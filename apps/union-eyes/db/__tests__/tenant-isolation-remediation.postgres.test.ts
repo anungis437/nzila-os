@@ -479,17 +479,20 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       await enrol(ORG_A, 'Bob A', '5.0')
       await enrol(ORG_B, 'Zed B', '44.0')
       const { GET } = await import('../../app/api/pension/retirement-eligibility/route')
-      const call = (organizationId: string, threshold = '') =>
+      const call = (organizationId: string, threshold: string) =>
         (GET as unknown as (c: unknown) => Promise<{ data: Array<Record<string, unknown>> }>)({
           request: new Request(`http://localhost/api/pension/retirement-eligibility${threshold}`),
           organizationId,
           userId: 'officer-1',
         })
-      const asA = await call(ORG_A)
+      await expect(call(ORG_A, '')).rejects.toMatchObject({ status: 400 })
+      await expect(call(ORG_A, '?threshold=0')).rejects.toMatchObject({ status: 400 })
+      await expect(call(ORG_A, '?threshold=61')).rejects.toMatchObject({ status: 400 })
+      const asA = await call(ORG_A, '?threshold=25')
       expect(asA.data.map((r) => r.name)).toEqual(['Alice A'])
       expect(JSON.stringify(asA)).not.toContain('123-456-789')
       expect((await call(ORG_A, '?threshold=1')).data.map((r) => r.name)).toEqual(['Alice A', 'Bob A'])
-      expect((await call(ORG_B)).data.map((r) => r.name)).toEqual(['Zed B'])
+      expect((await call(ORG_B, '?threshold=25')).data.map((r) => r.name)).toEqual(['Zed B'])
       expect(state.audit.map((e) => e.action)).toEqual(Array(3).fill('pension.retirement_eligibility.read'))
       expect(state.audit[0]).toMatchObject({ organizationId: ORG_A, userId: 'officer-1' })
     })
