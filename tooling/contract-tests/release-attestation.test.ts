@@ -111,7 +111,7 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     const staging = readContent('.github/workflows/deploy-staging.yml')
     expect(staging).toContain('STAGING_DEPLOY_TARGETS_JSON: ${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}')
     expect(staging).toContain('<<< "$STAGING_DEPLOY_TARGETS_JSON"')
-    expect(staging).not.toMatch(/echo\\s+['"]\\$\\{\\{\\s*secrets\\.STAGING_DEPLOY_TARGETS_JSON/)
+    expect(staging).not.toMatch(/echo\s+['"]\$\{\{\s*secrets\.STAGING_DEPLOY_TARGETS_JSON/)
     expect(staging).not.toContain('[ -n "${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}" ]')
   })
 
