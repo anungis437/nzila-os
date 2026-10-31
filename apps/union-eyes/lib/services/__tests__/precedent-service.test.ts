@@ -694,9 +694,3 @@ describe("precedent-service", () => {
   });
 });
 
-/* sf: select→from (no where/orderBy) */
-function sf(data: any[] = []) {
-  return {
-    from: vi.fn().mockResolvedValue(data),
-  };
-}
