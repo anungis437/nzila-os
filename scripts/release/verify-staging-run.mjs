@@ -38,6 +38,24 @@ export function verifyStagingRun(run, expectedCommit, expectedRunId, expectedWor
       jobs[0].conclusion !== 'success') {
     deny('no independently successful real staging deployment job')
   }
+  // A green job label is not proof that the deployment, boundary gate,
+  // smoke checks and live runtime evidence steps actually executed. GitHub
+  // job steps are fetched for this exact run by the promotion workflow.
+  // This is still only workflow evidence, NOT independent runtime certification.
+  const requiredSteps = [
+    'Azure login (OIDC, staging-scoped)',
+    'Staging boundary gate (fail-closed)',
+    'Require real staging deployment implementation',
+    'Run smoke tests',
+    'Ingest Azure runtime evidence (live)',
+  ]
+  if (!Array.isArray(jobs[0].steps) || requiredSteps.some(name => {
+    const matches = jobs[0].steps.filter(step => step?.name === name)
+    return matches.length !== 1 || matches[0].status !== 'completed' ||
+      matches[0].conclusion !== 'success'
+  })) {
+    deny('staging deployment and live runtime verification steps did not independently complete')
+  }
   return { runId: String(expectedRunId), commitSha: expectedCommit }
 }
 

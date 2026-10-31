@@ -16,7 +16,15 @@ function validRun() {
     conclusion: 'success',
     status: 'completed',
     attempt: 1,
-    jobs: [{ name: 'Deploy to Staging', status: 'completed', conclusion: 'success' }],
+    jobs: [{ name: 'Deploy to Staging', status: 'completed', conclusion: 'success',
+      steps: [
+        'Azure login (OIDC, staging-scoped)',
+        'Staging boundary gate (fail-closed)',
+        'Require real staging deployment implementation',
+        'Run smoke tests',
+        'Ingest Azure runtime evidence (live)',
+      ].map(name => ({ name, status: 'completed', conclusion: 'success' })),
+    }],
   }
 }
 
@@ -77,4 +85,36 @@ test('rejects missing, duplicate and spoofed deployment job evidence', () => {
   assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /successful real staging/)
   run.jobs = null
   assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /evidence unavailable/)
+})
+
+test('a green staging job without independently completed deployment and runtime steps is denied', () => {
+  const names = [
+    'Azure login (OIDC, staging-scoped)',
+    'Staging boundary gate (fail-closed)',
+    'Require real staging deployment implementation',
+    'Run smoke tests',
+    'Ingest Azure runtime evidence (live)',
+  ]
+  for (const name of names) {
+    const run = validRun()
+    run.jobs[0].steps = run.jobs[0].steps.filter(step => step.name !== name)
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID),
+      /staging deployment and live runtime verification steps/, name)
+  }
+})
+test('skipped, failed, duplicate or absent runtime step evidence cannot promote', () => {
+  for (const state of ['skipped', 'failure', 'cancelled', null]) {
+    const run = validRun()
+    run.jobs[0].steps[4].conclusion = state
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID),
+      /staging deployment and live runtime verification steps/)
+  }
+  const duplicate = validRun()
+  duplicate.jobs[0].steps.push({ ...duplicate.jobs[0].steps[2] })
+  assert.throws(() => verifyStagingRun(duplicate, SHA, RUN_ID, WORKFLOW_ID),
+    /staging deployment and live runtime verification steps/)
+  const absent = validRun()
+  delete absent.jobs[0].steps
+  assert.throws(() => verifyStagingRun(absent, SHA, RUN_ID, WORKFLOW_ID),
+    /staging deployment and live runtime verification steps/)
 })
