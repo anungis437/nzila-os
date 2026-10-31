@@ -220,7 +220,7 @@ export class GeofencePrivacyService {
   /**
    * Track user location (foreground only, 24-hour retention)
    */
-  static async trackLocation(tracking: LocationTrackingRequest) {
+  static async trackLocation(tracking: LocationTrackingRequest, tx: RLSTx = db) {
     // Verify consent, including the strike/event permission the member granted
     const consentContext =
       tracking.purpose === "strike" || tracking.purpose === "picket"
@@ -244,7 +244,7 @@ export class GeofencePrivacyService {
     expiresAt.setHours(expiresAt.getHours() + this.MAX_RETENTION_HOURS);
 
     // Record location
-    const [location] = await db
+    const [location] = await tx
       .insert(locationTracking)
       .values({
         userId: tracking.userId,

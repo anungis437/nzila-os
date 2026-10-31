@@ -78,6 +78,6 @@ describe('clauses/[id] route', () => {
     const { GET } = await import('../clauses/[id]/route');
     m.getClause.mockResolvedValue({ id: 'k1' });
     await GET(req('GET'), params);
-    expect(m.getClause).toHaveBeenCalledWith('org-1', 'k1', { countView: true });
+    expect(m.getClause).toHaveBeenCalledWith('org-1', 'k1', { countView: false });
   });
 });

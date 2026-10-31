@@ -105,6 +105,8 @@ const FACADES = {
   'communications/campaigns/[id]/schedule': 'the generic CRUD factory over campaigns (a campaign row; nothing is scheduled and no sender reads it)',
   'communications/campaigns/[id]/send-test': 'the generic CRUD factory over campaigns (a campaign row; no test message is sent)',
   'communications/templates/[id]/duplicate': 'the generic CRUD factory over message templates (a template item; nothing is duplicated and its DELETE removed the template)',
+  'investigations': 'an alias of the case collection (no investigation record exists, and a create made a case)',
+  'investigations/audit': 'an alias of the organization audit-log list under an investigation name (no investigation audit exists, and it listed the organization audit log)',
   'events/[id]/occurrences': 'a byte-for-byte copy of the event item route, so its path value was the event, not an occurrence',
 }
 

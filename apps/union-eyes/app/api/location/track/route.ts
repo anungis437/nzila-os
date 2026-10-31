@@ -2,6 +2,10 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { GeofencePrivacyService } from "@/services/geofence-privacy-service";
 import { withApiAuth, getCurrentUser } from "@/lib/api-auth-guard";
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
@@ -51,28 +55,47 @@ export const POST = withApiAuth(async (req: NextRequest) => {
 
     const { latitude, longitude, accuracy, altitude, purpose, activityType, strikeId, eventId } = validation.data;
 
-    // Track location (service will verify consent)
-    const location = await GeofencePrivacyService.trackLocation({
-      userId: user.id,
-      latitude,
-      longitude,
-      accuracy,
-      altitude,
-      purpose,
-      activityType,
-      strikeId,
-      eventId,
+    // Track location (the service verifies consent). The point and its audit record commit together; the audit names
+    // the purpose and the strike or event, never the coordinates.
+    const organizationId = await getOrganizationIdForUser(user.id);
+    const location = await withRLSContext({ organizationId }, async (tx) => {
+      const recorded = await GeofencePrivacyService.trackLocation({
+        userId: user.id,
+        latitude,
+        longitude,
+        accuracy,
+        altitude,
+        purpose,
+        activityType,
+        strikeId,
+        eventId,
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: user.id,
+        action: 'location.track.record',
+        resourceType: 'location_tracking',
+        resourceId: recorded.id,
+        details: { purpose, strikeId: strikeId ?? null, eventId: eventId ?? null },
+      });
+      return recorded;
     });
 
     return standardSuccessResponse(
       { location,
         message: "Location recorded. Data will be automatically deleted after 24 hours." }
     );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: (error as Error).message || "Failed to track location" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    // A refusal for want of consent or because tracking is off is the answer to the request, not a server fault.
+    const message = error instanceof Error ? error.message : '';
+    if (message.includes('requires explicit opt-in consent')) {
+      return NextResponse.json({ error: message }, { status: 403 });
+    }
+    if (message.includes('globally disabled')) {
+      return NextResponse.json({ error: message }, { status: 503 });
+    }
+    logger.error('location track failed', { error: message });
+    return NextResponse.json({ error: "Failed to track location" }, { status: 500 });
   }
 });
 

@@ -15,8 +15,19 @@ export const GET = withApi(
   async ({ organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.forbidden('Organization audit context required');
     return withRLSContext({ organizationId, userId }, async (tx) => {
+      // The record of who did what and when. The captured values, network address, user agent, session and correlation ids,
+      // free-form metadata and error text stay in the store and are not served by this list.
       const rows = await tx
-        .select()
+        .select({
+          auditId: auditLogs.auditId,
+          action: auditLogs.action,
+          resourceType: auditLogs.resourceType,
+          resourceId: auditLogs.resourceId,
+          userId: auditLogs.userId,
+          severity: auditLogs.severity,
+          outcome: auditLogs.outcome,
+          createdAt: auditLogs.createdAt,
+        })
         .from(auditLogs)
         .where(eq(auditLogs.organizationId, organizationId))
         .orderBy(desc(auditLogs.createdAt))

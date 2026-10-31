@@ -4012,6 +4012,75 @@
           "explanation": "The continuity forecast reports no trend and no projection instead of an improving curve from fixed rates, and bases its metrics on eligible interviews, proven against a real SQL engine (existing implementation and test)."
         }
       ]
+    },
+    {
+      "id": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
+      "family": "F06: an audit read serves the record and not the captured values, a recorded position and its audit commit together, and a GET changes nothing",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-CMP-AUDIT-LOG-FULL-ROW-READ-BY-OFFICER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/compliance/audit-logs/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts"
+          ],
+          "explanation": "The organization audit-log list names eight columns (who, what, which resource, severity, outcome, time) and no longer serves the captured old and new values, network address, user agent, session and correlation ids, metadata, error text or archive path. The read is still audited in the same transaction."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-LOCATION-TRACK-WRITES-ARE-UNAUDITED-AND-REFUSALS-ANSWER-500",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/location/track/route.ts",
+            "apps/union-eyes/services/geofence-privacy-service.ts",
+            "apps/union-eyes/app/api/__tests__/location-track.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts"
+          ],
+          "explanation": "The position insert and an audit record (purpose, strike or event, never the coordinates) commit in one transaction; a member who has not opted in gets 403, a disabled tracker 503, and any other failure a 500 without internal text. Test mocks extended for the new collaborators; three new route tests."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-INVESTIGATIONS-PATH-IS-THE-CASE-COLLECTION-NO-INVESTIGATION-RECORD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/investigations/route.ts",
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts"
+          ],
+          "explanation": "The investigations path was an alias of the case collection (a create made a case); it answers 501 and the roster-facade ratchet pins it."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-INVESTIGATIONS-AUDIT-PATH-RETURNS-THE-WHOLE-ORGANIZATION-AUDIT-LOG",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/investigations/audit/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts"
+          ],
+          "explanation": "The investigation audit path no longer returns the organization audit log under another name; it answers 501."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-ALIAS-WRAPPERS-CARRY-AN-ALWAYS-TRUE-ORG-GUARD",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/investigations/route.ts",
+            "apps/union-eyes/app/api/investigations/audit/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts"
+          ],
+          "explanation": "The two investigation aliases lost their always-true guard along with their delegation.",
+          "remaining": "Other wrappers (governance, intelligence, the oci paths and the communications tracking handlers) still carry a requireOrgAccess that returns true for every request."
+        },
+        {
+          "prefix": "DEF-0B4-CLAUSES-ITEM-GET-WRITES-VIEW-COUNT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/clauses/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/clauses-id.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts"
+          ],
+          "explanation": "Reading a clause by id writes nothing. Test adapted from countView true to false; the clause view counter is no longer incremented by a read."
+        }
+      ]
     }
   ]
 }

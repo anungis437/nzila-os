@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 369,
-    "engineeringRemaining": 408,
+    "engineeringCorrected": 373,
+    "engineeringRemaining": 404,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 65
+    "engineeringPartial": 66
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -3288,9 +3288,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
+        "path": "apps/union-eyes/app/api/clauses/[id]/route.ts; apps/union-eyes/app/api/__tests__/clauses-id.route.test.ts; apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts",
+        "explanation": "Reading a clause by id writes nothing. Test adapted from countView true to false; the clause view counter is no longer incremented by a read.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSES-SEARCH-FACADE",
@@ -10039,9 +10046,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
+        "path": "apps/union-eyes/app/api/investigations/route.ts; apps/union-eyes/app/api/investigations/audit/route.ts; apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts",
+        "explanation": "The two investigation aliases lost their always-true guard along with their delegation.",
+        "remaining": "Other wrappers (governance, intelligence, the oci paths and the communications tracking handlers) still carry a requireOrgAccess that returns true for every request.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-INVESTIGATIONS-PATH-IS-THE-CASE-COLLECTION-NO-INVESTIGATION-RECORD",
@@ -10056,9 +10071,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
+        "path": "apps/union-eyes/app/api/investigations/route.ts; apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts; apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts",
+        "explanation": "The investigations path was an alias of the case collection (a create made a case); it answers 501 and the roster-facade ratchet pins it.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-INVESTIGATIONS-AUDIT-PATH-RETURNS-THE-WHOLE-ORGANIZATION-AUDIT-LOG",
@@ -10073,9 +10095,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
+        "path": "apps/union-eyes/app/api/investigations/audit/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts; apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts",
+        "explanation": "The investigation audit path no longer returns the organization audit log under another name; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
@@ -10180,9 +10209,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
+        "path": "apps/union-eyes/app/api/location/track/route.ts; apps/union-eyes/services/geofence-privacy-service.ts; apps/union-eyes/app/api/__tests__/location-track.route.test.ts; apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts",
+        "explanation": "The position insert and an audit record (purpose, strike or event, never the coordinates) commit in one transaction; a member who has not opted in gets 403, a disabled tracker 503, and any other failure a 500 without internal text. Test mocks extended for the new collaborators; three new route tests.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
