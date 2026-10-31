@@ -33,9 +33,16 @@ function assertStream(orgId: string): void {
   }
 }
 function assertHead(row: Record<string, unknown>): LedgerHead {
-  const revision = Number(row.revision)
+  // PostgreSQL returns BIGINT as text. Number(null), Number('') and
+  // Number('  ') are all zero: never treat a missing/invalid revision as
+  // a legitimate genesis stream. Reject noncanonical and unsafe integers.
+  const rawRevision = row.revision
+  if (typeof rawRevision !== 'string' || !/^(0|[1-9][0-9]*)$/.test(rawRevision)) {
+    throw new LedgerStoreUnavailableError('Persistent trust stream head is invalid')
+  }
+  const revision = Number(rawRevision)
   const headHash = row.head_hash
-  if (!Number.isSafeInteger(revision) || revision < 0 ||
+  if (!Number.isSafeInteger(revision) ||
       typeof headHash !== 'string' || !/^[0-9a-f]{64}$/.test(headHash)) {
     throw new LedgerStoreUnavailableError('Persistent trust stream head is invalid')
   }

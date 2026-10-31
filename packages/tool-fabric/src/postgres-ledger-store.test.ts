@@ -48,6 +48,20 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     expect(out).toEqual({revision:0,headHash:LEDGER_GENESIS_HASH,entries:[]})
     expect(db.commits).toBe(1)
   })
+  it('fails closed on null, blank, noncanonical or unsafe PostgreSQL head revisions', async () => {
+    // A SQL NULL would otherwise be coerced by Number(null) to genesis 0.
+    for (const invalid of [null, undefined, '', ' ', '00', '01', '-0', '-1',
+      '1.0', '1e0', '9007199254740992', 0, 1]) {
+      const query = {
+        unsafe: async (sql: string) => sql.includes('FOR SHARE')
+          ? [{ revision: invalid, head_hash: LEDGER_GENESIS_HASH }]
+          : [],
+      }
+      const db = { ...query, begin: async <T>(fn: (tx: typeof query) => Promise<T>) => fn(query) }
+      await expect(new PostgresAtomicTrustLedgerStore(db).readSnapshot(ORG))
+        .rejects.toThrow('Persistent trust stream head is invalid')
+    }
+  })
   it('does not invent a fresh ledger when migration or stream is missing',async()=>{
     const s=new PostgresAtomicTrustLedgerStore(fake({initialized:false}))
     await expect(s.readSnapshot(ORG)).rejects.toThrow('not initialized')
