@@ -4424,6 +4424,15 @@
         "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts",
         "apps/union-eyes/lib/services/__tests__/s29-decisions-applied.test.ts"
       ],
+      "supplementalEngineeringEvidence": [
+        {
+          "commit": "3d146e6ad33745f37bd6b9adcc0c2511750b992c",
+          "path": "docs/union-eyes/convergence/remediation/ue-social-posts-read-privacy-engineering.json",
+          "scope": "Publishing workbench GET officer authorization, tenant-bound RLS, explicit projection and filter validation",
+          "qualification": "SOURCE_IMPLEMENTED_UNQUALIFIED",
+          "countsChanged": false
+        }
+      ],
       "explanation": "Publishing now needs the officer floor instead of the steward floor; the publish is already rate limited and bracketed by intent and outcome audit records. B85: POST /api/social-media/posts now only records a draft for each named account (account_ids is required and each account must be an active account of the organization on a selected platform), with its audit record in the same transaction; nothing is sent. A different officer approves or rejects it at POST /api/social-media/posts/review (the author cannot; a rejection needs a reason): the approval is claimed atomically before anything is sent, the external publish is audited before and after, the post is completed in place, and the deciding officer and time are kept on the post. The publish tests that pinned an immediate publish were rewritten for the draft flow (disclosed) and a review-route test file was added."
     },
     "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA": {
