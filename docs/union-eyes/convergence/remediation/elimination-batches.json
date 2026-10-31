@@ -7729,6 +7729,44 @@
       ]
     },
     {
+      "id": "B99-CLAUSE-LIBRARY-SOURCE-ATTRIBUTION",
+      "family": "Clause-library anonymized source projection across system-role list/search/compare",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/clause-library/route.ts",
+            "apps/union-eyes/app/api/clause-library/search/route.ts",
+            "apps/union-eyes/app/api/clause-library/compare/route.ts",
+            "apps/union-eyes/lib/clause-library/source-projection.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts"
+          ],
+          "explanation": "The system-role list, search and compare paths now apply a shared source-organization projection. For an anonymized or unclassified clause, cross-organization readers do not receive the source organization id/name; the source owner retains attribution. Search and compare explicitly select the anonymization flag instead of silently omitting it. A unit test covers the disclosure rule and a source contract asserts use in all three routes. The item GET now uses the same source projection and treats an unset anonymization flag as not permission to disclose the original employer; a route regression exercises this legacy-null case.",
+          "remaining": "System-role access remains subject to the SQL sharing-authority predicate and its policy; native PG15/16 cross-tenant tests, real HTTP response checks, anonymization of free-text content, and independent review are not yet established. This correction does not qualify all cross-tenant reads."
+        }
+      ]
+    },
+    {
+      "id": "B100-ONBOARDING-LOOKUP-TRUTHFULNESS",
+      "family": "Smart onboarding lookup failures and fabricated national benchmarks",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B9-ASM-ONBOARDING-LOOKUP-LIBRARY-SWALLOWS-EVERY-FAILURE-INTO-AN-EMPTY-SUCCESS-RESPONSE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/utils/smart-onboarding.ts",
+            "apps/union-eyes/lib/__tests__/smart-onboarding.test.ts"
+          ],
+          "explanation": "Federation, clause, peer and benchmark lookups now propagate storage failures instead of returning empty arrays that look like successful no-match results. Unknown organizations are rejected, while real empty datasets still return empty results. Tests distinguish those cases and verify propagation. National averages also no longer use invented fallback numbers or relabel peer averages as national figures: missing/failed/unmeasured CLC results return null, and empty peer counts do not yield NaN. A follow-up rejects invalid cached measurements, refuses an implicit guessed CLC endpoint (explicit HTTPS URL and key required), and skips a benchmark when no peer counts were measured. Regression cases cover invalid cache and empty peer measurements."
+        }
+      ]
+    },
+    {
       "id": "B101-PG-MIGRATIONS-SCIM-SLA-SURVEY-DECISIONS",
       "family": "PostgreSQL migrations: SCIM bearer token, SLA status clock, survey anonymity, decision owner",
       "evidenceCommit": null,
@@ -7766,6 +7804,78 @@
           ],
           "explanation": "The SCIM Users route now authenticates the identity provider by the organization's bearer token, not a browser session: only the SHA-256 is stored (platform 0048 has no bearer_token column and hashes a legacy plaintext one), the lookup is by hash with a constant-time compare, a disabled, revoked or expired configuration authenticates nothing, the token (not the path) decides the organization, and the surface is rate limited per client and refuses when the limiter is unavailable. A signed-in administrator issues, rotates and revokes the token at /api/enterprise/sso/scim-token (shown once, audited atomically). The SCIM prefix is public at the edge and the token route is not. Proven on native PostgreSQL 15 and 16 (hash and per-organization uniqueness, tenant isolation, system lookup by hash).",
           "remaining": "The route still offers only list and create: no get, replace, patch or delete of a user (so a deprovision cannot be sent), no groups, no ServiceProviderConfig, and no scim_events_log row per provisioning event; deprovision_action and the attribute mapping are stored but not consumed."
+        }
+      ]
+    },
+    {
+      "id": "B102-AUDIT-SETTINGS-NOT-IMPLEMENTED-HONESTY",
+      "family": "Mandatory external-access audit, unrecorded sync outcome, unenforced settings, 501 for the absent DSR route, workbook peer floor",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+            "apps/union-eyes/lib/external-resource-middleware.ts",
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+          ],
+          "explanation": "The external access decision is now written through persistAtomicAudit in its own tenant transaction and a failure throws, so the middleware answers 403 and the outside party receives nothing when the decision record could not be written; the legacy logger that logged and swallowed a failed insert is no longer on this path. A stranger who holds no authority is still not written into the named organization's trail.",
+          "remaining": "The read or write that follows is still not recorded as its own event, the decision record commits before the read rather than in the same transaction, and a document request still writes a matter decision row and a document decision row."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/audit/operation-audit.ts",
+            "apps/union-eyes/lib/audit/__tests__/operation-audit.test.ts",
+            "apps/union-eyes/lib/integrations/control-plane.ts",
+            "apps/union-eyes/app/api/integrations/framework/[id]/sync/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+          ],
+          "explanation": "performAuditedOperation reports whether the outcome record was written (outcomeReport.recorded), and the sync route returns auditOutcomeRecorded with the result, so a synchronization whose outcome row could not be written says so instead of looking fully audited; the intent row still precedes the effect."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/enterprise/dsr/requests/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+          ],
+          "explanation": "The enterprise data subject request route no longer wraps the generic factory that refused every call with a 403 naming another route: it answers 501 NOT_IMPLEMENTED for capability UE-PRIVACY-DSAR-WORKFLOW, as the privacy route does.",
+          "remaining": "No request can still be received: the table has no organization column to scope a request to the institution that must answer it, which is a schema and ownership decision."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/settings/unenforced-settings.ts",
+            "apps/union-eyes/app/api/settings/organization/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+          ],
+          "explanation": "The settings save reports the stored-but-unenforced keys (session timeout, MFA, password policy, rate limit, webhook, IP and domain lists) as notEnforced with a message, so a saved value is not read as one in force.",
+          "remaining": "No authentication, session, password, rate-limit or notification code reads these keys yet, and the settings screen does not yet display the notEnforced list."
+        },
+        {
+          "prefix": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/workbook/access-control.ts",
+            "apps/union-eyes/lib/workbook/__tests__/access-control.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+          ],
+          "explanation": "A same-organization peer of a claimed workbook now needs a steward role in the claimed organization (hasRoleInOrganization), not just a membership, before the memory-holder routes admit it to read, change or delete the named people.",
+          "remaining": "The named people still have no notice that they are recorded, and the PATCH and DELETE audit rows are written only when a row changed."
+        },
+        {
+          "prefix": "DEF-0B9-ASM-NATIONAL-AVERAGE-BENCHMARK-FALLS-BACK-TO-HARD-CODED-LITERALS-WITH-NO-INDICATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/utils/smart-onboarding.ts",
+            "apps/union-eyes/lib/__tests__/smart-onboarding.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+          ],
+          "explanation": "Credited from the B100 code change (commits 43cbe020f and f895de200): the invented national table is gone, an unavailable or invalid CLC measurement is null and is never replaced by a peer average, the endpoint must be an explicitly configured HTTPS URL, and a peer set with no positive member counts yields no average or percentile instead of 0 divided by 0. The existing tests assert nationalAverage null for an unset key, a 404, an invalid body, an invalid cache and a thrown error."
         }
       ]
     }

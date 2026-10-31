@@ -10,6 +10,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { validateOrganizationSettingsPatch } from '@/lib/settings/organization-settings-policy';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { notEnforcedKeysIn } from '@/lib/settings/unenforced-settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -149,6 +150,10 @@ export const PUT = withApi(
       });
     });
 
-    return { updated: true };
+    // Saved is not in force: a setting that no code reads is reported as such, not as applied.
+    const notEnforced = checkedSettings === null ? [] : notEnforcedKeysIn(checkedSettings);
+    return notEnforced.length > 0
+      ? { updated: true, notEnforced, message: 'Saved. These settings are stored but not yet enforced by the platform: ' + notEnforced.join(', ') }
+      : { updated: true };
   },
 );

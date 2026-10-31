@@ -59,6 +59,9 @@ export interface ClaimedWorkbookAuthority {
   operation?: 'read' | 'write';
 }
 
+/** The lowest organization role that may act on a claimed workbook as a same-organization peer. */
+const PEER_MIN_ROLE = 'steward';
+
 type AuthorityDecision =
   | { ok: true; authority: ClaimedWorkbookAuthority }
   | { ok: false; status: 401 | 403 | 404; error: string };
@@ -130,6 +133,14 @@ async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<Auth
     (await getOrganizationIdForUser(ownership.claimedByUserId).catch(() => null));
 
   if (!requesterOrgId || !ownerOrgId || requesterOrgId !== ownerOrgId) {
+    return { ok: false, status: 403, error: 'Forbidden' };
+  }
+
+  // The workbook names individuals who have no notice that they are recorded, so a peer needs a role in the organization, not just a
+  // membership: a plain member who shares the organization is not admitted to read, change or delete them.
+  // Loaded here, not at the top: the guard is heavy and only a peer needs it.
+  const { hasRoleInOrganization } = await import('@/lib/api-auth-guard');
+  if (!(await hasRoleInOrganization(ownerOrgId, PEER_MIN_ROLE, userId))) {
     return { ok: false, status: 403, error: 'Forbidden' };
   }
 

@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   selectQueue: [] as unknown[][],
   withSystemContext: vi.fn(),
   withExplicitUserContext: vi.fn(),
+  hasRoleInOrganization: vi.fn(),
 }));
 
 // A single-row workbook select chain fed by selectQueue. The claimed-workbook
@@ -24,6 +25,8 @@ const mockTx = {
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+// Disclosed adaptation (B102): a same-organization peer now needs a steward role, so the role check is a seam of its own.
+vi.mock('@/lib/api-auth-guard', () => ({ hasRoleInOrganization: m.hasRoleInOrganization }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn() }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: (...args: unknown[]) => m.withSystemContext(...args),
@@ -46,8 +49,21 @@ describe('claimed-workbook access control', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
+    m.hasRoleInOrganization.mockResolvedValue(true);
     m.withSystemContext.mockImplementation((cb: any) => cb(mockTx));
     m.withExplicitUserContext.mockImplementation((_userId: string, cb: any) => cb());
+  });
+
+  describe('same-organization peer role floor', () => {
+    it('refuses a peer who is a member of the organization but holds no steward role, and checks the claimed organization', async () => {
+      m.auth.mockResolvedValue({ userId: 'peer' });
+      m.selectQueue = [[{ id: 'wb', claimedByUserId: 'owner', claimedOrgId: 'org_shared' }]];
+      m.getOrganizationIdForUser.mockResolvedValueOnce('org_shared');
+      m.hasRoleInOrganization.mockResolvedValueOnce(false);
+      const { verifyClaimedWorkbookAccess } = await import('../access-control');
+      await expect(verifyClaimedWorkbookAccess('wb')).resolves.toMatchObject({ ok: false, status: 403 });
+      expect(m.hasRoleInOrganization).toHaveBeenCalledWith('org_shared', 'steward', 'peer');
+    });
   });
 
   describe('verifyClaimedWorkbookAccess', () => {

@@ -56,6 +56,8 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+// Disclosed adaptation (B102): a same-organization peer needs a steward role; the role check is a seam here.
+vi.mock('@/lib/api-auth-guard', () => ({ hasRoleInOrganization: vi.fn(async () => true) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,

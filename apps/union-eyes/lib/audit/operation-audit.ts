@@ -39,6 +39,8 @@ export interface AuditedOperation {
    * organization and to the administrator).
    */
   scope?: 'organization' | 'system'
+  /** Set to { recorded: false } by the operation when its outcome record could not be written, so the caller can say so. */
+  outcomeReport?: { recorded: boolean }
 }
 
 export async function performAuditedOperation<T>(op: AuditedOperation, operation: () => Promise<T>): Promise<T> {
@@ -64,10 +66,12 @@ export async function performAuditedOperation<T>(op: AuditedOperation, operation
 
   try {
     const result = await operation()
-    await recordOutcome(op.scope, organizationId, entry('completed'), 'success')
+    const recorded = await recordOutcome(op.scope, organizationId, entry('completed'), 'success')
+    if (op.outcomeReport) op.outcomeReport.recorded = recorded
     return result
   } catch (error) {
-    await recordOutcome(op.scope, organizationId, entry('failed', { error: error instanceof Error ? error.message : 'unknown' }), 'failure')
+    const recorded = await recordOutcome(op.scope, organizationId, entry('failed', { error: error instanceof Error ? error.message : 'unknown' }), 'failure')
+    if (op.outcomeReport) op.outcomeReport.recorded = recorded
     throw error
   }
 }
@@ -80,11 +84,13 @@ async function recordOutcome(
   organizationId: string,
   record: Parameters<typeof persistAtomicAudit>[1],
   outcome: 'success' | 'failure',
-) {
+): Promise<boolean> {
   try {
     await inScope(scope, organizationId, (tx) => persistAtomicAudit(tx, record, outcome))
+    return true
   } catch (error) {
     logger.error('platform_operation_outcome_not_recorded', { action: record.action, outcome, error })
+    return false
   }
 }
 

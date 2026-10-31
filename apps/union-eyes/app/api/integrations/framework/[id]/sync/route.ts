@@ -25,16 +25,18 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId, params }) => {
+    // The sync runs before its outcome record is written, so a record that could not be written is reported, not hidden.
+    const auditOutcome = { recorded: true };
     try {
-      return {
-        result: await initiateTenantIntegrationSync(organizationId!, userId!, {
+      const result = await initiateTenantIntegrationSync(organizationId!, userId!, {
           integrationId: params.id,
           syncType: body.syncType,
           entities: body.entities,
           dryRun: body.dryRun,
           limit: body.limit,
-        }),
-      };
+          auditOutcome,
+        });
+      return { result, auditOutcomeRecorded: auditOutcome.recorded };
     } catch (error) {
       const refused = operationAuditResponse(error);
       if (refused) throw ApiError.conflict(refused.body.error.message);

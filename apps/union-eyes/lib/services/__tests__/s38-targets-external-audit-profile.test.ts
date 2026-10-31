@@ -16,6 +16,6 @@ describe('Gate 0 batch B94: KPI target bounds and external refusal audit scope',
     const service = src('lib/services/external-resource-authorization-service.ts')
     const audit = service.slice(service.indexOf('export async function auditExternalAuthorizationDecision'))
     expect(audit.indexOf('!params.decision.allowed && !params.decision.authorityId')).toBeGreaterThan(-1)
-    expect(audit.indexOf('!params.decision.allowed && !params.decision.authorityId')).toBeLessThan(audit.indexOf('return auditLog({'))
+    expect(audit.indexOf('!params.decision.allowed && !params.decision.authorityId')).toBeLessThan(audit.indexOf('persistAtomicAudit('))
   })
 })

@@ -47,6 +47,8 @@ export interface TenantSyncRequest {
   entities?: string[];
   dryRun?: boolean;
   limit?: number;
+  /** Filled in when the outcome audit row could not be written after the sync ran, so the response can say so. */
+  auditOutcome?: { recorded: boolean };
 }
 
 export interface ServerIssuedSyncBinding {
@@ -324,6 +326,7 @@ export async function initiateTenantIntegrationSync(
       action: 'integration.sync',
       resourceType: 'integration_configs',
       resourceId: request.integrationId,
+      outcomeReport: request.auditOutcome,
       details: {
         provider,
         syncType: request.syncType,

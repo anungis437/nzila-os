@@ -36,6 +36,18 @@ describe('performAuditedOperation', () => {
     expect(m.audit.mock.calls[0][1]).toMatchObject({ organizationId: 'org_1', userId: 'admin', resourceId: 't1' });
   });
 
+  it('reports, through outcomeReport, an outcome record that could not be written, and still returns the result', async () => {
+    const outcomeReport = { recorded: true };
+    m.audit.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('audit down'));
+    await expect(performAuditedOperation({ ...op, outcomeReport }, async () => 7)).resolves.toBe(7);
+    expect(outcomeReport.recorded).toBe(false);
+
+    const ok = { recorded: false };
+    m.audit.mockResolvedValue(undefined);
+    await performAuditedOperation({ ...op, outcomeReport: ok }, async () => 7);
+    expect(ok.recorded).toBe(true);
+  });
+
   it('does not perform the operation when its intent cannot be recorded', async () => {
     m.audit.mockRejectedValue(new Error('audit down'));
     const operation = vi.fn();

@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 609,
- "partial": 85,
- "outstanding": 168,
- "accountedFor": 168,
+ "corrected": 612,
+ "partial": 90,
+ "outstanding": 165,
+ "accountedFor": 165,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -69,17 +69,17 @@
   {
    "family": "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD",
    "purpose": "Generic-CRUD exposure and mass assignment: allow-lists, governance classification, response projection",
-   "defects": 4,
+   "defects": 3,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 2,
+    "MEDIUM": 1,
     "LOW": 1
    },
    "namedRoutes": 3,
    "namedFiles": 2,
    "tranches": {
     "0B.3": 1,
-    "0B.9": 2,
+    "0B.9": 1,
     "0B.12": 1
    }
   },
@@ -110,11 +110,11 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 37,
+   "defects": 36,
    "severity": {
     "HIGH": 2,
     "MEDIUM": 33,
-    "LOW": 2
+    "LOW": 1
    },
    "namedRoutes": 5,
    "namedFiles": 0,
@@ -125,7 +125,7 @@
     "0B.4": 4,
     "0B.6": 2,
     "0B.7": 3,
-    "0B.8": 5,
+    "0B.8": 4,
     "0B.9": 1,
     "0B.10": 5,
     "0B.11": 8,
@@ -193,10 +193,10 @@
   {
    "family": "F10-FINANCIAL-AND-PAYMENT",
    "purpose": "Financial and payment integrity",
-   "defects": 5,
+   "defects": 4,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 4,
+    "MEDIUM": 3,
     "LOW": 1
    },
    "namedRoutes": 0,
@@ -204,7 +204,6 @@
    "tranches": {
     "0B.6": 1,
     "0B.8": 1,
-    "0B.9": 1,
     "0B.10": 2
    }
   },
@@ -294,7 +293,8 @@
    },
    {
     "id": "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    }
   ],
   "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
@@ -347,7 +347,8 @@
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
@@ -356,7 +357,8 @@
    },
    {
     "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
@@ -422,10 +424,6 @@
    {
     "id": "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B9-ASM-ONBOARDING-LOOKUP-LIBRARY-SWALLOWS-EVERY-FAILURE-INTO-AN-EMPTY-SUCCESS-RESPONSE",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
@@ -624,12 +622,9 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
@@ -710,7 +705,8 @@
    },
    {
     "id": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    }
   ],
   "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL": [
@@ -858,10 +854,6 @@
     "id": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
     "severity": "LOW",
     "partial": true
-   },
-   {
-    "id": "DEF-0B9-ASM-NATIONAL-AVERAGE-BENCHMARK-FALLS-BACK-TO-HARD-CODED-LITERALS-WITH-NO-INDICATION",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AMOUNTS-UNVERIFIED",

@@ -8,7 +8,8 @@ import {
   type ExternalMatterAccessGrant,
   type RepresentationAuthority,
 } from '@/db/schema/representation-authority-schema';
-import { auditLog, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { evaluateRepresentationAuthority } from './representation-authority-service';
 
@@ -354,22 +355,25 @@ export async function auditExternalAuthorizationDecision(params: {
     logger.warn('External authorization refused: no authority held', { resource: params.resource, reason: params.decision.reason });
     return;
   }
-  return auditLog({
-    eventType: params.decision.allowed
-      ? 'external_authorization.allowed'
-      : 'external_authorization.denied',
-    severity: params.decision.allowed ? AuditSeverity.LOW : AuditSeverity.MEDIUM,
-    userId: params.actorUserId,
-    organizationId: params.organizationId,
-    resource: params.resource,
-    resourceId: params.resourceId,
-    action: 'authorize',
-    details: {
-      reason: params.decision.reason,
-      authorityId: params.decision.authorityId,
-      matterGrantId: params.decision.matterGrantId,
-      documentGrantId: params.decision.documentGrantId,
-    },
-    outcome: params.decision.allowed ? 'success' : 'failure',
+  // The record is mandatory, not best-effort: an allowed decision releases the outside party's data only once its record exists. A
+  // failure to write it throws, and the external-resource middleware answers 403 instead of serving the data.
+  await withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    await persistAtomicAudit(
+      tx,
+      {
+        organizationId: params.organizationId,
+        userId: params.actorUserId,
+        action: params.decision.allowed ? 'external_authorization.allowed' : 'external_authorization.denied',
+        resourceType: params.resource,
+        resourceId: params.resourceId,
+        details: {
+          reason: params.decision.reason,
+          authorityId: params.decision.authorityId,
+          matterGrantId: params.decision.matterGrantId,
+          documentGrantId: params.decision.documentGrantId,
+        },
+      },
+      params.decision.allowed ? 'success' : 'failure',
+    );
   });
 }
