@@ -4694,6 +4694,45 @@
           "explanation": "Existing implementation, verified: the resilience index refuses an organization with no dependency data with a conflict instead of computing NaN scores, so no strong status or brief is derived from it; an existing test covers both the empty and the interviews-without-nodes cases."
         }
       ]
+    },
+    {
+      "id": "B48-F05-LITERAL-SEARCH-AND-BOUNDED-ANONYMOUS-JSON",
+      "family": "F05/F12: searches match literally and list only active organizations; free-form JSON from callers is bounded and cannot overwrite audited fields",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B10-OPL-06",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/organizations/search/route.ts",
+            "apps/union-eyes/lib/api/like-pattern.ts",
+            "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f12-b48-bounds.contract.test.ts"
+          ],
+          "explanation": "The organization search always excludes the platform organization type and any organization whose status is not active (a missing status counts as active), with or without a term, matches the term literally (percent and underscore escaped), and orders by name then id. The real-SQL pglite test for the search still passes, and a source-contract test pins the predicates."
+        },
+        {
+          "prefix": "DEF-0B9-ASM-ONBOARDING-EVENT-METADATA-IS-UNBOUNDED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/onboarding/events/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f12-b48-bounds.contract.test.ts"
+          ],
+          "explanation": "The onboarding event payload bounds targetUserId (255) and role (64), limits metadata to 20 keys of short scalar values, and stores caller metadata before targetUserId and role so it can never replace the values the audit row records.",
+          "remaining": "The event is still a caller-asserted milestone (tracked by the companion defect)."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PUBLIC-APPLICATION-RESPONSES-OBJECT-AND-ASSESSMENT-",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/pilot/apply/route.ts",
+            "apps/union-eyes/lib/api/bounded-json-record.ts",
+            "apps/union-eyes/lib/api/__tests__/f12-b48-bounds.contract.test.ts"
+          ],
+          "explanation": "The anonymous pilot application bounds responses to 16 KB, 60 keys and 4 levels of nesting, and keeps only a finite numeric or short string assessment score instead of a passthrough object. Unit tests cover each bound.",
+          "remaining": "The stored responses are still free-form JSON that later reads, proposals and exports consume; no per-key schema exists."
+        }
+      ]
     }
   ]
 }

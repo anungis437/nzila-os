@@ -12,6 +12,7 @@ import { hasMinRole } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS_PER_IP } from '@/lib/rate-limiter';
 import { clientAddress } from '@/lib/public-intake/guard';
 import { logger } from '@/lib/logger';
+import { boundedJsonRecord } from '@/lib/api/bounded-json-record';
 import { sanitizeResponsesForPublicCreate } from '@/lib/pilot/responses-authority';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
@@ -77,8 +78,9 @@ const pilotApplicationBodySchema = z.object({
   // assertion (`responses.organizationId`, if present, is a claim from this
   // unauthenticated submitter — see getPilotClaimedOrganizationId's doc
   // comment in lib/pilot/pilot-ownership.ts).
-  responses: z.record(z.string(), z.unknown()).optional(),
-  assessment: z.object({ score: z.union([z.number(), z.string()]).optional() }).passthrough().optional(),
+  responses: boundedJsonRecord({ maxBytes: 16 * 1024, maxKeys: 60, maxDepth: 4 }).optional(),
+  // Only the score is read; any other key an anonymous caller adds is dropped rather than carried.
+  assessment: z.object({ score: z.union([z.number().finite(), z.string().trim().max(20)]).optional() }).optional(),
 });
 
 export async function POST(request: NextRequest) {

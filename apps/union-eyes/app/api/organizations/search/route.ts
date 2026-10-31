@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { organizations } from '@/db/schema-organizations'
-import { and, ilike, inArray, or, ne } from 'drizzle-orm'
+import { and, asc, ilike, inArray, or, ne, sql } from 'drizzle-orm'
+import { likeContaining } from '@/lib/api/like-pattern'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { canAdministerOrganization, readableOrganizationIds, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
 
@@ -20,13 +21,17 @@ export async function GET(req: NextRequest) {
   const access = await resolveOrganizationAccess(userId)
   const readable = readableOrganizationIds(access)
   if (readable && readable.length === 0) return NextResponse.json({ data: [] })
-  const text = q ? or(ilike(organizations.name, `%${q}%`), ilike(organizations.slug, `%${q}%`)) : ne(organizations.organizationType, 'platform')
+  // The platform organization and any organization that is not active are never offered, with or without a search term, and the
+  // term is matched literally so a bare percent or underscore cannot list the whole directory.
+  const listable = and(ne(organizations.organizationType, 'platform'), sql`coalesce(${organizations.status}, 'active') = 'active'`)!
+  const text = q ? and(or(ilike(organizations.name, likeContaining(q)), ilike(organizations.slug, likeContaining(q))), listable)! : listable
 
   const rows = await withSystemContext((tx) =>
     tx
       .select()
       .from(organizations)
       .where(readable ? and(text, inArray(organizations.id, readable)) : text)
+      .orderBy(asc(organizations.name), asc(organizations.id))
       .limit(50),
   )
 

@@ -8,9 +8,12 @@ import { ErrorCode, standardErrorResponse, standardSuccessResponse } from '@/lib
 
 const payloadSchema = z.object({
   eventType: z.enum(['org_created', 'user_invited', 'role_assigned']),
-  targetUserId: z.string().optional(),
-  role: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  targetUserId: z.string().trim().min(1).max(255).optional(),
+  role: z.string().trim().min(1).max(64).optional(),
+  metadata: z
+    .record(z.string().max(64), z.union([z.string().max(500), z.number(), z.boolean(), z.null()]))
+    .refine((value) => Object.keys(value).length <= 20, 'metadata has too many keys')
+    .optional(),
 });
 
 export const POST = withOrganizationAuth(async (request, context) => {
@@ -36,10 +39,11 @@ export const POST = withOrganizationAuth(async (request, context) => {
         organizationId,
         sessionId: `server:onboarding:${parsed.data.eventType}`,
         eventType: parsed.data.eventType,
+        // The named target and role come last: caller metadata can add context but never replace what the audit row records.
         metadata: {
+          ...(parsed.data.metadata ?? {}),
           targetUserId: parsed.data.targetUserId,
           role: parsed.data.role,
-          ...(parsed.data.metadata ?? {}),
         },
       })
       .returning({ id: pilotEvents.id });
