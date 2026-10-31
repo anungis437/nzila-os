@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "en_CA",
     siteName: "Nzila Ventures",
-    title: "Nzila Ventures | Organizational Continuity Infrastructure",
+    title: "Nzila Ventures | Software That Preserves Institutional Knowledge",
     description: "Software for institutional continuity and accountable operations. Explore Union Eyes, CIVIC and the wider Nzila Ventures portfolio.",
     images: [
       {
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nzila Ventures | Organizational Continuity Infrastructure",
-    description: "Nzila builds governed operational infrastructure that preserves continuity, operational memory, evidence, and organizational trust.",
+    title: "Nzila Ventures | Software That Preserves Institutional Knowledge",
+    description: "Explore governed software for institutional continuity: Union Eyes, CIVIC, and Nzila OS.",
     images: ["/opengraph-image"],
   },
   robots: {
