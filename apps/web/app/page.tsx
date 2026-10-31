@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import HumanCenteredAI from '@/components/public/HumanCenteredAI';
 import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import HomeExperience from '@/components/public/HomeExperience';
@@ -351,6 +352,8 @@ export default async function Home() {
       </section>
 
       <SectionDivider variant="glow" />
+
+      <HumanCenteredAI isFr={isFr} />
 
       {/* ═══════════════════════ IP & VALUE ═══════════════════════ */}
       <section className="py-24 bg-navy-light relative overflow-hidden">
