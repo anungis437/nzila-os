@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@nzila/cfo-core": "workspace:*",
-    "zod": "^3.24.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^25",

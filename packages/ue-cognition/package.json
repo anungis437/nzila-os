@@ -25,7 +25,7 @@
     "report": "tsx src/cli/report.ts"
   },
   "dependencies": {
-    "zod": "^3.25.0",
+    "zod": "^4.6.6",
     "drizzle-orm": "^0.45.2",
     "@nzila/platform-cognition-core": "workspace:*",
     "@nzila/platform-decision-engine": "workspace:*"

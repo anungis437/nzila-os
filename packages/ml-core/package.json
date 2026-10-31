@@ -20,7 +20,7 @@
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
-    "zod": "^3.24.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^25",

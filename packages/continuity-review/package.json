@@ -11,6 +11,6 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": { "zod": "^3.25.0" },
+  "dependencies": { "zod": "^4.6.6" },
   "devDependencies": { "vitest": "^5.0.5" }
 }

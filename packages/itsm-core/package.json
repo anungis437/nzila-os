@@ -22,7 +22,7 @@
     "@nzila/fsm-core": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
     "@nzila/platform-events": "workspace:*",
-    "zod": "^3.25.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "typescript": "^6",

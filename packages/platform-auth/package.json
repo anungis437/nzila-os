@@ -61,7 +61,7 @@
     "argon2": "^0.41.1",
     "jose": "^6.2.2",
     "next-auth": "5.0.0-beta.32",
-    "zod": "^3.24.0"
+    "zod": "^4.6.6"
   },
   "peerDependencies": {
     "next": ">=15.0.0",

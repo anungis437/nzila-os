@@ -62,7 +62,7 @@
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
     "drizzle-orm": "^0.45.2",
-    "zod": "^3.24.0"
+    "zod": "^4.6.6"
   },
   "optionalDependencies": {
     "@nzila/platform-auth": "workspace:*",

@@ -15,7 +15,7 @@
   "dependencies": {
     "@nzila/zonga-core": "workspace:*",
     "@nzila/zonga-control-plane": "workspace:*",
-    "zod": "^3.23.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "typescript": "^6.0.2",
