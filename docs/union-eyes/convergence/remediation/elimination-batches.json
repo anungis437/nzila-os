@@ -7901,6 +7901,23 @@
           "remaining": "The session store and the audit store are separate databases, so the record is written first rather than in one transaction with the rebind; a record can exist for a rebind that then fails. The canonical path is covered by source pins and mocks only, not by a native or HTTP run."
         }
       ]
+    },
+    {
+      "id": "B104-OAUTH-CALLBACK-STATE-COOKIE-SAFETY",
+      "family": "Social OAuth callback authenticity and cookie lifecycle",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+            "apps/union-eyes/lib/social-media/oauth-callback-state.ts",
+            "apps/union-eyes/lib/social-media/__tests__/oauth-callback-state.test.ts"
+          ],
+          "explanation": "OAuth callback now validates state, signed-in user, active organization, platform, code and PKCE prerequisites before consuming temporary connection cookies. Invalid or forged callbacks cannot clear an unrelated pending connection. A valid provider denial consumes its matched flow, and valid credentials are exchanged only after cookie consumption. GET is required for provider redirects, while the credential-and-audit database transaction already exists. The validation helper passed 10/10 focused local behavioral cases; full Vitest, PostgreSQL and HTTP/browser qualification remain pending."
+        }
+      ]
     }
   ]
 }

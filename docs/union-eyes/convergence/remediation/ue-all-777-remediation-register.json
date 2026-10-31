@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 612,
-    "engineeringRemaining": 165,
+    "engineeringCorrected": 613,
+    "engineeringRemaining": 164,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 91
+    "engineeringPartial": 90
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -17395,11 +17395,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
-        "path": "apps/union-eyes/app/api/social-media/accounts/callback/route.ts; apps/union-eyes/lib/services/__tests__/s32-audit-records-onboarding-social.test.ts",
-        "explanation": "The completion audit is now an atomic row committed with the credential upsert (social_account.connected).",
-        "remaining": "The callback is still a GET that clears its state cookies before validating the request, so a forged request can clear a pending connection; changing the verb or the cookie order needs a coordinated change with the provider redirect registration.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B104-OAUTH-CALLBACK-STATE-COOKIE-SAFETY",
+        "path": "apps/union-eyes/app/api/social-media/accounts/callback/route.ts; apps/union-eyes/lib/social-media/oauth-callback-state.ts; apps/union-eyes/lib/social-media/__tests__/oauth-callback-state.test.ts",
+        "explanation": "OAuth callback now validates state, signed-in user, active organization, platform, code and PKCE prerequisites before consuming temporary connection cookies. Invalid or forged callbacks cannot clear an unrelated pending connection. A valid provider denial consumes its matched flow, and valid credentials are exchanged only after cookie consumption. GET is required for provider redirects, while the credential-and-audit database transaction already exists. The validation helper passed 10/10 focused local behavioral cases; full Vitest, PostgreSQL and HTTP/browser qualification remain pending.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },

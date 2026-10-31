@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 612,
- "partial": 91,
- "outstanding": 165,
- "accountedFor": 165,
+ "corrected": 613,
+ "partial": 90,
+ "outstanding": 164,
+ "accountedFor": 164,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -110,10 +110,10 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 36,
+   "defects": 35,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 33,
+    "MEDIUM": 32,
     "LOW": 1
    },
    "namedRoutes": 5,
@@ -128,7 +128,7 @@
     "0B.8": 4,
     "0B.9": 1,
     "0B.10": 5,
-    "0B.11": 8,
+    "0B.11": 7,
     "0B.12": 3
    }
   },
@@ -682,11 +682,6 @@
    },
    {
     "id": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE",
     "severity": "MEDIUM",
     "partial": true
    },

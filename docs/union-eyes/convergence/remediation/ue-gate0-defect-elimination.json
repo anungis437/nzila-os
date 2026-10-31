@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 559,
-    "partial": 91,
+    "implementedPendingQualification": 560,
+    "partial": 90,
     "qualificationVerified": 0,
-    "unresolved": 218,
+    "unresolved": 217,
     "externalBlockers": 0
   },
   "batches": [
@@ -1005,6 +1005,15 @@
       "newlyImplemented": 0,
       "outstandingAfter": 218,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B104-OAUTH-CALLBACK-STATE-COOKIE-SAFETY",
+      "family": "Social OAuth callback authenticity and cookie lifecycle",
+      "outstandingBefore": 218,
+      "newlyImplemented": 1,
+      "outstandingAfter": 217,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -7352,14 +7361,14 @@
       "explanation": "Listing and initiating a connection now write canonical audit rows (social_account.list, social_account.connect_initiated) and completing one writes social_account.connected in the same transaction as the credential upsert, so a connection with no record is not kept. The log-line helper, which dropped the action, organization and platform, is no longer used by either route. The list test asserts the audit row (disclosed), and the social_accounts importer census gained the review route that earlier batch B85 added."
     },
     "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE": {
-      "status": "PARTIAL",
-      "batch": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B104-OAUTH-CALLBACK-STATE-COOKIE-SAFETY",
       "files": [
         "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
-        "apps/union-eyes/lib/services/__tests__/s32-audit-records-onboarding-social.test.ts"
+        "apps/union-eyes/lib/social-media/oauth-callback-state.ts",
+        "apps/union-eyes/lib/social-media/__tests__/oauth-callback-state.test.ts"
       ],
-      "explanation": "The completion audit is now an atomic row committed with the credential upsert (social_account.connected).",
-      "remaining": "The callback is still a GET that clears its state cookies before validating the request, so a forged request can clear a pending connection; changing the verb or the cookie order needs a coordinated change with the provider redirect registration."
+      "explanation": "OAuth callback now validates state, signed-in user, active organization, platform, code and PKCE prerequisites before consuming temporary connection cookies. Invalid or forged callbacks cannot clear an unrelated pending connection. A valid provider denial consumes its matched flow, and valid credentials are exchanged only after cookie consumption. GET is required for provider redirects, while the credential-and-audit database transaction already exists. The validation helper passed 10/10 focused local behavioral cases; full Vitest, PostgreSQL and HTTP/browser qualification remain pending."
     },
     "DEF-0B11-RPT-STORED-CONFIG-IS-UNVALIDATED-UNBOUNDED-JSON-THAT-NO-SAVE-APPLIES-THE-EXECUTOR-CONTRACT-TO": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
