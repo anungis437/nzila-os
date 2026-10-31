@@ -9,95 +9,79 @@ interface InvestorCTAProps {
   className?: string;
 }
 
-const investorCtaCopy: Record<Locale, {
-  investorsBadge: string
-  investorsTitle: string
-  investorsBody: string
-  investorsCta: string
-  partnersBadge: string
-  partnersTitle: string
-  partnersBody: string
-  partnersCta: string
+const copy: Record<Locale, {
+  eyebrow: string;
+  title: string;
+  body: string;
+  primary: string;
+  secondary: string;
+  note: string;
 }> = {
   'en-CA': {
-    investorsBadge: 'For Institutions',
-    investorsTitle: 'See where continuity needs attention',
-    investorsBody: 'Explore how key-person dependencies, undocumented decisions and fragile handoffs can affect your organization.',
-    investorsCta: 'Begin Assessment',
-    partnersBadge: 'For Labor Organizations',
-    partnersTitle: 'Union Eyes is the flagship validation path',
-    partnersBody: 'Explore the proposed pilot journey for grievances, steward handoffs, governance evidence and member privacy.',
-    partnersCta: 'Explore Union Eyes',
+    eyebrow: 'Let’s begin with people',
+    title: 'Better systems begin with better conversations.',
+    body: 'Tell us what your organization is trying to achieve, where context gets lost, and what responsible technology could meaningfully improve. We’ll start by listening.',
+    primary: 'Start a conversation',
+    secondary: 'Our commitments',
+    note: 'Exploring a Union Eyes pilot or a CIVIC briefing? Tell us in your inquiry.',
   },
   'fr-CA': {
-    investorsBadge: 'Pour les institutions',
-    investorsTitle: 'Repérez les risques de rupture de continuité',
-    investorsBody: 'Explorez les risques liés aux dépendances individuelles, aux décisions peu documentées et aux transitions fragiles.',
-    investorsCta: 'Commencer l évaluation',
-    partnersBadge: 'Pour les organisations syndicales',
-    partnersTitle: 'Union Eyes est le chemin de validation principal',
-    partnersBody: 'Explorez un parcours pilote proposé pour les griefs, les transferts entre délégués, les preuves et la confidentialité des membres.',
-    partnersCta: 'Explorer Union Eyes',
+    eyebrow: 'Commençons par les personnes',
+    title: 'De meilleurs systèmes commencent par de meilleures conversations.',
+    body: 'Parlez-nous de vos objectifs, des situations où le contexte se perd et de ce que la technologie pourrait améliorer de manière responsable. Nous commencerons par vous écouter.',
+    primary: 'Entamer une conversation',
+    secondary: 'Nos engagements',
+    note: 'Vous souhaitez explorer un pilote Union Eyes ou une présentation CIVIC? Précisez-le dans votre demande.',
   },
 };
 
 export default function InvestorCTA({ className = '' }: InvestorCTAProps) {
   const locale = useLocale() as Locale;
-  const copy = investorCtaCopy[locale] ?? investorCtaCopy['en-CA'];
+  const c = copy[locale] ?? copy['en-CA'];
 
   return (
-    <section className={`relative overflow-hidden py-24 ${className}`}>
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[#0e1a2d]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -right-36 -top-40 h-[34rem] w-[34rem] rounded-full bg-electric/25 blur-[110px]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-52 left-[-8rem] h-[30rem] w-[30rem] rounded-full bg-violet/20 blur-[110px]" />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <ScrollReveal direction="left">
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-4">
-              {copy.investorsBadge}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              {copy.investorsTitle}
-            </h2>
-            <p className="text-gray-300 mb-6">
-              {copy.investorsBody}
-            </p>
+    <section className={`relative isolate overflow-hidden bg-[#080e1c] py-20 text-white sm:py-28 ${className}`}>
+      <div aria-hidden="true" className="pointer-events-none absolute -right-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-blue-500/20 blur-[110px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-60 -left-40 h-[30rem] w-[30rem] rounded-full bg-[#dfbe70]/10 blur-[110px]" />
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_0.7fr] lg:gap-16 lg:px-8">
+        <ScrollReveal>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#dfbe70]">{c.eyebrow}</p>
+          <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl lg:text-5xl">{c.title}</h2>
+          <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{c.body}</p>
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <TrackedLink
-              href="/continuity-assessment"
-              eventName="cta_continuity_assessment"
-              eventProps={{ source: 'investor_cta' }}
-              className="inline-flex items-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-colors text-lg"
+              href="/contact"
+              eventName="cta_human_conversation"
+              eventProps={{ source: 'public_home_final' }}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-6 py-3 text-sm font-bold text-[#101a2c] transition-colors hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              {copy.investorsCta}
+              {c.primary} <span aria-hidden="true" className="ml-2">↗</span>
             </TrackedLink>
-          </ScrollReveal>
+            <TrackedLink
+              href="/doctrine"
+              eventName="cta_governance_doctrine"
+              eventProps={{ source: 'public_home_final' }}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {c.secondary}
+            </TrackedLink>
+          </div>
+        </ScrollReveal>
 
-          <ScrollReveal direction="right">
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/20 text-electric-light mb-4">
-              {copy.partnersBadge}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              {copy.partnersTitle}
-            </h2>
-            <p className="text-gray-300 mb-6">
-              {copy.partnersBody}
-            </p>
-            <TrackedLink
-              href="/union-eyes"
-              eventName="cta_union_eyes"
-              eventProps={{ source: 'investor_cta' }}
-              className="inline-flex items-center px-8 py-4 bg-white text-navy font-bold rounded-xl hover:bg-gray-100 transition-colors text-lg"
-            >
-              {copy.partnersCta}
-            </TrackedLink>
-          </ScrollReveal>
+        <div className="rounded-3xl border border-white/15 bg-white/[0.045] p-6 sm:p-8">
+          <div aria-hidden="true" className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#dfbe70]/30 bg-[#dfbe70]/10">
+            <svg viewBox="0 0 44 44" fill="none" width="35" height="35">
+              <circle cx="16" cy="13" r="6" stroke="#dfbe70" strokeWidth="2" />
+              <path d="M4 35v-3a12 12 0 0 1 24 0v3" stroke="#dfbe70" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M31 14h8M35 10v8M31 26h8" stroke="#9ebbe4" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <p className="mt-6 text-lg font-medium leading-8 text-white">{c.note}</p>
+          <p className="mt-5 border-t border-white/10 pt-5 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
+            Union Eyes <span aria-hidden="true" className="mx-2 text-[#dfbe70]">·</span> CIVIC <span aria-hidden="true" className="mx-2 text-[#dfbe70]">·</span> Nzila OS
+          </p>
         </div>
       </div>
     </section>
   );
 }
-
-
-
-
-
