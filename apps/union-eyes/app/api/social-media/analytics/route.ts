@@ -45,7 +45,7 @@ const CAMPAIGN_EXPORT_KEYS: Record<string, string> = {
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   // An export is a separate, steward-gated read. The normal analytics view remains member-readable.
   if (request.nextUrl.searchParams.get('export') === 'true') {
-    return exportSocialMediaAnalyticsWithAuth(request);
+    return exportSocialMediaAnalyticsWithAuth(request, context);
   }
   try {
       const { userId, organizationId } = context;
