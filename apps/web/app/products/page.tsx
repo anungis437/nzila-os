@@ -172,7 +172,7 @@ export default async function ProductsPage() {
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-semibold tracking-tight md:text-5xl">{c.conversationTitle}</h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">{c.conversationBody}</p>
-          <TrackedLink href="/contact" eventName="products_contact" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-7 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.conversationCta} <span aria-hidden="true" className="ml-2">↗</span></TrackedLink>
+          <TrackedLink href="/contact?interest=portfolio" eventName="products_contact" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-7 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.conversationCta} <span aria-hidden="true" className="ml-2">↗</span></TrackedLink>
         </div>
       </section>
     </main>
