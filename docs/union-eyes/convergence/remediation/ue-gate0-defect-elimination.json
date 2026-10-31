@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 553,
-    "partial": 86,
+    "partial": 87,
     "qualificationVerified": 0,
     "unresolved": 224,
     "externalBlockers": 0
@@ -956,6 +956,15 @@
     {
       "id": "B98-ARBITRATION-CASE-AUTHORITY",
       "family": "Case authority for arbitration writes",
+      "outstandingBefore": 224,
+      "newlyImplemented": 0,
+      "outstandingAfter": 224,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B99-CLAUSE-LIBRARY-SOURCE-ATTRIBUTION",
+      "family": "Clause-library anonymized source projection across system-role list/search/compare",
       "outstandingBefore": 224,
       "newlyImplemented": 0,
       "outstandingAfter": 224,
@@ -7580,6 +7589,19 @@
       ],
       "explanation": "Creating an arbitration now requires that the grievanceId in the body be a grievance of the caller's organization (assertOrganizationOwns) and that the case authority allow the caller to edit that case (owner, or a collaborator with editing permission); changing one re-checks the same authority against the row loaded under the update's lock, and the grievance an arbitration belongs to cannot be changed.",
       "remaining": "Reads of the collection and item still return every arbitration of the organization to a steward, and DELETE is not re-checked against the case; the generic factory has no per-row read hook for a kernel decision."
+    },
+    "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS": {
+      "status": "PARTIAL",
+      "batch": "B99-CLAUSE-LIBRARY-SOURCE-ATTRIBUTION",
+      "files": [
+        "apps/union-eyes/app/api/clause-library/route.ts",
+        "apps/union-eyes/app/api/clause-library/search/route.ts",
+        "apps/union-eyes/app/api/clause-library/compare/route.ts",
+        "apps/union-eyes/lib/clause-library/source-projection.ts",
+        "apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts"
+      ],
+      "explanation": "The system-role list, search and compare paths now apply a shared source-organization projection. For an anonymized or unclassified clause, cross-organization readers do not receive the source organization id/name; the source owner retains attribution. Search and compare explicitly select the anonymization flag instead of silently omitting it. A unit test covers the disclosure rule and a source contract asserts use in all three routes.",
+      "remaining": "System-role access remains subject to the SQL sharing-authority predicate and its policy; native PG15/16 cross-tenant tests, real HTTP response checks, anonymization of free-text content, and independent review are not yet established. This correction does not qualify all cross-tenant reads."
     }
   }
 }

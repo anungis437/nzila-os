@@ -19,6 +19,7 @@ import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause } from '@/lib/clause-library/sharing-authority';
 import { commonKeywords } from '@/lib/clause-library/common-keywords';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +55,7 @@ export const POST = withApi(
           clauseText: sharedClauseLibrary.clauseText,
           clauseType: sharedClauseLibrary.clauseType,
           sharingLevel: sharedClauseLibrary.sharingLevel,
+          isAnonymized: sharedClauseLibrary.isAnonymized,
           sharedWithOrgIds: sharedClauseLibrary.sharedWithOrgIds,
           sector: sharedClauseLibrary.sector,
           province: sharedClauseLibrary.province,
@@ -95,7 +97,7 @@ export const POST = withApi(
         province: r.province,
         effectiveDate: r.effectiveDate,
         expiryDate: r.expiryDate,
-        sourceOrganization: { id: r.sourceOrganizationId, organizationName: r.organizationName },
+        sourceOrganization: clauseSourceProjection(r, organizationId),
         tags: allTags.filter((t) => t.clauseId === r.id).map((t) => ({ tagName: t.tagName })),
       }));
 

@@ -14,6 +14,7 @@ import { organizations, congressMemberships } from '@/db/schema';
 import { eq, ilike, or, and } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { buildClauseVisibilityCondition } from '@/lib/clause-library/sharing-authority';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,7 @@ async function searchClauses(q: string, organizationId: string) {
         clauseText: sharedClauseLibrary.clauseText,
         clauseType: sharedClauseLibrary.clauseType,
         sharingLevel: sharedClauseLibrary.sharingLevel,
+        isAnonymized: sharedClauseLibrary.isAnonymized,
         sector: sharedClauseLibrary.sector,
         province: sharedClauseLibrary.province,
         sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
@@ -61,7 +63,7 @@ async function searchClauses(q: string, organizationId: string) {
       sharingLevel: r.sharingLevel,
       sector: r.sector,
       province: r.province,
-      sourceOrganization: { id: r.sourceOrganizationId, organizationName: r.organizationName },
+      sourceOrganization: clauseSourceProjection(r, organizationId),
     }));
   });
 }

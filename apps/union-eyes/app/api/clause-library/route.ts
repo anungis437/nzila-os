@@ -18,6 +18,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { buildClauseVisibilityCondition, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 import { assertOriginalClauseOwned } from '@/lib/clause-library/original-clause';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
@@ -141,9 +142,7 @@ export const GET = withApi(
         viewCount: r.viewCount,
         // A shared anonymized clause must not reveal its source union by
         // returning the organization id/name in the collection response.
-        sourceOrganization: r.isAnonymized && r.sourceOrganizationId !== organizationId
-          ? undefined
-          : { id: r.sourceOrganizationId, organizationName: r.organizationName },
+        sourceOrganization: clauseSourceProjection(r, organizationId),
         createdAt: r.createdAt,
       }));
 
