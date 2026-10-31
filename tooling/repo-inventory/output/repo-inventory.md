@@ -104,8 +104,8 @@
 - sbom.yml
 - secret-scan.yml
 - security-design-review.yml
-- trivy.yml
 - tool-fabric-pg-contract.yml
+- trivy.yml
 - ue-build-push-proof.yml
 - ue-staging-discovery.yml
 - union-eyes-authority-rollout.yml
