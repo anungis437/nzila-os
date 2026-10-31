@@ -16,9 +16,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
-import {
-  workbookMemoryHolders,
-} from '@/db/schema/workbook-schema';
+import { workbooks, workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
@@ -28,6 +26,15 @@ import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Safety ceiling: never build an unbounded personal-data cartography or accept
+// unlimited bearer-capability writes. This is an operational bound, not a
+// product decision about how many roles a union should model.
+export const MAX_WORKBOOK_MEMORY_HOLDERS = 200;
+
+class WorkbookMemoryHolderLimitError extends Error {
+  constructor() { super('Workbook memory-holder capacity exceeded'); }
+}
 
 const TENURE_BANDS = ['0_3y', '3_7y', '7_15y', '15y_plus'] as const;
 const CRITICALITIES = ['routine', 'important', 'load_bearing', 'institution_critical'] as const;
@@ -56,7 +63,12 @@ async function loadCartography(workbookId: string) {
     })
     .from(workbookMemoryHolders)
     .where(eq(workbookMemoryHolders.workbookId, workbookId))
-    .orderBy(workbookMemoryHolders.capturedAt);
+    .orderBy(workbookMemoryHolders.capturedAt)
+    .limit(MAX_WORKBOOK_MEMORY_HOLDERS + 1);
+
+  // A partial cartography would be materially misleading. Fail explicitly
+  // rather than silently truncating the institution's memory-holder map.
+  if (rows.length > MAX_WORKBOOK_MEMORY_HOLDERS) throw new WorkbookMemoryHolderLimitError();
 
   const cartography = runStewardshipCartography(
     rows.map((h) => ({
@@ -91,6 +103,9 @@ export async function GET(
     }
     return NextResponse.json(access.value);
   } catch (err) {
+    if (err instanceof WorkbookMemoryHolderLimitError) {
+      return NextResponse.json({ error: 'Workbook memory-holder limit exceeded; review required' }, { status: 409 });
+    }
     logger.error('[workbook-memory-holders:get] DB error', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
@@ -122,6 +137,34 @@ export async function POST(
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
       async (authority) => {
+        // Lock the parent workbook within the authority transaction. Concurrent
+        // writers serialize on this row, so a count check cannot race another
+        // POST and exceed the ceiling. Recheck ownership after acquiring the
+        // lock: a claim/transfer may have occurred after authorization.
+        const [lockedWorkbook] = await db
+          .select({
+            id: workbooks.id,
+            claimedByUserId: workbooks.claimedByUserId,
+            claimedOrgId: workbooks.claimedOrgId,
+          })
+          .from(workbooks)
+          .where(eq(workbooks.id, workbookId))
+          .for('update');
+        if (
+          !lockedWorkbook ||
+          lockedWorkbook.claimedByUserId !== authority.claimedByUserId ||
+          (lockedWorkbook.claimedOrgId != null && lockedWorkbook.claimedOrgId !== authority.claimedOrgId)
+        ) throw new Error('Workbook authority changed before memory-holder write');
+
+        const existingHolders = await db
+          .select({ id: workbookMemoryHolders.id })
+          .from(workbookMemoryHolders)
+          .where(eq(workbookMemoryHolders.workbookId, workbookId))
+          .limit(MAX_WORKBOOK_MEMORY_HOLDERS);
+        if (existingHolders.length >= MAX_WORKBOOK_MEMORY_HOLDERS) {
+          throw new WorkbookMemoryHolderLimitError();
+        }
+
         const [inserted] = await db
           .insert(workbookMemoryHolders)
           .values({
@@ -154,6 +197,9 @@ export async function POST(
 
     return NextResponse.json(access.value, { status: 201 });
   } catch (err) {
+    if (err instanceof WorkbookMemoryHolderLimitError) {
+      return NextResponse.json({ error: 'Workbook memory-holder limit reached; review required' }, { status: 409 });
+    }
     logger.error('[workbook-memory-holders:post] DB error', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Failed to add memory holder' }, { status: 503 });
   }
