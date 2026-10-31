@@ -282,6 +282,26 @@ describe('SatisfactionService', () => {
 
   // ── getLroPerformance ─────────────────────────────────────────
   describe('getLroPerformance', () => {
+    it('returns no figures for a representative with fewer completed responses than the minimum', async () => {
+      const metrics = {
+        totalSurveys: 2,
+        avgCommunication: '5.0', avgResponsiveness: '5.0',
+        avgKnowledge: '5.0', avgAdvocacy: '5.0',
+        avgProfessionalism: '5.0', avgOutcome: '5.0',
+      };
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([metrics]))
+        .mockReturnValueOnce(chain([{ total: 2, recommended: 2 }]));
+
+      const { getLroPerformance } = await import('../satisfaction-service');
+      const result = await getLroPerformance('lro-1', 'org-1');
+
+      expect(result.suppressed).toBe(true);
+      expect(result.totalSurveys).toBe(2);
+      expect(result.overallAverage).toBe(0);
+      expect(result.avgCommunication).toBe(0);
+    });
+
     it('returns aggregated LRO metrics', async () => {
       const metrics = {
         totalSurveys: 10,

@@ -7406,6 +7406,48 @@
           "explanation": "Verified on source in B89: the signers list is parsed with a strict schema; a platform signer must be an active member of the sending organization and is stored under that member record name and e-mail address (what the sender typed is discarded); a document held by an external provider is refused for local signing, so it cannot be completed without the provider."
         }
       ]
+    },
+    {
+      "id": "B90-LIFECYCLE-ROUTES-AND-MINIMUM-COHORT",
+      "family": "Lifecycle routes (health-safety close, SSO provider) and minimum cohort for satisfaction figures",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B8-HS-RESOLUTION-TIME-NEEDS-DATES-NO-ROUTE-SETS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/health-safety/incidents/[id]/close/route.ts",
+            "apps/union-eyes/app/api/health-safety/hazards/[id]/transition/route.ts",
+            "apps/union-eyes/app/api/__tests__/health-safety-close-transition.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s34-lifecycle-routes-and-minimum-cohort.test.ts"
+          ],
+          "explanation": "The generic PATCH may not set a status or date, so there was no route that did. POST /api/health-safety/incidents/[id]/close (administrator) moves a reported or investigating incident to closed and stamps the closed and investigation-completed dates, and POST /api/health-safety/hazards/[id]/transition (resolve or close) moves an open hazard on and stamps the resolution date, and the closed date on close. The dates come from the database clock, the change is conditional on the prior status, and the transition is audited in the same transaction. The statistics routes already compute the resolution time from these dates and from no other.",
+          "remaining": "The incident statistics still count a status of resolved that the incident schema does not define; that counter is always zero."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-SATISFACTION-ANONYMITY-FLAG-IS-STORED-AND-NEVER-READ-WHILE-THE-FORM-PROMISES-THE-NAME-IS-HIDDEN",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/services/satisfaction-service.ts",
+            "apps/union-eyes/lib/services/__tests__/satisfaction-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s34-lifecycle-routes-and-minimum-cohort.test.ts"
+          ],
+          "explanation": "B90: a representative with fewer than five completed responses is returned without any figure (suppressed: true, all averages zero) and is listed after the ranked ones, so a steward who knows which claim the representative handled can no longer read one response back as an average.",
+          "remaining": "The survey row still keeps member_id, the free text and isAnonymous that nothing reads, and anonymous and named responses are still aggregated together; honoring the flag needs the member link removed from anonymous rows by a migration."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-SSO-NO-UPDATE-DISABLE-OR-DELETE-ROUTE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/enterprise-sso-provider-lifecycle.route.test.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/lib/operations/catalog-authority-contract.json",
+            "apps/union-eyes/lib/services/__tests__/s34-lifecycle-routes-and-minimum-cohort.test.ts"
+          ],
+          "explanation": "PATCH /api/enterprise/sso/providers/[id] (administrator) changes, enables, disables or rotates the client secret of one provider of the organization, and DELETE removes it. Unknown fields are refused, a role mapping may only assign roles a tenant administrator can already assign, the merged configuration must be complete for its type to be enabled, a rotated secret is encrypted with the same service as at creation, and every change is audited in the same transaction with the names of the fields and never a credential value. The manifest grants the tenant runtime UPDATE and DELETE on sso_providers (the manifest-driven generator issues the grants, so there is no hand-written migration) and the catalog contract was regenerated; the grants are unqualified until run on native PostgreSQL."
+        }
+      ]
     }
   ]
 }
