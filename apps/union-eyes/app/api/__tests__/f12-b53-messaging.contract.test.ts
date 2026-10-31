@@ -45,7 +45,6 @@ describe('B53 messaging records and retained communications', () => {
     'app/api/organizing/forms/generate/route.ts',
     'app/api/organizing/labour-board/route.ts',
     'app/api/organizing/nlrb-filings/route.ts',
-    'app/api/meeting-rooms/[id]/bookings/route.ts',
     'app/api/carbon/dashboard/route.ts',
   ])('%s answers 501 and is no longer a generic CRUD or an invented result (verified existing implementation)', (route) => {
     const text = read(route)

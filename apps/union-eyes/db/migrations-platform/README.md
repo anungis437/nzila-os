@@ -64,6 +64,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0038_gate0_integrity_columns` | Gate 0 integrity columns: KPI direction, who recorded minutes, who submitted an interview or content item, one primary employer contact and unique SSO providers (including nullable identity-key evolution for Django's minimal SSO stub). Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0039_committee_memberships_shape` | Evolve committee_memberships to its declared shape Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0040_gate0_integrity_enforcement` | Enforce gate-0 integrity rules in the database Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0041_room_bookings_shape` | Evolve room_bookings and refuse overlapping bookings Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 

@@ -235,6 +235,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Changes six more principal columns (employer_communications.sender_user_id and created_by, employer_contacts.created_by, ai_grievance_triages.reviewed_by, ai_clause_reasonings.reviewed_by, ai_copilot_sessions.user_id) from uuid to text (R-29). No policy, view or key depends on them, so nothing is dropped. cookie_consents.user_id is deliberately unchanged because it is a foreign key to profiles(id). Not applied to any live database."
+      },
+      {
+        "tag": "0035_room_bookings_rls_closure",
+        "sha256": "ad018d652bd74f220b070fcb6f337e1a5e996205d6644989f2f01f0af9260ef7",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for room_bookings (direct organization_id) once platform 0041 evolves the table; runtime privileges SELECT, INSERT, UPDATE come from the storage-authority manifest. Not applied to any live database."
       }
     ],
     "platform": [
@@ -419,6 +426,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Database enforcement: replay mode new_engine, ml_predictions model_version/subject_id, course registration uniqueness and capacity trigger"
+      },
+      {
+        "tag": "0041_room_bookings_shape",
+        "sha256": "e413a2c9f4f36d238e0745d0edb18a6b922524bbca1d2df12b85c4e3a8acfa7c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Shape evolution of room_bookings plus no-overlap trigger"
       }
     ]
   }

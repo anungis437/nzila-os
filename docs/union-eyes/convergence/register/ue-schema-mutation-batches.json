@@ -139,7 +139,7 @@
       "action": "A kept Drizzle relation, a public schema export, a compatibility re-export, or a service that still reads or writes this declaration keeps it. accessibility_audits, accessibility_issues, financial_audit_log, gss_applications, indigenous_member_data, and member_addresses stay because those services name them. The sixteen dependency holds stay because a kept relation or the public user_sessions export names them. Duplicate pgTable bodies for accessibility, indigenous data, and LMBP immigration now re-export the domain declaration. None of these six services is reached from an App Router entry, so retention is not a finished persona. Census column gaps are not evolved here. Do not retire any of these to shrink the census. Do not DROP the relation.",
       "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
       "applyNow": false,
-      "entryCount": 21,
+      "entryCount": 20,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -162,10 +162,10 @@
       "ratchet": "census",
       "execution": "prepared-evolve",
       "shrink": "census",
-      "action": "Platform migration 0031_reachable_stub_shape evolves data_anonymization_log, employment_history, job_classifications, and member_leaves. Platform migration 0039_committee_memberships_shape evolves committee_memberships the same way. Additive columns and defaults only. NOT NULL only when the relation is empty. No keys, no RLS, no DROP. Revised in place before any apply: existing columns must match the expected type, and the migration refuses a change to constraint, index, policy, or grant definitions, or to row security. It is registered UNQUALIFIED. Do not apply it here. Census regeneration after apply is READY_FOR_VS_EXECUTION.",
+      "action": "Platform migration 0031_reachable_stub_shape evolves data_anonymization_log, employment_history, job_classifications, and member_leaves. Platform migrations 0039_committee_memberships_shape and 0041_room_bookings_shape evolve committee_memberships and room_bookings the same way. Additive columns and defaults only. NOT NULL only when the relation is empty. No keys, no RLS, no DROP. Revised in place before any apply: existing columns must match the expected type, and the migration refuses a change to constraint, index, policy, or grant definitions, or to row security. It is registered UNQUALIFIED. Do not apply it here. Census regeneration after apply is READY_FOR_VS_EXECUTION.",
       "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
       "applyNow": false,
-      "entryCount": 5,
+      "entryCount": 6,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -2624,13 +2624,13 @@
     },
     {
       "table": "room_bookings",
-      "batchId": "schema-verify-dead-required",
+      "batchId": "schema-evolve-reachable",
       "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
       "registryClass": "LATENT_UNREACHABLE",
       "defects": [
         "COLUMNS_MISSING"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
       "blockers": [],
       "holdReason": "calendar_events relations name roomBookings. The financial-service shadow schema also declares room_bookings. The union-eyes declaration stays."

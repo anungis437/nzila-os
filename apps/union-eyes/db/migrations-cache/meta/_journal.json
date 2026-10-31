@@ -225,6 +225,13 @@
       "when": 1790280000000,
       "tag": "0034_remaining_principal_columns_text",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790290000000,
+      "tag": "0035_room_bookings_rls_closure",
+      "breakpoints": true
     }
   ]
 }

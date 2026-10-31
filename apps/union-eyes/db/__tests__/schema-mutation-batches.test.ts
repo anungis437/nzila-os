@@ -107,10 +107,12 @@ describe('schema and mutation batch program', () => {
     }
     expect(program.censusCount).toBe(231)
     const evolve = program.batches.find((batch) => batch.id === 'schema-evolve-reachable')
-    expect(evolve?.entryCount).toBe(5)
+    expect(evolve?.entryCount).toBe(6)
     expect(evolve?.applyNow).toBe(false)
     expect(evolve?.action).toContain('0031_reachable_stub_shape')
     expect(evolve?.action).toContain('0039_committee_memberships_shape')
+    expect(evolve?.action).toContain('0041_room_bookings_shape')
+    expect(program.schema.find((entry) => entry.table === 'room_bookings')?.batchId).toBe('schema-evolve-reachable')
     expect(program.schema.find((entry) => entry.table === 'committee_memberships')?.batchId).toBe('schema-evolve-reachable')
     expect(evolve?.action).toContain('READY_FOR_VS_EXECUTION')
     expect(evolve?.action).toContain('no DROP')
@@ -143,7 +145,6 @@ describe('schema and mutation batch program', () => {
       'organization_contacts',
       'organization_sharing_settings',
       'role_tenure_history',
-      'room_bookings',
       'segment_executions',
       'segment_exports',
       'user_sessions',

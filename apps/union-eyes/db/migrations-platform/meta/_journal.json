@@ -295,6 +295,13 @@
       "when": 1758970000000,
       "tag": "0040_gate0_integrity_enforcement",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1758980000000,
+      "tag": "0041_room_bookings_shape",
+      "breakpoints": true
     }
   ]
 }

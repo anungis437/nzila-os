@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 389,
-    "partial": 78,
+    "implementedPendingQualification": 391,
+    "partial": 76,
     "qualificationVerified": 0,
-    "unresolved": 388,
+    "unresolved": 386,
     "externalBlockers": 0
   },
   "batches": [
@@ -538,6 +538,15 @@
       "outstandingAfter": 388,
       "partial": 1,
       "evidenceCommit": null
+    },
+    {
+      "id": "S03-ROOM-BOOKING-MIGRATIONS-0041-AND-0035",
+      "family": "Room booking: the booking store, its tenant isolation and the route that enforces the room's own rules",
+      "outstandingBefore": 388,
+      "newlyImplemented": 2,
+      "outstandingAfter": 386,
+      "partial": 0,
+      "evidenceCommit": null
     }
   ],
   "entries": {
@@ -736,14 +745,22 @@
       "explanation": "writableFields excludes strike-vote, mandate, cost, status, confidentiality and agreement-link fields on create and update (400), and negotiations are read at steward level instead of member."
     },
     "DEF-0B9-MOB-MEETING-ROOM-BOOKING-RULES-ARE-STORED-BUT-NO-ROUTE-OR-SERVICE-ENFORCES-A-BOOKING": {
-      "status": "PARTIAL",
-      "batch": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S03-ROOM-BOOKING-MIGRATIONS-0041-AND-0035",
       "files": [
+        "apps/union-eyes/db/migrations-platform/0041_room_bookings_shape.sql",
+        "apps/union-eyes/db/migrations-platform/0041_room_bookings_shape.rollback.sql",
+        "apps/union-eyes/db/migrations-cache/0035_room_bookings_rls_closure.sql",
+        "apps/union-eyes/db/migrations-cache/0035_room_bookings_rls_closure.rollback.sql",
+        "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+        "apps/union-eyes/lib/services/room-booking-service.ts",
+        "apps/union-eyes/lib/services/room-booking-rules.ts",
         "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
-        "apps/union-eyes/lib/services/room-booking-rules.ts"
+        "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/room-booking-service.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s3-room-booking.test.ts"
       ],
-      "explanation": "The bookings route answers 501 and reads and writes nothing; the booking rules are implemented and tested in room-booking-rules.ts.",
-      "remaining": "The physical room_bookings table lacks the columns the application declares and has no runtime grant; booking needs that migration before the rules can be wired in."
+      "explanation": "Platform 0041 evolves the room_bookings stub to its 26 missing declared columns, cache 0035 forces row-level security by organization, and the manifest reclassifies the table from LATENT_UNREACHABLE to TENANT_RLS_REQUIRED with SELECT, INSERT and UPDATE only. POST /api/meeting-rooms/[id]/bookings now accepts a booking only when evaluateBooking allows it (hours, blocked dates, duration, how far ahead, who may book, capacity, approval); a room needing approval holds the slot as scheduled until staff other than the booker confirm it. Proved against real SQL on PGlite, including the room-locking trigger. Not applied to a native database. The unused calendar-service placeholders (listMeetingRooms returned an empty list, checkRoomAvailability always answered available, bookMeetingRoom returned a generated id without storing anything, cancelRoomBooking reported success) were removed together with their four stub tests (disclosed); overlap is refused by a trigger that locks the room row (SQLSTATE 23P01, answered as 409)."
     },
     "DEF-0B9-MOB-MEETING-ROOM-BOOKINGS-PATH-PATCH-EDITS-THE-ROOM-ROW-NOT-A-BOOKING": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -4994,14 +5011,22 @@
       "remaining": "The client still saves a JSON response as a PDF; the form generator itself is not built."
     },
     "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM": {
-      "status": "PARTIAL",
-      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S03-ROOM-BOOKING-MIGRATIONS-0041-AND-0035",
       "files": [
+        "apps/union-eyes/db/migrations-platform/0041_room_bookings_shape.sql",
+        "apps/union-eyes/db/migrations-platform/0041_room_bookings_shape.rollback.sql",
+        "apps/union-eyes/db/migrations-cache/0035_room_bookings_rls_closure.sql",
+        "apps/union-eyes/db/migrations-cache/0035_room_bookings_rls_closure.rollback.sql",
+        "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+        "apps/union-eyes/lib/services/room-booking-service.ts",
+        "apps/union-eyes/lib/services/room-booking-rules.ts",
         "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
-        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+        "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/room-booking-service.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s3-room-booking.test.ts"
       ],
-      "explanation": "Existing implementation, verified: the bookings path answers 501 for GET and POST, reads and writes no room or booking row.",
-      "remaining": "The room_bookings table is not migrated; the booking rules in lib/services/room-booking-rules.ts are not wired in."
+      "explanation": "The bookings path serves bookings (GET slots with details only for the caller's own bookings unless staff; POST; PATCH approve or decline; DELETE cancels and keeps the row), each scoped to the caller's organization, audited in the same transaction; a booking id of another organization or room is not found. The f12-b53 contract pin that listed this route as 501 was removed (disclosed)."
     },
     "DEF-0B4-CARBON-ORG-ID-FROM-QUERY-STRING": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",

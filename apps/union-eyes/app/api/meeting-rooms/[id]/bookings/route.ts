@@ -1,28 +1,73 @@
 /**
  * GET POST /api/meeting-rooms/[id]/bookings
  *
- * Room booking is not available. This path used to be the room CRUD, so a PATCH sent to it edited the room row and a booking id
- * addressed nothing, while the room's booking rules were stored and never enforced. Bookings cannot be stored yet: the physical
- * room_bookings table lacks 26 of the columns the application declares (organization, booker, start, end and status among
- * them) and the storage-authority manifest grants the runtime role nothing on it, so a booking route would fail on every
- * request. The booking rules themselves are implemented and tested in lib/services/room-booking-rules.ts and are wired in when
- * the table is migrated and classified. Until then every method answers 501 and no room or booking row is read or written.
+ * Books a meeting room under the room's own rules (hours, blocked dates, duration, how far ahead, who may book, capacity,
+ * approval): lib/services/room-booking-rules.ts decides, and the database refuses a second booking of the same slot.
+ * The path used to be the room CRUD and then answered 501 because the booking store did not exist; it exists once platform
+ * migration 0041 and cache migration 0035 are applied, and until then every call fails closed on the missing columns.
+ *
+ * GET lists a room's slots for a window. A member sees the slots and the details of their own bookings; staff see all.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi, z, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getRoleLevel, UserRole } from '@/lib/auth/roles';
+import { getUserRoleInOrganization } from '@/lib/organization-utils';
+import { createRoomBooking, isOverlapViolation, listRoomBookings, overlapConflict } from '@/lib/services/room-booking-service';
 
 export const dynamic = 'force-dynamic';
 
-const options = {
-  auth: { required: true, minRole: 'member' as const },
-  openapi: {
-    tags: ['Scheduling'],
-    summary: 'Room bookings (not implemented)',
-    description: 'Not implemented: answers 501.',
-  },
-};
-const refuse = async () => {
-  throw ApiError.notImplemented('Room booking is not implemented: the booking store is not provisioned, so no booking can be recorded.');
-};
+const createSchema = z.object({
+  startTime: z.coerce.date(),
+  endTime: z.coerce.date(),
+  purpose: z.string().trim().min(1).max(500),
+  attendeeCount: z.number().int().min(1).max(10000).optional(),
+  specialRequests: z.string().max(2000).optional(),
+  cateringRequired: z.boolean().optional(),
+  cateringNotes: z.string().max(1000).optional(),
+});
 
-export const GET = withApi(options, refuse);
-export const POST = withApi(options, refuse);
+const listSchema = z.object({
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(100),
+});
+
+const callerRole = (userId: string, organizationId: string) => getUserRoleInOrganization(userId, organizationId).catch(() => null);
+
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    query: listSchema,
+    openapi: { tags: ['Scheduling'], summary: 'List a room\'s bookings', description: 'Slots in a window; details only of the caller\'s own bookings unless staff.' },
+  },
+  async ({ params, query, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization membership required');
+    const role = await callerRole(userId, organizationId);
+    const isStaff = role != null && getRoleLevel(role as UserRole) >= getRoleLevel(UserRole.STEWARD);
+    const bookings = await withRLSContext({ organizationId }, (tx) =>
+      listRoomBookings(tx, { organizationId, userId, role, isStaff }, params.id, { from: query.from, to: query.to, limit: query.limit }),
+    );
+    return { data: bookings };
+  },
+);
+
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    body: createSchema,
+    openapi: { tags: ['Scheduling'], summary: 'Book a room', description: 'Accepted only when the room\'s own rules allow it; answers 409 when the slot is taken.' },
+  },
+  async ({ params, body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization membership required');
+    const role = await callerRole(userId, organizationId);
+    try {
+      const booking = await withRLSContext({ organizationId }, (tx) =>
+        createRoomBooking(tx, { organizationId, userId, role }, params.id, body),
+      );
+      return { data: booking };
+    } catch (error) {
+      if (isOverlapViolation(error)) throw overlapConflict();
+      throw error;
+    }
+  },
+);
