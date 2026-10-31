@@ -6,6 +6,7 @@ import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema';
 import { desc, sql, or, ilike } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
+import { performAuditedPlatformRead } from '@/lib/audit/audited-platform-read';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,8 +14,13 @@ export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
   async (ctx) => {
     const url = new URL(ctx.request.url);
-    const search = url.searchParams.get('search')?.trim() ?? '';
+    // A bounded term, with the pattern characters of LIKE taken literally.
+    const search = (url.searchParams.get('search')?.trim() ?? '').slice(0, 100).replace(/[\\%_]/g, '\\$&');
 
+    return performAuditedPlatformRead(
+      ctx,
+      { action: 'platform.user_directory.read', resourceType: 'organization_members', details: { searched: search.length > 0, limit: 100 } },
+      async () => {
     let query = db
       .select({
         id: organizationMembers.id,
@@ -55,6 +61,8 @@ export const GET = withApi(
       lastLogin: null,
       joinedAt: u.joinedAt ?? u.createdAt,
     }));
+      },
+    );
   },
 );
 

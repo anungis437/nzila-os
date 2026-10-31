@@ -50,14 +50,14 @@ export const GET = withRoleAuth('member', async (request, context) => {
 
       // Optionally fetch clauses
       if (includeClauses) {
-        const clauses = await getClausesByCBAId(id);
+        const clauses = await getClausesByCBAId(id, organizationId);
         response.clauses = clauses;
         response.clauseCount = clauses.length;
       }
 
       // Optionally fetch bargaining notes; privileged session notes are not embedded for every member.
       if (includeNotes) {
-        const notes = (await getBargainingNotesByCBA(id)).filter(
+        const notes = (await getBargainingNotesByCBA(id, organizationId)).filter(
           (note) =>
             !note.confidentialityLevel ||
             ['public', 'internal'].includes(note.confidentialityLevel) ||

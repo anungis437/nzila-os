@@ -84,6 +84,8 @@ export interface CrudOptions {
    * still reads only their own. Writes keep the owner scope, so staff reading a member's record never edits it as the member.
    */
   staffReadsAll?: boolean;
+  /** A condition added to every GET, whatever the caller's role (for example, a restricted row of shared reference data is never listed). */
+  readCondition?: SQL;
   /** A condition added to GET only for a caller below the steward floor (for example, hiding unpublished rows from members). */
   belowStaffReadCondition?: SQL;
   /** With an ownerColumn: the owner may delete their own row at the write floor (the row scope already limits it to theirs). */
@@ -530,6 +532,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId && !(await staffMayReadAll(userId, organizationId))) {
           conditions.push(eq(ownerCol, userId));
         }
+        if (opts.readCondition) conditions.push(opts.readCondition);
         if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
         const lowRole = await readScope(userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);
@@ -676,6 +679,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId && !(await staffMayReadAll(userId, organizationId))) {
           conditions.push(eq(ownerCol, userId));
         }
+        if (opts.readCondition) conditions.push(opts.readCondition);
         if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
         const lowRole = await readScope(userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);

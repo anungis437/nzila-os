@@ -4,6 +4,7 @@ import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
 import { recordedRunAmounts } from "@/lib/employer-execution/run-duties";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
 import {
   employerPayrollRuns,
   employerPayrollRunItems,
@@ -45,6 +46,12 @@ export const POST = withApi(
     if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
     const runId = params?.runId;
     if (typeof runId !== "string") throw ApiError.badRequest("Source payroll run id is required");
+
+    // A replay reads every payroll item of the run and returns per-employee differences: the role title alone is not
+    // financial authority, so it needs the same live view mandate as the run's own detail.
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view", resourceId: runId }),
+    );
 
     const [sourceRun] = await db
       .select()

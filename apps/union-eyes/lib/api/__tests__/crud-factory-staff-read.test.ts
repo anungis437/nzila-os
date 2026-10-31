@@ -73,6 +73,15 @@ describe('crud-factory role-dependent read scope', () => {
     expect(await listWith({ ownerColumn: 'memberId' })).toContain('"member_id"');
   });
 
+  // DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT
+  it('applies readCondition to every caller, staff included', async () => {
+    const condition = eq(courses.isActive, true);
+    expect(await listWith({ readCondition: condition })).toContain('"is_active"');
+    state.wheres.length = 0;
+    state.role = 'steward';
+    expect(await listWith({ readCondition: condition, staffReadsAll: true })).toContain('"is_active"');
+  });
+
   it('applies belowStaffReadCondition to a member and not to a steward', async () => {
     const condition = eq(courses.isActive, true);
     expect(await listWith({ belowStaffReadCondition: condition })).toContain('"is_active"');

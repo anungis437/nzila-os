@@ -13,6 +13,7 @@ const m = vi.hoisted(() => ({
   calculatePayroll: vi.fn(),
   buildReplayDiff: vi.fn(),
   buildEvaluationGraphDiff: vi.fn(),
+  requireLiveFinancialMandate: vi.fn(),
 }));
 
 function makeSelectChain() {
@@ -49,6 +50,7 @@ vi.mock('@/lib/api/framework', async () => {
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: m.requireLiveFinancialMandate }));
 vi.mock('../employer-execution/_lib', () => ({
   buildEvaluationGraphDiff: m.buildEvaluationGraphDiff,
   buildReplayDiff: m.buildReplayDiff,
@@ -69,6 +71,7 @@ describe('employer-execution/replay/[runId] route', () => {
     m.inserts = [];
     m.lastTx = undefined;
     m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.requireLiveFinancialMandate.mockResolvedValue({});
     m.sha256.mockReturnValue('hash_1');
     m.resolvePayrollRules.mockReturnValue({});
     m.calculatePayroll.mockReturnValue({
@@ -142,7 +145,7 @@ describe('employer-execution/replay/[runId] route', () => {
   it('throws when the actor is missing', async () => {
     const { POST } = await loadRoute();
     await expect(POST({ organizationId: 'org_1', params: { runId: 'run_1' }, body: { mode: 'exact' } } as any)).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.inserts).toHaveLength(0);
   });
 
   it('throws when runId param is missing', async () => {
@@ -163,7 +166,7 @@ describe('employer-execution/replay/[runId] route', () => {
     m.selectQueue.push([{ ...sourceRun, sourceBatchId: null }]);
 
     await expect(POST({ organizationId: 'org_1', userId: 'user_1', params: { runId: 'run_1' }, body: { mode: 'exact' } } as any)).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.inserts).toHaveLength(0);
   });
 
   it('throws when source run is missing CBA rule version reference', async () => {
@@ -171,7 +174,7 @@ describe('employer-execution/replay/[runId] route', () => {
     m.selectQueue.push([{ ...sourceRun, cbaRuleVersionId: null }]);
 
     await expect(POST({ organizationId: 'org_1', userId: 'user_1', params: { runId: 'run_1' }, body: { mode: 'exact' } } as any)).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.inserts).toHaveLength(0);
   });
 
   it('creates replay, returns diff payload and audits on the same transaction', async () => {
@@ -202,6 +205,18 @@ describe('employer-execution/replay/[runId] route', () => {
     });
   });
 
+  it('refuses a role holder who has no live financial view mandate, before reading any payroll item', async () => {
+    const { POST } = await loadRoute();
+    m.requireLiveFinancialMandate.mockRejectedValueOnce(Object.assign(new Error('Financial mandate required'), { status: 403 }));
+    queueReplayInputs();
+
+    await expect(POST({ organizationId: 'org_1', userId: 'user_1', params: { runId: 'run_1' }, body: { mode: 'exact' } } as any)).rejects.toMatchObject({ status: 403 });
+
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'finance:view', resourceId: 'run_1', organizationId: 'org_1', userId: 'user_1' }));
+    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(m.inserts).toHaveLength(0);
+  });
+
   it('answers a repeated identical replay with the replay it already made and adds nothing', async () => {
     const { POST } = await loadRoute();
     queueReplayInputs();
@@ -214,7 +229,7 @@ describe('employer-execution/replay/[runId] route', () => {
 
     expect(result.data.replay.id).toBe('replay_0');
     expect(result.data.repeated).toBe(true);
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.inserts).toHaveLength(0);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 

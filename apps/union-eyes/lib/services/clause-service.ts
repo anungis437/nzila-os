@@ -102,15 +102,17 @@ export async function getClauseById(
 /**
  * Get clauses by CBA ID
  */
+// A clause is named by its agreement and by the organization that holds it: a clause written against another organization's agreement id never appears here.
 export async function getClausesByCBAId(
   cbaId: string,
+  organizationId: string,
   _options: ClauseSearchOptions = {}
 ): Promise<Clause[]> {
   try {
     const clauses = await db
       .select()
       .from(cbaClause)
-      .where(eq(cbaClause.cbaId, cbaId))
+      .where(and(eq(cbaClause.cbaId, cbaId), eq(cbaClause.organizationId, organizationId)))
       .orderBy(asc(cbaClause.orderIndex), asc(cbaClause.clauseNumber));
 
     return clauses;

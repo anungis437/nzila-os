@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 293,
-    "partial": 54,
+    "implementedPendingQualification": 301,
+    "partial": 56,
     "qualificationVerified": 0,
-    "unresolved": 484,
+    "unresolved": 476,
     "externalBlockers": 0
   },
   "batches": [
@@ -285,6 +285,15 @@
       "newlyImplemented": 5,
       "outstandingAfter": 484,
       "partial": 3,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "family": "F03: a record is read under the organization that holds it, a shared record under what its own row permits, and a platform read of other organizations is attributed and recorded first",
+      "outstandingBefore": 484,
+      "newlyImplemented": 8,
+      "outstandingAfter": 476,
+      "partial": 2,
       "evidenceCommit": null
     }
   ],
@@ -3639,6 +3648,113 @@
         "apps/union-eyes/app/api/__tests__/billing-validate.route.test.ts"
       ],
       "explanation": "Validation failures are classified as validation (not unauthorized access), every evaluated result has a tenant-bound atomic audit receipt, and the route fails closed with 503 when the audit cannot commit (existing implementation, existing tests)."
+    },
+    "DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/app/api/__tests__/employer-replay-run-id.route.test.ts",
+        "apps/union-eyes/app/api/employer-execution/__tests__/execution-routes-hardening.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+      ],
+      "explanation": "A replay first requires a live financial view mandate for the run (resource-scoped, as the run detail does) and only then reads any payroll item. Tests adapted: assertions that no transaction was opened now assert that nothing is written, because the mandate check is itself a transaction; the not-found test asserts the mandate was requested. New test: a role holder with no mandate is refused before any read."
+    },
+    "DEF-0B6-EMP-REMITTANCE-DETAIL-MEMBER-READ": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+      ],
+      "explanation": "The remittance run detail needs the financial roles and a live view mandate for the run, reads inside one tenant RLS transaction, and returns only the evidence manifest, never the stored CSV or JSON (existing implementation, now pinned)."
+    },
+    "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT": {
+      "status": "PARTIAL",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/app/api/arbitration/precedents/route.ts",
+        "apps/union-eyes/app/api/arbitration/precedents/[id]/route.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-factory-staff-read.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+      ],
+      "explanation": "A new readCondition option applies to every GET whatever the caller's role; both decision routes use it so a decision marked not public, or carrying an access restriction, is neither listed nor returned.",
+      "remaining": "The row-level-security policy on arbitration_decisions still admits any tenant context (it needs a migration run on native PostgreSQL), and a restricted decision now has no viewing route at all."
+    },
+    "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/lib/services/clause-service.ts",
+        "apps/union-eyes/lib/services/bargaining-notes-service.ts",
+        "apps/union-eyes/app/api/cbas/[id]/route.ts",
+        "apps/union-eyes/lib/__tests__/clause-service.test.ts",
+        "apps/union-eyes/lib/services/__tests__/bargaining-notes-service.test.ts",
+        "apps/union-eyes/app/api/__tests__/cbas-bargaining-notes.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+      ],
+      "explanation": "The clause and bargaining-note reads take the caller's organization as a required argument and name it beside the agreement id, so a child row written against another organization's agreement is never returned. Existing service tests adapted only by passing the new argument; the route test now asserts the notes read carries the organization."
+    },
+    "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/education/completions/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+      ],
+      "explanation": "A completion is a locked transition of an existing registration of the organization that must be attended and passed, audited in the same transaction; nothing is inserted (existing implementation, now pinned)."
+    },
+    "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/continuity/inheritance/route.ts",
+        "apps/union-eyes/app/api/__tests__/continuity-inheritance.route.test.ts"
+      ],
+      "explanation": "The path no longer mounts the generic factory over pending_profiles; it answers 501 and exposes nothing (existing implementation and test)."
+    },
+    "DEF-0B9-ASM-ONBOARDING-ROOT-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/onboarding/route.ts",
+        "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+      ],
+      "explanation": "The onboarding root answers 501 instead of mounting the factory over pending_profiles, and the roster-facade ratchet pins it."
+    },
+    "DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/precedents/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/precedents-item-isolation.pglite.test.ts"
+      ],
+      "explanation": "The precedent item route reads under the caller's tenant context with an explicit sharing check, and PATCH and DELETE name the owning organization in their own WHERE clause and audit in the same transaction (existing implementation, existing pglite isolation test)."
+    },
+    "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/users/me/organizations/route.ts",
+        "apps/union-eyes/app/api/__tests__/users-me-organizations.route.test.ts"
+      ],
+      "explanation": "A GET never links or rewrites a membership by e-mail address or through another user id's profile; memberships are only those already bound to the caller (existing implementation, existing tests assert no update)."
+    },
+    "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ": {
+      "status": "PARTIAL",
+      "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
+      "files": [
+        "apps/union-eyes/app/api/admin/users/route.ts",
+        "apps/union-eyes/app/api/admin/stats/activity/route.ts",
+        "apps/union-eyes/lib/audit/audited-platform-read.ts",
+        "apps/union-eyes/lib/audit/__tests__/audited-platform-read.test.ts",
+        "apps/union-eyes/app/api/__tests__/admin-users.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/admin-stats-activity.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+      ],
+      "explanation": "The platform user directory and activity feed record the read under the system scope before running it and refuse (409) if that record cannot be written; the search term is bounded with LIKE wildcards taken literally, and the activity limit is a bounded integer.",
+      "remaining": "Authority is still the platform_lead role title rather than a mandate, and both reads still return member names and e-mail addresses across every organization by design."
     }
   }
 }

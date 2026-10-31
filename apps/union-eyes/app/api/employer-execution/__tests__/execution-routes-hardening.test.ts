@@ -676,7 +676,7 @@ describe("replay/[runId] POST", () => {
 
     const lookup = h.state.calls.find((c) => c.op === "db.select")!;
     expect(paramsOf(lookup.where)).toEqual(expect.arrayContaining([ORG, RUN_ID]));
-    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.requireLiveFinancialMandate).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: "finance:view", resourceId: RUN_ID }));
     expect(h.audit).not.toHaveBeenCalled();
   });
 

@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 344,
- "partial": 56,
- "outstanding": 433,
- "accountedFor": 433,
+ "corrected": 352,
+ "partial": 58,
+ "outstanding": 425,
+ "accountedFor": 425,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -50,26 +50,26 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 47,
+   "defects": 41,
    "severity": {
-    "HIGH": 12,
+    "HIGH": 6,
     "MEDIUM": 25,
     "LOW": 10
    },
-   "namedRoutes": 10,
+   "namedRoutes": 8,
    "namedFiles": 1,
    "tranches": {
     "0B.2": 1,
     "0B.3": 1,
-    "0B.4": 7,
+    "0B.4": 6,
     "0B.5": 2,
-    "0B.6": 11,
+    "0B.6": 9,
     "0B.7": 4,
     "0B.8": 2,
-    "0B.9": 3,
+    "0B.9": 2,
     "0B.10": 6,
-    "0B.11": 7,
-    "0B.12": 2,
+    "0B.11": 6,
+    "0B.12": 1,
     "0C.1": 1
    }
   },
@@ -95,9 +95,9 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 104,
+   "defects": 102,
    "severity": {
-    "HIGH": 12,
+    "HIGH": 10,
     "MEDIUM": 55,
     "LOW": 37
    },
@@ -109,7 +109,7 @@
     "0B.3": 1,
     "0B.4": 4,
     "0B.5": 4,
-    "0B.6": 15,
+    "0B.6": 13,
     "0B.7": 24,
     "0B.8": 9,
     "0B.9": 7,
@@ -389,11 +389,13 @@
   "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [
    {
     "id": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
@@ -417,10 +419,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B4-CBAS-CBA-NUMBER-GLOBALLY-UNIQUE",
     "severity": "MEDIUM"
    },
@@ -431,10 +429,6 @@
    {
     "id": "DEF-0B5-UNSUBSCRIBE-NO-CONSENT-RECORD-WITHOUT-CAMPAIGN",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B6-EDU-SESSION-COURSE-ID-NOT-VERIFIED-TO-ORGANIZATION",
@@ -463,10 +457,6 @@
    {
     "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
@@ -506,10 +496,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B9-ASM-ONBOARDING-ROOT-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B9-ORG-HIERARCHY-LIST-HARD-CODED-RLS-FLAG-AND-SILENT-FIVE-HUNDRED-ROW-CAP",
     "severity": "LOW"
    },
@@ -540,10 +526,6 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS",
     "severity": "MEDIUM"
    },
@@ -567,10 +549,6 @@
    {
     "id": "DEF-0B11-IDS-SETTINGS-TWILIO-NUMBER-KEY-ATTRIBUTES-INBOUND-SMS-WITH-NO-UNIQUENESS",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B12-PLT-ORGANIZATIONS-LEGACY-BRANCH-LISTS-EVERY-ORGANIZATION-TO-A-PLATFORM-ID-AND-LOADS-THE-WHOLE-TABLE-FOR-EVERY-OTHER-CALLER",
@@ -683,14 +661,6 @@
    {
     "id": "DEF-0B6-EDU-CONTENT-LISTS-UNBOUNDED-OR-UNVALIDATED",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-EMP-REMITTANCE-DETAIL-MEMBER-READ",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",

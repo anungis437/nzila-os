@@ -161,13 +161,13 @@ describe('clause-service', () => {
   describe('getClausesByCBAId', () => {
     it('returns clauses ordered by index and number', async () => {
       mocks.mockSelect.mockReturnValue(chain([CLAUSE]));
-      const result = await getClausesByCBAId('cba1');
+      const result = await getClausesByCBAId('cba1', 'org1');
       expect(result).toEqual([CLAUSE]);
     });
 
     it('throws on error', async () => {
       mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
-      await expect(getClausesByCBAId('cba1')).rejects.toThrow('Failed to fetch clauses');
+      await expect(getClausesByCBAId('cba1', 'org1')).rejects.toThrow('Failed to fetch clauses');
     });
   });
 
