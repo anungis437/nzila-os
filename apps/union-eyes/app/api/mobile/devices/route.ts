@@ -32,7 +32,7 @@ export function buildPushDeviceCreateValues(
   for (const key of ['quietHoursStart', 'quietHoursEnd'] as const) {
     const value = values[key];
     if (value !== undefined && value !== null &&
-      (typeof value !== 'string' || !/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(value))) {
+      (typeof value !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value))) {
       throw ApiError.badRequest(`${key} must be HH:mm in 24-hour time`);
     }
   }
