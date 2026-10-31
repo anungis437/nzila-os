@@ -17,6 +17,9 @@ const createContributionSchema = z.object({
 
 export const dynamic = 'force-dynamic';
 
+// A list answers at most this many rows.
+const LIST_LIMIT = 200;
+
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -36,7 +39,7 @@ export const GET = withApi(
         if (own.length === 0 || (memberId && !own.includes(memberId))) return [];
         conditions.push(inArray(pensionContributions.memberId, memberId ? [memberId] : own));
       }
-      return tx.select().from(pensionContributions).where(and(...conditions)).orderBy(desc(pensionContributions.createdAt));
+      return tx.select().from(pensionContributions).where(and(...conditions)).orderBy(desc(pensionContributions.createdAt)).limit(LIST_LIMIT);
     });
   },
 );

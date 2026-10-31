@@ -37,7 +37,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
       const includeAnalytics = searchParams.get("includeAnalytics") === "true";
 
       // Fetch CBA within the caller's organization
-      const cba = await getCbaForOrganization(organizationId, id, { countView: includeAnalytics });
+      const cba = await getCbaForOrganization(organizationId, id, { countView: false });
 
       if (!cba) {
         return standardErrorResponse(

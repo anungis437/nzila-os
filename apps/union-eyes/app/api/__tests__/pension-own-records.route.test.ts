@@ -54,7 +54,7 @@ describe.each([
       from: () => ({
         where: (w: unknown) => {
           m.conditions.push(w);
-          return { orderBy: async () => [{ id: 'row1' }] };
+          return { orderBy: () => ({ limit: async () => [{ id: 'row1' }] }) };
         },
       }),
     });

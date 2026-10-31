@@ -12,13 +12,14 @@ import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 
+// Every field is bounded: an anonymous submission is stored as typed, so none may be unbounded.
 const contactSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().optional(),
-  email: z.string().email(),
-  organization: z.string().optional(),
-  role: z.string().optional(),
-  inquiryType: z.string().optional(),
+  firstName: z.string().trim().min(1).max(100),
+  lastName: z.string().trim().max(100).optional(),
+  email: z.string().trim().max(254).email(),
+  organization: z.string().trim().max(200).optional(),
+  role: z.string().trim().max(100).optional(),
+  inquiryType: z.string().trim().max(100).optional(),
   message: z.string().max(2000).optional(),
 });
 
@@ -30,7 +31,8 @@ export async function POST(request: NextRequest) {
     const body = contactSchema.parse(raw);
     const { firstName, lastName, email, organization, role, inquiryType, message } = body;
 
-    logger.info('contact_form:submitted', { email, organization, inquiryType });
+    // The visitor's address is personal data and is not written to the log.
+    logger.info('contact_form:submitted', { organization, inquiryType });
 
     // Record the contact in HubSpot; an unconfigured or failing CRM is reported below, not hidden
     const contactId = await upsertContact({

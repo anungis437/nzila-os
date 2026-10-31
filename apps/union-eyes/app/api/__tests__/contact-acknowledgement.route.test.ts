@@ -47,6 +47,26 @@ describe('contact route', () => {
     expect(response.status).toBe(503);
   });
 
+  // DEF-0B6-SYS-CONTACT-UNBOUNDED-FIELDS-AND-EMAIL-LOGGED
+  it('refuses an oversized field with 400 before contacting the CRM', async () => {
+    m.guard.mockResolvedValue({ ok: true, json: { ...body, organization: 'x'.repeat(201) } });
+
+    const response = await post();
+
+    expect(response.status).toBe(400);
+    expect(m.upsertContact).not.toHaveBeenCalled();
+  });
+
+  it('does not write the visitor\'s e-mail address to the log', async () => {
+    const { logger } = await import('@/lib/logger');
+    m.upsertContact.mockResolvedValue('contact-1');
+    m.createDeal.mockResolvedValue('deal-1');
+
+    await post();
+
+    expect(JSON.stringify((logger.info as ReturnType<typeof vi.fn>).mock.calls)).not.toContain(body.email);
+  });
+
   it('refuses an invalid submission with 400 before contacting the CRM', async () => {
     m.guard.mockResolvedValue({ ok: true, json: { firstName: '', email: 'not-an-email' } });
 

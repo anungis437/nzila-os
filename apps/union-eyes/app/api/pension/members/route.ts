@@ -20,6 +20,9 @@ const createMemberSchema = z.object({
 
 export const dynamic = 'force-dynamic';
 
+// A list answers at most this many rows.
+const LIST_LIMIT = 200;
+
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -50,7 +53,7 @@ export const GET = withApi(
       .select()
       .from(pensionMembers)
       .where(and(...conditions))
-      .orderBy(desc(pensionMembers.createdAt));
+      .orderBy(desc(pensionMembers.createdAt)).limit(LIST_LIMIT);
     return members;
   },
 );

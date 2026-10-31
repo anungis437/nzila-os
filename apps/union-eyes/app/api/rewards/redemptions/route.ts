@@ -34,8 +34,9 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     const limit = boundedInt(searchParams.get('limit'), 20, 1, 100);
     const offset = boundedInt(searchParams.get('offset'), 0, 0, 1_000_000);
 
-    const validStatuses = ['pending', 'ordered', 'fulfilled', 'cancelled', 'refunded'];
-    if (status && !validStatuses.includes(status)) {
+    // The values the redemption status can hold; an earlier list named one it never holds and omitted the ones a redemption starts in.
+    const validStatuses = ['initiated', 'pending_payment', 'ordered', 'fulfilled', 'cancelled', 'refunded'] as const;
+    if (status && !(validStatuses as readonly string[]).includes(status)) {
       return NextResponse.json(
         { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
         { status: 400 }
@@ -46,7 +47,8 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
       organizationId,
       userId,
       limit,
-      offset
+      offset,
+      status as (typeof validStatuses)[number] | undefined
     );
 
     return NextResponse.json(

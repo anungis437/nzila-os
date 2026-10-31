@@ -464,16 +464,17 @@ export async function listUserRedemptions(
   orgId: string,
   userId: string,
   limit = 20,
-  offset = 0
+  offset = 0,
+  status?: RewardRedemption['status']
 ): Promise<{
   redemptions: RewardRedemption[];
   total: number;
 }> {
+  const own = status
+    ? and(eq(rewardRedemptions.orgId, orgId), eq(rewardRedemptions.userId, userId), eq(rewardRedemptions.status, status))
+    : and(eq(rewardRedemptions.orgId, orgId), eq(rewardRedemptions.userId, userId));
   const redemptions = await db.query.rewardRedemptions.findMany({
-    where: and(
-      eq(rewardRedemptions.orgId, orgId),
-      eq(rewardRedemptions.userId, userId)
-    ),
+    where: own,
     orderBy: [desc(rewardRedemptions.createdAt)],
     limit,
     offset,
@@ -483,12 +484,7 @@ export async function listUserRedemptions(
   const [{ total: totalCount }] = await db
     .select({ total: count() })
     .from(rewardRedemptions)
-    .where(
-      and(
-        eq(rewardRedemptions.orgId, orgId),
-        eq(rewardRedemptions.userId, userId)
-      )
-    );
+    .where(own);
 
   return {
     redemptions,

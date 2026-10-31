@@ -29,10 +29,24 @@ describe('rewards/redemptions GET', () => {
     expect(body.data?.redemptions ?? body.redemptions).toEqual([{ id: 'r1', status: 'fulfilled', creditsSpent: 10, providerOrderId: 'order-1' }]);
   });
 
+  // DEF-0B11-PRP-REDEMPTIONS-GET-IGNORES-THE-STATUS-FILTER-AND-VALIDATES-AGAINST-AN-INCOMPLETE-LIST
+  it('passes a valid status filter to the query and accepts the statuses a redemption starts in', async () => {
+    const { GET } = await import('../rewards/redemptions/route');
+    await GET(new NextRequest('http://localhost/api/rewards/redemptions?status=pending_payment'), { userId: 'member_1', organizationId: 'org_1' } as never);
+    expect(m.list).toHaveBeenCalledWith('org_1', 'member_1', 20, 0, 'pending_payment');
+  });
+
+  it('refuses a status no redemption holds with 400, without querying', async () => {
+    const { GET } = await import('../rewards/redemptions/route');
+    const response = await GET(new NextRequest('http://localhost/api/rewards/redemptions?status=pending'), { userId: 'member_1', organizationId: 'org_1' } as never);
+    expect(response.status).toBe(400);
+    expect(m.list).not.toHaveBeenCalled();
+  });
+
   it('turns a non-numeric or negative page request into bounded defaults instead of NaN', async () => {
     await get('?limit=abc&offset=-5');
-    expect(m.list).toHaveBeenCalledWith('org_1', 'u1', 20, 0);
+    expect(m.list).toHaveBeenCalledWith('org_1', 'u1', 20, 0, undefined);
     await get('?limit=9999&offset=3');
-    expect(m.list).toHaveBeenLastCalledWith('org_1', 'u1', 100, 3);
+    expect(m.list).toHaveBeenLastCalledWith('org_1', 'u1', 100, 3, undefined);
   });
 });

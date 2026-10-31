@@ -14,6 +14,9 @@ import { isPensionAdministrator, ownPensionIdentities, PENSION_ADMIN_ROLES } fro
  */
 export const dynamic = 'force-dynamic';
 
+// A list answers at most this many rows.
+const LIST_LIMIT = 200;
+
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -33,7 +36,7 @@ export const GET = withApi(
         if (own.length === 0 || (memberId && !own.includes(memberId))) return [];
         conditions.push(inArray(pensionT4aRecords.memberId, memberId ? [memberId] : own));
       }
-      return tx.select().from(pensionT4aRecords).where(and(...conditions)).orderBy(desc(pensionT4aRecords.createdAt));
+      return tx.select().from(pensionT4aRecords).where(and(...conditions)).orderBy(desc(pensionT4aRecords.createdAt)).limit(LIST_LIMIT);
     });
   },
 );

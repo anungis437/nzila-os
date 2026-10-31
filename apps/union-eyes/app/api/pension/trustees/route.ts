@@ -6,6 +6,9 @@ import { capabilityNotImplementedResponse } from '@/lib/finance/financial-author
 
 export const dynamic = 'force-dynamic';
 
+// A list answers at most this many rows.
+const LIST_LIMIT = 200;
+
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -24,7 +27,7 @@ export const GET = withApi(
       .select()
       .from(pensionTrustees)
       .where(and(...conditions))
-      .orderBy(desc(pensionTrustees.createdAt));
+      .orderBy(desc(pensionTrustees.createdAt)).limit(LIST_LIMIT);
     return trustees;
   },
 );
