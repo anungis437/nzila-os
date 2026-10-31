@@ -97,6 +97,48 @@ describe("BaseAdapter", () => {
     await expect(adapter.fetch("https://example.com", {})).rejects.toThrow("larger than the allowed size");
   });
 
+  it("refuses a declared oversized response before consuming its body", async () => {
+    const adapter = new TestAdapter();
+    const cancel = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(fetch).mockResolvedValueOnce({
+      headers: { get: (name: string) => name === "content-length" ? "10000001" : null },
+      body: { cancel },
+      ok: true,
+    } as unknown as Response);
+    await expect(adapter.fetch("https://example.com/large", {})).rejects.toThrow("larger than the allowed size");
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it("refuses an oversized streaming response even when Content-Length is absent", async () => {
+    const adapter = new TestAdapter();
+    let emitted = 0;
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (emitted++ < 2) controller.enqueue(new Uint8Array(6_000_000));
+        else controller.close();
+      },
+    });
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(stream, { status: 200 }));
+    await expect(adapter.fetch("https://example.com/large", {})).rejects.toThrow("larger than the allowed size");
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("decodes multi-byte UTF-8 split across streaming chunks", async () => {
+    const adapter = new TestAdapter();
+    const encoded = new TextEncoder().encode("A café B");
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoded.slice(0, 6));
+        controller.enqueue(encoded.slice(6));
+        controller.close();
+      },
+    });
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(stream, { status: 200 }));
+    const result = await adapter.fetch("https://example.com/text", {});
+    expect(result.rawContent).toBe("A café B");
+    expect(result.wordCount).toBe(3);
+  });
+
   it("retries on 5xx responses and preserves custom headers", async () => {
     const adapter = new TestAdapter();
     vi.mocked(fetch)
