@@ -18,11 +18,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     }
 
     const { searchParams } = new URL(request.url);
-    const limit = Math.min(
-      parseInt(searchParams.get('limit') || '20', 10),
-      100
-    );
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    // A non-numeric or negative value is the default, never NaN or a negative offset handed to the query.
+    const boundedInt = (raw: string | null, fallback: number, min: number, max: number) => {
+      const parsed = Number.parseInt(raw ?? '', 10);
+      return Number.isFinite(parsed) ? Math.min(Math.max(parsed, min), max) : fallback;
+    };
+    const limit = boundedInt(searchParams.get('limit'), 20, 1, 100);
+    const offset = boundedInt(searchParams.get('offset'), 0, 0, 1_000_000);
 
     const balance = await getBalance(organizationId, userId);
 

@@ -4333,6 +4333,32 @@
           "explanation": "The compliance event list moves from the member floor to the financial roles and is bounded to 500 rows; the payroll and remittance run lists already require the financial roles and a live view mandate."
         }
       ]
+    },
+    {
+      "id": "B40-F05-REWARDS-PAGING-AND-EXPORT",
+      "family": "F05: a page request is parsed into bounded integers and an export is bounded, administrative and audited",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-PRP-WALLET-GET-READS-BALANCE-AND-LEDGER-SEPARATELY-WITH-UNVALIDATED-PAGING",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/rewards/wallet/route.ts",
+            "apps/union-eyes/app/api/__tests__/rewards-wallet.route.test.ts"
+          ],
+          "explanation": "Limit and offset are parsed to bounded integers (limit 1..100, offset 0..1,000,000), so a non-numeric or negative value is the default rather than NaN or a negative offset; the route reads only the caller own balance and ledger.",
+          "remaining": "The balance and the ledger are still read in two separate statements, so a movement between them can make them disagree."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-EXPORT-IS-UNBOUNDED-AND-WRITES-NO-AUDIT-RECORD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/rewards/export/route.ts",
+            "apps/union-eyes/app/api/__tests__/rewards-export.route.test.ts"
+          ],
+          "explanation": "The export needs the administrator role before any read, is bounded to 5,000 rows, neutralises spreadsheet formula cells, and is audited in the transaction that reads it so a failed audit withholds the file (existing implementation and test)."
+        }
+      ]
     }
   ]
 }

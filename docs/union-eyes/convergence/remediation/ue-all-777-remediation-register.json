@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 385,
-    "engineeringRemaining": 392,
+    "engineeringCorrected": 386,
+    "engineeringRemaining": 391,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 68
+    "engineeringPartial": 69
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -14880,9 +14880,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B40-F05-REWARDS-PAGING-AND-EXPORT",
+        "path": "apps/union-eyes/app/api/rewards/export/route.ts; apps/union-eyes/app/api/__tests__/rewards-export.route.test.ts",
+        "explanation": "The export needs the administrator role before any read, is bounded to 5,000 rows, neutralises spreadsheet formula cells, and is audited in the transaction that reads it so a failed audit withholds the file (existing implementation and test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY",
@@ -15178,9 +15185,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B40-F05-REWARDS-PAGING-AND-EXPORT",
+        "path": "apps/union-eyes/app/api/rewards/wallet/route.ts; apps/union-eyes/app/api/__tests__/rewards-wallet.route.test.ts",
+        "explanation": "Limit and offset are parsed to bounded integers (limit 1..100, offset 0..1,000,000), so a non-numeric or negative value is the default rather than NaN or a negative offset; the route reads only the caller own balance and ledger.",
+        "remaining": "The balance and the ledger are still read in two separate statements, so a movement between them can make them disagree.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT-OF-THE-ORGANIZATION-TO-ANY-MEMBER-AND-NO-ROUTE-READS-IS-PUBLIC",

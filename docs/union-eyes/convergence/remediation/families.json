@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 385,
- "partial": 68,
- "outstanding": 392,
- "accountedFor": 392,
+ "corrected": 386,
+ "partial": 69,
+ "outstanding": 391,
+ "accountedFor": 391,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -94,13 +94,13 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 91,
+   "defects": 90,
    "severity": {
     "HIGH": 8,
-    "MEDIUM": 52,
+    "MEDIUM": 51,
     "LOW": 31
    },
-   "namedRoutes": 15,
+   "namedRoutes": 14,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
@@ -113,7 +113,7 @@
     "0B.8": 9,
     "0B.9": 7,
     "0B.10": 11,
-    "0B.11": 17,
+    "0B.11": 16,
     "0B.12": 3
    }
   },
@@ -894,12 +894,9 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B11-PRP-REWARDS-EXPORT-IS-UNBOUNDED-AND-WRITES-NO-AUDIT-RECORD",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B11-PRP-WALLET-GET-READS-BALANCE-AND-LEDGER-SEPARATELY-WITH-UNVALIDATED-PAGING",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B11-RPT-STORED-CONFIG-IS-UNVALIDATED-UNBOUNDED-JSON-THAT-NO-SAVE-APPLIES-THE-EXECUTOR-CONTRACT-TO",
