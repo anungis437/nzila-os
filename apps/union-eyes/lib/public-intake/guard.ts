@@ -61,8 +61,37 @@ export async function guardPublicIntake(
   const max = options.maxBodyBytes ?? PUBLIC_INTAKE_MAX_BODY_BYTES
   const declared = Number(request.headers.get('content-length') ?? '0')
   if (Number.isFinite(declared) && declared > max) return refuse(413, 'BODY_TOO_LARGE', 'The request is too large.')
-  const text = await request.text()
-  if (new TextEncoder().encode(text).length > max) return refuse(413, 'BODY_TOO_LARGE', 'The request is too large.')
+  // A post-read size check is insufficient: request.text() buffers the entire
+  // attacker-controlled payload before enforcing the limit. Stop reading as soon
+  // as the byte cap is crossed, including for chunked requests with no length.
+  const reader = request.body?.getReader()
+  const chunks: Uint8Array[] = []
+  let bytes = 0
+  if (reader) {
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        bytes += value.byteLength
+        if (bytes > max) {
+          await reader.cancel().catch(() => undefined)
+          return refuse(413, 'BODY_TOO_LARGE', 'The request is too large.')
+        }
+        chunks.push(value)
+      }
+    } catch {
+      return refuse(400, 'INVALID_BODY', 'Unable to read request body.')
+    } finally {
+      reader.releaseLock()
+    }
+  }
+  const payload = new Uint8Array(bytes)
+  let offset = 0
+  for (const chunk of chunks) {
+    payload.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  const text = new TextDecoder().decode(payload)
   if (text.trim() === '') return { ok: true, json: undefined }
   try {
     return { ok: true, json: JSON.parse(text) }
