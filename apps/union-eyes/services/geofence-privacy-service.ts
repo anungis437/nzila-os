@@ -183,8 +183,8 @@ export class GeofencePrivacyService {
   /**
    * Check if user has valid location tracking consent
    */
-  static async hasValidConsent(userId: string, context?: "strike" | "event"): Promise<boolean> {
-    const consent = await db
+  static async hasValidConsent(userId: string, context?: "strike" | "event", tx: RLSTx = db): Promise<boolean> {
+    const consent = await tx
       .select()
       .from(memberLocationConsent)
       .where(
@@ -227,7 +227,7 @@ export class GeofencePrivacyService {
         : tracking.purpose === "event"
           ? "event"
           : undefined;
-    const hasConsent = await this.hasValidConsent(tracking.userId, consentContext);
+    const hasConsent = await this.hasValidConsent(tracking.userId, consentContext, tx);
     if (!hasConsent) {
       throw new Error("Location tracking requires explicit opt-in consent");
     }
