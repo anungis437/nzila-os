@@ -1369,10 +1369,13 @@
       "status": "PARTIAL",
       "batch": "B07-REWARDS-CRON",
       "files": [
-        "apps/union-eyes/app/api/rewards/cron/route.ts"
+        "apps/union-eyes/app/api/rewards/cron/route.ts",
+        "apps/union-eyes/app/api/rewards/redemptions/route.ts",
+        "apps/union-eyes/app/api/__tests__/rewards-redemptions-list.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts"
       ],
-      "explanation": "The cron lists organizations under system authority and runs each organization's anniversary and scheduled task inside that organization's own RLS context, so the services' shared db handle is subject to row-level security on that path.",
-      "remaining": "The wallet and redemption routes wrapped by withRoleAuth, and the expiration scan (a cross-organization read), still reach the shared handle without a tenant context; each needs its own routing."
+      "explanation": "The cron lists organizations under system authority and runs each organization's anniversary and scheduled task inside that organization's own RLS context, so the services' shared db handle is subject to row-level security on that path. The member redemption list and cancellation route now execute inside the authenticated organization's withRLSContext; the cancellation receipt excludes provider payload and identifiers. Focused regression assertions were added in d454eef7630ceea9e93a6388c2b0c9174398a577, but executable qualification is pending.",
+      "remaining": "Wallet snapshot and expiration scan still need tenant-bound execution. Redemption route exact-HEAD Vitest, native PostgreSQL and HTTP/browser qualification are pending. Defect remains PARTIAL."
     },
     "DEF-0B11-PRP-REWARDS-CRON-RUNS-ARE-AUDITED-PER-AWARD-ONLY-AND-THE-EXPIRATION-E-MAILS-ARE-NOT-AUDITED": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
