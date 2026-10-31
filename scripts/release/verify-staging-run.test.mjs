@@ -12,6 +12,8 @@ function validRun() {
     workflowName: 'Deploy Staging',
     event: 'workflow_dispatch',
     conclusion: 'success',
+    status: 'completed',
+    attempt: 1,
     jobs: [{ name: 'Deploy to Staging', status: 'completed', conclusion: 'success' }],
   }
 }
@@ -19,6 +21,22 @@ function validRun() {
 test('requires independently completed staging deployment for exact run', () => {
   assert.deepEqual(verifyStagingRun(validRun(), SHA, RUN_ID),
     { runId: RUN_ID, commitSha: SHA })
+})
+test('rerun cannot reuse an earlier staging deployment or artifact success', () => {
+  for (const attempt of [2, 3, 0, null, undefined, '1']) {
+    const run = validRun()
+    run.attempt = attempt
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID),
+      /rerun lacks independently attributable deployment evidence/)
+  }
+})
+test('in-progress or cancelled staging run cannot be promoted', () => {
+  for (const status of ['in_progress', 'queued', 'waiting', null, undefined]) {
+    const run = validRun()
+    run.status = status
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID),
+      /identity, dispatch or source commit mismatch/)
+  }
 })
 test('build-only push run cannot be used for production promotion', () => {
   const run = validRun()

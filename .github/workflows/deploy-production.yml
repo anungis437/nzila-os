@@ -132,7 +132,7 @@ jobs:
           # A successful build-only staging run is NOT a deployed/verified
           # staging revision. GitHub must independently report a completed,
           # successful real staging-deploy job for this exact dispatch run.
-          RUN_JSON=$(gh run view "$SOURCE_RUN_ID" --json databaseId,headSha,headBranch,workflowName,event,conclusion,jobs)
+          RUN_JSON=$(gh run view "$SOURCE_RUN_ID" --json databaseId,headSha,headBranch,workflowName,event,conclusion,status,attempt,jobs)
           printf '%s\n' "$RUN_JSON" > "$RUNNER_TEMP/nzila-staging-run.json"
           node scripts/release/verify-staging-run.mjs "$RUNNER_TEMP/nzila-staging-run.json" "$GITHUB_SHA" "$SOURCE_RUN_ID"
 

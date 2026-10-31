@@ -21,9 +21,13 @@ export function verifyStagingRun(run, expectedCommit, expectedRunId) {
       run.headBranch !== 'main' ||
       run.workflowName !== 'Deploy Staging' ||
       run.event !== 'workflow_dispatch' ||
-      run.conclusion !== 'success') {
+      run.conclusion !== 'success' ||
+      run.status !== 'completed') {
     deny('staging workflow identity, dispatch or source commit mismatch')
   }
+  // GitHub job history is not sufficient to bind a successful deployment
+  // to a particular rerun attempt. Deny reruns pending per-attempt proof.
+  if (run.attempt !== 1) deny('staging rerun lacks independently attributable deployment evidence')
   if (!Array.isArray(run.jobs)) deny('GitHub staging job evidence unavailable')
   const jobs = run.jobs.filter(job => job && job.name === 'Deploy to Staging')
   if (jobs.length !== 1 || jobs[0].status !== 'completed' ||
