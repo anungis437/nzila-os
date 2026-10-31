@@ -12,7 +12,8 @@ export const dynamic = 'force-dynamic';
 const resolveSchema = z.object({
   exceptionId: z.guid(),
   resolution: z.enum(['resolved', 'written_off']),
-  notes: z.string().max(2000),
+  // A resolution or write-off without a stated reason is not a decision anyone can later review.
+  notes: z.string().trim().min(10, 'State why the exception is resolved or written off (at least 10 characters)').max(2000),
 });
 
 export const POST = withApi(

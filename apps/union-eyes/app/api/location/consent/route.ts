@@ -104,7 +104,12 @@ export const GET = withApiAuth(async (req: NextRequest) => {
     const userId = user.id;
 
     const { searchParams } = new URL(req.url);
-    const context = searchParams.get("context") as "strike" | "event" | undefined;
+    // The context is one of two known values; anything else is refused instead of being reflected back.
+    const rawContext = searchParams.get("context");
+    if (rawContext !== null && rawContext !== "strike" && rawContext !== "event") {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'context must be "strike" or "event"');
+    }
+    const context = (rawContext ?? undefined) as "strike" | "event" | undefined;
 
     const hasConsent = await GeofencePrivacyService.hasValidConsent(userId, context);
 
