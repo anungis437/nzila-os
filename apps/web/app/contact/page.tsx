@@ -54,7 +54,7 @@ const contactCopy: Record<Locale, {
     heroTitle: 'Get In Touch',
     heroSubtitle: "Let\'s discuss where your organization is exposed to continuity loss, governance fragility, or operational memory risk.",
     sendMessage: 'Send Us a Message',
-    responseTime: "We\'ll get back to you within 24-48 hours.",
+    responseTime: 'We review inquiries and respond based on the nature of the request.',
     success: 'Thank you! Your message has been sent successfully.',
     fullName: 'Full Name *',
     fullNamePlaceholder: 'John Doe',
