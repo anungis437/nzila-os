@@ -33,6 +33,8 @@ import type {
 import type { EmailService } from './email-service';
 import type { SMSService } from './sms-service';
 import { logger } from '@/lib/logger';
+import { getCommunicationsSigningSecret, signTrackingPayload } from '@/lib/communications/tracking-token';
+import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 
 // ============================================================================
 // TYPES
@@ -76,6 +78,29 @@ export interface AudienceResolutionResult {
   eligibleCount: number; // After consent filtering
   skippedCount: number;
   skippedReasons: Record<string, number>;
+}
+
+
+/**
+ * RFC 8058 one-click unsubscribe is a separately signed campaign/recipient
+ * capability. Refuse sending marketing mail without a usable signing key or
+ * recipient binding; an un-unsubscribable campaign is not a successful send.
+ */
+export function buildCampaignUnsubscribeHeaders(campaignId: string | null | undefined, recipientId: string | null | undefined): Record<string, string> {
+  if (!campaignId || !recipientId) throw new Error('Campaign unsubscribe binding missing');
+  const secret = getCommunicationsSigningSecret();
+  if (!secret) throw new Error('Campaign unsubscribe signing key not configured');
+  const origin = new URL(getUnionEyesSiteTopology().appUrl);
+  if (origin.protocol !== 'https:' && !(process.env.NODE_ENV !== 'production' && ['localhost', '127.0.0.1'].includes(origin.hostname))) {
+    throw new Error('Campaign unsubscribe origin must use HTTPS');
+  }
+  const url = new URL(`/api/communications/unsubscribe/${encodeURIComponent(recipientId)}`, origin);
+  url.searchParams.set('campaignId', campaignId);
+  url.searchParams.set('token', signTrackingPayload(secret, `${campaignId}:${recipientId}:unsubscribe`));
+  return {
+    'List-Unsubscribe': `<${url.toString()}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  };
 }
 
 // ============================================================================
@@ -497,6 +522,7 @@ export class CampaignService {
             to: message.recipientEmail,
             subject: message.subject || 'Message from Union',
             body: message.bodySnippet || '',
+            headers: buildCampaignUnsubscribeHeaders(message.campaignId, message.recipientId),
             metadata: {
               messageLogId: message.id,
               campaignId: message.campaignId,
