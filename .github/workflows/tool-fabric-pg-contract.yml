@@ -113,3 +113,8 @@ jobs:
             echo "::error::PostgreSQL restart changed durable trust receipts or head"
             exit 1
           fi
+
+      - name: Verify serialized concurrent CAS under PostgreSQL row locks (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          bash packages/tool-fabric/sql/test_trust_ledger_pg_concurrent.sh
