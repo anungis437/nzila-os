@@ -10,7 +10,8 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
+import { pathToFileURL } from 'node:url'
 
 type DeployTarget = {
   containerAppName: string
@@ -50,9 +51,10 @@ type ParsedArgs = {
 // BR-5 defense-in-depth: a production deploy target must reference an immutable
 // image digest, never a mutable tag. This mirrors the workflow-level gate so the
 // promotion script is fail-closed even if invoked directly.
-const DIGEST_PINNED_RE = /@sha256:[0-9a-f]{64}$/
+const DIGEST_PINNED_RE = /^[a-zA-Z0-9][a-zA-Z0-9._:/-]*@sha256:[0-9a-f]{64}$/i
+const CONTAINER_APP_NAME_RE = /^[a-z](?!.*--)[a-z0-9-]{0,30}[a-z0-9]$/
 
-function parseArgs(argv: string[]): ParsedArgs {
+export function parseArgs(argv: string[]): ParsedArgs {
   const args: Record<string, string> = {}
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i]
@@ -76,7 +78,13 @@ function parseArgs(argv: string[]): ParsedArgs {
   // possible by passing --require-digest-pinned false for a non-production group.
   const requireFlag = args['require-digest-pinned']
   const isProdGroup = /(^|[-_])prod($|[-_])/i.test(resourceGroup)
-  const requireDigestPinned = requireFlag !== undefined ? requireFlag === 'true' : isProdGroup
+  if (requireFlag !== undefined && requireFlag !== 'true' && requireFlag !== 'false') {
+    throw new Error('Invalid --require-digest-pinned flag; expected true or false')
+  }
+  if (isProdGroup && requireFlag === 'false') {
+    throw new Error('BR-5: production digest pinning cannot be disabled')
+  }
+  const requireDigestPinned = isProdGroup || requireFlag === 'true'
 
   return {
     manifest: resolve(args.manifest ?? 'staging-artifacts/artifact-manifest.json'),
@@ -96,8 +104,9 @@ function ensure(condition: unknown, message: string): asserts condition {
   }
 }
 
-function runJsonCommand(command: string): unknown {
-  const output = execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+function runJsonCommand(args: string[]): unknown {
+  // Manifest-controlled names and images must never enter a shell command.
+  const output = execFileSync('az', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
   return JSON.parse(output)
 }
 
@@ -105,7 +114,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms))
 }
 
-function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string, requireDigestPinned = false): DeployTarget[] {
+export function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string, requireDigestPinned = false): DeployTarget[] {
   const manifestRaw = readFileSync(manifestPath, 'utf8')
   const manifest = JSON.parse(manifestRaw) as { deployTargets?: unknown[]; apps?: unknown[] }
   const rawTargets = Array.isArray(manifest.deployTargets)
@@ -116,18 +125,27 @@ function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string
 
   const sourceTargets = rawTargets.length > 0
     ? rawTargets
-    : fallbackTargetsJson
+    : !requireDigestPinned && fallbackTargetsJson
       ? JSON.parse(fallbackTargetsJson)
       : []
 
   ensure(Array.isArray(sourceTargets) && sourceTargets.length > 0, 'No deploy targets found in artifact manifest and no fallback targets provided')
 
   const targets: DeployTarget[] = []
+  const seen = new Set<string>()
   for (const raw of sourceTargets as Record<string, unknown>[]) {
-    const appName = String(raw.containerAppName ?? raw.app ?? raw.name ?? '').trim()
-    const image = String(raw.image ?? raw.imageRef ?? raw.digest ?? '').trim()
-    ensure(appName.length > 0, `Deploy target missing containerAppName/app/name: ${JSON.stringify(raw)}`)
-    ensure(image.length > 0, `Deploy target ${appName} missing image/imageRef/digest`)
+    ensure(raw && typeof raw === 'object' && !Array.isArray(raw), 'Malformed deploy target')
+    const names = [raw.containerAppName, raw.app, raw.name].filter(v => v !== null && v !== undefined)
+    const images = [raw.image, raw.imageRef, raw.digest].filter(v => v !== null && v !== undefined)
+    ensure(names.length > 0 && names.every(v => typeof v === 'string') &&
+      new Set(names).size === 1, 'Missing or conflicting deployment target identities')
+    ensure(images.length > 0 && images.every(v => typeof v === 'string') &&
+      new Set(images).size === 1, 'Missing or conflicting deployment image references')
+    const appName = names[0] as string
+    const image = images[0] as string
+    ensure(CONTAINER_APP_NAME_RE.test(appName), 'Noncanonical Azure Container App destination')
+    ensure(!seen.has(appName), 'Duplicate Azure Container App destination')
+    seen.add(appName)
     ensure(
       !requireDigestPinned || DIGEST_PINNED_RE.test(image),
       `BR-5: deploy target ${appName} image '${image}' is not pinned to an immutable @sha256 digest. ` +
@@ -147,7 +165,8 @@ function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string
 }
 
 function captureCurrentState(target: DeployTarget, resourceGroup: string): TargetState {
-  const details = runJsonCommand(`az containerapp show --name "${target.containerAppName}" --resource-group "${resourceGroup}" --output json`)
+  const details = runJsonCommand(['containerapp', 'show', '--name', target.containerAppName,
+    '--resource-group', resourceGroup, '--output', 'json'])
   const previousImage = details?.properties?.template?.containers?.[0]?.image
   ensure(previousImage, `Unable to resolve current image for ${target.containerAppName}`)
 
@@ -165,7 +184,8 @@ async function runHealthCheck(target: DeployTarget, args: ParsedArgs, resourceGr
   let url = target.healthUrl
 
   if (!url) {
-    const app = runJsonCommand(`az containerapp show --name "${target.containerAppName}" --resource-group "${resourceGroup}" --output json`)
+    const app = runJsonCommand(['containerapp', 'show', '--name', target.containerAppName,
+      '--resource-group', resourceGroup, '--output', 'json'])
     const fqdn = app?.properties?.configuration?.ingress?.fqdn
     ensure(fqdn, `No ingress FQDN found for ${target.containerAppName}; provide healthUrl in deploy target`)
     url = `https://${fqdn}${defaultHealthPath}`
@@ -218,10 +238,9 @@ async function runHealthCheck(target: DeployTarget, args: ParsedArgs, resourceGr
 function rollback(updatedStates: TargetState[], resourceGroup: string): void {
   for (const state of [...updatedStates].reverse()) {
     console.log(`Rolling back ${state.appName} -> ${state.previousImage}`)
-    execSync(
-      `az containerapp update --name "${state.appName}" --resource-group "${resourceGroup}" --image "${state.previousImage}" --output none`,
-      { stdio: 'inherit' },
-    )
+    execFileSync('az', ['containerapp', 'update', '--name', state.appName,
+      '--resource-group', resourceGroup, '--image', state.previousImage, '--output', 'none'],
+      { stdio: 'inherit' })
   }
 }
 
@@ -250,10 +269,9 @@ async function main(): Promise<void> {
       ;(evidence.capturedState as TargetState[]).push(previous)
 
       console.log(`Promoting ${target.containerAppName} -> ${target.image}`)
-      execSync(
-        `az containerapp update --name "${target.containerAppName}" --resource-group "${args.resourceGroup}" --image "${target.image}" --output none`,
-        { stdio: 'inherit' },
-      )
+      execFileSync('az', ['containerapp', 'update', '--name', target.containerAppName,
+        '--resource-group', args.resourceGroup, '--image', target.image, '--output', 'none'],
+        { stdio: 'inherit' })
 
       updatedStates.push(previous)
 
@@ -283,7 +301,10 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error))
-  process.exit(1)
-})
+// Importing this module for contract tests must never start a deployment.
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error))
+    process.exitCode = 1
+  })
+}

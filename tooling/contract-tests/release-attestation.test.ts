@@ -9,8 +9,10 @@
  *
  * @invariant RELEASE_ATTESTATION_REQUIRED_001
  */
-import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { parseArgs, parseManifestTargets } from '../../scripts/deploy-transactional'
 import { describe, it, expect } from 'vitest'
 
 const ROOT = join(__dirname, '..', '..')
@@ -129,6 +131,48 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     expect(production).toContain('STAGING_RUN_ID_INPUT: ${{ github.event.inputs.staging_run_id }}')
     expect(production).toContain('REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || \'all\' }}')
     expect(staging).toContain('EMERGENCY_ACK_INPUT: ${{ github.event.inputs.emergency_ack }}')
+  })
+
+  it('P0 #1038: production digest enforcement cannot be disabled through CLI', () => {
+    expect(parseArgs(['--resource-group', 'nzila-canada-prod-rg']).requireDigestPinned).toBe(true)
+    expect(() => parseArgs(['--resource-group', 'nzila-canada-prod-rg', '--require-digest-pinned', 'false']))
+      .toThrow(/production digest pinning cannot be disabled/)
+    expect(() => parseArgs(['--resource-group', 'nzila-canada-prod-rg', '--require-digest-pinned', 'maybe']))
+      .toThrow(/Invalid --require-digest-pinned/)
+  })
+
+  it('P0 #1038: production target parsing rejects fallback, conflicting aliases, and shell payloads', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nzila-release-targets-'))
+    const manifestPath = join(dir, 'manifest.json')
+    const pinned = 'registry.example/app@sha256:' + 'a'.repeat(64)
+    const fallback = JSON.stringify([{ name: 'demo', image: pinned }])
+    const write = (deployTargets: unknown[]) => writeFileSync(manifestPath, JSON.stringify({ deployTargets }))
+    try {
+      write([])
+      expect(() => parseManifestTargets(manifestPath, fallback, true)).toThrow(/No deploy targets/)
+      write([{ name: 'demo', image: pinned }])
+      expect(parseManifestTargets(manifestPath, fallback, true)).toMatchObject([
+        { containerAppName: 'demo', image: pinned },
+      ])
+      write([{ name: 'demo', image: 'registry.example/$(touch /tmp/owned)@sha256:' + 'a'.repeat(64) }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/not pinned/)
+      write([{ name: 'demo";touch /tmp/owned', image: pinned }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/Noncanonical/)
+      write([{ name: 'demo', app: 'other', image: pinned }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/conflicting deployment target/)
+      write([{ name: 'demo', image: pinned, imageRef: 'registry.example/other@sha256:' + 'b'.repeat(64) }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/conflicting deployment image/)
+      write([{ name: 'demo', image: pinned }, { name: 'demo', image: pinned }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/Duplicate Azure/)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('P0 #1038: production Azure commands cannot interpolate signed manifest values into shell', () => {
+    const deployer = readContent('scripts/deploy-transactional.ts')
+    expect(deployer).toContain("execFileSync('az',")
+    expect(deployer).not.toContain('execSync(')
   })
 
   // 3. The same exact verified attestation must survive production promotion
