@@ -6,6 +6,7 @@ import {
 import { cancelRedemptionSchema } from '@/lib/validation/rewards-schemas';
 import { z } from 'zod';
 import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
  
 import {
@@ -43,13 +44,14 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
       );
     }
 
-    const result = await listUserRedemptions(
+    // Tenant-bound execution, not merely an explicit organization predicate.
+    const result = await withRLSContext({ organizationId }, () => listUserRedemptions(
       organizationId,
       userId,
       limit,
       offset,
       status as (typeof validStatuses)[number] | undefined
-    );
+    ));
 
     return NextResponse.json(
       {
@@ -105,15 +107,18 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
     const redemptionId = validated.redemptionId;
 
     // A member cancels only their own redemption; the credits go back to the member who spent them.
-    const cancelledRedemption = await cancelRedemption(
+    const cancelledRedemption = await withRLSContext({ organizationId }, () => cancelRedemption(
       redemptionId,
       organizationId,
       `member_cancelled: ${validated.reason}`,
       { userId, mustOwn: true }
-    );
+    ));
 
+    // A member receipt must never echo the payment provider's payload or identifiers.
+    const { redemption, newBalance } = cancelledRedemption;
     return standardSuccessResponse({
-      redemption: cancelledRedemption,
+      redemption: { id: redemption.id, status: redemption.status, creditsSpent: redemption.creditsSpent, updatedAt: redemption.updatedAt },
+      newBalance,
       message: 'Redemption cancelled and credits refunded',
     });
   } catch (error: any) {

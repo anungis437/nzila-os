@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
-const m = vi.hoisted(() => ({ list: vi.fn() }));
+const m = vi.hoisted(() => ({ list: vi.fn(), withRLSContext: vi.fn(async (_ctx: unknown, fn: () => Promise<unknown>) => fn()) }));
 
 vi.mock('@/lib/services/rewards/redemption-service', () => ({ cancelRedemption: vi.fn(), listUserRedemptions: m.list }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: (_role: string, handler: (req: NextRequest, ctx: unknown) => Promise<Response>) =>
     (req: NextRequest, ctx: unknown = { userId: 'u1', organizationId: 'org_1' }) => handler(req, ctx),
@@ -34,6 +35,14 @@ describe('rewards/redemptions GET', () => {
     const { GET } = await import('../rewards/redemptions/route');
     await GET(new NextRequest('http://localhost/api/rewards/redemptions?status=pending_payment'), { userId: 'member_1', organizationId: 'org_1' } as never);
     expect(m.list).toHaveBeenCalledWith('org_1', 'member_1', 20, 0, 'pending_payment');
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+  });
+
+  it('fails closed when tenant binding refuses the read', async () => {
+    m.withRLSContext.mockRejectedValueOnce(new Error('tenant binding refused'));
+    const response = await get();
+    expect(response.status).toBe(500);
+    expect(m.list).not.toHaveBeenCalled();
   });
 
   it('refuses a status no redemption holds with 400, without querying', async () => {

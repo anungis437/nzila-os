@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   deletePost: vi.fn(),
   persistAtomicAudit: vi.fn(),
   cancelRedemption: vi.fn(),
+  withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({})),
   selected: [] as unknown[],
   order: [] as string[],
 }));
@@ -30,9 +31,7 @@ vi.mock('@/db/schema/social-media-schema', () => ({
   socialAccounts: { id: 'id', organizationId: 'organizationId' },
 }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(), ilike: vi.fn(), desc: vi.fn(), count: vi.fn() }));
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: vi.fn(async (_ctx: unknown, fn: (t: unknown) => Promise<unknown>) => fn({})),
-}));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/services/rewards/redemption-service', () => ({
   cancelRedemption: m.cancelRedemption,
@@ -123,8 +122,32 @@ describe('rewards/redemptions POST (cancel)', () => {
     await POST(cancel(), { userId: 'member_1', organizationId: 'org_1' } as never);
 
     expect(m.cancelRedemption).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111', 'org_1', 'member_cancelled: changed my mind', { userId: 'member_1', mustOwn: true });
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
   });
 
+  it('returns a cancellation receipt without provider payload or checkout identifiers', async () => {
+    m.cancelRedemption.mockResolvedValueOnce({
+      redemption: { id: 'r1', status: 'cancelled', creditsSpent: 12,
+        providerCheckoutId: 'private-checkout', providerOrderId: 'private-order',
+        providerPayloadJson: { customer: { email: 'private@example.test' } } },
+      newBalance: 42,
+    });
+    const { POST } = await import('../rewards/redemptions/route');
+    const response = await POST(cancel(), { userId: 'member_1', organizationId: 'org_1' } as never);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(JSON.stringify(body)).not.toMatch(/private-checkout|private-order|private@example/);
+    expect(body.data?.redemption).toMatchObject({ id: 'r1', status: 'cancelled', creditsSpent: 12 });
+    expect(body.data?.newBalance).toBe(42);
+  });
+
+  it('does not cancel when tenant binding fails', async () => {
+    m.withRLSContext.mockRejectedValueOnce(new Error('tenant binding refused'));
+    const { POST } = await import('../rewards/redemptions/route');
+    const response = await POST(cancel(), { userId: 'member_1', organizationId: 'org_1' } as never);
+    expect(response.status).toBe(500);
+    expect(m.cancelRedemption).not.toHaveBeenCalled();
+  });
   it('rejects an initiation body on the cancel path instead of discarding it', async () => {
     const { POST } = await import('../rewards/redemptions/route');
     const request = new NextRequest('http://localhost/api/rewards/redemptions?id=r1', {
