@@ -5541,9 +5541,9 @@
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
-        "path": "apps/union-eyes/app/api/employer-execution/timesheets/route.ts; apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts",
-        "explanation": "The list is officer-level and bounded to 200 batches; a new batch needs calendar dates in order, a file name of at most 255 characters and a CSV of at most 2,000,000 characters. Its employer, worksite and unit references were already checked against the organization.",
-        "remaining": "The ingest still sits at the steward floor rather than a financial mandate, and no behavioural test of the route exists (contract test only).",
+        "path": "apps/union-eyes/app/api/employer-execution/timesheets/route.ts; apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts; apps/union-eyes/app/api/__tests__/employer-timesheets-mandate.route.test.ts",
+        "explanation": "Timesheet GET and POST now require the explicit financial-member role allowlist and a live principal financial mandate within the authenticated organization transaction. GET enforces finance:view and scopes rows to employers covered by the grant (bounded to 200). POST requires finance:prepare scoped to the employer before any registry read or insert, and preserves organization checks, bounded CSV, duplicate refusal and same-transaction audit.",
+        "remaining": "Exact-HEAD behavioral/unit and contract execution, native PostgreSQL 15/16 with real RLS and mandate fixtures, HTTP/browser/staging qualification, and institutional mandate issuance remain outstanding. The route stays PARTIAL and no CLOSED credit is claimed.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16092,8 +16092,8 @@
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
         "path": "apps/union-eyes/services/platform-economics/reconciliation-service.ts; apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts",
-        "explanation": "For an organization run, the period is locked, a billing period named in the request must be the organization's own (404), and a second run for the same period is refused (409, naming the earlier run) instead of adding a second set of exceptions. A period that ends before it starts is refused. The existing mocked test of a run gained the two new checks in its queue; three tests were added.",
-        "remaining": "The service still accepts a run with no organization, which reconciles every organization together; no route uses that mode, but it is not removed.",
+        "explanation": "Reconciliation now requires an organization at the TypeScript API boundary and validates it at runtime before any database work. Removed the legacy organization-less query branches: prior-run lookup, invoice/payment/fee reads and final update always use organization predicates. Existing advisory lock, billing-period ownership check, duplicate-run refusal and period validation remain; new regression asserts tenant predicates across all financial datasets.",
+        "remaining": "Native PostgreSQL 15/16 under real tenant RLS, exact-HEAD full unit/contract execution, HTTP/browser/staging proof, and audit/financial-mandate qualification are still outstanding. No independent CLOSED credit.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
