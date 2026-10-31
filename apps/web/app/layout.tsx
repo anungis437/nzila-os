@@ -19,10 +19,10 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL("https://nzilaventures.com"),
   title: {
-    default: "Nzila Ventures | Organizational Continuity Infrastructure",
+    default: "Nzila Ventures | Human-Centered Institutional Software",
     template: "%s | Nzila Ventures",
   },
-  description: "Nzila Ventures builds continuity-focused software, including Union Eyes and the CIVIC public-service initiative, with governed workflows, institutional knowledge and human accountability.",
+  description: "Nzila Ventures develops human-centered software that preserves institutional knowledge and keeps decisions accountable. Explore Union Eyes, CIVIC and Nzila OS.",
   keywords: ["organizational continuity", "operational memory", "governance infrastructure", "trust infrastructure", "Union Eyes", "Nzila OS", "auditability", "data sovereignty", "explainable AI", "Nzila Ventures"],
   authors: [{ name: "Nzila Ventures" }],
   creator: "Nzila Ventures",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_CA",
     siteName: "Nzila Ventures",
-    title: "Nzila Ventures | Software That Preserves Institutional Knowledge",
+    title: "Nzila Ventures | Human-Centered Institutional Software",
     description: "Software for institutional continuity and accountable operations. Explore Union Eyes, CIVIC and the wider Nzila Ventures portfolio.",
     images: [
       {
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nzila Ventures | Software That Preserves Institutional Knowledge",
+    title: "Nzila Ventures | Human-Centered Institutional Software",
     description: "Explore governed software for institutional continuity: Union Eyes, CIVIC, and Nzila OS.",
     images: ["/opengraph-image"],
   },
