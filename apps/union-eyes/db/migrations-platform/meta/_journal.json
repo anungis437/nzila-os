@@ -330,6 +330,13 @@
       "when": 1759020000000,
       "tag": "0045_contact_submissions",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1759030000000,
+      "tag": "0046_row_integrity",
+      "breakpoints": true
     }
   ]
 }

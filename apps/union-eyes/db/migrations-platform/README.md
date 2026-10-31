@@ -69,6 +69,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0043_knowledge_transfer_owner` | Record who opened each copilot conversation and reasoning session Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0044_anti_scab_author` | Record the author of an anti-scab violation from the session Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0045_contact_submissions` | Store contact-form submissions locally before the CRM sync Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0046_row_integrity` | Row integrity: preference uniqueness, employer parent organization, grant version pin Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 

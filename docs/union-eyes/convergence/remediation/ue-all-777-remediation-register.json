@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 480,
-    "engineeringRemaining": 297,
+    "engineeringCorrected": 491,
+    "engineeringRemaining": 286,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 79
+    "engineeringPartial": 80
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5431,9 +5431,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/employers/route.ts; apps/union-eyes/app/api/employers/[id]/route.ts; apps/union-eyes/db/migrations-platform/0046_row_integrity.sql; apps/union-eyes/db/migrations-platform/0046_row_integrity.rollback.sql; apps/union-eyes/db/__tests__/platform-0046-row-integrity.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "The create and update hooks require parentCompanyId to be an employer of the caller organization (and not the employer itself); migration 0046 adds a trigger that refuses a parent of another organization or itself with SQLSTATE 23514, mapped to a 400.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS",
@@ -8446,9 +8453,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/app/api/reports/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "The factory gains hardDeleteAuditColumns; the report delete audit now keeps the name, type, category, visibility and author of the removed definition.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-ATTESTATIONS-HARD-CODED",
@@ -8608,9 +8622,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/external/documents/[id]/download/route.ts; apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts; apps/union-eyes/lib/services/external-resource-authorization-service.ts; apps/union-eyes/db/schema/representation-authority-schema.ts; apps/union-eyes/db/migrations-platform/0046_row_integrity.sql; apps/union-eyes/db/migrations-platform/0046_row_integrity.rollback.sql; apps/union-eyes/db/__tests__/platform-0046-row-integrity.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "external_document_access_grants gains a nullable document_version_no (migration 0046). The authorization decision carries it, the download releases exactly that version, and an upload-created grant is pinned to the version it stored.",
+        "remaining": "Grants issued before the migration carry no pin and keep releasing the current version; pinning them needs a reviewed backfill of what each grant covered.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-EXT-GET-RETURNS-WHOLE-INTEGRATION-ROW-WITH-CREDENTIALS",
@@ -9251,11 +9273,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
-        "path": "apps/union-eyes/app/api/health-safety/hazards/route.ts; apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts; apps/union-eyes/app/api/health-safety/incidents/route.ts; apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts; apps/union-eyes/app/api/health-safety/hazards/stats/route.ts; apps/union-eyes/app/api/health-safety/incidents/stats/route.ts; apps/union-eyes/app/api/health-safety/incidents/trends/route.ts; apps/union-eyes/app/api/health-safety/dashboard/route.ts; apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts",
-        "explanation": "An archived incident or hazard is neither listed nor returned by id (the new readCondition), and the statistics, trends and dashboard no longer count it as open, critical or part of a total.",
-        "remaining": "The counts are pinned by source only; no test runs the statistics against rows holding an archived status.",
+        "path": "apps/union-eyes/app/api/health-safety/hazards/route.ts; apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts; apps/union-eyes/app/api/health-safety/incidents/route.ts; apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts; apps/union-eyes/app/api/health-safety/hazards/stats/route.ts; apps/union-eyes/app/api/health-safety/incidents/stats/route.ts; apps/union-eyes/app/api/health-safety/incidents/trends/route.ts; apps/union-eyes/app/api/health-safety/dashboard/route.ts; apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "An archived incident or hazard is neither listed nor returned by id (the new readCondition), and the statistics, trends and dashboard no longer count it as open, critical or part of a total. Verified later: the dashboard counts exclude archived hazards and the critical-alert count excludes archived incidents; list and item reads carry the archived exclusion on both tables.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -9272,9 +9293,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/app/api/health-safety/incidents/route.ts; apps/union-eyes/app/api/health-safety/hazards/route.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "The factory gains listFilters (enum-checked equality filters and an escaped, bounded text search); the incident list honours status, severity, incidentType and search, and the hazard list status, priority (the hazard level) and search.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR",
@@ -9457,9 +9485,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/health-safety/stats/route.ts; apps/union-eyes/app/api/health-safety/incidents/stats/route.ts; apps/union-eyes/app/api/health-safety/hazards/stats/route.ts; apps/union-eyes/app/api/health-safety/inspections/stats/route.ts; apps/union-eyes/app/api/health-safety/inspections/findings/route.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "Every aggregate refuses with a 400 when there is no organization instead of falling back to an always-true predicate; verified in source and pinned.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-TRENDS-ORGANIZATION-FROM-QUERY-AND-NO-PREDICATE-WHEN-ABSENT",
@@ -10388,9 +10423,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/external/grievances/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "The route selects only the projected columns under the names the grievances table really has (grievance_number as the case number, description as the summary), so the case number and summary are no longer always null and no other column is read.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME",
@@ -10575,9 +10617,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/jurisdiction-rules/route.ts; apps/union-eyes/app/api/__tests__/jurisdiction-rules-deadline.route.test.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "The code is looked up with an own-key test, so constructor and __proto__ no longer select a function; an unknown code or an unknown category is a 400 instead of success with an empty list. The deadline-separation test now expects the 400 for a category the register does not hold (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-CLC-AND-DEADLINE-PATHS-ARE-BARGAINING-UNIT-CRUD-NO-VALIDATION",
@@ -13405,9 +13454,9 @@
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
-        "path": "apps/union-eyes/app/api/organizing/forms/generate/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
-        "explanation": "Existing implementation, verified: the form generation path answers 501 and no longer inserts or lists campaign rows.",
-        "remaining": "The client still saves a JSON response as a PDF; the form generator itself is not built.",
+        "path": "apps/union-eyes/app/api/organizing/forms/generate/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts; apps/union-eyes/components/organizing/LabourBoardFormGenerator.tsx; apps/union-eyes/lib/organizing/verified-pdf-response.ts; apps/union-eyes/lib/organizing/__tests__/verified-pdf-response.test.ts",
+        "explanation": "The generation endpoint already refuses unsupported work with 501. The client now checks HTTP success, application/pdf content type, PDF magic bytes, and a 20 MB safety ceiling before creating a downloadable file. A 501 or JSON success-looking response produces an accessible visible error instead of a mislabeled PDF. Template selection now fills the selected template, and the federal information link no longer falsely advertises electronic filing. Focused regression tests are committed but not executed on this HEAD.",
+        "remaining": "A real jurisdiction-specific PDF generator, template authority/legal review, PDF content validation, and exact-HEAD unit, native PostgreSQL, HTTP/browser and staging acceptance remain outstanding; the client explicitly preserves entered values on refusal.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -15080,9 +15129,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/precedents/[id]/route.ts; apps/union-eyes/app/api/__tests__/precedents-item-isolation.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "A precedent with citation history is retained (409, withdraw its sharing instead) so the cascade can no longer destroy it; an uncited one is removed with an audit that keeps its case title, jurisdiction, sharing level and removed tag count. The PGlite test gained the tag and citation tables and two cases (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS",
@@ -15179,9 +15235,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/precedents/jurisdiction-preferences/route.ts; apps/union-eyes/db/schema/domains/member/jurisdiction-preferences.ts; apps/union-eyes/app/api/__tests__/precedents-jurisdiction-preferences.route.test.ts; apps/union-eyes/db/migrations-platform/0046_row_integrity.sql; apps/union-eyes/db/migrations-platform/0046_row_integrity.rollback.sql; apps/union-eyes/db/__tests__/platform-0046-row-integrity.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "Migration 0046 adds a unique index on (user_id, organization_id) (fail-closed on existing duplicates); the route upserts against it, so two concurrent first saves settle on one row, and includeNational and autoApply must be booleans. The route test mock gained onConflictDoUpdate (disclosed).",
+        "remaining": "No precedent route reads the saved preference, so it still filters nothing on the server; applying it server-side is a product decision.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
@@ -16688,8 +16752,8 @@
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
         "path": "apps/union-eyes/lib/social-media/social-media-service.ts; apps/union-eyes/app/api/social-media/analytics/route.ts; apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts; apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts",
-        "explanation": "fetchAnalytics fetched platform responses it never transformed and returned an empty list as a success. It now answers 501 when nothing was collected, and the analytics read says (data_collected, message) whether analytics were ever collected instead of letting an empty range read as no activity.",
-        "remaining": "No collector transforms the Meta, Instagram, Twitter or LinkedIn responses into the analytics table, and nothing calls fetchAnalytics, so no figure exists yet.",
+        "explanation": "Existing collection-unavailable and data_collected safeguards remain. Additionally, the post analytics summary, campaign analytics summary and campaign export no longer claim zero clicks when no click collector or click field exists; they return null (unknown) while account analytics retains actual recorded linkClicks. Regression assertions cover all three projections; tests and native/runtime acceptance remain pending.",
+        "remaining": "The social platform collector still does not transform provider responses into stored analytics and no proven worker calls it. Exact-HEAD unit, native PostgreSQL and HTTP/browser/staging qualification and institutional analytics authority remain outstanding.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16777,9 +16841,9 @@
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
-        "path": "apps/union-eyes/app/api/social-media/analytics/route.ts; apps/union-eyes/app/api/__tests__/f05-b50-social.contract.test.ts",
-        "explanation": "The export is now a steward-floor read with its own rate limit, at most 5000 rows per dataset, CSV cells neutralised through the shared formula-safe helper, zero values no longer blanked, and the campaign export reads each column by its real key (it previously left most columns empty). Existing analytics route tests still pass; a source-contract test pins each point.",
-        "remaining": "It is still served on the DELETE verb, and no audit record is written for the export.",
+        "path": "apps/union-eyes/app/api/social-media/analytics/route.ts; apps/union-eyes/app/api/__tests__/f05-b50-social.contract.test.ts; apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts; apps/union-eyes/lib/social-media/export-audit.ts; apps/union-eyes/lib/social-media/__tests__/export-audit.test.ts",
+        "explanation": "The social analytics export no longer executes on DELETE: that verb returns 405, while GET ?export=true is separately steward-gated. The export rejects invalid format/date windows and refuses oversized results rather than silently truncating them; CSV remains formula-neutralized and account follower columns now map correctly. A mandatory tenant-bound audit is persisted before any CSV/JSON response; audit failures return 503 without exporting data. Both response types prohibit caching. Source and regression tests are committed but executable and runtime qualification are pending.",
+        "remaining": "Exact-HEAD focused and full Vitest/contract, native PostgreSQL 15/16 with real RLS and audit storage, HTTP/browser/staging acceptance, and institutional decision on export audience remain outstanding. Campaign export still uses bounded per-campaign queries and needs scalable server-side aggregation; no production acceptance claimed.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -18080,9 +18144,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/lib/api/deprecation.ts; apps/union-eyes/app/api/deprecations/route.ts; apps/union-eyes/app/api/v2/[...path]/route.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "The v2 catch-all answers 410 Gone for every method (it never answers 200), the Sunset header is no longer advertised once the date has passed, and the registry route reports sunsetPassed computed from the clock through one shared helper instead of a typed string.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-TENANT-CURRENT-ANSWERS-200-WITH-NULL-NAME-SLUG-AND-TIER-AND-NO-FEATURES",
@@ -18259,9 +18330,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "apps/union-eyes/app/api/triage-designations/route.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "DELETE takes the designation id from the query string; a body of at most 1 KB is still honoured for existing callers, and an invalid id is a 400.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-VOCABULARY-SERVES-UNSOURCED-SERVICE-LEVEL-HOURS-ROLE-FLAGS-AND-TRANSITIONS-AS-INSTITUTIONAL-REFERENCE-DATA",
@@ -18324,9 +18402,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+        "path": "packages/cupe-vocabulary/src/vocabulary.ts; packages/cupe-vocabulary/src/types.ts; apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts",
+        "explanation": "lastUpdated is a fixed revision date and a contentDigest (a pure FNV-1a over every entry) changes whenever any entry changes, so the vocabulary no longer reports now and a constant on every call.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",

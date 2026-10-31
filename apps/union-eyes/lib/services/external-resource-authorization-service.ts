@@ -39,6 +39,8 @@ export interface ExternalAuthorizationDecision {
   authorityId?: string;
   matterGrantId?: string;
   documentGrantId?: string;
+  /** The version the grant is pinned to; null or absent means the grant predates version pinning. */
+  documentVersionNo?: number | null;
 }
 
 function isActiveGrant(grant: {
@@ -209,6 +211,7 @@ export function evaluateExternalDocumentAccess(input: {
     authorityId: matterDecision.authorityId,
     matterGrantId: matterDecision.matterGrantId,
     documentGrantId: grant.id,
+    documentVersionNo: (grant as { documentVersionNo?: number | null }).documentVersionNo ?? null,
   };
 }
 

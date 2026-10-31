@@ -9,14 +9,17 @@ import {
 } from '@/lib/canadian-labour-standards';
 
 /** Map jurisdiction code from ISO-style "CA-XX" to our module's format */
-function parseJurisdictionCode(code: string): CanadianJurisdiction {
+export const RULE_CATEGORIES = ['workers_compensation_board_reference', 'break_rule', 'overtime', 'termination_notice'] as const;
+
+/** Returns null for anything that is not an own key of the table, so inherited names such as `constructor` are refused. */
+export function parseJurisdictionCode(code: string): CanadianJurisdiction | null {
   const mapping: Record<string, CanadianJurisdiction> = {
     'CA-FED': 'federal', 'CA-AB': 'AB', 'CA-BC': 'BC', 'CA-MB': 'MB',
     'CA-NB': 'NB', 'CA-NL': 'NL', 'CA-NS': 'NS', 'CA-NT': 'NT',
     'CA-NU': 'NU', 'CA-ON': 'ON', 'CA-PE': 'PE', 'CA-QC': 'QC',
     'CA-SK': 'SK', 'CA-YT': 'YT',
   };
-  return mapping[code] ?? (code as CanadianJurisdiction);
+  return Object.prototype.hasOwnProperty.call(mapping, code) ? mapping[code] : null;
 }
 
 function buildRulesForJurisdiction(jur: CanadianJurisdiction) {
@@ -85,6 +88,12 @@ async function handler(request: NextRequest) {
     const category = searchParams.get('category');
 
     const jur = parseJurisdictionCode(jurisdictionParam);
+    if (!jur) {
+      return NextResponse.json({ success: false, error: 'Unknown jurisdiction code', code: 'INVALID_JURISDICTION' }, { status: 400 });
+    }
+    if (category && !(RULE_CATEGORIES as readonly string[]).includes(category)) {
+      return NextResponse.json({ success: false, error: 'Unknown rule category', code: 'INVALID_CATEGORY', allowed: RULE_CATEGORIES }, { status: 400 });
+    }
     const allRules = buildRulesForJurisdiction(jur);
 
     const rules = category

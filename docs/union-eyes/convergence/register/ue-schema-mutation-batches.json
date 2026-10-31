@@ -2374,7 +2374,7 @@
         "COLUMNS_MISSING",
         "REQUIRED_UNDECLARED"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
       "blockers": []
     },
@@ -2387,7 +2387,7 @@
         "COLUMNS_MISSING",
         "REQUIRED_UNDECLARED"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
       "blockers": []
     },
@@ -2662,7 +2662,7 @@
       "blockers": [
         "required-undeclared:event_id"
       ],
-      "holdReason": "A production file reads this relation: app/[locale]/dashboard/security/page.tsx, lib/api/crud-governance.ts"
+      "holdReason": "A production file reads this relation: app/[locale]/dashboard/security/page.tsx"
     },
     {
       "table": "segment_executions",

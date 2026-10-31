@@ -3925,7 +3925,7 @@
         },
         {
           "prefix": "DEF-0B8-HS-ARCHIVED-ROWS",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/health-safety/hazards/route.ts",
             "apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts",
@@ -3936,10 +3936,10 @@
             "apps/union-eyes/app/api/health-safety/incidents/trends/route.ts",
             "apps/union-eyes/app/api/health-safety/dashboard/route.ts",
             "apps/union-eyes/lib/api/crud-factory.ts",
-            "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+            "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
           ],
-          "explanation": "An archived incident or hazard is neither listed nor returned by id (the new readCondition), and the statistics, trends and dashboard no longer count it as open, critical or part of a total.",
-          "remaining": "The counts are pinned by source only; no test runs the statistics against rows holding an archived status."
+          "explanation": "An archived incident or hazard is neither listed nor returned by id (the new readCondition), and the statistics, trends and dashboard no longer count it as open, critical or part of a total. Verified later: the dashboard counts exclude archived hazards and the critical-alert count excludes archived incidents; list and item reads carry the archived exclusion on both tables."
         }
       ]
     },
@@ -6010,6 +6010,150 @@
           ],
           "explanation": "The vote path answered a misleading 403 for every caller because poll_votes is denied in the CRUD governance table; it now answers 501 honestly and the governance entries for poll_votes and security_events were removed because no generic route uses them any more (a table not listed is still DENIED; the ratchet test pin was adjusted, disclosed).",
           "remaining": "No route creates a poll or records a vote: the polls collection route is generic CRUD over a read-only table, and a real create-and-vote path with one-vote-per-member enforcement is not built."
+        }
+      ]
+    },
+    {
+      "id": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
+      "family": "Small platform fixes, list filters and migration 0046 (row integrity)",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B12-PLT-VOCABULARY-LAST-UPDATED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "packages/cupe-vocabulary/src/vocabulary.ts",
+            "packages/cupe-vocabulary/src/types.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "lastUpdated is a fixed revision date and a contentDigest (a pure FNV-1a over every entry) changes whenever any entry changes, so the vocabulary no longer reports now and a constant on every call."
+        },
+        {
+          "prefix": "DEF-0B12-PLT-V2-CATCH-ALL-SUNSET",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/deprecation.ts",
+            "apps/union-eyes/app/api/deprecations/route.ts",
+            "apps/union-eyes/app/api/v2/[...path]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "The v2 catch-all answers 410 Gone for every method (it never answers 200), the Sunset header is no longer advertised once the date has passed, and the registry route reports sunsetPassed computed from the clock through one shared helper instead of a typed string."
+        },
+        {
+          "prefix": "DEF-0B12-PLT-TRIAGE-REVOKE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/triage-designations/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "DELETE takes the designation id from the query string; a body of at most 1 KB is still honoured for existing callers, and an invalid id is a 400."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-RULES-ROUTE-ACCEPTS-ANY-CODE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/jurisdiction-rules/route.ts",
+            "apps/union-eyes/app/api/__tests__/jurisdiction-rules-deadline.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "The code is looked up with an own-key test, so constructor and __proto__ no longer select a function; an unknown code or an unknown category is a 400 instead of success with an empty list. The deadline-separation test now expects the 400 for a category the register does not hold (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/precedents/jurisdiction-preferences/route.ts",
+            "apps/union-eyes/db/schema/domains/member/jurisdiction-preferences.ts",
+            "apps/union-eyes/app/api/__tests__/precedents-jurisdiction-preferences.route.test.ts",
+            "apps/union-eyes/db/migrations-platform/0046_row_integrity.sql",
+            "apps/union-eyes/db/migrations-platform/0046_row_integrity.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0046-row-integrity.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "Migration 0046 adds a unique index on (user_id, organization_id) (fail-closed on existing duplicates); the route upserts against it, so two concurrent first saves settle on one row, and includeNational and autoApply must be booleans. The route test mock gained onConflictDoUpdate (disclosed).",
+          "remaining": "No precedent route reads the saved preference, so it still filters nothing on the server; applying it server-side is a product decision."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-REGISTRY-PARENT-COMPANY-CROSS-ORG-LINK",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/employers/route.ts",
+            "apps/union-eyes/app/api/employers/[id]/route.ts",
+            "apps/union-eyes/db/migrations-platform/0046_row_integrity.sql",
+            "apps/union-eyes/db/migrations-platform/0046_row_integrity.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0046-row-integrity.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "The create and update hooks require parentCompanyId to be an employer of the caller organization (and not the employer itself); migration 0046 adds a trigger that refuses a parent of another organization or itself with SQLSTATE 23514, mapped to a 400."
+        },
+        {
+          "prefix": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+            "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
+            "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+            "apps/union-eyes/db/schema/representation-authority-schema.ts",
+            "apps/union-eyes/db/migrations-platform/0046_row_integrity.sql",
+            "apps/union-eyes/db/migrations-platform/0046_row_integrity.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0046-row-integrity.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "external_document_access_grants gains a nullable document_version_no (migration 0046). The authorization decision carries it, the download releases exactly that version, and an upload-created grant is pinned to the version it stored.",
+          "remaining": "Grants issued before the migration carry no pin and keep releasing the current version; pinning them needs a reviewed backfill of what each grant covered."
+        },
+        {
+          "prefix": "DEF-0B8-FED-EXTERNAL-GRIEVANCE-PROJECTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/external/grievances/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "The route selects only the projected columns under the names the grievances table really has (grievance_number as the case number, description as the summary), so the case number and summary are no longer always null and no other column is read."
+        },
+        {
+          "prefix": "DEF-0B7-EXP-REPORT-HARD-DELETE-AUDIT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/crud-factory.ts",
+            "apps/union-eyes/app/api/reports/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "The factory gains hardDeleteAuditColumns; the report delete audit now keeps the name, type, category, visibility and author of the removed definition."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-PRECEDENT-ITEM-DELETE-HARD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/precedents/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/precedents-item-isolation.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "A precedent with citation history is retained (409, withdraw its sharing instead) so the cascade can no longer destroy it; an uncited one is removed with an audit that keeps its case title, jurisdiction, sharing level and removed tag count. The PGlite test gained the tag and citation tables and two cases (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B8-HS-STATS-ORGANIZATION-FILTER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/health-safety/stats/route.ts",
+            "apps/union-eyes/app/api/health-safety/incidents/stats/route.ts",
+            "apps/union-eyes/app/api/health-safety/hazards/stats/route.ts",
+            "apps/union-eyes/app/api/health-safety/inspections/stats/route.ts",
+            "apps/union-eyes/app/api/health-safety/inspections/findings/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "Every aggregate refuses with a 400 when there is no organization instead of falling back to an always-true predicate; verified in source and pinned."
+        },
+        {
+          "prefix": "DEF-0B8-HS-LIST-ROUTES-IGNORE-FILTERS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/crud-factory.ts",
+            "apps/union-eyes/app/api/health-safety/incidents/route.ts",
+            "apps/union-eyes/app/api/health-safety/hazards/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
+          ],
+          "explanation": "The factory gains listFilters (enum-checked equality filters and an escaped, bounded text search); the incident list honours status, severity, incidentType and search, and the hazard list status, priority (the hazard level) and search."
         }
       ]
     }

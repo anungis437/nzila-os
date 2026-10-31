@@ -17,6 +17,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   readRole: 'steward',
   writableFields: ['name', 'description', 'reportType', 'category', 'config', 'templateId'],
   writeRole: 'steward',
+  // The table has no status column, so DELETE removes the definition; the audit keeps what identifies it.
+  hardDeleteAuditColumns: ['name', 'reportType', 'category', 'isPublic', 'createdBy'],
   // A definition its author kept private is read by its author only; a public one by anyone who may read definitions.
   readConditionFor: ({ userId }) => (userId ? or(eq(reports.isPublic, true), eq(reports.createdBy, userId)) : eq(reports.isPublic, true)),
 });

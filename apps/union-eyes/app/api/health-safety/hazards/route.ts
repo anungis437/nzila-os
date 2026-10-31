@@ -129,6 +129,11 @@ const { GET, POST } = crudRoutes({
   readRole: 'health_safety_rep',
   // A record an administrator removed is archived, and an archived record is neither listed nor returned by id.
   readCondition: ne(hazardReports.status, 'archived'),
+  // The hazard list screen sends status, priority (the hazard level) and search.
+  listFilters: {
+    equals: { status: 'status', priority: 'hazardLevel', hazardLevel: 'hazardLevel' },
+    search: ['reportNumber', 'hazardDescription', 'specificLocation', 'department'],
+  },
   writeRole: 'health_safety_rep',
   preprocessCreateBody: preprocessHazardCreateBody,
   writableFields: [

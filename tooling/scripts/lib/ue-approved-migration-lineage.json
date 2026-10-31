@@ -468,6 +468,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Local record of public contact-form submissions (system-only, bounded, retention date)"
+      },
+      {
+        "tag": "0046_row_integrity",
+        "sha256": "9876831873efefa3b03d778841b9951a00d0f4762c41054c4ac27328385ee284",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Unique jurisdiction preference row per user and organization, same-organization employer parent trigger, pinned document version on external document grants"
       }
     ]
   }

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import type { PGlite } from '@electric-sql/pglite';
 import { organizations } from '@/db/schema-organizations';
 import { congressMemberships } from '@/db/schema';
-import { arbitrationPrecedents } from '@/db/schema/arbitration-precedents-schema';
+import { arbitrationPrecedents, precedentCitations, precedentTags } from '@/db/schema/arbitration-precedents-schema';
 import { createTableDatabase } from './support/pglite-tables';
 
 // DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION:
@@ -29,6 +29,7 @@ vi.mock('@/lib/api/framework', async () => {
     ApiError: {
       badRequest: make(400),
       forbidden: make(403),
+      conflict: make(409),
       notFound: (kind: string) => Object.assign(new Error(`${kind} not found`), { status: 404 }),
     },
   };
@@ -76,7 +77,7 @@ const ctx = (organizationId: string, id: string, body?: unknown) => ({
 });
 
 beforeAll(async () => {
-  const created = await createTableDatabase([organizations, congressMemberships, arbitrationPrecedents]);
+  const created = await createTableDatabase([organizations, congressMemberships, arbitrationPrecedents, precedentTags, precedentCitations]);
   pg = created.pg;
   state.db = created.db;
   state.audit = audit;
@@ -87,7 +88,7 @@ afterAll(async () => { await pg.close(); });
 beforeEach(async () => {
   audit.mockClear();
   audit.mockResolvedValue(undefined);
-  await pg.exec('TRUNCATE arbitration_precedents, congress_memberships, organizations CASCADE');
+  await pg.exec('TRUNCATE precedent_citations, precedent_tags, arbitration_precedents, congress_memberships, organizations CASCADE');
   await insertOrg(ORG_A, 'Alpha');
   await insertOrg(ORG_B, 'Bravo');
   await insertPrecedent(P_A_PRIVATE, ORG_A, 'private');
@@ -172,6 +173,25 @@ describe('DELETE /api/precedents/[id]', () => {
     await expect((DELETE as any)(ctx(ORG_A, P_A_PRIVATE))).resolves.toEqual({ success: true });
     expect(await row(P_A_PRIVATE)).toBeUndefined();
     expect(audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'precedent.delete', resourceId: P_A_PRIVATE }));
+  });
+
+  it('keeps what identified the removed precedent in the audit record', async () => {
+    await pg.query(`INSERT INTO precedent_tags (precedent_id, tag_name) VALUES ($1, 'a'), ($1, 'b')`, [P_A_PRIVATE]);
+    const { DELETE } = await import('../precedents/[id]/route');
+    await (DELETE as any)(ctx(ORG_A, P_A_PRIVATE));
+    expect(audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      details: expect.objectContaining({ caseTitle: 'title', jurisdiction: 'ON', sharingLevel: 'private', removedTagCount: 2 }),
+    }));
+  });
+
+  it('retains a precedent that has citation history instead of cascading it away', async () => {
+    await pg.query(`INSERT INTO precedent_citations (precedent_id, citing_organization_id, cited_by) VALUES ($1, $2, 'user-2')`, [P_A_PRIVATE, ORG_B]);
+    await pg.query(`INSERT INTO precedent_tags (precedent_id, tag_name) VALUES ($1, 'a')`, [P_A_PRIVATE]);
+    const { DELETE } = await import('../precedents/[id]/route');
+    await expect((DELETE as any)(ctx(ORG_A, P_A_PRIVATE))).rejects.toMatchObject({ status: 409 });
+    expect(await row(P_A_PRIVATE)).toBeDefined();
+    expect((await pg.query('SELECT count(*)::int AS n FROM precedent_tags')).rows[0]).toMatchObject({ n: 1 });
+    expect(audit).not.toHaveBeenCalled();
   });
 
   it('cannot delete another organization\'s precedent, shared or not', async () => {

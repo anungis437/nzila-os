@@ -150,6 +150,8 @@ export const POST = withExternalMatterResourceAuth(
         canView: derived.grant.canView,
         canDownload: derived.grant.canDownload,
         canShare: derived.grant.canShare,
+        // The grant covers the one version this upload stored.
+        documentVersionNo: 1,
         grantedBy: derived.grant.grantedBy,
       });
 

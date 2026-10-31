@@ -14,10 +14,21 @@ describe('jurisdiction rules: legal deadline domain separation', () => {
 
   it('never serves a workers-compensation period as an arbitration deadline', async () => {
     const { GET } = await loadRoute();
+    // A category the register does not hold is now refused outright instead of answering success with an empty list.
     const response = await GET(new NextRequest('http://localhost/api/jurisdiction-rules?jurisdiction=CA-ON&category=arbitration_deadline'));
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.data).toEqual([]);
+    expect(body).toMatchObject({ success: false, code: 'INVALID_CATEGORY' });
+    expect(body.data).toBeUndefined();
+  });
+
+  it('refuses an unknown or inherited jurisdiction code instead of answering success with no rules', async () => {
+    const { GET } = await loadRoute();
+    for (const code of ['CA-XX', 'constructor', '__proto__', 'toString']) {
+      const response = await GET(new NextRequest(`http://localhost/api/jurisdiction-rules?jurisdiction=${code}`));
+      expect(response.status, code).toBe(400);
+      expect(await response.json()).toMatchObject({ success: false, code: 'INVALID_JURISDICTION' });
+    }
   });
 
   it('preserves board reference without asserting an unqualified filing period', async () => {

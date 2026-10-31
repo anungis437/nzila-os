@@ -14,6 +14,11 @@ import { logger } from '@/lib/logger';
 /** Sunset date for deprecated routes — 90 days from Phase 9 deployment */
 const SUNSET_DATE = new Date('2026-07-07T00:00:00Z');
 
+/** The one sunset the registry route and the headers both report; `sunsetPassed` is computed per call, never stored. */
+export function deprecationSunset(now: Date = new Date()): { sunset: string; sunsetPassed: boolean } {
+  return { sunset: SUNSET_DATE.toISOString(), sunsetPassed: SUNSET_DATE.getTime() <= now.getTime() };
+}
+
 export interface DeprecatedRouteMapping {
   /** Original deprecated path pattern (e.g. '/api/v2/members/dues') */
   deprecated: string;

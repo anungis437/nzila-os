@@ -66,6 +66,9 @@ export const GET = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
+    // A grant pinned to a version releases that version only; a version added later is not covered by it. An unpinned (earlier) grant
+    // keeps releasing the current version.
+    const pinned = decision.documentVersionNo ?? null;
     const [latestVersion] = await db
       .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey })
       .from(documentVersions)
@@ -73,6 +76,7 @@ export const GET = withExternalMatterResourceAuth(
         and(
           eq(documentVersions.organizationId, context.organizationId),
           eq(documentVersions.documentId, row.id),
+          ...(pinned !== null ? [eq(documentVersions.versionNo, pinned)] : []),
         ),
       )
       .orderBy(desc(documentVersions.versionNo))

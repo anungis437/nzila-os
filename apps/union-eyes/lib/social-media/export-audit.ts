@@ -4,8 +4,7 @@
  * An audit outage rejects the export rather than delivering unrecorded data.
  */
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
-import { auditLogs } from '@/db/schema/domains/infrastructure/audit';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export async function auditSocialAnalyticsExport(input: {
   organizationId: string;
@@ -25,7 +24,7 @@ export async function auditSocialAnalyticsExport(input: {
     rowCount: input.rowCount,
   };
   await withRLSContext({ organizationId: input.organizationId }, async (tx) => {
-    const written = await appendMandatoryAudit(tx, {
+    await persistAtomicAudit(tx, {
       organizationId: input.organizationId,
       userId: input.userId,
       action: 'social_media_analytics_export',
@@ -33,17 +32,5 @@ export async function auditSocialAnalyticsExport(input: {
       resourceId: null,
       details,
     });
-    if (!written) {
-      await tx.insert(auditLogs).values({
-        organizationId: input.organizationId,
-        userId: input.userId,
-        action: 'social_media_analytics_export',
-        resourceType: 'social_analytics',
-        resourceId: null,
-        severity: 'info',
-        outcome: 'success',
-        metadata: details,
-      });
-    }
   });
 }

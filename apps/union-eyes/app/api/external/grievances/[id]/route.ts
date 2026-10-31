@@ -12,8 +12,19 @@ export const GET = withExternalMatterResourceAuth(
     resolve: resolveExternalGrievanceResource,
   },
   async (_request, context) => {
+    // Only the columns the projection exposes are read, under the names the grievance table really has: the table has no case
+    // number or summary column, so the earlier whole-row read left both empty.
     const [row] = await db
-      .select()
+      .select({
+        id: grievances.id,
+        caseNumber: grievances.grievanceNumber,
+        title: grievances.title,
+        status: grievances.status,
+        step: grievances.step,
+        filedDate: grievances.filedDate,
+        responseDeadline: grievances.responseDeadline,
+        summary: grievances.description,
+      })
       .from(grievances)
       .where(
         and(

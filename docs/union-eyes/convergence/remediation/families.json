@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 472,
- "partial": 78,
- "outstanding": 305,
- "accountedFor": 305,
+ "corrected": 491,
+ "partial": 80,
+ "outstanding": 286,
+ "accountedFor": 286,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -48,11 +48,11 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 31,
+   "defects": 29,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 20,
-    "LOW": 7
+    "MEDIUM": 19,
+    "LOW": 6
    },
    "namedRoutes": 7,
    "namedFiles": 1,
@@ -61,9 +61,9 @@
     "0B.3": 1,
     "0B.4": 3,
     "0B.5": 2,
-    "0B.6": 6,
+    "0B.6": 5,
     "0B.7": 2,
-    "0B.8": 2,
+    "0B.8": 1,
     "0B.9": 2,
     "0B.10": 5,
     "0B.11": 5,
@@ -92,10 +92,10 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 64,
+   "defects": 62,
    "severity": {
     "HIGH": 8,
-    "MEDIUM": 38,
+    "MEDIUM": 36,
     "LOW": 18
    },
    "namedRoutes": 6,
@@ -103,8 +103,8 @@
    "tranches": {
     "0B.2": 3,
     "0B.3": 1,
-    "0B.4": 2,
-    "0B.5": 3,
+    "0B.4": 1,
+    "0B.5": 2,
     "0B.6": 8,
     "0B.7": 18,
     "0B.8": 5,
@@ -117,25 +117,25 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 63,
+   "defects": 59,
    "severity": {
     "HIGH": 3,
-    "MEDIUM": 50,
-    "LOW": 10
+    "MEDIUM": 48,
+    "LOW": 8
    },
-   "namedRoutes": 9,
+   "namedRoutes": 8,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 3,
     "0B.2": 2,
     "0B.3": 3,
-    "0B.4": 5,
+    "0B.4": 4,
     "0B.6": 5,
-    "0B.7": 5,
-    "0B.8": 9,
+    "0B.7": 4,
+    "0B.8": 8,
     "0B.9": 5,
     "0B.10": 6,
-    "0B.11": 14,
+    "0B.11": 13,
     "0B.12": 6
    }
   },
@@ -164,11 +164,11 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 26,
+   "defects": 23,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 21,
-    "LOW": 4
+    "MEDIUM": 20,
+    "LOW": 2
    },
    "namedRoutes": 6,
    "namedFiles": 1,
@@ -176,11 +176,11 @@
     "0B.3": 1,
     "0B.4": 2,
     "0B.6": 1,
-    "0B.7": 5,
-    "0B.8": 3,
+    "0B.7": 4,
+    "0B.8": 2,
     "0B.9": 2,
     "0B.10": 3,
-    "0B.11": 5,
+    "0B.11": 4,
     "0B.12": 4
    }
   },
@@ -241,13 +241,13 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 64,
+   "defects": 56,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 43,
-    "LOW": 19
+    "MEDIUM": 40,
+    "LOW": 14
    },
-   "namedRoutes": 8,
+   "namedRoutes": 7,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 4,
@@ -255,13 +255,13 @@
     "0B.3": 2,
     "0B.4": 4,
     "0B.5": 7,
-    "0B.6": 11,
+    "0B.6": 10,
     "0B.7": 9,
-    "0B.8": 9,
+    "0B.8": 5,
     "0B.9": 1,
     "0B.10": 6,
     "0B.11": 4,
-    "0B.12": 6
+    "0B.12": 3
    }
   }
  ],
@@ -393,10 +393,6 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B6-EMP-REGISTRY-PARENT-COMPANY-CROSS-ORG-LINK",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
     "severity": "LOW"
    },
@@ -421,10 +417,6 @@
     "id": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
     "severity": "LOW",
     "partial": true
-   },
-   {
-    "id": "DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE",
@@ -540,20 +532,13 @@
     "partial": true
    },
    {
-    "id": "DEF-0B4-BATCH-STATUS-FINANCE-ENTITLEMENT-ON-NEWSLETTER",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B5-COMMS-ACTION-ROUTE-IS-GENERIC-CAMPAIGN-CRUD",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
@@ -843,10 +828,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-BATCH-STATUS-RECIPIENT-EMAILS-DISCLOSED",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
     "severity": "MEDIUM"
    },
@@ -870,10 +851,6 @@
    {
     "id": "DEF-0B7-COGB-SUCCESSION-CALL-NOT-AUDITED-AND-RUNS-ON-EVERY-GET",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXP-REPORT-HARD-DELETE-AUDIT-NAMES-NO-FIELDS",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
@@ -901,10 +878,6 @@
    },
    {
     "id": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B8-FED-LOCALS-DELETE-ARCHIVES-STATUS-WITHOUT-ARCHIVED-AT",
     "severity": "LOW"
    },
    {
@@ -971,10 +944,6 @@
    },
    {
     "id": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-PRECEDENT-ITEM-DELETE-HARD-DELETES-THE-PRECEDENT-AND-CASCADES-TO-ITS-TAGS-AND-CITATIONS",
     "severity": "MEDIUM"
    },
    {
@@ -1164,16 +1133,13 @@
    },
    {
     "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B7-PLT-EQUITY-SELF-IDENTIFY-WRITE-FLOOR-EXCLUDES-DATA-SUBJECT",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS",
@@ -1183,10 +1149,6 @@
    {
     "id": "DEF-0B8-ICRA-PUBLIC-WRITES-HAVE-NO-BOT-CHALLENGE-AND-TURNSTILE-IS-OPTIONAL",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-FED-EXTERNAL-GRIEVANCE-PROJECTION-READS-COLUMNS-THE-TABLE-LACKS",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
@@ -1220,10 +1182,6 @@
    {
     "id": "DEF-0B11-SOC-OAUTH-ACCESS-AND-REFRESH-TOKENS-ARE-STORED-AS-PLAINTEXT-TEXT-COLUMNS-WITH-PAGE-AND-ORGANIZATION-ADMIN-SCOPES",
     "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B11-SOC-DISCONNECT-DELETES-THE-CREDENTIAL-EVEN-WHEN-REVOCATION-FAILS-AND-NEVER-REVOKES-META-OR-LINKEDIN-TOKENS",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
@@ -1280,7 +1238,8 @@
    },
    {
     "id": "DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AMOUNTS-UNVERIFIED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-PIL-COMMERCIAL-TERMS-ARE-SET-BY-ONE-ADMINISTRATOR-FROM-A-TYPED-MEMBER-COUNT-AND-AMOUNT-WITH-NO-APPLICANT-ACCEPTANCE",
@@ -1424,11 +1383,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-SYS-CONTACT-ACKNOWLEDGES-SUBMISSION-WITH-NOTHING-STORED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B6-SYS-CONTACT-RATE-LIMIT-KEYED-ON-FORGEABLE-ADDRESS-NO-BOT-CHALLENGE",
     "severity": "MEDIUM"
    },
@@ -1481,15 +1435,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B8-HS-ARCHIVED-ROWS-STILL-READABLE-AND-COUNTED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B8-HS-LIST-ROUTES-IGNORE-FILTERS-THE-FORMS-SEND",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B8-HS-DASHBOARD-METRICS-DERIVED-FROM-RECORD-CREATION-AND-DEFAULTS",
     "severity": "MEDIUM"
    },
@@ -1498,19 +1443,11 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B8-HS-STATS-ORGANIZATION-FILTER-FALLS-BACK-TO-ALWAYS-TRUE",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
     "severity": "LOW"
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-JUR-RULES-ROUTE-ACCEPTS-ANY-CODE-AND-ANSWERS-SUCCESS-WITH-NO-OR-WRONG-RULES",
     "severity": "MEDIUM"
    },
    {
@@ -1549,7 +1486,8 @@
    },
    {
     "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-SCHEDULED-POST-IS-PUBLISHED-AT-ONCE-ON-INSTAGRAM-X-AND-LINKEDIN-WHILE-THE-ROW-SAYS-SCHEDULED-AND-HASHTAGS-AND-MENTIONS-ARE-NOT-SENT",
@@ -1566,18 +1504,6 @@
    {
     "id": "DEF-0B12-PLT-KPI-CALCULATION-AND-ALERT-FLAG-ARE-STORED-AND-APPLIED-BY-NO-CODE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-V2-CATCH-ALL-SUNSET-DATE-IS-A-CONSTANT-THAT-CHANGES-NO-ANSWER",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B12-PLT-TRIAGE-REVOKE-CARRIES-THE-DESIGNATION-ID-IN-A-DELETE-BODY",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B12-PLT-VOCABULARY-LAST-UPDATED-IS-THE-TIME-OF-THE-CALL-AND-THE-VERSION-IS-A-CONSTANT",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B12-PLT-VOICE-UPLOAD-CHECKS-THE-AI-SEARCH-ENTITLEMENT-AND-CONSUMES-NO-CREDIT",

@@ -33,7 +33,7 @@ import { ApiError } from './errors';
 import { db } from '@/db/db';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { eq, and, desc, count, sql, inArray, getTableName as drizzleTableName, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, count, sql, inArray, getTableName as drizzleTableName, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
@@ -161,6 +161,19 @@ export interface CrudOptions {
    */
   mapCreateError?: (error: unknown) => Error | null;
   /**
+   * Columns whose values the audit record keeps when DELETE removes the row for good (a table with no status or archive column).
+   * Without it the record of a hard delete names no field, so nothing survives of what was removed. Choose identifying, non-sensitive
+   * columns (a name, a category, an owner id), never free text or personal data.
+   */
+  hardDeleteAuditColumns?: string[];
+  /**
+   * Query-string filters the list GET honours, so a screen's filter controls act on the server instead of being ignored.
+   * `equals` maps a query parameter to a column name; an enum column refuses a value outside its members with a 400 rather than
+   * reaching the database. `search` lists text columns matched case-insensitively by the `search` parameter (at most 100
+   * characters, wildcards escaped). Filters only narrow the caller's already-scoped rows.
+   */
+  listFilters?: { equals?: Record<string, string>; search?: string[] };
+  /**
    * Optional transform applied to the PATCH payload, after
    * `blockedPatchFields` have been stripped, before `.set(...)`. Receives
    * the row's CURRENT (pre-update) values via one extra SELECT — only
@@ -221,6 +234,37 @@ export interface CrudOptions {
 
 function getColumn(table: PgTable, name: string): PgColumn | undefined {
   return (table as unknown as Record<string, PgColumn>)[name];
+}
+
+/** Builds the optional list filters; see the `listFilters` option. An unknown enum member or an over-long term is a 400. */
+export function listFilterConditions(
+  filters: { equals?: Record<string, string>; search?: string[] } | undefined,
+  table: PgTable,
+  params: URLSearchParams,
+): SQL[] {
+  if (!filters) return [];
+  const conditions: SQL[] = [];
+  for (const [param, columnName] of Object.entries(filters.equals ?? {})) {
+    const value = params.get(param);
+    if (value === null || value === '' || value === 'all') continue;
+    const column = getColumn(table, columnName);
+    if (!column) throw ApiError.internal(`List filter ${param} names a column the table does not have`);
+    const members = (column as unknown as { enumValues?: readonly string[] }).enumValues;
+    if (members ? !members.includes(value) : value.length > 100) throw ApiError.badRequest(`Invalid ${param} filter`);
+    conditions.push(eq(column, value));
+  }
+  const term = params.get('search')?.trim();
+  if (term && filters.search?.length) {
+    if (term.length > 100) throw ApiError.badRequest('search must be at most 100 characters');
+    const pattern = `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+    const columns = filters.search.map((name) => {
+      const column = getColumn(table, name);
+      if (!column) throw ApiError.internal(`List search names a column the table does not have: ${name}`);
+      return ilike(column, pattern);
+    });
+    conditions.push(or(...columns) as SQL);
+  }
+  return conditions;
 }
 
 /** Auto-detect the primary key column on a Drizzle pgTable */
@@ -530,6 +574,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     action: 'create' | 'update' | 'delete',
     fields: string[],
     operation: (tx: RLSTx) => Promise<T | undefined>,
+    describe?: (row: T) => Record<string, unknown>,
   ): Promise<T | undefined> {
     if (!organizationId || !userId) throw ApiError.forbidden();
     return withRLSContext({ organizationId, userId: userId === ANONYMOUS_ACTOR ? undefined : userId }, async (tx) => {
@@ -541,7 +586,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           action: `crud.${governance.name}.${action}`,
           resourceType: governance.name,
           resourceId: String(row[resolvedPk] ?? ''),
-          details: { fields, route: 'generic-crud' },
+          details: { fields, route: 'generic-crud', ...(describe ? { removed: describe(row) } : {}) },
         });
       }
       return row;
@@ -591,6 +636,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
         const lowRole = await readScope(userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);
+        conditions.push(...listFilterConditions(opts.listFilters, table, url.searchParams));
 
         const whereClause = conditions.length > 0
           ? and(...conditions)
@@ -973,9 +1019,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         }
 
         // Hard delete for tables without a status column
-        const deleted = await audited(organizationId, userId, 'delete', [], async (tx) => (await tx.delete(table)
+        const removedColumns = opts.hardDeleteAuditColumns ?? [];
+        const deleted = await audited(organizationId, userId, 'delete', removedColumns, async (tx) => (await tx.delete(table)
           .where(and(...conditions))
-          .returning())[0] as Record<string, unknown> | undefined);
+          .returning())[0] as Record<string, unknown> | undefined,
+        removedColumns.length > 0 ? (row) => Object.fromEntries(removedColumns.map((name) => [name, row[name] ?? null])) : undefined);
         if (!deleted) throw ApiError.notFound(`${resourceName} not found`);
         return { data: shape(deleted) };
       },
