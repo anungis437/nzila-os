@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ? 'Nzila Ventures conçoit des logiciels centrés sur l’humain pour préserver la mémoire institutionnelle et relier les décisions à des preuves. Découvrez Union Eyes et CIVIC.'
     : 'Nzila Ventures builds human-centered software to preserve institutional knowledge and keep decisions accountable. Discover Union Eyes for unions and CIVIC for public institutions.';
   return {
-    title: isFr ? 'Logiciels pensés pour les personnes et les institutions' : 'Human-Centered Software for Institutions',
+    title: isFr ? 'Logiciels pensés pour les personnes et les institutions | Nzila Ventures' : 'Human-Centered Software for Institutions | Nzila Ventures',
     description,
     openGraph: {
       title: isFr ? 'Nzila Ventures | Des logiciels au service des personnes' : 'Nzila Ventures | Software That Keeps People in Control',

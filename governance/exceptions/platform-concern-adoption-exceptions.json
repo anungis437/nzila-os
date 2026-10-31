@@ -26,8 +26,8 @@
       "concern": "contracts",
       "status": "legacy-migration-path",
       "owner": "platform-team",
-      "justification": "Public web remains thin and does not yet expose platform-contract adapters for governance endpoints.",
-      "expiresOn": "2026-10-31"
+      "justification": "Public web remains thin and does not yet expose platform-contract adapters for governance endpoints. [bridge: owner-accepted (Aubert Nungisa) 2026-10-31 go-live approval for the public web revamp; time-boxed to 2026-11-14 (14 days); real fix tracked: platform-contract adapters for the public web]",
+      "expiresOn": "2026-11-14"
     },
     {
       "app": "union-eyes",
@@ -53,8 +53,8 @@
       "concern": "eventing",
       "status": "legacy-migration-path",
       "owner": "media-team",
-      "justification": "Zonga events currently route through domain event packages; platform-events envelope migration is staged.",
-      "expiresOn": "2026-10-31"
+      "justification": "Zonga events currently route through domain event packages; platform-events envelope migration is staged. [bridge: owner-accepted (Aubert Nungisa) 2026-10-31 to keep the fleet-wide expiry gate green for the public web go-live; time-boxed to 2026-11-14 (14 days); media-team to renew or close]",
+      "expiresOn": "2026-11-14"
     }
   ]
 }
