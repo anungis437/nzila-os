@@ -96,9 +96,10 @@ describe('communications/unsubscribe/[recipientId] route', () => {
   it('renders the French confirmation copy when locale is fr-CA', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const { GET } = await loadRoute();
-    const t = token('secret', 'r1:unsubscribe');
+    const t = token('secret', 'c1:r1:unsubscribe');
+    m.selectQueue.push([{ id: 'c1', organizationId: 'org_1', stats: {} }], []);
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&locale=fr-CA&token=${t}`), {
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&reason=manual&locale=fr-CA&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
     const html = await response.text();
@@ -123,32 +124,53 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     expect(mockDb.insert).toHaveBeenCalledTimes(2);
   });
 
-  it('without a campaign id revokes in every organization that holds a preference or a list subscription, with a consent record for each', async () => {
+  it('refuses a legacy recipient-only token without an organization-bound campaign', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const { GET } = await loadRoute();
     const t = token('secret', 'r1:unsubscribe');
-    // preference organizations, list organizations, then each organization's own preference lookup
-    m.selectQueue.push([{ organizationId: 'org_1' }], [{ organizationId: 'org_2' }, { organizationId: 'org_1' }], [{ id: 'p1' }], []);
 
     const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
-    expect(response.status).toBe(200);
-    // org_1: consent record; org_2: new preference and consent record
-    expect(mockDb.insert).toHaveBeenCalledTimes(3);
+    expect(response.status).toBe(400);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(mockDb.insert).not.toHaveBeenCalled();
   });
 
-  it('handles fallback unsubscribe when no campaign id is provided', async () => {
+  it('refuses a signed campaign token for a missing campaign without recording consent or claiming success', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const { GET } = await loadRoute();
-    const t = token('secret', 'r1:unsubscribe');
+    const t = token('secret', 'missing:r1:unsubscribe');
+    m.selectQueue.push([]);
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&token=${t}`), {
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=missing&token=${t}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+
+    expect(response.status).toBe(404);
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(mockDb.insert).not.toHaveBeenCalled();
+  });
+
+  it('changes preferences only within the signed campaign organization, without cross-tenant recipient discovery', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'c1:r1:unsubscribe');
+    m.selectQueue.push([{ id: 'c1', organizationId: 'org_1', stats: {} }], []);
+    m.updateReturnQueue.push([]);
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
     expect(response.status).toBe(200);
+    expect(mockDb.select).toHaveBeenCalledTimes(2); // campaign and scoped preference only
+    expect(mockDb.insert).toHaveBeenCalledTimes(2); // preference and scoped consent only
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
   });
 
   it('fails closed without a configured secret: 401 and no mutation', async () => {
