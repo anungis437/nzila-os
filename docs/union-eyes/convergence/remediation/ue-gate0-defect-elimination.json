@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 416,
+    "implementedPendingQualification": 419,
     "partial": 77,
     "qualificationVerified": 0,
-    "unresolved": 361,
+    "unresolved": 358,
     "externalBlockers": 0
   },
   "batches": [
@@ -608,6 +608,15 @@
       "outstandingBefore": 365,
       "newlyImplemented": 4,
       "outstandingAfter": 361,
+      "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
+      "family": "Schema: a copilot conversation and a reasoning session belong to the person who opened them",
+      "outstandingBefore": 361,
+      "newlyImplemented": 3,
+      "outstandingAfter": 358,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -5590,6 +5599,48 @@
         "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
       ],
       "explanation": "The report-builder and data-source-sample paths no longer act as report-definition CRUD. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+    },
+    "DEF-0B7-EXC-COPILOT-CONVERSATIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
+        "apps/union-eyes/app/api/exit-interviews/copilot/route.ts",
+        "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts",
+        "apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.sql",
+        "apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0043-knowledge-transfer-owner.pglite.test.ts",
+        "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts"
+      ],
+      "explanation": "Migration 0043 adds created_by to ue_copilot_conversations (nullable; rows that predate it have no owner and so are visible to nobody, nothing is backfilled). A conversation is created with its opener, listed and read only for that opener, and appended to only by that opener; naming a conversation that is not yours answers not found with no model call. The engine tests (signature and ownership) were updated and extended (disclosed)."
+    },
+    "DEF-0B7-EXC-REASONING-SESSIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/reasoning-sessions/session-manager.ts",
+        "apps/union-eyes/app/api/exit-interviews/reasoning-sessions/route.ts",
+        "apps/union-eyes/lib/knowledge-transfer/reasoning-sessions/__tests__/session-manager.test.ts",
+        "apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.sql",
+        "apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0043-knowledge-transfer-owner.pglite.test.ts",
+        "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts"
+      ],
+      "explanation": "Migration 0043 adds created_by to ue_reasoning_sessions. A session records its creator; the route lists only the caller's sessions, and get, update, annotate, link and simulate are held to the creator in the SQL. The organization-wide list remains for the continuity engines that aggregate sessions into figures and show none to anyone."
+    },
+    "DEF-0B7-EXC-COPILOT-CONTEXT-IS-CLIENT-SUPPLIED-HISTORY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
+        "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts",
+        "apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.sql",
+        "apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0043-knowledge-transfer-owner.pglite.test.ts",
+        "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts"
+      ],
+      "explanation": "The model input is built from the caller's stored conversation (the last 20 messages); prior messages sent by the client are accepted for compatibility and ignored, so a caller cannot put words in the assistant's mouth or pass instructions as earlier turns. Tested with a forged assistant turn."
     }
   }
 }

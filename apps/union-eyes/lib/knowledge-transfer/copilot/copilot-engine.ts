@@ -16,6 +16,7 @@
 
 import { randomUUID } from 'crypto';
 import { sql } from 'drizzle-orm';
+import { ApiError } from '@/lib/api/errors';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import type { RLSTx } from '@/lib/db/with-rls-context';
@@ -39,31 +40,37 @@ import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './co
 // Profile key for continuity copilot — reuses STEWARD_COPILOT as organizational reasoning profile
 const COPILOT_PROFILE = 'ue-steward-copilot';
 
-/** Load or create a conversation, on the caller's transaction. */
+/**
+ * Load or create a conversation, on the caller's transaction. A conversation belongs to the person who opened it: naming one
+ * that is not yours (or does not exist) is a not-found, never a new conversation and never a continuation of someone else's.
+ */
 async function upsertConversation(
   tx: RLSTx,
   orgId: string,
   conversationId: string | null,
   sessionId: string | null,
   contextSnapshot: Record<string, unknown> | null,
+  userId: string,
 ): Promise<{ id: string; created: boolean }> {
-  if (conversationId && isUuid(conversationId)) {
-    // Verify it belongs to this org
+  if (conversationId) {
+    if (!isUuid(conversationId)) throw ApiError.notFound('Conversation');
     const rows = await tx.execute(sql`
-      SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND organization_id = ${orgId} LIMIT 1
+      SELECT id FROM ue_copilot_conversations
+      WHERE id = ${conversationId} AND organization_id = ${orgId} AND created_by = ${userId} LIMIT 1
     `);
     const result = rows as any as Record<string, unknown>[];
     if (result.length > 0) return { id: conversationId, created: false };
+    throw ApiError.notFound('Conversation');
   }
   // Create new conversation
   const id = randomUUID();
   const now = new Date().toISOString();
   await tx.execute(sql`
-    INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_at, updated_at)
+    INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_by, created_at, updated_at)
     VALUES (
       ${id}, ${orgId}, ${sessionId ?? null},
       ${contextSnapshot ? JSON.stringify(contextSnapshot) : null}::jsonb,
-      ${now}::timestamptz, ${now}::timestamptz
+      ${userId}, ${now}::timestamptz, ${now}::timestamptz
     )
   `);
   return { id, created: true };
@@ -75,12 +82,13 @@ async function appendMessage(
   orgId: string,
   conversationId: string,
   message: CopilotMessage,
+  userId: string,
 ): Promise<void> {
   await tx.execute(sql`
     UPDATE ue_copilot_conversations
     SET messages = messages || ${JSON.stringify([message])}::jsonb,
         updated_at = now()
-    WHERE id = ${conversationId} AND organization_id = ${orgId}
+    WHERE id = ${conversationId} AND organization_id = ${orgId} AND created_by = ${userId}
   `);
 }
 
@@ -166,6 +174,15 @@ export async function processCopilotQuery(
   input: CopilotQueryInput,
   userId: string,
 ): Promise<CopilotQueryResult> {
+  // The model's history is the stored conversation of the caller, never what the client says was said: a caller cannot put
+  // words in the assistant's mouth or smuggle instructions in as prior turns. A conversation that is not theirs is not found.
+  let storedMessages: CopilotMessage[] = [];
+  if (input.conversationId) {
+    const owned = await loadOwnedMessages(orgId, input.conversationId, userId);
+    if (owned === null) throw ApiError.notFound('Conversation');
+    storedMessages = owned;
+  }
+
   // Load org continuity context
   const [propagationMap, resilienceIndex] = await Promise.all([
     buildDependencyPropagationMap(orgId),
@@ -195,7 +212,7 @@ export async function processCopilotQuery(
   // Build message history
   const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
     { role: 'system', content: systemPrompt },
-    ...(input.priorMessages ?? []).map((m) => ({
+    ...storedMessages.slice(-20).map((m) => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     })),
@@ -294,15 +311,16 @@ export async function processCopilotQuery(
       input.conversationId ?? null,
       input.sessionId ?? null,
       { resilienceScore: resilienceIndex.overallScore, singleSourceCount, totalNodes },
+      userId,
     );
-    await appendMessage(tx, orgId, conversation.id, { id: userMsgId, role: 'user', content: input.query, createdAt: now });
+    await appendMessage(tx, orgId, conversation.id, { id: userMsgId, role: 'user', content: input.query, createdAt: now }, userId);
     await appendMessage(tx, orgId, conversation.id, {
       id: assistantMsgId,
       role: 'assistant',
       content: answer,
       createdAt: now,
       explainabilityRef: null,
-    });
+    }, userId);
     await persistAtomicAudit(tx, {
       organizationId: orgId,
       userId,
@@ -333,34 +351,41 @@ export async function processCopilotQuery(
   };
 }
 
-/** Load conversation history for a conversation. */
-export async function loadConversationHistory(
-  orgId: string,
-  conversationId: string,
-): Promise<CopilotMessage[]> {
-  if (!isUuid(conversationId)) return [];
+/** The messages of a conversation the caller opened; null when it is not theirs, does not exist, or the id is malformed. */
+async function loadOwnedMessages(orgId: string, conversationId: string, userId: string): Promise<CopilotMessage[] | null> {
+  if (!isUuid(conversationId)) return null;
   const rows = await inOrganization(orgId, (tx) =>
     tx.execute(sql`
       SELECT messages FROM ue_copilot_conversations
-      WHERE id = ${conversationId} AND organization_id = ${orgId}
+      WHERE id = ${conversationId} AND organization_id = ${orgId} AND created_by = ${userId}
       LIMIT 1
     `),
   );
   const result = rows as any as Record<string, unknown>[];
-  if (result.length === 0) return [];
+  if (result.length === 0) return null;
   return (result[0].messages as CopilotMessage[]) ?? [];
 }
 
-/** List recent conversations for an org. */
+/** Load conversation history for a conversation the caller opened (empty for any other). */
+export async function loadConversationHistory(
+  orgId: string,
+  conversationId: string,
+  userId: string,
+): Promise<CopilotMessage[]> {
+  return (await loadOwnedMessages(orgId, conversationId, userId)) ?? [];
+}
+
+/** List the caller's own recent conversations. */
 export async function listConversations(
   orgId: string,
+  userId: string,
   limit = 10,
 ): Promise<Array<{ id: string; title: string; updatedAt: string; messageCount: number }>> {
   const rows = await inOrganization(orgId, (tx) =>
     tx.execute(sql`
       SELECT id, title, updated_at, jsonb_array_length(messages) AS message_count
       FROM ue_copilot_conversations
-      WHERE organization_id = ${orgId}
+      WHERE organization_id = ${orgId} AND created_by = ${userId}
       ORDER BY updated_at DESC
       LIMIT ${limit}
     `),

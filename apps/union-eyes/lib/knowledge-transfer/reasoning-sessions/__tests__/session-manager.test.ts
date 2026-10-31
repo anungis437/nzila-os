@@ -79,9 +79,9 @@ describe('lib/knowledge-transfer/reasoning-sessions/session-manager', () => {
 
   it('getReasoningSession returns session or null', async () => {
     execute.mockResolvedValue([{ id: E1, organization_id: ORG, title: 'A', focus: 'general_continuity', status: 'active', created_at: '2025-01-01T00:00:00.000Z', updated_at: '2025-01-01T00:00:00.000Z' }]);
-    expect((await getReasoningSession(ORG, E1))?.id).toBe(E1);
+    expect((await getReasoningSession(ORG, E1, USER))?.id).toBe(E1);
     execute.mockResolvedValue([]);
-    expect(await getReasoningSession(ORG, E2)).toBeNull();
+    expect(await getReasoningSession(ORG, E2, USER)).toBeNull();
   });
 
   it('updateReasoningSession audits an updated session on the same transaction', async () => {
@@ -124,7 +124,7 @@ describe('lib/knowledge-transfer/reasoning-sessions/session-manager', () => {
 
   it('runs every operation inside the organization tenant context', async () => {
     await listReasoningSessions(OTHER_ORG);
-    await getReasoningSession(OTHER_ORG, E1);
+    await getReasoningSession(OTHER_ORG, E1, USER);
     await updateReasoningSession(OTHER_ORG, E1, { title: 'x' } as never, USER);
     await addSessionAnnotation(OTHER_ORG, E1, 'note', null, USER);
     await linkMemoryToSession(OTHER_ORG, E1, E2, USER);
@@ -143,7 +143,7 @@ describe('lib/knowledge-transfer/reasoning-sessions/session-manager', () => {
   });
 
   it('treats a malformed session id as matching nothing without querying', async () => {
-    expect(await getReasoningSession(ORG, 'not-a-uuid')).toBeNull();
+    expect(await getReasoningSession(ORG, 'not-a-uuid', USER)).toBeNull();
     expect(await updateReasoningSession(ORG, 'not-a-uuid', { title: 'x' } as never, USER)).toBe(false);
     expect(await linkMemoryToSession(ORG, 'not-a-uuid', E2, USER)).toBe(false);
     expect(execute).not.toHaveBeenCalled();
@@ -153,4 +153,23 @@ describe('lib/knowledge-transfer/reasoning-sessions/session-manager', () => {
     const source = readFileSync(fileURLToPath(new URL('../session-manager.ts', import.meta.url)), 'utf8');
     expect(source).not.toMatch(/CREATE\s+(TABLE|INDEX)|ALTER\s+TABLE|ensureTable/i);
   });
+
+  // DEF-0B7-EXC-REASONING-SESSIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD
+  describe('ownership', () => {
+    const source = () => readFileSync(fileURLToPath(new URL('../session-manager.ts', import.meta.url)), 'utf8');
+    it('records the creator, and holds get, update, annotate, link and simulate to the creator in the SQL', () => {
+      const text = source();
+      expect(text).toContain('context_description, created_by, created_at, updated_at');
+      expect(text.match(/AND created_by = \$\{userId\}/g)?.length).toBeGreaterThanOrEqual(5);
+    });
+    it('lists only the caller\'s sessions when asked for an owner, and keeps the organization-wide list for the engines', () => {
+      const text = source();
+      expect(text).toContain("options.ownerUserId ? sql`AND created_by = ${options.ownerUserId}` : sql``");
+    });
+    it('the sessions route lists with the caller as owner', () => {
+      const route = readFileSync(fileURLToPath(new URL('../../../../app/api/exit-interviews/reasoning-sessions/route.ts', import.meta.url)), 'utf8');
+      expect(route).toContain('ownerUserId: userId!');
+    });
+  });
+
 });

@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 469,
-    "engineeringRemaining": 308,
+    "engineeringCorrected": 472,
+    "engineeringRemaining": 305,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 77
   },
@@ -7224,9 +7224,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
+        "path": "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts; apps/union-eyes/app/api/exit-interviews/copilot/route.ts; apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts; apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.sql; apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.rollback.sql; apps/union-eyes/db/__tests__/platform-0043-knowledge-transfer-owner.pglite.test.ts; apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+        "explanation": "Migration 0043 adds created_by to ue_copilot_conversations (nullable; rows that predate it have no owner and so are visible to nobody, nothing is backfilled). A conversation is created with its opener, listed and read only for that opener, and appended to only by that opener; naming a conversation that is not yours answers not found with no model call. The engine tests (signature and ownership) were updated and extended (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
@@ -7258,9 +7265,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
+        "path": "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts; apps/union-eyes/lib/knowledge-transfer/copilot/copilot-models.ts; apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts; apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.sql; apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.rollback.sql; apps/union-eyes/db/__tests__/platform-0043-knowledge-transfer-owner.pglite.test.ts; apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+        "explanation": "The model input is built from the caller's stored conversation (the last 20 messages); prior messages sent by the client are accepted for compatibility and ignored, so a caller cannot put words in the assistant's mouth or pass instructions as earlier turns. Tested with a forged assistant turn.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT",
@@ -7399,9 +7413,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
+        "path": "apps/union-eyes/lib/knowledge-transfer/reasoning-sessions/session-manager.ts; apps/union-eyes/app/api/exit-interviews/reasoning-sessions/route.ts; apps/union-eyes/lib/knowledge-transfer/reasoning-sessions/__tests__/session-manager.test.ts; apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.sql; apps/union-eyes/db/migrations-platform/0043_knowledge_transfer_owner.rollback.sql; apps/union-eyes/db/__tests__/platform-0043-knowledge-transfer-owner.pglite.test.ts; apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+        "explanation": "Migration 0043 adds created_by to ue_reasoning_sessions. A session records its creator; the route lists only the caller's sessions, and get, update, annotate, link and simulate are held to the creator in the SQL. The organization-wide list remains for the continuity engines that aggregate sessions into figures and show none to anyone.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-ANALYTICS-REPORTS-FULL-CONSENT-FOR-MONTHS-WITH-NO-INTERVIEWS",

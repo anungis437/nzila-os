@@ -440,6 +440,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Record numbers and codes unique per organization, not across every organization (nine tables)"
+      },
+      {
+        "tag": "0043_knowledge_transfer_owner",
+        "sha256": "51d5aee1562b883922ff34d5bd0f39bd4b449b9e594a7e298d5a6c14c0818d0b",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "created_by on ue_copilot_conversations and ue_reasoning_sessions (owner scoping)"
       }
     ]
   }
