@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 339,
-    "partial": 58,
+    "partial": 59,
     "qualificationVerified": 0,
     "unresolved": 438,
     "externalBlockers": 0
@@ -4249,6 +4249,17 @@
         "apps/union-eyes/app/api/__tests__/chatbot-session-read-guards.route.test.ts"
       ],
       "explanation": "The session list reads active sessions only, and the message read needs the entitlement, the AI feature flag, the safety check and the rate limit, and refuses an archived or deleted session (existing implementation and test)."
+    },
+    "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ": {
+      "status": "PARTIAL",
+      "batch": "GATE0-ANALYTICS-PRIVACY-20261030",
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-factory.test.ts",
+        "apps/union-eyes/actions/analytics-actions.ts"
+      ],
+      "explanation": "Generic CRUD responses over analytics_metrics now centrally omit the metadata JSON on every collection/item alias, protecting historical case IDs and confidential provenance. The dedicated analytics action already allowlists aggregate metadata; new regression tests exercise redaction and real Drizzle table-name binding. Source commits 3b7223e89438c08d0451fe2e5f3ac10f6645fa0f, 7697305fe3010756931373e100c3af324f8a8d14 and 3658d9d19419702089cc93e88d6e42963a9d5761.",
+      "remaining": "Exact-HEAD focused tests, complete Vitest/contract, native PostgreSQL 15/16, HTTP/browser/staging acceptance and independent Gate 0C.4 approvals are not yet established. Do not promote to IMPLEMENTED_PENDING_QUALIFICATION or CLOSED solely on source edits."
     }
   }
 }
