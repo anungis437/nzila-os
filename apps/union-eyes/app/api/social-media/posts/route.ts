@@ -23,82 +23,86 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
-export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+// This is the organization's publishing workbench, not its public social feed.
+// Members must not see unapproved copy, officer identities, rejection reasons, provider errors or approval metadata.
+const postReadStatuses = z.enum(['draft', 'scheduled', 'published', 'failed', 'deleted']);
+
+export const GET = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { userId, organizationId } = context;
+    const { userId, organizationId } = context;
+    if (!userId || !organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+    }
 
-      if (!organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
-      // Rate limit check
-      const rateLimitResult = await checkRateLimit(
-        `social-posts-read:${userId}`,
-        RATE_LIMITS.SOCIAL_MEDIA_API
-      );
-      if (!rateLimitResult.allowed) {
-        return standardErrorResponse(
-      ErrorCode.RATE_LIMIT_EXCEEDED,
-      'Rate limit exceeded',
-      { resetIn: rateLimitResult.resetIn }
+    const rateLimitResult = await checkRateLimit(
+      `social-posts-read:${userId}`,
+      RATE_LIMITS.SOCIAL_MEDIA_API,
     );
-      }
+    if (!rateLimitResult.allowed) {
+      return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded', { resetIn: rateLimitResult.resetIn });
+    }
 
-      // Parse query parameters
-      const searchParams = request.nextUrl.searchParams;
-      const status = searchParams.get('status');
-      const campaignId = searchParams.get('campaign_id');
-      const search = searchParams.get('search');
-      const pagination = parseSocialPostPagination(searchParams);
-      if (!pagination) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'limit must be 1-100 and offset must be 0-10000');
-      const { limit, offset } = pagination;
+    const params = request.nextUrl.searchParams;
+    const pagination = parseSocialPostPagination(params);
+    if (!pagination) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'limit must be 1-100 and offset must be 0-10000');
 
-      // Build query with dynamic filters
-      const conditions: SQL[] = [eq(socialPosts.organizationId, organizationId)];
+    const rawStatus = params.get('status');
+    const status = rawStatus === null ? null : postReadStatuses.safeParse(rawStatus);
+    if (status && !status.success) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid post status');
 
-      if (status) {
-        conditions.push(eq(socialPosts.status, status as typeof socialPosts.status._.data));
-      }
+    const rawCampaignId = params.get('campaign_id');
+    const campaignId = rawCampaignId === null ? null : z.guid().safeParse(rawCampaignId);
+    if (campaignId && !campaignId.success) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid campaign id');
 
-      if (campaignId) {
-        conditions.push(eq(socialPosts.campaignId, campaignId));
-      }
+    const search = params.get('search');
+    if (search !== null && search.length > 200) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Search is too long');
 
-      if (search) {
-        conditions.push(ilike(socialPosts.content, `%${search}%`));
-      }
+    const conditions: SQL[] = [eq(socialPosts.organizationId, organizationId)];
+    if (status?.success) conditions.push(eq(socialPosts.status, status.data));
+    if (campaignId?.success) conditions.push(eq(socialPosts.campaignId, campaignId.data));
+    if (search) conditions.push(ilike(socialPosts.content, `%${search}%`));
 
-      const [{ total }] = await db
-        .select({ total: count() })
-        .from(socialPosts)
-        .where(and(...conditions));
-
-      const posts = await db
-        .select()
-        .from(socialPosts)
+    // Both reads must use the caller's tenant-bound transaction. An explicit field projection
+    // prevents JSON approval records, actor identifiers and provider diagnostics from leaking.
+    const { total, posts } = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const [{ total }] = await tx.select({ total: count() }).from(socialPosts).where(and(...conditions));
+      const posts = await tx.select({
+        id: socialPosts.id,
+        accountId: socialPosts.accountId,
+        campaignId: socialPosts.campaignId,
+        postType: socialPosts.postType,
+        content: socialPosts.content,
+        mediaUrls: socialPosts.mediaUrls,
+        linkUrl: socialPosts.linkUrl,
+        hashtags: socialPosts.hashtags,
+        mentions: socialPosts.mentions,
+        status: socialPosts.status,
+        scheduledFor: socialPosts.scheduledFor,
+        publishedAt: socialPosts.publishedAt,
+        platformUrl: socialPosts.platformUrl,
+        likesCount: socialPosts.likesCount,
+        commentsCount: socialPosts.commentsCount,
+        sharesCount: socialPosts.sharesCount,
+        impressionsCount: socialPosts.impressionsCount,
+        reachCount: socialPosts.reachCount,
+        engagementRate: socialPosts.engagementRate,
+        createdAt: socialPosts.createdAt,
+        updatedAt: socialPosts.updatedAt,
+      }).from(socialPosts)
         .where(and(...conditions))
         .orderBy(desc(socialPosts.createdAt))
-        .limit(limit)
-        .offset(offset);
+        .limit(pagination.limit)
+        .offset(pagination.offset);
+      return { total, posts };
+    });
 
-      return NextResponse.json({
-        posts,
-        total,
-        limit,
-        offset,
-      });
-    } catch (error) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Internal server error',
-      error
-    );
-    }
+    return NextResponse.json({ posts, total, limit: pagination.limit, offset: pagination.offset }, {
+      headers: { 'Cache-Control': 'private, no-store' },
+    });
+  } catch (error) {
+    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Internal server error', error);
+  }
 });
-
 
 const socialMediaPostsSchema = z.object({
   platforms: z.array(z.enum(["facebook", "twitter", "linkedin", "instagram"])).min(1, "At least one platform required"),
