@@ -46,6 +46,7 @@ vi.mock('@/lib/api-auth-guard', async (orig) => {
   return {
     ...actual,
     hasMinRole: m.hasMinRole,
+    getCurrentUser: vi.fn(async () => ({ id: 'steward-1', organizationId: 'test-org' })),
     withApiAuth: vi.fn((handler: (req: NextRequest, ctx?: any) => Promise<Response>) => (req: NextRequest, ctx?: any) => handler(req, ctx)),
   };
 });
@@ -62,6 +63,8 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
   getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
 }));
+// The declared audit commits with the write (B97); its writer has its own coverage.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
 async function loadRoute() {

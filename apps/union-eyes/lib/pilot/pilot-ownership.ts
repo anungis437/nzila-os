@@ -215,8 +215,10 @@ export async function bindPilotOrganization(params: {
   pilotId: string;
   organizationId: string;
   verifiedBy: string;
+  /** What the administrator relied on to conclude the applicant speaks for the organization; kept in the audit record. */
+  basis?: string;
 }): Promise<BindPilotOrganizationResult> {
-  const { pilotId, organizationId, verifiedBy } = params;
+  const { pilotId, organizationId, verifiedBy, basis } = params;
 
   return withSystemContext(async (tx) => {
     const [org] = await db
@@ -274,7 +276,7 @@ export async function bindPilotOrganization(params: {
       action: 'pilot.application.verify_organization',
       resourceType: 'pilot_applications',
       resourceId: pilotId,
-      details: { verifiedOrganizationId: organizationId, verifiedAt: verifiedAt.toISOString() },
+      details: { verifiedOrganizationId: organizationId, verifiedAt: verifiedAt.toISOString(), ...(basis ? { basis } : {}) },
     });
 
     return { ok: true, organizationId };

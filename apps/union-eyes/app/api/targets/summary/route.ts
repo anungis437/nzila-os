@@ -7,6 +7,13 @@ import { computeKpiHealth } from '@/lib/kpi/health';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * The current value of a target is the latest stored metric row of its metric type, which is all the stored data can say: neither the declared
+ * data source nor a calculation is applied to it. So the answer states which row it used (asOf) and does not judge a target against a row
+ * from a period long past: a row whose period ended more than this many days ago is no current value.
+ */
+const MAX_METRIC_AGE_DAYS = 120;
+
 
 export const GET = withApi(
   { auth: { minRole: 'officer' }, requireOrg: true },
@@ -36,7 +43,9 @@ export const GET = withApi(
           .orderBy(desc(analyticsMetrics.periodEnd))
           .limit(1);
 
-        const currentValue = latestMetric
+        const periodEnd = latestMetric?.periodEnd ? new Date(latestMetric.periodEnd) : null;
+        const fresh = periodEnd != null && Date.now() - periodEnd.getTime() <= MAX_METRIC_AGE_DAYS * 86_400_000;
+        const currentValue = latestMetric && fresh
           ? parseFloat(String(latestMetric.metricValue))
           : null;
         const targetNum = cfg.targetValue ? parseFloat(String(cfg.targetValue)) : null;
@@ -62,7 +71,10 @@ export const GET = withApi(
           health,
           currentValue,
           progress,
-          trend: latestMetric?.trend ?? null,
+          valueBasis: 'latest_metric_row_of_the_metric_type',
+          asOf: latestMetric && fresh ? periodEnd!.toISOString() : null,
+          stale: Boolean(latestMetric) && !fresh,
+          trend: latestMetric && fresh ? latestMetric.trend ?? null : null,
         };
       }),
     );

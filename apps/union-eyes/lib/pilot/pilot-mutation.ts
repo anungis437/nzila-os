@@ -37,7 +37,8 @@ import { NextResponse } from 'next/server';
 import { and, eq, isNull } from 'drizzle-orm';
 import { pilotApplications } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { hasMinRole, type UserRole } from '@/lib/api-auth-guard';
+import { getCurrentUser, hasMinRole, type UserRole } from '@/lib/api-auth-guard';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { buildMergeSetValues } from '@/lib/api/crud-factory';
 import { authorizePilotAccess, getPilotEffectiveOrganizationId } from './pilot-ownership';
 
@@ -92,7 +93,7 @@ export async function withLockedPilotMutation<T>(
   minRole: UserRole,
   mutate: (ctx: {
     application: PilotApplicationRow;
-  }) => Promise<{ responsesPatch?: Record<string, unknown>; data: T }>,
+  }) => Promise<{ responsesPatch?: Record<string, unknown>; data: T; audit?: { action: string; details?: Record<string, unknown> } }>,
 ): Promise<LockedPilotMutationOutcome<T>> {
   if (!(await hasMinRole(minRole))) {
     return { ok: false, response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
@@ -121,7 +122,7 @@ export async function withLockedPilotMutation<T>(
         });
       }
 
-      const { responsesPatch, data } = await mutate({ application: application as PilotApplicationRow });
+      const { responsesPatch, data, audit } = await mutate({ application: application as PilotApplicationRow });
 
       if (responsesPatch && Object.keys(responsesPatch).length > 0) {
         const setValues = buildMergeSetValues({ responses: responsesPatch }, pilotApplications, ['responses']);
@@ -140,6 +141,22 @@ export async function withLockedPilotMutation<T>(
           );
       }
 
+      // A change a mutation declares as audited commits with its audit row, under the owning organization (or the acting platform
+      // organization for an application not yet bound), so there is no write without a record of who made it.
+      if (audit && responsesPatch && Object.keys(responsesPatch).length > 0) {
+        const actor = await getCurrentUser();
+        const auditOrganizationId = getPilotEffectiveOrganizationId(application) ?? actor?.organizationId;
+        if (!actor?.id || !auditOrganizationId) throw new LockedPilotMutationRejected(403, { error: 'Forbidden' });
+        await persistAtomicAudit(tx, {
+          organizationId: auditOrganizationId,
+          userId: actor.id,
+          action: audit.action,
+          resourceType: 'pilot_applications',
+          resourceId: pilotId,
+          details: audit.details ?? {},
+        });
+      }
+
       return { application: application as PilotApplicationRow, data };
     });
 
@@ -151,3 +168,4 @@ export async function withLockedPilotMutation<T>(
     throw err;
   }
 }
+

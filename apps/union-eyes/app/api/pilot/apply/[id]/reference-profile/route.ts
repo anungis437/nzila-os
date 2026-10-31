@@ -278,6 +278,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       existingVersions.push(snapshot);
 
       return {
+        audit: { action: 'pilot.reference_profile.snapshot' },
         responsesPatch: {
           pilotReferenceVersions: existingVersions,
           latestPilotReferenceVersionId: snapshot.versionId,

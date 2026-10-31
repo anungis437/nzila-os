@@ -201,6 +201,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       existingVersions.push(snapshot);
 
       return {
+        audit: { action: 'pilot.artifact_version.add' },
         responsesPatch: {
           pilotArtifactVersions: existingVersions,
           latestPilotArtifactVersionId: snapshot.versionId,

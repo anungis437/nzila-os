@@ -177,6 +177,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       intelligence.updatedAt = nowIso;
 
       return {
+        audit: { action: 'pilot.intelligence.add' },
         responsesPatch: { pilotIntelligence: intelligence },
         data: { id: application.id, pilotIntelligence: intelligence },
       };

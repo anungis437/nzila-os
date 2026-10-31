@@ -29,6 +29,8 @@ const m = vi.hoisted(() => {
     updateCalls,
     fakeTx,
     hasMinRole: vi.fn(),
+    getCurrentUser: vi.fn(),
+    audit: vi.fn(),
     authorizePilotAccess: vi.fn(),
     getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
     withSystemContext: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn(fakeTx)),
@@ -45,7 +47,9 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
   hasMinRole: m.hasMinRole,
+  getCurrentUser: m.getCurrentUser,
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/pilot/pilot-ownership', () => ({
   authorizePilotAccess: m.authorizePilotAccess,
   getPilotEffectiveOrganizationId: m.getPilotEffectiveOrganizationId,
@@ -62,6 +66,7 @@ describe('withLockedPilotMutation (PR #752 round 25)', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.authorizePilotAccess.mockResolvedValue({ ok: true, reason: 'platform', actorOrganizationId: null });
     m.getPilotEffectiveOrganizationId.mockReturnValue('test-org');
+    m.getCurrentUser.mockResolvedValue({ id: 'steward-1', organizationId: 'actor-org' });
   });
 
   it('returns 403 without touching the database when the role gate fails', async () => {
@@ -148,6 +153,30 @@ describe('withLockedPilotMutation (PR #752 round 25)', () => {
     // never mentioned, so a concurrent write to it cannot be reverted here.
     expect(m.updateCalls[0].setValues.responses).toBeInstanceOf(SQL);
     expect(Object.keys(m.updateCalls[0].setValues)).toEqual(['responses']);
+  });
+
+  it('commits a declared audit row with the write, under the owning organization (B97)', async () => {
+    const { withLockedPilotMutation } = await loadModule();
+    m.queueSelect([{ id: 'pilot-1', responses: {} }]);
+    const outcome = await withLockedPilotMutation('pilot-1', 'steward', async () => ({
+      responsesPatch: { pilotIntelligence: { added: true } },
+      audit: { action: 'pilot.intelligence.add' },
+      data: { ok: true },
+    }));
+    expect(outcome.ok).toBe(true);
+    expect(m.audit).toHaveBeenCalledWith(m.fakeTx, expect.objectContaining({ organizationId: 'test-org', userId: 'steward-1', action: 'pilot.intelligence.add', resourceId: 'pilot-1' }));
+  });
+
+  it('writes no audit row when nothing was written, and refuses a declared audit with no actor', async () => {
+    const { withLockedPilotMutation } = await loadModule();
+    m.queueSelect([{ id: 'pilot-1', responses: {} }]);
+    await withLockedPilotMutation('pilot-1', 'steward', async () => ({ audit: { action: 'pilot.intelligence.add' }, data: {} }));
+    expect(m.audit).not.toHaveBeenCalled();
+    m.queueSelect([{ id: 'pilot-1', responses: {} }]);
+    m.getCurrentUser.mockResolvedValueOnce(null);
+    const refused = await withLockedPilotMutation('pilot-1', 'steward', async () => ({ responsesPatch: { a: 1 }, audit: { action: 'x' }, data: {} }));
+    expect(refused.ok).toBe(false);
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('skips the write entirely when mutate returns no responsesPatch (e.g. a no-op "already exists" branch)', async () => {
