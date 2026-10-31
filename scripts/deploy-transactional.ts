@@ -227,7 +227,7 @@ export function resolveAzureHealthUrl(target: DeployTarget, details: unknown): s
   } | null)?.properties?.configuration?.ingress?.fqdn
   ensure(typeof fqdn === 'string' &&
     /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i.test(fqdn) &&
-    !fqdn.includes('..') && fqdn.includes('.'),
+    !fqdn.includes('..') && fqdn.toLowerCase().endsWith('.azurecontainerapps.io'),
     `No canonical Azure ingress FQDN for ${target.containerAppName}`)
   const healthPath = target.healthPath ?? '/api/health'
   ensure(/^\/(?!\/)[^\s?#\\]*$/.test(healthPath),
