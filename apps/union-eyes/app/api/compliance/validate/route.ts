@@ -17,11 +17,26 @@ interface ComplianceCheck {
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
-interface ComplianceRequestBody {
-  jurisdiction?: string;
-  checksToPerform?: string[];
-  data?: Record<string, unknown>;
-}
+export const COMPLIANCE_CHECKS = ['arbitration_deadline', 'strike_vote', 'certification'] as const;
+export const COMPLIANCE_JURISDICTIONS = ['CA-FED', 'CA-AB', 'CA-BC', 'CA-MB', 'CA-NB', 'CA-NL', 'CA-NS', 'CA-NT', 'CA-NU', 'CA-ON', 'CA-PE', 'CA-QC', 'CA-SK', 'CA-YT'] as const;
+
+const dateText = z.string().max(40).refine((value) => !Number.isNaN(new Date(value).getTime()), 'must be a valid date');
+const countLike = z.union([z.number(), z.string().max(20)]);
+
+// The body is parsed, not cast: an unknown jurisdiction or check name is a 400 instead of silently producing no check, and a date that
+// is not a date is refused instead of being passed to Date.
+export const complianceValidateSchema = z.object({
+  jurisdiction: z.enum(COMPLIANCE_JURISDICTIONS).optional(),
+  checksToPerform: z.array(z.enum(COMPLIANCE_CHECKS)).max(10).optional(),
+  data: z.object({
+    arbitrationDate: dateText.optional(),
+    grievanceDate: dateText.optional(),
+    totalMembers: countLike.optional(),
+    votesCase: countLike.optional(),
+    signedCards: countLike.optional(),
+    bargainingUnit: countLike.optional(),
+  }).strict().optional(),
+}).strict();
 
 async function handler(request: NextRequest) {
   try {
@@ -33,9 +48,13 @@ async function handler(request: NextRequest) {
     );
     }
 
-    const body = (await request.json().catch(() => ({}))) as ComplianceRequestBody;
+    const parsed = complianceValidateSchema.safeParse(await request.json().catch(() => ({})));
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid compliance validation request', parsed.error.issues.slice(0, 5));
+    }
+    const body = parsed.data;
     const jurisdiction = body.jurisdiction || 'CA-FED';
-    const checksToPerform = Array.isArray(body.checksToPerform) ? body.checksToPerform : [];
+    const checksToPerform: readonly string[] = body.checksToPerform ?? [];
     const data = (body.data || {}) as Record<string, unknown>;
 
     const shouldRun = (category: string) =>
@@ -114,13 +133,5 @@ return standardErrorResponse(
     );
   }
 }
-
-
-const _complianceValidateSchema = z.object({
-  jurisdiction: z.boolean().optional(),
-  checksToPerform: z.unknown().optional(),
-  data: z.unknown().optional(),
-});
-
 
 export const POST = withApiAuth(handler);

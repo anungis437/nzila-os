@@ -104,7 +104,7 @@ describe('location retention owner sweep', () => {
       await tx.execute(sql.raw(`SET LOCAL ROLE union_eyes_system`))
       return GeofencePrivacyService.deleteExpiredLocationData(tx as never)
     })
-    expect(result).toEqual({ trackingRecordsDeleted: 2, eventRecordsDeleted: 1 })
+    expect(result).toEqual({ trackingRecordsDeleted: 2, eventRecordsDeleted: 1, truncated: false })
     await pg.exec('RESET ROLE')
     expect(await count(`SELECT count(*) AS n FROM location_tracking WHERE expires_at <= now()`)).toBe(0)
     expect(await count(`SELECT count(*) AS n FROM location_tracking WHERE expires_at > now()`)).toBe(2)

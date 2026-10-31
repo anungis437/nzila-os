@@ -5,7 +5,7 @@ const h = vi.hoisted(() => {
   const makeChain = () => {
     const chain: Record<string, unknown> = {};
     const methods = [
-      'select', 'from', 'where', 'limit', 'orderBy', 'groupBy',
+      'select', 'selectDistinct', 'from', 'where', 'limit', 'orderBy', 'groupBy',
       'innerJoin', 'leftJoin', 'insert', 'update', 'set', 'values', 'returning', 'delete', 'onConflictDoUpdate',
     ];
     for (const m of methods) chain[m] = vi.fn(() => chain);
@@ -18,6 +18,7 @@ const h = vi.hoisted(() => {
   };
   const db = {
     select: vi.fn(() => makeChain()),
+    selectDistinct: vi.fn(() => makeChain()),
     insert: vi.fn(() => makeChain()),
     update: vi.fn(() => makeChain()),
     delete: vi.fn(() => makeChain()),
@@ -266,6 +267,15 @@ describe('geofence-privacy-service', () => {
       const r = await S.deleteExpiredLocationData();
       expect(r.trackingRecordsDeleted).toBe(1);
       expect(r.eventRecordsDeleted).toBe(1);
+      expect(r.truncated).toBe(false);
+    });
+
+    it('works off at most the per-run cap of members and says more remain', async () => {
+      const cap = S.RETENTION_MAX_USERS_PER_RUN;
+      const many = Array.from({ length: cap + 1 }, (_, i) => ({ userId: `u${i}` }));
+      pushSel(many, []);
+      const r = await S.deleteExpiredLocationData();
+      expect(r.truncated).toBe(true);
     });
 
     it('does not log when there is nothing to delete', async () => {

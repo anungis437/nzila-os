@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 467,
+    "implementedPendingQualification": 471,
     "partial": 81,
     "qualificationVerified": 0,
-    "unresolved": 310,
+    "unresolved": 306,
     "externalBlockers": 0
   },
   "batches": [
@@ -717,6 +717,15 @@
       "newlyImplemented": 2,
       "outstandingAfter": 310,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
+      "family": "Parsed request bodies and system jobs that were unbounded or unreported",
+      "outstandingBefore": 310,
+      "newlyImplemented": 4,
+      "outstandingAfter": 306,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -6307,6 +6316,46 @@
         "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
       ],
       "explanation": "The safety policy receives the caller's own role instead of the literal member on all three routes, and the reply is marked reviewRequired true because it is model-generated and advisory and no person has reviewed it."
+    },
+    "DEF-0B6-CMP-VALIDATE-INPUT-NOT-VALIDATED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
+      "files": [
+        "apps/union-eyes/app/api/compliance/validate/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s15-validation-and-bounded-jobs.test.ts"
+      ],
+      "explanation": "The body is parsed with a strict schema (jurisdiction from the CA-XX set, checks from the three known names, dates that are dates, counts as numbers or short text); an unknown jurisdiction or check, an unknown key or an invalid date is a 400 instead of silently producing no check. The unused schema is replaced."
+    },
+    "DEF-0B6-SYS-REAPER-OBJECTS-PAST-RETRY-LIMIT-ARE-ABANDONED-UNREPORTED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
+      "files": [
+        "apps/union-eyes/lib/documents/intake-lifecycle.ts",
+        "apps/union-eyes/app/api/cron/document-intake-reaper/route.ts",
+        "apps/union-eyes/lib/documents/document-intake.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s15-validation-and-bounded-jobs.test.ts"
+      ],
+      "explanation": "Objects past the deletion retry limit are counted (countAbandonedIntakeObjects), the reaper report carries abandoned, and the cron answers a visible failed run naming them. The PGlite test expectations gained abandoned (disclosed)."
+    },
+    "DEF-0B6-SYS-LOCATION-RETENTION-BATCH-UNBOUNDED-IN-ONE-TRANSACTION": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
+      "files": [
+        "apps/union-eyes/services/geofence-privacy-service.ts",
+        "apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts",
+        "apps/union-eyes/db/__tests__/location-retention-owner.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s15-validation-and-bounded-jobs.test.ts"
+      ],
+      "explanation": "One run selects at most 500 distinct members with expired rows (distinct, limited) and reports truncated when more remain, so a backlog is worked off over several runs instead of one long system transaction. The service mock gained selectDistinct and a cap case, and the PGlite expectation gained truncated (disclosed)."
+    },
+    "DEF-0B6-SYS-OBSERVABILITY-SWEEP-ALERT-HAS-NO-HUMAN-RECIPIENT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
+      "files": [
+        "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+        "apps/union-eyes/lib/services/__tests__/s15-validation-and-bounded-jobs.test.ts"
+      ],
+      "explanation": "Verified in source: the alert is addressed to each active admin or president of the organization, and an organization with none records a failed execution naming that instead of an alert to a pseudo-user."
     }
   }
 }

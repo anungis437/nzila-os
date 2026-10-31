@@ -397,17 +397,26 @@ export class GeofencePrivacyService {
    * Runs hourly from app/api/cron/location-retention under the system role: the 24-hour retention covers every
    * member's rows, which an ordinary user-scoped session cannot see. Deletion and its evidence commit together.
    */
+  // One run reads and deletes at most this many members' expired rows: a backlog (for example after the job did not run) is worked off over
+  // several runs instead of one long system transaction. `truncated` tells the caller that more expired rows remain.
+  static readonly RETENTION_MAX_USERS_PER_RUN = 500;
+
   static async deleteExpiredLocationData(tx: RLSTx = db) {
     const now = new Date();
+    const cap = GeofencePrivacyService.RETENTION_MAX_USERS_PER_RUN;
     const expiredTracking = await tx
-      .select({ userId: locationTracking.userId })
+      .selectDistinct({ userId: locationTracking.userId })
       .from(locationTracking)
-      .where(lte(locationTracking.expiresAt, now));
+      .where(lte(locationTracking.expiresAt, now))
+      .limit(cap + 1);
     const expiredEvents = await tx
-      .select({ userId: geofenceEvents.userId })
+      .selectDistinct({ userId: geofenceEvents.userId })
       .from(geofenceEvents)
-      .where(lte(geofenceEvents.expiresAt, now));
-    const userIds = [...new Set([...expiredTracking, ...expiredEvents].map((row) => row.userId))];
+      .where(lte(geofenceEvents.expiresAt, now))
+      .limit(cap + 1);
+    const everyUserId = [...new Set([...expiredTracking, ...expiredEvents].map((row) => row.userId))];
+    const truncated = everyUserId.length > cap;
+    const userIds = everyUserId.slice(0, cap);
 
     let trackingRecordsDeleted = 0;
     let eventRecordsDeleted = 0;
@@ -447,7 +456,7 @@ export class GeofencePrivacyService {
       });
     }
 
-    return { trackingRecordsDeleted, eventRecordsDeleted };
+    return { trackingRecordsDeleted, eventRecordsDeleted, truncated };
   }
 
   /**
