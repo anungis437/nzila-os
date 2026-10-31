@@ -86,53 +86,52 @@ export default async function Home() {
       {/* Product-led homepage hero and interactive journey introduction */}
       <HomeExperience isFr={isFr} />
 
-      {/* ═══════════════════════ DUAL ENTRY GTM ═══════════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Modèle commercial' : 'Go-To-Market Model'}
-            title={isFr ? 'Deux parcours d entrée valides. Une seule architecture de continuité.' : 'Two valid entry paths. One continuity architecture.'}
-            subtitle={isFr
-              ? 'Les organisations peuvent entrer par la stratégie de continuité (OCRA) ou par la stabilisation opérationnelle (Union Eyes). Les deux parcours convergent vers la même infrastructure.'
-              : 'Organizations can enter through continuity intelligence (OCRA-first) or operational stabilization (Operations-first). Both paths converge into the same continuity infrastructure.'}
-          />
-
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-              <p className="text-xs uppercase tracking-wider text-electric font-semibold mb-2">{isFr ? 'Parcours A' : 'Path A'}</p>
-              <h3 className="text-2xl font-bold text-navy mb-3">{isFr ? 'OCRA-first' : 'OCRA-first'}</h3>
-              <p className="text-gray-700 mb-4">{isFr ? 'Diagnostiquer puis opérationnaliser. Pour la direction, la modernisation et la gouvernance.' : 'Diagnose then operationalize. Best for executive, modernization, and governance-led buyers.'}</p>
-              <TrackedLink
-                href="/continuity-assessment"
-                eventName="cta_dual_path_ocra"
-                eventProps={{ source: 'home_dual_entry' }}
-                className="inline-flex items-center justify-center px-5 py-3 bg-navy text-white font-semibold rounded-xl hover:bg-navy-light transition-all"
-              >
-                {isFr ? 'Entrer par OCRA' : 'Enter via OCRA'}
-              </TrackedLink>
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-              <p className="text-xs uppercase tracking-wider text-electric font-semibold mb-2">{isFr ? 'Parcours B' : 'Path B'}</p>
-              <h3 className="text-2xl font-bold text-navy mb-3">{isFr ? 'Operations-first' : 'Operations-first'}</h3>
-              <p className="text-gray-700 mb-4">{isFr ? 'Opérationnaliser puis diagnostiquer. Pour les équipes qui ont besoin d un soulagement workflow immédiat.' : 'Operationalize then diagnose. Best for teams that need immediate workflow stabilization.'}</p>
-              <TrackedLink
-                href="/union-eyes"
-                eventName="cta_dual_path_ops"
-                eventProps={{ source: 'home_dual_entry' }}
-                className="inline-flex items-center justify-center px-5 py-3 bg-navy text-white font-semibold rounded-xl hover:bg-navy-light transition-all"
-              >
-                {isFr ? 'Entrer par les opérations' : 'Enter via Operations'}
-              </TrackedLink>
-            </div>
+      {/* Two routes into the same governed operating architecture. */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">
+              {isFr ? 'Pour commencer' : 'Where to start'}
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-navy md:text-5xl">
+              {isFr ? 'Commencez par le problème que vous connaissez.' : 'Start with the problem you recognize.'}
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-slate-600">
+              {isFr
+                ? 'Vous pouvez d’abord examiner vos risques de continuité ou vous concentrer sur un processus opérationnel à sécuriser.'
+                : 'You can begin by understanding your continuity risks or by stabilizing the operational work that needs attention now.'}
+            </p>
           </div>
 
-          <div className="rounded-xl border border-navy/15 bg-white p-6">
-            <p className="text-sm text-gray-700">
-              {isFr
-                ? 'Règle architecture: ne jamais séparer la continuité en produits fragmentés. Les parcours se distinguent à l entrée, puis se reconnectent rapidement dans la même ontologie de continuité.'
-                : 'Architecture rule: never split continuity into fragmented products. Paths diverge at entry and reconnect quickly in the same continuity ontology.'}
-            </p>
+          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+            <article className="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Parcours stratégique' : 'Strategic starting point'}</p>
+              <h3 className="mt-3 text-2xl font-semibold text-navy">
+                {isFr ? 'Où notre continuité est-elle fragile?' : 'Where is our continuity fragile?'}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                {isFr
+                  ? 'Explorer les dépendances aux personnes, les pertes de contexte, les décisions sans trace et les risques de transition.'
+                  : 'Examine reliance on individual knowledge, missing decision context, handoff risks and gaps in governance evidence.'}
+              </p>
+              <TrackedLink href="/continuity-assessment" eventName="home_path_continuity" className="mt-6 inline-flex min-h-11 items-center text-sm font-bold text-electric hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+                {isFr ? 'Explorer l’évaluation' : 'Explore the assessment'} <span aria-hidden="true" className="ml-2">→</span>
+              </TrackedLink>
+            </article>
+            <article className="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Parcours opérationnel' : 'Operational starting point'}</p>
+              <h3 className="mt-3 text-2xl font-semibold text-navy">
+                {isFr ? 'Comment préserver le suivi du travail?' : 'How do we keep operational work connected?'}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                {isFr
+                  ? 'Découvrir un parcours concret de suivi des dossiers, de transfert des responsabilités et de préservation des preuves.'
+                  : 'Explore a concrete journey through case continuity, responsibility handoffs and evidence-aware operations.'}
+              </p>
+              <TrackedLink href="/union-eyes" eventName="home_path_operations" className="mt-6 inline-flex min-h-11 items-center text-sm font-bold text-electric hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+                {isFr ? 'Explorer Union Eyes' : 'Explore Union Eyes'} <span aria-hidden="true" className="ml-2">→</span>
+              </TrackedLink>
+            </article>
           </div>
         </div>
       </section>
