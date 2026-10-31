@@ -4,12 +4,21 @@ import PortfolioExplorer from '@/components/public/PortfolioExplorer';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Portfolio | Nzila Ventures',
-  description:
-    'Explore the Nzila Ventures product portfolio by name and sector, with a clear distinction between institutional product journeys and initiatives under exploration.',
-  alternates: { canonical: '/portfolio' },
-};
+const metaByLocale = {
+  'en-CA': {
+    title: 'Portfolio',
+    description: 'Explore the Nzila Ventures product portfolio by name and sector, with a clear distinction between institutional product journeys and initiatives under exploration.',
+  },
+  'fr-CA': {
+    title: 'Portefeuille',
+    description: 'Explorez le portefeuille de produits de Nzila Ventures par nom et par secteur, en distinguant clairement les parcours institutionnels des initiatives en exploration.',
+  },
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/portfolio' } };
+}
 
 export default async function PortfolioPage() {
   const locale = (await getLocale()) as Locale;

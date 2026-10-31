@@ -3,12 +3,21 @@ import { getLocale } from 'next-intl/server';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Continuity Assessment | Nzila Ventures',
-  description:
-    'Explore an organization-level approach to assessing key-person dependencies, decision context, governance evidence and operational transition risks.',
-  alternates: { canonical: '/continuity-assessment' },
-};
+const metaByLocale = {
+  'en-CA': {
+    title: 'Continuity Assessment',
+    description: 'Explore an organization-level approach to assessing key-person dependencies, decision context, governance evidence and operational transition risks.',
+  },
+  'fr-CA': {
+    title: 'Évaluation de la continuité',
+    description: 'Découvrez une approche organisationnelle pour évaluer les dépendances aux personnes clés, le contexte décisionnel, les preuves de gouvernance et les risques de transition opérationnelle.',
+  },
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/continuity-assessment' } };
+}
 
 const copy = {
   'en-CA': {

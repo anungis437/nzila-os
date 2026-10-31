@@ -4,12 +4,21 @@ import { getLocale } from 'next-intl/server';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Union Eyes | Continuity for Labour Organizations',
-  description:
-    'Explore Union Eyes: a continuity-first approach to member concerns, grievance casework, steward handoffs, governance evidence and role-scoped union operations.',
-  alternates: { canonical: '/union-eyes' },
-};
+const metaByLocale = {
+  'en-CA': {
+    title: 'Union Eyes | Continuity for Labour Organizations',
+    description: 'Explore Union Eyes: a continuity-first approach to member concerns, grievance casework, steward handoffs, governance evidence and role-scoped union operations.',
+  },
+  'fr-CA': {
+    title: 'Union Eyes | Continuité pour les organisations syndicales',
+    description: 'Découvrez Union Eyes : une approche axée sur la continuité pour les situations des membres, les dossiers de griefs, les transferts entre personnes déléguées, les preuves de gouvernance et les opérations syndicales par rôle.',
+  },
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/union-eyes' } };
+}
 
 const contentByLocale = {
   'en-CA': {

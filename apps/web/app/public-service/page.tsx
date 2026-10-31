@@ -4,12 +4,21 @@ import { getLocale } from 'next-intl/server';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'CIVIC | Public-Service Continuity',
-  description:
-    'CIVIC by Nzila explores accountable public-service modernization: institutional memory, implementation ownership, governance evidence, and human-reviewed decisions.',
-  alternates: { canonical: '/public-service' },
-};
+const metaByLocale = {
+  'en-CA': {
+    title: 'CIVIC | Public-Service Continuity',
+    description: 'CIVIC by Nzila explores accountable public-service modernization: institutional memory, implementation ownership, governance evidence, and human-reviewed decisions.',
+  },
+  'fr-CA': {
+    title: 'CIVIC | Continuité des services publics',
+    description: 'CIVIC de Nzila explore une modernisation responsable des services publics : mémoire institutionnelle, responsabilité de mise en œuvre, preuves de gouvernance et décisions examinées par des humains.',
+  },
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/public-service' } };
+}
 
 const copy = {
   'en-CA': {

@@ -43,6 +43,9 @@ const contactCopy: Record<Locale, {
   onboarding: string
   genericError: string
   networkError: string
+  rateLimitedError: string
+  invalidError: string
+  unavailableError: string
   verticals: string[]
   sidebarItems: Array<{ icon: string; title: string; value: string; href: string; sub: string }>
   inquiriesList: string[]
@@ -89,13 +92,16 @@ const contactCopy: Record<Locale, {
     notPartnerYet: 'Not a partner yet?',
     applyProgram: 'Apply to our partnership program',
     onboarding: '— contact us to discuss the appropriate next steps.',
-    genericError: 'Something went wrong',
-    networkError: 'Network error - please try again',
+    genericError: 'Something went wrong. Please try again, or email contact@nzilaventures.com.',
+    networkError: 'Network error - please try again, or email contact@nzilaventures.com.',
+    rateLimitedError: 'Too many attempts. Please wait a few minutes, or email contact@nzilaventures.com.',
+    invalidError: 'Please check the form fields and try again.',
+    unavailableError: 'The message could not be delivered. Please email contact@nzilaventures.com.',
     verticals: ['Healthtech', 'Uniontech', 'Insurtech', 'Legaltech', 'Fintech', 'Trade & Commerce', 'Justice & Equity', 'Entertainment', 'Agrotech', 'EdTech', 'Other'],
     sidebarItems: [
       { icon: '✉️', title: 'Email', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'Response times depend on the request' },
       { icon: '📞', title: 'Phone', value: 'Schedule on request', href: '', sub: 'Phone support by arranged discovery call' },
-      { icon: '🌍', title: 'Office', value: 'Remote-First · Global Opérations', href: '', sub: 'Teams across multiple time zones' },
+      { icon: '🌍', title: 'Office', value: 'Remote-First · Global Operations', href: '', sub: 'Teams across multiple time zones' },
     ],
     inquiriesList: ['OCI Continuity Risk Assessment', 'Union Eyes pilot scoping', 'Governance and trust review', 'Procurement-safe doctrine materials'],
     features: [
@@ -113,7 +119,7 @@ const contactCopy: Record<Locale, {
     heroSubtitle: 'Discutons des risques de continuité, de fragilité de gouvernance ou de mémoire opérationnelle de votre organisation.',
     sendMessage: 'Envoyez-nous un message',
     responseTime: 'Nous examinons les demandes et répondons selon leur nature.',
-    success: 'Merci ! Votre message a été envoye avec succes.',
+    success: 'Merci ! Votre message a été envoyé avec succès.',
     fullName: 'Nom complet *',
     fullNamePlaceholder: 'Jean Dupont',
     emailAddress: 'Adresse courriel *',
@@ -142,14 +148,17 @@ const contactCopy: Record<Locale, {
     inquiriesBlurb: 'Pour évaluations de continuité, pilotes Union Eyes, revues institutionnelles ou documentation procurement :',
     partnerPortal: 'Portail partenaires',
     buildingWithUs: 'Vous construisez déjà avec nous ?',
-    buildingSubtitle: 'Accédez a votre tableau de bord, gérez vos déploiements et collaborez avec l équipe d ingénierie Nzila Ventures.',
+    buildingSubtitle: 'Accédez à votre tableau de bord, gérez vos déploiements et collaborez avec l’équipe d’ingénierie de Nzila Ventures.',
     teamPortalLogin: 'Espace partenaires →',
     requestPartnerAccess: 'Demander un accès partenaire',
     notPartnerYet: 'Pas encore partenaire ?',
-    applyProgram: 'Postulez a notre programme de partenariat',
+    applyProgram: 'Postulez à notre programme de partenariat',
     onboarding: '— communiquez avec nous pour définir la suite.',
-    genericError: 'Une erreur est survenue',
-    networkError: 'Erreur réseau - veuillez reessayer',
+    genericError: 'Une erreur est survenue. Veuillez réessayer ou écrire à contact@nzilaventures.com.',
+    networkError: 'Erreur réseau - veuillez réessayer ou écrire à contact@nzilaventures.com.',
+    rateLimitedError: 'Trop de tentatives. Veuillez patienter quelques minutes ou écrire à contact@nzilaventures.com.',
+    invalidError: 'Veuillez vérifier les champs du formulaire et réessayer.',
+    unavailableError: 'Le message n’a pas pu être livré. Veuillez écrire à contact@nzilaventures.com.',
     verticals: ['Santé', 'Travail syndical', 'Assurtech', 'Legaltech', 'Fintech', 'Commerce', 'Justice et équité', 'Divertissement', 'Agrotech', 'EdTech', 'Autre'],
     sidebarItems: [
       { icon: '✉️', title: 'Courriel', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'Le délai dépend de la nature de la demande' },
@@ -160,8 +169,8 @@ const contactCopy: Record<Locale, {
     features: [
       { icon: '📊', title: 'Base de continuité', description: 'Revue de dépendance aux personnes clés, exposition de transition, visibilité de gouvernance et risque mémoire.' },
       { icon: '🔧', title: 'Cadrage pilote', description: 'Définir fonction pilote, critères de succès, autorités de rôle, consentement et cadence de revue.' },
-      { icon: '🤝', title: 'Revue de gouvernance', description: 'Cartographier lignée décisionnelle, preuves d audit, contrôles d accès et accountability institutionnelle.' },
-      { icon: '🔐', title: 'Accès par rôle', description: 'Identité entreprise avec autorité documentée, moindre privilège et journaux d audit révisables.' },
+      { icon: '🤝', title: 'Revue de gouvernance', description: 'Cartographier la lignée décisionnelle, les preuves d’audit, les contrôles d’accès et la responsabilité institutionnelle.' },
+      { icon: '🔐', title: 'Accès par rôle', description: 'Identité d’entreprise avec autorité documentée, moindre privilège et journaux d’audit révisables.' },
       { icon: '💬', title: 'Formation opérateurs', description: 'Support pour délégués, coordinateurs, équipes et opérateurs institutionnels dans le périmètre pilote.' },
       { icon: '📈', title: 'Rapport de validation', description: 'Conclusions de clôture sur continuité, preuves de gouvernance, confiance et conformité anti-surveillance.' },
     ],
@@ -205,8 +214,8 @@ export default function ContactClient({ initialSource }: { initialSource: string
       ...formData,
       source: formData.source,
       utmSource: (params.get('utm_source') ?? '').slice(0, 128),
-      utmMedium: (params.get('utm_medium') ?? '').slice(0, 160),
-      utmCampaign: (params.get('utm_campaign') ?? '').slice(0, 160),
+      utmMedium: (params.get('utm_medium') ?? '').slice(0, 128),
+      utmCampaign: (params.get('utm_campaign') ?? '').slice(0, 128),
     };
 
     try {
@@ -217,8 +226,17 @@ export default function ContactClient({ initialSource }: { initialSource: string
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error ?? copy.genericError);
+        // The server's error text is English and may not be JSON (e.g. a proxy's 502 page),
+        // so the message is chosen from the status instead of reading the body.
+        setError(
+          res.status === 429
+            ? copy.rateLimitedError
+            : res.status === 400
+              ? copy.invalidError
+              : res.status >= 500
+                ? copy.unavailableError
+                : copy.genericError,
+        );
         trackEvent('contact_submit_failed', {
           vertical: formData.vertical || 'unspecified',
           status: res.status,

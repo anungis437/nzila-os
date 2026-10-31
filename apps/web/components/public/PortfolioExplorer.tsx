@@ -36,10 +36,10 @@ export default function PortfolioExplorer({ locale }: { locale: Locale }) {
     const needle = query.trim().toLocaleLowerCase(locale);
     return publicPortfolio.filter((entry) => {
       const matchesSector = sector === 'all' || entry.sector === sector;
-      const haystack = [entry.name, entry.sector, entry.en, entry.fr].join(' ').toLocaleLowerCase(locale);
+      const haystack = [entry.name, entry.sector, isFr ? (sectorFr[entry.sector] ?? '') : '', entry.en, entry.fr].join(' ').toLocaleLowerCase(locale);
       return matchesSector && (!needle || haystack.includes(needle));
     });
-  }, [query, sector, locale]);
+  }, [query, sector, locale, isFr]);
 
   return (
     <div>

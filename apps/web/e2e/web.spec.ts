@@ -104,6 +104,22 @@ test.describe('Web E2E', () => {
     await expect(page.getByRole('dialog')).toBeHidden();
   });
 
+  test('search overlay covers the viewport and Enter on the close button only closes it', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${BASE}/`);
+    await page.evaluate(() => window.scrollTo(0, 600));
+    await page.keyboard.press('Control+k');
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    // The nav's backdrop-blur must not become the overlay's containing block.
+    const overlay = await dialog.locator('xpath=..').boundingBox();
+    expect(overlay!.height).toBeGreaterThanOrEqual(890);
+    await page.getByRole('button', { name: /Close search|Fermer la recherche/ }).focus();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toBeHidden();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
   test('status and security are reachable from the header and the home page backs trust claims', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`${BASE}/`);

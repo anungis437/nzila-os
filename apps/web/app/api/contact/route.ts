@@ -160,6 +160,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, email, company, vertical, message, source, utmSource, utmMedium, utmCampaign } = body;
+    const isCareersInterest = source === 'careers_interest';
     const qualification = scoreQualification(body);
 
     // Fail closed: a successful HTTP response must mean the inquiry was
@@ -200,26 +201,42 @@ export async function POST(request: NextRequest) {
 
       // The deal stores the inquiry message. Upserting a contact alone
       // must never be mistaken for successful delivery of the message.
-      const dealResult = await client.createDeal({
-        name: `Website inquiry — ${company || name}`,
-        stage: 'qualifiedtobuy',
-        contactId: contactResult.id,
-        properties: {
-          nzila_vertical: vertical || '',
-          nzila_source: source || 'marketing_site',
-          nzila_utm_source: utmSource || '',
-          nzila_utm_medium: utmMedium || '',
-          nzila_utm_campaign: utmCampaign || '',
-          description: message || '',
-        },
-      });
+      // Expressions of interest in working with us are not sales leads: they are
+      // kept as a contact note, with no deal, sales signal or onboarding workflow.
+      if (isCareersInterest) {
+        const noteResult = await client.logEngagementNote({
+          contactId: contactResult.id,
+          body: `Careers expression of interest\n\n${message || '(no message)'}`,
+        });
+        if (!noteResult.ok) {
+          _logger.error('contact.crm_note_failed', { reason: noteResult.error });
+          return NextResponse.json(
+            { error: 'The message could not be delivered. Please email contact@nzilaventures.com.' },
+            { status: 502 },
+          );
+        }
+      } else {
+        const dealResult = await client.createDeal({
+          name: `Website inquiry — ${company || name}`,
+          stage: 'qualifiedtobuy',
+          contactId: contactResult.id,
+          properties: {
+            nzila_vertical: vertical || '',
+            nzila_source: source || 'marketing_site',
+            nzila_utm_source: utmSource || '',
+            nzila_utm_medium: utmMedium || '',
+            nzila_utm_campaign: utmCampaign || '',
+            description: message || '',
+          },
+        });
 
-      if (!dealResult.ok) {
-        _logger.error('contact.crm_deal_failed', { reason: dealResult.error });
-        return NextResponse.json(
-          { error: 'The message could not be delivered. Please email contact@nzilaventures.com.' },
-          { status: 502 },
-        );
+        if (!dealResult.ok) {
+          _logger.error('contact.crm_deal_failed', { reason: dealResult.error });
+          return NextResponse.json(
+            { error: 'The message could not be delivered. Please email contact@nzilaventures.com.' },
+            { status: 502 },
+          );
+        }
       }
     } catch (error) {
       _logger.error('contact.crm_exception', {
@@ -239,6 +256,9 @@ export async function POST(request: NextRequest) {
       qualificationScore: qualification.score,
     });
 
+    if (isCareersInterest) {
+      return NextResponse.json({ ok: true });
+    }
     const signalPayload = {
       kind: 'sales_intake',
       capturedAt: new Date().toISOString(),

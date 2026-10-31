@@ -92,7 +92,12 @@ export default function SiteSearch({ open, onClose, isFr }: Props) {
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
       setActive(results.length === 0 ? 0 : (clampedActive - 1 + results.length) % results.length);
-    } else if (event.key === 'Enter' && results[clampedActive] && (query.trim().length === 0 || !showingSuggestions)) {
+    } else if (
+      event.key === 'Enter' &&
+      event.target === inputRef.current &&
+      results[clampedActive] &&
+      (query.trim().length === 0 || !showingSuggestions)
+    ) {
       event.preventDefault();
       go(results[clampedActive].href);
     } else if (event.key === 'Tab') {

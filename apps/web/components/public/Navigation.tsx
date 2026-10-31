@@ -85,6 +85,7 @@ export default function Navigation() {
   };
 
   return (
+    <>
     <nav
       aria-label={locale === 'fr-CA' ? 'Navigation principale' : 'Primary navigation'}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -350,8 +351,10 @@ export default function Navigation() {
             </div>
         </div>
         )}
-      <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} isFr={locale === 'fr-CA'} />
     </nav>
+    {/* Sibling of <nav>: its backdrop-blur makes it the containing block for fixed descendants. */}
+    <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} isFr={locale === 'fr-CA'} />
+    </>
   );
 }
 

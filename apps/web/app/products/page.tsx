@@ -3,12 +3,21 @@ import { getLocale } from 'next-intl/server';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Products | Nzila Ventures',
-  description:
-    'Discover Nzila Ventures product experiences: Union Eyes for labour organizations, CIVIC for institutional continuity, and the broader Nzila product portfolio.',
-  alternates: { canonical: '/products' },
-};
+const metaByLocale = {
+  'en-CA': {
+    title: 'Products',
+    description: 'Discover Nzila Ventures product experiences: Union Eyes for labour organizations, CIVIC for institutional continuity, and the broader Nzila product portfolio.',
+  },
+  'fr-CA': {
+    title: 'Produits',
+    description: 'Découvrez les expériences produit de Nzila Ventures : Union Eyes pour les organisations syndicales, CIVIC pour la continuité institutionnelle et le portefeuille Nzila.',
+  },
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/products' } };
+}
 
 const copy = {
   'en-CA': {
