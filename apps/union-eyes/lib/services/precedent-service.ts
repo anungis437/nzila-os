@@ -10,6 +10,7 @@
  */
 
 import { db } from "@/db/db";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import {
   arbitrationDecisions,
   arbitratorProfiles,
@@ -116,14 +117,8 @@ export async function getPrecedentById(
 
     if (!decision) return null;
 
-    // Increment view count
-    await db
-      .update(arbitrationDecisions)
-      .set({ 
-        viewCount: sql`${arbitrationDecisions.viewCount} + 1`,
-        updatedAt: new Date()
-      })
-      .where(eq(arbitrationDecisions.id, id));
+    // A read no longer counts itself. The old counter was a write by any tenant to a row owned by another, which a tenant may not
+    // make once the library has an owner (platform 0051 / cache 0041); view_count is no longer maintained.
 
     // Optionally exclude full text if not needed
     if (!options.includeFullText) {
@@ -267,16 +262,23 @@ export async function listPrecedents(
 /**
  * Create a new arbitration decision
  */
-export async function createPrecedent(data: NewArbitrationDecision): Promise<ArbitrationDecision> {
+export async function createPrecedent(
+  scope: { organizationId: string },
+  data: Omit<NewArbitrationDecision, 'sourceOrganizationId' | 'isPublic' | 'accessRestrictions'>,
+): Promise<ArbitrationDecision> {
   try {
-    const [newDecision] = await db
+    // The decision is owned by the organization that supplies it and is not shared until it is reviewed, whatever the caller sends.
+    const [newDecision] = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
       .insert(arbitrationDecisions)
       .values({
         ...data,
+        sourceOrganizationId: scope.organizationId,
+        isPublic: false,
+        accessRestrictions: 'pending_review',
         createdAt: new Date(),
         updatedAt: new Date(),
       })
-      .returning();
+      .returning());
 
     // Update arbitrator profile if exists
     if (data.arbitrator) {
@@ -294,18 +296,20 @@ export async function createPrecedent(data: NewArbitrationDecision): Promise<Arb
  * Update an arbitration decision
  */
 export async function updatePrecedent(
+  scope: { organizationId: string },
   id: string,
-  data: Partial<NewArbitrationDecision>
+  data: Partial<Omit<NewArbitrationDecision, 'id' | 'sourceOrganizationId' | 'isPublic' | 'accessRestrictions'>>,
 ): Promise<ArbitrationDecision | null> {
   try {
-    const [updated] = await db
+    // Only the supplying organization changes its decision; publication and ownership are not editable here.
+    const [updated] = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
       .update(arbitrationDecisions)
       .set({
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(arbitrationDecisions.id, id))
-      .returning();
+      .where(and(eq(arbitrationDecisions.id, id), eq(arbitrationDecisions.sourceOrganizationId, scope.organizationId)))
+      .returning());
 
     return updated || null;
   } catch (error) {
@@ -317,13 +321,14 @@ export async function updatePrecedent(
 /**
  * Delete a precedent
  */
-export async function deletePrecedent(id: string): Promise<boolean> {
+export async function deletePrecedent(scope: { organizationId: string }, id: string): Promise<boolean> {
   try {
-    await db
+    const removed = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
       .delete(arbitrationDecisions)
-      .where(eq(arbitrationDecisions.id, id));
+      .where(and(eq(arbitrationDecisions.id, id), eq(arbitrationDecisions.sourceOrganizationId, scope.organizationId)))
+      .returning({ id: arbitrationDecisions.id }));
 
-    return true;
+    return removed.length > 0;
   } catch (error) {
     logger.error("Error deleting precedent", { error, id });
     throw new Error("Failed to delete precedent");

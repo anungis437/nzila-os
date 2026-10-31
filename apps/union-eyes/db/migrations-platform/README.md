@@ -71,6 +71,10 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0045_contact_submissions` | Store contact-form submissions locally before the CRM sync Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0046_row_integrity` | Row integrity: preference uniqueness, employer parent organization, grant version pin Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0047_ml_prediction_feedback` | Prediction feedback as its own append-only tenant table Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0048_sso_scim_shape` | Evolve the SSO and SCIM stubs to the application shape; SCIM keeps only the SHA-256 of its bearer token Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0049_claim_status_transitions` | Record when a claim's status last changed and keep an append-only transition history Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0050_survey_anonymity` | Honour survey anonymity in the database: unlinked anonymous responses and a responded record Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0051_arbitration_decision_owner` | Give arbitration_decisions an owning organization and default new rows to private Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 

@@ -67,6 +67,13 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth/mfa/challenge',     // Consume MFA challenge token post-password (token IS the credential)
   
   // ========================================================================
+  // SCIM PROVISIONING
+  // Justification: the caller is an identity provider with no session. Every handler authenticates the organization's SCIM bearer
+  // token (lib/scim/scim-token.ts) and acts only for the organization that token belongs to.
+  // ========================================================================
+  '/api/scim/v2/',
+
+  // ========================================================================
   // PUBLIC TRACKING/ANALYTICS
   // Justification: Email opens/clicks tracking, must work without auth
   // Note: These use path prefixes - handler validates token in URL

@@ -8,18 +8,19 @@ const m = vi.hoisted(() => ({
   persistAtomicAudit: vi.fn(),
   page: null as null | { limit: number; offset: number },
   inserted: null as unknown,
+  auth: null as unknown,
+  limit: null as unknown,
 }));
 
 // The route counts the live members, then reads one ordered page of them.
 const pagedChain = () => ({ orderBy: () => ({ limit: (n: number) => ({ offset: async (o: number) => { m.page = { limit: n, offset: o }; return m.selectRows; } }) }) });
-const mockDb = {
-  select: vi.fn((fields?: unknown) => ({
-    from: vi.fn(() => ({
-      where: vi.fn(() => (fields ? Promise.resolve([{ total: m.selectRows.length }]) : pagedChain())),
-    })),
+const mockSelect = vi.fn((fields?: unknown) => ({
+  from: vi.fn(() => ({
+    where: vi.fn(() => (fields ? Promise.resolve([{ total: m.selectRows.length }]) : pagedChain())),
   })),
-};
+}));
 const mockTx = {
+  select: mockSelect,
   insert: vi.fn(() => ({
     values: vi.fn((v: unknown) => { m.inserted = v; return {
       onConflictDoNothing: vi.fn(() => ({ returning: vi.fn(async () => m.createdRows) })),
@@ -33,9 +34,15 @@ vi.mock('@/lib/api/framework', () => ({
     badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }),
     notFound: (msg: string) => Object.assign(new Error(msg), { status: 404 }),
     conflict: (msg: string) => Object.assign(new Error(msg), { status: 409 }),
+    unauthorized: (msg: string) => Object.assign(new Error(msg), { status: 401 }),
+    forbidden: (msg: string) => Object.assign(new Error(msg), { status: 403 }),
+    rateLimited: () => Object.assign(new Error('rate limited'), { status: 429 }),
+    externalService: (_s: string, msg: string) => Object.assign(new Error(msg), { status: 502 }),
   },
 }));
-vi.mock('@/db/db', () => ({ db: mockDb }));
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: vi.fn(async () => { if (m.limit instanceof Error) throw m.limit; return m.limit; }) }));
+// The identity provider's bearer-token check is exercised in lib/scim/__tests__; here it is the route's contract with it that matters.
+vi.mock('@/lib/scim/scim-token', () => ({ authenticateScimRequest: vi.fn(async () => m.auth) }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockTx)),
 }));
@@ -49,7 +56,9 @@ async function loadRoute() {
   return import('../scim/v2/[organizationId]/Users/route');
 }
 
-const ctx = { params: { organizationId: 'org_1' }, organizationId: 'org_1', userId: 'admin_1' };
+// An identity provider has no signed-in user: the route receives only the request and the path parameters.
+const ctx = { params: { organizationId: 'org_1' } };
+const SCIM_OK = { ok: true, organizationId: 'org_1', configurationId: 'cfg_1', syncUsers: true };
 
 const provision = (body: unknown) =>
   new NextRequest('http://localhost/api/scim/v2/org_1/Users', {
@@ -63,6 +72,8 @@ describe('scim users route', () => {
     vi.clearAllMocks();
     m.selectRows = [];
     m.inserted = null;
+    m.auth = SCIM_OK;
+    m.limit = { allowed: true, resetIn: 60 };
     m.createdRows = [
       {
         id: 'm-new',
@@ -111,7 +122,39 @@ describe('scim users route', () => {
     await expect(
       GET(new NextRequest('http://localhost/api/scim/v2/org_2/Users'), { ...ctx, params: { organizationId: 'org_2' } }),
     ).rejects.toMatchObject({ status: 404 });
-    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(mockSelect).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['no token', { ok: false, status: 401, reason: 'missing_token' }, 401],
+    ['an unknown token', { ok: false, status: 401, reason: 'invalid_token' }, 401],
+    ['a revoked token', { ok: false, status: 401, reason: 'revoked' }, 401],
+    ['an expired token', { ok: false, status: 401, reason: 'expired' }, 401],
+    ['a disabled configuration', { ok: false, status: 403, reason: 'disabled' }, 403],
+  ])('answers %s with %i and touches no data', async (_label, auth, status) => {
+    const { GET, POST } = await loadRoute();
+    m.auth = auth;
+    await expect(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx)).rejects.toMatchObject({ status });
+    await expect(POST(provision({ userName: 'jane@example.com' }), ctx)).rejects.toMatchObject({ status });
+    expect(mockSelect).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.inserted).toBeNull();
+  });
+
+  it('answers 429 before any token lookup when the client is over its limit, and refuses when the limiter is unavailable', async () => {
+    const { GET } = await loadRoute();
+    m.limit = { allowed: false, resetIn: 30 };
+    await expect(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx)).rejects.toMatchObject({ status: 429 });
+    m.limit = new Error('redis down');
+    await expect(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx)).rejects.toMatchObject({ status: 502 });
+    expect(mockSelect).not.toHaveBeenCalled();
+  });
+
+  it('POST refuses provisioning when user sync is switched off for the organization', async () => {
+    const { POST } = await loadRoute();
+    m.auth = { ...SCIM_OK, syncUsers: false };
+    await expect(POST(provision({ userName: 'jane@example.com' }), ctx)).rejects.toMatchObject({ status: 403 });
+    expect(m.inserted).toBeNull();
   });
 
   it('POST throws bad request when userName is missing', async () => {
@@ -137,7 +180,7 @@ describe('scim users route', () => {
     expect(result.name.formatted).toBe('Jane Doe');
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       mockTx,
-      expect.objectContaining({ organizationId: 'org_1', userId: 'admin_1', action: 'scim.user.provision', resourceId: 'm-new' }),
+      expect.objectContaining({ organizationId: 'org_1', userId: 'system:scim:cfg_1', action: 'scim.user.provision', resourceId: 'm-new' }),
     );
   });
 
@@ -178,7 +221,7 @@ describe('scim users route', () => {
   it('POST creates a pending membership: naming a user does not activate it', async () => {
     const { POST } = await loadRoute();
     await POST(provision({ userName: 'jane@example.com' }), ctx);
-    expect(m.inserted).toMatchObject({ status: 'pending', role: 'member', organizationId: 'org_1' });
+    expect(m.inserted).toMatchObject({ status: 'pending', role: 'member', organizationId: 'org_1', userId: 'scim:org_1:jane@example.com' });
   });
 
   // DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500

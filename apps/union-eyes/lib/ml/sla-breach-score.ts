@@ -7,6 +7,7 @@
  * inputs could choose the alert.
  */
 import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-lifecycle'
+import { slaClockStart } from '@/lib/workflow/sla-clock'
 import { toLifecycleState } from '@/lib/workflow/state-bridge'
 
 export const SLA_SCORING_METHOD = 'rule_based_heuristic_v1'
@@ -41,7 +42,7 @@ export function computeSlaBreachProbability(input: SlaScoreInput): number {
 export interface ScoredCase {
   status: string
   priority: string | null
-  updatedAt: Date | null
+  statusChangedAt?: Date | null
   createdAt: Date | null
 }
 
@@ -49,7 +50,7 @@ export interface ScoredCase {
 export function caseFacts(claim: ScoredCase, now: Date): { priority: ScoringPriority; hoursRemaining: number } {
   const priority = scoringPriority(claim.priority)
   const totalHours = getSLADeadlineHours(toLifecycleState('claim', claim.status) ?? 'submitted', priority as CasePriority)
-  const changedAt = claim.updatedAt ?? claim.createdAt ?? now
+  const changedAt = slaClockStart(claim, now).startedAt
   const deadline = changedAt.getTime() + totalHours * 3_600_000
   return { priority, hoursRemaining: (deadline - now.getTime()) / 3_600_000 }
 }

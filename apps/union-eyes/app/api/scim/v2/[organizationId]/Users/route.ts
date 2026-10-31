@@ -2,10 +2,16 @@
  * SCIM 2.0 Users endpoint
  * GET /api/scim/v2/[organizationId]/Users — list users in SCIM format
  * POST /api/scim/v2/[organizationId]/Users — provision a new user
+ *
+ * The caller is an identity provider, not a signed-in person: it authenticates with the organization's SCIM bearer token (see
+ * lib/scim/scim-token.ts). The token, not the organization named in the path, decides which organization is acted on; a path that names
+ * any other organization is a 404.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { authenticateScimRequest } from '@/lib/scim/scim-token';
+import { checkRateLimit } from '@/lib/rate-limiter';
+import { clientAddress } from '@/lib/public-intake/guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
 import { z } from 'zod';
@@ -45,36 +51,50 @@ function toScimUser(member: typeof organizationMembers.$inferSelect) {
   };
 }
 
+// The token is the only credential on this surface, so guessing is bounded per client address before the token is looked up. A shared
+// limiter that is unavailable refuses the request rather than leaving the endpoint unbounded.
+async function authenticateScim(request: Request, pathOrganizationId: string | undefined) {
+  const limited = await checkRateLimit(`scim:${clientAddress(request)}`, { limit: 600, window: 60, identifier: 'scim', failOpen: false }).catch(() => null);
+  if (!limited) throw ApiError.externalService('rate-limiter', 'Provisioning is temporarily unavailable');
+  if (!limited.allowed) throw ApiError.rateLimited(limited.resetIn ?? 60);
+  const auth = await authenticateScimRequest(request);
+  if (!auth.ok) {
+    throw auth.status === 403 ? ApiError.forbidden('SCIM provisioning is not enabled for this organization') : ApiError.unauthorized('Invalid SCIM token');
+  }
+  if (pathOrganizationId !== auth.organizationId) throw ApiError.notFound('Organization');
+  return auth;
+}
+
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { required: false },
     openapi: {
       tags: ['Auth'],
       summary: 'SCIM list users',
       description: 'Returns organization members in SCIM 2.0 format.',
     },
   },
-  async ({ params, request, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-    // An administrator lists only the organization they are acting in, whatever the path names.
-    if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
-    const orgId = organizationId;
+  async ({ params, request }) => {
+    const { organizationId: orgId } = await authenticateScim(request, params.organizationId);
     const url = new URL(request.url);
     const startIndex = Math.max(1, Number.parseInt(url.searchParams.get('startIndex') || '1', 10) || 1);
     const count = Math.min(100, Math.max(0, Number.parseInt(url.searchParams.get('count') || '50', 10) || 0));
 
     // A removed member is not a user of the organization, and the page is read in SQL with the count, not by loading the whole roster.
     const live = and(eq(organizationMembers.organizationId, orgId), isNull(organizationMembers.deletedAt));
-    const [{ total }] = await db.select({ total: countRows() }).from(organizationMembers).where(live);
-    const paged = count === 0
-      ? []
-      : await db
-          .select()
-          .from(organizationMembers)
-          .where(live)
-          .orderBy(asc(organizationMembers.createdAt), asc(organizationMembers.id))
-          .limit(count)
-          .offset(startIndex - 1);
+    const { total, paged } = await withRLSContext({ organizationId: orgId }, async (tx) => {
+      const [{ total }] = await tx.select({ total: countRows() }).from(organizationMembers).where(live);
+      const paged = count === 0
+        ? []
+        : await tx
+            .select()
+            .from(organizationMembers)
+            .where(live)
+            .orderBy(asc(organizationMembers.createdAt), asc(organizationMembers.id))
+            .limit(count)
+            .offset(startIndex - 1);
+      return { total, paged };
+    });
 
     return {
         schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
@@ -88,17 +108,17 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { required: false },
     openapi: {
       tags: ['Auth'],
       summary: 'SCIM create user',
       description: 'Provisions a new user in the organization via SCIM 2.0.',
     },
   },
-  async ({ params, request, organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    // An administrator provisions users only into the organization they are acting in.
-    if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
+  async ({ params, request }) => {
+    const scim = await authenticateScim(request, params.organizationId);
+    const organizationId = scim.organizationId;
+    if (!scim.syncUsers) throw ApiError.forbidden('User provisioning is not enabled for this organization');
     const parsed = provisionSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) {
       throw ApiError.badRequest(`Invalid SCIM user: ${parsed.error.issues.map((i) => i.path.join('.') || 'body').join(', ')}`);
@@ -114,7 +134,9 @@ export const POST = withApi(
         .insert(organizationMembers)
         .values({
           organizationId,
-          userId: userName,
+          // The IdP names a person; it does not assert that person's platform identity. A provisional, organization-scoped key stands
+          // until the person signs in and the membership is linked to their account.
+          userId: `scim:${organizationId}:${userName.toLowerCase()}`,
           email: primaryEmail ?? userName,
           name: fullName,
           role: 'member',
@@ -128,7 +150,7 @@ export const POST = withApi(
 
       await persistAtomicAudit(tx, {
         organizationId,
-        userId,
+        userId: `system:scim:${scim.configurationId}`,
         action: 'scim.user.provision',
         resourceType: 'organization_members',
         resourceId: created.id,

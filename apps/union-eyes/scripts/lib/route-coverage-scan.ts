@@ -58,6 +58,8 @@ function guardOf(source: string): RouteGuard {
   if (/notImplemented\(/.test(source) && !/\.(insert|update|delete)\(|persistAtomicAudit/.test(source)) return 'RETIRED'
   if (/@nzila\/platform-auth\/[\w/-]*handlers/.test(source)) return 'PLATFORM_AUTH_HANDLER'
   if (/crudRoutes\(/.test(source)) return 'CRUD_FACTORY'
+  // The identity provider's bearer token is the credential (lib/scim/scim-token.ts); the route acts for the token's organization.
+  if (/authenticateScimRequest\(/.test(source)) return 'CAPABILITY_TOKEN'
   if (/withAdminAuth|withSystemAdminAuth/.test(source)) return 'ADMIN_AUTH'
   if (/withRoleAuth|withEnhancedRoleAuth|withSecureAPI|withMinRole|withApiAuth/.test(source)) return 'ROLE_AUTH'
   if (/withOrganizationAuth|withOrganizationMiddleware|withExternalResourceAuth|external-resource-middleware/.test(source)) return 'ORG_AUTH'
@@ -121,7 +123,7 @@ export const READ_ONLY_POST_ROUTES = [
   'clause-library/search/route.ts', 'cognition/precedents/route.ts', 'compliance/validate/route.ts', 'emergency/pipeda/route.ts',
   'exit-interviews/graph-query/route.ts', 'exit-interviews/mitigation-comparison/route.ts', 'exit-interviews/scenarios/route.ts',
   'exit-interviews/search/route.ts', 'exit-interviews/simulation/route.ts', 'labour-standards/[jurisdiction]/compliance-check/route.ts',
-  'members/segments/preview/route.ts', 'pension/t4a/route.ts', 'precedents/search/route.ts', 'profile/roles/route.ts', 'reports/execute/route.ts',
+  'members/segments/preview/route.ts', 'pension/t4a/route.ts', 'precedents/search/route.ts', 'profile/roles/route.ts',
   'social-media/analytics/route.ts', 'v2/[...path]/route.ts', 'voice/upload/route.ts',
   'voting/verify/route.ts', 'workspace/telemetry/route.ts',
 ]
@@ -144,6 +146,7 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'contact/route.ts': { why: 'Public contact form: stores the submission in the system-only contact_submissions table before the CRM sync; no actor, no tenant (the row is platform-wide intake, not tenant data).', control: /guardPublicIntake/ },
   'workbook/checkout/route.ts': { why: 'Creates a payment-provider checkout session for a pseudonymous workbook, which is a bearer reference until claimed (the claim is audited); it stores nothing for the buyer here.', control: /guardPublicIntake/ },
   'workbook/start/route.ts': { why: 'Public pseudonymous workbook intake; the id is a bearer reference until claimed (the claim is audited).', control: /guardPublicIntake/ },
+  'communications/unsubscribe/[recipientId]/route.ts': { why: 'Recipient unsubscribe by an action-bound, signed link (no session, no acting user). The append-only consent_records row it writes is the evidence of the change, and the write is confined to the organization the signed link names.', control: /verifyTrackingToken\(/ },
   'pilot/events/route.ts': { why: 'Pilot usage telemetry stamped from the session; an audit row per usage event would flood the audit log.', control: /withRoleAuth|withApiAuth/ },
   'location/track/route.ts': { why: 'Per-ping location telemetry of a consenting member; consent, geofence and disable changes are audited.', control: /withApiAuth/ },
   'cron/external-data-sync/route.ts': { why: 'Platform-wide reference data refresh; no acting organization.', control: /cron:\s*true/ },

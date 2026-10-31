@@ -17,15 +17,15 @@ const hoursAgo = (h: number) => new Date(NOW.getTime() - h * 3_600_000);
 
 const claim = (over: Partial<ScannedClaim> = {}): ScannedClaim => ({
   claimId: 'c-1', claimNumber: 'CL-1', status: 'open', priority: 'high', organizationId: ORG, assignedTo: 'steward-1',
-  updatedAt: hoursAgo(1), createdAt: hoursAgo(50), ...over,
+  statusChangedAt: hoursAgo(1), createdAt: hoursAgo(50), ...over,
 });
 
 describe('assessClaim', () => {
   it('classifies by the share of the window left, once', () => {
-    expect(assessClaim(claim({ updatedAt: hoursAgo(1) }), NOW).state).toBe('ok');
-    expect(assessClaim(claim({ updatedAt: hoursAgo(9) }), NOW).state).toBe('at_risk'); // 1h of 10h left (< 20%)
-    expect(assessClaim(claim({ updatedAt: hoursAgo(10) }), NOW).state).toBe('breached');
-    expect(assessClaim(claim({ updatedAt: hoursAgo(12) }), NOW).hoursRemaining).toBeCloseTo(-2, 5);
+    expect(assessClaim(claim({ statusChangedAt: hoursAgo(1) }), NOW).state).toBe('ok');
+    expect(assessClaim(claim({ statusChangedAt: hoursAgo(9) }), NOW).state).toBe('at_risk'); // 1h of 10h left (< 20%)
+    expect(assessClaim(claim({ statusChangedAt: hoursAgo(10) }), NOW).state).toBe('breached');
+    expect(assessClaim(claim({ statusChangedAt: hoursAgo(12) }), NOW).hoursRemaining).toBeCloseTo(-2, 5);
   });
 });
 
@@ -33,7 +33,7 @@ describe('tally', () => {
   it('counts every claim once, alerts only the assigned, and reports the unassigned', () => {
     const t = emptyTally();
     for (const [c, h] of [[claim({ claimId: 'a' }), 1], [claim({ claimId: 'b' }), 9], [claim({ claimId: 'c' }), 12], [claim({ claimId: 'd', assignedTo: null }), 12]] as const) {
-      tally(t, c, assessClaim({ ...c, updatedAt: hoursAgo(h) }, NOW));
+      tally(t, c, assessClaim({ ...c, statusChangedAt: hoursAgo(h) }, NOW));
     }
     expect(t).toMatchObject({ scanned: 4, compliant: 2, atRisk: 1, breached: 2, unassigned: 1 });
     expect(t.alerts.map((a) => [a.claimId, a.kind, a.recipient])).toEqual([['b', 'at_risk', 'steward-1'], ['c', 'breached', 'steward-1']]);

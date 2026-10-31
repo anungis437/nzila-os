@@ -29,8 +29,13 @@ describe('computeSlaBreachProbability', () => {
 
 describe('case facts', () => {
   it('takes priority and time remaining from the case', () => {
-    expect(caseFacts({ status: 'open', priority: 'urgent', updatedAt: hoursAgo(2), createdAt: hoursAgo(50) }, NOW)).toEqual({ priority: 'urgent', hoursRemaining: 6 });
-    expect(caseFacts({ status: 'open', priority: 'urgent', updatedAt: hoursAgo(12), createdAt: null }, NOW).hoursRemaining).toBe(-4);
+    expect(caseFacts({ status: 'open', priority: 'urgent', statusChangedAt: hoursAgo(2), createdAt: hoursAgo(50) }, NOW)).toEqual({ priority: 'urgent', hoursRemaining: 6 });
+    expect(caseFacts({ status: 'open', priority: 'urgent', statusChangedAt: hoursAgo(12), createdAt: null }, NOW).hoursRemaining).toBe(-4);
+  });
+  // Disclosed adaptation: the clock was updatedAt, so an edit restarted it. It is the last status change, else creation.
+  it('starts the clock at the status change, falls back to creation, and ignores later edits', () => {
+    expect(caseFacts({ status: 'open', priority: 'urgent', statusChangedAt: null, createdAt: hoursAgo(10), updatedAt: hoursAgo(1) } as never, NOW).hoursRemaining).toBe(-2);
+    expect(caseFacts({ status: 'open', priority: 'urgent', statusChangedAt: hoursAgo(2), createdAt: hoursAgo(50), updatedAt: hoursAgo(0) } as never, NOW).hoursRemaining).toBe(6);
   });
   it('scores a priority outside the four as medium', () => {
     expect(scoringPriority('critical')).toBe('medium');

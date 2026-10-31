@@ -216,7 +216,7 @@ describe('workflow-engine', () => {
   // ── getClaimWorkflowStatus ────────────────────────────────────────────────
   describe('getClaimWorkflowStatus', () => {
     it('returns workflow info for a claim', () => {
-      const claim = { status: 'submitted', priority: 'medium', updatedAt: new Date(), progress: 10 };
+      const claim = { status: 'submitted', priority: 'medium', statusChangedAt: new Date(), createdAt: new Date(), progress: 10 };
       const result = getClaimWorkflowStatus(claim);
       expect(result.currentStatus).toBe('submitted');
       expect(result.priority).toBe('medium');
@@ -224,12 +224,22 @@ describe('workflow-engine', () => {
       expect(result.progress).toBe(10);
     });
 
-    it('uses createdAt when updatedAt is missing', () => {
+    // Disclosed adaptation: these tests used updatedAt as the SLA clock, which let any edit restart it. The clock is now the last status change.
+    it('uses createdAt when the status change is unknown', () => {
       const createdAt = new Date('2026-03-01');
       const result = getClaimWorkflowStatus({
-        status: 'investigation', priority: 'high', updatedAt: null, createdAt, progress: 50,
+        status: 'investigation', priority: 'high', statusChangedAt: null, createdAt, progress: 50,
       });
       expect(result.statusSince).toBe(createdAt);
+    });
+
+    it('does not restart the clock on an edit: updatedAt is not the SLA clock', () => {
+      const createdAt = new Date('2026-03-01');
+      const statusChangedAt = new Date('2026-03-05');
+      const result = getClaimWorkflowStatus({
+        status: 'investigation', priority: 'high', statusChangedAt, updatedAt: new Date(), createdAt, progress: 50,
+      } as Parameters<typeof getClaimWorkflowStatus>[0] & { updatedAt: Date });
+      expect(result.statusSince).toBe(statusChangedAt);
     });
   });
 
@@ -307,8 +317,8 @@ describe('workflow-engine', () => {
     it('filters overdue claims', async () => {
       const pastDate = new Date('2024-01-01');
       mocks.mockSelect.mockReturnValueOnce(chain([
-        { status: 'submitted', priority: 'medium', updatedAt: pastDate, createdAt: pastDate },
-        { status: 'closed', priority: 'medium', updatedAt: pastDate, createdAt: pastDate },
+        { status: 'submitted', priority: 'medium', statusChangedAt: pastDate, createdAt: pastDate },
+        { status: 'closed', priority: 'medium', statusChangedAt: pastDate, createdAt: pastDate },
       ]));
       const result = await getOverdueClaims();
       expect(result).toHaveLength(1);
@@ -322,7 +332,7 @@ describe('workflow-engine', () => {
 
     it('skips claims with no dates', async () => {
       mocks.mockSelect.mockReturnValueOnce(chain([
-        { status: 'submitted', priority: 'medium', updatedAt: null, createdAt: null },
+        { status: 'submitted', priority: 'medium', statusChangedAt: null, createdAt: null },
       ]));
       const result = await getOverdueClaims();
       expect(result).toHaveLength(0);
@@ -333,11 +343,13 @@ describe('workflow-engine', () => {
   describe('getClaimsApproachingDeadline', () => {
     it('filters claims within 1 day of deadline', async () => {
       // investigation = 10 days × medium 1.0 → deadline in 10 days from statusDate
-      // Need a date ~9 days ago so daysRemaining ≤ 1
-      const nineDaysAgo = new Date(Date.now() - 86400000 * 9);
+      // The deadline is calendar-day arithmetic (setDate), so the fixture is built the same way: a status date whose deadline falls 12
+      // hours from now. Counting 9 x 24h back from now made the test depend on whether a daylight-saving change falls inside the window.
+      const nineDaysAgo = new Date(Date.now() + 12 * 3600_000);
+      nineDaysAgo.setDate(nineDaysAgo.getDate() - 10);
       mocks.mockSelect.mockReturnValueOnce(chain([
-        { status: 'investigation', priority: 'medium', updatedAt: nineDaysAgo, createdAt: nineDaysAgo },
-        { status: 'closed', priority: 'medium', updatedAt: nineDaysAgo, createdAt: nineDaysAgo },
+        { status: 'investigation', priority: 'medium', statusChangedAt: nineDaysAgo, createdAt: nineDaysAgo },
+        { status: 'closed', priority: 'medium', statusChangedAt: nineDaysAgo, createdAt: nineDaysAgo },
       ]));
       const result = await getClaimsApproachingDeadline();
       expect(result).toHaveLength(1);

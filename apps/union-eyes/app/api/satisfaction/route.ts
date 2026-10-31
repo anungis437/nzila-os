@@ -10,6 +10,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   getPendingSurveys,
   createSatisfactionSurvey,
+  SurveyAlreadyAnsweredError,
 } from '@/lib/services/satisfaction-service';
 
 export const dynamic = 'force-dynamic';
@@ -72,15 +73,20 @@ export const POST = withApi(
       throw ApiError.badRequest('The survey must rate the representative assigned to the claim');
     }
 
-    const survey = await createSatisfactionSurvey(
-      {
-        organizationId,
-        claimId: body.claimId,
-        memberId: body.memberId,
-        lroId: body.lroId,
-      },
-      userId,
-    );
-    return survey;
+    try {
+      return await createSatisfactionSurvey(
+        {
+          organizationId,
+          claimId: body.claimId,
+          memberId: body.memberId,
+          lroId: body.lroId,
+        },
+        userId,
+      );
+    } catch (error) {
+      if (error instanceof SurveyAlreadyAnsweredError) throw ApiError.conflict('The member has already answered this survey');
+      throw error;
+    }
   }
 );
+

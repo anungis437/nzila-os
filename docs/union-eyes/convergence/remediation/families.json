@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 606,
- "partial": 86,
- "outstanding": 171,
- "accountedFor": 171,
+ "corrected": 609,
+ "partial": 85,
+ "outstanding": 168,
+ "accountedFor": 168,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -47,9 +47,9 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 17,
+   "defects": 16,
    "severity": {
-    "HIGH": 4,
+    "HIGH": 3,
     "MEDIUM": 10,
     "LOW": 3
    },
@@ -57,7 +57,6 @@
    "namedFiles": 1,
    "tranches": {
     "0B.2": 1,
-    "0B.3": 1,
     "0B.4": 2,
     "0B.6": 3,
     "0B.8": 1,
@@ -232,10 +231,10 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 32,
+   "defects": 30,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 24,
+    "MEDIUM": 22,
     "LOW": 6
    },
    "namedRoutes": 5,
@@ -244,11 +243,11 @@
     "0B.1": 4,
     "0B.2": 1,
     "0B.5": 4,
-    "0B.6": 6,
+    "0B.6": 5,
     "0B.7": 6,
     "0B.8": 3,
     "0B.10": 4,
-    "0B.11": 2,
+    "0B.11": 1,
     "0B.12": 2
    }
   }
@@ -338,11 +337,6 @@
   "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [
    {
     "id": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
     "severity": "HIGH",
     "partial": true
    },
@@ -827,7 +821,8 @@
    },
    {
     "id": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",
@@ -973,10 +968,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-SYS-SLA-CLOCK-RESTARTS-ON-ANY-CLAIM-UPDATE",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
     "severity": "MEDIUM"
    },
@@ -1032,11 +1023,6 @@
    {
     "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
     "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-IDS-SATISFACTION-ANONYMITY-FLAG-IS-STORED-AND-NEVER-READ-WHILE-THE-FORM-PROMISES-THE-NAME-IS-HIDDEN",
-    "severity": "MEDIUM",
     "partial": true
    },
    {

@@ -19,6 +19,7 @@ const PUBLIC_BY_DESIGN: Record<string, string> = {
   'auth/forgot-password/route.ts': 'Anonymous by nature; returns a neutral message whether or not the account exists.',
   'auth/magic-link/request/route.ts': 'Anonymous sign-in request; returns a neutral message whether or not the account exists.',
   'contact/route.ts': 'Public contact form; forwards the enquiry to the CRM service.',
+  'communications/unsubscribe/[recipientId]/route.ts': 'Recipient unsubscribe by a signed, action-bound link: the token names the recipient, campaign or scope, and the write is confined to that organization.',
   'icra/telemetry/route.ts': 'Anonymous product telemetry for the public assessment; rate limited to 60 requests a minute.',
   'staging-proof/deadline-engine/scenario/route.ts': 'Staging proof harness. Answers only an image built for staging (build-time NEXT_PUBLIC_APP_ENV), with the runtime switches, an HMAC over a fresh timestamp and a single-use nonce; every run creates and retires its own synthetic organization.',
   'whop/unauthenticated-checkout/route.ts': 'Pre-account checkout; creates a Whop checkout session and always redirects to signup.',
@@ -45,6 +46,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     const CONTROL: Record<string, RegExp> = {
       'auth/': /^$/, // limited per client IP by the proxy; asserted below
       'contact/route.ts': /guardPublicIntake/,
+      'communications/unsubscribe/[recipientId]/route.ts': /verifyTrackingToken\(/,
       'workbook/start/route.ts': /guardPublicIntake/,
       'workbook/checkout/route.ts': /guardPublicIntake/,
       'whop/unauthenticated-checkout/route.ts': /guardPublicIntake/,

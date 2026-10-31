@@ -256,6 +256,34 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Direct-organization RLS for ml_prediction_feedback"
+      },
+      {
+        "tag": "0038_scim_configurations_rls_closure",
+        "sha256": "34571a315f4427df3972421678f8f77be8c04b16515c30c66b5c23a306e9f06c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for scim_configurations"
+      },
+      {
+        "tag": "0039_claim_status_transitions_rls_closure",
+        "sha256": "6f4af8824f86074aa224851fd037c199f8366a46faf88d9f7def884d70d55b95",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only RLS for claim_status_transitions"
+      },
+      {
+        "tag": "0040_satisfaction_survey_responded_rls_closure",
+        "sha256": "d476c91c5d6947173adfcda8f0e6599e969df679a4199ce8a785f95d5b0f2200",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only RLS for satisfaction_survey_responded"
+      },
+      {
+        "tag": "0041_arbitration_decisions_owner_rls",
+        "sha256": "ac89767e26d6eac710f9bbb2a8e24505abcb5d34fc33f6932e851608b3226a34",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Public-or-owner row security for arbitration_decisions"
       }
     ],
     "platform": [
@@ -489,6 +517,34 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Append-only ml_prediction_feedback (one row per prediction) replaces rewriting model_metadata.parameters on feedback"
+      },
+      {
+        "tag": "0048_sso_scim_shape",
+        "sha256": "9bca043173e7b3aebf402b6e2ba2b6022293078ba20d32bde065e3dce3448eb5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Widen the sso_providers and scim_configurations Django stubs; SCIM keeps only a token hash"
+      },
+      {
+        "tag": "0049_claim_status_transitions",
+        "sha256": "ba7d67d0fd7cebe99a7d9f249bbe8f95432c7587bbc0858f4aa89d73c5c61550",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Claim status-change moment and append-only transition history for the SLA clock"
+      },
+      {
+        "tag": "0050_survey_anonymity",
+        "sha256": "11adffd2ec58f0fc1a1e692a7089a4316eb0d21afc3eae5166bb32c5dab43ebd",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Make anonymous satisfaction responses unlinked from member and claim"
+      },
+      {
+        "tag": "0051_arbitration_decision_owner",
+        "sha256": "db9f9668b40e33676f38532f465f76b3d0ace994ab761cc03f7d90c49f76729e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Owner column and private-by-default for the shared arbitration_decisions library"
       }
     ]
   }

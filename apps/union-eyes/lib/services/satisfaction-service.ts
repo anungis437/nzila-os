@@ -9,7 +9,7 @@
  */
 
 import { db } from '@/db/db';
-import { satisfactionSurveys } from '@/db/schema';
+import { satisfactionSurveys, satisfactionSurveyResponded } from '@/db/schema';
 import { eq, and, avg, count, desc, sql, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -54,6 +54,14 @@ export interface LroPerformance {
  */
 export const MIN_RESPONSES_FOR_AVERAGES = 5;
 
+/** The member already answered this survey (anonymously); it is not created again. */
+export class SurveyAlreadyAnsweredError extends Error {
+  constructor() {
+    super('This member has already answered the survey for this claim');
+    this.name = 'SurveyAlreadyAnsweredError';
+  }
+}
+
 // ============================================================================
 // Survey Lifecycle
 // ============================================================================
@@ -64,7 +72,7 @@ export const MIN_RESPONSES_FOR_AVERAGES = 5;
  * the claim-closure workflow passes none and is recorded as the system.
  */
 export async function createSatisfactionSurvey(
-  data: Pick<NewSatisfactionSurvey, 'organizationId' | 'claimId' | 'memberId' | 'lroId'>,
+  data: Pick<NewSatisfactionSurvey, 'organizationId' | 'lroId'> & { claimId: string; memberId: string },
   actorUserId?: string
 ): Promise<SatisfactionSurvey> {
   try {
@@ -81,6 +89,17 @@ export async function createSatisfactionSurvey(
       if (existing) {
         logger.info('Satisfaction survey already exists', { claimId: data.claimId });
         return existing;
+      }
+
+      // An anonymous response is held without its member and claim, so the survey row no longer shows that this member answered; the
+      // responded record does, and a member who has answered is not sent the survey again.
+      const [answered] = await tx
+        .select({ id: satisfactionSurveyResponded.id })
+        .from(satisfactionSurveyResponded)
+        .where(and(eq(satisfactionSurveyResponded.claimId, data.claimId), eq(satisfactionSurveyResponded.memberId, data.memberId)))
+        .limit(1);
+      if (answered) {
+        throw new SurveyAlreadyAnsweredError();
       }
 
       const [survey] = await tx
@@ -105,6 +124,7 @@ export async function createSatisfactionSurvey(
       return survey;
     });
   } catch (error) {
+    if (error instanceof SurveyAlreadyAnsweredError) throw error;
     logger.error('Error creating satisfaction survey', { error, data });
     throw new Error('Failed to create satisfaction survey');
   }

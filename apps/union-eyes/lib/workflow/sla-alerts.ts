@@ -6,6 +6,7 @@
  * which drops an event nobody subscribed to and does not outlive the process that emitted it.
  */
 import { sql } from 'drizzle-orm'
+import { slaClockStart } from './sla-clock'
 import { inAppNotifications } from '@/db/schema'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-lifecycle'
@@ -29,7 +30,7 @@ export interface ScannedClaim {
   priority: string | null
   organizationId: string | null
   assignedTo: string | null
-  updatedAt: Date | null
+  statusChangedAt?: Date | null
   createdAt: Date | null
 }
 
@@ -43,7 +44,7 @@ export interface SlaAssessment {
 export function assessClaim(claim: ScannedClaim, now: Date): SlaAssessment {
   const priority = (claim.priority as CasePriority) || 'medium'
   const totalHours = getSLADeadlineHours(toLifecycleState('claim', claim.status) ?? 'submitted', priority)
-  const changedAt = claim.updatedAt ?? claim.createdAt ?? now
+  const changedAt = slaClockStart(claim, now).startedAt
   const deadline = new Date(changedAt.getTime() + totalHours * 3_600_000)
   const hoursRemaining = (deadline.getTime() - now.getTime()) / 3_600_000
   const state: SlaState = hoursRemaining <= 0 ? 'breached' : hoursRemaining < totalHours * AT_RISK_FRACTION ? 'at_risk' : 'ok'

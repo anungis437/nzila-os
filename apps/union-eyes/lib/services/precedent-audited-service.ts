@@ -1,7 +1,7 @@
 /**
- * Creation of an arbitration precedent. The precedent library is shared across tenants (it has no organization
- * column), so the audit record is attributed to the organization the platform administrator is acting in, and the
- * record commits with the insert in the same transaction.
+ * Creation of an arbitration precedent. The precedent library is shared across tenants, but each decision is owned by the
+ * organization that supplied it (source_organization_id), so the audit record is attributed to that organization and
+ * commits with the insert in the same transaction.
  */
 import { arbitrationDecisions } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -9,7 +9,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export type PrecedentInput = Omit<
   typeof arbitrationDecisions.$inferInsert,
-  'id' | 'createdAt' | 'updatedAt' | 'embedding' | 'citationCount' | 'viewCount' | 'isPublic' | 'accessRestrictions' | 'importedFrom'
+  'id' | 'createdAt' | 'updatedAt' | 'embedding' | 'citationCount' | 'viewCount' | 'isPublic' | 'accessRestrictions' | 'importedFrom' | 'sourceOrganizationId'
 >;
 
 export async function createPrecedentAudited(
@@ -23,7 +23,9 @@ export async function createPrecedentAudited(
       ...data,
       isPublic: false,
       accessRestrictions: 'pending_review',
-      // The table has no organization column: the typed source is recorded on the row itself so a reviewer can see who supplied it.
+      // The decision is owned by the organization that supplies it (platform 0051); no other organization can change or delete it.
+      sourceOrganizationId: scope.organizationId,
+      // The supplying user stays on the row too, so a reviewer can see who typed it.
       importedFrom: `typed:${scope.organizationId}:${scope.userId}`.slice(0, 200),
     }).returning();
     await persistAtomicAudit(tx, {

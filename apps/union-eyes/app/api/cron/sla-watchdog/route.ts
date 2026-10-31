@@ -65,7 +65,7 @@ export const POST = withApi(
             priority: claims.priority,
             organizationId: claims.organizationId,
             assignedTo: claims.assignedTo,
-            updatedAt: claims.updatedAt,
+            statusChangedAt: claims.statusChangedAt,
             createdAt: claims.createdAt,
           })
           .from(claims)

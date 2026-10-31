@@ -49,12 +49,12 @@ export const ssoProviders = pgTable("sso_providers", {
   // { 'IdP-Admin': 'admin', 'IdP-Member': 'member' }
   
   // Settings
-  autoProvision: boolean("auto_provision").default(true), // Auto-create users on first login
-  justInTimeProvisioning: boolean("just_in_time_provisioning").default(true),
+  autoProvision: boolean("auto_provision").notNull().default(false), // Auto-create users on first login
+  justInTimeProvisioning: boolean("just_in_time_provisioning").notNull().default(false),
   requireGroups: text("require_groups").array(), // Required IdP groups
   
   // Status
-  enabled: boolean("enabled").default(true),
+  enabled: boolean("enabled").notNull().default(false),
   
   // Metadata
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
@@ -83,16 +83,18 @@ export const scimConfigurations = pgTable("scim_configurations", {
   baseUrl: varchar("base_url", { length: 500 }).notNull(), // https://union-eyes.com/scim/v2/{orgId}
   
   // Authentication
-  bearerToken: text("bearer_token").notNull(), // Long-lived token for IdP
-  tokenHash: varchar("token_hash", { length: 255 }), // SHA-256 hash for lookup
+  // No bearer_token column (platform 0048): the token is shown once at issue or rotation; only its SHA-256 is kept.
+  tokenHash: varchar("token_hash", { length: 64 }),
   tokenCreatedAt: timestamp("token_created_at", { withTimezone: true }).defaultNow(),
   tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+  tokenLastUsedAt: timestamp("token_last_used_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
   
   // Settings
-  enabled: boolean("enabled").default(true),
-  syncUsers: boolean("sync_users").default(true),
-  syncGroups: boolean("sync_groups").default(true),
-  deprovisionAction: varchar("deprovision_action", { length: 50 }).default('suspend'), 
+  enabled: boolean("enabled").notNull().default(false),
+  syncUsers: boolean("sync_users").notNull().default(true),
+  syncGroups: boolean("sync_groups").notNull().default(true),
+  deprovisionAction: varchar("deprovision_action", { length: 50 }).notNull().default('suspend'), 
   // 'suspend' | 'delete' | 'archive'
   
   // Filtering
@@ -105,8 +107,8 @@ export const scimConfigurations = pgTable("scim_configurations", {
   
   // Stats
   lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
-  usersSynced: integer("users_synced").default(0),
-  groupsSynced: integer("groups_synced").default(0),
+  usersSynced: integer("users_synced").notNull().default(0),
+  groupsSynced: integer("groups_synced").notNull().default(0),
   
   // Audit trail
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

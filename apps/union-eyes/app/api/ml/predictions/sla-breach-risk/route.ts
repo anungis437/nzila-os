@@ -53,7 +53,7 @@ export const POST = withApi(
     const { activeModel, prediction, score, derived } = await withRLSContext({ organizationId }, async (tx) => {
       // The case must exist in this organization, and its priority and deadline decide the score.
       const [claim] = await tx
-        .select({ status: claims.status, priority: claims.priority, updatedAt: claims.updatedAt, createdAt: claims.createdAt })
+        .select({ status: claims.status, priority: claims.priority, statusChangedAt: claims.statusChangedAt, createdAt: claims.createdAt })
         .from(claims)
         .where(and(eq(claims.claimId, body.caseId), eq(claims.organizationId, organizationId)))
         .limit(1);

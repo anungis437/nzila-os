@@ -51,6 +51,7 @@ vi.mock('@/db/schema', () => ({
     professionalismRating: 'profR', outcomeRating: 'outR',
     wouldRecommend: 'wouldRec', sentAt: 'sentAt',
   },
+  satisfactionSurveyResponded: { id: 'respId', claimId: 'respClaimId', memberId: 'respMemberId' },
 }));
 
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -109,6 +110,18 @@ describe('SatisfactionService', () => {
         expect.anything(),
         expect.objectContaining({ userId: 'system:claim-closure' }),
       );
+    });
+
+    // Disclosed addition: anonymous responses are held without member or claim (platform 0050), so "already answered" is read from the
+    // responded record, not from the survey row.
+    it('does not send the survey again to a member who already answered it anonymously', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([{ id: 'resp-1' }]));
+      const { createSatisfactionSurvey, SurveyAlreadyAnsweredError } = await import('../satisfaction-service');
+      await expect(
+        createSatisfactionSurvey({ organizationId: 'org-1', claimId: 'c-5', memberId: 'm-5', lroId: 'lro-1' }),
+      ).rejects.toBeInstanceOf(SurveyAlreadyAnsweredError);
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
     });
 
     it('does not create a survey when its audit cannot be written', async () => {

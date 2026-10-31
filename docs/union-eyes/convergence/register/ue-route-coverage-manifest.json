@@ -1,12 +1,12 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1003,
-  "mutating": 732,
+  "routes": 1004,
+  "mutating": 733,
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 7,
-   "CAPABILITY_TOKEN": 12,
+   "CAPABILITY_TOKEN": 13,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 142,
    "DELEGATED": 17,
@@ -22,7 +22,7 @@
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 7,
-   "CAPABILITY_TOKEN": 8,
+   "CAPABILITY_TOKEN": 9,
    "CRON_SECRET": 1,
    "CRUD_FACTORY": 140,
    "DELEGATED": 11,
@@ -36,21 +36,21 @@
    "WITH_API": 191
   },
   "mutatingByAudit": {
-   "ATOMIC": 155,
+   "ATOMIC": 157,
    "ATOMIC_SERVICE": 151,
-   "COMPUTE_ONLY": 33,
+   "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 141,
    "EXEMPT_BALLOT_SECRECY": 2,
-   "EXEMPT_UNATTRIBUTABLE": 25,
+   "EXEMPT_UNATTRIBUTABLE": 26,
    "NO_WRITES_FOUND": 12,
-   "NONE": 213
+   "NONE": 212
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 141,
    "NONE": 338,
    "SYSTEM_CONTEXT": 66,
-   "TENANT_TX": 173
+   "TENANT_TX": 174
   }
  },
  "routes": [
@@ -4310,7 +4310,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "communications/webhooks/resend/route.ts",
@@ -6096,6 +6096,20 @@
   {
    "route": "enterprise/sso/providers/route.ts",
    "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
+  },
+  {
+   "route": "enterprise/sso/scim-token/route.ts",
+   "methods": [
+    "DELETE",
     "GET",
     "POST"
    ],
@@ -11329,7 +11343,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "COMPUTE_ONLY"
+   "audit": "ATOMIC"
   },
   {
    "route": "reports/route.ts",
@@ -11503,7 +11517,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "CAPABILITY_TOKEN",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",

@@ -246,6 +246,34 @@
       "when": 1790310000000,
       "tag": "0037_ml_prediction_feedback_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790320000000,
+      "tag": "0038_scim_configurations_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790330000000,
+      "tag": "0039_claim_status_transitions_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790340000000,
+      "tag": "0040_satisfaction_survey_responded_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790350000000,
+      "tag": "0041_arbitration_decisions_owner_rls",
+      "breakpoints": true
     }
   ]
 }
