@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 304,
-    "partial": 60,
+    "implementedPendingQualification": 314,
+    "partial": 62,
     "qualificationVerified": 0,
-    "unresolved": 473,
+    "unresolved": 463,
     "externalBlockers": 0
   },
   "batches": [
@@ -303,6 +303,15 @@
       "newlyImplemented": 3,
       "outstandingAfter": 473,
       "partial": 4,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "family": "F12: a job runs statements the schema declares, a read states a failure as a failure, an acknowledgement means the record exists, and a removed record is no longer read or counted",
+      "outstandingBefore": 473,
+      "newlyImplemented": 10,
+      "outstandingAfter": 463,
+      "partial": 2,
       "evidenceCommit": null
     }
   ],
@@ -3686,9 +3695,11 @@
         "apps/union-eyes/app/api/arbitration/precedents/route.ts",
         "apps/union-eyes/app/api/arbitration/precedents/[id]/route.ts",
         "apps/union-eyes/lib/api/__tests__/crud-factory-staff-read.test.ts",
-        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts",
+        "apps/union-eyes/lib/services/precedent-service.ts",
+        "apps/union-eyes/lib/services/__tests__/precedent-service.test.ts"
       ],
-      "explanation": "A new readCondition option applies to every GET whatever the caller's role; both decision routes use it so a decision marked not public, or carrying an access restriction, is neither listed nor returned.",
+      "explanation": "A new readCondition option applies to every GET whatever the caller's role; both decision routes use it so a decision marked not public, or carrying an access restriction, is neither listed nor returned. The precedent service behind the search, list and by-id reads applies the same restriction (B33).",
       "remaining": "The row-level-security policy on arbitration_decisions still admits any tenant context (it needs a migration run on native PostgreSQL), and a restricted decision now has no viewing route at all."
     },
     "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY": {
@@ -3840,6 +3851,140 @@
       ],
       "explanation": "Publishing now needs the officer floor instead of the steward floor; the publish is already rate limited and bracketed by intent and outcome audit records.",
       "remaining": "There is still no draft, review or approval state, no content classification check, and the caller cannot choose which connected account of a platform receives the post."
+    },
+    "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/lib/education/reminder-queries.ts",
+        "apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts",
+        "apps/union-eyes/app/api/cron/education-reminders/route.ts",
+        "apps/union-eyes/app/api/__tests__/cron-education-reminders.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+      ],
+      "explanation": "Both reminder statements now name only columns the training schema declares (start_date, venue, lead_instructor_name, certification_number, the organization_members row that carries the name and e-mail) and join every table on the organization; they run against tables created from the declared schema, with positive and negative cases (cancelled, inactive, revoked, other organization). Route test adapted only to the new row field names."
+    },
+    "DEF-0B8-JUR-BC-TERMINATION-SCHEDULE-HAS-NO-TIER-ABOVE-EIGHT-YEARS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/lib/canadian-labour-standards/termination-notice.ts",
+        "apps/union-eyes/lib/canadian-labour-standards/__tests__/termination-notice-tiers.test.ts"
+      ],
+      "explanation": "British Columbia now has an open-ended top tier at the statutory maximum of eight weeks, and a test asserts that every jurisdiction ends in an open tier and that tiers are contiguous and non-decreasing. The lower British Columbia tiers were not changed here; they were not checked against the statutory text."
+    },
+    "DEF-0B8-JUR-WCB-REPORTING-DEADLINE-SERVED-AS-ARBITRATION-DEADLINE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/jurisdiction-rules/route.ts",
+        "apps/union-eyes/app/api/__tests__/jurisdiction-rules-deadline.route.test.ts"
+      ],
+      "explanation": "The rules route serves the board as a reference with verification required and no deadline number under an arbitration category (existing implementation and test)."
+    },
+    "DEF-0B11-PRP-PROFILE-ME-GET-SWALLOWS-DATABASE-ERRORS-INTO-A-SUCCESS-WITH-NULL-DATA": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/db/queries/profiles-queries.ts",
+        "apps/union-eyes/db/queries/__tests__/profiles-queries.test.ts",
+        "apps/union-eyes/app/api/profile/me/route.ts",
+        "apps/union-eyes/app/api/__tests__/profile-me.route.test.ts"
+      ],
+      "explanation": "A new strict lookup throws on a failed or timed-out query (and clears its timer); the profile route answers that as a failure, and says no profile exists only when the lookup completed and found none. The tolerant lookup remains for callers that treat failure as no profile."
+    },
+    "DEF-0B6-SYS-CONTACT-ACKNOWLEDGES-SUBMISSION-WITH-NOTHING-STORED": {
+      "status": "PARTIAL",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/contact/route.ts",
+        "apps/union-eyes/app/api/__tests__/contact-acknowledgement.route.test.ts"
+      ],
+      "explanation": "The contact form answers 503 instead of ok when the CRM did not record the contact or the message, so a visitor is no longer told it was received when nothing recorded it.",
+      "remaining": "There is still no local store: a submission exists only in HubSpot, and an unconfigured CRM refuses every contact submission."
+    },
+    "DEF-0B6-CMP-READ-FAILURE-RETURNS-EMPTY-SUCCESS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/compliance/alerts/route.ts",
+        "apps/union-eyes/app/api/compliance/reports/route.ts",
+        "apps/union-eyes/app/api/__tests__/compliance-read-failures.route.test.ts"
+      ],
+      "explanation": "A failed alert or report query answers 500 instead of an empty success, and both lists are bounded to 500 rows."
+    },
+    "DEF-0B12-PLT-QUEUE-STATUS-GIVES-ANY-SIGNED-IN-SESSION-THE-QUEUE-COUNTS-AND-RECENT-FAILED-TASK-NAMES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/union-eyes/queue-status/route.ts",
+        "apps/union-eyes/app/api/__tests__/queue-status.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+      ],
+      "explanation": "Queue counts and failed task names are for the control-plane key or a platform administrator and refuse a signed-in member (existing implementation; the contract test pins the administrator check before the queue read)."
+    },
+    "DEF-0B12-PLT-ORGANIZATIONS-RESPONSE-FABRICATES-A-CREATION-TIME-FOR-A-ROW-WITHOUT-ONE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/users/me/organizations/route.ts",
+        "apps/union-eyes/app/api/__tests__/users-me-organizations.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+      ],
+      "explanation": "A missing stored creation, update or join time is returned as null rather than the time of the call."
+    },
+    "DEF-0B12-PLT-VOCABULARY-ROUTES-SET-A-PUBLIC-ONE-HOUR-CACHE-ON-A-SIGNED-IN-RESPONSE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/vocabulary/route.ts",
+        "apps/union-eyes/app/api/vocabulary/statuses/route.ts",
+        "apps/union-eyes/app/api/vocabulary/severities/route.ts",
+        "apps/union-eyes/app/api/vocabulary/roles/route.ts",
+        "apps/union-eyes/app/api/vocabulary/priorities/route.ts",
+        "apps/union-eyes/app/api/vocabulary/case-types/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+      ],
+      "explanation": "All six vocabulary routes serve a signed-in response with Cache-Control private, so a shared cache cannot hand it to a caller without a session."
+    },
+    "DEF-0B11-PRP-PRECEDENT-SEARCH-USES-UNESCAPED-WILDCARD-LIKE-OVER-THE-FULL-TEXT-AND-CASTS-UNVALIDATED-FILTERS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/lib/services/precedent-service.ts",
+        "apps/union-eyes/lib/services/__tests__/precedent-service.test.ts",
+        "apps/union-eyes/app/api/precedents/search/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+      ],
+      "explanation": "Search terms take the LIKE wildcards literally, the search accepts only the two filters it reads (strict, bounded lists), and a filter value outside the column's declared values is refused with 400 instead of reaching the database as a 500. The same service also excludes decisions marked not public or restricted."
+    },
+    "DEF-0B12-WBK-CHECKOUT-READS-THE-USER-OWNED-WORKBOOKS-TABLE-OUTSIDE-ANY-DATABASE-CONTEXT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/workbook/checkout/route.ts",
+        "apps/union-eyes/app/api/__tests__/workbook-checkout.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+      ],
+      "explanation": "The unclaimed-workbook read runs under the explicit system context, as the start and claim routes do, instead of on the pooled connection with no user context. Test adapted to the new context call; new tests cover 404 and 503."
+    },
+    "DEF-0B8-HS-ARCHIVED-ROWS-STILL-READABLE-AND-COUNTED": {
+      "status": "PARTIAL",
+      "batch": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/hazards/route.ts",
+        "apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts",
+        "apps/union-eyes/app/api/health-safety/incidents/route.ts",
+        "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts",
+        "apps/union-eyes/app/api/health-safety/hazards/stats/route.ts",
+        "apps/union-eyes/app/api/health-safety/incidents/stats/route.ts",
+        "apps/union-eyes/app/api/health-safety/incidents/trends/route.ts",
+        "apps/union-eyes/app/api/health-safety/dashboard/route.ts",
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b33-responses.contract.test.ts"
+      ],
+      "explanation": "An archived incident or hazard is neither listed nor returned by id (the new readCondition), and the statistics, trends and dashboard no longer count it as open, critical or part of a total.",
+      "remaining": "The counts are pinned by source only; no test runs the statistics against rows holding an archived status."
     }
   }
 }

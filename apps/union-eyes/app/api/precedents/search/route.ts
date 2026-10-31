@@ -15,7 +15,15 @@ import {
 
 const precedentSearchSchema = z.object({
   query: z.string().min(1, 'Query is required').max(500, 'Query too long'),
-  filters: z.record(z.string(), z.unknown()).prefault({}),
+  // Only the filters the search reads, each a bounded list of bounded strings; their values are checked against the column's declared values.
+  filters: z
+    .object({
+      precedentValue: z.array(z.string().max(50)).max(10),
+      tribunal: z.array(z.string().max(50)).max(20),
+    })
+    .partial()
+    .strict()
+    .prefault({}),
   limit: z.number().int().min(1).max(100).default(50),
 });
 export const POST = withRoleAuth('steward', async (request, _context) => {
@@ -41,6 +49,9 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
         count: results.length
       });
     } catch (error) {
+      if ((error as { code?: string } | null)?.code === 'INVALID_PRECEDENT_FILTER') {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, (error as Error).message);
+      }
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     logger.info('contact_form:submitted', { email, organization, inquiryType });
 
-    // Sync to HubSpot (fire-and-forget — gracefully skips if unconfigured)
+    // Record the contact in HubSpot; an unconfigured or failing CRM is reported below, not hidden
     const contactId = await upsertContact({
       email,
       firstName,
@@ -45,16 +45,24 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (contactId) {
-      await createDeal({
-        name: `UE inquiry — ${organization || email}`,
-        stage: 'inquiry',
-        contactId,
-        properties: {
-          ue_inquiry_type: inquiryType || 'general',
-          ...(message ? { ue_message: message.slice(0, 500) } : {}),
-        },
-      });
+    // The submission is recorded only in the CRM; with no CRM record the visitor is told so instead of being acknowledged.
+    if (!contactId) {
+      logger.error('contact_form:not_recorded', { inquiryType });
+      return NextResponse.json({ error: 'Your message could not be recorded. Please try again later.' }, { status: 503 });
+    }
+
+    const dealId = await createDeal({
+      name: `UE inquiry — ${organization || email}`,
+      stage: 'inquiry',
+      contactId,
+      properties: {
+        ue_inquiry_type: inquiryType || 'general',
+        ...(message ? { ue_message: message.slice(0, 500) } : {}),
+      },
+    });
+    if (!dealId) {
+      logger.error('contact_form:inquiry_not_recorded', { inquiryType });
+      return NextResponse.json({ error: 'Your message could not be recorded. Please try again later.' }, { status: 503 });
     }
 
     return NextResponse.json({ ok: true });

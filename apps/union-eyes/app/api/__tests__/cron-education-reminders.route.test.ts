@@ -69,15 +69,12 @@ describe('cron/education-reminders route', () => {
       [
         {
           email: 'member@example.com',
-          first_name: 'Sam',
-          last_name: 'Member',
+          member_name: 'Sam Member',
           course_name: 'Steward Training',
           session_date: '2026-07-01',
-          session_time: '09:00',
           location: 'Hall A',
-          duration_hours: 4,
-          instructor_first_name: 'Dana',
-          instructor_last_name: 'Instructor',
+          duration_hours: '4.00',
+          lead_instructor_name: 'Dana Instructor',
           days_until: 7,
         },
       ],
@@ -95,7 +92,7 @@ describe('cron/education-reminders route', () => {
   it('POST answers 500 naming the failed batch when sends fail, keeping the counts', async () => {
     const { POST } = await loadRoute();
     m.executeQueue.push(
-      [{ email: 'member@example.com', first_name: 'Sam', last_name: 'Member', course_name: 'Steward Training', session_date: '2026-07-01', days_until: 3 }],
+      [{ email: 'member@example.com', member_name: 'Sam Member', course_name: 'Steward Training', session_date: '2026-07-01', days_until: 3 }],
       [],
     );
     m.batchSendSessionReminders.mockResolvedValueOnce({ sent: 0, failed: 1, errors: ['smtp refused'] });
@@ -114,10 +111,9 @@ describe('cron/education-reminders route', () => {
       [
         {
           email: 'member@example.com',
-          first_name: 'Sam',
-          last_name: 'Member',
+          member_name: 'Sam Member',
           certification_name: 'WSIB',
-          certificate_number: 'CERT-1',
+          certification_number: 'CERT-1',
           expiry_date: '2026-09-01',
           days_until_expiry: 30,
         },

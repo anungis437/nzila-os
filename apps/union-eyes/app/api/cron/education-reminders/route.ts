@@ -6,9 +6,9 @@
  * - Runs daily to send session reminders and certification expiry warnings
  */
 
-import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
+import { expiryWarningQuery, rowsOf, sessionReminderQuery, toExpiryWarning, toSessionReminder } from '@/lib/education/reminder-queries';
 import { logger } from "@/lib/logger";
 import { withApi } from '@/lib/api/framework';
 import { jobResponse, type JobFailure } from '@/lib/operations/job-result';
@@ -47,63 +47,17 @@ export const POST = withApi(
     
     // Use withSystemContext for system-wide cron job access
     const sessionReminders = await withSystemContext(async () => {
-      return await db.execute(sql`
-        SELECT 
-          m.email,
-          m.first_name,
-          m.last_name,
-          c.course_name,
-          cs.session_date,
-          cs.session_time,
-          cs.location,
-          cs.duration_hours,
-          i.first_name as instructor_first_name,
-          i.last_name as instructor_last_name,
-          EXTRACT(DAY FROM (cs.session_date - CURRENT_DATE))::int as days_until
-        FROM course_registrations cr
-        JOIN members m ON m.id = cr.member_id
-        JOIN training_courses c ON c.id = cr.course_id
-        JOIN course_sessions cs ON cs.id = cr.session_id
-        LEFT JOIN members i ON i.id = cs.lead_instructor_id
-        WHERE 
-          cr.registration_status = 'registered'
-          AND cs.session_status = 'scheduled'
-          AND cs.session_date::date IN (
-            CURRENT_DATE + INTERVAL '7 days',
-            CURRENT_DATE + INTERVAL '3 days',
-            CURRENT_DATE + INTERVAL '1 day'
-          )
-          AND m.email IS NOT NULL
-          AND m.email != ''
-        ORDER BY cs.session_date, m.email
-      `);
-    }) as Record<string, unknown>[];
+      return rowsOf(await db.execute(sessionReminderQuery));
+    });
 
     if (sessionReminders.length > 0) {
       logger.info("Processing session reminders", {
         count: sessionReminders.length,
       });
 
-      const reminderData = sessionReminders.map((row: Record<string, unknown>) => ({
-        toEmail: String(row.email),
-        memberName: `${row.first_name} ${row.last_name}`,
-        courseName: String(row.course_name),
-        sessionDate: new Date(row.session_date as string).toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        sessionTime: String(row.session_time || "TBD"),
-        daysUntilSession: Number(row.days_until),
-        location: row.location ? String(row.location) : undefined,
-        instructorName: row.instructor_first_name
-          ? `${row.instructor_first_name} ${row.instructor_last_name}`
-          : undefined,
-        sessionDuration: row.duration_hours ? Number(row.duration_hours) : undefined,
-      }));
+      const reminderData = sessionReminders.map(toSessionReminder);
 
-      results.sessionReminders = await batchSendSessionReminders(reminderData);
+            results.sessionReminders = await batchSendSessionReminders(reminderData);
       
       logger.info("Session reminders completed", {
         sent: results.sessionReminders.sent,
@@ -118,50 +72,17 @@ export const POST = withApi(
     // ========================================
     
     const expiryWarnings = await withSystemContext(async () => {
-      return await db.execute(sql`
-        SELECT 
-          m.email,
-          m.first_name,
-          m.last_name,
-          mc.certification_name,
-          mc.certificate_number,
-          mc.expiry_date,
-          EXTRACT(DAY FROM (mc.expiry_date - CURRENT_DATE))::int as days_until_expiry,
-          c.continuing_education_hours
-        FROM member_certifications mc
-        JOIN members m ON m.id = mc.member_id
-        LEFT JOIN training_courses c ON c.provides_certification = mc.certification_name
-        WHERE 
-          mc.certification_status = 'active'
-          AND mc.expiry_date::date IN (
-            CURRENT_DATE + INTERVAL '90 days',
-            CURRENT_DATE + INTERVAL '30 days'
-          )
-          AND m.email IS NOT NULL
-          AND m.email != ''
-        ORDER BY mc.expiry_date, m.email
-      `);
-    }) as Record<string, unknown>[];
+      return rowsOf(await db.execute(expiryWarningQuery));
+    });
 
     if (expiryWarnings.length > 0) {
       logger.info("Processing expiry warnings", {
         count: expiryWarnings.length,
       });
 
-      const warningData = expiryWarnings.map((row: Record<string, unknown>) => ({
-        toEmail: String(row.email),
-        memberName: `${row.first_name} ${row.last_name}`,
-        certificationName: String(row.certification_name),
-        certificateNumber: String(row.certificate_number),
-        expiryDate: new Date(row.expiry_date as string).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        daysUntilExpiry: Number(row.days_until_expiry),
-      }));
+      const warningData = expiryWarnings.map(toExpiryWarning);
 
-      results.expiryWarnings = await batchSendExpiryWarnings(warningData);
+            results.expiryWarnings = await batchSendExpiryWarnings(warningData);
       
       logger.info("Expiry warnings completed", {
         sent: results.expiryWarnings.sent,

@@ -39,14 +39,14 @@ export const GET = withApi(
     try {
     return await withRLSContext({ organizationId }, async (tx) => {
     const incidentRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived' AND ${dateFilter}`)
       );
       const totalIncidents = Number((incidentRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
       const startMs = new Date(startDate).getTime();
       const prevStart = new Date(startMs - (Date.now() - startMs)).toISOString();
       const prevRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND created_at >= ${prevStart}::timestamptz AND created_at < ${startDate}::timestamptz`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived' AND created_at >= ${prevStart}::timestamptz AND created_at < ${startDate}::timestamptz`)
       );
       const prevIncidents = Number((prevRows[0] as Record<string, unknown>)?.cnt ?? 0);
       const incidentChange = prevIncidents > 0
@@ -55,7 +55,7 @@ export const GET = withApi(
       const incidentTrend = incidentChange > 0 ? 'up' : incidentChange < 0 ? 'down' : 'stable';
 
       const hazardRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM hazard_reports WHERE ${orgFilter} AND (status IS NULL OR status NOT IN ('resolved','closed'))`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM hazard_reports WHERE ${orgFilter} AND (status IS NULL OR status NOT IN ('resolved','closed','archived'))`)
       );
       const openHazards = Number((hazardRows[0] as Record<string, unknown>)?.cnt ?? 0);
       const hazardTrend = openHazards > 3 ? 'up' : openHazards === 0 ? 'down' : 'stable';
@@ -75,7 +75,7 @@ export const GET = withApi(
         : null;
 
       const lastRows = Array.from(
-        await tx.execute(sql`SELECT max(created_at)::text AS last_dt FROM workplace_incidents WHERE ${orgFilter}`)
+        await tx.execute(sql`SELECT max(created_at)::text AS last_dt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived'`)
       );
       const lastDt = (lastRows[0] as Record<string, unknown>)?.last_dt as string | null;
       // No incident on record is not 90 days: it is no measurement.
@@ -84,7 +84,7 @@ export const GET = withApi(
         : null;
 
       const critRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND severity = 'critical' AND status != 'closed'`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND severity = 'critical' AND status NOT IN ('closed','archived')`)
       );
       const criticalAlerts = Number((critRows[0] as Record<string, unknown>)?.cnt ?? 0);
 

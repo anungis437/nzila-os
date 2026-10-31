@@ -49,7 +49,7 @@ export const GET = withApi(
             avg(EXTRACT(EPOCH FROM (closed_date - reported_date)) / 86400.0)
               FILTER (WHERE closed_date IS NOT NULL) AS avg_resolution_days
           FROM workplace_incidents
-          WHERE ${orgFilter} AND incident_date >= ${startISO}::timestamptz
+          WHERE ${orgFilter} AND status <> 'archived' AND incident_date >= ${startISO}::timestamptz
         `)
       )
     );

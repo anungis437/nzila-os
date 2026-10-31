@@ -52,6 +52,7 @@ export const GET = withApi(
             COUNT(*) AS total
           FROM workplace_incidents
           WHERE organization_id = ${organizationId}
+            AND status <> 'archived'
             AND incident_date >= ${startISO}::timestamptz
           GROUP BY date_trunc('month', incident_date)
           ORDER BY date_trunc('month', incident_date) ASC
@@ -65,6 +66,7 @@ export const GET = withApi(
           COUNT(*) AS total
         FROM workplace_incidents
         WHERE organization_id = ${organizationId}
+          AND status <> 'archived'
           AND incident_date >= ${startISO}::timestamptz
         GROUP BY date_trunc('day', incident_date)
         ORDER BY date_trunc('day', incident_date) ASC

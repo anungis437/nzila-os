@@ -23,7 +23,7 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
     
     return NextResponse.json(toPublicVocabulary(vocabulary), {
       headers: {
-        'Cache-Control': 'public, max-age=3600', // Cache vocab for 1 hour
+        'Cache-Control': 'private, max-age=3600', // Cache vocab for 1 hour
       },
     });
   } catch (error) {

@@ -18,7 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { WORKBOOK_TIERS } from '@/lib/icra/tiers';
 import { getStripeClient } from '@nzila/payments-stripe';
@@ -53,11 +53,15 @@ export async function POST(request: NextRequest) {
   // Verify the workbook exists (prevent arbitrary UUID injection)
   let existingTierId: string | null = null;
   try {
-    const [row] = await db
-      .select({ reportTierId: workbooks.reportTierId })
-      .from(workbooks)
-      .where(eq(workbooks.id, workbookId))
-      .limit(1);
+    // An unclaimed workbook (all a buyer has before paying) is invisible to the user isolation policy, so the read names the
+    // system role explicitly rather than running on the pooled connection with no user context.
+    const [row] = await withSystemContext(async (tx) =>
+      tx
+        .select({ reportTierId: workbooks.reportTierId })
+        .from(workbooks)
+        .where(eq(workbooks.id, workbookId))
+        .limit(1),
+    );
 
     if (!row) {
       return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });

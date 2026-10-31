@@ -19,7 +19,7 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
     
     return NextResponse.json(toPublicVocabulary(vocabulary).severities, {
       headers: {
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, max-age=3600',
       },
     });
   } catch (error) {

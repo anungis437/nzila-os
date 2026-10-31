@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   create: vi.fn(),
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
   rows: [] as Array<{ reportTierId: string | null }>,
+  withSystemContext: vi.fn(),
 }));
 
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.checkRateLimit }));
@@ -16,9 +17,7 @@ vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/db/schema/workbook-schema', () => ({ workbooks: { id: 'id', reportTierId: 'report_tier_id' } }));
 vi.mock('@/lib/icra/tiers', () => ({ WORKBOOK_TIERS: { workbook_self_guided: { name: 'Self-guided', selfServe: true, amountCents: 240000 } } }));
 vi.mock('@nzila/payments-stripe', () => ({ getStripeClient: () => ({ checkout: { sessions: { create: m.create } } }) }));
-vi.mock('@/db', () => ({
-  db: { select: () => ({ from: () => ({ where: () => ({ limit: async () => m.rows }) }) }) },
-}));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 
 function post() {
   return new NextRequest('http://localhost/api/workbook/checkout', {
@@ -34,6 +33,8 @@ describe('workbook/checkout route', () => {
     vi.unstubAllEnvs();
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 60 });
     m.rows = [{ reportTierId: null }];
+    m.withSystemContext.mockImplementation(async (work: (tx: unknown) => Promise<unknown>) =>
+      work({ select: () => ({ from: () => ({ where: () => ({ limit: async () => m.rows }) }) }) }));
     m.create.mockResolvedValue({ id: 'cs_1', url: 'https://checkout.example.test/s' });
   });
 
@@ -54,6 +55,22 @@ describe('workbook/checkout route', () => {
     expect(response.status).toBe(200);
     expect(m.create.mock.calls[0][1]).toEqual({ idempotencyKey: expect.stringContaining(`workbook-checkout:${WORKBOOK}:workbook_self_guided:`) });
     expect(m.create.mock.calls[0][0].success_url).toMatch(/^https:\/\/app\.example\.test\//);
+  });
+
+  // DEF-0B12-WBK-CHECKOUT-READS-THE-USER-OWNED-WORKBOOKS-TABLE-OUTSIDE-ANY-DATABASE-CONTEXT
+  it('reads the unclaimed workbook through the system context, not the bare connection', async () => {
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://app.example.test');
+    const { POST } = await import('../workbook/checkout/route');
+    await POST(post());
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+  });
+
+  it('answers 404 for a workbook that is not there and 503 when the lookup fails', async () => {
+    const { POST } = await import('../workbook/checkout/route');
+    m.rows = [];
+    expect((await POST(post())).status).toBe(404);
+    m.withSystemContext.mockRejectedValueOnce(new Error('db down'));
+    expect((await POST(post())).status).toBe(503);
   });
 
   // DEF-0B12-WBK-ROUTES-LOG-THE-BEARER-WORKBOOK-ID

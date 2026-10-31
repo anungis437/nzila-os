@@ -94,8 +94,8 @@ export async function GET(_req: NextRequest) {
         sector: o.sectors?.[0] ?? null,
         jurisdiction: o.provinceTerritory ?? null,
         description: o.description ?? null,
-        createdAt: o.createdAt?.toISOString() ?? new Date().toISOString(),
-        updatedAt: o.updatedAt?.toISOString() ?? new Date().toISOString(),
+        createdAt: o.createdAt?.toISOString() ?? null,
+        updatedAt: o.updatedAt?.toISOString() ?? null,
       })),
       memberships: memberships.map(m => ({
         id: m.id,
@@ -103,7 +103,7 @@ export async function GET(_req: NextRequest) {
         userId: m.userId,
         role: m.role,
         isPrimary: m.isPrimary ?? false,
-        joinedAt: m.joinedAt?.toISOString() ?? m.createdAt?.toISOString() ?? new Date().toISOString(),
+        joinedAt: m.joinedAt?.toISOString() ?? m.createdAt?.toISOString() ?? null,
       })),
     });
   } catch (error) {

@@ -2,6 +2,7 @@
  * CRUD collection route for workplaceIncidents
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
+import { ne } from 'drizzle-orm';
 import { workplaceIncidents } from '@/db/schema';
 import { ApiError } from '@/lib/api/errors';
 
@@ -144,6 +145,8 @@ const { GET, POST } = crudRoutes({
   // require at minimum the health_safety_rep role (level 30), not the
   // broader 'member' (20) or the stricter 'admin' (140).
   readRole: 'health_safety_rep',
+  // A record an administrator removed is archived, and an archived record is neither listed nor returned by id.
+  readCondition: ne(workplaceIncidents.status, 'archived'),
   writeRole: 'health_safety_rep',
   preprocessCreateBody: preprocessIncidentCreateBody,
   writableFields: [

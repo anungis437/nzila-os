@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 355,
- "partial": 62,
- "outstanding": 422,
- "accountedFor": 422,
+ "corrected": 365,
+ "partial": 64,
+ "outstanding": 412,
+ "accountedFor": 412,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -248,13 +248,13 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 100,
+   "defects": 90,
    "severity": {
-    "HIGH": 6,
-    "MEDIUM": 68,
-    "LOW": 26
+    "HIGH": 3,
+    "MEDIUM": 64,
+    "LOW": 23
    },
-   "namedRoutes": 15,
+   "namedRoutes": 11,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 4,
@@ -262,13 +262,13 @@
     "0B.3": 3,
     "0B.4": 8,
     "0B.5": 16,
-    "0B.6": 16,
+    "0B.6": 14,
     "0B.7": 11,
-    "0B.8": 14,
+    "0B.8": 12,
     "0B.9": 1,
     "0B.10": 8,
-    "0B.11": 7,
-    "0B.12": 11
+    "0B.11": 5,
+    "0B.12": 7
    }
   }
  ],
@@ -1779,10 +1779,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES",
     "severity": "LOW"
    },
@@ -1803,10 +1799,6 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B6-CMP-READ-FAILURE-RETURNS-EMPTY-SUCCESS",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
     "severity": "MEDIUM"
    },
@@ -1820,7 +1812,8 @@
    },
    {
     "id": "DEF-0B6-SYS-CONTACT-ACKNOWLEDGES-SUBMISSION-WITH-NOTHING-STORED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-SYS-CONTACT-RATE-LIMIT-KEYED-ON-FORGEABLE-ADDRESS-NO-BOT-CHALLENGE",
@@ -1884,7 +1877,8 @@
    },
    {
     "id": "DEF-0B8-HS-ARCHIVED-ROWS-STILL-READABLE-AND-COUNTED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B8-HS-LIST-ROUTES-IGNORE-FILTERS-THE-FORMS-SEND",
@@ -1917,14 +1911,6 @@
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-JUR-WCB-REPORTING-DEADLINE-SERVED-AS-ARBITRATION-DEADLINE",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B8-JUR-BC-TERMINATION-SCHEDULE-HAS-NO-TIER-ABOVE-EIGHT-YEARS",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B8-JUR-RULES-ROUTE-ACCEPTS-ANY-CODE-AND-ANSWERS-SUCCESS-WITH-NO-OR-WRONG-RULES",
@@ -1975,16 +1961,8 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B11-PRP-PRECEDENT-SEARCH-USES-UNESCAPED-WILDCARD-LIKE-OVER-THE-FULL-TEXT-AND-CASTS-UNVALIDATED-FILTERS",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B11-PRP-PROFILE-ME-GET-SWALLOWS-DATABASE-ERRORS-INTO-A-SUCCESS-WITH-NULL-DATA",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B11-RPT-BUILDER-AND-DATA-SOURCE-SAMPLE-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-SAMPLE-NO-SOURCE",
@@ -2011,23 +1989,11 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B12-PLT-ORGANIZATIONS-RESPONSE-FABRICATES-A-CREATION-TIME-FOR-A-ROW-WITHOUT-ONE",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B12-PLT-V2-CATCH-ALL-SUNSET-DATE-IS-A-CONSTANT-THAT-CHANGES-NO-ANSWER",
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B12-PLT-QUEUE-STATUS-GIVES-ANY-SIGNED-IN-SESSION-THE-QUEUE-COUNTS-AND-RECENT-FAILED-TASK-NAMES",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B12-PLT-TRIAGE-REVOKE-CARRIES-THE-DESIGNATION-ID-IN-A-DELETE-BODY",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B12-PLT-VOCABULARY-ROUTES-SET-A-PUBLIC-ONE-HOUR-CACHE-ON-A-SIGNED-IN-RESPONSE",
     "severity": "LOW"
    },
    {
@@ -2040,10 +2006,6 @@
    },
    {
     "id": "DEF-0B12-WBK-START-STORES-AN-OPTIONAL-CONSENT-OBJECT-THAT-NO-ROUTE-READS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-WBK-CHECKOUT-READS-THE-USER-OWNED-WORKBOOKS-TABLE-OUTSIDE-ANY-DATABASE-CONTEXT",
     "severity": "MEDIUM"
    }
   ]

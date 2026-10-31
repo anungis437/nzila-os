@@ -35,7 +35,7 @@ export const GET = withApi(
             avg(EXTRACT(EPOCH FROM (resolution_date - reported_date)) / 86400.0)
               FILTER (WHERE resolution_date IS NOT NULL) AS avg_resolution_days
           FROM hazard_reports
-          WHERE ${orgFilter}
+          WHERE ${orgFilter} AND status <> 'archived'
         `)
       )
     );
