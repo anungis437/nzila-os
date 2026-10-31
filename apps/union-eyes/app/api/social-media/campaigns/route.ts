@@ -13,6 +13,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { socialCampaigns, socialPosts } from '@/db/schema/social-media-schema';
 import { eq, and, ilike, or, gte, lte, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
+import { summarizePosts, averageEngagementRate, figuresRecorded, goalProgress } from '@/lib/social-media/campaign-figures';
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
@@ -96,27 +97,22 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
           const posts = await db
             .select({
               impressionsCount: socialPosts.impressionsCount,
+              reachCount: socialPosts.reachCount,
+              engagementRate: socialPosts.engagementRate,
               likesCount: socialPosts.likesCount,
               commentsCount: socialPosts.commentsCount,
               sharesCount: socialPosts.sharesCount,
             })
             .from(socialPosts)
-            .where(eq(socialPosts.campaignId, campaign.id));
+            .where(and(eq(socialPosts.campaignId, campaign.id), eq(socialPosts.organizationId, campaign.organizationId)));
 
-          const metrics = {
-            total_posts: posts.length,
-            total_impressions: posts.reduce((sum, p) => sum + (p.impressionsCount || 0), 0),
-            total_engagement: posts.reduce((sum, p) => sum + (p.likesCount || 0) + (p.commentsCount || 0) + (p.sharesCount || 0), 0),
-            total_likes: posts.reduce((sum, p) => sum + (p.likesCount || 0), 0),
-            total_comments: posts.reduce((sum, p) => sum + (p.commentsCount || 0), 0),
-            total_shares: posts.reduce((sum, p) => sum + (p.sharesCount || 0), 0),
-            total_clicks: 0,
-          };
+          const metrics = summarizePosts(posts);
 
           return {
             ...campaign,
             metrics,
-            goal_progress: undefined,
+            figures_recorded: figuresRecorded(posts),
+            goal_progress: goalProgress(campaign, metrics, averageEngagementRate(posts)),
           };
         })
       );

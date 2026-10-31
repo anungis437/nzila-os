@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 551,
- "partial": 78,
- "outstanding": 226,
- "accountedFor": 226,
+ "corrected": 553,
+ "partial": 79,
+ "outstanding": 224,
+ "accountedFor": 224,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -91,10 +91,10 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 34,
+   "defects": 33,
    "severity": {
     "HIGH": 6,
-    "MEDIUM": 23,
+    "MEDIUM": 22,
     "LOW": 5
    },
    "namedRoutes": 3,
@@ -108,18 +108,18 @@
     "0B.8": 2,
     "0B.9": 1,
     "0B.10": 1,
-    "0B.11": 10,
+    "0B.11": 9,
     "0B.12": 2
    }
   },
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 44,
+   "defects": 43,
    "severity": {
     "HIGH": 2,
     "MEDIUM": 39,
-    "LOW": 3
+    "LOW": 2
    },
    "namedRoutes": 5,
    "namedFiles": 0,
@@ -133,7 +133,7 @@
     "0B.8": 6,
     "0B.9": 2,
     "0B.10": 6,
-    "0B.11": 12,
+    "0B.11": 11,
     "0B.12": 3
    }
   },
@@ -625,11 +625,8 @@
    },
    {
     "id": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-SOC-CAMPAIGN-ANALYTICS-PLATFORM-AND-GOAL-FIGURES-READ-FIELDS-THE-QUERY-DOES-NOT-SELECT-AND-A-HARD-CODED-UNDEFINED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
@@ -810,10 +807,6 @@
    {
     "id": "DEF-0B11-SOC-CONNECT-AUDIT-IS-A-LOG-LINE-THAT-DROPS-THE-ACTION-ORGANIZATION-AND-PLATFORM-THE-CALLER-PASSES",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",

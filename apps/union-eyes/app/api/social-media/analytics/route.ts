@@ -15,6 +15,13 @@ import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 import { csvCell } from '@/lib/employer-execution/csv-cell';
 import { auditSocialAnalyticsExport } from '@/lib/social-media/export-audit';
+import {
+  summarizePosts,
+  averageEngagementRate,
+  figuresRecorded,
+  platformFigures,
+  goalProgress as campaignGoalProgress,
+} from '@/lib/social-media/campaign-figures';
 
 import {
   ErrorCode,
@@ -405,79 +412,15 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         })
         .from(socialPosts)
         .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
-        .where(and(eq(socialPosts.campaignId, campaignId), eq(socialPosts.status, 'published')))
+        .where(and(eq(socialPosts.campaignId, campaignId), eq(socialPosts.organizationId, organizationId), eq(socialPosts.status, 'published')))
         .orderBy(asc(socialPosts.publishedAt));
 
-      // Calculate overall metrics
-      const metrics = posts.reduce(
-        (acc, post) => ({
-          total_posts: acc.total_posts + 1,
-          total_impressions: acc.total_impressions + (post.impressionsCount || 0),
-          total_reach: acc.total_reach + (post.reachCount || 0),
-          total_engagement: acc.total_engagement + ((post.likesCount || 0) + (post.commentsCount || 0) + (post.sharesCount || 0)),
-          total_likes: acc.total_likes + (post.likesCount || 0),
-          total_comments: acc.total_comments + (post.commentsCount || 0),
-          total_shares: acc.total_shares + (post.sharesCount || 0),
-          total_clicks: acc.total_clicks,
-        }),
-        {
-          total_posts: 0,
-          total_impressions: 0,
-          total_reach: 0,
-          total_engagement: 0,
-          total_likes: 0,
-          total_comments: 0,
-          total_shares: 0,
-          total_clicks: null,
-        }
-      );
-
-      // Calculate average engagement rate
-      const avgEngagementRate =
-        posts.length > 0
-          ? posts.reduce((sum, post) => sum + (Number(post.engagementRate) || 0), 0) / posts.length
-          : 0;
-
-      // Goal progress: schema has individual goal fields, not a goals array
-      const goalProgress = undefined;
-
-      // Group posts by platform
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const postsByPlatform = posts.reduce((acc: Record<string, any[]>, post) => {
-        const platform = post.accountPlatform ?? 'unknown';
-        if (!acc[platform]) {
-          acc[platform] = [];
-        }
-        acc[platform].push(post);
-        return acc;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }, {} as Record<string, any[]>);
-
-      // Calculate platform-specific metrics
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const platformMetrics = Object.entries(postsByPlatform).map(([platform, platformPosts]: [string, any]) => {
-        const platformTotal = platformPosts.reduce(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (acc: any, post: any) => ({
-            posts: acc.posts + 1,
-            impressions: acc.impressions + (post.impressions || 0),
-            engagement: acc.engagement + (post.engagement || 0),
-            likes: acc.likes + (post.likes || 0),
-            comments: acc.comments + (post.comments || 0),
-            shares: acc.shares + (post.shares || 0),
-          }),
-          { posts: 0, impressions: 0, engagement: 0, likes: 0, comments: 0, shares: 0 }
-        );
-
-        return {
-          platform,
-          ...platformTotal,
-          avg_engagement_rate:
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            platformPosts.reduce((sum: number, post: any) => sum + (post.engagement_rate || 0), 0) /
-            platformPosts.length,
-        };
-      });
+      // The figures come from the counters the post rows hold; nothing collects platform analytics yet, so the response says
+      // whether any counter was recorded rather than presenting default zeros as measured performance.
+      const metrics = summarizePosts(posts);
+      const avgEngagementRate = averageEngagementRate(posts);
+      const goalProgress = campaignGoalProgress(campaign, metrics, avgEngagementRate);
+      const platformMetrics = platformFigures(posts);
 
       // Get timeline data (daily metrics)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -516,6 +459,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
           ...metrics,
           avg_engagement_rate: avgEngagementRate,
         },
+        figures_recorded: figuresRecorded(posts),
         goal_progress: goalProgress,
         platform_metrics: platformMetrics,
         timeline: Object.values(timeline),

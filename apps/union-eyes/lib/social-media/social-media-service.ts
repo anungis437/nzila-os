@@ -13,6 +13,7 @@ import { TwitterAPIClient, createTwitterClient } from './twitter-api-client';
 import { LinkedInAPIClient, createLinkedInClient } from './linkedin-api-client';
 import { db } from '@/db';
 import { ApiError } from '@/lib/api/errors';
+import { logger } from '@/lib/logger';
 import { socialAccounts, socialPosts, socialAnalytics } from '@/db/schema/social-media-schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import type {
@@ -44,6 +45,29 @@ export interface PlatformPostResult {
   post_id?: string;
   error?: string;
   permalink?: string;
+  /** false when the platform accepted the post but this application could not save its own record of it. */
+  recorded?: boolean;
+}
+
+/** Raised by a publish in which no platform accepted the post, so the operation audit records a failure, not a completion. */
+export class AllPlatformsFailedError extends Error {
+  constructor(readonly results: PlatformPostResult[]) {
+    super('No platform accepted the post');
+    this.name = 'AllPlatformsFailedError';
+  }
+}
+
+/** A refusal made by this application before the platform is asked; its message is ours and safe to return. */
+export class PublishRefusal extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PublishRefusal';
+  }
+}
+
+/** What a caller may be told about a failed platform call: this application's own refusals, never the platform's text. */
+function publishFailureMessage(error: unknown): string {
+  return error instanceof ApiError || error instanceof PublishRefusal ? error.message : 'The platform did not accept the post.';
 }
 
 /**
@@ -265,7 +289,7 @@ export class SocialMediaService {
             
             // Instagram requires at least one image
             if (!content.media_urls || content.media_urls.length === 0) {
-              throw new Error('Instagram posts require at least one image');
+              throw new PublishRefusal('Instagram posts require at least one image');
             }
 
             const response = await metaClient.publishInstagramPost(
@@ -337,37 +361,55 @@ export class SocialMediaService {
           }
 
           default:
-            throw new Error(`Unsupported platform: ${account.platform}`);
+            throw new PublishRefusal(`Unsupported platform: ${account.platform}`);
         }
 
-        // Save post to database
-        await db.insert(socialPosts).values({
-          organizationId,
-          accountId: account.id,
-          platformPostId: postId,
-          postType: this.detectPostType(content),
-          content: content.text,
-          mediaUrls: content.media_urls || [],
-          hashtags: content.hashtags || [],
-          mentions: content.mentions || [],
-          status: content.scheduled_for ? 'scheduled' : 'published',
-          scheduledFor: content.scheduled_for ?? null,
-          publishedAt: content.scheduled_for ? null : new Date(),
-          platformUrl: permalink ?? null,
-          createdBy: createdById,
-        });
+        // The platform has accepted the post. A failure to save our record of it must not be reported as a failed publish:
+        // the post is live, so it is reported as published and unrecorded, and the failure is logged.
+        let recorded = true;
+        try {
+          await db.insert(socialPosts).values({
+            organizationId,
+            accountId: account.id,
+            platformPostId: postId,
+            postType: this.detectPostType(content),
+            content: content.text,
+            mediaUrls: content.media_urls || [],
+            hashtags: content.hashtags || [],
+            mentions: content.mentions || [],
+            status: content.scheduled_for ? 'scheduled' : 'published',
+            scheduledFor: content.scheduled_for ?? null,
+            publishedAt: content.scheduled_for ? null : new Date(),
+            platformUrl: permalink ?? null,
+            createdBy: createdById,
+          });
+        } catch (recordError) {
+          recorded = false;
+          logger.error('Post accepted by the platform but not recorded', {
+            organizationId,
+            platform: account.platform,
+            platformPostId: postId,
+            error: recordError instanceof Error ? recordError.message : String(recordError),
+          });
+        }
 
         results.push({
           platform: account.platform,
           success: true,
           post_id: postId,
           permalink,
+          recorded,
         });
       } catch (error) {
+        logger.warn('Platform publish failed', {
+          organizationId,
+          platform: account.platform,
+          error: error instanceof Error ? error.message : String(error),
+        });
         results.push({
           platform: account.platform,
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: publishFailureMessage(error),
         });
       }
     }

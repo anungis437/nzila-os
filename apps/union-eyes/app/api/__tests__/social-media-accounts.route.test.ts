@@ -376,6 +376,40 @@ describe('social-media/accounts route', () => {
     expect(mockDb.update).toHaveBeenCalled();
   });
 
+  // DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE
+  it('does not refresh a suspended or disconnected account (409) and changes nothing', async () => {
+    const { PUT } = await loadRoute();
+    for (const status of ['suspended', 'disconnected']) {
+      m.queueSelect([{ id: 'acct-1', organizationId: TEST_USER.organizationId, platform: 'facebook', accessToken: 'old', refreshToken: null, status }]);
+      const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+        method: 'PUT',
+        body: JSON.stringify({ account_id: 'acct-1' }),
+        headers: { 'content-type': 'application/json' },
+      }));
+      expect(response.status).toBe(409);
+    }
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('does not mark an account expired when the platform refreshed but the record could not be saved', async () => {
+    const { PUT } = await loadRoute();
+    m.queueSelect([{ id: 'acct-1', organizationId: TEST_USER.organizationId, platform: 'facebook', accessToken: 'old', refreshToken: null, status: 'active' }]);
+    m.queueUpdateWhere([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+      method: 'PUT',
+      body: JSON.stringify({ account_id: 'acct-1' }),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(response.status).toBe(500);
+    // Only the failed refresh audit would be a second record; a storage failure writes none.
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'social.account.token_refresh_failed' }));
+  });
+
   it('refreshes a facebook token and returns the new expiry', async () => {
     const { PUT } = await loadRoute();
     m.queueSelect([

@@ -413,3 +413,34 @@ describe('getRateLimitStatus', () => {
     expect(statuses).toEqual([]);
   });
 });
+
+
+// DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT
+describe('publishPost reports what happened without echoing the platform or hiding a live post', () => {
+  it('never returns the platform error text', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    clients.twitter.postTweet = vi.fn().mockRejectedValue(new Error('401 Unauthorized: bearer abc.def.ghi rejected for app 12345'));
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1');
+    expect(results[0].success).toBe(false);
+    expect(results[0].error).toBe('The platform did not accept the post.');
+    expect(JSON.stringify(results)).not.toContain('bearer');
+  });
+
+  it('reports a post the platform accepted as published and unrecorded when the row cannot be saved', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const original = dbMock.insert;
+    (dbMock as any).insert = () => { throw new Error('db down'); };
+    try {
+      const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1');
+      expect(results[0]).toMatchObject({ success: true, post_id: 'tw-post-1', recorded: false });
+    } finally {
+      (dbMock as any).insert = original;
+    }
+  });
+
+  it('marks a recorded post as recorded', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1');
+    expect(results[0]).toMatchObject({ success: true, recorded: true });
+  });
+});

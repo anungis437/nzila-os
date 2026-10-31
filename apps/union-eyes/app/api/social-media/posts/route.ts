@@ -7,7 +7,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createSocialMediaService } from '@/lib/social-media/social-media-service';
+import { createSocialMediaService, AllPlatformsFailedError } from '@/lib/social-media/social-media-service';
 import { parseSocialPostPagination } from '@/lib/social-media/social-post-pagination';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { db } from '@/db';
@@ -197,8 +197,8 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
           resourceType: 'social_posts',
           details: { platforms, scheduled: !!scheduled_for, mediaCount: (media_urls || []).length },
         },
-        () =>
-          socialMediaService.publishPost(
+        async () => {
+          const published = await socialMediaService.publishPost(
             organizationId,
             {
               text: content,
@@ -212,7 +212,11 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
               platforms,
             },
             userId
-          ),
+          );
+          // When no platform accepted the post the operation is a failure, so its outcome record says so.
+          if (published.every((r) => !r.success)) throw new AllPlatformsFailedError(published);
+          return published;
+        },
       );
 
       // Check if any posts succeeded
@@ -236,6 +240,9 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         failed: failureCount,
       });
     } catch (error) {
+      if (error instanceof AllPlatformsFailedError) {
+        return NextResponse.json({ error: 'Failed to publish to any platform', results: error.results }, { status: 500 });
+      }
       const refused = operationAuditResponse(error);
       if (refused) return NextResponse.json(refused.body, { status: refused.status });
       return NextResponse.json(

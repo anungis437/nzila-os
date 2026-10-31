@@ -387,6 +387,11 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
     );
       }
 
+      // A suspended or disconnected account is not brought back by a token refresh; it is reconnected on purpose.
+      if (account.status === 'suspended' || account.status === 'disconnected') {
+        return standardErrorResponse(ErrorCode.CONFLICT, `A ${account.status} account must be reconnected, not refreshed`);
+      }
+
       // Refresh token based on platform
       let newAccessToken: string;
       let newRefreshToken: string | null = null;
@@ -433,8 +438,31 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
           default:
             throw new Error('Unsupported platform');
         }
+      } catch (providerError) {
+        // Only the platform refusing the refresh marks a connected account expired; a storage failure below does not.
+        await withRLSContext({ organizationId }, async (tx) => {
+          const rows = await tx
+            .update(socialAccounts)
+            .set({
+              status: 'expired',
+              updatedAt: new Date(),
+            })
+            .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId), eq(socialAccounts.status, 'active')))
+            .returning({ id: socialAccounts.id });
+          await persistAtomicAudit(tx, {
+            organizationId,
+            userId,
+            action: 'social.account.token_refresh_failed',
+            resourceType: 'social_accounts',
+            resourceId: account_id,
+            details: { platform: account.platform, markedExpired: rows.length > 0 },
+          });
+        });
 
-        // Update account with new tokens — org predicate is defense-in-depth on top of
+        throw providerError;
+      }
+
+      // Update account with new tokens — org predicate is defense-in-depth on top of
         // the org-scoped SELECT above; trusted org is passed explicitly rather than
         // letting withRLSContext silently re-resolve org through an independent auth path.
         const expiresAt = new Date(Date.now() + expiresIn * 1000);
@@ -444,7 +472,8 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
             .set({
               accessToken: newAccessToken,
               tokenExpiresAt: expiresAt,
-              status: 'active',
+              // An expired account is reconnected by a successful refresh; any other state is kept as it was.
+              status: account.status === 'expired' ? 'active' : account.status,
               updatedAt: new Date(),
               ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
             })
@@ -465,30 +494,6 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
           message: 'Token refreshed successfully',
           expires_at: expiresAt.toISOString(),
         });
-      } catch (error) {
-        // Update account status to error — org predicate is defense-in-depth (see above).
-        await withRLSContext({ organizationId }, async (tx) => {
-          const rows = await tx
-            .update(socialAccounts)
-            .set({
-              status: 'expired',
-              updatedAt: new Date(),
-            })
-            .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
-            .returning({ id: socialAccounts.id });
-          if (rows.length === 0) return;
-          await persistAtomicAudit(tx, {
-            organizationId,
-            userId,
-            action: 'social.account.token_refresh_failed',
-            resourceType: 'social_accounts',
-            resourceId: account_id,
-            details: { platform: account.platform },
-          });
-        });
-
-        throw error;
-      }
     } catch (_error) {
 return NextResponse.json(
         {

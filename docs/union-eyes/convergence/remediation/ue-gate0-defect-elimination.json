@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 498,
-    "partial": 78,
+    "implementedPendingQualification": 500,
+    "partial": 79,
     "qualificationVerified": 0,
-    "unresolved": 279,
+    "unresolved": 277,
     "externalBlockers": 0
   },
   "batches": [
@@ -788,6 +788,15 @@
       "outstandingBefore": 283,
       "newlyImplemented": 4,
       "outstandingAfter": 279,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B79-SOCIAL-FIGURES-AND-PUBLISH",
+      "family": "Social campaign figures, publish handling and token refresh",
+      "outstandingBefore": 279,
+      "newlyImplemented": 2,
+      "outstandingAfter": 277,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -1852,9 +1861,11 @@
         "apps/union-eyes/lib/social-media/social-media-service.ts",
         "apps/union-eyes/app/api/social-media/analytics/route.ts",
         "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
-        "apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts"
+        "apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts",
+        "apps/union-eyes/lib/social-media/campaign-figures.ts",
+        "apps/union-eyes/lib/services/__tests__/s23-social-figures-and-publish.test.ts"
       ],
-      "explanation": "Existing collection-unavailable and data_collected safeguards remain. Additionally, the post analytics summary, campaign analytics summary and campaign export no longer claim zero clicks when no click collector or click field exists; they return null (unknown) while account analytics retains actual recorded linkClicks. Regression assertions cover all three projections; tests and native/runtime acceptance remain pending.",
+      "explanation": "Existing collection-unavailable and data_collected safeguards remain. Additionally, the post analytics summary, campaign analytics summary and campaign export no longer claim zero clicks when no click collector or click field exists; they return null (unknown) while account analytics retains actual recorded linkClicks. Regression assertions cover all three projections; tests and native/runtime acceptance remain pending. B79: the campaign reads now say figures_recorded false when every counter is a default, so an unwritten counter is not presented as measured performance; no collector exists yet.",
       "remaining": "The social platform collector still does not transform provider responses into stored analytics and no proven worker calls it. Exact-HEAD unit, native PostgreSQL and HTTP/browser/staging qualification and institutional analytics authority remain outstanding."
     },
     "DEF-0B11-IDS-STEWARD-ROUTES-SERVE-ASSIGNMENT-ROWS-AND-NO-ROUTE-APPOINTS-OR-ENDS-A-STEWARD": {
@@ -6690,6 +6701,40 @@
         "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts"
       ],
       "explanation": "Verified in source: the employer risk calculation and the insight report no longer insert employer_risk_scores or ai_insight_reports on a GET (the comment records that persistence needs a separately authorized, audited command); the invocation is audited."
+    },
+    "DEF-0B11-SOC-CAMPAIGN-ANALYTICS-PLATFORM-AND-GOAL-FIGURES-READ-FIELDS-THE-QUERY-DOES-NOT-SELECT-AND-A-HARD-CODED-UNDEFINED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B79-SOCIAL-FIGURES-AND-PUBLISH",
+      "files": [
+        "apps/union-eyes/lib/social-media/campaign-figures.ts",
+        "apps/union-eyes/app/api/social-media/analytics/route.ts",
+        "apps/union-eyes/app/api/social-media/campaigns/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s23-social-figures-and-publish.test.ts"
+      ],
+      "explanation": "One helper computes the campaign totals, the per-platform figures (from the count fields the query selects, not impressions/engagement/likes names it does not return), the average engagement rate (absent when no post has one) and the progress toward the goals the campaign set (impressions, engagement rate; conversions have no actual because none is collected). The clicks total is absent, not zero; both reads add the organization predicate on posts; the responses carry figures_recorded so default zeros are not presented as measured performance."
+    },
+    "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT": {
+      "status": "PARTIAL",
+      "batch": "B79-SOCIAL-FIGURES-AND-PUBLISH",
+      "files": [
+        "apps/union-eyes/lib/social-media/social-media-service.ts",
+        "apps/union-eyes/app/api/social-media/posts/route.ts",
+        "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
+        "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s23-social-figures-and-publish.test.ts"
+      ],
+      "explanation": "A platform failure is returned as a fixed message (this application's own refusals keep their text; the platform's text is logged, not returned); a failure to save the row after the platform accepted the post is reported as published and unrecorded (recorded: false) and logged, not as a failed publish; when no platform accepted the post the audited operation throws, so its outcome record says failed. Two tests were adapted and three added (disclosed): the route test mock gained the error class, the service test gained the three cases.",
+      "remaining": "The intent and outcome records are still written around the external call and are not committed with a data row: an external effect cannot be made atomic with a database row, and a post scheduled or published before the row is saved can still exist without it if the process dies in between."
+    },
+    "DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B79-SOCIAL-FIGURES-AND-PUBLISH",
+      "files": [
+        "apps/union-eyes/app/api/social-media/accounts/route.ts",
+        "apps/union-eyes/app/api/__tests__/social-media-accounts.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s23-social-figures-and-publish.test.ts"
+      ],
+      "explanation": "Only the platform refusing the refresh marks a connected (active) account expired, with an audit record that says whether it did; a storage or audit failure after a successful refresh marks nothing. A suspended or disconnected account is refused with 409 rather than reactivated, and a successful refresh sets an expired account active and keeps any other state. Two tests were added (disclosed)."
     }
   }
 }

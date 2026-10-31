@@ -16,6 +16,9 @@ vi.mock('@/lib/rate-limiter', () => ({
 }));
 vi.mock('@/lib/social-media/social-media-service', () => ({
   createSocialMediaService: () => ({ publishPost: m.publishPost, deletePost: m.deletePost }),
+  AllPlatformsFailedError: class extends Error {
+    results: unknown[] = [];
+  },
 }));
 vi.mock('@/db', () => ({
   db: {
