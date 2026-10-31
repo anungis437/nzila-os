@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const API = join(process.cwd(), 'app', 'api');
+const API = join(fileURLToPath(new URL('../../../', import.meta.url)), 'app', 'api');
 
 function routeFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

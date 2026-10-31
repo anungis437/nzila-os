@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { narrateEnvelope } from '@/lib/organizational-narratives'
 import { INTERVIEW_READ_LIMIT } from '../governance/interview-read-limit'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 function envelope(evidence: unknown[]) {
   return {

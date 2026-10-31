@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -38,7 +39,7 @@ describe('B44 signer network data (DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCL
 })
 
 describe('B44 signature routes', () => {
-  const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+  const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
   it('applies the void schema, with a bounded reason, instead of reading the raw body', () => {
     const route = read('app/api/signatures/documents/[id]/route.ts')

@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('B56 content publication and registration', () => {
   it('does not let the person who prepared an item for review publish it, and keeps the first publication time (DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES)', () => {

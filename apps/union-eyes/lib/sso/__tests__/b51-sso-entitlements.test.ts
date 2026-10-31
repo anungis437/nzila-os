@@ -1,9 +1,10 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { validateSsoProviderInput } from '@/lib/sso/provider-input'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('B51 SSO provider input (DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT)', () => {
   const oidc = { name: 'IdP', providerType: 'oidc', oidcIssuer: 'https://idp.example.test', oidcClientId: 'client' }

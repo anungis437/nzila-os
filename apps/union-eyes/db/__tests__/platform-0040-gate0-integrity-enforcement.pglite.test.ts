@@ -1,9 +1,10 @@
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { PGlite } from '@electric-sql/pglite'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const file = join(process.cwd(), 'db/migrations-platform/0040_gate0_integrity_enforcement.sql')
+const file = join(fileURLToPath(new URL('../../', import.meta.url)), 'db/migrations-platform/0040_gate0_integrity_enforcement.sql')
 const statements = readFileSync(file, 'utf8')
   .split('--> statement-breakpoint')
   .map((s) => s.trim())

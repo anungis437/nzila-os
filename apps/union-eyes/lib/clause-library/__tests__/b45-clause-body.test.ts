@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -51,7 +52,7 @@ describe('B45 public publishing is an officer decision (DEF-0B4-CLAUSE-LIBRARY-P
 })
 
 describe('B45 clause library routes', () => {
-  const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+  const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
   it('parses and gates the create, update and share bodies, and checks the cited original clause', () => {
     const create = read('app/api/clause-library/route.ts')

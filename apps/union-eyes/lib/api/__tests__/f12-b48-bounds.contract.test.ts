@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { likeContaining } from '../like-pattern'
 import { boundedJsonRecord } from '../bounded-json-record'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('B48 literal search terms and bounded free-form JSON', () => {
   it('takes LIKE wildcards in a term literally', () => {

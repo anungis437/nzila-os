@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -46,7 +47,7 @@ describe('B46 ICRA stepwise coverage (DEF-0B8-ICRA-STEPWISE-SUBMIT-SCORES-ANY-NO
 })
 
 describe('B46 ICRA routes', () => {
-  const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+  const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
   it('requires consent to start, to answer and to submit the stepwise flow', () => {
     expect(read('app/api/icra/start/route.ts')).toContain('serverConsentRecord(payload.consent)')
