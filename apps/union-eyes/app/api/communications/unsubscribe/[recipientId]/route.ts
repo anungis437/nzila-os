@@ -120,12 +120,16 @@ export async function GET(
   const campaignId = request.nextUrl.searchParams.get('campaignId');
   const token = request.nextUrl.searchParams.get('token');
   const scope = request.nextUrl.searchParams.get('scope');
-  const reason = (request.nextUrl.searchParams.get('reason') || 'unsubscribe_link').slice(0, 200);
+  // Query strings are untrusted and may contain personal information; persist
+  // only the supported reason codes, never arbitrary link-supplied text.
+  const requestedReason = request.nextUrl.searchParams.get('reason');
+  const reason = requestedReason === 'manual' || requestedReason === 'preference_center'
+    ? requestedReason : 'unsubscribe_link';
   const locale = request.nextUrl.searchParams.get('locale') || 'en-CA';
 
   // A recipient-only token carries no organization authority. Do not infer
   // an organization from the recipient and silently revoke other tenants.
-  if ((!campaignId && scope !== 'all') || (campaignId && scope === 'all')) {
+  if ((!campaignId && scope !== 'all') || (campaignId && scope !== null)) {
     return new NextResponse('An explicit campaign or all-organizations unsubscribe scope is required', { status: 400 });
   }
 
@@ -134,8 +138,6 @@ export async function GET(
   const verification = requireOrgAccess(token, campaignId, recipientId, scope);
   if (verification !== 'valid') {
     logger.warn('[communications/unsubscribe] Unsubscribe token not authorized', {
-      recipientId,
-      campaignId,
       reason: verification,
     });
     return new NextResponse('Invalid unsubscribe token', { status: 401 });
