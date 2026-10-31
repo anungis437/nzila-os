@@ -13,8 +13,8 @@ const hash = text => createHash('sha256').update(text).digest('hex')
 
 function makeFixture(algorithm = 'ed25519') {
   const directory = mkdtempSync(join(tmpdir(), 'nzila-promotion-test-'))
-  const { publicKey, privateKey } = algorithm === 'rsa-512'
-    ? generateKeyPairSync('rsa', { modulusLength: 512 })
+  const { publicKey, privateKey } = algorithm === 'rsa-2048'
+    ? generateKeyPairSync('rsa', { modulusLength: 2048 })
     : generateKeyPairSync('ed25519')
   const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' }).toString()
   const sbom = JSON.stringify({ bomFormat: 'CycloneDX', specVersion: '1.6',
@@ -57,11 +57,11 @@ test('valid signed immutable promotion evidence passes', () => {
   const x = makeFixture()
   try { assert.equal(x.verify().commitSha, COMMIT) } finally { x.cleanup() }
 })
-test('RSA-512 signature with Ed25519-length output cannot substitute release authority', () => {
-  const x = makeFixture('rsa-512')
+test('RSA-2048 signature cannot substitute Ed25519 release authority', () => {
+  const x = makeFixture('rsa-2048')
   try {
     const signed = JSON.parse(readFileSync(join(x.directory, 'release-attestation.json'), 'utf8'))
-    assert.equal(signed.signature.length, 128) // 64 bytes, exactly Ed25519 length
+    assert.equal(signed.signature.length, 512) // 256 bytes for RSA-2048; the verifier still rejects the algorithm
     assert.throws(() => x.verify(), /attestation verification key must be Ed25519/)
   } finally { x.cleanup() }
 })
