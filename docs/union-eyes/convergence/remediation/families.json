@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 462,
- "partial": 73,
- "outstanding": 315,
- "accountedFor": 315,
+ "corrected": 465,
+ "partial": 77,
+ "outstanding": 312,
+ "accountedFor": 312,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -48,20 +48,20 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 34,
+   "defects": 32,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 22,
-    "LOW": 8
+    "MEDIUM": 21,
+    "LOW": 7
    },
    "namedRoutes": 8,
    "namedFiles": 1,
    "tranches": {
     "0B.2": 1,
     "0B.3": 1,
-    "0B.4": 4,
+    "0B.4": 3,
     "0B.5": 2,
-    "0B.6": 7,
+    "0B.6": 6,
     "0B.7": 2,
     "0B.8": 2,
     "0B.9": 2,
@@ -92,11 +92,11 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 63,
+   "defects": 64,
    "severity": {
     "HIGH": 8,
     "MEDIUM": 38,
-    "LOW": 17
+    "LOW": 18
    },
    "namedRoutes": 6,
    "namedFiles": 0,
@@ -107,7 +107,7 @@
     "0B.5": 3,
     "0B.6": 8,
     "0B.7": 18,
-    "0B.8": 4,
+    "0B.8": 5,
     "0B.9": 3,
     "0B.10": 8,
     "0B.11": 11,
@@ -164,13 +164,13 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 28,
+   "defects": 26,
    "severity": {
     "HIGH": 1,
     "MEDIUM": 21,
-    "LOW": 6
+    "LOW": 4
    },
-   "namedRoutes": 7,
+   "namedRoutes": 6,
    "namedFiles": 1,
    "tranches": {
     "0B.3": 1,
@@ -178,10 +178,10 @@
     "0B.6": 1,
     "0B.7": 5,
     "0B.8": 3,
-    "0B.9": 3,
+    "0B.9": 2,
     "0B.10": 3,
     "0B.11": 5,
-    "0B.12": 5
+    "0B.12": 4
    }
   },
   {
@@ -381,20 +381,12 @@
     "partial": true
    },
    {
-    "id": "DEF-0B4-CBAS-CBA-NUMBER-GLOBALLY-UNIQUE",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B5-TRACKING-STATS-READ-MODIFY-WRITE-UNAUDITED",
     "severity": "LOW"
    },
    {
     "id": "DEF-0B5-UNSUBSCRIBE-NO-CONSENT-RECORD-WITHOUT-CAMPAIGN",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-GLOBAL-UNIQUE-CODES-ACROSS-ORGANIZATIONS",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
@@ -414,7 +406,8 @@
    },
    {
     "id": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-SYS-PER-CAPITA-CRON-WRITES-A-DOMAIN-DECLARED-NOT-IMPLEMENTED",
@@ -430,7 +423,8 @@
    },
    {
     "id": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES",
@@ -447,7 +441,8 @@
    },
    {
     "id": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B10-ORG-ORGANIZER-TASK-CREATE-STORES-UNVERIFIED-ASSIGNEE-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
@@ -697,6 +692,11 @@
    {
     "id": "DEF-0B8-FED-FLAGS-TYPE-VOCABULARY-ORGANIZATION-NOT-EVALUATED",
     "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT",
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ML-SLA-FEEDBACK-PILOT-EVENT-IS-AN-AWAITED-POST-COMMIT-WRITE-THROUGH-THE-BARE-DB",
@@ -1217,10 +1217,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B9-ORG-DIRECTORY-PROJECTION-FILLS-MISSING-FIELDS-WITH-CANNED-DEPARTMENT-POSITION-AND-ZERO-SENIORITY",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-SENDS-THE-TYPED-CONTACT-TO-HUBSPOT-WITH-NO-PROOF-OF-THE-ADDRESS-AND-NO-CONSENT-DECISION",
     "severity": "MEDIUM"
    },
@@ -1251,10 +1247,6 @@
    {
     "id": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-ORGANIZATIONS-LEGACY-BRANCH-LOGS-THE-FULL-E-MAIL-ADDRESS",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY",

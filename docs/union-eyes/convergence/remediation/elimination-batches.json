@@ -5745,6 +5745,51 @@
           "explanation": "Existing implementation, verified: the organizations list no longer has the platform-administrator-id legacy branch and does not read or log the caller's e-mail address; pinned by a test."
         }
       ]
+    },
+    {
+      "id": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
+      "family": "Paths that advertised an operation but were generic CRUD over another table, verified as honest 501",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-RPT-SCHEDULED-PATHS-ARE-REPORT-DEFINITION-CRUD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/reports/scheduled/route.ts",
+            "apps/union-eyes/app/api/reports/scheduled/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+          ],
+          "explanation": "The scheduled-report paths no longer expose report-definition CRUD as though it were a schedule. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+        },
+        {
+          "prefix": "DEF-0B10-ORG-ORGANIZER-TASK-CREATE-STORES-UNVERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/organizer/impact/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+          ],
+          "explanation": "The organizer-impact path no longer creates organizer tasks with unverified assignee, member, case and grievance references. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+        },
+        {
+          "prefix": "DEF-0B10-ORG-ORGANIZER-TASKS-READABLE-BY-EVERY-STEWARD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/organizer/impact/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+          ],
+          "explanation": "The organizer-impact path no longer returns every organizer task of the organization to any steward. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+        },
+        {
+          "prefix": "DEF-0B11-RPT-BUILDER-AND-DATA-SOURCE-SAMPLE-PATHS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/reports/builder/route.ts",
+            "apps/union-eyes/app/api/reports/datasources/sample/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+          ],
+          "explanation": "The report-builder and data-source-sample paths no longer act as report-definition CRUD. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+        }
+      ]
     }
   ]
 }

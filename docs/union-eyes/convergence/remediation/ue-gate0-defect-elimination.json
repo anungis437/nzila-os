@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 412,
+    "implementedPendingQualification": 416,
     "partial": 77,
     "qualificationVerified": 0,
-    "unresolved": 365,
+    "unresolved": 361,
     "externalBlockers": 0
   },
   "batches": [
@@ -600,6 +600,15 @@
       "newlyImplemented": 2,
       "outstandingAfter": 365,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
+      "family": "Paths that advertised an operation but were generic CRUD over another table, verified as honest 501",
+      "outstandingBefore": 365,
+      "newlyImplemented": 4,
+      "outstandingAfter": 361,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -5543,6 +5552,44 @@
         "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
       ],
       "explanation": "Existing implementation, verified: the organizations list no longer has the platform-administrator-id legacy branch and does not read or log the caller's e-mail address; pinned by a test."
+    },
+    "DEF-0B11-RPT-SCHEDULED-PATHS-ARE-REPORT-DEFINITION-CRUD-NO-SCHEDULE-RECIPIENT-OR-DELIVERY-EXISTS-AND-PAUSE-RESUME-REPORT-SUCCESS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
+      "files": [
+        "apps/union-eyes/app/api/reports/scheduled/route.ts",
+        "apps/union-eyes/app/api/reports/scheduled/[id]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The scheduled-report paths no longer expose report-definition CRUD as though it were a schedule. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+    },
+    "DEF-0B10-ORG-ORGANIZER-TASK-CREATE-STORES-UNVERIFIED-ASSIGNEE-MEMBER-CASE-AND-GRIEVANCE-REFERENCES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
+      "files": [
+        "apps/union-eyes/app/api/organizer/impact/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The organizer-impact path no longer creates organizer tasks with unverified assignee, member, case and grievance references. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+    },
+    "DEF-0B10-ORG-ORGANIZER-TASKS-READABLE-BY-EVERY-STEWARD-WITH-MEMBER-CASE-AND-GRIEVANCE-REFERENCES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
+      "files": [
+        "apps/union-eyes/app/api/organizer/impact/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The organizer-impact path no longer returns every organizer task of the organization to any steward. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
+    },
+    "DEF-0B11-RPT-BUILDER-AND-DATA-SOURCE-SAMPLE-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-SAMPLE-NO-SOURCE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
+      "files": [
+        "apps/union-eyes/app/api/reports/builder/route.ts",
+        "apps/union-eyes/app/api/reports/datasources/sample/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The report-builder and data-source-sample paths no longer act as report-definition CRUD. Existing implementation, verified: the path answers 501 behind its role floor and reads and writes nothing; pinned by a test."
     }
   }
 }

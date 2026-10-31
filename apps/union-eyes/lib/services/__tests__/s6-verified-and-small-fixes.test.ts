@@ -65,4 +65,12 @@ describe('S6 verified and small fixes', () => {
     expect(service).toContain('at: locationTracking.recordedAt')
     expect(service).toContain('at: geofenceEvents.eventTime')
   })
+
+  it('answers 501, and not a generic CRUD, on the organizer-impact, scheduled-report and report-builder paths that advertised other operations (verified existing implementation)', () => {
+    for (const route of ['app/api/organizer/impact/route.ts', 'app/api/reports/scheduled/route.ts', 'app/api/reports/scheduled/[id]/route.ts', 'app/api/reports/builder/route.ts']) {
+      const source = read(route)
+      expect(source, route).toContain('ApiError.notImplemented')
+      expect(source, route).not.toContain('crudRoutes')
+    }
+  })
 })
