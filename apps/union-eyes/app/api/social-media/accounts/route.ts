@@ -292,7 +292,9 @@ export const DELETE = withRoleAuth('admin', async (request: NextRequest, context
     );
       }
 
-      // Revoke tokens on the platform (if supported)
+      // Revoke tokens on the platform (if supported). The local credential is removed either way, but the outcome is recorded and
+      // reported: a token the platform still honours is not described as disconnected.
+      let platformTokenRevoked: 'revoked' | 'not_required' | 'failed' = 'not_required';
       try {
         switch (account.platform) {
           case 'twitter': {
@@ -301,12 +303,13 @@ export const DELETE = withRoleAuth('admin', async (request: NextRequest, context
               account.refreshToken || undefined
             );
             await twitterClient.revokeToken();
+            platformTokenRevoked = 'revoked';
             break;
           }
           // Meta and LinkedIn don&apos;t require explicit revocation
         }
       } catch (_revokeError) {
-// Continue with deletion even if revocation fails
+        platformTokenRevoked = 'failed';
       }
 
       // Delete account and record the audit together — org predicate is defense-in-depth on top of
@@ -324,7 +327,7 @@ export const DELETE = withRoleAuth('admin', async (request: NextRequest, context
           action: 'social.account.disconnect',
           resourceType: 'social_accounts',
           resourceId: accountId,
-          details: { platform: account.platform },
+          details: { platform: account.platform, platformTokenRevoked },
         });
         return true;
       });
@@ -333,8 +336,11 @@ export const DELETE = withRoleAuth('admin', async (request: NextRequest, context
       }
 
       return NextResponse.json({
-        message: 'Account disconnected successfully',
+        message: platformTokenRevoked === 'failed'
+          ? 'Account disconnected here, but the platform token could not be revoked and stays valid until it expires or is revoked at the platform'
+          : 'Account disconnected successfully',
         account_id: accountId,
+        platform_token_revoked: platformTokenRevoked,
       });
     } catch (_error) {
 return NextResponse.json(

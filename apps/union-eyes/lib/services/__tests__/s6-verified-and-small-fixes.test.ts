@@ -73,4 +73,21 @@ describe('S6 verified and small fixes', () => {
       expect(source, route).not.toContain('crudRoutes')
     }
   })
+
+  it('answers 501, not generic CRUD, on the locals paths and the equity self-identification path (verified existing implementation)', () => {
+    for (const route of ['app/api/locals/route.ts', 'app/api/locals/[id]/route.ts', 'app/api/equity/self-identify/route.ts']) {
+      const source = read(route)
+      expect(source, route).toContain('ApiError.notImplemented')
+      expect(source, route).not.toContain('crudRoutes')
+    }
+  })
+
+  it('reports and audits whether the platform token was revoked when a social account is disconnected (DEF-0B11-SOC-DISCONNECT-DELETES-THE-CREDENTIAL-EVEN-WHEN-REVOCATION-FAILS)', () => {
+    const source = read('app/api/social-media/accounts/route.ts')
+    const disconnect = source.slice(source.indexOf('export const DELETE'), source.indexOf('export const PUT'))
+    expect(disconnect).toContain("platformTokenRevoked = 'failed'")
+    expect(disconnect).toContain('details: { platform: account.platform, platformTokenRevoked }')
+    expect(disconnect).toContain('platform_token_revoked: platformTokenRevoked')
+    expect(disconnect).toContain('could not be revoked')
+  })
 })

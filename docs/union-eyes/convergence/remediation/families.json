@@ -1,21 +1,21 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 465,
- "partial": 77,
- "outstanding": 312,
- "accountedFor": 312,
+ "corrected": 472,
+ "partial": 78,
+ "outstanding": 305,
+ "accountedFor": 305,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 10,
+   "defects": 9,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 7,
+    "MEDIUM": 6,
     "LOW": 3
    },
-   "namedRoutes": 3,
+   "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
@@ -23,7 +23,7 @@
     "0B.7": 1,
     "0B.8": 2,
     "0B.9": 1,
-    "0B.11": 4
+    "0B.11": 3
    }
   },
   {
@@ -48,13 +48,13 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 32,
+   "defects": 31,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 21,
+    "MEDIUM": 20,
     "LOW": 7
    },
-   "namedRoutes": 8,
+   "namedRoutes": 7,
    "namedFiles": 1,
    "tranches": {
     "0B.2": 1,
@@ -65,7 +65,7 @@
     "0B.7": 2,
     "0B.8": 2,
     "0B.9": 2,
-    "0B.10": 6,
+    "0B.10": 5,
     "0B.11": 5,
     "0B.12": 1,
     "0C.1": 1
@@ -117,13 +117,13 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 64,
+   "defects": 63,
    "severity": {
     "HIGH": 3,
-    "MEDIUM": 51,
+    "MEDIUM": 50,
     "LOW": 10
    },
-   "namedRoutes": 10,
+   "namedRoutes": 9,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 3,
@@ -134,7 +134,7 @@
     "0B.7": 5,
     "0B.8": 9,
     "0B.9": 5,
-    "0B.10": 7,
+    "0B.10": 6,
     "0B.11": 14,
     "0B.12": 6
    }
@@ -142,10 +142,10 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 20,
+   "defects": 18,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 15,
+    "MEDIUM": 13,
     "LOW": 1
    },
    "namedRoutes": 3,
@@ -155,7 +155,7 @@
     "0B.3": 1,
     "0B.4": 3,
     "0B.5": 4,
-    "0B.7": 5,
+    "0B.7": 3,
     "0B.8": 2,
     "0B.9": 2,
     "0B.10": 2
@@ -221,18 +221,18 @@
   {
    "family": "F11-AI-GOVERNANCE",
    "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
-   "defects": 8,
+   "defects": 7,
    "severity": {
     "HIGH": 0,
     "MEDIUM": 6,
-    "LOW": 2
+    "LOW": 1
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
     "0B.2": 1,
     "0B.6": 1,
-    "0B.7": 2,
+    "0B.7": 1,
     "0B.8": 1,
     "0B.9": 1,
     "0B.10": 2
@@ -241,13 +241,13 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 65,
+   "defects": 64,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 44,
+    "MEDIUM": 43,
     "LOW": 19
    },
-   "namedRoutes": 10,
+   "namedRoutes": 8,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 4,
@@ -260,7 +260,7 @@
     "0B.8": 9,
     "0B.9": 1,
     "0B.10": 6,
-    "0B.11": 5,
+    "0B.11": 4,
     "0B.12": 6
    }
   }
@@ -304,10 +304,6 @@
     "id": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B11-RPT-SCHEDULED-PATHS-ARE-REPORT-DEFINITION-CRUD-NO-SCHEDULE-RECIPIENT-OR-DELIVERY-EXISTS-AND-PAUSE-RESUME-REPORT-SUCCESS",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE",
@@ -443,10 +439,6 @@
     "id": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
     "severity": "LOW",
     "partial": true
-   },
-   {
-    "id": "DEF-0B10-ORG-ORGANIZER-TASK-CREATE-STORES-UNVERIFIED-ASSIGNEE-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
@@ -954,10 +946,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B10-ORG-ORGANIZER-TASKS-READABLE-BY-EVERY-STEWARD-WITH-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
     "severity": "HIGH"
    },
@@ -1086,7 +1074,8 @@
    },
    {
     "id": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
@@ -1106,17 +1095,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B7-EXC-COPILOT-CONVERSATIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B7-EXC-REASONING-SESSIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
@@ -1322,10 +1303,6 @@
    {
     "id": "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-COPILOT-CONTEXT-IS-CLIENT-SUPPLIED-HISTORY",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
@@ -1573,10 +1550,6 @@
    {
     "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B11-RPT-BUILDER-AND-DATA-SOURCE-SAMPLE-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-SAMPLE-NO-SOURCE",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B11-SOC-SCHEDULED-POST-IS-PUBLISHED-AT-ONCE-ON-INSTAGRAM-X-AND-LINKEDIN-WHILE-THE-ROW-SAYS-SCHEDULED-AND-HASHTAGS-AND-MENTIONS-ARE-NOT-SENT",
