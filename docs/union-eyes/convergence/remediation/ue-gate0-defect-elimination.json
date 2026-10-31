@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 500,
-    "partial": 79,
+    "implementedPendingQualification": 508,
+    "partial": 78,
     "qualificationVerified": 0,
-    "unresolved": 277,
+    "unresolved": 269,
     "externalBlockers": 0
   },
   "batches": [
@@ -489,315 +489,324 @@
       "id": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
       "family": "F12: routes that record a send or advertise an operation they do not perform answer 501; communications history is retained",
       "outstandingBefore": 399,
-      "newlyImplemented": 5,
-      "outstandingAfter": 394,
-      "partial": 5,
+      "newlyImplemented": 6,
+      "outstandingAfter": 393,
+      "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
       "family": "F12: referenced ids belong to the right parent, and a figure with nothing to measure is unknown rather than 0 or 100",
-      "outstandingBefore": 394,
+      "outstandingBefore": 393,
       "newlyImplemented": 4,
-      "outstandingAfter": 390,
+      "outstandingAfter": 389,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
       "family": "F12: approved records are locked, reviewers are independent, referenced members and documents are the organization own, and an unsubscribe is one transaction",
-      "outstandingBefore": 390,
+      "outstandingBefore": 389,
       "newlyImplemented": 3,
-      "outstandingAfter": 387,
+      "outstandingAfter": 386,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
       "family": "F12: publication needs a second person, and registration follows the session window and capacity",
-      "outstandingBefore": 387,
+      "outstandingBefore": 386,
       "newlyImplemented": 0,
-      "outstandingAfter": 387,
+      "outstandingAfter": 386,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "family": "Schema closure: the columns and indexes that let earlier partial fixes record the real fact instead of approximating it",
-      "outstandingBefore": 387,
+      "outstandingBefore": 386,
       "newlyImplemented": 7,
-      "outstandingAfter": 380,
+      "outstandingAfter": 379,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "family": "Database enforcement: constraints, triggers and columns that settle what application checks could only attempt",
-      "outstandingBefore": 380,
+      "outstandingBefore": 379,
       "newlyImplemented": 4,
-      "outstandingAfter": 376,
+      "outstandingAfter": 375,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S03-ROOM-BOOKING-MIGRATIONS-0041-AND-0035",
       "family": "Room booking: the booking store, its tenant isolation and the route that enforces the room's own rules",
-      "outstandingBefore": 376,
+      "outstandingBefore": 375,
       "newlyImplemented": 2,
-      "outstandingAfter": 374,
+      "outstandingAfter": 373,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
       "family": "Code closure of partial fixes whose remaining part needed no external decision",
-      "outstandingBefore": 374,
+      "outstandingBefore": 373,
       "newlyImplemented": 4,
-      "outstandingAfter": 370,
+      "outstandingAfter": 369,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B57-F05-INPUT-VALIDATION-AND-BOUNDS-SWEEP",
       "family": "F05 input validation and bounds: typed bodies, bounded pages and limited anonymous reads",
-      "outstandingBefore": 370,
+      "outstandingBefore": 369,
       "newlyImplemented": 8,
-      "outstandingAfter": 362,
+      "outstandingAfter": 361,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B58-F06-VERIFIED-AUDIT-AND-COMPLETION-COUNTS",
       "family": "F06 audit and records: verified existing audit and a completion count that measured attendance",
-      "outstandingBefore": 362,
+      "outstandingBefore": 361,
       "newlyImplemented": 2,
-      "outstandingAfter": 360,
+      "outstandingAfter": 359,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B59-F05-F08-READS-WITHOUT-SIDE-EFFECTS-AND-PRIVATE-DEFINITIONS",
       "family": "Reads that wrote, private definitions readable by others, and paths that advertised what they did not do",
-      "outstandingBefore": 360,
+      "outstandingBefore": 359,
       "newlyImplemented": 3,
-      "outstandingAfter": 357,
+      "outstandingAfter": 356,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
       "family": "Schema: record numbers and codes unique within an organization, not across every organization",
-      "outstandingBefore": 357,
+      "outstandingBefore": 356,
       "newlyImplemented": 2,
-      "outstandingAfter": 355,
+      "outstandingAfter": 354,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B60-F03-F08-RETENTION-LOG-AND-VERIFIED-PROJECTIONS",
       "family": "Retention evidence that told the truth, and projections verified free of canned values and address logging",
-      "outstandingBefore": 355,
+      "outstandingBefore": 354,
       "newlyImplemented": 2,
-      "outstandingAfter": 353,
+      "outstandingAfter": 352,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
       "family": "Paths that advertised an operation but were generic CRUD over another table, verified as honest 501",
-      "outstandingBefore": 353,
+      "outstandingBefore": 352,
       "newlyImplemented": 4,
-      "outstandingAfter": 349,
+      "outstandingAfter": 348,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
       "family": "Schema: a copilot conversation and a reasoning session belong to the person who opened them",
-      "outstandingBefore": 349,
+      "outstandingBefore": 348,
       "newlyImplemented": 3,
-      "outstandingAfter": 346,
+      "outstandingAfter": 345,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
       "family": "Schema: the author of an anti-scab violation is recorded by the server",
-      "outstandingBefore": 346,
+      "outstandingBefore": 345,
       "newlyImplemented": 0,
-      "outstandingAfter": 346,
+      "outstandingAfter": 345,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B62-F03-F08-F06-VERIFIED-PATHS-AND-HONEST-DISCONNECT",
       "family": "Verified honest 501 paths, and a disconnect that reports whether the platform token was revoked",
-      "outstandingBefore": 346,
+      "outstandingBefore": 345,
       "newlyImplemented": 3,
-      "outstandingAfter": 343,
+      "outstandingAfter": 342,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S08-CONTACT-SUBMISSIONS-STORE-MIGRATIONS-0045-AND-0036",
       "family": "Schema: a local, system-only record of public contact-form submissions",
-      "outstandingBefore": 343,
+      "outstandingBefore": 342,
       "newlyImplemented": 1,
-      "outstandingAfter": 342,
+      "outstandingAfter": 341,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
       "family": "A figure nothing measures is not zero, and a pension contribution names a real pension member",
-      "outstandingBefore": 342,
+      "outstandingBefore": 341,
       "newlyImplemented": 1,
-      "outstandingAfter": 341,
+      "outstandingAfter": 340,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
       "family": "Newsletter batch status: the right gate and no recipient addresses",
-      "outstandingBefore": 341,
+      "outstandingBefore": 340,
       "newlyImplemented": 2,
-      "outstandingAfter": 339,
+      "outstandingAfter": 338,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
       "family": "Campaign analytics and poll-vote paths that were generic CRUD over another table",
-      "outstandingBefore": 339,
+      "outstandingBefore": 338,
       "newlyImplemented": 1,
-      "outstandingAfter": 338,
+      "outstandingAfter": 337,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
       "family": "Small platform fixes, list filters and migration 0046 (row integrity)",
-      "outstandingBefore": 338,
+      "outstandingBefore": 337,
       "newlyImplemented": 10,
-      "outstandingAfter": 328,
+      "outstandingAfter": 327,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "family": "Cognition honesty, aggregator guards, audit-list honesty, employer correspondence and calendar-sync integrity",
-      "outstandingBefore": 328,
+      "outstandingBefore": 327,
       "newlyImplemented": 10,
-      "outstandingAfter": 318,
+      "outstandingAfter": 317,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
       "family": "Read-only registers, observability sinks and answers that stated more than the source computes",
-      "outstandingBefore": 318,
+      "outstandingBefore": 317,
       "newlyImplemented": 9,
-      "outstandingAfter": 309,
+      "outstandingAfter": 308,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
       "family": "Representative satisfaction figures, platform statistics definitions, the in-memory index answer and organization parent changes",
-      "outstandingBefore": 309,
+      "outstandingBefore": 308,
       "newlyImplemented": 3,
-      "outstandingAfter": 306,
+      "outstandingAfter": 305,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
       "family": "Clause tag projection, education reminder opt-out and chatbot role and review markers",
-      "outstandingBefore": 306,
+      "outstandingBefore": 305,
       "newlyImplemented": 2,
-      "outstandingAfter": 304,
+      "outstandingAfter": 303,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
       "family": "Parsed request bodies and system jobs that were unbounded or unreported",
-      "outstandingBefore": 304,
+      "outstandingBefore": 303,
       "newlyImplemented": 4,
-      "outstandingAfter": 300,
+      "outstandingAfter": 299,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B72-S10-ML-FEEDBACK-TABLE-QUERY-DISCLOSURE-AND-ALIAS-ROUTES",
       "family": "Schema: append-only prediction feedback (0047, cache 0037); ML query disclosure; alias routes; hierarchy list",
-      "outstandingBefore": 300,
+      "outstandingBefore": 299,
       "newlyImplemented": 5,
-      "outstandingAfter": 295,
+      "outstandingAfter": 294,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B73-PENSION-PLAN-FIGURES-AND-READS",
       "family": "Pension plan figures, member list authority and tenant-context reads",
-      "outstandingBefore": 295,
+      "outstandingBefore": 294,
       "newlyImplemented": 3,
-      "outstandingAfter": 292,
+      "outstandingAfter": 291,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B74-PILOT-WRITE-PAYLOADS",
       "family": "Pilot write routes: parsed, bounded request bodies",
-      "outstandingBefore": 292,
+      "outstandingBefore": 291,
       "newlyImplemented": 0,
-      "outstandingAfter": 292,
+      "outstandingAfter": 291,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B75-REPORT-OPERATORS-AND-QUEUE-STATUS",
       "family": "Report filter operators that were silently dropped; queue status verified",
-      "outstandingBefore": 292,
+      "outstandingBefore": 291,
       "newlyImplemented": 1,
-      "outstandingAfter": 291,
+      "outstandingAfter": 290,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B76-PILOT-EMPLOYER-CONTRACT",
       "family": "Pilot telemetry authority, employer read exposure, contract input",
-      "outstandingBefore": 291,
+      "outstandingBefore": 290,
       "newlyImplemented": 4,
-      "outstandingAfter": 287,
+      "outstandingAfter": 286,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B77-COGNITION-HONESTY",
       "family": "Cognition and exit-interview analytics: officer-asserted inputs, whole-word topics, windowed attribution, uncapped counts",
-      "outstandingBefore": 287,
+      "outstandingBefore": 286,
       "newlyImplemented": 4,
-      "outstandingAfter": 283,
+      "outstandingAfter": 282,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B78-AUDIT-ATOMICITY",
       "family": "Audit atomicity: invoice generation, trial expiry, lapsed designations, workbook export, deprecated-route access",
-      "outstandingBefore": 283,
+      "outstandingBefore": 282,
       "newlyImplemented": 4,
-      "outstandingAfter": 279,
+      "outstandingAfter": 278,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B79-SOCIAL-FIGURES-AND-PUBLISH",
       "family": "Social campaign figures, publish handling and token refresh",
-      "outstandingBefore": 279,
+      "outstandingBefore": 278,
       "newlyImplemented": 2,
-      "outstandingAfter": 277,
+      "outstandingAfter": 276,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "family": "CBA review visibility, benchmark and comparison honesty, cognition health scope, derived case metrics, metrics organization binding",
+      "outstandingBefore": 276,
+      "newlyImplemented": 7,
+      "outstandingAfter": 269,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -4088,7 +4097,7 @@
         "apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts"
       ],
       "explanation": "The schedule and send-test paths answer 501: they were the campaign row under another name and no sender reads them, so nothing was scheduled or tested.",
-      "remaining": "There is still no delivery path that checks consent before sending a campaign."
+      "remaining": "No sender exists: schedule and send-test answer 501 and nothing reads a campaign to deliver it, so the audience, communication preferences and consent are not evaluated by any send path; the consent check belongs to the sender when one is built. A campaign row remains a draft record whose scheduledAt and sendImmediately fields are intentions only."
     },
     "DEF-0B1-VERSION-UNAUTH-TOPOLOGY": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -5323,14 +5332,14 @@
       "explanation": "Existing implementation, verified: the carbon dashboard no longer reads an organization id from the query string and no longer returns figures; it answers 501."
     },
     "DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
       "files": [
         "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts",
-        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
       ],
-      "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey.",
-      "remaining": "The POST still takes the survey id from the body rather than the path."
+      "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey. Verified in source: POST binds the survey to the path (a body value may not change it), checks the survey belongs to the organization and is open, and GET returns counts for the path survey only."
     },
     "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -6738,6 +6747,76 @@
         "apps/union-eyes/lib/services/__tests__/s23-social-figures-and-publish.test.ts"
       ],
       "explanation": "Only the platform refusing the refresh marks a connected (active) account expired, with an audit record that says whether it did; a storage or audit failure after a successful refresh marks nothing. A suspended or disconnected account is refused with 409 rather than reactivated, and a successful refresh sets an expired account active and keeps any other state. Two tests were added (disclosed)."
+    },
+    "DEF-0B4-CBA-INTEL-UNREVIEWED-ROWS-SERVED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "files": [
+        "apps/union-eyes/lib/services/cba-intelligence/review-visibility.ts",
+        "apps/union-eyes/lib/services/cba-intelligence/extraction-service.ts",
+        "apps/union-eyes/app/api/cba-intelligence/agreements/route.ts",
+        "apps/union-eyes/app/api/cba-intelligence/agreements/export/route.ts",
+        "apps/union-eyes/app/api/cba-intelligence/agreements/[id]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+      ],
+      "explanation": "A member reads approved extractions only (list, export, and the agreement with its wage adjustments and clauses; an unapproved agreement answers 404 so its existence is not disclosed); a steward or above, the reviewers, may name any review status to read the queue."
+    },
+    "DEF-0B4-CBA-BENCHMARK-HISTORY-NOT-SCOPED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "files": [
+        "apps/union-eyes/lib/services/cba-intelligence/benchmark-service.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+      ],
+      "explanation": "The snapshot history no longer returns the computedBy user id: the snapshots belong to the platform-wide dataset, so who saved one is platform information and is not shown to a tenant reader."
+    },
+    "DEF-0B4-CLAUSES-COMPARE-PLACEHOLDER-RECOMMENDATIONS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "files": [
+        "apps/union-eyes/lib/services/clause-service.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+      ],
+      "explanation": "The comparison no longer returns three fixed recommendation sentences: differences, best practices and recommendations stay empty and the result states analysis grouped_by_type_only, since no wording is compared."
+    },
+    "DEF-0B5-COGNITION-HEALTH-PLATFORM-POSTURE-TO-ORG-OFFICER": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "files": [
+        "apps/union-eyes/app/api/cognition/health/route.ts",
+        "apps/union-eyes/app/api/__tests__/cognition-health.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+      ],
+      "explanation": "An organization officer receives the status and check time only; the registry, ontology and contract versions and the engine counts per domain are returned to a platform administrator. The route test was extended (disclosed): it mocks the platform-administrator check and asserts the reduced payload."
+    },
+    "DEF-0B3-DERIVED-CASE-METRICS-FROM-TELEMETRY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "files": [
+        "apps/union-eyes/app/api/analytics/operational/derived-case-metrics/route.ts",
+        "apps/union-eyes/app/api/analytics/insights/weekly-summary/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+      ],
+      "explanation": "The case counts (opened and closed in the window, open now) are read from the claims table of the organization under its tenant context at the steward floor; overdue cases and SLA compliance are returned as null because a claim records no deadline or status-change time. The weekly summary labels its telemetry count caseCreatedEvents."
+    },
+    "DEF-0B3-METRICS-ORG-RESOLVED-TWICE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "files": [
+        "apps/union-eyes/actions/analytics-actions.ts",
+        "apps/union-eyes/app/api/analytics/metrics/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+      ],
+      "explanation": "The metrics routes pass the organization they authorized to the actions, which refuse the call when their own verified resolution differs, so a user with several memberships cannot write to an organization other than the one the role check was made in."
+    },
+    "DEF-0B5-COMMITTEE-INTELLIGENCE-GATHERS-ALL-COMMITTEES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "files": [
+        "apps/union-eyes/app/api/committees/[id]/intelligence/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+      ],
+      "explanation": "Verified in source: the synthesis POST validates every named committee and then answers 501 without gathering minutes or storing a snapshot."
     }
   }
 }

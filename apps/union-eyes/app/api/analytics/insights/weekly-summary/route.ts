@@ -84,7 +84,8 @@ export const POST = withApi(
           metrics: {
             totalEvents: Number(eventRollup?.total_events ?? 0),
             sessionsStarted: Number(eventRollup?.sessions_started ?? 0),
-            casesCreated: Number(eventRollup?.cases_created ?? 0),
+            // A count of telemetry events, not of cases: the case table is not read here.
+            caseCreatedEvents: Number(eventRollup?.cases_created ?? 0),
             documentsUploaded: Number(eventRollup?.documents_uploaded ?? 0),
             activeUsers: Number(eventRollup?.active_users ?? 0),
             engagementScore,

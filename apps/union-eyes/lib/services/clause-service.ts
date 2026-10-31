@@ -63,6 +63,8 @@ export interface ClauseComparisonResult {
   differences: Array<{ description: string; clauseIds: string[]; impact: string }>;
   bestPractices: Array<{ description: string; clauseId: string; reason: string }>;
   recommendations: string[];
+  /** What the comparison actually did: it groups clauses by type and compares no wording. */
+  analysis?: 'grouped_by_type_only';
 }
 
 // ============================================================================
@@ -431,12 +433,9 @@ export async function compareClauses(
       }
     });
 
-    // Basic recommendations
-    result.recommendations.push(
-      "Consider standardizing clause language across CBAs",
-      "Review clauses with lower confidence scores for accuracy",
-      "Ensure all key terms are consistently defined"
-    );
+    // No text analysis exists: the comparison is grouping by clause type. Differences, best practices and recommendations stay
+    // empty rather than carry fixed sentences that read as findings about these clauses.
+    result.analysis = 'grouped_by_type_only';
 
     return result;
   } catch (error) {

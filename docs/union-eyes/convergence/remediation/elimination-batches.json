@@ -3494,7 +3494,7 @@
             "apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts"
           ],
           "explanation": "The schedule and send-test paths answer 501: they were the campaign row under another name and no sender reads them, so nothing was scheduled or tested.",
-          "remaining": "There is still no delivery path that checks consent before sending a campaign."
+          "remaining": "No sender exists: schedule and send-test answer 501 and nothing reads a campaign to deliver it, so the audience, communication preferences and consent are not evaluated by any send path; the consent check belongs to the sender when one is built. A campaign row remains a draft record whose scheduledAt and sendImmediately fields are intentions only."
         },
         {
           "prefix": "DEF-0B1-VERSION-UNAUTH-TOPOLOGY",
@@ -4981,13 +4981,13 @@
         },
         {
           "prefix": "DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts",
-            "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+            "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
           ],
-          "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey.",
-          "remaining": "The POST still takes the survey id from the body rather than the path."
+          "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey. Verified in source: POST binds the survey to the path (a body value may not change it), checks the survey belongs to the organization and is open, and GET returns counts for the path survey only."
         }
       ]
     },
@@ -6900,6 +6900,83 @@
             "apps/union-eyes/lib/services/__tests__/s23-social-figures-and-publish.test.ts"
           ],
           "explanation": "Only the platform refusing the refresh marks a connected (active) account expired, with an audit record that says whether it did; a storage or audit failure after a successful refresh marks nothing. A suspended or disconnected account is refused with 409 rather than reactivated, and a successful refresh sets an expired account active and keeps any other state. Two tests were added (disclosed)."
+        }
+      ]
+    },
+    {
+      "id": "B80-CBA-VISIBILITY-AND-ANALYTICS",
+      "family": "CBA review visibility, benchmark and comparison honesty, cognition health scope, derived case metrics, metrics organization binding",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CBA-INTEL-UNREVIEWED-ROWS-SERVED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/cba-intelligence/review-visibility.ts",
+            "apps/union-eyes/lib/services/cba-intelligence/extraction-service.ts",
+            "apps/union-eyes/app/api/cba-intelligence/agreements/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/agreements/export/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/agreements/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "A member reads approved extractions only (list, export, and the agreement with its wage adjustments and clauses; an unapproved agreement answers 404 so its existence is not disclosed); a steward or above, the reviewers, may name any review status to read the queue."
+        },
+        {
+          "prefix": "DEF-0B4-CBA-BENCHMARK-HISTORY-NOT-SCOPED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/cba-intelligence/benchmark-service.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "The snapshot history no longer returns the computedBy user id: the snapshots belong to the platform-wide dataset, so who saved one is platform information and is not shown to a tenant reader."
+        },
+        {
+          "prefix": "DEF-0B4-CLAUSES-COMPARE-PLACEHOLDER-RECOMMENDATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/clause-service.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "The comparison no longer returns three fixed recommendation sentences: differences, best practices and recommendations stay empty and the result states analysis grouped_by_type_only, since no wording is compared."
+        },
+        {
+          "prefix": "DEF-0B5-COGNITION-HEALTH-PLATFORM-POSTURE-TO-ORG-OFFICER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cognition/health/route.ts",
+            "apps/union-eyes/app/api/__tests__/cognition-health.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "An organization officer receives the status and check time only; the registry, ontology and contract versions and the engine counts per domain are returned to a platform administrator. The route test was extended (disclosed): it mocks the platform-administrator check and asserts the reduced payload."
+        },
+        {
+          "prefix": "DEF-0B3-DERIVED-CASE-METRICS-FROM-TELEMETRY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/analytics/operational/derived-case-metrics/route.ts",
+            "apps/union-eyes/app/api/analytics/insights/weekly-summary/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "The case counts (opened and closed in the window, open now) are read from the claims table of the organization under its tenant context at the steward floor; overdue cases and SLA compliance are returned as null because a claim records no deadline or status-change time. The weekly summary labels its telemetry count caseCreatedEvents."
+        },
+        {
+          "prefix": "DEF-0B3-METRICS-ORG-RESOLVED-TWICE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/actions/analytics-actions.ts",
+            "apps/union-eyes/app/api/analytics/metrics/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "The metrics routes pass the organization they authorized to the actions, which refuse the call when their own verified resolution differs, so a user with several memberships cannot write to an organization other than the one the role check was made in."
+        },
+        {
+          "prefix": "DEF-0B5-COMMITTEE-INTELLIGENCE-GATHERS-ALL-COMMITTEES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/committees/[id]/intelligence/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "Verified in source: the synthesis POST validates every named committee and then answers 501 without gathering minutes or storing a snapshot."
         }
       ]
     }

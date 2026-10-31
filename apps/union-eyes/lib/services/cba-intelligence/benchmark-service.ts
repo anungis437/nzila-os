@@ -339,7 +339,9 @@ export async function getBenchmarkSnapshots(
       .limit(limit)
       .offset(offset);
 
-    return { items, total: count, page, limit };
+    // The snapshots belong to the platform-wide dataset: who saved one is platform information and is not returned to a tenant reader.
+    const visible = items.map(({ computedBy: _computedBy, ...snapshot }) => snapshot);
+    return { items: visible, total: count, page, limit };
   } catch (error) {
     logger.error("Error fetching benchmark snapshots", { error, agreementId });
     throw new Error("Failed to fetch benchmark snapshots");
