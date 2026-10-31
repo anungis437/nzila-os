@@ -133,7 +133,7 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
         const current = disclosureRef.current;
         if (!current.ready || chunks.length === 0) return;
         try {
-          const audioBlob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+          const audioBlob = new Blob(chunks, { type: recorder.mimeType.split(';')[0] || 'audio/webm' });
           const form = new FormData();
           form.append('audio', audioBlob, 'recording.webm');
           if (!current.appendDisclosure(form)) return;
@@ -373,6 +373,7 @@ setIsSubmitting(false);
                 <VoiceDisclosurePrompt disclosure={disclosure} />
                 <motion.button
                   onClick={toggleRecording}
+                  type="button"
                   disabled={!isRecording && !disclosure.ready}
                   aria-disabled={!isRecording && !disclosure.ready}
                   whileHover={{ scale: 1.05 }}
