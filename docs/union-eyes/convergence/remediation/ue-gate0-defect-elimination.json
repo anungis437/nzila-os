@@ -3252,10 +3252,13 @@
       "status": "PARTIAL",
       "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
       "files": [
-        "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts"
+        "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts",
+        "apps/union-eyes/lib/organizations/analytics-privacy.ts",
+        "apps/union-eyes/lib/organizations/__tests__/analytics-privacy.test.ts",
+        "apps/union-eyes/app/api/__tests__/organizations-id-analytics.route.test.ts"
       ],
-      "explanation": "Analytics are officer-level and an undefined rate is null rather than 0 or 100 (batch B11).",
-      "remaining": "No small-group suppression threshold is applied to counts and rates."
+      "explanation": "Analytics are officer-level and an undefined rate is null rather than 0 or 100 (batch B11). Additional source change: organization analytics now suppresses entire member or grievance metric families when any displayed cell or its complement is below five, including rates, averages and status breakdowns, with explicit suppression metadata and regression cases. No small-cell counts can be reconstructed from a published family.",
+      "remaining": "Exact-HEAD focused and full regression, real PostgreSQL 15/16, HTTP/browser/staging privacy qualification and institutional approval of the minimum-group policy remain outstanding. The policy is deliberately conservative pending that decision."
     },
     "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM": {
       "status": "PARTIAL",

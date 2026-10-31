@@ -5,6 +5,7 @@ import { organizations } from '@/db/schema-organizations'
 import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { ROLE_HIERARCHY } from '@/lib/api-auth-guard'
+import { shouldSuppressClaimMetrics, shouldSuppressMemberMetrics, MIN_PUBLISHABLE_GROUP_SIZE } from '@/lib/organizations/analytics-privacy'
 import {
   canAdministerOrganization,
   canReadOrganization,
@@ -103,21 +104,27 @@ export async function GET(_req: NextRequest, { params }: Params) {
     // Growth against last month is undefined when the organization had no members before this month.
     const memberGrowthRate = mem.prev > 0 ? Math.round(((mem.total - mem.prev) / mem.prev) * 1000) / 10 : null
 
+    // A single small cell, including its complement to a published total, can identify individual members.
+    // Suppress the whole metric family rather than leaving totals or rates from which the cell can be derived.
+    const suppressMembers = shouldSuppressMemberMetrics(mem)
+    const suppressClaims = shouldSuppressClaimMetrics(claims, claimsByStatus)
+
     return {
+      suppression: { minimumGroupSize: MIN_PUBLISHABLE_GROUP_SIZE, members: suppressMembers, claims: suppressClaims },
       organizationId: id,
       organizationName: org.name,
       organizationType: org.organizationType,
-      totalMembers: mem.total,
-      activeMembers: mem.active,
-      newMembersThisMonth: mem.new_this_month,
-      memberGrowthRate,
-      totalClaims: claims.total,
-      activeClaims: claims.active,
-      resolvedClaims: claims.resolved,
-      claimsThisMonth: claims.this_month,
-      avgResolutionDays,
+      totalMembers: suppressMembers ? null : mem.total,
+      activeMembers: suppressMembers ? null : mem.active,
+      newMembersThisMonth: suppressMembers ? null : mem.new_this_month,
+      memberGrowthRate: suppressMembers ? null : memberGrowthRate,
+      totalClaims: suppressClaims ? null : claims.total,
+      activeClaims: suppressClaims ? null : claims.active,
+      resolvedClaims: suppressClaims ? null : claims.resolved,
+      claimsThisMonth: suppressClaims ? null : claims.this_month,
+      avgResolutionDays: suppressClaims ? null : avgResolutionDays,
       childOrganizations,
-      claimsByStatus,
+      claimsByStatus: suppressClaims ? null : claimsByStatus,
     }
   }
 
