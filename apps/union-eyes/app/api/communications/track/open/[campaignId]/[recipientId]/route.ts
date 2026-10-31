@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 
-import { db } from '@/db';
 import { campaigns, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { verifyTrackingToken } from '@/lib/communications/tracking-token';
