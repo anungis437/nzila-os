@@ -1,5 +1,7 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
-import { db } from "@/db";
+import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
+import { rowsVisibleToGrant } from "@/lib/finance/principal-financial-authority";
 import { employerTimesheetBatches, employerTimesheetEntries, employers, worksites, bargainingUnits } from "@/db/schema";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
@@ -22,25 +24,28 @@ const createSchema = z.object({
 export const GET = withApi(
   {
     // A batch names the employer's workers and their hours: a financial reader's data, not a member's.
-    auth: { minRole: "officer" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_timesheet_ingest",
     openapi: { tags: ["Employer Execution"], summary: "List timesheet batches" },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
-    const rows = await db
-      .select()
-      .from(employerTimesheetBatches)
-      .where(eq(employerTimesheetBatches.organizationId, organizationId))
-      .orderBy(desc(employerTimesheetBatches.createdAt))
-      .limit(200);
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view" });
+      return tx
+        .select()
+        .from(employerTimesheetBatches)
+        .where(rowsVisibleToGrant(grant, organizationId, employerTimesheetBatches.organizationId, employerTimesheetBatches.employerId))
+        .orderBy(desc(employerTimesheetBatches.createdAt))
+        .limit(200);
+    });
     return { data: rows };
   },
 );
 
 export const POST = withApi(
   {
-    auth: { minRole: "steward" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_timesheet_ingest",
     body: createSchema,
     openapi: { tags: ["Employer Execution"], summary: "Upload and normalize timesheet CSV" },
@@ -52,7 +57,10 @@ export const POST = withApi(
     const normalized = normalizeCsv(body.csvContent);
     const sourceFileHash = sha256(body.csvContent);
 
-    const batch = await withRLSContext({ organizationId }, async (tx) => {
+    const batch = await withRLSContext({ organizationId, userId }, async (tx) => {
+      // Require the authenticated principal's live prepare duty for this employer
+      // before reading registry records or creating a timesheet batch.
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:prepare", employerId: body.employerId });
       // Every structural reference must belong to this organization.
       const [employer] = await tx
         .select({ id: employers.id, status: employers.status })

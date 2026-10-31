@@ -4052,10 +4052,11 @@
       "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
       "files": [
         "apps/union-eyes/app/api/employer-execution/timesheets/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
+        "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts",
+        "apps/union-eyes/app/api/__tests__/employer-timesheets-mandate.route.test.ts"
       ],
-      "explanation": "The list is officer-level and bounded to 200 batches; a new batch needs calendar dates in order, a file name of at most 255 characters and a CSV of at most 2,000,000 characters. Its employer, worksite and unit references were already checked against the organization.",
-      "remaining": "The ingest still sits at the steward floor rather than a financial mandate, and no behavioural test of the route exists (contract test only)."
+      "explanation": "Timesheet GET and POST now require the explicit financial-member role allowlist and a live principal financial mandate within the authenticated organization transaction. GET enforces finance:view and scopes rows to employers covered by the grant (bounded to 200). POST requires finance:prepare scoped to the employer before any registry read or insert, and preserves organization checks, bounded CSV, duplicate refusal and same-transaction audit.",
+      "remaining": "Exact-HEAD behavioral/unit and contract execution, native PostgreSQL 15/16 with real RLS and mandate fixtures, HTTP/browser/staging qualification, and institutional mandate issuance remain outstanding. The route stays PARTIAL and no CLOSED credit is claimed."
     },
     "DEF-0B7-EXC-SEARCH-LIMITS-BEFORE-FILTERING-BY-SENSITIVITY": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",

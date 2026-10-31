@@ -30,7 +30,9 @@ describe('F05 commercial and employer-execution routes bound their inputs and fl
     expect(text).toContain('MAX_CSV_CHARACTERS');
     expect(text).toContain('YYYY-MM-DD');
     expect(text).toContain('.limit(200)');
-    expect(text).toMatch(/auth: \{ minRole: "officer" \}/);
+    expect(text).toContain('auth: { roles: FINANCIAL_MEMBER_DATA_ROLES }');
+    expect(text).toContain('requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:prepare", employerId: body.employerId })');
+    expect(text).toContain('rowsVisibleToGrant(grant, organizationId, employerTimesheetBatches.organizationId, employerTimesheetBatches.employerId)');
   });
 
   // DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS
