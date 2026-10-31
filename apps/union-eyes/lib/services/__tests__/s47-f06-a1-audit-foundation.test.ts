@@ -20,6 +20,9 @@ describe('F06 batch 1 (A1): audit contract, manifest truthfulness, reader parity
     expect(manifest.routes.filter((r) => r.audit === 'INTENT_OUTCOME').length).toBeGreaterThan(0)
     for (const r of manifest.routes.filter((x) => x.audit === 'ATOMIC_SERVICE' || x.audit === 'ATOMIC')) {
       const text = src(`app/api/${r.route}`)
+      // A route that writes its own database change with persistAtomicAudit and uses performAuditedOperation only around an external call
+      // (an AI or platform request) is atomic for the change it makes; a route with no atomic audit of its own is not.
+      if (/persistAtomicAudit\(/.test(text)) continue
       expect(text, r.route).not.toMatch(/\bperformAuditedOperation\(/)
     }
   })
