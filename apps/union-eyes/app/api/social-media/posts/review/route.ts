@@ -181,6 +181,17 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       throw error;
     }
 
+    // An external platform can accept the post while our database write fails.
+    // Do not claim successful approval or allow an automatic replay: the post may
+    // already be live. Keep the durable 'approving' claim for manual reconciliation.
+    if (results.some((result) => result.success && result.recorded === false)) {
+      return NextResponse.json({
+        error: 'The platform accepted the post, but the local record was not confirmed. Reconciliation is required.',
+        state: 'external_accepted_local_unconfirmed',
+        post_id: draft.id,
+      }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
+    }
+
     await db
       .update(socialPosts)
       .set({ postMetadata: approvalPatch({ state: 'approved' }) })

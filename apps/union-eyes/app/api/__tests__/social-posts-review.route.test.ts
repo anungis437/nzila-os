@@ -105,6 +105,17 @@ describe('social-media/posts/review — a second officer decides', () => {
     expect(m.updates.some((u) => u.status === 'failed')).toBe(true);
   });
 
+  it('does not claim publication succeeded when the platform accepted but the local record was not saved', async () => {
+    m.publishPost.mockResolvedValueOnce([{ success: true, platform: 'twitter', post_id: 'provider-private-id', recorded: false }]);
+    const response = await call({ post_id: POST_ID, decision: 'approve' });
+    expect(response.status).toBe(502);
+    const body = await response.json();
+    expect(body).toMatchObject({ state: 'external_accepted_local_unconfirmed', post_id: POST_ID });
+    expect(JSON.stringify(body)).not.toContain('provider-private-id');
+    // Only the initial atomic approval claim was made; no 'approved' status was falsely persisted.
+    expect(m.updates).toHaveLength(1);
+  });
+
   it('rejects with a stated reason, writes the rejection audit and never publishes', async () => {
     const response = await call({ post_id: POST_ID, decision: 'reject', reason: 'Not cleared by communications' });
     expect(response.status).toBe(200);
