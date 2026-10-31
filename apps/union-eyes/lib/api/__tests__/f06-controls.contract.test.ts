@@ -33,6 +33,11 @@ describe('F06 audit, retention and read-floor controls', () => {
   it('workbook memory-holder reads and writes are rate limited like every bearer route', () => {
     const text = route('workbook/[id]/memory-holders');
     expect(text.match(/guardPublicIntake\(request/g)).toHaveLength(2);
+    const item = route('workbook/[id]/memory-holders/[holderId]');
+    expect(item.match(/guardPublicIntake\\(request/g)).toHaveLength(2);
+    expect(item).toContain("bucket: 'capability'");
+    expect(item).toContain('readBody: false');
+    expect(item).not.toContain('request.json()');
   });
 
   // DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER / DEF-0B4-BATCH-STATUS-RECIPIENT-EMAILS-DISCLOSED
