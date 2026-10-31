@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import ScrollReveal from './ScrollReveal';
 import TrackedLink from './TrackedLink';
@@ -22,22 +21,22 @@ const investorCtaCopy: Record<Locale, {
 }> = {
   'en-CA': {
     investorsBadge: 'For Institutions',
-    investorsTitle: 'Assess continuity risk before transition exposes it',
-    investorsBody: 'Use the OCI Continuity Risk Assessment to identify governance fragility, operational memory loss, trust debt, and sovereignty exposure.',
+    investorsTitle: 'See where continuity needs attention',
+    investorsBody: 'Explore how key-person dependencies, undocumented decisions and fragile handoffs can affect your organization.',
     investorsCta: 'Begin Assessment',
     partnersBadge: 'For Labor Organizations',
     partnersTitle: 'Union Eyes is the flagship validation path',
-    partnersBody: 'Pilot continuity infrastructure for grievance history, steward handoffs, governance evidence, and anti-surveillance accountability.',
+    partnersBody: 'Explore the proposed pilot journey for grievances, steward handoffs, governance evidence and member privacy.',
     partnersCta: 'Explore Union Eyes',
   },
   'fr-CA': {
     investorsBadge: 'Pour les institutions',
-    investorsTitle: 'Évaluez le risque de continuité avant qu une transition ne l expose',
-    investorsBody: 'L évaluation de continuité institutionnelle identifie fragilité de gouvernance, perte de mémoire opérationnelle, dette de confiance et exposition de souveraineté.',
+    investorsTitle: 'Repérez les risques de rupture de continuité',
+    investorsBody: 'Explorez les risques liés aux dépendances individuelles, aux décisions peu documentées et aux transitions fragiles.',
     investorsCta: 'Commencer l évaluation',
     partnersBadge: 'Pour les organisations syndicales',
     partnersTitle: 'Union Eyes est le chemin de validation principal',
-    partnersBody: 'Pilotez une infrastructure de continuité pour les griefs, les transitions de délégués, les preuves de gouvernance et l accountability anti-surveillance.',
+    partnersBody: 'Explorez un parcours pilote proposé pour les griefs, les transferts entre délégués, les preuves et la confidentialité des membres.',
     partnersCta: 'Explorer Union Eyes',
   },
 };
@@ -48,14 +47,9 @@ export default function InvestorCTA({ className = '' }: InvestorCTAProps) {
 
   return (
     <section className={`relative overflow-hidden py-24 ${className}`}>
-      <Image
-        src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920"
-        alt="Earth at night showing interconnected cities — Nzila Ventures global AI infrastructure"
-        fill
-        className="object-cover"
-        sizes="100vw"
-      />
-      <div className="absolute inset-0 bg-linear-to-r from-navy/95 via-navy/85 to-electric/60" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[#0e1a2d]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-36 -top-40 h-[34rem] w-[34rem] rounded-full bg-electric/25 blur-[110px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-52 left-[-8rem] h-[30rem] w-[30rem] rounded-full bg-violet/20 blur-[110px]" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <ScrollReveal direction="left">
