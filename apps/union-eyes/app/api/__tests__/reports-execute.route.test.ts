@@ -5,9 +5,12 @@ const m = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   execute: vi.fn(),
   logApiAuditEvent: vi.fn(),
+  hasMinRole: vi.fn(),
+  audit: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
+  hasMinRole: (...args: unknown[]) => m.hasMinRole(...args),
   withRoleAuth: vi.fn(
     (_role: string, handler: (req: NextRequest, ctx: any) => Promise<Response>) =>
       (req: NextRequest, ctx: any = {}) => handler(req, ctx),
@@ -16,7 +19,7 @@ vi.mock('@/lib/api-auth-guard', () => ({
 
 // The execution is recorded durably (B95); the writer has its own coverage.
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({}) }));
-vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: (...args: unknown[]) => m.audit(...args) }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { REPORT_EXECUTION: { requests: 30, window: 60 } },
@@ -43,6 +46,9 @@ describe('reports/execute route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
+    // Existing cases exercise execution mechanics as an administrator; the officer cases below set it false.
+    m.hasMinRole.mockResolvedValue(true);
+    m.audit.mockReset().mockResolvedValue(undefined);
     m.execute.mockResolvedValue({ success: true, data: [{ id: 1 }], rowCount: 1, executionTimeMs: 12 });
   });
 
@@ -181,5 +187,75 @@ describe('reports/execute route', () => {
       expect(response.status).toBe(500);
       expect(events()).toEqual(['failure']);
     });
+  });
+});
+
+describe('reports/execute field authority (F06 A5)', () => {
+  const run = async (config: unknown) => {
+    const { POST } = await import('../reports/execute/route');
+    return POST(
+      new NextRequest('http://localhost/api/reports/execute', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ config }),
+      }),
+      { userId: 'u1', organizationId: 'org_1' },
+    );
+  };
+  const claimRows = { dataSourceId: 'claims', fields: [{ fieldId: 'claim_number', fieldName: 'Claim Number' }] };
+  const claimCount = { dataSourceId: 'claims', fields: [{ fieldId: 'id', fieldName: 'Claims', aggregation: 'count' }] };
+  const memberEmail = { dataSourceId: 'organization_members', fields: [{ fieldId: 'email', fieldName: 'Email' }] };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
+    m.execute.mockResolvedValue({ success: true, data: [{ n: 3 }], rowCount: 1, executionTimeMs: 4 });
+    m.audit.mockReset().mockResolvedValue(undefined);
+    m.hasMinRole.mockResolvedValue(false);
+  });
+
+  it('refuses an officer a listing of claim rows, records the refusal, and runs nothing', async () => {
+    const response = await run(claimRows);
+
+    expect(response.status).toBe(403);
+    expect(m.execute).not.toHaveBeenCalled();
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'report.execute.denied', details: { dataSource: 'claims', restricted: ['claims'] } }),
+      'failure',
+    );
+  });
+
+  it.each([
+    ['selecting', memberEmail],
+    ['filtering on', { ...memberEmail, fields: [{ fieldId: 'id', fieldName: 'Id' , aggregation: 'count' }], filters: [{ fieldId: 'email', operator: 'ilike', value: '%a%' }] }],
+    ['sorting by', { ...memberEmail, sortBy: [{ fieldId: 'email', direction: 'asc' }] }],
+  ])('refuses an officer %s member e-mail, which would otherwise be a search oracle over addresses', async (_label, config) => {
+    const response = await run(config);
+
+    expect(response.status).toBe(403);
+    expect(m.execute).not.toHaveBeenCalled();
+  });
+
+  it('lets an officer count claims, bounded to a capped page', async () => {
+    const response = await run({ ...claimCount, limit: 100000 });
+
+    expect(response.status).toBe(200);
+    expect(m.execute).toHaveBeenCalledWith(expect.objectContaining({ limit: 500 }));
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ adminOnlySelections: [], limit: 500 }) }));
+  });
+
+  it('lets an administrator list claim rows and member e-mail, recording that restricted data was selected', async () => {
+    m.hasMinRole.mockResolvedValue(true);
+
+    const rows = await run(claimRows);
+    const email = await run(memberEmail);
+
+    expect(rows.status).toBe(200);
+    expect(email.status).toBe(200);
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ adminOnlySelections: ['organization_members.email'] }) }),
+    );
   });
 });

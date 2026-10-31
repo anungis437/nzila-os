@@ -90,6 +90,14 @@ export async function PATCH(
             resourceId: holderId,
             details: { fields: Object.keys(parse.data).filter((k) => parse.data[k as keyof typeof parse.data] !== undefined) },
           });
+        } else {
+          // A write that matched nothing is still an attempt by an identified person on the organization's people map.
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.update_not_found',
+            resourceType: 'workbook_memory_holders',
+            resourceId: holderId,
+            details: {},
+          });
         }
         return updated;
       },
@@ -139,6 +147,13 @@ export async function DELETE(
         if (removed.length > 0) {
           await auditClaimedWorkbookWrite(authority, {
             action: 'workbook.memory_holder.delete',
+            resourceType: 'workbook_memory_holders',
+            resourceId: holderId,
+            details: {},
+          });
+        } else {
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.delete_not_found',
             resourceType: 'workbook_memory_holders',
             resourceId: holderId,
             details: {},

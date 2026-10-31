@@ -103,6 +103,7 @@ export const UE_PROFILES = {
   CLAIM_ANALYSIS: 'ue-claim-analysis',
   LEGAL_MEMORANDUM: 'ue-legal-memorandum',
   CHATBOT: 'ue-chatbot',
+  CHATBOT_MODERATION: 'ue-chatbot-moderation',
   EMBEDDINGS: 'ue-embeddings',
   // AI Intelligence Layer profiles
   GRIEVANCE_TRIAGE: 'ue-grievance-triage',

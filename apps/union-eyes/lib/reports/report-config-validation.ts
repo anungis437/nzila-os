@@ -13,6 +13,35 @@ const LEGACY_OPERATORS: Record<string, string> = { equals: 'eq', not_equals: 'ne
 const ALLOWED_SORT_DIRECTIONS = ['asc', 'desc'];
 
 /**
+ * Row-level disclosure that the officer role title does not carry. A report may count claims, but listing claim rows, and selecting,
+ * grouping, filtering or sorting on member e-mail (a filter on it is a search oracle), is member and matter data that needs an
+ * administrator. Returns what the configuration touches that needs that authority; empty when an officer may run it.
+ */
+const ADMIN_ONLY_FIELDS: Record<string, readonly string[]> = { organization_members: ['email'] };
+const ADMIN_ONLY_ROW_SOURCES = new Set(['claims', 'claim_deadlines']);
+export const OFFICER_REPORT_ROW_CAP = 500;
+
+export function adminOnlyReportSelections(config: ReportConfig): string[] {
+  const touched: string[] = [];
+  const fields = Array.isArray(config.fields) ? config.fields : [];
+  const rowLevel = fields.some((field) => field && !field.aggregation);
+  if (ADMIN_ONLY_ROW_SOURCES.has(config.dataSourceId) && rowLevel) touched.push(config.dataSourceId);
+
+  const protectedFields = ADMIN_ONLY_FIELDS[config.dataSourceId] ?? [];
+  const referenced = [
+    ...fields.filter((field) => field && !field.aggregation).map((field) => field.fieldId),
+    ...(config.groupBy ?? []),
+    ...(config.filters ?? []).map((filter) => filter.fieldId),
+    ...(config.having ?? []).map((filter) => filter.fieldId),
+    ...(config.sortBy ?? []).map((rule) => rule.fieldId),
+  ];
+  for (const field of protectedFields) {
+    if (referenced.includes(field)) touched.push(`${config.dataSourceId}.${field}`);
+  }
+  return touched;
+}
+
+/**
  * SECURITY: Validate report configuration against allowlists
  */
 export function validateReportConfig(config: ReportConfig): string | null {

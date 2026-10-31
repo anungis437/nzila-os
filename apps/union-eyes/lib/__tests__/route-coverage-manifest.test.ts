@@ -139,7 +139,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     const source = readFileSync(join(__dirname, '..', 'audit', 'operation-audit.ts'), 'utf8')
     const intent = source.indexOf("entry('requested')")
     const run = source.indexOf('await operation()')
-    const outcome = source.indexOf("entry('completed')")
+    const outcome = source.indexOf("entry('completed'")
     expect(intent).toBeGreaterThan(-1)
     expect(intent).toBeLessThan(run)
     expect(run).toBeLessThan(outcome)

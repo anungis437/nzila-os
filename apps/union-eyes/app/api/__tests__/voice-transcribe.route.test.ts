@@ -7,7 +7,9 @@ const m = vi.hoisted(() => ({
   transcribeAudioWithLanguage: vi.fn(),
   checkRateLimit: vi.fn(),
   audit: vi.fn(),
+  checkEntitlement: vi.fn(),
 }));
+vi.mock('@/lib/services/entitlements', () => ({ checkEntitlement: m.checkEntitlement }));
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.checkRateLimit, RATE_LIMITS: { AI_COMPLETION: {} } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_c: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({}) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
@@ -63,6 +65,7 @@ describe('voice/transcribe route', () => {
     m.transcribeAudioWithLanguage.mockResolvedValue('hello world');
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 60 });
     m.audit.mockResolvedValue(undefined);
+    m.checkEntitlement.mockResolvedValue({ allowed: true });
     process.env.UE_VOICE_DISCLOSURE_NOTICE_VERSION = 'v1';
     process.env.UE_VOICE_DISCLOSURE_NOTICE_EN_CA = 'External transcription notice';
     process.env.UE_VOICE_DISCLOSURE_NOTICE_FR_CA = 'Avis de transcription externe';
@@ -188,4 +191,16 @@ describe('voice/transcribe route', () => {
     }));
   });
 
+  it('F06 A7: refuses an organization without the entitlement before reading the recording, auditing or sending it', async () => {
+    m.checkEntitlement.mockResolvedValueOnce({ allowed: false, reason: 'Upgrade required', upgradeUrl: '/pricing' });
+    const { POST } = await loadRoute();
+
+    const response = await POST(makeFormRequest(new File(['x'], 'a.webm', { type: 'audio/webm' })), { userId: 'u1', organizationId: 'org1' } as never);
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ error: 'Upgrade required', feature: 'voice_transcribe' });
+    expect(m.checkEntitlement).toHaveBeenCalledWith('org1', 'ai_search');
+    expect(m.audit).not.toHaveBeenCalled();
+    expect(m.transcribeAudioWithLanguage).not.toHaveBeenCalled();
+  });
 });

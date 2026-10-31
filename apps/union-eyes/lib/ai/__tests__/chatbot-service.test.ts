@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   mockUpdateWhere: vi.fn(),
   mockFindFirstSession: vi.fn(),
   mockAiGenerate: vi.fn(),
+  mockModerate: vi.fn(),
   mockAiEmbed: vi.fn(),
   mockFetch: vi.fn(),
   audit: vi.fn(),
@@ -103,12 +104,15 @@ vi.mock("@/lib/services/ai/embedding-cache", () => ({
 
 vi.mock("@/lib/ai/ai-client", () => ({
   buildOrgAiTrace: () => ({}),
+  toGatewayDataClass: () => "sensitive",
   getAiClient: vi.fn(() => ({
-    generate: mocks.mockAiGenerate,
+    // Moderation and the reply are both control-plane calls; the profile tells them apart.
+    generate: (request: { profileKey: string }) =>
+      request.profileKey === "ue-chatbot-moderation" ? mocks.mockModerate(request) : mocks.mockAiGenerate(request),
     embed: mocks.mockAiEmbed,
   })),
   UE_APP_KEY: "union-eyes",
-  UE_PROFILES: { CHATBOT: "ue-chatbot", EMBEDDINGS: "ue-embeddings" },
+  UE_PROFILES: { CHATBOT: "ue-chatbot", CHATBOT_MODERATION: "ue-chatbot-moderation", EMBEDDINGS: "ue-embeddings" },
   UE_SYSTEM_ORG_ID: "00000000-0000-0000-0000-000000000000",
 }));
 
@@ -327,15 +331,10 @@ describe("ChatbotService", () => {
     ]);
     mocks.mockInsertValues.mockReturnValue({ returning: mocks.mockInsertReturning });
     mocks.mockUpdateWhere.mockResolvedValue(undefined);
-    // Use an explicit, valid moderation-provider response. A missing key must
-    // fail closed in production; it must not silently disable moderation in tests.
-    process.env.OPENAI_API_KEY = "test-key";
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        results: [{ flagged: false, categories: {}, category_scores: {} }],
-      }),
-    }));
+    // Moderation is a control-plane call with an explicit, well-formed verdict. A refused call or an unusable answer fails closed;
+    // it must not silently disable moderation in tests.
+    mocks.mockModerate.mockReset().mockResolvedValue({ content: JSON.stringify({ flagged: false, categories: [] }), tokensIn: 5, tokensOut: 5, model: "gpt-4o" });
+    vi.stubGlobal("fetch", vi.fn());
   });
 
   it("sendMessage throws if session not found", async () => {
@@ -359,8 +358,8 @@ describe("ChatbotService", () => {
     ).rejects.toThrow("Session not found");
   });
 
-  it("sendMessage refuses missing moderation credentials without calling the model or storing messages", async () => {
-    delete process.env.OPENAI_API_KEY;
+  it("sendMessage refuses when the control plane refuses the moderation call, without calling the model or storing messages", async () => {
+    mocks.mockModerate.mockRejectedValueOnce(new Error("profile not enabled"));
     mocks.mockSelectLimit.mockResolvedValueOnce([session]);
     await expect(bot.sendMessage({
       sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hello",
@@ -369,8 +368,12 @@ describe("ChatbotService", () => {
     expect(mocks.mockInsertValues).not.toHaveBeenCalled();
   });
 
-  it("sendMessage refuses a malformed moderation response without calling the model", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [] }) }));
+  it.each([
+    ["not json", "I think this is fine"],
+    ["a verdict without a boolean", JSON.stringify({ flagged: "no", categories: [] })],
+    ["a verdict without categories", JSON.stringify({ flagged: false })],
+  ])("sendMessage refuses a moderation answer that is %s, without calling the model", async (_label, content) => {
+    mocks.mockModerate.mockResolvedValueOnce({ content, tokensIn: 1, tokensOut: 1, model: "gpt-4o" });
     mocks.mockSelectLimit.mockResolvedValueOnce([session]);
     await expect(bot.sendMessage({
       sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hello",
@@ -443,32 +446,41 @@ describe("ChatbotService", () => {
   });
 
   it("sendMessage with content safety flagged throws", async () => {
-    process.env.OPENAI_API_KEY = "test-key";
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({
-          results: [
-            {
-              flagged: true,
-              categories: { violence: true },
-              category_scores: { violence: 0.9 },
-            },
-          ],
-        }),
-      }),
-    );
+    mocks.mockModerate.mockResolvedValueOnce({ content: JSON.stringify({ flagged: true, categories: ["violence"] }), tokensIn: 1, tokensOut: 1, model: "gpt-4o" });
     mocks.mockSelectLimit.mockResolvedValueOnce([session]);
     await expect(
       bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "bad content" }),
     ).rejects.toThrow("Message flagged by content safety filter");
     // round 54: flagged rows must retain sessionId so they're traceable to a tenant/session
     expect(mocks.mockInsertValues).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionId: "sess-1" }),
+      expect.objectContaining({ sessionId: "sess-1", flaggedCategories: ["violence"] }),
     );
-    vi.unstubAllGlobals();
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
+  });
+
+  // F06 A5: moderation is an AI call like any other. It goes through the control plane under its own profile, classed as member text,
+  // and never to a provider directly with a provider key.
+  it("F06 A5: moderates through the AI control plane under its own profile and data class, never by a direct provider call", async () => {
+    process.env.OPENAI_API_KEY = "provider-key-must-not-be-used";
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    await bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "What are my rights?" });
+
+    expect(mocks.mockModerate).toHaveBeenCalledTimes(1);
+    const request = mocks.mockModerate.mock.calls[0][0];
+    expect(request).toMatchObject({ profileKey: "ue-chatbot-moderation", dataClass: "sensitive", appKey: "union-eyes" });
+    expect(request.input[0].role).toBe("system");
+    expect(request.input[1].content).toBe("<<<MESSAGE\nWhat are my rights?\nMESSAGE>>>");
+    expect(fetch).not.toHaveBeenCalled();
     delete process.env.OPENAI_API_KEY;
+  });
+
+  it("F06 A5: reads a fenced verdict and keeps only known categories, naming an unclassified flag as unspecified", async () => {
+    mocks.mockModerate.mockResolvedValueOnce({ content: "```json\n" + JSON.stringify({ flagged: true, categories: ["made_up"] }) + "\n```", tokensIn: 1, tokensOut: 1, model: "gpt-4o" });
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "bad" }),
+    ).rejects.toThrow("Message flagged by content safety filter");
+    expect(mocks.mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ flaggedCategories: ["unspecified"] }));
   });
 
   it("getMessages returns messages in chronological order", async () => {

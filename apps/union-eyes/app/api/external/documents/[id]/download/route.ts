@@ -32,6 +32,8 @@ export const GET = withExternalMatterResourceAuth(
   {
     requiredPermission: 'download_documents',
     resolve: resolveExternalDocumentResource,
+    // The download writes its own, more specific record naming the bytes delivered.
+    readRecord: 'handler',
   },
   async (_request, context, params?: { id?: string }) => {
     if (!params?.id || !context.organizationId || !context.matterId) {

@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   hasMinRole: vi.fn(),
+  getCurrentUser: vi.fn(),
   isClaimExpired: vi.fn(),
   persistAtomicAudit: vi.fn(),
   logger: { info: vi.fn(), error: vi.fn() },
@@ -39,11 +40,11 @@ const mockTx: any = {
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
 // Claiming needs an organization administrator (added after this test was written; disclosed).
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole, getCurrentUser: m.getCurrentUser }));
 vi.mock('@/lib/icra/claim-tokens', () => ({ isClaimExpired: m.isClaimExpired }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(mockTx) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
-vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: {} }));
+vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: { claimEmail: 'claim_email' } }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -69,6 +70,7 @@ describe('icra/[assessmentId]/claim route', () => {
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.hasMinRole.mockResolvedValue(true);
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', email: 'Buyer@Example.com' });
     m.isClaimExpired.mockReturnValue(false);
     m.persistAtomicAudit.mockResolvedValue(undefined);
   });
@@ -185,6 +187,49 @@ describe('icra/[assessmentId]/claim route', () => {
         resourceId: A1,
       }),
     );
+  });
+
+  // F06 A7: the claim is the purchaser's, not any organization administrator's who holds the token.
+  const claim = async () => {
+    const { POST } = await loadRoute();
+    return POST(new NextRequest('http://localhost/api/icra/a1/claim', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
+  };
+
+  it('refuses a caller with no verified account e-mail before anything is written', async () => {
+    m.getCurrentUser.mockResolvedValueOnce({ id: 'u1', email: null });
+
+    const response = await claim();
+
+    expect(response.status).toBe(403);
+    expect(mockTx.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('makes the purchaser e-mail part of the one conditional write, compared case-insensitively', async () => {
+    m.updateQueue.push([{ id: A1 }]);
+
+    const response = await claim();
+
+    expect(response.status).toBe(200);
+    const { and } = await import('drizzle-orm');
+    const conditions = vi.mocked(and).mock.calls.flat();
+    expect(JSON.stringify(conditions, (_key, value) => (typeof value === 'function' ? undefined : value))).toContain('buyer@example.com');
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockTx, expect.objectContaining({ details: expect.objectContaining({ purchaserEmailMatched: true }) }));
+  });
+
+  it.each([
+    ['a different e-mail', 'someone-else@example.com'],
+    ['no recorded purchaser', null],
+  ])('refuses the token holder whose account has %s than the purchaser, consuming nothing', async (_label, claimEmail) => {
+    m.updateQueue.push([]);
+    m.selectQueue.push([{ id: A1, claimToken: 'valid_token_xxxx', claimedAt: null, claimTokenExpiresAt: null, claimEmail }]);
+
+    const response = await claim();
+
+    expect(response.status).toBe(403);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('fails the claim when its audit record cannot be written', async () => {

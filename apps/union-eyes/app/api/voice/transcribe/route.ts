@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isSupportedLanguage, transcribeAudioWithLanguage, type SupportedLanguage } from "@/lib/azure-speech";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { checkEntitlement } from '@/lib/services/entitlements';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { checkVoiceDisclosure } from '@/lib/voice/disclosure-consent';
@@ -24,6 +25,15 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       const limit = await checkRateLimit(`voice-transcribe:${userId}`, RATE_LIMITS.AI_COMPLETION);
       if (!limit.allowed) {
         return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded', { resetIn: limit.resetIn });
+      }
+
+      // The sibling upload route applies the same entitlement before it sends audio to the speech service.
+      const entitlement = await checkEntitlement(organizationId, 'ai_search');
+      if (!entitlement.allowed) {
+        return NextResponse.json(
+          { error: entitlement.reason, upgradeUrl: entitlement.upgradeUrl, feature: 'voice_transcribe' },
+          { status: 403 },
+        );
       }
 
       // Parse form data

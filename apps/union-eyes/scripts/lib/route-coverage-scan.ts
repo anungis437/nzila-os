@@ -126,7 +126,7 @@ export const READ_ONLY_POST_ROUTES = [
   'exit-interviews/graph-query/route.ts', 'exit-interviews/mitigation-comparison/route.ts', 'exit-interviews/scenarios/route.ts',
   'exit-interviews/search/route.ts', 'exit-interviews/simulation/route.ts', 'labour-standards/[jurisdiction]/compliance-check/route.ts',
   'members/segments/preview/route.ts', 'pension/t4a/route.ts', 'precedents/search/route.ts', 'profile/roles/route.ts',
-  'social-media/analytics/route.ts', 'v2/[...path]/route.ts', 'voice/upload/route.ts',
+  'social-media/analytics/route.ts', 'v2/[...path]/route.ts',
   'voting/verify/route.ts', 'workspace/telemetry/route.ts',
 ]
 

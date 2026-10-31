@@ -223,7 +223,7 @@ export async function authorizeExternalMatterAccess(input: {
   matterType: RepresentationAuthority['matterType'];
   matterId: string;
   requiredPermission: ExternalMatterPermission;
-}): Promise<ExternalAuthorizationDecision> {
+}, options: { recordAllowed?: boolean } = {}): Promise<ExternalAuthorizationDecision> {
   const [authority] = await db
     .select()
     .from(representationAuthorities)
@@ -264,7 +264,11 @@ export async function authorizeExternalMatterAccess(input: {
     authority,
     matterGrant,
   });
-  await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: input.matterType, resourceId: input.matterId });
+  // A read records its allowed decision itself, in the same transaction as the read (see external-resource-middleware), so the decision
+  // and the read are one record rather than a decision row followed by an unrecorded read. A refusal is always recorded here.
+  if (!(decision.allowed && options.recordAllowed === false)) {
+    await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: input.matterType, resourceId: input.matterId });
+  }
   return decision;
 }
 

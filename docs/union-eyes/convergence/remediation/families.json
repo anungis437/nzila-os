@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 633,
- "partial": 87,
- "outstanding": 144,
- "accountedFor": 144,
+ "corrected": 636,
+ "partial": 85,
+ "outstanding": 141,
+ "accountedFor": 141,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -110,22 +110,21 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 15,
+   "defects": 12,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 13,
+    "MEDIUM": 10,
     "LOW": 0
    },
-   "namedRoutes": 3,
+   "namedRoutes": 2,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
-    "0B.4": 1,
     "0B.7": 2,
-    "0B.8": 3,
+    "0B.8": 2,
     "0B.10": 1,
     "0B.11": 4,
-    "0B.12": 3
+    "0B.12": 2
    }
   },
   {
@@ -549,10 +548,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B4-CHATBOT-MODERATION-BYPASSES-AI-CONTROL-PLANE",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
     "severity": "MEDIUM",
     "partial": true
@@ -564,11 +559,6 @@
    },
    {
     "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
     "severity": "MEDIUM",
     "partial": true
    },
@@ -599,11 +589,6 @@
    },
    {
     "id": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",
     "severity": "MEDIUM",
     "partial": true
    },

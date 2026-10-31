@@ -3352,24 +3352,28 @@
         },
         {
           "prefix": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/voice/transcribe/route.ts",
             "apps/union-eyes/app/api/__tests__/voice-transcribe.route.test.ts",
-            "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts"
+            "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
           ],
-          "explanation": "Transcription is rate limited per caller, requires an organization context, and records the disclosure (language, size, type; never the audio or text) before the recording leaves; if the audit cannot be written nothing is sent.",
-          "remaining": "There is no entitlement or consent decision for sending a recording to the external service."
+          "explanation": "Transcription is rate limited per caller, requires an organization context, and records the disclosure (language, size, type; never the audio or text) before the recording leaves; if the audit cannot be written nothing is sent. The transcription route now applies the same entitlement as the sibling upload route before it reads or sends the recording (403 with the upgrade path, nothing audited or sent). With the per-user rate limit and the audit record written before the audio leaves (earlier batches), all three named gaps are closed.",
+          "remaining": "Another contributor is changing this route and its tests (disclosure consent): two of their existing tests (voice-upload and voice-transcribe disclosure refusals expecting 400, receiving 409) and the f06 pin on the earlier audit action name fail at HEAD independently of this change."
         },
         {
           "prefix": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",
           "status": "PARTIAL",
           "files": [
             "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
-            "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts"
+            "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/__tests__/route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
           ],
-          "explanation": "The collection reads and writes run through the public-intake guard (rate limit; body cap on writes). Claimed-workbook writes were already audited.",
-          "remaining": "The per-holder item route is not yet behind the guard, there is no per-workbook holder cap, and unclaimed-workbook reads are not audited."
+          "explanation": "The collection reads and writes run through the public-intake guard (rate limit; body cap on writes). Claimed-workbook writes were already audited. A miss on a claimed workbook (a PATCH or DELETE that matched no holder) is recorded as an attempt (update_not_found, delete_not_found) rather than leaving no trace. The collection and item routes are behind the public-intake guard and the per-workbook cap of 200 holders was already in place. Two tests that pinned \"a miss records nothing\" were replaced (disclosed).",
+          "remaining": "An unclaimed workbook has no tenant or actor to attribute a record to, so its bearer-identifier reads and writes still leave none; that is the pseudonymous design and attributing it needs a decision on a platform-level pseudonymous trail."
         },
         {
           "prefix": "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER",
@@ -7648,10 +7652,12 @@
           "files": [
             "apps/union-eyes/app/api/reports/execute/route.ts",
             "apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts",
+            "apps/union-eyes/lib/reports/report-config-validation.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
           ],
-          "explanation": "A successful execution now writes report.execute to the canonical audit log before the rows are returned (data source, field ids, filter count and row count, never the rows), where it was only a log line.",
-          "remaining": "The route is still at the officer role title and no field-level authority limits which registry fields (member e-mail, claim rows) an officer may select."
+          "explanation": "A successful execution now writes report.execute to the canonical audit log before the rows are returned (data source, field ids, filter count and row count, never the rows), where it was only a log line. Field-level authority: an officer may run aggregate reports, but listing claim or claim-deadline rows, and selecting, grouping, filtering or sorting on member e-mail (a filter is a search oracle over addresses), need an administrator. The refusal is recorded (report.execute.denied) and nothing is run; an officer's page is capped at 500 rows; the success record names the administrator-only selections and the limit. Six tests added; the existing mechanics tests run as an administrator (disclosed).",
+          "remaining": "No classification or consent check on the returned fields and no small-group suppression on aggregates."
         },
         {
           "prefix": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
@@ -7850,14 +7856,17 @@
       "items": [
         {
           "prefix": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
             "apps/union-eyes/lib/external-resource-middleware.ts",
-            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts",
+            "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+            "apps/union-eyes/app/api/external/__tests__/external-routes.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
           ],
-          "explanation": "The external access decision is now written through persistAtomicAudit in its own tenant transaction and a failure throws, so the middleware answers 403 and the outside party receives nothing when the decision record could not be written; the legacy logger that logged and swallowed a failed insert is no longer on this path. A stranger who holds no authority is still not written into the named organization's trail.",
-          "remaining": "The read or write that follows is still not recorded as its own event, the decision record commits before the read rather than in the same transaction, and a document request still writes a matter decision row and a document decision row."
+          "explanation": "The external access decision is now written through persistAtomicAudit in its own tenant transaction and a failure throws, so the middleware answers 403 and the outside party receives nothing when the decision record could not be written; the legacy logger that logged and swallowed a failed insert is no longer on this path. A stranger who holds no authority is still not written into the named organization's trail. A successful external read is now recorded: the middleware writes external.resource.read on the same transaction the read ran on, carrying the authorization decision it rested on (authority, matter grant, permission, method, status, the resource id), after the handler and before the response is released; a record that cannot be written abandons the transaction and the outside party receives nothing. The separate allowed-decision row for a read is folded into that record, so a document request no longer writes a matter decision row and a document decision row for the same matter. Refusals are still recorded by the decision service; the download keeps its own, more specific record (bytes delivered).",
+          "remaining": "Writes by an external party keep a separate allowed-decision row, and the document-level decision is still its own row next to the read record."
         },
         {
           "prefix": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
@@ -7898,10 +7907,13 @@
           "files": [
             "apps/union-eyes/lib/workbook/access-control.ts",
             "apps/union-eyes/lib/workbook/__tests__/access-control.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/__tests__/route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
           ],
-          "explanation": "A same-organization peer of a claimed workbook now needs a steward role in the claimed organization (hasRoleInOrganization), not just a membership, before the memory-holder routes admit it to read, change or delete the named people.",
-          "remaining": "The named people still have no notice that they are recorded, and the PATCH and DELETE audit rows are written only when a row changed."
+          "explanation": "A same-organization peer of a claimed workbook now needs a steward role in the claimed organization (hasRoleInOrganization), not just a membership, before the memory-holder routes admit it to read, change or delete the named people. The steward role floor from B102 stands; the PATCH and DELETE audit rows are no longer written only when a row changed: an attempt that changed nothing is recorded as such.",
+          "remaining": "The named people still have no notice that they are recorded; how and by whom they are told is an institutional and legal decision no code can make."
         },
         {
           "prefix": "DEF-0B9-ASM-NATIONAL-AVERAGE-BENCHMARK-FALLS-BACK-TO-HARD-CODED-LITERALS-WITH-NO-INDICATION",
@@ -8124,7 +8136,7 @@
     {
       "id": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
       "family": "F06 A3: each state change of a multi-step operation is recorded for what it is, with the durable record that leads to it",
-      "evidenceCommit": null,
+      "evidenceCommit": "c0d9e5ad7",
       "items": [
         {
           "prefix": "DEF-0B4-CBA-INTEL-AUDIT-NOT-ATOMIC",
@@ -8186,6 +8198,59 @@
           "remaining": "The already-removed detection reads the platform error text, since the platform clients expose no typed not-found."
         }
       ]
+    },
+    {
+      "id": "B109-F06-A5-A7-CLAIMED-CONTROLS-OPERATE",
+      "family": "F06 A5 + A7: a control the code names is the control that operates (AI control plane, external reads, report fields, claim binding, entitlement)",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CHATBOT-MODERATION-BYPASSES-AI-CONTROL-PLANE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/ai/chatbot-service.ts",
+            "apps/union-eyes/lib/ai/ai-client.ts",
+            "scripts/seed-ai-profiles-ue.sql",
+            "apps/union-eyes/lib/ai/__tests__/chatbot-service.test.ts",
+            "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ],
+          "explanation": "Moderation no longer posts member text to api.openai.com with a provider key. It is a generate call through @nzila/ai-sdk under its own profile (ue-chatbot-moderation), with the message classed member_personal (sensitive at the gateway) so the control plane applies its data-class, budget, guardrail and audit controls like any other AI call. The prompt delimits the member text as data, the answer must be one well-formed JSON verdict, unknown categories are dropped and an unclassified flag is recorded as unspecified; a refused call, an unparseable or ill-typed answer all fail closed to \"safety system unavailable\" before retrieval or generation. The provider-key branch tests were replaced (disclosed); the OPENAI_API_KEY and fetch stubs are gone and a test asserts no direct fetch.",
+          "remaining": "The ue-chatbot-moderation profile must be seeded in the control plane (scripts/seed-ai-profiles-ue.sql adds it; until it exists every message fails closed). A general-purpose model classifying safety is not qualified against the dedicated moderation endpoint it replaces; no provider was exercised."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/icra/[assessmentId]/claim/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-assessmentId-claim.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ],
+          "explanation": "The claim is bound to the purchaser: the paid-tier webhook records the buyer's e-mail on the assessment, and the claiming account's own e-mail must equal it (case-insensitive), as part of the single conditional write that consumes the token. An account without a verified e-mail, a different e-mail, or an assessment with no recorded purchaser cannot claim it (403, nothing consumed or audited); the audit row records that the purchaser e-mail matched.",
+          "remaining": "The pseudonymous capability token is still valid after the claim, because every ICRA read route authorizes only through that capability and no account-based access path exists for a claimed assessment; revoking it would lock the claiming organization out."
+        }
+      ]
     }
-  ]
+  ],
+  "uncreditedSourceEvidence": {
+    "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "110428200635f61b1023d3db04b05364f802de13",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-voice-disclosure-and-claims-intake-20261031.md",
+      "files": [
+        "apps/union-eyes/lib/voice/disclosure-consent.ts",
+        "apps/union-eyes/app/api/voice/disclosure/route.ts",
+        "apps/union-eyes/app/api/voice/upload/route.ts",
+        "apps/union-eyes/app/api/voice/transcribe/route.ts",
+        "apps/union-eyes/components/voice-disclosure-consent.tsx",
+        "apps/union-eyes/components/voice-recorder.tsx",
+        "apps/union-eyes/components/claims/new-claim-form.tsx",
+        "apps/union-eyes/lib/voice/__tests__/disclosure-consent.test.ts",
+        "apps/union-eyes/app/api/__tests__/voice-upload.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/voice-transcribe.route.test.ts",
+        "apps/union-eyes/app/api/voice/__tests__/disclosure.route.test.ts"
+      ],
+      "remaining": "Exact-HEAD focused/full tests, native PG15/16, HTTP/browser/provider, approved per-institution notice, consent semantics and independent review. No implementation or qualification credit assigned."
+    }
+  }
 }

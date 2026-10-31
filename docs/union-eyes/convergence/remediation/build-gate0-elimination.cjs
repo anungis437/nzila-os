@@ -47,6 +47,8 @@ const doc = {
   },
   batches: out,
   entries,
+  // Source evidence recorded without credit (other contributors' work): carried through from elimination-batches.json unchanged.
+  ...(batches.uncreditedSourceEvidence ? { uncreditedSourceEvidence: batches.uncreditedSourceEvidence } : {}),
 }
 for (const id of Object.keys(entries)) if (!ids.has(id)) throw new Error(`not in register: ${id}`)
 fs.writeFileSync(path.join(__dirname, 'ue-gate0-defect-elimination.json'), JSON.stringify(doc, null, 2) + '\n')

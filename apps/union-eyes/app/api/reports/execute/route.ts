@@ -11,10 +11,10 @@
 
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { hasMinRole, withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { ReportExecutor, type ReportConfig } from '@/lib/report-executor';
-import { validateReportConfig } from '@/lib/reports/report-config-validation';
+import { adminOnlyReportSelections, OFFICER_REPORT_ROW_CAP, validateReportConfig } from '@/lib/reports/report-config-validation';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -115,6 +115,30 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       );
     }
 
+    // The officer role title opens aggregate reporting; listing claim rows and anything that touches member e-mail needs an administrator.
+    // A refusal is recorded, so the attempt is visible. Anyone below administrator also gets a bounded page.
+    const adminOnly = adminOnlyReportSelections(config);
+    const isAdministrator = await hasMinRole('admin');
+    if (adminOnly.length > 0 && !isAdministrator) {
+      await withRLSContext({ organizationId, userId }, (tx) =>
+        persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'report.execute.denied',
+          resourceType: 'report_execution',
+          details: { dataSource: config.dataSourceId, restricted: adminOnly },
+        }, 'failure'),
+      );
+      return standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        'This report lists member or matter data (' + adminOnly.join(', ') + ') and needs an administrator',
+      );
+    }
+    if (!isAdministrator) {
+      const requested = typeof config.limit === 'number' && Number.isFinite(config.limit) && config.limit > 0 ? config.limit : OFFICER_REPORT_ROW_CAP;
+      config.limit = Math.min(requested, OFFICER_REPORT_ROW_CAP);
+    }
+
     // Execute report using secured ReportExecutor
     const executor = new ReportExecutor(organizationId);
     const result = await executor.execute(config);
@@ -166,6 +190,8 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
           fields: config.fields.map((field) => field.fieldId).slice(0, 100),
           filterCount: config.filters?.length ?? 0,
           rowCount: result.rowCount,
+          adminOnlySelections: adminOnly,
+          limit: config.limit ?? null,
         },
       }),
     );
