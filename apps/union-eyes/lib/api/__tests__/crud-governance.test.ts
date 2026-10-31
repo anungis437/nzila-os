@@ -51,7 +51,8 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
   it.each([
     ['claims', 'OWN_ROWS_READ'], ['documents', 'DENIED'], ['data_subject_access_requests', 'SUBJECT_OWNED'], ['user_consents', 'SUBJECT_OWNED'],
     ['organization_members', 'READ_ONLY'], ['dues_transactions', 'READ_ONLY'], ['per_capita_remittances', 'DENIED'],
-    ['poll_votes', 'DENIED'], ['security_events', 'DENIED'],
+    // poll_votes and security_events left the list when their generic routes became 501 paths; unlisted means DENIED.
+    ['poll_votes', undefined], ['security_events', undefined],
   ])('keeps %s as %s', (name, expected) => {
     expect(CRUD_GOVERNED_TABLES.get(name)).toBe(expected)
   })

@@ -22,7 +22,9 @@ const SUBJECT_OWNED = ['data_subject_access_requests', 'user_consents', 'consent
 
 const DENIED = [
   'documents',
-  'security_events', 'poll_votes', 'member_employment',
+  // security_events and poll_votes are no longer served by any generic route (their paths answer 501); a table that is not listed is
+  // treated as DENIED, so a future generic route over either still has to be decided here.
+  'member_employment',
   // The per-capita remittance ledger is organization financial data with no member-facing owner column; the finance
   // routes serve it under financial authority. Generic collections over it (tax, arrears, health and welfare) read it
   // to any member.

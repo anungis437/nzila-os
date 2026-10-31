@@ -112,4 +112,12 @@ describe('S6 verified and small fixes', () => {
     expect(source).not.toContain('requireEntitlement')
     expect(source).not.toMatch(/recipientEmail|\.email\b/)
   })
+
+  it('answers 501, not generic CRUD, on the campaign analytics path and the poll vote path', () => {
+    for (const route of ['app/api/communications/campaigns/[id]/analytics/route.ts', 'app/api/communications/campaigns/[id]/schedule/route.ts', 'app/api/communications/campaigns/[id]/send-test/route.ts', 'app/api/communications/polls/[pollId]/vote/route.ts']) {
+      const source = read(route)
+      expect(source, route).toContain('ApiError.notImplemented')
+      expect(source, route).not.toContain('crudRoutes')
+    }
+  })
 })

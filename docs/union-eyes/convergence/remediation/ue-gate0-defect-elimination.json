@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 426,
-    "partial": 78,
+    "implementedPendingQualification": 427,
+    "partial": 79,
     "qualificationVerified": 0,
-    "unresolved": 351,
+    "unresolved": 350,
     "externalBlockers": 0
   },
   "batches": [
@@ -663,6 +663,15 @@
       "newlyImplemented": 2,
       "outstandingAfter": 351,
       "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
+      "family": "Campaign analytics and poll-vote paths that were generic CRUD over another table",
+      "outstandingBefore": 351,
+      "newlyImplemented": 1,
+      "outstandingAfter": 350,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -5778,6 +5787,29 @@
         "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
       ],
       "explanation": "Existing implementation, verified: the status response lists no recipient address (earlier B53 work); pinned by a test, so there is no disclosure to audit."
+    },
+    "DEF-0B5-COMMS-ACTION-ROUTE-IS-GENERIC-CAMPAIGN-CRUD": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
+      "files": [
+        "apps/union-eyes/app/api/communications/campaigns/[id]/analytics/route.ts",
+        "apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts",
+        "apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The analytics path, the last of the three (schedule and send-test were already 501), no longer returns the campaign row as analytics, updates it without validation, or archives the campaign on DELETE: it answers 501 and reads and writes nothing; pinned by a test."
+    },
+    "DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH": {
+      "status": "PARTIAL",
+      "batch": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
+      "files": [
+        "apps/union-eyes/app/api/communications/polls/[pollId]/vote/route.ts",
+        "apps/union-eyes/lib/api/crud-governance.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-governance.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The vote path answered a misleading 403 for every caller because poll_votes is denied in the CRUD governance table; it now answers 501 honestly and the governance entries for poll_votes and security_events were removed because no generic route uses them any more (a table not listed is still DENIED; the ratchet test pin was adjusted, disclosed).",
+      "remaining": "No route creates a poll or records a vote: the polls collection route is generic CRUD over a read-only table, and a real create-and-vote path with one-vote-per-member enforcement is not built."
     }
   }
 }
