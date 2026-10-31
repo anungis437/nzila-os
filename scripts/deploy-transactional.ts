@@ -164,6 +164,42 @@ export function parseManifestTargets(manifestPath: string, fallbackTargetsJson?:
   return targets
 }
 
+/**
+ * The public ingress health endpoint can still serve an older, healthy revision.
+ * Bind promotion to Azure's actual latest READY revision and the signed image
+ * before using the HTTP health check as supplementary evidence.
+ */
+export function assertPromotedRevision(
+  target: DeployTarget,
+  previous: TargetState,
+  details: unknown,
+): string {
+  const properties = (details as {
+    properties?: {
+      template?: { containers?: Array<{ image?: unknown }> }
+      latestRevisionName?: unknown
+      latestReadyRevisionName?: unknown
+    }
+  } | null)?.properties
+  const deployedImage = properties?.template?.containers?.[0]?.image
+  const latestRevision = properties?.latestRevisionName
+  const latestReadyRevision = properties?.latestReadyRevisionName
+
+  ensure(deployedImage === target.image,
+    `Production image mismatch for ${target.containerAppName}; refusing to claim promotion`)
+  ensure(typeof latestRevision === 'string' && latestRevision.length > 0,
+    `Missing latest Azure revision for ${target.containerAppName}`)
+  ensure(typeof latestReadyRevision === 'string' && latestReadyRevision.length > 0,
+    `Missing ready Azure revision for ${target.containerAppName}`)
+  ensure(latestReadyRevision === latestRevision,
+    `Latest Azure revision is not ready for ${target.containerAppName}`)
+  if (previous.previousImage !== target.image) {
+    ensure(latestReadyRevision !== previous.previousRevision,
+      `Azure still reports the previous revision for ${target.containerAppName}`)
+  }
+  return latestReadyRevision
+}
+
 function captureCurrentState(target: DeployTarget, resourceGroup: string): TargetState {
   const details = runJsonCommand(['containerapp', 'show', '--name', target.containerAppName,
     '--resource-group', resourceGroup, '--output', 'json'])
@@ -257,6 +293,8 @@ async function main(): Promise<void> {
     targets,
     capturedState: [] as TargetState[],
     healthChecks: [] as HealthCheckResult[],
+    readyRevisions: [] as Array<{ appName: string; image: string; revision: string }>,
+    rollbackAttempted: false,
     rollbackPerformed: false,
     status: 'in_progress',
   }
@@ -269,11 +307,21 @@ async function main(): Promise<void> {
       ;(evidence.capturedState as TargetState[]).push(previous)
 
       console.log(`Promoting ${target.containerAppName} -> ${target.image}`)
+      // The Azure API may apply the image even when the CLI exits nonzero.
+      // Record the rollback candidate before attempting the remote mutation.
+      updatedStates.push(previous)
       execFileSync('az', ['containerapp', 'update', '--name', target.containerAppName,
         '--resource-group', args.resourceGroup, '--image', target.image, '--output', 'none'],
         { stdio: 'inherit' })
 
-      updatedStates.push(previous)
+      const deployed = runJsonCommand(['containerapp', 'show', '--name', target.containerAppName,
+        '--resource-group', args.resourceGroup, '--output', 'json'])
+      const readyRevision = assertPromotedRevision(target, previous, deployed)
+      ;(evidence.readyRevisions as Array<{ appName: string; image: string; revision: string }>).push({
+        appName: target.containerAppName,
+        image: target.image,
+        revision: readyRevision,
+      })
 
       const healthResult = await runHealthCheck(target, args, args.resourceGroup)
       ;(evidence.healthChecks as HealthCheckResult[]).push(healthResult)
@@ -288,8 +336,15 @@ async function main(): Promise<void> {
     evidence.error = error instanceof Error ? error.message : String(error)
 
     if (updatedStates.length > 0) {
-      rollback(updatedStates, args.resourceGroup)
-      evidence.rollbackPerformed = true
+      evidence.rollbackAttempted = true
+      try {
+        rollback(updatedStates, args.resourceGroup)
+        evidence.rollbackPerformed = true
+      } catch (rollbackError) {
+        // Do not hide the original deployment failure or claim rollback success.
+        evidence.rollbackError = rollbackError instanceof Error
+          ? rollbackError.message : String(rollbackError)
+      }
     }
 
     throw error

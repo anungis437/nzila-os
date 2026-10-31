@@ -12,7 +12,7 @@
 import { readFileSync, existsSync, readdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { parseArgs, parseManifestTargets } from '../../scripts/deploy-transactional'
+import { assertPromotedRevision, parseArgs, parseManifestTargets } from '../../scripts/deploy-transactional'
 import { describe, it, expect } from 'vitest'
 
 const ROOT = join(__dirname, '..', '..')
@@ -167,6 +167,37 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
+  })
+
+  it('P0 #1038: ready revision and signed image must match before a public health check can pass', () => {
+    const image = 'registry.example/app@sha256:' + 'a'.repeat(64)
+    const other = 'registry.example/app@sha256:' + 'b'.repeat(64)
+    const target = { containerAppName: 'demo', image }
+    const previous = {
+      appName: 'demo',
+      previousImage: other,
+      previousRevision: 'demo--old',
+      newImage: image,
+    }
+    const azure = (deployedImage: string, latest: unknown, ready: unknown) => ({
+      properties: {
+        template: { containers: [{ image: deployedImage }] },
+        latestRevisionName: latest,
+        latestReadyRevisionName: ready,
+      },
+    })
+    expect(assertPromotedRevision(target, previous, azure(image, 'demo--new', 'demo--new')))
+      .toBe('demo--new')
+    expect(() => assertPromotedRevision(target, previous, azure(other, 'demo--new', 'demo--new')))
+      .toThrow(/image mismatch/)
+    expect(() => assertPromotedRevision(target, previous, azure(image, 'demo--new', 'demo--old')))
+      .toThrow(/not ready/)
+    expect(() => assertPromotedRevision(target, previous, azure(image, 'demo--old', 'demo--old')))
+      .toThrow(/previous revision/)
+    expect(() => assertPromotedRevision(target, previous, azure(image, undefined, undefined)))
+      .toThrow(/Missing latest Azure revision/)
+    expect(() => assertPromotedRevision(target, previous, null))
+      .toThrow(/image mismatch/)
   })
 
   it('P0 #1038: production Azure commands cannot interpolate signed manifest values into shell', () => {
