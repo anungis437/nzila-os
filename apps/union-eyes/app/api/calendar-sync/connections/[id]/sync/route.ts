@@ -60,6 +60,8 @@ async function recordConnectionState(
           eq(externalCalendarConnections.id, actor.connectionId),
           eq(externalCalendarConnections.organizationId, actor.organizationId),
           eq(externalCalendarConnections.userId, actor.userId),
+          eq(externalCalendarConnections.isActive, true),
+          eq(externalCalendarConnections.syncEnabled, true),
         ),
       )
       .returning({ id: externalCalendarConnections.id })
