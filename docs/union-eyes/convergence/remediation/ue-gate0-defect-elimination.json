@@ -1801,10 +1801,11 @@
       "batch": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
       "files": [
         "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
-        "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"
+        "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts",
+        "docs/union-eyes/convergence/remediation/ue-reconciliation-tenant-guard-20261031.md"
       ],
-      "explanation": "For an organization run, the period is locked, a billing period named in the request must be the organization's own (404), and a second run for the same period is refused (409, naming the earlier run) instead of adding a second set of exceptions. A period that ends before it starts is refused. The existing mocked test of a run gained the two new checks in its queue; three tests were added.",
-      "remaining": "The service still accepts a run with no organization, which reconciles every organization together; no route uses that mode, but it is not removed."
+      "explanation": "A named billing period must belong to the organization; duplicate runs for the same organization and period are serialized and refused. The service now also rejects a missing, empty or whitespace organization before opening a transaction, preventing legacy all-organization reconciliation. Source changes and regression tests committed; exact-HEAD executable and native qualification pending.",
+      "remaining": "Run focused and complete regression, native PostgreSQL 15/16 with adversarial tenant fixtures, HTTP/browser and staging acceptance. Verify all finance callsites and independent institutional controls before upgrading from PARTIAL. No human ratification or CLOSED decision is implied."
     },
     "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
