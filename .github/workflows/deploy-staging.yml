@@ -132,14 +132,17 @@ jobs:
           echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
 
       - name: Save artifact manifest
+        env:
+          # Do not interpolate secrets into generated shell source.
+          STAGING_DEPLOY_TARGETS_JSON: ${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}
         run: |
           REQUESTED_APPS="${{ github.event.inputs.apps || 'all' }}"
           RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env staging --apps "$REQUESTED_APPS")
           APPROVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
 
           DEPLOY_TARGETS_JSON='[]'
-          if [ -n "${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}" ]; then
-            DEPLOY_TARGETS_JSON=$(echo '${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}' | jq --arg approved "$APPROVED_APPS" '[ .[] | select((.containerAppName // .app // .name) as $n | ($approved | split(",") | index($n) != null)) ]')
+          if [ -n "$STAGING_DEPLOY_TARGETS_JSON" ]; then
+            DEPLOY_TARGETS_JSON=$(jq --arg approved "$APPROVED_APPS" '[ .[] | select((.containerAppName // .app // .name) as $n | ($approved | split(",") | index($n) != null)) ]' <<< "$STAGING_DEPLOY_TARGETS_JSON")
           fi
 
           cat > artifact-manifest.json <<EOF
