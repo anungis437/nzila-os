@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { publicPortfolio } from '../lib/public-portfolio';
 import { searchSite, siteSearchIndex } from '../lib/site-search-index';
 import { securityControls } from '../lib/security-controls';
+import { pageMetadata } from '../lib/page-metadata';
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (path: string) => readFileSync(resolve(appRoot, path), 'utf8');
@@ -141,5 +142,16 @@ describe('public website credibility and navigation contract', () => {
     const careers = read('app/careers/page.tsx');
     expect(careers).toContain('No roles are posted right now');
     expect(careers).toContain('interest=careers');
+  });
+
+  it('gives each localized page its own social card instead of the homepage card', () => {
+    for (const path of ['products', 'portfolio', 'continuity-assessment', 'public-service', 'union-eyes']) {
+      expect(read(`app/${path}/page.tsx`), path).toContain('pageMetadata(');
+    }
+    const meta = pageMetadata({ title: 'Produits', description: 'Description', path: '/products', locale: 'fr-CA' });
+    expect(meta.openGraph).toMatchObject({ locale: 'fr_CA', title: 'Produits | Nzila Ventures', url: '/products' });
+    expect(meta.twitter).toMatchObject({ title: 'Produits | Nzila Ventures' });
+    expect(meta.alternates).toEqual({ canonical: '/products' });
+    expect(meta.title).toBe('Produits');
   });
 });

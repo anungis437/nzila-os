@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getLocale } from 'next-intl/server';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
+import { pageMetadata } from '@/lib/page-metadata';
 
 const metaByLocale = {
   'en-CA': {
@@ -16,7 +17,7 @@ const metaByLocale = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
-  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/products' } };
+  return pageMetadata({ ...(metaByLocale[locale] ?? metaByLocale['en-CA']), path: '/products', locale });
 }
 
 const copy = {

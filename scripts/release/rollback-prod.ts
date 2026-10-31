@@ -41,8 +41,9 @@ const RESOURCE_GROUP = process.env.AZURE_RESOURCE_GROUP ?? 'nzila-canada-staging
 
 /** Registry holding an app's production images; web must be set explicitly. */
 function registryFor(app: string): string {
-  const perApp = process.env[`ACR_NAME_${app.toUpperCase().replace(/-/g, '_')}`]
-  const registry = perApp ?? process.env.ACR_NAME
+  // An empty value (e.g. ACR_NAME_WEB= in CI) counts as unset so the next source applies.
+  const perApp = process.env[`ACR_NAME_${app.toUpperCase().replace(/-/g, '_')}`] || undefined
+  const registry = perApp ?? (process.env.ACR_NAME || undefined)
   if (registry) return registry
   if (app === 'web') {
     console.error('✗ No registry set for the web rollback. Web images were republished to a new registry')

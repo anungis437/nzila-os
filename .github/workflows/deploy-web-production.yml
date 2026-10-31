@@ -24,6 +24,17 @@ on:
         required: false
         type: string
         default: ''
+      union_eyes_readiness:
+        description: >-
+          Union Eyes /api/ready probe. 'required' (default) fails and rolls back when it is not 200.
+          'warn' records a warning in the run summary instead; use only while Union Eyes is known to be
+          down and not part of this release. The new-revision, content and link proofs still apply.
+        required: false
+        type: choice
+        options:
+          - required
+          - warn
+        default: required
 
 permissions:
   contents: read
@@ -292,6 +303,7 @@ jobs:
         env:
           PREV_REV: ${{ steps.before.outputs.prev_rev }}
           PREV_IMAGE: ${{ steps.before.outputs.prev_image }}
+          UE_READINESS_MODE: ${{ inputs.union_eyes_readiness }}
         run: |
           set -uo pipefail
           FQDN=$(az containerapp show --name "${PROD_APP}" --resource-group "${PROD_RG}" --query properties.configuration.ingress.fqdn -o tsv)
@@ -311,10 +323,17 @@ jobs:
             sleep 20
           done
           UE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "${PROD_UNION_EYES_URL}/api/ready" || echo 000)
-          if [ "$UE" != "200" ]; then OK=0; fi
+          if [ "$UE" != "200" ]; then
+            if [ "${UE_READINESS_MODE:-required}" = "warn" ]; then
+              echo "::warning::${PROD_UNION_EYES_URL}/api/ready returned ${UE}; continuing because union_eyes_readiness=warn."
+              echo "- WARNING: ${PROD_UNION_EYES_URL}/api/ready returned ${UE} (union_eyes_readiness=warn). Union Eyes is not covered by this release." >> "$GITHUB_STEP_SUMMARY"
+            else
+              OK=0
+            fi
+          fi
           if [ "$OK" != "1" ]; then
             echo "::error::Post-deploy proof failed (home=${CODE}, ready revision=${READY:-none}, previous=${PREV_REV}, union-eyes ready=${UE}). Rolling back to ${PREV_IMAGE}."
             az containerapp update --name "${PROD_APP}" --resource-group "${PROD_RG}" --image "${PREV_IMAGE}" --output none || true
             exit 1
           fi
-          echo "- Verified: new revision ${READY} serves 200, links to ${PROD_UNION_EYES_URL}, and ${PROD_UNION_EYES_URL}/api/ready is 200." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Verified: new revision ${READY} serves 200 and links to ${PROD_UNION_EYES_URL}; ${PROD_UNION_EYES_URL}/api/ready returned ${UE} (mode: ${UE_READINESS_MODE:-required})." >> "$GITHUB_STEP_SUMMARY"

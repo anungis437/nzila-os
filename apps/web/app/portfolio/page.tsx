@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import PortfolioExplorer from '@/components/public/PortfolioExplorer';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
+import { pageMetadata } from '@/lib/page-metadata';
 
 const metaByLocale = {
   'en-CA': {
@@ -17,7 +18,7 @@ const metaByLocale = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
-  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/portfolio' } };
+  return pageMetadata({ ...(metaByLocale[locale] ?? metaByLocale['en-CA']), path: '/portfolio', locale });
 }
 
 export default async function PortfolioPage() {
