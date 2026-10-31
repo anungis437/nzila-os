@@ -25,6 +25,9 @@ const contactCopy: Record<Locale, {
   message: string
   messagePlaceholder: string
   website: string
+  interestLabel: string
+  interestOptions: Array<{ value: string; label: string }>
+  privacyNotice: string
   sending: string
   send: string
   contactInfo: string
@@ -66,6 +69,14 @@ const contactCopy: Record<Locale, {
     website: 'Website',
     sending: 'Sending...',
     send: 'Send Message',
+    interestLabel: 'What would you like to discuss?',
+    interestOptions: [
+      { value: 'contact_page', label: 'General inquiry' },
+      { value: 'union_eyes_pilot', label: 'Union Eyes pilot' },
+      { value: 'civic_briefing', label: 'CIVIC institutional briefing' },
+      { value: 'portfolio_inquiry', label: 'Other Nzila product' },
+    ],
+    privacyNotice: 'We use the details you submit to review and respond to your inquiry. See our privacy policy.',
     contactInfo: 'Contact Information',
     contactBlurb: "Reach out for continuity assessment, governance review, Union Eyes pilot, or procurement documentation.",
     inquiries: 'Governance Inquiries',
@@ -77,12 +88,12 @@ const contactCopy: Record<Locale, {
     requestPartnerAccess: 'Request Partner Access',
     notPartnerYet: 'Not a partner yet?',
     applyProgram: 'Apply to our partnership program',
-    onboarding: '— we onboard qualified teams within 48 hours.',
+    onboarding: '— contact us to discuss the appropriate next steps.',
     genericError: 'Something went wrong',
     networkError: 'Network error - please try again',
     verticals: ['Healthtech', 'Uniontech', 'Insurtech', 'Legaltech', 'Fintech', 'Trade & Commerce', 'Justice & Equity', 'Entertainment', 'Agrotech', 'EdTech', 'Other'],
     sidebarItems: [
-      { icon: '✉️', title: 'Email', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'We respond within 24-48 hours' },
+      { icon: '✉️', title: 'Email', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'Response times depend on the request' },
       { icon: '📞', title: 'Phone', value: 'Schedule on request', href: '', sub: 'Phone support by arranged discovery call' },
       { icon: '🌍', title: 'Office', value: 'Remote-First · Global Opérations', href: '', sub: 'Teams across multiple time zones' },
     ],
@@ -101,7 +112,7 @@ const contactCopy: Record<Locale, {
     heroTitle: 'Entrons en contact',
     heroSubtitle: 'Discutons des risques de continuité, de fragilité de gouvernance ou de mémoire opérationnelle de votre organisation.',
     sendMessage: 'Envoyez-nous un message',
-    responseTime: 'Nous vous répondrons sous 24 a 48 heures.',
+    responseTime: 'Nous examinons les demandes et répondons selon leur nature.',
     success: 'Merci ! Votre message a été envoye avec succes.',
     fullName: 'Nom complet *',
     fullNamePlaceholder: 'Jean Dupont',
@@ -116,6 +127,14 @@ const contactCopy: Record<Locale, {
     website: 'Site Web',
     sending: 'Envoi...',
     send: 'Envoyer le message',
+    interestLabel: 'Quel sujet souhaitez-vous aborder ?',
+    interestOptions: [
+      { value: 'contact_page', label: 'Demande générale' },
+      { value: 'union_eyes_pilot', label: 'Pilote Union Eyes' },
+      { value: 'civic_briefing', label: 'Présentation CIVIC' },
+      { value: 'portfolio_inquiry', label: 'Autre produit Nzila' },
+    ],
+    privacyNotice: 'Nous utilisons vos renseignements pour examiner votre demande et vous répondre. Consultez notre politique de confidentialité.',
     contactInfo: 'Coordonnées',
     contactBlurb: 'Communiquez avec nous pour une évaluation de continuité, une revue de gouvernance, un pilote Union Eyes ou une documentation procurement.',
     inquiries: 'Demandes de gouvernance',
@@ -127,12 +146,12 @@ const contactCopy: Record<Locale, {
     requestPartnerAccess: 'Demander un accès partenaire',
     notPartnerYet: 'Pas encore partenaire ?',
     applyProgram: 'Postulez a notre programme de partenariat',
-    onboarding: '- nous intégrons les équipes qualifiées sous 48 heures.',
+    onboarding: '— communiquez avec nous pour définir la suite.',
     genericError: 'Une erreur est survenue',
     networkError: 'Erreur réseau - veuillez reessayer',
     verticals: ['Santé', 'Travail syndical', 'Assurtech', 'Legaltech', 'Fintech', 'Commerce', 'Justice et équité', 'Divertissement', 'Agrotech', 'EdTech', 'Autre'],
     sidebarItems: [
-      { icon: '✉️', title: 'Courriel', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'Reponse sous 24 a 48 heures' },
+      { icon: '✉️', title: 'Courriel', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'Le délai dépend de la nature de la demande' },
       { icon: '📞', title: 'Téléphone', value: 'Planification sur demande', href: '', sub: 'Support téléphonique via appel de découverte' },
       { icon: '🌍', title: 'Bureau', value: "Télétravail d'abord · Opérations mondiales", href: '', sub: 'Équipes sur plusieurs fuseaux horaires' },
     ],
@@ -163,7 +182,10 @@ export default function Contact() {
       company: '',
       vertical: '',
       message: '',
-      source: 'contact_page',
+      source: params?.get('interest') === 'union-eyes' ? 'union_eyes_pilot'
+        : params?.get('interest') === 'civic' ? 'civic_briefing'
+        : params?.get('interest') === 'portfolio' ? 'portfolio_inquiry'
+        : 'contact_page',
       utmSource: params?.get('utm_source') ?? '',
       utmMedium: params?.get('utm_medium') ?? '',
       utmCampaign: params?.get('utm_campaign') ?? '',
@@ -214,7 +236,7 @@ export default function Contact() {
         message: '',
         website: '',
       }));
-      setTimeout(() => setSubmitted(false), 5000);
+      // Keep the confirmation visible to assistive technology until the user navigates away.
     } catch {
       setError(copy.networkError);
       trackEvent('contact_submit_network_error');
@@ -277,7 +299,7 @@ export default function Contact() {
                 <p className="text-gray-500 mb-8">{copy.responseTime}</p>
 
                 {submitted && (
-                  <div className="mb-6 p-4 bg-emerald/5 border border-emerald/20 rounded-xl">
+                  <div role="status" aria-live="polite" className="mb-6 p-4 bg-emerald/5 border border-emerald/20 rounded-xl">
                     <p className="text-emerald font-medium">
                       {copy.success}
                     </p>
@@ -285,7 +307,7 @@ export default function Contact() {
                 )}
 
                 {error && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <div role="alert" className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
                     <p className="text-red-600 font-medium">{error}</p>
                   </div>
                 )}
@@ -325,10 +347,21 @@ export default function Contact() {
                   </div>
 
                   <div>
+                    <label htmlFor="source" className="block text-sm font-semibold text-navy mb-1.5">
+                      {copy.interestLabel}
+                    </label>
+                    <select id="source" name="source" value={formData.source} onChange={handleChange} className={inputClasses}>
+                      {copy.interestOptions.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
                     <label htmlFor="message" className="block text-sm font-semibold text-navy mb-1.5">
                       {copy.message}
                     </label>
-                    <textarea id="message" name="message" required value={formData.message} onChange={handleChange} rows={5} className={inputClasses} placeholder={copy.messagePlaceholder} />
+                    <textarea id="message" name="message" required value={formData.message} onChange={handleChange} rows={5} maxLength={2000} className={inputClasses} placeholder={copy.messagePlaceholder} />
                   </div>
 
                   {/* Honeypot field for basic bot filtering */}
@@ -337,7 +370,15 @@ export default function Contact() {
                     <input id="website" name="website" value={formData.website} onChange={handleChange} tabIndex={-1} autoComplete="off" />
                   </div>
 
+                  <p className="text-sm leading-6 text-slate-600">
+                    {copy.privacyNotice}{' '}
+                    <a href="/legal/privacy" className="font-semibold text-electric underline-offset-2 hover:underline">
+                      {locale === 'fr-CA' ? 'En savoir plus' : 'Learn more'}
+                    </a>
+                  </p>
+
                   <button
+                    type="submit"
                     disabled={submitting}
                     className="w-full bg-electric text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/25 btn-press disabled:opacity-60"
                   >
