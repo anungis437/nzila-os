@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import HumanCenteredAI from '@/components/public/HumanCenteredAI';
 import { getLocale } from 'next-intl/server';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
@@ -242,6 +243,8 @@ export default async function PublicServicePage() {
           <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">{c.futureBody}</p>
         </div>
       </section>
+
+      <HumanCenteredAI isFr={locale === "fr-CA"} audience="civic" />
 
       <section className="bg-[#f6f8fb] py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
