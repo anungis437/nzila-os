@@ -13,13 +13,13 @@ function fixture() {
       name:'production',can_admins_bypass:false,
       protection_rules:[{type:'required_reviewers',reviewers:[{type:'User',reviewer:{id:202,login:'security-reviewer',type:'User'}}]}],
     },
-    run:{id:12345,head_sha:SHA,name:'Deploy Production',event:'workflow_dispatch',
+    run:{id:12345,workflow_id:67890,head_sha:SHA,name:'Deploy Production',event:'workflow_dispatch',
       actor:{id:101,login:'developer',type:'User'},triggering_actor:{id:101,login:'developer',type:'User'},head_branch:'main',
       run_attempt:1,created_at:'2026-10-30T14:00:00Z',
       run_started_at:'2026-10-30T14:01:00Z'},
     approvals:[{id:890,state:'approved',user:{id:202,login:'security-reviewer',type:'User'},
       created_at:'2026-10-30T14:15:00Z',environments:[{name:'production'}]}],
-    expectedRunId:'12345',expectedSha:SHA,now:NOW,
+    expectedRunId:'12345',expectedWorkflowId:'67890',expectedSha:SHA,now:NOW,
   }
 }
 test('only a distinct individually entitled human on same run is accepted',()=>{
@@ -70,6 +70,18 @@ test('production run actors must have authenticated GitHub account IDs',()=> {
       const f=fixture(); f.run[key].id=id
       assert.throws(() => verifyProductionApproval(f), /run initiator not authenticated/)
     }
+  }
+})
+test('same-name workflow substitution and missing independently resolved workflow ID are denied',()=> {
+  for (const mutate of [
+    f => { f.run.workflow_id=99999 },
+    f => { delete f.run.workflow_id },
+    f => { f.run.workflow_id=null },
+    f => { f.expectedWorkflowId='99999' },
+    f => { delete f.expectedWorkflowId },
+  ]) {
+    const f=fixture(); mutate(f)
+    assert.throws(()=>verifyProductionApproval(f),/PRODUCTION_APPROVAL_DENIED/)
   }
 })
 test('run substitution, wrong SHA and workflow substitution rejected',()=>{
@@ -165,7 +177,7 @@ test('CLI writes a minimal, non-overwritable receipt only after authenticated re
     }
     const cli=fileURLToPath(new URL('./verify-production-approval.mjs',import.meta.url))
     const receipt=join(dir,'verified-approval.json')
-    const args=[cli,dir,'12345',SHA,receipt]
+    const args=[cli,dir,'12345',SHA,receipt,'67890']
     const ok=spawnSync(process.execPath,args,{encoding:'utf8'})
     assert.equal(ok.status,0,ok.stderr)
     const saved=JSON.parse(readFileSync(receipt,'utf8'))
@@ -179,7 +191,7 @@ test('CLI writes a minimal, non-overwritable receipt only after authenticated re
     f.approvals[0].user.login='developer'
     writeFileSync(join(dir,'approvals.json'),JSON.stringify(f.approvals))
     const denied=join(dir,'denied-approval.json')
-    const failed=spawnSync(process.execPath,[cli,dir,'12345',SHA,denied],{encoding:'utf8'})
+    const failed=spawnSync(process.execPath,[cli,dir,'12345',SHA,denied,'67890'],{encoding:'utf8'})
     assert.notEqual(failed.status,0,'self-approval must be rejected')
     assert.equal(existsSync(denied),false,'denied approval must leave no receipt')
   } finally { rmSync(dir,{recursive:true,force:true}) }

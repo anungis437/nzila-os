@@ -21,10 +21,16 @@ const identity = user => {
 const matches = entry => Array.isArray(entry?.environments) &&
   entry.environments.some(e => String(e?.name ?? '').toLowerCase() === 'production')
 
-export function verifyProductionApproval({environment,run,approvals,expectedRunId,expectedSha,now=new Date()}) {
-  if (!/^[1-9][0-9]*$/.test(String(expectedRunId ?? '')) || !/^[0-9a-f]{40}$/i.test(expectedSha ?? '')) deny('invalid request coordinates')
-  if (String(run?.id) !== String(expectedRunId) || run?.head_sha !== expectedSha ||
-      run?.name !== 'Deploy Production' || !['push','workflow_dispatch'].includes(run?.event)) {
+export function verifyProductionApproval({environment,run,approvals,expectedRunId,expectedSha,expectedWorkflowId,now=new Date()}) {
+  if (!/^[1-9][0-9]*$/.test(String(expectedRunId ?? '')) ||
+      !/^[1-9][0-9]*$/.test(String(expectedWorkflowId ?? '')) ||
+      !/^[0-9a-f]{40}$/i.test(expectedSha ?? '')) deny('invalid request coordinates')
+  // Display names can be duplicated across workflow files. Require the
+  // immutable workflow ID independently resolved from deploy-production.yml.
+  if (String(run?.id) !== String(expectedRunId) ||
+      String(run?.workflow_id) !== String(expectedWorkflowId) ||
+      run?.head_sha !== expectedSha || run?.name !== 'Deploy Production' ||
+      !['push','workflow_dispatch'].includes(run?.event)) {
     deny('untrusted workflow run or source SHA')
   }
   // GitHub's run approvals API does not bind each approval to a run attempt.
@@ -102,12 +108,13 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
 
 if (process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   try {
-    const [dir,runId,sha,receiptPath]=process.argv.slice(2)
+    const [dir,runId,sha,receiptPath,workflowId]=process.argv.slice(2)
     if (!dir || !runId || !sha) deny('missing input evidence')
     const load=n=>JSON.parse(readFileSync(join(dir,n),'utf8'))
     const proof=verifyProductionApproval({
       environment:load('environment.json'),run:load('run.json'),
       approvals:load('approvals.json'),expectedRunId:runId,expectedSha:sha,
+      expectedWorkflowId:workflowId,
     })
     if (!receiptPath) deny('durable approval receipt destination required')
     // Only a verified, minimally scoped result is retained. The raw GitHub

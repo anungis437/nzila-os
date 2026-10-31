@@ -242,8 +242,11 @@ jobs:
           gh api "repos/${GITHUB_REPOSITORY}/environments/production" > "$RUNNER_TEMP/nzila-production-review/environment.json"
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" > "$RUNNER_TEMP/nzila-production-review/run.json"
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/approvals" > "$RUNNER_TEMP/nzila-production-review/approvals.json"
+          # Workflow display names are not unique. Resolve the canonical
+          # workflow ID through authenticated GitHub API before approval proof.
+          PRODUCTION_WORKFLOW_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/deploy-production.yml" --jq '.id')
           mkdir -p ops/deploy-evidence
-          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA" "ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json"
+          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA" "ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json" "$PRODUCTION_WORKFLOW_ID"
 
       # Jobs have isolated filesystems: download again after the independent
       # GitHub Environment approval, then re-verify the exact signed artifact.
