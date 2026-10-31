@@ -34,7 +34,7 @@ describe('F06 audit, retention and read-floor controls', () => {
     const text = route('workbook/[id]/memory-holders');
     expect(text.match(/guardPublicIntake\(request/g)).toHaveLength(2);
     const item = route('workbook/[id]/memory-holders/[holderId]');
-    expect(item.match(/guardPublicIntake\\(request/g)).toHaveLength(2);
+    expect(item.split('guardPublicIntake(request').length - 1).toBe(2);
     expect(item).toContain("bucket: 'capability'");
     expect(item).toContain('readBody: false');
     expect(item).not.toContain('request.json()');
