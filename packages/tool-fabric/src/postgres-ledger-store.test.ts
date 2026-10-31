@@ -30,11 +30,18 @@ function fake(opts: { revision?: number; hash?: string; entries?: unknown[]; row
   }
 }
 function auditRecord(prevHash: string, seq: number, orgId = ORG, id: string = randomUUID(), prevEventHash = LEDGER_GENESIS_HASH): AuditEntry {
+  const eventBody = { type: 'TOOL_REGISTERED' as const, descriptor: pinned() }
+  const mutation = {
+    actorId: 'host-actor', role: 'platform-governance-board',
+    authorityRef: 'host:test-identity', operation: 'register' as const,
+  }
   const body = {
     id, timestamp: '2026-10-30T15:00:00.000Z', actorId: 'host-actor', orgId,
     action: 'tool_fabric.ledger.tool_registered', resource: 'tool-fabric-tool',
     resourceId: 'sample-tool',
-    payload: { seq, prevEventHash, eventHash: 'a'.repeat(64) },
+    payload: { seq, prevEventHash,
+      eventHash: computeEventHash(seq, prevEventHash, eventBody, mutation),
+      body: eventBody, mutation },
   }
   return { ...body, prevHash, hashVersion: 2, hash: computeAuditHash(prevHash, body) }
 }
@@ -254,5 +261,22 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
       ORG, { revision: 0, headHash: LEDGER_GENESIS_HASH }, entry,
     )).rejects.toThrow('Append event body hash or schema is invalid')
     expect(db.commits).toBe(0)
+  })
+  it('rejects forged inner event digest on snapshot even with authentic audit-v2 envelope', async () => {
+    const valid = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const eventHash = valid.payload.eventHash === 'f'.repeat(64)
+      ? 'e'.repeat(64) : 'f'.repeat(64)
+    const hashable = {
+      id: valid.id, timestamp: valid.timestamp, actorId: valid.actorId,
+      orgId: valid.orgId, action: valid.action, resource: valid.resource,
+      resourceId: valid.resourceId, payload: { ...valid.payload, eventHash },
+    }
+    const forged: AuditEntry = {
+      ...hashable, prevHash: LEDGER_GENESIS_HASH, hashVersion: 2,
+      hash: computeAuditHash(LEDGER_GENESIS_HASH, hashable),
+    }
+    await expect(new PostgresAtomicTrustLedgerStore(fake({
+      revision: 1, hash: forged.hash, entries: [forged],
+    })).readSnapshot(ORG)).rejects.toThrow('Persistent trust event body hash invalid')
   })
 })

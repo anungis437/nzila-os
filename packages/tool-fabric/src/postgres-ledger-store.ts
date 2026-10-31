@@ -128,6 +128,12 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
             !/^[0-9a-f]{64}$/.test(entry.payload.eventHash)) {
           throw new LedgerStoreUnavailableError('Persistent trust event chain disagrees with receipt index')
         }
+        // A valid outer audit-v2 digest can still authenticate a forged inner
+        // eventHash. A direct store reader must never receive that poisoned
+        // record, even before the higher-level replay checks it.
+        if (!isAuthenticTrustEventPayload(entry.payload)) {
+          throw new LedgerStoreUnavailableError('Persistent trust event body hash invalid')
+        }
         previousEventHash = entry.payload.eventHash
         // The relational identity/hash columns are immutable receipt indexes.
         // Verify them against the canonical full-coverage JSON event on every
