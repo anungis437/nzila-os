@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 559,
-    "partial": 90,
+    "partial": 91,
     "qualificationVerified": 0,
     "unresolved": 218,
     "externalBlockers": 0
@@ -996,6 +996,15 @@
       "newlyImplemented": 2,
       "outstandingAfter": 218,
       "partial": 4,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B103-ORGANIZATION-SELECTION-AUDIT",
+      "family": "Organization selection is audited before it takes effect",
+      "outstandingBefore": 218,
+      "newlyImplemented": 0,
+      "outstandingAfter": 218,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -7758,6 +7767,19 @@
         "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
       ],
       "explanation": "Credited from the B100 code change (commits 43cbe020f and f895de200): the invented national table is gone, an unavailable or invalid CLC measurement is null and is never replaced by a peer average, the endpoint must be an explicitly configured HTTPS URL, and a peer set with no positive member counts yields no average or percentile instead of 0 divided by 0. The existing tests assert nationalAverage null for an unset key, a 404, an invalid body, an invalid cache and a thrown error."
+    },
+    "DEF-0B10-OPL-10": {
+      "status": "PARTIAL",
+      "batch": "B103-ORGANIZATION-SELECTION-AUDIT",
+      "files": [
+        "apps/union-eyes/lib/auth/organization-selection-audit.ts",
+        "apps/union-eyes/lib/auth/canonical-organization-selection.ts",
+        "apps/union-eyes/app/api/organizations/switch/route.ts",
+        "apps/union-eyes/app/api/__tests__/organizations-switch.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s46-gate0-org-selection-audit.test.ts"
+      ],
+      "explanation": "Selecting an organization to work in now leaves an organization.select audit record (actor, organization, and whether the authority was membership or platform administrator) written through the atomic audit before the session is rebound, the preference cookie is set or the organization is returned; if the record cannot be written the selection is refused (503 in legacy mode, an error in canonical mode). A platform administrator selecting an organization they hold no membership of is named as such.",
+      "remaining": "The session store and the audit store are separate databases, so the record is written first rather than in one transaction with the rebind; a record can exist for a rebind that then fails. The canonical path is covered by source pins and mocks only, not by a native or HTTP run."
     }
   }
 }

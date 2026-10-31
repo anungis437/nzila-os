@@ -20,6 +20,7 @@ import {
 } from '@nzila/platform-auth/org-binding'
 import { createLogger } from '@nzila/os-core'
 import { organizations } from '@/db/schema-organizations'
+import { recordOrganizationSelection } from './organization-selection-audit'
 import { canonicalMembershipRole } from './canonical-membership-role'
 import {
   CANONICAL_ORGANIZATION_AUTHORITY,
@@ -300,6 +301,13 @@ export async function handleCanonicalOrganizationSwitch(request: NextRequest) {
         (candidate) => candidate.id === organizationId,
       )
       if (!organization) throw new AuthOrgBindingError('MEMBERSHIP_REQUIRED')
+      // Recorded before the session is rebound or the preference set; a failure refuses the selection.
+      await recordOrganizationSelection({
+        organizationId,
+        userId: actor.userId,
+        authority: 'membership',
+        mode: actor.authority === 'pg-session' ? 'canonical_session' : 'canonical_preference',
+      })
       const response = NextResponse.json({
         success: true,
         organization,

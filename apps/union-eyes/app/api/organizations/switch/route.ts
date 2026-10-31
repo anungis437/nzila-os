@@ -11,6 +11,7 @@ import { organizations, organizationMembers } from '@/db/schema-organizations';
 import { and, eq, isNull } from 'drizzle-orm';
 import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { recordOrganizationSelection } from '@/lib/auth/organization-selection-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,14 @@ export async function POST(req: NextRequest) {
     if (!userMembership) {
       return NextResponse.json({ error: 'Access denied: not a member of this organization' }, { status: 403 });
     }
+  }
+
+  // A selection that leaves no trail is refused: a platform administrator choosing an organization they hold no membership of is the case
+  // that matters most.
+  try {
+    await recordOrganizationSelection({ organizationId: org.id, userId, authority: isAdmin ? 'platform_administrator' : 'membership', mode: 'legacy' });
+  } catch {
+    return NextResponse.json({ error: 'The organization selection could not be recorded' }, { status: 503 });
   }
 
   return NextResponse.json({

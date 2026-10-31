@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 612,
- "partial": 90,
+ "partial": 91,
  "outstanding": 165,
  "accountedFor": 165,
  "families": [
@@ -654,7 +654,8 @@
    },
    {
     "id": "DEF-0B10-OPL-10",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
