@@ -2429,9 +2429,11 @@
       "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
       "files": [
         "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts"
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts",
+        "apps/union-eyes/lib/organizational-dynamics/elasticity/elasticity-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/momentum/momentum-engine.ts"
       ],
-      "explanation": "Governance coherence and momentum now explicitly refuse to manufacture a result; neither computes a governed governance trajectory.",
+      "explanation": "Governance coherence and momentum now explicitly refuse to manufacture a result; neither computes a governed governance trajectory. Legacy direct-call engines also refuse entry-count-derived scores rather than fabricating zeroes or confidence.",
       "remaining": "Implement a defensible governance-momentum measurement from authorized organization records, evidence provenance and an accepted model; verify the 501 path and later real behavior at unit, native and HTTP levels."
     },
     "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST": {
@@ -2439,9 +2441,11 @@
       "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
       "files": [
         "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts"
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts",
+        "apps/union-eyes/lib/organizational-dynamics/elasticity/elasticity-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/momentum/momentum-engine.ts"
       ],
-      "explanation": "Coordination, rhythm, trust and response elasticity now explicitly refuse to manufacture results from cognition-memory entry counts.",
+      "explanation": "Coordination, rhythm, trust and response elasticity now explicitly refuse to manufacture results from cognition-memory entry counts. Legacy direct-call engines also refuse entry-count-derived scores rather than fabricating zeroes or confidence.",
       "remaining": "Implement a defensible response-elasticity measurement with governed evidence, meaningful denominators and provenance; verify the 501 path and later real behavior at unit, native and HTTP levels."
     },
     "DEF-0B9-ML-CHURN-SQL-NAMES-COLUMNS-AND-STATUS-VALUES-THE-REPOSITORY-DOES-NOT-DEFINE": {
