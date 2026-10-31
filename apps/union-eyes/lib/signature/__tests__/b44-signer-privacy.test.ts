@@ -61,6 +61,16 @@ describe('B44 signer network data (DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCL
     ])
   })
 
+  it('does not treat the actor of a peer-signature event as owner of the peer email', () => {
+    const event = {
+      actorUserId: 'a', signerEmail: 'b@example.test',
+      email: 'b@example.test', ipAddress: '10.0.0.1', eventType: 'signer_status_updated',
+    }
+    expect(redactSignerNetworkData(event, 'a')).toEqual({
+      actorUserId: 'a', ipAddress: '10.0.0.1', eventType: 'signer_status_updated',
+    })
+  })
+
   it('preserves the sender audit report unchanged', () => {
     const report = [{ actorUserId: 'b', email: 'b@example.test', eventDescription: 'Signer b@example.test signed' }]
     expect(signatureViewForViewer(report, 'sender', 'sender')).toEqual(report)
