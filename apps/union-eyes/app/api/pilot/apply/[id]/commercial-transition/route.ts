@@ -37,11 +37,34 @@ export const dynamic = 'force-dynamic';
 // transition-allowed check).
 const FINANCIAL_TARGET_STATES: CommercialState[] = ['contract_sent', 'invoice_issued', 'subscription_active'];
 
+// Every transition that writes a contract, invoice or subscription row. If the row cannot be written the
+// transition is refused: a state, status or audit record must never say the effect happened when it did not.
+const EFFECT_TARGET_STATES: CommercialState[] = ['contract_sent', 'contract_signed', 'invoice_issued', 'subscription_active'];
+
+// States that move the pilot's own status to approved, active or completed. Those are platform decisions and need
+// the approved commercial terms, not just the state name.
+const TERMS_REQUIRED_STATES: CommercialState[] = [
+  'approved',
+  'contract_sent',
+  'contract_signed',
+  'invoice_issued',
+  'pilot_active',
+  'pilot_complete',
+  'subscription_offered',
+  'subscription_active',
+];
+
 type TransitionPayload = {
   targetState?: string;
   reason?: string;
   source?: string;
   allowSkip?: boolean;
+  counterpartAcceptance?: {
+    acceptedByName: string;
+    acceptedByRole: string;
+    channel: 'countersigned_document' | 'e_signature_provider' | 'written_confirmation';
+    evidenceReference: string;
+  };
   /**
    * Generic reference-template key. The operational package intentionally
    * carries no customer-specific reference templates; any value provided here
@@ -114,6 +137,13 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
     if (!targetState) {
       return NextResponse.json({ error: 'A valid targetState is required' }, { status: 400 });
+    }
+
+    if (targetState === 'contract_signed' && !body.counterpartAcceptance) {
+      return NextResponse.json(
+        { error: 'contract_signed requires counterpartAcceptance: who accepted for the other party, in what role, through which channel, and the evidence reference.' },
+        { status: 400 },
+      );
     }
 
     // PR #752 round 23: this is a CHEAP existence + role-tier pre-check
@@ -247,7 +277,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       // lib/pilot/commercial-terms-authority.ts's approveCommercialTerms) —
       // re-checked here, under the SAME row lock, against the FRESH read
       // above, never an earlier snapshot.
-      if (FINANCIAL_TARGET_STATES.includes(targetState)) {
+      if (TERMS_REQUIRED_STATES.includes(targetState)) {
         if (
           application.verifiedMemberCount == null ||
           application.verifiedPilotAmount == null ||
@@ -257,7 +287,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
           throw new CommercialTransitionRejected(409, {
             error:
               'Commercial terms have not been approved for this pilot. Call POST /api/pilot/apply/[id]/approve-commercial-terms ' +
-              'with a verified memberCount before contract, invoice, or subscription creation.',
+              'with a verified memberCount before approval, contract, invoice, activation or subscription.',
           });
         }
         if (targetState === 'subscription_active' && !application.verifiedSubscriptionPlanId) {
@@ -326,11 +356,11 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
         billingAccountId = billingAccount?.id ?? null;
 
-        if (!billingAccountId) {
-          monetization.notes.push('No billing account found; monetization side effects were staged only.');
+        if (!billingAccountId && EFFECT_TARGET_STATES.includes(targetState)) {
+          throw new CommercialTransitionRejected(409, {
+            error: `The verified organization has no billing account, so ${targetState} cannot create its contract, invoice or subscription. Nothing was changed.`,
+          });
         }
-      } else {
-        monetization.notes.push('No organizationId provided in pilot responses; monetization side effects were staged only.');
       }
 
       const contractNumber = buildPilotContractNumber(application.id);
@@ -376,27 +406,62 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
       if (targetState === 'contract_signed' && organizationId && billingAccountId) {
         const [existingContract] = await tx
-          .select({ id: commercialContracts.id })
+          .select({
+            id: commercialContracts.id,
+            status: commercialContracts.status,
+            metadata: commercialContracts.metadata,
+          })
           .from(commercialContracts)
-          .where(eq(commercialContracts.contractNumber, contractNumber));
+          .where(and(eq(commercialContracts.contractNumber, contractNumber), eq(commercialContracts.organizationId, organizationId)));
 
-        if (existingContract) {
+        if (!existingContract) {
+          throw new CommercialTransitionRejected(409, {
+            error: 'No contract exists for this pilot. Move to contract_sent first. Nothing was changed.',
+          });
+        }
+        if (existingContract.status !== 'pending_approval' && existingContract.status !== 'active') {
+          throw new CommercialTransitionRejected(409, {
+            error: `The pilot contract is ${existingContract.status}, not awaiting acceptance. Nothing was changed.`,
+          });
+        }
+
+        // A replay of an accepted contract keeps the original acceptance record.
+        if (existingContract.status === 'pending_approval' && body.counterpartAcceptance) {
+          const acceptedMetadata = {
+            ...((existingContract.metadata ?? {}) as Record<string, unknown>),
+            counterpartAcceptance: {
+              ...body.counterpartAcceptance,
+              recordedBy: actorUserId,
+              recordedAt: nowIso,
+              verification: 'recorded_by_platform_operator',
+            },
+          };
           await tx
             .update(commercialContracts)
-            .set({
-              status: 'active',
-              signedAt: now,
-              updatedAt: now,
-            })
+            .set({ status: 'active', signedAt: now, signedBy: body.counterpartAcceptance.acceptedByName, updatedAt: now, metadata: acceptedMetadata })
             .where(and(eq(commercialContracts.id, existingContract.id), eq(commercialContracts.organizationId, organizationId)));
-
-          monetization.contractId = existingContract.id;
-        } else {
-          monetization.notes.push('No draft contract found to sign; staged only.');
         }
+
+        monetization.contractId = existingContract.id;
       }
 
       if (targetState === 'invoice_issued' && organizationId && billingAccountId) {
+        const [acceptedContract] = await tx
+          .select({ id: commercialContracts.id })
+          .from(commercialContracts)
+          .where(
+            and(
+              eq(commercialContracts.contractNumber, contractNumber),
+              eq(commercialContracts.organizationId, organizationId),
+              eq(commercialContracts.status, 'active'),
+            ),
+          );
+        if (!acceptedContract) {
+          throw new CommercialTransitionRejected(409, {
+            error: 'No accepted contract exists for this pilot, so no invoice can be issued. Record contract_signed first. Nothing was changed.',
+          });
+        }
+
         const invoiceNumber = buildInvoiceNumber(application.id);
 
         const [invoice] = await tx
@@ -454,7 +519,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         const selectedPlanId = application.verifiedSubscriptionPlanId;
 
         if (!selectedPlanId) {
-          monetization.notes.push('No approved subscription plan; subscription activation staged only.');
+          throw new CommercialTransitionRejected(409, {
+            error: 'No approved subscription plan for this pilot. Nothing was changed.',
+          });
         } else {
           // Round 26: approval validated the plan was active AT APPROVAL
           // TIME, but activation can happen much later — isActive=false
@@ -466,7 +533,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
             .where(eq(subscriptionPlans.id, selectedPlanId));
 
           if (!plan || !plan.isActive) {
-            monetization.notes.push('Approved subscription plan is no longer active; subscription activation staged only.');
+            throw new CommercialTransitionRejected(409, {
+              error: 'The approved subscription plan is no longer active, so no subscription can be created. Re-approve the commercial terms with an active plan. Nothing was changed.',
+            });
           } else {
             const [existingSubscription] = await tx
               .select({ id: orgSubscriptions.id })
@@ -622,6 +691,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
           invoiceId: monetization.invoiceId ?? null,
           subscriptionId: monetization.subscriptionId ?? null,
           commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint ?? null,
+          counterpartAcceptanceChannel:
+            targetState === 'contract_signed' ? body.counterpartAcceptance?.channel ?? null : null,
         },
       });
         }),

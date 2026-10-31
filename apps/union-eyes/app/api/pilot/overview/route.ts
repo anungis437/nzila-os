@@ -1,13 +1,14 @@
 /**
  * GET /api/pilot/overview
  *
- * Returns pilot metrics for ALL enrolled organizations.
- * Only accessible by NZILA Ventures (platform owner) users.
+ * Returns pilot metrics for the enrolled organizations, one bounded page at a time.
+ * Reachable only by a platform administrator: the platform-staff authority (isPlatformAdminUser) is the mandate for a read across
+ * organizations. Holding an officer role title in the platform organization is not, and neither is any organization-level role.
+ * Each read is audited, with the page it returned.
  */
 
 import { NextResponse } from "next/server";
 import { requireUser, hasMinRole, isPlatformAdminUser } from "@/lib/api-auth-guard";
-import { currentStateContextEnabled } from "@/lib/auth/canonical-bootstrap";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -16,14 +17,25 @@ import { db } from "@/db/db";
 import { pilotEnrollments } from "@/db/schema/domains/pilot/pilot-enrollments";
 import { pilotMilestones } from "@/db/schema/domains/pilot/pilot-milestones";
 import { organizations } from "@/db/schema-organizations";
-import { eq, sql } from "drizzle-orm";
-import { withSystemContext } from "@/lib/db/with-rls-context";
-import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
+import { asc, eq, inArray, sql } from "drizzle-orm";
+import { operationAuditResponse, performAtomicAuditedOperation } from "@/lib/audit/operation-audit";
+import { DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import type { PilotMilestone } from "@/types/marketing";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+const DEFAULT_PAGE_SIZE = 25;
+const MAX_PAGE_SIZE = 100;
+
+const boundedInteger = (raw: string | null, fallback: number, min: number, max: number): number => {
+  const value = raw === null ? Number.NaN : Number.parseInt(raw, 10);
+  return Number.isFinite(value) ? Math.min(Math.max(value, min), max) : fallback;
+};
+
+type MemberStats = { organization_id: string; organizer_count: unknown; active_organizer_count: unknown; total_members: unknown; active_members: unknown };
+type CaseStats = { organization_id: string; cases_managed: unknown; avg_resolution_hours: unknown };
+
+export async function GET(request?: Request) {
   try {
     const user = await requireUser();
 
@@ -35,19 +47,32 @@ export async function GET() {
       );
     }
 
-    // Only NZILA Ventures (platform owner) or platform admins can see the overview
-    const platformAdmin = await isPlatformAdminUser(user.userId);
-    const platformOrganization = !currentStateContextEnabled() &&
-      (await getOrganizationIdForUser(user.userId)) === DEFAULT_ORGANIZATION_ID;
-    if (!platformAdmin && !platformOrganization) {
+    if (!(await isPlatformAdminUser(user.userId))) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
-        "Only the platform organization can view the pilot overview"
+        "Only platform administrators can view the pilot overview"
       );
     }
 
-    return await withSystemContext(async () => {
-      // Fetch all active enrollments with org names
+    const params = request ? new URL(request.url).searchParams : new URLSearchParams();
+    const limit = boundedInteger(params.get("limit"), DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
+    const offset = boundedInteger(params.get("offset"), 0, 0, 1_000_000);
+
+    const page = await performAtomicAuditedOperation(
+      {
+        scope: "system",
+        organizationId: user.organizationId ?? DEFAULT_ORGANIZATION_ID,
+        userId: user.userId,
+        action: "pilot.overview.read",
+        resourceType: "pilot_enrollments",
+        details: { limit, offset },
+      },
+      async () => {
+      const [{ total }] = (await db
+        .select({ total: sql<number>`count(*)` })
+        .from(pilotEnrollments)
+        .where(eq(pilotEnrollments.status, "active"))) as Array<{ total: number | string }>;
+
       const enrollments = await db
         .select({
           enrollment: pilotEnrollments,
@@ -56,43 +81,71 @@ export async function GET() {
         })
         .from(pilotEnrollments)
         .innerJoin(organizations, eq(pilotEnrollments.organizationId, organizations.id))
-        .where(eq(pilotEnrollments.status, "active"));
+        .where(eq(pilotEnrollments.status, "active"))
+        .orderBy(asc(pilotEnrollments.enrolledAt), asc(pilotEnrollments.id))
+        .limit(limit)
+        .offset(offset);
 
-      const orgMetrics = await Promise.all(
-        enrollments.map(async ({ enrollment, orgName, orgSlug }) => {
+      const orgIds = enrollments.map(({ enrollment }) => enrollment.organizationId);
+      const idList = sql.join(orgIds.map((id) => sql`${id}::uuid`), sql`, `);
+
+      // One query per figure for the whole page, not three per organization.
+      const milestoneRows = orgIds.length
+        ? await db.select().from(pilotMilestones).where(inArray(pilotMilestones.organizationId, orgIds))
+        : [];
+      const memberStatRows = orgIds.length
+        ? Array.from(
+            await db.execute(sql`
+              SELECT
+                organization_id::text AS organization_id,
+                COUNT(*) FILTER (WHERE role IN ('organizer', 'steward', 'president', 'vp', 'officer'))
+                  AS organizer_count,
+                COUNT(*) FILTER (WHERE role IN ('organizer', 'steward', 'president', 'vp', 'officer')
+                  AND updated_at > NOW() - INTERVAL '30 days')
+                  AS active_organizer_count,
+                COUNT(*) AS total_members,
+                COUNT(*) FILTER (WHERE updated_at > NOW() - INTERVAL '30 days')
+                  AS active_members
+              FROM organization_members
+              WHERE organization_id IN (${idList})
+                AND deleted_at IS NULL
+              GROUP BY organization_id
+            `),
+          ) as unknown as MemberStats[]
+        : [];
+      const caseStatRows = orgIds.length
+        ? Array.from(
+            await db.execute(sql`
+              SELECT
+                organization_id::text AS organization_id,
+                COUNT(*) AS cases_managed,
+                AVG(
+                  EXTRACT(EPOCH FROM (COALESCE(resolved_at, NOW()) - created_at)) / 3600
+                ) AS avg_resolution_hours
+              FROM grievances
+              WHERE organization_id IN (${idList})
+                AND created_at > NOW() - INTERVAL '30 days'
+              GROUP BY organization_id
+            `),
+          ) as unknown as CaseStats[]
+        : [];
+      const memberStatsByOrg = new Map(memberStatRows.map((row) => [String(row.organization_id), row]));
+      const caseStatsByOrg = new Map(caseStatRows.map((row) => [String(row.organization_id), row]));
+
+      const orgMetrics = enrollments.map(({ enrollment, orgName, orgSlug }) => {
           const orgId = enrollment.organizationId;
 
-          // Fetch milestones
-          const milestoneRows = await db
-            .select()
-            .from(pilotMilestones)
-            .where(eq(pilotMilestones.organizationId, orgId));
+          const milestones: PilotMilestone[] = milestoneRows
+            .filter((m) => m.organizationId === orgId)
+            .map((m) => ({
+              name: m.name,
+              description: m.description,
+              status: m.status as PilotMilestone["status"],
+              targetDate: m.targetDate ?? undefined,
+              completedAt: m.completedAt ?? undefined,
+            }));
 
-          const milestones: PilotMilestone[] = milestoneRows.map((m) => ({
-            name: m.name,
-            description: m.description,
-            status: m.status as PilotMilestone["status"],
-            targetDate: m.targetDate ?? undefined,
-            completedAt: m.completedAt ?? undefined,
-          }));
-
-          // Member stats
-          const memberStats = await db.execute(sql`
-            SELECT
-              COUNT(*) FILTER (WHERE role IN ('organizer', 'steward', 'president', 'vp', 'officer'))
-                AS organizer_count,
-              COUNT(*) FILTER (WHERE role IN ('organizer', 'steward', 'president', 'vp', 'officer')
-                AND updated_at > NOW() - INTERVAL '30 days')
-                AS active_organizer_count,
-              COUNT(*) AS total_members,
-              COUNT(*) FILTER (WHERE updated_at > NOW() - INTERVAL '30 days')
-                AS active_members
-            FROM organization_members
-            WHERE organization_id = ${orgId}
-              AND deleted_at IS NULL
-          `);
-
-          const mStats = Array.from(memberStats)[0] as Record<string, unknown> | undefined;
+          const mStats = memberStatsByOrg.get(orgId);
           const organizerCount = Number(mStats?.organizer_count ?? 0);
           const activeOrganizerCount = Number(mStats?.active_organizer_count ?? 0);
           const totalMembers = Number(mStats?.total_members ?? 0);
@@ -109,18 +162,7 @@ export async function GET() {
               : enrollment.memberEngagementRate;
 
           // Grievance stats
-          const caseStats = await db.execute(sql`
-            SELECT
-              COUNT(*) AS cases_managed,
-              AVG(
-                EXTRACT(EPOCH FROM (COALESCE(resolved_at, NOW()) - created_at)) / 3600
-              ) AS avg_resolution_hours
-            FROM grievances
-            WHERE organization_id = ${orgId}::uuid
-              AND created_at > NOW() - INTERVAL '30 days'
-          `);
-
-          const cStats = Array.from(caseStats)[0] as Record<string, unknown> | undefined;
+          const cStats = caseStatsByOrg.get(orgId);
           const casesManaged = Number(cStats?.cases_managed ?? enrollment.casesManaged);
           const avgTimeToResolution = Math.round(
             Number(cStats?.avg_resolution_hours ?? enrollment.avgTimeToResolution)
@@ -148,12 +190,16 @@ export async function GET() {
             milestones,
             lastCalculated: new Date(),
           };
-        })
-      );
+        });
 
-      return NextResponse.json({ organizations: orgMetrics });
-    });
+      return { organizations: orgMetrics, pagination: { limit, offset, total: Number(total), returned: orgMetrics.length } };
+      },
+    );
+
+    return NextResponse.json(page);
   } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return NextResponse.json(refused.body, { status: refused.status });
     const { logger: log } = await import('@/lib/logger');
     log.error('Pilot overview query failed', { error: error instanceof Error ? error.message : 'Unknown' });
     return standardErrorResponse(

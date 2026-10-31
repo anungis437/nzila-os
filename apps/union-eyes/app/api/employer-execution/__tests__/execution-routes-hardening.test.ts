@@ -345,7 +345,7 @@ describe("payroll-runs/[id] PATCH (approve / execute)", () => {
   it("executes (seals) with a third person, recording preparer, approver and executor", async () => {
     const PATCH = await load();
     const approved = makeRun({ status: "approved", approvedBy: APPROVER, immutableSnapshotLocked: true });
-    h.state.selects = [[approved]];
+    h.state.selects = [[approved], [{ id: "rem-1" }]];
     h.state.updates = [[{ ...approved, status: "posted" }]];
 
     const response = await PATCH(ctx(EXECUTOR, "seal"));
@@ -382,7 +382,7 @@ describe("payroll-runs/[id] PATCH (approve / execute)", () => {
     const PATCH = await load();
     const approved = makeRun({ status: "approved", approvedBy: APPROVER, immutableSnapshotLocked: true });
 
-    h.state.selects = [[approved]];
+    h.state.selects = [[approved], [{ id: "rem-1" }]];
     h.state.updates = [[]];
     await expect(PATCH(ctx(EXECUTOR, "seal"))).rejects.toMatchObject({ code: "CONFLICT" });
 
@@ -402,7 +402,7 @@ describe("payroll-runs/[id] PATCH (approve / execute)", () => {
   it("fails and rolls back an execution whose audit record cannot be written", async () => {
     const PATCH = await load();
     const approved = makeRun({ status: "approved", approvedBy: APPROVER, immutableSnapshotLocked: true });
-    h.state.selects = [[approved]];
+    h.state.selects = [[approved], [{ id: "rem-1" }]];
     h.state.updates = [[{ ...approved, status: "posted" }]];
     h.state.auditFails = true;
 

@@ -104,9 +104,12 @@ vi.mock('@/lib/api-auth-guard', async (orig) => {
 vi.mock('@/lib/pilot/commercialization-wave1', () => ({
   COMMERCIAL_STATE_ORDER: [
     'proposal_ready',
+    'approved',
     'contract_sent',
     'contract_signed',
     'invoice_issued',
+    'pilot_active',
+    'pilot_complete',
     'subscription_active',
   ],
   buildProposalPackage: m.buildProposalPackage,
@@ -352,7 +355,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           responses: { commercialState: 'proposal_ready' },
         },
       ], // the locked authoritative read (round 23)
-      [], // billing account lookup — none found, monetization staged only
+      [{ id: 'billing-account-1' }], // billing account lookup — found
+      [], // existing contract lookup — none, so one is created
     );
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
@@ -398,7 +402,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     };
 
     it('records the transition on the same transaction under the verified organization, attributed to the actor', async () => {
-      m.queueSelect([{ id: 'app-1' }], [lockedRow], []);
+      m.queueSelect([{ id: 'app-1' }], [lockedRow], [{ id: 'billing-account-1' }], []);
 
       const response = await call();
 
@@ -418,7 +422,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     });
 
     it('fails the transition when its audit cannot be written, so no contract or state change commits', async () => {
-      m.queueSelect([{ id: 'app-1' }], [lockedRow], []);
+      m.queueSelect([{ id: 'app-1' }], [lockedRow], [{ id: 'billing-account-1' }], []);
       m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
 
       const response = await call();
@@ -476,7 +480,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           responses: { commercialState: 'FRESH_LOCKED_STATE' },
         },
       ],
-      [], // billing account lookup
+      [{ id: 'billing-account-1' }], // billing account lookup — found
+      [], // existing contract lookup — none, so one is created
     );
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
@@ -720,7 +725,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     );
   });
 
-  it('round 26: revalidates the approved subscription plan is still active AT ACTIVATION TIME, staging only when it is not', async () => {
+  it('round 26: revalidates the approved subscription plan is still active AT ACTIVATION TIME and refuses (creating nothing) when it is not', async () => {
     const { POST } = await loadRoute();
     m.normalizeCommercialState.mockReturnValueOnce('invoice_issued');
     m.queueSelect(
@@ -760,9 +765,10 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     }), { params: { id: 'app-1' } });
     const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload.data.monetization.subscriptionId).toBeUndefined();
-    expect(payload.data.monetization.notes).toContainEqual(expect.stringMatching(/no longer active/));
+    expect(response.status).toBe(409);
+    expect(payload.error).toMatch(/no longer active/);
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('round 26: activates the subscription when the approved plan is still active', async () => {
@@ -808,5 +814,154 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.data.monetization.subscriptionId).toBe('generated-id');
+  });
+
+  describe('F06 A4: truthful outcomes - an effect that was not performed is never recorded as done', () => {
+    const row = {
+      id: 'app-1',
+      organizationName: 'Union Eyes',
+      organizationType: 'local',
+      contactName: 'Casey',
+      contactEmail: 'casey@example.com',
+      memberCount: 250,
+      jurisdictions: [],
+      sectors: [],
+      currentSystem: 'legacy',
+      challenges: [],
+      goals: [],
+      readinessScore: 65,
+      reviewedAt: null,
+      approvedAt: null,
+      verifiedMemberCount: 250,
+      verifiedPilotAmount: '12000.00',
+      verifiedSubscriptionPlanId: 'plan-x',
+      commercialTermsApprovedBy: 'admin-1',
+      commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
+      responses: { commercialState: 'contract_sent' },
+    };
+    const acceptance = {
+      acceptedByName: 'Pat Counterpart',
+      acceptedByRole: 'President',
+      channel: 'countersigned_document',
+      evidenceReference: 'doc-123',
+    };
+    const post = async (body: Record<string, unknown>) => {
+      const { POST } = await loadRoute();
+      return POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'content-type': 'application/json' },
+      }), { params: { id: 'app-1' } });
+    };
+    const updatedWith = () => mockDb.update.mock.results.map((r) => (r.value as { set: ReturnType<typeof vi.fn> }).set);
+
+    it.each(['contract_sent', 'invoice_issued'])('refuses %s when the organization has no billing account and creates nothing', async (targetState) => {
+      m.queueSelect([{ id: 'app-1' }], [row], []);
+
+      const response = await post({ targetState, allowSkip: true });
+      const payload = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(payload.error).toMatch(/no billing account/);
+      expect(mockDb.insert).not.toHaveBeenCalled();
+      expect(mockDb.update).not.toHaveBeenCalled();
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('requires counterpart acceptance evidence for contract_signed before touching the database', async () => {
+      const response = await post({ targetState: 'contract_signed' });
+
+      expect(response.status).toBe(400);
+      expect(m.withSystemContext).not.toHaveBeenCalled();
+    });
+
+    it('refuses contract_signed when there is no contract to accept', async () => {
+      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], []);
+
+      const response = await post({ targetState: 'contract_signed', counterpartAcceptance: acceptance });
+
+      expect(response.status).toBe(409);
+      expect(mockDb.update).not.toHaveBeenCalled();
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('refuses contract_signed for a contract that is expired or still a draft', async () => {
+      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'expired', metadata: {} }]);
+
+      const response = await post({ targetState: 'contract_signed', counterpartAcceptance: acceptance });
+
+      expect(response.status).toBe(409);
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('records who accepted for the other party, how, and who recorded it when the contract is accepted', async () => {
+      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: { source: 'x' } }]);
+
+      const response = await post({ targetState: 'contract_signed', counterpartAcceptance: acceptance });
+
+      expect(response.status).toBe(200);
+      const contractUpdate = updatedWith()[0];
+      expect(contractUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'active',
+          signedBy: 'Pat Counterpart',
+          metadata: expect.objectContaining({
+            source: 'x',
+            counterpartAcceptance: expect.objectContaining({
+              channel: 'countersigned_document',
+              evidenceReference: 'doc-123',
+              recordedBy: 'platform-admin-1',
+              verification: 'recorded_by_platform_operator',
+            }),
+          }),
+        }),
+      );
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+        mockDb,
+        expect.objectContaining({
+          details: expect.objectContaining({ counterpartAcceptanceChannel: 'countersigned_document' }),
+        }),
+      );
+      expect(JSON.stringify(m.persistAtomicAudit.mock.calls[0])).not.toContain('Pat Counterpart');
+    });
+
+    it('does not overwrite the acceptance record when the transition is replayed on an accepted contract', async () => {
+      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'active', metadata: {} }]);
+
+      const response = await post({ targetState: 'contract_signed', counterpartAcceptance: acceptance });
+
+      expect(response.status).toBe(200);
+      expect(updatedWith().some((s) => s.mock.calls.some((c) => (c[0] as { status?: string }).status === 'active'))).toBe(false);
+    });
+
+    it('refuses to issue an invoice when no accepted contract exists', async () => {
+      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], []);
+
+      const response = await post({ targetState: 'invoice_issued', allowSkip: true });
+      const payload = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(payload.error).toMatch(/accepted contract/);
+      expect(mockDb.insert).not.toHaveBeenCalled();
+    });
+
+    it('issues the invoice when an accepted contract exists', async () => {
+      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1' }]);
+
+      const response = await post({ targetState: 'invoice_issued', allowSkip: true });
+
+      expect(response.status).toBe(200);
+      expect(mockDb.insert).toHaveBeenCalled();
+    });
+
+    it.each(['approved', 'pilot_active', 'pilot_complete'])('does not write a %s status from the state name alone when commercial terms were never approved', async (targetState) => {
+      m.queueSelect([{ id: 'app-1' }], [{ ...row, commercialTermsApprovedBy: null, commercialTermsApprovedAt: null }]);
+
+      const response = await post({ targetState, allowSkip: true });
+
+      expect(response.status).toBe(409);
+      expect(mockDb.update).not.toHaveBeenCalled();
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
   });
 });

@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 621,
- "partial": 88,
- "outstanding": 156,
- "accountedFor": 156,
+ "corrected": 626,
+ "partial": 89,
+ "outstanding": 151,
+ "accountedFor": 151,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -110,10 +110,10 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 27,
+   "defects": 22,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 25,
+    "MEDIUM": 20,
     "LOW": 0
    },
    "namedRoutes": 5,
@@ -122,11 +122,9 @@
     "0B.1": 1,
     "0B.2": 1,
     "0B.4": 3,
-    "0B.6": 1,
     "0B.7": 3,
     "0B.8": 3,
-    "0B.9": 1,
-    "0B.10": 5,
+    "0B.10": 2,
     "0B.11": 6,
     "0B.12": 3
    }
@@ -568,10 +566,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
     "severity": "MEDIUM",
     "partial": true
@@ -583,7 +577,8 @@
    },
    {
     "id": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
@@ -601,25 +596,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B9-ASM-ONBOARDING-EVENTS-RECORD-CALLER-ASSERTED-MILESTONES-AS-EVENT-AND-AUDIT-ROWS-WITHOUT-PERFORMING-OR-VERIFYING-THEM",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B10-PIL-ORGANIZATION-VERIFICATION-CHECKS-ONLY-THAT-THE-TARGET-ORGANIZATION-ROW-EXISTS-AND-RECORDS-NO-PROOF-OR-REASON",
-    "severity": "MEDIUM",
+    "severity": "HIGH",
     "partial": true
-   },
-   {
-    "id": "DEF-0B10-PIL-ONBOARDING-CHECKLIST-ITEMS-ARE-TOGGLED-BY-THE-CALLER-WITH-NO-CHECK-THAT-THE-STEP-HAPPENED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PIL-PILOT-OVERVIEW-LISTS-EVERY-ENROLLED-ORGANIZATION-WITH-ITS-FIGURES-TO-ANY-OFFICER-OF-THE-PLATFORM-ORGANIZATION",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B10-OPL-10",

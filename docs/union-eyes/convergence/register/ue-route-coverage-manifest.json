@@ -10959,7 +10959,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
   {

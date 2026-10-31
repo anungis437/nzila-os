@@ -102,6 +102,12 @@ export default function AdminPilotApplicationsPage() {
   const [latestArtifactVersionId, setLatestArtifactVersionId] = useState<string | null>(null);
   const [latestArtifactDiff, setLatestArtifactDiff] = useState<ArtifactDiffSummary | null>(null);
   const [operationalRefresh, setOperationalRefresh] = useState(0);
+  const [acceptance, setAcceptance] = useState({
+    acceptedByName: '',
+    acceptedByRole: '',
+    channel: 'countersigned_document',
+    evidenceReference: '',
+  });
 
   const selected = useMemo(
     () => applications.find((app) => app.id === selectedId) ?? null,
@@ -370,7 +376,11 @@ export default function AdminPilotApplicationsPage() {
       const response = await fetch(`/api/pilot/apply/${selected.id}/commercial-transition`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetState: next, source: 'admin-ui' }),
+        body: JSON.stringify({
+          targetState: next,
+          source: 'admin-ui',
+          ...(next === 'contract_signed' ? { counterpartAcceptance: acceptance } : {}),
+        }),
       });
 
       if (!response.ok) {
@@ -525,6 +535,41 @@ export default function AdminPilotApplicationsPage() {
                         </Badge>
                       ))}
                     </div>
+                    {nextCommercialState(selectedCommercialState) === 'contract_signed' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <p className="md:col-span-2 text-sm text-muted-foreground">
+                          Recording the contract as signed requires evidence that the other party accepted it.
+                        </p>
+                        <Input
+                          aria-label="Accepted by (name)"
+                          placeholder="Accepted by (name)"
+                          value={acceptance.acceptedByName}
+                          onChange={(event) => setAcceptance({ ...acceptance, acceptedByName: event.target.value })}
+                        />
+                        <Input
+                          aria-label="Role of the person who accepted"
+                          placeholder="Their role"
+                          value={acceptance.acceptedByRole}
+                          onChange={(event) => setAcceptance({ ...acceptance, acceptedByRole: event.target.value })}
+                        />
+                        <select
+                          aria-label="How the contract was accepted"
+                          className="h-9 rounded-md border bg-background px-2 text-sm"
+                          value={acceptance.channel}
+                          onChange={(event) => setAcceptance({ ...acceptance, channel: event.target.value })}
+                        >
+                          <option value="countersigned_document">Countersigned document</option>
+                          <option value="e_signature_provider">E-signature provider</option>
+                          <option value="written_confirmation">Written confirmation</option>
+                        </select>
+                        <Input
+                          aria-label="Evidence reference"
+                          placeholder="Evidence reference (document or envelope id)"
+                          value={acceptance.evidenceReference}
+                          onChange={(event) => setAcceptance({ ...acceptance, evidenceReference: event.target.value })}
+                        />
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"

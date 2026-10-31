@@ -37,7 +37,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from '@/db';
-import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations } from '@/db/schema';
+import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations, organizationMembers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
@@ -125,9 +125,23 @@ export function getPilotEffectiveOrganizationId(
   return getPilotVerifiedOrganizationId(application) ?? getPilotClaimedOrganizationId(application);
 }
 
+/**
+ * What the server itself could establish about the applicant's link to the organization. These are checks the
+ * system made, not the administrator's statement (that is `basis`).
+ */
+export type PilotOrganizationCorroboration = {
+  /** The applicant's contact e-mail is an active member address of the target organization. */
+  contactIsActiveMember: boolean;
+  /** The organization name the applicant gave equals the target organization's name (case and spacing aside). */
+  organizationNameMatches: boolean;
+};
+
 export type BindPilotOrganizationResult =
-  | { ok: true; organizationId: string }
-  | { ok: false; status: 404 | 409; error: string };
+  | { ok: true; organizationId: string; corroboration?: PilotOrganizationCorroboration; uncorroboratedAcknowledged?: boolean }
+  | { ok: false; status: 404 | 409; error: string; corroboration?: PilotOrganizationCorroboration };
+
+const normalizeOrganizationName = (value: string | null | undefined): string =>
+  (value ?? '').normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
 
 /**
  * True if `pilotId` has ANY real financial artifact — a commercial
@@ -217,12 +231,17 @@ export async function bindPilotOrganization(params: {
   verifiedBy: string;
   /** What the administrator relied on to conclude the applicant speaks for the organization; kept in the audit record. */
   basis?: string;
+  /**
+   * Required when the server found nothing linking the applicant to the organization (no member address, no name
+   * match); the audit record then states the verification rests on the administrator's basis alone.
+   */
+  acknowledgeUncorroborated?: boolean;
 }): Promise<BindPilotOrganizationResult> {
-  const { pilotId, organizationId, verifiedBy, basis } = params;
+  const { pilotId, organizationId, verifiedBy, basis, acknowledgeUncorroborated } = params;
 
   return withSystemContext(async (tx) => {
     const [org] = await db
-      .select({ id: organizations.id })
+      .select({ id: organizations.id, name: organizations.name })
       .from(organizations)
       .where(eq(organizations.id, organizationId));
 
@@ -231,7 +250,11 @@ export async function bindPilotOrganization(params: {
     }
 
     const [pilot] = await db
-      .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .select({
+        verifiedOrganizationId: pilotApplications.verifiedOrganizationId,
+        contactEmail: pilotApplications.contactEmail,
+        organizationName: pilotApplications.organizationName,
+      })
       .from(pilotApplications)
       .where(eq(pilotApplications.id, pilotId))
       .limit(1)
@@ -251,6 +274,38 @@ export async function bindPilotOrganization(params: {
         error:
           'This pilot application is already bound to a different verified organization. ' +
           'Use the platform rebind-organization correction flow to change it.',
+      };
+    }
+
+    const contactEmail = (pilot.contactEmail ?? '').trim().toLowerCase();
+    const [memberMatch] = contactEmail
+      ? await db
+          .select({ id: organizationMembers.id })
+          .from(organizationMembers)
+          .where(
+            and(
+              eq(organizationMembers.organizationId, organizationId),
+              eq(organizationMembers.status, 'active'),
+              sql`lower(${organizationMembers.email}) = ${contactEmail}`,
+            ),
+          )
+          .limit(1)
+      : [];
+    const corroboration: PilotOrganizationCorroboration = {
+      contactIsActiveMember: Boolean(memberMatch),
+      organizationNameMatches:
+        normalizeOrganizationName(pilot.organizationName) !== '' &&
+        normalizeOrganizationName(pilot.organizationName) === normalizeOrganizationName(org.name),
+    };
+    const corroborated = corroboration.contactIsActiveMember || corroboration.organizationNameMatches;
+    if (!corroborated && acknowledgeUncorroborated !== true) {
+      return {
+        ok: false,
+        status: 409,
+        corroboration,
+        error:
+          'Nothing the system can check links this applicant to the organization: the contact e-mail is not an active member address and the organization name differs. ' +
+          'Confirm the basis independently and resubmit with acknowledgeUncorroborated to record the verification as resting on that basis alone.',
       };
     }
 
@@ -276,10 +331,16 @@ export async function bindPilotOrganization(params: {
       action: 'pilot.application.verify_organization',
       resourceType: 'pilot_applications',
       resourceId: pilotId,
-      details: { verifiedOrganizationId: organizationId, verifiedAt: verifiedAt.toISOString(), ...(basis ? { basis } : {}) },
+      details: {
+        verifiedOrganizationId: organizationId,
+        verifiedAt: verifiedAt.toISOString(),
+        ...(basis ? { basis } : {}),
+        corroboration,
+        uncorroboratedAcknowledged: !corroborated,
+      },
     });
 
-    return { ok: true, organizationId };
+    return { ok: true, organizationId, corroboration, uncorroboratedAcknowledged: !corroborated };
   });
 }
 

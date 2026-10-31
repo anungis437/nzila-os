@@ -94,6 +94,13 @@ const pilotOwnedByA = { responses: { organizationId: ORG_A } };
 const pilotOwnedByB = { responses: { organizationId: ORG_B } };
 const pilotNoOwner = { responses: {} };
 
+/** Selects bindPilotOrganization makes: the organization, the locked pilot row, then the member-address match. */
+const corroboratedBind: unknown[][] = [
+  [{ id: ORG_B, name: 'Local 100' }],
+  [{ verifiedOrganizationId: null, contactEmail: 'Casey@Example.com', organizationName: 'Local  100' }],
+  [{ id: 'member-1' }],
+];
+
 /** Records every `.limit(n).for(mode)` row-lock call across a test (PR #752 round 22). */
 let lockCalls: Array<{ limit: number; mode: string }> = [];
 
@@ -104,14 +111,15 @@ let lockCalls: Array<{ limit: number; mode: string }> = [];
  */
 function chainableRows(rows: unknown[]) {
   const thenable = Promise.resolve(rows) as Promise<unknown[]> & {
-    limit: (n: number) => { for: (mode: string) => Promise<unknown[]> };
+    limit: (n: number) => Promise<unknown[]> & { for: (mode: string) => Promise<unknown[]> };
   };
-  thenable.limit = (n: number) => ({
-    for: (mode: string) => {
-      lockCalls.push({ limit: n, mode });
-      return Promise.resolve(rows);
-    },
-  });
+  thenable.limit = (n: number) =>
+    Object.assign(Promise.resolve(rows), {
+      for: (mode: string) => {
+        lockCalls.push({ limit: n, mode });
+        return Promise.resolve(rows);
+      },
+    });
   return thenable;
 }
 
@@ -399,7 +407,7 @@ describe('pilot-ownership', () => {
 
   describe('bindPilotOrganization (PR #752 round 20/21)', () => {
     it('binds the pilot to the target organization when unbound and it exists', async () => {
-      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
+      dbSelectSequence(...corroboratedBind);
       dbUpdateReturns([{ id: 'pilot-1' }]);
 
       const result = await bindPilotOrganization({
@@ -408,7 +416,7 @@ describe('pilot-ownership', () => {
         verifiedBy: 'u-sysadmin',
       });
 
-      expect(result).toEqual({ ok: true, organizationId: ORG_B });
+      expect(result).toEqual({ ok: true, organizationId: ORG_B, corroboration: { contactIsActiveMember: true, organizationNameMatches: true }, uncorroboratedAcknowledged: false });
       expect(mockDbUpdate).toHaveBeenCalledTimes(1);
       expect(mockPersistAtomicAudit).toHaveBeenCalledTimes(1);
       expect(mockPersistAtomicAudit).toHaveBeenCalledWith(
@@ -424,7 +432,7 @@ describe('pilot-ownership', () => {
     });
 
     it('rolls the binding back when its audit record cannot be written', async () => {
-      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
+      dbSelectSequence(...corroboratedBind);
       dbUpdateReturns([{ id: 'pilot-1' }]);
       mockPersistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
 
@@ -433,8 +441,64 @@ describe('pilot-ownership', () => {
       ).rejects.toThrow('audit down');
     });
 
+    it('F06 A4: refuses to verify when nothing the system can check links the applicant to the organization, and writes nothing', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B, name: 'Local 100' }],
+        [{ verifiedOrganizationId: null, contactEmail: 'someone@elsewhere.example', organizationName: 'Another Union' }],
+        [],
+      );
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      const result = await bindPilotOrganization({ pilotId: 'pilot-1', organizationId: ORG_B, verifiedBy: 'u-sysadmin', basis: 'Confirmed by telephone with the hall' });
+
+      expect(result).toMatchObject({ ok: false, status: 409, corroboration: { contactIsActiveMember: false, organizationNameMatches: false } });
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+      expect(mockPersistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('F06 A4: records that the verification rests on the administrator basis alone when that was acknowledged', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B, name: 'Local 100' }],
+        [{ verifiedOrganizationId: null, contactEmail: 'someone@elsewhere.example', organizationName: 'Another Union' }],
+        [],
+      );
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      const result = await bindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        basis: 'Confirmed by telephone with the hall',
+        acknowledgeUncorroborated: true,
+      });
+
+      expect(result).toMatchObject({ ok: true, uncorroboratedAcknowledged: true });
+      expect(mockPersistAtomicAudit).toHaveBeenCalledWith(
+        mockTx,
+        expect.objectContaining({
+          details: expect.objectContaining({
+            uncorroboratedAcknowledged: true,
+            corroboration: { contactIsActiveMember: false, organizationNameMatches: false },
+          }),
+        }),
+      );
+    });
+
+    it('F06 A4: accepts the organization name alone as a checkable link and records which signal held', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B, name: 'Local 100' }],
+        [{ verifiedOrganizationId: null, contactEmail: 'someone@elsewhere.example', organizationName: ' local 100 ' }],
+        [],
+      );
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      const result = await bindPilotOrganization({ pilotId: 'pilot-1', organizationId: ORG_B, verifiedBy: 'u-sysadmin' });
+
+      expect(result).toMatchObject({ ok: true, corroboration: { contactIsActiveMember: false, organizationNameMatches: true }, uncorroboratedAcknowledged: false });
+    });
+
     it('writes no audit when nothing was bound (match-nothing update)', async () => {
-      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
+      dbSelectSequence(...corroboratedBind);
       dbUpdateReturns([]);
 
       const result = await bindPilotOrganization({ pilotId: 'pilot-1', organizationId: ORG_B, verifiedBy: 'u-sysadmin' });
@@ -444,7 +508,7 @@ describe('pilot-ownership', () => {
     });
 
     it('round 22: locks the pilot row with SELECT ... FOR UPDATE before reading/writing verifiedOrganizationId (concurrency hardening)', async () => {
-      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
+      dbSelectSequence(...corroboratedBind);
       dbUpdateReturns([{ id: 'pilot-1' }]);
 
       await bindPilotOrganization({ pilotId: 'pilot-1', organizationId: ORG_B, verifiedBy: 'u-sysadmin' });

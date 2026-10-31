@@ -17,8 +17,9 @@ import {
   employerExecutionEvidenceLinks,
   cbaRuleVersions,
   employerExecutionProfiles,
+  employerRemittanceRuns,
 } from "@/db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { createEvidencePack, enforcePayrollLifecycleTransition, sha256 } from "@/app/api/employer-execution/_lib";
 import { enforceRunDuty } from "@/app/api/employer-execution/_guard";
 
@@ -370,6 +371,25 @@ export async function executeRun(tx: RLSTx, { organizationId, userId, run }: Tra
   const participants = participantsFromRun(run);
   enforceRunDuty("execute", userId, participants);
 
+  // Sealing records that something was done with the approved amounts. The thing this system does with them is the remittance
+  // package, so a run with none is not sealed: a posted run must not read as executed while nothing happened.
+  const [remittance] = await tx
+    .select({ id: employerRemittanceRuns.id })
+    .from(employerRemittanceRuns)
+    .where(
+      and(
+        eq(employerRemittanceRuns.organizationId, organizationId),
+        eq(employerRemittanceRuns.payrollRunId, run.id),
+        ne(employerRemittanceRuns.status, "failed"),
+      ),
+    )
+    .limit(1);
+  if (!remittance) {
+    throw ApiError.conflict(
+      "No remittance has been generated for this payroll run. Generate the remittance package before sealing the run; nothing has been done with its amounts yet.",
+    );
+  }
+
   const [sealedRun] = await tx
     .update(employerPayrollRuns)
     .set({
@@ -397,9 +417,10 @@ export async function executeRun(tx: RLSTx, { organizationId, userId, run }: Tra
     eventCode: "official_run_posted",
     severity: "info",
     status: "resolved",
-    summary: "Official payroll run executed (posted)",
+    summary: "Official payroll run sealed (posted) after its remittance package was generated; this system makes no payment or ledger entry",
     details: {
       executedBy: userId,
+      remittanceRunId: remittance.id,
       preparedBy: participants.preparedBy,
       approvers: participants.approvedBy,
       amounts: recordedRunAmounts(sealedRun),
@@ -418,9 +439,10 @@ export async function executeRun(tx: RLSTx, { organizationId, userId, run }: Tra
       preparedBy: participants.preparedBy,
       approvers: participants.approvedBy,
       executedBy: userId,
+      remittanceRunId: remittance.id,
       amounts: recordedRunAmounts(sealedRun),
     },
   });
 
-  return { data: { run: sealedRun } };
+  return { data: { run: sealedRun, remittanceRunId: remittance.id } };
 }

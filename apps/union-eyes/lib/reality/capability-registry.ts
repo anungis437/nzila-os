@@ -1054,6 +1054,32 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'a named capability (DEF-0B1-REP-PROTOCOL-NOT-IN-CAPABILITY-MODEL); the frozen register entry is unchanged.',
   },
   {
+    id: 'UE-SSO-SIGN-IN',
+    title: 'Enterprise SSO sign-in, token exchange, provisioning and SCIM driven by a stored provider',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [],
+    evidence: [
+      'app/api/enterprise/sso/providers/route.ts and [id]/route.ts — the only readers and writers of sso_providers; every response and audit record carries lib/reality/configuration-effect.ts SSO_SIGN_IN_EFFECT (inEffect: false)',
+      'no sign-in, token-exchange, provisioning or SCIM code reads sso_providers, and the OIDC client-secret decryption helper has no caller',
+    ],
+    targetWave: 2,
+    notes:
+      'Provider configuration can be stored, and a provider is created disabled unless the administrator asks otherwise, but nothing consumes it: enabling a provider or auto-provisioning does not change how anyone signs in. A consumer needs the identity-provider protocol work and a real provider to qualify against; the stored configuration says so on every read and write rather than implying an effect.',
+  },
+  {
+    id: 'UE-EXT-INTEGRATION-SYNC',
+    title: 'Integration synchronization driven by a stored api_integrations configuration',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [],
+    evidence: [
+      'app/api/extensions/[id]/route.ts — reads, updates and deletes api_integrations rows; every response and audit record carries lib/reality/configuration-effect.ts INTEGRATION_SYNC_EFFECT (inEffect: false)',
+      'no route creates a row and nothing outside that route and the schema reads the table or its apiEndpoint',
+    ],
+    targetWave: 2,
+    notes:
+      'Enabling an integration, setting a sync frequency or repointing an endpoint is recorded but starts and redirects nothing, because no synchronization runs from the configuration. A creation path was deliberately not added: it would store more configuration that nothing consumes. The synchronization worker and its provider qualification are the missing capability.',
+  },
+  {
     id: 'UE-REP-MANDATE-RECUSAL-DELEGATION',
     title: 'Representative mandate model: recusal, territory, privileged-matter restriction, temporary delegation',
     state: 'NOT_IMPLEMENTED',

@@ -15,6 +15,15 @@ export const transitionPayloadSchema = z.object({
   source: short(100).optional(),
   allowSkip: z.boolean().optional(),
   applyReferenceTemplate: short(100).nullable().optional(),
+  // Evidence that the other party accepted the contract. Required for contract_signed.
+  counterpartAcceptance: z
+    .object({
+      acceptedByName: short(255).min(1),
+      acceptedByRole: short(255).min(1),
+      channel: z.enum(['countersigned_document', 'e_signature_provider', 'written_confirmation']),
+      evidenceReference: short(500).min(1),
+    })
+    .optional(),
 })
 
 export const versionNotePayloadSchema = z.object({

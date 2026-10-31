@@ -86,6 +86,32 @@ export async function listAuditEntries(tx: RLSTx, organizationId: string, limit 
     .slice(0, bound)
 }
 
+/**
+ * Whether the organization has at least one audit record whose action matches the pattern (SQL LIKE) and none of the excluded
+ * patterns. It answers "did this happen", reads no details, and checks both stores.
+ */
+export async function hasAuditedAction(
+  tx: RLSTx,
+  organizationId: string,
+  actionLike: string,
+  excludeLike: readonly string[] = [],
+): Promise<boolean> {
+  const exclusionsLegacy = excludeLike.map((pattern) => sql`AND action NOT LIKE ${pattern}`)
+  const legacy = (await tx.execute(
+    sql`SELECT 1 AS found FROM audit_security.audit_logs
+        WHERE organization_id = ${organizationId}::uuid AND action LIKE ${actionLike} ${sql.join(exclusionsLegacy, sql` `)}
+        LIMIT 1`,
+  )) as unknown as unknown[]
+  if (legacy.length > 0) return true
+  if (!currentStateContextEnabled()) return false
+  const canonical = (await tx.execute(
+    sql`SELECT 1 AS found FROM public.audit_logs
+        WHERE organization_id = ${organizationId}::uuid AND action LIKE ${actionLike} ${sql.join(exclusionsLegacy, sql` `)}
+        LIMIT 1`,
+  )) as unknown as unknown[]
+  return canonical.length > 0
+}
+
 export async function readAuditEntry(tx: RLSTx, organizationId: string, auditId: string): Promise<AuditEntryView | null> {
   if (currentStateContextEnabled()) {
     const [row] = (await tx.execute(

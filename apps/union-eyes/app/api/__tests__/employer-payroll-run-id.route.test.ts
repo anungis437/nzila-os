@@ -396,7 +396,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
 
     it('executes an approved run as a third party and audits on the same transaction', async () => {
       const { PATCH } = await loadRoute();
-      m.queueSelect([approvedRun]);
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
       m.queueUpdate([{ ...approvedRun, status: 'posted' }]);
 
       const result = await PATCH(patch('executor_1', 'run_4', 'seal'));
@@ -459,7 +459,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
 
     it('returns 409 when the run was already executed concurrently (status predicate)', async () => {
       const { PATCH } = await loadRoute();
-      m.queueSelect([approvedRun]);
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
       m.queueUpdate([]);
 
       await expect(PATCH(patch('executor_1', 'run_4', 'seal'))).rejects.toMatchObject({ status: 409 });
@@ -469,11 +469,33 @@ describe('employer-execution/payroll-runs/[id] route', () => {
 
     it('does not commit when the atomic audit cannot be written', async () => {
       const { PATCH } = await loadRoute();
-      m.queueSelect([approvedRun]);
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
       m.queueUpdate([{ ...approvedRun, status: 'posted' }]);
       m.persistAtomicAudit.mockRejectedValue(new Error('audit unavailable'));
 
       await expect(PATCH(patch('executor_1', 'run_4', 'seal'))).rejects.toThrow('audit unavailable');
+    });
+
+    it('F06 A4: refuses to seal a run for which no remittance was generated, so a posted run always means something was done', async () => {
+      const { PATCH } = await loadRoute();
+      m.queueSelect([approvedRun], []);
+
+      await expect(PATCH(patch('executor_1', 'run_4', 'seal'))).rejects.toMatchObject({ status: 409 });
+      expect(m.state.updates).toHaveLength(0);
+      expect(m.state.inserts).toHaveLength(0);
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('F06 A4: records which remittance the sealed run rests on', async () => {
+      const { PATCH } = await loadRoute();
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
+      m.queueUpdate([{ ...approvedRun, status: 'posted' }]);
+
+      const result = await PATCH(patch('executor_1', 'run_4', 'seal'));
+
+      expect(result.data.remittanceRunId).toBe('remit_1');
+      expect(m.state.inserts[0]!.values.details).toMatchObject({ remittanceRunId: 'remit_1' });
+      expect(auditEntry()).toMatchObject({ details: { remittanceRunId: 'remit_1' } });
     });
   });
 });

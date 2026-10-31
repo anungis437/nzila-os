@@ -20,17 +20,8 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotChecklistItems } from "@/db/schema/domains/pilot/pilot-onboarding";
 import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
 import { getDemoDatasetSummary } from "@/lib/pilot/cape-demo-data";
+import { CHECKLIST_ITEM_IDS, verifyChecklistStep, type ChecklistItemId } from "@/lib/pilot/onboarding-checklist-evidence";
 import { eq } from "drizzle-orm";
-
-const CHECKLIST_ITEM_IDS = [
-  "org-seeded",
-  "users-invited",
-  "roles-assigned",
-  "contracts-uploaded",
-  "employers-imported",
-  "integrations-configured",
-  "export-verified",
-] as const;
 
 // ── GET ─────────────────────────────────────────────────────────────────────
 
@@ -128,12 +119,19 @@ export const PATCH = withOrganizationAuth(async (request, context) => {
 
     const { itemId, completed } = parsed.data;
 
-    if (!CHECKLIST_ITEM_IDS.includes(itemId as (typeof CHECKLIST_ITEM_IDS)[number])) {
+    if (!CHECKLIST_ITEM_IDS.includes(itemId as ChecklistItemId)) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Checklist item not found");
     }
 
     // The toggle, the completeness it implies and the audit records commit together; a failed audit rolls the toggle back.
+    // A step is marked done only when the organization's own data shows it happened (see onboarding-checklist-evidence).
     const state = await withRLSContext({ organizationId }, async (tx) => {
+      let evidence: Record<string, number | boolean> | undefined;
+      if (completed) {
+        const check = await verifyChecklistStep(tx, organizationId, userId, itemId as ChecklistItemId);
+        if (!check.ok) return { missing: check.missing };
+        evidence = check.evidence;
+      }
       const changedAt = new Date();
       const [saved] = await tx
         .insert(pilotChecklistItems)
@@ -176,7 +174,7 @@ export const PATCH = withOrganizationAuth(async (request, context) => {
         action: completed ? CAPE_AUDIT_EVENTS.PILOT_CHECKLIST_ITEM_COMPLETED : 'pilot.checklist_item_reopened',
         resourceType: 'pilot_checklist_items',
         resourceId: saved?.id,
-        details: { itemId, completed, checklistComplete: isComplete },
+        details: { itemId, completed, checklistComplete: isComplete, ...(evidence ? { evidence } : {}) },
       });
 
       if (isComplete && completed) {
@@ -192,6 +190,13 @@ export const PATCH = withOrganizationAuth(async (request, context) => {
 
       return { items, completedCount, totalCount, isComplete };
     });
+
+    if ("missing" in state) {
+      return standardErrorResponse(
+        ErrorCode.CONFLICT,
+        `This step cannot be marked complete: the system found no ${state.missing}.`,
+      );
+    }
 
     return standardSuccessResponse(state);
   } catch (_error) {

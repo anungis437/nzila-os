@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { assertPublicHttpUrl } from '@/lib/security/outbound-url';
+import { INTEGRATION_SYNC_EFFECT, withConfigurationEffect } from '@/lib/reality/configuration-effect';
 
 const updateIntegrationSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -65,7 +66,7 @@ export const GET = withApi(
 
     if (!integration) throw ApiError.notFound('Integration');
 
-    return publicIntegration(integration);
+    return withConfigurationEffect(publicIntegration(integration), INTEGRATION_SYNC_EFFECT);
   },
 );
 
@@ -111,10 +112,10 @@ export const PATCH = withApi(
         action: 'integration.update',
         resourceType: 'api_integrations',
         resourceId: params.id,
-        details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
+        details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt'), inEffect: INTEGRATION_SYNC_EFFECT.inEffect },
       });
 
-      return publicIntegration(updated);
+      return withConfigurationEffect(publicIntegration(updated), INTEGRATION_SYNC_EFFECT);
     });
   },
 );
@@ -170,7 +171,7 @@ export const DELETE = withApi(
         details: { name: deleted.name },
       });
 
-      return { id: deleted.id, deleted: true };
+      return withConfigurationEffect({ id: deleted.id, deleted: true }, INTEGRATION_SYNC_EFFECT);
     });
   },
 );

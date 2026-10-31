@@ -18,6 +18,8 @@ const verifyOrganizationBodySchema = z.object({
   organizationId: z.guid(),
   // The binding is an administrator's conclusion, so what it rests on (a contact's membership, a document, a call) is recorded with it.
   basis: z.string().trim().min(20).max(1000),
+  // Needed only when the server cannot link the applicant to the organization by member address or name.
+  acknowledgeUncorroborated: z.boolean().optional(),
 });
 
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
@@ -53,11 +55,19 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     organizationId: parsed.data.organizationId,
     verifiedBy: user.id,
     basis: parsed.data.basis,
+    acknowledgeUncorroborated: parsed.data.acknowledgeUncorroborated,
   });
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: result.status });
+    return NextResponse.json(
+      { error: result.error, ...(result.corroboration ? { corroboration: result.corroboration } : {}) },
+      { status: result.status },
+    );
   }
 
-  return NextResponse.json({ ok: true, verifiedOrganizationId: result.organizationId });
+  return NextResponse.json({
+    ok: true,
+    verifiedOrganizationId: result.organizationId,
+    ...(result.corroboration ? { corroboration: result.corroboration, uncorroboratedAcknowledged: result.uncorroboratedAcknowledged } : {}),
+  });
 });

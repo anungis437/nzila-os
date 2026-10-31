@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 568,
-    "partial": 88,
+    "implementedPendingQualification": 573,
+    "partial": 89,
     "qualificationVerified": 0,
-    "unresolved": 209,
+    "unresolved": 204,
     "externalBlockers": 0
   },
   "batches": [
@@ -948,90 +948,99 @@
       "id": "B97-PILOT-AUDIT-VERIFICATION-BASIS-KPI-FRESHNESS",
       "family": "Pilot write audit, organization verification basis, KPI value freshness",
       "outstandingBefore": 220,
-      "newlyImplemented": 1,
-      "outstandingAfter": 219,
-      "partial": 2,
+      "newlyImplemented": 2,
+      "outstandingAfter": 218,
+      "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B98-ARBITRATION-CASE-AUTHORITY",
       "family": "Case authority for arbitration writes",
-      "outstandingBefore": 219,
+      "outstandingBefore": 218,
       "newlyImplemented": 0,
-      "outstandingAfter": 219,
+      "outstandingAfter": 218,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B99-CLAUSE-LIBRARY-SOURCE-ATTRIBUTION",
       "family": "Clause-library anonymized source projection across system-role list/search/compare",
-      "outstandingBefore": 219,
+      "outstandingBefore": 218,
       "newlyImplemented": 0,
-      "outstandingAfter": 219,
+      "outstandingAfter": 218,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B100-ONBOARDING-LOOKUP-TRUTHFULNESS",
       "family": "Smart onboarding lookup failures and fabricated national benchmarks",
-      "outstandingBefore": 219,
+      "outstandingBefore": 218,
       "newlyImplemented": 1,
-      "outstandingAfter": 218,
+      "outstandingAfter": 217,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B101-PG-MIGRATIONS-SCIM-SLA-SURVEY-DECISIONS",
       "family": "PostgreSQL migrations: SCIM bearer token, SLA status clock, survey anonymity, decision owner",
-      "outstandingBefore": 218,
+      "outstandingBefore": 217,
       "newlyImplemented": 1,
-      "outstandingAfter": 217,
+      "outstandingAfter": 216,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B102-AUDIT-SETTINGS-NOT-IMPLEMENTED-HONESTY",
       "family": "Mandatory external-access audit, unrecorded sync outcome, unenforced settings, 501 for the absent DSR route, workbook peer floor",
-      "outstandingBefore": 217,
+      "outstandingBefore": 216,
       "newlyImplemented": 2,
-      "outstandingAfter": 215,
+      "outstandingAfter": 214,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B103-ORGANIZATION-SELECTION-AUDIT",
       "family": "Organization selection is audited before it takes effect",
-      "outstandingBefore": 215,
+      "outstandingBefore": 214,
       "newlyImplemented": 0,
-      "outstandingAfter": 215,
+      "outstandingAfter": 214,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B104-OAUTH-CALLBACK-STATE-COOKIE-SAFETY",
       "family": "Social OAuth callback authenticity and cookie lifecycle",
-      "outstandingBefore": 215,
+      "outstandingBefore": 214,
       "newlyImplemented": 1,
-      "outstandingAfter": 214,
+      "outstandingAfter": 213,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B105-F06-A1-AUDIT-FOUNDATION",
       "family": "F06 A1: audit-write contract, truthful route manifest, canonical audit visibility, representation protocol capability",
-      "outstandingBefore": 214,
+      "outstandingBefore": 213,
       "newlyImplemented": 3,
-      "outstandingAfter": 211,
+      "outstandingAfter": 210,
       "partial": 1,
       "evidenceCommit": "b258d0938"
     },
     {
       "id": "B106-F06-A2-LOCAL-TRANSACTION-ATOMICITY",
       "family": "F06 A2: mutation and mandatory audit record in one database transaction",
-      "outstandingBefore": 211,
+      "outstandingBefore": 210,
       "newlyImplemented": 2,
-      "outstandingAfter": 209,
+      "outstandingAfter": 208,
       "partial": 0,
+      "evidenceCommit": "5dae044ef"
+    },
+    {
+      "id": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
+      "family": "F06 A4: a state, status or audit record names an outcome only when the system performed or can show it",
+      "outstandingBefore": 208,
+      "newlyImplemented": 4,
+      "outstandingAfter": 204,
+      "partial": 2,
       "evidenceCommit": null
     }
   ],
@@ -7640,10 +7649,13 @@
       "batch": "B96-HONEST-AVAILABILITY-AND-ENDPOINT-RULES",
       "files": [
         "apps/union-eyes/app/api/extensions/[id]/route.ts",
-        "apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts",
+        "apps/union-eyes/lib/reality/configuration-effect.ts",
+        "apps/union-eyes/lib/reality/capability-registry.ts",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
       ],
-      "explanation": "An integration endpoint written through PATCH must now be a public http(s) address (the same rule as every other address the platform is told to call).",
-      "remaining": "No route creates an integration row and no synchronization consumes the table, so enabling an integration or changing its frequency still affects nothing; a create path and a consumer are a product decision."
+      "explanation": "An integration endpoint written through PATCH must now be a public http(s) address (the same rule as every other address the platform is told to call). Every read, update and delete of an integration configuration, and its audit record, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-EXT-INTEGRATION-SYNC), so a change is no longer presented as having affected a synchronization. A creation path was deliberately not added: it would store more configuration that nothing consumes.",
+      "remaining": "No synchronization runs from the configuration, so enabling an integration, a sync frequency or an endpoint change has no effect. The worker and its provider qualification are the missing capability."
     },
     "DEF-0B10-PIL-ARTIFACT-INTELLIGENCE-AND-REFERENCE-WRITES-COMMIT-NO-AUDIT-ROW-THOUGH-THE-MANIFEST-DECLARES-ATOMIC-AUDIT": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7661,16 +7673,18 @@
       "explanation": "withLockedPilotMutation takes an optional audit declaration from the mutation and, when something was actually written, commits the audit row in the same transaction as the locked update, under the owning organization (or the acting platform organization for an application not yet bound); a missing actor refuses the write. The artifact, intelligence and reference-profile POST handlers declare pilot.artifact_version.add, pilot.intelligence.add and pilot.reference_profile.snapshot. No audit row is written when a branch writes nothing. The mutation helper test and two route tests were extended or given the actor and audit mocks (disclosed)."
     },
     "DEF-0B10-PIL-ORGANIZATION-VERIFICATION-CHECKS-ONLY-THAT-THE-TARGET-ORGANIZATION-ROW-EXISTS-AND-RECORDS-NO-PROOF-OR-REASON": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B97-PILOT-AUDIT-VERIFICATION-BASIS-KPI-FRESHNESS",
       "files": [
         "apps/union-eyes/app/api/pilot/apply/[id]/verify-organization/route.ts",
         "apps/union-eyes/lib/pilot/pilot-ownership.ts",
         "apps/union-eyes/app/api/__tests__/pilot-verify-organization.route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s41-pilot-audit-verification-basis-kpi-freshness.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s41-pilot-audit-verification-basis-kpi-freshness.test.ts",
+        "apps/union-eyes/lib/pilot/__tests__/pilot-ownership.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
       ],
-      "explanation": "Verification now requires the basis the administrator relied on (20 to 1000 characters) and keeps it in the audit record with the binding; a request without it is refused.",
-      "remaining": "No proof is compared (applicant e-mail domain, contact membership, a document), and the audit row is still written under the target organization; verified remains an administrator's recorded conclusion."
+      "explanation": "Verification now requires the basis the administrator relied on (20 to 1000 characters) and keeps it in the audit record with the binding; a request without it is refused. The binding now rests on what the server can check, not only on the administrator's selection. bindPilotOrganization compares the applicant's contact e-mail with the target organization's active member addresses and the organization name the applicant gave with the organization's own name, records both results in the audit record, and refuses (409, nothing written) when neither links the applicant to the organization unless the administrator resubmits with acknowledgeUncorroborated, in which case the audit record states that the verification rests on the stated basis alone. The basis (at least 20 characters) was already required. Three tests added; the bind tests were adapted to the extra reads and the test double made awaitable after limit.",
+      "remaining": "An organization with no member yet and a different name can still be verified on the administrator's basis, by design and explicitly recorded as uncorroborated."
     },
     "DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION": {
       "status": "PARTIAL",
@@ -7899,6 +7913,80 @@
         "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
       ],
       "explanation": "runReconciliation writes its completed and critical-variance audit records with persistAtomicAudit on the run's own transaction, and resolveException updates the exception and writes its record in one transaction (the notes stay on the exception row and only their length reaches the audit record). A failed audit write abandons the run or leaves the exception open, and a rolled-back run leaves no audit event. This changes audit atomicity only; no financial mandate, ledger effect or principal changed (the finance freeze stands)."
+    },
+    "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED": {
+      "status": "PARTIAL",
+      "batch": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
+      "files": [
+        "apps/union-eyes/app/api/pilot/apply/[id]/commercial-transition/route.ts",
+        "apps/union-eyes/lib/pilot/write-payloads.ts",
+        "apps/union-eyes/app/api/__tests__/pilot-commercial-transition.route.test.ts",
+        "apps/union-eyes/app/[locale]/dashboard/admin/pilots/page.tsx",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+      ],
+      "explanation": "The transition no longer says an effect happened when it did not. Every state that writes a contract, invoice or subscription (contract_sent, contract_signed, invoice_issued, subscription_active) is refused with 409 and nothing changed when its billing account, contract or active plan is missing, where it used to push a \"staged only\" note and still commit the new state, status, score history and audit row. contract_signed needs counterpartAcceptance (who accepted for the other party, their role, the channel and an evidence reference), is refused unless a contract exists and is awaiting acceptance, and records the acceptance, the recording administrator and the fact that it was recorded by a platform operator in the contract; a replay does not overwrite it. An invoice is issued only against an accepted (active) contract. A pilot status of approved, active or completed is written only once platform-approved commercial terms exist. Seven existing tests were adapted (staged-only expectations became refusals) and eleven added; the admin UI collects the acceptance. Disclosed adaptations: the mocked state order in the route test now includes approved, pilot_active and pilot_complete.",
+      "remaining": "The counterpart's acceptance is evidence an administrator records (a document or envelope reference), not a signature the system verified. Provider-verified e-signature, or an authenticated counterpart acceptance step, needs a signing provider and a counterpart identity that this release does not have."
+    },
+    "DEF-0B10-PIL-ONBOARDING-CHECKLIST-ITEMS-ARE-TOGGLED-BY-THE-CALLER-WITH-NO-CHECK-THAT-THE-STEP-HAPPENED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
+      "files": [
+        "apps/union-eyes/lib/pilot/onboarding-checklist-evidence.ts",
+        "apps/union-eyes/lib/audit/audit-reader.ts",
+        "apps/union-eyes/app/api/pilot/onboarding/route.ts",
+        "apps/union-eyes/app/api/__tests__/pilot-onboarding.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+      ],
+      "explanation": "A step is marked complete only when the organization's own data shows it: the organization record exists, a member other than the caller exists, a member other than the caller holds a role above member, a collective agreement is stored, an employer exists, an integration is configured, and an export was audited (a new hasAuditedAction reads both audit stores and excludes rejected, unavailable and request-only actions). Otherwise the PATCH returns 409 naming what is missing and writes nothing; reopening needs no evidence; the counts are recorded in the audit row, no row content. The evidence SQL was checked against the real PostgreSQL 16 schema. Two tests added; existing tests adapted to a mocked verifier.",
+      "remaining": "A configured integration only exists as stored configuration (UE-EXT-INTEGRATION-SYNC is NOT_IMPLEMENTED), so integrations-configured evidences configuration, not a working integration."
+    },
+    "DEF-0B9-ASM-ONBOARDING-EVENTS-RECORD-CALLER-ASSERTED-MILESTONES-AS-EVENT-AND-AUDIT-ROWS-WITHOUT-PERFORMING-OR-VERIFYING-THEM": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
+      "files": [
+        "apps/union-eyes/lib/pilot/onboarding-event-evidence.ts",
+        "apps/union-eyes/app/api/onboarding/events/route.ts",
+        "apps/union-eyes/app/api/onboarding/__tests__/events.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+      ],
+      "explanation": "The event and its audit row are written only after the organization's membership data shows the milestone: org_created needs the organization to exist, user_invited a named target that is a member of this organization, and role_assigned a named target that is an active member holding that role. An unverified milestone returns 409 and writes neither the event nor the audit row; the event is stamped with what it was verified against and the audit row carries the evidence. Two tests added.",
+      "remaining": "user_invited is evidenced by the member row, not by a sent invitation, because an invitation record is not a single governed table."
+    },
+    "DEF-0B10-PIL-PILOT-OVERVIEW-LISTS-EVERY-ENROLLED-ORGANIZATION-WITH-ITS-FIGURES-TO-ANY-OFFICER-OF-THE-PLATFORM-ORGANIZATION": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
+      "files": [
+        "apps/union-eyes/app/api/pilot/overview/route.ts",
+        "apps/union-eyes/app/api/__tests__/pilot-overview.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+      ],
+      "explanation": "Only platform-administrator authority (isPlatformAdminUser) opens the cross-organization overview; an officer role title in the platform organization no longer does. The read is paged (default 25, at most 100, ordered), takes three queries for the whole page instead of three per organization, and is recorded with performAtomicAuditedOperation in the system scope with the page it returned; a read that cannot be audited returns nothing. The test file was rewritten (disclosed): the old legacy-platform-organization expectations were removed, and tests added for attribution between organizations, bounds, the audit and an audit failure.",
+      "remaining": "The platform dashboard shows the first page only; a pager is a UI follow-up."
+    },
+    "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
+      "files": [
+        "apps/union-eyes/lib/employer-execution/payroll-run-transitions.ts",
+        "apps/union-eyes/app/api/__tests__/employer-payroll-run-id.route.test.ts",
+        "apps/union-eyes/app/api/employer-execution/__tests__/execution-routes-hardening.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+      ],
+      "explanation": "A payroll run is sealed (posted) only after a remittance package has been generated for it, in the same transaction, so a posted run always means something was done with its amounts; with none the seal is refused (409) and nothing is written. The compliance event and the audit record name the remittance run, the event summary says the system makes no payment or ledger entry, and the response returns the remittance id. No finance mandate, principal or amount logic was changed.",
+      "remaining": "Payment and ledger settlement are not performed by this system; the posted state means sealed after remittance, as the event states."
+    },
+    "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN": {
+      "status": "PARTIAL",
+      "batch": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
+      "files": [
+        "apps/union-eyes/lib/reality/configuration-effect.ts",
+        "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+        "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+        "apps/union-eyes/lib/reality/capability-registry.ts",
+        "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+      ],
+      "explanation": "Every provider list, create, update and delete response, and the create and update audit records, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-SSO-SIGN-IN), so a configured provider is no longer reported as though it governed sign-in.",
+      "remaining": "No sign-in, token-exchange, provisioning or SCIM code reads the stored provider; the consumer needs the identity-provider protocol work and a real provider to qualify against."
     }
   }
 }

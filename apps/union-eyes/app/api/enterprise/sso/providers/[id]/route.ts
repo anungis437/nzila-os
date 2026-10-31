@@ -16,6 +16,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 import { validateSsoProviderInput } from '@/lib/sso/provider-input';
 import { isUniqueViolation } from '@/lib/db/unique-violation';
+import { SSO_SIGN_IN_EFFECT, withConfigurationEffect } from '@/lib/reality/configuration-effect';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,9 +116,9 @@ export const PATCH = withApi(
         action: changed.includes('oidcClientSecret') ? 'sso.provider.rotate_secret' : 'sso.provider.update',
         resourceType: 'sso_providers',
         resourceId: params.id,
-        details: { fields: changed, enabled: updated.enabled === true },
+        details: { fields: changed, enabled: updated.enabled === true, inEffect: SSO_SIGN_IN_EFFECT.inEffect },
       });
-      return { id: updated.id, enabled: updated.enabled === true, changed };
+      return withConfigurationEffect({ id: updated.id, enabled: updated.enabled === true, changed }, SSO_SIGN_IN_EFFECT);
     });
   },
 );
@@ -150,7 +151,7 @@ export const DELETE = withApi(
         resourceId: removed.id,
         details: { name: removed.name, providerType: removed.providerType, wasEnabled: removed.enabled === true },
       });
-      return { id: removed.id, deleted: true };
+      return withConfigurationEffect({ id: removed.id, deleted: true }, SSO_SIGN_IN_EFFECT);
     });
   },
 );

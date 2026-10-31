@@ -1,27 +1,39 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   requireUser: vi.fn(),
   hasMinRole: vi.fn(),
   isPlatformAdminUser: vi.fn(),
-  getOrganizationIdForUser: vi.fn(),
-  withSystemContext: vi.fn(),
+  performAtomicAuditedOperation: vi.fn(),
+  operationAuditResponse: vi.fn(),
   logger: { error: vi.fn() },
   selectQueue: [] as unknown[][],
   executeQueue: [] as unknown[][],
+  chainCalls: [] as Array<[string, unknown[]]>,
 }));
 
-function makeSelectChain(rows: unknown[]) {
-  const chain: any = {
-    from: vi.fn(() => chain),
-    innerJoin: vi.fn(() => chain),
-    where: vi.fn(async () => rows),
-  };
+// A query chain that records its calls and resolves, when awaited, to the next queued result.
+function makeSelectChain() {
+  const chain: any = new Proxy(
+    {},
+    {
+      get(_target, prop: string) {
+        if (prop === 'then') {
+          const rows = (m.selectQueue.shift() ?? []) as unknown[];
+          return (resolve: (value: unknown[]) => unknown) => Promise.resolve(rows).then(resolve);
+        }
+        return (...args: unknown[]) => {
+          m.chainCalls.push([prop, args]);
+          return chain;
+        };
+      },
+    },
+  );
   return chain;
 }
 
 const mockDb = {
-  select: vi.fn(() => makeSelectChain((m.selectQueue.shift() ?? []) as unknown[])),
+  select: vi.fn(() => makeSelectChain()),
   execute: vi.fn(async () => (m.executeQueue.shift() ?? []) as unknown[]),
 };
 
@@ -31,11 +43,11 @@ vi.mock('@/lib/api-auth-guard', () => ({
   isPlatformAdminUser: m.isPlatformAdminUser,
 }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
-vi.mock('@/lib/organization-utils', () => ({
-  getOrganizationIdForUser: m.getOrganizationIdForUser,
-  DEFAULT_ORGANIZATION_ID: 'platform_org',
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAtomicAuditedOperation: m.performAtomicAuditedOperation,
+  operationAuditResponse: m.operationAuditResponse,
 }));
+vi.mock('@/lib/organization-utils', () => ({ DEFAULT_ORGANIZATION_ID: 'platform_org' }));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { FORBIDDEN: 'FORBIDDEN', INTERNAL_ERROR: 'INTERNAL_ERROR' },
   standardErrorResponse: (code: string, message: string) =>
@@ -47,90 +59,71 @@ async function loadRoute() {
   return import('../pilot/overview/route');
 }
 
+const enrollmentRow = (organizationId: string, name: string) => ({
+  enrollment: {
+    id: `enr_${organizationId}`,
+    pilotId: 'pilot_1',
+    organizationId,
+    enrolledAt: new Date('2026-01-01T00:00:00.000Z'),
+    organizerAdoptionRate: 10,
+    memberEngagementRate: 20,
+    casesManaged: 5,
+    avgTimeToResolution: 24,
+    healthScore: 80,
+  },
+  orgName: name,
+  orgSlug: name.toLowerCase().replace(/\s+/g, '-'),
+});
+
 describe('pilot/overview route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.executeQueue = [];
-    m.requireUser.mockResolvedValue({ userId: 'u1' });
+    m.chainCalls = [];
+    m.requireUser.mockResolvedValue({ userId: 'u1', organizationId: 'platform_org' });
     m.hasMinRole.mockResolvedValue(true);
-    m.isPlatformAdminUser.mockResolvedValue(false);
-    m.getOrganizationIdForUser.mockResolvedValue('platform_org');
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.isPlatformAdminUser.mockResolvedValue(true);
+    m.operationAuditResponse.mockReturnValue(null);
+    m.performAtomicAuditedOperation.mockImplementation(async (_op: unknown, work: (tx: unknown) => Promise<unknown>) => work(mockDb));
   });
-  afterEach(() => vi.unstubAllEnvs());
 
-  it('V2 denies a platform-organization match without canonical administrator authority', async () => {
-    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+  it('GET returns 403 when role check fails', async () => {
+    m.hasMinRole.mockResolvedValueOnce(false);
+    const { GET } = await loadRoute();
+
+    expect((await GET()).status).toBe(403);
+    expect(m.performAtomicAuditedOperation).not.toHaveBeenCalled();
+  });
+
+  it('F06 A4: an officer of the platform organization without platform-administrator authority is denied, and nothing is read', async () => {
+    m.isPlatformAdminUser.mockResolvedValueOnce(false);
     const { GET } = await loadRoute();
 
     const response = await GET();
 
     expect(response.status).toBe(403);
     expect(m.isPlatformAdminUser).toHaveBeenCalledWith('u1');
-    expect(m.getOrganizationIdForUser).not.toHaveBeenCalled();
-    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.performAtomicAuditedOperation).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
   });
 
-  it('V2 permits canonical platform administration without legacy organization authority', async () => {
-    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
-    m.isPlatformAdminUser.mockResolvedValueOnce(true);
-    const { GET } = await loadRoute();
-
-    const response = await GET();
-
-    expect(response.status).toBe(200);
-    expect(m.getOrganizationIdForUser).not.toHaveBeenCalled();
-    expect(m.withSystemContext).toHaveBeenCalledOnce();
-  });
-
-  it('GET returns 403 when role check fails', async () => {
-    const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
-
-    const response = await GET();
-    expect(response.status).toBe(403);
-  });
-
-  it('GET returns 403 when non-platform org requests overview', async () => {
-    const { GET } = await loadRoute();
-    m.getOrganizationIdForUser.mockResolvedValueOnce('local_org');
-    process.env.PLATFORM_ADMIN_USER_IDS = 'someone_else';
-
-    const response = await GET();
-    expect(response.status).toBe(403);
-  });
-
-  it('GET returns organizations metrics for active enrollments', async () => {
-    const { GET } = await loadRoute();
+  it('GET returns organization metrics for the page of active enrollments, with one query per figure', async () => {
     m.selectQueue.push(
-      [
-        {
-          enrollment: {
-            id: 'enr_1',
-            pilotId: 'pilot_1',
-            organizationId: 'org_1',
-            enrolledAt: new Date('2026-01-01T00:00:00.000Z'),
-            organizerAdoptionRate: 10,
-            memberEngagementRate: 20,
-            casesManaged: 5,
-            avgTimeToResolution: 24,
-            healthScore: 80,
-          },
-          orgName: 'Org 1',
-          orgSlug: 'org-1',
-        },
-      ],
-      [{ id: 'm1', name: 'Kickoff', description: 'desc', status: 'completed', targetDate: null, completedAt: null }],
+      [{ total: 1 }],
+      [enrollmentRow('org_1', 'Org 1')],
+      [{ organizationId: 'org_1', name: 'Kickoff', description: 'desc', status: 'completed', targetDate: null, completedAt: null }],
     );
     m.executeQueue.push(
-      [{ organizer_count: 4, active_organizer_count: 2, total_members: 20, active_members: 10 }],
-      [{ cases_managed: 12, avg_resolution_hours: 48 }],
+      [{ organization_id: 'org_1', organizer_count: 4, active_organizer_count: 2, total_members: 20, active_members: 10 }],
+      [{ organization_id: 'org_1', cases_managed: 12, avg_resolution_hours: 48 }],
     );
+    const { GET } = await loadRoute();
 
     const response = await GET();
-    expect(response.status).toBe(200);
     const json = await response.json();
+
+    expect(response.status).toBe(200);
     expect(json.organizations).toHaveLength(1);
     expect(json.organizations[0]).toMatchObject({
       organizationId: 'org_1',
@@ -139,13 +132,71 @@ describe('pilot/overview route', () => {
       memberEngagementRate: 50,
       casesManaged: 12,
     });
+    expect(json.organizations[0].milestones).toHaveLength(1);
+    expect(json.pagination).toEqual({ limit: 25, offset: 0, total: 1, returned: 1 });
+    expect(mockDb.execute).toHaveBeenCalledTimes(2);
   });
 
-  it('GET returns 500 when query throws', async () => {
+  it('F06 A4: attributes figures to the right organization and never reads a neighbor figures', async () => {
+    m.selectQueue.push(
+      [{ total: 2 }],
+      [enrollmentRow('org_1', 'Org 1'), enrollmentRow('org_2', 'Org 2')],
+      [
+        { organizationId: 'org_1', name: 'Only org 1', description: '', status: 'completed', targetDate: null, completedAt: null },
+      ],
+    );
+    m.executeQueue.push(
+      [{ organization_id: 'org_2', organizer_count: 2, active_organizer_count: 2, total_members: 10, active_members: 5 }],
+      [{ organization_id: 'org_2', cases_managed: 9, avg_resolution_hours: 10 }],
+    );
     const { GET } = await loadRoute();
-    m.withSystemContext.mockRejectedValueOnce(new Error('db down'));
+
+    const json = await (await GET()).json();
+    const [first, second] = json.organizations;
+
+    expect(first).toMatchObject({ organizationId: 'org_1', organizerAdoptionRate: 10, memberEngagementRate: 20, casesManaged: 5 });
+    expect(first.milestones).toHaveLength(1);
+    expect(second).toMatchObject({ organizationId: 'org_2', organizerAdoptionRate: 100, memberEngagementRate: 50, casesManaged: 9 });
+    expect(second.milestones).toHaveLength(0);
+  });
+
+  it('F06 A4: bounds the page and records the read', async () => {
+    m.selectQueue.push([{ total: 500 }], []);
+    const { GET } = await loadRoute();
+
+    const response = await GET(new Request('http://localhost/api/pilot/overview?limit=100000&offset=-5'));
+    const json = await response.json();
+
+    expect(json.pagination).toMatchObject({ limit: 100, offset: 0, total: 500, returned: 0 });
+    expect(m.chainCalls).toContainEqual(['limit', [100]]);
+    expect(m.performAtomicAuditedOperation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scope: 'system',
+        organizationId: 'platform_org',
+        userId: 'u1',
+        action: 'pilot.overview.read',
+        details: { limit: 100, offset: 0 },
+      }),
+      expect.any(Function),
+    );
+    expect(mockDb.execute).not.toHaveBeenCalled();
+  });
+
+  it('F06 A4: returns nothing when the read cannot be audited', async () => {
+    const refusal = { status: 409, body: { error: 'audit' } };
+    m.performAtomicAuditedOperation.mockRejectedValueOnce(new Error('audit down'));
+    m.operationAuditResponse.mockReturnValueOnce(refusal);
+    const { GET } = await loadRoute();
 
     const response = await GET();
-    expect(response.status).toBe(500);
+
+    expect(response.status).toBe(409);
+  });
+
+  it('GET returns 500 when the query throws', async () => {
+    m.performAtomicAuditedOperation.mockRejectedValueOnce(new Error('db down'));
+    const { GET } = await loadRoute();
+
+    expect((await GET()).status).toBe(500);
   });
 });

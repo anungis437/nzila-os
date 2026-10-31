@@ -13,6 +13,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 import { validateSsoProviderInput } from '@/lib/sso/provider-input';
 import { isUniqueViolation } from '@/lib/db/unique-violation';
+import { SSO_SIGN_IN_EFFECT, withConfigurationEffect } from '@/lib/reality/configuration-effect';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,11 +35,11 @@ export const GET = withApi(
       .where(eq(ssoProviders.organizationId, organizationId));
 
     // Never echo raw credential material back to the client.
-    return providers.map(({ samlCertificate, oidcClientSecret, ...safe }) => ({
+    return providers.map(({ samlCertificate, oidcClientSecret, ...safe }) => withConfigurationEffect({
       ...safe,
       samlCertificate: samlCertificate ? true : null,
       oidcClientSecret: oidcClientSecret ? true : null,
-    }));
+    }, SSO_SIGN_IN_EFFECT));
   },
 );
 
@@ -151,7 +152,7 @@ export const POST = withApi(
       action: 'sso.provider.create',
       resourceType: 'sso_providers',
       resourceId: row.id,
-      details: { providerType, autoProvision: autoProvision ?? false, enabled: enabled ?? false, roleMapping: roleMapping ?? null },
+      details: { providerType, autoProvision: autoProvision ?? false, enabled: enabled ?? false, roleMapping: roleMapping ?? null, inEffect: SSO_SIGN_IN_EFFECT.inEffect },
     });
     return row;
     }).catch((error) => {
@@ -164,10 +165,10 @@ export const POST = withApi(
     // redaction as GET — round 53: the create response previously
     // returned samlCertificate/oidcClientSecret in the clear).
     const { samlCertificate: _cert, oidcClientSecret: _secret, ...safe } = created;
-    return {
+    return withConfigurationEffect({
       ...safe,
       samlCertificate: _cert ? true : null,
       oidcClientSecret: _secret ? true : null,
-    };
+    }, SSO_SIGN_IN_EFFECT);
   },
 );
