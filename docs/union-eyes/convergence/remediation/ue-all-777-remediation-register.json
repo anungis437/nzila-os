@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 392,
-    "engineeringRemaining": 385,
+    "engineeringCorrected": 394,
+    "engineeringRemaining": 383,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 75
+    "engineeringPartial": 77
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -2997,9 +2997,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+        "path": "apps/union-eyes/lib/clause-library/clause-body.ts; apps/union-eyes/app/api/clause-library/route.ts; apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/app/api/clause-library/[id]/share/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
+        "explanation": "Setting a clause to public sharing on create, update or the share route now requires an officer role; a steward, a member or an unresolved role is refused with 403 before any read or write. Narrower scopes stay with the owning steward and keep their federation and congress eligibility checks.",
+        "remaining": "The floor is a role title; no mandate-kernel decision names who may publish collective-agreement text.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-BODY-FIELDS-UNVALIDATED",
@@ -3014,9 +3022,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+        "path": "apps/union-eyes/lib/clause-library/clause-body.ts; apps/union-eyes/app/api/clause-library/route.ts; apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/app/api/clause-library/[id]/share/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
+        "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed).",
+        "remaining": "The tag write route still reads its body without the schema.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-ORIGINAL-CLAUSE-ID-UNVERIFIED",
@@ -3031,9 +3047,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+        "path": "apps/union-eyes/lib/clause-library/original-clause.ts; apps/union-eyes/app/api/clause-library/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
+        "explanation": "A cited originalClauseId must be a clause of a collective agreement of the caller own organization (joined through the agreement); a missing or foreign one is a 404 and nothing is inserted. The id must also be well-formed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION",
@@ -3065,9 +3088,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+        "path": "apps/union-eyes/app/api/clause-library/compare/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
+        "explanation": "A comparison no longer increments comparisonCount on rows another organization owns: it is a read of those rows and writes only the usage counter of the caller own clauses. The audit stays with the comparing organization.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-COMPARE-GET-STUB-AND-EMPTY-KEYWORDS",

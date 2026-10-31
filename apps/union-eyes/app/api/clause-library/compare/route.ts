@@ -99,9 +99,9 @@ export const POST = withApi(
         tags: allTags.filter((t) => t.clauseId === r.id).map((t) => ({ tagName: t.tagName })),
       }));
 
-      // The counter lives on rows other organizations own, so it is written under the system role. Each increment is
-      // bound to the owning organization the read authorization was evaluated against, and is audited to the comparer.
-      for (const authorized of authorizedRows) {
+      // The usage counter is the owner own record: a comparison by another organization is a read and changes nothing
+      // it owns, so only the caller own clauses are counted.
+      for (const authorized of authorizedRows.filter((row) => row.sourceOrganizationId === organizationId)) {
         await tx
           .update(sharedClauseLibrary)
           .set({ comparisonCount: sql`${sharedClauseLibrary.comparisonCount} + 1` })

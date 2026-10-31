@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 348,
-    "partial": 66,
+    "implementedPendingQualification": 350,
+    "partial": 68,
     "qualificationVerified": 0,
-    "unresolved": 429,
+    "unresolved": 427,
     "externalBlockers": 0
   },
   "batches": [
@@ -411,6 +411,15 @@
       "newlyImplemented": 4,
       "outstandingAfter": 429,
       "partial": 3,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+      "family": "F03/F05: the shared clause library validates what it stores, reserves public publishing to an officer, and writes only rows it owns",
+      "outstandingBefore": 429,
+      "newlyImplemented": 2,
+      "outstandingAfter": 427,
+      "partial": 2,
       "evidenceCommit": null
     }
   ],
@@ -4487,6 +4496,51 @@
       ],
       "explanation": "Existing implementation, verified: a malformed target id is a 400 before any database predicate is built, with an existing test that no query or audit happens.",
       "remaining": "The route still offers no edit, rename or delete of a target."
+    },
+    "DEF-0B4-CLAUSE-LIBRARY-BODY-FIELDS-UNVALIDATED": {
+      "status": "PARTIAL",
+      "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+      "files": [
+        "apps/union-eyes/lib/clause-library/clause-body.ts",
+        "apps/union-eyes/app/api/clause-library/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/share/route.ts",
+        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
+      ],
+      "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed).",
+      "remaining": "The tag write route still reads its body without the schema."
+    },
+    "DEF-0B4-CLAUSE-LIBRARY-PUBLISHING-ON-STEWARD-ROLE-TITLE": {
+      "status": "PARTIAL",
+      "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+      "files": [
+        "apps/union-eyes/lib/clause-library/clause-body.ts",
+        "apps/union-eyes/app/api/clause-library/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/share/route.ts",
+        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
+      ],
+      "explanation": "Setting a clause to public sharing on create, update or the share route now requires an officer role; a steward, a member or an unresolved role is refused with 403 before any read or write. Narrower scopes stay with the owning steward and keep their federation and congress eligibility checks.",
+      "remaining": "The floor is a role title; no mandate-kernel decision names who may publish collective-agreement text."
+    },
+    "DEF-0B4-CLAUSE-LIBRARY-ORIGINAL-CLAUSE-ID-UNVERIFIED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+      "files": [
+        "apps/union-eyes/lib/clause-library/original-clause.ts",
+        "apps/union-eyes/app/api/clause-library/route.ts",
+        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
+      ],
+      "explanation": "A cited originalClauseId must be a clause of a collective agreement of the caller own organization (joined through the agreement); a missing or foreign one is a 404 and nothing is inserted. The id must also be well-formed."
+    },
+    "DEF-0B4-CLAUSE-LIBRARY-COMPARE-WRITES-OTHER-ORGANIZATION-ROWS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
+      "files": [
+        "apps/union-eyes/app/api/clause-library/compare/route.ts",
+        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
+      ],
+      "explanation": "A comparison no longer increments comparisonCount on rows another organization owns: it is a read of those rows and writes only the usage counter of the caller own clauses. The audit stays with the comparing organization."
     }
   }
 }

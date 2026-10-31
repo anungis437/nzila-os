@@ -16,6 +16,8 @@ import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { buildClauseVisibilityCondition, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
+import { assertOriginalClauseOwned } from '@/lib/clause-library/original-clause';
 
 export const dynamic = 'force-dynamic';
 
@@ -164,10 +166,11 @@ export const POST = withApi(
       summary: 'Create a new shared clause',
     },
   },
-  async ({ request, userId, organizationId }) => {
+  async ({ request, userId, organizationId, user }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     if (!userId) throw ApiError.badRequest('Authenticated user is required to create a clause.');
-    const body = await request.json();
+    const body = parseClauseBody(await request.json().catch(() => null), 'create');
+    assertMayPublish(user?.role, body.sharingLevel);
 
     const denial = await withSystemContext(() =>
       sharingChangeDenial(organizationId, {
@@ -188,6 +191,7 @@ export const POST = withApi(
           .limit(1);
         if (!agreement) throw ApiError.notFound('agreement', body.sourceCbaId);
       }
+      await assertOriginalClauseOwned(tx, body.originalClauseId, organizationId);
 
       const [created] = await tx
         .insert(sharedClauseLibrary)

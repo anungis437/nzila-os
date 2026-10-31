@@ -18,6 +18,7 @@ import { and, eq } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,10 +60,11 @@ export const POST = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Update sharing settings for a clause' },
   },
-  async ({ request, userId, organizationId }) => {
+  async ({ request, userId, organizationId, user }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/share')[0];
-    const body = await request.json();
+    const body = parseClauseBody(await request.json().catch(() => null), 'share');
+    assertMayPublish(user?.role, body.sharingLevel);
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const updates: Record<string, unknown> = {};
