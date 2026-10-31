@@ -8,20 +8,18 @@ import { useLocale, useTranslations } from 'next-intl';
 import TrackedLink from './TrackedLink';
 import { locales, type Locale } from '@/lib/locales';
 
-const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
+const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL;
 
 const navigation = [
   { key: 'publicService', href: '/public-service' },
   { key: 'unionEyes', href: '/union-eyes' },
   { key: 'platform', href: '/platform' },
   { key: 'trust', href: '/trust' },
-  { key: 'insights', href: '/insights' },
+  { key: 'products', href: '/products' },
   { key: 'contact', href: '/contact' },
 ] as const;
 
-const appLinks = [
-  { key: 'console', href: CONSOLE_URL },
-] as const;
+const appLinks = CONSOLE_URL ? [{ key: 'console' as const, href: CONSOLE_URL }] : [];
 
 const localeLabels: Record<Locale, string> = {
   'en-CA': 'EN',
@@ -40,6 +38,7 @@ export default function Navigation() {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -63,7 +62,7 @@ export default function Navigation() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-white/90 backdrop-blur-xl shadow-sm'
-          : 'bg-transparent'
+          : 'bg-[#080e1c]/90 backdrop-blur-xl border-b border-white/10'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,7 +83,7 @@ export default function Navigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden xl:flex items-center space-x-5">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -115,7 +114,7 @@ export default function Navigation() {
               {t('requestDemo')}
             </TrackedLink>
             {/* App-switcher divider */}
-            <div className="w-px h-6 bg-gray-200" />
+            {appLinks.length > 0 && <div className="w-px h-6 bg-gray-200" />}
             {appLinks.map((app) => (
               <TrackedLink
                 key={app.key}
@@ -133,7 +132,7 @@ export default function Navigation() {
                 <ArrowTopRightOnSquareIcon className="h-3 w-3" />
               </TrackedLink>
             ))}
-            <div className="w-px h-6 bg-gray-200" />
+            {appLinks.length > 0 && <div className="w-px h-6 bg-gray-200" />}
             <div
               role="group"
               aria-label="Language selector"
@@ -165,7 +164,7 @@ export default function Navigation() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center">
+          <div className="xl:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
@@ -189,7 +188,7 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div
           id="mobile-navigation-menu"
-          className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 transition-all duration-300 overflow-hidden"
+          className="xl:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 transition-all duration-300 overflow-hidden"
           style={{
             maxHeight: mobileMenuOpen ? '1000px' : '0',
             opacity: mobileMenuOpen ? 1 : 0,
