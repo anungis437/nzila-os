@@ -33,7 +33,7 @@ import { ApiError } from './errors';
 import { db } from '@/db/db';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { eq, and, desc, count, sql, inArray, type SQL } from 'drizzle-orm';
+import { eq, and, desc, count, sql, inArray, getTableName as drizzleTableName, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
@@ -381,6 +381,24 @@ export function validateMergeJsonColumnValues(
   }
 }
 
+/**
+ * Mandatory response projection for generic CRUD reads. analytics_metrics.metadata
+ * may contain historical claim IDs, source references or other case-level
+ * provenance. A member may read aggregate values but never this internal JSON.
+ * Apply centrally rather than trusting every alias to set omitFromResponse.
+ */
+export function shapeCrudResponseRow<T extends Record<string, unknown> | undefined>(
+  row: T,
+  tableName: string,
+  omitFromResponse: readonly string[] = [],
+): T {
+  if (!row) return row;
+  const omitted = new Set(omitFromResponse);
+  if (tableName === 'analytics_metrics') omitted.add('metadata');
+  if (omitted.size === 0) return row;
+  return Object.fromEntries(Object.entries(row).filter(([key]) => !omitted.has(key))) as T;
+}
+
 export function crudRoutes(opts: CrudOptions & { itemRoute: true }): ItemHandlers;
 export function crudRoutes(opts: CrudOptions & { itemRoute?: false | undefined }): CollectionHandlers;
 export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers {
@@ -441,11 +459,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     return !(await isBelowStaff(userId, organizationId));
   }
 
-  const omitted = new Set(opts.omitFromResponse ?? []);
-  /** Removes the columns this route never returns (credentials, internal flags) from a row. */
+  /** All generic aliases of the same table must apply the same confidentiality policy. */
   function shape<T extends Record<string, unknown> | undefined>(row: T): T {
-    if (!row || omitted.size === 0) return row;
-    return Object.fromEntries(Object.entries(row).filter(([key]) => !omitted.has(key))) as T;
+    return shapeCrudResponseRow(row, drizzleTableName(table), opts.omitFromResponse);
   }
 
   /** Refuses any body field outside the route's allow-list. Factory-managed fields are already refused by assertGenericWritePayload. */
