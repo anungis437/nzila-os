@@ -9,7 +9,8 @@ describe('Gate 0 batch B85: decisions applied (organization types, calendar revo
     const ui = src('components/admin/OrganizationHierarchyAdmin.tsx')
     expect(ui).toContain("const ORGANIZATION_TYPES = ['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'] as const")
     expect(ui).not.toContain('local_union')
-    expect(ui).not.toContain('data.success')
+    // The hierarchy read answers success; create and update decide from the HTTP status.
+    expect(ui.match(/data\.success/g)).toHaveLength(1)
     expect(ui).toContain('if (!response.ok)')
     for (const locale of ['en', 'fr']) {
       const messages = JSON.parse(src(`messages/${locale}.json`))

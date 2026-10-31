@@ -41,3 +41,13 @@ export function checkDocumentLocation(fileUrl: string, organizationId: string, e
   }
   return { ok: true }
 }
+
+/**
+ * The object path an uploaded interview document is stored under: the organization's own area, then the interview, then a random
+ * prefix so two uploads of one file name never collide and a name cannot be guessed. The file name is reduced to a safe base name.
+ */
+export function interviewDocumentBlobPath(organizationId: string, interviewId: string, fileName: string, randomHex: string): string {
+  const base = fileName.split(/[\\/]/).pop() ?? 'document'
+  const safe = base.normalize('NFKD').replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^\.+/, '').slice(-100) || 'document'
+  return `interviews/${organizationId.toLowerCase()}/${interviewId.toLowerCase()}/${randomHex}-${safe}`
+}

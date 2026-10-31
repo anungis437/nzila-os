@@ -1,8 +1,8 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 999,
-  "mutating": 727,
+  "routes": 1000,
+  "mutating": 728,
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 7,
@@ -17,7 +17,7 @@
    "ROLE_AUTH": 121,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 296,
+   "WITH_API": 297,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -33,10 +33,10 @@
    "ROLE_AUTH": 72,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 187
+   "WITH_API": 188
   },
   "mutatingByAudit": {
-   "ATOMIC": 151,
+   "ATOMIC": 152,
    "ATOMIC_SERVICE": 151,
    "COMPUTE_ONLY": 33,
    "CRUD_ATOMIC": 141,
@@ -50,7 +50,7 @@
    "CRUD_TENANT_TX": 141,
    "NONE": 339,
    "SYSTEM_CONTEXT": 65,
-   "TENANT_TX": 168
+   "TENANT_TX": 169
   }
  },
  "routes": [
@@ -6211,6 +6211,18 @@
    "route": "exit-interviews/[id]/documents/route.ts",
    "methods": [
     "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
+  },
+  {
+   "route": "exit-interviews/[id]/documents/upload/route.ts",
+   "methods": [
     "POST"
    ],
    "mutating": true,

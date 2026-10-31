@@ -393,6 +393,32 @@ export class GeofencePrivacyService {
   }
 
   /**
+   * Record the lapse of consents whose expiry has passed. A consent is not valid after its expiry whatever its stored status (the check
+   * is a read and writes nothing); this sweep makes the stored status say so, so a reader that looks at the status alone is not misled
+   * and the lapse is evident in the record. It runs under the system role with the retention sweep, one member at a time, capped like it.
+   */
+  static async expireLapsedConsents(tx: RLSTx = db) {
+    const now = new Date();
+    const cap = GeofencePrivacyService.RETENTION_MAX_USERS_PER_RUN;
+    const lapsed = await tx
+      .selectDistinct({ userId: memberLocationConsent.userId })
+      .from(memberLocationConsent)
+      .where(and(eq(memberLocationConsent.consentStatus, "opted_in"), lte(memberLocationConsent.expiresAt, now)))
+      .limit(cap + 1);
+    const truncated = lapsed.length > cap;
+    let expired = 0;
+    for (const { userId } of lapsed.slice(0, cap)) {
+      const rows = await tx
+        .update(memberLocationConsent)
+        .set({ consentStatus: "expired", updatedAt: now })
+        .where(and(eq(memberLocationConsent.userId, userId), eq(memberLocationConsent.consentStatus, "opted_in"), lte(memberLocationConsent.expiresAt, now)))
+        .returning({ id: memberLocationConsent.id });
+      expired += rows.length;
+    }
+    return { consentsExpired: expired, consentsTruncated: truncated };
+  }
+
+  /**
    * Delete expired location data (auto-cleanup job).
    * Runs hourly from app/api/cron/location-retention under the system role: the 24-hour retention covers every
    * member's rows, which an ordinary user-scoped session cannot see. Deletion and its evidence commit together.

@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 578,
- "partial": 76,
- "outstanding": 199,
- "accountedFor": 199,
+ "corrected": 579,
+ "partial": 75,
+ "outstanding": 198,
+ "accountedFor": 198,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -90,11 +90,11 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 30,
+   "defects": 29,
    "severity": {
     "HIGH": 5,
     "MEDIUM": 22,
-    "LOW": 3
+    "LOW": 2
    },
    "namedRoutes": 1,
    "namedFiles": 0,
@@ -104,7 +104,7 @@
     "0B.5": 2,
     "0B.6": 3,
     "0B.7": 9,
-    "0B.8": 2,
+    "0B.8": 1,
     "0B.9": 1,
     "0B.10": 1,
     "0B.11": 7,
@@ -555,11 +555,6 @@
    {
     "id": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT",
-    "severity": "LOW",
-    "partial": true
    },
    {
     "id": "DEF-0B9-ASM-CLAUSE-RELEVANCE-SCORES-SHARING-LEVELS-AND-SOURCE-NAMES-THAT-THE-ROW-LEVEL-POLICIES-WITHHOLD",

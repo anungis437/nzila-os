@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 525,
-    "partial": 76,
+    "implementedPendingQualification": 526,
+    "partial": 75,
     "qualificationVerified": 0,
-    "unresolved": 252,
+    "unresolved": 251,
     "externalBlockers": 0
   },
   "batches": [
@@ -579,278 +579,278 @@
       "id": "B59-F05-F08-READS-WITHOUT-SIDE-EFFECTS-AND-PRIVATE-DEFINITIONS",
       "family": "Reads that wrote, private definitions readable by others, and paths that advertised what they did not do",
       "outstandingBefore": 356,
-      "newlyImplemented": 3,
-      "outstandingAfter": 353,
-      "partial": 1,
+      "newlyImplemented": 4,
+      "outstandingAfter": 352,
+      "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
       "family": "Schema: record numbers and codes unique within an organization, not across every organization",
-      "outstandingBefore": 353,
+      "outstandingBefore": 352,
       "newlyImplemented": 2,
-      "outstandingAfter": 351,
+      "outstandingAfter": 350,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B60-F03-F08-RETENTION-LOG-AND-VERIFIED-PROJECTIONS",
       "family": "Retention evidence that told the truth, and projections verified free of canned values and address logging",
-      "outstandingBefore": 351,
+      "outstandingBefore": 350,
       "newlyImplemented": 2,
-      "outstandingAfter": 349,
+      "outstandingAfter": 348,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
       "family": "Paths that advertised an operation but were generic CRUD over another table, verified as honest 501",
-      "outstandingBefore": 349,
+      "outstandingBefore": 348,
       "newlyImplemented": 4,
-      "outstandingAfter": 345,
+      "outstandingAfter": 344,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
       "family": "Schema: a copilot conversation and a reasoning session belong to the person who opened them",
-      "outstandingBefore": 345,
+      "outstandingBefore": 344,
       "newlyImplemented": 3,
-      "outstandingAfter": 342,
+      "outstandingAfter": 341,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
       "family": "Schema: the author of an anti-scab violation is recorded by the server",
-      "outstandingBefore": 342,
+      "outstandingBefore": 341,
       "newlyImplemented": 0,
-      "outstandingAfter": 342,
+      "outstandingAfter": 341,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B62-F03-F08-F06-VERIFIED-PATHS-AND-HONEST-DISCONNECT",
       "family": "Verified honest 501 paths, and a disconnect that reports whether the platform token was revoked",
-      "outstandingBefore": 342,
+      "outstandingBefore": 341,
       "newlyImplemented": 3,
-      "outstandingAfter": 339,
+      "outstandingAfter": 338,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S08-CONTACT-SUBMISSIONS-STORE-MIGRATIONS-0045-AND-0036",
       "family": "Schema: a local, system-only record of public contact-form submissions",
-      "outstandingBefore": 339,
+      "outstandingBefore": 338,
       "newlyImplemented": 1,
-      "outstandingAfter": 338,
+      "outstandingAfter": 337,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
       "family": "A figure nothing measures is not zero, and a pension contribution names a real pension member",
-      "outstandingBefore": 338,
+      "outstandingBefore": 337,
       "newlyImplemented": 1,
-      "outstandingAfter": 337,
+      "outstandingAfter": 336,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
       "family": "Newsletter batch status: the right gate and no recipient addresses",
-      "outstandingBefore": 337,
+      "outstandingBefore": 336,
       "newlyImplemented": 2,
-      "outstandingAfter": 335,
+      "outstandingAfter": 334,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
       "family": "Campaign analytics and poll-vote paths that were generic CRUD over another table",
-      "outstandingBefore": 335,
+      "outstandingBefore": 334,
       "newlyImplemented": 1,
-      "outstandingAfter": 334,
+      "outstandingAfter": 333,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
       "family": "Small platform fixes, list filters and migration 0046 (row integrity)",
-      "outstandingBefore": 334,
+      "outstandingBefore": 333,
       "newlyImplemented": 10,
-      "outstandingAfter": 324,
+      "outstandingAfter": 323,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "family": "Cognition honesty, aggregator guards, audit-list honesty, employer correspondence and calendar-sync integrity",
-      "outstandingBefore": 324,
+      "outstandingBefore": 323,
       "newlyImplemented": 10,
-      "outstandingAfter": 314,
+      "outstandingAfter": 313,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
       "family": "Read-only registers, observability sinks and answers that stated more than the source computes",
-      "outstandingBefore": 314,
+      "outstandingBefore": 313,
       "newlyImplemented": 9,
-      "outstandingAfter": 305,
+      "outstandingAfter": 304,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
       "family": "Representative satisfaction figures, platform statistics definitions, the in-memory index answer and organization parent changes",
-      "outstandingBefore": 305,
+      "outstandingBefore": 304,
       "newlyImplemented": 3,
-      "outstandingAfter": 302,
+      "outstandingAfter": 301,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
       "family": "Clause tag projection, education reminder opt-out and chatbot role and review markers",
-      "outstandingBefore": 302,
+      "outstandingBefore": 301,
       "newlyImplemented": 2,
-      "outstandingAfter": 300,
+      "outstandingAfter": 299,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
       "family": "Parsed request bodies and system jobs that were unbounded or unreported",
-      "outstandingBefore": 300,
+      "outstandingBefore": 299,
       "newlyImplemented": 4,
-      "outstandingAfter": 296,
+      "outstandingAfter": 295,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B72-S10-ML-FEEDBACK-TABLE-QUERY-DISCLOSURE-AND-ALIAS-ROUTES",
       "family": "Schema: append-only prediction feedback (0047, cache 0037); ML query disclosure; alias routes; hierarchy list",
-      "outstandingBefore": 296,
+      "outstandingBefore": 295,
       "newlyImplemented": 5,
-      "outstandingAfter": 291,
+      "outstandingAfter": 290,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B73-PENSION-PLAN-FIGURES-AND-READS",
       "family": "Pension plan figures, member list authority and tenant-context reads",
-      "outstandingBefore": 291,
+      "outstandingBefore": 290,
       "newlyImplemented": 3,
-      "outstandingAfter": 288,
+      "outstandingAfter": 287,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B74-PILOT-WRITE-PAYLOADS",
       "family": "Pilot write routes: parsed, bounded request bodies",
-      "outstandingBefore": 288,
+      "outstandingBefore": 287,
       "newlyImplemented": 0,
-      "outstandingAfter": 288,
+      "outstandingAfter": 287,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B75-REPORT-OPERATORS-AND-QUEUE-STATUS",
       "family": "Report filter operators that were silently dropped; queue status verified",
-      "outstandingBefore": 288,
+      "outstandingBefore": 287,
       "newlyImplemented": 1,
-      "outstandingAfter": 287,
+      "outstandingAfter": 286,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B76-PILOT-EMPLOYER-CONTRACT",
       "family": "Pilot telemetry authority, employer read exposure, contract input",
-      "outstandingBefore": 287,
+      "outstandingBefore": 286,
       "newlyImplemented": 4,
-      "outstandingAfter": 283,
+      "outstandingAfter": 282,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B77-COGNITION-HONESTY",
       "family": "Cognition and exit-interview analytics: officer-asserted inputs, whole-word topics, windowed attribution, uncapped counts",
-      "outstandingBefore": 283,
+      "outstandingBefore": 282,
       "newlyImplemented": 4,
-      "outstandingAfter": 279,
+      "outstandingAfter": 278,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B78-AUDIT-ATOMICITY",
       "family": "Audit atomicity: invoice generation, trial expiry, lapsed designations, workbook export, deprecated-route access",
-      "outstandingBefore": 279,
+      "outstandingBefore": 278,
       "newlyImplemented": 4,
-      "outstandingAfter": 275,
+      "outstandingAfter": 274,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B79-SOCIAL-FIGURES-AND-PUBLISH",
       "family": "Social campaign figures, publish handling and token refresh",
-      "outstandingBefore": 275,
+      "outstandingBefore": 274,
       "newlyImplemented": 2,
-      "outstandingAfter": 273,
+      "outstandingAfter": 272,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B80-CBA-VISIBILITY-AND-ANALYTICS",
       "family": "CBA review visibility, benchmark and comparison honesty, cognition health scope, derived case metrics, metrics organization binding",
-      "outstandingBefore": 273,
+      "outstandingBefore": 272,
       "newlyImplemented": 7,
-      "outstandingAfter": 266,
+      "outstandingAfter": 265,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
       "family": "Social scheduling and campaign link, graph query inputs, health-safety statistics",
-      "outstandingBefore": 266,
+      "outstandingBefore": 265,
       "newlyImplemented": 3,
-      "outstandingAfter": 263,
+      "outstandingAfter": 262,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B82-ATTACH-CASCADE-CRON",
       "family": "Interview document location, cascade wording, per-capita job, education reminder cap, precedent reads",
-      "outstandingBefore": 263,
+      "outstandingBefore": 262,
       "newlyImplemented": 5,
-      "outstandingAfter": 258,
+      "outstandingAfter": 257,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B83-COGNITION-CASE-AUTHORITY",
       "family": "Cognition reads follow the case authority",
-      "outstandingBefore": 258,
+      "outstandingBefore": 257,
       "newlyImplemented": 2,
-      "outstandingAfter": 256,
+      "outstandingAfter": 255,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B84-SMALL-VALIDATION",
       "family": "Small validation and verification items",
-      "outstandingBefore": 256,
+      "outstandingBefore": 255,
       "newlyImplemented": 0,
-      "outstandingAfter": 256,
+      "outstandingAfter": 255,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B85-DECISIONS-APPLIED",
       "family": "Owner decisions applied: organization types, calendar revocation, bot challenge",
-      "outstandingBefore": 256,
+      "outstandingBefore": 255,
       "newlyImplemented": 4,
-      "outstandingAfter": 252,
+      "outstandingAfter": 251,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -4954,8 +4954,8 @@
         "apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
         "apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts"
       ],
-      "explanation": "The status, the audit trail and the audit report keep every signer network address, user agent and geolocation for the sender only. A signer sees those fields only on the rows that describe themselves. Unit tests cover sender, signer and audit rows. The audit route test mock gained getDocumentSender (disclosed adaptation). The signer projection now also removes peer email/contact fields and unstructured audit descriptions, and recursively filters nested signers even when the parent report belongs to the viewer; sender access remains unchanged. Adversarial regression cases added.",
-      "remaining": "Exact-HEAD unit/contract, native PostgreSQL 15/16, HTTP/browser/staging and independent privacy review are outstanding. Audit rows with no actor user ID cannot expose even the viewer's own network evidence; no identity is fabricated."
+      "explanation": "The status, the audit trail and the audit report keep every signer network address, user agent and geolocation for the sender only. A signer sees those fields only on the rows that describe themselves. Unit tests cover sender, signer and audit rows. The audit route test mock gained getDocumentSender (disclosed adaptation).",
+      "remaining": "Signer e-mail addresses are still visible to every signer, and the report actor and signer rows carry no user id, so a signer own network data is also withheld from the report."
     },
     "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE": {
       "status": "PARTIAL",
@@ -5714,16 +5714,21 @@
       "explanation": "Existing implementation, verified: the classify, summarize, match-precedents and search routes now run the model call inside performAuditedOperation, which records intent and outcome and answers a refused audit through operationAuditResponse; pinned by a test. The intent and outcome are separate transactions from the effect (a different, still open defect)."
     },
     "DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B59-F05-F08-READS-WITHOUT-SIDE-EFFECTS-AND-PRIVATE-DEFINITIONS",
       "files": [
         "apps/union-eyes/services/geofence-privacy-service.ts",
         "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts",
         "apps/union-eyes/app/api/location/consent/route.ts",
-        "apps/union-eyes/lib/services/__tests__/s28-small-validation-batch.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s28-small-validation-batch.test.ts",
+        "apps/union-eyes/app/api/cron/location-retention/route.ts",
+        "apps/union-eyes/db/rls-storage-authority/organizations-membership.ts",
+        "apps/union-eyes/db/__tests__/location-consent-expiry.pglite.test.ts",
+        "apps/union-eyes/app/api/__tests__/cron-location-retention.route.test.ts",
+        "apps/union-eyes/lib/operations/catalog-authority-contract.json",
+        "apps/union-eyes/lib/services/__tests__/s30-consent-sweep-and-document-upload.test.ts"
       ],
-      "explanation": "A consent check is a read and no longer writes: past its expiry the consent is simply not valid, whatever its stored status. The existing geofence service and route tests pass. B84: the context query parameter is one of strike or event, and anything else is refused (400) rather than reflected.",
-      "remaining": "The stored status of an expired consent never becomes expired: a sweep needs the system role to hold UPDATE on member_location_consent, which the storage-authority manifest and the location-retention ratchets do not grant."
+      "explanation": "A consent check is a read and no longer writes: past its expiry the consent is simply not valid, whatever its stored status. The existing geofence service and route tests pass. B84: the context query parameter is one of strike or event, and anything else is refused (400) rather than reflected. B86: the stored status now says expired. GeofencePrivacyService.expireLapsedConsents runs inside the hourly retention transaction under the system role, one member at a time and capped like the retention sweep (named by userId and expiresAt, so the mutation-scope ratchet holds), and marks only opted-in consents whose expiry has passed. The manifest gives the system role SELECT and UPDATE on member_location_consent (the same shape as geofence_events: privileges come from the manifest-driven generator, so there is no new migration), and the catalog contract was regenerated. The retention route test was extended for the second step and a PGlite test proves the lapsed rows change, live, open-ended, withdrawn and never-asked rows do not, a user-scoped session cannot do it for other members, and a second run changes nothing (disclosed). The grant itself is unqualified until the generated grants run on native PostgreSQL."
     },
     "DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -6452,15 +6457,10 @@
       "files": [
         "apps/union-eyes/lib/education/reminder-queries.ts",
         "apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
-        "apps/union-eyes/lib/education/reminder-delivery.ts",
-        "apps/union-eyes/lib/education/__tests__/reminder-delivery.pglite.test.ts",
-        "apps/union-eyes/lib/email/training-notifications.ts",
-        "apps/union-eyes/lib/email/__tests__/training-notifications-dedupe.test.ts",
-        "apps/union-eyes/app/api/__tests__/cron-education-reminders.route.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
       ],
-      "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed). A durable per-organization/member/source/tier in-app notification claim is now written before email delivery using the existing unique index; retries and overlapping cron runs cannot claim twice. Provider refusals release the marker; ambiguous failures retain it. Focused PGlite and sender regression tests were added in source commit 3ad7b9a611012e06d49921447d4950a0cf0cab80.",
-      "remaining": "Exact-HEAD focused tests, native PostgreSQL 15/16, complete Vitest/contract and real HTTP/browser/staging acceptance remain unproven; source credit is withheld until focused tests pass. Independent ratification is outstanding."
+      "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed).",
+      "remaining": "There is still no sent marker: a second run on the same day would send the same reminders again."
     },
     "DEF-0B4-CHATBOT-REVIEW-NOT-REQUIRED-AND-FIXED-ROLE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -6917,9 +6917,12 @@
         "apps/union-eyes/lib/knowledge-transfer/governance/document-location.ts",
         "apps/union-eyes/app/api/exit-interviews/[id]/documents/route.ts",
         "apps/union-eyes/app/api/__tests__/exit-interviews-mutations.route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts",
+        "apps/union-eyes/app/api/exit-interviews/[id]/documents/upload/route.ts",
+        "apps/union-eyes/app/api/__tests__/exit-interviews-document-upload.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s30-consent-sweep-and-document-upload.test.ts"
       ],
-      "explanation": "A document location must be https on an exact approved host (UE_DOCUMENT_STORAGE_HOSTS, default the shared storage account; a subdomain is another party's host and is refused), carry no credentials, query string or fragment (so a signed-access token is never stored), and have the organization id as a path segment so one organization cannot register another's object; localhost is accepted outside production only. The attach test body was moved to a path inside the organization area and four refusal cases were added (disclosed). The storage path convention (organization id as a segment) is a rule this change introduces: no uploader in the repository produces these URLs, so the client of the presigned-URL flow must follow it."
+      "explanation": "A document location must be https on an exact approved host (UE_DOCUMENT_STORAGE_HOSTS, default the shared storage account; a subdomain is another party's host and is refused), carry no credentials, query string or fragment (so a signed-access token is never stored), and have the organization id as a path segment so one organization cannot register another's object; localhost is accepted outside production only. The attach test body was moved to a path inside the organization area and four refusal cases were added (disclosed). The storage path convention (organization id as a segment) is a rule this change introduces: no uploader in the repository produces these URLs, so the client of the presigned-URL flow must follow it. B86: the producer of the required location now exists. POST /api/exit-interviews/[id]/documents/upload (steward or owner, entitlement-gated) scans the file for malware before storing anything, stores it at interviews/<organizationId>/<interviewId>/<random>-<name> in the approved storage account, registers the unsigned object location with an atomic audit record, and removes the stored object if the record cannot be written."
     },
     "DEF-0B7-COGA-CASCADE-REGULATORY-RISK-IS-A-LABEL-TEMPLATE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",

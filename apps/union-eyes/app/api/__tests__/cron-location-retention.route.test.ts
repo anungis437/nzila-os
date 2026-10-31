@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withApiConfig: undefined as unknown,
   withSystemContext: vi.fn(),
   deleteExpiredLocationData: vi.fn(),
+  expireLapsedConsents: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -21,7 +22,7 @@ vi.mock('@/lib/api/framework', () => ({
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/services/geofence-privacy-service', () => ({
-  GeofencePrivacyService: { deleteExpiredLocationData: m.deleteExpiredLocationData },
+  GeofencePrivacyService: { deleteExpiredLocationData: m.deleteExpiredLocationData, expireLapsedConsents: m.expireLapsedConsents },
 }));
 
 describe('cron/location-retention route', () => {
@@ -32,6 +33,7 @@ describe('cron/location-retention route', () => {
 
   it('is cron-authenticated and sweeps every member in one system-role transaction', async () => {
     m.deleteExpiredLocationData.mockResolvedValue({ trackingRecordsDeleted: 3, eventRecordsDeleted: 2 });
+    m.expireLapsedConsents.mockResolvedValue({ consentsExpired: 1, consentsTruncated: false });
     const { GET, POST } = await import('../cron/location-retention/route') as { GET?: unknown; POST: (request: NextRequest) => Promise<Response> };
     expect((m.withApiConfig as { auth: unknown }).auth).toEqual({ cron: true });
 
@@ -40,7 +42,9 @@ describe('cron/location-retention route', () => {
     for (const handler of [POST]) {
       const response = await handler(new NextRequest('http://localhost/api/cron/location-retention'));
       expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ trackingRecordsDeleted: 3, eventRecordsDeleted: 2 });
+      expect(await response.json()).toEqual({ trackingRecordsDeleted: 3, eventRecordsDeleted: 2, consentsExpired: 1, consentsTruncated: false });
+    // The lapse of expired consents is recorded in the same system transaction as the deletion.
+    expect(m.expireLapsedConsents).toHaveBeenCalledWith({ tx: true });
     }
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
     expect(m.deleteExpiredLocationData).toHaveBeenCalledWith({ tx: true });
