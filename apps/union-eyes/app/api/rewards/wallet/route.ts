@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBalance, listLedger } from '@/lib/services/rewards/wallet-service';
+import { getWalletSnapshot } from '@/lib/services/rewards/wallet-service';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
@@ -26,19 +26,19 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     const limit = boundedInt(searchParams.get('limit'), 20, 1, 100);
     const offset = boundedInt(searchParams.get('offset'), 0, 0, 1_000_000);
 
-    const balance = await getBalance(organizationId, userId);
-
-    const ledgerResult = await listLedger(organizationId, userId, limit, offset);
+    // The balance and the page come from one snapshot, so they cannot disagree.
+    const { balance, entries, total } = await getWalletSnapshot(organizationId, userId, limit, offset);
 
     return NextResponse.json(
       {
         balance,
         ledger: {
-          entries: ledgerResult.entries,
+          entries,
           pagination: {
             limit,
             offset,
-            hasMore: ledgerResult.entries.length === limit,
+            total,
+            hasMore: offset + entries.length < total,
           },
         },
       },

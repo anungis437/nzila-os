@@ -9,7 +9,8 @@ describe('F05 lists and reads are bounded, and a GET writes nothing', () => {
   it.each(['plans', 'trustees', 'members', 'benefits', 'contributions', 't4a'])('pension/%s lists at most LIST_LIMIT rows', (route) => {
     const source = read(`app/api/pension/${route}/route.ts`)
     expect(source).toContain('const LIST_LIMIT = 200;')
-    expect(source).toContain('.limit(LIST_LIMIT)')
+    expect(source).toContain('listPage(request, LIST_LIMIT)')
+    expect(source).toContain('.limit(page.limit).offset(page.offset)')
   })
 
   // DEF-0B4-CBAS-LIST-LIMIT-UNBOUNDED, DEF-0B4-CBAS-DETAIL-GET-WRITES-VIEW-COUNT

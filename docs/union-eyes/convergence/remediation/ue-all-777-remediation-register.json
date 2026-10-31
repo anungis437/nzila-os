@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 444,
-    "engineeringRemaining": 333,
+    "engineeringCorrected": 448,
+    "engineeringRemaining": 329,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 76
+    "engineeringPartial": 72
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -2592,11 +2592,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
-        "path": "apps/union-eyes/app/api/calendar/events/route.ts; apps/union-eyes/lib/kpi/__tests__/b54-references-and-figures.test.ts",
-        "explanation": "Existing implementation, verified by a new test: event create checks the calendar belongs to the caller organization and is not another member personal calendar (404).",
-        "remaining": "The event update route does not re-check a changed calendarId.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
+        "path": "apps/union-eyes/app/api/calendar/events/[id]/route.ts; apps/union-eyes/app/api/calendar/events/route.ts; apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts",
+        "explanation": "Existing implementation, verified: the event update schema is strict and does not accept calendarId, so an update cannot re-point an event at another calendar; creation already checks the calendar belongs to the organization and is not another member's personal calendar. Pinned by a test.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -3951,11 +3950,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
-        "path": "apps/union-eyes/lib/services/org-member-references.ts; apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/attendance/route.ts; apps/union-eyes/app/api/committees/[id]/action-items/route.ts; apps/union-eyes/app/api/committees/[id]/documents/route.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-        "explanation": "Attendance member ids and an action-item assignee must be current members of the organization (400, nothing written), and a linked documentId must be a document of the organization (404). Existing committee tests pass.",
-        "remaining": "A linked fileUrl is still accepted from the body without a storage-host allow-list.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
+        "path": "apps/union-eyes/lib/services/own-storage-reference.ts; apps/union-eyes/app/api/committees/[id]/documents/route.ts; apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts",
+        "explanation": "A linked fileUrl must be a pointer into the organization's own document storage (verifiedLegacyBlobPath: configured storage account, document container, the organization's folder, no credential, no traversal) or the link is refused with 400. Tested with an own URL, another host, another organization's folder, a credential, a traversal and a metadata address.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -13665,11 +13663,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B36-F05-BOUNDED-LISTS-AND-ACCURATE-FILTERS",
-        "path": "apps/union-eyes/app/api/pension/plans/route.ts; apps/union-eyes/app/api/pension/trustees/route.ts; apps/union-eyes/app/api/pension/members/route.ts; apps/union-eyes/app/api/pension/benefits/route.ts; apps/union-eyes/app/api/pension/contributions/route.ts; apps/union-eyes/app/api/pension/t4a/route.ts; apps/union-eyes/app/api/__tests__/pension-own-records.route.test.ts; apps/union-eyes/lib/api/__tests__/f05-b36-bounds.contract.test.ts",
-        "explanation": "Each of the six pension list reads returns at most 200 rows. Test mock adapted only to expose the added limit call.",
-        "remaining": "There is still no pagination: rows beyond the 200 cap are not reachable through these routes.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
+        "path": "apps/union-eyes/lib/api/list-page.ts; apps/union-eyes/app/api/pension/plans/route.ts; apps/union-eyes/app/api/pension/trustees/route.ts; apps/union-eyes/app/api/pension/members/route.ts; apps/union-eyes/app/api/pension/benefits/route.ts; apps/union-eyes/app/api/pension/contributions/route.ts; apps/union-eyes/app/api/pension/t4a/route.ts; apps/union-eyes/app/api/__tests__/pension-own-records.route.test.ts; apps/union-eyes/lib/api/__tests__/f05-b36-bounds.contract.test.ts; apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts",
+        "explanation": "The six pension list reads take bounded limit (1..200, default 200 so existing callers are unchanged) and offset (0..1,000,000) through the shared listPage helper, so rows beyond the first page are reachable. The own-records route test mock and the B36 bounds pin were adapted to the offset call (disclosed).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -15588,11 +15585,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B40-F05-REWARDS-PAGING-AND-EXPORT",
-        "path": "apps/union-eyes/app/api/rewards/wallet/route.ts; apps/union-eyes/app/api/__tests__/rewards-wallet.route.test.ts",
-        "explanation": "Limit and offset are parsed to bounded integers (limit 1..100, offset 0..1,000,000), so a non-numeric or negative value is the default rather than NaN or a negative offset; the route reads only the caller own balance and ledger.",
-        "remaining": "The balance and the ledger are still read in two separate statements, so a movement between them can make them disagree.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
+        "path": "apps/union-eyes/lib/services/rewards/wallet-service.ts; apps/union-eyes/app/api/rewards/wallet/route.ts; apps/union-eyes/app/api/__tests__/rewards-wallet.route.test.ts; apps/union-eyes/lib/services/rewards/__tests__/wallet-snapshot.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts",
+        "explanation": "getWalletSnapshot reads the latest balance, the page and the total inside one repeatable-read transaction, so they cannot disagree; the response also carries the total and hasMore is computed from it. Proved on PostgreSQL (PGlite) for paging, scoping to the member and organization, and an empty ledger. The route test mock now returns the snapshot (disclosed).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },

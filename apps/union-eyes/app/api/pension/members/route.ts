@@ -1,4 +1,5 @@
 import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
@@ -20,7 +21,7 @@ const createMemberSchema = z.object({
 
 export const dynamic = 'force-dynamic';
 
-// A list answers at most this many rows.
+// A list answers at most this many rows per page; offset pages through the rest.
 const LIST_LIMIT = 200;
 
 export const GET = withApi(
@@ -29,6 +30,7 @@ export const GET = withApi(
     openapi: { tags: ['Pension'], summary: 'List pension members', description: 'List pension members by organization and optionally by plan' },
   },
   async ({ request, organizationId, userId }) => {
+    const page = listPage(request, LIST_LIMIT);
     const url = new URL(request.url);
     const planId = url.searchParams.get('planId');
 
@@ -53,7 +55,7 @@ export const GET = withApi(
       .select()
       .from(pensionMembers)
       .where(and(...conditions))
-      .orderBy(desc(pensionMembers.createdAt)).limit(LIST_LIMIT);
+      .orderBy(desc(pensionMembers.createdAt)).limit(page.limit).offset(page.offset);
     return members;
   },
 );

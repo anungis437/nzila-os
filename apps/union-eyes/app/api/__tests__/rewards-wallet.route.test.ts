@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
-const m = vi.hoisted(() => ({ getBalance: vi.fn(), listLedger: vi.fn() }))
+const m = vi.hoisted(() => ({ getWalletSnapshot: vi.fn() }))
 
-vi.mock('@/lib/services/rewards/wallet-service', () => ({ getBalance: m.getBalance, listLedger: m.listLedger }))
+vi.mock('@/lib/services/rewards/wallet-service', () => ({ getWalletSnapshot: m.getWalletSnapshot }))
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: (_role: string, handler: (request: NextRequest, context: unknown) => unknown) => handler,
 }))
@@ -12,8 +12,7 @@ vi.mock('@/lib/api-auth-guard', () => ({
 describe('rewards/wallet GET paging', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    m.getBalance.mockResolvedValue(10)
-    m.listLedger.mockResolvedValue({ entries: [] })
+    m.getWalletSnapshot.mockResolvedValue({ balance: 10, entries: [], total: 0 })
   })
 
   const get = async (query: string) => {
@@ -26,18 +25,18 @@ describe('rewards/wallet GET paging', () => {
 
   it('turns a non-numeric or negative request into bounded defaults', async () => {
     await get('?limit=abc&offset=-5')
-    expect(m.listLedger).toHaveBeenCalledWith('org_1', 'u1', 20, 0)
+    expect(m.getWalletSnapshot).toHaveBeenCalledWith('org_1', 'u1', 20, 0)
   })
 
   it('caps the limit at 100 and never passes NaN', async () => {
     await get('?limit=9999&offset=3')
-    expect(m.listLedger).toHaveBeenLastCalledWith('org_1', 'u1', 100, 3)
+    expect(m.getWalletSnapshot).toHaveBeenLastCalledWith('org_1', 'u1', 100, 3)
     await get('?limit=0')
-    expect(m.listLedger).toHaveBeenLastCalledWith('org_1', 'u1', 1, 0)
+    expect(m.getWalletSnapshot).toHaveBeenLastCalledWith('org_1', 'u1', 1, 0)
   })
 
   it('reads only the caller\'s own balance and ledger', async () => {
     await get('')
-    expect(m.getBalance).toHaveBeenCalledWith('org_1', 'u1')
+    expect(m.getWalletSnapshot).toHaveBeenCalledWith('org_1', 'u1', 20, 0)
   })
 })

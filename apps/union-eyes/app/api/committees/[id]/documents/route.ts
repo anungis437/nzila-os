@@ -8,6 +8,7 @@ import { requireCommitteeReader } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
 import { assertOrganizationOwns } from "@/lib/api/org-references";
+import { assertOwnStorageUrl } from "@/lib/services/own-storage-reference";
 import { documents } from "@/db/schema/documents-schema";
 import {
   linkDocument,
@@ -55,6 +56,7 @@ export const POST = withApi(
     const { id: committeeId } = params as { id: string };
     await requireCommitteeScope(organizationId, committeeId, { meetingId: body.meetingId });
     await assertOrganizationOwns([{ field: 'documentId', value: body.documentId, table: documents }], organizationId);
+    assertOwnStorageUrl(body.fileUrl, organizationId);
 
     return linkDocument({
       ...body,

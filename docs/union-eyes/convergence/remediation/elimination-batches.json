@@ -5411,6 +5411,62 @@
           "explanation": "The bookings path serves bookings (GET slots with details only for the caller's own bookings unless staff; POST; PATCH approve or decline; DELETE cancels and keeps the row), each scoped to the caller's organization, audited in the same transaction; a booking id of another organization or room is not found. The f12-b53 contract pin that listed this route as 501 was removed (disclosed)."
         }
       ]
+    },
+    {
+      "id": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
+      "family": "Code closure of partial fixes whose remaining part needed no external decision",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-PRP-WALLET-GET-READS-BALANCE-AND-LEDGER-SEPARATELY-WITH-UNVALIDATED-PAGING",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/wallet-service.ts",
+            "apps/union-eyes/app/api/rewards/wallet/route.ts",
+            "apps/union-eyes/app/api/__tests__/rewards-wallet.route.test.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/wallet-snapshot.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts"
+          ],
+          "explanation": "getWalletSnapshot reads the latest balance, the page and the total inside one repeatable-read transaction, so they cannot disagree; the response also carries the total and hasMore is computed from it. Proved on PostgreSQL (PGlite) for paging, scoping to the member and organization, and an empty ledger. The route test mock now returns the snapshot (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-PENSION-LIST-READS-HAVE-NO-LIMIT-OR-PAGINATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/list-page.ts",
+            "apps/union-eyes/app/api/pension/plans/route.ts",
+            "apps/union-eyes/app/api/pension/trustees/route.ts",
+            "apps/union-eyes/app/api/pension/members/route.ts",
+            "apps/union-eyes/app/api/pension/benefits/route.ts",
+            "apps/union-eyes/app/api/pension/contributions/route.ts",
+            "apps/union-eyes/app/api/pension/t4a/route.ts",
+            "apps/union-eyes/app/api/__tests__/pension-own-records.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f05-b36-bounds.contract.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts"
+          ],
+          "explanation": "The six pension list reads take bounded limit (1..200, default 200 so existing callers are unchanged) and offset (0..1,000,000) through the shared listPage helper, so rows beyond the first page are reachable. The own-records route test mock and the B36 bounds pin were adapted to the offset call (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B5-COMMITTEE-REFERENCED-IDS-NOT-VERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/own-storage-reference.ts",
+            "apps/union-eyes/app/api/committees/[id]/documents/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts"
+          ],
+          "explanation": "A linked fileUrl must be a pointer into the organization's own document storage (verifiedLegacyBlobPath: configured storage account, document container, the organization's folder, no credential, no traversal) or the link is refused with 400. Tested with an own URL, another host, another organization's folder, a credential, a traversal and a metadata address."
+        },
+        {
+          "prefix": "DEF-0B4-CALENDAR-EVENT-CALENDAR-ID-UNVERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/calendar/events/[id]/route.ts",
+            "apps/union-eyes/app/api/calendar/events/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s4-code-closure.test.ts"
+          ],
+          "explanation": "Existing implementation, verified: the event update schema is strict and does not accept calendarId, so an update cannot re-point an event at another calendar; creation already checks the calendar belongs to the organization and is not another member's personal calendar. Pinned by a test."
+        }
+      ]
     }
   ]
 }

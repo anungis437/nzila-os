@@ -1,4 +1,5 @@
 import { withApi, ApiError } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { pensionContributions } from '@/db/schema';
@@ -17,7 +18,7 @@ const createContributionSchema = z.object({
 
 export const dynamic = 'force-dynamic';
 
-// A list answers at most this many rows.
+// A list answers at most this many rows per page; offset pages through the rest.
 const LIST_LIMIT = 200;
 
 export const GET = withApi(
@@ -26,6 +27,7 @@ export const GET = withApi(
     openapi: { tags: ['Pension'], summary: 'List contributions', description: 'Contributions: your own, or the organization\'s for a pension administrator' },
   },
   async ({ request, organizationId, userId, user }) => {
+    const page = listPage(request, LIST_LIMIT);
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const url = new URL(request.url);
     const memberId = url.searchParams.get('memberId');
@@ -39,7 +41,7 @@ export const GET = withApi(
         if (own.length === 0 || (memberId && !own.includes(memberId))) return [];
         conditions.push(inArray(pensionContributions.memberId, memberId ? [memberId] : own));
       }
-      return tx.select().from(pensionContributions).where(and(...conditions)).orderBy(desc(pensionContributions.createdAt)).limit(LIST_LIMIT);
+      return tx.select().from(pensionContributions).where(and(...conditions)).orderBy(desc(pensionContributions.createdAt)).limit(page.limit).offset(page.offset);
     });
   },
 );
