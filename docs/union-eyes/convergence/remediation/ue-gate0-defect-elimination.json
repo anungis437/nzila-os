@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 361,
-    "partial": 72,
+    "implementedPendingQualification": 362,
+    "partial": 73,
     "qualificationVerified": 0,
-    "unresolved": 416,
+    "unresolved": 415,
     "externalBlockers": 0
   },
   "batches": [
@@ -456,6 +456,15 @@
       "newlyImplemented": 3,
       "outstandingAfter": 416,
       "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
+      "family": "F05/F03: the social export is a bounded staff read with safe cells; records are looked up inside the caller organization",
+      "outstandingBefore": 416,
+      "newlyImplemented": 1,
+      "outstandingAfter": 415,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -4761,6 +4770,27 @@
         "apps/union-eyes/app/api/__tests__/ae-audit-misc.route.test.ts"
       ],
       "explanation": "Deleting an integration first confirms it belongs to the organization (404 otherwise), then refuses with 409 when any synchronization history exists, so the cascade can never erase it; the integration is disabled instead. The existing extensions test was adapted to the new query sequence and gained the history case (disclosed)."
+    },
+    "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS": {
+      "status": "PARTIAL",
+      "batch": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
+      "files": [
+        "apps/union-eyes/app/api/social-media/analytics/route.ts",
+        "apps/union-eyes/app/api/__tests__/f05-b50-social.contract.test.ts"
+      ],
+      "explanation": "The export is now a steward-floor read with its own rate limit, at most 5000 rows per dataset, CSV cells neutralised through the shared formula-safe helper, zero values no longer blanked, and the campaign export reads each column by its real key (it previously left most columns empty). Existing analytics route tests still pass; a source-contract test pins each point.",
+      "remaining": "It is still served on the DELETE verb, and no audit record is written for the export."
+    },
+    "DEF-0B11-SOC-RECORD-IS-LOADED-BY-ID-ALONE-ON-THE-BARE-DB-HANDLE-AND-THE-ORGANIZATION-IS-COMPARED-AFTERWARDS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
+      "files": [
+        "apps/union-eyes/app/api/social-media/posts/route.ts",
+        "apps/union-eyes/app/api/social-media/analytics/route.ts",
+        "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/f05-b50-social.contract.test.ts"
+      ],
+      "explanation": "The post delete and the campaign analytics lookups name the caller organization inside the query (the post through an inner join to its account), so another organization row is simply not found (404) and the 403-versus-404 existence oracle is gone. The campaign routes already did this. The post delete test mock gained the inner join and now expects 404 for a foreign post (disclosed)."
     }
   }
 }

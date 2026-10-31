@@ -276,8 +276,8 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
           orgId: socialAccounts.organizationId,
         })
         .from(socialPosts)
-        .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
-        .where(eq(socialPosts.id, postId))
+        .innerJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
+        .where(and(eq(socialPosts.id, postId), eq(socialAccounts.organizationId, organizationId)))
         .limit(1);
 
       if (!post?.id) {
@@ -285,13 +285,6 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       ErrorCode.RESOURCE_NOT_FOUND,
       'Post not found'
     );
-      }
-
-      if (organizationId !== post.orgId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'Unauthorized'
-        );
       }
 
       // Delete post using social media service; it removes the post from the external platform, so it is audited

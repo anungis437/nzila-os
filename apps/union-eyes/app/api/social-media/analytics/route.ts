@@ -13,6 +13,7 @@ import { socialAnalytics, socialPosts, socialAccounts, socialCampaigns } from '@
 import { eq, and, gte, lte, asc, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
+import { csvCell } from '@/lib/employer-execution/csv-cell';
 
 import {
   ErrorCode,
@@ -20,6 +21,23 @@ import {
 } from '@/lib/api/standardized-responses';
 
 const MAX_ANALYTICS_ROWS = 5000;
+const MAX_EXPORT_ROWS = 5000;
+
+// The campaign export names its columns differently from its header text, so each header maps to its own row key.
+const CAMPAIGN_EXPORT_KEYS: Record<string, string> = {
+  Campaign: 'name',
+  'Start Date': 'start_date',
+  'End Date': 'end_date',
+  Status: 'status',
+  Platforms: 'platforms',
+  'Total Posts': 'total_posts',
+  Impressions: 'total_impressions',
+  Engagement: 'total_engagement',
+  Likes: 'total_likes',
+  Comments: 'total_comments',
+  Shares: 'total_shares',
+  Clicks: 'total_clicks',
+};
 
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   try {
@@ -354,7 +372,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       const [campaign] = await db
         .select()
         .from(socialCampaigns)
-        .where(eq(socialCampaigns.id, campaignId))
+        .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
         .limit(1);
 
       if (!campaign) {
@@ -362,13 +380,6 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       ErrorCode.RESOURCE_NOT_FOUND,
       'Campaign not found'
     );
-      }
-
-      if (organizationId !== campaign.organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'Unauthorized'
-        );
       }
 
       // Get campaign posts
@@ -513,15 +524,21 @@ return NextResponse.json(
     }
 });
 
-export const DELETE = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+// An export of the organization's posts, account figures and campaigns is a staff read.
+export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { _userId, organizationId } = context;
+      const { userId, organizationId } = context;
 
       if (!organizationId) {
         return standardErrorResponse(
           ErrorCode.FORBIDDEN,
           'No organization found'
         );
+      }
+
+      const exportLimit = await checkRateLimit(`social-analytics-export:${userId}`, RATE_LIMITS.SOCIAL_MEDIA_API);
+      if (!exportLimit.allowed) {
+        return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded', { resetIn: exportLimit.resetIn });
       }
 
       // Parse query parameters
@@ -560,7 +577,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                 lte(socialPosts.publishedAt, new Date(endDate + 'T23:59:59'))
               )
             )
-            .orderBy(desc(socialPosts.publishedAt));
+            .orderBy(desc(socialPosts.publishedAt))
+            .limit(MAX_EXPORT_ROWS);
 
           data = exportPosts;
           headers = [
@@ -603,7 +621,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                 lte(socialAnalytics.analyticsDate, endDate)
               )
             )
-            .orderBy(asc(socialAnalytics.analyticsDate));
+            .orderBy(asc(socialAnalytics.analyticsDate))
+            .limit(MAX_EXPORT_ROWS);
 
           data = exportAnalytics;
           headers = [
@@ -628,7 +647,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
             .select()
             .from(socialCampaigns)
             .where(eq(socialCampaigns.organizationId, organizationId))
-            .orderBy(desc(socialCampaigns.createdAt));
+            .orderBy(desc(socialCampaigns.createdAt))
+            .limit(MAX_EXPORT_ROWS);
 
           data = await Promise.all(
             exportCampaigns.map(async (campaign) => {
@@ -690,9 +710,9 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
           ...data.map((row) => {
             return headers
               .map((header) => {
-                const key = header.toLowerCase().replace(/ /g, '_');
+                const key = data_type === 'campaigns' ? CAMPAIGN_EXPORT_KEYS[header] : header.toLowerCase().replace(/ /g, '_');
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                let value: any = row[key] || '';
+                let value: any = row[key] ?? '';
                 
                 // Handle nested objects
                 if (typeof value === 'object' && value !== null) {
@@ -703,9 +723,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                   }
                 }
                 
-                // Escape quotes and wrap in quotes if contains comma
-                value = String(value).replace(/"/g, '""');
-                return value.includes(',') ? `"${value}"` : value;
+                // Text a spreadsheet would read as a formula is neutralised, then quoted where needed.
+                return csvCell(String(value));
               })
               .join(',');
           }),

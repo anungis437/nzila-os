@@ -19,7 +19,7 @@ vi.mock('@/lib/social-media/social-media-service', () => ({
 }));
 vi.mock('@/db', () => ({
   db: {
-    select: () => ({ from: () => ({ leftJoin: () => ({ where: () => ({ limit: async () => m.selected }) }) }) }),
+    select: () => ({ from: () => ({ innerJoin: () => ({ where: () => ({ limit: async () => m.selected }) }) }) }),
   },
 }));
 vi.mock('@/db/schema/social-media-schema', () => ({
@@ -94,9 +94,10 @@ describe('social-media/posts — external effects are audited around the operati
 
     m.order.length = 0;
     m.deletePost.mockClear();
-    m.selected = [{ id: 'post_2', orgId: 'org_other' }];
+    // The lookup names the caller organization, so another organization's post is simply not found.
+    m.selected = [];
     const refused = await DELETE(new NextRequest('http://localhost/api/social-media/posts?id=post_2', { method: 'DELETE' }), ctx as never);
-    expect(refused.status).toBe(403);
+    expect(refused.status).toBe(404);
     expect(m.deletePost).not.toHaveBeenCalled();
   });
 });

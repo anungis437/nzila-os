@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 405,
-    "engineeringRemaining": 372,
+    "engineeringCorrected": 406,
+    "engineeringRemaining": 371,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 81
+    "engineeringPartial": 82
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -16304,9 +16304,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
+        "path": "apps/union-eyes/app/api/social-media/analytics/route.ts; apps/union-eyes/app/api/__tests__/f05-b50-social.contract.test.ts",
+        "explanation": "The export is now a steward-floor read with its own rate limit, at most 5000 rows per dataset, CSV cells neutralised through the shared formula-safe helper, zero values no longer blanked, and the campaign export reads each column by its real key (it previously left most columns empty). Existing analytics route tests still pass; a source-contract test pins each point.",
+        "remaining": "It is still served on the DELETE verb, and no audit record is written for the export.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-RECORD-IS-LOADED-BY-ID-ALONE-ON-THE-BARE-DB-HANDLE-AND-THE-ORGANIZATION-IS-COMPARED-AFTERWARDS",
@@ -16321,9 +16329,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
+        "path": "apps/union-eyes/app/api/social-media/posts/route.ts; apps/union-eyes/app/api/social-media/analytics/route.ts; apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts; apps/union-eyes/app/api/__tests__/f05-b50-social.contract.test.ts",
+        "explanation": "The post delete and the campaign analytics lookups name the caller organization inside the query (the post through an inner join to its account), so another organization row is simply not found (404) and the 403-versus-404 existence oracle is gone. The campaign routes already did this. The post delete test mock gained the inner join and now expects 404 for a foreign post (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-LIMIT-AND-OFFSET-ARE-PARSED-FROM-THE-QUERY-WITH-NO-NUMBER-CHECK-OR-UPPER-BOUND",
