@@ -367,3 +367,46 @@ body {
 }
 .doc-prose h2 { border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; }
 
+
+/* Progressive entrance motion: content remains visible when animation is off. */
+@keyframes nzila-enter {
+  from {
+    opacity: 0.82;
+    transform: var(--nzila-reveal-from, translate3d(0, 12px, 0));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nzila-reveal {
+    animation-name: nzila-enter;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  .nzila-reveal,
+  .gradient-text,
+  .shimmer,
+  .pulse-glow {
+    animation: none !important;
+  }
+
+  .hover-lift,
+  .img-zoom img {
+    transition: none !important;
+  }
+
+  .hover-lift:hover,
+  .img-zoom:hover img {
+    transform: none !important;
+  }
+}
