@@ -1,3 +1,4 @@
+import { parsePilotPayload, versionNotePayloadSchema } from '@/lib/pilot/write-payloads';
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -126,7 +127,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const payload = (await request.json().catch(() => ({}))) as PersistArtifactsPayload;
+    const parsedPayload = await parsePilotPayload(request, versionNotePayloadSchema);
+    if (!parsedPayload.ok) return parsedPayload.response;
+    const payload: PersistArtifactsPayload = parsedPayload.data;
 
     // PR #752 round 25: locked, re-authorized, key-specific merge (see
     // withLockedPilotMutation's doc comment) — this write only ever

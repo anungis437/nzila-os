@@ -1,3 +1,4 @@
+import { parsePilotPayload, transitionPayloadSchema } from '@/lib/pilot/write-payloads';
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -106,7 +107,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const body = (await request.json().catch(() => ({}))) as TransitionPayload;
+    const parsedBody = await parsePilotPayload(request, transitionPayloadSchema);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body: TransitionPayload = parsedBody.data;
     const targetState = parseTargetState(body.targetState);
 
     if (!targetState) {

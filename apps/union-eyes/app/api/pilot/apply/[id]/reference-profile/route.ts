@@ -1,3 +1,4 @@
+import { parsePilotPayload, versionNotePayloadSchema } from '@/lib/pilot/write-payloads';
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -228,7 +229,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const requestPayload = (await request.json().catch(() => ({}))) as PersistReferencePayload;
+    const parsedPayload = await parsePilotPayload(request, versionNotePayloadSchema);
+    if (!parsedPayload.ok) return parsedPayload.response;
+    const requestPayload: PersistReferencePayload = parsedPayload.data;
     // Read-only, unrelated table — fetched BEFORE the lock, never nested
     // inside withLockedPilotMutation's own transaction (which would grab a
     // second connection from the pool while still holding the first).

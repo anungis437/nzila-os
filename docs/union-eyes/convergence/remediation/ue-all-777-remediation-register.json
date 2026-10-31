@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 534,
-    "engineeringRemaining": 243,
+    "engineeringCorrected": 536,
+    "engineeringRemaining": 241,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 80
+    "engineeringPartial": 78
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -14453,11 +14453,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B48-F05-LITERAL-SEARCH-AND-BOUNDED-ANONYMOUS-JSON",
-        "path": "apps/union-eyes/app/api/pilot/apply/route.ts; apps/union-eyes/lib/api/bounded-json-record.ts; apps/union-eyes/lib/api/__tests__/f12-b48-bounds.contract.test.ts",
-        "explanation": "The anonymous pilot application bounds responses to 16 KB, 60 keys and 4 levels of nesting, and keeps only a finite numeric or short string assessment score instead of a passthrough object. Unit tests cover each bound.",
-        "remaining": "The stored responses are still free-form JSON that later reads, proposals and exports consume; no per-key schema exists.",
+        "path": "apps/union-eyes/app/api/pilot/apply/route.ts; apps/union-eyes/lib/api/bounded-json-record.ts; apps/union-eyes/lib/api/__tests__/f12-b48-bounds.contract.test.ts; apps/union-eyes/lib/services/__tests__/s18-pilot-write-payloads.test.ts",
+        "explanation": "The anonymous pilot application bounds responses to 16 KB, 60 keys and 4 levels of nesting, and keeps only a finite numeric or short string assessment score instead of a passthrough object. Unit tests cover each bound. Verified later: responses go through boundedJsonRecord (16 KB, 60 keys, depth 4) and an assessment keeps only its score.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -14529,11 +14528,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
-        "path": "apps/union-eyes/app/api/pilot/events/route.ts; apps/union-eyes/app/api/pilot/feedback/route.ts; apps/union-eyes/app/api/pilot/__tests__/pilot-events-authority.route.test.ts; apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts",
-        "explanation": "The pilot events and feedback writes bound their free-form fields (session id 200 characters, metadata a plain object of at most 4 KB, comment 2000 characters) and refuse a body that is not a JSON object; tests added for each bound.",
-        "remaining": "The other pilot write routes (apply, onboarding, demo data) still cast their JSON body without a schema, and the event type stays caller-asserted.",
+        "path": "apps/union-eyes/app/api/pilot/events/route.ts; apps/union-eyes/app/api/pilot/feedback/route.ts; apps/union-eyes/app/api/pilot/__tests__/pilot-events-authority.route.test.ts; apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts; apps/union-eyes/lib/pilot/write-payloads.ts; apps/union-eyes/app/api/pilot/apply/[id]/commercial-transition/route.ts; apps/union-eyes/app/api/pilot/apply/[id]/artifacts/route.ts; apps/union-eyes/app/api/pilot/apply/[id]/intelligence/route.ts; apps/union-eyes/app/api/pilot/apply/[id]/reference-profile/route.ts; apps/union-eyes/lib/services/__tests__/s18-pilot-write-payloads.test.ts",
+        "explanation": "The pilot events and feedback writes bound their free-form fields (session id 200 characters, metadata a plain object of at most 4 KB, comment 2000 characters) and refuse a body that is not a JSON object; tests added for each bound. Completed: the four POST handlers parse their body through length-bounded schemas (lib/pilot/write-payloads.ts; an absent body is the empty object, a malformed, mistyped, oversized or non-object body is a 400 or 413, unknown keys are dropped), so no caller text reaches the jsonb column unbounded.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
