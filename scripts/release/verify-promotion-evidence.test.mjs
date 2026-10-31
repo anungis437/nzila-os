@@ -11,9 +11,11 @@ const RUN = '123456'
 const IMAGE = 'example.invalid/app@sha256:' + 'b'.repeat(64)
 const hash = text => createHash('sha256').update(text).digest('hex')
 
-function makeFixture() {
+function makeFixture(algorithm = 'ed25519') {
   const directory = mkdtempSync(join(tmpdir(), 'nzila-promotion-test-'))
-  const { publicKey, privateKey } = generateKeyPairSync('ed25519')
+  const { publicKey, privateKey } = algorithm === 'rsa-512'
+    ? generateKeyPairSync('rsa', { modulusLength: 512 })
+    : generateKeyPairSync('ed25519')
   const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' }).toString()
   const sbom = JSON.stringify({ bomFormat: 'CycloneDX', specVersion: '1.6',
     components: [{ name: 'test', version: '1' }] }) + '\n'
@@ -54,6 +56,14 @@ test('nested canonical hashing preserves modifications', () => {
 test('valid signed immutable promotion evidence passes', () => {
   const x = makeFixture()
   try { assert.equal(x.verify().commitSha, COMMIT) } finally { x.cleanup() }
+})
+test('RSA-512 signature with Ed25519-length output cannot substitute release authority', () => {
+  const x = makeFixture('rsa-512')
+  try {
+    const signed = JSON.parse(readFileSync(join(x.directory, 'release-attestation.json'), 'utf8'))
+    assert.equal(signed.signature.length, 128) // 64 bytes, exactly Ed25519 length
+    assert.throws(() => x.verify(), /attestation verification key must be Ed25519/)
+  } finally { x.cleanup() }
 })
 test('tampered nested field is rejected even when outer JSON is valid', () => {
   const x = makeFixture()

@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { resolve, join } from 'node:path'
-import { createHash, verify } from 'node:crypto'
+import { createHash, createPublicKey, verify } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
 
 function deny(message) { throw new Error('PROMOTION_EVIDENCE_DENIED: ' + message) }
@@ -25,7 +25,16 @@ export function computeSignedPayloadDigest(attestation) {
 export function verifyPromotionEvidence({ directory, expectedCommit, expectedRunId, publicKeyPem, sourceLockfilePath, now = new Date() }) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '')) deny('missing/invalid expected commit SHA')
   if (!/^[1-9][0-9]*$/.test(String(expectedRunId ?? ''))) deny('missing/invalid trusted staging run ID')
-  if (!publicKeyPem || !publicKeyPem.includes('BEGIN PUBLIC KEY')) deny('independently provisioned verification key unavailable')
+  if (typeof publicKeyPem !== 'string' || !publicKeyPem.includes('BEGIN PUBLIC KEY')) deny('independently provisioned verification key unavailable')
+  // A 512-bit RSA key produces a 64-byte signature, the same length as
+  // Ed25519. Signature length and crypto.verify() alone do not enforce the
+  // release contract: reject an otherwise valid RSA-512 forgery.
+  let verificationKey
+  try { verificationKey = createPublicKey(publicKeyPem) }
+  catch { deny('invalid independent attestation verification key') }
+  if (verificationKey.asymmetricKeyType !== 'ed25519') {
+    deny('attestation verification key must be Ed25519')
+  }
   const load = name => {
     let raw
     try { raw = readFileSync(join(directory, name)) } catch { deny('missing ' + name) }
@@ -59,7 +68,7 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
       !/^[0-9a-f]{128}$/i.test(attestation.signature ?? '')) deny('unsigned or malformed attestation')
   let valid = false
   try {
-    valid = verify(null, Buffer.from(digest, 'hex'), publicKeyPem, Buffer.from(attestation.signature, 'hex'))
+    valid = verify(null, Buffer.from(digest, 'hex'), verificationKey, Buffer.from(attestation.signature, 'hex'))
   } catch { valid = false }
   if (!valid) deny('attestation signature verification failed')
   if (attestation.contractTestResult !== 'pass' ||
