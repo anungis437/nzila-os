@@ -48,7 +48,7 @@ export interface PeerBenchmark {
   metricName: string;
   yourValue: number;
   peerAverage: number;
-  nationalAverage: number;
+  nationalAverage: number | null;
   percentile: number;
   category: string;
 }
@@ -157,7 +157,7 @@ export async function autoDetectParentFederation(
     return suggestions.sort((a, b) => b.matchScore - a.matchScore);
   } catch (error) {
     logger.error('Failed to auto-detect parent federation', { error });
-    return [];
+    throw error;
   }
 }
 
@@ -276,7 +276,7 @@ export async function suggestRelevantClauses(
     return suggestions.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 20);
   } catch (error) {
     logger.error('Failed to suggest relevant clauses', { error });
-    return [];
+    throw error;
   }
 }
 
@@ -347,7 +347,7 @@ export async function findPeerOrganizations(
     return sectorFilteredPeers.map(p => p.id).filter(id => id !== organizationId);
   } catch (error) {
     logger.error('Failed to find peer organizations', { error });
-    return [];
+    throw error;
   }
 }
 
@@ -381,8 +381,8 @@ async function fetchNationalAverage(
     const CLC_API_KEY = process.env.CLC_API_KEY;
 
     if (!CLC_API_KEY) {
-      logger.warn('[CLC API] API key not configured, using fallback value');
-      return getFallbackAverage(metric);
+      logger.warn('[CLC API] API key not configured; national average unavailable');
+      return null;
     }
 
     // Make API call to CLC
@@ -408,17 +408,17 @@ async function fetchNationalAverage(
     if (!response.ok) {
       if (response.status === 404) {
         logger.warn('[CLC API] Metric not found', { metric, sector });
-        return getFallbackAverage(metric);
+        return null;
       }
       throw new Error(`CLC API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    const average = data?.data?.average || data?.average;
+    const average = data?.data?.average ?? data?.average;
 
-    if (typeof average !== 'number') {
-      logger.warn('[CLC API] Invalid response format', { data });
-      return getFallbackAverage(metric);
+    if (typeof average !== 'number' || !Number.isFinite(average) || average < 0) {
+      logger.warn('[CLC API] Invalid response format', { metric, sector });
+      return null;
     }
 
     // Cache result for 24 hours
@@ -437,24 +437,8 @@ async function fetchNationalAverage(
       sector,
       message: error instanceof Error ? error.message : 'Unknown error'
     });
-    return getFallbackAverage(metric);
+    return null;
   }
-}
-
-/**
- * Get fallback averages when CLC API is unavailable
- * Based on historical Canadian labour statistics
- */
-function getFallbackAverage(metric: string): number {
-  const fallbacks: Record<string, number> = {
-    memberCount: 2500,
-    perCapitaRate: 45.0, // CAD per member per month
-    staffCount: 8,
-    budgetSize: 1250000, // CAD
-    grievanceResolutionDays: 45,
-  };
-  
-  return fallbacks[metric] || 0;
 }
 
 // =============================================================================
@@ -490,6 +474,8 @@ export async function getPeerBenchmarks(
       });
 
       const peerCounts = peers.map(p => p.memberCount || 0).filter(c => c > 0);
+      // A roster with no measured member counts cannot yield a meaningful average or percentile.
+      if (peerCounts.length === 0) return benchmarks;
       const peerAverage = peerCounts.reduce((a, b) => a + b, 0) / peerCounts.length;
 
       // Calculate percentile (simplified)
@@ -507,7 +493,8 @@ export async function getPeerBenchmarks(
         metricName: 'Member Count',
         yourValue: org.memberCount,
         peerAverage: Math.round(peerAverage),
-        nationalAverage: nationalAverage ?? Math.round(peerAverage),
+        // A peer sample is not a national measurement; unavailable data stays unknown.
+        nationalAverage,
         percentile: Math.round(percentile),
         category: 'Membership',
       });
@@ -523,7 +510,7 @@ export async function getPeerBenchmarks(
     return benchmarks;
   } catch (error) {
     logger.error('Failed to get peer benchmarks', { error });
-    return [];
+    throw error;
   }
 }
 

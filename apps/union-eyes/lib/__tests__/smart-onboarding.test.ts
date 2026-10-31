@@ -203,10 +203,9 @@ describe('smart-onboarding', () => {
       expect(results).toEqual([]);
     });
 
-    it('returns empty array on error', async () => {
+    it('propagates federation lookup failure instead of reporting no matches', async () => {
       mocks.mockOrgFindMany.mockRejectedValue(new Error('db'));
-      const results = await autoDetectParentFederation('ON', 'public');
-      expect(results).toEqual([]);
+      await expect(autoDetectParentFederation('ON', 'public')).rejects.toThrow('db');
     });
 
     it('sorts by match score descending', async () => {
@@ -285,10 +284,9 @@ describe('smart-onboarding', () => {
       expect(results[0].relevanceReasons).toContain('Same province (ON)');
     });
 
-    it('returns empty array when org not found', async () => {
+    it('refuses clause discovery for an unknown organization', async () => {
       mocks.mockOrgFindFirst.mockResolvedValue(null);
-      const results = await suggestRelevantClauses('missing');
-      expect(results).toEqual([]);
+      await expect(suggestRelevantClauses('missing')).rejects.toThrow('Organization not found');
     });
 
     it('returns at most 20 suggestions', async () => {
@@ -347,16 +345,14 @@ describe('smart-onboarding', () => {
       expect(peers).toEqual(['peer-1']);
     });
 
-    it('returns empty array when org not found', async () => {
+    it('refuses peer discovery for an unknown organization', async () => {
       mocks.mockOrgFindFirst.mockResolvedValue(null);
-      const peers = await findPeerOrganizations('missing');
-      expect(peers).toEqual([]);
+      await expect(findPeerOrganizations('missing')).rejects.toThrow('Organization not found');
     });
 
-    it('returns empty array on error', async () => {
+    it('propagates peer lookup failures', async () => {
       mocks.mockOrgFindFirst.mockRejectedValue(new Error('db'));
-      const peers = await findPeerOrganizations('org-1');
-      expect(peers).toEqual([]);
+      await expect(findPeerOrganizations('org-1')).rejects.toThrow('db');
     });
 
     it('handles org without sectors', async () => {
@@ -397,7 +393,7 @@ describe('smart-onboarding', () => {
         .mockResolvedValueOnce([{ id: 'peer-1', sectors: ['public'] }, { id: 'peer-2', sectors: ['public'] }]) // findPeerOrganizations
         .mockResolvedValueOnce([{ memberCount: 800 }, { memberCount: 1200 }]); // peer member counts
 
-      // CLC API key not set → fallback average
+      // CLC API key not set → national measurement unavailable
       mocks.mockCacheGet.mockResolvedValue(null);
 
       const benchmarks = await getPeerBenchmarks('org-1');
@@ -405,7 +401,7 @@ describe('smart-onboarding', () => {
       expect(benchmarks[0].metricName).toBe('Member Count');
       expect(benchmarks[0].yourValue).toBe(1000);
       expect(benchmarks[0].peerAverage).toBe(1000); // (800+1200)/2
-      expect(benchmarks[0].nationalAverage).toBe(2500); // fallback
+      expect(benchmarks[0].nationalAverage).toBeNull(); // fallback
       expect(benchmarks[0].percentile).toBeGreaterThanOrEqual(0);
     });
 
@@ -423,10 +419,9 @@ describe('smart-onboarding', () => {
       expect(mocks.mockCacheSet).not.toHaveBeenCalled();
     });
 
-    it('returns empty array when org not found', async () => {
+    it('refuses benchmarking for an unknown organization', async () => {
       mocks.mockOrgFindFirst.mockResolvedValue(null);
-      const benchmarks = await getPeerBenchmarks('missing');
-      expect(benchmarks).toEqual([]);
+      await expect(getPeerBenchmarks('missing')).rejects.toThrow('Organization not found');
     });
 
     it('returns empty benchmarks when no peers', async () => {
@@ -439,10 +434,9 @@ describe('smart-onboarding', () => {
       expect(benchmarks).toEqual([]);
     });
 
-    it('returns empty on error', async () => {
+    it('propagates benchmarking storage errors', async () => {
       mocks.mockOrgFindFirst.mockRejectedValue(new Error('db'));
-      const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks).toEqual([]);
+      await expect(getPeerBenchmarks('org-1')).rejects.toThrow('db');
     });
   });
 
@@ -622,7 +616,7 @@ describe('smart-onboarding', () => {
       });
 
       const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks[0].nationalAverage).toBe(2500); // fallback
+      expect(benchmarks[0].nationalAverage).toBeNull(); // fallback
     });
 
     it('falls back on CLC API non-404 error', async () => {
@@ -636,7 +630,7 @@ describe('smart-onboarding', () => {
       });
 
       const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks[0].nationalAverage).toBe(2500); // fallback (from catch)
+      expect(benchmarks[0].nationalAverage).toBeNull(); // fallback (from catch)
     });
 
     it('falls back on invalid response format (non-number average)', async () => {
@@ -649,7 +643,7 @@ describe('smart-onboarding', () => {
       });
 
       const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks[0].nationalAverage).toBe(2500); // fallback
+      expect(benchmarks[0].nationalAverage).toBeNull(); // fallback
     });
 
     it('falls back on fetch throwing network error', async () => {
@@ -659,7 +653,7 @@ describe('smart-onboarding', () => {
       mockFetch.mockRejectedValueOnce(new Error('Network timeout'));
 
       const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks[0].nationalAverage).toBe(2500); // fallback
+      expect(benchmarks[0].nationalAverage).toBeNull(); // fallback
     });
 
     it('returns empty benchmarks when org has no memberCount', async () => {
@@ -783,10 +777,9 @@ describe('smart-onboarding', () => {
       expect(results[0].sharingLevel).toBe('congress');
     });
 
-    it('catches errors and returns empty array', async () => {
+    it('propagates clause discovery errors', async () => {
       mocks.mockOrgFindFirst.mockRejectedValueOnce(new Error('db err'));
-      const results = await suggestRelevantClauses('org-1');
-      expect(results).toEqual([]);
+      await expect(suggestRelevantClauses('org-1')).rejects.toThrow('db err');
     });
   });
 
@@ -820,10 +813,9 @@ describe('smart-onboarding', () => {
       expect(peers).toContain('peer-3');
     });
 
-    it('returns empty when org not found (error caught internally)', async () => {
+    it('refuses peer lookup for a missing organization', async () => {
       mocks.mockOrgFindFirst.mockResolvedValueOnce(null);
-      const peers = await findPeerOrganizations('missing');
-      expect(peers).toEqual([]);
+      await expect(findPeerOrganizations('missing')).rejects.toThrow('Organization not found');
     });
   });
 
@@ -871,16 +863,15 @@ describe('smart-onboarding', () => {
         .mockResolvedValueOnce([{ id: 'peer-1', sectors: ['public'] }])
         .mockResolvedValueOnce([{ memberCount: 800 }]);
       mocks.mockCacheGet.mockResolvedValue(null);
-      // No CLC_API_KEY — fetchNationalAverage returns getFallbackAverage(memberCount) = 2500
+      // No CLC_API_KEY — the national average is explicitly unknown
 
       const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks[0].nationalAverage).toBe(2500);
+      expect(benchmarks[0].nationalAverage).toBeNull();
     });
 
-    it('catches errors and returns empty array', async () => {
+    it('propagates benchmark lookup errors', async () => {
       mocks.mockOrgFindFirst.mockRejectedValueOnce(new Error('db'));
-      const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks).toEqual([]);
+      await expect(getPeerBenchmarks('org-1')).rejects.toThrow('db');
     });
   });
 
@@ -958,8 +949,8 @@ describe('smart-onboarding', () => {
       mockFetch.mockRejectedValueOnce('string-error');
 
       const benchmarks = await getPeerBenchmarks('org-1');
-      // Falls back to getFallbackAverage('memberCount') = 2500
-      expect(benchmarks[0].nationalAverage).toBe(2500);
+      // Missing provider measurement is explicitly unknown
+      expect(benchmarks[0].nationalAverage).toBeNull();
     });
   });
 
@@ -976,11 +967,11 @@ describe('smart-onboarding', () => {
         .mockResolvedValueOnce([{ id: 'peer-1', sectors: ['public'] }])
         .mockResolvedValueOnce([{ memberCount: 1200 }]);
       mocks.mockCacheGet.mockResolvedValue(null);
-      // Without CLC_API_KEY — returns fallback for 'memberCount' = 2500
+      // Without CLC_API_KEY — no invented national measurement
       // Can't easily call with unknown metric through getPeerBenchmarks
       // Just verify the known fallback path works
       const benchmarks = await getPeerBenchmarks('org-1');
-      expect(benchmarks[0].nationalAverage).toBe(2500);
+      expect(benchmarks[0].nationalAverage).toBeNull();
     });
   });
 
