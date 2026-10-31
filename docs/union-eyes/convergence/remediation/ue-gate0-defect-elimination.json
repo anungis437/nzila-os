@@ -7988,5 +7988,26 @@
       "explanation": "Every provider list, create, update and delete response, and the create and update audit records, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-SSO-SIGN-IN), so a configured provider is no longer reported as though it governed sign-in.",
       "remaining": "No sign-in, token-exchange, provisioning or SCIM code reads the stored provider; the consumer needs the identity-provider protocol work and a real provider to qualify against."
     }
+  },
+  "uncreditedSourceEvidence": {
+    "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "110428200635f61b1023d3db04b05364f802de13",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-voice-disclosure-and-claims-intake-20261031.md",
+      "files": [
+        "apps/union-eyes/lib/voice/disclosure-consent.ts",
+        "apps/union-eyes/app/api/voice/disclosure/route.ts",
+        "apps/union-eyes/app/api/voice/upload/route.ts",
+        "apps/union-eyes/app/api/voice/transcribe/route.ts",
+        "apps/union-eyes/components/voice-disclosure-consent.tsx",
+        "apps/union-eyes/components/voice-recorder.tsx",
+        "apps/union-eyes/components/claims/new-claim-form.tsx",
+        "apps/union-eyes/lib/voice/__tests__/disclosure-consent.test.ts",
+        "apps/union-eyes/app/api/__tests__/voice-upload.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/voice-transcribe.route.test.ts",
+        "apps/union-eyes/app/api/voice/__tests__/disclosure.route.test.ts"
+      ],
+      "remaining": "Exact-HEAD focused/full tests, native PG15/16, HTTP/browser/provider, approved per-institution notice, consent semantics and independent review. No implementation or qualification credit assigned."
+    }
   }
 }
