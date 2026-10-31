@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 448,
- "partial": 72,
- "outstanding": 329,
- "accountedFor": 329,
+ "corrected": 456,
+ "partial": 73,
+ "outstanding": 321,
+ "accountedFor": 321,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -92,24 +92,23 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 75,
+   "defects": 67,
    "severity": {
     "HIGH": 8,
-    "MEDIUM": 45,
-    "LOW": 22
+    "MEDIUM": 40,
+    "LOW": 19
    },
-   "namedRoutes": 10,
+   "namedRoutes": 8,
    "namedFiles": 0,
    "tranches": {
-    "0B.1": 1,
-    "0B.2": 4,
+    "0B.2": 3,
     "0B.3": 1,
     "0B.4": 2,
-    "0B.5": 4,
-    "0B.6": 9,
+    "0B.5": 3,
+    "0B.6": 8,
     "0B.7": 19,
-    "0B.8": 7,
-    "0B.9": 5,
+    "0B.8": 5,
+    "0B.9": 3,
     "0B.10": 8,
     "0B.11": 13,
     "0B.12": 2
@@ -532,15 +531,7 @@
   ],
   "F05-INPUT-VALIDATION-AND-BOUNDS": [
    {
-    "id": "DEF-0B1-CLC-PUBLIC-CACHE-CONTROL",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B2-CROSS-ORG-ANALYTICS-SCOPE-UNPROVEN",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B2-AGREEMENTS-BODY-UNVALIDATED",
     "severity": "MEDIUM"
    },
    {
@@ -571,20 +562,12 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B5-COMMITTEE-LIST-PAGINATION-UNBOUNDED",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B5-COMMS-ACTION-ROUTE-IS-GENERIC-CAMPAIGN-CRUD",
     "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-CONTENT-LISTS-UNBOUNDED-OR-UNVALIDATED",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
@@ -705,10 +688,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B8-ICRA-READ-ROUTES-HAVE-NO-LIMITER",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B8-ICRA-EVENT-SINK-WRITES-A-TABLE-NO-SCHEMA-DEFINES-AND-SWALLOWS-FAILURE",
     "severity": "MEDIUM"
    },
@@ -729,23 +708,11 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B8-JUR-GEOFENCE-CREATE-BODY-IS-UNVALIDATED-AND-STRIKE-ID-UNVERIFIED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ML-SLA-MODEL-VERSION-IS-CALLER-NAMED-AND-CREATES-UNBOUNDED-MODEL-ROWS",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B9-ML-SLA-FEEDBACK-PILOT-EVENT-IS-AN-AWAITED-POST-COMMIT-WRITE-THROUGH-THE-BARE-DB",
     "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B9-ASM-CLAUSE-RELEVANCE-SCORES-SHARING-LEVELS-AND-SOURCE-NAMES-THAT-THE-ROW-LEVEL-POLICIES-WITHHOLD",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ORG-ITEM-PATCH-BODY-UNVALIDATED-SETTINGS-AND-SLUG-REPLACED-WHOLESALE",
     "severity": "MEDIUM"
    },
    {
@@ -788,7 +755,8 @@
    },
    {
     "id": "DEF-0B11-PRP-DUES-PAY-GET-RETURNS-EVERY-LEDGER-ENTRY-TYPE-AS-PAYMENTS-AND-OMITS-PENDING-ATTEMPTS",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B11-PRP-PROFILE-ROLES-PATH-IS-A-BILLING-PROFILE-LIST-AND-ITS-POST-IS-REFUSED",

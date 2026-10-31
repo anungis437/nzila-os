@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 403,
+    "implementedPendingQualification": 405,
     "partial": 73,
     "qualificationVerified": 0,
-    "unresolved": 374,
+    "unresolved": 372,
     "externalBlockers": 0
   },
   "batches": [
@@ -564,6 +564,15 @@
       "newlyImplemented": 8,
       "outstandingAfter": 374,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B58-F06-VERIFIED-AUDIT-AND-COMPLETION-COUNTS",
+      "family": "F06 audit and records: verified existing audit and a completion count that measured attendance",
+      "outstandingBefore": 374,
+      "newlyImplemented": 2,
+      "outstandingAfter": 372,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -1810,11 +1819,10 @@
       "batch": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
       "files": [
         "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
-        "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts",
-        "docs/union-eyes/convergence/remediation/ue-reconciliation-tenant-guard-20261031.md"
+        "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"
       ],
-      "explanation": "A named billing period must belong to the organization; duplicate runs for the same organization and period are serialized and refused. The service now also rejects a missing, empty or whitespace organization before opening a transaction, preventing legacy all-organization reconciliation. Source changes and regression tests committed; exact-HEAD executable and native qualification pending.",
-      "remaining": "Run focused and complete regression, native PostgreSQL 15/16 with adversarial tenant fixtures, HTTP/browser and staging acceptance. Verify all finance callsites and independent institutional controls before upgrading from PARTIAL. No human ratification or CLOSED decision is implied."
+      "explanation": "For an organization run, the period is locked, a billing period named in the request must be the organization's own (404), and a second run for the same period is refused (409, naming the earlier run) instead of adding a second set of exceptions. A period that ends before it starts is refused. The existing mocked test of a run gained the two new checks in its queue; three tests were added.",
+      "remaining": "The service still accepts a run with no organization, which reconciles every organization together; no route uses that mode, but it is not removed."
     },
     "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -3716,14 +3724,10 @@
       "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
       "files": [
         "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts",
-        "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
-        "apps/union-eyes/lib/public-intake/guard.ts",
-        "apps/union-eyes/lib/public-intake/__tests__/guard.test.ts",
-        "docs/union-eyes/convergence/remediation/ue-bearer-stream-and-memory-holder-20261031.md"
+        "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts"
       ],
-      "explanation": "The collection GET/POST and item PATCH/DELETE now use the public-intake capability limiter before database access. PATCH/POST enforce an actual streamed byte cap, refusing oversized chunked bodies before full buffering. Claimed-workbook writes already invoke the claimed-write audit. Source patches and regression tests committed; exact-HEAD execution and runtime acceptance pending.",
-      "remaining": "Per-workbook holder count ceiling and unclaimed-workbook read audit are not implemented. Bearer-id security and deployment trust boundary need independent validation; exact-HEAD behavioral, native PostgreSQL, HTTP/browser and staging acceptance are outstanding. Do not mark CLOSED."
+      "explanation": "The collection reads and writes run through the public-intake guard (rate limit; body cap on writes). Claimed-workbook writes were already audited.",
+      "remaining": "The per-holder item route is not yet behind the guard, there is no per-workbook holder cap, and unclaimed-workbook reads are not audited."
     },
     "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -5367,6 +5371,28 @@
       ],
       "explanation": "The payment history lists payments only (not charges, credits, adjustments or write-offs), omits the processor payment reference, and pages through a bounded limit and offset with a stable order; a non-numeric limit is the default.",
       "remaining": "Pending payment attempts created by POST are still not listed: they live in dues_transactions and need a joined, status-filtered read."
+    },
+    "DEF-0B6-EDU-CONTENT-COMPLETIONS-COUNT-ATTENDED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B58-F06-VERIFIED-AUDIT-AND-COMPLETION-COUNTS",
+      "files": [
+        "apps/union-eyes/app/api/content/training/route.ts",
+        "apps/union-eyes/app/api/content/stats/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The training list and the content statistics count a completion as a registration with completed true, no longer as attended true, so a member who attended without finishing is not counted as having completed the course."
+    },
+    "DEF-0B2-AI-INVOCATION-NOT-AUDITED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B58-F06-VERIFIED-AUDIT-AND-COMPLETION-COUNTS",
+      "files": [
+        "apps/union-eyes/app/api/ai/classify/route.ts",
+        "apps/union-eyes/app/api/ai/summarize/route.ts",
+        "apps/union-eyes/app/api/ai/match-precedents/route.ts",
+        "apps/union-eyes/app/api/ai/search/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "Existing implementation, verified: the classify, summarize, match-precedents and search routes now run the model call inside performAuditedOperation, which records intent and outcome and answers a refused audit through operationAuditResponse; pinned by a test. The intent and outcome are separate transactions from the effect (a different, still open defect)."
     }
   }
 }
