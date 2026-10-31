@@ -133,25 +133,25 @@ export default function Footer() {
   const copy = footerCopy[locale] ?? footerCopy['en-CA'];
 
   return (
-    <footer className="bg-navy text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-12">
+    <footer className="bg-[#080e1c] text-slate-300">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-7 lg:gap-x-6">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-linear-to-br from-electric to-violet flex items-center justify-center">
-                <span className="text-white font-bold text-sm">NV</span>
+            <div className="mb-6 flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dfbe70]/35 bg-[#18335d]">
+                <span className="text-[#dfbe70] font-bold text-sm">NV</span>
               </div>
-              <span className="text-2xl font-bold text-white">Nzila Ventures</span>
+              <span className="text-xl font-semibold tracking-tight text-white sm:text-2xl">Nzila Ventures</span>
             </div>
             <p className="text-gray-400 mb-6 max-w-sm">
               {copy.blurb}
             </p>
-            <div className="flex items-center gap-3">
-              <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-gold/20 text-gold">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex rounded-full border border-[#dfbe70]/25 bg-[#dfbe70]/10 px-3 py-1.5 text-xs font-semibold text-[#dfbe70]">
                 {copy.seriesA}
               </span>
-              <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-emerald/20 text-emerald">
+              <span className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
                 {locale === 'fr-CA' ? 'Union Eyes · Produit phare' : 'Union Eyes · Flagship'}
               </span>
             </div>
@@ -168,7 +168,7 @@ export default function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                      className="inline-flex min-h-9 items-center rounded-sm text-sm text-slate-300 transition-colors hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70]"
                     >
                       {link.name}
                     </Link>
@@ -209,8 +209,8 @@ export default function Footer() {
           <p className="text-sm text-gray-500">
             &copy; {new Date().getFullYear()} Nzila Ventures. {copy.copyright}
           </p>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <Link href="/legal/privacy" className="hover:text-gray-300 transition-colors">{copy.privacy}</Link>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-slate-400 sm:gap-4">
+            <Link href="/legal/privacy" className="rounded-sm transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70]">{copy.privacy}</Link>
             <span>·</span>
             <Link href="/legal/terms" className="hover:text-gray-300 transition-colors">{copy.terms}</Link>
             <span>·</span>
