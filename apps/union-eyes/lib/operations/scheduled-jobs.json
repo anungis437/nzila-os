@@ -9,7 +9,6 @@
     { "code": "edu", "path": "/api/cron/education-reminders", "schedule": "0 13 * * *", "timeoutSeconds": 100 },
     { "code": "rpts", "path": "/api/cron/scheduled-reports", "schedule": "0 * * * *", "timeoutSeconds": 300 },
     { "code": "dues", "path": "/api/cron/monthly-dues", "schedule": "0 6 1 * *", "timeoutSeconds": 300 },
-    { "code": "capita", "path": "/api/cron/monthly-per-capita", "schedule": "0 7 1 * *", "timeoutSeconds": 300 },
     { "code": "kpi", "path": "/api/cron/analytics/daily-metrics", "schedule": "30 2 * * *", "timeoutSeconds": 300 },
     { "code": "bill", "path": "/api/cron/billing-lifecycle", "schedule": "0 3 * * *", "timeoutSeconds": 300 },
     { "code": "cal", "path": "/api/cron/calendar-sync", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },

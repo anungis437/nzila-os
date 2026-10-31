@@ -7016,6 +7016,65 @@
           "explanation": "The request schema is strict: category, roleFilter and depthLimit, which the reasoner never read, are refused (400); minimumRiskLevel is accepted only for isolated_knowledge, the one query that applies it; explanationLevel is optional and the response states one level and the filters actually applied."
         }
       ]
+    },
+    {
+      "id": "B82-ATTACH-CASCADE-CRON",
+      "family": "Interview document location, cascade wording, per-capita job, education reminder cap, precedent reads",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B7-EXC-DOCUMENT-ATTACH-ACCEPTS-ANY-URL-ON-SHARED-HOST-OR-LOCALHOST",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/governance/document-location.ts",
+            "apps/union-eyes/app/api/exit-interviews/[id]/documents/route.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-mutations.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts"
+          ],
+          "explanation": "A document location must be https on an exact approved host (UE_DOCUMENT_STORAGE_HOSTS, default the shared storage account; a subdomain is another party's host and is refused), carry no credentials, query string or fragment (so a signed-access token is never stored), and have the organization id as a path segment so one organization cannot register another's object; localhost is accepted outside production only. The attach test body was moved to a path inside the organization area and four refusal cases were added (disclosed). The storage path convention (organization id as a segment) is a rule this change introduces: no uploader in the repository produces these URLs, so the client of the presigned-URL flow must follow it."
+        },
+        {
+          "prefix": "DEF-0B7-COGA-CASCADE-REGULATORY-RISK-IS-A-LABEL-TEMPLATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/cascade-analysis/cascade-analyzer.ts",
+            "apps/union-eyes/lib/knowledge-transfer/cascade-analysis/__tests__/cascade-analyzer.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts"
+          ],
+          "explanation": "regulatoryRisks lists only the areas that depend on a compliance node, worded as a dependency (\"Depends on a compliance node: X\"), with regulatoryAssessment dependency_only_no_regulation_assessed; the three fixed recommendation sentences are gone (the list is empty). The analyzer test was rewritten for this (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-PER-CAPITA-CRON-WRITES-A-DOMAIN-DECLARED-NOT-IMPLEMENTED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cron/monthly-per-capita/route.ts",
+            "apps/union-eyes/lib/operations/scheduled-jobs.json",
+            "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts"
+          ],
+          "explanation": "The monthly per-capita route no longer calculates or writes anything: it answers 501 to an administrator (the affiliate remittance capability is NOT_IMPLEMENTED), and its schedule entry is removed so no monthly run fails for it. The calculator service and its tests are untouched."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-CRON-UNBOUNDED-SEQUENTIAL-SENDS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cron/education-reminders/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts"
+          ],
+          "explanation": "Each reminder kind is capped at 300 recipients per run, the remainder is reported as truncated in the job details and logged, so the run no longer grows with the member count past the job timeout."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/precedent-service.ts",
+            "apps/union-eyes/lib/precedents/public-decision-view.ts",
+            "apps/union-eyes/app/api/precedents/route.ts",
+            "apps/union-eyes/app/api/precedents/search/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts"
+          ],
+          "explanation": "Verified in source: every library read (by id, case number, list, search, issue type, related, statistics, most cited) filters isPublic and empty access restrictions in SQL, and the list, issue-type, most-cited and search routes answer an explicit public projection without the full text, grievor, remedy or provenance columns."
+        }
+      ]
     }
   ]
 }

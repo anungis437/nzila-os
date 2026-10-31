@@ -1,35 +1,23 @@
 /**
- * Monthly Per-Capita Cron Job
- * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
- * Purpose: Automatically calculate per-capita remittances on 1st of each month
- * Schedule: lib/operations/scheduled-jobs.json (POST, 07:00 UTC on the 1st)
+ * POST /api/cron/monthly-per-capita
  *
- * Answers 500 when any organization's calculation or save failed (with the counts and the failing organization ids), so the
- * scheduler shows a failed run; the organizations that did succeed keep their remittances. It used to answer success true
- * whatever the counts, and ran the overdue sweep a second time on top of the one processMonthlyPerCapita already performs.
+ * Not implemented, and not scheduled. The affiliate (per-capita) remittance capability is NOT_IMPLEMENTED (UE-FIN-AFFILIATE-REMITTANCES in
+ * lib/reality/capability-registry.ts: it needs a qualified model with institutional recipients, payable/receivable recognition and
+ * acknowledgment), yet this job inserted and recalculated per_capita_remittances rows and marked them overdue for every organization
+ * with a parent, which are financial records nothing qualified. It now writes nothing and answers HTTP 501 to an administrator;
+ * the schedule entry was removed from lib/operations/scheduled-jobs.json so no monthly run fails for it.
  */
 
-import { processMonthlyPerCapita } from '@/services/clc/per-capita-calculator';
-import { withApi } from '@/lib/api/framework';
-import { jobResponse } from '@/lib/operations/job-result';
+import { withApi, ApiError } from '@/lib/api/framework';
 
-const handler = withApi(
+export const dynamic = 'force-dynamic';
+
+export const POST = withApi(
   {
-    auth: { cron: true },
-    openapi: { tags: ['Cron'], summary: 'Calculate monthly per-capita remittances' },
+    auth: { required: true, minRole: 'admin' },
+    openapi: { tags: ['Cron'], summary: 'Monthly per-capita remittances (not implemented)' },
   },
   async () => {
-    const result = await processMonthlyPerCapita();
-    return jobResponse({
-      job: 'monthly-per-capita',
-      // Every organization was either calculated (and then saved or not) or failed to calculate.
-      attempted: result.calculated + result.calculationFailed,
-      succeeded: result.saved,
-      failures: result.failedOrganizationIds.map((scope) => ({ scope, reason: 'calculation or save failed' })),
-      details: { calculation: { calculated: result.calculated, saved: result.saved, errors: result.errors }, overdueMarked: result.overdueMarked },
-    });
+    throw ApiError.notImplemented('Monthly per-capita remittance calculation is not implemented: the affiliate remittance model has not been qualified. Nothing was calculated or written.');
   },
 );
-
-// POST only: a scheduler (lib/operations/scheduled-jobs.json) or an operator posts here; a GET can never run the job.
-export const POST = handler;

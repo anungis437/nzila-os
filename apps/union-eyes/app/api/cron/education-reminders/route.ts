@@ -18,6 +18,10 @@ import {
 } from "@/lib/email/training-notifications";
 
 export const dynamic = "force-dynamic";
+
+// One run sends sequentially (with a pause between messages) inside a bounded request, so each kind is capped; the rest is reported as
+// not processed rather than left to run past the job timeout.
+const MAX_RECIPIENTS_PER_KIND = 300;
 export const runtime = "nodejs";
 
 /**
@@ -38,6 +42,7 @@ export const POST = withApi(
     const results = {
       sessionReminders: { sent: 0, failed: 0, errors: [] as string[] },
       expiryWarnings: { sent: 0, failed: 0, errors: [] as string[] },
+      truncated: { sessionReminders: 0, expiryWarnings: 0 },
       timestamp: new Date().toISOString(),
     };
 
@@ -46,9 +51,11 @@ export const POST = withApi(
     // ========================================
     
     // Use withSystemContext for system-wide cron job access
-    const sessionReminders = await withSystemContext(async () => {
+    const allSessionReminders = await withSystemContext(async () => {
       return rowsOf(await db.execute(sessionReminderQuery));
     });
+    const sessionReminders = allSessionReminders.slice(0, MAX_RECIPIENTS_PER_KIND);
+    results.truncated.sessionReminders = allSessionReminders.length - sessionReminders.length;
 
     if (sessionReminders.length > 0) {
       logger.info("Processing session reminders", {
@@ -71,9 +78,11 @@ export const POST = withApi(
     // 2. CERTIFICATION EXPIRY WARNINGS (90, 30 days)
     // ========================================
     
-    const expiryWarnings = await withSystemContext(async () => {
+    const allExpiryWarnings = await withSystemContext(async () => {
       return rowsOf(await db.execute(expiryWarningQuery));
     });
+    const expiryWarnings = allExpiryWarnings.slice(0, MAX_RECIPIENTS_PER_KIND);
+    results.truncated.expiryWarnings = allExpiryWarnings.length - expiryWarnings.length;
 
     if (expiryWarnings.length > 0) {
       logger.info("Processing expiry warnings", {
@@ -90,6 +99,10 @@ export const POST = withApi(
       });
     } else {
       logger.info("No expiry warnings to send today");
+    }
+
+    if (results.truncated.sessionReminders + results.truncated.expiryWarnings > 0) {
+      logger.warn('Education reminders were capped for this run', results.truncated);
     }
 
     const failures: JobFailure[] = [];

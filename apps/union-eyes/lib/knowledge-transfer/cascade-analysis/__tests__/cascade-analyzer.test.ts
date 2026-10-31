@@ -25,6 +25,7 @@ describe('lib/knowledge-transfer/cascade-analysis/cascade-analyzer', () => {
       ],
       edges: [],
       downstreamImpacts: [
+        { nodeId: 'c1', directDependents: [], allAffectedNodes: ['Area C'], propagationPaths: [], totalExposureScore: 0, governanceExposure: [], vendorDependencyExposure: [], mitigation: { priority: 'high', actions: [] } },
         { nodeId: 'g1', directDependents: [], allAffectedNodes: ['Area A', 'Area B'], propagationPaths: [{ chainDepth: 3 } as never], totalExposureScore: 0, governanceExposure: [], vendorDependencyExposure: [], mitigation: { priority: 'high', actions: [] } },
       ],
       upstreamDependencies: [],
@@ -41,12 +42,15 @@ describe('lib/knowledge-transfer/cascade-analysis/cascade-analyzer', () => {
     expect(g1Risk?.cascadeDepth).toBe(3);
     expect(g1Risk?.impactedAreas).toEqual(['Area A', 'Area B']);
     expect(g1Risk?.severity).toBe('critical');
-    // c1 has no downstream impact -> defaults
+    // c1 has no propagation path -> default depth
     const c1Risk = result.cascadeRisks.find((r) => r.governanceGap === 'L-c1');
     expect(c1Risk?.cascadeDepth).toBe(1);
-    expect(c1Risk?.impactedAreas).toEqual([]);
-    expect(result.regulatoryRisks.some((r) => r.includes('Area A'))).toBe(true);
-    expect(result.recommendations.length).toBe(3);
+    expect(c1Risk?.impactedAreas).toEqual(['Area C']);
+    // DEF-0B7-COGA-CASCADE-REGULATORY-RISK-IS-A-LABEL-TEMPLATE: only what depends on a compliance node is listed, as a dependency;
+    // what depends on a governance node alone is not called regulatory, and no fixed recommendations are attached.
+    expect(result.regulatoryRisks).toEqual(['Depends on a compliance node: Area C']);
+    expect(result.regulatoryAssessment).toBe('dependency_only_no_regulation_assessed');
+    expect(result.recommendations).toEqual([]);
   });
 
   it('handles orgs with no governance nodes', async () => {

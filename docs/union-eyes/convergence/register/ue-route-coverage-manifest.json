@@ -13,11 +13,11 @@
    "NONE": 48,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 221,
+   "RETIRED": 222,
    "ROLE_AUTH": 120,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 297,
+   "WITH_API": 296,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -29,21 +29,21 @@
    "NONE": 8,
    "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 214,
+   "RETIRED": 215,
    "ROLE_AUTH": 71,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 188
+   "WITH_API": 187
   },
   "mutatingByAudit": {
    "ATOMIC": 149,
-   "ATOMIC_SERVICE": 153,
+   "ATOMIC_SERVICE": 152,
    "COMPUTE_ONLY": 33,
    "CRUD_ATOMIC": 141,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 25,
    "NO_WRITES_FOUND": 12,
-   "NONE": 211
+   "NONE": 212
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
@@ -4798,11 +4798,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "NONE"
   },
   {
    "route": "cron/observability-alerts/route.ts",

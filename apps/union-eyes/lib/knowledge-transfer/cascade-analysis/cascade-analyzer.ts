@@ -18,9 +18,13 @@ export interface GovernanceCascadeAnalysis {
     severity: 'high' | 'critical';
     cascadeDepth: number;
   }>;
-  /** Regulatory continuity risks */
+  /**
+   * Areas that depend on a compliance node. No regulation, obligation or deadline is assessed: the entries state a dependency,
+   * not a regulatory finding.
+   */
   regulatoryRisks: string[];
-  /** Recommendations */
+  regulatoryAssessment: 'dependency_only_no_regulation_assessed';
+  /** Recommendations: none are generated, since no analysis of the organization's procedures exists to base one on. */
   recommendations: string[];
 }
 
@@ -46,9 +50,15 @@ export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCasc
     };
   });
 
+  // Only what depends on a compliance node is listed; a governance node alone says nothing about a regulator.
+  const complianceIds = new Set(propagationMap.nodes.filter((node) => node.category === 'compliance').map((node) => node.id));
   const regulatoryRisks = [
-    ...new Set(cascadeRisks.flatMap((risk) => risk.impactedAreas)),
-  ].map((area) => `Regulatory continuity risk: ${area}`);
+    ...new Set(
+      governanceNodes
+        .filter((gov) => complianceIds.has(gov.id))
+        .flatMap((gov) => propagationMap.downstreamImpacts.find((impact) => impact.nodeId === gov.id)?.allAffectedNodes ?? []),
+    ),
+  ].map((area) => `Depends on a compliance node: ${area}`);
 
   return {
     organizationId: orgId,
@@ -56,10 +66,7 @@ export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCasc
     governanceNodes,
     cascadeRisks,
     regulatoryRisks,
-    recommendations: [
-      'Formalize all governance procedures',
-      'Create governance playbooks for regulatory bodies',
-      'Establish governance knowledge redundancy',
-    ],
+    regulatoryAssessment: 'dependency_only_no_regulation_assessed',
+    recommendations: [],
   };
 }

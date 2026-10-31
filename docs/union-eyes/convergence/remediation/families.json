@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 564,
+ "corrected": 569,
  "partial": 78,
- "outstanding": 213,
- "accountedFor": 213,
+ "outstanding": 208,
+ "accountedFor": 208,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -47,25 +47,24 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 27,
+   "defects": 22,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 18,
-    "LOW": 5
+    "MEDIUM": 14,
+    "LOW": 4
    },
-   "namedRoutes": 6,
+   "namedRoutes": 5,
    "namedFiles": 1,
    "tranches": {
     "0B.2": 1,
     "0B.3": 1,
     "0B.4": 2,
     "0B.5": 2,
-    "0B.6": 5,
-    "0B.7": 2,
+    "0B.6": 3,
     "0B.8": 1,
     "0B.9": 1,
     "0B.10": 5,
-    "0B.11": 5,
+    "0B.11": 4,
     "0B.12": 1,
     "0C.1": 1
    }
@@ -375,10 +374,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-EDU-CRON-UNBOUNDED-SEQUENTIAL-SENDS",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
     "severity": "LOW"
    },
@@ -386,18 +381,6 @@
     "id": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B6-SYS-PER-CAPITA-CRON-WRITES-A-DOMAIN-DECLARED-NOT-IMPLEMENTED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-DOCUMENT-ATTACH-ACCEPTS-ANY-URL-ON-SHARED-HOST-OR-LOCALHOST",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGA-CASCADE-REGULATORY-RISK-IS-A-LABEL-TEMPLATE",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
@@ -432,10 +415,6 @@
     "id": "DEF-0B10-OPL-14",
     "severity": "HIGH",
     "partial": true
-   },
-   {
-    "id": "DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",

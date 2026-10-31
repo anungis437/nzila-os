@@ -93,7 +93,7 @@ describe('exit-interview mutations', () => {
   });
 
   describe('documents', () => {
-    const body = { title: 'Transcript', fileUrl: 'https://nzilacanadastore.blob.core.windows.net/x.pdf', mimeType: 'application/pdf' };
+    const body = { title: 'Transcript', fileUrl: 'https://nzilacanadastore.blob.core.windows.net/interviews/org_1/x.pdf', mimeType: 'application/pdf' };
 
     it('attaches to a draft and audits', async () => {
       const { POST } = await import('../exit-interviews/[id]/documents/route');
@@ -116,6 +116,18 @@ describe('exit-interview mutations', () => {
         expect(m.audit).not.toHaveBeenCalled();
       },
     );
+
+    // DEF-0B7-EXC-DOCUMENT-ATTACH-ACCEPTS-ANY-URL-ON-SHARED-HOST-OR-LOCALHOST
+    it.each([
+      'https://nzilacanadastore.blob.core.windows.net/interviews/org_2/x.pdf',
+      'https://nzilacanadastore.blob.core.windows.net/interviews/org_1/x.pdf?sv=2024&sig=abc',
+      'http://nzilacanadastore.blob.core.windows.net/interviews/org_1/x.pdf',
+      'https://user:pw@nzilacanadastore.blob.core.windows.net/interviews/org_1/x.pdf',
+    ])('rejects a location outside the organization area, over http, with credentials or with a signed query (%s)', async (fileUrl) => {
+      const { POST } = await import('../exit-interviews/[id]/documents/route');
+      await expect((POST as any)({ ...ctx, body: { ...body, fileUrl } })).rejects.toMatchObject({ status: 400 });
+      expect(m.audit).not.toHaveBeenCalled();
+    });
 
     it("keeps a draft's attachments from members who are neither its owner nor steward-level", async () => {
       m.interview = [{ id: 'iv1', status: 'draft', createdBy: 'someone-else' }];

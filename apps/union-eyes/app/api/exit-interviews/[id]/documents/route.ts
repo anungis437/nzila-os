@@ -20,6 +20,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewDocuments } from '@/db/schema';
 import { ROLE_HIERARCHY, normalizeRole, hasMinRole } from '@/lib/api-auth-guard';
 import { canReadInterview, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
+import { checkDocumentLocation } from '@/lib/knowledge-transfer/governance/document-location';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,16 +79,9 @@ export const POST = withApi(
       throw ApiError.conflict('Cannot attach documents to a reviewed, published or archived interview');
     }
 
-    // Validate fileUrl is within allowed domains (no SSRF)
-    const parsedUrl = new URL(body!.fileUrl);
-    const allowedHosts = [
-      'nzilacanadastore.blob.core.windows.net',
-      'localhost',
-      '127.0.0.1',
-    ];
-    if (!allowedHosts.some((h) => parsedUrl.hostname === h || parsedUrl.hostname.endsWith(`.${h}`))) {
-      throw ApiError.badRequest('fileUrl must point to an authorized storage host');
-    }
+    // The location must be an object in the organization's own area of the approved storage (no SSRF, no signed link, no other tenant's object).
+    const location = checkDocumentLocation(body!.fileUrl, organizationId!);
+    if (!location.ok) throw ApiError.badRequest(location.reason);
 
     const doc = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
       const [row] = await tx
