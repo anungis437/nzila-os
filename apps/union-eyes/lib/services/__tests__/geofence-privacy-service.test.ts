@@ -75,11 +75,9 @@ describe("geofence-privacy-service", () => {
       expect(result.requiresUserAction).toBe(true);
     });
 
-    it("handles db error gracefully", async () => {
-      mocks.mockDb.query.memberLocationConsent.findFirst.mockRejectedValueOnce(new Error("fail"));
-      // The .catch(() => null) in source means this returns pending
-      const result = await requestLocationPermission("u1", "safety");
-      expect(result.requiresUserAction).toBe(true);
+    it("does not treat a failed consent read as an absent consent", async () => {
+      mocks.mockDb.query.memberLocationConsent.findFirst.mockRejectedValueOnce(new Error("db unavailable"));
+      await expect(requestLocationPermission("u1", "safety")).rejects.toThrow("db unavailable");
     });
   });
 
@@ -185,11 +183,9 @@ describe("geofence-privacy-service", () => {
       expect(result.canRevokeAnytime).toBe(true);
     });
 
-    it("handles db error", async () => {
-      mocks.mockDb.query.memberLocationConsent.findFirst.mockRejectedValueOnce(new Error("fail"));
-      // .catch(() => null) means null consent
-      const result = await getLocationConsentStatus("u1");
-      expect(result.status).toBe("never_asked");
+    it("does not report never_asked when the consent store is unavailable", async () => {
+      mocks.mockDb.query.memberLocationConsent.findFirst.mockRejectedValueOnce(new Error("db unavailable"));
+      await expect(getLocationConsentStatus("u1")).rejects.toThrow("db unavailable");
     });
   });
 
@@ -222,15 +218,13 @@ describe("geofence-privacy-service", () => {
       expect(result.compliant).toBe(true);
     });
 
-    it("returns compliant when findMany rejects (DB error)", async () => {
+    it("never reports compliance when the location query fails", async () => {
       mocks.mockDb.query.locationTracking.findMany.mockRejectedValueOnce(new Error("db fail"));
-      // .catch(() => []) ⇒ empty array ⇒ compliant
-      const result = await verifyNoBackgroundTracking();
-      expect(result.compliant).toBe(true);
-      expect(result.backgroundTrackingDetected).toBe(false);
+      await expect(verifyNoBackgroundTracking()).rejects.toThrow("db fail");
     });
   });
 
+  // A database outage cannot be turned into a clean compliance report.
   // ── generateGeofencePrivacyReport ────────────────────────────────────────
   describe("generateGeofencePrivacyReport", () => {
     it("returns compliant report when no issues", async () => {
@@ -239,6 +233,11 @@ describe("geofence-privacy-service", () => {
       expect(result.compliant).toBe(true);
       expect(result.issues).toHaveLength(0);
       expect(result.recommendations.length).toBeGreaterThan(0);
+    });
+
+    it("refuses to certify compliance when the database query fails", async () => {
+      mocks.mockDb.query.locationTracking.findMany.mockRejectedValueOnce(new Error("db fail"));
+      await expect(generateGeofencePrivacyReport()).rejects.toThrow("db fail");
     });
 
     it("returns non-compliant report with issues", async () => {
