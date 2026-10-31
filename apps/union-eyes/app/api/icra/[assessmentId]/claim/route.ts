@@ -18,6 +18,7 @@ import { icraAssessments } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { hasMinRole } from '@/lib/api-auth-guard';
 import { isClaimExpired } from '@/lib/icra/claim-tokens';
 import { logger } from '@/lib/logger';
 
@@ -63,6 +64,12 @@ export async function POST(
       { error: 'No organization context for the current user' },
       { status: 403 },
     );
+  }
+
+  // Claiming binds a paid assessment to the organization, so it is an act of that organization's administration: holding the token and
+  // any active membership is not enough.
+  if (!(await hasMinRole('admin'))) {
+    return NextResponse.json({ error: 'Claiming an assessment requires an organization administrator' }, { status: 403 });
   }
 
   try {

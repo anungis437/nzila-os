@@ -52,6 +52,25 @@ describe('employer communications and contacts audit atomically', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
       action: 'employer_communication.create', organizationId: 'org_1', userId: 'u1', resourceId: 'row-1',
     }));
+    // The in-transaction record is the only audit; no second event follows the commit, and the response says nothing was delivered.
+    expect(m.emitCapeAuditEvent).not.toHaveBeenCalled();
+    expect((await response.json()).data).toMatchObject({ delivery: 'recorded_only' });
+  });
+
+  it('records what the person states: no server-stamped send time and no invented sender', async () => {
+    const insertValues = vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'row-1', employerId: EMPLOYER, type: 'email', status: 'sent' }]) }));
+    m.tx.insert = vi.fn(() => ({ values: insertValues }));
+    const { POST } = await import('../employers/communications/route');
+    await POST(communication());
+    expect(insertValues).toHaveBeenCalledWith(expect.objectContaining({ senderName: 'Recorded by union staff', sentAt: undefined }));
+    await POST(post('http://localhost/api/employers/communications', {
+      employerId: EMPLOYER, type: 'email', status: 'sent', subject: 'Notice', body: 'Hello', occurredAt: '2026-01-02T03:04:05.000Z',
+    }));
+    expect(insertValues).toHaveBeenLastCalledWith(expect.objectContaining({ sentAt: new Date('2026-01-02T03:04:05.000Z') }));
+    const future = await POST(post('http://localhost/api/employers/communications', {
+      employerId: EMPLOYER, type: 'email', status: 'sent', subject: 'Notice', body: 'Hello', occurredAt: '2999-01-01T00:00:00.000Z',
+    }));
+    expect(future.status).toBe(400);
   });
 
   it('refuses a communication that names a grievance, contact or template of another organization, and writes nothing', async () => {
@@ -80,6 +99,7 @@ describe('employer communications and contacts audit atomically', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
       action: 'employer_contact.create', organizationId: 'org_1', resourceId: 'row-1',
     }));
+    expect(m.emitCapeAuditEvent).not.toHaveBeenCalled();
   });
 
   it('fails the contact when the audit record cannot be written', async () => {

@@ -2345,14 +2345,15 @@
         },
         {
           "prefix": "DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/exit-interviews/analytics/route.ts",
             "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts",
-            "apps/union-eyes/app/api/__tests__/exit-interviews-analytics.route.test.ts"
+            "apps/union-eyes/app/api/__tests__/exit-interviews-analytics.route.test.ts",
+            "apps/union-eyes/lib/knowledge-transfer/topic-graph/topic-graph-builder.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
           ],
-          "explanation": "The analytics aggregate takes a content-derived risk score only from interviews that are published, consented and at a derived-analytics level; the other derived views already read through that condition. The analytics test mocks the database, so the CASE expression is not exercised against real SQL.",
-          "remaining": "The analytics SQL expression has no real-database test."
+          "explanation": "The analytics aggregate takes a content-derived risk score only from interviews that are published, consented and at a derived-analytics level; the other derived views already read through that condition. The analytics test mocks the database, so the CASE expression is not exercised against real SQL. Verified later: the topic graph, propagation map, resilience index, succession analyzer, risk detector, forecaster and simulator all select through derivedAnalyticsCondition (sensitivity and consent), so the graph query, simulation, scenario and mitigation routes inherit it."
         },
         {
           "prefix": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
@@ -4400,13 +4401,13 @@
         },
         {
           "prefix": "DEF-0B7-COGB-PROPAGATION-UNKNOWN-NODE-ANSWERS-500-AND-ANALYSIS-TYPE-NOT-VALIDATED",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/exit-interviews/propagation/route.ts",
-            "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts"
+            "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
           ],
-          "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500.",
-          "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node."
+          "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500. Verified and completed: an unknown node is a 404, the query is a strict schema, and each analysis type, node view included, returns only its own section."
         }
       ]
     },
@@ -4660,7 +4661,7 @@
         },
         {
           "prefix": "DEF-0B7-COGB-INTERVIEW-READS-UNBOUNDED",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/lib/knowledge-transfer/governance/interview-read-limit.ts",
             "apps/union-eyes/lib/knowledge-transfer/topic-graph/topic-graph-builder.ts",
@@ -4669,10 +4670,10 @@
             "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
             "apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts",
             "apps/union-eyes/lib/knowledge-transfer/simulation/continuity-simulator.ts",
-            "apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts"
+            "apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
           ],
-          "explanation": "Every derived analysis that read all published exit interviews now reads at most 500, newest as the database returns them, through one shared constant, so the work and the model prompt no longer grow without bound. Six test mocks gained a limit step on the query chain (disclosed; behaviour unchanged).",
-          "remaining": "The 500 are not ordered by recency, and the topic graph still builds a pair edge for every two tags of each interview."
+          "explanation": "Every derived analysis that read all published exit interviews now reads at most 500, newest as the database returns them, through one shared constant, so the work and the model prompt no longer grow without bound. Six test mocks gained a limit step on the query chain (disclosed; behaviour unchanged). Verified later: the topic graph, propagation map, resilience index and succession analyzer each read at most INTERVIEW_READ_LIMIT (500) published interviews, which also bounds the succession prompt and the tag pairs."
         },
         {
           "prefix": "DEF-0B7-COGB-NARRATIVES-CITE-ZERO-EVIDENCE-AS-DERIVED-FROM-E",
@@ -6154,6 +6155,149 @@
             "apps/union-eyes/lib/services/__tests__/s10-row-integrity-and-small.test.ts"
           ],
           "explanation": "The factory gains listFilters (enum-checked equality filters and an escaped, bounded text search); the incident list honours status, severity, incidentType and search, and the hazard list status, priority (the hazard level) and search."
+        }
+      ]
+    },
+    {
+      "id": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
+      "family": "Cognition honesty, aggregator guards, audit-list honesty, employer correspondence and calendar-sync integrity",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B7-COGA-FEDERATED-PERCENTILE-FROM-UNSOURCED-LITERALS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/federated-intelligence/federated-engine.ts",
+            "apps/union-eyes/lib/knowledge-transfer/federated-intelligence/federated-models.ts",
+            "apps/union-eyes/lib/knowledge-transfer/federated-intelligence/__tests__/federated-engine.test.ts",
+            "apps/union-eyes/components/knowledge-transfer/governance-evolution/governance-evolution-tracker.tsx",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "The unsourced percentile table and cohort averages are removed. The result keeps the score bands as a rubric the product defines, reports no percentile (null) and no cohort average, compares each dimension with the midpoint of its own band, and states referenceStatus UNSOURCED_RUBRIC_NO_POPULATION; the screen no longer shows a percentile. The federated-engine test was rewritten for the new fields (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-MITIGATION-PROJECTIONS-ARE-FIXED-MULTIPLIERS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/mitigation-comparison/mitigation-comparator.ts",
+            "apps/union-eyes/lib/knowledge-transfer/mitigation-comparison/mitigation-models.ts",
+            "apps/union-eyes/lib/knowledge-transfer/mitigation-comparison/__tests__/mitigation-comparator.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "The per-domain confidence is always unvalidated (no band is claimed from the constant), the comparison states basis ASSUMED_EFFECTIVENESS_NOT_CALIBRATED with the assumptions listed, the rationale says it is under those assumptions, and a run in which no scenario reached any node reports noNodesEvaluated, recommends nothing and says so instead of ranking zeroes."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-AGGREGATE-ERRORS-RETURNED-VERBATIM-IN-HTTP-200",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-operating-intelligence/aggregate-guard.ts",
+            "apps/union-eyes/app/api/exit-interviews/organizational-cognition/route.ts",
+            "apps/union-eyes/app/api/exit-interviews/organizational-narratives/route.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-organizational-cognition.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "Both aggregators report a failed engine by engine, domain and a fixed code (NOT_IMPLEMENTED or ENGINE_FAILED) and never the exception text, state complete false when any engine is missing, and answer 503 when every engine failed. The route test mocks the limiter backend and gained four cases (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-AGGREGATE-RUNS-28-ENGINES-PER-REQUEST-UNCACHED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-operating-intelligence/aggregate-guard.ts",
+            "apps/union-eyes/app/api/exit-interviews/organizational-cognition/route.ts",
+            "apps/union-eyes/app/api/exit-interviews/organizational-narratives/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "A run is limited to 12 per minute per organization (shared limiter, refusing when it is unavailable), and a result without failures is reused for 30 seconds from a bounded memo keyed by organization, never shared across organizations."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-SUCCESSION-CALL-NOT-AUDITED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+            "apps/union-eyes/app/api/exit-interviews/succession/route.ts",
+            "apps/union-eyes/lib/organizational-operating-intelligence/aggregate-guard.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "Verified in source: the analyzer writes requested, completed and failed audit records through persistAtomicAudit naming the acting user; the route now also limits model runs to 10 per hour per organization."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-SUCCESSION-MODEL-OUTPUT-UNVALIDATED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "Verified in source: the reply is parsed against a zod schema, an unusable reply is audited and answers an error instead of a canned 200 summary, and the report carries modelGenerated."
+        },
+        {
+          "prefix": "DEF-0B3-AUDITS-FABRICATED-ENGAGEMENT-FIELDS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/audits/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "The list states kind audit_log_entries, no longer invents a findings count of 0 or a hasReport flag, and a non-successful entry is unknown instead of an engagement in progress."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-COMMUNICATION-NOT-DELIVERED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/employers/communications/route.ts",
+            "apps/union-eyes/app/api/__tests__/employers-communications-atomic-audit.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "The route is stated and answered as recorded only (delivery recorded_only): the sender is no longer the invented System, sentAt is the recorder-stated occurredAt (never in the future) and is no longer stamped by the server. The route test gained cases (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-CAPE-AUDIT-EVENT-AFTER-COMMIT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/employers/communications/route.ts",
+            "apps/union-eyes/app/api/employers/communications/contacts/route.ts",
+            "apps/union-eyes/app/api/__tests__/employers-communications-atomic-audit.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "The second audit event emitted after the commit (which also carried the contact name) is removed from both routes; the in-transaction audit record is the only one."
+        },
+        {
+          "prefix": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "The link lives five minutes instead of sixty, its lifetime is returned and recorded in the audit.",
+          "remaining": "A storage link is still a read-only bearer URL for those minutes and cannot be bound to the caller or recalled when the grant is revoked."
+        },
+        {
+          "prefix": "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "A change to the title, text or type raises the version and the audit records the versions and a SHA-256 of the replaced text; a clause shared beyond private is refused deletion (409) until withdrawn from sharing, and the delete audit keeps its title, type, version and text digest.",
+          "remaining": "The replaced text itself is not retained as a prior row (previous_version_id is unused); only its digest is."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-CALENDAR-SYNC-SWALLOWED-EVENT-ERRORS-COUNTED-AS-IMPORTED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/external-calendar-sync/microsoft-calendar-service.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "The Google import already counted failures and threw; the Microsoft import now counts a failed event, no longer counts a failed cancellation as deleted (the handler throws), stores the delta link only when every event was applied, throws MicrosoftCalendarImportError otherwise, and a failed delta-link write is no longer swallowed."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/icra/[assessmentId]/claim/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-assessmentId-claim.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+          ],
+          "explanation": "Claiming now requires an organization administrator in addition to the token and a membership; a member is refused before anything is written or audited. The claim test gained a case and a mock (disclosed).",
+          "remaining": "The claim still clears only the claim token: the pseudonymous capability token hash and expiry stay valid, and nothing checks that the claiming organization is the purchaser."
         }
       ]
     }

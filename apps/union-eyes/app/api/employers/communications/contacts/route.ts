@@ -13,7 +13,6 @@ import { withOrganizationAuth } from '@/lib/organization-middleware'
 import { hasMinRole } from '@/lib/api-auth-guard'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
-import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from '@/lib/audit/cape-audit-events'
 import {
   ErrorCode,
   standardErrorResponse,
@@ -111,19 +110,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
       return row
     })
 
-    await emitCapeAuditEvent({
-      eventType: CAPE_AUDIT_EVENTS.EMPLOYER_CONTACT_ADDED,
-      userId,
-      organizationId,
-      resource: 'employer_contacts',
-      resourceId: contact.id,
-      details: {
-        employerId: data.employerId,
-        contactName: data.name,
-        role: data.role,
-      },
-    })
-
+    // The in-transaction audit record is the only one: the earlier second event carried the contact's name into the audit log after the commit.
     return standardSuccessResponse(contact)
   } catch (error) {
     // The unique index admits one active primary contact per employer; a concurrent create that lost the race is a conflict.

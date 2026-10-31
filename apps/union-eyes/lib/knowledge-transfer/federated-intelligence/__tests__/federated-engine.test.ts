@@ -25,11 +25,17 @@ describe('lib/knowledge-transfer/federated-intelligence/federated-engine', () =>
 
     const result = await generateFederatedBenchmark('org-1');
     expect(result.orgPosition.cohort).toBe('developing');
-    expect(result.orgPosition.estimatedPercentile).toBeGreaterThan(0);
+    // No sourced population exists, so no percentile and no cohort average is reported.
+    expect(result.orgPosition.estimatedPercentile).toBeNull();
+    expect(result.percentileReference).toEqual([]);
+    expect(result.referenceStatus).toBe('UNSOURCED_RUBRIC_NO_POPULATION');
+    expect(result.disclaimer).toMatch(/no population, source or date/);
+    expect(JSON.stringify(result)).not.toMatch(/cohortAverage/);
+    expect(result.cohortInsights.join(' ')).not.toMatch(/percentile/i);
     expect(result.orgPosition.nextCohort).toBe('established');
     expect(result.dimensionComparisons.length).toBe(3);
-    expect(result.dimensionComparisons.some((d) => d.relativePosition === 'above_cohort')).toBe(true);
-    expect(result.dimensionComparisons.some((d) => d.relativePosition === 'below_cohort')).toBe(true);
+    expect(result.dimensionComparisons.some((d) => d.relativePosition === 'above_band_midpoint')).toBe(true);
+    expect(result.dimensionComparisons.some((d) => d.relativePosition === 'below_band_midpoint')).toBe(true);
     expect(result.maturityCurve.previousPosition).toBe(45);
     expect(result.cohortInsights.some((i) => i.includes('improved'))).toBe(true);
   });
@@ -56,7 +62,7 @@ describe('lib/knowledge-transfer/federated-intelligence/federated-engine', () =>
     loadCognitionMemory.mockResolvedValue({ resilienceTimeline: [{ resilienceScore: 12 }, { resilienceScore: 8 }] } as never);
     const result = await generateFederatedBenchmark('org-3');
     expect(result.orgPosition.cohort).toBe('nascent');
-    expect(result.orgPosition.estimatedPercentile).toBe(5);
+    expect(result.orgPosition.estimatedPercentile).toBeNull();
     expect(result.cohortInsights.some((i) => i.includes('declined'))).toBe(true);
   });
 });

@@ -56,21 +56,24 @@ export const GET = withApi(
       const upstreamDeps = propagationMap.upstreamDependencies.find((u) => u.nodeId === nodeId);
       const coupling = propagationMap.couplingAnalysis.find((c) => c.nodeId === nodeId);
 
+      // The node view honours analysisType too: each type returns only its own section next to the node.
       return {
         data: {
           node,
-          downstreamImpact,
-          upstreamDependencies: upstreamDeps,
-          couplingAnalysis: coupling,
+          downstreamImpact: analysisType === 'upstream' || analysisType === 'coupling' ? undefined : downstreamImpact,
+          upstreamDependencies: analysisType === 'downstream' || analysisType === 'coupling' ? undefined : upstreamDeps,
+          couplingAnalysis: analysisType === 'downstream' || analysisType === 'upstream' ? undefined : coupling,
         },
       };
     }
 
     // Return full map, potentially filtered by analysis type
+    // Each analysis type returns its own section: coupling no longer returns the downstream and upstream lists as well.
     const filtered = {
       ...propagationMap,
-      downstreamImpacts: analysisType === 'upstream' ? [] : propagationMap.downstreamImpacts,
-      upstreamDependencies: analysisType === 'downstream' ? [] : propagationMap.upstreamDependencies,
+      downstreamImpacts: analysisType === 'upstream' || analysisType === 'coupling' ? [] : propagationMap.downstreamImpacts,
+      upstreamDependencies: analysisType === 'downstream' || analysisType === 'coupling' ? [] : propagationMap.upstreamDependencies,
+      couplingAnalysis: analysisType === 'downstream' || analysisType === 'upstream' ? [] : propagationMap.couplingAnalysis,
     };
 
     return { data: filtered };

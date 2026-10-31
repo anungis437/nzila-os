@@ -19,6 +19,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
+import { createHash } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -156,6 +157,13 @@ export const PATCH = withApi(
       if (body.anonymizedEmployerName !== undefined) updateData.anonymizedEmployerName = body.anonymizedEmployerName;
       if (body.sharedWithOrgIds !== undefined) updateData.sharedWithOrgIds = body.sharedWithOrgIds;
 
+      // A change to what the clause says raises its version, so a reader who compared or cited it can tell it has changed. The audit keeps
+      // a digest of the text it replaced.
+      const contentChanged = (['clauseTitle', 'clauseText', 'clauseType'] as const).some(
+        (field) => body[field] !== undefined && body[field] !== existing[field],
+      );
+      if (contentChanged) updateData.version = (existing.version ?? 1) + 1;
+
       const [updated] = await tx
         .update(sharedClauseLibrary)
         .set(updateData)
@@ -173,6 +181,13 @@ export const PATCH = withApi(
         resourceId: id,
         details: {
           fields: Object.keys(updateData).filter((k) => k !== 'updatedAt'),
+          ...(contentChanged
+            ? {
+                fromVersion: existing.version ?? 1,
+                toVersion: updateData.version,
+                replacedTextSha256: createHash('sha256').update(existing.clauseText ?? '').digest('hex'),
+              }
+            : {}),
           ...(updateData.sharingLevel !== undefined
             ? { fromSharingLevel: existing.sharingLevel, toSharingLevel: updateData.sharingLevel }
             : {}),
@@ -199,6 +214,12 @@ export const DELETE = withApi(
         throw ApiError.notFound('clause', id);
       }
 
+      // A clause that is shared beyond its owner has been compared and cited by others, and the delete also removes its tags for good, so
+      // it is withdrawn from sharing first (sharingLevel private) and only then removed.
+      if (existing.sharingLevel !== 'private') {
+        throw ApiError.conflict('This clause is shared. Withdraw it from sharing (set its sharing level to private) before deleting it.');
+      }
+
       const [deleted] = await tx
         .delete(sharedClauseLibrary)
         .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
@@ -213,7 +234,14 @@ export const DELETE = withApi(
         action: 'clause_library.delete',
         resourceType: 'shared_clause_library',
         resourceId: id,
-        details: { clauseNumber: existing.clauseNumber, sharingLevel: existing.sharingLevel },
+        details: {
+          clauseNumber: existing.clauseNumber,
+          clauseTitle: existing.clauseTitle,
+          clauseType: existing.clauseType,
+          version: existing.version ?? 1,
+          sharingLevel: existing.sharingLevel,
+          clauseTextSha256: createHash('sha256').update(existing.clauseText ?? '').digest('hex'),
+        },
       });
       return { success: true };
     });

@@ -15,6 +15,12 @@ import { authorizeExternalDocumentAccess } from '@/lib/services/external-resourc
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
+/**
+ * The link is a read-only bearer URL: whoever holds it can read the file until it expires, and revoking the grant cannot recall it.
+ * The default sixty minutes is therefore replaced by a short life, so a grant revoked a moment later is not honoured for an hour.
+ */
+export const EXTERNAL_DOWNLOAD_LINK_MINUTES = 5;
+
 export const GET = withExternalMatterResourceAuth(
   {
     requiredPermission: 'download_documents',
@@ -88,7 +94,7 @@ export const GET = withExternalMatterResourceAuth(
 
     let downloadUrl: string;
     try {
-      downloadUrl = await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey);
+      downloadUrl = await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey, EXTERNAL_DOWNLOAD_LINK_MINUTES);
     } catch {
       return NextResponse.json({ error: 'Download is not available' }, { status: 503 });
     }
@@ -112,6 +118,7 @@ export const GET = withExternalMatterResourceAuth(
           documentId: row.id,
           versionId: latestVersion.id,
           versionNo: latestVersion.versionNo,
+          linkMinutes: EXTERNAL_DOWNLOAD_LINK_MINUTES,
         },
       });
     } catch {
@@ -124,6 +131,7 @@ export const GET = withExternalMatterResourceAuth(
         title: row.title ?? row.filename ?? row.name,
         mimeType: row.mimeType,
         downloadUrl,
+        expiresInSeconds: EXTERNAL_DOWNLOAD_LINK_MINUTES * 60,
       },
     });
   },

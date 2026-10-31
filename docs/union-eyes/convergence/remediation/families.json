@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 491,
+ "corrected": 504,
  "partial": 80,
- "outstanding": 286,
- "accountedFor": 286,
+ "outstanding": 273,
+ "accountedFor": 273,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -92,11 +92,11 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 62,
+   "defects": 57,
    "severity": {
     "HIGH": 8,
-    "MEDIUM": 36,
-    "LOW": 18
+    "MEDIUM": 34,
+    "LOW": 15
    },
    "namedRoutes": 6,
    "namedFiles": 0,
@@ -106,7 +106,7 @@
     "0B.4": 1,
     "0B.5": 2,
     "0B.6": 8,
-    "0B.7": 18,
+    "0B.7": 13,
     "0B.8": 5,
     "0B.9": 3,
     "0B.10": 8,
@@ -117,21 +117,21 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 59,
+   "defects": 54,
    "severity": {
     "HIGH": 3,
-    "MEDIUM": 48,
-    "LOW": 8
+    "MEDIUM": 44,
+    "LOW": 7
    },
    "namedRoutes": 8,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 3,
     "0B.2": 2,
-    "0B.3": 3,
+    "0B.3": 2,
     "0B.4": 4,
-    "0B.6": 5,
-    "0B.7": 4,
+    "0B.6": 2,
+    "0B.7": 3,
     "0B.8": 8,
     "0B.9": 5,
     "0B.10": 6,
@@ -142,10 +142,10 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 18,
+   "defects": 17,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 13,
+    "MEDIUM": 12,
     "LOW": 1
    },
    "namedRoutes": 3,
@@ -155,7 +155,7 @@
     "0B.3": 1,
     "0B.4": 3,
     "0B.5": 4,
-    "0B.7": 3,
+    "0B.7": 2,
     "0B.8": 2,
     "0B.9": 2,
     "0B.10": 2
@@ -164,10 +164,10 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 23,
+   "defects": 22,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 20,
+    "MEDIUM": 19,
     "LOW": 2
    },
    "namedRoutes": 6,
@@ -176,7 +176,7 @@
     "0B.3": 1,
     "0B.4": 2,
     "0B.6": 1,
-    "0B.7": 4,
+    "0B.7": 3,
     "0B.8": 2,
     "0B.9": 2,
     "0B.10": 3,
@@ -241,11 +241,11 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 56,
+   "defects": 55,
    "severity": {
     "HIGH": 2,
     "MEDIUM": 40,
-    "LOW": 14
+    "LOW": 13
    },
    "namedRoutes": 7,
    "namedFiles": 0,
@@ -256,7 +256,7 @@
     "0B.4": 4,
     "0B.5": 7,
     "0B.6": 10,
-    "0B.7": 9,
+    "0B.7": 8,
     "0B.8": 5,
     "0B.9": 1,
     "0B.10": 6,
@@ -596,10 +596,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-COGA-FEDERATED-PERCENTILE-FROM-UNSOURCED-LITERALS",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
     "severity": "MEDIUM",
     "partial": true
@@ -609,22 +605,8 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B7-COGB-SUCCESSION-MODEL-OUTPUT-UNVALIDATED-AND-PARSE-FAILURE-SWALLOWED",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-COGB-TOPIC-CATEGORY-BY-SUBSTRING-DRIVES-CRITICAL-SENSITIVITY",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B7-COGB-PROPAGATION-UNKNOWN-NODE-ANSWERS-500-AND-ANALYSIS-TYPE-NOT-VALIDATED",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGB-INTERVIEW-READS-UNBOUNDED",
-    "severity": "LOW",
-    "partial": true
    },
    {
     "id": "DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS",
@@ -644,10 +626,6 @@
    {
     "id": "DEF-0B7-COGB-MITIGATION-EFFECTIVENESS-ATTRIBUTES-NEXT-SCORE-TO-INTERVENTION",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-AGGREGATE-RUNS-28-ENGINES-PER-REQUEST-UNCACHED",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B7-COGB-NARRATIVES-CITE-ZERO-EVIDENCE-AS-DERIVED-FROM-EVIDENCE",
@@ -804,10 +782,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B3-AUDITS-FABRICATED-ENGAGEMENT-FIELDS",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B3-AUDITS-LEGACY-TABLE-NOT-CANONICAL",
     "severity": "MEDIUM"
    },
@@ -825,19 +799,12 @@
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EMP-COMMUNICATION-NOT-DELIVERED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EMP-CAPE-AUDIT-EVENT-AFTER-COMMIT",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
@@ -845,16 +812,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-SYS-CALENDAR-SYNC-SWALLOWED-EVENT-ERRORS-COUNTED-AS-IMPORTED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-SUCCESSION-CALL-NOT-AUDITED-AND-RUNS-ON-EVERY-GET",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
@@ -866,7 +826,8 @@
    },
    {
     "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS",
@@ -1064,11 +1025,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
     "severity": "MEDIUM"
    },
@@ -1121,10 +1077,6 @@
    },
    {
     "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-ALERT-HAS-NO-HUMAN-RECIPIENT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-MITIGATION-PROJECTIONS-ARE-FIXED-MULTIPLIERS-WITH-CONSTANT-CONFIDENCE",
     "severity": "MEDIUM"
    },
    {
@@ -1421,10 +1373,6 @@
    {
     "id": "DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-AGGREGATE-ERRORS-RETURNED-VERBATIM-IN-HTTP-200",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B7-PLT-SSO-NO-UPDATE-DISABLE-OR-DELETE-ROUTE",

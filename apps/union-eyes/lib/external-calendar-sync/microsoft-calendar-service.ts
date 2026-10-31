@@ -22,6 +22,7 @@ import {
   calendarEvents 
 } from '@/db/schema/calendar-schema';
 import { eq, and } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 import { decryptCalendarToken, encryptCalendarToken } from './token-crypto';
 
 // ============================================================================
@@ -334,6 +335,7 @@ export async function importMicrosoftEvents(
     let importedCount = 0;
     let updatedCount = 0;
     let deletedCount = 0;
+    let failed = 0;
 
     for (const msEvent of events) {
       try {
@@ -374,8 +376,16 @@ export async function importMicrosoftEvents(
           await db.insert(calendarEvents).values(eventData as any);
           importedCount++;
         }
-      } catch (_error) {
-}
+      } catch (error) {
+        failed += 1;
+        logger.error('Microsoft calendar event was not applied', { connectionId, eventId: msEvent.id, error: String(error) });
+      }
+    }
+
+    // The delta link moves only when every event was applied: a failed event is neither counted as imported nor skipped forever, the
+    // import throws so the caller records a failed sync, and the next run starts from the same point.
+    if (failed > 0) {
+      throw new MicrosoftCalendarImportError(`${failed} of ${events.length} Microsoft calendar events were not applied`, { failed });
     }
 
     // Update delta link
@@ -637,76 +647,79 @@ function mapRRuleToMicrosoftRecurrence(rrule: string): any {
 // HELPER FUNCTIONS
 // ============================================================================
 
+export class MicrosoftCalendarImportError extends Error {
+  constructor(message: string, readonly detail: { failed: number }) {
+    super(message);
+    this.name = 'MicrosoftCalendarImportError';
+  }
+}
+
 /**
  * Handle deleted Microsoft event
  */
+// A failure is not swallowed here: the caller counts an event as deleted only when this returned.
 async function handleDeletedMicrosoftEvent(calendarId: string, msEventId: string, organizationId: string) {
-  try {
-    const [event] = await db
-      .select()
-      .from(calendarEvents)
-      .where(
-        and(
-          eq(calendarEvents.calendarId, calendarId),
-          eq(calendarEvents.organizationId, organizationId),
-          eq(calendarEvents.externalEventId, msEventId)
-        )
+  const [event] = await db
+    .select()
+    .from(calendarEvents)
+    .where(
+      and(
+        eq(calendarEvents.calendarId, calendarId),
+        eq(calendarEvents.organizationId, organizationId),
+        eq(calendarEvents.externalEventId, msEventId)
       )
-      .limit(1);
+    )
+    .limit(1);
 
-    if (event) {
-      await db
-        .update(calendarEvents)
-        .set({
-          status: 'cancelled',
-          cancelledAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(calendarEvents.id, event.id), eq(calendarEvents.organizationId, organizationId)));
-    }
-  } catch (_error) {
-}
+  if (event) {
+    await db
+      .update(calendarEvents)
+      .set({
+        status: 'cancelled',
+        cancelledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(calendarEvents.id, event.id), eq(calendarEvents.organizationId, organizationId)));
+  }
 }
 
 /**
  * Update delta link for incremental sync
  */
+// A failure is not swallowed: the connection would otherwise read as synced while the next run started from the old delta link.
 async function updateDeltaLink(
   connectionId: string,
   organizationId: string,
   microsoftCalendarId: string,
   deltaLink: string | null
 ) {
-  try {
-    const [connection] = await db
-      .select()
-      .from(externalCalendarConnections)
-      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)))
-      .limit(1);
+  const [connection] = await db
+    .select()
+    .from(externalCalendarConnections)
+    .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)))
+    .limit(1);
 
-    if (!connection) return;
+  if (!connection) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappings: any = (connection.calendarMappings as any) || {};
-    
-    if (!mappings[microsoftCalendarId]) {
-      mappings[microsoftCalendarId] = {};
-    }
-    
-    mappings[microsoftCalendarId].deltaLink = deltaLink;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mappings: any = (connection.calendarMappings as any) || {};
+  
+  if (!mappings[microsoftCalendarId]) {
+    mappings[microsoftCalendarId] = {};
+  }
+  
+  mappings[microsoftCalendarId].deltaLink = deltaLink;
 
-    await db
-      .update(externalCalendarConnections)
-      .set({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        calendarMappings: mappings as any,
-        lastSyncAt: new Date(),
-        syncStatus: 'synced',
-        updatedAt: new Date(),
-      })
-      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
-  } catch (_error) {
-}
+  await db
+    .update(externalCalendarConnections)
+    .set({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      calendarMappings: mappings as any,
+      lastSyncAt: new Date(),
+      syncStatus: 'synced',
+      updatedAt: new Date(),
+    })
+    .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
 }
 
 /**

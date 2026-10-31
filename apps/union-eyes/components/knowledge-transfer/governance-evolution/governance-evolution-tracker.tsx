@@ -218,7 +218,7 @@ export function GovernanceEvolutionTracker() {
                 {benchmark.orgPosition.cohort}
               </div>
               <div className="text-sm text-slate-600">
-                ~{benchmark.orgPosition.estimatedPercentile}th percentile
+                Score band (rubric, not a population comparison)
               </div>
             </div>
           )}
@@ -437,12 +437,6 @@ export function GovernanceEvolutionTracker() {
                   {benchmark.orgPosition.currentScore}
                 </div>
               </div>
-              <div>
-                <span className="text-xs text-slate-500 uppercase tracking-wide">Percentile</span>
-                <div className="text-xl font-semibold text-indigo-700">
-                  ~{benchmark.orgPosition.estimatedPercentile}th
-                </div>
-              </div>
               {benchmark.orgPosition.pointsToNextCohort > 0 && (
                 <div>
                   <span className="text-xs text-slate-500 uppercase tracking-wide">To next cohort</span>
@@ -484,29 +478,29 @@ export function GovernanceEvolutionTracker() {
           {/* Dimension comparisons */}
           {benchmark.dimensionComparisons.length > 0 && (
             <div className="space-y-2">
-              <h3 className="font-semibold text-slate-800">Dimension Comparison vs Cohort</h3>
+              <h3 className="font-semibold text-slate-800">Dimension Comparison vs Score-Band Midpoint</h3>
               {benchmark.dimensionComparisons.map((dim) => (
                 <div key={dim.dimensionName} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-700">{dim.dimensionName}</span>
                     <span
                       className={`text-xs font-medium ${
-                        dim.relativePosition === 'above_cohort'
+                        dim.relativePosition === 'above_band_midpoint'
                           ? 'text-green-700'
-                          : dim.relativePosition === 'below_cohort'
+                          : dim.relativePosition === 'below_band_midpoint'
                           ? 'text-red-600'
                           : 'text-slate-500'
                       }`}
                     >
-                      {dim.gapToCohortAverage > 0 ? '+' : ''}{dim.gapToCohortAverage} vs cohort avg
+                      {dim.gapToBandMidpoint > 0 ? '+' : ''}{dim.gapToBandMidpoint} vs band midpoint
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full transition-all ${
-                        dim.relativePosition === 'above_cohort'
+                        dim.relativePosition === 'above_band_midpoint'
                           ? 'bg-green-500'
-                          : dim.relativePosition === 'below_cohort'
+                          : dim.relativePosition === 'below_band_midpoint'
                           ? 'bg-red-400'
                           : 'bg-indigo-400'
                       }`}

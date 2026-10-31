@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
+  hasMinRole: vi.fn(),
   isClaimExpired: vi.fn(),
   persistAtomicAudit: vi.fn(),
   logger: { info: vi.fn(), error: vi.fn() },
@@ -37,6 +38,8 @@ const mockTx: any = {
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+// Claiming needs an organization administrator (added after this test was written; disclosed).
+vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/icra/claim-tokens', () => ({ isClaimExpired: m.isClaimExpired }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(mockTx) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
@@ -65,6 +68,7 @@ describe('icra/[assessmentId]/claim route', () => {
     m.updateQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
+    m.hasMinRole.mockResolvedValue(true);
     m.isClaimExpired.mockReturnValue(false);
     m.persistAtomicAudit.mockResolvedValue(undefined);
   });
@@ -78,6 +82,17 @@ describe('icra/[assessmentId]/claim route', () => {
     }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(401);
+  });
+
+  it('refuses a member who is not an organization administrator and consumes nothing', async () => {
+    const { POST } = await loadRoute();
+    m.hasMinRole.mockResolvedValueOnce(false);
+    const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
+    expect(response.status).toBe(403);
+    expect(mockTx.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('returns 400 for invalid json', async () => {

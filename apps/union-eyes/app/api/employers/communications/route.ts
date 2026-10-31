@@ -3,7 +3,7 @@
  *
  * POST /api/employers/communications/contacts   — Add employer contact
  * GET  /api/employers/communications/contacts   — List contacts for employer
- * POST /api/employers/communications             — Log a communication
+ * POST /api/employers/communications             — Record a communication (nothing is delivered by the platform)
  * GET  /api/employers/communications             — List communications for employer
  */
 
@@ -14,7 +14,6 @@ import { withOrganizationAuth } from '@/lib/organization-middleware'
 import { hasMinRole } from '@/lib/api-auth-guard'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
-import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from '@/lib/audit/cape-audit-events'
 import {
   ErrorCode,
   standardErrorResponse,
@@ -38,9 +37,12 @@ const createCommunicationSchema = z.object({
   body: z.string().min(1),
   recipientContactId: z.guid().optional(),
   recipientName: z.string().optional(),
+  // A statement by the person recording it: the platform sends nothing, so 'sent' means they say it was sent elsewhere.
   status: z.enum(['draft', 'sent', 'received', 'acknowledged']).default('draft'),
+  // When it was sent or received, as the recorder states it; never stamped by the server and never in the future.
+  occurredAt: z.string().datetime().optional(),
   templateId: z.guid().optional(),
-})
+}).refine((value) => !value.occurredAt || new Date(value.occurredAt).getTime() <= Date.now() + 60_000, { message: 'occurredAt cannot be in the future', path: ['occurredAt'] })
 
 // ── POST — Log communication ────────────────────────────────────────────────
 
@@ -87,10 +89,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
           body: data.body,
           recipientContactId: data.recipientContactId,
           recipientName: data.recipientName ?? 'Unknown',
-          senderName: 'System',
+          senderName: 'Recorded by union staff',
           senderUserId: userId,
           templateId: data.templateId,
-          sentAt: data.status === 'sent' ? new Date() : undefined,
+          sentAt: data.status === 'sent' && data.occurredAt ? new Date(data.occurredAt) : undefined,
           createdBy: userId,
         })
         .returning()
@@ -101,30 +103,13 @@ export const POST = withOrganizationAuth(async (request, context) => {
         resourceType: 'employer_communications',
         action: 'employer_communication.create',
         resourceId: row.id,
-        details: { employerId: row.employerId, type: row.type, status: row.status },
+        details: { employerId: row.employerId, type: row.type, status: row.status, delivery: 'recorded_only' },
       })
       return row
     })
 
-    const eventType =
-      data.status === 'sent'
-        ? CAPE_AUDIT_EVENTS.EMPLOYER_COMMUNICATION_SENT
-        : CAPE_AUDIT_EVENTS.EMPLOYER_COMMUNICATION_LOGGED
-
-    await emitCapeAuditEvent({
-      eventType,
-      userId,
-      organizationId,
-      resource: 'employer_communications',
-      resourceId: communication.id,
-      details: {
-        employerId: data.employerId,
-        type: data.type,
-        subject: data.subject,
-      },
-    })
-
-    return standardSuccessResponse(communication)
+    // The audit record above is the only one: a second event emitted after the commit could be lost or duplicated independently of the row.
+    return standardSuccessResponse({ ...communication, delivery: 'recorded_only' })
   } catch (error) {
     if (error instanceof ApiError) {
       return standardErrorResponse(error.code, error.message)
