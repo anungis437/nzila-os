@@ -13,10 +13,15 @@
  * Entitlement: union_knowledge_suite
  */
 
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
 import { buildDependencyPropagationMap } from '@/lib/knowledge-transfer/propagation';
 
 export const dynamic = 'force-dynamic';
+
+const querySchema = z.object({
+  nodeId: z.string().trim().min(1).max(200).optional(),
+  analysisType: z.enum(['downstream', 'upstream', 'coupling', 'full']).default('full'),
+}).strict();
 
 export const GET = withApi(
   {
@@ -25,8 +30,9 @@ export const GET = withApi(
   },
   async ({ organizationId, request }) => {
     const { searchParams } = new URL(request.url);
-    const nodeId = searchParams.get('nodeId');
-    const analysisType = searchParams.get('analysisType') || 'full';
+    const parsed = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
+    if (!parsed.success) throw ApiError.badRequest('nodeId must be text and analysisType one of downstream, upstream, coupling or full');
+    const { nodeId, analysisType } = parsed.data;
 
     const propagationMap = await buildDependencyPropagationMap(organizationId!);
 
@@ -41,7 +47,7 @@ export const GET = withApi(
     if (nodeId) {
       const node = propagationMap.nodes.find((n) => n.id === nodeId);
       if (!node) {
-        throw new Error('Node not found');
+        throw ApiError.notFound('Node not found');
       }
 
       const downstreamImpact = propagationMap.downstreamImpacts.find((d) => d.nodeId === nodeId);

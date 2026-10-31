@@ -4380,6 +4380,35 @@
           "remaining": "The guard reads the address as written and does not resolve DNS, so a public name that resolves to a private address is not caught; that needs an egress policy or a resolving fetch. The body is still read whole before the size check."
         }
       ]
+    },
+    {
+      "id": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
+      "family": "F12: a failure is answered as a failure without internal text, and a query is validated",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B7-EXC-INDEX-FAILURE-RETURNS-200-WITH-RAW-ERROR-TEXT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/indexing/semantic-indexer.ts",
+            "apps/union-eyes/app/api/exit-interviews/[id]/index/route.ts",
+            "apps/union-eyes/lib/knowledge-transfer/indexing/__tests__/semantic-indexer.test.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-index.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts"
+          ],
+          "explanation": "A failed indexing now returns a result flagged failed with the fixed text \"Indexing failed\" (the error stays in the audit record), and the index route answers it 500 instead of 200 carrying the error. Two existing indexer assertions adapted: they required the raw error text (\"audit down\", \"embed boom\") in the reason, which is the defect; they now require the fixed text and the absence of the error text."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-PROPAGATION-UNKNOWN-NODE-ANSWERS-500-AND-ANALYSIS-TYPE-NOT-VALIDATED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/exit-interviews/propagation/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts"
+          ],
+          "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500.",
+          "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node."
+        }
+      ]
     }
   ]
 }

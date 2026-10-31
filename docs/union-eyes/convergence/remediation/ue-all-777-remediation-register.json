@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 386,
-    "engineeringRemaining": 391,
+    "engineeringCorrected": 387,
+    "engineeringRemaining": 390,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 70
+    "engineeringPartial": 71
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -6845,9 +6845,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
+        "path": "apps/union-eyes/lib/knowledge-transfer/indexing/semantic-indexer.ts; apps/union-eyes/app/api/exit-interviews/[id]/index/route.ts; apps/union-eyes/lib/knowledge-transfer/indexing/__tests__/semantic-indexer.test.ts; apps/union-eyes/app/api/__tests__/exit-interviews-index.route.test.ts; apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts",
+        "explanation": "A failed indexing now returns a result flagged failed with the fixed text \"Indexing failed\" (the error stays in the audit record), and the index route answers it 500 instead of 200 carrying the error. Two existing indexer assertions adapted: they required the raw error text (\"audit down\", \"embed boom\") in the reason, which is the defect; they now require the fixed text and the absence of the error text.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-SUMMARIZE-STORES-UNVALIDATED-OR-PLACEHOLDER-OUTPUT-AS-GENERATED",
@@ -7628,9 +7635,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
+        "path": "apps/union-eyes/app/api/exit-interviews/propagation/route.ts; apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts",
+        "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500.",
+        "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-INTERVIEW-READS-UNBOUNDED",
