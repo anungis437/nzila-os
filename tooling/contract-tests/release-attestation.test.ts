@@ -121,10 +121,10 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     // GitHub expressions inside run: are evaluated before bash parses them.
     // Quoting an expression does not prevent shell command substitution.
     for (const workflow of [production, staging]) {
-      const scripts = [...workflow.matchAll(/^\\s*run:\\s*\\|\\s*\\n((?: {10,}.*\\n)*)/gm)]
-        .map(match => match[1]).join('\\n')
-      expect(scripts).not.toMatch(/\\$\\{\\{\\s*github\\.event\\.inputs\\./)
-      expect(scripts).not.toMatch(/\\$\\{\\{\\s*(?:steps\\.resolve|needs\\.verify-artifact)\\.outputs\\.approved_apps/)
+      const scripts = [...workflow.matchAll(/^\s*run:\s*\|\s*\n((?: {10,}.*\n)*)/gm)]
+        .map(match => match[1]).join('\n')
+      expect(scripts).not.toMatch(/\$\{\{\s*github\.event\.inputs\./)
+      expect(scripts).not.toMatch(/\$\{\{\s*(?:steps\.resolve|needs\.verify-artifact)\.outputs\.approved_apps/)
     }
     expect(production).toContain('STAGING_RUN_ID_INPUT: ${{ github.event.inputs.staging_run_id }}')
     expect(production).toContain('REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || \'all\' }}')
