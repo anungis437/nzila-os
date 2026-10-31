@@ -144,7 +144,7 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     const poisoned = new PostgresAtomicTrustLedgerStore(fake({
       revision: 1, hash: entry.hash, entries: [altered],
     }))
-    await expect(poisoned.readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+    await expect(poisoned.readSnapshot(ORG)).rejects.toThrow('event chain disagrees with receipt index')
   })
   it('refuses audit-hashed payload sequence substitution despite matching SQL head', async () => {
     const forged = auditRecord(LEDGER_GENESIS_HASH, 2)
@@ -205,7 +205,7 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     const db = fake({ revision: 1, hash: first.hash, entries: [poisoned] })
     const store = new PostgresAtomicTrustLedgerStore(db)
     await expect(store.compareAndAppend(ORG, { revision: 1, headHash: first.hash }, next))
-      .rejects.toThrow('audit chain failed integrity')
+      .rejects.toThrow('event chain disagrees with receipt index')
     expect(db.commits).toBe(0)
   })
   it('refuses to extend a stream with missing durable audit records', async () => {
