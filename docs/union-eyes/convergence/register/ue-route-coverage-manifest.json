@@ -1461,7 +1461,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
   {

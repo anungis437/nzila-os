@@ -6,7 +6,9 @@ const src = (path: string) => readFileSync(join(process.cwd(), path), 'utf8').re
 
 describe('Gate 0 batch B75: report filter operators and queue status', () => {
   it('validates report filters against the executor\'s own operators and translates the earlier names', () => {
-    const route = src('app/api/reports/execute/route.ts')
+    // The allowlists moved to the shared validator so the save routes apply the same contract (B89).
+    const route = src('lib/reports/report-config-validation.ts')
+    expect(src('app/api/reports/execute/route.ts')).toContain('validateReportConfig(config)')
     expect(route).toContain("const ALLOWED_OPERATORS = ['eq', 'ne', 'gt', 'lt', 'gte', 'lte', 'like', 'ilike', 'in', 'not_in', 'is_null', 'is_not_null', 'between']")
     expect(route).toContain("equals: 'eq'")
     expect(route).toContain("contains: 'ilike'")

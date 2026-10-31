@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 536,
-    "partial": 78,
+    "implementedPendingQualification": 540,
+    "partial": 79,
     "qualificationVerified": 0,
-    "unresolved": 241,
+    "unresolved": 237,
     "externalBlockers": 0
   },
   "batches": [
@@ -869,6 +869,15 @@
       "outstandingBefore": 244,
       "newlyImplemented": 3,
       "outstandingAfter": 241,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
+      "family": "Stored report contract, cross-organization read authority, AI data class, verified signer and list fixes",
+      "outstandingBefore": 241,
+      "newlyImplemented": 4,
+      "outstandingAfter": 237,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -7195,6 +7204,63 @@
       ],
       "explanation": "The completion audit is now an atomic row committed with the credential upsert (social_account.connected).",
       "remaining": "The callback is still a GET that clears its state cookies before validating the request, so a forged request can clear a pending connection; changing the verb or the cookie order needs a coordinated change with the provider redirect registration."
+    },
+    "DEF-0B11-RPT-STORED-CONFIG-IS-UNVALIDATED-UNBOUNDED-JSON-THAT-NO-SAVE-APPLIES-THE-EXECUTOR-CONTRACT-TO": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
+      "files": [
+        "apps/union-eyes/lib/reports/report-config-validation.ts",
+        "apps/union-eyes/lib/reports/__tests__/report-config-validation.test.ts",
+        "apps/union-eyes/app/api/reports/route.ts",
+        "apps/union-eyes/app/api/reports/[id]/route.ts",
+        "apps/union-eyes/app/api/reports/execute/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s19-report-operators-and-queue-status.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s33-report-config-cross-org-ai-class.test.ts"
+      ],
+      "explanation": "The execute route allowlists moved into lib/reports/report-config-validation.ts and the report definition create (beforeCreate) and update (beforeUpdate) now apply them at save time through validateStoredReportConfig: an object of at most 32 KB and depth 6, a registry data source, registry field ids, the executor operator vocabulary, bounded lists, and a join only to a table of the reporting registry; a refused definition answers 400 with the reason instead of being stored as a success. The s19 pin was adapted to read the shared validator (disclosed)."
+    },
+    "DEF-0B2-CROSS-ORG-ANALYTICS-SCOPE-UNPROVEN": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
+      "files": [
+        "apps/union-eyes/app/api/analytics/cross-org/route.ts",
+        "apps/union-eyes/app/api/__tests__/analytics-cross-org.route.test.ts",
+        "apps/union-eyes/db/rls-storage-authority/analytics-ai.ts",
+        "apps/union-eyes/lib/operations/catalog-authority-contract.json",
+        "apps/union-eyes/lib/services/__tests__/s33-report-config-cross-org-ai-class.test.ts"
+      ],
+      "explanation": "The read no longer depends on whatever the connection role happens to see: it runs under the system role on purpose (the manifest now declares SELECT for the system role on analytics_metrics and the catalog contract was regenerated), returns aggregates only as before, requires an active organization for the caller, and records analytics.cross_org.read in the same transaction as the read. The route test was adapted to the system transaction and a no-organization case was added (disclosed). The platform_lead role-title floor remains the gate, as for the platform statistics read; a platform-staff mandate does not exist yet."
+    },
+    "DEF-0B2-AI-DATA-CLASS-DOWNGRADE": {
+      "status": "PARTIAL",
+      "batch": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
+      "files": [
+        "apps/union-eyes/lib/services/ai/precedent-matching-service.ts",
+        "apps/union-eyes/lib/ai/ai-client.ts",
+        "apps/union-eyes/lib/services/__tests__/s33-report-config-cross-org-ai-class.test.ts"
+      ],
+      "explanation": "A mapping exists (toGatewayDataClass: confidential and member data to sensitive; restricted, pension_financial and grievance_legal to regulated) and the finance, pension, employer risk, grievance triage, steward copilot and clause reasoning services use it. B87/B89: the three precedent-matching calls that send claim facts (keyword extraction, applicability, strength analysis) now declare regulated instead of internal.",
+      "remaining": "Several other services (auto classification, clause extraction, vector search, copilot, mamba, chatbot, knowledge-transfer) still declare internal literals; each needs a per-surface decision of the class its inputs carry."
+    },
+    "DEF-0B6-SYS-CONTINUITY-LIST-UNBOUNDED-AND-FILTERED-AFTER-FETCH": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
+      "files": [
+        "apps/union-eyes/app/api/documents/repository/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s33-report-config-cross-org-ai-class.test.ts"
+      ],
+      "explanation": "Verified on source in B89: the repository list is bounded (listPage, default 50, at most 100 candidate rows with an offset on candidate rows), the case filter is applied in SQL, and the filters are length-checked, so the cost no longer grows with the size of the document store."
+    },
+    "DEF-0B11-SOC-SIGNER-IDENTITY-IS-SENDER-TYPED-TEXT-AND-A-SENDER-CAN-SIGN-AS-A-NAMED-PERSON-AND-COMPLETE-THE-DOCUMENT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
+      "files": [
+        "apps/union-eyes/lib/signature/signer-verification.ts",
+        "apps/union-eyes/lib/signature/signature-service.ts",
+        "apps/union-eyes/app/api/signatures/documents/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s33-report-config-cross-org-ai-class.test.ts"
+      ],
+      "explanation": "Verified on source in B89: the signers list is parsed with a strict schema; a platform signer must be an active member of the sending organization and is stored under that member record name and e-mail address (what the sender typed is discarded); a document held by an external provider is refused for local signing, so it cannot be completed without the provider."
     }
   }
 }

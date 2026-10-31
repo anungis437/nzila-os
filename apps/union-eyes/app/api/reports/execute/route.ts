@@ -13,7 +13,8 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { ReportExecutor, getDataSource, type ReportConfig } from '@/lib/report-executor';
+import { ReportExecutor, type ReportConfig } from '@/lib/report-executor';
+import { validateReportConfig } from '@/lib/reports/report-config-validation';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 
 import {
@@ -177,90 +178,3 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     );
   }
 });
-
-/**
- * SECURITY: the data sources and columns a report may use are those of the executor's registry (the same ones /api/reports/datasources
- * advertises); the executor refuses anything else, so this route keeps no second, different list.
- */
-const ALLOWED_AGGREGATIONS = ['count', 'sum', 'avg', 'min', 'max', 'distinct'];
-// The executor's own vocabulary. The names this route used to accept (equals, contains, ...) were not the executor's, and the executor skipped
-// a filter whose operator it did not know, so such a filter was dropped and every row came back. The earlier names are translated, and
-// anything else is refused.
-const ALLOWED_OPERATORS = ['eq', 'ne', 'gt', 'lt', 'gte', 'lte', 'like', 'ilike', 'in', 'not_in', 'is_null', 'is_not_null', 'between'];
-const LEGACY_OPERATORS: Record<string, string> = { equals: 'eq', not_equals: 'ne', contains: 'ilike', greater_than: 'gt', less_than: 'lt' };
-const ALLOWED_SORT_DIRECTIONS = ['asc', 'desc'];
-
-/**
- * SECURITY: Validate report configuration against allowlists
- */
-function validateReportConfig(config: ReportConfig): string | null {
-  const source = getDataSource(config.dataSourceId);
-  if (!source) {
-    return `Invalid data source: ${config.dataSourceId}`;
-  }
-
-  const allowedColumns = source.fields.map((field) => field.id);
-
-  // SECURITY: Block custom formulas (P0 protection)
-  for (const field of config.fields) {
-    if (field && typeof field === 'object' && 'formula' in field) {
-      return 'Custom formulas are not supported for security reasons';
-    }
-  }
-
-  // Validate all field IDs
-  for (const field of config.fields) {
-    if (!allowedColumns.includes(field.fieldId)) {
-      return `Invalid field: ${field.fieldId}`;
-    }
-    if (field.aggregation && !ALLOWED_AGGREGATIONS.includes(field.aggregation)) {
-      return `Invalid aggregation: ${field.aggregation}`;
-    }
-    if (field.alias && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(field.alias)) {
-      return `Invalid alias format: ${field.alias}`;
-    }
-  }
-
-  // Validate filters
-  if (config.filters) {
-    for (const filter of config.filters) {
-      if (!allowedColumns.includes(filter.fieldId)) {
-        return `Invalid filter field: ${filter.fieldId}`;
-      }
-      const translated = LEGACY_OPERATORS[filter.operator as string];
-      if (translated) (filter as { operator: string }).operator = translated;
-      if (!ALLOWED_OPERATORS.includes(filter.operator)) {
-        return `Invalid operator: ${filter.operator}`;
-      }
-      const needsList = filter.operator === 'in' || filter.operator === 'not_in';
-      const values = (filter as { values?: unknown }).values;
-      if ((needsList || filter.operator === 'between') && (!Array.isArray(values) || values.length === 0 || (filter.operator === 'between' && values.length !== 2) || values.length > 100)) {
-        return `Operator ${filter.operator} needs ${filter.operator === 'between' ? 'exactly two' : 'a bounded list of'} values`;
-      }
-    }
-  }
-
-  // Validate groupBy
-  if (config.groupBy) {
-    for (const field of config.groupBy) {
-      if (!allowedColumns.includes(field)) {
-        return `Invalid group by field: ${field}`;
-      }
-    }
-  }
-
-  // Validate sortBy
-  if (config.sortBy) {
-    for (const sort of config.sortBy) {
-      if (!allowedColumns.includes(sort.fieldId)) {
-        return `Invalid sort field: ${sort.fieldId}`;
-      }
-      if (!ALLOWED_SORT_DIRECTIONS.includes(sort.direction)) {
-        return `Invalid sort direction: ${sort.direction}`;
-      }
-    }
-  }
-
-  return null;
-}
-

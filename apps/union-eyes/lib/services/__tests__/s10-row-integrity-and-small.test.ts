@@ -71,7 +71,8 @@ describe('Gate 0 batch B66/S09: small platform fixes and row integrity', () => {
   it('reads the external grievance projection from the columns the table really has', () => {
     const route = src('app/api/external/grievances/[id]/route.ts')
     expect(route).toContain('caseNumber: grievances.grievanceNumber')
-    expect(route).toContain('summary: grievances.description')
+    // The description is internal union material and is no longer part of the external projection (commit 2e7905bb0).
+    expect(route).not.toContain('summary: grievances.description')
     expect(route).not.toMatch(/\.select\(\)\s*\.from\(grievances\)/)
   })
 
