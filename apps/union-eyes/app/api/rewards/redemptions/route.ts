@@ -3,7 +3,7 @@ import {
   cancelRedemption,
   listUserRedemptions,
 } from '@/lib/services/rewards/redemption-service';
-import { initiateRedemptionSchema } from '@/lib/validation/rewards-schemas';
+import { cancelRedemptionSchema } from '@/lib/validation/rewards-schemas';
 import { z } from 'zod';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
@@ -81,11 +81,14 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
       );
     }
 
-    const body = await request.json();
-
-    let _validatedData;
+    // This path cancels a redemption, so it validates a cancellation: an initiation body (program, credits) is rejected rather than parsed and discarded.
+    let validated;
     try {
-      _validatedData = initiateRedemptionSchema.parse(body);
+      const body = await request.json();
+      validated = cancelRedemptionSchema
+        .extend({ reason: z.string().trim().min(1).max(200) })
+        .strict()
+        .parse(body);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return standardErrorResponse(
@@ -94,24 +97,16 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
           error
         );
       }
-      throw error;
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Request body must be a JSON cancellation');
     }
 
-    const { searchParams } = new URL(request.url);
-    const redemptionId = searchParams.get('id');
-
-    if (!redemptionId) {
-      return standardErrorResponse(
-        ErrorCode.MISSING_REQUIRED_FIELD,
-        'Redemption ID required'
-      );
-    }
+    const redemptionId = validated.redemptionId;
 
     // A member cancels only their own redemption; the credits go back to the member who spent them.
     const cancelledRedemption = await cancelRedemption(
       redemptionId,
       organizationId,
-      'member_cancelled',
+      `member_cancelled: ${validated.reason}`,
       { userId, mustOwn: true }
     );
 

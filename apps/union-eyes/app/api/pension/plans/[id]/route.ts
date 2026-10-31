@@ -1,4 +1,4 @@
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
@@ -37,6 +37,7 @@ export const GET = withApi(
 export const PATCH = withApi(
   {
     auth: { required: true, roles: PENSION_ADMIN_ROLES },
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: { tags: ['Pension'], summary: 'Update pension plan', description: 'Update an existing pension plan' },
   },
   async ({ params, body, organizationId, userId }) => {
@@ -71,6 +72,7 @@ export const PATCH = withApi(
 export const DELETE = withApi(
   {
     auth: { required: true, roles: PENSION_ADMIN_ROLES },
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: { tags: ['Pension'], summary: 'Terminate pension plan', description: 'Marks a pension plan terminated; the record and its history are kept' },
   },
   async ({ params, organizationId, userId }) => {

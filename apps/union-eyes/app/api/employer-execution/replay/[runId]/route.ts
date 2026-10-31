@@ -296,6 +296,32 @@ export const POST = withApi(
           : "Replay matched original run",
     };
 
+    // The stored mode column cannot tell an engine change from a faithful re-run, so the requested mode and rule
+    // version travel with the diff, and the same request against the same run is answered with the replay it made.
+    const replayContext = { requestedMode: body.mode, replayRuleVersionId: ruleVersion.id };
+    const diffHash = sha256(JSON.stringify(diff));
+    const priorReplays = await db
+      .select()
+      .from(employerExecutionReplays)
+      .where(
+        and(
+          eq(employerExecutionReplays.organizationId, organizationId),
+          eq(employerExecutionReplays.sourcePayrollRunId, sourceRun.id),
+          eq(employerExecutionReplays.diffHash, diffHash),
+        ),
+      );
+    const priorReplay = priorReplays.find((candidate) => {
+      const context = (candidate.diffJson as { replayContext?: typeof replayContext } | null)?.replayContext;
+      return (
+        context?.requestedMode === replayContext.requestedMode &&
+        context?.replayRuleVersionId === replayContext.replayRuleVersionId &&
+        candidate.replayEngineVersion === replayEngineVersion
+      );
+    });
+    if (priorReplay) {
+      return { data: { replay: priorReplay, diff, replayTotals: replayedTotals, repeated: true } };
+    }
+
     // A replay chains from the run's own seal, never from an earlier replay's manifest.
     const parentLink = sourceEvidenceManifests
       .map(
@@ -346,9 +372,9 @@ export const POST = withApi(
           mode: body.mode === "new_rule" ? "simulated" : "exact",
           sourceEngineVersion: sourceRun.engineVersion,
           replayEngineVersion,
-          diffJson: diff,
+          diffJson: { ...diff, replayContext },
           diffSummary: diff.summary,
-          diffHash: sha256(JSON.stringify(diff)),
+          diffHash,
           createdBy: userId ?? undefined,
         })
         .returning();

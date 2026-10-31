@@ -107,29 +107,39 @@ describe('rewards/redemptions POST (cancel)', () => {
     m.cancelRedemption.mockResolvedValue({ redemption: { id: 'r1' }, newBalance: 10 });
   });
 
-  const cancel = (id = 'r1') =>
-    new NextRequest(`http://localhost/api/rewards/redemptions?id=${id}`, {
+  const cancel = (id = '11111111-1111-4111-8111-111111111111') =>
+    new NextRequest('http://localhost/api/rewards/redemptions', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        programId: '11111111-1111-4111-8111-111111111111',
-        creditsToSpend: 10,
-        provider: 'shopify',
-      }),
+      body: JSON.stringify({ redemptionId: id, reason: 'changed my mind' }),
     });
 
   it('cancels only on behalf of the owning member (the caller), in the caller\u2019s organization', async () => {
     const { POST } = await import('../rewards/redemptions/route');
     await POST(cancel(), { userId: 'member_1', organizationId: 'org_1' } as never);
 
-    expect(m.cancelRedemption).toHaveBeenCalledWith('r1', 'org_1', 'member_cancelled', { userId: 'member_1', mustOwn: true });
+    expect(m.cancelRedemption).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111', 'org_1', 'member_cancelled: changed my mind', { userId: 'member_1', mustOwn: true });
+  });
+
+  it('rejects an initiation body on the cancel path instead of discarding it', async () => {
+    const { POST } = await import('../rewards/redemptions/route');
+    const request = new NextRequest('http://localhost/api/rewards/redemptions?id=r1', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ programId: '11111111-1111-4111-8111-111111111111', creditsToSpend: 10 }),
+    });
+
+    const response = await POST(request, { userId: 'member_1', organizationId: 'org_1' } as never);
+
+    expect(response.status).toBe(400);
+    expect(m.cancelRedemption).not.toHaveBeenCalled();
   });
 
   it('answers 404 when the redemption is someone else\u2019s', async () => {
     const { POST } = await import('../rewards/redemptions/route');
     m.cancelRedemption.mockRejectedValueOnce(new Error('Redemption not found'));
 
-    const response = await POST(cancel('r-other'), { userId: 'member_1', organizationId: 'org_1' } as never);
+    const response = await POST(cancel('22222222-2222-4222-8222-222222222222'), { userId: 'member_1', organizationId: 'org_1' } as never);
 
     expect(response.status).toBe(404);
   });

@@ -3512,6 +3512,96 @@
           "explanation": "The full operation inventory is served only to an authenticated administrator and never cached by a shared cache; the public documentation is the reduced openapi.json (upstream's change, existing tests)."
         }
       ]
+    },
+    {
+      "id": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
+      "family": "F09/F10: a financial write is rate limited and repeatable without piling up records, an endpoint validates the request it actually performs, and an exported package states only what the data supports",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B5-COMMS-TEMPLATE-DUPLICATE-IS-GENERIC-CRUD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/templates/[id]/duplicate/route.ts",
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "The duplicate path was the generic CRUD item over message templates (its DELETE removed the template and nothing was duplicated); it answers 501 and the roster-facade ratchet pins it."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-PENSION-ROUTES-APPLY-NO-RATE-LIMIT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/pension/plans/route.ts",
+            "apps/union-eyes/app/api/pension/members/route.ts",
+            "apps/union-eyes/app/api/pension/plans/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/pension-plan-terminate.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts"
+          ],
+          "explanation": "Every pension write (create plan, enrol member, update plan, terminate plan) carries the financial-write rate limit; the contract test checks each write configuration."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REDEMPTIONS-POST-IS-NAMED-FOR-INITIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/rewards/redemptions/route.ts",
+            "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts"
+          ],
+          "explanation": "The cancel path now validates a cancellation (redemption id and a bounded reason, strict) and uses that validated id; an initiation body is rejected with 400 instead of being parsed and discarded, and the reason is stored with the cancellation. Test updated: the previous cancel test posted an initiation body and a query id, which is the defect."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+            "apps/union-eyes/app/api/__tests__/employer-replay-run-id.route.test.ts",
+            "apps/union-eyes/scripts/codemods/f09-replay-idempotent.cjs"
+          ],
+          "explanation": "A replay identical in run, mode, rule version, engine version and result is answered with the replay already made, adding no replay row, artifacts, evidence link, compliance event or audit duplicate; a different requested mode is a new replay. Tests added for both.",
+          "remaining": "A genuinely different replay still opens an error-severity event that must be acknowledged before approval; whether a replay should gate approval is a payroll-governance decision, and replays are still allowed at any run status."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-REPLAY-MODE-MISRECORDED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+            "apps/union-eyes/app/api/__tests__/employer-replay-run-id.route.test.ts"
+          ],
+          "explanation": "The requested mode and replay rule version are stored with the diff, so an engine-change replay can be told from a faithful re-run.",
+          "remaining": "The mode enum column still holds only exact and simulated; adding new_engine needs a PostgreSQL enum migration that has not been run on a native database."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/employer-execution/csv-cell.ts",
+            "apps/union-eyes/lib/employer-execution/__tests__/csv-cell.test.ts",
+            "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts"
+          ],
+          "explanation": "The uploaded external employee id is neutralised against a leading formula character and quoted in the remittance CSV, and each remittance group reports the number of members who contribute to it rather than the payroll item count.",
+          "remaining": "The per-group member count is pinned by source only; no behavioural test drives the remittance route with a zero-amount group."
+        },
+        {
+          "prefix": "DEF-0B3-BILLING-VALIDATE-LOG-ONLY-MISLABELLED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/billing/validate/route.ts",
+            "apps/union-eyes/app/api/__tests__/billing-validate.route.test.ts"
+          ],
+          "explanation": "Validation failures are classified as validation (not unauthorized access), every evaluated result has a tenant-bound atomic audit receipt, and the route fails closed with 503 when the audit cannot commit (existing implementation, existing tests)."
+        },
+        {
+          "prefix": "DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/billing/invoices/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts"
+          ],
+          "explanation": "The invoice create path answers 501 stating that invoices are ingested from the provider; the contract test pins that it never inserts."
+        }
+      ]
     }
   ]
 }

@@ -8,12 +8,12 @@
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 2,
-   "CRUD_FACTORY": 147,
+   "CRUD_FACTORY": 146,
    "DELEGATED": 19,
    "NONE": 48,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 215,
+   "RETIRED": 216,
    "ROLE_AUTH": 120,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
@@ -24,12 +24,12 @@
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 147,
+   "CRUD_FACTORY": 146,
    "DELEGATED": 12,
    "NONE": 8,
    "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 209,
+   "RETIRED": 210,
    "ROLE_AUTH": 71,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
@@ -39,16 +39,16 @@
    "ATOMIC": 148,
    "ATOMIC_SERVICE": 151,
    "COMPUTE_ONLY": 35,
-   "CRUD_ATOMIC": 148,
+   "CRUD_ATOMIC": 147,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
    "NO_WRITES_FOUND": 13,
-   "NONE": 207
+   "NONE": 208
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
-   "CRUD_TENANT_TX": 148,
-   "NONE": 341,
+   "CRUD_TENANT_TX": 147,
+   "NONE": 342,
    "SYSTEM_CONTEXT": 63,
    "TENANT_TX": 161
   }
@@ -4242,11 +4242,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "communications/templates/[id]/route.ts",

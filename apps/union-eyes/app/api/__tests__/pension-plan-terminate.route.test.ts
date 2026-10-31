@@ -11,6 +11,7 @@ const err = (code: string, message: string) => Object.assign(new Error(message),
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: (_cfg: unknown, handler: (ctx: unknown) => Promise<unknown>) => handler,
+  RATE_LIMITS: { FINANCIAL_WRITE: {} },
   ApiError: {
     badRequest: (msg: string) => err('VALIDATION_ERROR', msg),
     notFound: (what: string) => err('NOT_FOUND', what),

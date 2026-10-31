@@ -18,6 +18,7 @@ import {
 import { and, desc, eq, ne } from "drizzle-orm";
 import { createEvidencePack, sha256 } from "../_lib";
 import { enforceRunDuty } from "../_guard";
+import { csvCell } from "@/lib/employer-execution/csv-cell";
 
 const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
@@ -33,7 +34,7 @@ const defaultFormatter: RemittanceFormatter = {
     const header = "employee_external_id,gross_pay,dues_amount,benefit_amount,pension_amount,net_pay";
     const body = rows.map((row) =>
       [
-        row.employeeExternalId,
+        csvCell(row.employeeExternalId),
         row.gross.toFixed(2),
         row.dues.toFixed(2),
         row.benefits.toFixed(2),
@@ -47,6 +48,11 @@ const defaultFormatter: RemittanceFormatter = {
     return JSON.stringify({ summary, rows }, null, 2);
   },
 };
+
+// A group reports the members who actually contribute to it, not every item of the payroll run.
+function contributing(items: Array<Record<string, unknown>>, column: string): number {
+  return items.filter((item) => Number(item[column]) > 0).length;
+}
 
 const createSchema = z.object({
   payrollRunId: z.guid(),
@@ -254,16 +260,16 @@ export const POST = withApi(
 
       await tx.insert(employerRemittanceRunItems).values(
         [
-          { groupKey: "dues", contributionType: "dues", amount: totals.dues },
-          { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits },
-          { groupKey: "pension", contributionType: "pension", amount: totals.pension },
+          { groupKey: "dues", contributionType: "dues", amount: totals.dues, members: contributing(items, "duesAmount") },
+          { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits, members: contributing(items, "benefitAmount") },
+          { groupKey: "pension", contributionType: "pension", amount: totals.pension, members: contributing(items, "pensionAmount") },
         ].map((item) => ({
           organizationId,
           remittanceRunId: remittanceRun.id,
           groupKey: item.groupKey,
           contributionType: item.contributionType,
           amount: item.amount.toString(),
-          memberCount: items.length.toString(),
+          memberCount: item.members.toString(),
           traceJson: { sourcePayrollRunId: payrollRun.id },
         })),
       );

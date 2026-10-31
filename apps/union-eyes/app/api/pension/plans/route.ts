@@ -1,4 +1,4 @@
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
@@ -37,6 +37,7 @@ export const GET = withApi(
 export const POST = withApi(
   {
     auth: { required: true, roles: PENSION_ADMIN_ROLES },
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: { tags: ['Pension'], summary: 'Create pension plan', description: 'Create a new pension plan' },
   },
   async ({ body, organizationId, userId }) => {
