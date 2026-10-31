@@ -50,15 +50,17 @@ async function certification(userId: string, org: string, expiryOffset: number, 
 
 beforeAll(async () => {
   const { trainingCourses, courseSessions, courseRegistrations, memberCertifications, organizationMembers } = await import('@/db/schema');
+  // The declaration that matches the physical table (it carries the topic columns, training_reminders included).
+  const { communicationPreferences } = await import('@/db/schema/communication-analytics-schema');
   const { createTableDatabase } = await import('../../../app/api/__tests__/support/pglite-tables');
-  const created = await createTableDatabase([trainingCourses, courseSessions, courseRegistrations, memberCertifications, organizationMembers]);
+  const created = await createTableDatabase([trainingCourses, courseSessions, courseRegistrations, memberCertifications, organizationMembers, communicationPreferences]);
   pg = created.pg;
   db = created.db as unknown as typeof db;
 });
 afterAll(async () => { await pg.close(); });
 
 beforeEach(async () => {
-  await pg.exec('TRUNCATE training_courses, course_sessions, course_registrations, member_certifications, organization_members');
+  await pg.exec('TRUNCATE training_courses, course_sessions, course_registrations, member_certifications, organization_members, communication_preferences');
   for (const [id, org, name] of [[COURSE, ORG, 'Steward Training'], [OTHER_COURSE, OTHER, 'Other Course']]) {
     await pg.query(
       `INSERT INTO training_courses (id, organization_id, course_code, course_name, course_category, delivery_method, duration_hours)
@@ -67,6 +69,10 @@ beforeEach(async () => {
     );
   }
 });
+
+async function optOut(userId: string, org: string, column: 'email_enabled' | 'training_reminders') {
+  await pg.query(`INSERT INTO communication_preferences (id, organization_id, user_id, ${column}) VALUES (gen_random_uuid(), $1::uuid, $2, false)`, [org, userId]);
+}
 
 describe('education reminder statements against the declared schema', () => {
   it('finds a registered member of a scheduled session 7, 3 and 1 days out and carries the session details', async () => {
@@ -108,6 +114,22 @@ describe('education reminder statements against the declared schema', () => {
     const rows = rowsOf(await db.execute(sessionReminderQuery));
 
     expect(rows.map((row) => row.email)).toEqual(['ok@example.test']);
+  });
+
+  it('writes to no member who turned e-mail or training reminders off, and to one with no preference row', async () => {
+    await member('on', ORG); await member('noemail', ORG); await member('notraining', ORG); await member('other-org-pref', ORG);
+    await session('c0000000-0000-4000-8000-000000000001', ORG, COURSE, 3);
+    for (const u of ['on', 'noemail', 'notraining', 'other-org-pref']) await registration(u, ORG, COURSE, 'c0000000-0000-4000-8000-000000000001');
+    await optOut('noemail', ORG, 'email_enabled');
+    await optOut('notraining', ORG, 'training_reminders');
+    // An opt-out recorded for another organization does not silence this one.
+    await optOut('other-org-pref', OTHER, 'email_enabled');
+    await certification('on', ORG, 30); await certification('noemail', ORG, 30); await certification('notraining', ORG, 30);
+
+    const sessions = rowsOf(await db.execute(sessionReminderQuery)).map((row) => row.email).sort();
+    expect(sessions).toEqual(['on@example.test', 'other-org-pref@example.test']);
+    const warnings = rowsOf(await db.execute(expiryWarningQuery)).map((row) => row.email).sort();
+    expect(warnings).toEqual(['on@example.test']);
   });
 
   it('never joins a member, course or session of another organization', async () => {

@@ -22,7 +22,7 @@ export const GET = withApi(
     rateLimit: RATE_LIMITS.AI_COMPLETION,
     openapi: { tags: ['AI'], summary: 'Get messages for a chat session' },
   },
-  async ({ params, userId, organizationId }) => {
+  async ({ params, userId, organizationId, user }) => {
     if (!organizationId) throw ApiError.badRequest('An active organization is required');
     const blocked = await guardAiFeature(AI_FEATURES.AI_CHATBOT, {
       userId: userId ?? undefined,
@@ -34,7 +34,7 @@ export const GET = withApi(
       action: 'GET',
       organizationId,
       userId,
-      userRole: 'member',
+      userRole: user?.role ?? 'member',
       dataClass: 'internal',
     });
     const messages = await chatbotService

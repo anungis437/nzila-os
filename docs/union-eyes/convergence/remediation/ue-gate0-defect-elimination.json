@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 463,
-    "partial": 82,
+    "implementedPendingQualification": 467,
+    "partial": 81,
     "qualificationVerified": 0,
-    "unresolved": 314,
+    "unresolved": 310,
     "externalBlockers": 0
   },
   "batches": [
@@ -417,297 +417,306 @@
       "id": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
       "family": "F03/F05: the shared clause library validates what it stores, reserves public publishing to an officer, and writes only rows it owns",
       "outstandingBefore": 426,
-      "newlyImplemented": 2,
-      "outstandingAfter": 424,
-      "partial": 2,
+      "newlyImplemented": 4,
+      "outstandingAfter": 422,
+      "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B46-F12-ICRA-CONSENT-AND-REQUIRED-COVERAGE",
       "family": "F12: an ICRA assessment exists only with server-stamped consent and is scored only from the required answers",
-      "outstandingBefore": 424,
+      "outstandingBefore": 422,
       "newlyImplemented": 3,
-      "outstandingAfter": 421,
+      "outstandingAfter": 419,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
       "family": "F12: cognition and knowledge-transfer results do not present absence, defaults or literals as measurement",
-      "outstandingBefore": 421,
+      "outstandingBefore": 419,
       "newlyImplemented": 4,
-      "outstandingAfter": 417,
+      "outstandingAfter": 415,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B48-F05-LITERAL-SEARCH-AND-BOUNDED-ANONYMOUS-JSON",
       "family": "F05/F12: searches match literally and list only active organizations; free-form JSON from callers is bounded and cannot overwrite audited fields",
-      "outstandingBefore": 417,
+      "outstandingBefore": 415,
       "newlyImplemented": 2,
-      "outstandingAfter": 415,
+      "outstandingAfter": 413,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B49-F06-REGULATORY-RECORDS-AND-SYNC-HISTORY-ARE-RETAINED",
       "family": "F06: regulatory records and integration sync history are not erased by the generic delete",
-      "outstandingBefore": 415,
+      "outstandingBefore": 413,
       "newlyImplemented": 3,
-      "outstandingAfter": 412,
+      "outstandingAfter": 410,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
       "family": "F05/F03: the social export is a bounded staff read with safe cells; records are looked up inside the caller organization",
-      "outstandingBefore": 412,
+      "outstandingBefore": 410,
       "newlyImplemented": 1,
-      "outstandingAfter": 411,
+      "outstandingAfter": 409,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
       "family": "F08: stored credentials and access configuration fail closed",
-      "outstandingBefore": 411,
+      "outstandingBefore": 409,
       "newlyImplemented": 2,
-      "outstandingAfter": 409,
+      "outstandingAfter": 407,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B52-F03-ORGANIZATION-OWNED-REFERENCES",
       "family": "F03: an id taken from a body must name a row of the caller organization",
-      "outstandingBefore": 409,
+      "outstandingBefore": 407,
       "newlyImplemented": 2,
-      "outstandingAfter": 407,
+      "outstandingAfter": 405,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
       "family": "F12: routes that record a send or advertise an operation they do not perform answer 501; communications history is retained",
-      "outstandingBefore": 407,
+      "outstandingBefore": 405,
       "newlyImplemented": 5,
-      "outstandingAfter": 402,
+      "outstandingAfter": 400,
       "partial": 5,
       "evidenceCommit": null
     },
     {
       "id": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
       "family": "F12: referenced ids belong to the right parent, and a figure with nothing to measure is unknown rather than 0 or 100",
-      "outstandingBefore": 402,
+      "outstandingBefore": 400,
       "newlyImplemented": 4,
-      "outstandingAfter": 398,
+      "outstandingAfter": 396,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
       "family": "F12: approved records are locked, reviewers are independent, referenced members and documents are the organization own, and an unsubscribe is one transaction",
-      "outstandingBefore": 398,
+      "outstandingBefore": 396,
       "newlyImplemented": 3,
-      "outstandingAfter": 395,
+      "outstandingAfter": 393,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
       "family": "F12: publication needs a second person, and registration follows the session window and capacity",
-      "outstandingBefore": 395,
+      "outstandingBefore": 393,
       "newlyImplemented": 0,
-      "outstandingAfter": 395,
+      "outstandingAfter": 393,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "family": "Schema closure: the columns and indexes that let earlier partial fixes record the real fact instead of approximating it",
-      "outstandingBefore": 395,
+      "outstandingBefore": 393,
       "newlyImplemented": 7,
-      "outstandingAfter": 388,
+      "outstandingAfter": 386,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "family": "Database enforcement: constraints, triggers and columns that settle what application checks could only attempt",
-      "outstandingBefore": 388,
+      "outstandingBefore": 386,
       "newlyImplemented": 4,
-      "outstandingAfter": 384,
+      "outstandingAfter": 382,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S03-ROOM-BOOKING-MIGRATIONS-0041-AND-0035",
       "family": "Room booking: the booking store, its tenant isolation and the route that enforces the room's own rules",
-      "outstandingBefore": 384,
+      "outstandingBefore": 382,
       "newlyImplemented": 2,
-      "outstandingAfter": 382,
+      "outstandingAfter": 380,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
       "family": "Code closure of partial fixes whose remaining part needed no external decision",
-      "outstandingBefore": 382,
+      "outstandingBefore": 380,
       "newlyImplemented": 4,
-      "outstandingAfter": 378,
+      "outstandingAfter": 376,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B57-F05-INPUT-VALIDATION-AND-BOUNDS-SWEEP",
       "family": "F05 input validation and bounds: typed bodies, bounded pages and limited anonymous reads",
-      "outstandingBefore": 378,
+      "outstandingBefore": 376,
       "newlyImplemented": 8,
-      "outstandingAfter": 370,
+      "outstandingAfter": 368,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B58-F06-VERIFIED-AUDIT-AND-COMPLETION-COUNTS",
       "family": "F06 audit and records: verified existing audit and a completion count that measured attendance",
-      "outstandingBefore": 370,
+      "outstandingBefore": 368,
       "newlyImplemented": 2,
-      "outstandingAfter": 368,
+      "outstandingAfter": 366,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B59-F05-F08-READS-WITHOUT-SIDE-EFFECTS-AND-PRIVATE-DEFINITIONS",
       "family": "Reads that wrote, private definitions readable by others, and paths that advertised what they did not do",
-      "outstandingBefore": 368,
+      "outstandingBefore": 366,
       "newlyImplemented": 3,
-      "outstandingAfter": 365,
+      "outstandingAfter": 363,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
       "family": "Schema: record numbers and codes unique within an organization, not across every organization",
-      "outstandingBefore": 365,
+      "outstandingBefore": 363,
       "newlyImplemented": 2,
-      "outstandingAfter": 363,
+      "outstandingAfter": 361,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B60-F03-F08-RETENTION-LOG-AND-VERIFIED-PROJECTIONS",
       "family": "Retention evidence that told the truth, and projections verified free of canned values and address logging",
-      "outstandingBefore": 363,
+      "outstandingBefore": 361,
       "newlyImplemented": 2,
-      "outstandingAfter": 361,
+      "outstandingAfter": 359,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
       "family": "Paths that advertised an operation but were generic CRUD over another table, verified as honest 501",
-      "outstandingBefore": 361,
+      "outstandingBefore": 359,
       "newlyImplemented": 4,
-      "outstandingAfter": 357,
+      "outstandingAfter": 355,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
       "family": "Schema: a copilot conversation and a reasoning session belong to the person who opened them",
-      "outstandingBefore": 357,
+      "outstandingBefore": 355,
       "newlyImplemented": 3,
-      "outstandingAfter": 354,
+      "outstandingAfter": 352,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
       "family": "Schema: the author of an anti-scab violation is recorded by the server",
-      "outstandingBefore": 354,
+      "outstandingBefore": 352,
       "newlyImplemented": 0,
-      "outstandingAfter": 354,
+      "outstandingAfter": 352,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B62-F03-F08-F06-VERIFIED-PATHS-AND-HONEST-DISCONNECT",
       "family": "Verified honest 501 paths, and a disconnect that reports whether the platform token was revoked",
-      "outstandingBefore": 354,
+      "outstandingBefore": 352,
       "newlyImplemented": 3,
-      "outstandingAfter": 351,
+      "outstandingAfter": 349,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S08-CONTACT-SUBMISSIONS-STORE-MIGRATIONS-0045-AND-0036",
       "family": "Schema: a local, system-only record of public contact-form submissions",
-      "outstandingBefore": 351,
+      "outstandingBefore": 349,
       "newlyImplemented": 1,
-      "outstandingAfter": 350,
+      "outstandingAfter": 348,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
       "family": "A figure nothing measures is not zero, and a pension contribution names a real pension member",
-      "outstandingBefore": 350,
+      "outstandingBefore": 348,
       "newlyImplemented": 1,
-      "outstandingAfter": 349,
+      "outstandingAfter": 347,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
       "family": "Newsletter batch status: the right gate and no recipient addresses",
-      "outstandingBefore": 349,
+      "outstandingBefore": 347,
       "newlyImplemented": 2,
-      "outstandingAfter": 347,
+      "outstandingAfter": 345,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
       "family": "Campaign analytics and poll-vote paths that were generic CRUD over another table",
-      "outstandingBefore": 347,
+      "outstandingBefore": 345,
       "newlyImplemented": 1,
-      "outstandingAfter": 346,
+      "outstandingAfter": 344,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
       "family": "Small platform fixes, list filters and migration 0046 (row integrity)",
-      "outstandingBefore": 346,
+      "outstandingBefore": 344,
       "newlyImplemented": 10,
-      "outstandingAfter": 336,
+      "outstandingAfter": 334,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "family": "Cognition honesty, aggregator guards, audit-list honesty, employer correspondence and calendar-sync integrity",
-      "outstandingBefore": 336,
+      "outstandingBefore": 334,
       "newlyImplemented": 10,
-      "outstandingAfter": 326,
+      "outstandingAfter": 324,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
       "family": "Read-only registers, observability sinks and answers that stated more than the source computes",
-      "outstandingBefore": 326,
+      "outstandingBefore": 324,
       "newlyImplemented": 9,
-      "outstandingAfter": 317,
+      "outstandingAfter": 315,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
       "family": "Representative satisfaction figures, platform statistics definitions, the in-memory index answer and organization parent changes",
-      "outstandingBefore": 317,
+      "outstandingBefore": 315,
       "newlyImplemented": 3,
-      "outstandingAfter": 314,
+      "outstandingAfter": 312,
       "partial": 2,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+      "family": "Clause tag projection, education reminder opt-out and chatbot role and review markers",
+      "outstandingBefore": 312,
+      "newlyImplemented": 2,
+      "outstandingAfter": 310,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -2437,25 +2446,19 @@
       "status": "PARTIAL",
       "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
       "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts",
-        "apps/union-eyes/lib/organizational-dynamics/elasticity/elasticity-engine.ts",
-        "apps/union-eyes/lib/organizational-dynamics/momentum/momentum-engine.ts"
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
       ],
-      "explanation": "Governance coherence and momentum now explicitly refuse to manufacture a result; neither computes a governed governance trajectory. Legacy direct-call engines also refuse entry-count-derived scores rather than fabricating zeroes or confidence.",
-      "remaining": "Implement a defensible governance-momentum measurement from authorized organization records, evidence provenance and an accepted model; verify the 501 path and later real behavior at unit, native and HTTP levels."
+      "explanation": "The governance-coherence engine, which embedded literal scores, answers 501 (batch B10).",
+      "remaining": "The governance-momentum engine still derives scores from ratios of cognition-memory entry counts with arbitrary scaling."
     },
     "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST": {
       "status": "PARTIAL",
       "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
       "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts",
-        "apps/union-eyes/lib/organizational-dynamics/elasticity/elasticity-engine.ts",
-        "apps/union-eyes/lib/organizational-dynamics/momentum/momentum-engine.ts"
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
       ],
-      "explanation": "Coordination, rhythm, trust and response elasticity now explicitly refuse to manufacture results from cognition-memory entry counts. Legacy direct-call engines also refuse entry-count-derived scores rather than fabricating zeroes or confidence.",
-      "remaining": "Implement a defensible response-elasticity measurement with governed evidence, meaningful denominators and provenance; verify the 501 path and later real behavior at unit, native and HTTP levels."
+      "explanation": "The coordination, rhythm and trust engines answer 501 (batch B10).",
+      "remaining": "The response-elasticity engine still derives its indicators from entry counts and labels them elasticity."
     },
     "DEF-0B9-ML-CHURN-SQL-NAMES-COLUMNS-AND-STATUS-VALUES-THE-REPOSITORY-DOES-NOT-DEFINE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -4827,30 +4830,32 @@
       "remaining": "The route still offers no edit, rename or delete of a target."
     },
     "DEF-0B4-CLAUSE-LIBRARY-BODY-FIELDS-UNVALIDATED": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
       "files": [
         "apps/union-eyes/lib/clause-library/clause-body.ts",
         "apps/union-eyes/app/api/clause-library/route.ts",
         "apps/union-eyes/app/api/clause-library/[id]/route.ts",
         "apps/union-eyes/app/api/clause-library/[id]/share/route.ts",
-        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
+        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/tags/route.ts",
+        "apps/union-eyes/lib/clause-library/tag-body.ts",
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
       ],
-      "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed).",
-      "remaining": "The tag write route still reads its body without the schema."
+      "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed). Verified later: create, update and share parse their body with parseClauseBody and the tag routes with parseClauseTagBody, so no malformed field reaches the database."
     },
     "DEF-0B4-CLAUSE-LIBRARY-PUBLISHING-ON-STEWARD-ROLE-TITLE": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
       "files": [
         "apps/union-eyes/lib/clause-library/clause-body.ts",
         "apps/union-eyes/app/api/clause-library/route.ts",
         "apps/union-eyes/app/api/clause-library/[id]/route.ts",
         "apps/union-eyes/app/api/clause-library/[id]/share/route.ts",
-        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
+        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
       ],
-      "explanation": "Setting a clause to public sharing on create, update or the share route now requires an officer role; a steward, a member or an unresolved role is refused with 403 before any read or write. Narrower scopes stay with the owning steward and keep their federation and congress eligibility checks.",
-      "remaining": "The floor is a role title; no mandate-kernel decision names who may publish collective-agreement text."
+      "explanation": "Setting a clause to public sharing on create, update or the share route now requires an officer role; a steward, a member or an unresolved role is refused with 403 before any read or write. Narrower scopes stay with the owning steward and keep their federation and congress eligibility checks. Verified later: create, update and share all call assertMayPublish, so public sharing needs an officer role on every path."
     },
     "DEF-0B4-CLAUSE-LIBRARY-ORIGINAL-CLAUSE-ID-UNVERIFIED": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -6270,6 +6275,38 @@
         "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts"
       ],
       "explanation": "A parent change (still a system administrator's act) now checks that the new parent exists and is neither the organization nor a descendant, refuses a branch deeper than the maximum, recomputes the path and level of the organization and every descendant in the same transaction, and records the previous parent and the number of descendants repointed in the audit. Proved on PGlite."
+    },
+    "DEF-0B4-CLAUSE-LIBRARY-CREATOR-USER-IDS-DISCLOSED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+      "files": [
+        "apps/union-eyes/app/api/clause-library/[id]/tags/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
+      ],
+      "explanation": "The tags read selects only the tag id, clause id and name (no author user id), and the item read already returns the author only to the owner organization."
+    },
+    "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER": {
+      "status": "PARTIAL",
+      "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+      "files": [
+        "apps/union-eyes/lib/education/reminder-queries.ts",
+        "apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
+      ],
+      "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed).",
+      "remaining": "There is still no sent marker: a second run on the same day would send the same reminders again."
+    },
+    "DEF-0B4-CHATBOT-REVIEW-NOT-REQUIRED-AND-FIXED-ROLE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+      "files": [
+        "apps/union-eyes/app/api/chatbot/messages/route.ts",
+        "apps/union-eyes/app/api/chatbot/sessions/route.ts",
+        "apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
+      ],
+      "explanation": "The safety policy receives the caller's own role instead of the literal member on all three routes, and the reply is marked reviewRequired true because it is model-generated and advisory and no person has reviewed it."
     }
   }
 }

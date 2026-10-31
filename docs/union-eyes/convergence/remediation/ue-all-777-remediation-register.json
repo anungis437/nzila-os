@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 516,
-    "engineeringRemaining": 261,
+    "engineeringCorrected": 520,
+    "engineeringRemaining": 257,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 82
+    "engineeringPartial": 81
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -2888,9 +2888,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+        "path": "apps/union-eyes/app/api/chatbot/messages/route.ts; apps/union-eyes/app/api/chatbot/sessions/route.ts; apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts; apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "explanation": "The safety policy receives the caller's own role instead of the literal member on all three routes, and the reply is marked reviewRequired true because it is model-generated and advisory and no person has reviewed it.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CHATBOT-FALLBACK-PRESENTED-AS-AI-REPLY",
@@ -3037,9 +3044,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+        "path": "apps/union-eyes/app/api/clause-library/[id]/tags/route.ts; apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "explanation": "The tags read selects only the tag id, clause id and name (no author user id), and the item read already returns the author only to the owner organization.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-PUBLISHING-ON-STEWARD-ROLE-TITLE",
@@ -3058,11 +3072,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
-        "path": "apps/union-eyes/lib/clause-library/clause-body.ts; apps/union-eyes/app/api/clause-library/route.ts; apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/app/api/clause-library/[id]/share/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
-        "explanation": "Setting a clause to public sharing on create, update or the share route now requires an officer role; a steward, a member or an unresolved role is refused with 403 before any read or write. Narrower scopes stay with the owning steward and keep their federation and congress eligibility checks.",
-        "remaining": "The floor is a role title; no mandate-kernel decision names who may publish collective-agreement text.",
+        "path": "apps/union-eyes/lib/clause-library/clause-body.ts; apps/union-eyes/app/api/clause-library/route.ts; apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/app/api/clause-library/[id]/share/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts; apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "explanation": "Setting a clause to public sharing on create, update or the share route now requires an officer role; a steward, a member or an unresolved role is refused with 403 before any read or write. Narrower scopes stay with the owning steward and keep their federation and congress eligibility checks. Verified later: create, update and share all call assertMayPublish, so public sharing needs an officer role on every path.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -3083,11 +3096,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
-        "path": "apps/union-eyes/lib/clause-library/clause-body.ts; apps/union-eyes/app/api/clause-library/route.ts; apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/app/api/clause-library/[id]/share/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
-        "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed).",
-        "remaining": "The tag write route still reads its body without the schema.",
+        "path": "apps/union-eyes/lib/clause-library/clause-body.ts; apps/union-eyes/app/api/clause-library/route.ts; apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/app/api/clause-library/[id]/share/route.ts; apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts; apps/union-eyes/app/api/clause-library/[id]/tags/route.ts; apps/union-eyes/lib/clause-library/tag-body.ts; apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed). Verified later: create, update and share parse their body with parseClauseBody and the tag routes with parseClauseTagBody, so no malformed field reaches the database.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -5020,9 +5032,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+        "path": "apps/union-eyes/lib/education/reminder-queries.ts; apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed).",
+        "remaining": "There is still no sent marker: a second run on the same day would send the same reminders again.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EDU-CRON-REPORTS-SUCCESS-AFTER-FAILED-SENDS",

@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 516,
- "partial": 82,
- "outstanding": 261,
- "accountedFor": 261,
+ "corrected": 520,
+ "partial": 81,
+ "outstanding": 257,
+ "accountedFor": 257,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -48,10 +48,10 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 29,
+   "defects": 28,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 19,
+    "MEDIUM": 18,
     "LOW": 6
    },
    "namedRoutes": 7,
@@ -59,7 +59,7 @@
    "tranches": {
     "0B.2": 1,
     "0B.3": 1,
-    "0B.4": 3,
+    "0B.4": 2,
     "0B.5": 2,
     "0B.6": 5,
     "0B.7": 2,
@@ -92,18 +92,17 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 48,
+   "defects": 47,
    "severity": {
     "HIGH": 8,
     "MEDIUM": 28,
-    "LOW": 12
+    "LOW": 11
    },
    "namedRoutes": 5,
    "namedFiles": 0,
    "tranches": {
     "0B.2": 3,
     "0B.3": 1,
-    "0B.4": 1,
     "0B.5": 2,
     "0B.6": 7,
     "0B.7": 13,
@@ -164,17 +163,17 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 22,
+   "defects": 21,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 19,
+    "MEDIUM": 18,
     "LOW": 2
    },
    "namedRoutes": 6,
    "namedFiles": 1,
    "tranches": {
     "0B.3": 1,
-    "0B.4": 2,
+    "0B.4": 1,
     "0B.6": 1,
     "0B.7": 3,
     "0B.8": 2,
@@ -241,10 +240,10 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 55,
+   "defects": 54,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 40,
+    "MEDIUM": 39,
     "LOW": 13
    },
    "namedRoutes": 7,
@@ -253,7 +252,7 @@
     "0B.1": 4,
     "0B.2": 1,
     "0B.3": 2,
-    "0B.4": 4,
+    "0B.4": 3,
     "0B.5": 7,
     "0B.6": 10,
     "0B.7": 8,
@@ -372,11 +371,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CLAUSE-LIBRARY-PUBLISHING-ON-STEWARD-ROLE-TITLE",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B5-TRACKING-STATS-READ-MODIFY-WRITE-UNAUDITED",
     "severity": "LOW"
    },
@@ -386,7 +380,8 @@
    },
    {
     "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EDU-CRON-UNBOUNDED-SEQUENTIAL-SENDS",
@@ -525,11 +520,6 @@
    {
     "id": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
     "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B4-CLAUSE-LIBRARY-BODY-FIELDS-UNVALIDATED",
-    "severity": "LOW",
     "partial": true
    },
    {
@@ -1029,10 +1019,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B4-CLAUSE-LIBRARY-CREATOR-USER-IDS-DISCLOSED",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-ALERT-HAS-NO-HUMAN-RECIPIENT",
     "severity": "MEDIUM"
    },
@@ -1222,10 +1208,6 @@
    },
    {
     "id": "DEF-0B4-CBA-BENCHMARK-HISTORY-NOT-SCOPED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CHATBOT-REVIEW-NOT-REQUIRED-AND-FIXED-ROLE",
     "severity": "MEDIUM"
    },
    {

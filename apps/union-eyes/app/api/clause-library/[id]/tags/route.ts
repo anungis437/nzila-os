@@ -65,8 +65,9 @@ export const GET = withApi(
         throw ApiError.notFound('clause', id);
       }
 
+      // The tag names and ids only: the author's user id is owner-internal and a reader of a shared clause does not receive it.
       const tags = await db
-        .select()
+        .select({ id: clauseLibraryTags.id, clauseId: clauseLibraryTags.clauseId, tagName: clauseLibraryTags.tagName })
         .from(clauseLibraryTags)
         .where(eq(clauseLibraryTags.clauseId, id));
 
