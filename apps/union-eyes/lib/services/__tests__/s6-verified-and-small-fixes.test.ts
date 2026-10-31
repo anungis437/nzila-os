@@ -90,4 +90,11 @@ describe('S6 verified and small fixes', () => {
     expect(disconnect).toContain('platform_token_revoked: platformTokenRevoked')
     expect(disconnect).toContain('could not be revoked')
   })
+
+  it('does not report zero training due for an organization that has no training records (DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES)', () => {
+    const route = read('app/api/health-safety/stats/route.ts')
+    expect(route).toContain('trainingDue: recordsHeld > 0 ? Number(row.training_due ?? 0) : null')
+    expect(route).toContain('trainingRecordsHeld: recordsHeld')
+    expect(read('app/[locale]/dashboard/health-safety/training/page.tsx')).toContain('totalRecords: json.trainingRecordsHeld ?? 0')
+  })
 })

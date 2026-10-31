@@ -70,7 +70,7 @@ export default function TrainingPage() {
       if (res.ok) {
         const json = await res.json();
         setStats({
-          totalRecords: json.trainingDue ?? 0,
+          totalRecords: json.trainingRecordsHeld ?? 0,
           certifiedMembers: 0,
           expiringSoon: json.trainingDue ?? 0,
           overdue: 0,

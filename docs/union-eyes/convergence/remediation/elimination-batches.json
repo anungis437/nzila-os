@@ -5920,6 +5920,33 @@
           "explanation": "Migration 0045 adds contact_submissions (every column length-limited, a crm_status check of pending, recorded or failed, retain_until defaulting to two years) and cache 0036 gives it a system-role-only policy; the manifest classifies it SYSTEM_ONLY with no runtime privilege (registry count pin 865 to 866, disclosed). The contact route stores the submission under the system role first, acknowledges the visitor once it exists, then syncs to the CRM and records recorded or failed; an unconfigured or failing CRM no longer refuses or loses the submission, and a failed store answers 503 and contacts no CRM. The route test was rewritten for the new behaviour (the 503-on-unconfigured-CRM cases replaced, disclosed). Proved on PGlite and with route tests."
         }
       ]
+    },
+    {
+      "id": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
+      "family": "A figure nothing measures is not zero, and a pension contribution names a real pension member",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/health-safety/stats/route.ts",
+            "apps/union-eyes/app/[locale]/dashboard/health-safety/training/page.tsx",
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+          ],
+          "explanation": "No route or job writes training records, so an organization with none now gets trainingDue null (not measured) with trainingRecordsHeld 0, instead of \"0 due\"; the training page shows the records held as its total rather than the due count."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AM",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/pension/contributions/route.ts",
+            "apps/union-eyes/app/api/__tests__/pension-contribution-member.route.test.ts"
+          ],
+          "explanation": "A contribution is recorded only against a pension member of the caller's organization (404 otherwise), under the stored member name (the typed name is ignored), and the amount must be a positive amount of at most ten digits and two decimals. Tested with a mocked transaction.",
+          "remaining": "The T4A, benefit-claim, member and plan write routes still store typed references, names and amounts; each needs the same reference and amount checks."
+        }
+      ]
     }
   ]
 }
