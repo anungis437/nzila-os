@@ -231,6 +231,33 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects ambiguous scope parameters before any database access', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'c1:r1:unsubscribe');
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&scope=unknown&token=${t}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+    expect(response.status).toBe(400);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('does not persist arbitrary query-string text as a consent reason', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'c2:r2:unsubscribe');
+    m.selectQueue.push([{ id: 'c2', organizationId: 'org_2', stats: {} }], []);
+    m.updateReturnQueue.push([]);
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c2&token=${t}&reason=${encodeURIComponent('email=private@example.org')}`), {
+      params: Promise.resolve({ recipientId: 'r2' }),
+    });
+    expect(response.status).toBe(200);
+    const preferenceInsert = mockDb.insert.mock.results[0].value.values;
+    expect(preferenceInsert).toHaveBeenCalledWith(expect.objectContaining({ unsubscribeReason: 'unsubscribe_link' }));
+    const consentInsert = mockDb.insert.mock.results[1].value.values;
+    expect(consentInsert).toHaveBeenCalledWith(expect.objectContaining({ metadata: { reason: 'unsubscribe_link', campaignId: 'c2' } }));
+  });
+
   it('fails closed without a configured secret: 401 and no mutation', async () => {
     const { GET } = await loadRoute();
 
