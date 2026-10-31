@@ -5,11 +5,17 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   info: vi.fn(),
   error: vi.fn(),
+  checkRateLimit: vi.fn(),
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
-  withRoleAuth: (_role: string, handler: (req: NextRequest) => Promise<Response>) => handler,
+  withRoleAuth: (_role: string, handler: (req: NextRequest, context: { userId: string; organizationId: string }) => Promise<Response>) =>
+    (req: NextRequest) => handler(req, { userId: "user-a", organizationId: "org-a" }),
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: m.info, error: m.error } }));
+vi.mock('@/lib/rate-limiter', () => ({
+  checkRateLimit: m.checkRateLimit,
+  createRateLimitHeaders: () => ({}),
+}));
 
 const request = (body: unknown, headers: Record<string, string> = {}) =>
   new NextRequest('http://localhost/api/workspace/telemetry', {
@@ -19,7 +25,30 @@ const request = (body: unknown, headers: Record<string, string> = {}) =>
   });
 
 describe('POST /api/workspace/telemetry privacy and size bounds', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.checkRateLimit.mockResolvedValue({ allowed: true, limit: 120, remaining: 119, resetIn: 60 });
+  });
+
+  it('enforces an organization/user-scoped rate limit before parsing or logging', async () => {
+    const { POST } = await import('../workspace/telemetry/route');
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, limit: 120, remaining: 0, resetIn: 60 });
+    const denied = await POST(request({ event: 'tab.view', payload: {} }));
+    expect(denied.status).toBe(429);
+    expect(m.checkRateLimit).toHaveBeenCalledWith('org-a:user-a', expect.objectContaining({
+      identifier: 'workspace-telemetry', limit: 120, window: 60, failOpen: false,
+    }));
+    expect(m.info).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when rate limiting is unavailable', async () => {
+    const { POST } = await import('../workspace/telemetry/route');
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, error: 'Redis unavailable', limit: 120, remaining: 0, resetIn: 60 });
+    expect((await POST(request({ event: 'tab.view' }))).status).toBe(503);
+    m.checkRateLimit.mockRejectedValueOnce(new Error('Redis timeout'));
+    expect((await POST(request({ event: 'tab.view' }))).status).toBe(503);
+    expect(m.info).not.toHaveBeenCalled();
+  });
 
   it('records only canonical event, tab, route and server timestamp', async () => {
     const { POST } = await import('../workspace/telemetry/route');
