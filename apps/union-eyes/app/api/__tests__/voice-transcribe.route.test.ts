@@ -37,10 +37,15 @@ async function loadRoute() {
   return import('../voice/transcribe/route');
 }
 
-function makeFormRequest(file?: File, language?: string) {
+function makeFormRequest(file?: File, language?: string, consent: 'valid' | 'missing' | 'stale' = 'valid') {
   const form = new FormData();
   if (file) form.append('audio', file);
   if (language) form.append('language', language);
+  if (consent !== 'missing') {
+    form.append('disclosureNoticeVersion', consent === 'stale' ? 'old' : 'v1');
+    form.append('disclosureAcknowledged', 'true');
+    form.append('participantPermissionConfirmed', 'true');
+  }
   return new NextRequest('http://localhost/api/voice/transcribe', {
     method: 'POST',
     body: form,
@@ -58,6 +63,10 @@ describe('voice/transcribe route', () => {
     m.transcribeAudioWithLanguage.mockResolvedValue('hello world');
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 60 });
     m.audit.mockResolvedValue(undefined);
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_VERSION = 'v1';
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_EN_CA = 'External transcription notice';
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_FR_CA = 'Avis de transcription externe';
+    process.env.UE_VOICE_DISCLOSURE_APPROVAL_REFERENCE = 'test-only-approval-reference';
   });
 
   it('returns validation error when audio file is missing', async () => {
@@ -155,4 +164,28 @@ describe('voice/transcribe route', () => {
     expect(response.status).toBe(500);
     expect(m.transcribeAudioWithLanguage).not.toHaveBeenCalled();
   });
+  it('refuses external speech calls without both confirmations and a current approved notice', async () => {
+    const { POST } = await loadRoute();
+    const file = new File(['voice'], 'ok.wav', { type: 'audio/wav' });
+    expect((await POST(makeFormRequest(file, 'en-CA', 'missing'))).status).toBe(400);
+    expect((await POST(makeFormRequest(file, 'en-CA', 'stale'))).status).toBe(409);
+    delete process.env.UE_VOICE_DISCLOSURE_NOTICE_FR_CA;
+    expect((await POST(makeFormRequest(file, 'en-CA'))).status).toBe(503);
+    expect(m.audit).not.toHaveBeenCalled();
+    expect(m.transcribeAudioWithLanguage).not.toHaveBeenCalled();
+  });
+
+  it('includes the institutionally configured notice version in pre-disclosure audit', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(makeFormRequest(new File(['voice'], 'ok.wav', { type: 'audio/wav' }), 'fr-CA'));
+    expect(response.status).toBe(200);
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      details: expect.objectContaining({
+        noticeVersion: 'v1',
+        approvalReference: 'test-only-approval-reference',
+        participantPermissionAsserted: true,
+      }),
+    }));
+  });
+
 });
