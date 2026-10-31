@@ -8,6 +8,7 @@ import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { canAdministerOrganization, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
 import { mergeSettings, organizationPatchSchema } from '@/lib/organizations/profile-input'
+import { repointHierarchy, ReparentRefusal, type ReparentPlan } from '@/lib/organizations/reparent'
 import { isUniqueViolation } from '@/lib/db/unique-violation'
 
 export const dynamic = 'force-dynamic'
@@ -175,6 +176,19 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       delete updates.status
     }
 
+    // A parent change recomputes this organization's path and level and every descendant's, or is refused (unknown parent, a cycle, too deep).
+    let reparent: ReparentPlan | null = null
+    if (parentChanged) {
+      try {
+        reparent = await repointHierarchy(tx, id, body.parent_id ?? null)
+      } catch (error) {
+        if (error instanceof ReparentRefusal) return { refused: error.message } as const
+        throw error
+      }
+      updates.hierarchyPath = reparent.hierarchyPath
+      updates.hierarchyLevel = reparent.hierarchyLevel
+    }
+
     // A new slug must be free: paths resolve organizations by slug. Settings are merged into the stored ones, not substituted.
     if (typeof updates.slug === 'string' && updates.slug !== current.slug) {
       const [taken] = await tx.select({ id: organizations.id }).from(organizations).where(eq(organizations.slug, updates.slug)).limit(1)
@@ -190,7 +204,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       action: 'organization.update',
       resourceType: 'organizations',
       resourceId: id,
-      details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
+      details: {
+        fields: Object.keys(updates).filter((k) => k !== 'updatedAt'),
+        ...(reparent ? { previousParentId: reparent.previousParentId, newParentId: body.parent_id ?? null, descendantsRepointed: reparent.descendantsRepointed } : {}),
+      },
     })
     return row
   })
@@ -202,6 +219,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (isUniqueViolation(error)) return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
     throw error
   }
+  if (updated && typeof updated === 'object' && 'refused' in updated) return NextResponse.json({ error: updated.refused }, { status: 400 })
   if (updated === 'slug-taken') return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
   if (updated === 'forbidden') {
     return NextResponse.json(

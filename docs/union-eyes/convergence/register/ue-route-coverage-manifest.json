@@ -11418,7 +11418,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -11430,7 +11430,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {

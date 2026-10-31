@@ -5,9 +5,9 @@
  * Used by both the API route and server components.
  */
 
-import { db } from '@/db/db';
 import { organizations, organizationMembers } from '@/db/schema';
-import { sql, ne, count, sum } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { sql, ne, count, sum, isNull } from 'drizzle-orm';
 
 export interface PlatformStats {
   totalOrganizations: number;
@@ -56,7 +56,19 @@ export interface PlatformStats {
   roleDistribution: Array<{ role: string; cnt: number }>;
 }
 
-export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
+/**
+ * Platform-wide counts across every organization, read under the system role on purpose (a platform operator's cross-tenant read), not
+ * through whatever the connection role happens to see.
+ *
+ * `registeredUsers` and `activeUsers` count distinct people with an undeleted membership (one person in several organizations is one);
+ * `resolved` grievances are settled or closed ones; `totalMonetaryValue` sums only settlements that were agreed or implemented, and the
+ * settlements table records no currency, so it is an unlabelled amount.
+ */
+export function getPlatformStatsFromDb(): Promise<PlatformStats> {
+  return withSystemContext((tx) => computePlatformStats(tx as unknown as typeof import('@/db/db').db));
+}
+
+async function computePlatformStats(db: typeof import('@/db/db').db): Promise<PlatformStats> {
   // ── Organization stats ──
   const orgStats = await db
     .select({
@@ -75,11 +87,12 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
   // ── Registered users (organization_members) ──
   const memberStats = await db
     .select({
-      totalRegisteredUsers: count(),
-      activeUsers: sql<number>`count(*) filter (where ${organizationMembers.status} = 'active')`,
+      totalRegisteredUsers: sql<number>`count(distinct ${organizationMembers.userId})`,
+      activeUsers: sql<number>`count(distinct ${organizationMembers.userId}) filter (where ${organizationMembers.status} = 'active')`,
       distinctOrgs: sql<number>`count(distinct ${organizationMembers.organizationId})`,
     })
-    .from(organizationMembers);
+    .from(organizationMembers)
+    .where(isNull(organizationMembers.deletedAt));
 
   // ── Grievance stats ──
   const grievanceStats = await db.execute(sql`
@@ -87,7 +100,7 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
       count(*) as total_grievances,
       count(*) filter (where status NOT IN ('settled', 'withdrawn', 'denied', 'closed')) as open_grievances,
       count(*) filter (where priority IN ('high', 'urgent')) as high_priority,
-      count(*) filter (where status = 'settled') as resolved_grievances,
+      count(*) filter (where status IN ('settled', 'closed')) as resolved_grievances,
       count(*) filter (where status = 'arbitration') as in_arbitration
     FROM grievances
   `);
@@ -106,7 +119,7 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
   const settlementStats = await db.execute(sql`
     SELECT 
       count(*) as total_settlements,
-      coalesce(sum(monetary_amount), 0) as total_monetary_value
+      coalesce(sum(monetary_amount) filter (where status IN ('agreed', 'implemented')), 0) as total_monetary_value
     FROM settlements
   `);
 
@@ -151,6 +164,7 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
   const roleDistribution = await db.execute(sql`
     SELECT role, count(*) as cnt 
     FROM organization_members 
+    WHERE deleted_at IS NULL
     GROUP BY role 
     ORDER BY cnt DESC
   `);

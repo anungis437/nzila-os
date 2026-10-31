@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 460,
-    "partial": 80,
+    "implementedPendingQualification": 463,
+    "partial": 82,
     "qualificationVerified": 0,
-    "unresolved": 317,
+    "unresolved": 314,
     "externalBlockers": 0
   },
   "batches": [
@@ -699,6 +699,15 @@
       "newlyImplemented": 9,
       "outstandingAfter": 317,
       "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
+      "family": "Representative satisfaction figures, platform statistics definitions, the in-memory index answer and organization parent changes",
+      "outstandingBefore": 317,
+      "newlyImplemented": 3,
+      "outstandingAfter": 314,
+      "partial": 2,
       "evidenceCommit": null
     }
   ],
@@ -6207,6 +6216,60 @@
         "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
       ],
       "explanation": "Verified in source: the steward routes expose only the directory read (a member-safe projection, the full audited rows for an officer) and no write is configured."
+    },
+    "DEF-0B11-IDS-SATISFACTION-REPRESENTATIVE-FIGURES-HAVE-NO-MINIMUM-RESPONSES-AND-ARE-READ-BY-EVERY-STEWARD-FOR-ANY-REPRESENTATIVE-ID": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
+      "files": [
+        "apps/union-eyes/lib/satisfaction/figures-policy.ts",
+        "apps/union-eyes/app/api/satisfaction/rankings/route.ts",
+        "apps/union-eyes/app/api/satisfaction/lro/[lroId]/route.ts",
+        "apps/union-eyes/app/api/__tests__/satisfaction-lro.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/satisfaction-rankings-policy.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts"
+      ],
+      "explanation": "The rankings are an officer read that leaves out a representative with fewer than five completed surveys (and says how many); the item route lets a steward read their own figures and any other representative's only at the officer floor, shows the count without averages below five, and both record the read in the same transaction. The lro route test was adapted (a mock for the guard, audit and context, a six-survey fixture and three new cases; disclosed)."
+    },
+    "DEF-0B10-OPL-15": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
+      "files": [
+        "apps/union-eyes/lib/queries/platform-stats.ts",
+        "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts"
+      ],
+      "explanation": "registeredUsers and activeUsers count distinct people with an undeleted membership (one person in several organizations is one; removed members are excluded), resolved grievances are settled or closed, and the settlement total sums only agreed or implemented settlements (the table records no currency, noted in the source)."
+    },
+    "DEF-0B10-OPL-14": {
+      "status": "PARTIAL",
+      "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
+      "files": [
+        "apps/union-eyes/lib/queries/platform-stats.ts",
+        "apps/union-eyes/app/api/platform/stats/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts"
+      ],
+      "explanation": "The cross-organization statements now run in withSystemContext on purpose instead of whatever the connection role sees, and the role-title read is unchanged.",
+      "remaining": "The read is still authorized by a platform_lead role title and is not audited (the audit entry needs an organization, and no platform-scope audit exists); a platform-staff mandate is an authority decision."
+    },
+    "DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL": {
+      "status": "PARTIAL",
+      "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
+      "files": [
+        "apps/union-eyes/app/api/ai/ingest/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts"
+      ],
+      "explanation": "The answer now says indexed_in_process_memory with durable false and no invented chunk count.",
+      "remaining": "The index itself is still process memory; a durable shared index (a table with embeddings or a vector store) is not built."
+    },
+    "DEF-0B9-ORG-ITEM-PATCH-PARENT-CHANGE-DOES-NOT-REPOINT-HIERARCHY-PATH-OR-CHECK-CYCLE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
+      "files": [
+        "apps/union-eyes/lib/organizations/reparent.ts",
+        "apps/union-eyes/app/api/organizations/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/organization-reparent.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts"
+      ],
+      "explanation": "A parent change (still a system administrator's act) now checks that the new parent exists and is neither the organization nor a descendant, refuses a branch deeper than the maximum, recomputes the path and level of the organization and every descendant in the same transaction, and records the previous parent and the number of descendants repointed in the audit. Proved on PGlite."
     }
   }
 }
