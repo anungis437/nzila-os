@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
 
     try {
       const client = new HubSpotClient({ apiKey: HUBSPOT_API_KEY });
-      const [firstName, ...rest] = name.trim().split(/\\s+/);
+      const [firstName, ...rest] = name.trim().split(/\s+/);
       const lastName = rest.join(' ') || undefined;
       const contactResult = await client.upsertContact({
         email,
