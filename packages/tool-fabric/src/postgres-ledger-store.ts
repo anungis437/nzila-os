@@ -5,7 +5,7 @@
  * This module never creates connections, reads secrets or permits tool execution.
  * Applying the database migration is a separately governed operation.
  *
- * Every read uses a database row lock to obtain an atomic snapshot. Every
+ * All SQL references pin the public schema: pg_temp must never shadow the\n * canonical ledger, even if the authenticated connection changes search_path.\n * Every read uses a database row lock to obtain an atomic snapshot. Every
  * append locks the same row and commits the entry plus the new stream head
  * in one transaction. An externally managed rollback witness is STILL
  * mandatory (ToolTrustLedger); this DB is not its own trust anchor.
@@ -100,7 +100,7 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
     tx: PostgresTrustQuery, orgId: string, lock: 'SHARE' | 'UPDATE',
   ): Promise<LedgerSnapshot> {
       const heads = await tx.unsafe(
-        `SELECT revision::text AS revision, head_hash FROM tool_fabric_trust_stream WHERE stream_id = $1 FOR ${lock}`,
+        `SELECT revision::text AS revision, head_hash FROM public.tool_fabric_trust_stream WHERE stream_id = $1 FOR ${lock}`,
         [orgId],
       )
       if (heads.length !== 1) {
@@ -108,7 +108,7 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       }
       const head = assertHead(heads[0]!)
       const rows = await tx.unsafe(
-        'SELECT seq::text AS seq, audit_id::text AS audit_id, entry_hash, entry FROM tool_fabric_trust_entry WHERE stream_id = $1 ORDER BY seq ASC',
+        'SELECT seq::text AS seq, audit_id::text AS audit_id, entry_hash, entry FROM public.tool_fabric_trust_entry WHERE stream_id = $1 ORDER BY seq ASC',
         [orgId],
       )
       if (rows.length !== head.revision) {
@@ -206,7 +206,7 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       }
       try {
         const inserted = await tx.unsafe(
-          'INSERT INTO tool_fabric_trust_entry (stream_id, seq, audit_id, entry_hash, entry) VALUES ($1,$2,$3,$4,$5::jsonb) RETURNING seq::text AS seq',
+          'INSERT INTO public.tool_fabric_trust_entry (stream_id, seq, audit_id, entry_hash, entry) VALUES ($1,$2,$3,$4,$5::jsonb) RETURNING seq::text AS seq',
           [orgId, current.revision + 1, entry.id, entry.hash, JSON.stringify(entry)],
         )
         if (inserted.length !== 1) {
@@ -218,7 +218,7 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
           throw new LedgerConflictError('Persistent trust append returned invalid receipt')
         }
         const updated = await tx.unsafe(
-          'UPDATE tool_fabric_trust_stream SET revision = $2, head_hash = $3, updated_at = now() WHERE stream_id = $1 AND revision = $4 AND head_hash = $5 RETURNING revision::text AS revision, head_hash',
+          'UPDATE public.tool_fabric_trust_stream SET revision = $2, head_hash = $3, updated_at = now() WHERE stream_id = $1 AND revision = $4 AND head_hash = $5 RETURNING revision::text AS revision, head_hash',
           [orgId, current.revision + 1, entry.hash, current.revision, current.headHash],
         )
         if (updated.length !== 1) throw new LedgerConflictError('Persistent CAS stream head conflict')

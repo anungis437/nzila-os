@@ -50,6 +50,43 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
   it('rejects missing authenticated transactional client',()=>{
     expect(()=>new PostgresAtomicTrustLedgerStore({} as never)).toThrow(LedgerStoreUnavailableError)
   })
+  it('pins every read and append SQL relation to the canonical public schema', async () => {
+    // A session can create pg_temp relations that shadow unqualified names.
+    // This contract rejects any SQL that could be redirected by search_path.
+    const statements: string[] = []
+    const entry = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const query = {
+      unsafe: async (sql: string) => {
+        statements.push(sql)
+        if (sql.includes('FOR SHARE') || sql.includes('FOR UPDATE')) {
+          return [{ revision: '0', head_hash: LEDGER_GENESIS_HASH }]
+        }
+        if (sql.includes('ORDER BY seq ASC')) return []
+        if (sql.includes('INSERT INTO')) return [{ seq: '1' }]
+        if (sql.includes('UPDATE')) return [{ revision: '1', head_hash: entry.hash }]
+        throw new Error('Unexpected SQL statement: ' + sql)
+      },
+    }
+    const db = {
+      unsafe: query.unsafe,
+      begin: async <T>(fn: (tx: typeof query) => Promise<T>) => fn(query),
+    }
+    const store = new PostgresAtomicTrustLedgerStore(db)
+    await expect(store.readSnapshot(ORG)).resolves.toEqual({
+      revision: 0, headHash: LEDGER_GENESIS_HASH, entries: [],
+    })
+    await expect(store.compareAndAppend(
+      ORG, { revision: 0, headHash: LEDGER_GENESIS_HASH }, entry,
+    )).resolves.toEqual({ revision: 1, headHash: entry.hash })
+    expect(statements).toHaveLength(6)
+    expect(statements.filter(sql => sql.includes('FROM public.tool_fabric_trust_stream'))).toHaveLength(2)
+    expect(statements.filter(sql => sql.includes('FROM public.tool_fabric_trust_entry'))).toHaveLength(2)
+    expect(statements.filter(sql => sql.includes('INSERT INTO public.tool_fabric_trust_entry'))).toHaveLength(1)
+    expect(statements.filter(sql => sql.includes('UPDATE public.tool_fabric_trust_stream'))).toHaveLength(1)
+    expect(statements.some(sql =>
+      /\\b(?:FROM|INTO|UPDATE)\\s+(?:tool_fabric_trust_stream|tool_fabric_trust_entry)\\b/i.test(sql),
+    )).toBe(false)
+  })
   it('reads independently initialized empty canonical stream',async()=>{
     const db=fake()
     const s=new PostgresAtomicTrustLedgerStore(db)
