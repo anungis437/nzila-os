@@ -76,8 +76,18 @@ describe('geofence-privacy-service', () => {
     });
 
     it('throws when an active consent already exists', async () => {
-      pushSel([{ id: 'c0', consentStatus: 'opted_in', expiresAt: new Date('2999-01-01') }]);
+      pushSel([{ id: 'c0', consentStatus: 'opted_in', expiresAt: new Date('2999-01-01'), consentVersion: 'v1' }]);
       await expect(S.requestLocationConsent(req)).rejects.toThrow('already has active');
+    });
+
+    it('allows re-consent under a new notice version instead of trapping an old active consent', async () => {
+      pushSel(
+        [{ id: 'old', consentStatus: 'opted_in', consentVersion: 'v0', expiresAt: new Date('2999-01-01') }],
+        [{ id: 'old', consentVersion: 'v1' }],
+        [],
+      );
+      const r = await S.requestLocationConsent(req);
+      expect(r).toEqual({ id: 'old', consentVersion: 'v1' });
     });
 
     it('renews an expired or withdrawn consent row in place with an upsert (user_id is unique)', async () => {
@@ -153,17 +163,25 @@ describe('geofence-privacy-service', () => {
     });
 
     it('returns false for strike context without strike permission', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: false }]);
+      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
       expect(await S.hasValidConsent('u1', 'strike')).toBe(false);
     });
 
     it('returns false for event context without event permission', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringEvents: false }]);
+      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringEvents: false }]);
       expect(await S.hasValidConsent('u1', 'event')).toBe(false);
     });
 
+    it('does not authorize tracking under a superseded or unconfigured notice', async () => {
+      pushSel([{ id: 'old', expiresAt: new Date('2999-01-01'), consentVersion: 'v0', allowedDuringStrike: true }]);
+      expect(await S.hasValidConsent('u1', 'strike')).toBe(false);
+      delete process.env.UE_LOCATION_CONSENT_NOTICE_TEXT;
+      pushSel([{ id: 'current', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }]);
+      expect(await S.hasValidConsent('u1', 'strike')).toBe(false);
+    });
+
     it('returns true for a valid consent', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: true }]);
+      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }]);
       expect(await S.hasValidConsent('u1', 'strike')).toBe(true);
     });
   });
@@ -178,20 +196,20 @@ describe('geofence-privacy-service', () => {
 
     it('throws when tracking is globally disabled', async () => {
       pushSel(
-        [{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: true }], // hasValidConsent
+        [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], // hasValidConsent
         [enabledConfig({ locationTrackingEnabled: false })], // getConfig
       );
       await expect(S.trackLocation(tr)).rejects.toThrow('globally disabled');
     });
 
     it('refuses a strike ping when the member did not allow tracking during strikes', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: false }]);
+      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
       await expect(S.trackLocation(tr)).rejects.toThrow('explicit opt-in consent');
     });
 
     it('records a location point', async () => {
       pushSel(
-        [{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: true }], // hasValidConsent
+        [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], // hasValidConsent
         [enabledConfig()], // getConfig
         [{ id: 'loc1' }], // insert returning
       );
@@ -222,7 +240,7 @@ describe('geofence-privacy-service', () => {
     it('reports inside and logs an entry event for a member who opted in', async () => {
       pushSel(
         [fence],
-        [{ id: 'c1', expiresAt: new Date('2999-01-01') }], // hasValidConsent
+        [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1' }], // hasValidConsent
         [enabledConfig()], // getConfig
         [], // logGeofenceEvent insert
       );
@@ -245,7 +263,7 @@ describe('geofence-privacy-service', () => {
 
     it('stores no position while location tracking is globally disabled', async () => {
       h.db.insert.mockClear();
-      pushSel([fence], [{ id: 'c1', expiresAt: new Date('2999-01-01') }], [enabledConfig({ locationTrackingEnabled: false })]);
+      pushSel([fence], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1' }], [enabledConfig({ locationTrackingEnabled: false })]);
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.recorded).toBe(false);
       expect(h.db.insert).not.toHaveBeenCalled();
@@ -253,7 +271,7 @@ describe('geofence-privacy-service', () => {
 
     it('asks for the strike permission when the fence belongs to a strike', async () => {
       h.db.insert.mockClear();
-      pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: false }]);
+      pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.recorded).toBe(false);
       expect(h.db.insert).not.toHaveBeenCalled();
@@ -338,7 +356,7 @@ describe('geofence-privacy-service', () => {
     it('summarizes active and expired records', async () => {
       pushSel([
         { expiresAt: new Date('2000-01-01'), recordedAt: new Date('1999-01-01') },
-        { expiresAt: new Date('2999-01-01'), recordedAt: new Date('2026-01-01') },
+        { expiresAt: new Date('2999-01-01'), consentVersion: 'v1', recordedAt: new Date('2026-01-01') },
       ]);
       const r = await S.getRetentionStats();
       expect(r.totalRecords).toBe(2);
