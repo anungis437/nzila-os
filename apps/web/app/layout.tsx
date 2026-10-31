@@ -9,7 +9,6 @@ import Footer from "@/components/public/Footer";
 import BackToTop from "@/components/public/BackToTop";
 import PageTransition from "@/components/public/PageTransition";
 import JsonLd from "@/components/public/JsonLd";
-import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from "@/lib/marketing-facts";
 
 const poppins = Poppins({ 
   subsets: ["latin"],
@@ -23,26 +22,25 @@ export const metadata: Metadata = {
     default: "Nzila Ventures | Organizational Continuity Infrastructure",
     template: "%s | Nzila Ventures",
   },
-  description: `Nzila Ventures builds ${platformCoverageLabel()}, ${governedCoverageLabel()}, and Nzila OS for organizations where governance, continuity, evidence, and trust matter.`,
+  description: "Nzila Ventures builds continuity-focused software, including Union Eyes and the CIVIC public-service initiative, with governed workflows, institutional knowledge and human accountability.",
   keywords: ["organizational continuity", "operational memory", "governance infrastructure", "trust infrastructure", "Union Eyes", "Nzila OS", "auditability", "data sovereignty", "explainable AI", "Nzila Ventures"],
   authors: [{ name: "Nzila Ventures" }],
   creator: "Nzila Ventures",
   icons: {
     icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "Nzila Ventures",
     title: "Nzila Ventures | Organizational Continuity Infrastructure",
-    description: `Continuity infrastructure for trust-sensitive institutions, delivered through Nzila OS, Union Eyes, and ${MARKETING_FACTS.governedApplications} governed operational applications.`,
+    description: "Software for institutional continuity and accountable operations. Explore Union Eyes, CIVIC and the wider Nzila Ventures portfolio.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Earth at night showing illuminated cities and global connectivity - representing Nzila Ventures continuity infrastructure",
+        alt: "Nzila Ventures — Build continuity. Preserve accountability.",
       },
     ],
   },
@@ -50,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Nzila Ventures | Organizational Continuity Infrastructure",
     description: "Nzila builds governed operational infrastructure that preserves continuity, operational memory, evidence, and organizational trust.",
-    images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80"],
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,
