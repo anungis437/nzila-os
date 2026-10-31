@@ -593,7 +593,8 @@ export class ReportExecutor {
           condition = sql`${safeColumnName(fieldName)} BETWEEN ${filter.values![0]} AND ${filter.values![1]}`;
           break;
         default:
-          continue;
+          // An operator this switch does not know is refused, never skipped: skipping dropped the filter and returned every row.
+          throw new Error(`Unsupported filter operator: ${String((filter as { operator: unknown }).operator)}`);
       }
 
       // Handle logical operator transitions

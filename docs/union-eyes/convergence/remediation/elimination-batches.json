@@ -6671,6 +6671,23 @@
       "family": "Pilot write routes: parsed, bounded request bodies",
       "evidenceCommit": null,
       "items": []
+    },
+    {
+      "id": "B75-REPORT-OPERATORS-AND-QUEUE-STATUS",
+      "family": "Report filter operators that were silently dropped; queue status verified",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-RPT-EXECUTE-OPERATORS-THE-ROUTE-ACCEPTS-ARE-SKIPPED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/reports/execute/route.ts",
+            "apps/union-eyes/lib/report-executor.ts",
+            "apps/union-eyes/lib/services/__tests__/s19-report-operators-and-queue-status.test.ts"
+          ],
+          "explanation": "The route validates filters against the executor's own operator vocabulary (translating the earlier names equals, not_equals, contains, greater_than and less_than), requires a bounded value list for in, not_in and between (exactly two for between), and the executor now throws on an operator it does not know instead of skipping the filter, so a filter can no longer be dropped and every row returned."
+        }
+      ]
     }
   ]
 }

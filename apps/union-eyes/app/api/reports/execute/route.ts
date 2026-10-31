@@ -183,7 +183,11 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
  * advertises); the executor refuses anything else, so this route keeps no second, different list.
  */
 const ALLOWED_AGGREGATIONS = ['count', 'sum', 'avg', 'min', 'max', 'distinct'];
-const ALLOWED_OPERATORS = ['equals', 'not_equals', 'contains', 'greater_than', 'less_than', 'between', 'in'];
+// The executor's own vocabulary. The names this route used to accept (equals, contains, ...) were not the executor's, and the executor skipped
+// a filter whose operator it did not know, so such a filter was dropped and every row came back. The earlier names are translated, and
+// anything else is refused.
+const ALLOWED_OPERATORS = ['eq', 'ne', 'gt', 'lt', 'gte', 'lte', 'like', 'ilike', 'in', 'not_in', 'is_null', 'is_not_null', 'between'];
+const LEGACY_OPERATORS: Record<string, string> = { equals: 'eq', not_equals: 'ne', contains: 'ilike', greater_than: 'gt', less_than: 'lt' };
 const ALLOWED_SORT_DIRECTIONS = ['asc', 'desc'];
 
 /**
@@ -223,8 +227,15 @@ function validateReportConfig(config: ReportConfig): string | null {
       if (!allowedColumns.includes(filter.fieldId)) {
         return `Invalid filter field: ${filter.fieldId}`;
       }
+      const translated = LEGACY_OPERATORS[filter.operator as string];
+      if (translated) (filter as { operator: string }).operator = translated;
       if (!ALLOWED_OPERATORS.includes(filter.operator)) {
         return `Invalid operator: ${filter.operator}`;
+      }
+      const needsList = filter.operator === 'in' || filter.operator === 'not_in';
+      const values = (filter as { values?: unknown }).values;
+      if ((needsList || filter.operator === 'between') && (!Array.isArray(values) || values.length === 0 || (filter.operator === 'between' && values.length !== 2) || values.length > 100)) {
+        return `Operator ${filter.operator} needs ${filter.operator === 'between' ? 'exactly two' : 'a bounded list of'} values`;
       }
     }
   }
