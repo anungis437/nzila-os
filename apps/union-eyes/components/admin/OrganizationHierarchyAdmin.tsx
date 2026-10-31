@@ -45,7 +45,7 @@ interface Organization {
   level: number;
   member_count?: number;
   child_count?: number;
-  rls_enabled: boolean;
+  rls_enabled?: boolean;
 }
 
 interface OrganizationHierarchyAdminProps {

@@ -204,6 +204,17 @@ export const analyticsAiEntries: StorageAuthorityEntry[] = [
     reviewPriority: "NONE",
   },
   {
+    table: "ml_prediction_feedback",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "S10 (Gate 0 total defect elimination): the outcome of an SLA prediction as its own append-only row (platform 0047_ml_prediction_feedback, one row per prediction by a unique index). The feedback route used to rewrite model_metadata.parameters, which the runtime role may not UPDATE, so under canonical bootstrap every submission failed and rolled back its audit record. Direct organization_id uuid NOT NULL; row-level security is cache 0037_ml_prediction_feedback_rls_closure (ue_create_direct_org_rls_policy). The application never changes or removes a recorded outcome, so the runtime role receives SELECT and INSERT only. Registered UNQUALIFIED; not applied to a live database.",
+    supportingCapability: ["app/api/ml/predictions/sla-breach-risk/feedback/route.ts","db/schema/domains/ml/predictions.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
     table: "model_metadata",
     classification: "TENANT_RLS_REQUIRED",
     reason: "CLOSED (round 48, derived analytics and AI telemetry authority cohort): direct NOT NULL organization_id table (db/schema/domains/ml/predictions.ts, canonical — same resolution as ml_predictions above), unique(organizationId, modelType, version). NOT a global model registry in this codebase: each organization gets its own model_metadata rows. DUAL-SCHEMA FINDING: services/financial-service also declares 'model_metadata' — same same-database conclusion as analytics_metrics. Reachable via app/api/ml/predictions/sla-breach-risk/route.ts (POST, withApi minRole='steward', reads/writes modelMetadata scoped by withApi's server-resolved organizationId, never client-supplied) and app/api/ml/predictions/sla-breach-risk/feedback/route.ts (same pattern) and app/api/ml/predictions/churn-risk/route.ts (writes a 'modelMetadata' JSON blob as prediction metadata, not the modelMetadata TABLE itself). No defect found on this table's own routes.",

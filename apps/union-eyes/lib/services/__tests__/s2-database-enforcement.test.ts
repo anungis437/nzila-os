@@ -41,7 +41,8 @@ describe('S2 database enforcement of the partial Gate 0 fixes (migration 0040)',
     expect(predict).toContain('subjectId: body.caseId')
     const feedback = read('app/api/ml/predictions/sla-breach-risk/feedback/route.ts')
     expect(feedback).toContain("body.modelVersion ?? prediction.modelVersion ?? 'sla-risk-v1'")
-    expect(feedback).toContain('const recordedVersion = prediction.modelVersion')
+    // The version check is now written against the stored outcome row (S10 rewrote the route; disclosed update).
+    expect(feedback).toContain('prediction.modelVersion !== model.version')
   })
 
   it('answers a lost registration race as a conflict through the factory error mapping', () => {

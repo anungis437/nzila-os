@@ -5,7 +5,7 @@ const m = vi.hoisted(() => ({
   withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
-  logApiAuditEvent: vi.fn(),
+  audit: vi.fn(),
   guardAiFeature: vi.fn(),
   enforceAISafety: vi.fn(),
 }));
@@ -16,7 +16,9 @@ vi.mock('@/lib/rate-limiter', () => ({
   RATE_LIMITS: { ML_PREDICTIONS: { limit: 20 } },
   createRateLimitHeaders: m.createRateLimitHeaders,
 }));
-vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
+// The disclosure is recorded durably before the call (replaces the earlier log-line audit; disclosed).
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_c: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({}) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/ai/ai-feature-guard', () => ({ guardAiFeature: m.guardAiFeature }));
 vi.mock('@/lib/services/feature-flags', () => ({ AI_FEATURES: { ML_QUERY: 'ML_QUERY' } }));
 vi.mock('@nzila/policies', () => ({ enforceAISafety: m.enforceAISafety }));
@@ -37,6 +39,7 @@ describe('ml/query route', () => {
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-limit': '20' });
     m.checkRateLimit.mockResolvedValue({ allowed: true });
     m.guardAiFeature.mockResolvedValue(null);
+    m.audit.mockResolvedValue(undefined);
     m.withRoleAuth.mockImplementation(
       (_role: string, handler: (request: NextRequest, context: any) => Promise<Response>) =>
         (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org_1' }) => handler(request, context),
@@ -98,7 +101,28 @@ describe('ml/query route', () => {
     const json = await response.json();
     expect(json.answer).toBe('ok');
     expect(Array.isArray(json.suggestions)).toBe(true);
-    expect(m.logApiAuditEvent).toHaveBeenCalled();
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'ml.query.external_disclosure', details: expect.objectContaining({ questionLength: 'How many claims are overdue?'.length }) }));
+    expect(JSON.stringify(m.audit.mock.calls)).not.toContain('overdue');
+    expect(m.enforceAISafety).toHaveBeenCalledWith(expect.objectContaining({ dataClass: 'confidential' }));
+  });
+
+  it('sends nothing when the disclosure record cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+    const response = await POST(new NextRequest('http://localhost/api/ml/query', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: 'How many claims?' }),
+    }), { userId: 'u1', organizationId: 'org_1' });
+    expect(response.status).toBe(500);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('refuses a nested or oversized context', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/ml/query', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: 'x', context: { deep: { a: 1 } } }),
+    }), { userId: 'u1', organizationId: 'org_1' });
+    expect(response.status).toBe(400);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('returns 500 when AI service URL is missing', async () => {

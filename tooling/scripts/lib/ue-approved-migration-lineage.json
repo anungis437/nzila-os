@@ -249,6 +249,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "FORCE RLS with a system-role policy only for contact_submissions (platform 0045); runtime has no policy. Not applied to any live database."
+      },
+      {
+        "tag": "0037_ml_prediction_feedback_rls_closure",
+        "sha256": "74bed3e3d0f6257cb86aac00106ace8cc78a18dfc71b4af96de24786a7a64b0f",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Direct-organization RLS for ml_prediction_feedback"
       }
     ],
     "platform": [
@@ -475,6 +482,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Unique jurisdiction preference row per user and organization, same-organization employer parent trigger, pinned document version on external document grants"
+      },
+      {
+        "tag": "0047_ml_prediction_feedback",
+        "sha256": "e8d85f7fa4ac511bcb84697371f40b0ad64449883f22bf2019b6a7d59b28adb1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only ml_prediction_feedback (one row per prediction) replaces rewriting model_metadata.parameters on feedback"
       }
     ]
   }

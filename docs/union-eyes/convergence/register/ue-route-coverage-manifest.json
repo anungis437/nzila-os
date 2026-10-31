@@ -48,9 +48,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 141,
-   "NONE": 343,
+   "NONE": 342,
    "SYSTEM_CONTEXT": 65,
-   "TENANT_TX": 163
+   "TENANT_TX": 164
   }
  },
  "routes": [
@@ -9437,7 +9437,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {

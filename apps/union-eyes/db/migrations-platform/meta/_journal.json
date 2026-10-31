@@ -337,6 +337,13 @@
       "when": 1759030000000,
       "tag": "0046_row_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1759040000000,
+      "tag": "0047_ml_prediction_feedback",
+      "breakpoints": true
     }
   ]
 }
