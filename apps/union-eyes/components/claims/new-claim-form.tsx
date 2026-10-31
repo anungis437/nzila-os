@@ -25,6 +25,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
 import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
 import Link from "next/link";
+import { VoiceDisclosurePrompt, useVoiceDisclosure } from "@/components/voice-disclosure-consent";
 
 type CasePriority = "low" | "medium" | "high" | "urgent";
 
@@ -89,7 +90,9 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const disclosure = useVoiceDisclosure();
+  const disclosureRef = useRef(disclosure);
+  useEffect(() => { disclosureRef.current = disclosure; }, [disclosure]);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Form state
@@ -106,78 +109,55 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Voice recording with actual audio capture
+  // The MediaRecorder final chunk arrives in onstop, not synchronously after stop().
+  // Recheck the latest disclosure state before sending any audio externally.
   const toggleRecording = async () => {
     if (isRecording) {
-      // Stop recording
       setIsRecording(false);
-      clearInterval(timerRef.current);
-      
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-      }
-      
-      // Process the recorded audio
-      if (audioChunks.length > 0) {
-        try {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          const formData = new FormData();
-          formData.append('audio', audioBlob, 'recording.webm');
-          
-          // Send to transcription API
-          const response = await fetch('/api/voice/transcribe', {
-            method: 'POST',
-            body: formData,
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            const transcript = typeof data.text === 'string' ? data.text.trim() : '';
-            if (!transcript) throw new Error('empty transcript');
-            setFormData(prev => ({
-              ...prev,
-              description: prev.description + (prev.description ? '\n\n' : '') +
-                          'Voice Recording Transcript:\n' + transcript
-            }));
-          } else {
-            throw new Error(`transcription ${response.status}`);
-          }
-        } catch (_error) {
-          toast({ variant: "destructive", title: t('claims.transcriptionFailed') });
-        }
-      }
-      
-      setAudioChunks([]);
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
       setRecordingTime(0);
-    } else {
-      // Start recording
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
-        
-        const chunks: Blob[] = [];
-        recorder.ondataavailable = (e) => {
-          if (e.data.size > 0) {
-            chunks.push(e.data);
-          }
-        };
-        
-        recorder.onstop = () => {
-          setAudioChunks(chunks);
-          stream.getTracks().forEach(track => track.stop());
-        };
-        
-        recorder.start();
-        setMediaRecorder(recorder);
-        setIsRecording(true);
-        setRecordingTime(0);
-        
-        timerRef.current = setInterval(() => {
-          setRecordingTime(prev => prev + 1);
-        }, 1000);
-      } catch (_error) {
-        toast({ variant: "destructive", title: t('claims.microphoneAccessDenied') });
-      }
+      return;
+    }
+
+    if (!disclosure.ready) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = event => {
+        if (event.data.size > 0) chunks.push(event.data);
+      };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop());
+        const current = disclosureRef.current;
+        if (!current.ready || chunks.length === 0) return;
+        try {
+          const audioBlob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+          const form = new FormData();
+          form.append('audio', audioBlob, 'recording.webm');
+          if (!current.appendDisclosure(form)) return;
+          const response = await fetch('/api/voice/transcribe', { method: 'POST', body: form });
+          if (!response.ok) throw new Error('transcription refused');
+          const data = await response.json();
+          const transcript = typeof data.text === 'string' ? data.text.trim() : '';
+          if (!transcript) throw new Error('empty transcript');
+          setFormData(prev => ({
+            ...prev,
+            description: prev.description + (prev.description ? '\n\n' : '') +
+              'Voice Recording Transcript:\n' + transcript,
+          }));
+        } catch (_error) {
+          toast({ variant: 'destructive', title: t('claims.transcriptionFailed') });
+        }
+      };
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      setRecordingTime(0);
+      timerRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
+    } catch (_error) {
+      toast({ variant: 'destructive', title: t('claims.microphoneAccessDenied') });
     }
   };
 
@@ -390,8 +370,11 @@ setIsSubmitting(false);
                   {t('claims.voiceRecordingInstructions')}
                 </p>
                 
+                <VoiceDisclosurePrompt disclosure={disclosure} />
                 <motion.button
                   onClick={toggleRecording}
+                  disabled={!isRecording && !disclosure.ready}
+                  aria-disabled={!isRecording && !disclosure.ready}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`inline-flex items-center justify-center w-20 h-20 rounded-full shadow-lg transition-all ${
