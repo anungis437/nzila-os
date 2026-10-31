@@ -7,3 +7,5 @@ Source correction: list, search and compare now use `clauseSourceProjection` to 
 Regression coverage: `apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts` exercises owner, cross-tenant anonymized, missing flag, explicit non-anonymized and missing-context behavior, plus the three route integrations by source inspection.
 
 Qualification: source-level changes and test code are authored, but unit/contract, native PostgreSQL 15/16, HTTP/browser and staging acceptance must be run on the final commit. This is **PARTIAL**, not CLOSED; the shared clause body itself is not guaranteed to be anonymized, and system-role authorization must still be qualified against real policies. Frozen defect evidence is unchanged.
+
+Follow-up: the item GET also applies the shared source projection and suppresses the original employer when the anonymization flag is unset; an item-route regression covers this legacy-null state. No additional completion credit or independent qualification is claimed.

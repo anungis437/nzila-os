@@ -25,6 +25,7 @@ import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,7 +75,7 @@ function formatClause(r: Awaited<ReturnType<typeof getClauseRow>>, callerOrgId: 
     // reader, even one authorized to read the clause content itself.
     sharedWithOrgIds: isOwner ? r!.sharedWithOrgIds : undefined,
     isAnonymized: r!.isAnonymized,
-    originalEmployerName: isOwner || !r!.isAnonymized ? r!.originalEmployerName : undefined,
+    originalEmployerName: isOwner || r!.isAnonymized === false ? r!.originalEmployerName : undefined,
     anonymizedEmployerName: r!.anonymizedEmployerName,
     sector: r!.sector,
     province: r!.province,
@@ -82,7 +83,7 @@ function formatClause(r: Awaited<ReturnType<typeof getClauseRow>>, callerOrgId: 
     expiryDate: r!.expiryDate,
     viewCount: r!.viewCount,
     version: r!.version,
-    sourceOrganization: isOwner || !r!.isAnonymized ? { id: r!.sourceOrganizationId, organizationName: r!.organizationName } : undefined,
+    sourceOrganization: clauseSourceProjection(r!, callerOrgId ?? ''),
     createdBy: isOwner ? r!.createdBy : undefined,
     createdAt: r!.createdAt,
     updatedAt: r!.updatedAt,

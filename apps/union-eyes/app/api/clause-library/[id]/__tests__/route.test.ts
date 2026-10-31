@@ -240,6 +240,23 @@ describe('clause-library/[id] item route (round 55)', () => {
     expect(h.withRLSContext).not.toHaveBeenCalled();
   });
 
+  it('GET does not disclose source organization or original employer for an unclassified shared clause', async () => {
+    h.allowPrivilegedRead.current = true;
+    pushSel([{
+      id: 'clause-1', sourceOrganizationId: 'org-a', organizationName: 'Private Union',
+      sharingLevel: 'public', isAnonymized: null, originalEmployerName: 'Private Employer',
+    }]);
+    h.canReadSharedClause.mockResolvedValue(true);
+    pushSel([]); // tags
+    const { GET } = await loadHandlers();
+
+    const result = (await GET({
+      request: req('clause-1'), organizationId: 'org-b', userId: 'user-1', user: { role: 'officer' },
+    })) as { sourceOrganization?: unknown; originalEmployerName?: unknown };
+    expect(result.sourceOrganization).toBeUndefined();
+    expect(result.originalEmployerName).toBeUndefined();
+  });
+
   it('GET includes sharedWithOrgIds for the owner', async () => {
     h.allowPrivilegedRead.current = true;
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private', sharedWithOrgIds: ['org-b'] }]);

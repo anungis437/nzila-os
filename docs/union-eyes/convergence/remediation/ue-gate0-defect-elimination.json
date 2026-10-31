@@ -7598,9 +7598,11 @@
         "apps/union-eyes/app/api/clause-library/search/route.ts",
         "apps/union-eyes/app/api/clause-library/compare/route.ts",
         "apps/union-eyes/lib/clause-library/source-projection.ts",
-        "apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts"
+        "apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts"
       ],
-      "explanation": "The system-role list, search and compare paths now apply a shared source-organization projection. For an anonymized or unclassified clause, cross-organization readers do not receive the source organization id/name; the source owner retains attribution. Search and compare explicitly select the anonymization flag instead of silently omitting it. A unit test covers the disclosure rule and a source contract asserts use in all three routes.",
+      "explanation": "The system-role list, search and compare paths now apply a shared source-organization projection. For an anonymized or unclassified clause, cross-organization readers do not receive the source organization id/name; the source owner retains attribution. Search and compare explicitly select the anonymization flag instead of silently omitting it. A unit test covers the disclosure rule and a source contract asserts use in all three routes. The item GET now uses the same source projection and treats an unset anonymization flag as not permission to disclose the original employer; a route regression exercises this legacy-null case.",
       "remaining": "System-role access remains subject to the SQL sharing-authority predicate and its policy; native PG15/16 cross-tenant tests, real HTTP response checks, anonymization of free-text content, and independent review are not yet established. This correction does not qualify all cross-tenant reads."
     }
   }
