@@ -8,6 +8,7 @@ import { Mic, Square, Play, Pause, Trash2, Upload, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { speechLanguageForLocale, type SupportedLanguage } from "@/lib/azure-speech";
+import { VoiceDisclosurePrompt, useVoiceDisclosure } from "@/components/voice-disclosure-consent";
 
 interface VoiceRecorderProps {
   onTranscriptionComplete?: (text: string, audioBlob: Blob) => void;
@@ -25,6 +26,7 @@ export function VoiceRecorder({
   const t = useTranslations('voice');
   const locale = useLocale();
   const { toast } = useToast();
+  const disclosure = useVoiceDisclosure();
   
   const detectedLanguage = language ?? speechLanguageForLocale(locale);
   
@@ -175,7 +177,7 @@ toast({
 
   // Transcribe audio
   const transcribeAudio = useCallback(async () => {
-    if (!audioBlob) return;
+    if (!audioBlob || !disclosure.ready) return;
 
     setIsTranscribing(true);
 
@@ -183,6 +185,9 @@ toast({
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
       formData.append("language", detectedLanguage);
+      if (!disclosure.appendDisclosure(formData)) {
+        throw new Error("Voice disclosure must be acknowledged before transcription");
+      }
 
       const response = await fetch("/api/voice/transcribe", {
         method: "POST",
@@ -215,7 +220,7 @@ toast({
     } finally {
       setIsTranscribing(false);
     }
-  }, [audioBlob, detectedLanguage, onTranscriptionComplete, t, toast]);
+  }, [audioBlob, detectedLanguage, onTranscriptionComplete, t, toast, disclosure]);
 
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -283,7 +288,7 @@ toast({
               <Button
                 onClick={transcribeAudio}
                 size="lg"
-                disabled={isTranscribing}
+                disabled={isTranscribing || !disclosure.ready}
                 className="rounded-full w-16 h-16"
               >
                 {isTranscribing ? (
@@ -304,6 +309,8 @@ toast({
             </>
           )}
         </div>
+
+        <VoiceDisclosurePrompt disclosure={disclosure} />
 
         {/* Recording Timer */}
         {isRecording && (
