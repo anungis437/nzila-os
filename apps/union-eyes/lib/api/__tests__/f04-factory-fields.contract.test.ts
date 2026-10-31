@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const API = join(process.cwd(), 'app', 'api');
+const API = join(fileURLToPath(new URL('../../../', import.meta.url)), 'app', 'api');
 const read = (route: string) => readFileSync(join(API, ...route.split('/'), 'route.ts'), 'utf8');
 
 describe('F04 generic CRUD routes name what a body may write and what a response omits', () => {

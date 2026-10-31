@@ -1,9 +1,10 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { computeKpiHealth, kpiLowerIsBetter } from '@/lib/kpi/health'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('B54 KPI health follows the direction the thresholds state (DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET)', () => {
   it('keeps higher-is-better behaviour for thresholds below the target', () => {

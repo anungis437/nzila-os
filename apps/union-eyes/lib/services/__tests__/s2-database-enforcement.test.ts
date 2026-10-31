@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { isCheckViolation } from '@/lib/db/unique-violation'
 import { expiryWarningKey } from '@/lib/services/rewards/expiry-warning-marker'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('S2 database enforcement of the partial Gate 0 fixes (migration 0040)', () => {
   it('recognises a check violation, which is what the capacity trigger raises', () => {

@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('B55 workflow integrity', () => {
   it('locks decisions, agenda and status once the minutes are approved (DEF-0B5-COMMITTEE-DECISIONS-EDITABLE-AFTER-APPROVAL)', () => {

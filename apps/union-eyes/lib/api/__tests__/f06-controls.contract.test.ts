@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const ROOT = process.cwd();
+const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const read = (path: string) => readFileSync(join(ROOT, path), 'utf8');
 const route = (name: string) => read(join('app', 'api', ...name.split('/'), 'route.ts'));
 

@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { computeKpiHealth, kpiLowerIsBetter } from '@/lib/kpi/health'
 import { isUniqueViolation } from '@/lib/db/unique-violation'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('S1 schema closure of the partial Gate 0 fixes (migration 0038)', () => {
   it('lets a stored KPI direction decide, and reads thresholds only when none is stored', () => {

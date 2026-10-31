@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+const read = (path: string) => readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), path), 'utf8')
 
 describe('B49 regulatory records are retained, not deleted through the generic route (DEF-0B4-OHS-REGULATORY-RECORD-HARD-DELETE, DEF-0B5-OHS-REFUSAL-EVENT-HARD-DELETE)', () => {
   it('refuses the generic DELETE with a conflict before any lookup or write', () => {
