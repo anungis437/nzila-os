@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { claimEducationReminder, releaseEducationReminder, type EducationReminderIdentity } from '@/lib/education/reminder-delivery';
 import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 import RegistrationConfirmationEmail from "@/emails/training/registration-confirmation";
 import SessionReminderEmail from "@/emails/training/session-reminder";
@@ -321,10 +323,44 @@ return {
 }
 
 /**
- * Batch send session reminders (for cron jobs)
+ * The unique, durable in-app reminder is claimed before contacting the mail provider.
+ * A repeat or overlapping cron cannot claim the same organization/member/source/tier.
+ * A definitive provider refusal releases the claim for retry; an unexpected exception
+ * leaves it in place for manual reconciliation, rather than risk a duplicate email.
  */
+async function deliverOnce(
+  identity: EducationReminderIdentity,
+  send: () => Promise<SendEmailResult>,
+): Promise<'sent' | 'skipped' | 'failed'> {
+  let claimed: boolean;
+  try {
+    claimed = await withSystemContext(() => claimEducationReminder(identity));
+  } catch {
+    // No delivery without a durable idempotency record.
+    return 'failed';
+  }
+  if (!claimed) return 'skipped';
+  try {
+    const result = await send();
+    if (result.success) return 'sent';
+    // The provider explicitly refused; retry is safe only after the claim is released.
+    try {
+      await withSystemContext(() => releaseEducationReminder(identity));
+    } catch {
+      // Keep a conservative failure disposition if the release could not be confirmed.
+    }
+    return 'failed';
+  } catch {
+    // Delivery may have occurred. Retain the claim to prevent an unsafe replay.
+    return 'failed';
+  }
+}
+
 export async function batchSendSessionReminders(
   reminders: Array<{
+    organizationId: string;
+    userId: string;
+    sourceId: string;
     toEmail: string;
     memberName: string;
     courseName: string;
@@ -336,34 +372,28 @@ export async function batchSendSessionReminders(
     sessionDuration?: number;
   }>
 ): Promise<{ sent: number; failed: number; errors: string[] }> {
-  const results = {
-    sent: 0,
-    failed: 0,
-    errors: [] as string[],
-  };
-
+  const results = { sent: 0, failed: 0, errors: [] as string[] };
   for (const reminder of reminders) {
-    const result = await sendSessionReminder(reminder);
-    if (result.success) {
-      results.sent++;
-    } else {
+    const outcome = await deliverOnce(
+      { organizationId: reminder.organizationId, userId: reminder.userId,
+        sourceId: reminder.sourceId, kind: 'session', leadDays: reminder.daysUntilSession },
+      () => sendSessionReminder(reminder),
+    );
+    if (outcome === 'sent') results.sent++;
+    if (outcome === 'failed') {
       results.failed++;
-      if (result.error) {
-        results.errors.push(`${reminder.toEmail}: ${result.error}`);
-      }
+      results.errors.push('Session reminder delivery failed or could not be safely claimed');
     }
-    // Rate limiting: wait 100ms between sends
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-
   return results;
 }
 
-/**
- * Batch send certification expiry warnings (for cron jobs)
- */
 export async function batchSendExpiryWarnings(
   warnings: Array<{
+    organizationId: string;
+    userId: string;
+    sourceId: string;
     toEmail: string;
     memberName: string;
     certificationName: string;
@@ -372,27 +402,19 @@ export async function batchSendExpiryWarnings(
     daysUntilExpiry: number;
   }>
 ): Promise<{ sent: number; failed: number; errors: string[] }> {
-  const results = {
-    sent: 0,
-    failed: 0,
-    errors: [] as string[],
-  };
-
+  const results = { sent: 0, failed: 0, errors: [] as string[] };
   for (const warning of warnings) {
-    const result = await sendCertificationExpiryWarning(warning);
-    if (result.success) {
-      results.sent++;
-    } else {
+    const outcome = await deliverOnce(
+      { organizationId: warning.organizationId, userId: warning.userId,
+        sourceId: warning.sourceId, kind: 'certification', leadDays: warning.daysUntilExpiry },
+      () => sendCertificationExpiryWarning(warning),
+    );
+    if (outcome === 'sent') results.sent++;
+    if (outcome === 'failed') {
       results.failed++;
-      if (result.error) {
-        results.errors.push(`${warning.toEmail}: ${result.error}`);
-      }
+      results.errors.push('Certification expiry warning delivery failed or could not be safely claimed');
     }
-    // Rate limiting: wait 100ms between sends
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-
   return results;
 }
-
-

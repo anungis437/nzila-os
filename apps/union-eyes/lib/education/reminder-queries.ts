@@ -9,6 +9,9 @@ import { sql } from 'drizzle-orm'
 export const sessionReminderQuery = sql`
   SELECT
     om.email,
+    om.user_id,
+    cr.organization_id,
+    cr.id AS reminder_source_id,
     om.name AS member_name,
     c.course_name,
     cs.start_date AS session_date,
@@ -36,6 +39,9 @@ export const sessionReminderQuery = sql`
 export const expiryWarningQuery = sql`
   SELECT
     om.email,
+    om.user_id,
+    mc.organization_id,
+    mc.id AS reminder_source_id,
     om.name AS member_name,
     mc.certification_name,
     mc.certification_number,
@@ -72,6 +78,9 @@ const longDate = (value: unknown, withWeekday: boolean) =>
 
 export function toSessionReminder(row: Record<string, unknown>) {
   return {
+    organizationId: String(row.organization_id),
+    userId: String(row.user_id),
+    sourceId: String(row.reminder_source_id),
     toEmail: String(row.email),
     memberName: String(row.member_name),
     courseName: String(row.course_name),
@@ -86,6 +95,9 @@ export function toSessionReminder(row: Record<string, unknown>) {
 
 export function toExpiryWarning(row: Record<string, unknown>) {
   return {
+    organizationId: String(row.organization_id),
+    userId: String(row.user_id),
+    sourceId: String(row.reminder_source_id),
     toEmail: String(row.email),
     memberName: String(row.member_name),
     certificationName: String(row.certification_name),

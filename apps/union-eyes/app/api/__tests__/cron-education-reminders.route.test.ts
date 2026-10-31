@@ -69,6 +69,9 @@ describe('cron/education-reminders route', () => {
       [
         {
           email: 'member@example.com',
+          user_id: 'u-1',
+          organization_id: '11111111-1111-4111-8111-111111111111',
+          reminder_source_id: '33333333-3333-4333-8333-333333333333',
           member_name: 'Sam Member',
           course_name: 'Steward Training',
           session_date: '2026-07-01',
@@ -86,7 +89,10 @@ describe('cron/education-reminders route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.results.sessionReminders.sent).toBe(1);
-    expect(m.batchSendSessionReminders).toHaveBeenCalledTimes(1);
+    expect(m.batchSendSessionReminders).toHaveBeenCalledWith([expect.objectContaining({
+      organizationId: '11111111-1111-4111-8111-111111111111', userId: 'u-1',
+      sourceId: '33333333-3333-4333-8333-333333333333', daysUntilSession: 7,
+    })]);
   });
 
   it('POST answers 500 naming the failed batch when sends fail, keeping the counts', async () => {
@@ -112,6 +118,9 @@ describe('cron/education-reminders route', () => {
         {
           email: 'member@example.com',
           member_name: 'Sam Member',
+          organization_id: '11111111-1111-4111-8111-111111111111',
+          user_id: 'u-1',
+          reminder_source_id: '44444444-4444-4444-8444-444444444444',
           certification_name: 'WSIB',
           certification_number: 'CERT-1',
           expiry_date: '2026-09-01',
@@ -125,7 +134,10 @@ describe('cron/education-reminders route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.results.expiryWarnings.sent).toBe(1);
-    expect(m.batchSendExpiryWarnings).toHaveBeenCalledTimes(1);
+    expect(m.batchSendExpiryWarnings).toHaveBeenCalledWith([expect.objectContaining({
+      organizationId: '11111111-1111-4111-8111-111111111111', userId: 'u-1',
+      sourceId: '44444444-4444-4444-8444-444444444444', daysUntilExpiry: 30,
+    })]);
   });
 
   it('POST calls withSystemContext for both queries', async () => {

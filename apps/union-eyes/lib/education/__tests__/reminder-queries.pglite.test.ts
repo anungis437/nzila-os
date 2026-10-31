@@ -93,6 +93,9 @@ describe('education reminder statements against the declared schema', () => {
     expect(reminder).toMatchObject({
       toEmail: 'u7@example.test',
       memberName: 'Name u7',
+      organizationId: ORG,
+      userId: 'u7',
+      sourceId: expect.any(String),
       courseName: 'Steward Training',
       daysUntilSession: 7,
       location: 'Hall A',
@@ -167,6 +170,9 @@ describe('certification expiry warnings against the declared schema', () => {
     expect(rows.map((row) => row.days_until_expiry).sort()).toEqual([30, 90]);
     expect(toExpiryWarning(rows.find((row) => row.days_until_expiry === 90)!)).toMatchObject({
       toEmail: 'u1@example.test',
+      organizationId: ORG,
+      userId: 'u1',
+      sourceId: expect.any(String),
       certificationName: 'First Aid',
       certificateNumber: 'CERT-1',
       daysUntilExpiry: 90,
