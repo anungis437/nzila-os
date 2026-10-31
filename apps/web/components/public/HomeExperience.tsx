@@ -111,8 +111,8 @@ export default function HomeExperience({ isFr }: { isFr: boolean }) {
           </h1>
           <p className="mt-8 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
             {isFr
-              ? 'Nzila Ventures conçoit des logiciels qui préservent le savoir institutionnel, relient les décisions à leurs preuves et rendent les transitions plus sûres pour les organisations.'
-              : 'Nzila Ventures builds software that preserves institutional knowledge, connects decisions to evidence, and helps organizations remain accountable through change.'}
+              ? 'Nzila Ventures conçoit au Canada des logiciels bilingues pour les organisations syndicales et les institutions publiques. Ils préservent le savoir institutionnel, relient les décisions à leurs preuves et maintiennent la responsabilité malgré les changements.'
+              : 'Nzila Ventures builds bilingual software in Canada for labour organizations and public institutions. It preserves institutional knowledge, connects decisions to evidence, and keeps people accountable through change.'}
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <TrackedLink

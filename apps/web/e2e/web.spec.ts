@@ -81,4 +81,39 @@ test.describe('Web E2E', () => {
     await expect(page.locator('select#source')).toHaveValue('union_eyes_pilot');
   });
 
+  test('site search opens from the keyboard, ranks results and navigates', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${BASE}/`);
+    await page.keyboard.press('Control+k');
+    const dialog = page.getByRole('dialog', { name: /Search nzilaventures.com|Rechercher sur nzilaventures.com/ });
+    await expect(dialog).toBeVisible();
+    await expect(page.getByRole('combobox')).toBeFocused();
+    await page.keyboard.type('security');
+    await expect(page.getByRole('option').first()).toContainText(/Security controls|Contrôles de sécurité/);
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/security$/);
+    await expect(dialog).toBeHidden();
+  });
+
+  test('search closes with Escape', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${BASE}/`);
+    await page.getByRole('button', { name: /^(Search|Rechercher)$/ }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toBeHidden();
+  });
+
+  test('status and security are reachable from the header and the home page backs trust claims', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${BASE}/`);
+    await expect(page.getByRole('navigation').getByRole('link', { name: /System status|État du système/ })).toHaveAttribute('href', '/status');
+    await expect(page.getByRole('navigation').getByRole('link', { name: /^(Company|Entreprise)$/ })).toHaveAttribute('href', '/about');
+    await expect(page.getByRole('heading', { name: /We show what is real today|Nous montrons ce qui est réel/ })).toBeVisible();
+    await page.goto(`${BASE}/careers`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await page.getByRole('link', { name: /Tell us how you would like to contribute|Dites-nous comment/ }).click();
+    await expect(page.locator('select#source')).toHaveValue('careers_interest');
+  });
+
 })

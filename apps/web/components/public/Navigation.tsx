@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { Bars3Icon, XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, ArrowTopRightOnSquareIcon, MagnifyingGlassIcon, SignalIcon } from '@heroicons/react/24/outline';
 import { useLocale, useTranslations } from 'next-intl';
 import TrackedLink from './TrackedLink';
+import SiteSearch from './SiteSearch';
 import { locales, type Locale } from '@/lib/locales';
 
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL;
@@ -15,7 +16,8 @@ const navigation = [
   { key: 'unionEyes', href: '/union-eyes' },
   { key: 'platform', href: '/platform' },
   { key: 'trust', href: '/trust' },
-  { key: 'products', href: '/products' },
+  { key: 'company', href: '/about' },
+  { key: 'insights', href: '/insights' },
   { key: 'contact', href: '/contact' },
 ] as const;
 
@@ -32,10 +34,22 @@ export default function Navigation() {
   const locale = useLocale() as Locale;
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   
   const isConsole = pathname?.startsWith('/console');
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen((current) => !current);
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -120,6 +134,30 @@ export default function Navigation() {
                 </Link>
               );
             })}
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-label={t('search')}
+                aria-haspopup="dialog"
+                className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70] ${
+                  scrolled ? 'text-gray-600 hover:bg-gray-100 hover:text-navy' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <MagnifyingGlassIcon aria-hidden="true" className="h-5 w-5" />
+              </button>
+              <Link
+                href="/status"
+                aria-label={t('status')}
+                aria-current={pathname === '/status' ? 'page' : undefined}
+                title={t('status')}
+                className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70] ${
+                  scrolled ? 'text-gray-600 hover:bg-gray-100 hover:text-navy' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <SignalIcon aria-hidden="true" className="h-5 w-5" />
+              </Link>
+            </div>
             <TrackedLink
               href="/contact"
               eventName="book_demo_click"
@@ -235,6 +273,35 @@ export default function Navigation() {
               >
                 {t('requestDemo')}
               </TrackedLink>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setSearchOpen(true);
+                  }}
+                  aria-haspopup="dialog"
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  <MagnifyingGlassIcon aria-hidden="true" className="h-4 w-4" />
+                  {t('search')}
+                </button>
+                <Link
+                  href="/status"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  <SignalIcon aria-hidden="true" className="h-4 w-4" />
+                  {t('status')}
+                </Link>
+                <Link
+                  href="/careers"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex min-h-12 items-center justify-center rounded-xl border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  {t('careers')}
+                </Link>
+              </div>
               {appLinks.length > 0 && <div className="mt-2 border-t border-gray-100 pt-2">
                 <p className="mb-1 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">{t('apps')}</p>
                 {appLinks.map((app) => (
@@ -283,6 +350,7 @@ export default function Navigation() {
             </div>
         </div>
         )}
+      <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} isFr={locale === 'fr-CA'} />
     </nav>
   );
 }

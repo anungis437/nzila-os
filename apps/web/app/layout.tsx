@@ -76,7 +76,7 @@ export default async function RootLayout({
 
   return (
     <AuthProvider>
-      <html lang={locale}>
+      <html lang={locale} data-scroll-behavior="smooth">
         <head>
           <JsonLd />
         </head>

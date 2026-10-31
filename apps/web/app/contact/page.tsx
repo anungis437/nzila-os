@@ -1,6 +1,6 @@
 import ContactClient from './ContactClient';
 
-type ContactSource = 'contact_page' | 'union_eyes_pilot' | 'civic_briefing' | 'portfolio_inquiry';
+type ContactSource = 'contact_page' | 'union_eyes_pilot' | 'civic_briefing' | 'portfolio_inquiry' | 'careers_interest';
 
 /** Resolve only known public referral intents on the server so the initial
  * selector and submitted CRM source agree without hydration side effects. */
@@ -13,6 +13,8 @@ function resolveSource(value: string | string[] | undefined): ContactSource {
       return 'civic_briefing';
     case 'portfolio':
       return 'portfolio_inquiry';
+    case 'careers':
+      return 'careers_interest';
     default:
       return 'contact_page';
   }

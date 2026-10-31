@@ -3,7 +3,9 @@ import HumanCenteredAI from '@/components/public/HumanCenteredAI';
 import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import HomeExperience from '@/components/public/HomeExperience';
-import SectionHeading from '@/components/public/SectionHeading';
+import TrustStrip from '@/components/public/TrustStrip';
+import ProofLedger from '@/components/public/ProofLedger';
+import { BuildingLibraryIcon, CubeTransparentIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import SectionDivider from '@/components/public/SectionDivider';
@@ -87,6 +89,7 @@ export default async function Home() {
     <main className="min-h-screen">
       {/* Product-led homepage hero and interactive journey introduction */}
       <HomeExperience isFr={isFr} />
+      <TrustStrip isFr={isFr} />
 
       {/* Two routes into the same governed operating architecture. */}
       <section className="bg-white py-20">
@@ -248,6 +251,7 @@ export default async function Home() {
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             <article className="flex flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-shadow hover:shadow-lg sm:p-8">
+              <span aria-hidden="true" className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-electric/10 text-electric"><UserGroupIcon className="h-6 w-6" /></span>
               <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Organisations syndicales' : 'Labour organizations'}</p>
               <h3 className="mt-4 text-3xl font-semibold tracking-tight text-navy">Union Eyes</h3>
               <p className="mt-4 flex-1 text-sm leading-7 text-slate-600">
@@ -262,6 +266,7 @@ export default async function Home() {
             </article>
 
             <article className="flex flex-col rounded-3xl border border-slate-200 bg-[#101a2c] p-7 shadow-lg sm:p-8">
+              <span aria-hidden="true" className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#dfbe70]"><BuildingLibraryIcon className="h-6 w-6" /></span>
               <p className="text-xs font-semibold uppercase tracking-wider text-[#dfbe70]">{isFr ? 'Institutions publiques' : 'Public institutions'}</p>
               <h3 className="mt-4 text-3xl font-semibold tracking-tight text-white">CIVIC</h3>
               <p className="mt-4 flex-1 text-sm leading-7 text-slate-300">
@@ -276,19 +281,26 @@ export default async function Home() {
             </article>
 
             <article className="flex flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-shadow hover:shadow-lg sm:p-8">
-              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Studio de produits' : 'Product studio'}</p>
-              <h3 className="mt-4 text-3xl font-semibold tracking-tight text-navy">{isFr ? 'Portefeuille Nzila' : 'Nzila portfolio'}</h3>
+              <span aria-hidden="true" className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-electric/10 text-electric"><CubeTransparentIcon className="h-6 w-6" /></span>
+              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Fondation gouvernée' : 'Governed foundation'}</p>
+              <h3 className="mt-4 text-3xl font-semibold tracking-tight text-navy">Nzila OS</h3>
               <p className="mt-4 flex-1 text-sm leading-7 text-slate-600">
                 {isFr
-                  ? 'Découvrir les autres produits et les secteurs que nous explorons, sans confondre initiative, pilote et disponibilité commerciale.'
-                  : 'Discover other product lines and sectors we are exploring, with clear distinctions between concepts, pilots and commercial availability.'}
+                  ? 'Identité, isolation des données, politiques, preuves et observabilité partagées entre les applications gouvernées de Nzila.'
+                  : 'Shared identity, data isolation, policy, evidence and observability across Nzila’s governed applications.'}
               </p>
-              <p className="mt-7 text-xs font-semibold text-slate-500">{isFr ? 'Explorer par produit' : 'Explore by product'}</p>
-              <TrackedLink href="/products" eventName="home_solution_portfolio" className="mt-4 inline-flex min-h-11 items-center self-start text-sm font-bold text-electric underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
-                {isFr ? 'Voir les produits' : 'View products'} <span aria-hidden="true" className="ml-2">→</span>
+              <p className="mt-7 text-xs font-semibold text-slate-500">{isFr ? 'Aperçu de la plateforme' : 'Platform overview'}</p>
+              <TrackedLink href="/platform" eventName="home_solution_platform" className="mt-4 inline-flex min-h-11 items-center self-start text-sm font-bold text-electric underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+                {isFr ? 'Découvrir la plateforme' : 'Explore the platform'} <span aria-hidden="true" className="ml-2">→</span>
               </TrackedLink>
             </article>
           </div>
+          <p className="mt-8 text-sm text-slate-600">
+            {isFr ? 'Vous cherchez autre chose ? ' : 'Looking for something else? '}
+            <TrackedLink href="/products" eventName="home_solution_all_products" className="font-bold text-electric underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+              {isFr ? 'Voir tous les produits et leur maturité' : 'See every product and its maturity'}
+            </TrackedLink>
+          </p>
         </div>
       </section>
 
@@ -361,35 +373,7 @@ export default async function Home() {
 
       <HumanCenteredAI isFr={isFr} />
 
-      {/* ═══════════════════════ IP & VALUE ═══════════════════════ */}
-      <section className="py-24 bg-navy-light relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-40" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Confiance et preuves' : 'Trust and Evidence'}
-            title={isFr ? 'L adoption institutionnelle exige des preuves, pas du bruit' : 'Organizational adoption requires evidence, not noise'}
-            subtitle={isFr ? 'Les pilotes, évaluations et études de cas doivent montrer des améliorations mesurables de continuité, gouvernance et confiance.' : 'Pilots, assessments, and case studies must show measurable improvement in continuity, governance, and trust.'}
-            light
-          />
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { value: 'OCRA', label: isFr ? 'Diagnostic de continuité' : 'Continuity Diagnostic', color: 'from-electric to-violet' },
-              { value: 'UE', label: isFr ? 'Validation Union Eyes' : 'Union Eyes Validation', color: 'from-gold to-gold-light' },
-              { value: 'ICI', label: isFr ? 'Indice de continuité' : 'Continuity Index', color: 'from-emerald to-cyan-400' },
-            ].map((item, i) => (
-              <ScrollReveal key={item.label} delay={i * 0.15}>
-                <div className="relative rounded-2xl p-8 text-center bg-white/5 border border-white/10 hover-lift">
-                  <div className={`text-4xl md:text-5xl font-bold bg-linear-to-r ${item.color} bg-clip-text text-transparent mb-3`}>
-                    {item.value}
-                  </div>
-                  <div className="text-gray-400 font-medium">{item.label}</div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ProofLedger isFr={isFr} />
 
       {/* ═══════════════════════ TECH STACK ═══════════════════════ */}
       <section className="py-16 bg-white">
