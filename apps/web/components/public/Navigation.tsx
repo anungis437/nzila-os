@@ -2,26 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { Bars3Icon, XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useRef } from 'react';
+import { Bars3Icon, XMarkIcon, ArrowTopRightOnSquareIcon, MagnifyingGlassIcon, SignalIcon } from '@heroicons/react/24/outline';
 import { useLocale, useTranslations } from 'next-intl';
 import TrackedLink from './TrackedLink';
+import SiteSearch from './SiteSearch';
 import { locales, type Locale } from '@/lib/locales';
 
-const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
+const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL;
 
 const navigation = [
   { key: 'publicService', href: '/public-service' },
   { key: 'unionEyes', href: '/union-eyes' },
   { key: 'platform', href: '/platform' },
   { key: 'trust', href: '/trust' },
+  { key: 'company', href: '/about' },
   { key: 'insights', href: '/insights' },
   { key: 'contact', href: '/contact' },
 ] as const;
 
-const appLinks = [
-  { key: 'console', href: CONSOLE_URL },
-] as const;
+const appLinks = CONSOLE_URL && /^https:\/\//.test(CONSOLE_URL) ? [{ key: 'console' as const, href: CONSOLE_URL }] : [];
 
 const localeLabels: Record<Locale, string> = {
   'en-CA': 'EN',
@@ -34,15 +34,41 @@ export default function Navigation() {
   const locale = useLocale() as Locale;
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   
   const isConsole = pathname?.startsWith('/console');
 
   useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen((current) => !current);
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [mobileMenuOpen]);
 
   if (isConsole) {
     return null;
@@ -59,22 +85,24 @@ export default function Navigation() {
   };
 
   return (
+    <>
     <nav
+      aria-label={locale === 'fr-CA' ? 'Navigation principale' : 'Primary navigation'}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-white/90 backdrop-blur-xl shadow-sm'
-          : 'bg-transparent'
+          : 'bg-[#080e1c]/90 backdrop-blur-xl border-b border-white/10'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 md:h-20">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-linear-to-br from-electric to-violet flex items-center justify-center">
-                <span className="text-white font-bold text-sm">NV</span>
+            <Link href="/" className="flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dfbe70]/35 bg-[#18335d] shadow-sm">
+                <span className="text-[#dfbe70] font-bold text-sm tracking-tight">NV</span>
               </div>
               <span
-                className={`text-xl font-bold transition-colors ${
+                className={`truncate text-base font-semibold tracking-tight transition-colors sm:text-xl ${
                   scrolled ? 'text-navy' : 'text-white'
                 }`}
               >
@@ -84,14 +112,15 @@ export default function Navigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden xl:flex items-center gap-4 2xl:gap-6">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.key}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors relative ${
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`relative rounded-sm py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70] ${
                     isActive
                       ? scrolled ? 'text-electric' : 'text-white'
                       : scrolled
@@ -106,16 +135,40 @@ export default function Navigation() {
                 </Link>
               );
             })}
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-label={t('search')}
+                aria-haspopup="dialog"
+                className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70] ${
+                  scrolled ? 'text-gray-600 hover:bg-gray-100 hover:text-navy' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <MagnifyingGlassIcon aria-hidden="true" className="h-5 w-5" />
+              </button>
+              <Link
+                href="/status"
+                aria-label={t('status')}
+                aria-current={pathname === '/status' ? 'page' : undefined}
+                title={t('status')}
+                className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70] ${
+                  scrolled ? 'text-gray-600 hover:bg-gray-100 hover:text-navy' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <SignalIcon aria-hidden="true" className="h-5 w-5" />
+              </Link>
+            </div>
             <TrackedLink
               href="/contact"
               eventName="book_demo_click"
               eventProps={{ source: 'navigation_desktop' }}
-              className="px-5 py-2.5 bg-electric text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-electric/25"
+              className="inline-flex min-h-11 items-center rounded-xl bg-[#dfbe70] px-4 py-2.5 text-sm font-bold text-[#101a2c] transition-colors hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70]"
             >
               {t('requestDemo')}
             </TrackedLink>
             {/* App-switcher divider */}
-            <div className="w-px h-6 bg-gray-200" />
+            {appLinks.length > 0 && <div className="w-px h-6 bg-gray-200" />}
             {appLinks.map((app) => (
               <TrackedLink
                 key={app.key}
@@ -133,7 +186,7 @@ export default function Navigation() {
                 <ArrowTopRightOnSquareIcon className="h-3 w-3" />
               </TrackedLink>
             ))}
-            <div className="w-px h-6 bg-gray-200" />
+            {appLinks.length > 0 && <div className="w-px h-6 bg-gray-200" />}
             <div
               role="group"
               aria-label="Language selector"
@@ -165,13 +218,15 @@ export default function Navigation() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center">
+          <div className="xl:hidden flex items-center">
             <button
+              ref={menuButtonRef}
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation-menu"
               aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfbe70] ${
                 scrolled ? 'text-gray-700' : 'text-white'
               }`}
             >
@@ -189,13 +244,9 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div
           id="mobile-navigation-menu"
-          className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 transition-all duration-300 overflow-hidden"
-          style={{
-            maxHeight: mobileMenuOpen ? '1000px' : '0',
-            opacity: mobileMenuOpen ? 1 : 0,
-          }}
+          className="max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-white/98 shadow-2xl backdrop-blur-xl xl:hidden md:max-h-[calc(100dvh-5rem)]"
         >
-            <div className="px-4 pt-2 pb-4 space-y-1">
+            <div className="space-y-1 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -203,6 +254,7 @@ export default function Navigation() {
                     key={item.key}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
+                    aria-current={isActive ? 'page' : undefined}
                     className={`block px-4 py-3 rounded-xl text-base font-medium ${
                       isActive
                         ? 'bg-electric/10 text-electric'
@@ -218,12 +270,41 @@ export default function Navigation() {
                 eventName="book_demo_click"
                 eventProps={{ source: 'navigation_mobile' }}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-3 bg-electric text-white rounded-xl text-base font-semibold text-center mt-2"
+                className="mt-3 block rounded-xl bg-[#193d7a] px-4 py-3.5 text-center text-base font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#193d7a]"
               >
                 {t('requestDemo')}
               </TrackedLink>
-              <div className="pt-2 border-t border-gray-100 mt-2">
-                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('apps')}</p>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setSearchOpen(true);
+                  }}
+                  aria-haspopup="dialog"
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  <MagnifyingGlassIcon aria-hidden="true" className="h-4 w-4" />
+                  {t('search')}
+                </button>
+                <Link
+                  href="/status"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  <SignalIcon aria-hidden="true" className="h-4 w-4" />
+                  {t('status')}
+                </Link>
+                <Link
+                  href="/careers"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex min-h-12 items-center justify-center rounded-xl border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  {t('careers')}
+                </Link>
+              </div>
+              {appLinks.length > 0 && <div className="mt-2 border-t border-gray-100 pt-2">
+                <p className="mb-1 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">{t('apps')}</p>
                 {appLinks.map((app) => (
                   <TrackedLink
                     key={app.key}
@@ -240,7 +321,7 @@ export default function Navigation() {
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </TrackedLink>
                 ))}
-              </div>
+              </div>}
               <div className="pt-2 border-t border-gray-100 mt-2">
                 <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('language')}</p>
                 <div className="px-4 grid grid-cols-2 gap-2">
@@ -271,6 +352,9 @@ export default function Navigation() {
         </div>
         )}
     </nav>
+    {/* Sibling of <nav>: its backdrop-blur makes it the containing block for fixed descendants. */}
+    <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} isFr={locale === 'fr-CA'} />
+    </>
   );
 }
 

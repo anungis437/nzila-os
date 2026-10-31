@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-23 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-10-31 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 260 |
 | GitHub Workflows | 60 |
 | Contract Test Files | 300 |
-| TS/JS Test Files | 2856 |
+| TS/JS Test Files | 2858 |
 | Python Test Files | 43 |
 
 ## Apps
@@ -43,7 +43,7 @@
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 93 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 107 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 100 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 462 | Africa-first music distribution, streaming, and royalty management platform. |
 

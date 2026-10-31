@@ -17,7 +17,11 @@
  * Requires:
  *   - Azure CLI authenticated (az login or OIDC in CI)
  *   - AZURE_RESOURCE_GROUP env var (production resource group)
- *   - ACR_NAME env var (defaults to nzilacanadaacr)
+ *   - ACR_NAME env var (applies to every app; otherwise per-app below)
+ *   - ACR_NAME_<APP> env var (e.g. ACR_NAME_WEB=nzilaventuresacr) overrides ACR_NAME for one app
+ *   - web has no default registry: its production images moved to a new registry
+ *     after the Azure subscription migration, so ACR_NAME_WEB (or ACR_NAME) must be
+ *     set explicitly. Other apps default to nzilacanadaacr.
  *
  * Evidence output:
  *   ops/rollbacks/rollback-prod-<timestamp>.json
@@ -32,8 +36,22 @@ const RELEASES_DIR = path.join(ROOT, 'ops', 'releases')
 const ROLLBACKS_DIR = path.join(ROOT, 'ops', 'rollbacks')
 const INVENTORY_PATH = path.join(ROOT, 'governance', 'release', 'deployment-inventory.json')
 
-const ACR_NAME = process.env.ACR_NAME ?? 'nzilacanadaacr'
+const LEGACY_ACR_NAME = 'nzilacanadaacr'
 const RESOURCE_GROUP = process.env.AZURE_RESOURCE_GROUP ?? 'nzila-canada-staging-rg'
+
+/** Registry holding an app's production images; web must be set explicitly. */
+function registryFor(app: string): string {
+  const perApp = process.env[`ACR_NAME_${app.toUpperCase().replace(/-/g, '_')}`]
+  const registry = perApp ?? process.env.ACR_NAME
+  if (registry) return registry
+  if (app === 'web') {
+    console.error('✗ No registry set for the web rollback. Web images were republished to a new registry')
+    console.error('  after the subscription migration; set ACR_NAME_WEB (e.g. nzilaventuresacr) so an older')
+    console.error('  tag is not pulled from the wrong registry.')
+    process.exit(1)
+  }
+  return LEGACY_ACR_NAME
+}
 
 // Container app naming convention: nzila-os-<appName>
 const CONTAINER_APP_PREFIX = 'nzila-os'
@@ -274,7 +292,7 @@ function main(): void {
   const targets: RollbackTarget[] = approvedApps.map((app) => ({
     app,
     containerAppName: `${CONTAINER_APP_PREFIX}-${app}`,
-    image: `${ACR_NAME}.azurecr.io/${CONTAINER_APP_PREFIX}-${app}:${targetSha}`,
+    image: `${registryFor(app)}.azurecr.io/${CONTAINER_APP_PREFIX}-${app}:${targetSha}`,
     tag: targetTag,
   }))
 

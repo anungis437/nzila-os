@@ -13,6 +13,7 @@ export default function ScrollReveal({
   className = '',
   delay = 0,
   direction = 'up',
+  duration = 0.6,
 }: ScrollRevealProps) {
   const transformByDirection: Record<NonNullable<ScrollRevealProps['direction']>, string> = {
     up: 'translate3d(0, 12px, 0)',
@@ -22,13 +23,14 @@ export default function ScrollReveal({
     none: 'translate3d(0, 0, 0)',
   };
 
-  const style: CSSProperties = {
+  const style = {
     animationDelay: `${delay}s`,
-    transform: transformByDirection[direction],
-  };
+    animationDuration: `${duration}s`,
+    '--nzila-reveal-from': transformByDirection[direction],
+  } as CSSProperties;
 
   return (
-    <div className={className} style={style}>
+    <div className={`nzila-reveal ${className}`} style={style}>
       {children}
     </div>
   );

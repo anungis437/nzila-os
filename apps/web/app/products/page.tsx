@@ -1,248 +1,189 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { getLocale } from 'next-intl/server';
-import ScrollReveal from '@/components/public/ScrollReveal';
-import SectionHeading from '@/components/public/SectionHeading';
-import InvestorCTA from '@/components/public/InvestorCTA';
+import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Products',
-  description: 'Nzila Ventures product architecture: Nzila OS, Union Eyes as the flagship validation product, and continuity-oriented product lines.',
-  openGraph: {
-    title: 'Nzila Ventures Products',
-    description: 'Nzila OS, Union Eyes, and governed product lines for continuity-critical institutions.',
-    images: [{ url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Digital network visualization representing Nzila Ventures product suite' }],
+const metaByLocale = {
+  'en-CA': {
+    title: 'Products',
+    description: 'Discover Nzila Ventures product experiences: Union Eyes for labour organizations, CIVIC for institutional continuity, and the broader Nzila product portfolio.',
   },
-  alternates: { canonical: '/products' },
-};
+  'fr-CA': {
+    title: 'Produits',
+    description: 'Découvrez les expériences produit de Nzila Ventures : Union Eyes pour les organisations syndicales, CIVIC pour la continuité institutionnelle et le portefeuille Nzila.',
+  },
+} as const;
 
-const flagships = [
-  {
-    name: 'Union Eyes',
-    vertical: 'Uniontech',
-    status: 'Production Ready',
-    tam: '$50B',
-    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
-    alt: 'Union Eyes - continuity infrastructure for labor organizations',
-    description: 'Flagship continuity and governance infrastructure for labor organizations: grievance lineage, steward continuity, CBA context, and evidence-sealed audit trails.',
-    features: ['Grievance Lineage', 'Steward Continuity', 'CBA Context', 'Evidence-Sealed Audit Trails'],
-  },
-  {
-    name: 'Zonga',
-    vertical: 'Music & Creator Economy',
-    status: 'Production Ready',
-    tam: '$20B+',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
-    alt: 'Zonga — African music platform for artists, streaming, and creator royalties',
-    description: 'Africa-first music distribution and streaming platform — artist onboarding, catalog management, playlist curation, royalty calculation, and transparent payouts for thousands of creators.',
-    features: ['Artist Onboarding', 'Release Management', 'Royalty Engine', 'Streaming Analytics'],
-  },
-  {
-    name: 'Flow',
-    vertical: 'Commerce & Operations',
-    status: 'Production Ready',
-    tam: '$100B+',
-    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
-    alt: 'Flow — enterprise order-to-cash and supply chain management platform',
-    description: 'Complete commerce operations platform — order-to-cash, procure-to-pay, inventory management, production tracking, and integrations with Shopify, Zoho, WhatsApp, and ERP systems.',
-    features: ['Order Management', 'Inventory & Warehouse', 'Production Tracking', 'Multi-Channel Integrations'],
-  },
-  {
-    name: 'Agrimo',
-    vertical: 'Agriculture & Supply Chain',
-    status: 'Production Ready',
-    tam: '$8B',
-    image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
-    alt: 'Agrimo — agricultural field operations and supply chain management',
-    description: 'Agricultural supply chain and operations platform — harvest tracking, lot management, quality grading, warehousing, cold-chain logistics, traceability, and farmer payouts for DRC and Central African producers.',
-    features: ['Harvest Tracking', 'Lot Management', 'Warehouse Operations', 'Supply Chain Traceability'],
-  },
-];
-
-const pipeline = [
-  { name: 'CORA', vertical: 'Agricultural Intelligence', tam: '$8.6B', status: 'Production Ready' },
-  { name: '3CUO / DiasporaCore', vertical: 'Fintech', tam: '$100B', status: 'Production Ready' },
-  { name: 'FAIRCASE', vertical: 'Justice & Governance', tam: '$1.5B+', status: 'Production Ready' },
-  { name: 'Zonga', vertical: 'Entertainment', tam: '$50B', status: 'Production Ready' },
-  { name: 'SentryIQ360', vertical: 'Insurtech', tam: '$30B', status: 'In Development' },
-  { name: 'Court Lens', vertical: 'Legaltech', tam: '$12B', status: 'In Development' },
-  { name: 'Trade OS', vertical: 'Commerce', tam: '$15B', status: 'Beta' },
-  { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', status: 'In Development' },
-  { name: 'Flow', vertical: 'Commerce', tam: '$100B+', status: 'Production Ready' },
-  { name: 'CyberLearn', vertical: 'EdTech', tam: '$8B', status: 'In Development' },
-  { name: 'Memora', vertical: 'Healthtech', tam: '$20B', status: 'Legacy' },
-];
-
-function getStatusStyle(status: string) {
-  if (status === 'Production Ready') return 'bg-emerald/10 text-emerald';
-  if (status === 'Beta') return 'bg-violet/10 text-violet';
-  if (status === 'In Development') return 'bg-electric/10 text-electric';
-  if (status === 'Django PoC') return 'bg-violet/10 text-violet';
-  if (status === 'Migrating') return 'bg-gold/10 text-gold';
-  return 'bg-gray-100 text-gray-600';
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  return { ...(metaByLocale[locale] ?? metaByLocale['en-CA']), alternates: { canonical: '/products' } };
 }
 
-const statusFr: Record<string, string> = {
-  'Production Ready': 'Pret pour production',
-  'In Development': 'En developpement',
-  Beta: 'Beta',
-};
-
-const flagshipFr: Record<string, { vertical: string; description: string; features: string[] }> = {
-  'Union Eyes': {
-    vertical: 'Uniontech',
-    description: 'Infrastructure phare de continuité et gouvernance pour organisations syndicales: lignée des griefs, continuité des délégués, contexte CBA et audit scellé par preuve.',
-    features: ['Lignée des griefs', 'Continuité des délégués', 'Contexte CBA', 'Audit scellé par preuve'],
+const copy = {
+  'en-CA': {
+    eyebrow: 'Product experiences',
+    title: 'Software shaped around the work that matters.',
+    intro: 'Nzila Ventures is a product studio. We develop distinct experiences for different institutional and operational needs, grounded in continuity, governed workflows and human accountability.',
+    foundationTag: 'How the portfolio fits',
+    foundationTitle: 'One studio. Distinct product journeys.',
+    foundation: 'Nzila Ventures is the company. Nzila OS is the engineering and governance foundation. Each product has its own users, boundaries, maturity and commercial path.',
+    entries: [
+      {
+        name: 'Union Eyes',
+        audience: 'For labour organizations',
+        title: 'Keep member support connected.',
+        description: 'Explore a continuity-oriented approach to intake, stewardship, case handoffs, deadlines and evidence management.',
+        phase: 'Flagship · Pilot validation',
+        href: '/union-eyes',
+        cta: 'Explore Union Eyes',
+        tone: 'gold',
+      },
+      {
+        name: 'CIVIC',
+        audience: 'For public institutions',
+        title: 'Make modernization accountable.',
+        description: 'Explore how institutional commitments, responsibilities, evidence and human review can remain connected through change.',
+        phase: 'Discovery · Institutional briefings',
+        href: '/public-service',
+        cta: 'Explore CIVIC',
+        tone: 'blue',
+      },
+    ],
+    portfolioTag: 'The wider portfolio',
+    portfolioTitle: 'Explore beyond the first two doors.',
+    portfolioBody: 'Nzila also develops and explores initiatives across sport, justice, research, finance, care, creative industries and commerce. Listing an initiative does not imply commercial or production availability.',
+    portfolioCta: 'Browse the portfolio',
+    conversationTitle: 'Start with your organization, not a software catalogue.',
+    conversationBody: 'We can discuss your operational needs and identify whether a product journey, pilot or exploratory conversation makes sense.',
+    conversationCta: 'Start a conversation',
   },
-  Zonga: {
-    vertical: 'Musique et économie des createurs',
-    description: 'Plateforme africaine de distribution et streaming musical - onboarding artistes, gestion du catalogue, curation de playlists et calcul transparent des redevances.',
-    features: ['Onboarding artistes', 'Gestion des sorties', 'Moteur de redevances', 'Analytique streaming'],
+  'fr-CA': {
+    eyebrow: 'Expériences produits',
+    title: 'Des logiciels conçus pour le travail qui compte.',
+    intro: 'Nzila Ventures est un studio de produits. Nous concevons des expériences distinctes pour différents besoins institutionnels et opérationnels, fondées sur la continuité, la gouvernance et la responsabilité humaine.',
+    foundationTag: 'L’architecture du portefeuille',
+    foundationTitle: 'Un studio. Des parcours distincts.',
+    foundation: 'Nzila Ventures est la société. Nzila OS forme le socle d’ingénierie et de gouvernance. Chaque produit a ses propres utilisateurs, limites, niveau de maturité et parcours commercial.',
+    entries: [
+      {
+        name: 'Union Eyes',
+        audience: 'Pour les organisations syndicales',
+        title: 'Relier l’accompagnement des membres.',
+        description: 'Explorer une approche de continuité pour l’accueil, la représentation, les transferts de dossiers, les échéances et les preuves.',
+        phase: 'Produit phare · Validation pilote',
+        href: '/union-eyes',
+        cta: 'Découvrir Union Eyes',
+        tone: 'gold',
+      },
+      {
+        name: 'CIVIC',
+        audience: 'Pour les institutions publiques',
+        title: 'Rendre la modernisation responsable.',
+        description: 'Explorer comment relier engagements institutionnels, responsabilités, preuves et examens humains pendant le changement.',
+        phase: 'Découverte · Présentations institutionnelles',
+        href: '/public-service',
+        cta: 'Découvrir CIVIC',
+        tone: 'blue',
+      },
+    ],
+    portfolioTag: 'Le portefeuille élargi',
+    portfolioTitle: 'Explorer les autres parcours.',
+    portfolioBody: 'Nzila développe et explore également des initiatives dans le sport, la justice, la recherche, la finance, les soins, les industries créatives et le commerce. Leur présence ici ne garantit ni leur disponibilité commerciale ni leur déploiement en production.',
+    portfolioCta: 'Parcourir le portefeuille',
+    conversationTitle: 'Commencer par votre organisation, pas par un catalogue.',
+    conversationBody: 'Nous pouvons examiner vos besoins opérationnels et déterminer si un parcours produit, un pilote ou une conversation exploratoire convient.',
+    conversationCta: 'Échanger avec nous',
   },
-  Flow: {
-    vertical: 'Commerce et operations',
-    description: 'Plateforme complété d operations commerciales - order-to-cash, procure-to-pay, inventaire, suivi de production et intégrations Shopify, Zoho, WhatsApp et ERP.',
-    features: ['Gestion des commandes', 'Inventaire et entrepot', 'Suivi production', 'Integrations multicanal'],
-  },
-  Agrimo: {
-    vertical: 'Agriculture et chaine logistique',
-    description: 'Plateforme d operations et chaine d approvisionnement agricole - suivi des recoltes, gestion de lots, qualite, entreposage, logistique et traceabilite.',
-    features: ['Suivi des recoltes', 'Gestion des lots', 'Opérations entrepot', 'Traceabilite logistique'],
-  },
-};
+} as const;
 
 export default async function ProductsPage() {
   const locale = (await getLocale()) as Locale;
-  const isFr = locale === 'fr-CA';
+  const c = copy[locale] ?? copy['en-CA'];
 
   return (
-    <main className="min-h-screen">
-      {/* ═══════════════════════ HERO ═══════════════════════ */}
-      <section className="relative min-h-[60vh] flex items-center overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1920"
-          alt="Digital network with glowing nodes and connections representing modern software systems"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
-        <div className="absolute inset-0 bg-mesh opacity-50" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
-          <ScrollReveal>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/20 text-electric mb-6">
-              {isFr ? 'Portefeuille produits' : 'Product Portfolio'}
-            </span>
-          </ScrollReveal>
-          <ScrollReveal delay={0.1}>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">{isFr ? 'Nos produits' : 'Our Products'}</h1>
-          </ScrollReveal>
-          <ScrollReveal delay={0.2}>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              {isFr
-                ? 'Nzila Ventures distingue la société d exploitation, Nzila OS, Union Eyes et les lignes produit qui étendent l infrastructure de continuité.'
-                : 'Nzila Ventures distinguishes the operating company, Nzila OS, Union Eyes, and the product lines that extend continuity infrastructure.'}
-            </p>
-          </ScrollReveal>
+    <main className="min-h-screen bg-white">
+      <section className="relative isolate overflow-hidden bg-[#080e1c] text-white">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-20 top-10 h-[30rem] w-[30rem] rounded-full bg-violet/20 blur-[110px]" />
+        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-36 sm:px-6 lg:px-8 lg:pb-24 lg:pt-44">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#dfbe70]">{c.eyebrow}</p>
+          <h1 className="mt-6 max-w-4xl text-4xl font-semibold leading-[1.07] tracking-[-0.045em] sm:text-6xl lg:text-7xl">{c.title}</h1>
+          <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300">{c.intro}</p>
+          <div className="mt-10 grid gap-4 border-t border-white/15 pt-7 sm:grid-cols-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#dfbe70]">Nzila Ventures</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{locale === 'fr-CA' ? 'Société et vision' : 'The company and its vision'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#dfbe70]">Nzila OS</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{locale === 'fr-CA' ? 'Socle technique et gouvernance' : 'Engineering and governance foundation'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#dfbe70]">{locale === 'fr-CA' ? 'Produits' : 'Products'}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{locale === 'fr-CA' ? 'Parcours adaptés aux besoins' : 'Distinct user and buyer journeys'}</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ═══════════════════════ FLAGSHIP PRODUCTS ═══════════════════════ */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Architecture produit' : 'Product Architecture'}
-            title={isFr ? 'Union Eyes d abord, portefeuille ensuite' : 'Union Eyes first, portfolio second'}
-            subtitle={isFr ? 'Union Eyes est le produit de validation phare. Les autres lignes étendent les mêmes principes de continuité, gouvernance, preuve et souveraineté.' : 'Union Eyes is the flagship validation product. Other lines extend the same continuity, governance, evidence, and sovereignty principles.'}
-          />
-
-          <div className="space-y-8">
-            {flagships.map((product, i) => (
-              <ScrollReveal key={product.name} delay={i * 0.1}>
-                <div className="grid lg:grid-cols-5 gap-6 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover-lift">
-                  <div className="lg:col-span-2 relative min-h-62.5">
-                    <Image
-                      src={product.image}
-                      alt={product.alt}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 40vw"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-r from-transparent to-black/20 lg:bg-linear-to-r lg:from-transparent lg:to-gray-50" />
-                  </div>
-                  <div className="lg:col-span-3 p-6 lg:p-8 flex flex-col justify-center">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-electric/10 text-electric">
-                        {isFr ? (statusFr[product.status] ?? product.status) : product.status}
-                      </span>
-                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
-                        {isFr ? (flagshipFr[product.name]?.vertical ?? product.vertical) : product.vertical}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-navy mb-2">{product.name}</h3>
-                    <p className="text-gray-600 mb-4">{isFr ? (flagshipFr[product.name]?.description ?? product.description) : product.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {(isFr ? (flagshipFr[product.name]?.features ?? product.features) : product.features).map((f) => (
-                        <span key={f} className="px-3 py-1 text-xs font-medium bg-white rounded-full border border-gray-200 text-gray-700">
-                          {f}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-6 text-sm">
-                      <span className="font-bold text-gold">{product.tam} {isFr ? 'taille du marché' : 'market size'}</span>
-                    </div>
-                  </div>
-                </div>
-              </ScrollReveal>
+      <section className="bg-[#f6f8fb] py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">{c.foundationTag}</p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-navy md:text-5xl">{c.foundationTitle}</h2>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{c.foundation}</p>
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            {c.entries.map((entry) => (
+              <article key={entry.name} className={entry.tone === 'gold'
+                ? 'flex flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9'
+                : 'flex flex-col rounded-3xl border border-white/10 bg-[#101a2c] p-7 text-white shadow-lg sm:p-9'}>
+                <p className={entry.tone === 'gold'
+                  ? 'text-xs font-semibold uppercase tracking-wider text-electric'
+                  : 'text-xs font-semibold uppercase tracking-wider text-[#dfbe70]'}>{entry.audience}</p>
+                <h3 className={entry.tone === 'gold' ? 'mt-6 text-4xl font-semibold text-navy' : 'mt-6 text-4xl font-semibold text-white'}>{entry.name}</h3>
+                <p className={entry.tone === 'gold'
+                  ? 'mt-2 text-2xl font-medium tracking-tight text-navy'
+                  : 'mt-2 text-2xl font-medium tracking-tight text-white'}>{entry.title}</p>
+                <p className={entry.tone === 'gold'
+                  ? 'mt-5 flex-1 text-base leading-8 text-slate-600'
+                  : 'mt-5 flex-1 text-base leading-8 text-slate-300'}>{entry.description}</p>
+                <p className={entry.tone === 'gold'
+                  ? 'mt-8 text-xs font-semibold text-slate-500'
+                  : 'mt-8 text-xs font-semibold text-slate-400'}>{entry.phase}</p>
+                <TrackedLink
+                  href={entry.href}
+                  eventName="products_primary_detail"
+                  eventProps={{ product: entry.name }}
+                  className={entry.tone === 'gold'
+                    ? 'mt-4 inline-flex min-h-11 items-center self-start text-sm font-bold text-electric hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric'
+                    : 'mt-4 inline-flex min-h-11 items-center self-start text-sm font-bold text-[#dfbe70] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'}
+                >
+                  {entry.cta} <span aria-hidden="true" className="ml-2">→</span>
+                </TrackedLink>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════ EXTENDED PORTFOLIO ═══════════════════════ */}
-      <section className="py-24 bg-navy relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-30" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Lignes produit' : 'Product Lines'}
-            title={isFr ? 'Le portefeuille reste subordonné à la doctrine' : 'The portfolio stays subordinate to the doctrine'}
-            subtitle={isFr ? 'Chaque ligne doit renforcer continuité, gouvernance, explicabilité, confiance, souveraineté, preuve ou fédération.' : 'Every product line must strengthen continuity, governance, explainability, trust, sovereignty, evidence, or federation.'}
-            light
-          />
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {pipeline.map((product, i) => (
-              <ScrollReveal key={product.name} delay={i * 0.05}>
-                <div className="bg-white/5 rounded-xl p-5 border border-white/10 hover-lift">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-white">{product.name}</h3>
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusStyle(product.status)}`}>
-                      {isFr ? (statusFr[product.status] ?? product.status) : product.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-400 mb-3">{product.vertical}</p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-gold font-semibold">{product.tam}</span>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
+      <section className="py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl rounded-3xl border border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-8 py-10 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">{c.portfolioTag}</p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-navy md:text-4xl">{c.portfolioTitle}</h2>
+              <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">{c.portfolioBody}</p>
+            </div>
+            <TrackedLink href="/portfolio" eventName="products_portfolio" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-navy px-6 py-3 text-sm font-bold text-white hover:bg-navy-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">{c.portfolioCta} <span aria-hidden="true" className="ml-2">→</span></TrackedLink>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════ CTA ═══════════════════════ */}
-      <InvestorCTA />
+      <section className="bg-[#101a2c] py-20 text-white">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-semibold tracking-tight md:text-5xl">{c.conversationTitle}</h2>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">{c.conversationBody}</p>
+          <TrackedLink href="/contact?interest=portfolio" eventName="products_contact" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-7 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.conversationCta} <span aria-hidden="true" className="ml-2">↗</span></TrackedLink>
+        </div>
+      </section>
     </main>
   );
 }
-
-
-
-
-
-
-

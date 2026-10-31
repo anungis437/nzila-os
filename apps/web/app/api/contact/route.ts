@@ -160,15 +160,23 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, email, company, vertical, message, source, utmSource, utmMedium, utmCampaign } = body;
+    const isCareersInterest = source === 'careers_interest';
     const qualification = scoreQualification(body);
 
-    // If HubSpot is configured, sync the lead
-    if (HUBSPOT_API_KEY) {
+    // Fail closed: a successful HTTP response must mean the inquiry was
+    // durably accepted. A no-op HubSpot configuration is not lead capture.
+    if (!HUBSPOT_API_KEY) {
+      _logger.error('contact.unavailable', { reason: 'hubspot_not_configured' });
+      return NextResponse.json(
+        { error: 'The contact form is temporarily unavailable. Please email contact@nzilaventures.com.' },
+        { status: 503 },
+      );
+    }
+
+    try {
       const client = new HubSpotClient({ apiKey: HUBSPOT_API_KEY });
-
-      const [firstName, ...rest] = name.split(' ');
+      const [firstName, ...rest] = name.trim().split(/\s+/);
       const lastName = rest.join(' ') || undefined;
-
       const contactResult = await client.upsertContact({
         email,
         firstName,
@@ -183,10 +191,33 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      if (contactResult.ok) {
-        // Create a deal to track the pilot inquiry
-        await client.createDeal({
-          name: `Pilot inquiry — ${company || name}`,
+      if (!contactResult.ok) {
+        _logger.error('contact.crm_upsert_failed', { reason: contactResult.error });
+        return NextResponse.json(
+          { error: 'The message could not be delivered. Please email contact@nzilaventures.com.' },
+          { status: 502 },
+        );
+      }
+
+      // The deal stores the inquiry message. Upserting a contact alone
+      // must never be mistaken for successful delivery of the message.
+      // Expressions of interest in working with us are not sales leads: they are
+      // kept as a contact note, with no deal, sales signal or onboarding workflow.
+      if (isCareersInterest) {
+        const noteResult = await client.logEngagementNote({
+          contactId: contactResult.id,
+          body: `Careers expression of interest\n\n${message || '(no message)'}`,
+        });
+        if (!noteResult.ok) {
+          _logger.error('contact.crm_note_failed', { reason: noteResult.error });
+          return NextResponse.json(
+            { error: 'The message could not be delivered. Please email contact@nzilaventures.com.' },
+            { status: 502 },
+          );
+        }
+      } else {
+        const dealResult = await client.createDeal({
+          name: `Website inquiry — ${company || name}`,
           stage: 'qualifiedtobuy',
           contactId: contactResult.id,
           properties: {
@@ -198,7 +229,23 @@ export async function POST(request: NextRequest) {
             description: message || '',
           },
         });
+
+        if (!dealResult.ok) {
+          _logger.error('contact.crm_deal_failed', { reason: dealResult.error });
+          return NextResponse.json(
+            { error: 'The message could not be delivered. Please email contact@nzilaventures.com.' },
+            { status: 502 },
+          );
+        }
       }
+    } catch (error) {
+      _logger.error('contact.crm_exception', {
+        reason: error instanceof Error ? error.name : 'unknown',
+      });
+      return NextResponse.json(
+        { error: 'The contact form is temporarily unavailable. Please email contact@nzilaventures.com.' },
+        { status: 502 },
+      );
     }
 
     _logger.info('contact.submitted', {
@@ -209,6 +256,9 @@ export async function POST(request: NextRequest) {
       qualificationScore: qualification.score,
     });
 
+    if (isCareersInterest) {
+      return NextResponse.json({ ok: true });
+    }
     const signalPayload = {
       kind: 'sales_intake',
       capturedAt: new Date().toISOString(),

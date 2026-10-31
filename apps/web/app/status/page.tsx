@@ -31,26 +31,29 @@ interface ProbeResult {
 
 /**
  * Map of telemetry-required apps → publicly probeable URL.
- * `null` means the service exists but has no public health endpoint
- * (internal only) — surfaced as "Private" rather than failed.
+ * `null` means the service has no public health endpoint in this environment
+ * — surfaced as "Private" rather than failed, so a service that is not
+ * deployed is never reported as an outage of a live service.
  *
- * The base domain is read from STATUS_PUBLIC_DOMAIN at runtime so this
- * page works in dev (localhost) and prod (Azure Container Apps) without
- * a code change.
+ * Defaults follow the production hostnames. Each URL can be overridden with
+ * STATUS_URL_<SLUG> (an empty value disables the probe), and
+ * STATUS_ACA_ENV_DOMAIN opts Container App services into the
+ * https://<appname>.<env-domain>/api/health pattern.
  */
 function publicHealthUrls(): Record<string, string | null> {
-  // STATUS_ACA_ENV_DOMAIN is the environment-level domain suffix, e.g.
-  // "jollydune-88c1e97f.canadacentral.azurecontainerapps.io".
-  // Each Container App is reachable at https://<appname>.<env-domain>.
-  const envDomain = process.env.STATUS_ACA_ENV_DOMAIN
-    ?? 'jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
-  const aca = (app: string) => `https://${app}.${envDomain}/api/health`;
+  const envDomain = process.env.STATUS_ACA_ENV_DOMAIN;
+  const aca = (app: string) => (envDomain ? `https://${app}.${envDomain}/api/health` : null);
+  const resolve = (slug: string, fallback: string | null): string | null => {
+    const override = process.env[`STATUS_URL_${slug.toUpperCase().replace(/-/g, '_')}`];
+    if (override === undefined) return fallback;
+    return /^https:\/\//.test(override) ? override : null;
+  };
   return {
-    web:                aca('nzila-os-web'),
-    'union-eyes':       aca('nzila-os-union-eyes'),
+    web:                resolve('web', 'https://nzilaventures.com/api/health'),
+    'union-eyes':       resolve('union-eyes', 'https://app.unioneyes.app/api/health'),
     flow:               null,                  // internal — proxied via union-eyes
-    zonga:              aca('nzila-os-zonga'),
-    console:            aca('nzila-os-console'),
+    zonga:              resolve('zonga', aca('nzila-os-zonga')),
+    console:            resolve('console', aca('nzila-os-console')),
     'orchestrator-api': null,                  // internal — not deployed as a Container App
     abr:                null,                  // internal
     cfo:                null,                  // internal
@@ -59,6 +62,7 @@ function publicHealthUrls(): Record<string, string | null> {
     'control-plane':    null,                  // internal
   };
 }
+
 
 async function probe(slug: string, url: string | null): Promise<ProbeResult> {
   if (!url) {
