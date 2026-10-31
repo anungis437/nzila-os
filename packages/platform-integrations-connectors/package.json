@@ -20,6 +20,6 @@
   "dependencies": {
     "@nzila/platform-integrations": "workspace:*",
     "@nzila/platform-integrations-types": "workspace:*",
-    "zod": "^3.24.0"
+    "zod": "^4.6.6"
   }
 }

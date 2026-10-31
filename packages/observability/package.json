@@ -30,7 +30,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "^0.217.0",
     "@opentelemetry/instrumentation-http": "^0.222.0",
     "@opentelemetry/context-async-hooks": "^2.12.0",
-    "zod": "^3.24.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8",
