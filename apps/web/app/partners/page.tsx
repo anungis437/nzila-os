@@ -12,17 +12,16 @@ export const metadata: Metadata = {
 export default async function PartnersSignIn() {
   // Never redirect visitors to a localhost/development fallback.
   const configured = process.env.NEXT_PUBLIC_PARTNERS_URL;
+  let partnerUrl: URL | null = null;
   if (configured) {
     try {
-      const url = new URL(configured);
-      if (url.protocol === 'https:' && !url.username && !url.password) {
-        redirect(new URL('/sign-in', url).toString());
-      }
-    } catch (error) {
-      // NEXT_REDIRECT is raised by Next.js; never swallow a valid redirect.
-      if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
-      if (error && typeof error === 'object' && 'digest' in error && String(error.digest).startsWith('NEXT_REDIRECT')) throw error;
+      partnerUrl = new URL(configured);
+    } catch {
+      // Treat invalid destinations as unconfigured.
     }
+  }
+  if (partnerUrl?.protocol === 'https:' && !partnerUrl.username && !partnerUrl.password) {
+    redirect(new URL('/sign-in', partnerUrl).toString());
   }
 
   const isFr = (await getLocale()) === 'fr-CA';
