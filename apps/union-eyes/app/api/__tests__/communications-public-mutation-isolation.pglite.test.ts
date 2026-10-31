@@ -173,8 +173,8 @@ describe('communications/track/open — organization-bound mutation', () => {
 describe('communications/unsubscribe — organization-bound mutation', () => {
   async function unsubscribe(recipientId: string, campaignId?: string) {
     const { GET } = await import('../communications/unsubscribe/[recipientId]/route');
-    const token = sign(campaignId ? `${campaignId}:${recipientId}:unsubscribe` : `${recipientId}:unsubscribe`);
-    const query = `${campaignId ? `campaignId=${campaignId}&` : ''}token=${token}`;
+    const token = sign(campaignId ? `${campaignId}:${recipientId}:unsubscribe` : `${recipientId}:unsubscribe-all`);
+    const query = `${campaignId ? `campaignId=${campaignId}&` : 'scope=all&'}token=${token}`;
     return GET(new NextRequest(`http://localhost/api/communications/unsubscribe/${recipientId}?${query}`), {
       params: Promise.resolve({ recipientId }),
     });
