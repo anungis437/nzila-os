@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   trackCaseCreated: vi.fn(),
   trackUpdateAdded: vi.fn(),
   claimRows: [{ claimId: '11111111-1111-4111-8111-111111111111' }] as Array<{ claimId: string }>,
+  txSelect: vi.fn(),
+  tx: { select: vi.fn() },
 }))
 
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -24,7 +26,7 @@ vi.mock('@/lib/services/pilot-tracking', () => ({
 }))
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: vi.fn(async (...args: any[]) => (args[1] ?? args[0])()),
+  withRLSContext: vi.fn(async (...args: any[]) => (args[1] ?? args[0])(mocks.tx)),
 }))
 
 vi.mock('@/db', () => ({
@@ -44,6 +46,7 @@ const post = (body: unknown, context: Record<string, unknown> = { userId: 'calle
 describe('pilot/events route — identity comes from the authenticated context', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.tx.select.mockImplementation(() => ({ from: () => ({ where: () => ({ limit: async () => mocks.claimRows }) }) }))
     mocks.trackPilotEvent.mockResolvedValue(undefined)
   })
 
@@ -53,6 +56,7 @@ describe('pilot/events route — identity comes from the authenticated context',
     expect(res.status).toBe(200)
     expect(mocks.trackPilotEvent).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'caller', organizationId: 'caller-org', sessionId: 's1' }),
+      mocks.tx,
     )
   })
 
@@ -83,7 +87,8 @@ describe('pilot/events route — identity comes from the authenticated context',
     const res = await post({ eventType: 'case_created', sessionId: 's1', metadata: { caseId: CASE_ID_PLACEHOLDER } })
 
     expect(res.status).toBe(200)
-    expect(mocks.trackCaseCreated).toHaveBeenCalledWith('caller', 'caller-org', 's1', CASE_ID_PLACEHOLDER)
+    expect(mocks.trackCaseCreated).toHaveBeenCalledWith('caller', 'caller-org', 's1', CASE_ID_PLACEHOLDER, mocks.tx)
+    expect(mocks.tx.select).toHaveBeenCalledTimes(1)
   })
 })
 

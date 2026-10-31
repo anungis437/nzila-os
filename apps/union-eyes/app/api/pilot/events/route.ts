@@ -3,7 +3,6 @@ import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
 import { logger } from "@/lib/logger";
 import { trackPilotEvent, trackCaseCreated, trackUpdateAdded } from "@/lib/services/pilot-tracking";
 import { claims } from "@/db/schema";
-import { db } from "@/db";
 import { and, eq } from "drizzle-orm";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import type { PilotEventType } from "@/lib/services/pilot-tracking";
@@ -94,8 +93,8 @@ export const POST = withRoleAuth('member', async (req, context: BaseAuthContext)
       }
       const caseId: string = metadata.caseId;
       const known = UUID_PATTERN.test(caseId)
-        ? await withRLSContext({ organizationId }, async () =>
-            db.select({ claimId: claims.claimId }).from(claims)
+        ? await withRLSContext({ organizationId }, async (tx) =>
+            tx.select({ claimId: claims.claimId }).from(claims)
               .where(and(eq(claims.claimId, caseId), eq(claims.organizationId, organizationId))).limit(1))
         : [];
       if (known.length === 0) {
@@ -105,11 +104,11 @@ export const POST = withRoleAuth('member', async (req, context: BaseAuthContext)
 
     // Delegate to smart trackers for case/update events
     if (eventType === "case_created" && metadata?.caseId) {
-      await withRLSContext({ organizationId }, async () => trackCaseCreated(userId, organizationId, sessionId, metadata.caseId));
+      await withRLSContext({ organizationId }, async (tx) => trackCaseCreated(userId, organizationId, sessionId, metadata.caseId, tx));
     } else if (eventType === "update_added" && metadata?.caseId) {
-      await withRLSContext({ organizationId }, async () => trackUpdateAdded(userId, organizationId, sessionId, metadata.caseId));
+      await withRLSContext({ organizationId }, async (tx) => trackUpdateAdded(userId, organizationId, sessionId, metadata.caseId, tx));
     } else {
-      await withRLSContext({ organizationId }, async () => trackPilotEvent({ eventType, userId, organizationId, sessionId, metadata }));
+      await withRLSContext({ organizationId }, async (tx) => trackPilotEvent({ eventType, userId, organizationId, sessionId, metadata }, tx));
     }
 
     return NextResponse.json({ ok: true });
