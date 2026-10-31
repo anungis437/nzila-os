@@ -551,9 +551,9 @@ describe("precedent-service", () => {
         .mockReturnValueOnce(groupedTribunal)
         .mockReturnValueOnce(total);
       await getPrecedentStatistics();
-      expect(groupedOutcome.from().where).toHaveBeenCalled();
-      expect(groupedTribunal.from().where).toHaveBeenCalled();
-      expect(total.from().where).toHaveBeenCalled();
+      expect(groupedOutcome.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(groupedTribunal.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(total.from.mock.results[0].value.where).toHaveBeenCalled();
       expect(eq).toHaveBeenCalledWith("isPublic", true);
     });
 
