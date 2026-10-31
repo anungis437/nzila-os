@@ -36,9 +36,9 @@
    "WITH_API": 188
   },
   "mutatingByAudit": {
-   "ATOMIC": 148,
+   "ATOMIC": 149,
    "ATOMIC_SERVICE": 153,
-   "COMPUTE_ONLY": 34,
+   "COMPUTE_ONLY": 33,
    "CRUD_ATOMIC": 141,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 25,
@@ -9438,7 +9438,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "COMPUTE_ONLY"
+   "audit": "ATOMIC"
   },
   {
    "route": "ml/recommendations/route.ts",
