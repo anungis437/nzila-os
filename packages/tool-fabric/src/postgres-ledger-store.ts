@@ -49,6 +49,14 @@ function assertHead(row: Record<string, unknown>): LedgerHead {
   return Object.freeze({ revision, headHash })
 }
 
+/** PostgreSQL BIGINT is selected as text; reject coercible row indexes. */
+function assertSequence(value: unknown, expected: number): void {
+  if (typeof value !== 'string' || !/^[1-9][0-9]*$/.test(value) ||
+      !Number.isSafeInteger(Number(value)) || Number(value) !== expected) {
+    throw new LedgerStoreUnavailableError('Persistent trust stream has invalid sequence index')
+  }
+}
+
 function parseAuditEntry(row: Record<string, unknown>): AuditEntry {
   let value = row.entry
   try {
@@ -98,16 +106,14 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       }
       const head = assertHead(heads[0]!)
       const rows = await tx.unsafe(
-        'SELECT seq, audit_id::text AS audit_id, entry_hash, entry FROM tool_fabric_trust_entry WHERE stream_id = $1 ORDER BY seq ASC',
+        'SELECT seq::text AS seq, audit_id::text AS audit_id, entry_hash, entry FROM tool_fabric_trust_entry WHERE stream_id = $1 ORDER BY seq ASC',
         [orgId],
       )
       if (rows.length !== head.revision) {
         throw new LedgerStoreUnavailableError('Persistent trust stream has missing or excess events')
       }
       const entries = rows.map((r, i) => {
-        if (Number(r.seq) !== i + 1) {
-          throw new LedgerStoreUnavailableError('Persistent trust stream has sequence gaps')
-        }
+        assertSequence(r.seq, i + 1)
         const entry = parseAuditEntry(r)
         // The relational identity/hash columns are immutable receipt indexes.
         // Verify them against the canonical full-coverage JSON event on every
@@ -167,10 +173,15 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       }
       try {
         const inserted = await tx.unsafe(
-          'INSERT INTO tool_fabric_trust_entry (stream_id, seq, audit_id, entry_hash, entry) VALUES ($1,$2,$3,$4,$5::jsonb) RETURNING seq',
+          'INSERT INTO tool_fabric_trust_entry (stream_id, seq, audit_id, entry_hash, entry) VALUES ($1,$2,$3,$4,$5::jsonb) RETURNING seq::text AS seq',
           [orgId, current.revision + 1, entry.id, entry.hash, JSON.stringify(entry)],
         )
-        if (inserted.length !== 1 || Number(inserted[0]!.seq) !== current.revision + 1) {
+        if (inserted.length !== 1) {
+          throw new LedgerConflictError('Persistent trust append returned invalid receipt')
+        }
+        try {
+          assertSequence(inserted[0]!.seq, current.revision + 1)
+        } catch {
           throw new LedgerConflictError('Persistent trust append returned invalid receipt')
         }
         const updated = await tx.unsafe(
