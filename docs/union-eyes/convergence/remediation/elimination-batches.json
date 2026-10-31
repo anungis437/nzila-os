@@ -5895,6 +5895,31 @@
           "explanation": "The local credential is still removed (an unremovable credential would be worse), but the revocation outcome (revoked, not required, failed) is recorded in the audit entry and returned, and a failed revocation is answered with a message that the platform token stays valid until it expires or is revoked at the platform instead of a plain success. The existing social-media route tests pass."
         }
       ]
+    },
+    {
+      "id": "S08-CONTACT-SUBMISSIONS-STORE-MIGRATIONS-0045-AND-0036",
+      "family": "Schema: a local, system-only record of public contact-form submissions",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-SYS-CONTACT-ACKNOWLEDGES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0045_contact_submissions.sql",
+            "apps/union-eyes/db/migrations-platform/0045_contact_submissions.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0036_contact_submissions_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0036_contact_submissions_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/domains/communications/contact-submissions.ts",
+            "apps/union-eyes/db/rls-storage-authority/communications-notifications.ts",
+            "apps/union-eyes/db/__tests__/rls-storage-authority-registry-composition.test.ts",
+            "apps/union-eyes/app/api/contact/route.ts",
+            "apps/union-eyes/app/api/__tests__/contact-acknowledgement.route.test.ts",
+            "apps/union-eyes/db/__tests__/platform-0045-contact-submissions.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s9-contact-submissions.test.ts"
+          ],
+          "explanation": "Migration 0045 adds contact_submissions (every column length-limited, a crm_status check of pending, recorded or failed, retain_until defaulting to two years) and cache 0036 gives it a system-role-only policy; the manifest classifies it SYSTEM_ONLY with no runtime privilege (registry count pin 865 to 866, disclosed). The contact route stores the submission under the system role first, acknowledges the visitor once it exists, then syncs to the CRM and records recorded or failed; an unconfigured or failing CRM no longer refuses or loses the submission, and a failed store answers 503 and contacts no CRM. The route test was rewritten for the new behaviour (the 503-on-unconfigured-CRM cases replaced, disclosed). Proved on PGlite and with route tests."
+        }
+      ]
     }
   ]
 }

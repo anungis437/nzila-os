@@ -242,6 +242,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "FORCE RLS for room_bookings (direct organization_id) once platform 0041 evolves the table; runtime privileges SELECT, INSERT, UPDATE come from the storage-authority manifest. Not applied to any live database."
+      },
+      {
+        "tag": "0036_contact_submissions_rls_closure",
+        "sha256": "8f8080a0a906439eabe5c164eea8de0b28b092b35c3a938a9ed991f8b66591aa",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS with a system-role policy only for contact_submissions (platform 0045); runtime has no policy. Not applied to any live database."
       }
     ],
     "platform": [
@@ -454,6 +461,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "created_by on anti_scab_violations (server-recorded author)"
+      },
+      {
+        "tag": "0045_contact_submissions",
+        "sha256": "c8e716d7d512ffb67e58d922eed41013b695e7b5829d1751a93d781381d1c6b9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Local record of public contact-form submissions (system-only, bounded, retention date)"
       }
     ]
   }

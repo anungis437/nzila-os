@@ -42,14 +42,14 @@
    "CRUD_ATOMIC": 145,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
-   "NO_WRITES_FOUND": 13,
-   "NONE": 210
+   "NO_WRITES_FOUND": 12,
+   "NONE": 211
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 145,
-   "NONE": 342,
-   "SYSTEM_CONTEXT": 64,
+   "NONE": 341,
+   "SYSTEM_CONTEXT": 65,
    "TENANT_TX": 163
   }
  },
@@ -4407,8 +4407,8 @@
    "guard": "NONE",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "data": "SYSTEM_CONTEXT",
+   "audit": "NONE"
   },
   {
    "route": "content/stats/route.ts",
