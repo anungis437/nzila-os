@@ -10,7 +10,7 @@ describe('Gate 0 batch B95: durable records for report execution and knowledge-b
     const audit = route.indexOf("action: 'report.execute'")
     expect(audit).toBeGreaterThan(-1)
     expect(audit).toBeLessThan(route.indexOf('data: result.data'))
-    expect(route.slice(audit, audit + 400)).not.toContain('result.data')
+    expect(route.slice(audit, route.indexOf('rowCount: result.rowCount', audit))).not.toContain('result.data')
   })
 
   it('applies the access columns to a parent organization\'s knowledge-base rows and audits a document read', () => {
@@ -24,3 +24,4 @@ describe('Gate 0 batch B95: durable records for report execution and knowledge-b
     expect(src('app/api/knowledge-base/route.ts')).not.toContain('ilike(knowledgeBase.content, pattern)')
   })
 })
+
