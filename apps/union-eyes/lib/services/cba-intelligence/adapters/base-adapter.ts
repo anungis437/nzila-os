@@ -26,8 +26,42 @@ export abstract class BaseAdapter implements IngestionAdapter {
   ): Promise<FetchedContent> {
     const response = await this.fetchWithRetry(sourceUrl);
     const contentType = response.headers.get("content-type") ?? "text/html";
-    const rawContent = await response.text();
-    if (rawContent.length > MAX_SOURCE_CHARACTERS) throw new Error("Source document is larger than the allowed size");
+    // Enforce the bound while reading. Checking text.length only after response.text()
+    // permits a hostile source to exhaust memory before the size check runs.
+    const declaredSize = Number(response.headers.get("content-length"));
+    if (Number.isFinite(declaredSize) && declaredSize > MAX_SOURCE_CHARACTERS) {
+      await response.body?.cancel();
+      throw new Error("Source document is larger than the allowed size");
+    }
+    let rawContent: string;
+    if (response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      const parts: string[] = [];
+      let bytes = 0;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          bytes += value.byteLength;
+          if (bytes > MAX_SOURCE_CHARACTERS) {
+            await reader.cancel();
+            throw new Error("Source document is larger than the allowed size");
+          }
+          parts.push(decoder.decode(value, { stream: true }));
+        }
+        parts.push(decoder.decode());
+      } finally {
+        reader.releaseLock();
+      }
+      rawContent = parts.join("");
+    } else {
+      // Supports adapters providing an in-memory Response without a stream.
+      rawContent = await response.text();
+      if (new TextEncoder().encode(rawContent).byteLength > MAX_SOURCE_CHARACTERS) {
+        throw new Error("Source document is larger than the allowed size");
+      }
+    }
 
     return {
       rawContent,
