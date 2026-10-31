@@ -20,7 +20,13 @@ export default async function PartnersSignIn() {
       // Treat invalid destinations as unconfigured.
     }
   }
-  if (partnerUrl?.protocol === 'https:' && !partnerUrl.username && !partnerUrl.password) {
+  const host = partnerUrl?.hostname.toLowerCase() ?? '';
+  const isPublicHost = host !== 'localhost'
+    && host !== '127.0.0.1'
+    && host !== '[::1]'
+    && !host.endsWith('.localhost')
+    && !host.endsWith('.local');
+  if (partnerUrl?.protocol === 'https:' && isPublicHost && !partnerUrl.username && !partnerUrl.password) {
     redirect(new URL('/sign-in', partnerUrl).toString());
   }
 
