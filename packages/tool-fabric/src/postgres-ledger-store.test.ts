@@ -299,6 +299,36 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     )).rejects.toThrow('Append event body hash or schema is invalid')
     expect(db.commits).toBe(0)
   })
+  it('rejects independently rehashed but semantically mismatched audit envelopes', async () => {
+    const base = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const sign = (entry: AuditEntry): AuditEntry => {
+      const { prevHash, hash, hashVersion, ...hashable } = entry
+      return { ...hashable, prevHash, hashVersion: 2, hash: computeAuditHash(prevHash, hashable) }
+    }
+    const wrongOperationPayload = {
+      ...base.payload,
+      mutation: { ...(base.payload.mutation as Record<string, unknown>), operation: 'decide' },
+    }
+    wrongOperationPayload.eventHash = computeEventHash(
+      1, LEDGER_GENESIS_HASH, wrongOperationPayload.body, wrongOperationPayload.mutation,
+    )
+    for (const forged of [
+      sign({ ...base, actorId: 'impersonated-actor' }),
+      sign({ ...base, action: 'tool_fabric.ledger.trust_decision' }),
+      sign({ ...base, resource: 'different-resource' }),
+      sign({ ...base, payload: wrongOperationPayload }),
+    ]) {
+      expect(isAuthenticTrustEventPayload(forged.payload)).toBe(true)
+      const db = fake()
+      await expect(new PostgresAtomicTrustLedgerStore(db).compareAndAppend(
+        ORG, { revision: 0, headHash: LEDGER_GENESIS_HASH }, forged,
+      )).rejects.toThrow('Append audit envelope disagrees with event provenance')
+      expect(db.commits).toBe(0)
+      await expect(new PostgresAtomicTrustLedgerStore(fake({
+        revision: 1, hash: forged.hash, entries: [forged],
+      })).readSnapshot(ORG)).rejects.toThrow('Persistent trust audit envelope disagrees with event provenance')
+    }
+  })
   it('rejects forged inner event digest on snapshot even with authentic audit-v2 envelope', async () => {
     const valid = auditRecord(LEDGER_GENESIS_HASH, 1)
     const eventHash = valid.payload.eventHash === 'f'.repeat(64)

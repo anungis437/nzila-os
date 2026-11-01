@@ -22,6 +22,38 @@ import {
   type LedgerHead, type LedgerSnapshot,
 } from './ledger-store'
 
+
+/**
+ * The audit-v2 hash authenticates bytes, not the semantic relationship between
+ * the outer audit envelope and the inner, separately hashed trust mutation.
+ * A direct store caller must not persist an envelope that the canonical
+ * ToolTrustLedger replay would later reject.
+ */
+function hasCanonicalAuditProvenance(entry: AuditEntry): boolean {
+  if (!isAuthenticTrustEventPayload(entry.payload)) return false
+  const payload = entry.payload as {
+    mutation: { actorId: string; role: string; operation: string }
+    body: {
+      type: 'TOOL_REGISTERED' | 'TRUST_DECISION' | 'DRIFT_OBSERVED' | 'TRUST_REAFFIRMED'
+      governance?: { decidedByRole: string; actorId?: string }
+    }
+  }
+  const operation = {
+    TOOL_REGISTERED: 'register',
+    TRUST_DECISION: 'decide',
+    DRIFT_OBSERVED: 'observe',
+    TRUST_REAFFIRMED: 'reaffirm',
+  }[payload.body.type]
+  return payload.mutation.actorId === entry.actorId &&
+    payload.mutation.operation === operation &&
+    entry.action === `tool_fabric.ledger.${payload.body.type.toLowerCase()}` &&
+    entry.resource === 'tool-fabric-tool' &&
+    (!payload.body.governance ||
+      (payload.mutation.role === payload.body.governance.decidedByRole &&
+        (payload.body.governance.actorId === undefined ||
+          payload.mutation.actorId === payload.body.governance.actorId)))
+}
+
 export const TOOL_FABRIC_PG_STREAM = 'platform:tool-fabric:trust'
 
 export interface PostgresTrustQuery {
@@ -136,6 +168,9 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
         if (!isAuthenticTrustEventPayload(entry.payload)) {
           throw new LedgerStoreUnavailableError('Persistent trust event body hash invalid')
         }
+        if (!hasCanonicalAuditProvenance(entry)) {
+          throw new LedgerStoreUnavailableError('Persistent trust audit envelope disagrees with event provenance')
+        }
         previousEventHash = entry.payload.eventHash
         // The relational identity/hash columns are immutable receipt indexes.
         // Verify them against the canonical full-coverage JSON event on every
@@ -205,6 +240,9 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       // eventHash. Verify the canonical event body before any SQL write.
       if (!isAuthenticTrustEventPayload(entry.payload)) {
         throw new LedgerConflictError('Append event body hash or schema is invalid')
+      }
+      if (!hasCanonicalAuditProvenance(entry)) {
+        throw new LedgerConflictError('Append audit envelope disagrees with event provenance')
       }
       try {
         const inserted = await tx.unsafe(
