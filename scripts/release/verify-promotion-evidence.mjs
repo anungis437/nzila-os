@@ -65,7 +65,7 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
     : []
   if (sbom.obj?.bomFormat !== 'CycloneDX' ||
       typeof sbom.obj.specVersion !== 'string' ||
-      !/^1\\.(?:[4-9]|[1-9][0-9]+)$/.test(sbom.obj.specVersion) ||
+      !/^1\.(?:[4-9]|[1-9][0-9]+)$/.test(sbom.obj.specVersion) ||
       !Array.isArray(components) || components.length === 0 ||
       components.some(component =>
         !component || typeof component !== 'object' || Array.isArray(component) ||
