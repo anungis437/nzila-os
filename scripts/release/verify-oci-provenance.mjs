@@ -40,6 +40,12 @@ export function verifyOciProvenance({manifestRaw, sourceSha, repository, staging
         new Set(names).size !== 1 || !images.length ||
         new Set(images).size !== 1 || !IMAGE.test(images[0])) deny('conflicting or noncanonical OCI target')
     const name = names[0], image = images[0]
+    // The promotion verifier and Azure deployer require canonical Container App
+    // identities. Reject signed lookalikes, shell metacharacters and aliases
+    // before minting a positive OCI receipt for a different destination.
+    if (!/^[a-z](?!.*--)[a-z0-9-]{0,30}[a-z0-9]$/.test(name)) {
+      deny('noncanonical OCI deployment destination')
+    }
     if (seenNames.has(name) || seenImages.has(image)) deny('duplicate signed image or destination')
     seenNames.add(name); seenImages.add(image)
     const args = [

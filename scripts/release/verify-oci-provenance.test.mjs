@@ -65,4 +65,18 @@ test('binds exact signed staging bytes, source SHA and run ID; rejects substitut
   assert.throws(()=>verifyOciProvenance(opts({manifestRaw:'{'})),/malformed signed/)
   assert.throws(()=>verifyOciProvenance(opts({manifestRaw:undefined})),/manifest bytes required/)
 })
+test('OCI receipt rejects signed but noncanonical Azure deployment identities',()=>{
+  for(const name of [
+    'Demo', 'demo--prod', 'demo\\nprod', 'demo/prod', '-demo', 'demo-',
+    'd', 'a'.repeat(33), 'demo\\\\nprod',
+  ]) {
+    assert.throws(()=>verifyOciProvenance(opts({manifestRaw:JSON.stringify({
+      ...manifest(),deployTargets:[{name,image:IMAGE}],
+    })})),/noncanonical OCI deployment destination/,name)
+  }
+  const result=verifyOciProvenance(opts({manifestRaw:JSON.stringify({
+    ...manifest(),deployTargets:[{name:'demo-prod-2',image:IMAGE}],
+  })}))
+  assert.equal(result.targets[0].name,'demo-prod-2')
+})
 // Mocked unit tests establish policy behavior only, never Sigstore or production certification.
