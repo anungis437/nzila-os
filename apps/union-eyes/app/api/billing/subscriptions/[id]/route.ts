@@ -6,7 +6,7 @@
  * DELETE /api/billing/subscriptions/:id — Cancel subscription (soft delete)
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
-import { db } from '@/db';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { orgSubscriptions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -22,17 +22,18 @@ export const GET = withApi(
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Get a subscription by ID' },
   },
-  async ({ organizationId, params }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId, params }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = await params;
-
-    const [subscription] = await db
-      .select()
-      .from(orgSubscriptions)
-      .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
-
-    if (!subscription) throw ApiError.notFound('Subscription not found');
-
+    const subscription = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', resourceId: id });
+      const [row] = await tx
+        .select()
+        .from(orgSubscriptions)
+        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
+      if (!row) throw ApiError.notFound('Subscription not found');
+      return row;
+    });
     return { data: subscription };
   },
 );
@@ -67,40 +68,39 @@ export const PATCH = withApi(
     }
     const body = parsedBody.data;
 
-    const [existing] = await db
-      .select()
-      .from(orgSubscriptions)
-      .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
+    // Read, authorize, mutate and audit under one tenant transaction. The
+    // metadata provenance must be copied from the row read in that transaction.
+    const updated = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, {
+        organizationId, userId, action: 'finance:prepare', resourceId: id,
+      });
+      const [existing] = await tx
+        .select()
+        .from(orgSubscriptions)
+        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
+      if (!existing) throw ApiError.notFound('Subscription not found');
 
-    if (!existing) throw ApiError.notFound('Subscription not found');
-
-    const setValues: Record<string, unknown> = { ...body, updatedAt: new Date() };
-
-    if ('metadata' in body) {
-      // Strip the client's fragment of the server-owned keys (never trust a
-      // client-supplied value for them, whether erased or forged), then
-      // restore each one from the row's CURRENT value — never from an
-      // earlier read, and never fabricated if the row never had it.
-      const existingMetadata = (existing.metadata ?? {}) as Record<string, unknown>;
-      const sanitizedMetadata: Record<string, unknown> = { ...(body.metadata ?? {}) };
-      for (const key of SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS) {
-        delete sanitizedMetadata[key];
-      }
-      for (const key of SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS) {
-        if (key in existingMetadata) {
-          sanitizedMetadata[key] = existingMetadata[key];
+      const setValues: Record<string, unknown> = { ...body, updatedAt: new Date() };
+      if ('metadata' in body) {
+        const existingMetadata = (existing.metadata ?? {}) as Record<string, unknown>;
+        const sanitizedMetadata: Record<string, unknown> = { ...(body.metadata ?? {}) };
+        for (const key of SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS) delete sanitizedMetadata[key];
+        for (const key of SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS) {
+          if (key in existingMetadata) sanitizedMetadata[key] = existingMetadata[key];
         }
+        setValues.metadata = sanitizedMetadata;
       }
-      setValues.metadata = sanitizedMetadata;
-    }
 
-    const updated = await withRLSContext({ organizationId }, async (tx) => {
       const [row] = await tx
         .update(orgSubscriptions)
         .set(setValues)
-        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)))
+        .where(and(
+          eq(orgSubscriptions.id, id),
+          eq(orgSubscriptions.organizationId, organizationId),
+          eq(orgSubscriptions.updatedAt, existing.updatedAt),
+        ))
         .returning();
-      if (!row) throw ApiError.notFound('Subscription not found');
+      if (!row) throw ApiError.conflict('Subscription changed while metadata was being updated');
       await persistAtomicAudit(tx, {
         organizationId,
         userId,
@@ -128,26 +128,25 @@ export const DELETE = withApi(
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = params;
 
-    const [existing] = await db
-      .select()
-      .from(orgSubscriptions)
-      .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
+    const cancelled = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, {
+        organizationId, userId, action: 'finance:execute', resourceId: id,
+      });
+      const [existing] = await tx
+        .select()
+        .from(orgSubscriptions)
+        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
+      if (!existing) throw ApiError.notFound('Subscription not found');
+      if (existing.status === 'cancelled') throw ApiError.conflict('Subscription is already cancelled');
 
-    if (!existing) throw ApiError.notFound('Subscription not found');
-
-    if (existing.status === 'cancelled') throw ApiError.conflict('Subscription is already cancelled');
-
-    const cancelled = await withRLSContext({ organizationId }, async (tx) => {
       const [row] = await tx
         .update(orgSubscriptions)
         .set({ status: 'cancelled', endDate: new Date(), updatedAt: new Date() })
-        .where(
-          and(
-            eq(orgSubscriptions.id, id),
-            eq(orgSubscriptions.organizationId, organizationId),
-            eq(orgSubscriptions.status, existing.status),
-          ),
-        )
+        .where(and(
+          eq(orgSubscriptions.id, id),
+          eq(orgSubscriptions.organizationId, organizationId),
+          eq(orgSubscriptions.status, existing.status),
+        ))
         .returning();
       if (!row) throw ApiError.conflict('The subscription changed while it was being cancelled');
       await persistAtomicAudit(tx, {
