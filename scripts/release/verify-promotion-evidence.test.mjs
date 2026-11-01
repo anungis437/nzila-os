@@ -1,10 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync, readFileSync, rmSync, truncateSync, renameSync, symlinkSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, rmSync, truncateSync, renameSync, symlinkSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createHash, generateKeyPairSync, sign } from 'node:crypto'
-import { canonical, computeSignedPayloadDigest, verifyPromotionEvidence } from './verify-promotion-evidence.mjs'
+import { canonical, computeSignedPayloadDigest, verifyPromotionEvidence, readBoundedPromotionArtifact } from './verify-promotion-evidence.mjs'
 
 const COMMIT = 'a'.repeat(40)
 const RUN = '123456'
@@ -70,6 +70,33 @@ test('promotion evidence refuses oversized artifacts and symlinks before JSON pa
     renameSync(path, original)
     symlinkSync(original, path)
     assert.throws(() => x.verify(), /invalid artifact size or type for sbom.json/)
+  } finally { x.cleanup() }
+})
+
+test('promotion evidence preserves signed bytes and rejects descriptor substitution for every artifact', () => {
+  const x = makeFixture()
+  try {
+    const manifestPath = join(x.directory, 'artifact-manifest.json')
+    const signedBytes = Buffer.from(JSON.stringify(x.manifest) + String.fromCharCode(10))
+    writeFileSync(manifestPath, signedBytes)
+    assert.deepEqual(readBoundedPromotionArtifact(manifestPath, 2_097_152, 'artifact-manifest.json'), signedBytes)
+    assert.throws(() => x.verify(), /source commit or provenance/)
+    x.write()
+    assert.equal(x.verify().commitSha, COMMIT)
+    for (const name of ['artifact-manifest.json', 'sbom.json', 'release-attestation.json']) {
+      const path = join(x.directory, name)
+      const original = join(x.directory, name + '.original')
+      renameSync(path, original)
+      symlinkSync(original, path)
+      assert.throws(() => x.verify(), /invalid artifact size or type for /, name)
+      rmSync(path)
+      renameSync(original, path)
+      assert.equal(x.verify().commitSha, COMMIT)
+    }
+    const path = join(x.directory, 'artifact-manifest.json')
+    renameSync(path, join(x.directory, 'artifact-manifest.original'))
+    mkdirSync(path)
+    assert.throws(() => x.verify(), /invalid artifact size or type for artifact-manifest.json/)
   } finally { x.cleanup() }
 })
 

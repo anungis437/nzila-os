@@ -4,7 +4,7 @@
  * This is not a grant of release authority: the GitHub production environment
  * still requires its own human approval and protected deployment identity.
  */
-import { readFileSync, lstatSync } from 'node:fs'
+import { readFileSync, openSync, closeSync, fstatSync, readSync, constants } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { createHash, createPublicKey, verify } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
@@ -32,6 +32,47 @@ export function computeSignedPayloadDigest(attestation) {
   const { signature, attestationDigest, ...payload } = attestation
   return sha256(Buffer.from(JSON.stringify(canonical(payload))))
 }
+/**
+ * Read promotion evidence from one opened descriptor, never from a pathname
+ * after a separate lstat. O_NOFOLLOW blocks symlink substitution; O_NONBLOCK
+ * prevents a substituted FIFO from hanging the release gate. Bounded reads
+ * and descriptor metadata checks reject concurrent modification. This does
+ * not replace the cryptographic signature and provenance checks below.
+ */
+export function readBoundedPromotionArtifact(path, limit, name) {
+  let fd
+  try {
+    fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK)
+    const before = fstatSync(fd, { bigint: true })
+    if (!before.isFile() || before.size < 2n || before.size > BigInt(limit)) {
+      deny('invalid artifact size or type for ' + name)
+    }
+    const expectedSize = Number(before.size)
+    const buffer = Buffer.allocUnsafe(expectedSize + 1)
+    let length = 0
+    while (length < buffer.length) {
+      const count = readSync(fd, buffer, length, buffer.length - length, null)
+      if (count === 0) break
+      length += count
+    }
+    const after = fstatSync(fd, { bigint: true })
+    if (length !== expectedSize || after.size !== before.size ||
+        after.mtimeNs !== before.mtimeNs || after.ctimeNs !== before.ctimeNs ||
+        after.ino !== before.ino || after.dev !== before.dev) {
+      deny('artifact changed during bounded read for ' + name)
+    }
+    return buffer.subarray(0, length)
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('PROMOTION_EVIDENCE_DENIED:')) throw error
+    if (error && typeof error === 'object' && error.code === 'ELOOP') {
+      deny('invalid artifact size or type for ' + name)
+    }
+    deny('missing or unreadable ' + name)
+  } finally {
+    if (fd !== undefined) closeSync(fd)
+  }
+}
+
 export function verifyPromotionEvidence({ directory, expectedCommit, expectedRunId, publicKeyPem, sourceLockfilePath, now = new Date() }) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '')) deny('missing/invalid expected commit SHA')
   if (!canonicalRunId(expectedRunId)) deny('missing/invalid trusted staging run ID')
@@ -53,22 +94,7 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
     'release-attestation.json': 4_194_304,
   })
   const load = name => {
-    const path = join(directory, name)
-    const limit = artifactLimits[name]
-    let raw
-    try {
-      const metadata = lstatSync(path)
-      if (!metadata.isFile() || metadata.size < 2 || metadata.size > limit) {
-        deny('invalid artifact size or type for ' + name)
-      }
-      raw = readFileSync(path)
-      if (raw.length < 2 || raw.length > limit) {
-        deny('invalid artifact size or type for ' + name)
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message.startsWith('PROMOTION_EVIDENCE_DENIED:')) throw error
-      deny('missing or unreadable ' + name)
-    }
+    const raw = readBoundedPromotionArtifact(join(directory, name), artifactLimits[name], name)
     let obj
     try { obj = JSON.parse(raw.toString('utf8')) } catch { deny('malformed ' + name) }
     return { obj, raw }
