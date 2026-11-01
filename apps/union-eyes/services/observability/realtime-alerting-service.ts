@@ -1,5 +1,4 @@
-import { db } from '@/db';
-import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import {
   alertExecutions,
@@ -10,6 +9,7 @@ import {
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { logger } from '@/lib/logger';
+import { SLA_MODEL_VERSION } from '@/lib/ml/sla-breach-score';
 
 interface AlertSignal {
   organizationId: string;
@@ -178,6 +178,10 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
     SELECT organization_id::text, COUNT(*)::int AS count
     FROM ml_predictions
     WHERE prediction_type = 'sla_breach_risk'
+      -- Never turn legacy v1 caller-controlled scores into institutional alerts.
+      -- v2's uncalibrated score does not currently reach the historical 0.80 threshold;
+      -- the SLA watchdog remains the operational overdue/at-risk alert authority.
+      AND model_version = ${SLA_MODEL_VERSION}
       AND created_at >= NOW() - INTERVAL '60 minutes'
       AND predicted_value::numeric >= 0.80
     GROUP BY organization_id
@@ -261,7 +265,10 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
 }
 
 export async function getRecentRealtimeAlerts(organizationId: string, limit = 25) {
-  const rows = await db
+  if (!organizationId) throw new Error('Organization context required');
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('Invalid alert page size');
+  // A tenant predicate is not a substitute for executing under the tenant's runtime RLS role.
+  return withRLSContext({ organizationId }, (tx) => tx
     .select({
       executionId: alertExecutions.id,
       status: alertExecutions.status,
@@ -282,7 +289,5 @@ export async function getRecentRealtimeAlerts(organizationId: string, limit = 25
       ),
     )
     .orderBy(desc(alertExecutions.createdAt))
-    .limit(limit);
-
-  return rows;
+    .limit(limit));
 }

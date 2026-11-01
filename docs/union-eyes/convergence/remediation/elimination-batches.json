@@ -9166,7 +9166,19 @@
         "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
       ],
       "correction": "v2 risk indicator uses only tenant-scoped claim priority and SLA clock; ignores caller-supplied transition/breach values, priority, deadline and featureRefs; persists server-owned provenance; GET excludes legacy v1 rows. No confidence or training claim.",
-      "remaining": "Exact-HEAD focused/full Vitest/contract, native PG15/16, HTTP/browser/staging, downstream alert-sweep version filtering, independent review, persona and institutional ratification. No implementation or CLOSED credit."
+      "remaining": "Exact-HEAD focused/full Vitest/contract, PG15/16, HTTP/browser/staging and independent review. Downstream sweep now filters legacy v1 scores; v2 does not meet historic 0.80 threshold, so operational SLA watchdog remains authoritative pending institutional threshold policy. No CLOSED credit."
+    },
+    "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": null,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-observability-alert-provenance-and-rls-20261101.md",
+      "files": [
+        "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+        "apps/union-eyes/services/observability/__tests__/realtime-alerting-service.test.ts",
+        "apps/union-eyes/services/observability/__tests__/realtime-alerting-service.pglite.test.ts"
+      ],
+      "correction": "Realtime alert inbox reader now executes under tenant runtime RLS instead of privileged shared DB handle; explicit tenant/limit guards. Alert sweep excludes caller-controlled legacy v1 SLA scores from institutional alerts; native SQL regression authored.",
+      "remaining": "Exact-HEAD focused/full Vitest, PG15/16, HTTP/browser, real alert delivery and independent review. Officer audience/redaction and model-based alert threshold require institutional decisions. No implementation or CLOSED credit."
     }
   }
 }

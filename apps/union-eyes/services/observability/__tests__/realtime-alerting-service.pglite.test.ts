@@ -41,7 +41,7 @@ const count = async (table: string) => Number((await pg.query<{ n: string }>(`SE
 
 beforeAll(async () => {
   const created = await createTableDatabase([alertRules, alertExecutions, inAppNotifications, organizationMembers], [
-    `CREATE TABLE ml_predictions (organization_id uuid, prediction_type text, predicted_value text, created_at timestamptz default now())`,
+    `CREATE TABLE ml_predictions (organization_id uuid, prediction_type text, model_version text, predicted_value text, created_at timestamptz default now())`,
     `CREATE TABLE ingestion_batches (organization_id uuid, status text, created_at timestamptz default now())`,
     `CREATE TABLE platform_payments (organization_id uuid, status text, created_at timestamptz default now())`,
   ]);
@@ -57,6 +57,16 @@ beforeEach(async () => {
 });
 
 describe('runRealtimeObservabilitySweep', () => {
+  it('never emits a model-based alert from a legacy caller-controlled v1 SLA prediction', async () => {
+    await member(ORG_A, 'admin-1', 'admin');
+    await pg.query(`INSERT INTO ml_predictions (organization_id, prediction_type, model_version, predicted_value, created_at)
+      VALUES ($1, 'sla_breach_risk', 'sla-risk-v1', '0.99', now())`, [ORG_A]);
+    const result = await sweep();
+    expect(result.emitted).toBe(0);
+    expect(result.byKind.sla_breach_imminent).toBe(0);
+    expect(await notices()).toEqual([]);
+  });
+
   it('tells the organization\'s active administrators, and nobody else, and records only the channel that delivered', async () => {
     await member(ORG_A, 'admin-1', 'admin');
     await member(ORG_A, 'pres-1', 'president');

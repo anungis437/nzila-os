@@ -25,13 +25,18 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     execute,
   };
-  return { queue, db, execute, values, returning, persistAtomicAudit: vi.fn() };
+  return { queue, db, execute, values, returning, persistAtomicAudit: vi.fn(), scopes: [] as Record<string, unknown>[], rlsFailure: null as Error | null };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) => fn(h.db)),
+  withRLSContext: vi.fn((scope: Record<string, unknown>, fn: (tx: unknown) => Promise<unknown>) => {
+    h.scopes.push(scope);
+    if (h.rlsFailure) return Promise.reject(h.rlsFailure);
+    return fn(h.db);
+  }),
 }));
 vi.mock('@/db/schema', () =>
   new Proxy({}, { has: () => true, get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })) }),
@@ -51,6 +56,8 @@ const pushSel = (...items: unknown[]) => h.queue.push(...items);
 beforeEach(() => {
   h.queue.length = 0;
   h.execute.mockReset();
+  h.scopes.length = 0;
+  h.rlsFailure = null;
   h.values.mockClear();
   h.returning.mockClear();
   h.persistAtomicAudit.mockReset();
@@ -67,6 +74,20 @@ describe('observability/realtime-alerting-service', () => {
       const rows = await getRecentRealtimeAlerts('org-1');
       expect(rows).toHaveLength(1);
       expect(rows[0].executionId).toBe('exec-1');
+      expect(h.scopes).toEqual([{ organizationId: 'org-1' }]);
+    });
+
+    it('fails closed before querying if tenant RLS context cannot be established', async () => {
+      h.rlsFailure = new Error('RLS transaction unavailable');
+      await expect(getRecentRealtimeAlerts('org-1')).rejects.toThrow('RLS transaction unavailable');
+      expect(h.queue).toEqual([]);
+      expect(h.scopes).toEqual([{ organizationId: 'org-1' }]);
+    });
+
+    it('rejects missing tenant identity and invalid direct-call limits', async () => {
+      await expect(getRecentRealtimeAlerts('', 25)).rejects.toThrow('Organization context required');
+      await expect(getRecentRealtimeAlerts('org-1', 100000)).rejects.toThrow('Invalid alert page size');
+      expect(h.scopes).toEqual([]);
     });
 
     it('respects a custom limit', async () => {
