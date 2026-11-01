@@ -8438,6 +8438,21 @@
         "apps/union-eyes/lib/icra/email-results-origin.ts"
       ],
       "remaining": "Canonical production HTTPS redirect source-level correction requires exact-HEAD executable/PG15/16/HTTP/Stripe qualification. Actual displayed price and configured Stripe Price IDs still require authoritative parity and institutional pricing decision; no implementation or CLOSED credit."
+    },
+    "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "0973c8a41550ae728d5b4555883405d465f226ab",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/ue-pension-resource-mandate-20261101.md",
+      "files": [
+        "apps/union-eyes/lib/finance/finance-view-mandate.ts",
+        "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
+        "apps/union-eyes/app/api/ai/pension/plans/[id]/funding/route.ts",
+        "apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts",
+        "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
+      ],
+      "correction": "All three pension AI routes now require a live financial view mandate covering the requested member/plan or organization ledger, rather than any unrelated financial resource. Identifier resolved before the model/feature gate.",
+      "remaining": "Exact-HEAD focused/full Vitest/contract, PG15/16, HTTP/browser/staging, plan-to-member delegation policy, independent reviewer, persona and institutional ratification. Defect remains PARTIAL and no completion credit is claimed."
     }
   }
 }
