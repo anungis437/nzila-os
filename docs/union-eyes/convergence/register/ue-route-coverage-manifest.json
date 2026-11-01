@@ -36,8 +36,8 @@
    "WITH_API": 183
   },
   "mutatingByAudit": {
-   "ATOMIC": 165,
-   "ATOMIC_SERVICE": 115,
+   "ATOMIC": 164,
+   "ATOMIC_SERVICE": 116,
    "COMPUTE_ONLY": 31,
    "CRUD_ATOMIC": 86,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -1013,7 +1013,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -1088,7 +1088,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -10861,7 +10861,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "pilot/champions/route.ts",

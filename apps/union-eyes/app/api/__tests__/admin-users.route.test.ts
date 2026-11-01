@@ -2,64 +2,77 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
-  audited: vi.fn(async (_actor: unknown, _read: unknown, operation: () => Promise<unknown>) => operation()),
-  db: { select: vi.fn() },
+  authority: vi.fn(),
+  atomic: vi.fn(async (_actor: unknown, _read: unknown, operation: (tx: unknown) => Promise<unknown>) => operation('tx')),
+  list: vi.fn(),
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
-vi.mock('@/lib/audit/audited-platform-read', () => ({ performAuditedPlatformRead: m.audited }));
-vi.mock('@/db/db', () => ({ db: m.db }));
-vi.mock('@/db/schema', () => ({ organizationMembers: {}, organizations: {} }));
-vi.mock('drizzle-orm', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return {
-    ...actual,
-    desc: vi.fn(() => 'desc'),
-    eq: vi.fn(() => 'eq'),
-    or: vi.fn(() => 'or'),
-    ilike: vi.fn(() => 'ilike'),
-    sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }),
-  };
-});
-
-async function loadRoute() {
-  return import('../admin/users/route');
+class TestApiError extends Error {
+  constructor(readonly status: number, message: string) { super(message); }
+  static badRequest = (message: string) => new TestApiError(400, message);
+  static forbidden = (message: string) => new TestApiError(403, message);
 }
+vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: TestApiError }));
+vi.mock('@/lib/audit/audited-platform-read', () => ({ performAtomicPlatformRead: m.atomic }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.authority }));
+vi.mock('@/lib/platform/user-directory', async (importOriginal) => ({ ...(await importOriginal<typeof import('@/lib/platform/user-directory')>()), listPlatformUsers: m.list }));
 
-describe('admin/users route', () => {
+const ctx = (query = '') => ({ request: new Request(`http://localhost/api/admin/users${query}`), userId: 'staff_1', organizationId: 'org_1' });
+const ORG = '11111111-1111-4111-8111-111111111111';
+
+describe('admin/users route (DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
-      (ctx: any) => handler(ctx));
-    m.db.select.mockReturnValue({
-      from: vi.fn(() => ({
-        leftJoin: vi.fn(() => ({
-          orderBy: vi.fn(() => ({
-            $dynamic: vi.fn(() => ({
-              where: vi.fn(() => ({
-                limit: vi.fn(async () => [{ id: 'u1', name: 'Ada', email: 'ada@example.com', organizationName: 'Union', status: 'active', role: 'admin', joinedAt: '2026-01-01', createdAt: '2026-01-01', organizationId: 'org_1' }]),
-              })),
-              limit: vi.fn(async () => [{ id: 'u1', name: 'Ada', email: 'ada@example.com', organizationName: 'Union', status: 'active', role: 'admin', joinedAt: '2026-01-01', createdAt: '2026-01-01', organizationId: 'org_1' }]),
-            })),
-          })),
-        })),
-      })),
-    } as any);
+    m.withApi.mockImplementation((_cfg: unknown, handler: (c: any) => Promise<unknown>) => (c: any) => handler(c));
+    m.authority.mockResolvedValue({ userId: 'staff_1', organizationId: 'org_1' });
+    m.list.mockResolvedValue([{ id: 'u1', name: 'Ada', email: 'a***@example.com' }]);
   });
 
-  it('returns the user list', async () => {
-    const { GET } = await loadRoute();
-    const result = await GET({ request: new Request('http://localhost/api/admin/users?search=Ada') });
+  it('asks for platform-staff authority before anything else, and reads nothing without it', async () => {
+    m.authority.mockRejectedValue(new TestApiError(403, 'Reading across organizations needs platform-staff authority'));
+    const { GET } = await import('../admin/users/route');
 
-    expect(m.audited).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'platform.user_directory.read', details: { searched: true, limit: 100 } }), expect.any(Function));
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({
-      id: 'u1',
-      name: 'Ada',
-      email: 'ada@example.com',
-      organizationName: 'Union',
-      status: 'active',
-    });
+    await expect(GET(ctx('?search=Ada'))).rejects.toMatchObject({ status: 403 });
+
+    expect(m.authority).toHaveBeenCalledWith(expect.objectContaining({ userId: 'staff_1', organizationId: 'org_1' }), 'platform.user_directory.read');
+    expect(m.atomic).not.toHaveBeenCalled();
+    expect(m.list).not.toHaveBeenCalled();
+  });
+
+  it('reads inside one system-scope audited transaction and returns the projection the directory gives', async () => {
+    const { GET } = await import('../admin/users/route');
+
+    const result = await GET(ctx('?search=Ada'));
+
+    expect(m.atomic).toHaveBeenCalledWith(
+      { userId: 'staff_1', organizationId: 'org_1' },
+      expect.objectContaining({ action: 'platform.user_directory.read', resourceType: 'organization_members', details: { searched: true, scopedToOrganization: false, limit: 100 } }),
+      expect.any(Function),
+    );
+    expect(m.list).toHaveBeenCalledWith('tx', { search: 'Ada', organizationId: null });
+    expect(result).toEqual([{ id: 'u1', name: 'Ada', email: 'a***@example.com' }]);
+  });
+
+  it('records how many rows came back, never which', async () => {
+    const { GET } = await import('../admin/users/route');
+    await GET(ctx());
+
+    const read = m.atomic.mock.calls[0][1] as { resultDetails: (rows: unknown[]) => unknown };
+    expect(read.resultDetails([1, 2, 3])).toEqual({ returned: 3 });
+  });
+
+  it.each([['a'], ['ab']])('refuses a search of %j as too short to be a search, before reading', async (term) => {
+    const { GET } = await import('../admin/users/route');
+    await expect(GET(ctx(`?search=${term}`))).rejects.toMatchObject({ status: 400 });
+    expect(m.atomic).not.toHaveBeenCalled();
+  });
+
+  it('narrows to one organization only when it is given an organization id, and refuses anything else', async () => {
+    const { GET } = await import('../admin/users/route');
+    await GET(ctx(`?organizationId=${ORG}`));
+    expect(m.list).toHaveBeenCalledWith('tx', { search: '', organizationId: ORG });
+
+    await expect(GET(ctx('?organizationId=not-an-id'))).rejects.toMatchObject({ status: 400 });
+    await expect(GET(ctx(`?organizationId=${ORG}' OR '1'='1`))).rejects.toMatchObject({ status: 400 });
   });
 });

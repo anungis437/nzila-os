@@ -295,6 +295,9 @@ export async function loadFinancialTransaction(exec: SqlExecutor, req: Authority
 
 // ── Governance review ────────────────────────────────────────────────────────
 
+// Cache 0047 lets the database show a review only to its participants and to overseers a live mandate names. A review the
+// principal cannot see is therefore not found here, and the kernel denies it as RESOURCE_FACTS_MISSING, which is exactly what a
+// review that does not exist produces; a denial never confirms that someone is a respondent.
 export async function loadReview(exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
   const org = req.resource.organizationId
   if (!isUuid(org) || !isUuid(req.resource.id)) return null

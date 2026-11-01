@@ -621,7 +621,7 @@ export class SignatureService {
       const lapsed = await tx
         .update(documentSigners)
         .set({ status: "expired", updatedAt: new Date() })
-        .where(and(eq(documentSigners.documentId, document.id), notInArray(documentSigners.status, [...SETTLED_SIGNER_STATES])))
+        .where(and(eq(documentSigners.documentId, document.id), inArray(documentSigners.documentId, documentsOfOrganization(tx, document.organizationId)), notInArray(documentSigners.status, [...SETTLED_SIGNER_STATES])))
         .returning({ id: documentSigners.id });
       await AuditTrailService.log({
         documentId: document.id,

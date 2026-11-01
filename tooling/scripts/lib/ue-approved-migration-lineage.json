@@ -312,6 +312,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Org-scoped runtime SELECT on audit_security.audit_logs; the reconciled INSERT-only sink left every audit reader permission-denied natively."
+      },
+      {
+        "tag": "0046_pilot_fixture_rows_rls_closure",
+        "sha256": "d057b5e5cf6bf76993fca8d986c87da1104967697d8502f4714b3e54102ef656",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Tenant RLS for pilot_fixture_rows (organization isolation, no UPDATE)"
+      },
+      {
+        "tag": "0047_authority_reviews_visibility_rls",
+        "sha256": "6c8a727dda64ba16fc5fb7f2236a58d98c76700f9b2d6635063d6e00c9b98f0a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Restrictive SELECT policy on ue_authority_reviews: adverse parties see nothing; participants and live-mandate overseers see only their reviews"
       }
     ],
     "platform": [
@@ -615,6 +629,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Notice evidence level for named workbook holders (none, self_reported, delivery_verified); 0055 notices relabelled self_reported, none upgraded."
+      },
+      {
+        "tag": "0058_pilot_fixture_rows",
+        "sha256": "040bf3ef64288559b8922cc9174ed738e8290318f5132acb6fff9531eb1b213b",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "CUPE pilot bootstrap origin ledger (F03-A: a reset deletes only rows the bootstrap recorded creating)"
       }
     ]
   }

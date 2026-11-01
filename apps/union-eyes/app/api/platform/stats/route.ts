@@ -1,15 +1,20 @@
 /**
  * Platform Stats API
- * 
- * Returns real-time platform metrics from the database for the Nzila Ops Dashboard,
- * Customer Success, and other platform admin pages.
- * 
+ *
+ * Returns platform-wide counts and distributions from the database for the Nzila Ops Dashboard, Customer Success and other platform admin
+ * pages.
+ *
+ * It reads every organization, so it is authorized by platform-staff authority (lib/platform/platform-staff.ts), not by a role title: an
+ * organization's `platform_lead` title is authority inside that organization only. Without the authority the read is refused and the refusal
+ * recorded. The statements run under the system role and the read is recorded in the same transaction (lib/queries/platform-stats.ts).
+ *
  * @route GET /api/platform/stats
- * @auth Required — minimum role: platform_lead
+ * @auth Required: platform-staff authority
  */
 
 import { getPlatformStatsFromDb } from '@/lib/queries/platform-stats';
-import { withApi, ApiError } from '@/lib/api/framework';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,8 +27,8 @@ export const GET = withApi(
     },
   },
   async ({ userId, organizationId }) => {
-    if (!userId || !organizationId) throw ApiError.forbidden('An active organization is required to read platform statistics');
-    const stats = await getPlatformStatsFromDb({ userId, organizationId });
-    return stats as any as Record<string, unknown>;
+    const actor = await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.stats.read');
+    const stats = await getPlatformStatsFromDb(actor);
+    return stats as unknown as Record<string, unknown>;
   },
 );

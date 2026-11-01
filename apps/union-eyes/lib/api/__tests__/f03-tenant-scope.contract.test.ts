@@ -42,13 +42,18 @@ describe('F03 tenant scope of shared and child records', () => {
     expect(source).not.toContain('remittance_csv')
   })
 
-  // DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ
+  // DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ. Replaces the earlier pin that the read was audited before it ran (two-phase). The behaviour is
+  // proven in app/api/__tests__/admin-users.route.test.ts, admin-stats-activity.route.test.ts and db/__tests__/platform-directory.postgres.test.ts;
+  // this pin only keeps the routes from drifting back to a bare database handle or a role-title check.
   it.each(['app/api/admin/users/route.ts', 'app/api/admin/stats/activity/route.ts'])(
-    '%s records the cross-organization read before running it',
+    '%s asks for platform-staff authority, then reads and records in one system transaction',
     (route) => {
       const source = read(route)
-      expect(source).toContain('performAuditedPlatformRead(')
-      expect(source.indexOf('performAuditedPlatformRead(')).toBeLessThan(source.indexOf('.from(organizationMembers)'))
+      expect(source).toContain('requirePlatformStaffAuthority(')
+      expect(source).toContain('performAtomicPlatformRead(')
+      expect(source.indexOf('requirePlatformStaffAuthority(')).toBeLessThan(source.indexOf('performAtomicPlatformRead('))
+      expect(source).not.toContain('performAuditedPlatformRead(')
+      expect(source).not.toContain("from '@/db/db'")
     },
   )
 

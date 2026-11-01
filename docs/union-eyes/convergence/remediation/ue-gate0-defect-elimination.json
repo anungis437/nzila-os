@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 591,
-    "partial": 77,
+    "implementedPendingQualification": 593,
+    "partial": 76,
     "qualificationVerified": 0,
-    "unresolved": 186,
+    "unresolved": 184,
     "externalBlockers": 0
   },
   "batches": [
@@ -1157,6 +1157,15 @@
       "outstandingBefore": 186,
       "newlyImplemented": 0,
       "outstandingAfter": 186,
+      "partial": 0,
+      "evidenceCommit": "cfcb6ab8d"
+    },
+    {
+      "id": "B121-F03-A-ISOLATION-AND-DESTRUCTIVE-OPERATIONS",
+      "family": "F03-A: platform-wide reads, the pilot fixture reset and the governance review register",
+      "outstandingBefore": 186,
+      "newlyImplemented": 2,
+      "outstandingAfter": 184,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -5478,14 +5487,27 @@
       ]
     },
     "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER": {
-      "status": "PARTIAL",
-      "batch": "B25-F03-ORGANIZATION-BOUND-REFERENCES-AND-VERIFIED-CREDITS",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B121-F03-A-ISOLATION-AND-DESTRUCTIVE-OPERATIONS",
       "files": [
         "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts",
-        "apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts"
+        "apps/union-eyes/lib/pilot/fixture-bootstrap.ts",
+        "apps/union-eyes/lib/pilot/fixture-plan.ts",
+        "apps/union-eyes/db/migrations-platform/0058_pilot_fixture_rows.sql",
+        "apps/union-eyes/db/migrations-platform/0058_pilot_fixture_rows.rollback.sql",
+        "apps/union-eyes/db/migrations-cache/0046_pilot_fixture_rows_rls_closure.sql",
+        "apps/union-eyes/db/migrations-cache/0046_pilot_fixture_rows_rls_closure.rollback.sql",
+        "apps/union-eyes/db/schema/domains/pilot/pilot-fixture-rows.ts",
+        "apps/union-eyes/db/schema-organizations.ts",
+        "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+        "apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts",
+        "apps/union-eyes/lib/pilot/__tests__/fixture-plan.test.ts",
+        "apps/union-eyes/lib/pilot/__tests__/fixture-bootstrap.test.ts",
+        "apps/union-eyes/db/__tests__/pilot-fixture-bootstrap.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
       ],
-      "explanation": "The reset needs a system administrator, a pilot or demo runtime and an explicit confirmation naming the organization (upstream's change, existing test).",
-      "remaining": "Seeded rows still carry no demo marker, so a reset deletes by organization and slug rather than by marker.",
+      "explanation": "F03-A: the bootstrap records the origin of every row it seeds in pilot_fixture_rows (platform 0058, RLS cache 0046: organization-isolated select, insert and delete, no update policy) and a reset deletes exactly the rows that ledger names. An organization found at the fixture slug is reset only when the ledger holds an organization marker for it; an unmarked organization, a member, grievance or checklist row the ledger does not name, or a ledger row referenced by a record the bootstrap did not create refuses the reset with nothing deleted and the refusal recorded (pilot.bootstrap.cupe.denied). The route needs the platform-staff fact (platform.pilot_fixture.manage), a pilot or demo runtime and the confirmation naming the organization, and takes dryRun, which runs the real statements in a savepoint that is rolled back and leaves only its own record. Concurrent bootstraps serialise on an advisory lock and cannot duplicate the organization or its members. Django and Drizzle convergence: the physical organizations table has no database defaults, so a Drizzle insert that omitted a NOT NULL column sent DEFAULT and failed; the Drizzle organizations model now supplies every ORM default ($defaultFn) so both writers agree. Native PG15 and PG16 as the real roles: the migrations apply twice, roll back and re-apply; grants equal the catalog contract; the system role cannot write members or grievances; a reset deletes exactly the ledger; every refusal deletes nothing; a dry run leaves nothing behind; the ledger is organization-isolated; injected faults leave no partial seed. Tests replaced and disclosed: the whole pilot-bootstrap-cupe route test was rewritten for the two-phase, ledger-bound route (the old test pinned the organization-wide delete).",
+      "remaining": "The seed is tenant-side because the system role cannot write members or grievances, so the operator needs an active membership in the fixture organization. An organization seeded before the ledger existed has no ledger and cannot be reset until it is re-seeded, which is deliberate. No backup is taken because a reset removes only rows the fixture itself created. The CUPE fixture is a demonstration and is not authoritative; it is realigned after the application. Migrations 0058 and 0046 are not qualified in a deployment environment, and the bootstrap-v2 source plan was not regenerated (it needs the Python wheelhouse).",
       "history": [
         {
           "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
@@ -5503,6 +5525,28 @@
           "files": [
             "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts",
             "apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts"
+          ]
+        },
+        {
+          "batch": "B121-F03-A-ISOLATION-AND-DESTRUCTIVE-OPERATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts",
+            "apps/union-eyes/lib/pilot/fixture-bootstrap.ts",
+            "apps/union-eyes/lib/pilot/fixture-plan.ts",
+            "apps/union-eyes/db/migrations-platform/0058_pilot_fixture_rows.sql",
+            "apps/union-eyes/db/migrations-platform/0058_pilot_fixture_rows.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0046_pilot_fixture_rows_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0046_pilot_fixture_rows_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/domains/pilot/pilot-fixture-rows.ts",
+            "apps/union-eyes/db/schema-organizations.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts",
+            "apps/union-eyes/lib/pilot/__tests__/fixture-plan.test.ts",
+            "apps/union-eyes/lib/pilot/__tests__/fixture-bootstrap.test.ts",
+            "apps/union-eyes/db/__tests__/pilot-fixture-bootstrap.postgres.test.ts",
+            "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
           ]
         }
       ]
@@ -9219,10 +9263,16 @@
         "apps/union-eyes/lib/audit/__tests__/audited-platform-read.test.ts",
         "apps/union-eyes/app/api/__tests__/admin-users.route.test.ts",
         "apps/union-eyes/app/api/__tests__/admin-stats-activity.route.test.ts",
-        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+        "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts",
+        "apps/union-eyes/lib/platform/platform-staff.ts",
+        "apps/union-eyes/lib/platform/user-directory.ts",
+        "apps/union-eyes/lib/platform/__tests__/platform-staff.test.ts",
+        "apps/union-eyes/lib/platform/__tests__/user-directory.test.ts",
+        "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
       ],
-      "explanation": "The platform user directory and activity feed record the read under the system scope before running it and refuse (409) if that record cannot be written; the search term is bounded with LIKE wildcards taken literally, and the activity limit is a bounded integer.",
-      "remaining": "Authority is still the platform_lead role title rather than a mandate, and both reads still return member names and e-mail addresses across every organization by design.",
+      "explanation": "The platform user directory and activity feed record the read under the system scope before running it and refuse (409) if that record cannot be written; the search term is bounded with LIKE wildcards taken literally, and the activity limit is a bounded integer. F03-A: the directory and the activity feed no longer admit a role title. Authority is the canonical platform-staff fact (isPlatformAdminUser: the isSystemAdmin identity fact or the legacy platform-admin list), checked per capability by requirePlatformStaffAuthority, and a refusal is recorded under the caller's own organization (<capability>.denied) and is still a 403 if that record cannot be written. Each read now runs in one system transaction with its audit row (performAtomicPlatformRead); the record carries counts only, never result rows, and a read whose audit cannot be written returns nothing. The projection is the minimum a platform operator needs: the directory returns a masked e-mail (p***@example.org) and an abbreviated name (Pat M.), the activity feed an abbreviated name and no e-mail, soft-deleted members are excluded, an organization filter is a validated UUID, and a search needs three characters, is bounded to 100 and takes LIKE characters literally. Native PG15 and PG16 as the real system role: the grants are the catalog contract's, the reads equal a superuser's counts, projections never carry an unmasked e-mail, a fault in the audit write rolls the read back and a denial is recorded. Tests replaced or adapted and disclosed: the admin-users and admin-stats-activity route tests were rewritten for the new authority and projection; the f03-tenant-scope contract pins the directory routes by structure only.",
+      "remaining": "Authority is a platform-staff identity fact, not an issued, time-bound, accepted mandate: the authority kernel has no platform scope or platform-staff mandate kind (every kernel relation is organization-scoped), so one cannot be issued here, and defining one needs a platform-authority design and an institutional decision on who issues it. Platform staff still receive an abbreviated name, a masked e-mail and a role across every organization by design. Not qualified in a deployment environment.",
       "history": [
         {
           "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
@@ -9235,7 +9285,33 @@
             "apps/union-eyes/lib/audit/__tests__/audited-platform-read.test.ts",
             "apps/union-eyes/app/api/__tests__/admin-users.route.test.ts",
             "apps/union-eyes/app/api/__tests__/admin-stats-activity.route.test.ts",
-            "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts"
+            "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts",
+            "apps/union-eyes/lib/platform/platform-staff.ts",
+            "apps/union-eyes/lib/platform/user-directory.ts",
+            "apps/union-eyes/lib/platform/__tests__/platform-staff.test.ts",
+            "apps/union-eyes/lib/platform/__tests__/user-directory.test.ts",
+            "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+            "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
+          ]
+        },
+        {
+          "batch": "B121-F03-A-ISOLATION-AND-DESTRUCTIVE-OPERATIONS",
+          "status": "PARTIAL",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/platform/platform-staff.ts",
+            "apps/union-eyes/lib/platform/user-directory.ts",
+            "apps/union-eyes/lib/audit/audited-platform-read.ts",
+            "apps/union-eyes/app/api/admin/users/route.ts",
+            "apps/union-eyes/app/api/admin/stats/activity/route.ts",
+            "apps/union-eyes/lib/platform/__tests__/platform-staff.test.ts",
+            "apps/union-eyes/lib/platform/__tests__/user-directory.test.ts",
+            "apps/union-eyes/lib/audit/__tests__/audited-platform-read.test.ts",
+            "apps/union-eyes/app/api/__tests__/admin-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/admin-stats-activity.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts",
+            "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+            "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
           ]
         }
       ]
@@ -14042,10 +14118,15 @@
         "apps/union-eyes/lib/queries/platform-stats.ts",
         "apps/union-eyes/app/api/platform/stats/route.ts",
         "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
+        "apps/union-eyes/lib/platform/platform-staff.ts",
+        "apps/union-eyes/lib/audit/audited-platform-read.ts",
+        "apps/union-eyes/components/dashboards/nzila-ops-dashboard.tsx",
+        "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
       ],
-      "explanation": "The cross-organization statements now run in withSystemContext on purpose instead of whatever the connection role sees, and the role-title read is unchanged. B87: the platform read records platform_stats.read in the same system-context transaction, attributed to the caller and the organization they act in, so the cross-tenant read is no longer silent.",
-      "remaining": "The route is still authorized by the platform_lead role title; a platform-staff mandate does not exist in the authority kernel, so it cannot be issued here.",
+      "explanation": "The cross-organization statements now run in withSystemContext on purpose instead of whatever the connection role sees, and the role-title read is unchanged. B87: the platform read records platform_stats.read in the same system-context transaction, attributed to the caller and the organization they act in, so the cross-tenant read is no longer silent. F03-A: GET /api/platform/stats requires the platform-staff fact (platform.stats.read) instead of a role-title floor, runs and audits in one system transaction through performAtomicPlatformRead (the audit row carries counts only), and returns only figures the system role can lawfully read. The settlements total and the per-capita rate were withdrawn from the response, the query and the ops dashboard tile: the system role holds no privilege on settlements, so that statement could never have run natively as written, and an unreadable figure must not be reported as zero. Native PG15 and PG16: the statistics equal a superuser's counts and the system role has no settlements privilege. Tests adapted and disclosed: the s13 settlements assertions and the s31 stats-route pin were changed to the withdrawn figures and the new authority.",
+      "remaining": "The same mandate gap as the directory: no platform-staff mandate exists in the authority kernel, so the route cannot be authorised by an issued mandate. The settlements and per-capita figures are withdrawn rather than computed; restoring them needs a finance mandate and a system privilege on settlements, which is under the finance freeze. Not qualified in a deployment environment.",
       "history": [
         {
           "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
@@ -14055,7 +14136,28 @@
             "apps/union-eyes/lib/queries/platform-stats.ts",
             "apps/union-eyes/app/api/platform/stats/route.ts",
             "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
+            "apps/union-eyes/lib/platform/platform-staff.ts",
+            "apps/union-eyes/lib/audit/audited-platform-read.ts",
+            "apps/union-eyes/components/dashboards/nzila-ops-dashboard.tsx",
+            "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+            "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
+          ]
+        },
+        {
+          "batch": "B121-F03-A-ISOLATION-AND-DESTRUCTIVE-OPERATIONS",
+          "status": "PARTIAL",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/queries/platform-stats.ts",
+            "apps/union-eyes/app/api/platform/stats/route.ts",
+            "apps/union-eyes/lib/platform/platform-staff.ts",
+            "apps/union-eyes/lib/audit/audited-platform-read.ts",
+            "apps/union-eyes/components/dashboards/nzila-ops-dashboard.tsx",
+            "apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
+            "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+            "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts"
           ]
         }
       ]
@@ -17066,7 +17168,7 @@
         {
           "batch": "B120-F06-SCANNER-CALL-AWARE",
           "status": "PARTIAL",
-          "evidenceCommit": null,
+          "evidenceCommit": "cfcb6ab8d",
           "files": [
             "apps/union-eyes/scripts/lib/call-reach.ts",
             "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
@@ -17474,6 +17576,47 @@
             "apps/union-eyes/lib/ai/__tests__/chatbot-service.test.ts",
             "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
             "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0C1-REV-REVIEW-ROWS-ARE-PROTECTED-BY-AN-ORGANIZATION-ONLY-RLS-POLICY-SO-ADVERSE-PARTY-COMPLAINANT-AND-PRIVILEGE-CONFIDENTIALITY-IS-APPLICATION-CODE-ONLY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B121-F03-A-ISOLATION-AND-DESTRUCTIVE-OPERATIONS",
+      "files": [
+        "apps/union-eyes/db/migrations-cache/0047_authority_reviews_visibility_rls.sql",
+        "apps/union-eyes/db/migrations-cache/0047_authority_reviews_visibility_rls.rollback.sql",
+        "apps/union-eyes/lib/authority/store/workflow.ts",
+        "apps/union-eyes/lib/authority/store/resources.ts",
+        "apps/union-eyes/lib/authority/store/review-intake.ts",
+        "apps/union-eyes/lib/authority/store/audit.ts",
+        "apps/union-eyes/db/rls-storage-authority/authority-kernel.ts",
+        "apps/union-eyes/db/__tests__/review-visibility.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/authority-kernel-storage.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/authority-kernel-harness.ts"
+      ],
+      "explanation": "F03-A: cache 0047 adds a restrictive SELECT policy for the runtime role to ue_authority_reviews, so the database itself now enforces the visibility rules that lived only in review-intake.ts. A principal named as an adverse party sees nothing of the review, even holding a live mandate that names it; every other principal sees only the reviews they opened or filed, or that a live, accepted, unrecused governance_review mandate names (the kernel's own liveness test: status active, not revoked, inside its window, accepted when acceptance is required). A review the principal cannot see is not found, so the kernel denies it as RESOURCE_FACTS_MISSING, identical to a review that does not exist: a denial no longer confirms that someone is a respondent. The event history was the same data by another route: ue_authority_events keeps a full snapshot (complainant, adverse parties, classification) and the acting principal of every review write, and every member could read it, so a second restrictive policy makes an event of a review exactly as visible as the review (its subquery is itself subject to the first policy). registerReview refuses a review that names its own opener or complainant as adverse (SELF_ADVERSE) and the database independently refuses that INSERT ... RETURNING. Grants, FORCE RLS, the append-only guards and the actor-binding triggers are unchanged, and a re-run of 0020 cannot undo the policy because it is a separate restrictive policy. Proof: 21 PGlite and 21 native tests on PG15 and PG16 as the real runtime role, including the control in which, without the policies, a member who is neither party nor overseer reads every review and every snapshot. Tests adapted and disclosed: authority-kernel-resources.pglite (the adverse reviewer's denial is now RESOURCE_FACTS_MISSING and never ADVERSE_PARTY; the pure-kernel rule stays pinned in kernel-governance.test.ts), authority-kernel-storage.pglite (the review register and the event history carry one restrictive policy each, so six, and no other authority relation has one), and the harness newUuid (a random per-process base, so native suites re-run in one database instead of colliding on append-only ids).",
+      "remaining": "Which columns a rightful reader receives is still a projection rule: an overseer who may read a review can read its adverse_user_ids, and the oversight list's omission of respondent identifiers is application code, because hiding the column from the people conducting the review would need the kernel's adverse check moved into a definer function. The visibility of mandate and recusal rows (a recusal reason is free text) and of the events of every other authority relation stays organization-wide because the kernel reads them for delegation facts; narrowing them needs its own design and is not in the frozen register. Audit-log rows for review.open and review.oversight.read stay readable by the runtime role like every audit row (they name the opener, the review type and review ids, never the respondents); the audit-reader boundary governs that. The audit reconciliation must run as a role that reads every event (the migration owner), not as a narrowed runtime role. Migration 0047 is not qualified in a deployment environment.",
+      "history": [
+        {
+          "batch": "B121-F03-A-ISOLATION-AND-DESTRUCTIVE-OPERATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0047_authority_reviews_visibility_rls.sql",
+            "apps/union-eyes/db/migrations-cache/0047_authority_reviews_visibility_rls.rollback.sql",
+            "apps/union-eyes/lib/authority/store/workflow.ts",
+            "apps/union-eyes/lib/authority/store/resources.ts",
+            "apps/union-eyes/lib/authority/store/review-intake.ts",
+            "apps/union-eyes/lib/authority/store/audit.ts",
+            "apps/union-eyes/db/rls-storage-authority/authority-kernel.ts",
+            "apps/union-eyes/db/__tests__/review-visibility.pglite.test.ts",
+            "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts",
+            "apps/union-eyes/db/__tests__/authority-kernel-storage.pglite.test.ts",
+            "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
+            "apps/union-eyes/db/__tests__/authority-kernel-harness.ts"
           ]
         }
       ]

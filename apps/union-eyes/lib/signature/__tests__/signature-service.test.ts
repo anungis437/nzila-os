@@ -93,19 +93,19 @@ describe('SignatureService authority and atomic audit', () => {
 
   describe('voidDocument', () => {
     it('refuses anyone but the sender, and writes nothing', async () => {
-      await expect(SignatureService.voidDocument('d1', 'signer', 'why')).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      await expect(SignatureService.voidDocument('d1', 'signer', 'why', 'o1')).rejects.toMatchObject({ code: 'FORBIDDEN' });
       expect(m.tx.update).not.toHaveBeenCalled();
       expect(m.audit).not.toHaveBeenCalled();
     });
 
     it.each(['completed', 'voided', 'declined', 'expired'])('refuses a %s document', async (status) => {
       m.documentFind.mockResolvedValue({ ...DOC, status });
-      await expect(SignatureService.voidDocument('d1', 'sender', 'why')).rejects.toMatchObject({ code: 'CONFLICT' });
+      await expect(SignatureService.voidDocument('d1', 'sender', 'why', 'o1')).rejects.toMatchObject({ code: 'CONFLICT' });
       expect(m.audit).not.toHaveBeenCalled();
     });
 
     it('voids for the sender and records the trail entry and the platform audit on the same transaction', async () => {
-      await SignatureService.voidDocument('d1', 'sender', 'wrong version');
+      await SignatureService.voidDocument('d1', 'sender', 'wrong version', 'o1');
       expect(m.trail[0]).toMatchObject({ eventType: 'document_voided', actorUserId: 'sender' });
       expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'signature.document.void', userId: 'sender', organizationId: 'o1' }));
     });
@@ -114,14 +114,14 @@ describe('SignatureService authority and atomic audit', () => {
     it('does not record a void, or audit one, when the provider could not void the envelope', async () => {
       m.documentFind.mockResolvedValue({ ...DOC, provider: 'docusign', providerEnvelopeId: 'env-1' });
       m.voidEnvelope.mockRejectedValue(new Error('provider down'));
-      await expect(SignatureService.voidDocument('d1', 'sender', 'why')).rejects.toMatchObject({ code: 'CONFLICT' });
+      await expect(SignatureService.voidDocument('d1', 'sender', 'why', 'o1')).rejects.toMatchObject({ code: 'CONFLICT' });
       expect(m.tx.update).not.toHaveBeenCalled();
       expect(m.audit).not.toHaveBeenCalled();
     });
 
     it('is a conflict with no audit when the document completed in the meantime', async () => {
       m.voidUpdate = [];
-      await expect(SignatureService.voidDocument('d1', 'sender', 'why')).rejects.toBeInstanceOf(SignatureAuthorityError);
+      await expect(SignatureService.voidDocument('d1', 'sender', 'why', 'o1')).rejects.toBeInstanceOf(SignatureAuthorityError);
       expect(m.audit).not.toHaveBeenCalled();
     });
   });
@@ -230,7 +230,7 @@ describe('SignatureService authority and atomic audit', () => {
     it('binds the void and completion statements to the document organization', async () => {
       const { eq } = await import('drizzle-orm');
       vi.mocked(eq).mockClear();
-      await SignatureService.voidDocument('d1', 'sender', 'why');
+      await SignatureService.voidDocument('d1', 'sender', 'why', 'o1');
       expect(vi.mocked(eq).mock.calls.some((c) => c[0] === 'signatureDocuments.organizationId' && c[1] === 'o1')).toBe(true);
     });
 

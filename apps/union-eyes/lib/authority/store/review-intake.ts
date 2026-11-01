@@ -11,6 +11,12 @@
  * `review:monitor` allows that exact review. A missing mandate, a foreign
  * organization, a recusal, a complainant or an adverse party produces an empty
  * oversight list. The response never carries respondent identifiers.
+ *
+ * The database enforces the same visibility (cache 0047, restrictive policy on
+ * ue_authority_reviews), so no other query in an organization context can read a
+ * review the principal has no part in. These queries still filter explicitly: the
+ * rules then hold even where the policy is absent, and the policy is a floor, not
+ * the only gate.
  */
 import { assessMandate } from '../common'
 import { decide } from '../kernel'

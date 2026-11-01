@@ -1141,6 +1141,17 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     reviewPriority: "HIGH",
   },
   {
+    table: "pilot_fixture_rows",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "Created by platform 0058 with cache 0046: the origin ledger of the CUPE pilot bootstrap (app/api/pilot/bootstrap/cupe/route.ts, lib/pilot/fixture-bootstrap.ts). One row says the bootstrap created a member, a grievance or the organization itself from a fixture; a reset deletes exactly the rows named here and refuses when the organization holds any other, so a row that is not in the ledger is never treated as fixture data. Direct NOT NULL organization_id with FORCE RLS: the platform phase writes only the organization marker as the system role when it creates the organization (the runtime role cannot insert into organizations); the tenant phase reads, writes and deletes the member and grievance entries as the runtime role bound to the fixture organization, so the operator needs an active membership in it (no UPDATE: an origin record is not edited). Identifiers only: no member or case content. Proven on PostgreSQL 15 and 16 as the real roles by db/__tests__/pilot-fixture-bootstrap.postgres.test.ts.",
+    supportingCapability: ["app/api/pilot/bootstrap/cupe/route.ts","lib/pilot/fixture-bootstrap.ts","lib/pilot/fixture-plan.ts","db/migrations-platform/0058_pilot_fixture_rows.sql","db/migrations-cache/0046_pilot_fixture_rows_rls_closure.sql","db/__tests__/pilot-fixture-bootstrap.postgres.test.ts"],
+    requiredRuntimePrivileges: ["SELECT", "INSERT", "DELETE"],
+    requiredSystemPrivileges: ["SELECT", "INSERT"],
+    invocationAuthority: "PLATFORM_ADMIN",
+    dbExecutionPrincipal: "MIXED",
+    reviewPriority: "NONE",
+  },
+  {
     table: "pilot_milestones",
     classification: "TENANT_RLS_REQUIRED",
     reason: "CLOSED (round 53, FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, PILOT_CONTROL_PLANE_STORAGE family; PILOT CONTROL-PLANE PRODUCT DOCTRINE UNCHANGED): db/schema/domains/pilot/pilot-milestones.ts's pilotMilestones has organizationId NOT NULL, no user column — direct org-owned. UNLIKE pilot_enrollments, every query against THIS table in both live routes carries an explicit organizationId predicate — app/api/pilot/overview/route.ts's cross-org fan-out happens at the pilotEnrollments level (an unscoped WHERE status='active' query, gated PLATFORM_ADMIN — see that entry), then loops per already-authorized enrollment.organizationId to fetch that SPECIFIC org's milestones (eq(pilotMilestones.organizationId, orgId), verified by direct read of the route — never a single unscoped query against this table itself). app/api/pilot/current/route.ts (TENANT_USER, withOrganizationAuth + hasMinRole('officer')) reads only the caller's own org's milestones the same way. Both execute inside withSystemContext (SYSTEM_RUNTIME). invocationAuthority recorded as MIXED (TENANT_USER via /current, PLATFORM_ADMIN via /overview) even though the table's own authority boundary (organizationId) is always enforced at the SQL predicate level in every query. Genuinely SELECT-only from the TS app today: git-grep confirms zero INSERT/UPDATE/DELETE against pilotMilestones anywhere — milestone rows are created out-of-band (pilot ops/migration). No Django ViewSet exists for this table.",

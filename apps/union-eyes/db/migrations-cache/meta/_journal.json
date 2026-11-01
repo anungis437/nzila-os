@@ -302,6 +302,20 @@
       "when": 1790390000000,
       "tag": "0045_audit_security_runtime_read",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1790400000000,
+      "tag": "0046_pilot_fixture_rows_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1790410000000,
+      "tag": "0047_authority_reviews_visibility_rls",
+      "breakpoints": true
     }
   ]
 }

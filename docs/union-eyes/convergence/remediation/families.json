@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 644,
- "partial": 77,
- "outstanding": 133,
- "accountedFor": 133,
+ "corrected": 646,
+ "partial": 76,
+ "outstanding": 131,
+ "accountedFor": 131,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -47,23 +47,22 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 16,
+   "defects": 14,
    "severity": {
-    "HIGH": 3,
-    "MEDIUM": 10,
+    "HIGH": 2,
+    "MEDIUM": 9,
     "LOW": 3
    },
    "namedRoutes": 4,
-   "namedFiles": 1,
+   "namedFiles": 0,
    "tranches": {
     "0B.2": 1,
     "0B.4": 2,
     "0B.6": 3,
     "0B.8": 1,
     "0B.9": 1,
-    "0B.10": 4,
-    "0B.11": 3,
-    "0C.1": 1
+    "0B.10": 3,
+    "0B.11": 3
    }
   },
   {
@@ -373,11 +372,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
     "id": "DEF-0B10-OPL-02",
     "severity": "MEDIUM",
     "partial": true
@@ -401,10 +395,6 @@
     "id": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0C1-REV-REVIEW-ROWS-ARE-PROTECTED-BY-AN-ORGANIZATION-ONLY-RLS-POLICY-SO-ADVERSE-PARTY-COMPLAINANT-AND-PRIVILEGE-CONFIDENTIALITY-IS-APPLICATION-CODE-ONLY",
-    "severity": "MEDIUM"
    }
   ],
   "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD": [

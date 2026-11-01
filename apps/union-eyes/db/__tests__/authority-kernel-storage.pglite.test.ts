@@ -78,14 +78,23 @@ describe('migration structure', () => {
     }
   })
 
-  it('every relation has FORCE RLS and the five canonical policies', async () => {
+  it('every relation has FORCE RLS and the five canonical policies; the review register and its event history add one restrictive visibility policy each', async () => {
     await k.asAdmin(async () => {
+      const narrowed = ['ue_authority_reviews', 'ue_authority_events']
       for (const e of authorityKernelEntries) {
         const c = await db.query<{ relrowsecurity: boolean; relforcerowsecurity: boolean }>(`SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE oid = $1::regclass`, [e.table])
         expect(c.rows[0], e.table).toEqual({ relrowsecurity: true, relforcerowsecurity: true })
         const p = await db.query<{ n: string }>(`SELECT count(*)::text n FROM pg_policies WHERE tablename = $1`, [e.table])
-        expect(Number(p.rows[0].n), e.table).toBe(5)
+        expect(Number(p.rows[0].n), e.table).toBe(narrowed.includes(e.table) ? 6 : 5)
       }
+      const visibility = await db.query<{ tablename: string; policyname: string; permissive: string; cmd: string; roles: string }>(
+        `SELECT tablename, policyname, permissive, cmd, roles::text roles FROM pg_policies WHERE permissive = 'RESTRICTIVE' AND tablename = ANY ($1::text[]) ORDER BY tablename`,
+        [authorityKernelEntries.map((e) => e.table)],
+      )
+      expect(visibility.rows).toEqual([
+        { tablename: 'ue_authority_events', policyname: 'ue_authority_events_review_visibility', permissive: 'RESTRICTIVE', cmd: 'SELECT', roles: '{union_eyes_runtime}' },
+        { tablename: 'ue_authority_reviews', policyname: 'ue_authority_reviews_visibility', permissive: 'RESTRICTIVE', cmd: 'SELECT', roles: '{union_eyes_runtime}' },
+      ])
     })
   })
 

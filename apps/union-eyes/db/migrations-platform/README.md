@@ -81,6 +81,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0055_workbook_holder_notice` | Records, per named person in a workbook, whether a notice that they are recorded has been recorded, by whom, when and through which channel (every existing row starts as not_recorded). Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0056_workbook_capability` | Workbook capability: hash and expiry of the bearer capability of an unclaimed workbook Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0057_workbook_holder_notice_evidence` | Workbook holder notice evidence: none / self-reported / delivery-verified Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0058_pilot_fixture_rows` | Origin ledger of the CUPE pilot bootstrap: which member, grievance and organization rows the bootstrap created, so a reset deletes only those (rollback provided; RLS is cache 0046). Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 

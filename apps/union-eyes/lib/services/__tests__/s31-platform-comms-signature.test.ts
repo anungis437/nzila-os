@@ -9,7 +9,10 @@ describe('Gate 0 batch B87: platform reads, communications tracking and signatur
     const query = src('lib/queries/platform-stats.ts')
     expect(query).toContain("action: 'platform_stats.read'")
     expect(query.indexOf('computePlatformStats(tx')).toBeLessThan(query.indexOf('persistAtomicAudit(tx'))
-    expect(src('app/api/platform/stats/route.ts')).toContain('getPlatformStatsFromDb({ userId, organizationId })')
+    const route = src('app/api/platform/stats/route.ts')
+    expect(route).toContain("requirePlatformStaffAuthority({ userId, organizationId }, 'platform.stats.read')")
+    expect(route).toContain('getPlatformStatsFromDb(actor)')
+    expect(route.indexOf('requirePlatformStaffAuthority(')).toBeLessThan(route.indexOf('getPlatformStatsFromDb('))
   })
 
   it('keeps the platform metric routes at the system_admin floor and unimplemented', () => {

@@ -28,7 +28,6 @@ import {
   Globe,
   Clock,
   FileText,
-  Scale,
 } from "lucide-react";
 
 interface PlatformData {
@@ -39,7 +38,6 @@ interface PlatformData {
   activeUsers: number;
   grievances: { total: number; open: number; highPriority: number; resolved: number; inArbitration: number };
   collectiveAgreements: { total: number; active: number; negotiating: number; expired: number };
-  settlements: { total: number; totalMonetaryValue: number };
   clcAffiliatedCount: number;
 }
 
@@ -87,7 +85,6 @@ export default function NzilaOpsDashboard() {
     { title: t('totalMembers'), value: (d?.totalMemberCount ?? 0).toLocaleString(), icon: <Users size={20} />, color: "text-purple-600 bg-purple-100", change: t('registeredUsers', { count: d?.registeredUsers ?? 0 }) },
     { title: t('openGrievances'), value: d?.grievances?.open ?? 0, icon: <AlertTriangle size={20} />, color: "text-orange-600 bg-orange-100", change: t('highPriority', { count: d?.grievances?.highPriority ?? 0 }) },
     { title: t('activeCBAs'), value: d?.collectiveAgreements?.active ?? 0, icon: <FileText size={20} />, color: "text-green-600 bg-green-100", change: t('underNegotiation', { count: d?.collectiveAgreements?.negotiating ?? 0 }) },
-    { title: t('settlements'), value: d?.settlements?.total ?? 0, icon: <Scale size={20} />, color: "text-emerald-600 bg-emerald-100", change: t('totalValue', { value: (d?.settlements?.totalMonetaryValue ?? 0).toLocaleString() }) },
     { title: t('clcAffiliated'), value: d?.clcAffiliatedCount ?? 0, icon: <Globe size={20} />, color: "text-indigo-600 bg-indigo-100", change: t('affiliatedOrganizations') },
   ];
 

@@ -70,7 +70,9 @@ export const organizationStatusEnum = pgEnum('organization_status', [
 export const organizations = pgTable(
   'organizations',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    // The physical table is Django-managed and carries no database defaults, so every NOT NULL default is also supplied by the ORM
+    // (a Drizzle .default() is DDL only: an insert that omits the column sends DEFAULT, which the physical table cannot resolve).
+    id: uuid('id').defaultRandom().$defaultFn(() => crypto.randomUUID()).primaryKey(),
 
     // Basic Information
     name: text('name').notNull(),
@@ -83,12 +85,12 @@ export const organizations = pgTable(
     organizationType: organizationTypeEnum('organization_type').notNull(),
     parentId: uuid('parent_id').references((): AnyPgColumn => organizations.id, { onDelete: 'restrict' }),
     hierarchyPath: text('hierarchy_path').array().notNull(),
-    hierarchyLevel: integer('hierarchy_level').notNull().default(0),
+    hierarchyLevel: integer('hierarchy_level').notNull().default(0).$defaultFn(() => 0),
 
     // Jurisdiction & Sectors
     // jurisdiction: caJurisdictionEnum('jurisdiction'), // Commented out - column does not exist in database
     provinceTerritory: text('province_territory'),
-    sectors: labourSectorEnum('sectors').array().default([]),
+    sectors: labourSectorEnum('sectors').array().default([]).$defaultFn(() => []),
 
     // Contact & Metadata
     email: text('email'),
@@ -104,7 +106,7 @@ export const organizations = pgTable(
     }>(),
 
     // CLC Affiliation
-    clcAffiliated: boolean('clc_affiliated').default(false),
+    clcAffiliated: boolean('clc_affiliated').default(false).$defaultFn(() => false),
     affiliationDate: date('affiliation_date'),
     charterNumber: text('charter_number'),
 
@@ -114,8 +116,8 @@ export const organizations = pgTable(
     // These are organization-level defaults that feed into per-capita calculations
 
     // Membership Counts (cached)
-    memberCount: integer('member_count').default(0),
-    activeMemberCount: integer('active_member_count').default(0),
+    memberCount: integer('member_count').default(0).$defaultFn(() => 0),
+    activeMemberCount: integer('active_member_count').default(0).$defaultFn(() => 0),
     lastMemberCountUpdate: timestamp('last_member_count_update', { withTimezone: true }),
 
     // Billing & Settings
@@ -128,13 +130,13 @@ export const organizations = pgTable(
     //   fiscalYearEnd?: string;        // e.g., "March 31"
     //   customFields?: Record<string, unknown>;
     // }
-    settings: jsonb('settings').$type<Record<string, unknown>>().default({}),
-    featuresEnabled: text('features_enabled').array().default([]),
+    settings: jsonb('settings').$type<Record<string, unknown>>().default({}).$defaultFn(() => ({})),
+    featuresEnabled: text('features_enabled').array().default([]).$defaultFn(() => []),
 
     // Status & Audit
-    status: text('status').default('active'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    status: text('status').default('active').$defaultFn(() => 'active'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
     createdBy: text('created_by'),
 
     // Legacy & Migration
@@ -143,7 +145,7 @@ export const organizations = pgTable(
     // CLC Financial Fields
     clcAffiliateCode: varchar('clc_affiliate_code', { length: 20 }),
     perCapitaRate: numeric('per_capita_rate', { precision: 10, scale: 2 }),
-    remittanceDay: integer('remittance_day').default(15),
+    remittanceDay: integer('remittance_day').default(15).$defaultFn(() => 15),
     lastRemittanceDate: timestamp('last_remittance_date', { withTimezone: true }),
     fiscalYearEnd: date('fiscal_year_end').default('2024-12-31'),
   },

@@ -17,14 +17,14 @@ describe('Gate 0 batch B69: satisfaction figures, platform statistics and the in
     expect(item).toContain('Satisfaction ratings for this representative')
   })
 
-  it('counts people once and agreed settlements only, and reads under the system role on purpose', () => {
+  it('counts people once and reads under the system role on purpose, with no settlement figure (DEF-0B10-OPL-14 replaces the settlements assertions)', () => {
     const stats = src('lib/queries/platform-stats.ts')
     expect(stats).toContain('count(distinct ${organizationMembers.userId})')
     expect(stats).toContain('isNull(organizationMembers.deletedAt)')
-    expect(stats).toContain("filter (where status IN ('agreed', 'implemented'))")
     expect(stats).toContain("status IN ('settled', 'closed')")
     expect(stats).toContain('withSystemContext')
     expect(stats).toContain('WHERE deleted_at IS NULL')
+    expect(stats).not.toMatch(/FROM settlements|settlements\b.*\bamount|perCapitaRate/)
   })
 
   it('does not claim the process-local document index is durable or counted', () => {

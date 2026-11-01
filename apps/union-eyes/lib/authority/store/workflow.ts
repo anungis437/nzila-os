@@ -114,6 +114,11 @@ export async function registerReview(
 ): Promise<string> {
   requireUuids(i.organizationId)
   requirePrincipals(i.openedBy, i.complainantUserId, ...(i.adverseUserIds ?? []))
+  // The register hides a review from the people it names as respondents, so its opener and complainant cannot be among them.
+  const respondents = i.adverseUserIds ?? []
+  if (respondents.includes(i.openedBy) || (i.complainantUserId != null && respondents.includes(i.complainantUserId))) {
+    throw new AuthorityStoreError('INVALID_CONTEXT', 'SELF_ADVERSE: the opener and the complainant cannot be named as adverse parties')
+  }
   await bindSessionActor(exec, i.openedBy, 'review opener')
   const m = (await deps.memberships(exec, i.organizationId, [i.openedBy])).filter((x) => x.userId === i.openedBy && x.organizationId === i.organizationId)
   if (m.length !== 1 || m[0].status !== 'active') throw new AuthorityStoreError('DENIED', 'only an active member may open a review')

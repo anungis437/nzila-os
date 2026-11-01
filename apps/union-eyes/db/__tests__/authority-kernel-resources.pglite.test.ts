@@ -437,7 +437,10 @@ describe('governance review register and WorkAid referral', () => {
     await k.grantMandate('governance_review', adverseReviewer, ['monitor'], { scope: { resourceIds: [review] } })
     const d = await decide(adverseReviewer, 'review:monitor', 'governance_review', review)
     expect(d.effect).toBe('deny')
-    expect(codes(d)).toContain('ADVERSE_PARTY')
+    // The database no longer shows the review to the person it names, so the denial is the non-disclosing "not found",
+    // never ADVERSE_PARTY (the pure-kernel rule is pinned in lib/authority/__tests__/kernel-governance.test.ts).
+    expect(codes(d)).toContain('RESOURCE_FACTS_MISSING')
+    expect(codes(d)).not.toContain('ADVERSE_PARTY')
     // Powers are independent: a monitor cannot enforce or issue findings.
     expect((await decide(U.auditor, 'review:enforce', 'governance_review', review)).effect).toBe('deny')
     expect((await decide(U.auditor, 'review:issue_finding', 'governance_review', review)).effect).toBe('deny')

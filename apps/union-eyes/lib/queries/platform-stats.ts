@@ -36,10 +36,6 @@ export interface PlatformStats {
     negotiating: number;
     expired: number;
   };
-  settlements: {
-    total: number;
-    totalMonetaryValue: number;
-  };
   sectors: Array<{ sector: string; org_count: number; total_members: number }>;
   organizations: Array<{
     id: string;
@@ -51,7 +47,6 @@ export interface PlatformStats {
     sectors: string[];
     clcAffiliated: boolean | null;
     subscriptionTier: string | null;
-    perCapitaRate: string | null;
     createdAt: Date;
   }>;
   roleDistribution: Array<{ role: string; cnt: number }>;
@@ -62,8 +57,12 @@ export interface PlatformStats {
  * through whatever the connection role happens to see.
  *
  * `registeredUsers` and `activeUsers` count distinct people with an undeleted membership (one person in several organizations is one);
- * `resolved` grievances are settled or closed ones; `totalMonetaryValue` sums only settlements that were agreed or implemented, and the
- * settlements table records no currency, so it is an unlabelled amount.
+ * `resolved` grievances are settled or closed ones.
+ *
+ * Minimum necessary. The figures are counts and distributions. The organization list gives each organization's name, type, status, size and
+ * commercial tier; it does not give a per-capita rate, and there is no settlement count or monetary total: a sum of every tenant's settlement
+ * amounts is not something a platform operator needs, and the system role holds no privilege on settlements, so the earlier query could not
+ * have run under it at all.
  */
 export function getPlatformStatsFromDb(reader: { userId: string; organizationId: string }): Promise<PlatformStats> {
   return withSystemContext(async (tx) => {
@@ -127,14 +126,6 @@ async function computePlatformStats(db: typeof import('@/db/db').db): Promise<Pl
     FROM collective_agreements
   `);
 
-  // ── Settlement stats ──
-  const settlementStats = await db.execute(sql`
-    SELECT 
-      count(*) as total_settlements,
-      coalesce(sum(monetary_amount) filter (where status IN ('agreed', 'implemented')), 0) as total_monetary_value
-    FROM settlements
-  `);
-
   // ── Sector breakdown ──
   const sectorBreakdown = await db.execute(sql`
     SELECT 
@@ -159,7 +150,6 @@ async function computePlatformStats(db: typeof import('@/db/db').db): Promise<Pl
       sectors: organizations.sectors,
       clcAffiliated: organizations.clcAffiliated,
       subscriptionTier: organizations.subscriptionTier,
-      perCapitaRate: organizations.perCapitaRate,
       createdAt: organizations.createdAt,
     })
     .from(organizations)
@@ -185,7 +175,6 @@ async function computePlatformStats(db: typeof import('@/db/db').db): Promise<Pl
   const members = memberStats[0];
   const grievanceRow = grievanceStats[0] ?? {};
   const cbaRow = cbaStats[0] ?? {};
-  const settlementRow = settlementStats[0] ?? {};
   const sectors = Array.from(sectorBreakdown) as Array<{ sector: string; org_count: number; total_members: number }>;
   const roles = Array.from(roleDistribution) as Array<{ role: string; cnt: number }>;
 
@@ -214,10 +203,6 @@ async function computePlatformStats(db: typeof import('@/db/db').db): Promise<Pl
       active: Number(cbaRow.active_cbas ?? 0),
       negotiating: Number(cbaRow.negotiating_cbas ?? 0),
       expired: Number(cbaRow.expired_cbas ?? 0),
-    },
-    settlements: {
-      total: Number(settlementRow.total_settlements ?? 0),
-      totalMonetaryValue: Number(settlementRow.total_monetary_value ?? 0),
     },
     sectors,
     organizations: orgList,
