@@ -77,7 +77,8 @@ export const PATCH = withApi(
       const [existing] = await tx
         .select()
         .from(orgSubscriptions)
-        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
+        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)))
+        .for('update');
       if (!existing) throw ApiError.notFound('Subscription not found');
 
       const setValues: Record<string, unknown> = { ...body, updatedAt: new Date() };
@@ -97,7 +98,6 @@ export const PATCH = withApi(
         .where(and(
           eq(orgSubscriptions.id, id),
           eq(orgSubscriptions.organizationId, organizationId),
-          eq(orgSubscriptions.updatedAt, existing.updatedAt),
         ))
         .returning();
       if (!row) throw ApiError.conflict('Subscription changed while metadata was being updated');
@@ -135,7 +135,8 @@ export const DELETE = withApi(
       const [existing] = await tx
         .select()
         .from(orgSubscriptions)
-        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)));
+        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)))
+        .for('update');
       if (!existing) throw ApiError.notFound('Subscription not found');
       if (existing.status === 'cancelled') throw ApiError.conflict('Subscription is already cancelled');
 
