@@ -9105,7 +9105,22 @@
         "apps/union-eyes/lib/signature/__tests__/signature-service.test.ts",
         "apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts"
       ],
-      "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16 with real RLS and cross-tenant fixtures, HTTP/browser/staging, signature-provider acceptance and independent institutional review are outstanding. Other signature service write helpers still require a separate authorization audit; no CLOSED credit."
+      "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16 with real RLS and cross-tenant fixtures, HTTP/browser/staging, signature-provider acceptance and independent institutional review are outstanding. Other signature service write helpers still require a separate authorization audit; no CLOSED credit.",
+      "supplementalEvidence": [
+        {
+          "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-signature-tenantless-and-void-scope-20261101.md",
+          "evidenceCommit": "755df349a6b29614eabe9cbd541320692d95196a",
+          "files": [
+            "apps/union-eyes/app/api/signatures/audit/[documentId]/route.ts",
+            "apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts",
+            "apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+            "apps/union-eyes/app/api/signatures/documents/[id]/__tests__/tenant-bound-route.test.ts",
+            "apps/union-eyes/lib/signature/signature-service.ts"
+          ],
+          "correction": "Explicit missing-tenant refusal on audit and document GET/PATCH/POST; voidDocument now requires tenant-bound RLS document lookup before provider side effects; refresh no longer falsely reports success when provider fails or no update occurs.",
+          "remaining": "Authored regressions require executable, native PG15/16, HTTP/browser and provider qualification. External provider/database reconciliation and independent release authority remain outstanding. No additional implementation or CLOSED credit."
+        }
+      ]
     },
     "DEF-0B8-ICRA-EMAIL-RESULTS-SENDS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS": {
       "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
