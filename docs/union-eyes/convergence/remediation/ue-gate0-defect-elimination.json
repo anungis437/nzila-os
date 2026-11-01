@@ -1149,7 +1149,7 @@
       "newlyImplemented": 2,
       "outstandingAfter": 186,
       "partial": 0,
-      "evidenceCommit": null
+      "evidenceCommit": "86aa8adb2"
     }
   ],
   "entries": {
@@ -16248,7 +16248,7 @@
         {
           "batch": "B119-F06-FINAL-SAFETY-HARDENING",
           "status": "PARTIAL",
-          "evidenceCommit": null,
+          "evidenceCommit": "86aa8adb2",
           "files": [
             "apps/union-eyes/lib/reports/report-field-authority.ts",
             "apps/union-eyes/app/api/reports/execute/route.ts",
@@ -16809,7 +16809,7 @@
         {
           "batch": "B119-F06-FINAL-SAFETY-HARDENING",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "86aa8adb2",
           "files": [
             "apps/union-eyes/lib/workbook/holder-notice.ts",
             "apps/union-eyes/db/migrations-platform/0057_workbook_holder_notice_evidence.sql",
@@ -17045,7 +17045,7 @@
         {
           "batch": "B119-F06-FINAL-SAFETY-HARDENING",
           "status": "PARTIAL",
-          "evidenceCommit": null,
+          "evidenceCommit": "86aa8adb2",
           "files": [
             "apps/union-eyes/lib/__tests__/intent-outcome-routes-reviewed.test.ts",
             "apps/union-eyes/db/__tests__/pilot-acceptance-denial.postgres.test.ts"
@@ -17140,7 +17140,7 @@
         {
           "batch": "B119-F06-FINAL-SAFETY-HARDENING",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "86aa8adb2",
           "files": [
             "apps/union-eyes/lib/pilot/counterpart-acceptance.ts",
             "apps/union-eyes/lib/pilot/acceptance-denial.ts",

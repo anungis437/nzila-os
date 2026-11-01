@@ -9059,7 +9059,7 @@
     {
       "id": "B119-F06-FINAL-SAFETY-HARDENING",
       "family": "F06 final hardening: two unsafe provisional defaults made fail-closed, report differencing bounded, two-phase audit routes reviewed",
-      "evidenceCommit": null,
+      "evidenceCommit": "86aa8adb2",
       "items": [
         {
           "prefix": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
