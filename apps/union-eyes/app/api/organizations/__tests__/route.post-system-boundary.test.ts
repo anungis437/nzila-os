@@ -48,6 +48,12 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
+// Creation must use the transaction object, never the module-level db mock.
+const creationTx = {
+  select: () => ({ from: () => ({ where: m.selectWhere }) }),
+  insert: () => ({ values: () => ({ returning: m.insertReturning }) }),
+};
+
 // The list route reads through the transaction handed to it by withSystemContext, a chain that ends in the readable set.
 const listTx = {
   select: () => ({ from: () => ({ where: () => Object.assign(Promise.resolve([]), { orderBy: () => ({ limit: async () => [] }) }) }) }),
@@ -63,7 +69,7 @@ vi.mock('@/lib/utils/hierarchy-validation', () => ({ MAX_HIERARCHY_DEPTH: 10 }))
 describe('POST /api/organizations — creation authority + execution boundary (PR #752 round 7)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
+    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn(creationTx));
     m.withRLSContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
     m.selectWhere.mockResolvedValue([{ hierarchyPath: [], hierarchyLevel: 0 }]);
     m.insertReturning.mockResolvedValue([{ id: 'new-org-id' }]);

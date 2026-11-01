@@ -16,7 +16,9 @@ vi.mock('@/lib/api-auth-guard', () => ({
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: vi.fn().mockResolvedValue({ userId: 'admin-1' }) }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => unknown)({}),
-  withSystemContext: async (fn: (tx: unknown) => unknown) => fn({}),
+  withSystemContext: async (fn: (tx: unknown) => unknown) => fn({
+    insert: () => ({ values: (v: unknown) => { m.values(v); return { returning: m.returning }; } }),
+  }),
 }));
 vi.mock('@/db/db', () => ({
   db: {

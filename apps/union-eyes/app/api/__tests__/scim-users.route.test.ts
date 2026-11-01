@@ -60,8 +60,8 @@ const events = async () => (await database.pg.query<Record<string, any>>('SELECT
 const seed = async (count: number, prefix = 'person') => {
   for (let i = 1; i <= count; i += 1) {
     await database.pg.query(
-      `INSERT INTO scim_provisioned_users (organization_id, config_id, user_name, user_name_key, display_name, email) VALUES ($1, $2, $3, $3, $4, $3)`,
-      [ORG, config, `${prefix}${i}@example.test`, `Person ${i}`],
+      `INSERT INTO scim_provisioned_users (organization_id, config_id, user_name, user_name_key, display_name, email, created_at) VALUES ($1, $2, $3, $3, $4, $3, $5::timestamptz)`,
+      [ORG, config, `${prefix}${i}@example.test`, `Person ${i}`, new Date(Date.UTC(2026, 0, 1, 0, 0, i)).toISOString()],
     );
   }
 };

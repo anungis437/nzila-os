@@ -215,7 +215,11 @@ describe('scim user routes', () => {
       await PATCH(patchRequest([{ op: 'replace', value: { active: false, name: { givenName: 'Janet' } } }]), ctx());
       expect(await row()).toMatchObject({ display_name: 'Janet Doe', status: 'inactive', deprovisioned_action: 'archive' });
       expect(auditActions()).toEqual(['scim.user.update', 'scim.user.deprovision']);
-      expect(await events()).toEqual(['user.updated PATCH 200', 'user.deleted PATCH 200']);
+      // The log is append-only, but created_at is transaction-timestamp based and UUID tie-breaking does not encode operation order.
+      // Verify both durable events and the ordered atomic-audit calls without inventing a database event sequence.
+      const recorded = await events();
+      expect(recorded).toHaveLength(2);
+      expect(recorded).toEqual(expect.arrayContaining(['user.updated PATCH 200', 'user.deleted PATCH 200']));
     });
 
     it('answers a taken externalId as a uniqueness conflict, and a userName change as immutable', async () => {

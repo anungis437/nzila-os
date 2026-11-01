@@ -70,15 +70,23 @@ export async function resetQaCase(claimId: string): Promise<void> {
 
 /** Simulates elapsed time in the current status for QA only. The FSM reads status_changed_at, never updated_at. */
 export async function ageQaCase(claimId: string, hours: number): Promise<void> {
+  if (!QA_CASE.test(claimId)) throw new Error('ageQaCase only touches the seeded QA cases');
   if (!Number.isSafeInteger(hours) || hours < 1 || hours > 8760) throw new Error('Invalid QA case age');
   await withApp(async (db) => {
     const result = await db.query(
       `UPDATE claims SET status_changed_at = now() - make_interval(hours => $2::int)
         WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111'
-        RETURNING claim_id`,
+        RETURNING claim_id, status_changed_at`,
       [claimId, hours],
     );
     if (result.rowCount !== 1) throw new Error('QA case not found in the designated QA organization');
+    const observed = new Date(result.rows[0]?.status_changed_at).getTime();
+    const target = Date.now() - hours * 60 * 60 * 1000;
+    // Platform 0049 deliberately protects the SLA clock from edits that do not change status.
+    // Its trigger may reject this QA-only attempt. Never claim a journey was aged when the clock stayed unchanged.
+    if (!Number.isFinite(observed) || Math.abs(observed - target) > 120_000) {
+      throw new Error('QA status clock was not backdated: database trigger preserved the authoritative clock; lifecycle acceptance remains unverified');
+    }
   });
 }
 
