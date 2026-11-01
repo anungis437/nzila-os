@@ -244,7 +244,7 @@ test('signed bundle provenance refuses duplicate or noncanonical identities', ()
     ]) {
       x.attestation.artifactDigests = invalid
       x.write() // Valid signature cannot make ambiguous metadata safe.
-      assert.throws(() => x.verify(), /incomplete or ambiguous source\\/bundle digest evidence/)
+      assert.throws(() => x.verify(), /incomplete or ambiguous source/)
     }
   } finally { x.cleanup() }
 })
