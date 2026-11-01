@@ -68,14 +68,18 @@ export async function resetQaCase(claimId: string): Promise<void> {
   })
 }
 
-/** Simulates the passing of time in the current status, so a minimum-duration business rule can be exercised (QA organization only). */
+/** Simulates elapsed time in the current status for QA only. The FSM reads status_changed_at, never updated_at. */
 export async function ageQaCase(claimId: string, hours: number): Promise<void> {
-  await withApp((db) =>
-    db.query(
-      `UPDATE claims SET updated_at = now() - ($2 || ' hours')::interval WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111'`,
-      [claimId, String(hours)],
-    ),
-  )
+  if (!Number.isSafeInteger(hours) || hours < 1 || hours > 8760) throw new Error('Invalid QA case age');
+  await withApp(async (db) => {
+    const result = await db.query(
+      `UPDATE claims SET status_changed_at = now() - make_interval(hours => $2::int)
+        WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111'
+        RETURNING claim_id`,
+      [claimId, hours],
+    );
+    if (result.rowCount !== 1) throw new Error('QA case not found in the designated QA organization');
+  });
 }
 
 /** The audit details recorded for the assignments of one case, newest first. */
