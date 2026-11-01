@@ -5,6 +5,7 @@ import { verifyOciProvenance } from './verify-oci-provenance.mjs'
 const SHA='a'.repeat(40), REPO='anungis437/nzila-os'
 const IMAGE='nzilacanadaacr.azurecr.io/nzila/web@sha256:'+'b'.repeat(64)
 const manifest=()=>({source_workflow:'deploy-staging',commit_sha:SHA,run_id:'123456',
+  built_at:new Date().toISOString(),
   attestation_ref:'release-attestation.json',deployTargets:[{name:'nzila-os-web',image:IMAGE}]})
 const proof=()=>JSON.stringify([{verificationResult:{
   signature:{certificate:{subject:'GitHub OIDC'}},
@@ -64,6 +65,25 @@ test('binds exact signed staging bytes, source SHA and run ID; rejects substitut
   ]) assert.throws(()=>verifyOciProvenance(opts(bad)),/source\/run mismatch/)
   assert.throws(()=>verifyOciProvenance(opts({manifestRaw:'{'})),/malformed signed/)
   assert.throws(()=>verifyOciProvenance(opts({manifestRaw:undefined})),/manifest bytes required/)
+})
+test('rejects missing, stale and future signed staging build times before OCI verification',()=>{
+  const now = new Date('2026-11-01T12:00:00.000Z')
+  for (const built_at of [
+    undefined, 'invalid',
+    '2026-10-24T11:59:59.000Z',
+    '2026-11-01T12:05:01.000Z',
+  ]) {
+    const m = manifest()
+    if (built_at === undefined) delete m.built_at
+    else m.built_at = built_at
+    assert.throws(()=>verifyOciProvenance(opts({
+      manifestRaw:JSON.stringify(m),now,
+      verifier:()=>{throw Error('must reject before external verifier')},
+    })),/build time is missing, stale or from future/)
+  }
+  const m = {...manifest(),built_at:'2026-11-01T12:00:00.000Z'}
+  assert.equal(verifyOciProvenance(opts({manifestRaw:JSON.stringify(m),now})).verdict,
+    'OCI_PROVENANCE_VERIFIED')
 })
 test('OCI receipt rejects signed but noncanonical Azure deployment identities',()=>{
   for(const name of [

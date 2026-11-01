@@ -27,8 +27,15 @@ export function verifyOciProvenance({manifestRaw, sourceSha, repository, staging
       manifest.attestation_ref !== 'release-attestation.json') {
     deny('signed staging manifest source/run mismatch')
   }
-  if (!Number.isFinite(now.getTime()) || !Array.isArray(manifest.deployTargets) ||
-      manifest.deployTargets.length === 0) deny('missing manifest or receipt time')
+  const current = now.getTime()
+  const builtAt = Date.parse(manifest.built_at ?? '')
+  if (!Number.isFinite(current) || !Number.isFinite(builtAt) ||
+      builtAt > current + 5 * 60_000 ||
+      builtAt < current - 7 * 24 * 60 * 60_000) {
+    deny('signed staging manifest build time is missing, stale or from future')
+  }
+  if (!Array.isArray(manifest.deployTargets) ||
+      manifest.deployTargets.length === 0) deny('missing manifest deployment targets')
   const seenNames = new Set(), seenImages = new Set(), targets = []
   for (const target of manifest.deployTargets) {
     if (!target || typeof target !== 'object' || Array.isArray(target)) deny('malformed target')
