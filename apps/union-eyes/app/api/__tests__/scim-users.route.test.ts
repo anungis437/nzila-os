@@ -56,7 +56,9 @@ const provision = (body: unknown) =>
 const listUrl = (query = '') => new NextRequest(`http://localhost/api/scim/v2/${ORG}/Users${query}`);
 
 const rows = async () => (await database.pg.query<Record<string, any>>('SELECT * FROM scim_provisioned_users ORDER BY created_at, id')).rows;
-const events = async () => (await database.pg.query<Record<string, any>>('SELECT * FROM scim_events_log ORDER BY created_at, id')).rows;
+// Insertion order is what an administrator reads: ctid breaks a tie between events written within one clock tick.
+const events = async () => (await database.pg.query<Record<string, any>>('SELECT * FROM scim_events_log ORDER BY created_at, ctid')).rows;
+// Each person gets its own, strictly increasing creation time: the list pages by (created_at, id), and rows written in one clock tick would tie.
 const seed = async (count: number, prefix = 'person') => {
   for (let i = 1; i <= count; i += 1) {
     await database.pg.query(

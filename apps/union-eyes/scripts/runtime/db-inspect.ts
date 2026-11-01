@@ -68,24 +68,45 @@ export async function resetQaCase(claimId: string): Promise<void> {
   })
 }
 
-/** Simulates elapsed time in the current status for QA only. The FSM reads status_changed_at, never updated_at. */
+/**
+ * Simulates elapsed time in the current status for QA only. The FSM reads status_changed_at, never updated_at.
+ *
+ * The clock is kept by the claims trigger ue_claims_stamp_status_changed (platform 0049), which ignores any write to it that does not come
+ * with a change of status, so that no caller can move it. This fixture is the one place that does: the harness connects as the database
+ * superuser, and writes the clock inside one transaction with triggers off (session_replication_role is reset when it ends). The latest
+ * recorded transition moves with it, so the history and the clock still agree about when the status last changed.
+ *
+ * The write is read back: a journey is never reported as aged when the persisted clock does not say so (for example a connection that is not
+ * allowed to switch triggers off), because acceptance would then pass or fail for the wrong reason. The boundary is the designated QA
+ * organization, not a list of seeded cases: a journey also ages the case it filed itself.
+ */
 export async function ageQaCase(claimId: string, hours: number): Promise<void> {
-  if (!QA_CASE.test(claimId)) throw new Error('ageQaCase only touches the seeded QA cases');
   if (!Number.isSafeInteger(hours) || hours < 1 || hours > 8760) throw new Error('Invalid QA case age');
   await withApp(async (db) => {
-    const result = await db.query(
-      `UPDATE claims SET status_changed_at = now() - make_interval(hours => $2::int)
-        WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111'
-        RETURNING claim_id, status_changed_at`,
-      [claimId, hours],
-    );
-    if (result.rowCount !== 1) throw new Error('QA case not found in the designated QA organization');
-    const observed = new Date(result.rows[0]?.status_changed_at).getTime();
-    const target = Date.now() - hours * 60 * 60 * 1000;
-    // Platform 0049 deliberately protects the SLA clock from edits that do not change status.
-    // Its trigger may reject this QA-only attempt. Never claim a journey was aged when the clock stayed unchanged.
-    if (!Number.isFinite(observed) || Math.abs(observed - target) > 120_000) {
-      throw new Error('QA status clock was not backdated: database trigger preserved the authoritative clock; lifecycle acceptance remains unverified');
+    await db.query('BEGIN');
+    try {
+      await db.query('SET LOCAL session_replication_role = replica');
+      const result = await db.query(
+        `UPDATE claims SET status_changed_at = now() - make_interval(hours => $2::int)
+          WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111'
+          RETURNING claim_id, id, status_changed_at`,
+        [claimId, hours],
+      );
+      if (result.rowCount !== 1) throw new Error('QA case not found in the designated QA organization');
+      const observed = new Date(result.rows[0]?.status_changed_at).getTime();
+      const target = Date.now() - hours * 60 * 60 * 1000;
+      if (!Number.isFinite(observed) || Math.abs(observed - target) > 120_000) {
+        throw new Error('QA status clock was not backdated: database trigger preserved the authoritative clock; lifecycle acceptance remains unverified');
+      }
+      await db.query(
+        `UPDATE claim_status_transitions SET changed_at = now() - make_interval(hours => $2::int)
+          WHERE id = (SELECT id FROM claim_status_transitions WHERE claim_id = $1 ORDER BY changed_at DESC LIMIT 1)`,
+        [result.rows[0].id, hours],
+      );
+      await db.query('COMMIT');
+    } catch (error) {
+      await db.query('ROLLBACK').catch(() => undefined);
+      throw error;
     }
   });
 }

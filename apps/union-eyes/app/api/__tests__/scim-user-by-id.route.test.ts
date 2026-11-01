@@ -46,7 +46,7 @@ const loadConfig = () => import('../scim/v2/[organizationId]/ServiceProviderConf
 
 const row = async (id: string = ID) => (await database.pg.query<Record<string, any>>('SELECT * FROM scim_provisioned_users WHERE id = $1', [id])).rows[0];
 const events = async (id: string = ID) =>
-  (await database.pg.query<Record<string, any>>('SELECT event_type, operation, status_code FROM scim_events_log WHERE resource_id = $1 ORDER BY created_at, id', [id])).rows.map((r) => `${r.event_type} ${r.operation} ${r.status_code}`);
+  (await database.pg.query<Record<string, any>>('SELECT event_type, operation, status_code FROM scim_events_log WHERE resource_id = $1 ORDER BY created_at, ctid', [id])).rows.map((r) => `${r.event_type} ${r.operation} ${r.status_code}`);
 const auditActions = () => m.persistAtomicAudit.mock.calls.map((call) => (call[1] as { action: string }).action);
 const person = async (over: { id?: string; userName?: string; externalId?: string | null; name?: string | null; email?: string | null; status?: string; by?: string | null; org?: string; config?: string } = {}) => {
   const id = over.id ?? ID;
@@ -215,11 +215,8 @@ describe('scim user routes', () => {
       await PATCH(patchRequest([{ op: 'replace', value: { active: false, name: { givenName: 'Janet' } } }]), ctx());
       expect(await row()).toMatchObject({ display_name: 'Janet Doe', status: 'inactive', deprovisioned_action: 'archive' });
       expect(auditActions()).toEqual(['scim.user.update', 'scim.user.deprovision']);
-      // The log is append-only, but created_at is transaction-timestamp based and UUID tie-breaking does not encode operation order.
-      // Verify both durable events and the ordered atomic-audit calls without inventing a database event sequence.
-      const recorded = await events();
-      expect(recorded).toHaveLength(2);
-      expect(recorded).toEqual(expect.arrayContaining(['user.updated PATCH 200', 'user.deleted PATCH 200']));
+      // created_at is the moment of each event (clock_timestamp), so the two events of one request keep the order they were written in.
+      expect(await events()).toEqual(['user.updated PATCH 200', 'user.deleted PATCH 200']);
     });
 
     it('answers a taken externalId as a uniqueness conflict, and a userName change as immutable', async () => {

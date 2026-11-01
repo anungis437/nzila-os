@@ -117,7 +117,14 @@ describe('provisionScimMember', () => {
 
 describe('listScimMembers', () => {
   it('reads the live total and then one page from a one-based start index, in creation order', async () => {
-    for (let i = 1; i <= 7; i += 1) await inTx((tx) => provisionScimMember(tx, ref, { userName: `user${i}@example.test` }));
+    for (let i = 1; i <= 7; i += 1) {
+      await inTx((tx) => provisionScimMember(tx, ref, { userName: `user${i}@example.test` }));
+      // Creation order is what is asserted, so each person gets its own creation time rather than depending on the clock resolution of the test database.
+      await database.pg.query(
+        `UPDATE scim_provisioned_users SET created_at = timestamptz '2026-01-01 00:00:00+00' + make_interval(secs => $2::int) WHERE user_name_key = $1`,
+        [`user${i}@example.test`, i],
+      );
+    }
     await inTx((tx) => provisionScimMember(tx, otherRef, { userName: 'other@example.test' }));
     const first = await inTx((tx) => listScimMembers(tx, ref, { startIndex: 1, count: 3 }));
     const last = await inTx((tx) => listScimMembers(tx, ref, { startIndex: 7, count: 3 }));

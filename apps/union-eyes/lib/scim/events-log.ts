@@ -41,11 +41,14 @@ export interface ScimEventInput {
 
 export async function recordScimEvent(tx: RLSTx, ref: ScimConfigurationRef, trace: ScimTrace, event: ScimEventInput): Promise<void> {
   const elapsed = Math.max(0, Math.round(performance.now() - trace.startedAt));
+  // created_at is the moment of the event (clock_timestamp), not the start of the transaction (now), so the events of one request, such as an
+  // update followed by a deprovision, keep their order in the log instead of tying.
   await tx.execute(sql`
     INSERT INTO public.scim_events_log
       (config_id, organization_id, event_type, resource_type, resource_id, operation, request_path, status, status_code,
-       processing_time_ms, ip_address, authenticated_as)
+       processing_time_ms, ip_address, authenticated_as, created_at)
     VALUES
       (${ref.configurationId}::uuid, ${ref.organizationId}::uuid, ${event.eventType}, 'User', ${event.resourceId}, ${event.operation}, ${trace.path},
-       'success', ${event.statusCode}::int, ${elapsed}::int, ${trace.ipAddress ? trace.ipAddress.slice(0, 50) : null}, ${`scim:${ref.configurationId}`})`);
+       'success', ${event.statusCode}::int, ${elapsed}::int, ${trace.ipAddress ? trace.ipAddress.slice(0, 50) : null}, ${`scim:${ref.configurationId}`},
+       clock_timestamp())`);
 }
