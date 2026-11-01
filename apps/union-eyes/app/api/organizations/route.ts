@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, requireSystemAdmin } from '@/lib/api-auth-guard';
-import { db } from '@/db/db';
 import { organizations } from '@/db/schema';
 import { eq, and, sql, inArray, asc, type SQL } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
@@ -246,7 +245,7 @@ export async function POST(req: NextRequest) {
       let hierarchyPath: string[] = [];
       let hierarchyLevel = 0;
       if (parentId) {
-        const parentRows = await db
+        const parentRows = await tx
           .select({ hierarchyPath: organizations.hierarchyPath, hierarchyLevel: organizations.hierarchyLevel })
           .from(organizations)
           .where(eq(organizations.id, parentId));
@@ -263,7 +262,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const [row] = await db
+      const [row] = await tx
         .insert(organizations)
         .values({
           name: body.name,
