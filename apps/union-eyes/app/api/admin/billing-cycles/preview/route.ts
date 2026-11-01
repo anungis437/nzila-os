@@ -6,7 +6,7 @@
  * @module app/api/admin/billing-cycles/preview
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
 import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
@@ -94,6 +94,15 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       dryRun: true, // Always dry run for preview
       executedBy: user.id,
     });
+
+    if (!result.success) {
+      return NextResponse.json({
+        ...result,
+        preview: true,
+        success: false,
+        message: 'Preview incomplete: some members could not be calculated; no charges were created.',
+      }, { status: 422 });
+    }
 
     return standardSuccessResponse({
       preview: true,
