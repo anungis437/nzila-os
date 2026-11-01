@@ -42,6 +42,7 @@ const m = vi.hoisted(() => {
     hasMinRole: vi.fn(),
     getCurrentUser: vi.fn(),
     persistAtomicAudit: vi.fn(),
+    recordDenial: vi.fn(async () => true),
     authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
     getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
     getPilotVerifiedOrganizationId: vi.fn(() => TEST_ORG_ID),
@@ -87,6 +88,8 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+// The denial record is written in its own transaction after the rollback; its own behaviour is proven in lib/pilot/__tests__/acceptance-denial.test.ts.
+vi.mock('@/lib/pilot/acceptance-denial', () => ({ recordAcceptanceDenial: m.recordDenial }));
 
 vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<typeof import('@/lib/api-auth-guard')>();
@@ -110,6 +113,7 @@ vi.mock('@/lib/pilot/commercialization-wave1', () => ({
     'invoice_issued',
     'pilot_active',
     'pilot_complete',
+    'subscription_offered',
     'subscription_active',
   ],
   buildProposalPackage: m.buildProposalPackage,
@@ -755,6 +759,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
         },
       ],
       [{ id: 'billing-account-1' }], // billing account lookup — found
+      [{ id: 'contract-1', status: 'active', metadata: { counterpartAcceptance: { verificationDetail: { status: 'provider_verified' } } } }], // the contract's stored acceptance (F06 final hardening: read from the contract, verified)
       [{ id: 'plan-x', isActive: false }], // plan revalidation — no longer active
     );
 
@@ -801,6 +806,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
         },
       ],
       [{ id: 'billing-account-1' }], // billing account lookup — found
+      [{ id: 'contract-1', status: 'active', metadata: { counterpartAcceptance: { verificationDetail: { status: 'provider_verified' } } } }], // the contract's stored acceptance (F06 final hardening: read from the contract, verified)
       [{ id: 'plan-x', isActive: true }], // plan revalidation — still active
       [], // existing subscription lookup — none found, triggers insert
     );
@@ -855,6 +861,20 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     };
     const updatedWith = () => mockDb.update.mock.results.map((r) => (r.value as { set: ReturnType<typeof vi.fn> }).set);
 
+    // An acceptance policy that someone with authority has approved to accept an administrator's recorded statement. The shipped policy is
+    // unapproved and refuses it; these tests exercise what the route does once the institution has decided otherwise.
+    const approvedOperatorPolicy = async () => {
+      const { COUNTERPART_ACCEPTANCE_POLICY } = await import('@/lib/pilot/counterpart-acceptance');
+      COUNTERPART_ACCEPTANCE_POLICY.activationRequires = 'operator_recorded';
+      COUNTERPART_ACCEPTANCE_POLICY.approvedBy = 'test-approver';
+    };
+    afterEach(async () => {
+      const { COUNTERPART_ACCEPTANCE_POLICY, clearAcceptanceVerifiers } = await import('@/lib/pilot/counterpart-acceptance');
+      COUNTERPART_ACCEPTANCE_POLICY.activationRequires = 'provider_verified';
+      COUNTERPART_ACCEPTANCE_POLICY.approvedBy = null;
+      clearAcceptanceVerifiers();
+    });
+
     it.each(['contract_sent', 'invoice_issued'])('refuses %s when the organization has no billing account and creates nothing', async (targetState) => {
       m.queueSelect([{ id: 'app-1' }], [row], []);
 
@@ -894,7 +914,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
       expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     });
 
-    it('records who accepted for the other party, how, and who recorded it when the contract is accepted', async () => {
+    it('records who accepted for the other party, how, and who recorded it when the contract is accepted (under an approved operator-recorded policy)', async () => {
+      await approvedOperatorPolicy();
       m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: { source: 'x' } }]);
 
       const response = await post({ targetState: 'contract_signed', counterpartAcceptance: acceptance });
@@ -945,8 +966,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
       expect(mockDb.insert).not.toHaveBeenCalled();
     });
 
-    it('issues the invoice when an accepted contract exists', async () => {
-      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1' }]);
+    it('issues the invoice when an accepted contract with verified acceptance exists', async () => {
+      m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'active', metadata: { counterpartAcceptance: { verificationDetail: { status: 'provider_verified' } } } }]);
 
       const response = await post({ targetState: 'invoice_issued', allowSkip: true });
 
@@ -964,42 +985,23 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
       expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     });
 
-    // F06 R5: the evidence level of the counterpart's acceptance is a stored fact that every downstream effect carries.
+    const verifiedContract = { id: 'c-1', status: 'active', metadata: { counterpartAcceptance: { verificationDetail: { status: 'provider_verified' } } } };
+    const legacyUnverifiedContract = { id: 'c-1', status: 'active', metadata: { counterpartAcceptance: { verification: 'recorded_by_platform_operator' } } };
+
+    // F06 R5 / final hardening: the evidence level of the counterpart's acceptance is a stored fact that every downstream effect carries, and
+    // the unapproved policy does not let an administrator's statement stand in for verification.
     describe('counterpart acceptance evidence', () => {
       const acceptanceModule = () => import('@/lib/pilot/counterpart-acceptance');
 
-      afterEach(async () => {
-        const { COUNTERPART_ACCEPTANCE_POLICY, clearAcceptanceVerifiers } = await acceptanceModule();
+      it('ships fail-closed: the policy is unapproved and requires verification, and "operator_recorded" alone is not honoured without an approver', async () => {
+        const { COUNTERPART_ACCEPTANCE_POLICY, acceptanceMaySupport } = await acceptanceModule();
+        expect(COUNTERPART_ACCEPTANCE_POLICY).toMatchObject({ approvedBy: null, activationRequires: 'provider_verified' });
         COUNTERPART_ACCEPTANCE_POLICY.activationRequires = 'operator_recorded';
-        clearAcceptanceVerifiers();
+        expect(acceptanceMaySupport('x', 'operator_recorded_unverified').allowed).toBe(false);
       });
 
-      it('stores the claimed channel as a claim and the evidence level as unverified, with the policy that applied and its approval state', async () => {
-        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: {} }]);
-
-        const response = await post({ targetState: 'contract_signed', counterpartAcceptance: { ...acceptance, channel: 'e_signature_provider' } });
-        const payload = await response.json();
-
-        expect(response.status).toBe(200);
-        expect(payload.data.monetization.acceptanceEvidence).toBe('operator_recorded_unverified');
-        expect(updatedWith()[0]).toHaveBeenCalledWith(expect.objectContaining({
-          metadata: expect.objectContaining({
-            counterpartAcceptance: expect.objectContaining({
-              channel: 'e_signature_provider',
-              verification: 'recorded_by_platform_operator',
-              verificationDetail: { status: 'operator_recorded_unverified', reason: 'no_verifier_registered_for_channel' },
-              policyApprovedBy: null,
-            }),
-          }),
-        }));
-        expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
-          details: expect.objectContaining({ acceptanceEvidence: 'operator_recorded_unverified', acceptancePolicy: { version: expect.any(String), approvedBy: null } }),
-        }));
-      });
-
-      it('refuses, as a specific blocked operation, to activate a contract on an unverified acceptance when the policy requires verification', async () => {
+      it('refuses to activate a contract on an administrator\'s statement by default, keeps the claim as a claim, and records the refusal', async () => {
         const { COUNTERPART_ACCEPTANCE_POLICY } = await acceptanceModule();
-        COUNTERPART_ACCEPTANCE_POLICY.activationRequires = 'provider_verified';
         m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: {} }]);
 
         const response = await post({ targetState: 'contract_signed', counterpartAcceptance: acceptance });
@@ -1013,13 +1015,51 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           policyApprovedBy: null,
           evidence: 'operator_recorded_unverified',
         });
+        expect(payload.denialRecorded).toBe(true);
         expect(mockDb.update).not.toHaveBeenCalled();
+        expect(mockDb.insert).not.toHaveBeenCalled();
         expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+        // The refusal, and the claim as evidence that it was made, are written on their own after the rollback.
+        expect(m.recordDenial).toHaveBeenCalledWith(
+          expect.objectContaining({ organizationId: TEST_ORG_ID, applicationId: 'app-1', targetState: 'contract_signed', contractId: 'c-1', claim: acceptance }),
+          'platform-admin-1',
+        );
+      });
+
+      it('still refuses, and says the refusal could not be recorded, when the denial record fails', async () => {
+        m.recordDenial.mockResolvedValueOnce(false);
+        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: {} }]);
+
+        const response = await post({ targetState: 'contract_signed', counterpartAcceptance: acceptance });
+
+        expect(response.status).toBe(409);
+        expect((await response.json()).denialRecorded).toBe(false);
+        expect(mockDb.update).not.toHaveBeenCalled();
+      });
+
+      it('stores the claimed channel as a claim and the evidence level as unverified, with the policy that applied and its approval state (under an approved operator-recorded policy)', async () => {
+        await approvedOperatorPolicy();
+        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: {} }]);
+
+        const response = await post({ targetState: 'contract_signed', counterpartAcceptance: { ...acceptance, channel: 'e_signature_provider' } });
+        const payload = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(payload.data.monetization.acceptanceEvidence).toBe('operator_recorded_unverified');
+        expect(updatedWith()[0]).toHaveBeenCalledWith(expect.objectContaining({
+          metadata: expect.objectContaining({
+            counterpartAcceptance: expect.objectContaining({
+              channel: 'e_signature_provider',
+              verification: 'recorded_by_platform_operator',
+              verificationDetail: { status: 'operator_recorded_unverified', reason: 'no_verifier_registered_for_channel' },
+              policyApprovedBy: 'test-approver',
+            }),
+          }),
+        }));
       });
 
       it('activates the contract as provider-verified when a registered verifier confirms the reference, before the transaction opens', async () => {
-        const { registerAcceptanceVerifier, COUNTERPART_ACCEPTANCE_POLICY } = await acceptanceModule();
-        COUNTERPART_ACCEPTANCE_POLICY.activationRequires = 'provider_verified';
+        const { registerAcceptanceVerifier } = await acceptanceModule();
         const verify = vi.fn(async () => ({ verified: true, providerReference: 'env-42' }));
         registerAcceptanceVerifier('e_signature_provider', { provider: 'test-provider', verify });
         m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: {} }]);
@@ -1035,30 +1075,111 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
         }));
       });
 
-      it('leaves the acceptance unverified, not failed, when the verifier throws or declines', async () => {
+      it.each([
+        ['throws', async () => { throw new Error('provider down'); }],
+        ['declines', async () => ({ verified: false })],
+      ])('leaves the acceptance unverified, not failed, when the verifier %s, and so refuses by default', async (_name, verify) => {
         const { registerAcceptanceVerifier } = await acceptanceModule();
-        registerAcceptanceVerifier('e_signature_provider', { provider: 'down', verify: async () => { throw new Error('provider down'); } });
+        registerAcceptanceVerifier('e_signature_provider', { provider: 'down', verify });
         m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: {} }]);
 
         const response = await post({ targetState: 'contract_signed', counterpartAcceptance: { ...acceptance, channel: 'e_signature_provider' } });
 
-        expect(response.status).toBe(200);
-        expect((await response.json()).data.monetization.acceptanceEvidence).toBe('operator_recorded_unverified');
+        expect(response.status).toBe(409);
+        expect((await response.json()).blockedOperation).toMatchObject({ evidence: 'operator_recorded_unverified' });
+        expect(mockDb.update).not.toHaveBeenCalled();
       });
 
-      it('stamps the invoice with the evidence its contract rests on and refuses it under a verification-required policy', async () => {
-        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', metadata: { counterpartAcceptance: { verification: 'recorded_by_platform_operator' } } }]);
+      it('refuses an invoice on a contract whose acceptance is unverified, naming the standing, and issues it on a verified one', async () => {
+        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [legacyUnverifiedContract]);
+        const refused = await post({ targetState: 'invoice_issued', allowSkip: true });
+        const payload = await refused.json();
+        expect(refused.status).toBe(409);
+        expect(payload.blockedOperation).toMatchObject({ operation: 'pilot.commercial.invoice_issued', evidence: 'operator_recorded_unverified' });
+        expect(payload.acceptanceStanding.standing).toBe('activated_on_unverified_acceptance');
+        expect(mockDb.insert).not.toHaveBeenCalled();
+        expect(m.recordDenial).toHaveBeenCalledWith(expect.objectContaining({ targetState: 'invoice_issued', contractId: 'c-1' }), 'platform-admin-1');
+
+        vi.clearAllMocks();
+        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [verifiedContract]);
+        const issued = await post({ targetState: 'invoice_issued', allowSkip: true });
+        expect(issued.status).toBe(200);
+        expect(mockDb.insert.mock.results.some((r) => JSON.stringify((r.value as { values: ReturnType<typeof vi.fn> }).values.mock.calls).includes('"acceptanceEvidence":"provider_verified"'))).toBe(true);
+      });
+
+      it('stamps the invoice as operator-recorded when an approved policy accepts it, and refuses it once the policy is unapproved again', async () => {
+        await approvedOperatorPolicy();
+        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [legacyUnverifiedContract]);
         const issued = await post({ targetState: 'invoice_issued', allowSkip: true });
         expect(issued.status).toBe(200);
         expect(mockDb.insert.mock.results.some((r) => JSON.stringify((r.value as { values: ReturnType<typeof vi.fn> }).values.mock.calls).includes('"acceptanceEvidence":"operator_recorded_unverified"'))).toBe(true);
+      });
+    });
 
-        vi.clearAllMocks();
-        const { COUNTERPART_ACCEPTANCE_POLICY } = await acceptanceModule();
-        COUNTERPART_ACCEPTANCE_POLICY.activationRequires = 'provider_verified';
-        m.queueSelect([{ id: 'app-1' }], [row], [{ id: 'billing-account-1' }], [{ id: 'c-1', metadata: {} }]);
-        const refused = await post({ targetState: 'invoice_issued', allowSkip: true });
-        expect(refused.status).toBe(409);
-        expect((await refused.json()).blockedOperation).toMatchObject({ operation: 'pilot.commercial.invoice_issued' });
+    // Final hardening: the states after the contract is signed rest on the acceptance too. None of them used to look for it.
+    describe('states that rest on the counterpart\'s acceptance', () => {
+      const stateRow = { ...row, responses: { commercialState: 'invoice_issued' } };
+
+      it.each(['pilot_active', 'pilot_complete', 'subscription_offered'])('refuses %s when there is no contract at all, and writes no status', async (targetState) => {
+        m.queueSelect([{ id: 'app-1' }], [stateRow], [{ id: 'billing-account-1' }], []);
+
+        const response = await post({ targetState, allowSkip: true });
+        const payload = await response.json();
+
+        expect(response.status).toBe(409);
+        expect(payload.blockedOperation).toMatchObject({ operation: `pilot.commercial.${targetState}`, evidence: 'none' });
+        expect(payload.acceptanceStanding.standing).toBe('no_acceptance');
+        expect(mockDb.update).not.toHaveBeenCalled();
+        expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+        expect(m.recordDenial).toHaveBeenCalledWith(expect.objectContaining({ targetState, contractId: null }), 'platform-admin-1');
+      });
+
+      it('refuses to advance the pilot on a contract that was activated under the earlier permissive default, and leaves that contract as it is', async () => {
+        m.queueSelect([{ id: 'app-1' }], [stateRow], [{ id: 'billing-account-1' }], [legacyUnverifiedContract]);
+
+        const response = await post({ targetState: 'pilot_active' });
+        const payload = await response.json();
+
+        expect(response.status).toBe(409);
+        expect(payload.acceptanceStanding.standing).toBe('activated_on_unverified_acceptance');
+        expect(mockDb.update).not.toHaveBeenCalled();
+      });
+
+      it('refuses a contract that only has an acceptance claim recorded on it', async () => {
+        m.queueSelect([{ id: 'app-1' }], [stateRow], [{ id: 'billing-account-1' }], [{ id: 'c-1', status: 'pending_approval', metadata: { acceptanceClaims: [{ standing: 'unverified_claim' }] } }]);
+
+        const response = await post({ targetState: 'pilot_active' });
+
+        expect(response.status).toBe(409);
+        expect((await response.json()).acceptanceStanding).toMatchObject({ standing: 'awaiting_verified_acceptance', claimsRecorded: 1 });
+      });
+
+      it('lets the pilot run on a provider-verified acceptance', async () => {
+        m.queueSelect([{ id: 'app-1' }], [stateRow], [{ id: 'billing-account-1' }], [verifiedContract]);
+
+        const response = await post({ targetState: 'pilot_active' });
+
+        expect(response.status).toBe(200);
+        expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not refuse a move back to an earlier state, which is not an advance', async () => {
+        m.normalizeCommercialState.mockReturnValueOnce('pilot_complete');
+        m.queueSelect([{ id: 'app-1' }], [{ ...stateRow, responses: { commercialState: 'pilot_complete' } }], [{ id: 'billing-account-1' }]);
+
+        const response = await post({ targetState: 'pilot_active' });
+
+        expect(response.status).toBe(200);
+      });
+
+      it('reads the subscription\'s acceptance from the contract, not from the pilot\'s own responses record', async () => {
+        const forged = { ...stateRow, responses: { commercialState: 'invoice_issued', commercialMonetization: { acceptanceEvidence: 'provider_verified' } } };
+        m.queueSelect([{ id: 'app-1' }], [forged], [{ id: 'billing-account-1' }], [legacyUnverifiedContract]);
+
+        const response = await post({ targetState: 'subscription_active', allowSkip: true });
+
+        expect(response.status).toBe(409);
+        expect((await response.json()).blockedOperation).toMatchObject({ operation: 'pilot.commercial.subscription_active', evidence: 'operator_recorded_unverified' });
         expect(mockDb.insert).not.toHaveBeenCalled();
       });
     });

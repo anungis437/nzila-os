@@ -39,6 +39,9 @@ const reportsExecuteSchema = z.object({
 // An officer may ask the same question of the same source and grouping only so many times an hour with different values: the answers of
 // near-identical questions can be subtracted from each other, so probing that way is bounded and every question's shape is recorded.
 const REPORT_SHAPE_BUDGET = { limit: 12, window: 3600, identifier: 'report-shape' };
+// The shape of a question is easy to vary (a harmless extra filter is a new shape), so the same source is also bounded across shapes and across the
+// officers of one organization. Neither budget eliminates differencing; they bound how much of it one hour allows, and every refusal is recorded.
+const REPORT_SOURCE_BUDGET = { limit: 60, window: 3600, identifier: 'report-source' };
 
 export const POST = withRoleAuth('officer', async (request: NextRequest, context) => {
   const { userId, organizationId } = context as { userId: string; organizationId: string };
@@ -145,20 +148,21 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     const cellReport = !isAdministrator && isCellReport(config);
     if (cellReport) {
       const budget = await checkRateLimit(`report-shape:${organizationId}:${userId}:${disclosure.shape}`, REPORT_SHAPE_BUDGET);
-      if (!budget.allowed) {
+      const sourceBudget = budget.allowed ? await checkRateLimit(`report-source:${organizationId}:${config.dataSourceId}`, REPORT_SOURCE_BUDGET) : budget;
+      if (!budget.allowed || !sourceBudget.allowed) {
         await withRLSContext({ organizationId, userId }, (tx) =>
           persistAtomicAudit(tx, {
             organizationId,
             userId,
             action: 'report.execute.denied',
             resourceType: 'report_execution',
-            details: { dataSource: config.dataSourceId, reason: 'repeated_question_shape', shape: disclosure.shape },
+            details: { dataSource: config.dataSourceId, reason: budget.allowed ? 'repeated_questions_of_one_source' : 'repeated_question_shape', shape: disclosure.shape },
           }, 'failure'),
         );
         return standardErrorResponse(
           ErrorCode.RATE_LIMIT_EXCEEDED,
           'This question has been asked too many times with different values; ask a different question or have an administrator run it',
-          { resetIn: budget.resetIn },
+          { resetIn: sourceBudget.resetIn },
         );
       }
     }

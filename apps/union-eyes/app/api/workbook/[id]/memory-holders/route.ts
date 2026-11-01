@@ -24,7 +24,7 @@ import { auditClaimedWorkbookWrite, auditWorkbookRead } from '@/lib/workbook/cla
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
-import { assertNoticeContract, holderNoticeSchema, HolderNoticeBlocked, IDENTIFYING_FIELDS, noticeColumns, summarizeNotice, withholdUnnoticedDetail } from '@/lib/workbook/holder-notice';
+import { assertNoticeContract, holderNoticeSchema, HolderNoticeBlocked, IDENTIFYING_FIELDS, noticeColumns, projectHolder, summarizeNotice, verifyNoticeDelivery, type NoticeViewer } from '@/lib/workbook/holder-notice';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -53,7 +53,7 @@ const createSchema = z.object({
   notice: holderNoticeSchema.optional(),
 });
 
-async function loadCartography(workbookId: string) {
+async function loadCartography(workbookId: string, viewer: NoticeViewer) {
   const rows = await db
     .select({
       id: workbookMemoryHolders.id,
@@ -65,6 +65,7 @@ async function loadCartography(workbookId: string) {
       successorIdentified: workbookMemoryHolders.successorIdentified,
       notes: workbookMemoryHolders.notes,
       noticeState: workbookMemoryHolders.noticeState,
+      noticeEvidence: workbookMemoryHolders.noticeEvidence,
       notifiedAt: workbookMemoryHolders.notifiedAt,
       noticeChannel: workbookMemoryHolders.noticeChannel,
     })
@@ -87,9 +88,9 @@ async function loadCartography(workbookId: string) {
     })),
   );
 
-  // Whether the named people have been told is shown with them: a count, and per holder whether a notice was recorded. Under the notice
-  // policy, identifying detail of a person whose notice is not recorded is withheld.
-  return { holders: rows.map((row) => withholdUnnoticedDetail(row)), cartography, notice: summarizeNotice(rows) };
+  // What each named person's notice rests on is shown with them (none, a person's statement, or a verified delivery). A name or note whose notice
+  // does not meet the policy is shown only to the claimant; everyone else gets it withheld, and is told that it was.
+  return { holders: rows.map((row) => projectHolder(row, viewer)), cartography, notice: summarizeNotice(rows) };
 }
 
 export async function GET(
@@ -114,7 +115,7 @@ export async function GET(
           resourceId: workbookId,
           details: { authority: authority.kind },
         });
-        return loadCartography(workbookId);
+        return loadCartography(workbookId, authority.kind);
       },
     );
     if (!access.ok) {
@@ -150,6 +151,10 @@ export async function POST(
     );
   }
 
+  // A notice is checked with the channel's delivery verifier, if one is registered (none is), before any transaction opens: a provider call is not
+  // made while the workbook row is locked. Without a confirming verifier the notice stays a person's statement.
+  const verification = parse.data.notice ? await verifyNoticeDelivery(parse.data.notice) : null;
+
   try {
     // Authorization is resolved first; the protected insert + cartography read
     // then run inside the DB execution context that matches the authority.
@@ -158,7 +163,19 @@ export async function POST(
       async (authority) => {
         // A notice is attributed to the identified person who records it; an unclaimed workbook has none, and that is reported rather than faked.
         const writesIdentifyingDetail = IDENTIFYING_FIELDS.some((field) => parse.data[field] !== undefined && parse.data[field] !== null);
-        assertNoticeContract({ writesIdentifyingDetail, notice: parse.data.notice, authorityKind: authority.kind });
+        try {
+          assertNoticeContract({ writesIdentifyingDetail, notice: parse.data.notice, authorityKind: authority.kind, verification });
+        } catch (error) {
+          if (!(error instanceof HolderNoticeBlocked)) throw error;
+          // The refusal is itself recorded (the workbook is not touched, so nothing rolls it back).
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.create_refused',
+            resourceType: 'workbook_memory_holders',
+            resourceId: workbookId,
+            details: { code: error.code, fields: IDENTIFYING_FIELDS.filter((field) => parse.data[field] !== undefined && parse.data[field] !== null) },
+          });
+          return { refused: error } as const;
+        }
         // Lock the parent workbook within the authority transaction. Concurrent
         // writers serialize on this row, so a count check cannot race another
         // POST and exceed the ceiling. Recheck ownership after acquiring the
@@ -198,7 +215,7 @@ export async function POST(
             criticality: parse.data.criticality ?? null,
             successorIdentified: parse.data.successorIdentified,
             notes: parse.data.notes ?? null,
-            ...(parse.data.notice && authority.actorUserId ? noticeColumns(parse.data.notice, authority.actorUserId, new Date()) : {}),
+            ...(parse.data.notice && authority.actorUserId ? noticeColumns(parse.data.notice, authority.actorUserId, new Date(), verification) : {}),
           })
           .returning({ id: workbookMemoryHolders.id });
 
@@ -209,7 +226,7 @@ export async function POST(
           details: { role: parse.data.role },
         });
 
-        const cartography = await loadCartography(workbookId);
+        const cartography = await loadCartography(workbookId, authority.kind);
         return { id: inserted?.id, ...cartography };
       },
     );
@@ -218,6 +235,11 @@ export async function POST(
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
+    const outcome = access.value;
+    if ('refused' in outcome && outcome.refused instanceof HolderNoticeBlocked) {
+      const refused = outcome.refused;
+      return NextResponse.json({ error: { code: refused.code, message: 'A name or note about a person needs a delivery-verified notice to that person, and none can be recorded yet' }, blockedOperation: refused.blockedOperation }, { status: 409 });
+    }
     return NextResponse.json(access.value, { status: 201 });
   } catch (err) {
     if (err instanceof HolderNoticeBlocked) {

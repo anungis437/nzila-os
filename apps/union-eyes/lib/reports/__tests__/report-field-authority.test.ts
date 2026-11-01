@@ -13,7 +13,7 @@ vi.mock('@/lib/report-executor', async (importOriginal) => {
   return { ...real, db: undefined }
 })
 
-import { assessReportDisclosure } from '../report-field-authority'
+import { assessReportDisclosure, dateFilterIsMonthCoarse } from '../report-field-authority'
 import { adminOnlyReportSelections, suppressSmallGroups, validateReportConfig, withGroupSizeField } from '../report-config-validation'
 
 const cfg = (over: Partial<ReportConfig> & { dataSourceId: string }): ReportConfig => ({ fields: [], ...over }) as ReportConfig
@@ -144,5 +144,43 @@ describe('cells too small to be anonymous', () => {
 
   it('treats a missing or non-numeric measure as too small', () => {
     expect(suppressSmallGroups([{ k: 'a' }, { k: 'b', ue_group_size: 'x', ue_group_people: 9 }]).rows).toEqual([])
+  })
+})
+
+describe('date filters that would let two large cells be subtracted into one person', () => {
+  const claimsBy = (filter: Record<string, unknown>) => cfg({ dataSourceId: 'claims', fields: [count('id')], filters: [{ fieldId: 'created_at', ...filter } as never] })
+
+  it.each([
+    ['a start-of-month lower bound', { operator: 'gte', value: '2026-03-01' }, true],
+    ['a month-start timestamp', { operator: 'lt', value: '2026-04-01T00:00:00Z' }, true],
+    ['a year-month', { operator: 'gte', value: '2026-03' }, true],
+    ['a range between month starts', { operator: 'between', values: ['2026-03-01', '2026-04-01'] }, true],
+    ['a null test', { operator: 'is_null' }, true],
+    ['a day', { operator: 'gte', value: '2026-03-14' }, false],
+    ['a range ending on a day', { operator: 'between', values: ['2026-03-01', '2026-03-31'] }, false],
+    ['a single instant', { operator: 'eq', value: '2026-03-01' }, false],
+    ['a list of dates', { operator: 'in', values: ['2026-03-01'] }, false],
+    ['a pattern', { operator: 'like', value: '2026-03%' }, false],
+    ['a number', { operator: 'gte', value: 20260301 }, false],
+    ['no value at all', { operator: 'gte' }, false],
+  ])('judges %s', (_name, filter, coarse) => {
+    expect(dateFilterIsMonthCoarse(filter as never)).toBe(coarse)
+    const restricted = assessReportDisclosure(claimsBy(filter)).restricted
+    expect(restricted.includes('claims.created_at (date filter finer than a month)')).toBe(!coarse)
+  })
+
+  it('applies to every date column, whatever its class, and not to a column that is not a date', () => {
+    const day = { operator: 'gte', value: '2026-03-14' }
+    for (const [source, column] of [['organization_members', 'hire_date'], ['organization_members', 'created_at'], ['claims', 'resolved_at'], ['claim_deadlines', 'due_date'], ['dues_assignments', 'effective_date']]) {
+      const config = cfg({ dataSourceId: source, fields: [count('id')], filters: [{ fieldId: column, ...day } as never] })
+      expect(assessReportDisclosure(config).restricted, `${source}.${column}`).toContain(`${source}.${column} (date filter finer than a month)`)
+    }
+    const status = cfg({ dataSourceId: 'claims', fields: [count('id')], filters: [{ fieldId: 'status', operator: 'eq', value: 'open' } as never] })
+    expect(assessReportDisclosure(status).restricted.some((entry) => entry.includes('date filter'))).toBe(false)
+  })
+
+  it('catches the executor-side column named in fieldName as well as the validated id', () => {
+    const config = cfg({ dataSourceId: 'claims', fields: [count('id')], filters: [{ fieldId: 'status', fieldName: 'claims.resolved_at', operator: 'gte', value: '2026-03-14' } as never] })
+    expect(assessReportDisclosure(config).restricted).toContain('claims.resolved_at (date filter finer than a month)')
   })
 })

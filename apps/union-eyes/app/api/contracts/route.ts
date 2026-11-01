@@ -14,6 +14,7 @@ import { db } from '@/db';
 import { commercialContracts, billingAccounts, orgSubscriptions } from '@/db/schema';
 import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { eq, desc } from 'drizzle-orm';
+import { classifyAcceptanceStanding } from '@/lib/pilot/counterpart-acceptance';
 
 export const GET = withApi(
   {
@@ -32,7 +33,15 @@ export const GET = withApi(
       .from(commercialContracts)
       .where(eq(commercialContracts.organizationId, organizationId))
       .orderBy(desc(commercialContracts.createdAt));
-    return { contracts };
+    // A contract the pilot flow accepted says what its acceptance amounts to: one activated on an administrator's statement under the earlier
+    // permissive default is named as unverified here. Derived on read; nothing is rewritten.
+    return {
+      contracts: contracts.map((contract) =>
+        (contract.metadata as { source?: string } | null)?.source === 'pilot-commercial-transition'
+          ? { ...contract, acceptanceStanding: classifyAcceptanceStanding(contract) }
+          : contract,
+      ),
+    };
   },
 );
 

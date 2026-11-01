@@ -2211,7 +2211,9 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     reason: "CLOSED round 54 (final non-voting parent-owned authority convergence, BLOCKER_ROOT_MICRO_COHORT — direct parent of contract_line_items, one-hop): organization_id NOT NULL (db/schema/domains/finance/contracts.ts). All 3 real reference paths verified: app/api/contracts/route.ts's GET/POST both use the trusted withApi organizationId context (GET filters by it directly; POST passes it straight to createContract(), never client-suppliable). app/api/pilot/apply/[id]/commercial-transition/route.ts requires system_admin (platform-tier) and derives organizationId from the already-verified pilot application record inside a withSystemContext transaction, not from client input. services/platform-economics/contract-service.ts's activateContract/terminateContract/checkContractEntitlement/recordEntitlementUsage/resetExpiredUsagePeriods have zero real callers anywhere (dead code, flagged not fixed since unreachable) and take contractId/organizationId as trusted caller-supplied parameters, not client input directly. SECURITY DEFECT FOUND AND FIXED THIS ROUND (see contract_line_items entry): getContractLineItems(contractId) had zero org verification, a cross-org IDOR — fixed. No Django ViewSet exists for this table.",
     supportingCapability: ["app/api/contracts/route.ts","app/api/pilot/apply/[id]/commercial-transition/route.ts","services/platform-economics/contract-service.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
-    requiredSystemPrivileges: ["INSERT","UPDATE"],
+    requiredSystemPrivileges: ["SELECT","INSERT","UPDATE"],
+    // SELECT: the pilot commercial-transition route reads the contract it accepts, bills against or starts, and records an acceptance claim on
+    // it, under the system context. INSERT and UPDATE alone could not do that natively: a WHERE or a SET that names a column needs SELECT.
     invocationAuthority: "MIXED",
     dbExecutionPrincipal: "MIXED",
     reviewPriority: "NONE",

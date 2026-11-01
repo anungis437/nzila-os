@@ -300,6 +300,47 @@ describe('reports/execute field authority (F06 A5)', () => {
     expect(key).toContain('org_1:u1:');
   });
 
+  it('bounds one source across shapes and across the organization\'s officers, so a new shape does not reset the budget', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+    m.checkRateLimit.mockImplementation(async (key: string) => (String(key).startsWith('report-source:') ? { allowed: false, resetIn: 1200 } : { allowed: true, resetIn: 0 }));
+
+    const response = await run({ ...claimCount, filters: [{ fieldId: 'priority', operator: 'ne', value: 'none-such' }] });
+
+    expect(response.status).toBe(429);
+    expect(m.execute).not.toHaveBeenCalled();
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'report.execute.denied', details: expect.objectContaining({ reason: 'repeated_questions_of_one_source' }) }),
+      'failure',
+    );
+    expect(String(m.checkRateLimit.mock.calls.find((call) => String(call[0]).startsWith('report-source:'))?.[0])).toBe('report-source:org_1:claims');
+  });
+
+  it.each([
+    ['a day', '2026-03-14'],
+    ['a single instant', '2026-03-01T09:30:00Z'],
+  ])('refuses an officer a date filter that cuts at %s, records it, and runs nothing', async (_name, value) => {
+    m.hasMinRole.mockResolvedValue(false);
+
+    const response = await run({ ...claimCount, filters: [{ fieldId: 'created_at', operator: 'gte', value }] });
+
+    expect(response.status).toBe(403);
+    expect(m.execute).not.toHaveBeenCalled();
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'report.execute.denied', details: expect.objectContaining({ restricted: expect.arrayContaining(['claims.created_at (date filter finer than a month)']) }) }),
+      'failure',
+    );
+    expect(JSON.stringify(m.audit.mock.calls)).not.toContain(value);
+  });
+
+  it('lets an officer filter on month boundaries, and an administrator on any date', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+    expect((await run({ ...claimCount, filters: [{ fieldId: 'created_at', operator: 'between', values: ['2026-03-01', '2026-04-01'] }] })).status).toBe(200);
+
+    m.hasMinRole.mockResolvedValue(true);
+    expect((await run({ ...claimCount, filters: [{ fieldId: 'created_at', operator: 'eq', value: '2026-03-14' }] })).status).toBe(200);
+  });
   it('does not spend the question budget on an administrator or on a row listing an officer may run', async () => {
     m.hasMinRole.mockResolvedValue(true);
     await run(claimCount);

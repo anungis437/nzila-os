@@ -16,7 +16,7 @@ import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
-import { assertNoticeContract, holderNoticeSchema, HolderNoticeBlocked, IDENTIFYING_FIELDS, noticeColumns } from '@/lib/workbook/holder-notice';
+import { assertNoticeContract, holderNoticeSchema, HolderNoticeBlocked, IDENTIFYING_FIELDS, noticeColumns, noticeEvidenceOf, verifyNoticeDelivery, type NoticeEvidence } from '@/lib/workbook/holder-notice';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -71,6 +71,9 @@ export async function PATCH(
   }
   const writesIdentifyingDetail = IDENTIFYING_FIELDS.some((field) => columns[field] !== undefined && columns[field] !== null);
 
+  // See the list route: the notice is checked with a delivery verifier, if one is registered, before any transaction opens.
+  const verification = notice ? await verifyNoticeDelivery(notice) : null;
+
   try {
     // Authorization is resolved first; the protected update then runs inside
     // the DB execution context that matches the resolved authority.
@@ -78,8 +81,29 @@ export async function PATCH(
       { workbookId, operation: 'write', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         // A notice is attributed to the identified person who records it; an unclaimed workbook has none, and that is reported rather than faked.
-        assertNoticeContract({ writesIdentifyingDetail, notice, authorityKind: authority.kind });
-        if (notice && authority.actorUserId) Object.assign(patch, noticeColumns(notice, authority.actorUserId, new Date()));
+        // What the holder already has stored counts: a name may be edited once its notice is verified, without recording the notice again.
+        let storedEvidence: NoticeEvidence = 'none';
+        if (writesIdentifyingDetail) {
+          const [stored] = await db
+            .select({ noticeState: workbookMemoryHolders.noticeState, noticeEvidence: workbookMemoryHolders.noticeEvidence })
+            .from(workbookMemoryHolders)
+            .where(and(eq(workbookMemoryHolders.id, holderId), eq(workbookMemoryHolders.workbookId, workbookId)))
+            .limit(1);
+          if (stored) storedEvidence = noticeEvidenceOf(stored);
+        }
+        try {
+          assertNoticeContract({ writesIdentifyingDetail, notice, authorityKind: authority.kind, verification, storedEvidence });
+        } catch (error) {
+          if (!(error instanceof HolderNoticeBlocked)) throw error;
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.update_refused',
+            resourceType: 'workbook_memory_holders',
+            resourceId: holderId,
+            details: { code: error.code, fields: IDENTIFYING_FIELDS.filter((field) => columns[field] !== undefined && columns[field] !== null) },
+          });
+          return { refused: error } as const;
+        }
+        if (notice && authority.actorUserId) Object.assign(patch, noticeColumns(notice, authority.actorUserId, new Date(), verification));
         const orgId = authority.claimedOrgId;
         const updated = await db
           .update(workbookMemoryHolders)
@@ -116,7 +140,12 @@ export async function PATCH(
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
-    if (access.value.length === 0) {
+    const outcome = access.value as { refused: HolderNoticeBlocked } | Array<{ id: string }>;
+    if (!Array.isArray(outcome)) {
+      const refused = outcome.refused;
+      return NextResponse.json({ error: { code: refused.code, message: 'A name or note about a person needs a delivery-verified notice to that person, and none can be recorded yet' }, blockedOperation: refused.blockedOperation }, { status: 409 });
+    }
+    if (outcome.length === 0) {
       return NextResponse.json({ error: 'Memory holder not found' }, { status: 404 });
     }
 
@@ -179,7 +208,12 @@ export async function DELETE(
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
-    if (access.value.length === 0) {
+    const outcome = access.value as { refused: HolderNoticeBlocked } | Array<{ id: string }>;
+    if (!Array.isArray(outcome)) {
+      const refused = outcome.refused;
+      return NextResponse.json({ error: { code: refused.code, message: 'A name or note about a person needs a delivery-verified notice to that person, and none can be recorded yet' }, blockedOperation: refused.blockedOperation }, { status: 409 });
+    }
+    if (outcome.length === 0) {
       return NextResponse.json({ error: 'Memory holder not found' }, { status: 404 });
     }
 

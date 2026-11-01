@@ -16,6 +16,10 @@
  * Non-identifier classes may appear as an aggregate or as a grouping dimension whose cells are large enough to be anonymous. Listing them
  * row by row is a disclosure of member or matter data and needs an administrator; only `operational` columns may be listed by an officer.
  *
+ * Cell size does not stop differencing: two filters that differ by one person's date give two large cells whose counts subtract to that
+ * person. An officer's date filters are therefore limited to month boundaries (see DATE_COLUMN); that bounds the resolution and does not eliminate
+ * differencing at month level, which is bounded by the question budgets in the route and recorded by shape.
+ *
  * PROVISIONAL: which offices may reproduce which classes is an INSTITUTIONAL decision. This mapping is deliberately conservative and
  * carries `approvedBy: null`; an unknown column is an identifier. The server never activates a looser policy on its own authority.
  */
@@ -24,7 +28,25 @@ import { getDataSource, type ReportConfig } from '@/lib/report-executor';
 
 export type ReportFieldClass = 'identifier' | 'financial' | 'matter' | 'member_attribute' | 'operational';
 
-export const REPORT_FIELD_POLICY = { version: 'ue-report-field-class/provisional-1', approvedBy: null as string | null } as const;
+export const REPORT_FIELD_POLICY = { version: 'ue-report-field-class/provisional-2', approvedBy: null as string | null } as const;
+
+// A date column is any *_at or *_date column. A filter on one narrows a population to those dated in a window, and two windows that differ
+// by a day differ by the people dated on that day: subtracting their counts reads one person's date out of two cells that are each large
+// enough to be anonymous. Cell size cannot prevent that. What can be refused is the resolution: for anyone below an administrator a date
+// filter may only cut at the start of a month (an open or closed range between month starts), never at a day, never a single instant or a list.
+const DATE_COLUMN = /(?:_at|_date)$/;
+const MONTH_BOUNDARY = /^\d{4}-(?:0[1-9]|1[0-2])(?:-01(?:[T ]00:00:00(?:\.0+)?(?:Z|[+-]00:?00)?)?)?$/;
+const RANGE_OPERATORS = new Set(['gt', 'gte', 'lt', 'lte', 'between']);
+const NULL_OPERATORS = new Set(['is_null', 'is_not_null']);
+
+/** Whether a date filter cuts no finer than a month. A null test says nothing about when, so it is fine. */
+export function dateFilterIsMonthCoarse(filter: { operator?: string; value?: unknown; values?: unknown[] }): boolean {
+  const operator = String(filter.operator);
+  if (NULL_OPERATORS.has(operator)) return true;
+  if (!RANGE_OPERATORS.has(operator)) return false;
+  const bounds = operator === 'between' ? (Array.isArray(filter.values) ? filter.values : []) : [filter.value];
+  return bounds.length > 0 && bounds.every((bound) => typeof bound === 'string' && MONTH_BOUNDARY.test(bound.trim()));
+}
 
 const SEVERITY: Record<ReportFieldClass, number> = { operational: 0, member_attribute: 1, matter: 2, financial: 3, identifier: 4 };
 
@@ -150,6 +172,14 @@ export function assessReportDisclosure(config: ReportConfig): ReportDisclosure {
   const groupedBy = refsOf(Array.isArray(config.groupBy) ? config.groupBy : []);
   const sorted = refsOf((config.sortBy ?? []).map((rule) => rule?.fieldId).filter((id): id is string => typeof id === 'string'));
   flag(filtered.resolved);
+  // A date filter finer than a month is a differencing instrument (see DATE_COLUMN), so it needs an administrator.
+  for (const filter of config.filters ?? []) {
+    if (!filter) continue;
+    const dateRefs = resolveRef(filter.fieldName && filter.fieldName !== filter.fieldId ? filter.fieldName : filter.fieldId, baseTable, baseFields, queryTables)
+      .concat(filter.fieldName && filter.fieldName !== filter.fieldId ? resolveRef(filter.fieldId, baseTable, baseFields, queryTables) : [])
+      .filter((ref) => DATE_COLUMN.test(ref.column));
+    if (dateRefs.length > 0 && !dateFilterIsMonthCoarse(filter)) for (const ref of dateRefs) restricted.add(`${label(ref)} (date filter finer than a month)`);
+  }
   flag(groupedBy.resolved);
   flag(sorted.resolved);
 

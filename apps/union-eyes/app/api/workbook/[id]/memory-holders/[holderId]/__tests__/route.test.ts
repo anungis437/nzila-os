@@ -75,7 +75,8 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
 
     const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
       method: 'PATCH',
-      body: JSON.stringify({ role: 'x', notes: 'private' }),
+      // Clearing a note is a change that removes identifying detail, so it needs no notice; writing one now does (see holder-notice.ts).
+      body: JSON.stringify({ role: 'x', notes: null }),
     }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
 
     expect(response.status).toBe(200);

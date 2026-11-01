@@ -465,36 +465,131 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
       expect(mockDb.update).not.toHaveBeenCalled();
     });
 
-    it('refuses a name or note without a notice, as a blocked operation, when the policy conditions naming a person on one', async () => {
-      const { HOLDER_NOTICE_POLICY } = await import('@/lib/workbook/holder-notice');
-      HOLDER_NOTICE_POLICY.identifyingDetailsRequireNotice = true;
+    it('records a notice as a person\'s statement, never as a delivery, when no verifier confirms it', async () => {
+      const { PATCH } = await loadItemRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.updateQueue.push([{ id: 'holder_1' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+
+      const response = await PATCH(patch({ notice: { channel: 'email', reference: 'msg-1' } }), itemParams);
+
+      expect(response.status).toBe(200);
+      expect(setCalls()[0]).toMatchObject({ noticeState: 'notified', noticeEvidence: 'self_reported', noticeVerifiedAt: null, noticeVerifiedBy: null, noticeProviderReference: null });
+    });
+
+    it('keeps the provider evidence when a registered verifier confirms the delivery, checked before the transaction opens', async () => {
+      const { registerNoticeDeliveryVerifier, clearNoticeDeliveryVerifiers } = await import('@/lib/workbook/holder-notice');
+      const verify = vi.fn(async () => ({ verified: true, providerReference: 'ev-9' }));
+      registerNoticeDeliveryVerifier('email', { provider: 'mail-provider', verify });
       try {
         const { PATCH } = await loadItemRoute();
         m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+        m.updateQueue.push([{ id: 'holder_1' }]);
         m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
-        const response = await PATCH(patch({ displayName: 'A Person' }), itemParams);
+        const response = await PATCH(patch({ notice: { channel: 'email', reference: 'msg-1' } }), itemParams);
 
-        expect(response.status).toBe(409);
-        expect((await response.json()).blockedOperation).toMatchObject({ operation: 'workbook.memory_holder.write_identifying_detail' });
-        expect(mockDb.update).not.toHaveBeenCalled();
+        expect(response.status).toBe(200);
+        expect(verify).toHaveBeenCalledTimes(1);
+        expect(setCalls()[0]).toMatchObject({ noticeEvidence: 'delivery_verified', noticeVerifiedBy: 'mail-provider', noticeProviderReference: 'ev-9' });
       } finally {
-        HOLDER_NOTICE_POLICY.identifyingDetailsRequireNotice = false;
+        clearNoticeDeliveryVerifiers();
       }
     });
 
-    it('shows the reader how many of the named people have a recorded notice', async () => {
+    it.each([
+      ['a name with no notice', { displayName: 'A Person' }],
+      ['a private note with no notice', { notes: 'private' }],
+      ['a name with only a statement that the person was told', { displayName: 'A Person', notice: { channel: 'email', reference: 'msg-1' } }],
+    ])('refuses %s, as a blocked operation, and records the refusal without the value', async (_name, body) => {
+      const { PATCH } = await loadItemRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }], [{ noticeState: 'not_recorded', noticeEvidence: 'none' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+
+      const response = await PATCH(patch(body), itemParams);
+      const payload = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(payload.error.code).toBe('NOTICE_REQUIRED_FOR_IDENTIFYING_DETAIL');
+      expect(payload.blockedOperation).toMatchObject({ operation: 'workbook.memory_holder.write_identifying_detail', policyApprovedBy: null });
+      expect(mockDb.update).not.toHaveBeenCalled();
+      expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+      expect(m.persistAtomicAudit.mock.calls[0][1]).toMatchObject({ action: 'workbook.memory_holder.update_refused', userId: 'user_1' });
+      expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toMatch(/A Person|private/);
+    });
+
+    it('lets a name be changed once the holder\'s stored notice is a confirmed delivery, and lets any name be cleared', async () => {
+      const { PATCH } = await loadItemRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }], [{ noticeState: 'notified', noticeEvidence: 'delivery_verified' }]);
+      m.updateQueue.push([{ id: 'holder_1' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+      expect((await PATCH(patch({ displayName: 'A Person' }), itemParams)).status).toBe(200);
+
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.updateQueue.push([{ id: 'holder_1' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+      expect((await PATCH(patch({ displayName: null, notes: null }), itemParams)).status).toBe(200);
+    });
+
+    it('refuses to add a name or note to a new holder, and still adds one that names no one', async () => {
+      const { POST } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+
+      const refused = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques', displayName: 'A Person' }), { params: Promise.resolve({ id: 'w1' }) });
+
+      expect(refused.status).toBe(409);
+      expect((await refused.json()).error.code).toBe('NOTICE_REQUIRED_FOR_IDENTIFYING_DETAIL');
+      expect(mockDb.insert).not.toHaveBeenCalled();
+      expect(m.persistAtomicAudit.mock.calls[0][1]).toMatchObject({ action: 'workbook.memory_holder.create_refused' });
+    });
+
+    it('records an unclaimed workbook\'s refused name write under the pseudonymous authority, by field name only', async () => {
+      const { PATCH } = await loadItemRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }], [{ noticeState: 'not_recorded', noticeEvidence: 'none' }]);
+
+      const response = await PATCH(patch({ displayName: 'A Person' }), itemParams);
+
+      expect(response.status).toBe(409);
+      expect(mockDb.update).not.toHaveBeenCalled();
+      expect(m.appendIntake).toHaveBeenCalledTimes(1);
+      expect(m.appendIntake.mock.calls[0][1]).toMatchObject({ action: 'workbook.memory_holder.update_refused', subjectKind: 'unclaimed_workbook' });
+      expect(JSON.stringify(m.appendIntake.mock.calls[0][1])).not.toContain('A Person');
+    });
+    it('shows the reader what each named person\'s notice rests on, and withholds the names whose notice is only a statement from a bearer of the capability', async () => {
       const { GET } = await loadListRoute();
       m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
       m.selectQueue.push([
-        { id: 'h1', role: 'A', displayName: 'N1', notes: null, noticeState: 'notified' },
-        { id: 'h2', role: 'B', displayName: 'N2', notes: null, noticeState: 'not_recorded' },
+        { id: 'h1', role: 'A', displayName: 'N1', notes: null, noticeState: 'notified', noticeEvidence: 'self_reported' },
+        { id: 'h2', role: 'B', displayName: 'N2', notes: null, noticeState: 'not_recorded', noticeEvidence: 'none' },
+        { id: 'h3', role: 'C', displayName: 'N3', notes: 'private', noticeState: 'notified', noticeEvidence: 'delivery_verified' },
       ]);
 
       const body = await (await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).json();
 
-      expect(body.notice).toEqual({ holders: 2, noticeRecorded: 1, noticeNotRecorded: 1 });
-      expect(body.holders.map((h: { identifyingDetailWithheld: boolean }) => h.identifyingDetailWithheld)).toEqual([false, false]);
+      expect(body.notice).toEqual({ holders: 3, deliveryVerified: 1, selfReported: 1, noNotice: 1 });
+      expect(body.holders.map((h: { identifyingDetailWithheld: boolean }) => h.identifyingDetailWithheld)).toEqual([true, true, false]);
+      expect(JSON.stringify(body)).not.toContain('N1');
+      expect(JSON.stringify(body)).not.toContain('N2');
+      expect(body.holders[2]).toMatchObject({ displayName: 'N3', notes: 'private', identifyingDetailWritable: true });
+    });
+
+    it('lets the claimant see what they entered, read-only, and withholds it from a same-organization peer', async () => {
+      const { GET } = await loadListRoute();
+      const rows = [{ id: 'h1', role: 'A', displayName: 'N1', notes: 'private', noticeState: 'notified', noticeEvidence: 'self_reported' }];
+
+      m.auth.mockResolvedValue({ userId: 'owner_1' });
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_1' }], rows);
+      const owner = await (await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).json();
+      expect(owner.holders[0]).toMatchObject({ displayName: 'N1', notes: 'private', identifyingDetailWithheld: false, identifyingDetailWritable: false });
+
+      m.auth.mockResolvedValue({ userId: 'peer_1' });
+      m.getOrganizationIdForUser.mockResolvedValue('org_1');
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_1' }], rows);
+      const peer = await (await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).json();
+      expect(peer.holders[0]).toMatchObject({ displayName: null, notes: null, identifyingDetailWithheld: true });
+      expect(JSON.stringify(peer)).not.toContain('N1');
+      expect(JSON.stringify(peer)).not.toContain('private');
     });
   });
 

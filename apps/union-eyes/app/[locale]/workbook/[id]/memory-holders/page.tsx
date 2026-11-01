@@ -13,6 +13,7 @@ import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCar
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { auditWorkbookRead } from '@/lib/workbook/claimed-write-audit';
 import { readWorkbookCapabilityCookie } from '@/lib/workbook/workbook-capability';
+import { projectHolder } from '@/lib/workbook/holder-notice';
 import { isFrench } from '@/lib/workbook/copy';
 import MemoryHoldersClient from './MemoryHoldersClient';
 
@@ -50,7 +51,7 @@ export default async function MemoryHoldersPage({
       details: { authority: authority.kind, surface: 'page' },
     });
 
-    return db
+    const holders = await db
       .select({
         id: workbookMemoryHolders.id,
         role: workbookMemoryHolders.role,
@@ -60,13 +61,18 @@ export default async function MemoryHoldersPage({
         criticality: workbookMemoryHolders.criticality,
         successorIdentified: workbookMemoryHolders.successorIdentified,
         notes: workbookMemoryHolders.notes,
+        noticeState: workbookMemoryHolders.noticeState,
+        noticeEvidence: workbookMemoryHolders.noticeEvidence,
       })
       .from(workbookMemoryHolders)
       .where(eq(workbookMemoryHolders.workbookId, id))
       .orderBy(workbookMemoryHolders.capturedAt);
+    return { holders, viewer: authority.kind };
   });
   if (!loaded.ok || !loaded.value) notFound();
-  const rows = loaded.value;
+  // A name or note whose notice does not meet the policy reaches the page only for the claimant; for anyone else it is withheld here, on the
+  // server, so it is not in the page payload at all.
+  const rows = loaded.value.holders.map((holder) => projectHolder(holder, loaded.value!.viewer));
 
   const cartography = runStewardshipCartography(
     rows.map((h) => ({

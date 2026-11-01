@@ -608,6 +608,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Separate bearer capability for an unclaimed workbook (hash and expiry, additive); the workbook id stops being the credential."
+      },
+      {
+        "tag": "0057_workbook_holder_notice_evidence",
+        "sha256": "1288b2369b53b81367108f0f83fe7b7e93681971a51e325e19ea572c150958ee",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Notice evidence level for named workbook holders (none, self_reported, delivery_verified); 0055 notices relabelled self_reported, none upgraded."
       }
     ]
   }

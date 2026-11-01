@@ -80,6 +80,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0054_public_intake_audit_events` | Platform-level, system-only, append-only audit of pseudonymous public-intake access (a keyed reference of the bearer identifier, a per-subject hash chain, no organization and no actor). Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0055_workbook_holder_notice` | Records, per named person in a workbook, whether a notice that they are recorded has been recorded, by whom, when and through which channel (every existing row starts as not_recorded). Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0056_workbook_capability` | Workbook capability: hash and expiry of the bearer capability of an unclaimed workbook Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0057_workbook_holder_notice_evidence` | Workbook holder notice evidence: none / self-reported / delivery-verified Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 

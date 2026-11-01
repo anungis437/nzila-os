@@ -133,6 +133,11 @@ export const workbookMemoryHolders = pgTable(
     notifiedBy: varchar('notified_by', { length: 255 }),
     noticeChannel: varchar('notice_channel', { length: 32 }),
     noticeReference: varchar('notice_reference', { length: 255 }),
+    // What a recorded notice rests on (platform 0057): 'none', 'self_reported' (a person's statement) or 'delivery_verified' (a registered verifier confirmed it).
+    noticeEvidence: varchar('notice_evidence', { length: 24 }).notNull().default('none'),
+    noticeVerifiedAt: timestamp('notice_verified_at', { withTimezone: true }),
+    noticeVerifiedBy: varchar('notice_verified_by', { length: 64 }),
+    noticeProviderReference: varchar('notice_provider_reference', { length: 255 }),
     capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
