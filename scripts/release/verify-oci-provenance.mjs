@@ -2,7 +2,7 @@
 /** P0 #1038: live Sigstore/SLSA OCI verification; never grants release authority. */
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, lstatSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -14,6 +14,25 @@ const canonicalUtcTimestamp = value => typeof value === 'string' &&
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
   Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value
 
+
+/** Refuse oversized or redirected on-disk staging evidence before allocating. */
+export function readSignedManifestFile(path) {
+  let bytes
+  try {
+    const stat = lstatSync(path)
+    if (!stat.isFile() || stat.size < 2 || stat.size > 2_097_152) {
+      deny('signed staging manifest file size or type invalid')
+    }
+    bytes = readFileSync(path)
+    if (bytes.length < 2 || bytes.length > 2_097_152) {
+      deny('signed staging manifest file size or type invalid')
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('OCI_PROVENANCE_DENIED:')) throw error
+    deny('signed staging manifest file missing or unreadable')
+  }
+  return bytes
+}
 
 export function verifyOciProvenance({manifestRaw, sourceSha, repository, stagingRunId, verifier = execFileSync, now = new Date()}) {
   if (!/^[0-9a-f]{40}$/.test(sourceSha ?? '') || repository !== REPO) deny('untrusted source identity')
@@ -100,7 +119,7 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
   try {
     const [manifestPath,sourceSha,repository,receiptPath,stagingRunId] = process.argv.slice(2)
     if (!manifestPath || !receiptPath || !stagingRunId) deny('signed manifest, staging run and exclusive receipt required')
-    const manifestRaw = readFileSync(manifestPath)
+    const manifestRaw = readSignedManifestFile(manifestPath)
     const receipt = verifyOciProvenance({manifestRaw,sourceSha,repository,stagingRunId})
     writeFileSync(receiptPath,JSON.stringify(receipt,null,2)+'\n',{flag:'wx',mode:0o600})
     console.log('Verified independent OCI provenance for '+receipt.targets.length+' target(s)')

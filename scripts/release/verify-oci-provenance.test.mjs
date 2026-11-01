@@ -1,6 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { verifyOciProvenance } from './verify-oci-provenance.mjs'
+import { verifyOciProvenance, readSignedManifestFile } from './verify-oci-provenance.mjs'
+import { mkdtempSync, writeFileSync, truncateSync, symlinkSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 const SHA='a'.repeat(40), REPO='anungis437/nzila-os'
 const IMAGE='nzilacanadaacr.azurecr.io/nzila/web@sha256:'+'b'.repeat(64)
@@ -15,6 +18,22 @@ const proof=()=>JSON.stringify([{verificationResult:{
 }}])
 const opts=extra=>({manifestRaw:JSON.stringify(manifest()),sourceSha:SHA,repository:REPO,
   stagingRunId:'123456',verifier:()=>proof(),...extra})
+
+test('OCI CLI refuses oversized or symlinked manifest evidence before loading bytes',()=>{
+  const directory=mkdtempSync(join(tmpdir(),'nzila-oci-manifest-'))
+  try {
+    const file=join(directory,'manifest.json')
+    writeFileSync(file,JSON.stringify(manifest()))
+    assert.equal(JSON.parse(readSignedManifestFile(file)).run_id,'123456')
+    const symlink=join(directory,'redirect.json')
+    symlinkSync(file,symlink)
+    assert.throws(()=>readSignedManifestFile(symlink),/file size or type invalid/)
+    truncateSync(file,2_097_153)
+    assert.throws(()=>readSignedManifestFile(file),/file size or type invalid/)
+    truncateSync(file,0)
+    assert.throws(()=>readSignedManifestFile(file),/file size or type invalid/)
+  } finally { rmSync(directory,{recursive:true,force:true}) }
+})
 
 test('requires canonical GitHub signer, exact source/ref and digest subject',()=>{
   let args
