@@ -151,6 +151,26 @@ describe('EntityCurrencyConfigSchema', () => {
     })).toThrow()
   })
 
+  it('bounds transaction currency lists to the supported ISO 4217 set after Zod 4 migration', () => {
+    const orgId = '00000000-0000-4000-8000-000000000001'
+    // A legitimate full supported-currency configuration remains accepted.
+    const valid = EntityCurrencyConfigSchema.parse({
+      orgId,
+      transactionCurrencies: [...SUPPORTED_CURRENCIES],
+    })
+    expect(valid.transactionCurrencies).toHaveLength(SUPPORTED_CURRENCIES.length)
+    // Reject oversized repeated arrays before downstream FX configuration
+    // processing. The Zod 3 -> 4 migration must not leave unbounded ingress.
+    const oversized = EntityCurrencyConfigSchema.safeParse({
+      orgId,
+      transactionCurrencies: Array(SUPPORTED_CURRENCIES.length + 1).fill('CAD'),
+    })
+    expect(oversized.success).toBe(false)
+    if (!oversized.success) {
+      expect(oversized.error.issues.some(issue => issue.code === 'too_big')).toBe(true)
+    }
+  })
+
   it('rejects non-UUID orgId', () => {
     expect(() => EntityCurrencyConfigSchema.parse({
       orgId: 'not-a-uuid',
