@@ -9621,6 +9621,20 @@
           ]
         }
       ]
+    },
+    {
+      "id": "UE-LOCATION-POLICY-PACKAGED-CATALOG-PARITY-20261101",
+      "status": "SOURCE_CHANGED_TEST_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-location-policy-packaged-catalog-parity-20261101.md",
+      "sourceBaseline": "bb1b76633612a85714ecce4f20ea901e2ba75a2b",
+      "files": [
+        "apps/union-eyes/lib/operations/catalog-authority-contract.json",
+        "apps/union-eyes/lib/operations/catalog-authority-contract.test.ts"
+      ],
+      "correction": "Reconciles the digest-bound packaged catalog authority for the global location_tracking_config singleton with the canonical SELECT-only manifest. Adds an explicit regression invariant forbidding runtime INSERT and system grants. Existing 777-defect provenance unchanged.",
+      "remaining": "Exact-HEAD focused and full tests, native PG15/16 catalog privilege reconciliation, HTTP/browser/staging, independent reviewer and institutional location-policy authority. Separate SECURITY DEFINER migration 0048/0049 preflight remains safety-blocked and must not be bypassed."
     }
   ],
   "uncreditedSourceEvidence": {
