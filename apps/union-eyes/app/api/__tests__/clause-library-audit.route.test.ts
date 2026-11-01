@@ -12,7 +12,7 @@ const h = vi.hoisted(() => ({
 
 function chain(): Record<string, unknown> {
   const c: Record<string, unknown> = {};
-  for (const m of ['select', 'from', 'leftJoin', 'limit', 'insert', 'values', 'update', 'set', 'delete', 'returning', 'orderBy', 'onConflictDoNothing']) c[m] = () => c;
+  for (const m of ['select', 'from', 'leftJoin', 'limit', 'insert', 'values', 'update', 'set', 'delete', 'returning', 'orderBy', 'offset', 'onConflictDoNothing']) c[m] = () => c;
   c.where = (...a: unknown[]) => {
     h.where(...a);
     return c;
@@ -80,6 +80,53 @@ beforeEach(() => {
   h.isOwner.mockReset().mockReturnValue(true);
   h.canRead.mockReset().mockResolvedValue(true);
   h.unscopedRead.mockReset();
+});
+
+describe('clause-library tenant-scoped GET family', () => {
+  const row = { id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private', isAnonymized: false, clauseTitle: 'Safe', clauseText: 'Text', clauseType: 'wages' };
+
+  it('GET clause detail reads the clause and its tags only through the tenant transaction', async () => {
+    const { GET } = await import('../clause-library/[id]/route');
+    h.queue.push([row], [{ id: 't1', tagName: 'wages' }]);
+    await expect(GET(ctx('/api/clause-library/k1', undefined))).resolves.toMatchObject({ id: 'k1' });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('GET clause tags reads both parent and child only through the tenant transaction', async () => {
+    const { GET } = await import('../clause-library/[id]/tags/route');
+    h.queue.push([row], [{ id: 't1', tagName: 'wages' }]);
+    await expect(GET(ctx('/api/clause-library/k1/tags', undefined))).resolves.toMatchObject({ tags: [{ id: 't1', tagName: 'wages' }] });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('GET search uses the tenant transaction for the result query', async () => {
+    const { GET } = await import('../clause-library/search/route');
+    h.queue.push([row]);
+    await expect(GET(ctx('/api/clause-library/search?q=Safe', undefined))).resolves.toMatchObject({ clauses: [{ id: 'k1' }] });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('GET collection uses the tenant transaction for both page and count', async () => {
+    const { GET } = await import('../clause-library/route');
+    h.queue.push([row], [{ count: 1 }]);
+    await expect(GET(ctx('/api/clause-library?page=1&limit=20', undefined))).resolves.toMatchObject({ clauses: [{ id: 'k1' }], total: 1 });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('refuses tenantless search, collection and tag reads without touching either database handle', async () => {
+    const { GET: search } = await import('../clause-library/search/route');
+    const { GET: list } = await import('../clause-library/route');
+    const { GET: tags } = await import('../clause-library/[id]/tags/route');
+    for (const [handler, path] of [
+      [search, '/api/clause-library/search?q=Safe'],
+      [list, '/api/clause-library'],
+      [tags, '/api/clause-library/k1/tags'],
+    ] as const) {
+      await expect(handler({ ...ctx(path, undefined), organizationId: null })).rejects.toMatchObject({ status: 400 });
+    }
+    expect(h.where).not.toHaveBeenCalled();
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
 });
 
 describe('clause-library/[id]/tags', () => {
