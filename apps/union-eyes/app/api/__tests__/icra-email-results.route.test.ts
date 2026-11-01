@@ -178,6 +178,34 @@ describe('icra/email-results route', () => {
     expect(emailArgs.html).not.toContain('?cap=');
   });
 
+  it('refuses to send a capability-bearing link without a canonical origin in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', '');
+    try {
+      const { POST } = await loadRoute();
+      const response = await POST(req({ assessmentId: 'a1', email: 'a@example.com' }));
+      expect(response.status).toBe(503);
+      expect(m.sendEmail).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('uses the configured HTTPS destination rather than the request host for the secret link', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://union-eyes.example/');
+    try {
+      const { POST } = await loadRoute();
+      const response = await POST(req({ assessmentId: 'a1', email: 'a@example.com' }));
+      expect(response.status).toBe(200);
+      const html = m.sendEmail.mock.calls[0][0].html as string;
+      expect(html).toContain('https://union-eyes.example/en-CA/continuity-assessment/results/a1#cap=');
+      expect(html).not.toContain('localhost');
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it('does not affect the persisted capability hash when email delivery fails', async () => {
     const { POST } = await loadRoute();
     m.sendEmail.mockResolvedValueOnce({ success: false, error: 'provider-down' });
