@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiAuth } from '@/lib/api-auth-guard';
 import { SignatureService, SignatureAuthorityError } from "@/lib/signature/signature-service";
+import { signerNetworkAddress } from "@/lib/signature/signer-network-address";
 
  
 import {
@@ -18,10 +19,13 @@ import {
 
 const signatureSchema = z.object({
   signerId: z.guid('Invalid signerId'),
-  signatureImageUrl: z.string().url('Invalid signature image URL'),
+  // The signature is an image the signer drew on this page, carried inline and bounded. A link to an image elsewhere could change after
+  // the signature was recorded, so it is not accepted as the signature.
+  signatureImageUrl: z.string().max(262_144).regex(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/, 'The signature must be an inline PNG or JPEG image'),
   signatureType: z.enum(['electronic', 'digital', 'wet'], { 
     error: 'Invalid signature type' 
   }),
+  // Accepted for compatibility and not stored: a position the signer's own browser reports is a claim, not evidence.
   geolocation: z.object({
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),
@@ -54,14 +58,13 @@ export async function POST(req: NextRequest) {
       signerId,
       signatureImageUrl,
       signatureType,
-      geolocation,
     } = validation.data;
 
-    // Get IP and user agent
-    const ipAddress = req.headers.get("x-forwarded-for") || 
-                      req.headers.get("x-real-ip") || 
-                      "unknown";
-    const userAgent = req.headers.get("user-agent") || "unknown";
+    // The signer's address is read from the proxy chain only as far as the deployment trusts it (the first value of X-Forwarded-For is
+    // whatever the client sent), and how it was obtained is recorded with it.
+    const network = signerNetworkAddress(req.headers);
+    const ipAddress = network.address ?? undefined;
+    const userAgent = (req.headers.get("user-agent") ?? undefined)?.slice(0, 512);
 
     const signer = await SignatureService.recordSignature({
       signerId,
@@ -69,8 +72,8 @@ export async function POST(req: NextRequest) {
       signatureImageUrl,
       signatureType,
       ipAddress,
+      ipProvenance: network.provenance,
       userAgent,
-      geolocation,
     });
 
     return NextResponse.json({

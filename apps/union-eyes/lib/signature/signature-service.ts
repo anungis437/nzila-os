@@ -20,6 +20,9 @@ import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
 import DocumentStorageService from "@/lib/services/document-storage-service";
+import { chainHash, verifyChain, type ChainVerification } from "./audit-chain";
+import { loadChainRows, nextChainLink } from "./audit-chain-store";
+import { verifySignatureDocumentFile } from "./file-integrity";
 
 type SignatureDocumentInsert = typeof signatureDocuments.$inferInsert;
 type SignatureAuditTrailInsert = typeof signatureAuditTrail.$inferInsert;
@@ -27,7 +30,7 @@ type DocumentSignerInsert = typeof documentSigners.$inferInsert;
 
 /** A refusal the route can report as a 403 (not permitted) or 409 (not in a state that allows it). */
 export class SignatureAuthorityError extends Error {
-  constructor(readonly code: "FORBIDDEN" | "CONFLICT", message: string) {
+  constructor(readonly code: "FORBIDDEN" | "CONFLICT", message: string, readonly reason?: "expired") {
     super(message);
     this.name = "SignatureAuthorityError";
   }
@@ -90,6 +93,11 @@ export class SignatureService {
     sequentialSigning?: boolean;
     metadata?: any;
   }): Promise<typeof signatureDocuments.$inferSelect> {
+    // A stored option that nothing can enforce is not accepted and then ignored.
+    if (data.requireAuthentication) {
+      throw new SignatureAuthorityError("CONFLICT", "A second-factor requirement cannot be honoured: this release has no second factor, so a request that states one is not created");
+    }
+
     // Who may sign is decided before anything leaves the platform: no envelope is created and no file is stored for a
     // signer list that names someone the organization cannot vouch for.
     const parsedSigners = signerListSchema.safeParse(data.signers);
@@ -292,8 +300,10 @@ export class SignatureService {
       throw new Error("Document not found");
     }
 
-    // A read never calls the provider or writes a row; the sender refreshes explicitly through syncDocumentStatus.
-    return document;
+    // A read never calls the provider or writes a row; the sender refreshes explicitly through syncDocumentStatus. It does say when an open
+    // request has run out, so an expired request is not shown as awaiting signatures.
+    const runOut = Boolean(document.expiresAt && document.expiresAt.getTime() < Date.now() && !FINAL_DOCUMENT_STATES.includes(document.status as (typeof FINAL_DOCUMENT_STATES)[number]));
+    return { ...document, effectiveStatus: runOut ? "expired" : document.status };
   }
 
   /**
@@ -469,6 +479,8 @@ export class SignatureService {
     signatureImageUrl: string;
     signatureType: "electronic" | "digital" | "wet";
     ipAddress?: string;
+    /** How the address was obtained (see signer-network-address.ts); recorded with the signature. */
+    ipProvenance?: Record<string, unknown>;
     userAgent?: string;
     geolocation?: any;
   }) {
@@ -492,7 +504,25 @@ export class SignatureService {
       throw new SignatureAuthorityError("CONFLICT", "This document is signed through its signature provider and cannot be signed here");
     }
 
-    return withRLSContext({ organizationId: document.organizationId }, async (tx) => {
+    // A signature is given on what was sent: the stored file is hashed again and must match the hash recorded when the request was
+    // created. A file that cannot be located as this organization's own storage cannot be checked, and the signature record says so.
+    const fileCheck = await verifySignatureDocumentFile({
+      organizationId: document.organizationId,
+      fileUrl: document.fileUrl,
+      fileHash: document.fileHash,
+    });
+    if (fileCheck.status === "mismatch") {
+      throw new SignatureAuthorityError("CONFLICT", "The document no longer matches the content hash recorded when it was sent for signature");
+    }
+
+    // The sender asked for a second factor before a signature is accepted. This release has no second factor to give, and a stored option
+    // that does not operate is not honoured by ignoring it: the signature is refused until the request is sent without it.
+    if (document.requireAuthentication) {
+      throw new SignatureAuthorityError("CONFLICT", "This request requires the signer to authenticate with a second factor, which is not available; ask the sender to send it again without that requirement");
+    }
+
+    try {
+    return await withRLSContext({ organizationId: document.organizationId }, async (tx) => {
       // A signature lands only on a document that is still open and a signer who has not already settled: a voided
       // or completed document is not signed, and a signature already given is not overwritten.
       const [open] = await tx
@@ -508,7 +538,7 @@ export class SignatureService {
         .from(signatureDocuments)
         .where(eq(signatureDocuments.id, document.id));
       if (terms?.expiresAt && terms.expiresAt.getTime() < Date.now()) {
-        throw new SignatureAuthorityError("CONFLICT", "This signature request has expired");
+        throw new SignatureAuthorityError("CONFLICT", "This signature request has expired", "expired");
       }
       if (terms?.sequentialSigning && existingSigner.signingOrder != null) {
         const earlier = await tx
@@ -546,7 +576,11 @@ export class SignatureService {
         ipAddress: data.ipAddress,
         userAgent: data.userAgent,
         geolocation: data.geolocation,
-        metadata: { signatureType: data.signatureType },
+        metadata: {
+          signatureType: data.signatureType,
+          fileHashCheck: fileCheck.status === "unverified" ? `unverified:${fileCheck.reason}` : fileCheck.status,
+          ...(data.ipProvenance ? { ipProvenance: data.ipProvenance } : {}),
+        },
       }, tx);
       await persistAtomicAudit(tx, {
         organizationId: document.organizationId,
@@ -559,6 +593,38 @@ export class SignatureService {
 
       await this.checkCompletion(updated.documentId, document.organizationId, tx);
       return updated;
+    });
+    } catch (error) {
+      // The refusal rolled the signing transaction back, so the expiry is recorded on its own: nothing else ever sets an internal
+      // document to expired.
+      if (error instanceof SignatureAuthorityError && error.reason === "expired") await this.markExpired(document);
+      throw error;
+    }
+  }
+
+  /** Marks an open document whose request has run out as expired, with its trail event and platform audit record in one transaction. */
+  private static async markExpired(document: { id: string; organizationId: string; expiresAt: Date | null }) {
+    await withRLSContext({ organizationId: document.organizationId }, async (tx) => {
+      const [expired] = await tx
+        .update(signatureDocuments)
+        .set({ status: "expired", updatedAt: new Date() })
+        .where(and(eq(signatureDocuments.id, document.id), eq(signatureDocuments.organizationId, document.organizationId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES])))
+        .returning({ id: signatureDocuments.id });
+      if (!expired) return;
+      await AuditTrailService.log({
+        documentId: document.id,
+        eventType: "document_expired",
+        eventDescription: "The signature request expired before every signer had signed",
+        metadata: { expiresAt: document.expiresAt?.toISOString() ?? null },
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId: document.organizationId,
+        userId: "system:signature-expiry",
+        action: "signature.document.expire",
+        resourceType: "signature_documents",
+        resourceId: document.id,
+        details: { expiresAt: document.expiresAt?.toISOString() ?? null },
+      });
     });
   }
 
@@ -587,6 +653,7 @@ export class SignatureService {
         eventType: "document_completed",
         eventDescription: "All signers have completed signing",
       }, tx);
+      await AuditTrailService.seal(documentId, organizationId, tx);
       await persistAtomicAudit(tx, {
         organizationId,
         userId: "system:signature-completion",
@@ -784,11 +851,45 @@ export class AuditTrailService {
     geolocation?: any;
     metadata?: any;
   }, exec: RLSTx = db) {
-    const auditData: SignatureAuditTrailInsert = {
-      ...data,
-      timestamp: new Date(),
-    };
-    await exec.insert(signatureAuditTrail).values(auditData);
+    // Each event is chained to the one before it, in one transaction with the lock that serializes the document's events.
+    await exec.transaction(async (chainTx) => {
+      const recordedAt = new Date();
+      const { seq, previousHash } = await nextChainLink(chainTx, data.documentId);
+      const metadata = { ...(data.metadata ?? {}), chainSeq: seq, recordedAt: recordedAt.toISOString() };
+      const hashChain = chainHash(previousHash, { ...data, metadata }, seq);
+      const auditData: SignatureAuditTrailInsert = { ...data, metadata, hashChain, timestamp: recordedAt };
+      await chainTx.insert(signatureAuditTrail).values(auditData);
+    });
+  }
+
+  /** Recomputes a document's chain. Rows from before chaining are counted as unchained, not verified. */
+  static async verifyChain(documentId: string, exec: RLSTx = db): Promise<ChainVerification> {
+    return verifyChain(await loadChainRows(exec, documentId));
+  }
+
+  /**
+   * Seals the trail at completion: the verified chain head and the number of events are recorded as the last chained event and
+   * repeated in the platform's own hash-chained audit log, so the end of the trail can be checked against a record kept elsewhere.
+   * A trail whose chain does not verify is not sealed.
+   */
+  static async seal(documentId: string, organizationId: string, tx: RLSTx) {
+    const verification = await this.verifyChain(documentId, tx);
+    if (!verification.ok || verification.head === null) return { sealed: false as const };
+    await this.log({
+      documentId,
+      eventType: "document_sealed",
+      eventDescription: "The audit trail was sealed at completion",
+      metadata: { sealedHead: verification.head, sealedEvents: verification.chained, unchainedEventsBeforeSeal: verification.legacyUnchained },
+    }, tx);
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: "system:signature-completion",
+      action: "signature.document.sealed",
+      resourceType: "signature_documents",
+      resourceId: documentId,
+      details: { chainHead: verification.head, chainedEvents: verification.chained },
+    });
+    return { sealed: true as const, head: verification.head };
   }
 
   static async getDocumentAudit(documentId: string) {
@@ -829,7 +930,10 @@ export class AuditTrailService {
         completedAt: document?.completedAt,
         status: document?.status,
       },
+      // Each row names its owner (the signer's user id, the actor's user id) so a signer's own row is recognised and every other row is
+      // redacted for them; an address or a description is never packed into one field that no redaction rule can read.
       signers: document?.signers.map((s) => ({
+        userId: s.userId,
         name: s.name,
         email: s.email,
         signedAt: s.signedAt,
@@ -839,13 +943,36 @@ export class AuditTrailService {
       auditTrail: auditLog.map((entry) => ({
         timestamp: entry.timestamp,
         event: entry.eventType,
-        description: entry.eventDescription,
-        actor: entry.actorEmail || entry.actorUserId,
+        eventDescription: entry.eventDescription,
+        actorUserId: entry.actorUserId,
+        actorEmail: entry.actorEmail,
         ipAddress: entry.ipAddress,
       })),
-      // The trail is a plain record: its rows are not hash-chained or sealed, and the stored file hash is not recomputed here.
-      integrity: { hashChained: false, sealed: false, notice: 'Unsealed record. It is not tamper-evident and is not a certified e-signature audit.' },
+      // The integrity block states what was actually checked when the report was generated, never what a certified trail would say.
+      integrity: await this.integrityStatement(documentId, auditLog),
       generatedAt: new Date(),
+    };
+  }
+
+  private static async integrityStatement(documentId: string, auditLog: Array<{ eventType: string; metadata: unknown }>) {
+    const verification = await this.verifyChain(documentId);
+    const seal = auditLog.find((entry) => entry.eventType === "document_sealed")?.metadata as { sealedHead?: string; sealedEvents?: number } | undefined;
+    const rows = await loadChainRows(db, documentId);
+    const sealedRow = seal?.sealedEvents ? rows.find((row) => (row.metadata as { chainSeq?: number } | null)?.chainSeq === seal.sealedEvents) : undefined;
+    const sealed = Boolean(verification.ok && seal?.sealedHead && sealedRow?.hashChain === seal.sealedHead);
+    const base = {
+      hashChained: verification.chained > 0,
+      chainVerified: verification.ok && verification.chained > 0,
+      chainedEvents: verification.chained,
+      unchainedEvents: verification.legacyUnchained,
+      sealed,
+      ...(verification.ok ? {} : { brokenAtSequence: verification.brokenAtSeq, brokenReason: verification.reason }),
+    };
+    if (!verification.ok) return { ...base, notice: `The audit trail was altered: its hash chain does not verify from event ${verification.brokenAtSeq} (${verification.reason}). Do not rely on it as evidence.` };
+    if (verification.chained === 0) return { ...base, notice: "Unchained record from before hash chaining. It is not tamper-evident and is not a certified e-signature audit." };
+    return {
+      ...base,
+      notice: `${sealed ? "Hash chain verified and sealed at completion" : "Hash chain verified; the trail has not been sealed (the document is not complete)"}. ${verification.legacyUnchained > 0 ? `${verification.legacyUnchained} earlier event(s) predate chaining and are not covered. ` : ""}Tamper-evident against changes to the stored rows; not a qualified or certified e-signature audit, and the signer address and any signer-supplied field are as recorded, not independently verified.`,
     };
   }
 }

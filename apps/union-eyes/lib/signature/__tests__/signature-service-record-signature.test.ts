@@ -34,6 +34,7 @@ vi.mock('@/db', () => ({
     update: vi.fn(() => ({
       set: mocks.updateSet,
     })),
+    transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn((await import('@/db')).db),
     insert: vi.fn(() => ({
       values: mocks.insertValues,
     })),
@@ -50,6 +51,9 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }))
 vi.mock('@/lib/services/notification-service', () => ({
   NotificationService: { send: vi.fn() },
 }));
+
+vi.mock('../audit-chain-store', () => ({ nextChainLink: vi.fn(async () => ({ seq: 1, previousHash: null })), loadChainRows: vi.fn(async () => []) }));
+vi.mock('../file-integrity', () => ({ verifySignatureDocumentFile: vi.fn(async () => ({ status: 'verified', sha256: 'h' })) }));
 
 vi.mock('@/lib/services/document-storage-service', () => ({
   default: class {

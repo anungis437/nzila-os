@@ -97,9 +97,51 @@ describe('B44 signature routes', () => {
     expect(read('app/api/signatures/audit/[documentId]/route.ts')).toContain('signatureViewForViewer(')
   })
 
-  it('pages the caller own document list and states the audit report is unsealed', () => {
+  // Replaced in F06 batch 6 (A6): the report no longer states that the trail is unsealed and unchained as a constant; it states what the
+  // chain verification found for that document.
+  it('pages the caller own document list and states in the audit report what the chain verification found', () => {
     const service = read('lib/signature/signature-service.ts')
     expect(service.match(/\.limit\(USER_DOCUMENT_LIMIT\)/g)).toHaveLength(2)
-    expect(service).toContain('hashChained: false')
+    expect(service).not.toContain('hashChained: false')
+    expect(service).toContain('integrity: await this.integrityStatement(documentId, auditLog)')
+  })
+})
+
+describe('F06 A6: the audit report is readable by the signer whose rows they are, and by no other signer', () => {
+  const report = {
+    signers: [
+      { userId: 'a', name: 'A', email: 'a@example.test', ipAddress: '10.0.0.1', signatureType: 'electronic' },
+      { userId: 'b', name: 'B', email: 'b@example.test', ipAddress: '10.0.0.2', signatureType: 'electronic' },
+    ],
+    auditTrail: [
+      { event: 'document_signed', eventDescription: 'A signed', actorUserId: 'a', actorEmail: 'a@example.test', ipAddress: '10.0.0.1' },
+      { event: 'document_signed', eventDescription: 'B signed', actorUserId: 'b', actorEmail: 'b@example.test', ipAddress: '10.0.0.2' },
+    ],
+  }
+
+  it('lets a signer see their own network data and address in the report', () => {
+    const view = signatureViewForViewer(report, 'a', 'sender')
+    expect(view.signers[0]).toEqual(report.signers[0])
+    expect(view.auditTrail[0]).toEqual(report.auditTrail[0])
+  })
+
+  it('shows a signer no other signer\'s address, network data or free-text description, whichever field would carry it', () => {
+    const view = signatureViewForViewer(report, 'a', 'sender')
+    const text = JSON.stringify(view)
+    expect(text).not.toContain('b@example.test')
+    expect(text).not.toContain('10.0.0.2')
+    expect(text).not.toContain('B signed')
+    expect(view.signers[1]).toEqual({ userId: 'b', name: 'B', signatureType: 'electronic' })
+  })
+
+  it('shows the sender the whole report', () => {
+    expect(signatureViewForViewer(report, 'sender', 'sender')).toEqual(report)
+  })
+
+  it('generates the report with owner ids and no address packed into an unredactable field', () => {
+    const service = readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), 'lib/signature/signature-service.ts'), 'utf8')
+    expect(service).not.toContain('actor: entry.actorEmail || entry.actorUserId')
+    expect(service).toContain('actorUserId: entry.actorUserId')
+    expect(service).toContain('userId: s.userId')
   })
 })

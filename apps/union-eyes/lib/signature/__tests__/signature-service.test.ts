@@ -29,6 +29,9 @@ vi.mock('../providers', () => ({ default: { getProvider: () => ({ voidEnvelope: 
 vi.mock('@/db/schema-organizations', () => ({ organizationMembers: {} }));
 vi.mock('@/lib/services/notification-service', () => ({ NotificationService: {} }));
 vi.mock('@/lib/services/document-storage-service', () => ({ default: class {} }));
+vi.mock('../audit-chain-store', () => ({ nextChainLink: vi.fn(async () => ({ seq: 1, previousHash: null })), loadChainRows: vi.fn(async () => []) }));
+vi.mock('../file-integrity', () => ({ verifySignatureDocumentFile: vi.fn(async () => ({ status: 'verified', sha256: 'h' })) }));
+
 
 import { SignatureService, SignatureAuthorityError } from '../signature-service';
 
@@ -54,6 +57,7 @@ describe('SignatureService authority and atomic audit', () => {
         }),
       }),
     }));
+    m.tx.transaction = async (fn: (t: unknown) => Promise<unknown>) => fn(m.tx);
     m.tx.insert = vi.fn(() => ({ values: async (v: Record<string, unknown>) => { m.trail.push(v); } }));
     m.tx.query = { documentSigners: { findMany: async () => [{ status: 'signed' }, { status: 'sent' }] } };
   });
@@ -105,11 +109,57 @@ describe('SignatureService authority and atomic audit', () => {
     const input = { signerId: 'sg1', actorUserId: 'signer', signatureImageUrl: 'https://x.test/s.png', signatureType: 'electronic' as const };
 
     // DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT
-    it('does not sign an expired request', async () => {
+    // Extended in F06 batch 6 (A6): the refusal rolls the signing transaction back, so the expiry itself is recorded on its own.
+    it('does not sign an expired request, and records the expiry on its own with its trail event and platform audit', async () => {
       m.queue = [[{ id: 'd1' }], [{ expiresAt: new Date(Date.now() - 1000), sequentialSigning: false }]];
+      m.voidUpdate = [{ id: 'd1' }];
       await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('expired') });
+      expect(m.signerUpdate).toEqual([{ ...SIGNER, status: 'signed' }]);
+      expect(m.trail.map((entry) => entry.eventType)).toEqual(['document_expired']);
+      expect(m.audit).toHaveBeenCalledTimes(1);
+      expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'signature.document.expire', resourceId: 'd1' }));
+    });
+
+    it('records nothing more when the expired document had already been settled in the meantime', async () => {
+      m.queue = [[{ id: 'd1' }], [{ expiresAt: new Date(Date.now() - 1000), sequentialSigning: false }]];
+      m.voidUpdate = [];
+      await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT' });
+      expect(m.trail).toHaveLength(0);
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('refuses to sign a request that stored a second-factor requirement this release cannot perform, writing nothing', async () => {
+      m.documentFind.mockResolvedValue({ ...DOC, requireAuthentication: true, signers: [SIGNER] });
+      await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('second factor') });
       expect(m.tx.update).not.toHaveBeenCalled();
       expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('refuses to sign when the stored file no longer matches the hash recorded when it was sent', async () => {
+      const { verifySignatureDocumentFile } = await import('../file-integrity');
+      vi.mocked(verifySignatureDocumentFile).mockResolvedValueOnce({ status: 'mismatch', expected: 'a', actual: 'b' });
+      await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('content hash') });
+      expect(m.tx.update).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('records on the signing event that the file was verified, or that it could not be, and how the address was obtained', async () => {
+      const { verifySignatureDocumentFile } = await import('../file-integrity');
+      await SignatureService.recordSignature({ ...input, ipAddress: '203.0.113.7', ipProvenance: { source: 'x-forwarded-for', trustedProxyHops: 1 } });
+      expect(m.trail[0]).toMatchObject({ eventType: 'document_signed', ipAddress: '203.0.113.7' });
+      expect(m.trail[0].metadata).toMatchObject({ fileHashCheck: 'verified', ipProvenance: { source: 'x-forwarded-for', trustedProxyHops: 1 }, chainSeq: 1 });
+      expect(String(m.trail[0].hashChain)).toMatch(/^sha256:[0-9a-f]{64}$/);
+
+      m.trail = [];
+      vi.mocked(verifySignatureDocumentFile).mockResolvedValueOnce({ status: 'unverified', reason: 'not_own_storage' });
+      await SignatureService.recordSignature(input);
+      expect(m.trail[0].metadata).toMatchObject({ fileHashCheck: 'unverified:not_own_storage' });
+    });
+
+    it('does not create a request that states a second-factor requirement nothing can enforce', async () => {
+      await expect(
+        SignatureService.createSignatureRequest({ requireAuthentication: true } as never),
+      ).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('second-factor') });
     });
 
     it('makes a later signer wait for the earlier ones when signing is sequential', async () => {

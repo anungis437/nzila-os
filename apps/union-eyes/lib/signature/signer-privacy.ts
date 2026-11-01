@@ -1,6 +1,8 @@
 const NETWORK_KEYS = new Set(['ipAddress', 'ip_address', 'userAgent', 'user_agent', 'geolocation']);
 const CONTACT_KEYS = new Set(['email', 'emailAddress', 'email_address']);
 const THIRD_PARTY_CONTACT_KEYS = new Set(['signerEmail', 'signer_email', 'recipientEmail', 'recipient_email']);
+// An audit row's actor address: the actor's own, and only when the row is the viewer's.
+const ACTOR_CONTACT_KEYS = new Set(['actorEmail', 'actor_email']);
 
 /**
  * A signer can see their own identity and network evidence; the sender can see
@@ -23,6 +25,7 @@ export function redactSignerNetworkData<T>(value: T, viewerUserId: string): T {
     // An actor can operate on someone else's signer row: actor identity alone
     // does not prove ownership of the contact address in the same event.
     if (CONTACT_KEYS.has(key) && !ownsSignerRow) continue;
+    if (ACTOR_CONTACT_KEYS.has(key) && !ownsActorRow) continue;
     // These explicitly describe another party, not necessarily the actor.
     if (THIRD_PARTY_CONTACT_KEYS.has(key)) continue;
     // Event descriptions are unstructured and can contain signer email, IP or location
