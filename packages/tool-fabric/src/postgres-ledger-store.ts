@@ -14,6 +14,7 @@
  */
 import type { AuditEntry } from '@nzila/audit'
 import { isAuthenticTrustEventPayload } from './ledger'
+import { toolKey } from './types'
 import { computeAuditHash, verifyChain } from '@nzila/audit'
 import {
   LEDGER_GENESIS_HASH, LedgerConflictError, LedgerDuplicateError,
@@ -35,6 +36,8 @@ function hasCanonicalAuditProvenance(entry: AuditEntry): boolean {
     mutation: { actorId: string; role: string; operation: string }
     body: {
       type: 'TOOL_REGISTERED' | 'TRUST_DECISION' | 'DRIFT_OBSERVED' | 'TRUST_REAFFIRMED'
+      descriptor?: { identity: { name: string; version: string } }
+      toolKey?: string
       governance?: { decidedByRole: string; actorId?: string }
     }
   }
@@ -44,7 +47,14 @@ function hasCanonicalAuditProvenance(entry: AuditEntry): boolean {
     DRIFT_OBSERVED: 'observe',
     TRUST_REAFFIRMED: 'reaffirm',
   }[payload.body.type]
-  return payload.mutation.actorId === entry.actorId &&
+  // The replay state machine derives the canonical resource identity from
+  // the signed event body. The adapter must reject a differently labeled
+  // audit envelope before it can persist a permanently unreplayable record.
+  const resourceId = payload.body.type === 'TOOL_REGISTERED'
+    ? toolKey(payload.body.descriptor!.identity)
+    : payload.body.toolKey
+  return entry.resourceId === resourceId &&
+    payload.mutation.actorId === entry.actorId &&
     payload.mutation.operation === operation &&
     entry.action === `tool_fabric.ledger.${payload.body.type.toLowerCase()}` &&
     entry.resource === 'tool-fabric-tool' &&

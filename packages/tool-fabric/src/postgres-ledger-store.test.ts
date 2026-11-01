@@ -316,6 +316,7 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
       sign({ ...base, actorId: 'impersonated-actor' }),
       sign({ ...base, action: 'tool_fabric.ledger.trust_decision' }),
       sign({ ...base, resource: 'different-resource' }),
+      sign({ ...base, resourceId: 'different-tool@9.9.9' }),
       sign({ ...base, payload: wrongOperationPayload }),
     ]) {
       expect(isAuthenticTrustEventPayload(forged.payload)).toBe(true)
