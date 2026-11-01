@@ -9153,11 +9153,11 @@
         "apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts"
       ],
       "correction": "SLA prediction list now reads inside the authenticated organization's RLS transaction instead of the bare shared database handle. It retains organization/type predicates and a 25-row limit; failed RLS transaction refuses rather than producing a false success.",
-      "remaining": "Exact-HEAD focused and full Vitest/contract, native PG15/16 tenant-role isolation, HTTP/browser/staging and independent review. The separate SLA scoring heuristic still accepts caller-supplied transition count and previous-breach flag; no implementation or CLOSED credit."
+      "remaining": "Exact-HEAD focused/full Vitest/contract, native PG15/16 tenant-role isolation, HTTP/browser/staging and independent review. Separate v2 verified-facts scoring patch now authored under DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE; both defects remain unqualified, no CLOSED credit."
     },
     "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE": {
       "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
-      "evidenceCommit": null,
+      "evidenceCommit": "220dc70c903306bc954390835d759a3d99961f51",
       "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-sla-risk-verified-facts-20261101.md",
       "files": [
         "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
