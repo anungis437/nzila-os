@@ -40,6 +40,9 @@ function sharedDecisions(): SQL {
   ) as SQL;
 }
 
+// precedent_value is an enum that sorts as declared (high, medium, low), so ordering by the column puts the least valuable decision first.
+const precedentRank = sql<number>`case ${arbitrationDecisions.precedentValue} when 'high' then 3 when 'medium' then 2 when 'low' then 1 else 0 end`;
+
 /** The text of a search term with the LIKE wildcards taken literally, so a broad pattern cannot scan the whole text column. */
 function containing(term: string): string {
   return `%${term.replace(/[\\%_]/g, '\\$&')}%`;
@@ -368,7 +371,7 @@ export async function searchPrecedents(
       .select()
       .from(arbitrationDecisions)
       .where(and(...conditions))
-      .orderBy(desc(arbitrationDecisions.precedentValue), desc(arbitrationDecisions.citationCount))
+      .orderBy(desc(precedentRank), desc(arbitrationDecisions.citationCount))
       .limit(limit);
 
     return results;
@@ -391,7 +394,7 @@ export async function getPrecedentsByIssueType(
       .select()
       .from(arbitrationDecisions)
       .where(and(sharedDecisions(), sql`${arbitrationDecisions.issueTypes}::jsonb ? ${issueType}`))
-      .orderBy(desc(arbitrationDecisions.precedentValue), desc(arbitrationDecisions.decisionDate))
+      .orderBy(desc(precedentRank), desc(arbitrationDecisions.decisionDate))
       .limit(limit);
 
     return results;
@@ -416,14 +419,21 @@ export async function getRelatedPrecedents(
     // Find related decisions based on similar criteria
     const conditions: SQL[] = [sharedDecisions()];
 
-    if (decision.issueTypes) {
-      // Would use vector similarity or JSONB overlap in production
-      conditions.push(sql`${arbitrationDecisions.issueTypes}::jsonb && ${decision.issueTypes}::jsonb`);
+    // Any shared issue type. jsonb has no && operator, and a JS array bound as one parameter is not JSON: ask whether each of the strings
+    // is an element of the stored array (?) with each one as its own parameter, as the issue-type lookup does.
+    const issueTypes = Array.isArray(decision.issueTypes)
+      ? (decision.issueTypes as unknown[]).filter((type): type is string => typeof type === "string")
+      : [];
+    if (issueTypes.length > 0) {
+      conditions.push(or(...issueTypes.map((type) => sql`${arbitrationDecisions.issueTypes}::jsonb ? ${type}`)) as SQL);
     }
 
     if (decision.sector) {
       conditions.push(eq(arbitrationDecisions.sector, decision.sector));
     }
+
+    // A decision with no issue type and no sector has nothing that relates it to another, so there is nothing to return.
+    if (conditions.length === 1) return [];
 
     // Exclude the current decision
     conditions.push(sql`${arbitrationDecisions.id} != ${decisionId}`);
@@ -432,7 +442,7 @@ export async function getRelatedPrecedents(
       .select()
       .from(arbitrationDecisions)
       .where(and(...conditions))
-      .orderBy(desc(arbitrationDecisions.precedentValue))
+      .orderBy(desc(precedentRank))
       .limit(limit);
 
     return related;

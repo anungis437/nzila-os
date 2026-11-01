@@ -1,7 +1,8 @@
 # Convergence tranche 4: the reachable stub relations take their declared shape
 
 Date: 2026-11-01. Branch `agents/ue-cursor-final-closure`. Base commit `c0b97cfc9`. Platform migration `0060_reachable_stub_shape_2`.
-Credit: none. This is cross-cutting source evidence (`defectCredit` 0, `closureCredit` 0). `READY_FOR_STAGING` stays `NO`.
+Credit: none for the tranche itself (cross-cutting source evidence, `defectCredit` 0, `closureCredit` 0). The follow-up below (ledger B129) clears the remaining item recorded against one defect
+that was already counted as implemented pending qualification, so no count changes (652 corrected, 72 partial, 125 unresolved); nothing is closed. `READY_FOR_STAGING` stays `NO`.
 
 ## What was wrong
 
@@ -103,15 +104,40 @@ frozen assessment of the code as it was; rewriting its quote would make a stale 
 
 ## What this does not do
 
-- It does not prove the routes. The one defect whose recorded remaining item concerns this shape, `DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT`, now has the shape it was
-  waiting for, but the precedent service and the two library routes have not yet been run against the real converged table under the real roles. That proof is the next increment; the item stays partial until it exists.
 - It does not touch the 202 remaining census entries or the 65 reachable declarations that still fail: 33 are relations Django never created (the capability must answer 501, not 500), and 32 are
   contained deny-all, individual-decision (pgvector, an enum name declared with different members), finance-frozen or owned by another change.
 - It does not qualify the migration on a staging clone. It is `UNQUALIFIED`.
+
+## Follow-up in the same pull request: the precedent library on the converged table
+
+The one defect whose recorded remaining item concerned this shape, `DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT`, had been waiting for the shape and for proof that the library works
+against a real database. `db/__tests__/precedent-library.postgres.test.ts` (14 tests, PG15 and PG16, re-runnable, leaves nothing behind) runs the unmodified `precedent-service` and the unmodified
+collection and item routes of `arbitration/precedents` against the converged real table, over eight decisions (public, private, restricted, pending review, owned by two organizations and by nobody).
+Reads go through the tenant runtime role with no organization (as the service's ambient handle does in production, set by a connection-level `role` option so row-level security applies), writes
+through the tenant transaction. It proves, with the expectations stated independently of the code under test:
+
+- every service read (by id, by case number, list with paging, sort and filters, search, issue type, related, statistics, most cited) returns exactly the public unrestricted decisions, with the intended ordering;
+- both routes list the same set and report a private, restricted, pending-review or ownerless-private decision as not found, even to its owner;
+- the row-level-security floor agrees (a tenant reads what is public and unrestricted plus what it supplied), and refuses a tenant an insert owned by another organization or by nobody (`42501`) and
+  an update or delete of what it does not own;
+- a decision is created owned by the supplying organization, not public and pending review, whatever the caller sends, and only that organization changes or deletes it.
+
+Run against the real table it failed before it passed, and the failures were three defects in `precedent-service.ts` that no unit test could show, because they depend on the real column types:
+
+- `searchPrecedents`, `getPrecedentsByIssueType` and `getRelatedPrecedents` ordered by `precedent_value DESC`. The enum sorts as declared (high, medium, low), so the least valuable decision came first.
+  They now order by an explicit rank.
+- `getRelatedPrecedents` used `jsonb && jsonb`, which PostgreSQL does not have (`operator does not exist: jsonb && jsonb`), and cast a JavaScript array bound as one parameter to `jsonb`
+  (`invalid input syntax for type json`), so it threw for every decision that had issue types. It now asks, per issue type, whether it is an element of the stored array. A decision with no issue type
+  and no sector now relates to nothing, instead of to every readable decision.
+
+The role floor (`readRole`, the session) is outside this test, because the wrapper is replaced; the generic POST over this table, which has no owner to write, is a separate defect. This is the
+proof the ledger item named, so B129 clears that item's remaining text and records the defect as implemented pending qualification with nothing outstanding in source. It is not closed: nothing here is a
+staging, browser or independent-reviewer result.
 
 ## Reproduce
 
 1. Build a database: in `apps/union-eyes/backend` run `python manage.py migrate --noinput`, then from the repository root run `node tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs`
    with `DATABASE_URL`, `SYSTEM_DATABASE_URL` and `PLATFORM_DATABASE_URL` set to that database, `QA_TEST_ENV=true`, `UE_ENVIRONMENT=local` and `UE_CANONICAL_BOOTSTRAP_V2=0`.
 2. From `apps/union-eyes`: `DATABASE_URL=... npx tsx scripts/runtime/orm-select-probe.ts` and `DATABASE_URL=... npx tsx scripts/runtime/orm-physical-parity.ts --json`.
-3. `UE_AUTHORITY_COMBINED_URL=... npx vitest run -c vitest.native.config.ts db/__tests__/reachable-stub-shape-2.postgres.test.ts` and, with `UE_CENSUS_URL=...`, `db/__tests__/canonical-schema-census.postgres.test.ts`.
+3. `UE_AUTHORITY_COMBINED_URL=... npx vitest run -c vitest.native.config.ts db/__tests__/reachable-stub-shape-2.postgres.test.ts db/__tests__/precedent-library.postgres.test.ts` and, with `UE_CENSUS_URL=...`,
+   `db/__tests__/canonical-schema-census.postgres.test.ts`.
