@@ -19,6 +19,7 @@
 import { useState } from 'react';
 import type { ReportTierId } from '@/lib/icra/types';
 import { COPY } from '@/lib/icra/copy';
+import { ICRA_PAID_REPORT_PRICES } from '@/lib/icra/pricing';
 import { TurnstileWidget, isTurnstileConfigured } from './TurnstileWidget';
 
 interface ICRAReportGateProps {
@@ -38,11 +39,6 @@ interface ICRAReportGateProps {
   chapters?: readonly string[];
   locale?: 'en-CA' | 'fr-CA';
 }
-
-const TIER_PRICE: Record<Exclude<ReportTierId, 'continuity_reflection'>, string> = {
-  executive_continuity_brief: '$1,200 CAD',
-  institutional_continuity_diagnostic: '$6,500 CAD',
-};
 
 const TIER_NAME: Record<Exclude<ReportTierId, 'continuity_reflection'>, string> = {
   executive_continuity_brief: 'Leadership Briefing Report',
@@ -83,7 +79,7 @@ export function ICRAReportGate({
     : COPY.reportGate.diagnosticCtaLabel;
 
   const resolvedLabel = ctaLabel ?? defaultLabel;
-  const price = TIER_PRICE[requiredTier];
+  const price = ICRA_PAID_REPORT_PRICES[requiredTier].label;
   const tierName = TIER_NAME[requiredTier];
   const formatLines = TIER_FORMAT[requiredTier];
   const chapterEyebrow =

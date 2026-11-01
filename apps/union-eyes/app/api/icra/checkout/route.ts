@@ -24,6 +24,7 @@ import {
 } from '@/lib/icra/assessment-capability';
 import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access';
 import { resolveIcraEmailOrigin } from '@/lib/icra/email-results-origin';
+import { ICRA_PAID_REPORT_PRICES } from '@/lib/icra/pricing';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
@@ -41,9 +42,6 @@ const bodySchema = z.object({
 
 // ── Pricing (CAD) — midpoint of published ranges, override via env ──────────
 
-const BRIEF_AMOUNT_CENTS = 120000; // $1,200 CAD (canonical)
-const DIAGNOSTIC_AMOUNT_CENTS = 650000; // $6,500 CAD (canonical)
-
 function buildLineItems(
   tierId: 'executive_continuity_brief' | 'institutional_continuity_diagnostic',
   currency: string,
@@ -59,7 +57,7 @@ function buildLineItems(
         price_data: {
           currency,
           product_data: { name: 'Leadership Briefing Report' },
-          unit_amount: BRIEF_AMOUNT_CENTS,
+          unit_amount: ICRA_PAID_REPORT_PRICES.executive_continuity_brief.amountCents,
         },
         quantity: 1,
       },
@@ -75,7 +73,7 @@ function buildLineItems(
       price_data: {
         currency,
         product_data: { name: 'Institutional Continuity Diagnostic' },
-        unit_amount: DIAGNOSTIC_AMOUNT_CENTS,
+        unit_amount: ICRA_PAID_REPORT_PRICES.institutional_continuity_diagnostic.amountCents,
       },
       quantity: 1,
     },
@@ -188,8 +186,7 @@ export async function POST(request: NextRequest) {
   const configuredPriceId = (tierId === 'executive_continuity_brief'
     ? process.env.STRIPE_PRICE_ICRA_BRIEF
     : process.env.STRIPE_PRICE_ICRA_DIAGNOSTIC)?.trim();
-  const expectedAmount = tierId === 'executive_continuity_brief'
-    ? BRIEF_AMOUNT_CENTS : DIAGNOSTIC_AMOUNT_CENTS;
+  const expectedAmount = ICRA_PAID_REPORT_PRICES[tierId].amountCents;
 
   try {
     const stripe = getStripeClient();

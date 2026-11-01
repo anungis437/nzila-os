@@ -1,3 +1,5 @@
+import { ICRA_PAID_REPORT_PRICES } from './pricing';
+
 /**
  * OCRA — Canonical Copy
  *
@@ -198,15 +200,15 @@ export const COPY = {
       id: 'executive_continuity_brief' as const,
       name: 'Leadership Briefing Report',
       tagline: 'A board-grade analysis of your continuity posture, for leadership conversations.',
-      price: '$1,200 CAD',
-      priceLabel: '$1,200 CAD',
+      price: ICRA_PAID_REPORT_PRICES.executive_continuity_brief.label,
+      priceLabel: ICRA_PAID_REPORT_PRICES.executive_continuity_brief.label,
     },
     diagnostic: {
       id: 'institutional_continuity_diagnostic' as const,
       name: 'Full Diagnostic & Action Plan',
       tagline: 'A facilitated organizational review for organizations ready to act.',
-      price: '$6,500 CAD',
-      priceLabel: '$6,500 CAD',
+      price: ICRA_PAID_REPORT_PRICES.institutional_continuity_diagnostic.label,
+      priceLabel: ICRA_PAID_REPORT_PRICES.institutional_continuity_diagnostic.label,
     },
   },
   /**
