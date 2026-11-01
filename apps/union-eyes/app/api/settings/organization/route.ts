@@ -54,6 +54,9 @@ export const GET = withApi(
         fiscalYearEnd: org.fiscalYearEnd,
         settings,
       },
+      // Persisted security preferences are not proof of enforcement. Surface the status on every read,
+      // not just the immediate save response, so a returning administrator cannot mistake them for controls.
+      notEnforced: notEnforcedKeysIn(settings),
     };
   },
 );
