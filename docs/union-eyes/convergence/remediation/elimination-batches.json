@@ -9620,6 +9620,21 @@
       ],
       "correction": "Parent lookup and organization INSERT now use the same withSystemContext transaction handle as the atomic audit; no false success on audit failure.",
       "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16 forced rollback, HTTP/browser/staging and independent reviewer/persona/institutional authority. The separate scoped 0048 SECURITY DEFINER privilege preflight remains blocked."
+    },
+    {
+      "id": "UE-LOCATION-CONSENT-PURPOSE-AND-CONFIG-20261101",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-location-consent-purpose-and-config-20261101.md",
+      "files": [
+        "apps/union-eyes/services/geofence-privacy-service.ts",
+        "apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts",
+        "apps/union-eyes/app/api/location/track/route.ts",
+        "apps/union-eyes/app/api/__tests__/location-track.route.test.ts"
+      ],
+      "correction": "Restricts precise location tracking to explicit strike/picket or event consent; rejects meeting/organizing; missing global policy no longer creates an enabled configuration; unsafe policy refuses; unlinked geofence lookups do not persist coordinates.",
+      "remaining": "Exact-HEAD focused/full tests, native PG15/16, HTTP/browser/staging, independent review, owner persona and institutional location-purpose ratification. No implementation or CLOSED credit."
     }
   ]
 }

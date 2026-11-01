@@ -46,7 +46,10 @@ import { GeofencePrivacyService } from '../geofence-privacy-service';
 import { LOCATION_CONSENT_DESCRIPTION, LOCATION_CONSENT_PURPOSE } from '@/lib/location/consent-notice';
 
 const S = GeofencePrivacyService;
-const enabledConfig = (over: Record<string, unknown> = {}) => ({ locationTrackingEnabled: true, backgroundTrackingAllowed: false, ...over });
+const enabledConfig = (over: Record<string, unknown> = {}) => ({
+  locationTrackingEnabled: true, backgroundTrackingAllowed: false,
+  explicitOptInRequired: true, autoDeletionEnabled: true, ...over,
+});
 
 beforeEach(() => {
   h.queue.length = 0;
@@ -207,6 +210,35 @@ describe('geofence-privacy-service', () => {
       await expect(S.trackLocation(tr)).rejects.toThrow('explicit opt-in consent');
     });
 
+    it('refuses unapproved purposes before any consent read or location write', async () => {
+      h.db.select.mockClear();
+      h.db.insert.mockClear();
+      for (const purpose of ['meeting', 'organizing', 'arbitrary']) {
+        await expect(S.trackLocation({ ...tr, purpose })).rejects.toThrow('not covered by the current consent');
+      }
+      expect(h.db.select).not.toHaveBeenCalled();
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('does not treat strike consent as event consent', async () => {
+      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true, allowedDuringEvents: false }]);
+      await expect(S.trackLocation({ ...tr, purpose: 'event' })).rejects.toThrow('explicit opt-in consent');
+    });
+
+    it('does not auto-enable tracking when institutional configuration is absent', async () => {
+      h.db.insert.mockClear();
+      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], []);
+      await expect(S.trackLocation(tr)).rejects.toThrow('no approved configuration');
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('refuses enabled but privacy-unsafe configurations', async () => {
+      for (const override of [{ backgroundTrackingAllowed: true }, { explicitOptInRequired: false }, { autoDeletionEnabled: false }]) {
+        pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], [enabledConfig(override)]);
+        await expect(S.trackLocation(tr)).rejects.toThrow('globally disabled');
+      }
+    });
+
     it('records a location point', async () => {
       pushSel(
         [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], // hasValidConsent
@@ -237,10 +269,10 @@ describe('geofence-privacy-service', () => {
 
     const fence = { id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' };
 
-    it('reports inside and logs an entry event for a member who opted in', async () => {
+    it('reports inside and logs an entry event for a strike-linked fence with strike consent', async () => {
       pushSel(
-        [fence],
-        [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1' }], // hasValidConsent
+        [{ ...fence, strikeId: 's1' }],
+        [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], // hasValidConsent
         [enabledConfig()], // getConfig
         [], // logGeofenceEvent insert
       );
@@ -263,7 +295,7 @@ describe('geofence-privacy-service', () => {
 
     it('stores no position while location tracking is globally disabled', async () => {
       h.db.insert.mockClear();
-      pushSel([fence], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1' }], [enabledConfig({ locationTrackingEnabled: false })]);
+      pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], [enabledConfig({ locationTrackingEnabled: false })]);
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.recorded).toBe(false);
       expect(h.db.insert).not.toHaveBeenCalled();
@@ -274,6 +306,17 @@ describe('geofence-privacy-service', () => {
       pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.recorded).toBe(false);
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('does not record coordinates for an unlinked union-hall or safety-zone lookup', async () => {
+      h.db.insert.mockClear();
+      h.db.select.mockClear();
+      pushSel([fence]);
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
+      expect(r.inside).toBe(true);
+      expect(r.recorded).toBe(false);
+      expect(h.db.select).toHaveBeenCalledTimes(1);
       expect(h.db.insert).not.toHaveBeenCalled();
     });
 
@@ -340,15 +383,11 @@ describe('geofence-privacy-service', () => {
       expect(r.violations).toHaveLength(3);
     });
 
-    it('creates a default config when none exists', async () => {
-      pushSel(
-        [], // getConfig select empty
-        [enabledConfig()], // getConfig insert default
-        [], // backgroundConsents
-        [], // backgroundTracking
-      );
-      const r = await S.verifyNoBackgroundTracking();
-      expect(r.compliant).toBe(true);
+    it('does not report compliance or auto-enable tracking when policy is missing', async () => {
+      h.db.insert.mockClear();
+      pushSel([]);
+      await expect(S.verifyNoBackgroundTracking()).rejects.toThrow('no approved configuration');
+      expect(h.db.insert).not.toHaveBeenCalled();
     });
   });
 

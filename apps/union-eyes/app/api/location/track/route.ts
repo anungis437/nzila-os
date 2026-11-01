@@ -29,7 +29,8 @@ const locationTrackSchema = z.object({
   longitude: z.number().min(-180, "Longitude must be -180 to 180").max(180, "Longitude must be -180 to 180"),
   accuracy: z.number().positive().optional(),
   altitude: z.number().optional(),
-  purpose: z.enum(["strike", "picket", "meeting", "event", "organizing"]),
+  // Other purposes require a separately approved consent context.
+  purpose: z.enum(["strike", "picket", "event"]),
   activityType: z.string().max(100).optional(),
   strikeId: z.guid("Invalid strikeId").optional(),
   eventId: z.guid("Invalid eventId").optional(),
@@ -88,7 +89,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
   } catch (error: unknown) {
     // A refusal for want of consent or because tracking is off is the answer to the request, not a server fault.
     const message = error instanceof Error ? error.message : '';
-    if (message.includes('requires explicit opt-in consent')) {
+    if (message.includes('requires explicit opt-in consent') || message.includes('not covered by the current consent')) {
       return NextResponse.json({ error: message }, { status: 403 });
     }
     if (message.includes('globally disabled')) {

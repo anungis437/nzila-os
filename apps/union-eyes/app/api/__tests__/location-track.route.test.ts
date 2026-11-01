@@ -122,6 +122,17 @@ describe('location/track route (PR #752 round 49 — self-service location-track
     expect(m.trackLocation).not.toHaveBeenCalled();
   });
 
+  it('POST refuses unapproved location purposes before calling the service', async () => {
+    const { POST } = await loadRoute();
+    for (const purpose of ['meeting', 'organizing']) {
+      const response = await POST(new NextRequest('http://localhost/api/location/track', {
+        method: 'POST', body: JSON.stringify({ latitude: 45.5, longitude: -73.6, purpose }),
+      }));
+      expect(response.status).toBe(400);
+    }
+    expect(m.trackLocation).not.toHaveBeenCalled();
+  });
+
   it('POST returns validation error for invalid coordinates', async () => {
     const { POST } = await loadRoute();
 

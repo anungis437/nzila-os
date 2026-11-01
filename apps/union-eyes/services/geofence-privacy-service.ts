@@ -242,20 +242,22 @@ export class GeofencePrivacyService {
    */
   static async trackLocation(tracking: LocationTrackingRequest, tx: RLSTx = db) {
     // Verify consent, including the strike/event permission the member granted
-    const consentContext =
-      tracking.purpose === "strike" || tracking.purpose === "picket"
-        ? "strike"
-        : tracking.purpose === "event"
-          ? "event"
-          : undefined;
+    // A generic opt-in is not permission for meeting, organizing or arbitrary tracking.
+    const consentContext = tracking.purpose === "strike" || tracking.purpose === "picket"
+      ? "strike"
+      : tracking.purpose === "event" ? "event" : null;
+    if (!consentContext) throw new Error("Location tracking purpose is not covered by the current consent");
     const hasConsent = await this.hasValidConsent(tracking.userId, consentContext, tx);
     if (!hasConsent) {
       throw new Error("Location tracking requires explicit opt-in consent");
     }
 
     // Verify config allows tracking
-    const config = await this.getConfig();
-    if (!config.locationTrackingEnabled) {
+    const config = await this.getConfig(tx);
+    if (config.locationTrackingEnabled !== true ||
+        config.backgroundTrackingAllowed !== false ||
+        config.explicitOptInRequired !== true ||
+        config.autoDeletionEnabled !== true) {
       throw new Error("Location tracking is globally disabled");
     }
 
@@ -351,11 +353,20 @@ export class GeofencePrivacyService {
     // The point is the caller's own and is only compared; a precise position is stored only for a member who opted in
     // (for the strike permission when the fence belongs to a strike) while tracking is enabled.
     let recorded = false;
-    if (inside) {
-      const consented = await this.hasValidConsent(userId, fence.strikeId ? "strike" : undefined);
-      if (consented && (await this.getConfig()).locationTrackingEnabled) {
-        await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude);
-        recorded = true;
+    // The current notice authorizes strike/event contexts, not generic union-hall
+    // attendance. A fence with no verified strike link may answer the spatial
+    // question but must not persist precise member coordinates.
+    if (inside && fence.strikeId) {
+      const consented = await this.hasValidConsent(userId, "strike");
+      if (consented) {
+        const config = await this.getConfig();
+        if (config.locationTrackingEnabled === true &&
+            config.backgroundTrackingAllowed === false &&
+            config.explicitOptInRequired === true &&
+            config.autoDeletionEnabled === true) {
+          await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude);
+          recorded = true;
+        }
       }
     }
 
@@ -567,25 +578,13 @@ export class GeofencePrivacyService {
   /**
    * Get global location tracking configuration
    */
-  private static async getConfig() {
-    const configs = await db.select().from(locationTrackingConfig).limit(1);
-
+  private static async getConfig(tx: RLSTx = db) {
+    const configs = await tx.select().from(locationTrackingConfig).limit(1);
+    // Absence of an institutional policy is not permission to collect GPS data.
+    // Neither member requests nor compliance checks may auto-enable tracking.
     if (configs.length === 0) {
-      // Create default config
-      const [config] = await db
-        .insert(locationTrackingConfig)
-        .values({
-          locationTrackingEnabled: true,
-          maxRetentionHours: this.MAX_RETENTION_HOURS.toString(),
-          backgroundTrackingAllowed: false, // ALWAYS false
-          explicitOptInRequired: true,
-          autoDeletionEnabled: true,
-        })
-        .returning();
-
-      return config;
+      throw new Error("Location tracking is globally disabled: no approved configuration");
     }
-
     return configs[0];
   }
 
