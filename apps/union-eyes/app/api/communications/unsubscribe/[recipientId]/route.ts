@@ -19,11 +19,11 @@ export const dynamic = 'force-dynamic';
  */
 const unsubscribeTargetSchema = z.object({
   recipientId: z.string().min(1).max(256).refine(
-    (value) => !/[:\\s/?#\\x00-\\x1f]/.test(value),
+    (value) => !/[:\s/?#\x00-\x1f]/.test(value),
     'Invalid recipient identifier',
   ),
   campaignId: z.string().min(1).max(256).refine(
-    (value) => !/[:\\s/?#\\x00-\\x1f]/.test(value),
+    (value) => !/[:\s/?#\x00-\x1f]/.test(value),
     'Invalid campaign identifier',
   ).nullable(),
   scope: z.enum(['all']).nullable(),
