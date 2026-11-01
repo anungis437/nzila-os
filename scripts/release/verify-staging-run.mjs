@@ -9,14 +9,20 @@ import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 function deny(message) { throw new Error('STAGING_RUN_DENIED: ' + message) }
+// API run/workflow IDs are JSON integers, never coercible strings. CLI
+// coordinates may be decimal text, but must remain exactly representable.
+const safeCoordinate = value => /^[1-9][0-9]*$/.test(String(value ?? '')) &&
+  Number.isSafeInteger(Number(value)) && Number(value) > 0
 
 export function verifyStagingRun(run, expectedCommit, expectedRunId, expectedWorkflowId) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '') ||
-      !/^[1-9][0-9]*$/.test(String(expectedRunId ?? '')) ||
-      !/^[1-9][0-9]*$/.test(String(expectedWorkflowId ?? ''))) {
+      !safeCoordinate(expectedRunId) ||
+      !safeCoordinate(expectedWorkflowId)) {
     deny('missing trusted commit or run coordinate')
   }
   if (!run || typeof run !== 'object' || Array.isArray(run) ||
+      !Number.isSafeInteger(run.databaseId) ||
+      !Number.isSafeInteger(run.workflowDatabaseId) ||
       String(run.databaseId) !== String(expectedRunId) ||
       // A workflow display name is not a unique identity. Require the
       // workflow ID independently resolved from the canonical workflow file.

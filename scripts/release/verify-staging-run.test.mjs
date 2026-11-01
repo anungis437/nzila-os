@@ -44,6 +44,21 @@ test('a same-name but different workflow ID cannot substitute canonical staging'
   assert.throws(() => verifyStagingRun(validRun(), SHA, RUN_ID, undefined),
     /missing trusted commit or run coordinate/)
 })
+test('unsafe or coerced GitHub staging coordinates cannot authorize promotion', () => {
+  for (const value of ['9007199254740992','01','1e3',' 123456',0,-1]) {
+    assert.throws(() => verifyStagingRun(validRun(), SHA, value, WORKFLOW_ID),
+      /missing trusted commit or run coordinate/)
+    assert.throws(() => verifyStagingRun(validRun(), SHA, RUN_ID, value),
+      /missing trusted commit or run coordinate/)
+  }
+  for (const key of ['databaseId','workflowDatabaseId']) {
+    for (const value of ['123456',null,Number.MAX_SAFE_INTEGER+1]) {
+      const run=validRun();run[key]=value
+      assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID),
+        /staging workflow identity, dispatch or source commit mismatch/)
+    }
+  }
+})
 test('rerun cannot reuse an earlier staging deployment or artifact success', () => {
   for (const attempt of [2, 3, 0, null, undefined, '1']) {
     const run = validRun()
