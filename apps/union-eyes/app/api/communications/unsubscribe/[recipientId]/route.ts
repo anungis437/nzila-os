@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { and, eq, inArray, ne } from 'drizzle-orm';
 
 import { db } from '@/db';
@@ -8,6 +9,49 @@ import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * A signed unsubscribe capability uses colon-delimited campaign/recipient
+ * components. Reject delimiter injection, duplicate authority parameters and
+ * oversized identifiers before signature verification or any database work.
+ * The POST body is deliberately not an authority source: RFC 8058 clients
+ * submit a one-click form body, while the action is authorized by the URL token.
+ */
+const unsubscribeTargetSchema = z.object({
+  recipientId: z.string().min(1).max(256).refine(
+    (value) => !/[:\\s/?#\\x00-\\x1f]/.test(value),
+    'Invalid recipient identifier',
+  ),
+  campaignId: z.string().min(1).max(256).refine(
+    (value) => !/[:\\s/?#\\x00-\\x1f]/.test(value),
+    'Invalid campaign identifier',
+  ).nullable(),
+  scope: z.enum(['all']).nullable(),
+  token: z.string().min(1).max(512).nullable(),
+}).superRefine((target, ctx) => {
+  if ((target.scope === 'all') === (target.campaignId !== null)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Exactly one unsubscribe authority scope is required',
+    });
+  }
+});
+
+function parseUnsubscribeTarget(request: NextRequest, recipientId: string) {
+  const params = request.nextUrl.searchParams;
+  // URLSearchParams.get() silently picks the first duplicate, which can make
+  // proxy, mail-client and server interpretations disagree about authority.
+  if (['campaignId', 'scope', 'token'].some((key) => params.getAll(key).length > 1)) {
+    return null;
+  }
+  const parsed = unsubscribeTargetSchema.safeParse({
+    recipientId,
+    campaignId: params.get('campaignId'),
+    scope: params.get('scope'),
+    token: params.get('token'),
+  });
+  return parsed.success ? parsed.data : null;
+}
 
 // The unsubscribe link is a narrowly scoped capability, not a user session.
 // Its signed action, campaign and recipient must all match; a recipient-only
@@ -124,14 +168,14 @@ export async function GET(
   context: { params: Promise<{ recipientId: string }> },
 ) {
   const { recipientId } = await context.params;
-  const campaignId = request.nextUrl.searchParams.get('campaignId');
-  const scope = request.nextUrl.searchParams.get('scope');
-  if ((!campaignId && scope !== 'all') || (campaignId && scope !== null)) {
+  const target = parseUnsubscribeTarget(request, recipientId);
+  if (!target) {
     return new NextResponse('An explicit campaign or all-organizations unsubscribe scope is required', {
       status: 400, headers: { 'Cache-Control': 'no-store' },
     });
   }
-  const verification = requireOrgAccess(request.nextUrl.searchParams.get('token'), campaignId, recipientId, scope);
+  const { campaignId, scope, token } = target;
+  const verification = requireOrgAccess(token, campaignId, recipientId, scope);
   if (verification !== 'valid') {
     return new NextResponse('Invalid unsubscribe token', {
       status: 401, headers: { 'Cache-Control': 'no-store' },
@@ -165,21 +209,17 @@ export async function POST(
   context: { params: Promise<{ recipientId: string }> },
 ) {
   const { recipientId } = await context.params;
-  const campaignId = request.nextUrl.searchParams.get('campaignId');
-  const token = request.nextUrl.searchParams.get('token');
-  const scope = request.nextUrl.searchParams.get('scope');
+  const target = parseUnsubscribeTarget(request, recipientId);
+  if (!target) {
+    return new NextResponse('Invalid unsubscribe target or authority scope', { status: 400 });
+  }
+  const { campaignId, token, scope } = target;
   // Query strings are untrusted and may contain personal information; persist
   // only the supported reason codes, never arbitrary link-supplied text.
   const requestedReason = request.nextUrl.searchParams.get('reason');
   const reason = requestedReason === 'manual' || requestedReason === 'preference_center'
     ? requestedReason : 'unsubscribe_link';
   const locale = request.nextUrl.searchParams.get('locale') || 'en-CA';
-
-  // A recipient-only token carries no organization authority. Do not infer
-  // an organization from the recipient and silently revoke other tenants.
-  if ((!campaignId && scope !== 'all') || (campaignId && scope !== null)) {
-    return new NextResponse('An explicit campaign or all-organizations unsubscribe scope is required', { status: 400 });
-  }
 
   // Only an action-bound token for this exact campaign and recipient may
   // authorize a write; open/click tokens cannot be repurposed.
