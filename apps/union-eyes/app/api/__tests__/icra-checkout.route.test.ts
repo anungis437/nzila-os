@@ -10,6 +10,7 @@ const ASSESSMENT_ID = '11111111-1111-1111-1111-111111111111';
 const m = vi.hoisted(() => ({
   selectQueue: [] as unknown[][],
   stripeCreate: vi.fn(),
+  stripeRetrieve: vi.fn(),
   logger: { error: vi.fn(), info: vi.fn() },
 }));
 
@@ -43,7 +44,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: { id: 'id', reportTierId: 'reportTierId', status: 'status' } }));
 vi.mock('@nzila/payments-stripe', () => ({
-  getStripeClient: () => ({ checkout: { sessions: { create: m.stripeCreate } } }),
+  getStripeClient: () => ({ checkout: { sessions: { create: m.stripeCreate } }, prices: { retrieve: m.stripeRetrieve } }),
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -69,6 +70,9 @@ describe('icra/checkout route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
+    delete process.env.STRIPE_PRICE_ICRA_BRIEF;
+    delete process.env.STRIPE_PRICE_ICRA_DIAGNOSTIC;
+    process.env.STRIPE_DEFAULT_CURRENCY = 'CAD';
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
     m.stripeCreate.mockResolvedValue({ id: 'cs_1', url: 'https://checkout.stripe.com/cs_1' });
   });
@@ -186,6 +190,81 @@ describe('icra/checkout route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.url).toContain('checkout.stripe.com');
+  });
+
+  // A configured Stripe Price is a reference, not permission to override the
+  // CAD price advertised by the report gate. No payable session on mismatch.
+  it.each([
+    ['wrong amount', { unit_amount: 119900 }],
+    ['wrong currency', { currency: 'usd' }],
+    ['inactive', { active: false }],
+    ['recurring', { type: 'recurring', recurring: { interval: 'month' } }],
+    ['wrong identifier', { id: 'price_other' }],
+    ['unknown amount', { unit_amount: null }],
+  ])('refuses configured Stripe Price with %s', async (_case, override) => {
+    vi.stubEnv('STRIPE_PRICE_ICRA_BRIEF', 'price_brief');
+    try {
+      const { POST } = await loadRoute();
+      m.stripeRetrieve.mockResolvedValue({
+        id: 'price_brief', active: true, currency: 'cad',
+        unit_amount: 120000, type: 'one_time', recurring: null, ...override,
+      });
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body()));
+      expect(response.status).toBe(503);
+      expect(m.stripeRetrieve).toHaveBeenCalledWith('price_brief');
+      expect(m.stripeCreate).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('refuses checkout when the configured Price cannot be verified', async () => {
+    vi.stubEnv('STRIPE_PRICE_ICRA_BRIEF', 'price_brief');
+    try {
+      const { POST } = await loadRoute();
+      m.stripeRetrieve.mockRejectedValueOnce(new Error('Stripe unavailable'));
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body()));
+      expect(response.status).toBe(503);
+      expect(m.stripeCreate).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('accepts only a verified CAD 6,500 one-time diagnostic Price', async () => {
+    vi.stubEnv('STRIPE_PRICE_ICRA_DIAGNOSTIC', 'price_diagnostic');
+    try {
+      const { POST } = await loadRoute();
+      m.stripeRetrieve.mockResolvedValueOnce({
+        id: 'price_diagnostic', active: true, currency: 'cad',
+        unit_amount: 650000, type: 'one_time', recurring: null,
+      });
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body('institutional_continuity_diagnostic')));
+      expect(response.status).toBe(200);
+      expect(m.stripeCreate.mock.calls[0][0].line_items).toEqual([{ price: 'price_diagnostic', quantity: 1 }]);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('uses published CAD amount when no configured Price exists, and refuses a non-CAD default currency', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    expect((await POST(req(body()))).status).toBe(200);
+    expect(m.stripeCreate.mock.calls[0][0].line_items[0].price_data).toMatchObject({ currency: 'cad', unit_amount: 120000 });
+    expect(m.stripeRetrieve).not.toHaveBeenCalled();
+    vi.stubEnv('STRIPE_DEFAULT_CURRENCY', 'USD');
+    try {
+      m.stripeCreate.mockClear();
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      expect((await POST(req(body()))).status).toBe(503);
+      expect(m.stripeCreate).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('returns 500 when stripe session creation fails', async () => {
