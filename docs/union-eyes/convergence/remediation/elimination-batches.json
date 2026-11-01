@@ -9327,6 +9327,19 @@
         "correction": "The alert reader now returns only allowlisted signal kind and nonnegative safe-integer count; unknown signal and all other raw trigger JSON fields are redacted. Existing officer role floor and tenant RLS are preserved.",
         "remaining": "Focused/full Vitest and contract, native PG15/16, HTTP/browser/staging, institutional officer audience decision, independent reviewer and owner persona ratification. No CLOSED or additional implementation credit."
       }
+    },
+    "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "d2060cbfb02d66cac8b4e566698fcecd57eb7da4",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-subscription-atomic-mandate-transition-20261101.md",
+      "files": [
+        "apps/union-eyes/services/platform-economics/subscription-lifecycle-service.ts",
+        "apps/union-eyes/app/api/billing/subscriptions/route.ts",
+        "apps/union-eyes/services/platform-economics/__tests__/subscription-lifecycle-service.test.ts",
+        "apps/union-eyes/app/api/__tests__/billing-subscriptions.route.test.ts"
+      ],
+      "correction": "Pause/resume finance:execute resource mandate is now checked inside the same tenant/principal RLS transaction as status transition, subscription event and atomic audit. The separate route-level preflight is removed. Missing mandate refuses before writes.",
+      "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16 adversarial concurrency and tenant-role tests, HTTP/browser/staging, provider reconciliation and institutional reviewer/persona/authority decisions. Defect remains PARTIAL; no additional implementation or CLOSED credit."
     }
   }
 }
