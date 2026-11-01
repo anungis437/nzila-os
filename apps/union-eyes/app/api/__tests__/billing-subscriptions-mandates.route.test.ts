@@ -5,7 +5,7 @@ const m = vi.hoisted(() => {
   const tx = {
     select: vi.fn(() => ({
       from: vi.fn(() => {
-        const query = {
+        const query: any = {
           where: vi.fn(() => query),
           for: vi.fn(async () => state.selected.shift() ?? []),
           // A normal GET awaits the query without acquiring a row lock.
