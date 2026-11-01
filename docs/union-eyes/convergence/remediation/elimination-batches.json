@@ -9154,6 +9154,19 @@
       ],
       "correction": "SLA prediction list now reads inside the authenticated organization's RLS transaction instead of the bare shared database handle. It retains organization/type predicates and a 25-row limit; failed RLS transaction refuses rather than producing a false success.",
       "remaining": "Exact-HEAD focused and full Vitest/contract, native PG15/16 tenant-role isolation, HTTP/browser/staging and independent review. The separate SLA scoring heuristic still accepts caller-supplied transition count and previous-breach flag; no implementation or CLOSED credit."
+    },
+    "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": null,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-sla-risk-verified-facts-20261101.md",
+      "files": [
+        "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+        "apps/union-eyes/lib/ml/sla-breach-score.ts",
+        "apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts",
+        "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
+      ],
+      "correction": "v2 risk indicator uses only tenant-scoped claim priority and SLA clock; ignores caller-supplied transition/breach values, priority, deadline and featureRefs; persists server-owned provenance; GET excludes legacy v1 rows. No confidence or training claim.",
+      "remaining": "Exact-HEAD focused/full Vitest/contract, native PG15/16, HTTP/browser/staging, downstream alert-sweep version filtering, independent review, persona and institutional ratification. No implementation or CLOSED credit."
     }
   }
 }

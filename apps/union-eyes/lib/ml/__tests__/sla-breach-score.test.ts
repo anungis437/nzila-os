@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/lib/workflow/case-lifecycle', () => ({ getSLADeadlineHours: (_s: string, p: string) => (p === 'urgent' ? 8 : 100) }));
 vi.mock('@/lib/workflow/state-bridge', () => ({ toLifecycleState: () => 'submitted' }));
 
-import { caseFacts, computeSlaBreachProbability, scoringPriority } from '../sla-breach-score';
+import { caseFacts, computeSlaBreachProbability, computeVerifiedCaseSlaRisk, scoringPriority } from '../sla-breach-score';
 
 const NOW = new Date('2026-06-01T12:00:00Z');
 const hoursAgo = (h: number) => new Date(NOW.getTime() - h * 3_600_000);
@@ -24,6 +24,15 @@ describe('computeSlaBreachProbability', () => {
     // with the case's real facts fixed (medium priority, plenty of time), the most the caller-supplied inputs add is 0.34
     const best = computeSlaBreachProbability({ priority: 'medium', hoursRemaining: 100, transitionCount: 1000, hasPreviousBreaches: true });
     expect(best).toBeLessThan(0.8);
+  });
+});
+
+describe('verified case-facts-only SLA scoring', () => {
+  it('uses only priority and deadline, not caller-provided history', () => {
+    expect(computeVerifiedCaseSlaRisk({ priority: 'high', hoursRemaining: 8 })).toBe(0.5);
+    expect(computeVerifiedCaseSlaRisk({ priority: 'high', hoursRemaining: 8 })).toBe(
+      computeSlaBreachProbability({ priority: 'high', hoursRemaining: 8, transitionCount: 0, hasPreviousBreaches: false }),
+    );
   });
 });
 

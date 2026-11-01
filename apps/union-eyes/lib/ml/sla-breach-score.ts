@@ -10,9 +10,9 @@ import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-life
 import { slaClockStart } from '@/lib/workflow/sla-clock'
 import { toLifecycleState } from '@/lib/workflow/state-bridge'
 
-export const SLA_SCORING_METHOD = 'rule_based_heuristic_v1'
+export const SLA_SCORING_METHOD = 'rule_based_verified_case_facts_v2'
 /** The one model version this scorer can honestly claim: a caller does not get to name another. */
-export const SLA_MODEL_VERSION = 'sla-risk-v1'
+export const SLA_MODEL_VERSION = 'sla-risk-v2'
 
 export type ScoringPriority = 'low' | 'medium' | 'high' | 'urgent'
 
@@ -37,6 +37,15 @@ export function computeSlaBreachProbability(input: SlaScoreInput): number {
   const historyWeight = input.hasPreviousBreaches ? 0.16 : 0
   const score = Math.min(0.99, Math.max(0.01, priorityWeight + timePressure + transitionPressure + historyWeight))
   return Number(score.toFixed(4))
+}
+
+/**
+ * Production scoring excludes historical transition and breach flags until derived from
+ * audited, tenant-bound history. Unknown history is not evidence of zero history.
+ * The legacy four-factor helper is retained for offline callers, not for the API.
+ */
+export function computeVerifiedCaseSlaRisk(input: Pick<SlaScoreInput, 'priority' | 'hoursRemaining'>): number {
+  return computeSlaBreachProbability({ priority: input.priority, hoursRemaining: input.hoursRemaining, transitionCount: 0, hasPreviousBreaches: false })
 }
 
 export interface ScoredCase {

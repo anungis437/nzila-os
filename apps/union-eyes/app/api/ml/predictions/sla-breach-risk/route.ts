@@ -3,7 +3,7 @@ import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
 import { claims, mlPredictions, modelMetadata } from '@/db/schema';
-import { SLA_MODEL_VERSION, SLA_SCORING_METHOD, caseFacts, computeSlaBreachProbability } from '@/lib/ml/sla-breach-score';
+import { SLA_MODEL_VERSION, SLA_SCORING_METHOD, caseFacts, computeVerifiedCaseSlaRisk } from '@/lib/ml/sla-breach-score';
 import { and, desc, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -15,10 +15,11 @@ const bodySchema = z.object({
     // existing callers keep working.
     hoursRemaining: z.number().optional(),
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
-    transitionCount: z.number().int().nonnegative(),
-    hasPreviousBreaches: z.boolean(),
-    featureRefs: z.array(z.string().min(2)).min(1),
-  }),
+    // Legacy fields are accepted for compatibility, but are NOT authoritative scoring inputs.
+    transitionCount: z.number().int().nonnegative().optional(),
+    hasPreviousBreaches: z.boolean().optional(),
+    featureRefs: z.array(z.string().min(2)).max(50).optional(),
+  }).strict().optional(),
   // Only the version this scorer implements: naming another used to create a model row for any string a steward typed.
   modelVersion: z.literal(SLA_MODEL_VERSION).optional(),
 });
@@ -58,11 +59,8 @@ export const POST = withApi(
         .limit(1);
       if (!claim) throw ApiError.notFound('Case');
       const derived = caseFacts(claim, now);
-      const score = computeSlaBreachProbability({
-        ...derived,
-        transitionCount: body.features.transitionCount,
-        hasPreviousBreaches: body.features.hasPreviousBreaches,
-      });
+      // Only case facts read under tenant RLS affect the risk indicator.
+      const score = computeVerifiedCaseSlaRisk(derived);
 
       const [existingModel] = await tx
         .select()
@@ -86,7 +84,7 @@ export const POST = withApi(
                 modelType: 'sla_breach_risk',
                 version: selectedVersion,
                 parameters: {
-                  featureSet: body.features.featureRefs,
+                  featureSet: ['claim.priority', 'claim.status', 'claim.statusChangedAt', 'claim.createdAt'],
                   scoring: SLA_SCORING_METHOD,
                 },
               })
@@ -121,7 +119,8 @@ export const POST = withApi(
           caseId: body.caseId,
           modelVersion: model.version,
           modelType: model.modelType,
-          featureRefs: body.features.featureRefs,
+          featureRefs: ['claim.priority', 'claim.status', 'claim.statusChangedAt', 'claim.createdAt'],
+          unverifiedHistoryExcluded: true,
           score,
           method: SLA_SCORING_METHOD,
           derivedFromCase: { priority: derived.priority, hoursRemaining: Number(derived.hoursRemaining.toFixed(2)) },
@@ -143,9 +142,9 @@ export const POST = withApi(
       },
       inputs: {
         fromCase: { priority: derived.priority, hoursRemaining: Number(derived.hoursRemaining.toFixed(2)) },
-        supplied: { transitionCount: body.features.transitionCount, hasPreviousBreaches: body.features.hasPreviousBreaches },
+        historyFeatures: 'excluded_unverified',
       },
-      featureRefs: body.features.featureRefs,
+      featureRefs: ['claim.priority', 'claim.status', 'claim.statusChangedAt', 'claim.createdAt'],
       confidence: null,
     };
   },
@@ -183,6 +182,8 @@ export const GET = withApi(
           and(
             eq(mlPredictions.organizationId, organizationId),
             eq(mlPredictions.predictionType, 'sla_breach_risk'),
+            // Legacy v1 scores could incorporate unverified caller history; do not serve them as current.
+            eq(mlPredictions.modelVersion, SLA_MODEL_VERSION),
           ),
         )
         .orderBy(desc(mlPredictions.createdAt))
