@@ -44,6 +44,12 @@ export interface AtomicAuditedOperation<T = unknown> {
   /** Facts about what the work did (counts, identifiers), recorded in the same audit row once the work has produced them. */
   resultDetails?: (value: T) => Record<string, unknown>
   scope?: 'organization' | 'system'
+  /**
+   * Set to { ok: false } when the `afterCommit` step failed. The change and its audit record have committed; what did not happen is the
+   * follow-up (a cache refresh, for example), so the caller must not report the whole operation as having taken effect everywhere. The
+   * failure is also recorded durably as `<action>.after_commit_failed`.
+   */
+  afterCommitReport?: { ok: boolean }
 }
 
 export interface AuditedOperation<T = unknown> {
@@ -133,8 +139,24 @@ export async function performAtomicAuditedOperation<T>(
   if (afterCommit) {
     try {
       await afterCommit()
+      if (op.afterCommitReport) op.afterCommitReport.ok = true
     } catch (error) {
       logger.error('platform_operation_after_commit_failed', { action: op.action, error })
+      if (op.afterCommitReport) op.afterCommitReport.ok = false
+      // The change committed; the follow-up did not. That is itself recorded, so a later reader can tell why the effect lagged.
+      await recordOutcome(
+        op.scope,
+        organizationId,
+        {
+          organizationId,
+          userId,
+          action: `${op.action}.after_commit_failed`,
+          resourceType: op.resourceType,
+          resourceId: op.resourceId,
+          details: { ...op.details, error: error instanceof Error ? error.message : 'unknown' },
+        },
+        'failure',
+      )
     }
   }
   return result

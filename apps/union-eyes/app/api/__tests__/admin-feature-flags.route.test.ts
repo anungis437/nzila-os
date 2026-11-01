@@ -5,7 +5,11 @@ import { NextRequest } from 'next/server';
 // hands the work a transaction handle and runs afterCommit.
 const TX = { tx: true };
 const audit = vi.hoisted(() => ({
-  run: vi.fn(async (_op: unknown, fn: (tx: unknown) => Promise<unknown>, after?: () => Promise<void>) => { const v = await fn({ tx: true }); await after?.(); return v; }),
+  run: vi.fn(async (op: { afterCommitReport?: { ok: boolean } }, fn: (tx: unknown) => Promise<unknown>, after?: () => Promise<void>) => {
+    const v = await fn({ tx: true });
+    try { await after?.(); if (op.afterCommitReport) op.afterCommitReport.ok = true; } catch { if (op.afterCommitReport) op.afterCommitReport.ok = false; }
+    return v;
+  }),
 }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAtomicAuditedOperation: audit.run,
@@ -28,6 +32,7 @@ vi.mock('@/lib/feature-flags', () => {
     getAllFeatureFlags: m.getAllFeatureFlags,
     setFeatureFlagEnabledInTransaction: m.setFlag,
     invalidateFeatureFlagCache: m.invalidate,
+    FEATURE_FLAG_PROPAGATION_SECONDS: 60,
     FeatureFlagNotFoundError,
   };
 });
@@ -115,8 +120,26 @@ describe('admin/feature-flags route', () => {
 
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.success).toBe(true);
+    expect(json).toMatchObject({ success: true, committed: true, cacheRefreshed: true, propagationSeconds: 60 });
+    expect(json).not.toHaveProperty('warning');
     expect(m.setFlag).toHaveBeenCalledWith(TX, 'featureA', false);
+  });
+
+  // F06 R4: the change committed, but this instance could not reload its cache, and the answer says so instead of reporting a plain success.
+  it('PATCH says so when the change committed but this instance could not refresh its cache', async () => {
+    m.invalidate.mockRejectedValueOnce(new Error('Feature flag cache refresh failed'));
+    const { PATCH } = await loadRoute();
+    const response = await PATCH(new NextRequest('http://localhost/api/admin/feature-flags', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'featureA', enabled: true }),
+    }), { userId: 'u1', organizationId: 'org_1' } as any);
+
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json).toMatchObject({ success: true, committed: true, cacheRefreshed: false });
+    expect(json.warning).toMatch(/may serve the previous value/);
+    expect(m.logApiAuditEvent).toHaveBeenCalledWith(expect.objectContaining({ eventType: 'success', details: expect.objectContaining({ cacheRefreshed: false }) }));
   });
 
   it('PATCH is gated by withSystemAdminAuth, not the ordinary per-org withAdminAuth (round 51: feature_flags is platform-wide, an org admin must not flip it)', async () => {

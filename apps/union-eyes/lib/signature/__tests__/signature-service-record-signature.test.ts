@@ -83,6 +83,22 @@ describe('SignatureService.recordSignature ownership verification', () => {
     mocks.audit.mockResolvedValue(undefined);
   });
 
+  // F06 R4: a signature is evidenced as what it is. "digital" asserts certificate evidence and "wet" a physical signature; this release has
+  // neither, so they are refused before anything is read or written rather than stored under a stronger name.
+  it.each(['digital', 'wet'] as const)('refuses a %s signature, which would claim evidence this release does not hold', async (signatureType) => {
+    await expect(
+      SignatureService.recordSignature({
+        signerId: SIGNER_ID,
+        actorUserId: OWNER_USER_ID,
+        signatureImageUrl: 'https://example.com/sig.png',
+        signatureType,
+      })
+    ).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('only an electronic signature') });
+
+    expect(mocks.findFirst).not.toHaveBeenCalled();
+    expect(mocks.updateSet).not.toHaveBeenCalled();
+  });
+
   it('rejects when the signer row belongs to a different user (impersonation attempt)', async () => {
     mocks.findFirst.mockResolvedValue({
       id: SIGNER_ID,

@@ -15,6 +15,7 @@
     { "code": "alert", "path": "/api/cron/observability-alerts", "schedule": "*/10 * * * *", "timeoutSeconds": 100 },
     { "code": "sla", "path": "/api/cron/sla-watchdog", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },
     { "code": "reap", "path": "/api/cron/document-intake-reaper", "schedule": "*/30 * * * *", "timeoutSeconds": 100 },
+    { "code": "sigexp", "path": "/api/cron/signature-expiry", "schedule": "*/30 * * * *", "timeoutSeconds": 100 },
     { "code": "xsync", "path": "/api/cron/external-data-sync", "schedule": "0 4 * * *", "timeoutSeconds": 300 },
     { "code": "locret", "path": "/api/cron/location-retention", "schedule": "0 * * * *", "timeoutSeconds": 100 },
     { "code": "rwds", "path": "/api/rewards/cron?task=all", "schedule": "0 9 * * *", "timeoutSeconds": 300 }

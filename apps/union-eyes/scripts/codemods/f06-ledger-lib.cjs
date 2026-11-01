@@ -26,7 +26,7 @@ function addBatch({ id, family, test, items, previousEvidence }) {
     const fresh = []
     for (const it of items) {
       const prefix = resolveId(it.prefix)
-      const found = all.find((i) => i.prefix === prefix)
+      const found = it.fresh ? undefined : all.find((i) => i.prefix === prefix)
       const files = [...new Set([...(it.files || []), ...(test ? [test] : [])])]
       if (found) {
         found.status = it.status

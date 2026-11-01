@@ -1,8 +1,8 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1007,
-  "mutating": 680,
+  "routes": 1008,
+  "mutating": 681,
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 20,
@@ -17,7 +17,7 @@
    "ROLE_AUTH": 174,
    "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 286,
+   "WITH_API": 287,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -33,24 +33,24 @@
    "ROLE_AUTH": 98,
    "SESSION_AUTH": 31,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 182
+   "WITH_API": 183
   },
   "mutatingByAudit": {
-   "ATOMIC": 164,
-   "ATOMIC_SERVICE": 109,
+   "ATOMIC": 165,
+   "ATOMIC_SERVICE": 110,
    "COMPUTE_ONLY": 31,
    "CRUD_ATOMIC": 86,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 28,
-   "INTENT_OUTCOME": 37,
+   "INTENT_OUTCOME": 36,
    "NO_WRITES_FOUND": 10,
    "NONE": 213
   },
   "mutatingByData": {
    "AMBIENT_DB": 13,
    "CRUD_TENANT_TX": 86,
-   "NONE": 338,
-   "SYSTEM_CONTEXT": 66,
+   "NONE": 340,
+   "SYSTEM_CONTEXT": 65,
    "TENANT_TX": 177
   }
  },
@@ -397,8 +397,8 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "INTENT_OUTCOME"
+   "data": "NONE",
+   "audit": "ATOMIC"
   },
   {
    "route": "admin/documents/legacy-backfill/route.ts",
@@ -4889,6 +4889,18 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
+  },
+  {
+   "route": "cron/signature-expiry/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cron/sla-watchdog/route.ts",

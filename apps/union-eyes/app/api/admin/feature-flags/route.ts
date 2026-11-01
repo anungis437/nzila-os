@@ -10,6 +10,7 @@ import {
   getAllFeatureFlags,
   setFeatureFlagEnabledInTransaction,
   invalidateFeatureFlagCache,
+  FEATURE_FLAG_PROPAGATION_SECONDS,
   FeatureFlagNotFoundError,
 } from '@/lib/feature-flags';
 import { z } from 'zod';
@@ -102,7 +103,9 @@ try {
       const { name, enabled } = body;
 
       // A platform-wide flag is rows in our own database: the change and its audit record commit in one transaction, so a failed audit
-      // write leaves the flag as it was. The in-memory cache is refreshed only after the commit.
+      // write leaves the flag as it was. This instance's cache is refreshed only after the commit, and the answer says whether that worked:
+      // a committed change whose refresh failed is not reported as having taken effect here.
+      const cacheRefresh = { ok: true };
       await performAtomicAuditedOperation(
         {
           organizationId,
@@ -111,6 +114,7 @@ try {
           resourceType: 'feature_flag',
           resourceId: name,
           details: { enabled },
+          afterCommitReport: cacheRefresh,
         },
         (tx) => setFeatureFlagEnabledInTransaction(tx, name, enabled),
         invalidateFeatureFlagCache,
@@ -122,10 +126,17 @@ try {
         method: 'PATCH',
         eventType: 'success',
         severity: 'medium',
-        details: { flagName: name, enabled },
+        details: { flagName: name, enabled, cacheRefreshed: cacheRefresh.ok },
       });
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({
+        success: true,
+        committed: true,
+        cacheRefreshed: cacheRefresh.ok,
+        // Other instances read the change when their own cache expires.
+        propagationSeconds: FEATURE_FLAG_PROPAGATION_SECONDS,
+        ...(cacheRefresh.ok ? {} : { warning: 'The change is saved, but this instance could not reload the flags and may serve the previous value until its next successful reload.' }),
+      });
     } catch (error) {
       logApiAuditEvent({
         timestamp: new Date().toISOString(), userId,

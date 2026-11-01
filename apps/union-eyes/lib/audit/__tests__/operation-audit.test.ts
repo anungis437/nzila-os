@@ -134,4 +134,31 @@ describe('performAtomicAuditedOperation', () => {
     expect(after).toHaveBeenCalledTimes(1);
     expect(m.logger.error).toHaveBeenCalledWith('platform_operation_after_commit_failed', expect.anything());
   });
+
+  // F06 R4: a committed change whose follow-up failed is not reported as having taken effect everywhere.
+  it('reports a failed afterCommit through afterCommitReport and records it durably as its own failure entry', async () => {
+    const afterCommitReport = { ok: true };
+    const after = vi.fn(async () => { throw new Error('cache refresh failed'); });
+
+    await expect(performAtomicAuditedOperation({ ...op, details: { enabled: true }, afterCommitReport }, async () => 5, after)).resolves.toBe(5);
+
+    expect(afterCommitReport.ok).toBe(false);
+    const entries = m.audit.mock.calls.map((call) => [call[1].action, call[2]]);
+    expect(entries).toEqual([['platform.thing', undefined], ['platform.thing.after_commit_failed', 'failure']]);
+    expect(m.audit.mock.calls[1][1].details).toMatchObject({ enabled: true, error: 'cache refresh failed' });
+  });
+
+  it('reports a successful afterCommit as ok and writes no extra entry', async () => {
+    const afterCommitReport = { ok: false };
+    await performAtomicAuditedOperation({ ...op, afterCommitReport }, async () => 5, async () => undefined);
+    expect(afterCommitReport.ok).toBe(true);
+    expect(m.audit).toHaveBeenCalledTimes(1);
+  });
+
+  it('still returns the committed result when the after-commit failure record cannot be written either', async () => {
+    const afterCommitReport = { ok: true };
+    m.audit.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('audit down'));
+    await expect(performAtomicAuditedOperation({ ...op, afterCommitReport }, async () => 5, async () => { throw new Error('x'); })).resolves.toBe(5);
+    expect(afterCommitReport.ok).toBe(false);
+  });
 });

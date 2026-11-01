@@ -12,10 +12,10 @@ import {
 } from "@/db/schema";
 import SignatureProviderFactory from "./providers";
 import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
-import { eq, and, or, desc, inArray, notInArray, isNull, lt } from "drizzle-orm";
+import { eq, and, or, desc, asc, gt, inArray, notInArray, isNull, lt } from "drizzle-orm";
 import { organizationMembers } from "@/db/schema-organizations";
 import { signerListSchema, verifySignerList, SignerVerificationError } from "./signer-verification";
-import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
+import { withRLSContext, withSystemContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
@@ -42,6 +42,16 @@ const FINAL_DOCUMENT_STATES = ["completed", "voided", "declined", "expired"] as 
 const USER_DOCUMENT_LIMIT = 200;
 /** Signer states that are settled: a signature is not applied over them. */
 const SETTLED_SIGNER_STATES = ["signed", "declined", "authentication_failed", "expired"] as const;
+
+/**
+ * A short reason for a job report. A database error is wrapped with the statement and its parameters, which a job's response must not
+ * carry, so the underlying cause is reported instead, bounded.
+ */
+function failureReason(error: unknown): string {
+  const cause = error instanceof Error ? (error as Error & { cause?: unknown }).cause : undefined;
+  const message = cause instanceof Error ? cause.message : error instanceof Error && !/^Failed query/.test(error.message) ? error.message : "database error";
+  return message.slice(0, 200);
+}
 
 /** Signer rows carry no organization of their own: their ownership is proven through the organization of their document. */
 const documentsOfOrganization = (tx: RLSTx, organizationId: string) =>
@@ -470,6 +480,12 @@ export class SignatureService {
     userAgent?: string;
     geolocation?: any;
   }) {
+    // What this release can evidence is a signature drawn by an authenticated platform user. A certificate-based ("digital") signature
+    // asserts cryptographic evidence and a "wet" one a physical signature; neither exists here, so a record labelled with either would
+    // claim evidence it does not hold. They are refused rather than stored under a stronger name.
+    if (data.signatureType !== "electronic") {
+      throw new SignatureAuthorityError("CONFLICT", `A ${data.signatureType} signature cannot be recorded: this release can evidence only an electronic signature by an authenticated user`);
+    }
     const existingSigner = await db.query.documentSigners.findFirst({
       where: eq(documentSigners.id, data.signerId),
     });
@@ -588,20 +604,29 @@ export class SignatureService {
     }
   }
 
-  /** Marks an open document whose request has run out as expired, with its trail event and platform audit record in one transaction. */
-  private static async markExpired(document: { id: string; organizationId: string; expiresAt: Date | null }) {
-    await withRLSContext({ organizationId: document.organizationId }, async (tx) => {
+  /**
+   * Marks an open document whose request has run out as expired, with its signers, its trail event and a platform audit record in one
+   * transaction. Returns whether this call made the change (a concurrent signature, expiry or void leaves nothing to do).
+   */
+  private static async markExpired(document: { id: string; organizationId: string; expiresAt: Date | null }): Promise<boolean> {
+    return withRLSContext({ organizationId: document.organizationId }, async (tx) => {
       const [expired] = await tx
         .update(signatureDocuments)
         .set({ status: "expired", updatedAt: new Date() })
         .where(and(eq(signatureDocuments.id, document.id), eq(signatureDocuments.organizationId, document.organizationId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES])))
         .returning({ id: signatureDocuments.id });
-      if (!expired) return;
+      if (!expired) return false;
+      // A signer who had not settled can no longer sign: their state says so, rather than staying "pending" on a closed request.
+      const lapsed = await tx
+        .update(documentSigners)
+        .set({ status: "expired", updatedAt: new Date() })
+        .where(and(eq(documentSigners.documentId, document.id), notInArray(documentSigners.status, [...SETTLED_SIGNER_STATES])))
+        .returning({ id: documentSigners.id });
       await AuditTrailService.log({
         documentId: document.id,
         eventType: "document_expired",
         eventDescription: "The signature request expired before every signer had signed",
-        metadata: { expiresAt: document.expiresAt?.toISOString() ?? null },
+        metadata: { expiresAt: document.expiresAt?.toISOString() ?? null, signersLapsed: lapsed.length },
       }, tx);
       await persistAtomicAudit(tx, {
         organizationId: document.organizationId,
@@ -609,9 +634,61 @@ export class SignatureService {
         action: "signature.document.expire",
         resourceType: "signature_documents",
         resourceId: document.id,
-        details: { expiresAt: document.expiresAt?.toISOString() ?? null },
+        details: { expiresAt: document.expiresAt?.toISOString() ?? null, signersLapsed: lapsed.length },
       });
+      return true;
     });
+  }
+
+  /**
+   * Expires every internal document whose request has run out, whether or not anyone tries to sign it. Overdue documents are found across
+   * organizations by system authority (a cross-organization SELECT on signature_documents only, keyset-paged and bounded), and each is
+   * expired inside its own organization's context by the same transaction a refused signature uses, so one document's failure does not
+   * stop the rest and is reported instead of swallowed. A document held by a signature provider is left to the provider sync.
+   */
+  static async expireOverdue(options: { now?: Date; pageSize?: number; maxPages?: number } = {}): Promise<{
+    scanned: number;
+    expired: number;
+    failures: Array<{ documentId: string; reason: string }>;
+    truncated: boolean;
+  }> {
+    const now = options.now ?? new Date();
+    const pageSize = Math.min(Math.max(options.pageSize ?? 100, 1), 500);
+    const maxPages = Math.max(options.maxPages ?? 20, 1);
+    const failures: Array<{ documentId: string; reason: string }> = [];
+    let scanned = 0;
+    let expired = 0;
+    let after: string | null = null;
+    let pages = 0;
+
+    for (;;) {
+      if (pages >= maxPages) return { scanned, expired, failures, truncated: true };
+      const cursor: string | null = after;
+      const page: Array<{ id: string; organizationId: string; expiresAt: Date | null }> = await withSystemContext((tx) =>
+        tx
+          .select({ id: signatureDocuments.id, organizationId: signatureDocuments.organizationId, expiresAt: signatureDocuments.expiresAt })
+          .from(signatureDocuments)
+          .where(and(
+            eq(signatureDocuments.provider, "internal"),
+            notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES]),
+            lt(signatureDocuments.expiresAt, now),
+            cursor ? gt(signatureDocuments.id, cursor) : undefined,
+          ))
+          .orderBy(asc(signatureDocuments.id))
+          .limit(pageSize),
+      );
+      pages += 1;
+      for (const document of page) {
+        scanned += 1;
+        try {
+          if (await this.markExpired(document)) expired += 1;
+        } catch (error) {
+          failures.push({ documentId: document.id, reason: failureReason(error) });
+        }
+      }
+      if (page.length < pageSize) return { scanned, expired, failures, truncated: false };
+      after = page[page.length - 1].id;
+    }
   }
 
   /**

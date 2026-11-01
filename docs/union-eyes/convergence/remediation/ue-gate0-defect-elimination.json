@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 586,
-    "partial": 82,
+    "implementedPendingQualification": 587,
+    "partial": 81,
     "qualificationVerified": 0,
-    "unresolved": 191,
+    "unresolved": 190,
     "externalBlockers": 0
   },
   "batches": [
@@ -1103,6 +1103,15 @@
       "outstandingBefore": 191,
       "newlyImplemented": 0,
       "outstandingAfter": 191,
+      "partial": 0,
+      "evidenceCommit": "cb737a972"
+    },
+    {
+      "id": "B115-F06-R4-SIGNATURE-EXPIRY-AND-OPERATION-STATE",
+      "family": "F06 R4: signature expiry sweep, honest evidence types, atomic database-only operations, truthful post-commit reports",
+      "outstandingBefore": 191,
+      "newlyImplemented": 1,
+      "outstandingAfter": 190,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -2962,14 +2971,18 @@
       "explanation": "A provider failure while voiding is no longer swallowed: the document is not recorded as voided and no void is audited, and the sender is told with a conflict, because the envelope can still be signed at the provider."
     },
     "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT": {
-      "status": "PARTIAL",
-      "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B115-F06-R4-SIGNATURE-EXPIRY-AND-OPERATION-STATE",
       "files": [
         "apps/union-eyes/lib/signature/signature-service.ts",
-        "apps/union-eyes/lib/signature/__tests__/signature-service.test.ts"
+        "apps/union-eyes/app/api/cron/signature-expiry/route.ts",
+        "apps/union-eyes/lib/operations/scheduled-jobs.json",
+        "apps/union-eyes/db/rls-storage-authority/documents-evidence.ts",
+        "apps/union-eyes/lib/signature/__tests__/signature-service-record-signature.test.ts",
+        "apps/union-eyes/db/__tests__/signature-expiry.postgres.test.ts",
+        "apps/union-eyes/lib/signature/__tests__/signature-expiry.pglite.test.ts"
       ],
-      "explanation": "Existing implementation, verified: recordSignature refuses an expired request and enforces sequential signing order, each with a test.",
-      "remaining": "The requireAuthentication option is still stored and not enforced, and nothing sets the expired status for an internal document."
+      "explanation": "Every stored term now operates or is refused. Expiry: besides refusing an expired attempt, a cron-authenticated sweep (every 30 minutes, registered in scheduled-jobs.json) finds overdue open internal documents across organizations by system authority (a cross-organization SELECT on signature_documents only, keyset-paged and bounded) and expires each inside its own organization in one transaction with its unsettled signers lapsed, its trail event and its platform audit record; a failing document rolls back whole, is reported (and the run answers 500) while the rest are still expired, and a provider-held document is left to the provider sync. Authentication evidence the platform cannot supply is refused in every signature action: a second-factor request is not created and is not signed; a \"digital\" (certificate) or \"wet\" (physical) signature, which would be stored under a stronger name than the evidence supports, is refused before anything is read. Proven natively on PostgreSQL 15 and 16 as the system and runtime roles: the grant and policies suffice, organizations stay isolated, and an injected audit-write fault leaves the document, its signers and its trail exactly as they were."
     },
     "DEF-0B9-ORG-ROSTER-GET-ANY-ORGANIZATION-MEMBER-READS-FULL-ROSTER-WITH-CONTACT-DETAILS": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -8026,10 +8039,14 @@
         "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts",
         "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts",
         "apps/union-eyes/app/api/cba-intelligence/benchmark/[id]/route.ts",
-        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts",
+        "apps/union-eyes/app/api/admin/database/optimize/route.ts",
+        "apps/union-eyes/lib/__tests__/feature-flags.test.ts",
+        "apps/union-eyes/app/api/__tests__/admin-database-optimize.route.test.ts",
+        "apps/union-eyes/lib/signature/__tests__/signature-expiry.pglite.test.ts"
       ],
-      "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make). The two database-only operations that were still two-phase, the CBA registry seed and the benchmark snapshot, now write the change and a single hash-chained audit record in one system-scope transaction (a failed audit write rolls the whole seed or snapshot back; the seed fails fast so a swallowed statement error cannot leave an aborted transaction reporting a partial result). performAtomicAuditedOperation and performAuditedOperation gain resultDetails, so the record carries what the work did.",
-      "remaining": "Operations that act outside the database transaction stay durable two-phase records, labelled INTENT_OUTCOME in the route manifest rather than ATOMIC. Billing-cycle generation is finance-frozen and was not changed."
+      "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make). The two database-only operations that were still two-phase, the CBA registry seed and the benchmark snapshot, now write the change and a single hash-chained audit record in one system-scope transaction (a failed audit write rolls the whole seed or snapshot back; the seed fails fast so a swallowed statement error cannot leave an aborted transaction reporting a partial result). performAtomicAuditedOperation and performAuditedOperation gain resultDetails, so the record carries what the work did. Re-examined every remaining two-phase route for a single-transaction option. The platform ANALYZE, a database-only statement that was still intent/outcome, now runs with its audit record in one system-scope transaction. It also claimed database-wide statistics were updated although the system role analyzes only tables it owns (measured natively on PostgreSQL 15 and 16: 0 of 730 tables); the answer now reports the tables analyzed and skipped, and says plainly when nothing was updated. The feature-flag cache refresh no longer reports a committed change as having taken effect when the refresh failed: the refresh throws on failure (the request path keeps serving its cache), performAtomicAuditedOperation reports a failed after-commit step through afterCommitReport and records it durably as <action>.after_commit_failed, and the route answers committed / cacheRefreshed / propagationSeconds with a warning. The remaining INTENT_OUTCOME routes act outside the transaction (AI and other providers, mail, payments, queues, calendar and integration sync, PKI signing, bulk import with per-record continuation, ANALYZE-free storage reads), which is what the two-phase contract is for.",
+      "remaining": "Billing-cycle generation is finance-frozen and was not changed. Operations whose effect is outside our database remain durable two-phase records by nature. The PKI workflow cancel acts on an in-process store and is a separate capability defect. The bootstrap-v2 source-plan commitments for the changed pilot overview and database optimize routes need regenerating with the Python wheelhouse (UE_V2_WHEELHOUSE) at admission."
     },
     "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
