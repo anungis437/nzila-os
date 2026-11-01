@@ -8,8 +8,9 @@ const h = vi.hoisted(() => {
     eventsLog: [] as Array<Record<string, unknown>>,
   };
   const auditLog = vi.fn();
+  const requireLiveFinancialMandate = vi.fn();
   const getActiveContract = vi.fn();
-  return { state, auditLog, getActiveContract };
+  return { state, auditLog, getActiveContract, requireLiveFinancialMandate };
 });
 
 type Predicate = (row: Record<string, unknown>) => boolean;
@@ -66,6 +67,9 @@ vi.mock('drizzle-orm', async (orig) => ({
 }));
 
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.auditLog }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: h.requireLiveFinancialMandate,
+}));
 vi.mock('@/lib/db/with-rls-context', async () => ({
   withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import('@/db')).db),
 }));
@@ -94,6 +98,7 @@ beforeEach(() => {
   h.auditLog.mockReset();
   h.auditLog.mockResolvedValue(undefined);
   h.getActiveContract.mockReset();
+  h.requireLiveFinancialMandate.mockReset().mockResolvedValue({ ledgerWide: true, resourceIds: [] });
 });
 
 describe('platform-economics/subscription-lifecycle-service', () => {
@@ -179,6 +184,17 @@ describe('platform-economics/subscription-lifecycle-service', () => {
   });
 
   describe('pauseSubscription — org-scoped (PR #752 IDOR fix)', () => {
+    it('refuses a missing resource execute mandate before any status, event or audit write', async () => {
+      setSubs([{ id: 'sub-1', organizationId: ORG_A, status: 'active' }]);
+      h.requireLiveFinancialMandate.mockRejectedValueOnce(new Error('DUTY_NOT_HELD'));
+      await expect(pauseSubscription(ORG_A, 'sub-1', 'user-1')).rejects.toThrow('DUTY_NOT_HELD');
+      expect(h.requireLiveFinancialMandate).toHaveBeenCalledWith(expect.anything(), {
+        organizationId: ORG_A, userId: 'user-1', action: 'finance:execute', resourceId: 'sub-1',
+      });
+      expect(h.state.subs[0]!.status).toBe('active');
+      expect(h.state.eventsLog).toEqual([]);
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
     it('an org A caller pauses its own active subscription', async () => {
       setSubs([{ id: 'sub-1', organizationId: ORG_A, status: 'active' }]);
       const action = await pauseSubscription(ORG_A, 'sub-1', 'user-1', 'maintenance');
@@ -210,6 +226,17 @@ describe('platform-economics/subscription-lifecycle-service', () => {
   });
 
   describe('resumeSubscription — org-scoped (PR #752 IDOR fix)', () => {
+    it('refuses a missing resource execute mandate before any status, event or audit write', async () => {
+      setSubs([{ id: 'sub-1', organizationId: ORG_A, status: 'paused' }]);
+      h.requireLiveFinancialMandate.mockRejectedValueOnce(new Error('FINANCIAL_MANDATES_NOT_ISSUED'));
+      await expect(resumeSubscription(ORG_A, 'sub-1', 'user-1')).rejects.toThrow('FINANCIAL_MANDATES_NOT_ISSUED');
+      expect(h.requireLiveFinancialMandate).toHaveBeenCalledWith(expect.anything(), {
+        organizationId: ORG_A, userId: 'user-1', action: 'finance:execute', resourceId: 'sub-1',
+      });
+      expect(h.state.subs[0]!.status).toBe('paused');
+      expect(h.state.eventsLog).toEqual([]);
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
     it('an org A caller resumes its own paused subscription', async () => {
       setSubs([{ id: 'sub-1', organizationId: ORG_A, status: 'paused' }]);
       const action = await resumeSubscription(ORG_A, 'sub-1', 'user-1');

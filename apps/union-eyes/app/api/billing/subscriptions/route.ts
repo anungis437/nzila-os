@@ -62,13 +62,8 @@ export const POST = withApi(
   },
   async ({ body, userId, organizationId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    // Authorize the particular subscription before any service call. The service
-    // must independently enforce tenant scope when applying the transition.
-    await withRLSContext({ organizationId, userId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, {
-        organizationId, userId, action: 'finance:execute', resourceId: body.subscriptionId,
-      });
-    });
+    // The service checks the live resource mandate inside the very transaction
+    // that changes status and writes the event and audit. No preflight gap.
     if (body.action === 'pause') {
       const result = await pauseSubscription(organizationId, body.subscriptionId, userId!, body.reason);
       return { ...result };

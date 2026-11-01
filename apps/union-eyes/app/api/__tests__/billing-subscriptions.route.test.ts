@@ -108,10 +108,8 @@ describe('billing/subscriptions route', () => {
 
     expect(result).toMatchObject({ ok: true, status: 'paused' });
     expect(m.pauseSubscription).toHaveBeenCalledWith('org_1', '11111111-1111-1111-1111-111111111111', 'u1', 'maintenance');
-    expect(m.requireLiveFinancialMandate).toHaveBeenCalledWith(m.db, {
-      organizationId: 'org_1', userId: 'u1', action: 'finance:execute',
-      resourceId: '11111111-1111-1111-1111-111111111111',
-    });
+    // The mandate is enforced in the service's mutation transaction, not in a preflight.
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
   });
 
   it('POST resumes subscription when action is resume, scoped to the callers organization (PR #752 IDOR fix)', async () => {
@@ -125,21 +123,21 @@ describe('billing/subscriptions route', () => {
 
     expect(result).toMatchObject({ ok: true, status: 'active' });
     expect(m.resumeSubscription).toHaveBeenCalledWith('org_1', '11111111-1111-1111-1111-111111111111', 'u1');
-    expect(m.requireLiveFinancialMandate).toHaveBeenCalledWith(m.db, {
-      organizationId: 'org_1', userId: 'u1', action: 'finance:execute',
-      resourceId: '11111111-1111-1111-1111-111111111111',
-    });
+    // The mandate is enforced in the service's mutation transaction, not in a preflight.
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
   });
 
-  it.each(['pause', 'resume'])('POST refuses %s without a resource-scoped execute mandate', async (action) => {
+  it.each(['pause', 'resume'])('POST propagates service refusal for %s without a resource-scoped execute mandate', async (action) => {
     const { POST } = await loadRoute();
-    m.requireLiveFinancialMandate.mockRejectedValueOnce(new Error('DUTY_NOT_HELD'));
+    (action === 'pause' ? m.pauseSubscription : m.resumeSubscription)
+      .mockRejectedValueOnce(new Error('DUTY_NOT_HELD'));
     await expect(POST({
       body: { subscriptionId: '11111111-1111-1111-1111-111111111111', action },
       userId: 'u1', organizationId: 'org_1',
     })).rejects.toThrow('DUTY_NOT_HELD');
-    expect(m.pauseSubscription).not.toHaveBeenCalled();
-    expect(m.resumeSubscription).not.toHaveBeenCalled();
+    expect(action === 'pause' ? m.pauseSubscription : m.resumeSubscription).toHaveBeenCalledTimes(1);
+    expect(action === 'pause' ? m.resumeSubscription : m.pauseSubscription).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
   });
 
   it('GET requires the caller identity even with an organization context', async () => {

@@ -1272,5 +1272,19 @@
       "result": "FAIL (33 HTTP steps recorded; every functional step passed; the final health step fails catalog admission, R-46)",
       "separateFrom": "the synthetic-session runtime evidence; never merged"
     }
+  },
+  "supplementalSourceEvidence": {
+    "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-subscription-atomic-mandate-transition-20261101.md",
+      "files": [
+        "apps/union-eyes/services/platform-economics/subscription-lifecycle-service.ts",
+        "apps/union-eyes/app/api/billing/subscriptions/route.ts",
+        "apps/union-eyes/services/platform-economics/__tests__/subscription-lifecycle-service.test.ts",
+        "apps/union-eyes/app/api/__tests__/billing-subscriptions.route.test.ts"
+      ],
+      "correction": "Pause and resume now check finance:execute on the particular subscription inside the same tenant-RLS transaction as the conditional status transition, event and atomic audit; route preflight removed. Service refuses missing or unrelated mandate before writes.",
+      "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16 concurrency and tenant-role tests, HTTP/browser/staging, provider reconciliation, independent reviewer and institutional persona/authority ratification. No additional implementation or CLOSED credit."
+    }
   }
 }

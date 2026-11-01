@@ -16,6 +16,7 @@ import {
 import { eq, and, lte, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { getActiveContract } from './contract-service';
 
 // ============================================================================
@@ -152,7 +153,12 @@ export async function pauseSubscription(
   reason?: string,
 ): Promise<SubscriptionAction> {
   // The status change, the event-log row and the audit record commit together.
-  return withRLSContext({ organizationId }, async (tx) => {
+  return withRLSContext({ organizationId, userId: pausedBy }, async (tx) => {
+    // Authority and mutation share the same tenant transaction. A route-level
+    // preflight cannot authorize a later independent service transaction.
+    await requireLiveFinancialMandate(tx, {
+      organizationId, userId: pausedBy, action: 'finance:execute', resourceId: subscriptionId,
+    });
     const [sub] = await tx
       .update(orgSubscriptions)
       .set({ status: 'paused', updatedAt: new Date() })
@@ -209,7 +215,10 @@ export async function resumeSubscription(
   subscriptionId: string,
   resumedBy: string,
 ): Promise<SubscriptionAction> {
-  return withRLSContext({ organizationId }, async (tx) => {
+  return withRLSContext({ organizationId, userId: resumedBy }, async (tx) => {
+    await requireLiveFinancialMandate(tx, {
+      organizationId, userId: resumedBy, action: 'finance:execute', resourceId: subscriptionId,
+    });
     const [sub] = await tx
       .update(orgSubscriptions)
       .set({ status: 'active', updatedAt: new Date() })
