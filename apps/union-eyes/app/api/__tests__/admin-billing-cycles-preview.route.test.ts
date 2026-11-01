@@ -32,7 +32,7 @@ describe('admin/billing-cycles/preview route', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.requireBillingCycleAuthority.mockResolvedValue(undefined);
     m.BillingCycleService.calculatePeriodDates.mockReturnValue({ periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') });
-    m.BillingCycleService.generateBillingCycle.mockResolvedValue({ cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
+    m.BillingCycleService.generateBillingCycle.mockResolvedValue({ success: true, cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -97,4 +97,22 @@ describe('admin/billing-cycles/preview route', () => {
 
     expect(response.status).toBe(500);
   });
+  it('returns 422 and explicit failure when a preview cannot calculate every member', async () => {
+    const { POST } = await loadRoute();
+    m.BillingCycleService.generateBillingCycle.mockResolvedValueOnce({
+      success: false, transactionsCreated: 0, totalAmount: 0,
+      members: { processed: 1, success: 0, failed: 1, skipped: 0 },
+      errors: [{ memberId: 'member-1', error: 'missing wage data' }],
+    });
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
+    }));
+    const payload = await response.json();
+    expect(response.status).toBe(422);
+    expect(payload).toMatchObject({ preview: true, success: false });
+    expect(payload.errors).toHaveLength(1);
+    expect(m.BillingCycleService.generateBillingCycle).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true }));
+  });
+
 });
