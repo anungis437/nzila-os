@@ -27,6 +27,20 @@ describe('Gate 0: stored organization security settings must not masquerade as e
     expect(put).toContain('await persistAtomicAudit(tx,');
   });
 
+  it('does not invent billing prices, paid invoices, or functional payment actions', () => {
+    const screen = source('app/[locale]/dashboard/settings/_components/org-settings-content.tsx');
+    const billing = screen.slice(screen.indexOf('activeSection === "billing"'));
+    expect(billing).toContain('Billing records unavailable on this page');
+    expect(billing).toContain('Facturation non disponible sur cette page');
+    expect(billing).toContain('No authoritative billing source is connected');
+    expect(billing).not.toContain('$299');
+    expect(billing).not.toContain('Dec 1, 2024');
+    expect(billing).not.toContain('Nov 1, 2024');
+    expect(billing).not.toContain('Download December 2024 invoice');
+    expect(billing).not.toContain("t('settings.paid')");
+    expect(billing).not.toContain("t('settings.update')");
+  });
+
   it('keeps the warning visible after reload and refuses to claim a failed save succeeded', () => {
     const screen = source('app/[locale]/dashboard/settings/_components/org-settings-content.tsx');
     expect(screen).toContain('setNotEnforced(Array.isArray(json.data.notEnforced)');
