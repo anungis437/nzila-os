@@ -18,6 +18,12 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Provider tokens are stored sealed (B91); a deterministic stand-in for the secret service keeps these tests free of key material.
+vi.mock('@/lib/encryption', () => ({
+  encryptSecret: async (value: string) => `sealed(${value})`,
+  decryptSecret: async (value: string) => value.replace(/^sealed\((.*)\)$/, '$1'),
+}));
+
 interface FakeAccount {
   id: string;
   organizationId: string;
@@ -161,7 +167,7 @@ describe('round 37: cross-org OAuth account boundary (negative tests 1, 2, 4)', 
 
     const legit = accounts.find((a) => a.id === 'legit-account')!;
     const rogue = accounts.find((a) => a.id === 'rogue-account')!;
-    expect(legit.accessToken).toBe('rotated-meta-token');
+    expect(legit.accessToken).toBe('enc:v1:sealed(rotated-meta-token)');
     // Rogue (org A) stays untouched even though it exists in the same fake db.
     expect(rogue.accessToken).toBe('rogue-access-token');
   });

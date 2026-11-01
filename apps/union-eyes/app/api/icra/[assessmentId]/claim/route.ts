@@ -10,14 +10,17 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isAssessmentId } from '@/lib/icra/assessment-id'
 import { z } from 'zod';
-import { and, eq, gt, isNull, or } from 'drizzle-orm';
+import { and, eq, gt, isNull, or, sql } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import { isClaimExpired } from '@/lib/icra/claim-tokens';
+import { clearCapabilityCookie } from '@/lib/icra/assessment-capability';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +35,7 @@ export async function POST(
   { params }: { params: Promise<{ assessmentId: string }> },
 ) {
   const { assessmentId } = await params;
+  if (!isAssessmentId(assessmentId)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
 
   const { userId } = await auth();
   if (!userId) {
@@ -63,6 +67,20 @@ export async function POST(
     );
   }
 
+  // Claiming binds a paid assessment to the organization, so it is an act of that organization's administration: holding the token and
+  // any active membership is not enough.
+  if (!(await hasMinRole('admin'))) {
+    return NextResponse.json({ error: 'Claiming an assessment requires an organization administrator' }, { status: 403 });
+  }
+
+  // The claim is the purchaser's: the paid-tier webhook records the buyer's e-mail on the assessment, and the claiming account's own
+  // verified e-mail must be that address. Holding the token and administering some organization is not enough, and an assessment whose
+  // purchaser was not recorded cannot be verified, so it is not claimed here.
+  const claimantEmail = ((await getCurrentUser().catch(() => null))?.email ?? '').trim().toLowerCase();
+  if (!claimantEmail) {
+    return NextResponse.json({ error: 'A verified account e-mail is required to claim an assessment' }, { status: 403 });
+  }
+
   try {
     return await withSystemContext(async (tx) => {
     const claimedAt = new Date();
@@ -75,6 +93,9 @@ export async function POST(
         claimedAt,
         claimToken: null,
         claimTokenExpiresAt: null,
+        // The same write withdraws the bearer capability: from this instant the old link/cookie holder is not the owner.
+        capabilityTokenHash: null,
+        capabilityTokenExpiresAt: null,
       })
       .where(
         and(
@@ -82,6 +103,7 @@ export async function POST(
           eq(icraAssessments.claimToken, claimToken),
           isNull(icraAssessments.claimedAt),
           or(isNull(icraAssessments.claimTokenExpiresAt), gt(icraAssessments.claimTokenExpiresAt, claimedAt)),
+          sql`lower(${icraAssessments.claimEmail}) = ${claimantEmail}`,
         ),
       )
       .returning({ id: icraAssessments.id });
@@ -93,12 +115,14 @@ export async function POST(
         action: 'icra.assessment.claim',
         resourceType: 'icra_assessments',
         resourceId: assessmentId,
-        details: { claimedAt: claimedAt.toISOString() },
+        details: { claimedAt: claimedAt.toISOString(), purchaserEmailMatched: true },
       });
 
       logger.info('[icra-claim] Assessment claimed', { assessmentId, userId, orgId });
 
-      return NextResponse.json({ ok: true, assessmentId, organizationId: orgId });
+      const claimedResponse = NextResponse.json({ ok: true, assessmentId, organizationId: orgId });
+      clearCapabilityCookie(claimedResponse, assessmentId);
+      return claimedResponse;
     }
 
     const [row] = await tx
@@ -107,6 +131,7 @@ export async function POST(
         claimToken: icraAssessments.claimToken,
         claimTokenExpiresAt: icraAssessments.claimTokenExpiresAt,
         claimedAt: icraAssessments.claimedAt,
+        claimEmail: icraAssessments.claimEmail,
       })
       .from(icraAssessments)
       .where(
@@ -124,6 +149,13 @@ export async function POST(
 
     if (isClaimExpired(row.claimTokenExpiresAt)) {
       return NextResponse.json({ error: 'Claim token expired' }, { status: 410 });
+    }
+
+    if ((row.claimEmail ?? '').trim().toLowerCase() !== claimantEmail) {
+      return NextResponse.json(
+        { error: 'This assessment was purchased with a different e-mail address. Sign in with the purchasing account to claim it.' },
+        { status: 403 },
+      );
     }
 
     // Lost a race with a concurrent claim that consumed the token between the write and this read.

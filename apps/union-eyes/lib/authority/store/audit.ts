@@ -89,6 +89,12 @@ export interface AuditReconciliation {
  * event must be named by a canonical audit row, every id an authority audit row
  * names must be a real event, and the organization's hash chain must be intact
  * (each row's previous_hash equals the prior row's content_hash).
+ *
+ * This is an integrity check and must read every event, so it runs as the
+ * migration owner or another role that bypasses row-level security. Run as the
+ * tenant runtime role it sees only the events that role may read: since cache 0047
+ * an event of a governance review is hidden from a principal who has no part in
+ * that review, and an audit row naming such an event would be reported as unknown.
  */
 export async function reconcileAuthorityAudit(exec: SqlExecutor, organizationId: string): Promise<AuditReconciliation> {
   const missing = await exec.query<{ id: string }>(

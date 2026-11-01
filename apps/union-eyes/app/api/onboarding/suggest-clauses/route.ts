@@ -5,8 +5,11 @@
  * 
  * Suggest relevant clauses based on:
  * - Parent organization hierarchy
- * - Sector/province similarity
- * - Sharing level availability
+ * - Sector and province (filters: the suggestions are for the organization's own sector and province)
+ * - How the clause reached the organization (public, or shared with it)
+ *
+ * Only clauses the organization may already read are suggested (lib/utils/smart-onboarding.ts); a clause whose source is anonymized or
+ * unclassified is offered without naming its owner.
  */
 
 import { z } from 'zod';
@@ -14,7 +17,7 @@ import { NextResponse } from 'next/server';
 import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { suggestRelevantClauses } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
-import { eventBus, AppEvents } from '@/lib/events';
+import { recordOnboardingRead } from '@/lib/utils/onboarding-read-audit';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
  
@@ -28,7 +31,7 @@ const onboardingSuggestClausesSchema = z.object({
 });
 
 export const POST = withRoleAuth('officer' as MemberRole, async (request, context) => {
-  const { userId, organizationId: _organizationId } = context;
+  const { userId, organizationId } = context;
 
   try {
     const rateLimit = await checkRateLimit(userId, RATE_LIMITS.ONBOARDING);
@@ -54,7 +57,14 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       );
     }
     
-    const { organizationId: reqOrgId } = validation.data;
+    // Suggestions are drawn for the caller's own organization; another organization named in the body reads as not found.
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+    }
+    if (validation.data.organizationId !== organizationId) {
+      return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Organization not found');
+    }
+    const reqOrgId = organizationId;
 
     const suggestions = await suggestRelevantClauses(reqOrgId);
 
@@ -64,13 +74,7 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       suggestionCount: suggestions.length,
     });
 
-    // Emit audit event
-    eventBus.emit(AppEvents.AUDIT_LOG, {
-      userId,
-      action: 'clause_suggestions',
-      resource: 'onboarding',
-      details: { organizationId: reqOrgId, suggestionCount: suggestions.length },
-    });
+    await recordOnboardingRead({ organizationId: reqOrgId, userId }, 'onboarding.clause_suggestions', { suggestionCount: suggestions.length });
 
     return NextResponse.json({
       success: true,

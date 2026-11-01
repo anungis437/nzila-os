@@ -8,20 +8,19 @@
  * lib/clause-library/sharing-authority.ts.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { organizations, congressMemberships } from '@/db/schema';
-import { eq, ilike, or, and } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { buildClauseVisibilityCondition } from '@/lib/clause-library/sharing-authority';
+import { ilike, or, and } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { buildClauseVisibilityCondition, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
 async function searchClauses(q: string, organizationId: string) {
-  return withSystemContext(async () => {
+  return withRLSContext({ organizationId }, async (tx) => {
     const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
 
-    const rows = await db
+    const rows = await tx
       .select({
         id: sharedClauseLibrary.id,
         clauseNumber: sharedClauseLibrary.clauseNumber,
@@ -29,20 +28,12 @@ async function searchClauses(q: string, organizationId: string) {
         clauseText: sharedClauseLibrary.clauseText,
         clauseType: sharedClauseLibrary.clauseType,
         sharingLevel: sharedClauseLibrary.sharingLevel,
+        isAnonymized: sharedClauseLibrary.isAnonymized,
         sector: sharedClauseLibrary.sector,
         province: sharedClauseLibrary.province,
         sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-        organizationName: organizations.name,
       })
       .from(sharedClauseLibrary)
-      .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
-      .leftJoin(
-        congressMemberships,
-        and(
-          eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
-          eq(congressMemberships.status, 'active'),
-        ),
-      )
       .where(and(
         visibilityCondition,
         or(
@@ -52,6 +43,7 @@ async function searchClauses(q: string, organizationId: string) {
       ))
       .limit(50);
 
+    const sourceNames = await sourceNamesFor(rows, organizationId);
     return rows.map((r) => ({
       id: r.id,
       clauseNumber: r.clauseNumber,
@@ -61,7 +53,7 @@ async function searchClauses(q: string, organizationId: string) {
       sharingLevel: r.sharingLevel,
       sector: r.sector,
       province: r.province,
-      sourceOrganization: { id: r.sourceOrganizationId, organizationName: r.organizationName },
+      sourceOrganization: clauseSourceProjection({ ...r, organizationName: sourceNames.get(r.sourceOrganizationId) ?? null }, organizationId),
     }));
   });
 }

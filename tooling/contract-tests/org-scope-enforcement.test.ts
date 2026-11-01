@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import { APP_REGISTRY } from '@nzila/platform-contracts/registry'
 
 import { isRetiredNoOpRoute } from './retired-routes'
+import { isReexportAliasOfAcceptedRoute } from './route-aliases'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -98,6 +99,32 @@ describe('Org-scope enforcement patterns', () => {
     (a) => a.requiresOrgScope,
   )
 
+  // The org-scope guards this contract accepts in a route's own text.
+  const hasOrgGuardIn = (content: string) =>
+    isRetiredNoOpRoute(content) ||
+    content.includes('withOrgScope') ||
+    content.includes('requireOrgAccess') ||
+    /await\s+getCaseActor\s*\(/.test(content) ||
+    content.includes('requireVerifiedOrgAccess') ||   // ABR CourtLens — Phase 2C.6
+    content.includes('requireVerifiedPermission') ||  // ABR CourtLens — Phase 2C.6
+    content.includes('resolveOrgContext') ||
+    content.includes('withApi(') ||
+    content.includes('withApiAuth(') ||
+    content.includes('withRoleAuth(') ||
+    content.includes('crudRoutes(') ||
+    content.includes('requireApiAuth(') ||
+    content.includes('withOrganizationAuth(') ||
+    content.includes('withExternalMatterResourceAuth(') ||
+    content.includes('getCurrentUser(') ||
+    content.includes('withMinRole(') ||
+    content.includes('requireUser(') ||
+    content.includes('authenticateUser(') ||
+    content.includes('verifyWebhookSignature(') ||
+    content.includes('auth()') ||
+    content.includes('getAuth(') ||
+    content.includes('requirePlatformRole(') ||
+    content.includes('cognitionRoute(')
+
   it('ORG-ENFC-001: org-scoped apps use withOrgScope or requireOrgAccess in API routes', () => {
     const violations: string[] = []
 
@@ -109,30 +136,10 @@ describe('Org-scope enforcement patterns', () => {
       for (const route of routes) {
         if (isExemptRoute(route)) continue
         const content = readFileSync(route, 'utf-8')
+        // A route that only re-exports another route is as guarded as that route: one this contract accepts, or one it already exempts.
         const hasOrgGuard =
-          isRetiredNoOpRoute(content) ||
-          content.includes('withOrgScope') ||
-          content.includes('requireOrgAccess') ||
-          /await\s+getCaseActor\s*\(/.test(content) ||
-          content.includes('requireVerifiedOrgAccess') ||   // ABR CourtLens — Phase 2C.6
-          content.includes('requireVerifiedPermission') ||  // ABR CourtLens — Phase 2C.6
-          content.includes('resolveOrgContext') ||
-          content.includes('withApi(') ||
-          content.includes('withApiAuth(') ||
-          content.includes('withRoleAuth(') ||
-          content.includes('crudRoutes(') ||
-          content.includes('requireApiAuth(') ||
-          content.includes('withOrganizationAuth(') ||
-          content.includes('withExternalMatterResourceAuth(') ||
-          content.includes('getCurrentUser(') ||
-          content.includes('withMinRole(') ||
-          content.includes('requireUser(') ||
-          content.includes('authenticateUser(') ||
-          content.includes('verifyWebhookSignature(') ||
-          content.includes('auth()') ||
-          content.includes('getAuth(') ||
-          content.includes('requirePlatformRole(') ||
-          content.includes('cognitionRoute(')
+          hasOrgGuardIn(content) ||
+          isReexportAliasOfAcceptedRoute(route, content, (file, text) => isExemptRoute(file) || hasOrgGuardIn(text))
         if (!hasOrgGuard) {
           const rel = route.replace(APPS_DIR, '').replace(/\\/g, '/')
           violations.push(`${app.id}: ${rel} — no org-scope guard`)
@@ -190,8 +197,30 @@ describe('Org-scope enforcement patterns', () => {
         continue
       }
       const mw = readFileSync(mwPath, 'utf-8')
-      if (!mw.includes('checkOrgRateLimit') && !mw.includes('orgRateLimit')) {
+      // Union Eyes replaced the header-keyed org limiter (dead behind an early return and forgeable: a client could omit or forge
+      // x-org-id) with an edge guard keyed on the presented credential and client address (lib/rate-limit/proxy-api-guard.ts, R-31),
+      // and it applies the verified-organization bucket inside withApi. The other apps keep the original pattern.
+      const edgeGuard = mw.includes('decideApiLimit')
+      if (!edgeGuard && !mw.includes('checkOrgRateLimit') && !mw.includes('orgRateLimit')) {
         violations.push(`${app.id}: proxy.ts missing org-scoped rate limiting`)
+      }
+      if (edgeGuard) {
+        const guardPath = join(APPS_DIR, app.id, 'lib', 'rate-limit', 'proxy-api-guard.ts')
+        if (!existsSync(guardPath)) {
+          violations.push(`${app.id}: proxy.ts uses decideApiLimit but lib/rate-limit/proxy-api-guard.ts is missing`)
+        } else {
+          const code = readFileSync(guardPath, 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+          if (/x-org-id|x-organization-id/i.test(code)) {
+            violations.push(`${app.id}: the edge rate-limit guard must not key a bucket on a client-supplied organization header`)
+          }
+        }
+        if (/headers\.get\(\s*['"]x-org-id['"]\s*\)/i.test(mw)) {
+          violations.push(`${app.id}: proxy.ts must not read a rate-limit key from the x-org-id request header`)
+        }
+        const framework = join(APPS_DIR, app.id, 'lib', 'api', 'with-api.ts')
+        if (!existsSync(framework) || !readFileSync(framework, 'utf-8').includes('DEFAULT_API_ORG')) {
+          violations.push(`${app.id}: withApi must apply the verified-organization default rate limit (DEFAULT_API_ORG)`)
+        }
       }
     }
 

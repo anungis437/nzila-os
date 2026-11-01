@@ -19,6 +19,7 @@ const m = vi.hoisted(() => {
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
       limit: vi.fn(() => chain),
+      offset: vi.fn(() => chain),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;

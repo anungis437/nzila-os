@@ -1,129 +1,120 @@
 /**
  * SCIM 2.0 Users endpoint
- * GET /api/scim/v2/[organizationId]/Users — list users in SCIM format
- * POST /api/scim/v2/[organizationId]/Users — provision a new user
+ * GET  /api/scim/v2/[organizationId]/Users — the people this organization's directory holds, one page at a time, or one person by filter
+ *                                            (userName eq "x" or externalId eq "x"; any other filter is a 400)
+ * POST /api/scim/v2/[organizationId]/Users — provision a person: pending, never active, not linked to anyone's account, not a member
+ * One person: GET, PATCH, PUT and DELETE on Users/[id] (deprovision by the organization's own configured action).
+ *
+ * The caller is an identity provider, not a signed-in person (lib/scim/route-support.ts): the route declares the SCIM bearer token as its machine
+ * credential, so the framework verifies it and reads no session. The tenant connection needs a session user and the system role holds no INSERT on
+ * the membership table, so the people a stream provisions are rows of their own directory (public.scim_provisioned_users, platform 0059) that only
+ * the system role reaches (lib/scim/provisioned-members.ts). Answers are SCIM resources and SCIM errors (lib/scim/responses.ts), not the framework's
+ * envelope, because that is what an identity provider reads.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withApi } from '@/lib/api/framework';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { recordScimEvent, scimTraceOf } from '@/lib/scim/events-log';
+import { parseScimFilter } from '@/lib/scim/filter';
+import { findScimMembers, listScimMembers, provisionScimMember, toScimUser, type ScimMember } from '@/lib/scim/provisioned-members';
+import { handleScim, ScimHttpError, scimJson } from '@/lib/scim/responses';
+import { scimCaller, scimLocation } from '@/lib/scim/route-support';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { organizationMembers } from '@/db/schema/organization-members-schema';
-import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
-function toScimUser(member: typeof organizationMembers.$inferSelect) {
-  const parts = (member.name ?? '').split(' ');
-  const givenName = parts[0] ?? '';
-  const familyName = parts.slice(1).join(' ') ?? '';
-  return {
-    schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
-    id: member.id,
-    userName: member.email ?? member.userId,
-    name: {
-      givenName,
-      familyName,
-      formatted: member.name ?? '',
-    },
-    emails: member.email
-      ? [{ value: member.email, primary: true, type: 'work' }]
-      : [],
-    active: member.status === 'active',
-    meta: {
-      resourceType: 'User',
-      created: member.joinedAt ?? member.createdAt,
-      lastModified: member.updatedAt,
-    },
-  };
-}
+const LIST_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:ListResponse';
+
+// A provisioning request is bounded, typed input. Malformed or oversized input is a 400 naming the field, not a 500 from a failed insert.
+const provisionSchema = z.object({
+  userName: z.string().trim().min(1).max(320),
+  // The identity provider's own identifier for the person (SCIM core attribute externalId).
+  externalId: z.string().trim().min(1).max(255).optional(),
+  name: z.object({ givenName: z.string().trim().max(100).optional(), familyName: z.string().trim().max(100).optional() }).optional(),
+  emails: z.array(z.object({ value: z.string().trim().email().max(320), primary: z.boolean().optional() })).max(10).optional(),
+});
+
+const listResponse = (organizationId: string, members: ScimMember[], total: number, startIndex: number) => ({
+  schemas: [LIST_SCHEMA],
+  totalResults: total,
+  startIndex,
+  itemsPerPage: members.length,
+  Resources: members.map((member) => toScimUser(member, scimLocation(organizationId, member.id))),
+});
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { machine: scimCaller },
     openapi: {
       tags: ['Auth'],
       summary: 'SCIM list users',
-      description: 'Returns organization members in SCIM 2.0 format.',
+      description: 'Returns the people this SCIM stream provisioned in SCIM 2.0 format, or the one person a userName or externalId filter names.',
     },
   },
-  async ({ params, request, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-    // An administrator lists only the organization they are acting in, whatever the path names.
-    if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
-    const orgId = organizationId;
-    const url = new URL(request.url);
-    const startIndex = Math.max(1, parseInt(url.searchParams.get('startIndex') || '1', 10));
-    const count = Math.min(100, parseInt(url.searchParams.get('count') || '50', 10));
+  async ({ request, machine }) =>
+    handleScim(async () => {
+      const ref = { configurationId: machine.configurationId, organizationId: machine.organizationId };
+      const url = new URL(request.url);
+      const filter = parseScimFilter(url.searchParams.get('filter'));
+      if (filter) {
+        const found = await withSystemContext((tx) => findScimMembers(tx, ref, filter));
+        return scimJson(listResponse(ref.organizationId, found, found.length, 1));
+      }
 
-    const members = await db
-      .select()
-      .from(organizationMembers)
-      .where(eq(organizationMembers.organizationId, orgId));
-
-    const paged = members.slice(startIndex - 1, startIndex - 1 + count);
-
-    return {
-        schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
-        totalResults: members.length,
-        startIndex,
-        itemsPerPage: paged.length,
-        Resources: paged.map(toScimUser),
-      };
-  },
+      const startIndex = Math.max(1, Number.parseInt(url.searchParams.get('startIndex') || '1', 10) || 1);
+      const count = Math.min(100, Math.max(0, Number.parseInt(url.searchParams.get('count') || '50', 10) || 0));
+      // A removed person is not a user of the organization, and the page is read in SQL with the count, not by loading the whole directory.
+      const { total, members } = await withSystemContext((tx) => listScimMembers(tx, ref, { startIndex, count }));
+      return scimJson(listResponse(ref.organizationId, members, total, startIndex));
+    }),
 );
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { machine: scimCaller },
     openapi: {
       tags: ['Auth'],
       summary: 'SCIM create user',
-      description: 'Provisions a new user in the organization via SCIM 2.0.',
+      description: 'Provisions a person in the organization via SCIM 2.0. The person is pending and is not linked to an account.',
     },
   },
-  async ({ params, request, organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    // An administrator provisions users only into the organization they are acting in.
-    if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
-    const body = await request.json();
-    const { userName, name, emails } = body as {
-      userName: string;
-      name?: { givenName?: string; familyName?: string };
-      emails?: Array<{ value: string; primary?: boolean }>;
-    };
+  async ({ request, machine }) =>
+    handleScim(async () => {
+      const organizationId = machine.organizationId;
+      if (!machine.syncUsers) throw new ScimHttpError(403, 'User provisioning is not enabled for this organization');
+      const parsed = provisionSchema.safeParse(await request.json().catch(() => null));
+      if (!parsed.success) {
+        throw new ScimHttpError(400, `Invalid SCIM user: ${parsed.error.issues.map((i) => i.path.join('.') || 'body').join(', ')}`, 'invalidValue');
+      }
+      const { userName, externalId, name, emails } = parsed.data;
 
-    if (!userName) {
-      throw ApiError.badRequest('userName is required');
-    }
+      const primaryEmail = emails?.find((e) => e.primary)?.value ?? emails?.[0]?.value;
 
-    const primaryEmail = emails?.find((e) => e.primary)?.value ?? emails?.[0]?.value;
+      // Nothing is invented for what the identity provider did not send: no name falls back to the userName and no e-mail address is guessed.
+      const fullName = [name?.givenName, name?.familyName].filter(Boolean).join(' ') || null;
+      const trace = scimTraceOf(request);
+      const ref = { configurationId: machine.configurationId, organizationId };
 
-    const fullName = [name?.givenName, name?.familyName].filter(Boolean).join(' ') || userName;
+      const member = await withSystemContext(async (tx) => {
+        // The IdP names a person; it does not assert that person's platform identity. The person is a pending directory entry (naming a user does not
+        // give that user access and does not make them a member) until a verified binding exists; see SCIM_MEMBER_LINK.
+        const { outcome, member: provisioned } = await provisionScimMember(tx, ref, { userName, externalId, name: fullName, email: primaryEmail ?? null });
+        if (outcome === 'exists') throw new ScimHttpError(409, 'A user with this userName already exists in the organization', 'uniqueness');
+        if (outcome === 'external_id_conflict') throw new ScimHttpError(409, 'Another user of the organization already has this externalId', 'uniqueness');
+        if (!provisioned) throw new Error('SCIM provisioning returned no member');
 
-    return withRLSContext({ organizationId }, async (tx) => {
-      const [created] = await tx
-        .insert(organizationMembers)
-        .values({
+        await persistAtomicAudit(tx, {
           organizationId,
-          userId: userName,
-          email: primaryEmail ?? userName,
-          name: fullName,
-          role: 'member',
-          status: 'active',
-        })
-        .onConflictDoNothing()
-        .returning();
-      if (!created) throw ApiError.conflict('A user with this userName already exists in the organization');
-
-      await persistAtomicAudit(tx, {
-        organizationId,
-        userId,
-        action: 'scim.user.provision',
-        resourceType: 'organization_members',
-        resourceId: created.id,
-        details: { provisionedUserName: userName },
+          userId: `system:scim:${machine.configurationId}`,
+          action: outcome === 'created' ? 'scim.user.provision' : 'scim.user.reprovision',
+          resourceType: 'scim_provisioned_users',
+          resourceId: provisioned.id,
+          details: { provisionedUserName: userName, ...(externalId ? { externalId } : {}), outcome },
+        });
+        await recordScimEvent(tx, ref, trace, { eventType: 'user.created', resourceId: provisioned.id, operation: 'POST', statusCode: 201 });
+        return provisioned;
       });
-      return toScimUser(created);
-    });
-  },
+      const location = scimLocation(organizationId, member.id);
+      return scimJson(toScimUser(member, location), 201, location ? { Location: location } : {});
+    }),
 );

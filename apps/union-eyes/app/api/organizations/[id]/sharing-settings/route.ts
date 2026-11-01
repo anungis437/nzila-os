@@ -1,28 +1,26 @@
 /**
- * CRUD item route for organizations
+ * GET organization sharing settings — explicitly unavailable until the canonical domain
+ * workflow is implemented. The former route returned an unrelated full
+ * organizations row through generic CRUD and exposed PATCH/DELETE handlers.
+ * No organization row may be read or modified through this alias.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { organizations } from '@/db/schema';
-import { requireOwnOrganizationItem } from '@/lib/api/require-own-organization-item';
+import { NextResponse } from 'next/server';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET: rawGET, PATCH: rawPATCH, DELETE: rawDELETE } = crudRoutes({
-  table: organizations,
-  pk: 'id',
-  tags: ["Organizations"],
-  orgScoped: false,
-  itemRoute: true,
-  readRole: 'admin',
-  writeRole: 'admin',
-});
-
-// PR #752 round 11: orgScoped:false + itemRoute on the organizations table
-// itself applied NO caller-vs-target ownership check at all — see
-// lib/api/require-own-organization-item.ts for the cross-tenant IDOR this
-// closes (any org's own member/steward/admin could read/patch/delete ANY
-// other organization by ID).
-export const GET = requireOwnOrganizationItem('id', rawGET);
-export const PATCH = requireOwnOrganizationItem('id', rawPATCH);
-export const DELETE = requireOwnOrganizationItem('id', rawDELETE);
-
+export const GET = withApi(
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ organizationId, params }) => {
+    if (!organizationId || !params.id || params.id !== organizationId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    return NextResponse.json(
+      {
+        error: 'GOVERNED_SHARING_SETTINGS_NOT_IMPLEMENTED',
+        message: 'Organization sharing settings are unavailable until their canonical settings model, mandate checks, audited updates and rollback are implemented and verified.',
+      },
+      { status: 501, headers: { 'Cache-Control': 'private, no-store' } },
+    );
+  },
+);

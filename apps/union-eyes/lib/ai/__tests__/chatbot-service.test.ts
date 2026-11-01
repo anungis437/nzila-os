@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   mockUpdateWhere: vi.fn(),
   mockFindFirstSession: vi.fn(),
   mockAiGenerate: vi.fn(),
+  mockModerate: vi.fn(),
   mockAiEmbed: vi.fn(),
   mockFetch: vi.fn(),
   audit: vi.fn(),
@@ -102,12 +103,16 @@ vi.mock("@/lib/services/ai/embedding-cache", () => ({
 }));
 
 vi.mock("@/lib/ai/ai-client", () => ({
+  buildOrgAiTrace: () => ({}),
+  toGatewayDataClass: () => "sensitive",
   getAiClient: vi.fn(() => ({
-    generate: mocks.mockAiGenerate,
+    // Moderation and the reply are both control-plane calls; the profile tells them apart.
+    generate: (request: { profileKey: string }) =>
+      request.profileKey === "ue-chatbot-moderation" ? mocks.mockModerate(request) : mocks.mockAiGenerate(request),
     embed: mocks.mockAiEmbed,
   })),
   UE_APP_KEY: "union-eyes",
-  UE_PROFILES: { CHATBOT: "ue-chatbot", EMBEDDINGS: "ue-embeddings" },
+  UE_PROFILES: { CHATBOT: "ue-chatbot", CHATBOT_MODERATION: "ue-chatbot-moderation", EMBEDDINGS: "ue-embeddings" },
   UE_SYSTEM_ORG_ID: "00000000-0000-0000-0000-000000000000",
 }));
 
@@ -127,7 +132,7 @@ vi.mock("@/lib/rate-limiter", () => ({
 
 /* ── imports ────────────────────────────────────────────────────────── */
 
-import { ChatSessionManager, RAGService, ChatbotService } from "../chatbot-service";
+import { ChatSessionManager, RAGService, ChatbotService, ChatbotUnavailableError } from "../chatbot-service";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -142,6 +147,7 @@ const session = {
   userId: "user-1",
   organizationId: "org-1",
   title: "Test chat",
+  status: "active",
   model: "gpt-4",
   temperature: "0.7",
   messageCount: 0,
@@ -240,6 +246,14 @@ describe("RAGService", () => {
     expect(mocks.mockAiEmbed).toHaveBeenCalled();
   });
 
+  it("searchDocuments fails closed before embedding or SQL when organization is absent", async () => {
+    await expect(rag.searchDocuments("grievance", { organizationId: "" })).rejects.toThrow(
+      "Organization context required for knowledge search",
+    );
+    expect(mocks.mockAiEmbed).not.toHaveBeenCalled();
+    expect(mocks.mockSelectFrom).not.toHaveBeenCalled();
+  });
+
   it("searchDocuments returns scored results", async () => {
     mocks.mockSelectLimit.mockResolvedValueOnce([
       {
@@ -249,8 +263,23 @@ describe("RAGService", () => {
         embedding: JSON.stringify(Array(384).fill(0.1)),
       },
     ]);
-    const results = await rag.searchDocuments("grievance", { limit: 5 });
+    const results = await rag.searchDocuments("grievance", { organizationId: "org-1", limit: 5 });
     expect(Array.isArray(results)).toBe(true);
+  });
+
+  // DEF-0B4-CHATBOT-RAG-LIMITS-BEFORE-SCORING
+  it("searchDocuments scores the candidate set before applying the limit, and skips unreadable embeddings", async () => {
+    const aligned = (n: number) => JSON.stringify(Array(384).fill(n));
+    mocks.mockSelectLimit.mockResolvedValueOnce([
+      { id: "weak", title: "Weak", content: "x", embedding: JSON.stringify(Array.from({ length: 384 }, (_, i) => (i === 0 ? 1 : 0))) },
+      { id: "broken", title: "Broken", content: "x", embedding: "not json" },
+      { id: "missing", title: "Missing", content: "x", embedding: null },
+      { id: "best", title: "Best", content: "x", embedding: aligned(0.1) },
+    ]);
+    const results = await rag.searchDocuments("grievance", { organizationId: "org-1", limit: 1, similarityThreshold: 0 });
+    expect(results.map((r) => r.documentId)).toEqual(["best"]);
+    // The query reads a bounded candidate set, not the requested limit.
+    expect(mocks.mockSelectLimit).toHaveBeenCalledWith(500);
   });
 
   it("searchDocuments filters by threshold", async () => {
@@ -262,7 +291,7 @@ describe("RAGService", () => {
         embedding: JSON.stringify(Array(384).fill(0)),
       },
     ]);
-    const results = await rag.searchDocuments("grievance", { similarityThreshold: 0.99 });
+    const results = await rag.searchDocuments("grievance", { organizationId: "org-1", similarityThreshold: 0.99 });
     expect(results).toHaveLength(0);
   });
 
@@ -278,8 +307,9 @@ describe("ChatbotService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     bot = new ChatbotService();
-    // Session lookup
-    mocks.mockSelectLimit.mockReturnValue(limitResult([session]));
+    // Reset queued one-shot lookups: a fail-closed moderation rejection must not
+    // leak an unused history lookup into the next test's session ownership check.
+    mocks.mockSelectLimit.mockReset().mockReturnValue(limitResult([session]));
     mocks.mockSelectOffset.mockResolvedValue([]);
     // AI responses
     mocks.mockAiGenerate.mockResolvedValue({
@@ -301,8 +331,10 @@ describe("ChatbotService", () => {
     ]);
     mocks.mockInsertValues.mockReturnValue({ returning: mocks.mockInsertReturning });
     mocks.mockUpdateWhere.mockResolvedValue(undefined);
-    // No OPENAI_API_KEY → skip safety check
-    delete process.env.OPENAI_API_KEY;
+    // Moderation is a control-plane call with an explicit, well-formed verdict. A refused call or an unusable answer fails closed;
+    // it must not silently disable moderation in tests.
+    mocks.mockModerate.mockReset().mockResolvedValue({ content: JSON.stringify({ flagged: false, categories: [] }), tokensIn: 5, tokensOut: 5, model: "gpt-4o" });
+    vi.stubGlobal("fetch", vi.fn());
   });
 
   it("sendMessage throws if session not found", async () => {
@@ -324,6 +356,30 @@ describe("ChatbotService", () => {
     await expect(
       bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-2", content: "hi" }),
     ).rejects.toThrow("Session not found");
+  });
+
+  it("sendMessage refuses when the control plane refuses the moderation call, without calling the model or storing messages", async () => {
+    mocks.mockModerate.mockRejectedValueOnce(new Error("profile not enabled"));
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    await expect(bot.sendMessage({
+      sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hello",
+    })).rejects.toThrow("Content safety system unavailable");
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
+    expect(mocks.mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["not json", "I think this is fine"],
+    ["a verdict without a boolean", JSON.stringify({ flagged: "no", categories: [] })],
+    ["a verdict without categories", JSON.stringify({ flagged: false })],
+  ])("sendMessage refuses a moderation answer that is %s, without calling the model", async (_label, content) => {
+    mocks.mockModerate.mockResolvedValueOnce({ content, tokensIn: 1, tokensOut: 1, model: "gpt-4o" });
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    await expect(bot.sendMessage({
+      sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hello",
+    })).rejects.toThrow("Content safety system unavailable");
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
+    expect(mocks.mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("sendMessage returns assistant message", async () => {
@@ -372,56 +428,59 @@ describe("ChatbotService", () => {
     ).rejects.toThrow("audit down");
   });
 
-  it("sendMessage handles AI error with fallback", async () => {
+  // Replaced: this test asserted that a failed generation was stored as an assistant reply from the model "fallback". The ai-client mock also
+  // lacked buildOrgAiTrace, so the other sendMessage tests were passing on that canned reply; the mock now provides it.
+  // DEF-0B4-CHATBOT-FALLBACK-PRESENTED-AS-AI-REPLY
+  it("sendMessage raises when generation fails and stores no reply", async () => {
     mocks.mockSelectLimit
       .mockResolvedValueOnce([session])
       .mockResolvedValueOnce([]);
     mocks.mockAiGenerate.mockRejectedValueOnce(new Error("AI down"));
-    mocks.mockInsertReturning.mockResolvedValueOnce([
-      {
-        id: "msg-2",
-        sessionId: "sess-1",
-        role: "assistant",
-        content: "I'm sorry, the AI assistant is temporarily unavailable.",
-        modelUsed: "fallback",
-      },
-    ]);
-    const msg = await bot.sendMessage({
+    await expect(bot.sendMessage({
       sessionId: "sess-1",
       userId: "user-1",
       organizationId: "org-1",
       content: "Hello",
-      useRAG: false,
-    });
-    expect(msg.content).toContain("temporarily unavailable");
+    })).rejects.toBeInstanceOf(ChatbotUnavailableError);
+    expect(mocks.mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("sendMessage with content safety flagged throws", async () => {
-    process.env.OPENAI_API_KEY = "test-key";
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        json: () => Promise.resolve({
-          results: [
-            {
-              flagged: true,
-              categories: { violence: true },
-              category_scores: { violence: 0.9 },
-            },
-          ],
-        }),
-      }),
-    );
+    mocks.mockModerate.mockResolvedValueOnce({ content: JSON.stringify({ flagged: true, categories: ["violence"] }), tokensIn: 1, tokensOut: 1, model: "gpt-4o" });
     mocks.mockSelectLimit.mockResolvedValueOnce([session]);
     await expect(
       bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "bad content" }),
     ).rejects.toThrow("Message flagged by content safety filter");
     // round 54: flagged rows must retain sessionId so they're traceable to a tenant/session
     expect(mocks.mockInsertValues).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionId: "sess-1" }),
+      expect.objectContaining({ sessionId: "sess-1", flaggedCategories: ["violence"] }),
     );
-    vi.unstubAllGlobals();
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
+  });
+
+  // F06 A5: moderation is an AI call like any other. It goes through the control plane under its own profile, classed as member text,
+  // and never to a provider directly with a provider key.
+  it("F06 A5: moderates through the AI control plane under its own profile and data class, never by a direct provider call", async () => {
+    process.env.OPENAI_API_KEY = "provider-key-must-not-be-used";
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    await bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "What are my rights?" });
+
+    expect(mocks.mockModerate).toHaveBeenCalledTimes(1);
+    const request = mocks.mockModerate.mock.calls[0][0];
+    expect(request).toMatchObject({ profileKey: "ue-chatbot-moderation", dataClass: "sensitive", appKey: "union-eyes" });
+    expect(request.input[0].role).toBe("system");
+    expect(request.input[1].content).toBe("<<<MESSAGE\nWhat are my rights?\nMESSAGE>>>");
+    expect(fetch).not.toHaveBeenCalled();
     delete process.env.OPENAI_API_KEY;
+  });
+
+  it("F06 A5: reads a fenced verdict and keeps only known categories, naming an unclassified flag as unspecified", async () => {
+    mocks.mockModerate.mockResolvedValueOnce({ content: "```json\n" + JSON.stringify({ flagged: true, categories: ["made_up"] }) + "\n```", tokensIn: 1, tokensOut: 1, model: "gpt-4o" });
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "bad" }),
+    ).rejects.toThrow("Message flagged by content safety filter");
+    expect(mocks.mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ flaggedCategories: ["unspecified"] }));
   });
 
   it("getMessages returns messages in chronological order", async () => {
@@ -434,6 +493,23 @@ describe("ChatbotService", () => {
     const result = await bot.getMessages("sess-1", { userId: "user-1", organizationId: "org-1" });
     // reverse() is called, so first should be m-1
     expect(result[0].id).toBe("m-1");
+  });
+
+  it.each(["archived", "deleted"])("getMessages refuses %s sessions before reading messages", async (status) => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([{ ...session, status }]);
+    await expect(
+      bot.getMessages("sess-1", { userId: "user-1", organizationId: "org-1" }),
+    ).rejects.toThrow("Session not found");
+    expect(mocks.mockSelectOffset).not.toHaveBeenCalled();
+  });
+
+  it.each(["archived", "deleted"])("sendMessage refuses %s sessions before AI generation", async (status) => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([{ ...session, status }]);
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hi" }),
+    ).rejects.toThrow("Session not found");
+    expect(mocks.operation).not.toHaveBeenCalled();
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
   });
 
   it("getMessages throws when the caller does not own the session", async () => {

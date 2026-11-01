@@ -14,7 +14,7 @@ import { getCaseTypeById } from '@nzila/cupe-vocabulary';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { createClaim, getClaimsByMember } from '@/db/queries/claims-queries';
 import { requireCaseFilingCapacity, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
@@ -226,24 +226,23 @@ export async function POST(request: Request) {
       const canonicalDecision = canonical
         ? await decideIntake(newClaim.claimId, createCanonicalNarProofAdapter(tx)) : null;
       if (canonicalDecision && !canonicalDecision.allowed) throw new Error('UE_INTAKE_DECISION_REJECTED');
+      // The claim and this record commit together. A failed audit rolls the intake back.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.intake_submitted',
+        resourceType: 'claims',
+        resourceId: newClaim.claimId,
+        details: {
+          event: 'CASE_INTAKE_SUBMITTED',
+          caseType: data.caseType,
+          priority: data.priority,
+          severity,
+          title: data.title,
+          isAnonymous: data.isAnonymous,
+        },
+      });
       return { claim: newClaim, canonicalDecision };
-    });
-
-    // 6. Operational audit trail. The canonical signed claim proof already committed atomically.
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      resourceId: claim.claimId,
-      action: 'create',
-      details: {
-        event: 'CASE_INTAKE_SUBMITTED',
-        caseType: data.caseType,
-        priority: data.priority,
-        severity,
-        title: data.title,
-        isAnonymous: data.isAnonymous,
-      },
     });
 
     logger.info('Case intake submitted', {
@@ -286,6 +285,10 @@ export async function POST(request: Request) {
   } catch (error) {
     const refused = caseAuthorizationResponse(error);
     if (refused) return refused;
+    // An organization without the module is refused, not reported as a server fault.
+    if ((error as { code?: unknown } | null)?.code === 'ENTITLEMENT_REQUIRED') {
+      return NextResponse.json({ error: 'ENTITLEMENT_REQUIRED', message: 'Module access denied' }, { status: 403 });
+    }
     logger.error('Case intake failed', error as Error);
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },

@@ -89,7 +89,7 @@ describe('POST /api/clause-library (round 55 ownership-spoofing fix)', () => {
       }),
     };
 
-    await POST({ request, organizationId: 'org-a', userId: 'user-1' });
+    await POST({ request, organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } });
 
     expect(h.insertedValues[0].sourceOrganizationId).toBe('org-a');
     expect(h.insertedValues[0].sourceOrganizationId).not.toBe('attacker-controlled-org');
@@ -117,7 +117,7 @@ describe('POST /api/clause-library (round 55 ownership-spoofing fix)', () => {
       json: async () => ({ clauseTitle: 'T', clauseText: 'x', clauseType: 'wages', sharingLevel: 'public' }),
     };
 
-    await expect(POST({ request, organizationId: 'org-a', userId: 'user-1' })).rejects.toMatchObject({ status: 403 });
+    await expect(POST({ request, organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } })).rejects.toMatchObject({ status: 403 });
     expect(h.insertedValues).toHaveLength(0);
     expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
@@ -126,10 +126,10 @@ describe('POST /api/clause-library (round 55 ownership-spoofing fix)', () => {
     h.queue.push([]); // org-scoped agreement lookup finds nothing
     const { POST } = await loadHandlers();
     const request = {
-      json: async () => ({ clauseTitle: 'T', clauseText: 'x', clauseType: 'wages', sourceCbaId: 'cba-other-org' }),
+      json: async () => ({ clauseTitle: 'T', clauseText: 'x', clauseType: 'wages', sourceCbaId: '00000000-0000-4000-8000-0000000000c1' }),
     };
 
-    await expect(POST({ request, organizationId: 'org-a', userId: 'user-1' })).rejects.toMatchObject({ status: 404 });
+    await expect(POST({ request, organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } })).rejects.toMatchObject({ status: 404 });
     expect(h.insertedValues).toHaveLength(0);
     expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });

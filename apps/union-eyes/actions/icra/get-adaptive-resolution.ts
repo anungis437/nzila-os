@@ -10,7 +10,8 @@
 import { eq } from 'drizzle-orm'
 import { icraAssessments } from '@/db/schema/icra-schema'
 import { withSystemContext } from '@/lib/db/with-rls-context'
-import { checkCapability, type CapabilityDenialReason } from '@/lib/icra/assessment-capability'
+import type { CapabilityDenialReason } from '@/lib/icra/assessment-capability'
+import { authorizeAssessmentToken } from '@/lib/icra/assessment-access'
 import {
   resolveAdaptiveContext,
   type AdaptiveContextResolution,
@@ -32,12 +33,15 @@ export async function getIcraAdaptiveResolution(
         organizationContext: icraAssessments.organizationContext,
         capabilityTokenHash: icraAssessments.capabilityTokenHash,
         capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        claimedAt: icraAssessments.claimedAt,
+        claimedOrgId: icraAssessments.claimedOrgId,
+        claimedByUserId: icraAssessments.claimedByUserId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
       .limit(1)
 
-    const check = checkCapability(capabilityToken, row)
+    const check = await authorizeAssessmentToken(capabilityToken, row)
     if (!check.ok) return { ok: false, reason: check.reason }
 
     const resolution = resolveAdaptiveContext({

@@ -75,7 +75,8 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
 
     const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
       method: 'PATCH',
-      body: JSON.stringify({ role: 'x', notes: 'private' }),
+      // Clearing a note is a change that removes identifying detail, so it needs no notice; writing one now does (see holder-notice.ts).
+      body: JSON.stringify({ role: 'x', notes: null }),
     }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
 
     expect(response.status).toBe(200);
@@ -89,7 +90,9 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     );
   });
 
-  it('PATCH on a holder that is not in the workbook is 404 with no audit', async () => {
+  // Replaced in F06 batch 5 (A7): these two pinned that a write matching nothing is not recorded. It is now recorded as an attempt (a claimed
+  // workbook only; a pre-claim one has no actor), so an identified person's miss on the organization's people map is visible.
+  it('PATCH on a holder that is not in the workbook is 404 and is recorded as a missed attempt, never as an update', async () => {
     const { PATCH } = await loadRoute();
     m.updateResult = [];
 
@@ -99,7 +102,11 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     }), { params: Promise.resolve({ id: 'w1', holderId: 'h9' }) });
 
     expect(response.status).toBe(404);
-    expect(m.auditClaimedWorkbookWrite).not.toHaveBeenCalled();
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledTimes(1);
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'workbook.memory_holder.update_not_found', resourceId: 'h9' }),
+    );
   });
 
   it('PATCH fails when its audit cannot be written', async () => {
@@ -114,7 +121,7 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     expect(response.status).toBe(503);
   });
 
-  it('DELETE records an audit, and a missing holder is 404 with none', async () => {
+  it('DELETE records an audit, and a missing holder is 404 recorded as a missed attempt', async () => {
     const { DELETE } = await loadRoute();
     const ctx = { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) };
 
@@ -129,7 +136,11 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     m.deleteResult = [];
     const missing = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE' }), ctx);
     expect(missing.status).toBe(404);
-    expect(m.auditClaimedWorkbookWrite).not.toHaveBeenCalled();
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledTimes(1);
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'workbook.memory_holder.delete_not_found', resourceId: 'h1' }),
+    );
   });
 
   it('PATCH returns the access-control error status when access is denied', async () => {
@@ -155,7 +166,7 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write' },
+      { workbookId: 'w1', operation: 'write', capability: null },
       expect.any(Function),
     );
   });
@@ -177,11 +188,12 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
 
     const response = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
       method: 'DELETE',
+      headers: { cookie: 'wbk_cap_w1=tok-1' },
     }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write' },
+      { workbookId: 'w1', operation: 'write', capability: 'tok-1' },
       expect.any(Function),
     );
   });

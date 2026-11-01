@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-26T00:00:00.000Z",
+  "generatedAt": "2026-11-01T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 60,
-  "contractTestCount": 302,
-  "tsTestFileCount": 3043,
+  "workflowCount": 64,
+  "contractTestCount": 304,
+  "tsTestFileCount": 3426,
   "pythonTestFileCount": 43,
   "apps": [
     {
@@ -690,7 +690,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 5828
+      "codeFileCount": 6403
     },
     {
       "name": "union-eyes-demo",
@@ -910,6 +910,10 @@
     "security-design-review.yml",
     "trivy.yml",
     "ue-build-push-proof.yml",
+    "ue-full-regression.yml",
+    "ue-http-runtime.yml",
+    "ue-native-postgres.yml",
+    "ue-security-regression.yml",
     "ue-staging-discovery.yml",
     "union-eyes-authority-rollout.yml",
     "zonga-check.yml"

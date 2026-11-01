@@ -66,6 +66,9 @@ export type ResourceType =
   | 'approval_request'
   | 'governance_review'
   | 'workaid_matter'
+  | 'message_thread'
+  | 'message_retention'
+  | 'council_election'
 
 export interface ResourceRef {
   type: ResourceType
@@ -295,6 +298,34 @@ export interface WorkAidMatterFacts {
   counselControlled: true
 }
 
+/** A member conversation. Content is private: a legal-hold mandate does not confer a read. */
+export interface MessageThreadFacts {
+  kind: 'message_thread'
+  id: Uuid
+  organizationId: Uuid
+  memberUserId: Uuid
+  assigneeUserId: Uuid | null
+  status: 'open' | 'closed'
+}
+
+/** The organization's conversation-retention duty. It is not a conversation and holds no message text. */
+export interface MessageRetentionFacts {
+  kind: 'message_retention'
+  /** The organization whose retention record is being read or recorded. */
+  id: Uuid
+  organizationId: Uuid
+}
+
+/** A council election owned by one organization. Certified facts are immutable; supersession is a new row. */
+export interface CouncilElectionFacts {
+  kind: 'council_election'
+  id: Uuid
+  organizationId: Uuid
+  certified: boolean
+  /** User ids named on the certified candidates or winners. They cannot issue or review the supersession. */
+  namedUserIds: readonly Uuid[]
+}
+
 export type ResourceFacts =
   | CaseFacts
   | FinancialTransactionFacts
@@ -302,6 +333,9 @@ export type ResourceFacts =
   | ApprovalRequestFacts
   | GovernanceReviewFacts
   | WorkAidMatterFacts
+  | MessageThreadFacts
+  | MessageRetentionFacts
+  | CouncilElectionFacts
 
 // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -331,6 +365,7 @@ export const ACTIONS = [
   'finance:reconcile',
   'finance:audit',
   'governance:approve',
+  'governance:supersede_certified_result',
   'review:monitor',
   'review:access_evidence',
   'review:issue_finding',
@@ -340,6 +375,17 @@ export const ACTIONS = [
   'workaid:refer',
   'workaid:receive_disclosure',
   'workaid:read_counsel_material',
+  // The conversation relationship (owner or eligible assignee). Not a mandate power.
+  'message:read',
+  'message:reply',
+  'message:close',
+  'message:archive',
+  // Distinct from reading or replying. Neither action discloses message content.
+  'message:place_legal_hold',
+  'message:release_legal_hold',
+  // Recording or reading the organization's retention record. Neither action reads a conversation.
+  'message:adopt_retention',
+  'message:read_retention_policy',
 ] as const
 
 export type Action = (typeof ACTIONS)[number]

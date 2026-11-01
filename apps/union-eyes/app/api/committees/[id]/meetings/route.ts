@@ -3,7 +3,9 @@
  * POST /api/committees/[id]/meetings — Create a meeting
  */
 
+import { listPage } from "@/lib/api/list-page";
 import { z } from "zod";
+import { requireCommitteeReader } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
 import {
@@ -49,14 +51,14 @@ export const GET = withApi(
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "List committee meetings" },
   },
-  async ({ organizationId, params, request }) => {
+  async ({ organizationId, userId, params, request }) => {
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
-    await requireCommitteeScope(organizationId, committeeId);
+    await requireCommitteeReader(organizationId, committeeId, userId);
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get("status") ?? undefined;
-    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : undefined;
-    const offset = searchParams.get("offset") ? parseInt(searchParams.get("offset")!, 10) : undefined;
+    // A page is bounded: a non-numeric or negative value is the default and no page exceeds 200 rows.
+    const { limit, offset } = listPage(request, 200, 50);
 
     return listMeetings(committeeId, { status, limit, offset });
   }

@@ -55,6 +55,7 @@ describe('round 37: full reachability census for social_accounts', () => {
         'app/api/social-media/accounts/callback/route.ts',
         'app/api/social-media/accounts/route.ts',
         'app/api/social-media/analytics/route.ts',
+        'app/api/social-media/posts/review/route.ts',
         'app/api/social-media/posts/route.ts',
         'db/schema/domains/infrastructure/social-media.ts',
         'db/schema/social-media-schema.ts',

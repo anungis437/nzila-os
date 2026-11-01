@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl';
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -77,6 +77,7 @@ interface DashboardData {
 export default function FinanceDashboardPage() {
   const t = useTranslations('financeDashboardPage');
   const router = useRouter();
+  const locale = useParams<{ locale: string }>().locale ?? 'en';
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -152,6 +153,9 @@ export default function FinanceDashboardPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => router.push(`/${locale}/dashboard/finance/remittances`)}>
+            {t('unionRemittances')}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => router.push('/finance/exports')}>
             <Download className="h-4 w-4 mr-1" /> {t('exports')}
           </Button>

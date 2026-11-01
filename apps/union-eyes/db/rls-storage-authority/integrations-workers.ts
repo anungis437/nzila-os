@@ -681,6 +681,7 @@ export const integrationsWorkersEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "signature_webhooks_log",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "Round-7 scope-expansion scan: zero references to the 'signatureWebhooksLog' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files via a combined ripgrep pass across app/, actions/, lib/, services/. No known application code path queries this table today. NOT yet individually checked for raw-SQL (non-Drizzle-symbol) references to the physical table name — see the raw-SQL LATENT fixture test for why that check matters before this can be treated as final.",
     supportingCapability: [],

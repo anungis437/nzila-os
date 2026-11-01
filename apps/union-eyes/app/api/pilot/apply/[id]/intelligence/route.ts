@@ -1,3 +1,4 @@
+import { parsePilotPayload, intelligencePayloadSchema } from '@/lib/pilot/write-payloads';
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -103,7 +104,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const payload = (await request.json().catch(() => ({}))) as IntelligencePayload;
+    const parsedPayload = await parsePilotPayload(request, intelligencePayloadSchema);
+    if (!parsedPayload.ok) return parsedPayload.response;
+    const payload: IntelligencePayload = parsedPayload.data;
 
     // PR #752 round 25: this write only ever touches `pilotIntelligence` —
     // withLockedPilotMutation locks the row, re-authorizes ownership under
@@ -174,6 +177,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       intelligence.updatedAt = nowIso;
 
       return {
+        audit: { action: 'pilot.intelligence.add' },
         responsesPatch: { pilotIntelligence: intelligence },
         data: { id: application.id, pilotIntelligence: intelligence },
       };

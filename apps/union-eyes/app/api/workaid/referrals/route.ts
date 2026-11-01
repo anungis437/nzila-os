@@ -1,6 +1,7 @@
 /**
  * /api/workaid/referrals
- *   GET  ?caseId=… — consents on a case that the authenticated principal may refer today (no member identity shown).
+ *   GET  ?caseId=… — consents the authenticated principal may refer today, and referrals already recorded
+ *                    on that case when the kernel still allows the same action. Neither list names the member.
  *   POST          — a member (their own case) or an authorised representative refers a consented matter.
  * The member and the case come from the consent record, never from the request. The kernel decides; a recused,
  * removed or unrelated representative is refused. A recorded referral is a union-side record: it is NOT delivery to
@@ -11,7 +12,7 @@ import { z } from 'zod'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { getCaseActor } from '@/lib/cases/case-authorization'
 import { drizzleExecutor, kernelDeps } from '@/lib/authority/store/route-adapter'
-import { listReferableWorkAidConsents, referMatterToWorkAid } from '@/lib/authority/store/workaid-disclosure'
+import { listCaseWorkAidReferrals, listReferableWorkAidConsents, referMatterToWorkAid } from '@/lib/authority/store/workaid-disclosure'
 import { COUNSEL_SIDE_NOTICE, parseBody, workAidErrorResponse } from '@/lib/workaid/route-support'
 
 export const dynamic = 'force-dynamic'
@@ -26,10 +27,14 @@ export async function GET(request: Request) {
     const caseId = new URL(request.url).searchParams.get('caseId')
     if (!z.guid().safeParse(caseId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'caseId must be a uuid.' }, { status: 400 })
     const actor = await getCaseActor()
-    const referable = await withRLSContext(async (tx) =>
-      listReferableWorkAidConsents(drizzleExecutor(tx), kernelDeps, { organizationId: actor.organizationId, actorUserId: actor.userId, caseId: caseId as string }),
-    )
-    return NextResponse.json({ success: true, referable })
+    const { referable, recorded } = await withRLSContext(async (tx) => {
+      const exec = drizzleExecutor(tx)
+      const input = { organizationId: actor.organizationId, actorUserId: actor.userId, caseId: caseId as string }
+      const referable = await listReferableWorkAidConsents(exec, kernelDeps, input)
+      const recorded = await listCaseWorkAidReferrals(exec, kernelDeps, input)
+      return { referable, recorded }
+    })
+    return NextResponse.json({ success: true, referable, recorded })
   } catch (error) {
     return workAidErrorResponse(error)
   }

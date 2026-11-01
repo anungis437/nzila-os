@@ -7,9 +7,6 @@
 import { NextResponse } from "next/server";
 import {
   listBargainingNotes,
-  getBargainingTimeline,
-  getBargainingNotesStatistics,
-  getSessionTypes,
 } from "@/lib/services/bargaining-notes-service";
 import {
   createBargainingNoteAudited,
@@ -17,6 +14,9 @@ import {
 } from "@/lib/services/bargaining-notes-audited-service";
 import { getCbaForOrganization } from "@/lib/services/cba-audited-service";
 import { z } from "zod";
+import { db } from '@/db/db';
+import { bargainingNotes } from '@/db/schema';
+import { and, or, eq, inArray, asc, desc, count } from 'drizzle-orm';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
  
@@ -57,22 +57,43 @@ export const GET = withRoleAuth('member', async (request, context) => {
         return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'CBA not found');
       }
 
-      // Return timeline
+      // Special views must use the SAME confidentiality policy as ordinary
+      // listing. The legacy summary helpers read restricted note titles.
+      const visible = and(
+        eq(bargainingNotes.organizationId, organizationId),
+        or(
+          inArray(bargainingNotes.confidentialityLevel, ['public', 'internal']),
+          eq(bargainingNotes.createdBy, userId),
+        ),
+      );
       if (timeline && cbaId) {
-        const timelineData = await getBargainingTimeline(cbaId);
+        const timelineData = await db.select({
+          id: bargainingNotes.id,
+          sessionDate: bargainingNotes.sessionDate,
+          sessionType: bargainingNotes.sessionType,
+          sessionNumber: bargainingNotes.sessionNumber,
+          title: bargainingNotes.title,
+        }).from(bargainingNotes).where(and(visible, eq(bargainingNotes.cbaId, cbaId)))
+          .orderBy(asc(bargainingNotes.sessionDate)).limit(500);
         return NextResponse.json({ timeline: timelineData });
       }
-
-      // Return statistics
       if (statistics) {
-        const stats = await getBargainingNotesStatistics(organizationId);
-        return NextResponse.json(stats);
+        const bySessionType = await db.select({
+          sessionType: bargainingNotes.sessionType,
+          count: count(),
+        }).from(bargainingNotes).where(visible).groupBy(bargainingNotes.sessionType);
+        const [total] = await db.select({ value: count() }).from(bargainingNotes).where(visible);
+        const recentActivity = await db.select({
+          sessionDate: bargainingNotes.sessionDate,
+          sessionType: bargainingNotes.sessionType,
+          title: bargainingNotes.title,
+        }).from(bargainingNotes).where(visible).orderBy(desc(bargainingNotes.sessionDate)).limit(5);
+        return NextResponse.json({ total: total?.value ?? 0, bySessionType, recentActivity });
       }
-
-      // Return session types
       if (sessionTypes) {
-        const types = await getSessionTypes(organizationId);
-        return NextResponse.json({ sessionTypes: types });
+        const rows = await db.selectDistinct({ sessionType: bargainingNotes.sessionType })
+          .from(bargainingNotes).where(visible);
+        return NextResponse.json({ sessionTypes: rows.map(row => row.sessionType).filter(Boolean) });
       }
 
       // Privileged session notes stay with their author; everyone else sees public and internal notes only
@@ -82,7 +103,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
       // Check for tags filter
       const tags = searchParams.get("tags");
       if (tags) {
-        const limit = parseInt(searchParams.get("limit") || "50");
+        const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50") || 50));
         const { notes } = await listBargainingNotes(
           { ...filters, tags: tags.split(",") },
           { limit },
@@ -126,8 +147,8 @@ export const GET = withRoleAuth('member', async (request, context) => {
       }
 
       // Pagination
-      const page = parseInt(searchParams.get("page") || "1");
-      const limit = parseInt(searchParams.get("limit") || "20");
+      const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
+      const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20") || 20));
       const sortBy = searchParams.get("sortBy") || "sessionDate";
       const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
 

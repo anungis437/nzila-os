@@ -44,6 +44,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { secretsEqual } from '@/lib/api/secret-compare';
+import { expectedCronSecret, presentedCronSecret } from '@/lib/api/cron-secret';
 import { auth, currentUser as platformCurrentUser } from '@nzila/platform-auth/entra/server';
 import { cookies } from 'next/headers';
 import { eq, and, isNull } from 'drizzle-orm';
@@ -429,15 +430,17 @@ import { isPublicRoute, isCronRoute } from './public-routes';
  * Verify cron secret header
  */
 function verifyCronAuth(request: NextRequest): boolean {
-  const cronSecret = request.headers.get('x-cron-secret');
-  const expectedSecret = process.env.CRON_SECRET_KEY || process.env.CRON_SECRET;
+  // Same presentation rule and precedence as withApi, the edge check and the rewards route (lib/api/cron-secret.ts): the secret is
+  // accepted as x-cron-secret or as a bearer token.
+  const cronSecret = presentedCronSecret(request.headers);
+  const expectedSecret = expectedCronSecret();
   
   if (!expectedSecret) {
     logger.error('CRON_SECRET_KEY/CRON_SECRET not configured', undefined, { context: 'Auth' });
     return false;
   }
   
-  return secretsEqual(cronSecret ?? '', expectedSecret);
+  return secretsEqual(cronSecret, expectedSecret);
 }
 
 // =============================================================================
@@ -477,8 +480,35 @@ function canonicalAuthUser(context: {
   };
 }
 
-export async function getCurrentUser(): Promise<AuthUser | null> {
-  if (currentStateContextEnabled()) {
+/**
+ * The caller's active membership role in one organization, read inside that organization's own RLS context. On a bare
+ * connection the membership policy matches no row, which used to turn every role into 'member'. Null when there is no
+ * active membership or the lookup fails; callers then keep the least-privileged default.
+ */
+async function membershipRoleInOwnContext(userId: string, organizationId: string): Promise<string | null> {
+  try {
+    const { withRLSContext } = await import('@/lib/db/with-rls-context');
+    const [membership] = await withRLSContext({ organizationId, userId }, async (tx) =>
+      tx
+        .select({ role: organizationMembers.role })
+        .from(organizationMembers)
+        .where(
+          and(
+            eq(organizationMembers.userId, userId),
+            eq(organizationMembers.organizationId, organizationId),
+            eq(organizationMembers.status, 'active'),
+            isNull(organizationMembers.deletedAt),
+          ),
+        )
+        .limit(1),
+    );
+    return membership?.role ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getCurrentUser(): Promise<AuthUser | null> {  if (currentStateContextEnabled()) {
     const passwordActor = await getCanonicalPasswordActor();
     if (passwordActor && !passwordActor.organizationId)
       return canonicalAuthUser({
@@ -504,25 +534,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       if (platformAdminIds.includes(pgUser.id)) {
         role = 'app_owner';
       } else if (pgUser.organizationId) {
-        try {
-          const [membership] = await db
-            .select({ role: organizationMembers.role })
-            .from(organizationMembers)
-            .where(
-              and(
-                eq(organizationMembers.userId, pgUser.id),
-                eq(organizationMembers.organizationId, pgUser.organizationId),
-                eq(organizationMembers.status, 'active'),
-                isNull(organizationMembers.deletedAt),
-              ),
-            )
-            .limit(1);
-          if (membership?.role) {
-            role = membership.role;
-          }
-        } catch {
-          // DB lookup failed — fall through with default role
-        }
+        role = (await membershipRoleInOwnContext(pgUser.id, pgUser.organizationId)) ?? role;
       }
 
       return {
@@ -656,14 +668,19 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       }
     }
 
-    // Resolve role: PLATFORM_ADMIN_USER_IDS override → auth metadata → default
-    let role = (publicMetadata.role as string) || (privateMetadata.role as string) || 'member';
+    // Resolve role: PLATFORM_ADMIN_USER_IDS override → auth metadata → active membership → default
+    let role = (publicMetadata.role as string) || (privateMetadata.role as string) || '';
     const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
       .split(',')
       .map(id => id.trim())
       .filter(Boolean);
     if (platformAdminIds.includes(userId)) {
       role = 'app_owner';
+    } else if (!role) {
+      // An identity that asserts no role (the password-session shim, a provider without role claims) used to become
+      // 'member' here, which refused every steward, officer and administrator on a role-floor route (R-42). The role comes
+      // from the caller's own active membership, never from anything the client sent; no membership still means member.
+      role = (resolvedOrganizationId && (await membershipRoleInOwnContext(userId, resolvedOrganizationId))) || 'member';
     }
 
     return {
@@ -746,14 +763,14 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
 
     if (resolvedOrgId) {
       membership = await db.query.organizationMembers.findFirst({
-        where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId)),
+        where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId), eq(om.status, 'active'), isNull(om.deletedAt)),
         columns: { id: true, organizationId: true, role: true },
       });
     }
 
     if (!membership) {
       membership = await db.query.organizationMembers.findFirst({
-        where: (om, { eq }) => eq(om.userId, userId),
+        where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.status, 'active'), isNull(om.deletedAt)),
         columns: { id: true, organizationId: true, role: true },
       });
     }
@@ -879,8 +896,9 @@ export async function getUserContextForOrganization(
   // Membership tables are tenant-RLS org-scoped. Resolve under system
   // authority (filter still binds userId + organizationId in WHERE).
   return withSystemContext(async () => {
+  // Only an ACTIVE membership counts: a pending, suspended or inactive row is not access.
   const membership = await db.query.organizationMembers.findFirst({
-    where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId)),
+    where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId), eq(om.status, 'active'), isNull(om.deletedAt)),
     columns: { id: true, organizationId: true, role: true },
   });
 
@@ -1051,7 +1069,7 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
     }
 
     const membershipByOrg = await db.query.organizationMembers.findFirst({
-      where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId)),
+      where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId), eq(om.status, 'active'), isNull(om.deletedAt)),
       columns: { role: true },
     });
 
@@ -1076,7 +1094,7 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
   }
 
   const membership = await db.query.organizationMembers.findFirst({
-    where: (om, { eq }) => eq(om.userId, userId),
+    where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.status, 'active'), isNull(om.deletedAt)),
     columns: { role: true },
   });
 
@@ -1291,7 +1309,8 @@ export async function hasRoleInOrganization(
       where: (om, { eq, and }) => and(
         eq(om.userId, actorUserId),
         eq(om.organizationId, organizationId),
-        eq(om.status, 'active')
+        eq(om.status, 'active'),
+        isNull(om.deletedAt)
       ),
       columns: { role: true },
     });
@@ -1336,7 +1355,8 @@ export async function getUserRole(
       where: (om, { eq, and }) => and(
         eq(om.userId, userId),
         eq(om.organizationId, organizationId),
-        eq(om.status, 'active')
+        eq(om.status, 'active'),
+        isNull(om.deletedAt)
       ),
       columns: { role: true },
     });

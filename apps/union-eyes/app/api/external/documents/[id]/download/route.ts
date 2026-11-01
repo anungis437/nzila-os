@@ -2,7 +2,7 @@ import { and, desc, eq, isNull } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
-import { generateSasUrl } from '@/lib/blob-client';
+import { BlobTooLargeError, readBlobBounded } from '@/lib/blob-client';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import {
   badExternalResourceRequest,
@@ -13,12 +13,27 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { authorizeExternalDocumentAccess } from '@/lib/services/external-resource-authorization-service';
 
-const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
+/**
+ * The file is served by this route, not handed over as a storage link. A link is a bearer URL: whoever holds it reads the file until
+ * it expires, revoking the grant cannot recall it, and the audit row could only say a link was issued. Here the grant, its expiry and
+ * its revocation are checked on every read, the bytes are only released after the access record is written, and that record names the
+ * bytes actually delivered. A streamed read is bounded; a larger file is refused.
+ */
+export const EXTERNAL_DOWNLOAD_MAX_BYTES = 50 * 1024 * 1024;
+
+/** A header-safe file name: no path, quotes, control characters or non-ASCII fallback surprises. */
+function attachmentName(raw: string | null | undefined): string {
+  const base = (raw ?? '').split(/[\\/]/).pop() ?? '';
+  const cleaned = base.replace(/[\u0000-\u001f\u007f"]/g, '').trim();
+  return cleaned.length > 0 ? cleaned.slice(0, 200) : 'document';
+}
 
 export const GET = withExternalMatterResourceAuth(
   {
     requiredPermission: 'download_documents',
     resolve: resolveExternalDocumentResource,
+    // The download writes its own, more specific record naming the bytes delivered.
+    readRecord: 'handler',
   },
   async (_request, context, params?: { id?: string }) => {
     if (!params?.id || !context.organizationId || !context.matterId) {
@@ -66,6 +81,9 @@ export const GET = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
+    // A grant pinned to a version releases that version only; a version added later is not covered by it. An unpinned (earlier) grant
+    // keeps releasing the current version.
+    const pinned = decision.documentVersionNo ?? null;
     const [latestVersion] = await db
       .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey })
       .from(documentVersions)
@@ -73,6 +91,7 @@ export const GET = withExternalMatterResourceAuth(
         and(
           eq(documentVersions.organizationId, context.organizationId),
           eq(documentVersions.documentId, row.id),
+          ...(pinned !== null ? [eq(documentVersions.versionNo, pinned)] : []),
         ),
       )
       .orderBy(desc(documentVersions.versionNo))
@@ -82,15 +101,17 @@ export const GET = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Download is not available' }, { status: 404 });
     }
 
-    let downloadUrl: string;
+    let bytes: Buffer;
     try {
-      downloadUrl = await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey);
-    } catch {
+      bytes = await readBlobBounded(latestVersion.storageKey, EXTERNAL_DOWNLOAD_MAX_BYTES);
+    } catch (error) {
+      if (error instanceof BlobTooLargeError) {
+        return NextResponse.json({ error: 'This file is too large to download here' }, { status: 413 });
+      }
       return NextResponse.json({ error: 'Download is not available' }, { status: 503 });
     }
-    if (!downloadUrl) return NextResponse.json({ error: 'Download is not available' }, { status: 503 });
 
-    // The access is on the record before the link leaves the server. The link itself is never recorded.
+    // The access is on the record before any byte leaves the server, and it names what is delivered.
     try {
       await persistAtomicAudit(db as unknown as RLSTx, {
         organizationId: context.organizationId,
@@ -108,18 +129,23 @@ export const GET = withExternalMatterResourceAuth(
           documentId: row.id,
           versionId: latestVersion.id,
           versionNo: latestVersion.versionNo,
+          delivery: 'served_by_route',
+          sizeBytes: bytes.length,
         },
       });
     } catch {
       return NextResponse.json({ error: 'Download is unavailable' }, { status: 503 });
     }
 
-    return NextResponse.json({
-      data: {
-        id: row.id,
-        title: row.title ?? row.filename ?? row.name,
-        mimeType: row.mimeType,
-        downloadUrl,
+    const name = attachmentName(row.filename ?? row.title ?? row.name);
+    return new Response(new Uint8Array(bytes), {
+      status: 200,
+      headers: {
+        'Content-Type': row.mimeType || 'application/octet-stream',
+        'Content-Length': String(bytes.length),
+        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(name)}`,
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff',
       },
     });
   },

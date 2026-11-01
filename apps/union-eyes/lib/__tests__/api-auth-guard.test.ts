@@ -9,7 +9,7 @@
  * canAccessMemberResource, getPrimaryRole, getRolesForScope, getServerSession,
  * requireAuth.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 /* ── hoisted mocks ────────────────────────────────────────────────── */
 
@@ -27,6 +27,8 @@ const mocks = vi.hoisted(() => ({
   mockIsCronRoute: vi.fn(),
   mockCookiesGet: vi.fn(),
   mockCanonicalOrganizationContext: vi.fn(),
+  mockGetAuthUser: vi.fn(),
+  mockWithRLSContext: vi.fn(),
 }));
 
 /** Recursive chain for db.select chains */
@@ -41,7 +43,7 @@ function chain(resolveValue: any): any {
 }
 
 
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: any) => fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: any) => fn(), withRLSContext: mocks.mockWithRLSContext }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: mocks.mockAuth,
   currentUser: mocks.mockCurrentUser,
@@ -108,7 +110,7 @@ vi.mock('../auth/rbac-server', () => ({
 }));
 
 vi.mock('@/lib/auth/auth-service', () => ({
-  getAuthUser: vi.fn().mockResolvedValue(null),
+  getAuthUser: mocks.mockGetAuthUser,
 }));
 
 vi.mock('../organization-utils', () => ({
@@ -324,9 +326,73 @@ describe('ApiAuthGuard', () => {
       expect(user!.role).toBe('app_owner');
     });
 
+    describe('identity that asserts no role (R-42)', () => {
+      const ORG = '11111111-1111-4111-8111-111111111111';
+      const noRole = { ...authUser, publicMetadata: {}, privateMetadata: {} };
+      const withOrg = () => {
+        mocks.mockAuth.mockResolvedValue({ userId: 'user_123', orgId: ORG });
+        mocks.mockSelect.mockReturnValue(chain([{ id: ORG }]));
+      };
+
+      it('takes the role from the caller\'s own active membership, read in their RLS context', async () => {
+        mocks.mockCurrentUser.mockResolvedValue(noRole);
+        withOrg();
+        mocks.mockWithRLSContext.mockResolvedValue([{ role: 'admin' }]);
+        const user = await getCurrentUser();
+        expect(mocks.mockWithRLSContext).toHaveBeenCalledWith({ organizationId: ORG, userId: 'user_123' }, expect.any(Function));
+        expect(user!.role).toBe('admin');
+      });
+
+      it('never lets a membership override a role the identity does assert', async () => {
+        withOrg();
+        mocks.mockWithRLSContext.mockResolvedValue([{ role: 'admin' }]);
+        expect((await getCurrentUser())!.role).toBe('steward');
+        expect(mocks.mockWithRLSContext).not.toHaveBeenCalled();
+      });
+
+      it('stays member with no active membership, or when the lookup fails', async () => {
+        mocks.mockCurrentUser.mockResolvedValue(noRole);
+        withOrg();
+        mocks.mockWithRLSContext.mockResolvedValue([]);
+        expect((await getCurrentUser())!.role).toBe('member');
+        mocks.mockWithRLSContext.mockRejectedValue(new Error('unavailable'));
+        expect((await getCurrentUser())!.role).toBe('member');
+      });
+    });
     it('throws on auth system error', async () => {
       mocks.mockAuth.mockRejectedValue(new Error('boom'));
       await expect(getCurrentUser()).rejects.toThrow('Service temporarily unavailable');
+    });
+
+    // The password-session path resolves the role from the caller's membership. That row is only visible inside the
+    // organization's RLS context; on a bare connection it matches nothing and the role silently became 'member', which
+    // refused every steward, officer and administrator on a role-floor route (R-42).
+    describe('password-session role resolution', () => {
+      const session = { id: 'ue-qa-steward-primary', email: 's@union.org', firstName: 'S', lastName: 'T', organizationId: '11111111-1111-4111-8111-111111111111' };
+      afterEach(() => {
+        mocks.mockGetAuthUser.mockReset();
+        mocks.mockWithRLSContext.mockReset();
+      });
+
+      it('reads the membership role inside the caller\'s own RLS context', async () => {
+        mocks.mockGetAuthUser.mockResolvedValue(session);
+        mocks.mockWithRLSContext.mockResolvedValue([{ role: 'steward' }]);
+        const user = await getCurrentUser();
+        expect(mocks.mockWithRLSContext).toHaveBeenCalledWith({ organizationId: session.organizationId, userId: session.id }, expect.any(Function));
+        expect(user!.role).toBe('steward');
+      });
+
+      it('falls back to member only when no active membership is found', async () => {
+        mocks.mockGetAuthUser.mockResolvedValue(session);
+        mocks.mockWithRLSContext.mockResolvedValue([]);
+        expect((await getCurrentUser())!.role).toBe('member');
+      });
+
+      it('falls back to member, never to a higher role, when the lookup fails', async () => {
+        mocks.mockGetAuthUser.mockResolvedValue(session);
+        mocks.mockWithRLSContext.mockRejectedValue(new Error('rls context unavailable'));
+        expect((await getCurrentUser())!.role).toBe('member');
+      });
     });
   });
 
@@ -406,6 +472,23 @@ describe('ApiAuthGuard', () => {
     it('returns context for membership', async () => {
       const ctx = await getUserContextForOrganization('org-1');
       expect(ctx!.organizationId).toBe('org-1');
+    });
+
+    it('requires active and non-deleted membership before granting organization authority', async () => {
+      await getUserContextForOrganization('org-1');
+      const query = mocks.mockOrgMembersFindFirst.mock.calls[0][0];
+      const checked: string[] = [];
+      query.where(
+        { userId: 'userId', organizationId: 'organizationId', status: 'status', deletedAt: 'deletedAt' },
+        {
+          eq: (column: string, value: string) => { checked.push(`eq:${column}:${value}`); return true; },
+          isNull: (column: string) => { checked.push(`isNull:${column}`); return true; },
+          and: (...predicates: boolean[]) => predicates.every(Boolean),
+        },
+      );
+      expect(checked).toEqual([
+        'eq:userId:user_123', 'eq:organizationId:org-1', 'eq:status:active', 'isNull:deletedAt',
+      ]);
     });
 
     it('returns null when no membership', async () => {

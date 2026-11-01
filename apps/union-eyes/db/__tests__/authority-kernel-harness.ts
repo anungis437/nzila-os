@@ -25,9 +25,16 @@ export interface Db {
 const APP_ROOT = resolve(__dirname, '..', '..')
 export const read = (p: string) => readFileSync(resolve(APP_ROOT, p), 'utf8')
 export const PLATFORM_SQL = read('db/migrations-platform/0013_authority_kernel_storage.sql')
+export const MESSAGE_THREAD_AUTHORITY_SQL = read('db/migrations-platform/0029_message_thread_authority_scope.sql')
+export const MESSAGE_RETENTION_AUTHORITY_SQL = read('db/migrations-platform/0030_message_retention_authority_scope.sql')
+export const ELECTION_SUPERSESSION_AUTHORITY_SQL = read('db/migrations-platform/0035_election_supersession_authority_scope.sql')
 export const RLS_SQL = read('db/migrations-cache/0020_authority_kernel_rls_closure.sql')
+export const REVIEW_VISIBILITY_RLS_SQL = read('db/migrations-cache/0047_authority_reviews_visibility_rls.sql')
 export const WORKAID_PLATFORM_SQL = read('db/migrations-platform/0027_workaid_union_side_disclosure.sql')
 export const WORKAID_RLS_SQL = read('db/migrations-cache/0026_workaid_union_side_rls_closure.sql')
+export const WORKAID_WORDING_SQL = read('db/migrations-platform/0036_workaid_consent_wording_proposals.sql')
+export const WORKAID_WORDING_RLS_SQL = read('db/migrations-cache/0028_workaid_consent_wording_proposal_rls.sql')
+export const WORKAID_REFERRAL_SCOPE_SQL = read('db/migrations-platform/0037_workaid_referral_scope.sql')
 export const HELPER = read('db/migrations-cache/0010_tenant_isolation_rls_foundation.sql')
   .match(/CREATE OR REPLACE FUNCTION ue_create_direct_org_rls_policy\([\s\S]*?\$\$ LANGUAGE plpgsql;/)?.[0] as string
 if (!HELPER) throw new Error('ue_create_direct_org_rls_policy not found')
@@ -117,9 +124,16 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   await db.exec(BUSINESS_FIXTURE_SQL)
   if (!options.realAuditLogs) await db.exec(AUDIT_FIXTURE_SQL)
   await db.exec(PLATFORM_SQL)
+  await db.exec(MESSAGE_THREAD_AUTHORITY_SQL)
+  await db.exec(MESSAGE_RETENTION_AUTHORITY_SQL)
+  await db.exec(ELECTION_SUPERSESSION_AUTHORITY_SQL)
   await db.exec(RLS_SQL)
+  await db.exec(REVIEW_VISIBILITY_RLS_SQL)
   await db.exec(WORKAID_PLATFORM_SQL)
   await db.exec(WORKAID_RLS_SQL)
+  await db.exec(WORKAID_WORDING_SQL)
+  await db.exec(WORKAID_WORDING_RLS_SQL)
+  await db.exec(WORKAID_REFERRAL_SCOPE_SQL)
   for (const t of ['audit_logs', 'grievances', 'claims', 'grievance_case_access_assignments', 'documents', 'payments']) {
     await db.exec(`SELECT ue_create_direct_org_rls_policy('${t}')`)
   }
@@ -135,7 +149,9 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
 const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
 export const ORG = uuid(0xa)
 export const ORG_B = uuid(0xb)
-export const newUuid = (() => { let n = 100000; return () => uuid(n++) })()
+// A per-process random base keeps ids unique across runs: the authority tables are append-only, so a native run in a database an
+// earlier run used would otherwise collide on the same counter values.
+export const newUuid = (() => { let n = 100000 + Math.floor(Math.random() * 900_000_000); return () => uuid(n++) })()
 
 /** Internal principal ids are NOT uuids (legacy `user_xxx` ids exist); the fixtures reflect that. */
 export const U = {

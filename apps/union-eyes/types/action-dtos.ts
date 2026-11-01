@@ -39,7 +39,6 @@ export interface OrgWithStats {
   subscriptionTier: string;
   totalUsers: number;
   activeUsers: number;
-  storageUsed: string;
   createdAt: string;
   contactEmail: string | null;
   phone: string | null;
@@ -49,7 +48,6 @@ export interface SystemStats {
   totalMembers: number;
   totalOrgs: number;
   activeOrgs: number;
-  totalStorage: number;
   activeToday: number;
 }
 

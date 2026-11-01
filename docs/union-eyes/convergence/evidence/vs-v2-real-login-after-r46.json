@@ -1,0 +1,37 @@
+{
+  "record": "UE-V2-REAL-LOGIN-HTTP-SMOKE-AFTER-R46",
+  "supersedes": "vs-v2-real-login-smoke.json (kept unchanged as the FAIL record that exposed R-46)",
+  "harness": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.ts + next-http-smoke.ts (canonical V2 acceptance; the only runtime in which the REAL login path runs)",
+  "baseSha": "21f427a96",
+  "workingTreeNote": "run against the uncommitted R-46 tree: regenerated V2 source plan, installer applying the member-access projection and the case/conversation assignee predicates, V2 canonical admission overlay, manifest-security allowance for the two predicates",
+  "topology": "canonical V2 bootstrap on native PostgreSQL 16, dedicated nzila_auth_* roles, AUTH_DATABASE_URL, no QA session switches, production Next build (webpack) in an isolated snapshot",
+  "harnessStatus": "HTTP_SMOKE_PASS_FINAL_ACCEPTANCE_NOT_PROVEN",
+  "harnessExitCode": 1,
+  "harnessExitCodeNote": "The harness exits non-zero for every status other than PASS and never reports PASS: its own limitation reads 'Representative HTTP smoke is not complete caller or financial qualification.' The non-zero exit is therefore by design, not a failure of any step.",
+  "nextBuild": "PASS",
+  "nextRuntimeReady": "PASS",
+  "httpSteps": 33,
+  "httpStepsAsExpected": 33,
+  "healthStep": "GET /api/health -> 200 (was 503 with 25 catalog-admission violations before R-46)",
+  "catalogAdmissionViolations": 0,
+  "catalogAdmissionViolationsBefore": 25,
+  "sourcePlanDigest": "aa80d68101e151b235172067a823210610b7922cd649c43a498cf7868d0df633",
+  "sourcePlanDigestBefore": "c68394588292aad941ef532ee29351e0bbc08b3ff50cb06033ade4af4cbf1a85",
+  "planChange": "698 -> 722 tables. 24 authority-kernel and document tables were absent from the stale plan (ue_authority_* mandates, requests, delegations, recusals, reviews, workaid and counsel tables, document_intakes, document_transcript_*). grievance_timeline reverts to its Django-only declaration (the Drizzle declaration was removed from the barrel earlier; no application code reads the table).",
+  "remainingCauses": "After regeneration 13 violations remained; each was fixed at its cause: runtime schema USAGE (audit_security is excluded from V2 by the plan), the unclassified bootstrap receipt, two documented V2 privilege decisions (donations, evidence_packs), two system column ACLs generated from service-column-contracts, the missing organization_members projection grants, and the missing assignee predicates.",
+  "notProven": [
+    "This is HTTP smoke on a synthetic V2 fixture, not final acceptance.",
+    "Multi-organization conflicts, provider-claim elevation, the R-42 fallback with real sessions and suspended identities are not yet exercised in real-login mode.",
+    "Financial qualification and the immutable audit adapter are not exercised.",
+    "READY_FOR_STAGING remains NO."
+  ],
+  "alsoVerified": {
+    "v2AdmissionProbe": "ok=true violations=0",
+    "planDriftCheck": "plan.ts --check exit 0",
+    "unit": "scripts/bootstrap-v2 + lib/operations: 4 files, 35 tests passed",
+    "identityContract": "scripts/acceptance: 2 files, 8 tests passed",
+    "contractSuite": "302 files, 10,280 tests passed (Git bash on PATH)",
+    "tsc": "exit 0",
+    "eslint": "exit 0 on changed files"
+  }
+}

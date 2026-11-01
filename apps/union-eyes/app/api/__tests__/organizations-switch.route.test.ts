@@ -24,6 +24,9 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
 }));
 
 vi.mock('@/db/db', () => ({ db: mockDb }));
+const recordSelection = vi.hoisted(() => vi.fn());
+// Disclosed addition (B103): a selection is recorded before it is returned.
+vi.mock('@/lib/auth/organization-selection-audit', () => ({ recordOrganizationSelection: recordSelection }));
 
 async function loadRoute() {
   return import('../organizations/switch/route');
@@ -33,6 +36,8 @@ describe('organizations/switch route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
+    recordSelection.mockReset();
+    recordSelection.mockResolvedValue(undefined);
     m.auth.mockResolvedValue({ userId: 'user_1' });
     delete process.env.PLATFORM_ADMIN_USER_IDS;
   });
@@ -144,6 +149,22 @@ describe('organizations/switch route', () => {
     const json = await response.json();
     expect(json.success).toBe(true);
     expect(json.organization).toMatchObject({ id: 'org_1', name: 'Org 1', slug: 'org-1' });
+    expect(recordSelection).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', authority: 'platform_administrator' }));
+  });
+
+  // DEF-0B10-OPL-10
+  it('POST records a member selection, and refuses the selection when it cannot be recorded', async () => {
+    const { POST } = await loadRoute();
+    const req = () => new NextRequest('http://localhost/api/organizations/switch', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ organizationId: 'org_1' }) });
+    m.selectQueue.push([{ id: 'org_1', name: 'Org 1', slug: 'org-1' }], [{ id: 'membership_1', userId: 'user_1', organizationId: 'org_1' }]);
+    expect((await POST(req())).status).toBe(200);
+    expect(recordSelection).toHaveBeenCalledWith(expect.objectContaining({ authority: 'membership', mode: 'legacy' }));
+
+    m.selectQueue.push([{ id: 'org_1', name: 'Org 1', slug: 'org-1' }], [{ id: 'membership_1', userId: 'user_1', organizationId: 'org_1' }]);
+    recordSelection.mockRejectedValueOnce(new Error('audit down'));
+    const refused = await POST(req());
+    expect(refused.status).toBe(503);
+    expect((await refused.json()).success).toBeUndefined();
   });
 
   it('POST allows member user with UUID membership', async () => {
@@ -164,6 +185,22 @@ describe('organizations/switch route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.success).toBe(true);
+  });
+
+  // DEF-0B10-OPL-09
+  it('POST answers 404 to a member for an organization that is not active', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'org_1', name: 'Org 1', slug: 'org-1', status: 'archived' }], [{ id: 'membership_1', userId: 'user_1', organizationId: 'org_1' }]);
+
+    const response = await POST(
+      new NextRequest('http://localhost/api/organizations/switch', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ organizationId: 'org_1' }),
+      }),
+    );
+
+    expect(response.status).toBe(404);
   });
 
   it('POST denies a member when the UUID membership is absent', async () => {

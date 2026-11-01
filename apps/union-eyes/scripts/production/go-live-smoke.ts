@@ -106,10 +106,11 @@ async function main() {
     hook.status === 401 || hook.status === 503,
     `HTTP ${hook.status}`,
   )
-  const cron = await http('/api/cron/deadline-reminders')
+  const cron = await http('/api/cron/deadline-reminders', { method: 'POST' })
   record('cron route denies without credential', cron.status === 401, `HTTP ${cron.status}`)
   if (env.SMOKE_CRON_SECRET) {
     const withSecret = await http('/api/cron/deadline-reminders', {
+      method: 'POST',
       headers: { 'x-cron-secret': env.SMOKE_CRON_SECRET },
     })
     record('cron route accepts credential', withSecret.status === 200, `HTTP ${withSecret.status}`)

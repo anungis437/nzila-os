@@ -1,6 +1,6 @@
-// External matter document download: the access is durably audited before the storage link leaves the server, the
-// link itself is never recorded, and the link is withheld whenever the audit cannot be written. Real PostgreSQL
-// semantics (PGlite); the external authorization chain and the blob signer are stood in for.
+// External matter document download: the route serves the file itself (no bearer link), the access is durably audited before any byte
+// leaves the server and names the bytes delivered, the bytes are withheld whenever the audit cannot be written, and a refused grant
+// releases nothing. Real PostgreSQL semantics (PGlite); the external authorization chain and the blob read are stood in for.
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
@@ -10,7 +10,7 @@ const MATTER = '00000000-0000-4000-8000-0000000000a1';
 const DOC = '00000000-0000-4000-8000-000000000001';
 const REP = 'external-rep-1';
 
-const state = vi.hoisted(() => ({ db: null as unknown, allowed: true, sasFails: false, signed: [] as string[] }));
+const state = vi.hoisted(() => ({ db: null as unknown, allowed: true, sasFails: false, tooLarge: false, signed: [] as string[] }));
 
 vi.mock('@/db/db', () => ({ db: new Proxy({}, { get: (_t, p) => { const d = state.db as Record<PropertyKey, unknown> | null; const v = d?.[p]; return typeof v === 'function' ? (v as (...a: unknown[]) => unknown).bind(d) : v; } }) }));
 vi.mock('@/lib/external-resource-middleware', () => ({
@@ -28,13 +28,18 @@ vi.mock('@/lib/external-resource-route-utils', () => ({
 vi.mock('@/lib/services/external-resource-authorization-service', () => ({
   authorizeExternalDocumentAccess: async () => ({ allowed: state.allowed }),
 }));
-vi.mock('@/lib/blob-client', () => ({
-  generateSasUrl: async (_container: string, path: string) => {
-    if (state.sasFails) throw new Error('storage down');
-    state.signed.push(path);
-    return `https://uestore.blob.core.windows.net/union-eyes/${path}?sig=SECRET-SIGNATURE`;
-  },
-}));
+vi.mock('@/lib/blob-client', () => {
+  class BlobTooLargeError extends Error {}
+  return {
+    BlobTooLargeError,
+    readBlobBounded: async (path: string) => {
+      if (state.sasFails) throw new Error('storage down');
+      if (state.tooLarge) throw new BlobTooLargeError('too large');
+      state.signed.push(path);
+      return Buffer.from('FILE-BYTES-0123');
+    },
+  };
+});
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_c: unknown, work: (tx: unknown) => Promise<unknown>) => (state.db as { transaction: (f: (t: unknown) => Promise<unknown>) => Promise<unknown> }).transaction((t) => work(t)),
 }));
@@ -58,44 +63,50 @@ async function seed(link = true) {
 
 beforeAll(async () => { pg = await createDocumentDatabase(); state.db = drizzle(pg); });
 afterAll(async () => { await pg.close(); });
-beforeEach(async () => { await resetDocumentDatabase(pg); state.allowed = true; state.sasFails = false; state.signed.length = 0; });
+beforeEach(async () => { await resetDocumentDatabase(pg); state.allowed = true; state.sasFails = false; state.tooLarge = false; state.signed.length = 0; });
 
 describe('external matter document download', () => {
-  it('records principal, organization, matter, document and version durably, then returns the link', async () => {
+  it('records principal, organization, matter, document, version and bytes delivered durably, then serves the file', async () => {
     await seed();
     const response = await get();
     expect(response.status).toBe(200);
-    expect((await response.json()).data.downloadUrl).toContain('SECRET-SIGNATURE');
+    expect(Buffer.from(await response.arrayBuffer()).toString()).toBe('FILE-BYTES-0123');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(response.headers.get('content-disposition')).toBe("attachment; filename*=UTF-8''e.pdf");
+    expect(response.headers.get('content-type')).toBe('application/pdf');
     const rows = await audit();
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ action: 'document.external_download', user_id: REP, resource_id: DOC });
     expect(rows[0].metadata).toMatchObject({
       actorKind: 'external_representative', representativeOrganizationId: 'rep-org-1', authorityId: 'auth-1', matterGrantId: 'grant-1',
-      matterType: 'grievance', matterId: MATTER, documentId: DOC, versionNo: 2,
+      matterType: 'grievance', matterId: MATTER, documentId: DOC, versionNo: 2, delivery: 'served_by_route', sizeBytes: 15,
     });
     expect(rows[0].metadata.versionId).toBe('00000000-0000-4000-8000-0000000000b2');
     expect(state.signed).toEqual([`documents/${ORG}/two`]);
   });
 
-  it('never persists the link, its signature or the storage path', async () => {
+  it('hands over no storage link and records neither the bytes nor the storage path', async () => {
     await seed();
-    await get();
+    const response = await get();
+    const body = Buffer.from(await response.arrayBuffer()).toString();
+    expect(body).not.toContain('http');
+    expect(body).not.toContain('sig=');
     const text = JSON.stringify(await audit());
-    expect(text).not.toContain('SECRET-SIGNATURE');
-    expect(text).not.toContain('sig=');
+    expect(text).not.toContain('FILE-BYTES');
     expect(text).not.toContain(`documents/${ORG}`);
   });
 
-  it('withholds the link when the mandatory audit cannot be written', async () => {
+  it('withholds the bytes when the mandatory audit cannot be written', async () => {
     await seed();
     await q(`INSERT INTO audit_fault_actions(action) VALUES ('document.external_download')`);
     const response = await get();
     expect(response.status).toBe(503);
-    expect(JSON.stringify(await response.json())).not.toContain('SECRET-SIGNATURE');
+    expect(await response.text()).not.toContain('FILE-BYTES');
     expect(await audit()).toHaveLength(0);
   });
 
-  it('records no access when no link could be issued', async () => {
+  it('records no access when the file could not be read', async () => {
     await seed();
     state.sasFails = true;
     const response = await get();
@@ -103,7 +114,15 @@ describe('external matter document download', () => {
     expect(await audit()).toHaveLength(0);
   });
 
-  it('issues nothing and records nothing when the external authorization chain refuses', async () => {
+  it('refuses a file over the streamed-read limit and records no access', async () => {
+    await seed();
+    state.tooLarge = true;
+    const response = await get();
+    expect(response.status).toBe(413);
+    expect(await audit()).toHaveLength(0);
+  });
+
+  it('releases nothing and records nothing when the external authorization chain refuses (a revoked or expired grant is refused on every read)', async () => {
     await seed();
     state.allowed = false;
     const response = await get();

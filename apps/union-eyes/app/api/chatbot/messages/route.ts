@@ -6,7 +6,7 @@
  */
 import { z } from 'zod';
 import { withApi } from '@/lib/api/with-api';
-import { ChatbotService } from '@/lib/ai/chatbot-service';
+import { ChatbotService, ChatbotUnavailableError } from '@/lib/ai/chatbot-service';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { RATE_LIMITS } from '@/lib/rate-limiter';
@@ -34,7 +34,7 @@ export const POST = withApi(
     rateLimit: RATE_LIMITS.AI_COMPLETION,
     openapi: { tags: ['AI'], summary: 'Send chatbot message and get AI response' },
   },
-  async ({ body, userId, organizationId }) => {
+  async ({ body, userId, organizationId, user }) => {
     const blocked = await guardAiFeature(AI_FEATURES.AI_CHATBOT, { userId: userId ?? undefined, organizationId: organizationId ?? undefined });
     if (blocked) return blocked;
     enforceAISafety({
@@ -42,7 +42,8 @@ export const POST = withApi(
       action: 'POST',
       organizationId,
       userId,
-      userRole: 'member',
+      // The caller's own role, not a literal: the safety policy decides on who is asking.
+      userRole: user?.role ?? 'member',
       dataClass: 'internal',
     });
     const auditRefId = await auditAIInvocation({
@@ -62,6 +63,7 @@ export const POST = withApi(
         useRAG: body.useRAG,
       });
     } catch (error) {
+      if (error instanceof ChatbotUnavailableError) throw ApiError.externalService('ai-assistant', 'The assistant is temporarily unavailable. Please try again shortly.');
       const refused = operationAuditResponse(error);
       if (refused) throw ApiError.conflict(refused.body.error.message);
       throw error;
@@ -69,7 +71,8 @@ export const POST = withApi(
 
     return standardSuccessResponse({ data: assistantMessage }, {
       aiGenerated: true,
-      reviewRequired: false,
+      // The reply is model-generated and advisory; it has not been reviewed by a person.
+      reviewRequired: true,
       source: 'ai',
       model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
       timestamp: new Date().toISOString(),

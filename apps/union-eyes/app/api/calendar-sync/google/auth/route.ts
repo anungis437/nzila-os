@@ -1,3 +1,4 @@
+import { issueCalendarOAuthState, setCalendarOAuthStateCookie } from '@/lib/external-calendar-sync/oauth-state';
 /**
  * Google Calendar OAuth Authorization
  *
@@ -19,8 +20,13 @@ export const GET = withRoleAuth('member', async (_request: NextRequest, context:
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required')
     }
 
-    const authUrl = getAuthorizationUrl(userId)
-    return NextResponse.redirect(authUrl)
+    const organizationId = typeof context.organizationId === 'string' ? context.organizationId : null
+    if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required')
+    const state = issueCalendarOAuthState('google', userId, organizationId)
+    const authUrl = getAuthorizationUrl(state)
+    const response = NextResponse.redirect(authUrl)
+    setCalendarOAuthStateCookie(response, 'google', state)
+    return response
   } catch (error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,

@@ -176,6 +176,174 @@
       "when": 1790210000000,
       "tag": "0026_workaid_union_side_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790220000000,
+      "tag": "0028_workaid_consent_wording_proposal_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790230000000,
+      "tag": "0029_election_succession_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1790240000000,
+      "tag": "0030_precedent_explicit_share_select",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1790250000000,
+      "tag": "0031_feature_flags_attribution_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1790260000000,
+      "tag": "0032_grievance_events_actor_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1790270000000,
+      "tag": "0033_external_authority_principals_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790280000000,
+      "tag": "0034_remaining_principal_columns_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790290000000,
+      "tag": "0035_room_bookings_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1790300000000,
+      "tag": "0036_contact_submissions_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790310000000,
+      "tag": "0037_ml_prediction_feedback_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790320000000,
+      "tag": "0038_scim_configurations_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790330000000,
+      "tag": "0039_claim_status_transitions_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790340000000,
+      "tag": "0040_satisfaction_survey_responded_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790350000000,
+      "tag": "0041_arbitration_decisions_owner_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790360000000,
+      "tag": "0042_shared_clause_versions_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790370000000,
+      "tag": "0043_email_address_suppressions_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790380000000,
+      "tag": "0044_public_intake_audit_events_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790390000000,
+      "tag": "0045_audit_security_runtime_read",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1790400000000,
+      "tag": "0046_pilot_fixture_rows_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1790410000000,
+      "tag": "0047_authority_reviews_visibility_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790420000000,
+      "tag": "0048_clause_library_sharing_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1790430000000,
+      "tag": "0049_scim_provisioning_functions",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790440000000,
+      "tag": "0050_clause_library_sharing_functions_retired",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1790450000000,
+      "tag": "0051_scim_provisioned_users_rls_closure",
+      "breakpoints": true
     }
   ]
 }

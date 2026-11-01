@@ -23,6 +23,7 @@ import {
   import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
   import { AI_FEATURES } from '@/lib/services/feature-flags';
   import { enforceAISafety } from '@nzila/policies';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 const matchPrecedentsSchema = z.object({
   action: z.enum(['match', 'analyze', 'memorandum']).default('match'),
@@ -69,7 +70,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       // OWASP AI: Feature flag + AI safety gate
       const blocked = await guardAiFeature(AI_FEATURES.AI_MATCH_PRECEDENTS, { userId: context.userId, organizationId: context.organizationId });
       if (blocked) return blocked;
-      enforceAISafety({ origin: 'match-precedents', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
+      enforceAISafety({ origin: 'match-precedents', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'grievance_legal' });
 
     try {
       const body = await request.json();
@@ -90,6 +91,12 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         options,
       } = validation.data;
 
+      return await performAuditedOperation({
+        organizationId: context.organizationId,
+        userId: context.userId,
+        action: 'ai.precedent_matching.' + action,
+        resourceType: 'ai_invocations',
+      }, async () => {
       switch (action) {
         case 'match':
           // Simple precedent matching without full analysis
@@ -146,7 +153,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       'Invalid action. Use: match, analyze, or memorandum'
     );
       }
-    } catch {
+      });
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
 return NextResponse.json(
         {
           error: 'Precedent matching failed',

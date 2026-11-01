@@ -256,7 +256,7 @@ describe('counsel / WorkAid relationships: member-counsel capacity needs an acti
 
   beforeAll(async () => {
     await k.as(U.steward)(async (t) => {
-      await t.query(`INSERT INTO ue_authority_workaid_matters (id, organization_id, member_user_id, case_id, referred_by) VALUES ($1,$2,$3,$4,$5)`, [MATTER, ORG, U.member, CASE, U.steward])
+      await t.query(`INSERT INTO ue_authority_workaid_matters (id, organization_id, member_user_id, case_id, referred_by, referred_categories) VALUES ($1,$2,$3,$4,$5,ARRAY['status']::text[])`, [MATTER, ORG, U.member, CASE, U.steward])
       await auditAuthorityMutation(t, { organizationId: ORG, action: 'test.raw', resourceType: 'ue_authority_workaid_matters', resourceId: MATTER })
     })
     await k.as(U.vp)((t) =>

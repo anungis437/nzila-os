@@ -30,22 +30,14 @@ interface SendEmailParams {
  * Send scheduled report via email
  */
 export async function sendScheduledReportEmail(params: SendEmailParams): Promise<void> {
-  const { schedule: _schedule, fileUrl: _fileUrl, fileBuffer: _fileBuffer } = params;
-
-  // Check if email service is configured
   const emailProvider = process.env.EMAIL_PROVIDER || 'resend';
 
-  try {
-    if (emailProvider === 'resend') {
-      await sendViaResend(params);
-    } else if (emailProvider === 'sendgrid') {
-      await sendViaSendGrid(params);
-    } else {
-      // Fallback to console log for development
-}
-  } catch (error) {
-throw error;
+  // Only the Resend path applies the platform address suppression and reports a failed send. A provider that is selected but has no
+  // delivery path here is an error, never a silent success.
+  if (emailProvider !== 'resend') {
+    throw new Error(`Scheduled report email is not available for EMAIL_PROVIDER="${emailProvider}": no delivery path is implemented for it, so no email was sent`);
   }
+  await sendViaResend(params);
 }
 
 /**
@@ -79,56 +71,6 @@ async function sendViaResend(params: SendEmailParams): Promise<void> {
     }
 } catch (error) {
 throw error;
-  }
-}
-
-/**
- * Send email via SendGrid
- * Note: Requires @sendgrid/mail package to be installed
- * Install with: npm install @sendgrid/mail
- */
-async function sendViaSendGrid(params: SendEmailParams): Promise<void> {
-  const { schedule, fileUrl, fileBuffer } = params;
-
-  // SendGrid integration (install with: pnpm add @sendgrid/mail)
-  try {
-    // Check if SendGrid is available
-    let sgMail: { default: { setApiKey: (key: string) => void; send: (msg: Record<string, unknown>) => Promise<unknown> } };
-    try {
-       
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - @sendgrid/mail may not be installed
-      sgMail = await import('@sendgrid/mail') as typeof sgMail;
-    } catch (_importError) {
-throw new Error('SendGrid package not installed. Using Resend fallback.');
-    }
-
-    if (!process.env.SENDGRID_API_KEY) {
-throw new Error('SendGrid API key not configured. Using Resend fallback.');
-    }
-
-    sgMail.default.setApiKey(process.env.SENDGRID_API_KEY);
-
-    const reportName = (schedule as unknown as Record<string, unknown>).report_name as string || 'Report';
-    const fileName = `${reportName.replace(/\s+/g, '-')}.${schedule.format}`;
-
-    await sgMail.default.send({
-      to: schedule.recipients,
-      from: process.env.EMAIL_FROM || 'reports@union-claims.com',
-      subject: `Scheduled Report: ${reportName}`,
-      html: generateEmailHTML(schedule, fileUrl),
-      attachments: [
-        {
-          content: fileBuffer.toString('base64'),
-          filename: fileName,
-          type: getMimeType(schedule.format),
-          disposition: 'attachment',
-        },
-      ],
-    });
-return;
-  } catch (_error) {
-// Fall through to Resend implementation below
   }
 }
 
@@ -286,20 +228,6 @@ function generateEmailHTML(schedule: ScheduledReport, fileUrl: string): string {
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/**
- * Get MIME type for export format
- */
-function getMimeType(format: string): string {
-  const mimeTypes: Record<string, string> = {
-    pdf: 'application/pdf',
-    excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    csv: 'text/csv',
-    json: 'application/json',
-  };
-
-  return mimeTypes[format] || 'application/octet-stream';
-}
 
 /**
  * Send test email (for testing)

@@ -11,6 +11,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votingOptions, votingSessions } from '@/db/schema';
 import { castVote, hasVoted } from '@/lib/services/voting-service';
+import { recordBallotAcceptance } from '@/lib/voting/ballot-process-audit';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -62,7 +63,7 @@ export const POST = withApi(
     // Voter identity and eligibility are derived server-side from the
     // authenticated user via castVote() — never trust a client-supplied
     // voterId, which would let a caller impersonate/duplicate ballots.
-    const vote = await withRLSContext({ organizationId }, async () => {
+    const vote = await withRLSContext({ organizationId }, async (tx) => {
       const [session] = await db
         .select()
         .from(votingSessions)
@@ -71,7 +72,9 @@ export const POST = withApi(
       if (session.status !== 'active') throw ApiError.badRequest('Voting session is not open');
 
       try {
-        return await castVote(id, parsed.optionId, userId, parsed.isAnonymous);
+        const cast = await castVote(id, parsed.optionId, userId, parsed.isAnonymous);
+        await recordBallotAcceptance(tx, { organizationId, sessionId: id, receiptId: cast.id });
+        return cast;
       } catch (error) {
         throw ApiError.badRequest(error instanceof Error ? error.message : 'Failed to cast vote');
       }

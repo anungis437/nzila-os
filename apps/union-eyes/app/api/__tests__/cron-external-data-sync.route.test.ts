@@ -49,9 +49,10 @@ describe('cron/external-data-sync route', () => {
     m.syncContributionRates.mockResolvedValue({ ...okResult, recordsFailed: 0 });
   });
 
-  it('runs all sync stages successfully through GET', async () => {
-    const { GET } = await loadRoute();
-    const result = await GET();
+  it('runs all sync stages successfully through POST', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST();
+    const result = await response.json();
 
     expect(result).toMatchObject({
       syncType: 'scheduled',
@@ -69,8 +70,11 @@ describe('cron/external-data-sync route', () => {
     m.syncWageData.mockRejectedValueOnce(new Error('wage offline'));
     m.syncUnionDensity.mockResolvedValueOnce({ ...okResult, success: false, recordsFailed: 2 });
 
-    const result = await POST();
+    const response = await POST();
+    const result = await response.json();
 
+    // Gate 0 F01: a run with a failed source is a failed run, so the scheduler sees a non-2xx answer.
+    expect(response.status).toBe(500);
     expect(result).toMatchObject({
       syncType: 'scheduled',
       summary: expect.objectContaining({ success: false }),
@@ -83,13 +87,15 @@ describe('cron/external-data-sync route', () => {
   });
 
   it('returns outer failure envelope when orchestration throws', async () => {
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     m.syncWageData.mockImplementationOnce(() => {
       throw new Error('fatal startup failure');
     });
 
-    const result = await GET();
+    const response = await POST();
+    const result = await response.json();
 
+    expect(response.status).toBe(500);
     expect(result.summary.success).toBe(false);
     expect(result.errors[0]).toContain('fatal startup failure');
   });

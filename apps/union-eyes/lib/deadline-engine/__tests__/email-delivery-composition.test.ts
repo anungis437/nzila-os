@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ send: vi.fn() }));
+const mocks = vi.hoisted(() => ({ send: vi.fn(), systemRows: vi.fn() }));
 vi.mock('resend', () => ({ Resend: class { emails = { send: mocks.send }; } }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
+// The suppression ledger is read through the system context; only that boundary is replaced, so the real lookup, digesting and screening run.
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: () => mocks.systemRows() }));
 
-// Real canonical service + real deadline adapter. Only the provider SDK is mocked.
+// Real canonical service + real deadline adapter. Only the provider SDK and the database boundary are mocked.
 import { deliverDeadlineReminderEmail } from '../email-adapter';
+import { addressSha256 } from '@/lib/communications/address-suppression';
 
 const input = {
   recipientEmail: 'owned-fixture@example.test', recipientLocale: 'en', subject: 'Isolated composition test',
@@ -16,6 +19,7 @@ const previousKey = process.env.RESEND_API_KEY;
 
 beforeEach(() => {
   mocks.send.mockReset();
+  mocks.systemRows.mockReset().mockResolvedValue([]);
   process.env.RESEND_API_KEY = 're_local_mock_never_sent';
 });
 afterEach(() => {
@@ -67,6 +71,18 @@ describe('canonical email service and deadline adapter composition', () => {
   it('keeps unconfigured delivery disabled without contacting the provider', async () => {
     delete process.env.RESEND_API_KEY;
     expect(await deliverDeadlineReminderEmail(input)).toMatchObject({ kind: 'disabled' });
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+
+  it('does not send to a suppressed address, and keeps that permanent: retrying cannot make it deliverable', async () => {
+    mocks.systemRows.mockResolvedValue([{ hash: addressSha256(input.recipientEmail) }]);
+    expect(await deliverDeadlineReminderEmail(input)).toMatchObject({ kind: 'permanent_failure', code: 'ADDRESS_SUPPRESSED' });
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+
+  it('retries, rather than dead-letters, a reminder when the suppression list cannot be read, and still sends nothing unchecked', async () => {
+    mocks.systemRows.mockRejectedValue(new Error('connection terminated'));
+    expect(await deliverDeadlineReminderEmail(input)).toMatchObject({ kind: 'transient_failure', code: 'SUPPRESSION_CHECK_UNAVAILABLE' });
     expect(mocks.send).not.toHaveBeenCalled();
   });
 });

@@ -209,12 +209,13 @@ export interface StatCanMembershipData {
 /**
  * Generate comprehensive annual compliance report
  */
-export async function generateAnnualComplianceReport(year: number): Promise<AnnualComplianceReport> {
+export async function generateAnnualComplianceReport(year: number, organizationId: string): Promise<AnnualComplianceReport> {
+  if (!organizationId) throw new Error('Organization context is mandatory for remittance reports');
   // Fetch all remittances for the year
   const remittances = await db
     .select()
     .from(perCapitaRemittances)
-    .where(eq(perCapitaRemittances.remittanceYear, year));
+    .where(and(eq(perCapitaRemittances.remittanceYear, year), eq(perCapitaRemittances.fromOrganizationId, organizationId)));
 
   // Generate summary
   const summary = await generateComplianceSummary(remittances, year);
@@ -305,7 +306,9 @@ export async function generateStatCanAnnualReport(fiscalYear: number): Promise<S
 export async function analyzeMultiYearTrends(options: {
   years: number;
   endYear?: number;
+  organizationId: string;
 }): Promise<MultiYearTrendAnalysis> {
+  if (!options.organizationId) throw new Error('Organization context is mandatory for trend reports');
   const endYear = options.endYear || new Date().getFullYear();
   const startYear = endYear - options.years + 1;
   const years = Array.from({ length: options.years }, (_, i) => startYear + i);
@@ -316,7 +319,7 @@ export async function analyzeMultiYearTrends(options: {
       const remittances = await db
         .select()
         .from(perCapitaRemittances)
-        .where(eq(perCapitaRemittances.remittanceYear, year));
+        .where(and(eq(perCapitaRemittances.remittanceYear, year), eq(perCapitaRemittances.fromOrganizationId, options.organizationId)));
 
       const uniqueOrgs = new Set(remittances.map(r => r.fromOrganizationId));
 
@@ -1142,7 +1145,8 @@ export const detectAnomalies = detectComplianceAnomalies;
 
 // Simple forecast using historical per-capita remittance data
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function forecastRemittances(months: number): Promise<any[]> {
+export async function forecastRemittances(months: number, organizationId: string): Promise<any[]> {
+  if (!organizationId) throw new Error('Organization context is mandatory for forecasts');
   // Fetch last 12 months of historical remittance data for a moving-average forecast
   const historicalData = await db
     .select({
@@ -1153,7 +1157,7 @@ export async function forecastRemittances(months: number): Promise<any[]> {
     })
     .from(perCapitaRemittances)
     .where(
-      sql`MAKE_DATE(${perCapitaRemittances.remittanceYear}, ${perCapitaRemittances.remittanceMonth}, 1) >= NOW() - INTERVAL '12 months'`
+      and(eq(perCapitaRemittances.fromOrganizationId, organizationId), sql`MAKE_DATE(${perCapitaRemittances.remittanceYear}, ${perCapitaRemittances.remittanceMonth}, 1) >= NOW() - INTERVAL '12 months'`)
     )
     .groupBy(
       perCapitaRemittances.remittanceYear,

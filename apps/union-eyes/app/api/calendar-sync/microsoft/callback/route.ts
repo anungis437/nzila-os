@@ -1,3 +1,5 @@
+import { verifyCalendarOAuthState, clearCalendarOAuthStateCookie } from '@/lib/external-calendar-sync/oauth-state'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 /**
  * Microsoft Calendar OAuth Callback
  *
@@ -10,7 +12,6 @@ import { and, eq } from 'drizzle-orm'
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard'
 import { exchangeCodeForTokens } from '@/lib/external-calendar-sync/microsoft-calendar-service'
 import { encryptCalendarToken } from '@/lib/external-calendar-sync/token-crypto'
-import { db } from '@/db/db'
 import { externalCalendarConnections } from '@/db/schema/calendar-schema'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses'
@@ -33,16 +34,20 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
     const state = request.nextUrl.searchParams.get('state')
 
     if (!code) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing OAuth authorization code')
+      const response = standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing OAuth authorization code')
+      clearCalendarOAuthStateCookie(response, 'microsoft')
+      return response
     }
-    if (state && state !== userId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state mismatch')
+    if (!verifyCalendarOAuthState(request, 'microsoft', state, userId, organizationId)) {
+      const response = standardErrorResponse(ErrorCode.FORBIDDEN, 'Missing, expired or invalid OAuth state')
+      clearCalendarOAuthStateCookie(response, 'microsoft')
+      return response
     }
 
     const tokens = await exchangeCodeForTokens(code)
 
-    await withRLSContext(async () => {
-      const [existing] = await db
+    await withRLSContext({ organizationId, userId }, async (tx) => {
+      const [existing] = await tx
         .select({ id: externalCalendarConnections.id })
         .from(externalCalendarConnections)
         .where(
@@ -77,12 +82,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         updatedAt: now,
       }
 
+      let connectionId = existing?.id
       if (existing) {
-        await db
+        await tx
           .update(externalCalendarConnections)
           .set({
             ...connectionPayload,
-            refreshToken: tokens.refreshToken || undefined,
+            refreshToken: tokens.refreshToken ? encryptCalendarToken(tokens.refreshToken) : undefined,
           })
           .where(
             and(
@@ -92,27 +98,44 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
             ),
           )
       } else {
-        await db.insert(externalCalendarConnections).values({
+        const [created] = await tx.insert(externalCalendarConnections).values({
           ...connectionPayload,
           createdAt: now,
-        })
+        }).returning({ id: externalCalendarConnections.id })
+        if (!created) throw new Error('Calendar connection creation failed')
+        connectionId = created.id
       }
+      if (!connectionId) throw new Error('Calendar connection id unavailable')
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'calendar.connection.oauth.connect',
+        resourceType: 'external_calendar_connections',
+        resourceId: connectionId,
+        details: { provider: 'microsoft', updatedExisting: Boolean(existing) },
+      })
     })
 
     const redirectUrl = new URL('/calendar?sync=connected&provider=microsoft', request.nextUrl.origin)
-    return NextResponse.redirect(redirectUrl)
+    const response = NextResponse.redirect(redirectUrl)
+    clearCalendarOAuthStateCookie(response, 'microsoft')
+    return response
   } catch (error) {
     if (error instanceof Error && error.message.includes('did not return refresh token')) {
-      return standardErrorResponse(
+      const response = standardErrorResponse(
         ErrorCode.SERVICE_UNAVAILABLE,
         'Microsoft OAuth did not return a refresh token. Reconnect and grant offline access to enable continuous sync.',
       )
+      clearCalendarOAuthStateCookie(response, 'microsoft')
+      return response
     }
 
-    return standardErrorResponse(
+    const response = standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to complete Microsoft Calendar authorization',
       error,
     )
+    clearCalendarOAuthStateCookie(response, 'microsoft')
+    return response
   }
 })

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "register": "GATE-0C-CLASSIFICATION-LEDGER",
+  "note": "Classification ledger for operations the canonical route universe gained after Gate 0B. The Gate 0B ledger is frozen at the Gate 0B.12 acceptance commit and is not rewritten; an operation appears in exactly one of the two ledgers.",
+  "anchorCommit": "447c98c44b04fdca23d9b959bddfa62ccec351b2",
+  "tranches": {
+    "GATE-0C.1": {
+      "version": 1,
+      "operationsHash": "6f6b996d3bd863acea9222d696d22ca42eea990b9ab14018bbe04d62635ad6fb"
+    }
+  },
+  "classified": {
+    "reviews/route.ts|GET": "UE-CAP-REVIEW-INTAKE",
+    "reviews/route.ts|POST": "UE-CAP-REVIEW-INTAKE"
+  },
+  "classifiedIn": {
+    "reviews/route.ts|GET": "GATE-0C.1",
+    "reviews/route.ts|POST": "GATE-0C.1"
+  }
+}

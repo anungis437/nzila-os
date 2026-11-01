@@ -136,7 +136,6 @@ describe('MIL-INT-003 — Core billing API routes avoid crudRoutes stubs', () =>
 describe('MIL-INT-004 — Entitlement enforcement on commerce routes', () => {
   const entitledRoutes = [
     'contracts/route.ts',
-    'billing/send-invoice/route.ts',
     'billing/subscriptions/route.ts',
     'dues/late-fees/route.ts',
     'dues/ledger/route.ts',
@@ -158,6 +157,16 @@ describe('MIL-INT-004 — Entitlement enforcement on commerce routes', () => {
       expect(hasEntitlement).toBe(true);
     });
   }
+
+  it('billing/send-invoice remains fail-closed until delivery and entitlement controls exist', () => {
+    // A retired operation must not be made to look implemented by adding a
+    // no-op entitlement check. It cannot send or generate an invoice.
+    const file = read(join(API, 'billing/send-invoice/route.ts'));
+    expect(file).toContain('withApi');
+    expect(file).toMatch(/auth:\s*\{\s*required:\s*true/);
+    expect(file).toMatch(/throw\s+ApiError\.notImplemented\s*\(/);
+    expect(file).not.toMatch(/(?:createInvoice|generateInvoice|sendInvoice|sendEmail|db\.insert|db\.update)\s*\(/);
+  });
 });
 
 // ============================================================================

@@ -33,6 +33,7 @@ const m = vi.hoisted(() => {
     state,
     configs: {} as Record<string, any>,
     requireEntitlement: vi.fn(),
+    requireLiveFinancialMandate: vi.fn(),
     persistAtomicAudit: vi.fn(),
     verifyEvidenceChainFromLinks: vi.fn(),
     enforcePayrollLifecycleTransition: vi.fn(),
@@ -65,6 +66,7 @@ const mockDb = {
 
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: m.requireLiveFinancialMandate }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   PLATFORM_MODULES: { EMPLOYER_PAYROLL_OFFICIAL: 'employer_payroll_official' },
@@ -129,6 +131,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     vi.clearAllMocks();
     m.resetQueues();
     m.requireEntitlement.mockResolvedValue(undefined);
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.verifyEvidenceChainFromLinks.mockReturnValue({ valid: true });
     m.enforcePayrollLifecycleTransition.mockImplementation(() => undefined);
@@ -189,11 +192,22 @@ describe('employer-execution/payroll-runs/[id] route', () => {
       }],
     );
 
-    const result = await GET({ organizationId: 'org_1', params: { id: 'run_1' } } as any);
+    const result = await GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: 'run_1' } } as any);
 
     expect(result.data.run.id).toBe('run_1');
     expect(result.data.items.length).toBe(1);
     expect(result.data.chainVerification).toMatchObject({ valid: true });
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalled();
+  });
+
+  it('GET and PATCH refuse before reading a run when no live financial mandate exists', async () => {
+    const { GET, PATCH } = await loadRoute();
+    const denied = Object.assign(new Error('financial mandate'), { status: 403 });
+    m.requireLiveFinancialMandate.mockRejectedValue(denied);
+    m.queueSelect([[{ id: 'run_1', runType: 'official' }]]);
+    await expect(GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: 'run_1' } } as any)).rejects.toMatchObject({ status: 403 });
+    await expect(PATCH(patch('approver_1', 'run_1', 'approve'))).rejects.toMatchObject({ status: 403 });
+    expect(m.state.selectQueue).toHaveLength(1);
   });
 
   it('PATCH is restricted to the named financial roles', async () => {
@@ -215,7 +229,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     m.queueSelect([{ ...baseRun, id: 'run_3', runType: 'preview' }]);
 
     await expect(PATCH(patch('approver_1', 'run_3', 'approve'))).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1', userId: 'approver_1' }, expect.any(Function));
     expect(m.state.locks).toEqual(['update']);
   });
 
@@ -382,7 +396,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
 
     it('executes an approved run as a third party and audits on the same transaction', async () => {
       const { PATCH } = await loadRoute();
-      m.queueSelect([approvedRun]);
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
       m.queueUpdate([{ ...approvedRun, status: 'posted' }]);
 
       const result = await PATCH(patch('executor_1', 'run_4', 'seal'));
@@ -445,7 +459,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
 
     it('returns 409 when the run was already executed concurrently (status predicate)', async () => {
       const { PATCH } = await loadRoute();
-      m.queueSelect([approvedRun]);
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
       m.queueUpdate([]);
 
       await expect(PATCH(patch('executor_1', 'run_4', 'seal'))).rejects.toMatchObject({ status: 409 });
@@ -455,11 +469,33 @@ describe('employer-execution/payroll-runs/[id] route', () => {
 
     it('does not commit when the atomic audit cannot be written', async () => {
       const { PATCH } = await loadRoute();
-      m.queueSelect([approvedRun]);
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
       m.queueUpdate([{ ...approvedRun, status: 'posted' }]);
       m.persistAtomicAudit.mockRejectedValue(new Error('audit unavailable'));
 
       await expect(PATCH(patch('executor_1', 'run_4', 'seal'))).rejects.toThrow('audit unavailable');
+    });
+
+    it('F06 A4: refuses to seal a run for which no remittance was generated, so a posted run always means something was done', async () => {
+      const { PATCH } = await loadRoute();
+      m.queueSelect([approvedRun], []);
+
+      await expect(PATCH(patch('executor_1', 'run_4', 'seal'))).rejects.toMatchObject({ status: 409 });
+      expect(m.state.updates).toHaveLength(0);
+      expect(m.state.inserts).toHaveLength(0);
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('F06 A4: records which remittance the sealed run rests on', async () => {
+      const { PATCH } = await loadRoute();
+      m.queueSelect([approvedRun], [{ id: 'remit_1' }]);
+      m.queueUpdate([{ ...approvedRun, status: 'posted' }]);
+
+      const result = await PATCH(patch('executor_1', 'run_4', 'seal'));
+
+      expect(result.data.remittanceRunId).toBe('remit_1');
+      expect(m.state.inserts[0]!.values.details).toMatchObject({ remittanceRunId: 'remit_1' });
+      expect(auditEntry()).toMatchObject({ details: { remittanceRunId: 'remit_1' } });
     });
   });
 });

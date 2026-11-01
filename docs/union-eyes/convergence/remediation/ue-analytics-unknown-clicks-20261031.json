@@ -1,0 +1,24 @@
+{
+  "record": "UE_GATE0_SOURCE_PATCH_AWAITING_QUALIFICATION",
+  "defectId": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
+  "branch": "agents/ue-cursor-final-closure",
+  "sourceBaseline": "169fd3b3f95478f760d005b7e7ed180cdec20c6c",
+  "files": [
+    "apps/union-eyes/app/api/social-media/analytics/route.ts",
+    "apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts"
+  ],
+  "state": "PARTIAL",
+  "source": "PATCHED",
+  "unit": "NOT_RUN",
+  "nativePg15": "NOT_RUN",
+  "nativePg16": "NOT_RUN",
+  "httpBrowser": "NOT_RUN",
+  "staging": "NOT_RUN",
+  "independentReviewer": "OUTSTANDING",
+  "institutionalAuthority": "OUTSTANDING",
+  "population": 777,
+  "notes": [
+    "Existing collection-unavailable and data_collected safeguards remain. Additionally, the post analytics summary, campaign analytics summary and campaign export no longer claim zero clicks when no click collector or click field exists; they return null (unknown) while account analytics retains actual recorded linkClicks. Regression assertions cover all three projections; tests and native/runtime acceptance remain pending.",
+    "The social platform collector still does not transform provider responses into stored analytics and no proven worker calls it. Exact-HEAD unit, native PostgreSQL and HTTP/browser/staging qualification and institutional analytics authority remain outstanding."
+  ]
+}

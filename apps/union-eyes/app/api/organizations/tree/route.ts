@@ -9,8 +9,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
-import { asc } from 'drizzle-orm';
+import { asc, inArray } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { readableOrganizationIds, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,10 +31,19 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const orgs = await db
-    .select()
-    .from(organizations)
-    .orderBy(asc(organizations.hierarchyLevel), asc(organizations.name));
+  const access = await resolveOrganizationAccess(userId);
+  const readable = readableOrganizationIds(access);
+  if (readable && readable.length === 0) return NextResponse.json({ data: [] });
+
+  // Read as the system role, bounded to the organizations the caller may read; the ambient connection role is not tenant-scoped.
+  const orgs = await withSystemContext(() =>
+    db
+      .select()
+      .from(organizations)
+      .where(readable ? inArray(organizations.id, readable) : undefined)
+      .orderBy(asc(organizations.hierarchyLevel), asc(organizations.name))
+      .limit(1000),
+  );
 
   return NextResponse.json({
     data: orgs.map((o) => ({

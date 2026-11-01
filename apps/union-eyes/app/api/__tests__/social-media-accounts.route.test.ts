@@ -1,4 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Provider tokens are stored sealed (B91); a deterministic stand-in for the secret service keeps these tests free of key material.
+vi.mock('@/lib/encryption', () => ({
+  encryptSecret: async (value: string) => `sealed(${value})`,
+  decryptSecret: async (value: string) => value.replace(/^sealed\((.*)\)$/, '$1'),
+}));
 import { NextRequest } from 'next/server';
 
 const TEST_USER = {
@@ -205,9 +211,10 @@ describe('social-media/accounts route', () => {
     expect(response.status).toBe(200);
     expect(payload.accounts).toHaveLength(1);
     expect(payload.accounts[0]).toMatchObject({ id: 'acct-1', platform: 'facebook' });
-    expect(m.logApiAuditEvent).toHaveBeenCalledWith(expect.objectContaining({
-      action: 'LIST_SOCIAL_ACCOUNTS',
-      metadata: { count: 1 },
+    // The list is recorded in the canonical audit log (B87), not a log line.
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      action: 'social_account.list',
+      details: { count: 1 },
     }));
   });
 
@@ -374,6 +381,40 @@ describe('social-media/accounts route', () => {
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toMatchObject({ error: 'Failed to refresh token' });
     expect(mockDb.update).toHaveBeenCalled();
+  });
+
+  // DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE
+  it('does not refresh a suspended or disconnected account (409) and changes nothing', async () => {
+    const { PUT } = await loadRoute();
+    for (const status of ['suspended', 'disconnected']) {
+      m.queueSelect([{ id: 'acct-1', organizationId: TEST_USER.organizationId, platform: 'facebook', accessToken: 'old', refreshToken: null, status }]);
+      const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+        method: 'PUT',
+        body: JSON.stringify({ account_id: 'acct-1' }),
+        headers: { 'content-type': 'application/json' },
+      }));
+      expect(response.status).toBe(409);
+    }
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('does not mark an account expired when the platform refreshed but the record could not be saved', async () => {
+    const { PUT } = await loadRoute();
+    m.queueSelect([{ id: 'acct-1', organizationId: TEST_USER.organizationId, platform: 'facebook', accessToken: 'old', refreshToken: null, status: 'active' }]);
+    m.queueUpdateWhere([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+      method: 'PUT',
+      body: JSON.stringify({ account_id: 'acct-1' }),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(response.status).toBe(500);
+    // Only the failed refresh audit would be a second record; a storage failure writes none.
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'social.account.token_refresh_failed' }));
   });
 
   it('refreshes a facebook token and returns the new expiry', async () => {

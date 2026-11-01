@@ -17,7 +17,6 @@ import {
   clcPerCapitaBenchmarks, 
   clcUnionDensity, 
   clcBargainingTrends,
-  clcSyncLog,
   clcOAuthTokens 
 } from '@/db/schema/clc-partnership-schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
@@ -249,24 +248,17 @@ export class CLCPartnershipService {
   }
 
   private async createSyncLog(
-    syncType: string,
-    initiatedBy?: string
+    _syncType: string,
+    _initiatedBy?: string
   ): Promise<string> {
-    const syncId = this.generateSyncId();
-    
-    await db.insert(clcSyncLog).values({
-      syncType,
-      syncId,
-      status: 'running',
-      initiatedBy,
-    });
-
-    return syncId;
+    // clc_sync_log is TENANT_RLS_REQUIRED (organization_id NOT NULL) and is written by the
+    // organization-scoped CLC routes. This service has no caller organization, so it does not insert a row.
+    return this.generateSyncId();
   }
 
   private async updateSyncLog(
-    syncId: string,
-    result: {
+    _syncId: string,
+    _result: {
       status: 'completed' | 'failed';
       recordsProcessed: number;
       recordsInserted: number;
@@ -276,18 +268,7 @@ export class CLCPartnershipService {
       errorDetails?: string;
     }
   ): Promise<void> {
-    await db.update(clcSyncLog)
-      .set({
-        status: result.status,
-        recordsProcessed: result.recordsProcessed,
-        recordsInserted: result.recordsInserted,
-        recordsUpdated: result.recordsUpdated,
-        recordsFailed: result.recordsFailed,
-        errorMessage: result.errorMessage,
-        errorDetails: result.errorDetails,
-        completedAt: new Date(),
-      })
-      .where(eq(clcSyncLog.syncId, syncId));
+    // Same boundary as createSyncLog. Matching syncId alone would update another tenant's row.
   }
 
   /**
@@ -677,13 +658,11 @@ export class CLCPartnershipService {
   }
 
   /**
-   * Get sync history
+   * Sync history for clc_sync_log is served by the organization-scoped CLC routes.
+   * This service does not read every tenant's rows.
    */
-  async getSyncHistory(limit: number = 10) {
-    return await db.select()
-      .from(clcSyncLog)
-      .orderBy(desc(clcSyncLog.startedAt))
-      .limit(limit);
+  async getSyncHistory(_limit: number = 10): Promise<never> {
+    throw new Error('CLC partnership sync history is served by the organization-scoped CLC routes.');
   }
 }
 

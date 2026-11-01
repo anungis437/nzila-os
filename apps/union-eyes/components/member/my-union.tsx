@@ -102,6 +102,14 @@ export function MyUnion() {
         )}
       </section>
 
+      <section aria-labelledby="union-reviews" className="rounded-lg border p-4">
+        <h2 id="union-reviews" className="mb-1 text-lg font-semibold">{t('reviewsTitle')}</h2>
+        <p className="mb-3 text-sm text-muted-foreground">{t('reviewsBody')}</p>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/${locale}/dashboard/union/reviews`}>{t('reviewsLink')}</Link>
+        </Button>
+      </section>
+
       <section aria-labelledby="union-services" className="rounded-lg border p-4">
         <h2 id="union-services" className="mb-1 text-lg font-semibold">{t('servicesTitle')}</h2>
         <p className="mb-3 text-sm text-muted-foreground">{t('servicesIntro')}</p>

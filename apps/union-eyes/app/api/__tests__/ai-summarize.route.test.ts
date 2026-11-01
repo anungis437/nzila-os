@@ -36,6 +36,7 @@ vi.mock('@/db/schema', () => ({ knowledgeBase: { id: {}, isActive: {} }, exitInt
 vi.mock('@/lib/ai/ai-client', () => ({
   buildOrgAiTrace: vi.fn(() => ({})),
   getAiClient: m.getAiClient,
+  toGatewayDataClass: vi.fn((value: string) => value),
   UE_APP_KEY: 'ue-app',
   UE_SYSTEM_ORG_ID: 'system',
   UE_PROFILES: { CLAUSE_SUMMARY: 'CLAUSE_SUMMARY' },
@@ -50,6 +51,11 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and') };
 });
+
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: (_op: unknown, run: () => Promise<unknown>) => run(),
+  operationAuditResponse: () => null,
+}));
 
 async function loadRoute() {
   return import('../ai/summarize/route');

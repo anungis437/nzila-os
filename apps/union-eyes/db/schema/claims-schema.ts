@@ -123,6 +123,8 @@ export const claims = pgTable("claims", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
   closedAt: timestamp("closed_at", { withTimezone: true }),
+  // When the status last changed (platform 0049). NULL means the history is unknown; it is not the last edit (updatedAt).
+  statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
 }, (table) => [
   index("idx_claims_org").on(table.organizationId),
   index("idx_claims_status").on(table.status),
@@ -130,6 +132,20 @@ export const claims = pgTable("claims", {
   index("idx_claims_created").on(table.createdAt),
   index("idx_claims_type").on(table.claimType),
   index("idx_claims_priority").on(table.priority),
+]);
+
+// Append-only history of status changes (platform 0049), written only by the status-change trigger.
+export const claimStatusTransitions = pgTable("claim_status_transitions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id").notNull(),
+  claimId: uuid("claim_id").notNull(),
+  fromStatus: varchar("from_status", { length: 50 }),
+  toStatus: varchar("to_status", { length: 50 }).notNull(),
+  changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+  changedBy: varchar("changed_by", { length: 255 }),
+}, (table) => [
+  index("claim_status_transitions_claim_idx").on(table.claimId, table.changedAt),
+  index("claim_status_transitions_org_idx").on(table.organizationId, table.changedAt),
 ]);
 
 // Claim updates/notes table

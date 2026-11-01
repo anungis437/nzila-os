@@ -5,9 +5,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { mockSelect, mockWithRLS, mockCalcEngine } = vi.hoisted(() => ({
+const { mockSelect, mockWithRLS, mockCalcEngine, mockRequireMandate } = vi.hoisted(() => ({
   mockSelect: vi.fn(),
   mockWithRLS: vi.fn(),
+  mockRequireMandate: vi.fn(),
   mockCalcEngine: {
     calculateMemberDues: vi.fn(() => ({
       baseDues: 50,
@@ -48,6 +49,11 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: mockWithRLS,
 }));
 
+// The mandate check reads the ledger on the transaction; billing-cycle-transaction-safety.test.ts covers its behavior.
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: mockRequireMandate,
+}));
+
 vi.mock('@/lib/decimal-safe', () => ({
   moneyToNumber: vi.fn((s: string) => parseFloat(s)),
   toCents: vi.fn((n: number) => Math.round(n * 100)),
@@ -59,7 +65,7 @@ vi.mock('@/lib/logger', () => ({
 
 // ── Imports ──────────────────────────────────────────────────────────────────
 
-import type { BillingCycleParams } from '../billing-cycle-service';
+import { BillingCycleService, type BillingCycleParams } from '../billing-cycle-service';
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
@@ -84,6 +90,42 @@ describe('BillingCycleService', () => {
         }),
       }),
     });
+  });
+
+  it('binds the target organization and actor to the database transaction, and requires the live execution mandate on that same transaction before reading members', async () => {
+    const order: string[] = [];
+    let boundTx: unknown;
+    mockRequireMandate.mockImplementationOnce(async () => {
+      order.push('mandate');
+    });
+    mockWithRLS.mockImplementationOnce(async (scope, callback) => {
+      expect(scope).toEqual({ organizationId: '11111111-1111-4111-8111-111111111111', userId: 'user-1' });
+      boundTx = {
+        select: () => {
+          order.push('read-members');
+          return { from: () => ({ leftJoin: () => ({ where: async () => [] }) }) };
+        },
+      };
+      return callback(boundTx);
+    });
+    const result = await BillingCycleService.generateBillingCycle({
+      organizationId: '11111111-1111-4111-8111-111111111111',
+      periodStart: new Date('2026-03-01'),
+      periodEnd: new Date('2026-03-31'),
+      frequency: 'monthly',
+      executedBy: 'user-1',
+      dryRun: true,
+    });
+    expect(result.transactionsCreated).toBe(0);
+    expect(mockWithRLS).toHaveBeenCalledOnce();
+    expect(mockRequireMandate).toHaveBeenCalledWith(boundTx, {
+      organizationId: '11111111-1111-4111-8111-111111111111',
+      userId: 'user-1',
+      action: 'finance:execute',
+      requiresLedger: true,
+    });
+    expect(order[0]).toBe('mandate');
+    expect(order).toContain('read-members');
   });
 
   it('BillingCycleParams has expected structure', () => {

@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
+import { rowsVisibleToGrant } from "@/lib/finance/principal-financial-authority";
 import { recordedRunAmounts } from "@/lib/employer-execution/run-duties";
 import { PLATFORM_MODULES, requireEntitlement } from "@/services/platform-economics/entitlement-guard";
 import {
@@ -27,17 +29,20 @@ const createSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_payroll_preview",
     openapi: { tags: ["Employer Execution"], summary: "List payroll runs" },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
-    const rows = await db
-      .select()
-      .from(employerPayrollRuns)
-      .where(eq(employerPayrollRuns.organizationId, organizationId))
-      .orderBy(desc(employerPayrollRuns.createdAt));
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view" });
+      return tx
+        .select()
+        .from(employerPayrollRuns)
+        .where(rowsVisibleToGrant(grant, organizationId, employerPayrollRuns.organizationId, employerPayrollRuns.id))
+        .orderBy(desc(employerPayrollRuns.createdAt));
+    });
     return { data: rows };
   },
 );
@@ -56,6 +61,10 @@ export const POST = withApi(
     if (body.runType === "official") {
       await requireEntitlement(organizationId, PLATFORM_MODULES.EMPLOYER_PAYROLL_OFFICIAL, userId ?? undefined);
     }
+
+    await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:prepare", requiresLedger: true });
+    });
 
     const [sourceBatch] = await db
       .select()

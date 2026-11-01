@@ -1,12 +1,14 @@
 /**
  * GET /api/dashboard/stats
- * Returns real-time dashboard statistics (claims counts, member count)
- * for the current organization.
+ * Case counts for the CALLER: the cases they filed or hold a live kernel relationship to (the same read scope as
+ * GET /api/cases). A tenant-wide aggregate is not a member's to see, and seniority is not a read, so no count here
+ * is derived from a case the caller could not open. A failed query is an error, never a zero.
  */
 import { NextResponse } from 'next/server';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { caseReadScope, getCaseActor } from '@/lib/cases/case-authorization';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,61 +17,49 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Dashboard'],
-      summary: 'Dashboard statistics for the current organization',
+      summary: 'Case statistics for the cases the caller is party to',
     },
   },
-  async ({ organizationId }) => {
-  if (!organizationId) {
-    return NextResponse.json(
-      { error: 'Organization ID required' },
-      { status: 400 },
-    );
-  }
+  async () => {
+    const actor = await getCaseActor();
 
-  try {
     const [claimsResult, membersResult] = await withRLSContext(
-      { organizationId },
+      { organizationId: actor.organizationId },
       async (rlsDb) => Promise.all([
         rlsDb.execute(sql`
           SELECT
-            count(*) FILTER (WHERE status NOT IN ('resolved','closed','rejected'))::int AS "activeClaims",
-            count(*) FILTER (WHERE status IN ('submitted','under_review'))::int          AS "pendingReviews",
-            count(*) FILTER (WHERE status IN ('resolved','closed'))::int                 AS "resolvedCases",
-            count(*) FILTER (WHERE priority IN ('high','critical')
-                             AND status NOT IN ('resolved','closed','rejected'))::int    AS "highPriorityClaims"
-          FROM claims
-          WHERE organization_id = ${organizationId}
+            count(*) FILTER (WHERE c.status NOT IN ('resolved','closed','rejected'))::int AS "activeClaims",
+            count(*) FILTER (WHERE c.status IN ('submitted','under_review'))::int          AS "pendingReviews",
+            count(*) FILTER (WHERE c.status IN ('resolved','closed'))::int                 AS "resolvedCases",
+            count(*) FILTER (WHERE c.priority IN ('high','critical')
+                             AND c.status NOT IN ('resolved','closed','rejected'))::int    AS "highPriorityClaims"
+          FROM claims c
+          WHERE ${caseReadScope(actor, 'c')}
         `),
-        rlsDb.execute(sql`
-          SELECT count(*)::int AS "activeMembers"
-          FROM organization_members
-          WHERE organization_id = ${organizationId}
-            AND status = 'active'
-        `),
-      ])
-    );
+        // The organization's member count is institutional information, not a figure for an ordinary member.
+        actor.role === 'member'
+          ? Promise.resolve([] as Array<Record<string, number>>)
+          : rlsDb.execute(sql`
+              SELECT count(*)::int AS "activeMembers"
+              FROM organization_members
+              WHERE organization_id = ${actor.organizationId}
+                AND status = 'active'
+            `),
+      ]),
+    ).catch(() => {
+      throw ApiError.internal('Dashboard statistics are unavailable');
+    });
 
     const claims = (claimsResult[0] as Record<string, number>) ?? {};
-    const members = (membersResult[0] as Record<string, number>) ?? {};
+    const members = (membersResult[0] as Record<string, number> | undefined) ?? null;
 
+    // The consumers read the bare object, so the shape is preserved.
     return NextResponse.json({
       activeClaims: claims.activeClaims ?? 0,
       pendingReviews: claims.pendingReviews ?? 0,
       resolvedCases: claims.resolvedCases ?? 0,
       highPriorityClaims: claims.highPriorityClaims ?? 0,
-      activeMembers: members.activeMembers ?? 0,
+      activeMembers: members ? (members.activeMembers ?? 0) : null,
     });
-  } catch (error) {
-    const { logger: log } = await import('@/lib/logger');
-    log.error('Dashboard stats query failed', {
-      error: error instanceof Error ? error.message : 'Unknown',
-    });
-    return NextResponse.json({
-      activeClaims: 0,
-      pendingReviews: 0,
-      resolvedCases: 0,
-      highPriorityClaims: 0,
-      activeMembers: 0,
-    });
-  }
-});
+  },
+);

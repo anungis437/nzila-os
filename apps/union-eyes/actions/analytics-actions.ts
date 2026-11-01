@@ -42,19 +42,29 @@ import { logger } from '@/lib/logger';
  * membership in. getOrganizationIdForUser() always resolves via a verified
  * organization_members row.
  */
-async function getCurrentUserOrgId(): Promise<string> {
+/**
+ * A caller that already resolved an organization (an API route behind its role guard) names it as expectedOrganizationId: the
+ * action resolves independently, and a disagreement (a user with more than one membership whose selection changed between
+ * the two resolutions) refuses the call instead of writing to a different organization than the one the caller was authorized in.
+ */
+function assertSameOrganization(resolved: string, expected: string | undefined): string {
+  if (expected && expected !== resolved) throw new Error('Organization context changed during the request');
+  return resolved;
+}
+
+async function getCurrentUserOrgId(expectedOrganizationId?: string): Promise<string> {
   const { userId } = await auth();
   if (!userId) throw new Error('Unauthorized');
 
-  return getOrganizationIdForUser(userId);
+  return assertSameOrganization(await getOrganizationIdForUser(userId), expectedOrganizationId);
 }
 
 /** The acting user and the organization verified for them; every write is audited to this pair. */
-async function getActor(): Promise<{ userId: string; orgId: string }> {
+async function getActor(expectedOrganizationId?: string): Promise<{ userId: string; orgId: string }> {
   const { userId } = await auth();
   if (!userId) throw new Error('Unauthorized');
 
-  return { userId, orgId: await getOrganizationIdForUser(userId) };
+  return { userId, orgId: assertSameOrganization(await getOrganizationIdForUser(userId), expectedOrganizationId) };
 }
 
 /**
@@ -66,9 +76,10 @@ export async function calculateMetrics(params: {
   periodType: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
   periodStart: Date;
   periodEnd: Date;
+  expectedOrganizationId?: string;
 }) {
   try {
-    const { userId, orgId } = await getActor();
+    const { userId, orgId } = await getActor(params.expectedOrganizationId);
     
     // Calculate metric value based on type
     let metricValue: number;
@@ -88,7 +99,7 @@ export async function calculateMetrics(params: {
         );
         metricValue = claimsCount.length;
         metricUnit = 'count';
-        metadata = { claimIds: claimsCount.map(c => c.claimId) };
+        metadata = { claimsCount: claimsCount.length };
         break;
         
       case 'resolution_time':
@@ -434,9 +445,10 @@ export async function getAnalyticsMetrics(params: {
   startDate?: Date;
   endDate?: Date;
   limit?: number;
+  expectedOrganizationId?: string;
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const orgId = await getCurrentUserOrgId(params.expectedOrganizationId);
     
     const metrics = await withRLSContext({ organizationId: orgId }, async (db) => {
       const conditions = [eq(analyticsMetrics.organizationId, orgId)];
@@ -464,7 +476,26 @@ export async function getAnalyticsMetrics(params: {
       });
     });
     
-    return { success: true, metrics };
+    // A member may read aggregate metric values, never underlying claim IDs
+    // or arbitrary metadata left by historical versions of the calculator.
+    // Explicit allowlisting also protects records created before the redaction migration.
+    const publicMetrics = metrics.map((metric) => {
+      const raw = metric.metadata && typeof metric.metadata === 'object' && !Array.isArray(metric.metadata)
+        ? metric.metadata as Record<string, unknown>
+        : {};
+      let metadata: Record<string, number | null> = {};
+      if (metric.metricType === 'claims_volume') {
+        const claimsCount = Number(metric.metricValue);
+        metadata = { claimsCount: Number.isFinite(claimsCount) ? claimsCount : null };
+      } else if (metric.metricType === 'resolution_time' && raw.claimsResolved != null) {
+        const claimsResolved = Number(raw.claimsResolved);
+        if (Number.isFinite(claimsResolved) && claimsResolved >= 0) {
+          metadata = { claimsResolved };
+        }
+      }
+      return { ...metric, metadata };
+    });
+    return { success: true, metrics: publicMetrics };
   } catch (error) {
     logger.error('Error fetching analytics metrics', error as Error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };

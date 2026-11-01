@@ -18,6 +18,7 @@ const schema = z.object({
   matterId: z.guid(),
   categories: z.array(z.string().min(1).max(64)).max(8).optional(),
   documentAuthorisationIds: z.array(z.guid()).max(100).optional(),
+  confirm: z.literal(true),
 })
 
 export async function POST(request: Request) {
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
         matterId: body.data.matterId,
         categories: body.data.categories,
         documentAuthorisationIds: body.data.documentAuthorisationIds,
+        confirm: true,
       }),
     )
     return NextResponse.json({ success: true, shareIds, ...COUNSEL_SIDE_NOTICE }, { status: 201 })

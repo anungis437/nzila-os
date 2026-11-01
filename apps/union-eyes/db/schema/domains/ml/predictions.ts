@@ -13,6 +13,8 @@ import {
   jsonb,
   index,
   unique,
+  boolean,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { organizations } from "../../../schema-organizations";
 
@@ -31,6 +33,8 @@ export const mlPredictions = pgTable("ml_predictions", {
   confidence: decimal("confidence"), // 0-100
   horizon: integer("horizon"), // 30, 60, 90 days
   granularity: varchar("granularity", { length: 20 }), // 'daily', 'weekly'
+  modelVersion: varchar("model_version", { length: 20 }), // the model that made the prediction (migration 0040)
+  subjectId: varchar("subject_id", { length: 255 }), // the case or member the prediction scored (migration 0040)
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => ({
   organizationIdx: index("idx_ml_predictions_organization").on(table.organizationId),
@@ -43,6 +47,25 @@ export const mlPredictions = pgTable("ml_predictions", {
 // ============================================================================
 // MODEL METADATA
 // ============================================================================
+
+// The recorded outcome of a prediction (migration 0047): append-only, one row per prediction. The feedback statistics are computed from
+// these rows; model_metadata is never rewritten by the feedback route.
+export const mlPredictionFeedback = pgTable("ml_prediction_feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  predictionId: uuid("prediction_id").notNull().references(() => mlPredictions.id, { onDelete: "cascade" }),
+  modelVersion: varchar("model_version", { length: 20 }),
+  predictedValue: decimal("predicted_value").notNull(),
+  actualBreach: boolean("actual_breach").notNull(),
+  absError: decimal("abs_error").notNull(),
+  resolutionHours: decimal("resolution_hours"),
+  comment: varchar("comment", { length: 1000 }),
+  submittedBy: varchar("submitted_by", { length: 255 }),
+  submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  predictionUq: uniqueIndex("ml_prediction_feedback_prediction_uq").on(table.predictionId),
+  orgVersionIdx: index("ml_prediction_feedback_org_version_idx").on(table.organizationId, table.modelVersion, table.submittedAt),
+}));
 
 export const modelMetadata = pgTable("model_metadata", {
   id: uuid("id").primaryKey().defaultRandom(),

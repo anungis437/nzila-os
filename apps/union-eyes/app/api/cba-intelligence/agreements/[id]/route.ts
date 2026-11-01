@@ -1,4 +1,5 @@
 import { withApi, ApiError } from "@/lib/api/framework";
+import { canReadUnreviewed } from "@/lib/services/cba-intelligence/review-visibility";
 import {
   getAgreementById,
   listWageAdjustments,
@@ -18,13 +19,15 @@ export const GET = withApi(
       summary: "Get agreement details with wage adjustments and clauses",
     },
   },
-  async ({ params }) => {
+  async ({ params, userId }) => {
+    const curator = await canReadUnreviewed(userId);
     const agreement = await getAgreementById(params.id);
-    if (!agreement) throw ApiError.notFound("Agreement not found");
+    // A reader does not learn that an unreviewed extraction exists; only the platform staff who curate the dataset see it.
+    if (!agreement || (!curator && agreement.reviewStatus !== "approved")) throw ApiError.notFound("Agreement not found");
 
     const [wages, clauses] = await Promise.all([
-      listWageAdjustments(params.id),
-      listClauses(params.id),
+      listWageAdjustments(params.id, { approvedOnly: !curator }),
+      listClauses(params.id, { approvedOnly: !curator }),
     ]);
 
     return {

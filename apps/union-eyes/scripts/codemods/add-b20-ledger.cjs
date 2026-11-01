@@ -1,0 +1,83 @@
+const fs = require('fs')
+const path = require('path')
+const file = path.resolve(__dirname, '../../../../docs/union-eyes/convergence/remediation/elimination-batches.json')
+const ledger = JSON.parse(fs.readFileSync(file, 'utf8'))
+const ID = 'B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR'
+if (ledger.batches.some((b) => b.id === ID)) { console.log('B20 present'); process.exit(0) }
+const A = 'apps/union-eyes/'
+const CONTRACT = A + 'lib/api/__tests__/f07-read-authority.contract.test.ts'
+const FACTORY_TEST = A + 'lib/api/__tests__/crud-factory-staff-read.test.ts'
+const item = (prefix, files, explanation, extra = {}) => ({ prefix, status: 'IMPLEMENTED_PENDING_QUALIFICATION', files, explanation, ...extra })
+ledger.batches.push({
+  id: ID,
+  family: 'F07: a role floor is eligibility, not authority; reads and writes need the mandate, ownership, sensitivity or workflow that the record belongs to',
+  evidenceCommit: null,
+  items: [
+    item('DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR', [A + 'app/api/enterprise/sso/providers/route.ts', A + 'app/api/enterprise/sso/providers/__tests__/route.test.ts', CONTRACT],
+      'The provider list (issuer, endpoints, client id, attribute mapping) is an administrator read; credential columns were already reduced to a boolean.'),
+    item('DEF-0B12-PLT-TEST-AUTH-FORWARDS-THE-SESSION-TOKEN', [A + 'app/api/test-auth/route.ts', A + 'app/api/__tests__/test-auth.route.test.ts'],
+      'The diagnostic is a platform administrator\'s: anyone else gets 403 and the backend is never called; the response carries backend statuses only, never the backend bodies. Test disclosure: two tests added, the existing one now mocks platform-admin authority.'),
+    item('DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT', [A + 'app/api/reports/route.ts', A + 'app/api/reports/[id]/route.ts', CONTRACT],
+      'Report definitions (which sources and filters a report reads) are read at the steward floor, not by any member. No UI consumes these collection routes.'),
+    item('DEF-0B11-RPT-TEMPLATES-ROUTE-LISTS-EVERY-REPORT-DEFINITION', [A + 'app/api/reports/templates/route.ts', CONTRACT],
+      'The templates route no longer fronts the whole report table: it lists only rows marked as templates with an allow-listed projection, and a create is always stored as an organization template through a strict body schema, in the tenant context and audited.'),
+    item('DEF-0B11-RPT-DATA-SOURCE-REGISTRY-IS-SERVED-TO-ANY-SIGNED-IN-USER', [A + 'app/api/reports/datasources/route.ts', CONTRACT],
+      'The registry is served at the officer floor, the same floor that can execute a report over it.'),
+    item('DEF-0B5-COMMITTEE-INTERNAL-NOTES-READ-BY-ANY-MEMBER', [A + 'app/api/committees/route.ts', A + 'app/api/committees/[id]/route.ts', CONTRACT],
+      'The committee routes omit the internal notes and custom fields from every response.'),
+    item('DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP', [A + 'app/api/committees/route.ts', CONTRACT],
+      'Internal working fields are no longer returned to every member.',
+      { status: 'PARTIAL', remaining: 'A committee is still listed to every member of the organization: there is no committee-membership scope on the generic read.' }),
+    item('DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ', [A + 'app/api/analytics/kpis/route.ts', CONTRACT],
+      'alertRecipients (user ids and emails of staff notified) is omitted from every KPI response.'),
+    item('DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ', [A + 'lib/bargaining/negotiation-route-rules.ts', A + 'app/api/bargaining/proposals/route.ts', A + 'app/api/bargaining/proposals/[id]/route.ts', CONTRACT],
+      'Negotiations are read at the steward floor through shared rules (upstream\'s change); bargaining proposals, which carry unreleased positions, now match it.'),
+    item('DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION', [A + 'app/api/alerts/realtime/route.ts', CONTRACT],
+      'The realtime alert inbox needs an officer, since each execution carries the rule\'s trigger data.'),
+    item('DEF-0B4-OHS-COMMITTEE-ROSTER-MEMBER-READ', [A + 'app/api/cnesst/hs-committees/route.ts', A + 'app/api/cnesst/hs-committees/[id]/route.ts', CONTRACT],
+      'The joint health-and-safety committee roster is read at the steward floor.'),
+    item('DEF-0B5-SMS-STEWARD-READS-ALL-MEMBER-MESSAGES', [A + 'app/api/communications/sms/route.ts', A + 'app/api/communications/sms/conversations/route.ts', A + 'app/api/communications/sms/conversations/[conversationId]/read/route.ts', CONTRACT],
+      'SMS messages and conversations are read and written at the officer floor.'),
+    item('DEF-0B5-SMS-CAMPAIGN-READ-BY-ANY-MEMBER', [A + 'app/api/communications/sms/campaigns/route.ts', CONTRACT],
+      'SMS campaigns are read and written at the officer floor.'),
+    item('DEF-0B5-SURVEY-DRAFTS-READABLE-BY-MEMBERS', [A + 'lib/api/crud-factory.ts', A + 'app/api/communications/surveys/route.ts', A + 'app/api/communications/surveys/[surveyId]/route.ts', FACTORY_TEST, CONTRACT],
+      'The generic factory gained belowStaffReadCondition, applied to GET for a caller below the steward floor. Surveys add status != draft, so a member reads published surveys only; staff still read drafts.'),
+    item('DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS', [A + 'app/api/communications/surveys/[surveyId]/responses/route.ts'],
+      'The responses route exports POST only and its header states no individual identity, address or response row is returned to a steward; no read exposes respondents (upstream\'s change).'),
+    item('DEF-0B6-EDU-OWNER-SCOPED-READS-HIDE-MEMBER-RECORDS-FROM-STAFF', [A + 'lib/api/crud-factory.ts', A + 'app/api/education/registrations/route.ts', A + 'app/api/education/certifications/route.ts', FACTORY_TEST, CONTRACT],
+      'The factory gained staffReadsAll: with an owner column, a steward or above reads every member\'s registration or certification on GET while a member keeps their own; writes keep the owner scope.'),
+    item('DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS', [A + 'app/api/education/sessions/route.ts', CONTRACT],
+      'The virtual-meeting access code, session budget and actual cost are omitted from every session response.',
+      { status: 'PARTIAL', remaining: 'The factory has no per-role column view, so staff also cannot read the cost columns through this route.' }),
+    item('DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER', [A + 'app/api/education/courses/route.ts', FACTORY_TEST, CONTRACT],
+      'A member reads only active courses; draft and archived ones are visible to staff.'),
+    item('DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD', [A + 'app/api/cope/campaigns/route.ts', CONTRACT],
+      'A campaign body is limited to an allow-list; the amount raised, the status and the payment-provider identifiers can no longer be set by a steward.'),
+    item('DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW', [A + 'app/api/health-safety/incidents/[id]/route.ts', A + 'app/api/health-safety/hazards/[id]/route.ts', A + 'app/api/health-safety/inspections/[id]/route.ts', CONTRACT],
+      'A PATCH can no longer set status, closure, verification, investigation outcome or scoring fields on incidents, hazards and inspections.',
+      { status: 'PARTIAL', remaining: 'No dedicated workflow route yet performs the investigation, verification and closure transitions that the blocked fields now require.' }),
+    item('DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR', [A + 'app/api/health-safety/ppe/route.ts', CONTRACT],
+      'The PPE register, which names the member each item is issued to, is read at the health-and-safety representative floor.'),
+    item('DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME', [A + 'app/api/feature-flags/route.ts', A + 'app/api/__tests__/feature-flags.route.test.ts'],
+      'A single-flag probe answers only flags the application defines (plus pilot-mode); an unknown name is a 404 and is not evaluated.'),
+    item('DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY', [A + 'app/api/social-media/accounts/route.ts', A + 'app/api/social-media/accounts/callback/route.ts', CONTRACT],
+      'Connecting and disconnecting a publishing identity, and its OAuth callback, need an administrator; the business-management and organization-admin scopes are no longer requested; a connection is made only when the account manages exactly one Page, instead of picking the first.'),
+    item('DEF-0B7-EXC-PUBLISH-PARSE-FAILURE-STORES-DEFAULT-MEDIUM-RISK-SCORE', [A + 'lib/knowledge-transfer/expertise/expertise-extractor.ts', A + 'lib/knowledge-transfer/expertise/__tests__/expertise-extractor.test.ts'],
+      'An unparseable or malformed model answer now throws ExpertiseExtractionError; publish records the failed extraction and stores no score. Test disclosure: the test that asserted the default medium profile was replaced by two that assert refusal.'),
+    item('DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL', [A + 'lib/knowledge-transfer/governance/interview-access.ts', A + 'app/api/__tests__/exit-interviews-read-gates.pglite.test.ts'],
+      'Reads of interviews apply the sensitivity floor and consent condition (upstream\'s change), proven on real SQL by an existing test.'),
+    item('DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE', [A + 'app/api/exit-interviews/[id]/publish/route.ts', A + 'app/api/__tests__/exit-interviews-publish.route.test.ts'],
+      'Only a level that permits indexing is copied to the knowledge base, without the employee\'s name; sensitivity and consent travel with the source id (upstream\'s change, existing test).'),
+    item('DEF-0B7-EXC-NEW-INTERVIEWS-DEFAULT-PUBLIC-INTERNAL-WITH-NO-CLASSIFICATION-STEP', [A + 'app/api/exit-interviews/route.ts', A + 'app/api/__tests__/exit-interviews-mutations.route.test.ts'],
+      'A new interview is created at the restricted level (UNRECORDED_LEVEL) instead of the public_internal column default; an administrator classifies it through the governance step, and publication refuses an unclassified level.'),
+    item('DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT', [A + 'app/api/exit-interviews/analytics/route.ts', A + 'lib/knowledge-transfer/governance/interview-access.ts', A + 'app/api/__tests__/exit-interviews-analytics.route.test.ts'],
+      'The analytics aggregate takes a content-derived risk score only from interviews that are published, consented and at a derived-analytics level; the other derived views already read through that condition. The analytics test mocks the database, so the CASE expression is not exercised against real SQL.',
+      { status: 'PARTIAL', remaining: 'The analytics SQL expression has no real-database test.' }),
+    item('DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY', [A + 'lib/knowledge-transfer/succession/succession-analyzer.ts', A + 'lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts'],
+      'The succession analyzer selects interviews through the derived-analytics condition before anything reaches a model (upstream\'s change, existing test).'),
+    item('DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY', [A + 'lib/knowledge-transfer/topic-graph/topic-graph-builder.ts', A + 'lib/knowledge-transfer/topic-graph/__tests__/topic-graph-builder.test.ts'],
+      'The topic graph reads interviews through the derived-analytics condition (upstream\'s change, existing test).'),
+  ],
+})
+fs.writeFileSync(file, JSON.stringify(ledger, null, 2) + '\n')
+console.log('B20 added')

@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-CARBON-SCOPE-DECISION-RECORD",
+  "gate": "GATE-0C.3",
+  "version": 1,
+  "anchorCommit": "f90f74d135c209812b4728585c076ea410704719",
+  "preparedOn": "2026-10-27",
+  "decisionId": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+  "status": "DECISION_READY_NOT_DECIDED",
+  "state": "OUTSTANDING",
+  "note": "A decision-ready record for the institutional decision that the four carbon operations wait on. It states three options, the evidence for and against each and a preparer recommendation. It selects nothing, adopts nothing and does not change the four decision-bound scope exceptions, which are not owned, authorized, adopted, approved or production ready.",
+  "question": "Does the platform operator or an organization own carbon accounting, and which measured data source, if any, may back an emissions figure or a neutrality claim?",
+  "decisionOwnerRole": "INSTITUTION_TO_BE_NAMED",
+  "requiredApprovalEvidence": "An adopted institutional decision record that names the deciding authority, its date, its scope and the decision text, and that is independent of the preparer. No such record format is adopted in the repository yet, so none exists for any of the 79.",
+  "exceptionRegister": {
+    "file": "docs/union-eyes/convergence/register/ue-route-decision-bound-exceptions.json",
+    "sha256": "e412bec8870a37d3b3ac7354763b7b79c8f8e891a08e62e5ec28ca45d75e63c4",
+    "modifiedByGate0C3": false
+  },
+  "operations": [
+    {
+      "operationId": "carbon/dashboard/route.ts|GET",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "frozenRecords": {
+        "GATE-0B.4": "4e9a6f45b5764a6a72d0195bd1290c1aa06befc4b26e971bbeb0b4192656b929",
+        "GATE-0B.5": "6d546c287b00738d2db54befb46df23ed740dce07c1f6490abc3b6e9b956ab80"
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "anyOptionChosen": false
+      },
+      "defects": [
+        "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
+        "DEF-0B4-CARBON-ORG-ID-FROM-QUERY-STRING"
+      ],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    },
+    {
+      "operationId": "carbon/infrastructure/route.ts|GET",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "frozenRecords": {
+        "GATE-0B.4": "6aa26972888c5bc95d13f216910aa4cd72c78877d378b79d2ced3c31a153b06e",
+        "GATE-0B.5": "6e0a6bf92ebde9595f3a6c76d416be878da130591c14ed8277ee83fb5ec6e804"
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "anyOptionChosen": false
+      },
+      "defects": [
+        "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200"
+      ],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    },
+    {
+      "operationId": "carbon/validate/route.ts|GET",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "frozenRecords": {
+        "GATE-0B.4": "9b52bb6b89fa89b39544c7f3d2993435fe5eed4294ca125b82d5bce702826c0d",
+        "GATE-0B.5": "60d72402142018199ae85b482a95146070ea19d6adc4d7e68992e0c0d3269c86"
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "anyOptionChosen": false
+      },
+      "defects": [],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    },
+    {
+      "operationId": "carbon/validate/route.ts|POST",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "frozenRecords": {
+        "GATE-0B.4": "5b8cc5f584db15f2984bda9b5edee1ff7efbb0123ed781826e4120494afa6f9c",
+        "GATE-0B.5": "4b8117dddc1e7a45d08af9c96b95097fcdae3797c1109af470d5936c8aca77ae"
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "anyOptionChosen": false
+      },
+      "defects": [
+        "DEF-0B4-CARBON-VALIDATE-ATTESTS-CALLER-DATA"
+      ],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    }
+  ],
+  "currentBehavior": {
+    "statement": "The dashboard and infrastructure routes return emissions totals, regional breakdowns, renewable percentages and optimization advice as literals in the handler with success true and status 200, and the validate routes compute a certification-shaped verdict from caller-supplied data points. No route reads a table or a service.",
+    "fabricatedMeasurementDefect": {
+      "defectId": "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
+      "severity": "HIGH",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "state": "PROPOSED_NOT_ACCEPTED"
+    },
+    "routeEvidence": [
+      {
+        "ref": "apps/union-eyes/app/api/carbon/dashboard/route.ts",
+        "quote": "totalEmissions: 1245.67,"
+      },
+      {
+        "ref": "apps/union-eyes/app/api/carbon/dashboard/route.ts",
+        "quote": "const organizationId = searchParams.get('organizationId') || 'union-eyes';"
+      },
+      {
+        "ref": "apps/union-eyes/app/api/carbon/infrastructure/route.ts",
+        "quote": "export const GET = withApiAuth("
+      },
+      {
+        "ref": "apps/union-eyes/app/api/carbon/validate/route.ts",
+        "quote": "let certificationEligible = false;"
+      }
+    ]
+  },
+  "evidenceFound": {
+    "note": "Sources outside the four route files that name carbon accounting.",
+    "sources": [
+      {
+        "ref": "apps/union-eyes/services/carbon-accounting-service.ts",
+        "quote": "Tracks UnionEyes' carbon footprint:",
+        "shows": "The service names the platform product own footprint as its subject."
+      },
+      {
+        "ref": "apps/union-eyes/services/carbon-accounting-service.ts",
+        "quote": "// For now, use estimated values based on carbon reduction plan",
+        "shows": "Scope 2 is an estimate from a plan, not a measurement."
+      },
+      {
+        "ref": "apps/union-eyes/services/carbon-accounting-service.ts",
+        "quote": "const employeeCount = 20; // Estimated from carbon plan",
+        "shows": "Scope 3 uses a fixed estimated head count."
+      },
+      {
+        "ref": "apps/union-eyes/services/carbon-accounting-service.ts",
+        "quote": "return 5000;",
+        "shows": "The active member count is a constant."
+      },
+      {
+        "ref": "apps/union-eyes/services/carbon-accounting-integration.ts",
+        "quote": "// For now, we'll use mock data structure",
+        "shows": "The infrastructure monitor is a mock data structure."
+      },
+      {
+        "ref": "apps/union-eyes/services/carbon-accounting-integration.ts",
+        "quote": "verificationStatus: 'estimated',",
+        "shows": "The service records its own emissions as estimated, never measured."
+      },
+      {
+        "ref": "apps/union-eyes/db/migrations/0004_phase2_complete.sql",
+        "quote": "CREATE TABLE IF NOT EXISTS \"carbon_emissions\" (",
+        "shows": "A carbon_emissions table is declared in migration 0004 only; its organization_id column is nullable."
+      },
+      {
+        "ref": "apps/union-eyes/backend/services/api/carbon_accounting_service_views.py",
+        "quote": "permission_classes = [IsAuthenticated]",
+        "shows": "A backend (not Next.js) viewset records and reports emissions per organization and is open to any authenticated user."
+      },
+      {
+        "ref": "apps/union-eyes/backend/services/api/carbon_accounting_service_views.py",
+        "quote": "Required fields: source, scope (scope_1|scope_2|scope_3), amount_kg, emission_date.",
+        "shows": "The recorded figures are caller-entered amounts, not measured values."
+      },
+      {
+        "ref": "apps/union-eyes/backend/services/api/carbon_accounting_service_views.py",
+        "quote": "Data store: Uses AuditLogs with resource_type 'CarbonEmission', 'CarbonTarget',",
+        "shows": "The backend stores them as audit-log rows until dedicated carbon models exist."
+      }
+    ]
+  },
+  "priorEvidenceGap": {
+    "frozenStatement": "No table, service, persona source, register entry or product caller names carbon accounting or Azure emissions monitoring, so there is no engineering capability whose obligation covers the operation and no institutional office that owns it.",
+    "discrepancy": "The frozen Gate 0B.4 and Gate 0B.5 statement says no source names carbon accounting. A Next.js service, an integration service, a backend viewset and a database migration do name it. None is reachable from the four routes and every figure in them is an estimate or a caller-entered amount, so the four routes still have no measured source, owner or persona. The frozen statement is preserved and not edited.",
+    "materialToDecision": true,
+    "reviewRequired": "An independent reviewer confirms whether the backend recording path is part of the released scope; that is a separate scope question from the four routes."
+  },
+  "options": [
+    {
+      "id": "OPT-PLATFORM-OWNED-MEASURED",
+      "label": "Platform-owned measured carbon accounting",
+      "summary": "The platform operator owns carbon accounting of its own hosting and operations and publishes figures backed by a measured data source.",
+      "requires": [
+        "A named measured data source (for example provider-reported emissions or metered usage), which no repository source names.",
+        "A named owning office and an approval path for any neutrality, renewable or net-zero claim.",
+        "A decision whether organizations see the platform figures or none."
+      ],
+      "routeConsequence": "The dashboard and infrastructure routes read from the measured source for the platform scope and return 501 until it exists; the validate routes either verify a claim against measured platform data or are retired; organizationId stops being caller supplied.",
+      "evidenceFor": [
+        "The existing service and integration define the subject as the platform product own footprint, so a platform owner matches the in-repository design intent."
+      ],
+      "evidenceAgainst": [
+        "Every figure in the service is an estimate from a plan or a literal constant; no measured source exists in the source tree.",
+        "The integration names itself a mock data structure."
+      ],
+      "reversibility": "Adoptable later without undoing the 501 containment.",
+      "selected": false,
+      "adopted": false
+    },
+    {
+      "id": "OPT-ORGANIZATION-OWNED-MEASURED",
+      "label": "Organization-owned measured carbon accounting",
+      "summary": "Each union organization owns its own carbon accounting and the platform only stores and presents it.",
+      "requires": [
+        "A per-organization measured data source and an intake path for it; none exists.",
+        "A named organization office that owns the figures and any claim, per organization.",
+        "Tenant isolation and audience rules for the figures."
+      ],
+      "routeConsequence": "The routes become organization-scoped from the session organization, never from a query parameter, and return 501 until an intake and an owner exist.",
+      "evidenceFor": [
+        "The declared carbon_emissions table has an organization_id column.",
+        "A backend viewset already records and reports emissions per organization from caller-entered amounts, so a per-organization design intent exists in the repository."
+      ],
+      "evidenceAgainst": [
+        "That column is nullable and the table has no Drizzle declaration and no Next.js route or service that reads or writes it.",
+        "The backend figures are caller-entered, stored as audit-log rows and open to any authenticated user; they are not measured, and nothing shows the backend is part of the released scope.",
+        "No persona, capability or caller names an organization carbon owner.",
+        "The Next.js service computes no per-organization figure."
+      ],
+      "reversibility": "Adoptable later without undoing the 501 containment.",
+      "selected": false,
+      "adopted": false
+    },
+    {
+      "id": "OPT-RETIRE-ROUTES",
+      "label": "Retire the four unsupported routes",
+      "summary": "The four carbon operations leave the product scope and answer 501 retired; the Next.js estimate service stays unrouted until a later decision.",
+      "requires": [
+        "Removal of the four operations from navigation, documentation and the route registry, and a retired-route contract answering 501."
+      ],
+      "routeConsequence": "carbon/dashboard GET, carbon/infrastructure GET, carbon/validate GET and carbon/validate POST answer 501 and are counted as retired, not owned; the Gate 8 obligation to prevent unsupported success responses is met by retirement.",
+      "evidenceFor": [
+        "No measured data source, owner office, persona or product caller exists for any of the four operations.",
+        "The routes return literal figures and a certification-shaped result today.",
+        "It is the only option that needs no capability the repository does not contain."
+      ],
+      "evidenceAgainst": [
+        "The platform product carries its own sustainability plan in the service, so retirement discards a stated product intent unless it is reopened later.",
+        "Retiring the four Next.js routes does not remove the backend recording path, which needs its own scope decision."
+      ],
+      "reversibility": "Reversible: a later adoption of either measured option can reopen the scope.",
+      "selected": false,
+      "adopted": false
+    }
+  ],
+  "recommendation": {
+    "optionId": "OPT-RETIRE-ROUTES",
+    "status": "PREPARER_RECOMMENDATION_NOT_SELECTED",
+    "recommendationOnly": true,
+    "notSelected": true,
+    "notAdopted": true,
+    "basis": [
+      "No measured data source, owner office, persona or product caller exists for any of the four operations.",
+      "The routes return literal figures and a certification-shaped result today.",
+      "It is the only option that needs no capability the repository does not contain."
+    ],
+    "caveats": [
+      "The platform product carries its own sustainability plan in the service, so retirement discards a stated product intent unless it is reopened later.",
+      "Retiring the four Next.js routes does not remove the backend recording path, which needs its own scope decision.",
+      "If the deciding authority names a measured data source and an owning office, a measured option replaces this recommendation.",
+      "Retirement is a scope action. It is taken only by the deciding authority and this record retires no route."
+    ]
+  },
+  "selected": null,
+  "institutionalDecision": null,
+  "decisionRecord": null,
+  "preservedObligation": {
+    "capabilityId": "UE-CAP-H-001",
+    "gate": 8,
+    "obligation": "Whichever option the institution chooses, the routes must not return emissions totals, renewable percentages, optimization advice or a certification-shaped result as success while no measured data source exists. Until then they return 501 not implemented. This obligation is held by the retired scaffold capability and is independent of who owns carbon accounting.",
+    "closesInstitutionalDecision": false,
+    "statedBy": "The frozen exception register, unchanged.",
+    "satisfiedByGate0C3": false,
+    "note": "Whichever option the institution chooses, the four routes must not return an unsupported success response. This gate does not return 501 from them; the repair is owned by Gate 8 and stays open."
+  }
+}

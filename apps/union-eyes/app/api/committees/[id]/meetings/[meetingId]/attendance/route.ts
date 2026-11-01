@@ -4,8 +4,10 @@
  */
 
 import { z } from "zod";
+import { requireCommitteeReader } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
+import { assertOrganizationMembers } from "@/lib/services/org-member-references";
 import {
   recordAttendance,
   getMeetingAttendees,
@@ -31,10 +33,10 @@ export const GET = withApi(
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "Get meeting attendance" },
   },
-  async ({ organizationId, params }) => {
+  async ({ organizationId, userId, params }) => {
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
-    await requireCommitteeScope(organizationId, committeeId, { meetingId });
+    await requireCommitteeReader(organizationId, committeeId, userId, { meetingId });
     return getMeetingAttendees(meetingId);
   }
 );
@@ -50,6 +52,7 @@ export const POST = withApi(
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
     await requireCommitteeScope(organizationId, committeeId, { meetingId });
+    await assertOrganizationMembers(body.attendees.map((a) => a.memberId), organizationId);
     await recordAttendance(meetingId, organizationId, body.attendees, userId ?? undefined);
     return { success: true };
   }

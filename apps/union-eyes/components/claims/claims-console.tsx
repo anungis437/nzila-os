@@ -26,6 +26,7 @@ export function ClaimsConsole({ view = 'staff' }: ClaimsConsoleProps) {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations('claimsPage');
+  const workAid = useTranslations('workAidPage');
 
   const [claims, setClaims] = useState<ClaimRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,10 +108,15 @@ export function ClaimsConsole({ view = 'staff' }: ClaimsConsoleProps) {
             {t(`${copy}Subtitle`)}
           </p>
         </div>
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
+        <Button className="w-full sm:w-auto" variant="outline" onClick={() => router.push(view === 'member' ? `/${locale}/dashboard/claims/workaid` : `/${locale}/dashboard/workbench/workaid`)}>
+          {workAid('openJourney')}
+        </Button>
         <Button className="w-full sm:w-auto" onClick={() => router.push(`/${locale}/dashboard/claims/new`)}>
           <Plus className="mr-2 h-4 w-4" />
           {t(`${copy}NewAction`)}
         </Button>
+        </div>
       </div>
 
       {claims.length === 0 ? (

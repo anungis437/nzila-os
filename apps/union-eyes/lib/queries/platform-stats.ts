@@ -5,9 +5,10 @@
  * Used by both the API route and server components.
  */
 
-import { db } from '@/db/db';
 import { organizations, organizationMembers } from '@/db/schema';
-import { sql, ne, count, sum } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { sql, ne, count, sum, isNull } from 'drizzle-orm';
 
 export interface PlatformStats {
   totalOrganizations: number;
@@ -35,10 +36,6 @@ export interface PlatformStats {
     negotiating: number;
     expired: number;
   };
-  settlements: {
-    total: number;
-    totalMonetaryValue: number;
-  };
   sectors: Array<{ sector: string; org_count: number; total_members: number }>;
   organizations: Array<{
     id: string;
@@ -50,13 +47,39 @@ export interface PlatformStats {
     sectors: string[];
     clcAffiliated: boolean | null;
     subscriptionTier: string | null;
-    perCapitaRate: string | null;
     createdAt: Date;
   }>;
   roleDistribution: Array<{ role: string; cnt: number }>;
 }
 
-export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
+/**
+ * Platform-wide counts across every organization, read under the system role on purpose (a platform operator's cross-tenant read), not
+ * through whatever the connection role happens to see.
+ *
+ * `registeredUsers` and `activeUsers` count distinct people with an undeleted membership (one person in several organizations is one);
+ * `resolved` grievances are settled or closed ones.
+ *
+ * Minimum necessary. The figures are counts and distributions. The organization list gives each organization's name, type, status, size and
+ * commercial tier; it does not give a per-capita rate, and there is no settlement count or monetary total: a sum of every tenant's settlement
+ * amounts is not something a platform operator needs, and the system role holds no privilege on settlements, so the earlier query could not
+ * have run under it at all.
+ */
+export function getPlatformStatsFromDb(reader: { userId: string; organizationId: string }): Promise<PlatformStats> {
+  return withSystemContext(async (tx) => {
+    const stats = await computePlatformStats(tx as unknown as typeof import('@/db/db').db);
+    // The read of every tenant's counts is recorded in the same transaction as the read: no audit record, no data.
+    await persistAtomicAudit(tx, {
+      userId: reader.userId,
+      organizationId: reader.organizationId,
+      resourceType: 'platform_stats',
+      action: 'platform_stats.read',
+      details: { organizationsCounted: stats.totalOrganizations },
+    });
+    return stats;
+  });
+}
+
+async function computePlatformStats(db: typeof import('@/db/db').db): Promise<PlatformStats> {
   // ── Organization stats ──
   const orgStats = await db
     .select({
@@ -75,11 +98,12 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
   // ── Registered users (organization_members) ──
   const memberStats = await db
     .select({
-      totalRegisteredUsers: count(),
-      activeUsers: sql<number>`count(*) filter (where ${organizationMembers.status} = 'active')`,
+      totalRegisteredUsers: sql<number>`count(distinct ${organizationMembers.userId})`,
+      activeUsers: sql<number>`count(distinct ${organizationMembers.userId}) filter (where ${organizationMembers.status} = 'active')`,
       distinctOrgs: sql<number>`count(distinct ${organizationMembers.organizationId})`,
     })
-    .from(organizationMembers);
+    .from(organizationMembers)
+    .where(isNull(organizationMembers.deletedAt));
 
   // ── Grievance stats ──
   const grievanceStats = await db.execute(sql`
@@ -87,7 +111,7 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
       count(*) as total_grievances,
       count(*) filter (where status NOT IN ('settled', 'withdrawn', 'denied', 'closed')) as open_grievances,
       count(*) filter (where priority IN ('high', 'urgent')) as high_priority,
-      count(*) filter (where status = 'settled') as resolved_grievances,
+      count(*) filter (where status IN ('settled', 'closed')) as resolved_grievances,
       count(*) filter (where status = 'arbitration') as in_arbitration
     FROM grievances
   `);
@@ -100,14 +124,6 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
       count(*) filter (where status = 'under_negotiation') as negotiating_cbas,
       count(*) filter (where status = 'expired') as expired_cbas
     FROM collective_agreements
-  `);
-
-  // ── Settlement stats ──
-  const settlementStats = await db.execute(sql`
-    SELECT 
-      count(*) as total_settlements,
-      coalesce(sum(monetary_amount), 0) as total_monetary_value
-    FROM settlements
   `);
 
   // ── Sector breakdown ──
@@ -134,7 +150,6 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
       sectors: organizations.sectors,
       clcAffiliated: organizations.clcAffiliated,
       subscriptionTier: organizations.subscriptionTier,
-      perCapitaRate: organizations.perCapitaRate,
       createdAt: organizations.createdAt,
     })
     .from(organizations)
@@ -151,6 +166,7 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
   const roleDistribution = await db.execute(sql`
     SELECT role, count(*) as cnt 
     FROM organization_members 
+    WHERE deleted_at IS NULL
     GROUP BY role 
     ORDER BY cnt DESC
   `);
@@ -159,7 +175,6 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
   const members = memberStats[0];
   const grievanceRow = grievanceStats[0] ?? {};
   const cbaRow = cbaStats[0] ?? {};
-  const settlementRow = settlementStats[0] ?? {};
   const sectors = Array.from(sectorBreakdown) as Array<{ sector: string; org_count: number; total_members: number }>;
   const roles = Array.from(roleDistribution) as Array<{ role: string; cnt: number }>;
 
@@ -188,10 +203,6 @@ export async function getPlatformStatsFromDb(): Promise<PlatformStats> {
       active: Number(cbaRow.active_cbas ?? 0),
       negotiating: Number(cbaRow.negotiating_cbas ?? 0),
       expired: Number(cbaRow.expired_cbas ?? 0),
-    },
-    settlements: {
-      total: Number(settlementRow.total_settlements ?? 0),
-      totalMonetaryValue: Number(settlementRow.total_monetary_value ?? 0),
     },
     sectors,
     organizations: orgList,

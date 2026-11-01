@@ -21,11 +21,11 @@ import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 import {
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability';
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access';
 import type { InstitutionalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
 import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
@@ -37,11 +37,16 @@ const PDF_ELIGIBLE_TIERS = new Set([
   'institutional_continuity_diagnostic',
 ]);
 
+const REPORTABLE_STATUSES = new Set(['submitted', 'completed']);
+
 interface RouteContext {
   params: Promise<{ assessmentId: string }>;
 }
 
 export async function GET(request: Request, { params }: RouteContext) {
+  // A capability read is bounded like the writes: a caller cannot probe assessment ids or render reports without limit.
+  const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false })
+  if (!intake.ok) return intake.response
   const { assessmentId } = await params;
 
   if (!assessmentId || typeof assessmentId !== 'string') {
@@ -65,6 +70,9 @@ export async function GET(request: Request, { params }: RouteContext) {
         organizationContext: icraAssessments.organizationContext,
         capabilityTokenHash: icraAssessments.capabilityTokenHash,
         capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        claimedAt: icraAssessments.claimedAt,
+        claimedOrgId: icraAssessments.claimedOrgId,
+        claimedByUserId: icraAssessments.claimedByUserId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
@@ -74,8 +82,7 @@ export async function GET(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
     }
 
-    const presented = extractCapabilityToken(request, assessmentId);
-    const capCheck = checkCapability(presented, assessment);
+    const capCheck = await authorizeAssessmentAccess(request, assessmentId, assessment);
     if (!capCheck.ok) {
       return NextResponse.json(
         { error: 'Not authorized to download this report' },
@@ -83,8 +90,10 @@ export async function GET(request: Request, { params }: RouteContext) {
       );
     }
 
-    if (assessment.status !== 'completed') {
-      return NextResponse.json({ error: 'Assessment not yet completed' }, { status: 422 });
+    // The submit routes write submitted; nothing in the application writes completed, so gating on it refused every
+    // paid assessment. A submitted assessment is the finished one the report is built from.
+    if (!REPORTABLE_STATUSES.has(assessment.status)) {
+      return NextResponse.json({ error: 'Assessment not yet submitted' }, { status: 422 });
     }
 
     if (!PDF_ELIGIBLE_TIERS.has(assessment.reportTierId)) {

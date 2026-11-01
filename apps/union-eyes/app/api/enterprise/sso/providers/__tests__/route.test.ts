@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   badRequest: vi.fn((message: string) => ({ apiError: true, status: 400, message })),
+  conflict: vi.fn((message: string, details?: unknown) => ({ apiError: true, status: 409, message, details })),
   select: vi.fn(),
   from: vi.fn(),
   where: vi.fn(),
@@ -15,14 +16,17 @@ const m = vi.hoisted(() => ({
   tx: {} as Record<string, unknown>,
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest } }));
+vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest, conflict: m.conflict } }));
 vi.mock('@/db/schema/sso-scim-schema', () => ({
   ssoProviders: { id: 'sp.id', organizationId: 'sp.organizationId' },
 }));
 vi.mock('drizzle-orm', () => ({ eq: m.eq }));
 vi.mock('@/lib/encryption', () => ({ encryptSecret: m.encryptSecret }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(m.tx) }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  // The route calls withRLSContext(fn); the activation guard calls withRLSContext(context, fn). Both reach the same transaction handle.
+  withRLSContext: async (a: unknown, b?: (tx: unknown) => Promise<unknown>) => ((typeof a === 'function' ? a : b) as (tx: unknown) => Promise<unknown>)(m.tx),
+}));
 vi.mock('@nzila/db/auth-storage-authority', () => ({ AUTH_TENANT_ASSIGNABLE_ROLES: ['member', 'steward', 'chief_steward', 'admin'] }));
 vi.mock('@/db/db', () => ({
   db: {
@@ -58,8 +62,8 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
     await loadRoute();
   });
 
-  it('GET requires at least member role and reads org-scoped', async () => {
-    expect(capturedGetOpts?.auth).toMatchObject({ required: true, minRole: 'member' });
+  it('GET requires at least admin role and reads org-scoped', async () => {
+    expect(capturedGetOpts?.auth).toMatchObject({ required: true, minRole: 'admin' });
 
     m.where.mockResolvedValue([
       { id: 'sp1', name: 'Okta', samlCertificate: 'CERT-DATA', oidcClientSecret: null },
@@ -86,6 +90,59 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
 
   it('POST requires admin role', () => {
     expect(capturedPostOpts?.auth).toMatchObject({ required: true, minRole: 'admin' });
+  });
+
+  // F06 R5: nothing reads a provider at sign-in, so a provider cannot be created already enabled or auto-provisioning. The attempt is
+  // recorded as the specific blocked operation, in its own record, and nothing is stored.
+  it.each([{ enabled: true }, { autoProvision: true }, { enabled: true, autoProvision: true }])('POST refuses to create a provider with %j and records the blocked operation', async (flags) => {
+    const body = { name: 'New IdP', providerType: 'oidc', attributeMapping: { email: 'email' }, ...flags };
+
+    let refused: { status?: number; message?: string; details?: { blockedOperation?: { operation: string } } } | undefined;
+    try { await capturedPostHandler!({ body, organizationId: 'org-real', userId: 'admin-user' }); } catch (error) { refused = error as typeof refused; }
+
+    expect(refused?.status).toBe(409);
+    expect(refused?.message).toContain('auth.sso.federated_sign_in');
+    expect(refused?.message).toContain('the institution approves this identity provider');
+    expect(refused?.details?.blockedOperation?.operation).toBe('auth.sso.federated_sign_in');
+    expect(m.audit).toHaveBeenCalledWith(
+      m.tx,
+      expect.objectContaining({
+        action: 'sso.provider.activate_blocked',
+        organizationId: 'org-real',
+        userId: 'admin-user',
+        details: expect.objectContaining({ blockedOperation: 'auth.sso.federated_sign_in', capability: 'UE-SSO-SIGN-IN', requested: Object.keys(flags) }),
+      }),
+      'failure',
+    );
+    expect(m.insert).not.toHaveBeenCalled();
+    expect(m.encryptSecret).not.toHaveBeenCalled();
+  });
+
+  it('POST still stores a staged provider (disabled, not auto-provisioning) and says it is not in effect, with what each requirement needs', async () => {
+    m.returning.mockResolvedValue([{ id: 'sp-new', organizationId: 'org-real', enabled: false }]);
+
+    const result = await capturedPostHandler!({
+      body: { name: 'New IdP', providerType: 'oidc', attributeMapping: { email: 'email' }, enabled: false, autoProvision: false },
+      organizationId: 'org-real',
+      userId: 'admin-user',
+    }) as { effect: { inEffect: boolean; blockedOperation: { operation: string } } };
+
+    expect(result.effect).toMatchObject({ inEffect: false, blockedOperation: { operation: 'auth.sso.federated_sign_in' } });
+    expect(m.insert).toHaveBeenCalledOnce();
+    expect(m.audit).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'sso.provider.activate_blocked' }), 'failure');
+  });
+
+  it('GET reports per provider what stands between its configuration and sign-in, from the stored row', async () => {
+    m.where.mockResolvedValue([
+      { id: 'sp1', providerType: 'oidc', oidcIssuer: 'https://idp.example.test', oidcClientId: 'c', oidcClientSecret: 'enc', oidcAuthorizationEndpoint: 'a', oidcTokenEndpoint: 't', samlCertificate: null },
+    ]);
+
+    const [provider] = await capturedGetHandler!({ organizationId: 'org-real' }) as Array<{ readiness: { ready: boolean; requirements: Array<{ code: string; met: boolean }> } }>;
+
+    expect(provider.readiness.ready).toBe(false);
+    expect(provider.readiness.requirements.find((r) => r.code === 'configuration_complete')?.met).toBe(true);
+    expect(provider.readiness.requirements.find((r) => r.code === 'provider_approved_by_institution')?.met).toBe(false);
+    expect(JSON.stringify(provider)).not.toContain('"enc"');
   });
 
   it('POST create response redacts raw credential material (round 53 fix — previously echoed in the clear)', async () => {

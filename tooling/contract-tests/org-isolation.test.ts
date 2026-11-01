@@ -12,6 +12,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
 import { isRetiredNoOpRoute } from './retired-routes'
+import { isReexportAliasOfAcceptedRoute } from './route-aliases'
 const ROOT = resolve(__dirname, '../..')
 
 function readContent(path: string): string {
@@ -103,13 +104,17 @@ function isPublicRoute(routeFile: string): boolean {
 }
 
 describe('PR9: Org isolation — authorize() called in protected routes', () => {
+  const hasOwnAuth = (content: string) => AUTH_CALL_PATTERNS.some(p => p.test(content)) || isRetiredNoOpRoute(content)
+  // A route that only re-exports another route is as authorized as that route: one this contract accepts, or one it already exempts as public.
+  const acceptedTarget = (file: string, content: string) => isPublicRoute(file) || hasOwnAuth(content)
+
   for (const app of PROTECTED_APPS) {
     it(`${app}: every route.ts calls an auth function`, () => {
       const routeFiles = findRouteFiles(app)
       for (const routeFile of routeFiles) {
         if (isPublicRoute(routeFile)) continue  // health endpoints are intentionally public
         const content = readContent(routeFile)
-        const hasAuth = AUTH_CALL_PATTERNS.some(p => p.test(content)) || isRetiredNoOpRoute(content)
+        const hasAuth = hasOwnAuth(content) || isReexportAliasOfAcceptedRoute(routeFile, content, acceptedTarget)
         expect(
           hasAuth,
           `${routeFile.replace(ROOT, '')} missing auth call`

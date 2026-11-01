@@ -1,8 +1,10 @@
 /**
- * Place or release a legal hold on one conversation. Organization administrators only; the administrator learns that
- * the conversation exists, never what it says, and the hold carries only a reference to the matter requiring it. A hold
- * does not stop participants from using the conversation; it stops the conversation from ever being treated as eligible
- * for disposition. The history record and the audit commit together.
+ * Place or release a legal hold on one conversation. The kernel allows it only for a live
+ * governance mandate that names this conversation and the action. The caller learns that the
+ * conversation exists, never what it says, and the hold carries only a reference to the matter
+ * requiring it. A hold does not stop participants from using the conversation; it stops the
+ * conversation from ever being treated as eligible for disposition. The history record and the
+ * audit commit together.
  */
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -17,7 +19,7 @@ export const dynamic = 'force-dynamic';
 const bodySchema = z.object({ action: z.enum(HOLD_ACTIONS), reference: z.string().trim().min(1).max(MAX_HOLD_REFERENCE) });
 
 export const POST = withApi(
-  { auth: { required: true, minRole: 'admin' }, body: bodySchema, openapi: { tags: ['Messages'], summary: 'Place or release a legal hold' } },
+  { auth: { required: true }, body: bodySchema, openapi: { tags: ['Messages'], summary: 'Place or release a legal hold' } },
   async ({ params, body }) => {
     const actor = await getCaseActor();
     const result = await withRLSContext(async (tx) => setLegalHold(tx, actor, params.threadId, body.action, body.reference));
@@ -25,7 +27,7 @@ export const POST = withApi(
       case 'ok':
         return NextResponse.json({ data: { held: result.held } });
       case 'forbidden':
-        throw ApiError.forbidden('Only an organization administrator can place or release a legal hold.');
+        throw ApiError.forbidden('A live governance mandate naming this conversation is required.');
       case 'not_found':
         throw ApiError.notFound('Conversation');
       case 'invalid_reference':

@@ -1,12 +1,13 @@
 import { defineProject } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import { heavyTests, sharedExclude, sharedResolve } from "./vitest.shared";
+import { heavyTests, sharedExclude, sharedResolve, sharedSetupFiles } from "./vitest.shared";
 
 export default defineProject({
   plugins: [react()],
   resolve: sharedResolve,
   test: {
     name: "union-eyes",
+    setupFiles: sharedSetupFiles,
     // Route-matrix smoke and import-matrix tests dynamically import hundreds
     // of Next.js API route modules; cold module resolution on Windows +
     // monorepo-scale parallel runners can occasionally push individual

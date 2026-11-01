@@ -19,6 +19,9 @@ import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
+import { clearWorkbookCapabilityCookie } from '@/lib/workbook/workbook-capability';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -38,14 +41,11 @@ export async function POST(
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  // The claim token is a bearer secret, so attempts are rate limited and the body is capped before it is parsed.
+  const intake = await guardPublicIntake(request, { bucket: 'capability' });
+  if (!intake.ok) return intake.response;
 
-  const parse = bodySchema.safeParse(body);
+  const parse = bodySchema.safeParse(intake.json);
   if (!parse.success) {
     return NextResponse.json(
       { error: 'Validation failed', details: parse.error.flatten().fieldErrors },
@@ -74,6 +74,9 @@ export async function POST(
           claimedAt,
           claimToken: null,
           claimTokenExpiresAt: null,
+          // The bearer capability of the unclaimed workbook ends with the claim, in this same statement; ownership authority applies from here.
+          capabilityTokenHash: null,
+          capabilityTokenExpiresAt: null,
           status: 'active',
           updatedAt: claimedAt,
         })
@@ -82,6 +85,7 @@ export async function POST(
             eq(workbooks.id, workbookId),
             eq(workbooks.claimToken, claimToken),
             isNull(workbooks.claimedAt),
+            isNull(workbooks.claimedByUserId),
             gt(workbooks.claimTokenExpiresAt, claimedAt),
           ),
         )
@@ -124,11 +128,13 @@ export async function POST(
       return NextResponse.json({ error: 'Claim token expired' }, { status: 410 });
     }
 
-    logger.info('[workbook-claim] Workbook claimed', { workbookId, userId, orgId });
+    logger.info('[workbook-claim] Workbook claimed', { workbookRef: opaqueRef(workbookId), userId, orgId });
 
-    return NextResponse.json({ ok: true, workbookId, organizationId: orgId });
+    const response = NextResponse.json({ ok: true, workbookId, organizationId: orgId });
+    clearWorkbookCapabilityCookie(response, workbookId);
+    return response;
   } catch (err) {
-    logger.error('[workbook-claim] Claim failed', { workbookId, err });
+    logger.error('[workbook-claim] Claim failed', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Failed to claim workbook' }, { status: 500 });
   }
 }

@@ -380,3 +380,16 @@ describe('rls-storage-authority-manifest — registry/census boundary (PR #752 r
 });
 
 
+
+describe('location tracking global policy privilege regression', () => {
+  it('keeps member runtime read-only and cannot reintroduce lazy policy creation', () => {
+    const entry = storageAuthorityManifest.find((e) => e.table === 'location_tracking_config');
+    expect(entry).toBeDefined();
+    expect(entry!.classification).toBe('GLOBAL_REFERENCE_DATA');
+    expect(entry!.requiredRuntimePrivileges).toEqual(['SELECT']);
+    expect(entry!.requiredSystemPrivileges).toEqual([]);
+    expect(entry!.dbExecutionPrincipal).toBe('TENANT_RUNTIME');
+    expect(entry!.invocationAuthority).toBe('TENANT_USER');
+    expect(entry!.reason).toMatch(/fails closed if absent/i);
+  });
+});

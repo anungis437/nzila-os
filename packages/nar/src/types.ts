@@ -1,9 +1,10 @@
 import type { DecisionRecord } from '@nzila/decision-core'
 
 export type NarStorageRef = {
-  type: 'azure_blob'
+  type: 'azure_blob' | 'local_sandbox'
   uri: string
-  immutable: true
+  /** True only for the immutable (WORM) store; the local sandbox reference is never immutable. */
+  immutable: boolean
   retentionUntil: string
 }
 

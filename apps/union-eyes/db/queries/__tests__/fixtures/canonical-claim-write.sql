@@ -63,5 +63,7 @@ CREATE TABLE "claim_updates" (
   PRIMARY KEY (id),
   UNIQUE (update_id)
 );
+-- Added to the deployed claims table by platform 0049; nullable, kept by a trigger the unit fixture does not need.
+ALTER TABLE claims ADD COLUMN status_changed_at timestamptz;
 -- Deployed Django relationship: history points at the internal PK, not public claim_id.
 ALTER TABLE claim_updates ADD FOREIGN KEY (claim_id) REFERENCES claims(id) DEFERRABLE INITIALLY DEFERRED;

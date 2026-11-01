@@ -67,6 +67,7 @@ vi.mock('drizzle-orm', async (orig) => ({
   desc: vi.fn(() => ({})),
   inArray: vi.fn(() => ({})),
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.auditLog }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: h.auditLog,
   AuditEventType: { DATA_CREATE: 'data_create', DATA_UPDATE: 'data_update' },

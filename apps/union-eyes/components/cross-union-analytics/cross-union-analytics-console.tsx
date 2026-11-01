@@ -200,9 +200,9 @@ export default function CrossUnionAnalyticsConsole() {
         });
 
         const [clauseRes, precedentRes, orgRes] = await Promise.all([
-          fetch(`/api/v2/analytics/clause-stats?${params}`),
-          fetch(`/api/v2/analytics/precedent-stats?${params}`),
-          fetch(`/api/v2/analytics/org-activity?${params}${organizationLevel !== "all" ? `&organizationLevel=${organizationLevel}` : ""}`),
+          fetch(`/api/analytics/clause-stats?${params}`),
+          fetch(`/api/analytics/precedent-stats?${params}`),
+          fetch(`/api/analytics/org-activity?${params}${organizationLevel !== "all" ? `&organizationLevel=${organizationLevel}` : ""}`),
         ]);
 
         const [clauseData, precedentData, orgData] = await Promise.all([

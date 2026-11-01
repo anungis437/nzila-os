@@ -35,7 +35,7 @@ export const SYSTEM_SCHEMA_USAGE = ['public', 'user_management']
  * Exact non-public grants installed by the scoped auth migrations.
  * 0006: runtime SELECT on user_management.users and organization_users.
  * 0007: system grants on the auth tables.
- * 0008: runtime INSERT on audit_security.audit_logs.
+ * 0008: runtime INSERT on audit_security.audit_logs; scoped 0045 adds tenant-RLS SELECT.
  */
 export const SCOPED_NONPUBLIC_PRIVILEGES = [
   { schema: 'user_management', table: 'users', runtime: ['SELECT'], system: ['SELECT', 'UPDATE'] },
@@ -44,7 +44,7 @@ export const SCOPED_NONPUBLIC_PRIVILEGES = [
   { schema: 'user_management', table: 'mfa_totp', runtime: [], system: ['SELECT'] },
   { schema: 'user_management', table: 'org_auth_policies', runtime: [], system: ['SELECT'] },
   { schema: 'user_management', table: 'user_sessions', runtime: [], system: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] },
-  { schema: 'audit_security', table: 'audit_logs', runtime: ['INSERT'], system: [] },
+  { schema: 'audit_security', table: 'audit_logs', runtime: ['SELECT', 'INSERT'], system: [] },
 ]
 
 /**

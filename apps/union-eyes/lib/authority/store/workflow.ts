@@ -114,6 +114,11 @@ export async function registerReview(
 ): Promise<string> {
   requireUuids(i.organizationId)
   requirePrincipals(i.openedBy, i.complainantUserId, ...(i.adverseUserIds ?? []))
+  // The register hides a review from the people it names as respondents, so its opener and complainant cannot be among them.
+  const respondents = i.adverseUserIds ?? []
+  if (respondents.includes(i.openedBy) || (i.complainantUserId != null && respondents.includes(i.complainantUserId))) {
+    throw new AuthorityStoreError('INVALID_CONTEXT', 'SELF_ADVERSE: the opener and the complainant cannot be named as adverse parties')
+  }
   await bindSessionActor(exec, i.openedBy, 'review opener')
   const m = (await deps.memberships(exec, i.organizationId, [i.openedBy])).filter((x) => x.userId === i.openedBy && x.organizationId === i.organizationId)
   if (m.length !== 1 || m[0].status !== 'active') throw new AuthorityStoreError('DENIED', 'only an active member may open a review')
@@ -177,6 +182,15 @@ export async function referToWorkAid(
   requireUuids(i.organizationId, i.caseId, i.matterId)
   requirePrincipals(i.referrerUserId, i.memberUserId)
   await bindSessionActor(exec, i.referrerUserId, 'referrer')
+  const scopeReady = (
+    await exec.query<{ ok: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1 FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'ue_authority_workaid_matters' AND column_name = 'referred_categories'
+       ) AS ok`,
+    )
+  ).rows[0]?.ok
+  if (!scopeReady) throw new AuthorityStoreError('PRECONDITION', 'STORE_UNAPPLIED: referral scope is not installed')
   const now = (deps.now ?? (() => new Date()))()
   const matterId = i.matterId ?? randomUUID()
   const resource = { type: 'workaid_matter' as const, id: matterId, organizationId: i.organizationId }
@@ -194,16 +208,21 @@ export async function referToWorkAid(
     now,
   )
   assertAllowed(decision)
+  const stored = [...i.categories]
+  if (stored.length === 0 || stored.includes('*') || new Set(stored).size !== stored.length) {
+    throw new AuthorityStoreError('DENIED', 'CATEGORY_NOT_ALLOWED: the referral categories are not a closed scope')
+  }
   await exec.query(
-    `INSERT INTO ue_authority_workaid_matters (id, organization_id, member_user_id, case_id, referred_by) VALUES ($1,$2,$3,$4,$5)`,
-    [matterId, i.organizationId, i.memberUserId, i.caseId, i.referrerUserId],
+    `INSERT INTO ue_authority_workaid_matters (id, organization_id, member_user_id, case_id, referred_by, referred_categories)
+     VALUES ($1,$2,$3,$4,$5,$6::text[])`,
+    [matterId, i.organizationId, i.memberUserId, i.caseId, i.referrerUserId, stored],
   )
   await auditAuthorityMutation(exec, {
     organizationId: i.organizationId,
     action: 'workaid.refer',
     resourceType: 'ue_authority_workaid_matters',
     resourceId: matterId,
-    details: { caseId: i.caseId, referrer: i.referrerUserId, categories: i.categories },
+    details: { caseId: i.caseId, referrer: i.referrerUserId, categories: stored },
   })
   return matterId
 }

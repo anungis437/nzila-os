@@ -65,8 +65,8 @@ export const GET = async (request: NextRequest, { params: pendingParams }: { par
         return NextResponse.json(hierarchy);
       }
 
-      // Fetch clause
-      const clause = await getClauseForOrganization(organizationId, id, { countView: true });
+      // A GET is a read: it no longer increments the clause's view counter.
+      const clause = await getClauseForOrganization(organizationId, id, { countView: false });
 
       if (!clause) {
         return standardErrorResponse(

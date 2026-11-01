@@ -2,13 +2,18 @@ import type { DecisionProofAdapter } from '@nzila/decision-core'
 import type { NarProofAdapterOptions } from './types'
 import { createNarRecord } from './record'
 import { uploadNarToAzureImmutableBlob } from './storage/azure-blob'
+import { localSandboxEnabled, writeNarToLocalSandbox } from './storage/local-sandbox'
 
 export function createNarProofAdapter(options: NarProofAdapterOptions): DecisionProofAdapter {
   return {
     async createProof(decision, context) {
       const previousHash = await options.getPreviousHash(decision.organizationId)
       const secret = options.getSigningSecret ? await options.getSigningSecret() : undefined
-      const persistImmutableStorage = options.persistImmutableStorage ?? ((record) => uploadNarToAzureImmutableBlob(record, options.retentionYears ?? 7))
+      const persistImmutableStorage =
+        options.persistImmutableStorage ??
+        (localSandboxEnabled()
+          ? (record) => writeNarToLocalSandbox(record)
+          : (record) => uploadNarToAzureImmutableBlob(record, options.retentionYears ?? 7))
 
       const narWithoutStorage = await createNarRecord({
         decision,

@@ -84,32 +84,39 @@ async function checkAuth(): Promise<HealthCheckState> {
 }
 
 async function checkRedis(): Promise<{ state: HealthCheckState; ms?: number; note?: string }> {
-  const hasRedis =
-    Boolean(process.env.UPSTASH_REDIS_REST_URL) ||
-    Boolean(process.env.KV_REST_API_URL) ||
-    Boolean(process.env.REDIS_URL)
-  if (!hasRedis) return { state: 'ok', note: 'Redis not configured — optional for this deployment' }
+  const upstashUrl = (process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL ?? '').replace(/\/$/, '')
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? ''
+  const redisUrl = process.env.REDIS_URL ?? ''
+  // Rate limiting is a security control. Without Redis it is degraded, not healthy: explicit per-route limits reject
+  // requests and only the catch-all organization limit fails open (lib/rate-limiter.ts).
+  if (!(upstashUrl && upstashToken) && !redisUrl) {
+    return { state: 'degraded', note: 'Redis not configured: rate limiting is degraded (explicit per-route limits reject requests; the catch-all organization limit fails open)' }
+  }
 
+  const start = Date.now()
   try {
-    const start = Date.now()
-    const url = (
-      process.env.UPSTASH_REDIS_REST_URL ??
-      process.env.KV_REST_API_URL ??
-      ''
-    ).replace(/\/$/, '')
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? ''
-    if (!url || !token) return { state: 'degraded', note: 'Redis URL or token missing' }
-
-    const res = await fetch(`${url}/ping`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-      signal: AbortSignal.timeout(2000),
-    })
-    return res.ok
-      ? { state: 'ok', ms: Date.now() - start }
-      : { state: 'degraded', note: `ping returned ${res.status}`, ms: Date.now() - start }
+    if (upstashUrl && upstashToken) {
+      const res = await fetch(`${upstashUrl}/ping`, {
+        headers: { Authorization: ['Bearer', upstashToken].join(' ') },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(2000),
+      })
+      return res.ok
+        ? { state: 'ok', ms: Date.now() - start }
+        : { state: 'degraded', note: `ping returned ${res.status}`, ms: Date.now() - start }
+    }
+    const { default: IORedis } = await import('ioredis')
+    const client = new IORedis(redisUrl, { lazyConnect: true, connectTimeout: 1500, maxRetriesPerRequest: 0, retryStrategy: () => null, enableOfflineQueue: false })
+    client.on('error', () => undefined)
+    try {
+      await client.connect()
+      await client.ping()
+      return { state: 'ok', ms: Date.now() - start }
+    } finally {
+      client.disconnect()
+    }
   } catch (err) {
-    return { state: 'degraded', note: err instanceof Error ? err.message : 'unreachable' }
+    return { state: 'degraded', ms: Date.now() - start, note: `Redis unreachable: rate limiting is degraded (${err instanceof Error ? err.message || 'connection failed' : 'connection failed'})` }
   }
 }
 

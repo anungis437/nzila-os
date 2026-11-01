@@ -29,6 +29,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { clientAddress } from '@/lib/public-intake/guard';
 import { createHash } from 'crypto'
 import { eq } from 'drizzle-orm'
 import { icraAssessments } from '@/db/schema/icra-schema'
@@ -38,7 +39,9 @@ import {
   checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability'
-import { rateLimit } from '@/lib/rate-limit'
+import { isAssessmentClaimed } from '@/lib/icra/assessment-access'
+import { resolveIcraEmailOrigin } from '@/lib/icra/email-results-origin'
+import { checkRateLimit } from '@/lib/rate-limiter'
 import { sendEmail, isValidEmail } from '@/lib/email-service'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { logger } from '@/lib/logger'
@@ -47,6 +50,7 @@ interface RequestBody {
   assessmentId?: any
   email?: any
   locale?: any
+  acknowledgeLinkAccess?: any
 }
 
 const COPY = {
@@ -71,14 +75,20 @@ const COPY = {
 } as const
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ip = clientAddress(req)
   const ipHash = hashIp(ip)
 
-  const rl = rateLimit(req, { maxRequests: 5, windowSeconds: 60 * 60 })
-  if (!rl.success) {
+  // The shared, durable limiter: a per-process counter let every instance and restart start again from zero.
+  const rl = await checkRateLimit(`icra-email-results:${ip}`, {
+    limit: 5,
+    window: 60 * 60,
+    identifier: 'icra-email-results',
+    failOpen: process.env.NODE_ENV !== 'production',
+  })
+  if (!rl.allowed) {
     return NextResponse.json(
-      { error: 'Too many email requests. Please try again later.' },
-      { status: 429 },
+      { error: rl.error ? 'Email sending is temporarily unavailable.' : 'Too many email requests. Please try again later.' },
+      { status: rl.error ? 503 : 429 },
     )
   }
 
@@ -101,6 +111,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
   }
+  // The link carries the access capability, so mailing it to a typed address is a disclosure the respondent must decide on.
+  if (body.acknowledgeLinkAccess !== true) {
+    return NextResponse.json(
+      { error: 'Confirm that anyone with the link can open the results before it is sent.', code: 'LINK_ACCESS_ACKNOWLEDGEMENT_REQUIRED' },
+      { status: 400 },
+    )
+  }
 
   // Confirm the assessment exists AND the caller presents a currently valid
   // capability for THIS assessment. Knowledge of assessmentId alone is never
@@ -114,11 +131,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         id: icraAssessments.id,
         capabilityTokenHash: icraAssessments.capabilityTokenHash,
         capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        claimedAt: icraAssessments.claimedAt,
+        claimedOrgId: icraAssessments.claimedOrgId,
+        claimedByUserId: icraAssessments.claimedByUserId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
       .limit(1)
 
+    // A claimed assessment has no bearer capability to mail: its owner signs in. Mailing a link that carries one would hand out access
+    // the claim withdrew.
+    if (assessment && isAssessmentClaimed(assessment)) return { ok: false as const, reason: 'claimed' as const }
     return checkCapability(presented, assessment)
   })
 
@@ -129,9 +152,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
-    `${req.nextUrl.protocol}//${req.nextUrl.host}`
+  // Never put a capability in an email link derived from a request Host header.
+  // In production the canonical HTTPS application origin must be configured.
+  const baseUrl = resolveIcraEmailOrigin(
+    process.env.NEXT_PUBLIC_APP_URL,
+    req.nextUrl.origin,
+    process.env.NODE_ENV === 'production',
+  )
+  if (!baseUrl) {
+    return NextResponse.json({ error: 'Results email links are temporarily unavailable.' }, { status: 503 })
+  }
   const resultsUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}#cap=${encodeURIComponent(presented as string)}`
   const copy = COPY[locale]
 

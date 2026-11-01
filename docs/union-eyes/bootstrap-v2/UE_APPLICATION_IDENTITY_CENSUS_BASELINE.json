@@ -1,8 +1,8 @@
 {
   "contract": "APPLICATION_USER_ID=TEXT",
-  "candidateColumns": 78,
+  "candidateColumns": 77,
   "classificationCounts": {
-    "APPLICATION_USER_ID": 45,
+    "APPLICATION_USER_ID": 44,
     "DOMAIN_ENTITY_UUID": 19,
     "DEAD_OR_UNREACHABLE": 14
   },
@@ -30,7 +30,6 @@
     "grievance_deadlines.override_by",
     "grievance_deadlines.superseded_by",
     "grievance_events.actor_user_id",
-    "grievance_timeline.created_by",
     "grievances.created_by",
     "grievances.last_updated_by",
     "hazard_reports.created_by",
@@ -366,15 +365,6 @@
         "app/api/grievances/[id]/assign/route.ts :: actorUserId: userId"
       ],
       "rationale": "Live application code reads or writes the authenticated application user id into this column."
-    },
-    {
-      "table": "grievance_timeline",
-      "column": "created_by",
-      "currentType": "uuid",
-      "classification": "APPLICATION_USER_ID",
-      "targetType": "text",
-      "evidence": [],
-      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity."
     },
     {
       "table": "grievances",

@@ -18,6 +18,7 @@ import {
   FRAMEWORK_ROLES,
   PLATFORM_METADATA_MODEL_OWNERS,
 } from './framework-contract'
+import { assertNoProtectedConstraintDrop } from '../lib/protected-physical-constraints'
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..')
 export const folder = path.join(root, 'docs', 'union-eyes', 'bootstrap-v2')
@@ -990,6 +991,7 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     }
     const ddl = await generateMigration(previous, snapshot)
     for (const [index, sql] of ddl.entries()) {
+      assertNoProtectedConstraintDrop(sql)
       if (/^CREATE TYPE/.test(sql)) continue
       statements.push({
         canonicalId: `CURRENT_DECLARATION:${key}:${index}`,
@@ -1041,13 +1043,15 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     const snapshot = generateDrizzleJson({ [symbol]: table })
     snapshot.schemas = {}
     const ddl = await generateMigration(generateDrizzleJson({}), snapshot)
-    for (const [index, sql] of ddl.entries())
+    for (const [index, sql] of ddl.entries()) {
+      assertNoProtectedConstraintDrop(sql)
       statements.push({
         canonicalId: `PLATFORM_AUTH_CURRENT:${config.name}:${index}`,
         sql,
         source: authSource,
         sourceDigest: authDigest,
       })
+    }
     tables.push({
       name: `user_management.${config.name}`,
       columns: config.columns.map((column) => ({
@@ -1068,13 +1072,15 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
   const bindingSnapshot = generateDrizzleJson({ platformIdentityBindings })
   for (const [index, sql] of (
     await generateMigration(generateDrizzleJson({}), bindingSnapshot)
-  ).entries())
+  ).entries()) {
+    assertNoProtectedConstraintDrop(sql)
     statements.push({
       canonicalId: `PLATFORM_IDENTITY_CURRENT:${index}`,
       sql,
       source: bindingSource,
       sourceDigest: bindingDigest,
     })
+  }
   tables.push({
     name: bindingConfig.name,
     source: bindingSource,

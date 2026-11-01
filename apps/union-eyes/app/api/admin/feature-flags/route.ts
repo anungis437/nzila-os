@@ -6,10 +6,16 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getAllFeatureFlags, toggleFeatureFlag } from '@/lib/feature-flags';
+import {
+  getAllFeatureFlags,
+  setFeatureFlagEnabledInTransaction,
+  invalidateFeatureFlagCache,
+  FEATURE_FLAG_PROPAGATION_SECONDS,
+  FeatureFlagNotFoundError,
+} from '@/lib/feature-flags';
 import { z } from 'zod';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { performAtomicAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { withAdminAuth, withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
@@ -96,8 +102,11 @@ try {
 
       const { name, enabled } = body;
 
-      // A platform-wide flag: the intent is recorded durably before it changes and the outcome after.
-      await performAuditedOperation(
+      // A platform-wide flag is rows in our own database: the change and its audit record commit in one transaction, so a failed audit
+      // write leaves the flag as it was. This instance's cache is refreshed only after the commit, and the answer says whether that worked:
+      // a committed change whose refresh failed is not reported as having taken effect here.
+      const cacheRefresh = { ok: true };
+      await performAtomicAuditedOperation(
         {
           organizationId,
           userId,
@@ -105,8 +114,10 @@ try {
           resourceType: 'feature_flag',
           resourceId: name,
           details: { enabled },
+          afterCommitReport: cacheRefresh,
         },
-        () => toggleFeatureFlag(name, enabled),
+        (tx) => setFeatureFlagEnabledInTransaction(tx, name, enabled),
+        invalidateFeatureFlagCache,
       );
 
       logApiAuditEvent({
@@ -115,10 +126,17 @@ try {
         method: 'PATCH',
         eventType: 'success',
         severity: 'medium',
-        details: { flagName: name, enabled },
+        details: { flagName: name, enabled, cacheRefreshed: cacheRefresh.ok },
       });
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({
+        success: true,
+        committed: true,
+        cacheRefreshed: cacheRefresh.ok,
+        // Other instances read the change when their own cache expires.
+        propagationSeconds: FEATURE_FLAG_PROPAGATION_SECONDS,
+        ...(cacheRefresh.ok ? {} : { warning: 'The change is saved, but this instance could not reload the flags and may serve the previous value until its next successful reload.' }),
+      });
     } catch (error) {
       logApiAuditEvent({
         timestamp: new Date().toISOString(), userId,
@@ -128,7 +146,10 @@ try {
         severity: 'high',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
       });
-const refused = operationAuditResponse(error);
+if (error instanceof FeatureFlagNotFoundError) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Feature flag not found');
+      }
+      const refused = operationAuditResponse(error);
       if (refused) return NextResponse.json(refused.body, { status: refused.status });
       throw error;
     }

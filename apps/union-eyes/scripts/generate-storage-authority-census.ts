@@ -134,9 +134,11 @@ function realImporterFiles(pattern: string, extensions: string[]): string[] {
       maxBuffer: 1024 * 1024 * 32,
     })
   } catch (err: unknown) {
-    const execErr = err as { status?: number; stdout?: string }
+    const execErr = err as { status?: number; stdout?: string; message?: string }
     if (execErr.status === 1) return []
-    out = execErr.stdout ?? ''
+    // Any other failure with no output is not "no matches": reporting zero references would silently pass the ratchets built on this.
+    if (!execErr.stdout) throw new Error(`git grep failed for ${pattern}: ${execErr.message ?? 'unknown error'}`)
+    out = execErr.stdout
   }
   return out
     .split('\n')

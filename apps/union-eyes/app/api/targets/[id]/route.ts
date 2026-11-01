@@ -16,6 +16,9 @@ export const PATCH = withApi(
   async ({ body, organizationId, userId, params }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = params;
+    // Reject malformed identifiers before constructing the UUID database predicate.
+    // An invalid target reference is client input, not a database outage.
+    if (!z.guid().safeParse(id).success) throw ApiError.badRequest('Invalid target id');
 
     return withRLSContext({ organizationId }, async (tx) => {
       const [updated] = await tx

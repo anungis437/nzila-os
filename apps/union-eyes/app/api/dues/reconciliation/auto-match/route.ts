@@ -6,10 +6,10 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
 import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
@@ -25,7 +25,8 @@ export const POST = withApi(
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     // Matching, the hand-off of the rest to manual review, and the audit record commit together.
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true });
       const pending = await tx
         .select()
         .from(remittanceLineItems)

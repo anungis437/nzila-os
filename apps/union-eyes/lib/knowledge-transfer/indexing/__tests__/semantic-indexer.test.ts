@@ -146,7 +146,8 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     h.audit.mockRejectedValueOnce(new Error('audit down'));
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result.indexed).toBe(false);
-    expect((result as { reason: string }).reason).toContain('audit down');
+    expect(result).toEqual({ indexed: false, reason: 'Indexing failed', failed: true });
+    expect(JSON.stringify(result)).not.toContain('audit down');
   });
 
   it('records the requested event in the same transaction as the index', async () => {
@@ -162,7 +163,8 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     h.getCached.mockRejectedValue(new Error('embed boom'));
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result.indexed).toBe(false);
-    expect((result as { reason: string }).reason).toContain('embed boom');
+    expect(result).toEqual({ indexed: false, reason: 'Indexing failed', failed: true });
+    expect(JSON.stringify(result)).not.toContain('embed boom');
     expect(h.error).toHaveBeenCalled();
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.failed' }), 'failure');
   });

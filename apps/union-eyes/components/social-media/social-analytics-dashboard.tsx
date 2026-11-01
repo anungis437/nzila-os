@@ -122,7 +122,7 @@ export default function SocialAnalyticsDashboard() {
   const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/v2/social-media/analytics?range=${dateRange}`);
+      const res = await fetch(`/api/social-media/analytics?range=${dateRange}`);
       if (res.ok) {
         const data = await res.json();
         if (data.platformMetrics ?? data.platform_metrics) setPlatformMetrics(data.platformMetrics ?? data.platform_metrics);

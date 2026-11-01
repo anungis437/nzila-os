@@ -31,6 +31,8 @@ const COPY = {
     privacy:
       'We never store your email address. Only a one-way hash is logged with the send event.',
     invalid: 'Please enter a valid email address.',
+    acknowledge: 'I understand that this link gives access to my results to anyone who has it, and that I chose this address.',
+    acknowledgeRequired: 'Please confirm the statement above before the link is sent.',
     error: 'Could not send the email. Please try again or copy the URL above.',
   },
   'fr-CA': {
@@ -44,6 +46,8 @@ const COPY = {
     privacy:
       "Nous ne conservons jamais votre adresse courriel. Seule une empreinte unidirectionnelle est enregistrée avec l'événement d'envoi.",
     invalid: 'Veuillez entrer une adresse courriel valide.',
+    acknowledge: "Je comprends que ce lien donne accès à mes résultats à quiconque le possède, et que j'ai choisi cette adresse.",
+    acknowledgeRequired: "Veuillez confirmer l'énoncé ci-dessus avant l'envoi du lien.",
     error: "Impossible d'envoyer le courriel. Veuillez réessayer ou copier l'URL ci-dessus.",
   },
 } as const;
@@ -52,6 +56,7 @@ export function EmailResultsCard({ assessmentId, locale = 'en-CA' }: EmailResult
   const inputId = useId();
   const copy = COPY[locale as keyof typeof COPY] ?? COPY['en-CA'];
   const [email, setEmail] = useState('');
+  const [acknowledged, setAcknowledged] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -66,13 +71,18 @@ export function EmailResultsCard({ assessmentId, locale = 'en-CA' }: EmailResult
       setErrorMsg(copy.invalid);
       return;
     }
+    if (!acknowledged) {
+      setStatus('error');
+      setErrorMsg(copy.acknowledgeRequired);
+      return;
+    }
     setStatus('sending');
     setErrorMsg(null);
     try {
       const res = await fetch('/api/icra/email-results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessmentId, email, locale }),
+        body: JSON.stringify({ assessmentId, email, locale, acknowledgeLinkAccess: true }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -136,6 +146,21 @@ export function EmailResultsCard({ assessmentId, locale = 'en-CA' }: EmailResult
               {status === 'sending' ? copy.sending : copy.submit}
             </button>
           </div>
+          <label className="flex items-start gap-2 text-xs text-stone-700">
+            <input
+              type="checkbox"
+              checked={acknowledged}
+              onChange={(e) => {
+                setAcknowledged(e.target.checked);
+                if (status === 'error') {
+                  setStatus('idle');
+                  setErrorMsg(null);
+                }
+              }}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-stone-300"
+            />
+            <span>{copy.acknowledge}</span>
+          </label>
           {status === 'error' && errorMsg && (
             <p id={`${inputId}-err`} role="alert" className="text-xs text-red-700">
               {errorMsg}

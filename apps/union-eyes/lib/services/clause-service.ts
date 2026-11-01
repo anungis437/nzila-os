@@ -63,6 +63,8 @@ export interface ClauseComparisonResult {
   differences: Array<{ description: string; clauseIds: string[]; impact: string }>;
   bestPractices: Array<{ description: string; clauseId: string; reason: string }>;
   recommendations: string[];
+  /** What the comparison actually did: it groups clauses by type and compares no wording. */
+  analysis?: 'grouped_by_type_only';
 }
 
 // ============================================================================
@@ -102,15 +104,17 @@ export async function getClauseById(
 /**
  * Get clauses by CBA ID
  */
+// A clause is named by its agreement and by the organization that holds it: a clause written against another organization's agreement id never appears here.
 export async function getClausesByCBAId(
   cbaId: string,
+  organizationId: string,
   _options: ClauseSearchOptions = {}
 ): Promise<Clause[]> {
   try {
     const clauses = await db
       .select()
       .from(cbaClause)
-      .where(eq(cbaClause.cbaId, cbaId))
+      .where(and(eq(cbaClause.cbaId, cbaId), eq(cbaClause.organizationId, organizationId)))
       .orderBy(asc(cbaClause.orderIndex), asc(cbaClause.clauseNumber));
 
     return clauses;
@@ -429,12 +433,9 @@ export async function compareClauses(
       }
     });
 
-    // Basic recommendations
-    result.recommendations.push(
-      "Consider standardizing clause language across CBAs",
-      "Review clauses with lower confidence scores for accuracy",
-      "Ensure all key terms are consistently defined"
-    );
+    // No text analysis exists: the comparison is grouping by clause type. Differences, best practices and recommendations stay
+    // empty rather than carry fixed sentences that read as findings about these clauses.
+    result.analysis = 'grouped_by_type_only';
 
     return result;
   } catch (error) {

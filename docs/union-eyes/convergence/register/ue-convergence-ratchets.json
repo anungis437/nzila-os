@@ -117,7 +117,6 @@
       "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/db/migrations*/**", "**/reports/**", "apps/union-eyes/backend/**/migrations/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
       "allowed": [
         { "file": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts", "reason": "Writes the legacy column with the deadline convergence task; migrate to assignCase" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/convert/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/app/api/grievances/[id]/status/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/backend/grievances/models.py", "reason": "Column definition (the record being retired as an authority source)" },
         { "file": "apps/union-eyes/backend/grievances/views.py", "reason": "Legacy consumer; migrate to kernel assignments" },
@@ -128,6 +127,7 @@
         { "file": "apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts", "reason": "Separate health-and-safety record with its own representative field" },
         { "file": "apps/union-eyes/db/schema/domains/health-safety/provincial-wcb-schema.ts", "reason": "Separate health-and-safety record with its own representative field" },
         { "file": "apps/union-eyes/lib/authority/store/case-ownership.ts", "reason": "The read-only reconciler that reports drift for a governed backfill" },
+        { "file": "apps/union-eyes/lib/authority/store/case-ownership-backfill.ts", "reason": "The governed backfill that turns reviewed legacy owners into kernel assignments through assignCase (approval hash, stale-plan refusal, all-or-nothing); it reads the column but never treats it as authority" },
         { "file": "apps/union-eyes/lib/cognition/ue-adapter.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/lib/deadline-engine/assignment-sync.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/lib/deadline-engine/recipient-resolver.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
@@ -221,7 +221,8 @@
         { "file": "apps/union-eyes/lib/deadline-engine/audit.ts", "reason": "Writes deadline_audit_events on the caller executor, then the canonical record; failure is rethrown" },
         { "file": "apps/union-eyes/lib/member-employment/durable-employment-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" },
         { "file": "apps/union-eyes/lib/member-integrity/durable-member-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" },
-        { "file": "apps/union-eyes/lib/member-segments/durable-segment-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" }
+        { "file": "apps/union-eyes/lib/member-segments/durable-segment-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" },
+        { "file": "apps/union-eyes/lib/voting/election-succession.ts", "reason": "Branches explicitly: canonical ledger, else appendCanonicalAuditLog on the same executor (hash-chained audit_logs insert); a failed write throws and rolls the succession back" }
       ]
     }
   ]

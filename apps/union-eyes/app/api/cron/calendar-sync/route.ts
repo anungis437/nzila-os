@@ -6,18 +6,15 @@
  */
 
 import { NextRequest } from 'next/server'
-import { and, eq, isNull, lte, or } from 'drizzle-orm'
+import { and, asc, eq, isNull, lte, or } from 'drizzle-orm'
 import { withApiAuth } from '@/lib/api-auth-guard'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { calendars, externalCalendarConnections } from '@/db/schema/calendar-schema'
-import { importGoogleEvents } from '@/lib/external-calendar-sync/google-calendar-service'
+import { importGoogleEvents, getSyncToken } from '@/lib/external-calendar-sync/google-calendar-service'
 import { importMicrosoftEvents } from '@/lib/external-calendar-sync/microsoft-calendar-service'
-import {
-  ErrorCode,
-  standardErrorResponse,
-  standardSuccessResponse,
-} from '@/lib/api/standardized-responses'
+import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses'
+import { jobResponse } from '@/lib/operations/job-result'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,6 +88,10 @@ function getMappingPairs(calendarMappings: any): CalendarMappingPair[] {
 
 const CRON_ACTOR = 'system:cron:calendar-sync'
 
+// A connection picked up by a run is leased until this long from now, so an overlapping run does not repeat its provider calls. A
+// successful sync sets the normal interval and a failed one the retry delay; a run that dies leaves the lease to expire.
+const LEASE_MINUTES = 15
+
 // One connection is one system transaction: its imported events, its sync state and its audit record commit together,
 // and a failure rolls the lot back before the failure itself is recorded separately.
 async function processConnection(connection: SyncConnection) {
@@ -131,7 +132,8 @@ async function processConnection(connection: SyncConnection) {
           connection.id,
           mapping.localCalendarId,
           mapping.externalId,
-          { timeMin, timeMax },
+          // The stored token asks Google for what changed since the last complete import; without one the import reads the window.
+          { timeMin, timeMax, syncToken: getSyncToken(connection, mapping.externalId) ?? undefined },
         )
         imported += Number(result.imported || 0)
         updated += Number(result.updated || 0)
@@ -233,9 +235,10 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     const limit = parseLimit(request)
     const now = new Date()
 
-    // The due list spans every organization, which only system authority may read.
-    const dueConnections = await withSystemContext(async (tx) =>
-      tx
+    // The due list spans every organization, which only system authority may read. Each row is locked and leased in the same
+    // transaction that selects it (SKIP LOCKED), so two overlapping runs claim different connections.
+    const dueConnections = await withSystemContext(async (tx) => {
+      const due = await tx
         .select({
           id: externalCalendarConnections.id,
           provider: externalCalendarConnections.provider,
@@ -259,8 +262,20 @@ export const POST = withApiAuth(async (request: NextRequest) => {
             ),
           ),
         )
-        .limit(limit),
-    )
+        .orderBy(asc(externalCalendarConnections.nextSyncAt))
+        .limit(limit)
+        .for('update', { skipLocked: true })
+
+      // Each lease is bound to the row's own organization, like every other write in this job.
+      const leaseUntil = new Date(now.getTime() + LEASE_MINUTES * 60 * 1000)
+      for (const row of due) {
+        await tx
+          .update(externalCalendarConnections)
+          .set({ nextSyncAt: leaseUntil })
+          .where(and(eq(externalCalendarConnections.id, row.id), eq(externalCalendarConnections.organizationId, row.organizationId)))
+      }
+      return due
+    })
 
     const results = [] as Array<Record<string, unknown>>
     const failures = [] as Array<Record<string, unknown>>
@@ -277,12 +292,12 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       }
     }
 
-    return standardSuccessResponse({
-      dueCount: dueConnections.length,
-      syncedCount: results.length,
-      failedCount: failures.length,
-      results,
-      failures,
+    return jobResponse({
+      job: 'calendar-sync',
+      attempted: dueConnections.length,
+      succeeded: results.length,
+      failures: failures.map((failure) => ({ scope: String(failure.connectionId), reason: String(failure.error).slice(0, 200) })),
+      details: { dueCount: dueConnections.length, syncedCount: results.length, failedCount: failures.length, results },
     })
   } catch (error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to process calendar sync cron job', error)

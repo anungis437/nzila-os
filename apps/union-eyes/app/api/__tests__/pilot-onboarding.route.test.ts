@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   persistAtomicAudit: vi.fn(),
   withRLSContext: vi.fn(),
   getDemoDatasetSummary: vi.fn(),
+  verifyChecklistStep: vi.fn(),
   selectQueue: [] as unknown[][],
 }));
 
@@ -43,6 +44,10 @@ vi.mock('@/lib/audit/cape-audit-events', () => ({
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/pilot/onboarding-checklist-evidence', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/pilot/onboarding-checklist-evidence')>()),
+  verifyChecklistStep: m.verifyChecklistStep,
+}));
 vi.mock('@/lib/pilot/cape-demo-data', () => ({ getDemoDatasetSummary: m.getDemoDatasetSummary }));
 
 async function loadRoute() {
@@ -68,6 +73,7 @@ describe('pilot/onboarding route', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
+    m.verifyChecklistStep.mockResolvedValue({ ok: true, evidence: { organizationRows: 1 } });
     m.getDemoDatasetSummary.mockReturnValue({ members: 10, employers: 2, grievances: 3, timelines: 1, resolutions: 1 });
   });
 
@@ -134,7 +140,7 @@ describe('pilot/onboarding route', () => {
         action: 'PILOT_CHECKLIST_ITEM_COMPLETED',
         resourceType: 'pilot_checklist_items',
         resourceId: 'item-row-1',
-        details: { itemId: 'org-seeded', completed: true, checklistComplete: false },
+        details: { itemId: 'org-seeded', completed: true, checklistComplete: false, evidence: { organizationRows: 1 } },
       }),
     );
   });
@@ -165,5 +171,28 @@ describe('pilot/onboarding route', () => {
     expect(forbidden.status).toBe(403);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
+  it('F06 A4: refuses to mark a step complete when the organization data shows it did not happen, and writes nothing', async () => {
+    m.verifyChecklistStep.mockResolvedValueOnce({ ok: false, missing: 'an employer record' });
+
+    const response = await patch({ itemId: 'employers-imported', completed: true });
+    const payload = await response.json();
+
+    expect(response.status).toBe(409);
+    expect(JSON.stringify(payload)).toContain('an employer record');
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.verifyChecklistStep).toHaveBeenCalledWith(mockDb, 'org_1', 'u1', 'employers-imported');
+  });
+
+  it('F06 A4: reopening a step needs no evidence', async () => {
+    m.selectQueue.push([{ itemId: 'org-seeded', completed: false }]);
+
+    const response = await patch({ itemId: 'employers-imported', completed: false });
+
+    expect(response.status).toBe(200);
+    expect(m.verifyChecklistStep).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'pilot.checklist_item_reopened' }));
   });
 });

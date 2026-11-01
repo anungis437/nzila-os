@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import { AuditTrailService, SignatureService } from "@/lib/signature/signature-service";
+import { signatureViewForViewer } from "@/lib/signature/signer-privacy";
 
 import {
   ErrorCode,
@@ -17,11 +18,19 @@ export const GET = withApiAuth(async (
 ) => {
   try {
     const user = await getCurrentUser();
-    if (!user) {
+    if (!user || !user.id) {
       return standardErrorResponse(
       ErrorCode.AUTH_REQUIRED,
       'Unauthorized'
     );
+    }
+
+    // A signed-in identity without an active tenant cannot read signer identities,
+    // IP addresses or audit events. Do not delegate an empty tenant to a mockable
+    // downstream access check; reject before any document lookup.
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
     }
 
     const documentId = params.documentId;
@@ -32,7 +41,7 @@ export const GET = withApiAuth(async (
     // any document's signer identities, IPs, and timestamps by guessing a
     // documentId). Reuses the same check already applied to
     // app/api/signatures/documents/[id]/route.ts.
-    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id);
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id, organizationId);
     if (!hasAccess) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
@@ -40,25 +49,27 @@ export const GET = withApiAuth(async (
       );
     }
     
+    const senderId = await SignatureService.getDocumentSender(documentId, organizationId);
+
     // Get query params
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format"); // 'json' or 'report'
 
     if (format === "report") {
       // Generate comprehensive audit report
-      const report = await AuditTrailService.generateAuditReport(documentId);
+      const report = await AuditTrailService.generateAuditReport(documentId, organizationId);
       
       return NextResponse.json({
-        report,
+        report: signatureViewForViewer(report, user.id, senderId),
         message: "Audit report generated successfully",
       });
     } else {
       // Return raw audit trail
-      const auditTrail = await AuditTrailService.getDocumentAudit(documentId);
+      const auditTrail = await AuditTrailService.getDocumentAudit(documentId, organizationId);
       
       return NextResponse.json({
         documentId,
-        events: auditTrail,
+        events: signatureViewForViewer(auditTrail, user.id, senderId),
         totalEvents: auditTrail.length,
       });
     }

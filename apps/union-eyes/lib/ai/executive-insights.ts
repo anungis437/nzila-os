@@ -19,12 +19,13 @@
 
 import { db } from '@/db/db';
 import { eq, and, desc, gte, count, sql } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
-import { aiInsightReports, type AiInsightReportInsert } from '@/db/schema/domains/ml/ai-insight-reports';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { aiInsightReports } from '@/db/schema/domains/ml/ai-insight-reports';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { employers } from '@/db/schema/union-structure-schema';
 import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compliance';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { logger } from '@/lib/logger';
 
 // ============================================================================
@@ -98,14 +99,20 @@ export async function generateInsightReport(params: {
   // 2. Call AI
   const ai = getAiClient();
   const prompt = buildInsightPrompt(reportType, timeframe, context);
-  const aiResult = await ai.generate({
+  const aiResult = await performAuditedOperation({
+    organizationId,
+    userId,
+    action: 'ai.executive_insights.generate',
+    resourceType: 'ai_invocations',
+    
+  }, () => ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
     trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EXECUTIVE_INSIGHTS,
     input: prompt,
-    dataClass: 'internal',
-  });
+    dataClass: toGatewayDataClass('confidential'),
+  }));
 
   // 3. Parse
   const parsed = parseInsightResponse(aiResult.content ?? '', reportType, timeframe);
@@ -121,25 +128,9 @@ export async function generateInsightReport(params: {
     modelVersion: MODEL_VERSION,
   });
 
-  // 5. Persist
-  const insert: AiInsightReportInsert = {
-    organizationId,
-    reportType,
-    timeframe,
-    title: parsed.result.title,
-    summary: parsed.result.summary,
-    insightsJson: parsed.result.insights,
-    predictionsJson: parsed.result.predictions.length > 0 ? parsed.result.predictions : null,
-    recommendationsJson: parsed.result.recommendations.length > 0 ? parsed.result.recommendations : null,
-    confidence: parsed.confidence.toFixed(4),
-    explanation: parsed.explanation,
-    dataSourcesUsed: parsed.result.dataSourcesUsed,
-    modelVersion: MODEL_VERSION,
-    profileKey: UE_PROFILES.EXECUTIVE_INSIGHTS,
-    auditRef,
-  };
-
-  await db.insert(aiInsightReports).values(insert);
+  // HTTP GET is observational. Do not materialize an AI report or risk score in
+  // the database as a side effect of reading it; explicit governed persistence
+  // requires a separately authorized, audited command.
 
   return buildAiEnvelope(parsed.result, {
     confidence: parsed.confidence,

@@ -40,8 +40,11 @@ export interface MitigationImpactDelta {
   mitigatedExposure: number;
   /** Net exposure reduction (positive = improvement) */
   exposureReduction: number;
-  /** Confidence in this estimate */
-  confidence: 'low' | 'medium' | 'high';
+  /**
+   * Always 'unvalidated': the exposure figures come from the assumption table below, which no measurement of this or any other
+   * organization has calibrated, so no confidence band is claimed.
+   */
+  confidence: 'unvalidated';
 }
 
 export interface ResilienceImprovementProjection {
@@ -98,6 +101,11 @@ export interface MitigationComparison {
   recommendationRationale: string;
   /** Areas that no mitigation scenario fully addresses */
   residualRisks: string[];
+  /** The figures are the result of the assumptions listed, not of a calibrated model. */
+  basis: 'ASSUMED_EFFECTIVENESS_NOT_CALIBRATED';
+  assumptions: string[];
+  /** True when no scenario reached any node, so every figure above is zero because nothing was evaluated. */
+  noNodesEvaluated: boolean;
 }
 
 /**

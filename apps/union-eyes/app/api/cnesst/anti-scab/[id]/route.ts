@@ -16,7 +16,10 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ['CNESST', 'Anti-Scab'],
   orgScoped: true,
   itemRoute: true,
+  retainOnDelete: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // Authorship and the reporter are fixed when the violation is filed.
+  blockedPatchFields: ['createdBy', 'reportedById', 'reportedByName'],
 });
 export { GET, PATCH, DELETE };

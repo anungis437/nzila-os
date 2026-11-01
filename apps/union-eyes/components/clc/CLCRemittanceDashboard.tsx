@@ -31,7 +31,7 @@ export default function CLCRemittanceDashboard({ period }: CLCRemittanceDashboar
   const fetchRemittances = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/v2/clc/remittances?period=${period}`);
+      const res = await fetch(`/api/clc/remittances?period=${period}`);
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];

@@ -25,13 +25,18 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     execute,
   };
-  return { queue, db, execute, values, returning, persistAtomicAudit: vi.fn() };
+  return { queue, db, execute, values, returning, persistAtomicAudit: vi.fn(), scopes: [] as Record<string, unknown>[], rlsFailure: null as Error | null };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) => fn(h.db)),
+  withRLSContext: vi.fn((scope: Record<string, unknown>, fn: (tx: unknown) => Promise<unknown>) => {
+    h.scopes.push(scope);
+    if (h.rlsFailure) return Promise.reject(h.rlsFailure);
+    return fn(h.db);
+  }),
 }));
 vi.mock('@/db/schema', () =>
   new Proxy({}, { has: () => true, get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })) }),
@@ -44,13 +49,15 @@ vi.mock('drizzle-orm', async (orig) => ({
   sql: Object.assign(vi.fn(() => ({})), { raw: vi.fn(() => ({})) }),
 }));
 
-import { getRecentRealtimeAlerts, runRealtimeObservabilitySweep } from '../realtime-alerting-service';
+import { getRecentRealtimeAlerts } from '../realtime-alerting-service';
 
 const pushSel = (...items: unknown[]) => h.queue.push(...items);
 
 beforeEach(() => {
   h.queue.length = 0;
   h.execute.mockReset();
+  h.scopes.length = 0;
+  h.rlsFailure = null;
   h.values.mockClear();
   h.returning.mockClear();
   h.persistAtomicAudit.mockReset();
@@ -58,96 +65,8 @@ beforeEach(() => {
 });
 
 describe('observability/realtime-alerting-service', () => {
-  describe('runRealtimeObservabilitySweep', () => {
-    it('emits signals for each threshold breach and creates rules', async () => {
-      // 3 execute calls: sla, ingestion, payment
-      h.execute
-        .mockResolvedValueOnce([{ organization_id: 'org-1', count: 6 }]) // sla critical (>=5)
-        .mockResolvedValueOnce([{ organization_id: 'org-2', count: 1 }]) // ingestion high (<3)
-        .mockResolvedValueOnce([{ organization_id: 'org-3', count: 2 }]); // payment critical (>=2)
-
-      // For each of the 3 signals, emitSignal:
-      // getOrCreateRealtimeRule: select existing → push [] (none) then insert returning [created]
-      // signal 1: no existing rule
-      pushSel([]); // select existing -> none
-      pushSel([{ id: 'rule-1' }]); // insert rule returning
-      pushSel([]); // insert execution without reading the insert-only table
-      pushSel([]); // insert notificationTracking
-      pushSel([]); // insert inAppNotifications
-      // signal 2: existing rule found
-      pushSel([{ id: 'rule-2' }]); // select existing -> found (skips insert)
-      pushSel([]); // insert execution
-      pushSel([]); // notificationTracking
-      pushSel([]); // inAppNotifications
-      // signal 3: no existing rule
-      pushSel([]); // select existing
-      pushSel([{ id: 'rule-3' }]); // insert rule returning
-      pushSel([]); // insert execution
-      pushSel([]); // notificationTracking
-      pushSel([]); // inAppNotifications
-
-      const result = await runRealtimeObservabilitySweep();
-      expect(result.emitted).toBe(3);
-      expect(result.byKind.sla_breach_imminent).toBe(1);
-      expect(result.byKind.ingestion_failures).toBe(1);
-      expect(result.byKind.payment_reconciliation_failures).toBe(1);
-      expect(h.returning).toHaveBeenCalledTimes(2); // newly created rules only
-      // One audit per organization's alert, on the sweep's transaction, attributed to the cron system actor.
-      expect(h.persistAtomicAudit).toHaveBeenCalledTimes(3);
-      expect(h.persistAtomicAudit.mock.calls.map((c) => c[1].organizationId)).toEqual(['org-1', 'org-2', 'org-3']);
-      expect(h.persistAtomicAudit).toHaveBeenCalledWith(
-        h.db,
-        expect.objectContaining({
-          userId: 'system:cron:observability-alerts',
-          action: 'observability.alert.emit',
-          resourceType: 'alert_executions',
-          details: expect.objectContaining({ signal: 'sla_breach_imminent', count: 6, severity: 'critical' }),
-        }),
-      );
-      for (const offset of [1, 4, 8]) {
-        const execution = h.values.mock.calls[offset][0];
-        expect(execution.id).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
-        const tracking = h.values.mock.calls[offset + 1][0];
-        const notification = h.values.mock.calls[offset + 2][0];
-        expect(tracking.templateData.executionId).toBe(execution.id);
-        expect(tracking.metadata.executionId).toBe(execution.id);
-        expect(notification.data.executionId).toBe(execution.id);
-      }
-    });
-
-    it('fails the sweep when an alert audit cannot be written, so its alert rows do not commit', async () => {
-      h.execute
-        .mockResolvedValueOnce([{ organization_id: 'org-1', count: 1 }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
-      pushSel([{ id: 'rule-1' }], [], [], []);
-      h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
-
-      await expect(runRealtimeObservabilitySweep()).rejects.toThrow('audit down');
-    });
-
-    it('returns zero when there are no breaches', async () => {
-      h.execute
-        .mockResolvedValueOnce([{ organization_id: 'org-1', count: 0 }]) // filtered out
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
-
-      const result = await runRealtimeObservabilitySweep();
-      expect(result.emitted).toBe(0);
-      expect(result.byKind.sla_breach_imminent).toBe(0);
-    });
-
-    it('surfaces execution insertion failure before publishing notification metadata', async () => {
-      h.execute
-        .mockResolvedValueOnce([{ organization_id: 'org-1', count: 1 }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
-      pushSel([{ id: 'rule-1' }], new Error('synthetic insert permission denied'));
-      await expect(runRealtimeObservabilitySweep()).rejects.toThrow('synthetic insert permission denied');
-      expect(h.values).toHaveBeenCalledTimes(1);
-      expect(h.returning).not.toHaveBeenCalled();
-    });
-  });
+  // runRealtimeObservabilitySweep (recipients, hourly dedupe, failed alerts, per-alert rollback) is exercised against a real SQL engine in
+  // realtime-alerting-service.pglite.test.ts.
 
   describe('getRecentRealtimeAlerts', () => {
     it('returns recent alert rows', async () => {
@@ -155,6 +74,56 @@ describe('observability/realtime-alerting-service', () => {
       const rows = await getRecentRealtimeAlerts('org-1');
       expect(rows).toHaveLength(1);
       expect(rows[0].executionId).toBe('exec-1');
+      expect(h.scopes).toEqual([{ organizationId: 'org-1' }]);
+    });
+
+    it('fails closed before querying if tenant RLS context cannot be established', async () => {
+      h.rlsFailure = new Error('RLS transaction unavailable');
+      await expect(getRecentRealtimeAlerts('org-1')).rejects.toThrow('RLS transaction unavailable');
+      expect(h.queue).toEqual([]);
+      expect(h.scopes).toEqual([{ organizationId: 'org-1' }]);
+    });
+
+    it('rejects missing tenant identity and invalid direct-call limits', async () => {
+      await expect(getRecentRealtimeAlerts('', 25)).rejects.toThrow('Organization context required');
+      await expect(getRecentRealtimeAlerts('org-1', 100000)).rejects.toThrow('Invalid alert page size');
+      expect(h.scopes).toEqual([]);
+    });
+
+    it('returns only approved signal metadata and strips sensitive nested trigger fields', async () => {
+      pushSel([{
+        executionId: 'exec-redact',
+        triggerData: {
+          organizationId: 'org-1',
+          signal: 'ingestion_failures',
+          count: 3,
+          memberId: 'member-private',
+          caseId: 'case-private',
+          externalProviderError: 'provider token',
+          details: { name: 'private person', email: 'private@example.test' },
+        },
+      }]);
+      const rows = await getRecentRealtimeAlerts('org-1');
+      expect(rows).toEqual([{
+        executionId: 'exec-redact',
+        triggerData: { signal: 'ingestion_failures', count: 3 },
+      }]);
+      expect(JSON.stringify(rows)).not.toMatch(/member-private|case-private|provider token|private person/);
+    });
+
+    it('fails closed for unknown signal kinds and malformed count data', async () => {
+      pushSel([
+        { executionId: 'unknown', triggerData: { signal: 'sensitive_new_alert', count: 7, name: 'private' } },
+        { executionId: 'malformed', triggerData: { signal: 'payment_reconciliation_failures', count: '999', account: 'secret' } },
+        { executionId: 'null', triggerData: null },
+      ]);
+      const rows = await getRecentRealtimeAlerts('org-1');
+      expect(rows.map((row) => row.triggerData)).toEqual([
+        {},
+        { signal: 'payment_reconciliation_failures' },
+        {},
+      ]);
+      expect(JSON.stringify(rows)).not.toContain('secret');
     });
 
     it('respects a custom limit', async () => {

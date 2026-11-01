@@ -32,7 +32,7 @@ describe('precedents/jurisdiction-preferences route', () => {
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
     m.db.select.mockReturnValue({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => []) })) })) } as any);
-    m.db.insert.mockReturnValue({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'pref_1', preferredJurisdictions: ['ON'] }]) })) });
+    m.db.insert.mockReturnValue({ values: vi.fn(() => ({ onConflictDoUpdate: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'pref_1', preferredJurisdictions: ['ON'] }]) })) })) });
     m.db.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'pref_1', preferredJurisdictions: ['QC'] }]) })) })) } as any);
   });
 

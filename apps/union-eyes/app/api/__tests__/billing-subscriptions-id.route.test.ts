@@ -1,11 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => {
-  const state = { selectRows: [] as unknown[][], updateRows: [] as unknown[][], setCalls: [] as Array<Record<string, unknown>> };
+  const state = { selectRows: [] as unknown[][], updateRows: [] as unknown[][], setCalls: [] as Array<Record<string, unknown>>, locks: [] as string[] };
   const createSelectChain = () => {
+    const take = () => (state.selectRows.shift() ?? []) as unknown[];
     const chain = {
       from: vi.fn(() => chain),
-      where: vi.fn(async () => (state.selectRows.shift() ?? []) as unknown[]),
+      // A read is either awaited directly or locked with .for('update') first; each consumes the next queued result.
+      where: vi.fn(() => ({
+        for: vi.fn(async (strength: string) => {
+          state.locks.push(strength);
+          return take();
+        }),
+        then: (resolve: (rows: unknown[]) => unknown, reject?: (error: unknown) => unknown) => Promise.resolve(take()).then(resolve, reject),
+      })),
     };
     return chain;
   };
@@ -13,6 +21,7 @@ const m = vi.hoisted(() => {
     state,
     withApi: vi.fn(),
     audit: vi.fn(),
+    mandate: vi.fn(),
     logger: { info: vi.fn() },
     db: {
       select: vi.fn(() => createSelectChain()),
@@ -44,6 +53,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(m.db),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: m.mandate }));
 vi.mock('@/lib/finance/financial-authority', () => ({ FINANCIAL_MEMBER_DATA_ROLES: ['secretary_treasurer'] }));
 vi.mock('@/db/schema', () => ({ orgSubscriptions: { id: 'id', organizationId: 'organizationId' } }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
@@ -62,7 +72,9 @@ describe('billing/subscriptions/[id] route', () => {
     m.state.selectRows = [];
     m.state.updateRows = [];
     m.state.setCalls = [];
+    m.state.locks = [];
     m.audit.mockResolvedValue(undefined);
+    m.mandate.mockResolvedValue({ ledgerWide: true, resourceIds: [] });
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
   });
 
@@ -76,14 +88,14 @@ describe('billing/subscriptions/[id] route', () => {
     const { GET } = await loadRoute();
     m.state.selectRows.push([]);
 
-    await expect(GET({ organizationId: 'org_1', params: Promise.resolve({ id: 'sub_1' }) })).rejects.toThrow('Subscription not found');
+    await expect(GET({ organizationId: 'org_1', userId: 'u1', params: Promise.resolve({ id: 'sub_1' }) })).rejects.toThrow('Subscription not found');
   });
 
   it('GET returns subscription payload when found', async () => {
     const { GET } = await loadRoute();
     m.state.selectRows.push([{ id: 'sub_1', status: 'active' }]);
 
-    const result = await GET({ organizationId: 'org_1', params: Promise.resolve({ id: 'sub_1' }) });
+    const result = await GET({ organizationId: 'org_1', userId: 'u1', params: Promise.resolve({ id: 'sub_1' }) });
 
     expect(result).toMatchObject({ data: { id: 'sub_1', status: 'active' } });
   });
@@ -266,5 +278,83 @@ describe('billing/subscriptions/[id] route', () => {
     });
 
     expect(m.state.setCalls[0]).not.toHaveProperty('metadata');
+  });
+
+  describe('the live financial mandate comes before any subscription is read or changed', () => {
+    const refusal = () => Object.assign(new Error('DUTY_NOT_HELD'), { code: 'DUTY_NOT_HELD' });
+
+    it('GET asks for the view power on this subscription, and a refusal reads nothing', async () => {
+      const { GET } = await loadRoute();
+      m.state.selectRows.push([{ id: 'sub_1', status: 'active' }]);
+      await GET({ organizationId: 'org_1', userId: 'u1', params: Promise.resolve({ id: 'sub_1' }) });
+      expect(m.mandate).toHaveBeenCalledWith(m.db, { organizationId: 'org_1', userId: 'u1', action: 'finance:view', resourceId: 'sub_1' });
+
+      m.db.select.mockClear();
+      m.mandate.mockRejectedValueOnce(refusal());
+      await expect(GET({ organizationId: 'org_1', userId: 'u1', params: Promise.resolve({ id: 'sub_1' }) })).rejects.toThrow('DUTY_NOT_HELD');
+      expect(m.db.select).not.toHaveBeenCalled();
+    });
+
+    it('PATCH asks for the prepare power, and a refusal reads, writes and audits nothing', async () => {
+      const { PATCH } = await loadRoute();
+      m.mandate.mockRejectedValueOnce(refusal());
+      await expect(PATCH({
+        organizationId: 'org_1', userId: 'u1', params: { id: 'sub_1' }, request: { json: async () => ({ metadata: { note: 'x' } }) },
+      })).rejects.toThrow('DUTY_NOT_HELD');
+      expect(m.mandate).toHaveBeenCalledWith(m.db, { organizationId: 'org_1', userId: 'u1', action: 'finance:prepare', resourceId: 'sub_1' });
+      expect(m.db.select).not.toHaveBeenCalled();
+      expect(m.db.update).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('DELETE asks for the execute power, and a refusal reads, cancels and audits nothing', async () => {
+      const { DELETE } = await loadRoute();
+      m.mandate.mockRejectedValueOnce(refusal());
+      await expect(DELETE({ organizationId: 'org_1', userId: 'u1', params: { id: 'sub_1' } })).rejects.toThrow('DUTY_NOT_HELD');
+      expect(m.mandate).toHaveBeenCalledWith(m.db, { organizationId: 'org_1', userId: 'u1', action: 'finance:execute', resourceId: 'sub_1' });
+      expect(m.db.select).not.toHaveBeenCalled();
+      expect(m.db.update).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('every method needs the caller identity as well as the organization, and touches nothing without it', async () => {
+      const { GET, PATCH, DELETE } = await loadRoute();
+      await expect(GET({ organizationId: 'org_1', params: Promise.resolve({ id: 'sub_1' }) })).rejects.toThrow('Organization context required');
+      await expect(PATCH({ organizationId: 'org_1', params: { id: 'sub_1' }, request: { json: async () => ({}) } })).rejects.toThrow('Organization context required');
+      await expect(DELETE({ organizationId: 'org_1', params: { id: 'sub_1' } })).rejects.toThrow('Organization context required');
+      expect(m.mandate).not.toHaveBeenCalled();
+      expect(m.db.select).not.toHaveBeenCalled();
+    });
+  });
+
+  it('PATCH and DELETE lock the subscription they read, so provenance and cancellation are decided on the row that is changed', async () => {
+    const { PATCH, DELETE } = await loadRoute();
+    m.state.selectRows.push([{ id: 'sub_1', metadata: {} }]);
+    m.state.updateRows.push([{ id: 'sub_1' }]);
+    await PATCH({ organizationId: 'org_1', userId: 'treasurer', params: { id: 'sub_1' }, request: { json: async () => ({ metadata: { note: 'x' } }) } });
+    expect(m.state.locks).toEqual(['update']);
+
+    m.state.selectRows.push([{ id: 'sub_1', status: 'active' }]);
+    m.state.updateRows.push([{ id: 'sub_1', status: 'cancelled' }]);
+    await DELETE({ organizationId: 'org_1', userId: 'treasurer', params: { id: 'sub_1' } });
+    expect(m.state.locks).toEqual(['update', 'update']);
+  });
+
+  it('PATCH reports a conflict, and audits nothing, when the subscription changed between the read and the write', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.selectRows.push([{ id: 'sub_1', metadata: {} }]);
+    m.state.updateRows.push([]);
+    await expect(PATCH({
+      organizationId: 'org_1', userId: 'treasurer', params: { id: 'sub_1' }, request: { json: async () => ({ metadata: { note: 'x' } }) },
+    })).rejects.toThrow('changed while metadata was being updated');
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('DELETE reports a conflict, and audits nothing, when the subscription changed between the read and the cancellation', async () => {
+    const { DELETE } = await loadRoute();
+    m.state.selectRows.push([{ id: 'sub_1', status: 'active' }]);
+    m.state.updateRows.push([]);
+    await expect(DELETE({ organizationId: 'org_1', userId: 'treasurer', params: { id: 'sub_1' } })).rejects.toThrow('changed while it was being cancelled');
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });

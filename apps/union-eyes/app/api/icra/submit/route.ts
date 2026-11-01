@@ -11,12 +11,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { clientAddress } from '@/lib/public-intake/guard';
 import type { Answer, ConsentRecord } from '@/lib/icra/types'
 import { buildAnswer, scoreAssessment } from '@/lib/icra/scoring'
-import { rateLimit } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limiter'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { verifyTurnstileToken } from '@/lib/icra/turnstile'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
+import { ICRA_SUBMIT_MAX_BODY_BYTES, normalizeIcraLocale, serverConsentRecord } from '@/lib/icra/consent'
 import {
   ALL_QUESTIONS,
   QUESTION_BANK_VERSION,
@@ -47,6 +49,9 @@ import {
   computeCapabilityExpiry,
   setCapabilityCookie,
 } from '@/lib/icra/assessment-capability'
+
+const MAX_ORG_CONTEXT_KEYS = 40
+const ORG_CONTEXT_KEY = /^[a-z][a-z0-9_]{0,63}$/
 
 interface SubmitBody {
   consent: ConsentRecord
@@ -108,20 +113,29 @@ function validateBody(body: unknown): body is SubmitBody {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ip = clientAddress(req)
   const ipHash = hashIp(ip)
 
-  const rl = rateLimit(req, { maxRequests: 3, windowSeconds: 60 * 60 })
-  if (!rl.success) {
+  const rl = await checkRateLimit(`icra-submit:${ip}`, {
+    limit: 3,
+    window: 60 * 60,
+    identifier: 'icra-submit',
+    failOpen: process.env.NODE_ENV !== 'production',
+  })
+  if (!rl.allowed) {
     return NextResponse.json(
-      { error: 'Too many submissions. Please try again later.' },
-      { status: 429 },
+      { error: rl.error ? 'Submissions are temporarily unavailable.' : 'Too many submissions. Please try again later.' },
+      { status: rl.error ? 503 : 429 },
     )
   }
 
   let body: unknown
   try {
-    body = await req.json()
+    const raw = await req.text()
+    if (raw.length > ICRA_SUBMIT_MAX_BODY_BYTES) {
+      return NextResponse.json({ error: 'Request body is too large.' }, { status: 413 })
+    }
+    body = JSON.parse(raw)
   } catch {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
   }
@@ -133,11 +147,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const { consent, orgContext, answers, locale = 'en-CA', turnstileToken } = body
+  const { orgContext, answers, turnstileToken } = body
+  // The stored consent is built here: a client-supplied time, doctrine version or extra key is not evidence.
+  const consent = serverConsentRecord(body.consent)!
+  const locale = normalizeIcraLocale(body.locale)
+  if (!locale) {
+    return NextResponse.json({ error: 'Unsupported locale.' }, { status: 400 })
+  }
 
-  // Turnstile verification — env-gated. Returns success=true when no secret
-  // is configured so dev/private envs work without keys.
+  // Turnstile verification. Outside production an unconfigured secret is open so dev/private envs work without keys; in production an
+  // unconfigured challenge refuses (503) instead of quietly running unchallenged.
   const turnstile = await verifyTurnstileToken(turnstileToken ?? null, ip)
+  if (turnstile.notConfigured && process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'This form is temporarily unavailable.' }, { status: 503 })
+  }
   if (!turnstile.success) {
     fireAndForgetEvent({
       kind: 'turnstile_failed',
@@ -160,6 +183,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   let normalizedOrgContext: Record<string, string> | null = null
   if (orgContext && typeof orgContext === 'object') {
     const entries: Array<[string, string]> = []
+    const submittedKeys = Object.keys(orgContext)
+    if (submittedKeys.length > MAX_ORG_CONTEXT_KEYS || !submittedKeys.every((key) => ORG_CONTEXT_KEY.test(key))) {
+      return NextResponse.json({ error: 'Invalid organization context.' }, { status: 400 })
+    }
     for (const [k, v] of Object.entries(orgContext)) {
       if (typeof v !== 'string') continue
       const trimmed = v.trim()

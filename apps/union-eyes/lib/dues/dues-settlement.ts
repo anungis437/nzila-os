@@ -129,6 +129,9 @@ export async function settleDuesPaymentIntent(
         WHERE organization_id = ${row.organization_id}::uuid AND user_id = ${row.member_id} AND status = 'posted'`,
   )) as unknown as { balance: string }[]
   const before = balance[0]?.balance ?? '0'
+  // The provider has collected this amount, so it is always posted. If the member's balance fell in the meantime (another
+  // payment settled first) the ledger shows a credit and the audit record says how much was paid beyond the balance.
+  const overpaidCents = Math.max(0, toCents(row.amount) - Math.max(0, toCents(before)))
   const ledger = (await tx.execute(
     sql`INSERT INTO member_dues_ledger
           (user_id, organization_id, transaction_type, transaction_date, effective_date, amount,
@@ -154,6 +157,7 @@ export async function settleDuesPaymentIntent(
       paymentIntentId: pi.id,
       stripeEventId: eventId,
       ledgerEntryId: ledger[0]?.id,
+      ...(overpaidCents > 0 ? { overpaidCents } : {}),
     },
   })
   return 'settled'

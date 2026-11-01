@@ -46,11 +46,7 @@ export const PUBLIC_API_ROUTES: PublicRouteConfig[] = [
     reason: 'Public system status page',
     category: 'health',
   },
-  {
-    pattern: '/api/docs/openapi.json',
-    reason: 'OpenAPI documentation (public spec)',
-    category: 'public-content',
-  },
+  // Full OpenAPI inventory is administrator-only, not a public-content route.
   
   // ========== WEBHOOKS (signature-verified) ==========
   {

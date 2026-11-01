@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/api-auth-guard";
-import { getProfileByUserId } from "@/db/queries/profiles-queries";
+import { findProfileByUserId } from "@/db/queries/profiles-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +14,11 @@ export async function GET() {
       );
     }
 
-    const profile = await getProfileByUserId(userId);
+    // A failed lookup is an error; only a completed lookup that found nothing says there is no profile.
+    const profile = await findProfileByUserId(userId);
     return NextResponse.json({
       isSuccess: true,
-      message: "Profile retrieved successfully",
+      message: profile ? "Profile retrieved successfully" : "No profile exists for this user",
       data: profile,
     });
   } catch {

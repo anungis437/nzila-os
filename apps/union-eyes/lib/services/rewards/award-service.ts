@@ -23,6 +23,8 @@ export interface CreateAwardOptions {
   reason: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadataJson?: Record<string, any>;
+  /** Run inside an existing transaction (savepoint) instead of opening a new one on another connection. */
+  executor?: typeof db;
 }
 
 export interface ApproveAwardOptions {
@@ -35,6 +37,8 @@ export interface IssueAwardOptions {
   awardId: string;
   orgId: string;
   approvedByUserId?: string; // For auto-approve flow
+  /** Run inside an existing transaction (savepoint) instead of opening a new one on another connection. */
+  executor?: typeof db;
 }
 
 export interface RevokeAwardOptions {
@@ -52,9 +56,10 @@ export async function createAwardRequest(
   options: CreateAwardOptions
 ): Promise<RecognitionAward> {
   const { orgId, awardTypeId, recipientUserId, issuerUserId, reason, metadataJson } = options;
+  const runner = options.executor ?? db;
 
   // Get award type to check approval requirements
-  const awardType = await db.query.recognitionAwardTypes.findFirst({
+  const awardType = await runner.query.recognitionAwardTypes.findFirst({
     where: and(
       eq(recognitionAwardTypes.id, awardTypeId),
       eq(recognitionAwardTypes.orgId, orgId)
@@ -68,7 +73,7 @@ export async function createAwardRequest(
   // Determine initial status
   const initialStatus = awardType.requiresApproval ? 'pending' : 'approved';
 
-  return await db.transaction(async (tx) => {
+  return await runner.transaction(async (tx) => {
     const [award] = await tx
       .insert(recognitionAwards)
       .values({
@@ -166,8 +171,7 @@ export async function issueAward(
 }> {
   const { awardId, orgId } = options;
 
-  return await db.transaction(async (tx) => {
-    // Get award with award type
+  return await (options.executor ?? db).transaction(async (tx) => {
     const award = await tx.query.recognitionAwards.findFirst({
       where: and(
         eq(recognitionAwards.id, awardId),

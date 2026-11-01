@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "tranche": "GATE-0C.1",
+  "version": 1,
+  "size": 2,
+  "selectionRule": "Every operation the canonical route universe gained after the Gate 0B.12 acceptance commit: the exported handlers of route files that the regenerated route-coverage manifest lists and the historical manifest omitted, in ascending code-unit order of the string \"<route file>|<METHOD>\". No Gate 0B operation is re-examined, no decision-bound exception is re-examined and nothing is carried forward.",
+  "anchorCommit": "447c98c44b04fdca23d9b959bddfa62ccec351b2",
+  "carryForward": [],
+  "excludedDecisionBound": [
+    "carbon/dashboard/route.ts|GET",
+    "carbon/infrastructure/route.ts|GET",
+    "carbon/validate/route.ts|GET",
+    "carbon/validate/route.ts|POST"
+  ],
+  "priorTranches": [
+    {
+      "tranche": "GATE-0B.1",
+      "version": 1,
+      "operationsHash": "8d7161fb09cf7f6e96aec085971c1433463acbe5631cdec8322e852a03de8e8f"
+    },
+    {
+      "tranche": "GATE-0B.2",
+      "version": 1,
+      "operationsHash": "a9f19795b764a892c48f99d3056bbcde5431da735d04e6c60529de7644776b4c"
+    },
+    {
+      "tranche": "GATE-0B.3",
+      "version": 1,
+      "operationsHash": "909924795fbbe3e5d9cbbe0d6bce06b592302957a45428f3debd129cba3674f7"
+    },
+    {
+      "tranche": "GATE-0B.4",
+      "version": 1,
+      "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35"
+    },
+    {
+      "tranche": "GATE-0B.5",
+      "version": 1,
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e"
+    },
+    {
+      "tranche": "GATE-0B.6",
+      "version": 1,
+      "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385"
+    },
+    {
+      "tranche": "GATE-0B.7",
+      "version": 1,
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03"
+    },
+    {
+      "tranche": "GATE-0B.8",
+      "version": 1,
+      "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af"
+    },
+    {
+      "tranche": "GATE-0B.9",
+      "version": 1,
+      "operationsHash": "eafe16b5f25727c021f48057d0a164dccc0796ca382183008d8d43d65f5cbcc9"
+    },
+    {
+      "tranche": "GATE-0B.10",
+      "version": 1,
+      "operationsHash": "8e0b6ef1b382c817264503a249c4a41dfe7e68a2392697e285a6336781ce4387"
+    },
+    {
+      "tranche": "GATE-0B.11",
+      "version": 1,
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327"
+    },
+    {
+      "tranche": "GATE-0B.12",
+      "version": 1,
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b"
+    }
+  ],
+  "newOperations": [
+    "reviews/route.ts|GET",
+    "reviews/route.ts|POST"
+  ],
+  "operations": [
+    "reviews/route.ts|GET",
+    "reviews/route.ts|POST"
+  ],
+  "operationsHash": "6f6b996d3bd863acea9222d696d22ca42eea990b9ab14018bbe04d62635ad6fb",
+  "versionLog": [
+    {
+      "version": 1,
+      "date": "2026-10-27",
+      "operationsHash": "6f6b996d3bd863acea9222d696d22ca42eea990b9ab14018bbe04d62635ad6fb",
+      "reason": "Initial freeze of the Gate 0C.1 tranche from the canonical route universe: the two exported handlers of app/api/reviews/route.ts that the route-coverage manifest had omitted. No later addition, removal or reorder is allowed without a new version and reason."
+    }
+  ]
+}

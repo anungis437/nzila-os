@@ -16,6 +16,7 @@ import {
 import { eq, and, lte, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { getActiveContract } from './contract-service';
 
 // ============================================================================
@@ -68,23 +69,35 @@ export async function expireTrials(
     const newStatus = hasPm ? 'active' : 'cancelled';
     const eventType = hasPm ? 'trial_converted' : 'trial_expired';
 
-    await db
-      .update(orgSubscriptions)
-      .set({
-        status: newStatus,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(orgSubscriptions.id, sub.id), eq(orgSubscriptions.organizationId, organizationId)));
+    // The status change, its event row and its audit record commit together.
+    await db.transaction(async (tx) => {
+      await tx
+        .update(orgSubscriptions)
+        .set({
+          status: newStatus,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(orgSubscriptions.id, sub.id), eq(orgSubscriptions.organizationId, organizationId)));
 
-    await db.insert(subscriptionEventsLog).values({
-      organizationId: sub.organizationId,
-      subscriptionId: sub.id,
-      eventType,
-      previousState: { status: 'trialing' },
-      newState: { status: newStatus },
-      reason: hasPm
-        ? 'Trial converted — payment method on file'
-        : 'Trial expired — no payment method',
+      await tx.insert(subscriptionEventsLog).values({
+        organizationId: sub.organizationId,
+        subscriptionId: sub.id,
+        eventType,
+        previousState: { status: 'trialing' },
+        newState: { status: newStatus },
+        reason: hasPm
+          ? 'Trial converted — payment method on file'
+          : 'Trial expired — no payment method',
+      });
+
+      await persistAtomicAudit(tx as unknown as Parameters<typeof persistAtomicAudit>[0], {
+        organizationId: sub.organizationId,
+        userId: 'system:trial-expiry',
+        action: `subscription.${eventType}`,
+        resourceType: 'org_subscriptions',
+        resourceId: sub.id,
+        details: { previousStatus: 'trialing', newStatus },
+      });
     });
 
     actions.push({
@@ -140,7 +153,12 @@ export async function pauseSubscription(
   reason?: string,
 ): Promise<SubscriptionAction> {
   // The status change, the event-log row and the audit record commit together.
-  return withRLSContext({ organizationId }, async (tx) => {
+  return withRLSContext({ organizationId, userId: pausedBy }, async (tx) => {
+    // Authority and mutation share the same tenant transaction. A route-level
+    // preflight cannot authorize a later independent service transaction.
+    await requireLiveFinancialMandate(tx, {
+      organizationId, userId: pausedBy, action: 'finance:execute', resourceId: subscriptionId,
+    });
     const [sub] = await tx
       .update(orgSubscriptions)
       .set({ status: 'paused', updatedAt: new Date() })
@@ -197,7 +215,10 @@ export async function resumeSubscription(
   subscriptionId: string,
   resumedBy: string,
 ): Promise<SubscriptionAction> {
-  return withRLSContext({ organizationId }, async (tx) => {
+  return withRLSContext({ organizationId, userId: resumedBy }, async (tx) => {
+    await requireLiveFinancialMandate(tx, {
+      organizationId, userId: resumedBy, action: 'finance:execute', resourceId: subscriptionId,
+    });
     const [sub] = await tx
       .update(orgSubscriptions)
       .set({ status: 'active', updatedAt: new Date() })

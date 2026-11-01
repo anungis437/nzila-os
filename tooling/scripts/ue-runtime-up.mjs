@@ -1,0 +1,312 @@
+#!/usr/bin/env node
+/**
+ * Reproducible local runtime for Union Eyes acceptance: the real Next.js app, native PostgreSQL, deterministic QA fixtures.
+ *
+ *   node tooling/scripts/ue-runtime-up.mjs up      # database, migrations, seed, platform sandbox DB, app, wait healthy
+ *   node tooling/scripts/ue-runtime-up.mjs db      # only the native combined DB fixture; no Next server
+ *   node tooling/scripts/ue-runtime-up.mjs test    # run the Playwright runtime acceptance (desktop, tablet, mobile)
+ *   node tooling/scripts/ue-runtime-up.mjs restart-check  # file a case, restart the app, prove it persisted
+ *   node tooling/scripts/ue-runtime-up.mjs all     # up, then test, then restart-check
+ *   node tooling/scripts/ue-runtime-up.mjs down    # stop the app and the database container
+ *   node tooling/scripts/ue-runtime-up.mjs env     # print the environment the app and the tests use
+ *
+ * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod --rebuild --redis
+ * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
+ *
+ * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
+ * solely when QA_TEST_ENV=true and UE_ENVIRONMENT=local. The NAR audit store is a local sandbox (never immutable) and the
+ * sandbox platform database refuses the relaxation unless its name ends in _sandbox.
+ */
+import { spawn, spawnSync } from 'node:child_process'
+import { randomBytes } from 'node:crypto'
+import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { hasOwnedContainerLabels, UE_DISPOSABLE_MISSION } from './lib/ue-disposable-container-ownership.mjs'
+import { resetRestartCaseHandoff, requireRestartCaseHandoff } from './lib/ue-runtime-restart-handoff.mjs'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+const APP = join(ROOT, 'apps', 'union-eyes')
+const STATE = join(ROOT, '.ue-runtime')
+const args = process.argv.slice(2)
+const command = args.find((a) => !a.startsWith('--')) ?? 'all'
+const opt = (name, fallback) => {
+  const i = args.indexOf(`--${name}`)
+  return i >= 0 ? args[i + 1] : fallback
+}
+const PORT_DB = Number(opt('port-db', '55430'))
+const PORT_APP = Number(opt('port-app', '3002'))
+const FRESH = args.includes('--fresh')
+// A production build (next build + next start) is the reliable runtime: the dev server stalls under repeated acceptance runs.
+const PROD = args.includes('--prod')
+const REBUILD = args.includes('--rebuild')
+// --redis adds a real Redis container so rate limiting and the cache run against the real dependency (and can be stopped to test degradation).
+const REDIS = args.includes('--redis')
+const PORT_REDIS = Number(opt('port-redis', '56379'))
+const REDIS_CONTAINER = 'ue-runtime-redis'
+const CONTAINER = 'ue-runtime-pg'
+const APP_DB = 'ue_runtime'
+const POSTGRES_VERSION = opt('postgres-version', '16')
+if (!['15', '16'].includes(POSTGRES_VERSION)) throw new Error('Only PostgreSQL 15 and 16 are supported for disposable QA fixtures')
+const PLATFORM_DB = 'ue_platform_sandbox'
+const isWin = process.platform === 'win32'
+// Only the Windows .cmd shims (pnpm, npx) need a shell; with a shell, arguments that contain spaces are split apart.
+const useShell = (cmd) => isWin && /^(pnpm|npx)$/.test(cmd)
+
+/** Disposable credentials, generated on first use and kept (git-ignored) with the runtime state; nothing is committed. */
+function secrets() {
+  mkdirSync(STATE, { recursive: true })
+  const file = join(STATE, 'secrets.json')
+  if (!existsSync(file)) {
+    const token = () => randomBytes(24).toString('hex')
+    writeFileSync(file, JSON.stringify({ db: token(), auth: token(), voting: token(), nar: token() }), { mode: 0o600 })
+  }
+  return JSON.parse(readFileSync(file, 'utf8'))
+}
+
+/** Opaque per-worktree owner key. Only containers with this exact label may be reused or removed. */
+function runtimeOwnerToken() {
+  mkdirSync(STATE, { recursive: true })
+  const file = join(STATE, 'runtime-owner.txt')
+  if (!existsSync(file)) writeFileSync(file, randomBytes(16).toString('hex'), { mode: 0o600, flag: 'wx' })
+  const token = readFileSync(file, 'utf8').trim()
+  if (!/^[a-f0-9]{32}$/.test(token)) throw new Error('Malformed disposable runtime owner token')
+  return token
+}
+
+function isOwnedContainer(name) {
+  const result = spawnSync('docker', ['inspect', '--format', '{{json .Config.Labels}}', name], {
+    cwd: ROOT, encoding: 'utf8',
+  })
+  if (result.status !== 0) {
+    if (/No such object|No such container/i.test(result.stderr ?? '')) return false
+    throw new Error(`Unable to inspect Docker ownership for ${name}`)
+  }
+  let labels
+  try { labels = JSON.parse(result.stdout) } catch {
+    throw new Error(`Unparseable Docker labels for ${name}`)
+  }
+  if (!hasOwnedContainerLabels(labels, runtimeOwnerToken())) {
+    throw new Error(`Refusing to reuse/remove unowned Docker container ${name}`)
+  }
+  return true
+}
+
+function checkLoopbackPort(name, port, containerPort) {
+  const actual = out('docker', ['port', name, `${containerPort}/tcp`])
+  if (actual !== `127.0.0.1:${port}`) {
+    throw new Error(`Refusing non-loopback or mismatched Docker binding for ${name}`)
+  }
+}
+
+function dbUrl(db) {
+  const url = new URL('postgresql://127.0.0.1') // gitleaks:allow (credentials are generated at runtime, never committed)
+  url.username = 'postgres'
+  url.password = secrets().db
+  url.port = String(PORT_DB)
+  url.pathname = `/${db}`
+  return url.toString()
+}
+
+export function runtimeEnv() {
+  return {
+    DATABASE_URL: dbUrl(APP_DB),
+    SYSTEM_DATABASE_URL: dbUrl(APP_DB),
+    PLATFORM_DATABASE_URL: dbUrl(PLATFORM_DB),
+    AUTH_SECRET: secrets().auth,
+    VOTING_SECRET: secrets().voting,
+    QA_TEST_ENV: 'true',
+    NODE_ENV: PROD ? 'production' : 'development',
+    PLAYWRIGHT_TEST_AUTH: 'true',
+    UE_ENVIRONMENT: 'local',
+    UE_CANONICAL_BOOTSTRAP_V2: '0',
+    UE_E2E_RISK_BYPASS: 'true',
+    NODE_OPTIONS: '--max-old-space-size=8192',
+    NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${PORT_APP}`,
+    PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
+    ...(REDIS ? { REDIS_URL: `redis://127.0.0.1:${PORT_REDIS}` } : {}),
+    UE_RUNTIME_REDIS_CONTAINER: REDIS ? REDIS_CONTAINER : '',
+    NAR_SIGNING_SECRET: secrets().nar,
+    NAR_SIGNING_KEY_ID: 'local-acceptance',
+    NAR_STORAGE_MODE: 'local_sandbox',
+    NAR_LOCAL_SANDBOX_DIR: join(STATE, 'nar-sandbox'),
+  }
+}
+
+function run(cmd, cmdArgs, options = {}) {
+  const result = spawnSync(cmd, cmdArgs, { stdio: 'inherit', shell: useShell(cmd), cwd: ROOT, ...options, env: { ...process.env, ...options.env } })
+  // Never print command arguments on failure: Docker arguments can contain generated database credentials.
+  if (result.status !== 0) throw new Error(`${cmd} exited with ${result.status ?? 'unknown'} (arguments withheld)`)
+}
+const out = (cmd, cmdArgs, options = {}) => spawnSync(cmd, cmdArgs, { encoding: 'utf8', shell: useShell(cmd), cwd: ROOT, ...options }).stdout?.trim() ?? ''
+const psql = (db, sql) => run('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1', '-c', sql])
+const psqlFile = (db, file) => {
+  const sql = readFileSync(file, 'utf8').replaceAll('--> statement-breakpoint', '')
+  const result = spawnSync('docker', ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], { input: sql, encoding: 'utf8' })
+  if (result.status !== 0) throw new Error(`psql ${file}: ${result.stderr}`)
+}
+
+async function healthy(timeoutMs) {
+  const until = Date.now() + timeoutMs
+  while (Date.now() < until) {
+    try {
+      const response = await fetch(`http://127.0.0.1:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(120_000) })
+      const body = await response.json().catch(() => ({}))
+      if (response.ok && body.ok === true) return body
+    } catch {
+      /* not up yet */
+    }
+    await new Promise((r) => setTimeout(r, 3_000))
+  }
+  throw new Error('the application did not report healthy in time')
+}
+
+async function up() {
+  mkdirSync(STATE, { recursive: true })
+  const owner = runtimeOwnerToken()
+  const labels = ['--label', `nzila.mission=${UE_DISPOSABLE_MISSION}`, '--label', `nzila.qualification-owner=${owner}`]
+  const redisExists = isOwnedContainer(REDIS_CONTAINER)
+  const pgExists = isOwnedContainer(CONTAINER)
+  if (REDIS) {
+    const redisRunning = out('docker', ['ps', '--filter', `name=^/${REDIS_CONTAINER}$`, '--format', '{{.Names}}'])
+    if (!redisRunning) {
+      if (redisExists) run('docker', ['rm', '-f', REDIS_CONTAINER])
+      run('docker', ['run', '-d', '--name', REDIS_CONTAINER, ...labels, '-p', `127.0.0.1:${PORT_REDIS}:6379`, 'redis:7-alpine'])
+    }
+    checkLoopbackPort(REDIS_CONTAINER, PORT_REDIS, 6379)
+  }
+  const running = out('docker', ['ps', '--filter', `name=^/${CONTAINER}$`, '--format', '{{.Names}}'])
+  if (!running) {
+    if (pgExists) run('docker', ['rm', '-f', CONTAINER])
+    run('docker', ['run', '-d', '--name', CONTAINER, ...labels, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `127.0.0.1:${PORT_DB}:5432`, `postgres:${POSTGRES_VERSION}`])
+    for (let i = 0; i < 60; i++) {
+      if (/accepting connections/.test(out('docker', ['exec', CONTAINER, 'pg_isready', '-U', 'postgres']))) break
+      await new Promise((r) => setTimeout(r, 2_000))
+    }
+    await new Promise((r) => setTimeout(r, 4_000))
+  }
+  checkLoopbackPort(CONTAINER, PORT_DB, 5432)
+  const actualImage = out('docker', ['inspect', '--format', '{{.Config.Image}}', CONTAINER])
+  if (actualImage !== `postgres:${POSTGRES_VERSION}`) {
+    throw new Error('Refusing PostgreSQL QA container with wrong major version')
+  }
+  const exists = (db) => out('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-tAc', `SELECT 1 FROM pg_database WHERE datname='${db}'`]) === '1'
+  const seeded = exists(APP_DB)
+  if (seeded && FRESH) {
+    for (const db of [APP_DB, PLATFORM_DB]) psql('postgres', `DROP DATABASE IF EXISTS ${db} WITH (FORCE)`)
+  }
+  if (!exists(APP_DB)) {
+    psql('postgres', `CREATE DATABASE ${APP_DB}`)
+    // Django migrates first, as in production; then the approved Drizzle bootstrap; then the deterministic QA fixtures.
+    run('python', ['manage.py', 'migrate', '--noinput'], {
+      cwd: join(APP, 'backend'),
+      env: { PGHOST: '127.0.0.1', PGPORT: String(PORT_DB), PGUSER: 'postgres', PGPASSWORD: secrets().db, PGDATABASE: APP_DB },
+    })
+    run('node', ['tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'], { env: runtimeEnv() })
+    run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: runtimeEnv() })
+  }
+  if (!exists(PLATFORM_DB)) {
+    psql('postgres', `CREATE DATABASE ${PLATFORM_DB}`)
+    psqlFile(PLATFORM_DB, join(ROOT, 'migrations/platform/20260501_nar_audit_records.sql'))
+    psqlFile(PLATFORM_DB, join(ROOT, 'migrations/platform/20260502_nar_phase3_hardening.sql'))
+    psqlFile(PLATFORM_DB, join(ROOT, 'tooling/sql/ue-runtime-sandbox-nar-relax.sql'))
+  }
+
+  // CI's native database gate needs migrations and seed but must never start Next.js.
+  if (command === 'db') return
+
+  const alive = await fetch(`http://127.0.0.1:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(5_000) }).then(() => true, () => false)
+  const startedAt = Date.now()
+  if (!alive) startApp()
+  // Cold start on a loaded workstation has exceeded 240 s on some runs (finding R-21); the wait is bounded and the elapsed time is reported, not hidden.
+  const body = await healthy(480_000)
+  console.log(`[ue-runtime] healthy after ${Math.round((Date.now() - startedAt) / 1000)} s: ${JSON.stringify(body.checks)}`)
+}
+
+function startApp() {
+  const filter = ['--filter', '@nzila/union-eyes']
+  if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID')))) run('pnpm', [...filter, 'exec', 'next', 'build'], { env: runtimeEnv() })
+  const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['dev']
+  const log = openSync(join(STATE, 'app.log'), 'a')
+  const child = spawn('pnpm', [...filter, ...serve], {
+    cwd: ROOT, env: { ...process.env, ...runtimeEnv() }, shell: useShell('pnpm'), detached: true, stdio: ['ignore', log, log],
+  })
+  child.unref()
+  writeFileSync(join(STATE, 'app.pid'), String(child.pid))
+}
+
+function stopApp() {
+  const pidFile = join(STATE, 'app.pid')
+  if (!existsSync(pidFile)) return
+  const pid = readFileSync(pidFile, 'utf8').trim()
+  if (isWin) spawnSync('taskkill', ['/PID', pid, '/T', '/F'], { stdio: 'ignore' })
+  else try { process.kill(-Number(pid)) } catch { /* already gone */ }
+}
+
+function test() {
+  // Separate machine-readable reports ensure later Playwright invocations never overwrite earlier proof.
+  // They stay under the ignored disposable state directory and must be selectively uploaded (no secrets.json).
+  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--grep-invert', 'persistence after a restart'], {
+    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
+  })
+}
+
+/** Re-applies the deterministic QA fixtures (idempotent) to a running database. */
+function seed() {
+  run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: runtimeEnv() })
+}
+
+/** Files a case, stops the application, starts it again, and proves the case, its audit proof and its boundaries survived. */
+async function restartCheck() {
+  // File, route, escalate and prepare everything the restart check then looks for, so it does not depend on an earlier run.
+  const caseStateFile = join(STATE, 'journey-a-state.json')
+  // Never accept a stale hand-off from an earlier QA run as evidence of this run's filing.
+  resetRestartCaseHandoff(caseStateFile)
+  const desktop = ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop']
+  run('npx', [...desktop, 'e2e/runtime/01', '-g', 'journey A'], {
+    cwd: APP,
+    env: {
+      ...runtimeEnv(),
+      // The filing test writes the restart hand-off only when artifacts are enabled.
+      // This is also an isolated Playwright output directory, never a production setting.
+      UE_RUNTIME_ARTIFACTS: join(STATE, 'playwright-restart-artifacts'),
+      UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-case.json'),
+    },
+  })
+  requireRestartCaseHandoff(caseStateFile)
+  run('npx', [...desktop, 'e2e/runtime/03', 'e2e/runtime/05'], {
+    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-mandates.json') },
+  })
+  stopApp()
+  await new Promise((r) => setTimeout(r, 5_000))
+  startApp()
+  await healthy(300_000)
+  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop', 'e2e/runtime/02'], {
+    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-persistence.json') },
+  })
+}
+
+function down() {
+  const pgOwned = isOwnedContainer(CONTAINER)
+  const redisOwned = isOwnedContainer(REDIS_CONTAINER)
+  stopApp()
+  if (pgOwned) run('docker', ['rm', '-f', CONTAINER])
+  if (redisOwned) run('docker', ['rm', '-f', REDIS_CONTAINER])
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (command === 'env') console.log(JSON.stringify(runtimeEnv(), null, 2))
+  else if (command === 'up' || command === 'db') await up()
+  else if (command === 'seed') seed()
+  else if (command === 'test') test()
+  else if (command === 'restart-check') await restartCheck()
+  else if (command === 'down') down()
+  else if (command === 'all') {
+    await up()
+    test()
+    await restartCheck()
+  } else {
+    console.error(`unknown command ${command}`)
+    process.exit(2)
+  }
+}

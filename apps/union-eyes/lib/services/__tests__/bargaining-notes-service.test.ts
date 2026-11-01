@@ -169,7 +169,7 @@ describe("bargaining-notes-service", () => {
       const mockFrom2 = vi.fn().mockReturnValue({ where: mockWhere2 });
       mocks.mockDb.select.mockReturnValue({ from: mockFrom2 });
 
-      const result = await getBargainingNotesByCBA("cba-1");
+      const result = await getBargainingNotesByCBA("cba-1", "org-1");
       expect(result).toEqual([{ id: "n1" }]);
     });
 
@@ -179,13 +179,13 @@ describe("bargaining-notes-service", () => {
       const mockFrom2 = vi.fn().mockReturnValue({ where: mockWhere2 });
       mocks.mockDb.select.mockReturnValue({ from: mockFrom2 });
 
-      const result = await getBargainingNotesByCBA("cba-1", "negotiation");
+      const result = await getBargainingNotesByCBA("cba-1", "org-1", "negotiation");
       expect(result).toEqual([]);
     });
 
     it("throws on DB error", async () => {
       mocks.mockDb.select.mockImplementation(() => { throw new Error("db"); });
-      await expect(getBargainingNotesByCBA("cba-1")).rejects.toThrow("Failed to fetch bargaining notes by CBA");
+      await expect(getBargainingNotesByCBA("cba-1", "org-1")).rejects.toThrow("Failed to fetch bargaining notes by CBA");
     });
   });
 

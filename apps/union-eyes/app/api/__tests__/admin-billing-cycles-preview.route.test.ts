@@ -5,11 +5,13 @@ const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
   hasMinRole: vi.fn(),
+  requireBillingCycleAuthority: vi.fn(),
   BillingCycleService: { calculatePeriodDates: vi.fn(), generateBillingCycle: vi.fn() },
   logger: { info: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser, hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/finance/billing-cycle-authority', () => ({ requireBillingCycleAuthority: m.requireBillingCycleAuthority }));
 vi.mock('@/lib/services/billing-cycle-service', () => ({ BillingCycleService: m.BillingCycleService }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/api/standardized-responses', () => ({
@@ -28,8 +30,9 @@ describe('admin/billing-cycles/preview route', () => {
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
     m.getCurrentUser.mockResolvedValue({ id: 'u1' });
     m.hasMinRole.mockResolvedValue(true);
+    m.requireBillingCycleAuthority.mockResolvedValue(undefined);
     m.BillingCycleService.calculatePeriodDates.mockReturnValue({ periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') });
-    m.BillingCycleService.generateBillingCycle.mockResolvedValue({ cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
+    m.BillingCycleService.generateBillingCycle.mockResolvedValue({ success: true, cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -38,7 +41,7 @@ describe('admin/billing-cycles/preview route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly' }),
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
     }));
 
     expect(response.status).toBe(401);
@@ -50,10 +53,23 @@ describe('admin/billing-cycles/preview route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly' }),
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
     }));
 
     expect(response.status).toBe(403);
+  });
+
+  it('refuses a target organization without a live financial mandate before touching member billing', async () => {
+    const { POST } = await loadRoute();
+    m.requireBillingCycleAuthority.mockRejectedValueOnce(new Error('DUTY_NOT_HELD'));
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
+    }));
+    expect(response.status).toBe(403);
+    expect(m.requireBillingCycleAuthority).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111', 'u1');
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
+    
   });
 
   it('returns preview result using calculated dates and dry run', async () => {
@@ -61,7 +77,7 @@ describe('admin/billing-cycles/preview route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly' }),
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
     }));
     const payload = await response.json();
 
@@ -76,9 +92,95 @@ describe('admin/billing-cycles/preview route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly' }),
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
     }));
 
     expect(response.status).toBe(500);
   });
+  it('returns 422 and explicit failure when a preview cannot calculate every member', async () => {
+    const { POST } = await loadRoute();
+    m.BillingCycleService.generateBillingCycle.mockResolvedValueOnce({
+      success: false, transactionsCreated: 0, totalAmount: 0,
+      members: { processed: 1, success: 0, failed: 1, skipped: 0 },
+      errors: [{ memberId: 'member-1', error: 'missing wage data' }],
+    });
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
+    }));
+    const payload = await response.json();
+    expect(response.status).toBe(422);
+    expect(payload).toMatchObject({ preview: true, success: false });
+    expect(payload.errors).toHaveLength(1);
+    expect(m.BillingCycleService.generateBillingCycle).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true }));
+  });
+
+  it.each([
+    [
+        "impossible calendar date",
+        {
+            "periodStart": "2026-02-30",
+            "periodEnd": "2026-03-01"
+        }
+    ],
+    [
+        "reversed period",
+        {
+            "periodStart": "2026-03-02",
+            "periodEnd": "2026-03-01"
+        }
+    ],
+    [
+        "partial period",
+        {
+            "periodStart": "2026-03-01"
+        }
+    ],
+    [
+        "ambiguous local timestamp",
+        {
+            "periodStart": "2026-03-01T00:00:00",
+            "periodEnd": "2026-03-31T00:00:00"
+        }
+    ],
+    [
+        "invalid timezone",
+        {
+            "periodStart": "2026-03-01T00:00:00+15:00",
+            "periodEnd": "2026-03-31"
+        }
+    ]
+])('rejects %s without generating a financial cycle', async (_label, period) => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly', ...period }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
+    
+  });
+
+  it('accepts a real leap day and preserves exact supplied period boundaries', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly', periodStart: '2028-02-29', periodEnd: '2028-03-01',  }),
+    }));
+    expect(response.status).toBe(200);
+    expect(m.BillingCycleService.generateBillingCycle).toHaveBeenCalledWith(expect.objectContaining({
+      periodStart: new Date('2028-02-29T00:00:00.000Z'),
+      periodEnd: new Date('2028-03-01T00:00:00.000Z'),
+    }));
+  });
+
+  it('returns validation failure for malformed JSON without billing', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: '{',
+    }));
+    expect(response.status).toBe(400);
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
+  });
+
 });

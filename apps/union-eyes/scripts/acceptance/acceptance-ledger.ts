@@ -109,6 +109,18 @@ export const CONTROLS: Control[] = [
     ],
   },
   {
+    controlId: 'MACHINE_CREDENTIAL',
+    source: ['lib/api/with-api.ts', 'app/api/scim', 'lib/scim/scim-token.ts'],
+    authority:
+      'The route declares its credential verifier (withApi auth.machine): a per-organization bearer token, stored only as its SHA-256, bound to one organization and one configuration; no human actor and no session',
+    callerClass: 'Identity-provider provisioning (SCIM)',
+    runtimeEvidence: [
+      'lib/api/__tests__/with-api-machine.test.ts',
+      'app/api/__tests__/scim-users.route.test.ts',
+      'db/__tests__/scim-provisioning.postgres.test.ts',
+    ],
+  },
+  {
     controlId: 'WEBHOOK_SIGNATURE',
     source: [
       'lib/webhook-security.ts',
@@ -175,6 +187,14 @@ const EXCEPTION_CLASSES = [
     proof: [
       'app/api/__tests__/cron-sla-watchdog.route.test.ts',
       'app/api/__tests__/rewards-cron.route.test.ts',
+    ],
+  },
+  {
+    id: 'E11_MACHINE_CREDENTIAL',
+    test: (c: Caller) => c.boundControl === 'MACHINE_CREDENTIAL',
+    proof: [
+      'lib/api/__tests__/with-api-machine.test.ts',
+      'db/__tests__/scim-provisioning.postgres.test.ts',
     ],
   },
   {

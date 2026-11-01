@@ -9,6 +9,7 @@ const m = vi.hoisted(() => {
     lastTx: undefined as any,
     configs: {} as Record<string, any>,
     withRLSContext: vi.fn(),
+    requireLiveFinancialMandate: vi.fn(),
     persistAtomicAudit: vi.fn(),
     createEvidencePack: vi.fn(),
     sha256: vi.fn(),
@@ -57,6 +58,7 @@ vi.mock('@/lib/api/framework', async () => {
 vi.mock('@/lib/api/errors', () => ({ ApiError: m.ApiError }));
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: m.requireLiveFinancialMandate }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('../employer-execution/_lib', () => ({
   createEvidencePack: m.createEvidencePack,
@@ -100,6 +102,7 @@ describe('employer-execution/remittance-runs route', () => {
     m.locks = [];
     m.inserts = [];
     m.lastTx = undefined;
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
     m.sha256.mockReturnValue('hash_1');
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.createEvidencePack.mockReturnValue({
@@ -135,7 +138,7 @@ describe('employer-execution/remittance-runs route', () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([{ id: 'rr_1', runCode: 'rr-1' }]);
 
-    const result = await GET({ organizationId: 'org_1' } as any);
+    const result = await GET({ organizationId: 'org_1', userId: 'u1' } as any);
     expect(result.data).toHaveLength(1);
   });
 
@@ -203,7 +206,7 @@ describe('employer-execution/remittance-runs route', () => {
     const result = await POST(postCtx('executor_1'));
 
     expect(result.data.remittanceRun.id).toBe('rr_1');
-    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1', userId: 'executor_1' }, expect.any(Function));
     expect(m.locks).toEqual(['update']);
     expect(m.createEvidencePack).toHaveBeenCalled();
 

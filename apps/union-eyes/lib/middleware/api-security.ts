@@ -500,6 +500,7 @@ export interface ApiAuditEvent {
     | 'validation_failed'
     | 'sql_injection_attempt'
     | 'unauthorized_access'
+    | 'failure'
     | 'success';
   details?: Record<string, unknown>;
   severity: 'low' | 'medium' | 'high' | 'critical';

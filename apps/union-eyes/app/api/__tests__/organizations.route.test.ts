@@ -15,7 +15,10 @@ const m = vi.hoisted(() => ({
 const mockDb: any = {
   select: vi.fn(() => ({
     from: vi.fn(() => ({
-      where: vi.fn(async () => (m.rowsQueue.shift() ?? []) as unknown[]),
+      where: vi.fn(() => {
+        const rows = (m.rowsQueue.shift() ?? []) as unknown[];
+        return Object.assign(Promise.resolve(rows), { orderBy: () => ({ limit: async () => rows }) });
+      }),
     })),
   })),
   execute: vi.fn(async () => (m.executeQueue.shift() ?? []) as unknown[]),
@@ -28,6 +31,14 @@ const mockDb: any = {
 
 vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+// The list is scoped by the shared read authority, whose SQL behaviour is proven in organizations-read-authority.pglite.test.ts;
+// here the caller is a platform administrator so this suite keeps testing the route's mapping and creation rules.
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
+  readableOrganizationIds: () => null,
+  canAdministerOrganization: () => true,
+  UUID_PATTERN: /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+}));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status', hierarchyPath: 'hierarchyPath', hierarchyLevel: 'hierarchyLevel' } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext, withSystemContext: m.withSystemContext }));
@@ -60,7 +71,7 @@ describe('organizations route', () => {
     m.audit.mockResolvedValue(undefined);
     m.requireSystemAdmin.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
-    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
+    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn(mockDb));
   });
 
   it('GET returns 401 when unauthenticated', async () => {
@@ -117,6 +128,54 @@ describe('organizations route', () => {
     const json = await response.json();
     expect(json.data.id).toBe('org_1');
     expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'organization.create', userId: 'u1', organizationId: 'org_1' }));
+  });
+
+  it('POST uses the same system transaction for parent lookup, creation and audit', async () => {
+    const { POST } = await loadRoute();
+    m.rowsQueue.push([{ hierarchyPath: ['root-id'], hierarchyLevel: 1 }]);
+
+    // A distinct transaction handle makes an accidental use of the shared
+    // connection observable. A mock that passes the same object would miss
+    // a parent-read/insert escaping the audit transaction.
+    const tx = {
+      select: vi.fn((...args: unknown[]) => mockDb.select(...args)),
+      insert: vi.fn((...args: unknown[]) => mockDb.insert(...args)),
+    };
+    m.withSystemContext.mockImplementationOnce(async (work: (handle: typeof tx) => Promise<unknown>) => work(tx));
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Child', slug: 'child', type: 'local', parent_id: 'parent-id' }),
+    }));
+
+    expect(response.status).toBe(201);
+    expect(tx.select).toHaveBeenCalledTimes(1);
+    expect(tx.insert).toHaveBeenCalledTimes(1);
+    expect(m.audit).toHaveBeenCalledWith(tx, expect.objectContaining({
+      action: 'organization.create', organizationId: 'org_1',
+    }));
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
+    expect(mockDb.insert).toHaveBeenCalledTimes(1);
+  });
+
+  it('POST rolls back rather than acknowledging creation when the atomic audit fails', async () => {
+    const { POST } = await loadRoute();
+    m.audit.mockRejectedValueOnce(new Error('audit persistence refused'));
+    const tx = {
+      select: vi.fn((...args: unknown[]) => mockDb.select(...args)),
+      insert: vi.fn((...args: unknown[]) => mockDb.insert(...args)),
+    };
+    m.withSystemContext.mockImplementationOnce(async (work: (handle: typeof tx) => Promise<unknown>) => {
+      // The production helper owns the rollback. The test verifies the route
+      // propagates the failure rather than returning a false HTTP 201.
+      return work(tx);
+    });
+    await expect(POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Child', slug: 'child', type: 'local' }),
+    }))).rejects.toThrow('audit persistence refused');
+    expect(tx.insert).toHaveBeenCalledTimes(1);
+    expect(m.audit).toHaveBeenCalledTimes(1);
   });
 
   it('POST returns 400 for an invalid organization type', async () => {

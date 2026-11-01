@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
+  canReadOrganization: vi.fn(),
   selectQueue: [] as unknown[][],
 }));
 
@@ -22,6 +23,11 @@ const mockDb = {
 };
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: () => Promise<unknown>) => fn() }));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: false, direct: new Map(), descendants: new Set() }),
+  canReadOrganization: m.canReadOrganization,
+}));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -41,6 +47,7 @@ describe('organizations/[id]/path route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
+    m.canReadOrganization.mockReturnValue(true);
   });
 
   it('GET returns 401 when unauthenticated', async () => {
@@ -55,7 +62,7 @@ describe('organizations/[id]/path route', () => {
     expect(response.status).toBe(401);
   });
 
-  it('GET returns empty data when organization is not found', async () => {
+  it('GET returns 404 when organization is not found', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([]);
 
@@ -64,9 +71,19 @@ describe('organizations/[id]/path route', () => {
       { params: Promise.resolve({ id: 'org_1' }) },
     );
 
-    expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.data).toEqual([]);
+    expect(response.status).toBe(404);
+  });
+
+  it('GET rejects a foreign organization before querying its ancestors', async () => {
+    const { GET } = await loadRoute();
+    m.canReadOrganization.mockReturnValue(false);
+    m.selectQueue.push([{ id: 'org_1', slug: 'org-1', hierarchyPath: ['foreign-parent'] }]);
+
+    const response = await GET(new NextRequest('http://localhost/api/organizations/org_1/path'), {
+      params: Promise.resolve({ id: 'org_1' }),
+    });
+    expect(response.status).toBe(404);
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
   });
 
   it('GET returns path containing only org when hierarchyPath is empty', async () => {

@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   withClaimedWorkbookAccess: vi.fn(),
   auditClaimedWorkbookWrite: vi.fn(),
+  auditWorkbookRead: vi.fn(),
   runStewardshipCartography: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -15,7 +16,11 @@ const mockDb = {
     const chain = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
-      orderBy: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
+      orderBy: vi.fn(() => chain),
+      // Row lock on the parent workbook and the bounded holder-count read used by the serialized POST.
+      for: vi.fn(async () => [{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]),
+      // The cartography read is ordered then bounded; the POST holder-count read is bounded only. Both consume the queue.
+      limit: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
     };
     return chain;
   }),
@@ -32,11 +37,14 @@ vi.mock('@/lib/workbook/access-control', () => ({
 }));
 vi.mock('@/lib/workbook/claimed-write-audit', () => ({
   auditClaimedWorkbookWrite: m.auditClaimedWorkbookWrite,
+  auditWorkbookRead: m.auditWorkbookRead,
 }));
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+// The bearer-capability limiter is a separate unit; this test exercises the route's own access and audit boundary.
+vi.mock('@/lib/public-intake/guard', () => ({ guardPublicIntake: vi.fn(async (req: Request, opts: { readBody?: boolean }) => ({ ok: true, json: opts.readBody === false ? undefined : await req.json() })) }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn() }));
 
 async function loadRoute() {
@@ -73,6 +81,7 @@ describe('workbook/[id]/memory-holders route', () => {
     m.selectQueue = [];
     m.runStewardshipCartography.mockReturnValue({ score: 0 });
     m.auditClaimedWorkbookWrite.mockResolvedValue(undefined);
+    m.auditWorkbookRead.mockResolvedValue(undefined);
     allowAccess();
   });
 
@@ -126,7 +135,7 @@ describe('workbook/[id]/memory-holders route', () => {
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'read' },
+      { workbookId: 'w1', operation: 'read', capability: null },
       expect.any(Function),
     );
   });
@@ -154,7 +163,7 @@ describe('workbook/[id]/memory-holders route', () => {
 
     expect(response.status).toBe(201);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write' },
+      { workbookId: 'w1', operation: 'write', capability: null },
       expect.any(Function),
     );
   });

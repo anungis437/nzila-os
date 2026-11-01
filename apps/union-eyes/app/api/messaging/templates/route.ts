@@ -2,6 +2,7 @@
  * CRUD collection route for messageTemplates
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
+import { sql } from 'drizzle-orm';
 import { messageTemplates } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
@@ -11,6 +12,8 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Communications"],
   orgScoped: true,
+  // An archived row is not listed.
+  readCondition: sql`${messageTemplates.isActive} IS NOT FALSE`,
   readRole: 'member',
   writeRole: 'steward',
 });

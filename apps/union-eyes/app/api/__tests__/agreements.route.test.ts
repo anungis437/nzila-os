@@ -32,6 +32,12 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   return { ...actual, eq: vi.fn(() => 'eq'), ilike: vi.fn(() => 'ilike'), and: vi.fn((...a: unknown[]) => a), or: vi.fn((...a: unknown[]) => a), sql: vi.fn(() => ({ mapWith: vi.fn() })) };
 });
 
+// A creatable agreement: the route now validates the body, so a test body must be one.
+const valid = (extra: Record<string, unknown> = {}) => ({
+  cbaNumber: 'C-1', title: 'New CBA', jurisdiction: 'ontario', employerName: 'Acme', unionName: 'Local 7',
+  effectiveDate: '2026-01-01', expiryDate: '2028-12-31', industrySector: 'manufacturing', ...extra,
+});
+
 async function loadRoute() {
   return import('../agreements/route');
 }
@@ -86,7 +92,7 @@ describe('agreements route', () => {
     const result = await POST({
       request: new Request('http://localhost/api/agreements', {
         method: 'POST',
-        body: JSON.stringify({ title: 'New CBA', organizationId: 'org_from_body' }),
+        body: JSON.stringify(valid({ organizationId: 'org_from_body' })),
       }),
       organizationId: 'org_1',
       userId: 'u1',
@@ -112,7 +118,7 @@ describe('agreements route', () => {
     await POST({
       request: new Request('http://localhost/api/agreements', {
         method: 'POST',
-        body: JSON.stringify({ title: 'New CBA', isPublic: true }),
+        body: JSON.stringify(valid({ isPublic: true })),
       }),
       organizationId: 'org_1',
       userId: 'u1',
@@ -130,7 +136,7 @@ describe('agreements route', () => {
     const { POST } = await loadRoute();
     await expect(
       POST({
-        request: new Request('http://localhost/api/agreements', { method: 'POST', body: JSON.stringify({ title: 'x' }) }),
+        request: new Request('http://localhost/api/agreements', { method: 'POST', body: JSON.stringify(valid({ title: 'x' })) }),
         organizationId: 'org_1',
         userId: 'u1',
       }),
@@ -141,12 +147,38 @@ describe('agreements route', () => {
     const { POST } = await loadRoute();
     await expect(
       POST({
-        request: new Request('http://localhost/api/agreements', { method: 'POST', body: JSON.stringify({ status: 'approved' }) }),
+        request: new Request('http://localhost/api/agreements', { method: 'POST', body: JSON.stringify(valid({ status: 'approved' })) }),
         organizationId: 'org_1',
         userId: 'u1',
       }),
     ).rejects.toMatchObject({ status: 400 });
     expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['an empty body', {}],
+    ['an expiry before the effective date', { expiryDate: '2025-01-01' }],
+    ['an unknown jurisdiction', { jurisdiction: 'mars' }],
+    ['a non-https document address', { documentUrl: 'javascript:alert(1)' }],
+    ['an unbounded title', { title: 'x'.repeat(501) }],
+    ['a string coverage', { employeeCoverage: 'many' }],
+  ])('refuses %s and writes nothing (DEF-0B2-AGREEMENTS-BODY-UNVALIDATED)', async (_name, patch) => {
+    const { POST } = await loadRoute();
+    await expect(
+      POST({
+        request: new Request('http://localhost/api/agreements', { method: 'POST', body: JSON.stringify(_name === 'an empty body' ? {} : valid(patch)) }),
+        organizationId: 'org_1',
+        userId: 'u1',
+      }),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
+  it('refuses a body that is not JSON', async () => {
+    const { POST } = await loadRoute();
+    await expect(
+      POST({ request: new Request('http://localhost/api/agreements', { method: 'POST', body: '{not json' }), organizationId: 'org_1', userId: 'u1' }),
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it('rejects create when organization context is missing', async () => {
@@ -155,7 +187,7 @@ describe('agreements route', () => {
       POST({
         request: new Request('http://localhost/api/agreements', {
           method: 'POST',
-          body: JSON.stringify({ title: 'New CBA', organizationId: 'org_from_body' }),
+          body: JSON.stringify(valid({ organizationId: 'org_from_body' })),
         }),
         userId: 'u1',
       }),

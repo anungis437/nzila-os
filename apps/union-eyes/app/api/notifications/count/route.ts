@@ -20,7 +20,8 @@ export const GET = withApi(
     },
   },
   async ({ userId, organizationId }) => {
-    try {
+    // A failed read is a failure, not a count of zero: the top bar must be able to tell an empty inbox from a broken one.
+    {
       const now = new Date();
       const [result] = await db
         .select({ count: count() })
@@ -35,8 +36,6 @@ export const GET = withApi(
         );
 
       return { count: result?.count ?? 0 };
-    } catch {
-      return { count: 0 };
     }
   },
 );

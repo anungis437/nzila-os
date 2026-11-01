@@ -9,7 +9,7 @@
  */
 
 import { db } from '@/db/db';
-import { satisfactionSurveys } from '@/db/schema';
+import { satisfactionSurveys, satisfactionSurveyResponded } from '@/db/schema';
 import { eq, and, avg, count, desc, sql, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -44,6 +44,22 @@ export interface LroPerformance {
   avgOutcome: number;
   overallAverage: number;
   recommendRate: number;
+  /** True when too few responses were completed to show a figure without identifying the people who gave them. */
+  suppressed?: boolean;
+}
+
+/**
+ * Fewest completed responses for which an average is returned. A figure over one or two responses is that response, and a steward
+ * who knows which claim the representative handled can name the member, whatever the form said about anonymity.
+ */
+export const MIN_RESPONSES_FOR_AVERAGES = 5;
+
+/** The member already answered this survey (anonymously); it is not created again. */
+export class SurveyAlreadyAnsweredError extends Error {
+  constructor() {
+    super('This member has already answered the survey for this claim');
+    this.name = 'SurveyAlreadyAnsweredError';
+  }
 }
 
 // ============================================================================
@@ -56,7 +72,7 @@ export interface LroPerformance {
  * the claim-closure workflow passes none and is recorded as the system.
  */
 export async function createSatisfactionSurvey(
-  data: Pick<NewSatisfactionSurvey, 'organizationId' | 'claimId' | 'memberId' | 'lroId'>,
+  data: Pick<NewSatisfactionSurvey, 'organizationId' | 'lroId'> & { claimId: string; memberId: string },
   actorUserId?: string
 ): Promise<SatisfactionSurvey> {
   try {
@@ -73,6 +89,17 @@ export async function createSatisfactionSurvey(
       if (existing) {
         logger.info('Satisfaction survey already exists', { claimId: data.claimId });
         return existing;
+      }
+
+      // An anonymous response is held without its member and claim, so the survey row no longer shows that this member answered; the
+      // responded record does, and a member who has answered is not sent the survey again.
+      const [answered] = await tx
+        .select({ id: satisfactionSurveyResponded.id })
+        .from(satisfactionSurveyResponded)
+        .where(and(eq(satisfactionSurveyResponded.claimId, data.claimId), eq(satisfactionSurveyResponded.memberId, data.memberId)))
+        .limit(1);
+      if (answered) {
+        throw new SurveyAlreadyAnsweredError();
       }
 
       const [survey] = await tx
@@ -97,6 +124,7 @@ export async function createSatisfactionSurvey(
       return survey;
     });
   } catch (error) {
+    if (error instanceof SurveyAlreadyAnsweredError) throw error;
     logger.error('Error creating satisfaction survey', { error, data });
     throw new Error('Failed to create satisfaction survey');
   }
@@ -133,13 +161,14 @@ export async function getOwnSatisfactionSurvey(
 /**
  * Get pending surveys for a member
  */
-export async function getPendingSurveys(memberId: string): Promise<SatisfactionSurvey[]> {
+export async function getPendingSurveys(memberId: string, organizationId: string): Promise<SatisfactionSurvey[]> {
   return db
     .select()
     .from(satisfactionSurveys)
     .where(
       and(
         eq(satisfactionSurveys.memberId, memberId),
+        eq(satisfactionSurveys.organizationId, organizationId),
         eq(satisfactionSurveys.status, 'pending')
       )
     )
@@ -322,6 +351,23 @@ export async function getLroPerformance(
 
     const n = (v: string | null) => parseFloat(v ?? '0');
 
+    if (metrics.totalSurveys < MIN_RESPONSES_FOR_AVERAGES) {
+      return {
+        lroId,
+        totalSurveys: metrics.totalSurveys,
+        completedSurveys: metrics.totalSurveys,
+        avgCommunication: 0,
+        avgResponsiveness: 0,
+        avgKnowledge: 0,
+        avgAdvocacy: 0,
+        avgProfessionalism: 0,
+        avgOutcome: 0,
+        overallAverage: 0,
+        recommendRate: 0,
+        suppressed: true,
+      };
+    }
+
     const avgValues = [
       n(metrics.avgCommunication),
       n(metrics.avgResponsiveness),
@@ -375,7 +421,8 @@ export async function getOrganizationLroRankings(
     );
 
     // Sort by overall average descending
-    performances.sort((a, b) => b.overallAverage - a.overallAverage);
+    // A representative with too few responses is listed without a figure, after the ranked ones.
+    performances.sort((a, b) => Number(a.suppressed ?? false) - Number(b.suppressed ?? false) || b.overallAverage - a.overallAverage);
 
     return performances;
   } catch (error) {

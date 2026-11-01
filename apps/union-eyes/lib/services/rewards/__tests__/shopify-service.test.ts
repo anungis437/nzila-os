@@ -175,11 +175,12 @@ describe('shopify-service', () => {
           json: vi.fn().mockResolvedValue({ discount_code: { id: 'dc-1' } }),
         });
 
-      const result = await createDiscountCode('abc-123-def', 50);
+      const result = await createDiscountCode('0f8fad5b-d9cb-469f-a165-70867728950e', 50);
 
       expect(result.amount).toBe(50);
       expect(result.currency).toBe('CAD');
-      expect(result.code).toContain('UE');
+      // lossless: the webhook parses the redemption id straight back out of this code
+      expect(result.code).toBe('UE0F8FAD5BD9CB469FA16570867728950E');
       expect(mocks.mockFetch).toHaveBeenCalledTimes(2);
     });
 
@@ -203,7 +204,7 @@ describe('shopify-service', () => {
           json: vi.fn().mockResolvedValue({ discount_code: { id: 'dc-1' } }),
         });
 
-      const result = await createDiscountCode('abc', 25, 'USD');
+      const result = await createDiscountCode('0f8fad5b-d9cb-469f-a165-70867728950e', 25, 'USD');
 
       expect(result.currency).toBe('USD');
     });

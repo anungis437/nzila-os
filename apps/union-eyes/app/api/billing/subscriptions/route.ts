@@ -4,9 +4,12 @@
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
-import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { rowsVisibleToGrant } from '@/lib/finance/principal-financial-authority';
+import { listPage } from '@/lib/api/list-page';
 import { orgSubscriptions } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 import { pauseSubscription, resumeSubscription } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
@@ -14,32 +17,41 @@ export const dynamic = 'force-dynamic';
 const actionSchema = z.object({
   subscriptionId: z.guid(),
   action: z.enum(['pause', 'resume']),
-  reason: z.string().optional(),
+  reason: z.string().trim().max(500).optional(),
 });
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { minRole: 'officer' },
     entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Billing'],
       summary: 'List organization subscriptions',
     },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const subscriptions = await db
-      .select()
-      .from(orgSubscriptions)
-      .where(eq(orgSubscriptions.organizationId, organizationId))
-      .orderBy(desc(orgSubscriptions.createdAt));
-    return { subscriptions };
+  async ({ organizationId, userId, request }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const page = listPage(request);
+    // A role and entitlement are not financial authority. The caller sees only
+    // subscriptions named by their live view mandate, or the organization ledger.
+    const subscriptions = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view' });
+      return tx
+        .select()
+        .from(orgSubscriptions)
+        .where(rowsVisibleToGrant(grant, organizationId, orgSubscriptions.organizationId, orgSubscriptions.id))
+        .orderBy(desc(orgSubscriptions.createdAt))
+        .limit(page.limit)
+        .offset(page.offset);
+    });
+    return { subscriptions, page };
   },
 );
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    // Pausing or resuming billing requires administrator role AND a live execute mandate.
+    auth: { minRole: 'admin' },
     entitlement: 'financial_intelligence_suite',
     body: actionSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
@@ -49,7 +61,9 @@ export const POST = withApi(
     },
   },
   async ({ body, userId, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    // The service checks the live resource mandate inside the very transaction
+    // that changes status and writes the event and audit. No preflight gap.
     if (body.action === 'pause') {
       const result = await pauseSubscription(organizationId, body.subscriptionId, userId!, body.reason);
       return { ...result };

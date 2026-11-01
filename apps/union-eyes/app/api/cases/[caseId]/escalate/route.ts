@@ -90,6 +90,8 @@ const claimTypeToGrievanceType: Record<string, string> = {
   other: 'other',
 };
 
+class EscalationRefused extends Error {}
+
 const escalateSchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
   notes: z.string().max(2000).optional(),
@@ -195,7 +197,9 @@ export const POST = withApi(
     }
 
     // Create the grievance
-    const escalationResult = await withRLSContext(async (tx) => {
+    // A refused case transition must undo the grievance and its event, so the work throws to roll the transaction back.
+    const escalateInTransaction = async () => {
+    return withRLSContext(async (tx) => {
       const [g] = await tx
         .insert(grievances)
         .values({
@@ -233,10 +237,7 @@ export const POST = withApi(
       );
 
       if (!transitionResult.success) {
-        return {
-          success: false as const,
-          error: transitionResult.error ?? 'Escalation requires a valid FSM transition to resolved',
-        };
+        throw new EscalationRefused(transitionResult.error ?? 'Escalation requires a valid FSM transition to resolved');
       }
 
       // Store the link in the claim's metadata
@@ -270,12 +271,16 @@ export const POST = withApi(
 
       return { success: true as const, grievance: g };
     });
+    }
 
-    if (!escalationResult.success) {
-      return NextResponse.json(
-        { success: false, error: escalationResult.error },
-        { status: 422 },
-      );
+    let escalationResult: Awaited<ReturnType<typeof escalateInTransaction>>;
+    try {
+      escalationResult = await escalateInTransaction();
+    } catch (error) {
+      if (error instanceof EscalationRefused) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 422 });
+      }
+      throw error;
     }
 
     const grievance = escalationResult.grievance;

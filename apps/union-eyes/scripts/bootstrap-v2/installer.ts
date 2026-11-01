@@ -4,6 +4,10 @@ import { hash, quote, type V2Plan } from './source'
 import { compileSecurity } from './security'
 import { producerBytes, type ExecutionHook, type Producer } from './manifest-trace'
 import { compileAuthBootstrapSql } from './auth-sql'
+import { compileAuthorityMembershipReaderSql } from '../../lib/authority/store/platform-identity'
+import { compileMemberAccessProjectionSql } from '../../db/auth/member-access-projection'
+import { compileCaseAssigneePredicateSql } from '../../db/auth/case-assignee-predicate'
+import { compileConversationAssigneePredicateSql } from '../../db/auth/conversation-assignee-predicate'
 import { canonicalRoleSqlList } from './execution-roles'
 import { compileFrameworkSql } from './framework-sql'
 import {
@@ -169,9 +173,12 @@ export async function createCurrentState(
     if (options.profile !== 'PREPROVISIONED_NON_SUPERUSER') await client.query('RESET ROLE')
     await execute({
       canonicalId: 'CANONICAL_AUTH_EXECUTION',
-      sql: compileAuthBootstrapSql({
-        rolesPreprovisioned: options.profile === 'PREPROVISIONED_NON_SUPERUSER',
-      }),
+      // The kernel's membership reader is part of the auth-owned execution surface: under this topology the runtime role has no
+      // grant on the identity relations, so the kernel can only read membership through it.
+      sql: [
+        compileAuthBootstrapSql({ rolesPreprovisioned: options.profile === 'PREPROVISIONED_NON_SUPERUSER' }),
+        compileAuthorityMembershipReaderSql(),
+      ].join('\n'),
       source: plan.authExecution.compilerSource,
       sourceDigest: producerBytes(plan.authExecution.compilerSource),
     })
@@ -197,6 +204,21 @@ export async function createCurrentState(
       source: 'apps/union-eyes/scripts/bootstrap-v2/security.ts',
       sourceDigest: producerBytes('apps/union-eyes/scripts/bootstrap-v2/security.ts'),
     })
+  if (plan.authExecution) {
+    if (options.profile !== 'PREPROVISIONED_NON_SUPERUSER') await client.query('RESET ROLE')
+    await execute(
+      installerProducer(
+        'CANONICAL_AUTH_COMPANIONS',
+        // These need the canonical auth schema and FORCE RLS on organization_members, so they follow the security statements.
+        [
+          compileMemberAccessProjectionSql(),
+          compileCaseAssigneePredicateSql(),
+          compileConversationAssigneePredicateSql(),
+        ].join('\n'),
+      ),
+    )
+    await client.query('SET LOCAL ROLE ue_v2_owner')
+  }
   await execute(
     installerProducer(
       'BOOTSTRAP_RECEIPT',

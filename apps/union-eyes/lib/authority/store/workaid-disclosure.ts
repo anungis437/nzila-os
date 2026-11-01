@@ -23,6 +23,7 @@ import {
   MAX_PURPOSE_LENGTH,
   normaliseCategories,
   SHAREABLE_DOCUMENT_CLASSES,
+  WORKAID_CATEGORIES,
   type CounselManifest,
   type WorkAidCategory,
   type WorkAidRefusalCode,
@@ -120,6 +121,181 @@ export async function loadCurrentConsentText(exec: SqlExecutor, organizationId: 
     )
   ).rows[0]
   return r ? { id: String(r.id), version: String(r.version), body: String(r.body), bodySha256: String(r.body_sha256), effectiveAt: toDate(r.effective_at) } : null
+}
+
+const WORDING_VERSION = /^[A-Za-z0-9._-]{1,64}$/
+
+function assertWordingInput(version: string, body: string): { version: string; body: string } {
+  const trimmedVersion = typeof version === 'string' ? version.trim() : ''
+  const trimmedBody = typeof body === 'string' ? body.trim() : ''
+  if (!WORDING_VERSION.test(trimmedVersion) || trimmedBody.length === 0 || trimmedBody.length > 8000) {
+    throw new AuthorityStoreError('INVALID_CONTEXT', 'WORDING_INVALID: a version and the institution-supplied wording are required')
+  }
+  return { version: trimmedVersion, body: trimmedBody }
+}
+
+async function requireProposalStore(exec: SqlExecutor): Promise<void> {
+  const rel = (await exec.query<{ rel: string | null }>(`SELECT to_regclass('public.ue_authority_workaid_consent_text_proposals') AS rel`)).rows[0]?.rel
+  if (!rel) throw new AuthorityStoreError('PRECONDITION', 'STORE_UNAPPLIED: consent wording proposals are not installed')
+}
+
+function isProposalVersionTaken(error: unknown): boolean {
+  const code = typeof error === 'object' && error && 'code' in error ? String((error as { code?: string }).code) : ''
+  const message = error instanceof Error ? error.message : String(error)
+  return code === '23505' || message.includes('ue_authority_wa_proposal_open_uq')
+}
+
+export interface ConsentWordingProposalView {
+  id: string
+  version: string
+  body: string
+  bodySha256: string
+  ownProposal: boolean
+  proposedAt: Date
+}
+
+/**
+ * Records institution-supplied wording as a proposal. It is not current consent text.
+ * The body is the caller's text. This function does not author wording.
+ */
+export async function proposeConsentWording(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; proposerUserId: string; version: string; body: string },
+): Promise<string> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId)
+  requirePrincipals(i.proposerUserId)
+  await bindSessionActor(exec, i.proposerUserId, 'consent wording proposer')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.proposerUserId, 'propose')
+  const wording = assertWordingInput(i.version, i.body)
+  let id: string
+  try {
+    id = String(
+      (
+        await exec.query<Row>(
+          `INSERT INTO ue_authority_workaid_consent_text_proposals (organization_id, version, body, body_sha256, proposed_by)
+           VALUES ($1,$2,$3,encode(sha256(convert_to($3, 'UTF8')), 'hex'),$4) RETURNING id::text AS id`,
+          [i.organizationId, wording.version, wording.body, i.proposerUserId],
+        )
+      ).rows[0].id,
+    )
+  } catch (error) {
+    if (isProposalVersionTaken(error)) throw new AuthorityStoreError('PRECONDITION', 'WORDING_ALREADY_PROPOSED: an open proposal already uses this version')
+    throw error
+  }
+  await auditAuthorityMutation(exec, { organizationId: i.organizationId, action: 'workaid.consent_text_propose', resourceType: 'ue_authority_workaid_consent_text_proposals', resourceId: id, details: { version: wording.version } })
+  return id
+}
+
+/** Open proposals in this organization. The other executive's identity is not returned. */
+export async function listOpenConsentWordingProposals(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; reviewerUserId: string },
+): Promise<ConsentWordingProposalView[]> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId)
+  requirePrincipals(i.reviewerUserId)
+  await bindSessionActor(exec, i.reviewerUserId, 'consent wording reviewer')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.reviewerUserId, 'review')
+  const rows = (
+    await exec.query<Row>(
+      `SELECT id::text AS id, version, body, body_sha256, proposed_by, proposed_at
+         FROM ue_authority_workaid_consent_text_proposals
+        WHERE organization_id = $1 AND adopted_at IS NULL AND withdrawn_at IS NULL
+        ORDER BY proposed_at ASC, created_at ASC`,
+      [i.organizationId],
+    )
+  ).rows
+  return rows.map((r) => ({
+    id: String(r.id),
+    version: String(r.version),
+    body: String(r.body),
+    bodySha256: String(r.body_sha256),
+    ownProposal: String(r.proposed_by) === i.reviewerUserId,
+    proposedAt: toDate(r.proposed_at),
+  }))
+}
+
+/**
+ * Adopts a proposal by inserting the stored body as current consent wording.
+ * The adopter cannot change the text, and cannot be the proposer.
+ */
+export async function adoptConsentWording(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; adopterUserId: string; proposalId: string },
+): Promise<{ textId: string; version: string; bodySha256: string }> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId, i.proposalId)
+  requirePrincipals(i.adopterUserId)
+  await bindSessionActor(exec, i.adopterUserId, 'consent wording adopter')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.adopterUserId, 'adopt')
+  const row = (
+    await exec.query<Row>(
+      `SELECT version, body, body_sha256, proposed_by, adopted_at, withdrawn_at
+         FROM ue_authority_workaid_consent_text_proposals
+        WHERE organization_id = $1 AND id = $2`,
+      [i.organizationId, i.proposalId],
+    )
+  ).rows[0]
+  if (!row) throw new AuthorityStoreError('NOT_FOUND', 'no consent wording proposal with this id in this organization')
+  if (row.adopted_at || row.withdrawn_at) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  if (String(row.proposed_by) === i.adopterUserId) throw new AuthorityStoreError('DENIED', 'WORDING_ADOPTION_SEGREGATION: the proposer cannot adopt the wording')
+  const now = clock(deps)
+  const textId = await recordConsentText(exec, deps, {
+    organizationId: i.organizationId,
+    recorderUserId: i.adopterUserId,
+    version: String(row.version),
+    body: String(row.body),
+    effectiveAt: now,
+  })
+  const updated = await exec.query(
+    `UPDATE ue_authority_workaid_consent_text_proposals
+        SET adopted_by = $3, adopted_at = $4, adopted_text_id = $5
+      WHERE organization_id = $1 AND id = $2 AND adopted_at IS NULL AND withdrawn_at IS NULL
+      RETURNING id`,
+    [i.organizationId, i.proposalId, i.adopterUserId, now, textId],
+  )
+  if (updated.rows.length !== 1) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  await auditAuthorityMutation(exec, {
+    organizationId: i.organizationId,
+    action: 'workaid.consent_text_adopt',
+    resourceType: 'ue_authority_workaid_consent_text_proposals',
+    resourceId: i.proposalId,
+    details: { version: String(row.version), textId },
+  })
+  return { textId, version: String(row.version), bodySha256: String(row.body_sha256) }
+}
+
+/** The proposer withdraws an open proposal. It never becomes consent wording. */
+export async function withdrawConsentWordingProposal(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; proposerUserId: string; proposalId: string },
+): Promise<void> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId, i.proposalId)
+  requirePrincipals(i.proposerUserId)
+  await bindSessionActor(exec, i.proposerUserId, 'consent wording proposer')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.proposerUserId, 'withdraw')
+  const row = (
+    await exec.query<Row>(
+      `SELECT proposed_by, adopted_at, withdrawn_at FROM ue_authority_workaid_consent_text_proposals WHERE organization_id = $1 AND id = $2`,
+      [i.organizationId, i.proposalId],
+    )
+  ).rows[0]
+  if (!row) throw new AuthorityStoreError('NOT_FOUND', 'no consent wording proposal with this id in this organization')
+  if (row.adopted_at || row.withdrawn_at) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  if (String(row.proposed_by) !== i.proposerUserId) throw new AuthorityStoreError('DENIED', 'WORDING_WITHDRAWAL_NOT_PROPOSER: only the proposer may withdraw this wording')
+  const updated = await exec.query(
+    `UPDATE ue_authority_workaid_consent_text_proposals SET withdrawn_at = now(), withdrawn_by = $3
+      WHERE organization_id = $1 AND id = $2 AND adopted_at IS NULL AND withdrawn_at IS NULL RETURNING id`,
+    [i.organizationId, i.proposalId, i.proposerUserId],
+  )
+  if (updated.rows.length !== 1) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  await auditAuthorityMutation(exec, { organizationId: i.organizationId, action: 'workaid.consent_text_withdraw_proposal', resourceType: 'ue_authority_workaid_consent_text_proposals', resourceId: i.proposalId })
 }
 
 // ── Internal loaders ─────────────────────────────────────────────────────────
@@ -319,6 +495,170 @@ export async function listReferableWorkAidConsents(
   return out
 }
 
+export type ReferralScopeStatus = 'recorded' | 'unavailable' | 'conflict'
+
+export interface CaseWorkAidReferralView {
+  matterId: string
+  purpose: string
+  scopeStatus: ReferralScopeStatus
+  referredCategories: WorkAidCategory[]
+  releasedCategories: WorkAidCategory[]
+  expiresAt: Date
+  referredAt: Date
+  withdrawn: boolean
+  counselAccepted: boolean
+}
+
+function knownCategories(value: unknown): WorkAidCategory[] {
+  let tokens: string[] = []
+  if (Array.isArray(value)) tokens = value.map(String)
+  else if (typeof value === 'string' && value.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(value) as unknown
+      if (Array.isArray(parsed)) tokens = parsed.map(String)
+    } catch {
+      tokens = []
+    }
+  } else if (typeof value === 'string') {
+    try {
+      tokens = parsePgTextArray(value)
+    } catch {
+      tokens = []
+    }
+  }
+  return WORKAID_CATEGORIES.filter((category) => tokens.includes(category))
+}
+
+async function requireReferralScopeColumn(exec: SqlExecutor): Promise<void> {
+  const ok = (
+    await exec.query<{ ok: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1 FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'ue_authority_workaid_matters' AND column_name = 'referred_categories'
+       ) AS ok`,
+    )
+  ).rows[0]?.ok
+  if (!ok) throw new AuthorityStoreError('PRECONDITION', 'STORE_UNAPPLIED: referral scope is not installed')
+}
+
+function strictCategories(value: unknown): WorkAidCategory[] | null {
+  let tokens: string[] | null = null
+  if (Array.isArray(value)) tokens = value.map(String)
+  else if (value == null) return null
+  else if (typeof value === 'string' && value.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(value) as unknown
+      if (!Array.isArray(parsed)) return null
+      tokens = parsed.map(String)
+    } catch {
+      return null
+    }
+  } else if (typeof value === 'string') {
+    try {
+      tokens = parsePgTextArray(value)
+    } catch {
+      return null
+    }
+  } else return null
+  if (!tokens || tokens.length === 0 || new Set(tokens).size !== tokens.length) return null
+  if (tokens.some((token) => !(WORKAID_CATEGORIES as readonly string[]).includes(token))) return null
+  return WORKAID_CATEGORIES.filter((category) => tokens.includes(category))
+}
+
+function sameCategories(left: readonly WorkAidCategory[], right: readonly WorkAidCategory[]): boolean {
+  return left.length === right.length && left.every((category, index) => category === right[index])
+}
+
+/**
+ * The categories actually referred. The stored column and the referral audit must both parse and match.
+ * Consent categories are never substituted. Missing, malformed, or disagreeing provenance is an explicit status.
+ */
+async function loadReferralScope(exec: SqlExecutor, organizationId: string, matterId: string): Promise<{ status: ReferralScopeStatus; categories: WorkAidCategory[] }> {
+  const storedRow = (
+    await exec.query<Row>(
+      `SELECT referred_categories FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`,
+      [organizationId, matterId],
+    )
+  ).rows[0]
+  const auditedRow = (
+    await exec.query<Row>(
+      `SELECT details -> 'categories' AS categories
+         FROM public.audit_logs
+        WHERE organization_id = $1 AND action = 'authority.workaid.refer' AND resource_id = $2
+        ORDER BY created_at DESC
+        LIMIT 1`,
+      [organizationId, matterId],
+    )
+  ).rows[0]
+  const stored = strictCategories(storedRow?.referred_categories)
+  const audited = auditedRow ? strictCategories(auditedRow.categories) : null
+  if (!stored || !audited) return { status: 'unavailable', categories: [] }
+  if (!sameCategories(stored, audited)) return { status: 'conflict', categories: [] }
+  return { status: 'recorded', categories: stored }
+}
+
+async function liveReleasedCategories(exec: SqlExecutor, organizationId: string, matterId: string): Promise<WorkAidCategory[]> {
+  const rows = (
+    await exec.query<Row>(
+      `SELECT categories FROM ue_authority_workaid_shares
+        WHERE organization_id = $1 AND matter_id = $2 AND invalidated_at IS NULL`,
+      [organizationId, matterId],
+    )
+  ).rows
+  const released = new Set<string>()
+  for (const row of rows) for (const category of knownCategories(row.categories)) released.add(category)
+  return WORKAID_CATEGORIES.filter((category) => released.has(category))
+}
+
+/**
+ * Recorded referrals on one case. The kernel must still allow `workaid:refer` for this principal and the recorded
+ * categories. A recused, removed, unrelated or cross-tenant caller receives an empty list, the same shape as a case
+ * with no referral. The payload names the matter, the referred scope and the categories released on the union side.
+ * It does not name the member or the referrer, and it does not contact counsel.
+ */
+export async function listCaseWorkAidReferrals(
+  exec: SqlExecutor,
+  deps: EnforcementDeps,
+  i: { organizationId: string; actorUserId: string; caseId: string },
+): Promise<CaseWorkAidReferralView[]> {
+  requireUuids(i.organizationId, i.caseId)
+  requirePrincipals(i.actorUserId)
+  await bindSessionActor(exec, i.actorUserId, 'representative')
+  await requireReferralScopeColumn(exec)
+  const now = clock(deps)
+  const matters = (
+    await exec.query<Row>(
+      `SELECT id::text AS matter_id, referred_at, withdrawn_at, counsel_accepted_at
+         FROM ue_authority_workaid_matters
+        WHERE organization_id = $1 AND case_id = $2
+        ORDER BY referred_at DESC`,
+      [i.organizationId, i.caseId],
+    )
+  ).rows
+  const out: CaseWorkAidReferralView[] = []
+  for (const matter of matters) {
+    const grant = await loadGrantByMatter(exec, i.organizationId, String(matter.matter_id))
+    if (!grant || grant.caseId !== i.caseId) continue
+    const scope = await loadReferralScope(exec, i.organizationId, grant.matterId)
+    // Consent categories decide whether this principal may see the row. They are not the referred scope.
+    const decisionCategories = scope.status === 'recorded' ? scope.categories : grant.categories
+    const decision = await referralDecision(exec, deps, { organizationId: i.organizationId, actorUserId: i.actorUserId, grant, categories: decisionCategories, now })
+    if (decision.effect !== 'allow') continue
+    out.push({
+      matterId: grant.matterId,
+      purpose: grant.purpose,
+      scopeStatus: scope.status,
+      referredCategories: scope.status === 'recorded' ? scope.categories : [],
+      releasedCategories: await liveReleasedCategories(exec, i.organizationId, grant.matterId),
+      expiresAt: grant.expiresAt,
+      referredAt: toDate(matter.referred_at),
+      withdrawn: Boolean(matter.withdrawn_at),
+      counselAccepted: Boolean(matter.counsel_accepted_at),
+    })
+  }
+  return out
+}
+
 /**
  * Records the referral of a consented matter. The member and the case come from the consent record, never from the
  * caller. The kernel decides: an active member who is EITHER a representative with a live owner/assignee relationship
@@ -437,11 +777,12 @@ export async function revokeWorkAidDocumentAuthorisation(
 export async function createWorkAidShare(
   exec: SqlExecutor,
   deps: EnforcementDeps,
-  i: { organizationId: string; actorUserId: string; matterId: string; categories?: readonly string[]; documentAuthorisationIds?: readonly string[] },
+  i: { organizationId: string; actorUserId: string; matterId: string; categories?: readonly string[]; documentAuthorisationIds?: readonly string[]; confirm?: boolean },
 ): Promise<string[]> {
   requireUuids(i.organizationId, i.matterId, ...(i.documentAuthorisationIds ?? []))
   requirePrincipals(i.actorUserId)
   await bindSessionActor(exec, i.actorUserId, 'sharer')
+  await requireReferralScopeColumn(exec)
   const now = clock(deps)
   const matter = (await exec.query<Row>(`SELECT withdrawn_at FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.matterId])).rows[0]
   if (!matter || matter.withdrawn_at) throw new AuthorityStoreError('NOT_FOUND', 'MATTER_NOT_FOUND: no live referral with this id')
@@ -469,6 +810,12 @@ export async function createWorkAidShare(
       { authenticated: true },
     ),
   )
+  const scope = await loadReferralScope(exec, i.organizationId, i.matterId)
+  if (scope.status === 'conflict') throw new AuthorityStoreError('PRECONDITION', 'REFERRAL_SCOPE_CONFLICT: stored referral categories do not match the audit record')
+  if (scope.status !== 'recorded') throw new AuthorityStoreError('PRECONDITION', 'REFERRAL_SCOPE_UNAVAILABLE: the categories actually referred cannot be verified')
+  if (plain.some((category) => !scope.categories.includes(category)) || (docIds.length > 0 && !scope.categories.includes('documents'))) {
+    throw refuse('REFERRAL_SCOPE_EXCEEDED', 'a category can be released only when this referral includes it')
+  }
 
   for (const authId of docIds) {
     const a = (
@@ -482,6 +829,7 @@ export async function createWorkAidShare(
       throw refuse('DOCUMENT_NOT_AUTHORISED', 'the document no longer classifies as one the member may release')
     }
   }
+  if (i.confirm !== true) throw new AuthorityStoreError('INVALID_CONTEXT', 'RELEASE_UNCONFIRMED: release requires explicit confirmation of the selected categories')
 
   const ids: string[] = []
   if (plain.length > 0) {
@@ -572,6 +920,18 @@ export async function revokeWorkAidConsent(
 
 // ── Member's own view ────────────────────────────────────────────────────────
 
+export interface MemberDisclosureEvent {
+  shareId: string
+  categories: WorkAidCategory[]
+  categoriesUnavailable: boolean
+  releasedAt: Date
+  withdrawnAt: Date | null
+  withdrawalReason: string | null
+  effective: boolean
+  deliveredToCounsel: false
+  counselAcknowledged: false
+}
+
 export interface MemberWorkAidConsentView {
   consentId: string
   matterId: string
@@ -584,6 +944,12 @@ export interface MemberWorkAidConsentView {
   referred: boolean
   referralWithdrawn: boolean
   counselAccepted: boolean
+  /** Categories with a live union-side share. Empty after revocation. This is not delivery to counsel. */
+  releasedCategories: WorkAidCategory[]
+  disclosureHistory: MemberDisclosureEvent[]
+  /** No adopted WorkAid notification policy exists, so no notification is sent. Screen visibility is not delivery. */
+  notificationDelivered: false
+  notificationPolicy: 'not_adopted'
   documentAuthorisations: { id: string; documentId: string; classification: string; expiresAt: Date; revoked: boolean }[]
 }
 
@@ -603,6 +969,15 @@ export async function listMemberWorkAidConsents(exec: SqlExecutor, deps: Deps, i
         [i.organizationId, g.consentId],
       )
     ).rows
+    const shares = (
+      await exec.query<Row>(
+        `SELECT id::text AS id, categories, created_at, invalidated_at, invalidation_reason
+           FROM ue_authority_workaid_shares
+          WHERE organization_id = $1 AND consent_id = $2
+          ORDER BY created_at`,
+        [i.organizationId, g.consentId],
+      )
+    ).rows
     out.push({
       consentId: g.consentId,
       matterId: g.matterId,
@@ -615,6 +990,23 @@ export async function listMemberWorkAidConsents(exec: SqlExecutor, deps: Deps, i
       referred: !!m,
       referralWithdrawn: !!m?.withdrawn_at,
       counselAccepted: !!m?.counsel_accepted_at,
+      releasedCategories: await liveReleasedCategories(exec, i.organizationId, g.matterId),
+      disclosureHistory: shares.map((share) => {
+        const categories = strictCategories(share.categories)
+        return {
+          shareId: String(share.id),
+          categories: categories ?? [],
+          categoriesUnavailable: !categories,
+          releasedAt: toDate(share.created_at),
+          withdrawnAt: share.invalidated_at ? toDate(share.invalidated_at) : null,
+          withdrawalReason: share.invalidation_reason ? String(share.invalidation_reason) : null,
+          effective: !share.invalidated_at,
+          deliveredToCounsel: false,
+          counselAcknowledged: false,
+        }
+      }),
+      notificationDelivered: false,
+      notificationPolicy: 'not_adopted',
       documentAuthorisations: docs.map((d) => ({ id: String(d.id), documentId: String(d.document_id), classification: String(d.classification), expiresAt: toDate(d.expires_at), revoked: !!d.revoked_at })),
     })
   }

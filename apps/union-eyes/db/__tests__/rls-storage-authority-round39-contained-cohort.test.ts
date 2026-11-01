@@ -166,10 +166,14 @@ describe('round 39 exception (unaffected by round 40): external_invoices (TENANT
     expect(entry!.dbExecutionPrincipal).toBe('TENANT_RUNTIME');
   });
 
-  it('has a real, org-scoped crud-factory route as its sole legitimate consumer', () => {
+  it('has one real route as its sole consumer: a mandate-checked, organization-scoped read that no longer writes through the factory', () => {
     const routeSrc = readFileSync(resolve(APP_ROOT, 'app/api/billing/invoices/route.ts'), 'utf8');
-    expect(routeSrc).toMatch(/table:\s*externalInvoices/);
-    expect(routeSrc).toMatch(/orgScoped:\s*true/);
+    expect(routeSrc).toMatch(/\.from\(externalInvoices\)/);
+    expect(routeSrc).toMatch(/requireLiveFinancialMandate/);
+    expect(routeSrc).toMatch(/rowsVisibleToGrant\(grant, organizationId, externalInvoices\.organizationId/);
+    // DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED: a write answers 501, and nothing writes the table through the generic factory.
+    expect(routeSrc).not.toMatch(/crudRoutes\(/);
+    expect(routeSrc).toMatch(/ApiError\.notImplemented/);
     // No item route (PATCH/DELETE) exists for this resource.
     expect(routeSrc).not.toMatch(/PATCH|DELETE/);
   });

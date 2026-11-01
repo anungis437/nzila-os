@@ -12,6 +12,8 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { workbooks, workbookModules, WORKBOOK_MODULE_IDS } from '@/db/schema/workbook-schema';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
+import { issueWorkbookCapability, setWorkbookCapabilityCookie } from '@/lib/workbook/workbook-capability';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -38,7 +40,7 @@ const bodySchema = z.object({
 export async function POST(request: NextRequest) {
   // Public pseudonymous intake: bounded by a per-client limit and a body cap. The workbook it creates holds no
   // tenant data and grants no access to any; it is a bearer-id record until claimed by an authenticated user.
-  const intake = await guardPublicIntake(request, { bucket: 'write' });
+  const intake = await guardPublicIntake(request, { bucket: 'write', challenge: true });
   if (!intake.ok) return intake.response;
 
   const parse = bodySchema.safeParse(intake.json ?? {});
@@ -50,6 +52,8 @@ export async function POST(request: NextRequest) {
   }
 
   const { locale, consent, sectorBand, institutionSizeBand, utm } = parse.data;
+  // The workbook id is public (page URLs, checkout redirects); this capability, returned once, is what reaches the workbook's data.
+  const capability = issueWorkbookCapability();
 
   try {
     // The workbook and its module rows are one record: a failure seeding the modules must not leave a bare workbook.
@@ -64,6 +68,8 @@ export async function POST(request: NextRequest) {
           utmSource: utm?.source ?? null,
           utmMedium: utm?.medium ?? null,
           utmCampaign: utm?.campaign ?? null,
+          capabilityTokenHash: capability.tokenHash,
+          capabilityTokenExpiresAt: capability.expiresAt,
         })
         .returning({ id: workbooks.id });
 
@@ -87,9 +93,11 @@ export async function POST(request: NextRequest) {
     if (!wb) {
       return NextResponse.json({ error: 'Failed to create workbook' }, { status: 500 });
     }
-    logger.info('[workbook-start] Workbook created', { workbookId: wb.id, locale });
+    logger.info('[workbook-start] Workbook created', { workbookRef: opaqueRef(wb.id), locale });
 
-    return NextResponse.json({ workbookId: wb.id });
+    const response = NextResponse.json({ workbookId: wb.id, capabilityToken: capability.token, capabilityExpiresAt: capability.expiresAt.toISOString() });
+    setWorkbookCapabilityCookie(response, wb.id, capability.token);
+    return response;
   } catch (err) {
     logger.error('[workbook-start] DB error', { err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });

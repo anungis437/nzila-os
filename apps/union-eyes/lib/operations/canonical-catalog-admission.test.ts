@@ -9,7 +9,7 @@ function snapshots() {
   return {
     roles: ['union_eyes_runtime', 'union_eyes_system'].map(rolname => ({ rolname, ...safeRole })),
     schemaUsage: [
-      ...base.payload.runtimeSchemaUsage.map(nspname => ({ rolname: 'union_eyes_runtime', nspname })),
+      ...canonical.payload.runtimeSchemaUsage.map(nspname => ({ rolname: 'union_eyes_runtime', nspname })),
       { rolname: 'union_eyes_system', nspname: 'public' },
     ],
   }
@@ -20,8 +20,18 @@ const approvedFunction = {
 }
 
 describe('canonical catalog admission', () => {
-  it('preserves every public manifest privilege and the original legacy contract', () => {
-    expect(canonical.payload.entries.slice(0, base.payload.entries.length)).toEqual(base.payload.entries)
+  it('preserves every public manifest privilege and the original legacy contract, except two documented V2 decisions', () => {
+    const inherited = canonical.payload.entries.slice(0, base.payload.entries.length)
+    const decided = new Set(['donations', 'evidence_packs'])
+    expect(inherited.filter(entry => !decided.has(entry.table))).toEqual(base.payload.entries.filter(entry => !decided.has(entry.table)))
+    // Pinned exactly so that any other change to the inherited manifest still fails this test.
+    expect(inherited.find(entry => entry.table === 'donations')).toMatchObject({
+      classification: 'TENANT_RLS_REQUIRED', runtime: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'], system: [],
+    })
+    expect(inherited.find(entry => entry.table === 'evidence_packs')).toMatchObject({ runtime: ['SELECT', 'INSERT', 'UPDATE'], system: ['SELECT'] })
+    expect(base.payload.entries.find(entry => entry.table === 'donations')).toMatchObject({ classification: 'SEPARATE_DATABASE_BOUNDARY', runtime: [], system: [] })
+    expect(canonical.payload.entries.find(entry => entry.table === 'ue_v2_bootstrap_receipt')).toMatchObject({ runtime: [], system: [] })
+    expect(canonical.payload.runtimeSchemaUsage).toEqual(['public', 'user_management'])
     expect(catalogContractDigest(base.payload)).toBe(base.digest)
     expect(catalogContractDigest(canonical.payload)).toBe(canonical.digest)
     expect(canonical.payload.nonPublic.filter(row => row.schema === 'user_management')

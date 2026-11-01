@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "register": "DECISION_BOUND_SCOPE_EXCEPTION",
+  "note": "Operations that have been inspected, whose available evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. An exception is not an approval: the candidate capability is not adopted, the operation is not authorized, and the containment obligation holds whichever way the decision goes. Only an independent decision record can convert an exception, and none exists.",
+  "anchorCommit": "00de050b86e1014854e38fc34f51b4c7c85ed747",
+  "exceptions": [
+    {
+      "id": "carbon/dashboard/route.ts|GET",
+      "route": "carbon/dashboard/route.ts",
+      "method": "GET",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "examinedIn": [
+        "GATE-0B.4",
+        "GATE-0B.5"
+      ],
+      "frozenRecords": {
+        "GATE-0B.4": "4e9a6f45b5764a6a72d0195bd1290c1aa06befc4b26e971bbeb0b4192656b929",
+        "GATE-0B.5": "6d546c287b00738d2db54befb46df23ed740dce07c1f6490abc3b6e9b956ab80"
+      },
+      "decisionId": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+      "unresolvedDecision": "Does the platform operator or an organization own carbon accounting, and which measured data source, if any, may back an emissions figure or a neutrality claim?",
+      "evidenceExhausted": {
+        "statement": "Gate 0B.4 and Gate 0B.5 each read the route, the schema, the services, the capability registry, the register and the product callers. No source names a data owner, a measured data source or a persona. A third pass over the same sources adds no evidence, so the operation is not selected for source investigation again.",
+        "evidenceGap": "No table, service, persona source, register entry or product caller names carbon accounting or Azure emissions monitoring, so there is no engineering capability whose obligation covers the operation and no institutional office that owns it."
+      },
+      "candidateCapability": {
+        "proposed": "A future carbon accounting capability that names a measured data source and an owning office; none exists in the register, the persona sources or the capability registry.",
+        "adopted": false
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "optionIds": [
+          "PLATFORM_OPERATOR_OWNS",
+          "ORGANIZATION_OWNS",
+          "RETIRE_THE_ROUTES"
+        ],
+        "anyOptionChosen": false
+      },
+      "containmentObligation": {
+        "capabilityId": "UE-CAP-H-001",
+        "gate": 8,
+        "obligation": "Whichever option the institution chooses, the routes must not return emissions totals, renewable percentages, optimization advice or a certification-shaped result as success while no measured data source exists. Until then they return 501 not implemented. This obligation is held by the retired scaffold capability and is independent of who owns carbon accounting.",
+        "closesInstitutionalDecision": false
+      },
+      "defects": [
+        "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
+        "DEF-0B4-CARBON-ORG-ID-FROM-QUERY-STRING"
+      ],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    },
+    {
+      "id": "carbon/infrastructure/route.ts|GET",
+      "route": "carbon/infrastructure/route.ts",
+      "method": "GET",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "examinedIn": [
+        "GATE-0B.4",
+        "GATE-0B.5"
+      ],
+      "frozenRecords": {
+        "GATE-0B.4": "6aa26972888c5bc95d13f216910aa4cd72c78877d378b79d2ced3c31a153b06e",
+        "GATE-0B.5": "6e0a6bf92ebde9595f3a6c76d416be878da130591c14ed8277ee83fb5ec6e804"
+      },
+      "decisionId": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+      "unresolvedDecision": "Does the platform operator or an organization own carbon accounting, and which measured data source, if any, may back an emissions figure or a neutrality claim?",
+      "evidenceExhausted": {
+        "statement": "Gate 0B.4 and Gate 0B.5 each read the route, the schema, the services, the capability registry, the register and the product callers. No source names a data owner, a measured data source or a persona. A third pass over the same sources adds no evidence, so the operation is not selected for source investigation again.",
+        "evidenceGap": "No table, service, persona source, register entry or product caller names carbon accounting or Azure emissions monitoring, so there is no engineering capability whose obligation covers the operation and no institutional office that owns it."
+      },
+      "candidateCapability": {
+        "proposed": "A future carbon accounting capability that names a measured data source and an owning office; none exists in the register, the persona sources or the capability registry.",
+        "adopted": false
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "optionIds": [
+          "PLATFORM_OPERATOR_OWNS",
+          "ORGANIZATION_OWNS",
+          "RETIRE_THE_ROUTES"
+        ],
+        "anyOptionChosen": false
+      },
+      "containmentObligation": {
+        "capabilityId": "UE-CAP-H-001",
+        "gate": 8,
+        "obligation": "Whichever option the institution chooses, the routes must not return emissions totals, renewable percentages, optimization advice or a certification-shaped result as success while no measured data source exists. Until then they return 501 not implemented. This obligation is held by the retired scaffold capability and is independent of who owns carbon accounting.",
+        "closesInstitutionalDecision": false
+      },
+      "defects": [
+        "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200"
+      ],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    },
+    {
+      "id": "carbon/validate/route.ts|GET",
+      "route": "carbon/validate/route.ts",
+      "method": "GET",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "examinedIn": [
+        "GATE-0B.4",
+        "GATE-0B.5"
+      ],
+      "frozenRecords": {
+        "GATE-0B.4": "9b52bb6b89fa89b39544c7f3d2993435fe5eed4294ca125b82d5bce702826c0d",
+        "GATE-0B.5": "60d72402142018199ae85b482a95146070ea19d6adc4d7e68992e0c0d3269c86"
+      },
+      "decisionId": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+      "unresolvedDecision": "Does the platform operator or an organization own carbon accounting, and which measured data source, if any, may back an emissions figure or a neutrality claim?",
+      "evidenceExhausted": {
+        "statement": "Gate 0B.4 and Gate 0B.5 each read the route, the schema, the services, the capability registry, the register and the product callers. No source names a data owner, a measured data source or a persona. A third pass over the same sources adds no evidence, so the operation is not selected for source investigation again.",
+        "evidenceGap": "No table, service, persona source, register entry or product caller names carbon accounting or Azure emissions monitoring, so there is no engineering capability whose obligation covers the operation and no institutional office that owns it."
+      },
+      "candidateCapability": {
+        "proposed": "A future carbon accounting capability that names a measured data source and an owning office; none exists in the register, the persona sources or the capability registry.",
+        "adopted": false
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "optionIds": [
+          "PLATFORM_OPERATOR_OWNS",
+          "ORGANIZATION_OWNS",
+          "RETIRE_THE_ROUTES"
+        ],
+        "anyOptionChosen": false
+      },
+      "containmentObligation": {
+        "capabilityId": "UE-CAP-H-001",
+        "gate": 8,
+        "obligation": "Whichever option the institution chooses, the routes must not return emissions totals, renewable percentages, optimization advice or a certification-shaped result as success while no measured data source exists. Until then they return 501 not implemented. This obligation is held by the retired scaffold capability and is independent of who owns carbon accounting.",
+        "closesInstitutionalDecision": false
+      },
+      "defects": [],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    },
+    {
+      "id": "carbon/validate/route.ts|POST",
+      "route": "carbon/validate/route.ts",
+      "method": "POST",
+      "inventoryClassification": "DECISION_BOUND_SCOPE_EXCEPTION",
+      "examinedIn": [
+        "GATE-0B.4",
+        "GATE-0B.5"
+      ],
+      "frozenRecords": {
+        "GATE-0B.4": "5b8cc5f584db15f2984bda9b5edee1ff7efbb0123ed781826e4120494afa6f9c",
+        "GATE-0B.5": "4b8117dddc1e7a45d08af9c96b95097fcdae3797c1109af470d5936c8aca77ae"
+      },
+      "decisionId": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+      "unresolvedDecision": "Does the platform operator or an organization own carbon accounting, and which measured data source, if any, may back an emissions figure or a neutrality claim?",
+      "evidenceExhausted": {
+        "statement": "Gate 0B.4 and Gate 0B.5 each read the route, the schema, the services, the capability registry, the register and the product callers. No source names a data owner, a measured data source or a persona. A third pass over the same sources adds no evidence, so the operation is not selected for source investigation again.",
+        "evidenceGap": "No table, service, persona source, register entry or product caller names carbon accounting or Azure emissions monitoring, so there is no engineering capability whose obligation covers the operation and no institutional office that owns it."
+      },
+      "candidateCapability": {
+        "proposed": "A future carbon accounting capability that names a measured data source and an owning office; none exists in the register, the persona sources or the capability registry.",
+        "adopted": false
+      },
+      "scopeDisposition": {
+        "recordedIn": "GATE-0B.5",
+        "disposition": "RETAIN_AS_UNAPPROVED_CAPABILITY_CANDIDATE",
+        "optionIds": [
+          "PLATFORM_OPERATOR_OWNS",
+          "ORGANIZATION_OWNS",
+          "RETIRE_THE_ROUTES"
+        ],
+        "anyOptionChosen": false
+      },
+      "containmentObligation": {
+        "capabilityId": "UE-CAP-H-001",
+        "gate": 8,
+        "obligation": "Whichever option the institution chooses, the routes must not return emissions totals, renewable percentages, optimization advice or a certification-shaped result as success while no measured data source exists. Until then they return 501 not implemented. This obligation is held by the retired scaffold capability and is independent of who owns carbon accounting.",
+        "closesInstitutionalDecision": false
+      },
+      "defects": [
+        "DEF-0B4-CARBON-VALIDATE-ATTESTS-CALLER-DATA"
+      ],
+      "adopted": false,
+      "authorized": false,
+      "operationallyApproved": false,
+      "productionReady": false,
+      "countedAsOwned": false,
+      "independentDecisionRecord": null
+    }
+  ],
+  "summary": {
+    "exceptions": 4,
+    "decisionIds": [
+      "UE-INST-CARBON-ACCOUNTING-SCOPE"
+    ]
+  }
+}

@@ -51,6 +51,7 @@ vi.mock('@/db/schema', () => ({
     professionalismRating: 'profR', outcomeRating: 'outR',
     wouldRecommend: 'wouldRec', sentAt: 'sentAt',
   },
+  satisfactionSurveyResponded: { id: 'respId', claimId: 'respClaimId', memberId: 'respMemberId' },
 }));
 
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -111,6 +112,18 @@ describe('SatisfactionService', () => {
       );
     });
 
+    // Disclosed addition: anonymous responses are held without member or claim (platform 0050), so "already answered" is read from the
+    // responded record, not from the survey row.
+    it('does not send the survey again to a member who already answered it anonymously', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([{ id: 'resp-1' }]));
+      const { createSatisfactionSurvey, SurveyAlreadyAnsweredError } = await import('../satisfaction-service');
+      await expect(
+        createSatisfactionSurvey({ organizationId: 'org-1', claimId: 'c-5', memberId: 'm-5', lroId: 'lro-1' }),
+      ).rejects.toBeInstanceOf(SurveyAlreadyAnsweredError);
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
+
     it('does not create a survey when its audit cannot be written', async () => {
       mocks.mockInsert.mockReturnValueOnce(chain([{ id: 'srv-new' }]));
       mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
@@ -157,7 +170,7 @@ describe('SatisfactionService', () => {
       const pending = [{ id: 's-1', status: 'pending' }, { id: 's-2', status: 'pending' }];
       mocks.mockSelect.mockReturnValueOnce(chain(pending));
       const { getPendingSurveys } = await import('../satisfaction-service');
-      expect(await getPendingSurveys('m-1')).toEqual(pending);
+      expect(await getPendingSurveys('m-1', 'org-1')).toEqual(pending);
     });
   });
 
@@ -282,6 +295,26 @@ describe('SatisfactionService', () => {
 
   // ── getLroPerformance ─────────────────────────────────────────
   describe('getLroPerformance', () => {
+    it('returns no figures for a representative with fewer completed responses than the minimum', async () => {
+      const metrics = {
+        totalSurveys: 2,
+        avgCommunication: '5.0', avgResponsiveness: '5.0',
+        avgKnowledge: '5.0', avgAdvocacy: '5.0',
+        avgProfessionalism: '5.0', avgOutcome: '5.0',
+      };
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([metrics]))
+        .mockReturnValueOnce(chain([{ total: 2, recommended: 2 }]));
+
+      const { getLroPerformance } = await import('../satisfaction-service');
+      const result = await getLroPerformance('lro-1', 'org-1');
+
+      expect(result.suppressed).toBe(true);
+      expect(result.totalSurveys).toBe(2);
+      expect(result.overallAverage).toBe(0);
+      expect(result.avgCommunication).toBe(0);
+    });
+
     it('returns aggregated LRO metrics', async () => {
       const metrics = {
         totalSurveys: 10,

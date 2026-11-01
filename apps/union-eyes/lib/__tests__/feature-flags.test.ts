@@ -52,6 +52,8 @@ import {
   checkFlags,
   features,
   refreshFeatureFlags,
+  invalidateFeatureFlagCache,
+  FEATURE_FLAG_PROPAGATION_SECONDS,
   getAllFeatureFlags,
   toggleFeatureFlag,
 } from '../feature-flags';
@@ -230,6 +232,27 @@ describe('feature-flags', () => {
       mocks.mockSelect.mockImplementationOnce(() => { throw new Error('DB down'); });
       await refreshFeatureFlags(); // should not throw
       // Previous cache still has 'keep'
+    });
+  });
+
+  // F06 R4: the request path keeps serving the cache when a reload fails, but the refresh after a committed change must not report success
+  // when it did not reload.
+  describe('invalidateFeatureFlagCache', () => {
+    it('reloads this instance after a change and resolves', async () => {
+      const fresh = [{ name: 'fresh', type: 'boolean', enabled: false, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null }];
+      // the reload after the change, and the one getAllFeatureFlags performs itself
+      mocks.mockSelect.mockReturnValueOnce(chain(fresh)).mockReturnValueOnce(chain(fresh));
+      await expect(invalidateFeatureFlagCache()).resolves.toBeUndefined();
+      expect((await getAllFeatureFlags()).find((f) => f.name === 'fresh')?.enabled).toBe(false);
+    });
+
+    it('throws when the reload fails, so the caller can say the change did not take effect here', async () => {
+      mocks.mockSelect.mockImplementationOnce(() => { throw new Error('DB down'); });
+      await expect(invalidateFeatureFlagCache()).rejects.toThrow('Feature flag cache refresh failed');
+    });
+
+    it('exposes how long other instances take to converge', () => {
+      expect(FEATURE_FLAG_PROPAGATION_SECONDS).toBe(60);
     });
   });
 

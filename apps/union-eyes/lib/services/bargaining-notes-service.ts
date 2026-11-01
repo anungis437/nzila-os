@@ -179,10 +179,11 @@ export async function listBargainingNotes(
  */
 export async function getBargainingNotesByCBA(
   cbaId: string,
+  organizationId: string,
   sessionType?: string
 ): Promise<BargainingNote[]> {
   try {
-    const conditions = [eq(bargainingNotes.cbaId, cbaId)];
+    const conditions = [eq(bargainingNotes.cbaId, cbaId), eq(bargainingNotes.organizationId, organizationId)];
 
     if (sessionType) {
       conditions.push(eq(bargainingNotes.sessionType, sessionType));

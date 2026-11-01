@@ -6,13 +6,15 @@
  * levels, trend heuristic, and recommendation filtering.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
 const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[] }));
 
 function makeChain() {
   const chain: Record<string, unknown> = {};
   chain.from = () => chain;
-  chain.where = () => Promise.resolve(mocks.interviews);
+  chain.where = () => ({ limit: () => Promise.resolve(mocks.interviews) });
   return chain;
 }
 
@@ -125,5 +127,21 @@ describe('calculateResilienceIndex', () => {
     const idx = await calculateResilienceIndex('org');
     const doc = idx.dimensions.find((d) => d.name === 'Documentation Maturity');
     expect(doc!.components.some((c) => c.value === 25)).toBe(true);
+  });
+
+  // DEF-0B7-COGB-EMPTY-ORGANIZATION-RESILIENCE-INDEX-DIVIDES-BY-ZERO-AND-REPORTS-STRONG: an organization with no dependency map used to read as a
+  // score (NaN, or strong from the absence of risks never looked for). It is refused, whether or not it has interviews.
+  it.each([[[]], [[{ id: 'i1' }, { id: 'i2' }]]])('refuses, rather than scoring, an organization with no dependency data (interviews: %j)', async (interviews) => {
+    mocks.interviews = interviews as unknown[];
+    mocks.buildMap.mockResolvedValue(mapWith([]));
+    await expect(calculateResilienceIndex('org')).rejects.toMatchObject({ code: 'CONFLICT' });
+  });
+
+  it('always produces finite scores once there is dependency data', async () => {
+    mocks.interviews = [];
+    mocks.buildMap.mockResolvedValue(mapWith([n('a', 2, 'general', false, 'low')]));
+    const idx = await calculateResilienceIndex('org');
+    expect(idx.dimensions.every((d) => Number.isFinite(d.score))).toBe(true);
+    expect(Number.isFinite(idx.overallScore)).toBe(true);
   });
 });

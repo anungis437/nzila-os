@@ -75,6 +75,7 @@ vi.mock("@/lib/ai/ai-client", () => ({
     EXECUTIVE_INSIGHTS: "ue-executive-insights",
   },
   UE_SYSTEM_ORG_ID: "00000000-0000-0000-0000-000000000000",
+  toGatewayDataClass: (value: string) => value,
 }));
 
 vi.mock("@/lib/ai/ai-feature-guard", () => ({
@@ -93,6 +94,12 @@ vi.mock("@/lib/ai/ai-feature-guard", () => ({
 vi.mock("@/lib/audit-logger", () => ({
   auditLog: vi.fn(),
   auditDataMutation: vi.fn(),
+}));
+
+// Platform AI invocations are audited before they run; the audit store is exercised by the operation-audit tests.
+vi.mock("@/lib/audit/operation-audit", () => ({
+  performAuditedOperation: (_op: unknown, run: () => Promise<unknown>) => run(),
+  operationAuditResponse: () => null,
 }));
 
 vi.mock("@/lib/logger", () => ({

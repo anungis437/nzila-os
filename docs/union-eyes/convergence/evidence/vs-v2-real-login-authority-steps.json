@@ -1,0 +1,25 @@
+{
+  "record": "UE-V2-REAL-LOGIN-AUTHORITY-STEPS",
+  "harness": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.ts + next-http-smoke.ts (canonical V2 topology; real password and TOTP login; no QA session switches). Not merged with the synthetic-session runtime evidence.",
+  "baseSha": "e25b62f75",
+  "workingTreeNote": "run against the uncommitted tree that adds the authority steps to next-http-smoke.ts",
+  "harnessStatus": "HTTP_SMOKE_PASS_FINAL_ACCEPTANCE_NOT_PROVEN",
+  "httpSteps": 42,
+  "httpStepsAsExpected": 42,
+  "sourcePlanDigest": "aa80d68101e151b235172067a823210610b7922cd649c43a498cf7868d0df633",
+  "newSteps": [
+    "multi-org: a steward in organization B who is only a member in organization A is refused a steward action (POST /api/claims 403) when A is selected; switching back to B restores it",
+    "a client x-org-id / x-organization-id header naming a foreign organization does not select it (response never contains that organization)",
+    "a session cookie with a tampered tail is refused (401)",
+    "a cross-tenant administrator (administrator of another organization) is refused reading the claim (403) and its claim number is not disclosed",
+    "a suspended identity (lifecycle_state suspended, is_active false) is refused on an existing session (401) and at login (401); reinstatement restores the session (200)"
+  ],
+  "existingStepsRelevantToR42": "member-claim-create-denied and steward-claim-create already show the role is read from the active membership in the selected organization; role-revoked-claim-create-denied shows revocation; inactive-membership-denied shows a deactivated membership.",
+  "runNote": "The first attempt aborted with a 120 s fetch timeout before any HTTP step ran (cold start, R-21); the rerun on the same tree passed. Both are recorded: the harness is not yet reliable on cold start.",
+  "notProven": [
+    "Provider-claim elevation and conflicting external-provider claims: the harness has no external provider callback path; not exercised.",
+    "Stale-session behaviour after the membership role is downgraded mid-session is covered only by role-revoked-claim-create-denied.",
+    "Distinct real principals per tenant beyond the two seeded organizations.",
+    "This remains HTTP smoke on a synthetic fixture; READY_FOR_STAGING remains NO."
+  ]
+}

@@ -406,6 +406,32 @@ describe('durable audit of access changes', () => {
     );
   });
 
+  it('F06 A3: makes the attempt durable before any store is touched, and the outcome after the local change', async () => {
+    const order: string[] = [];
+    m.audit.mockImplementation(async (_tx: unknown, entry: { action: string }) => { order.push(entry.action); });
+    m.revokeAllUserSessions.mockImplementation(async () => { order.push('sessions'); });
+    const { revokeMemberAccess } = await loadService();
+
+    const result = await revokeMemberAccess(baseInput);
+
+    expect(result).toMatchObject({ success: true, intentRecorded: true });
+    expect(order).toEqual(['member.access.deactivate_attempt', 'sessions', 'member.access.deactivate']);
+  });
+
+  it('F06 A3: still revokes when the attempt cannot be recorded (denial is the safe direction) and says it was not recorded', async () => {
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+    const { revokeMemberAccess } = await loadService();
+
+    const result = await revokeMemberAccess({ ...baseInput, newLocalStatus: 'deleted' });
+
+    expect(result).toMatchObject({ success: true, sessionsRevoked: true, authMembershipDisabled: true, localStatusUpdated: true, intentRecorded: false });
+    expect(m.audit).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'member.access.delete', details: expect.objectContaining({ attemptRecorded: false }) }),
+      'success',
+    );
+  });
+
   it('does not report the local status as updated when the audit write fails', async () => {
     m.audit.mockRejectedValue(new Error('audit down'));
     const { revokeMemberAccess } = await loadService();

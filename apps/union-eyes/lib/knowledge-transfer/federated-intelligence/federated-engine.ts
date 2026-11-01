@@ -24,20 +24,11 @@ import type {
 } from './federated-models';
 
 /**
- * Reference maturity distribution based on organizational governance research.
- * These are calibrated reference points — not derived from any specific organization.
+ * The earlier reference percentile table and cohort averages were literals with no named source, population or date, and the
+ * result stated a percentile and a cohort average from them. They are removed: the result keeps the score bands (a rubric the
+ * product defines) and compares each dimension with the midpoint of the band the organization is in.
  */
-const REFERENCE_DISTRIBUTION: BenchmarkPercentileRange[] = [
-  { percentile: 10, scoreAtPercentile: 15, cohortLabel: 'nascent', description: 'Minimal continuity governance — early-stage organizational awareness.' },
-  { percentile: 25, scoreAtPercentile: 28, cohortLabel: 'emerging', description: 'Basic continuity practices — some documentation, limited resilience.' },
-  { percentile: 40, scoreAtPercentile: 42, cohortLabel: 'developing', description: 'Active continuity governance — growing documentation and process redundancy.' },
-  { percentile: 50, scoreAtPercentile: 52, cohortLabel: 'developing', description: 'Median organizational continuity posture — moderate resilience with known gaps.' },
-  { percentile: 60, scoreAtPercentile: 60, cohortLabel: 'established', description: 'Established continuity governance — systematic documentation and risk mitigation.' },
-  { percentile: 75, scoreAtPercentile: 70, cohortLabel: 'established', description: 'Strong continuity posture — proactive governance with measurable resilience.' },
-  { percentile: 85, scoreAtPercentile: 78, cohortLabel: 'advanced', description: 'Advanced organizational continuity — diversified knowledge and governance depth.' },
-  { percentile: 95, scoreAtPercentile: 88, cohortLabel: 'leading', description: 'Leading continuity intelligence — adaptive governance with continuous learning.' },
-];
-
+const REFERENCE_DISTRIBUTION: BenchmarkPercentileRange[] = [];
 /** Cohort band definitions */
 const COHORT_BANDS = [
   { cohort: 'nascent' as MaturityCohort, minScore: 0, maxScore: 20, midpointScore: 10, description: 'Minimal continuity governance infrastructure' },
@@ -48,37 +39,11 @@ const COHORT_BANDS = [
   { cohort: 'leading' as MaturityCohort, minScore: 86, maxScore: 100, midpointScore: 93, description: 'Adaptive organizational continuity intelligence' },
 ];
 
-/** Cohort average scores for dimension comparisons */
-const COHORT_DIMENSION_AVERAGES: Record<MaturityCohort, number> = {
-  nascent: 10,
-  emerging: 30,
-  developing: 48,
-  established: 63,
-  advanced: 78,
-  leading: 93,
-};
-
 function scoreToCohort(score: number): MaturityCohort {
   for (const band of COHORT_BANDS) {
     if (score >= band.minScore && score <= band.maxScore) return band.cohort;
   }
   return score > 85 ? 'leading' : 'nascent';
-}
-
-function scoreToPercentile(score: number): number {
-  // Interpolate percentile from reference distribution
-  for (let i = 0; i < REFERENCE_DISTRIBUTION.length - 1; i++) {
-    const lower = REFERENCE_DISTRIBUTION[i];
-    const upper = REFERENCE_DISTRIBUTION[i + 1];
-    if (score >= lower.scoreAtPercentile && score <= upper.scoreAtPercentile) {
-      const fraction =
-        (score - lower.scoreAtPercentile) /
-        (upper.scoreAtPercentile - lower.scoreAtPercentile);
-      return Math.round(lower.percentile + fraction * (upper.percentile - lower.percentile));
-    }
-  }
-  if (score < REFERENCE_DISTRIBUTION[0].scoreAtPercentile) return 5;
-  return 97;
 }
 
 /**
@@ -94,7 +59,6 @@ export async function generateFederatedBenchmark(
 
   const currentScore = resilienceIndex.overallScore;
   const cohort = scoreToCohort(currentScore);
-  const percentile = scoreToPercentile(currentScore);
 
   // Next cohort
   const currentBandIdx = COHORT_BANDS.findIndex((b) => b.cohort === cohort);
@@ -113,32 +77,32 @@ export async function generateFederatedBenchmark(
   const orgPosition: OrgBenchmarkPosition = {
     currentScore,
     cohort,
-    estimatedPercentile: percentile,
+    estimatedPercentile: null,
     pointsToNextCohort: pointsToNext,
     nextCohort: nextBand?.cohort ?? null,
     positionDescription: positionDescriptions[cohort] ?? '',
   };
 
   // Dimension comparisons
-  const cohortAvg = COHORT_DIMENSION_AVERAGES[cohort];
+  const bandMidpoint = COHORT_BANDS.find((b) => b.cohort === cohort)?.midpointScore ?? 0;
   const dimensionComparisons: BenchmarkDimensionComparison[] = resilienceIndex.dimensions.map(
     (dim) => {
-      const gap = dim.score - cohortAvg;
+      const gap = dim.score - bandMidpoint;
       const relativePosition: BenchmarkDimensionComparison['relativePosition'] =
-        gap >= 5 ? 'above_cohort' : gap <= -5 ? 'below_cohort' : 'at_cohort';
+        gap >= 5 ? 'above_band_midpoint' : gap <= -5 ? 'below_band_midpoint' : 'at_band_midpoint';
 
       const insightMap: Record<string, string> = {
-        above_cohort: `${dim.name} exceeds typical ${cohort}-level governance — a continuity strength.`,
-        at_cohort: `${dim.name} aligns with typical ${cohort}-level governance posture.`,
-        below_cohort: `${dim.name} is below typical ${cohort}-level posture — a priority area for investment.`,
+        above_band_midpoint: `${dim.name} is above the midpoint of the ${cohort} score band.`,
+        at_band_midpoint: `${dim.name} is near the midpoint of the ${cohort} score band.`,
+        below_band_midpoint: `${dim.name} is below the midpoint of the ${cohort} score band.`,
       };
 
       return {
         dimensionName: dim.name,
         orgScore: dim.score,
-        cohortAverageScore: cohortAvg,
+        bandMidpointScore: bandMidpoint,
         relativePosition,
-        gapToCohortAverage: Math.round(gap),
+        gapToBandMidpoint: Math.round(gap),
         insight: insightMap[relativePosition] ?? '',
       };
     },
@@ -157,14 +121,14 @@ export async function generateFederatedBenchmark(
 
   // Cohort-specific insights
   const cohortInsights: string[] = [
-    `At ${percentile}th percentile, this organization's continuity posture is ${cohort}-level.`,
+    `This organization's resilience score of ${currentScore} falls in the ${cohort} score band.`,
     positionDescriptions[cohort],
     nextBand
       ? `${pointsToNext} resilience points separate this organization from ${nextBand.cohort}-level continuity governance.`
       : 'This organization has achieved leading-level continuity governance maturity.',
-    dimensionComparisons.filter((d) => d.relativePosition === 'above_cohort').length > 0
-      ? `Strengths above cohort average: ${dimensionComparisons.filter((d) => d.relativePosition === 'above_cohort').map((d) => d.dimensionName).join(', ')}.`
-      : 'All dimensions are at or below cohort average — comprehensive investment would advance maturity.',
+    dimensionComparisons.filter((d) => d.relativePosition === 'above_band_midpoint').length > 0
+      ? `Dimensions above the band midpoint: ${dimensionComparisons.filter((d) => d.relativePosition === 'above_band_midpoint').map((d) => d.dimensionName).join(', ')}.`
+      : 'No dimension is above the band midpoint.',
     previousScore !== null
       ? `Resilience has ${currentScore >= previousScore ? 'improved' : 'declined'} from ${previousScore} to ${currentScore} since last measurement.`
       : 'Establish regular resilience baselines to track positioning over time.',
@@ -177,8 +141,9 @@ export async function generateFederatedBenchmark(
     dimensionComparisons,
     maturityCurve,
     percentileReference: REFERENCE_DISTRIBUTION,
+    referenceStatus: 'UNSOURCED_RUBRIC_NO_POPULATION',
     cohortInsights,
     disclaimer:
-      'Benchmarking uses reference distributions based on organizational governance research. No cross-organization data is used. This is privacy-safe positioning intelligence, not competitive comparison.',
+      'The score bands are a rubric defined by this product, not a measurement of other organizations: no population, source or date supports a percentile or a cohort average, and none is reported. No cross-organization data is used.',
   };
 }

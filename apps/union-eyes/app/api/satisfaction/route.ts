@@ -10,6 +10,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   getPendingSurveys,
   createSatisfactionSurvey,
+  SurveyAlreadyAnsweredError,
 } from '@/lib/services/satisfaction-service';
 
 export const dynamic = 'force-dynamic';
@@ -23,8 +24,9 @@ export const GET = withApi(
       description: 'Returns satisfaction surveys pending completion for the current user.',
     },
   },
-  async ({ userId }) => {
-    const surveys = await getPendingSurveys(userId!);
+  async ({ userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.badRequest('Organization context required');
+    const surveys = await getPendingSurveys(userId, organizationId);
     return { surveys, count: surveys.length };
   }
 );
@@ -50,7 +52,7 @@ export const POST = withApi(
     // The claim must be this organization's, and the survey must go to the claim's own member.
     const [claim] = await withRLSContext({ organizationId }, (tx) =>
       tx
-        .select({ memberId: claims.memberId, assignedTo: claims.assignedTo })
+        .select({ memberId: claims.memberId, assignedTo: claims.assignedTo, status: claims.status })
         .from(claims)
         .where(and(eq(claims.id, body.claimId), eq(claims.organizationId, organizationId)))
         .limit(1),
@@ -59,19 +61,32 @@ export const POST = withApi(
     if (claim.memberId !== body.memberId) {
       throw ApiError.badRequest('The survey can only be sent to the member who filed the claim');
     }
-    if (claim.assignedTo && claim.assignedTo !== body.lroId) {
+    // A survey rates the service of a finished claim by the representative who handled it. On a claim still in progress, or one
+    // with no assigned representative, there is nothing to rate and no one whose rating it would be.
+    if (claim.status !== 'resolved' && claim.status !== 'closed') {
+      throw ApiError.conflict('A satisfaction survey can only be created for a resolved or closed claim');
+    }
+    if (!claim.assignedTo) {
+      throw ApiError.badRequest('The claim has no assigned representative to rate');
+    }
+    if (claim.assignedTo !== body.lroId) {
       throw ApiError.badRequest('The survey must rate the representative assigned to the claim');
     }
 
-    const survey = await createSatisfactionSurvey(
-      {
-        organizationId,
-        claimId: body.claimId,
-        memberId: body.memberId,
-        lroId: body.lroId,
-      },
-      userId,
-    );
-    return survey;
+    try {
+      return await createSatisfactionSurvey(
+        {
+          organizationId,
+          claimId: body.claimId,
+          memberId: body.memberId,
+          lroId: body.lroId,
+        },
+        userId,
+      );
+    } catch (error) {
+      if (error instanceof SurveyAlreadyAnsweredError) throw ApiError.conflict('The member has already answered this survey');
+      throw error;
+    }
   }
 );
+

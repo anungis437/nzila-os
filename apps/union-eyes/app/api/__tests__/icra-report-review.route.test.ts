@@ -10,6 +10,9 @@ const m = vi.hoisted(() => ({
   selectQueue: [] as unknown[][],
   updateThrow: false,
   persistAtomicAudit: vi.fn(),
+  userId: 'reviewer-1' as string | null,
+  requireSystemAdmin: vi.fn(),
+  actingOrg: vi.fn(),
 }));
 
 function makeSelectChain(rows: unknown[]) {
@@ -34,7 +37,11 @@ const mockDb: any = {
 
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(mockDb) }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: async () => ({ userId: m.userId }) }));
+vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: m.requireSystemAdmin }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+// Disclosed addition (F06 A2): an unclaimed assessment is audited against the reviewer's acting organization.
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.actingOrg }));
 vi.mock('@/lib/icra/questions', () => ({ ALL_QUESTIONS: [] }));
 vi.mock('@/lib/icra/adaptation', () => ({
   extractPersistedAdaptiveReportAISlot: m.extractPersistedAdaptiveReportAISlot,
@@ -57,7 +64,9 @@ describe('icra/report/[assessmentId]/review route', () => {
     m.selectQueue = [];
     m.updateThrow = false;
     m.persistAtomicAudit.mockResolvedValue(undefined);
-    process.env.CRON_SECRET_KEY = 'secret';
+    m.userId = 'reviewer-1';
+    m.actingOrg.mockResolvedValue('org_acting');
+    m.requireSystemAdmin.mockResolvedValue(undefined);
     m.extractPersistedAdaptiveReportAISlot.mockReturnValue(null);
     m.resolveAdaptiveReportAISlot.mockReturnValue({ reviewWorkflow: { status: 'pending' } });
     m.applyAdaptiveReportReviewDecision.mockReturnValue({ reviewWorkflow: { status: 'approved' } });
@@ -67,25 +76,91 @@ describe('icra/report/[assessmentId]/review route', () => {
   it('returns 400 for invalid assessment id', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/icra/report/bad/review', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'secret' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
     }), { params: Promise.resolve({ assessmentId: 'bad' }) });
 
     expect(response.status).toBe(400);
   });
 
-  it('returns 401 for invalid secret', async () => {
-    const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/icra/report/a/review', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'wrong' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
-    }), { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) });
+  const plain = (extra: Record<string, unknown> = {}) => new NextRequest('http://localhost/api/icra/report/a/review', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'approve', summary: 'ok', ...extra }),
+  });
+  const ok = { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) };
 
+  it('returns 401 for a caller who is not signed in, whatever secret they hold', async () => {
+    const { POST } = await loadRoute();
+    m.userId = null;
+    const response = await POST(new NextRequest('http://localhost/api/icra/report/a/review', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'the-shared-secret', authorization: 'Bearer the-shared-secret' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
+    }), ok);
     expect(response.status).toBe(401);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 for a signed-in caller without platform governance authority, and writes nothing', async () => {
+    const { POST } = await loadRoute();
+    m.requireSystemAdmin.mockRejectedValue(new Error('System administrator privileges required'));
+    const response = await POST(plain(), ok);
+    expect(response.status).toBe(403);
+    expect(mockDb.update).not.toHaveBeenCalled();
+  });
+
+  it('refuses a reviewer role the body asserts, instead of recording it', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(plain({ reviewerRole: 'exec_sponsor' }), ok);
+    expect(response.status).toBe(403);
+    expect(m.applyAdaptiveReportReviewDecision).not.toHaveBeenCalled();
+  });
+
+  it('records the decision under the verified governance reviewer role', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'a1', organizationContext: {}, locale: 'en-CA' }], [{ profilePayload: { generatedAt: '2026-01-01' } }]);
+    await POST(plain({ reviewerRole: 'governance_reviewer' }), ok);
+    expect(m.applyAdaptiveReportReviewDecision).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ reviewerRole: 'governance_reviewer' }));
+  });
+
+  describe('every decision is audited (DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS)', () => {
+    const decide = async (assessment: Record<string, unknown>) => {
+      const { POST } = await loadRoute();
+      m.selectQueue.push([{ id: 'a1', organizationContext: {}, locale: 'en-CA', ...assessment }], [{ profilePayload: { generatedAt: '2026-01-01' } }]);
+      return POST(plain(), ok);
+    };
+
+    it('audits an unclaimed assessment against the reviewer\'s acting organization, in the same transaction as the decision', async () => {
+      const response = await decide({ claimedOrgId: null });
+      expect(response.status).toBe(200);
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
+        organizationId: 'org_acting', userId: 'reviewer-1', action: 'icra.report.review', resourceId: '11111111-1111-1111-1111-111111111111',
+        details: expect.objectContaining({ decision: 'approve', assessmentClaimed: false }),
+      }));
+    });
+
+    it('audits a claimed assessment against the claiming organization', async () => {
+      await decide({ claimedOrgId: 'org_claimed' });
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ organizationId: 'org_claimed', details: expect.objectContaining({ assessmentClaimed: true }) }));
+    });
+
+    it('records no decision at all when the reviewer acts in no organization', async () => {
+      m.actingOrg.mockRejectedValue(new Error('no organization'));
+      const response = await decide({ claimedOrgId: null });
+      expect(response.status).toBe(409);
+      expect(mockDb.update).not.toHaveBeenCalled();
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('fails the decision when its audit record cannot be written, and never copies the summary text into the record', async () => {
+      m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+      const response = await decide({ claimedOrgId: null });
+      expect(response.status).toBe(500);
+      await decide({ claimedOrgId: null });
+      expect(JSON.stringify(m.persistAtomicAudit.mock.calls.at(-1))).not.toContain('"summary"');
+    });
   });
 
   it('returns 400 for invalid action', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/icra/report/a/review', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'secret' }, body: JSON.stringify({ action: 'noop', summary: 'ok' }),
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'noop', summary: 'ok' }),
     }), { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) });
 
     expect(response.status).toBe(400);
@@ -96,7 +171,7 @@ describe('icra/report/[assessmentId]/review route', () => {
     m.selectQueue.push([]);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/report/a/review', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'secret' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
     }), { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) });
 
     expect(response.status).toBe(404);
@@ -108,7 +183,7 @@ describe('icra/report/[assessmentId]/review route', () => {
     m.resolveAdaptiveReportAISlot.mockReturnValueOnce(null);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/report/a/review', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'secret' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'approve', summary: 'ok' }),
     }), { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) });
 
     expect(response.status).toBe(422);
@@ -119,21 +194,22 @@ describe('icra/report/[assessmentId]/review route', () => {
     m.selectQueue.push([{ id: 'a1', organizationContext: {}, locale: 'en-CA' }], [{ profilePayload: { generatedAt: '2026-01-01' } }]);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/report/a/review', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'secret' }, body: JSON.stringify({ action: 'approve', summary: 'approved by governance' }),
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'approve', summary: 'approved by governance' }),
     }), { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) });
 
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.success).toBe(true);
     expect(json.reviewStatus).toBe('approved');
-    // An unclaimed prospect assessment has no tenant to audit against; the decision lives in its own row.
-    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    // Disclosed adaptation (F06 A2): this test asserted that an unclaimed assessment is NOT audited. That was the defect; it is now audited
+    // against the reviewer's acting organization (see the describe block above).
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
   });
 
   const ORG = '22222222-2222-4222-8222-222222222222';
   const review = (summary = 'approved by governance') =>
     new NextRequest('http://localhost/api/icra/report/a/review', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'secret' }, body: JSON.stringify({ action: 'approve', summary, reviewerRole: 'exec_sponsor' }),
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'approve', summary, reviewerRole: 'governance_reviewer' }),
     });
   const context = { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) };
 
@@ -147,10 +223,10 @@ describe('icra/report/[assessmentId]/review route', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
       organizationId: ORG,
-      userId: 'system:icra-report-review',
+      userId: 'reviewer-1',
       action: 'icra.report.review',
       resourceId: '11111111-1111-1111-1111-111111111111',
-      details: expect.objectContaining({ decision: 'approve', reviewerRole: 'exec_sponsor', reviewStatus: 'approved' }),
+      details: expect.objectContaining({ decision: 'approve', reviewerRole: 'governance_reviewer', reviewStatus: 'approved' }),
     }));
     expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('PRIVATE REVIEW SUMMARY');
   });

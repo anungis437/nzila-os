@@ -333,6 +333,23 @@ describe('analytics-actions', () => {
       expect(result.success).toBe(true);
     });
 
+    it('redacts historical claim identifiers and arbitrary private metadata from member metric reads', async () => {
+      mocks.metricsFindMany.mockReturnValue([
+        { id: 'm1', metricType: 'claims_volume', metricValue: '3', metadata: { claimIds: ['case-secret'], note: 'private' } },
+        { id: 'm2', metricType: 'resolution_time', metricValue: '5.0', metadata: { claimsResolved: 2, claimIds: ['other-secret'] } },
+        { id: 'm3', metricType: 'custom', metricValue: '9', metadata: { memberEmail: 'private@example.invalid' } },
+      ]);
+      const result = await getAnalyticsMetrics({});
+      expect(result.success).toBe(true);
+      const metrics = result.metrics ?? [];
+      expect(metrics.map((metric) => metric.metadata)).toEqual([
+        { claimsCount: 3 }, { claimsResolved: 2 }, {},
+      ]);
+      expect(JSON.stringify(metrics)).not.toContain('case-secret');
+      expect(JSON.stringify(metrics)).not.toContain('other-secret');
+      expect(JSON.stringify(metrics)).not.toContain('private@example.invalid');
+    });
+
     it('returns metrics with no filters', async () => {
       const result = await getAnalyticsMetrics({});
       expect(result.success).toBe(true);

@@ -135,23 +135,25 @@ describe('claim writes against canonical Django column defaults', () => {
     expect((await pg.query('SELECT * FROM claim_updates')).rows).toHaveLength(1)
   })
 
-  it('keeps public-ID history behavior when canonical mode is disabled', async () => {
+  it('keys history by the internal primary key in legacy mode too, because the Django foreign key targets claims.id', async () => {
+    // Replaces 'keeps public-ID history behavior when canonical mode is disabled', which re-pointed the foreign key at
+    // claims.claim_id to prove the old behaviour. The physical Django schema never does that, so legacy mode wrote history rows
+    // that violated the real foreign key (found by the runtime acceptance suite, R-14). The API still returns the public id.
     mode.canonical=false
-    await pg.exec('ALTER TABLE claim_updates DROP CONSTRAINT claim_updates_claim_id_fkey; ALTER TABLE claim_updates ADD FOREIGN KEY (claim_id) REFERENCES claims(claim_id) DEFERRABLE INITIALLY DEFERRED')
+    const result=await db.transaction(async tx=>{
+      const typed=tx as unknown as RLSTx
+      const created=await createClaim({organizationId:org,memberId:member},typed)
+      const note=await addClaimUpdate(created.claimId,'Legacy synthetic note',member,'note',typed)
+      return {created,note,history:await getRecentClaimUpdates(created.claimId,typed)}
+    })
     try {
-      const result=await db.transaction(async tx=>{
-        const typed=tx as unknown as RLSTx
-        const created=await createClaim({organizationId:org,memberId:member},typed)
-        const note=await addClaimUpdate(created.claimId,'Legacy synthetic note',member,'note',typed)
-        return {created,note,history:await getRecentClaimUpdates(created.claimId,typed)}
-      })
       expect(result.created.id).not.toBe(result.created.claimId)
       expect(result.note.claimId).toBe(result.created.claimId)
       expect(result.history).toHaveLength(1)
       const stored=(await pg.query<{claim_id:string}>('SELECT claim_id FROM claim_updates')).rows[0]
-      expect(stored.claim_id).toBe(result.created.claimId)
+      expect(stored.claim_id).toBe(result.created.id)
     } finally {
-      await pg.exec('TRUNCATE claims,claim_updates; ALTER TABLE claim_updates DROP CONSTRAINT claim_updates_claim_id_fkey; ALTER TABLE claim_updates ADD FOREIGN KEY (claim_id) REFERENCES claims(id) DEFERRABLE INITIALLY DEFERRED')
+      await pg.exec('TRUNCATE claims,claim_updates')
       mode.canonical=true
     }
   })

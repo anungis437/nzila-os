@@ -5,43 +5,21 @@
  * POST /api/contracts — Create a new commercial contract
  */
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { createContractSchema } from '@/lib/contracts/contract-input';
 import {
   createContract,
 } from '@/services/platform-economics';
 import { db } from '@/db';
-import { commercialContracts } from '@/db/schema';
+import { commercialContracts, billingAccounts, orgSubscriptions } from '@/db/schema';
+import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { eq, desc } from 'drizzle-orm';
-
-const createContractSchema = z.object({
-  billingAccountId: z.guid(),
-  subscriptionId: z.guid().optional(),
-  name: z.string().min(1).max(255),
-  description: z.string().optional(),
-  effectiveDate: z.coerce.date(),
-  expirationDate: z.coerce.date(),
-  autoRenew: z.boolean().optional(),
-  renewalTermMonths: z.number().int().positive().optional(),
-  terminationNoticeDays: z.number().int().nonnegative().optional(),
-  totalContractValue: z.string().optional(),
-  lineItems: z.array(z.object({
-    lineType: z.enum(['module_license', 'feature_access', 'usage_quota', 'seat_allocation', 'support_level', 'sla_commitment', 'custom']),
-    featureKey: z.string(),
-    description: z.string(),
-    quantity: z.number().int().positive().optional(),
-    unitPrice: z.string().optional(),
-    totalPrice: z.string().optional(),
-    usageLimit: z.number().int().nonnegative().optional(),
-    usagePeriod: z.string().optional(),
-    slaTarget: z.string().optional(),
-    effectiveDate: z.coerce.date(),
-    expirationDate: z.coerce.date().optional(),
-  })).optional(),
-});
+import { classifyAcceptanceStanding } from '@/lib/pilot/counterpart-acceptance';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    // Contract value, term and renewal conditions are the organization's commercial position: an officer reads them.
+    auth: { minRole: 'officer' },
     entitlement: 'commercial_reporting',
     openapi: {
       tags: ['Contracts'],
@@ -55,7 +33,15 @@ export const GET = withApi(
       .from(commercialContracts)
       .where(eq(commercialContracts.organizationId, organizationId))
       .orderBy(desc(commercialContracts.createdAt));
-    return { contracts };
+    // A contract the pilot flow accepted says what its acceptance amounts to: one activated on an administrator's statement under the earlier
+    // permissive default is named as unverified here. Derived on read; nothing is rewritten.
+    return {
+      contracts: contracts.map((contract) =>
+        (contract.metadata as { source?: string } | null)?.source === 'pilot-commercial-transition'
+          ? { ...contract, acceptanceStanding: classifyAcceptanceStanding(contract) }
+          : contract,
+      ),
+    };
   },
 );
 
@@ -72,6 +58,11 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+    // The billing account and the subscription must be the caller's organization's: a contract provisions entitlements from its lines.
+    await assertOrganizationOwns([
+      { field: 'billingAccountId', value: body.billingAccountId, table: billingAccounts },
+      { field: 'subscriptionId', value: body.subscriptionId, table: orgSubscriptions },
+    ], organizationId);
     const result = await createContract({
       ...body,
       organizationId,

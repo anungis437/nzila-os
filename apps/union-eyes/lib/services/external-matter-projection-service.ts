@@ -36,6 +36,8 @@ export function toExternalMatterProjection(matter: InternalMatterLike): External
     step: matter.step ?? null,
     filedDate: isoOrNull(matter.filedDate),
     responseDeadline: isoOrNull(matter.responseDeadline),
-    summary: matter.summary ?? null,
+    // The grievance summary/description is internal union material. A view grant is NOT
+    // an approval to disclose it. No separately reviewed counsel-safe summary is stored.
+    summary: null,
   };
 }

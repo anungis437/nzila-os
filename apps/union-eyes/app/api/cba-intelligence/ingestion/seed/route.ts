@@ -1,5 +1,6 @@
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { withApi, ApiError } from "@/lib/api/framework";
-import { performAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
+import { performAtomicAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 import { seedSources } from "@/lib/services/cba-intelligence/seed-sources";
 
 // ---------------------------------------------------------------------------
@@ -16,12 +17,21 @@ export const POST = withApi(
     },
   },
   async ({ userId, organizationId }) => {
-    // Seeding inserts the registry one source at a time, so it cannot share one transaction: its intent is recorded
-    // first and nothing is seeded if that record cannot be written.
+    // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
+    await requireSystemAdmin();
+    // The whole registry seed and its audit record commit in one transaction: a source that cannot be inserted, or an audit record
+    // that cannot be written, leaves the registry as it was.
     try {
-      return await performAuditedOperation(
-        { organizationId, userId, action: "cba_intel.sources.seed", resourceType: "cba_intel_sources" },
-        () => seedSources(),
+      return await performAtomicAuditedOperation(
+        {
+          organizationId,
+          userId,
+          scope: "system",
+          action: "cba_intel.sources.seed",
+          resourceType: "cba_intel_sources",
+          resultDetails: (result) => ({ created: result.created, skipped: result.skipped }),
+        },
+        () => seedSources({ failFast: true }),
       );
     } catch (error) {
       const refused = operationAuditResponse(error);

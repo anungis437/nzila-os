@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
@@ -30,7 +32,7 @@ function setResults(...results: unknown[]) {
 
 vi.mock('@/db/db', () => ({ db: mocks.chain }));
 vi.mock('@/db/schema/domains/member', () => ({ organizationUsers: {} }));
-vi.mock('@/db/schema', () => ({ organizations: {}, orgConfigurations: {}, orgUsage: {} }));
+vi.mock('@/db/schema', () => ({ organizations: {}, orgConfigurations: {} }));
 vi.mock('drizzle-orm/node-postgres', () => ({}));
 vi.mock('drizzle-orm', () => ({
   eq: () => ({}),
@@ -65,6 +67,14 @@ import {
 const tx = mocks.chain as never;
 
 describe('admin-actions', () => {
+  it('does not invent a storage measurement', () => {
+    const source = readFileSync(path.join(__dirname, '../admin-actions.ts'), 'utf8');
+    expect(source).not.toMatch(/totalStorage\s*=\s*0/);
+    expect(source).not.toMatch(/storageUsed\s*=\s*["']0["']/);
+    expect(source).not.toContain('totalStorage');
+    expect(source).not.toContain('storageUsed');
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.queue.length = 0;
@@ -73,13 +83,12 @@ describe('admin-actions', () => {
 
   describe('getSystemStats', () => {
     it('aggregates system-wide statistics', async () => {
-      setResults([{ count: 5 }], [{ count: 3 }], [{ count: 2 }], [{ total: 1000 }], [{ count: 1 }]);
+      setResults([{ count: 5 }], [{ count: 3 }], [{ count: 2 }], [{ count: 1 }]);
       const stats = await getSystemStats(tx);
       expect(stats).toEqual({
         totalMembers: 5,
         totalOrgs: 3,
         activeOrgs: 2,
-        totalStorage: 1000,
         activeToday: 1,
       });
     });
@@ -91,7 +100,6 @@ describe('admin-actions', () => {
         totalMembers: 0,
         totalOrgs: 0,
         activeOrgs: 0,
-        totalStorage: 0,
         activeToday: 0,
       });
     });
@@ -159,7 +167,8 @@ describe('admin-actions', () => {
       ]);
       const orgs = await getAdminOrgs('search');
       expect(orgs).toHaveLength(1);
-      expect(orgs[0]).toMatchObject({ id: 'o1', totalUsers: 0, activeUsers: 0, storageUsed: '0' });
+      expect(orgs[0]).toMatchObject({ id: 'o1', totalUsers: 0, activeUsers: 0 });
+      expect(orgs[0]).not.toHaveProperty('storageUsed');
     });
 
     it('applies defaults for nullable org fields (no search)', async () => {

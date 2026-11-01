@@ -41,8 +41,11 @@ export const GET = withOrganizationAuth(async (
     outcome: 'success',
   });
 
+  // Nothing in the application computes engagement snapshots yet, so an empty list is the absence of a measurement, not a finding that no
+  // member is disengaged; the answer says so instead of reading as a measured zero.
   return NextResponse.json({
     members: latest,
+    availability: latest.length === 0 ? 'not_computed' : 'computed',
     governance: {
       autoApplied: false,
       humanOverrideRequired: true,

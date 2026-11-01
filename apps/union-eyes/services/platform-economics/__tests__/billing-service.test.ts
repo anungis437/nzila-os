@@ -26,10 +26,11 @@ const h = vi.hoisted(() => {
     transaction: (fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
   };
   const auditLog = vi.fn();
+  const persistAtomicAudit = vi.fn(async () => undefined);
   const appendLedgerEntry = vi.fn(async () => 'ledger-1');
   const requireReconciliation = vi.fn(async () => ({ id: 'run-1' }));
   const getActiveContract = vi.fn();
-  return { queue, db, auditLog, appendLedgerEntry, requireReconciliation, getActiveContract };
+  return { queue, db, auditLog, persistAtomicAudit, appendLedgerEntry, requireReconciliation, getActiveContract };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
@@ -57,6 +58,7 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditEventType: { DATA_CREATE: 'data_create', DATA_UPDATE: 'data_update', PAYMENT_PROCESSED: 'payment_processed' },
   AuditSeverity: { HIGH: 'high', CRITICAL: 'critical' },
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('../ledger-service', () => ({ appendLedgerEntry: h.appendLedgerEntry }));
 vi.mock('../reconciliation-service', () => ({ requireReconciliation: h.requireReconciliation }));
 vi.mock('../contract-service', () => ({ getActiveContract: h.getActiveContract }));
@@ -85,6 +87,7 @@ const pushSel = (...items: unknown[]) => h.queue.push(...items);
 beforeEach(() => {
   h.queue.length = 0;
   h.auditLog.mockReset();
+  h.persistAtomicAudit.mockClear();
   h.appendLedgerEntry.mockClear();
   h.requireReconciliation.mockClear();
   h.getActiveContract.mockReset();
@@ -156,14 +159,14 @@ describe('platform-economics/billing-service', () => {
     });
 
     it('throws when the period is already closed', async () => {
-      pushSel([{ id: 'bp-1', isClosed: true, label: 'P1' }]);
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: true, label: 'P1' }]);
       await expect(closeBillingPeriod('bp-1', 'user-1')).rejects.toThrow('already closed');
     });
   });
 
   describe('generateInvoice', () => {
     const account = { id: 'acct-1', netTermsDays: 30 };
-    const period = { id: 'bp-1', isClosed: false, label: 'P1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
+    const period = { id: 'bp-1', organizationId: 'o1', isClosed: false, label: 'P1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
     const subscription = {
       organizationId: 'o1',
       status: 'active',
@@ -200,8 +203,24 @@ describe('platform-economics/billing-service', () => {
       // line item inserts default to []
       const result = await generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1', createdBy: 'user-1' });
       expect(result.id).toBe('inv-1');
+      // The ledger entries and the audit record join the invoice transaction (DEF-0B3-BILLING-AUDIT-NOT-ATOMIC).
       expect(h.appendLedgerEntry).toHaveBeenCalled();
-      expect(h.auditLog).toHaveBeenCalledTimes(1);
+      expect(h.appendLedgerEntry.mock.calls.every((call: unknown[]) => call[1] !== undefined)).toBe(true);
+      expect(h.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'invoice_generated', resourceId: 'inv-1', organizationId: 'o1' }));
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('writes no invoice when its audit record cannot be written', async () => {
+      pushSel([account]);
+      pushSel([period]);
+      pushSel([]);
+      h.getActiveContract.mockResolvedValueOnce({ id: 'ctr-1' });
+      pushSel([subscription]);
+      pushSel([plan]);
+      pushSel([]);
+      pushSel([{ id: 'inv-1' }]);
+      h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+      await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1', createdBy: 'user-1' })).rejects.toThrow('audit down');
     });
 
     it('throws when there is no billing account', async () => {
@@ -211,7 +230,7 @@ describe('platform-economics/billing-service', () => {
 
     it('throws when the period is closed', async () => {
       pushSel([account]);
-      pushSel([{ id: 'bp-1', isClosed: true, label: 'P1' }]);
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: true, label: 'P1' }]);
       await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' })).rejects.toThrow('is closed');
     });
 
@@ -361,7 +380,7 @@ describe('platform-economics/billing-service', () => {
       pushSel([{ id: 'bp-1' }]); // getOrCreateBillingPeriod existing
       // generateInvoice → throws 'already exists' (skipped)
       pushSel([{ id: 'acct-1', netTermsDays: 30 }]); // getBillingAccount
-      pushSel([{ id: 'bp-1', isClosed: false, label: 'P', periodStart: runAt, periodEnd: runAt }]); // period
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: false, label: 'P', periodStart: runAt, periodEnd: runAt }]); // period
       pushSel([{ id: 'inv-x', invoiceNumber: 'INV-X' }]); // existing invoice → throws already exists
       // draft invoices query
       pushSel([{ id: 'draft-1', metadata: null }]);
@@ -386,32 +405,37 @@ describe('platform-economics/billing-service', () => {
 
   describe('getInvoiceWithLineItems', () => {
     it('returns an invoice with line items', async () => {
-      pushSel([{ id: 'inv-1' }]); // invoice
+      pushSel([{ id: 'inv-1', organizationId: 'o1' }]); // invoice
       pushSel([{ id: 'li-1' }]); // line items
-      const result = await getInvoiceWithLineItems('inv-1');
+      const result = await getInvoiceWithLineItems('inv-1', 'o1');
       expect(result?.lineItems).toHaveLength(1);
     });
 
     it('returns null when not found', async () => {
       pushSel([]);
-      expect(await getInvoiceWithLineItems('inv-1')).toBeNull();
+      expect(await getInvoiceWithLineItems('inv-1', 'o1')).toBeNull();
     });
   });
 
   describe('replayInvoiceDeterministically', () => {
+    it('refuses a foreign invoice before reading its line items', async () => {
+      pushSel([{ id: 'inv-1', organizationId: 'foreign-org' }]);
+      expect(await replayInvoiceDeterministically('inv-1', 'o1')).toBeNull();
+    });
+
     it('recomputes the subtotal and lineage', async () => {
-      pushSel([{ id: 'inv-1', subtotal: '100.00', totalAmount: '100.00', metadata: { pricingRuleVersion: 'v1' } }]); // invoice
+      pushSel([{ id: 'inv-1', organizationId: 'o1', subtotal: '100.00', totalAmount: '100.00', metadata: { pricingRuleVersion: 'v1' } }]); // invoice
       pushSel([
         { id: 'li-1', costType: 'base_subscription', amount: '100.00', metadata: { usageAggregateId: 'agg-1', usageEventIds: ['ue-1', 'ue-2'] } },
       ]); // line items
-      const result = await replayInvoiceDeterministically('inv-1');
+      const result = await replayInvoiceDeterministically('inv-1', 'o1');
       expect(result?.recomputed.isMatch).toBe(true);
       expect(result?.lineage[0]!.usageEventIds).toEqual(['ue-1', 'ue-2']);
     });
 
     it('returns null when the invoice is missing', async () => {
       pushSel([]); // getInvoiceWithLineItems invoice missing
-      expect(await replayInvoiceDeterministically('inv-1')).toBeNull();
+      expect(await replayInvoiceDeterministically('inv-1', 'o1')).toBeNull();
     });
   });
 

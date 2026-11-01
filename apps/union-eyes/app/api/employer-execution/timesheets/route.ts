@@ -1,41 +1,51 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
-import { db } from "@/db";
+import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
+import { rowsVisibleToGrant } from "@/lib/finance/principal-financial-authority";
 import { employerTimesheetBatches, employerTimesheetEntries, employers, worksites, bargainingUnits } from "@/db/schema";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { and, desc, eq, ne } from "drizzle-orm";
 import { normalizeCsv, sha256 } from "../_lib";
 
+const MAX_CSV_CHARACTERS = 2_000_000;
+
 const createSchema = z.object({
   employerId: z.guid(),
   worksiteId: z.guid().optional(),
   bargainingUnitId: z.guid().optional(),
-  periodStart: z.string(),
-  periodEnd: z.string(),
-  sourceFileName: z.string(),
-  csvContent: z.string(),
-});
+  // Dates are calendar dates, the file name is a bounded label and the CSV is capped: an uncapped string was hashed, parsed and stored whole.
+  periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'periodStart must be YYYY-MM-DD'),
+  periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'periodEnd must be YYYY-MM-DD'),
+  sourceFileName: z.string().trim().min(1).max(255),
+  csvContent: z.string().min(1).max(MAX_CSV_CHARACTERS),
+}).refine((value) => value.periodStart <= value.periodEnd, { message: 'periodStart must not be after periodEnd', path: ['periodEnd'] });
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    // A batch names the employer's workers and their hours: a financial reader's data, not a member's.
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_timesheet_ingest",
     openapi: { tags: ["Employer Execution"], summary: "List timesheet batches" },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
-    const rows = await db
-      .select()
-      .from(employerTimesheetBatches)
-      .where(eq(employerTimesheetBatches.organizationId, organizationId))
-      .orderBy(desc(employerTimesheetBatches.createdAt));
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view" });
+      return tx
+        .select()
+        .from(employerTimesheetBatches)
+        .where(rowsVisibleToGrant(grant, organizationId, employerTimesheetBatches.organizationId, employerTimesheetBatches.employerId))
+        .orderBy(desc(employerTimesheetBatches.createdAt))
+        .limit(200);
+    });
     return { data: rows };
   },
 );
 
 export const POST = withApi(
   {
-    auth: { minRole: "steward" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_timesheet_ingest",
     body: createSchema,
     openapi: { tags: ["Employer Execution"], summary: "Upload and normalize timesheet CSV" },
@@ -47,14 +57,19 @@ export const POST = withApi(
     const normalized = normalizeCsv(body.csvContent);
     const sourceFileHash = sha256(body.csvContent);
 
-    const batch = await withRLSContext({ organizationId }, async (tx) => {
+    const batch = await withRLSContext({ organizationId, userId }, async (tx) => {
+      // Require the authenticated principal's live prepare duty for this employer
+      // before reading registry records or creating a timesheet batch.
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:prepare", employerId: body.employerId });
       // Every structural reference must belong to this organization.
       const [employer] = await tx
-        .select({ id: employers.id })
+        .select({ id: employers.id, status: employers.status })
         .from(employers)
         .where(and(eq(employers.organizationId, organizationId), eq(employers.id, body.employerId)))
         .limit(1);
       if (!employer) throw ApiError.notFound("Employer not found");
+      // An archived employer is out of the registry: it takes no further payroll input.
+      if (employer.status === "archived") throw ApiError.conflict("The employer is archived and takes no timesheet input");
 
       if (body.worksiteId) {
         const [worksite] = await tx

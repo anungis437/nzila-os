@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/api-auth-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import {
   authorizeExternalMatterAccess,
@@ -58,6 +59,11 @@ export function withExternalMatterResourceAuth<TParams extends object = External
   options: {
     requiredPermission: ExternalMatterPermission;
     resolve: (request: Request, params?: TParams) => ExternalResourceParams;
+    /**
+     * Who records a successful read. 'middleware' (default): one record written here, in the same transaction as the read, carrying the
+     * authorization decision. 'handler': the route writes its own, more specific record (the document download does).
+     */
+    readRecord?: 'middleware' | 'handler';
   },
   handler: (
     request: Request,
@@ -75,20 +81,24 @@ export function withExternalMatterResourceAuth<TParams extends object = External
         representativeOrganizationId: (user as { organizationId?: string }).organizationId,
       };
 
-      return await withRLSContext({ organizationId: resource.organizationId }, async () => {
+      const method = request.method.toUpperCase();
+      const isRead = method === 'GET' || method === 'HEAD';
+      const middlewareRecordsRead = isRead && (options.readRecord ?? 'middleware') === 'middleware';
+
+      return await withRLSContext({ organizationId: resource.organizationId }, async (tx) => {
         const decision = await authorizeExternalMatterAccess({
           actor,
           organizationId: resource.organizationId,
           matterType: resource.matterType,
           matterId: resource.matterId,
           requiredPermission: options.requiredPermission,
-        });
+        }, { recordAllowed: !middlewareRecordsRead });
 
         if (!decision.allowed || !decision.authorityId || !decision.matterGrantId) {
           return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        return handler(request, {
+        const response = await handler(request, {
           actor,
           organizationId: resource.organizationId,
           matterType: resource.matterType,
@@ -96,6 +106,30 @@ export function withExternalMatterResourceAuth<TParams extends object = External
           authorityId: decision.authorityId,
           matterGrantId: decision.matterGrantId,
         }, routeParams);
+
+        // The read happened on this transaction; its record is written on it too, before the response is released. A record that cannot
+        // be written throws, the transaction (and anything the read touched) is abandoned, and the outside party receives nothing.
+        if (middlewareRecordsRead && response.status < 400) {
+          await persistAtomicAudit(tx, {
+            organizationId: resource.organizationId,
+            userId: actor.userId,
+            action: 'external.resource.read',
+            resourceType: resource.matterType,
+            resourceId: resource.matterId,
+            details: {
+              actorKind: 'external_representative',
+              representativeOrganizationId: actor.representativeOrganizationId ?? null,
+              permission: options.requiredPermission,
+              reason: decision.reason,
+              authorityId: decision.authorityId,
+              matterGrantId: decision.matterGrantId,
+              method,
+              status: response.status,
+              routeResourceId: typeof (routeParams as { id?: unknown } | undefined)?.id === 'string' ? (routeParams as { id: string }).id : null,
+            },
+          });
+        }
+        return response;
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { PageHeading } from '@/components/dashboard/page-heading';
 import { Card } from "@/components/ui/card";
-import { Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Check, Download, Info, Loader2 } from "lucide-react";
+import { Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Info, Loader2 } from "lucide-react";
 
 type OrgSettingsSection = "general" | "branding" | "members" | "integrations" | "notifications" | "security" | "billing";
 
@@ -60,11 +60,14 @@ const DEFAULT_SETTINGS = {
 
 export default function OrgSettingsContent() {
   const t = useTranslations();
+  const isFrench = useLocale().startsWith('fr');
   const [activeSection, setActiveSection] = useState<OrgSettingsSection>("general");
   const [hasChanges, setHasChanges] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const [notEnforced, setNotEnforced] = useState<string[]>([]);
   
   const [orgSettings, setOrgSettings] = useState(DEFAULT_SETTINGS);
 
@@ -77,6 +80,9 @@ export default function OrgSettingsContent() {
       const json = await res.json();
       if (!json.success || !json.data?.organization) throw new Error('SETTINGS_UNAVAILABLE');
       if (json.success && json.data?.organization) {
+        setNotEnforced(Array.isArray(json.data.notEnforced)
+          ? json.data.notEnforced.filter((key: unknown): key is string => typeof key === 'string')
+          : []);
         const org = json.data.organization;
         const s = org.settings ?? {};
         setOrgSettings(prev => ({
@@ -197,6 +203,7 @@ export default function OrgSettingsContent() {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError(false);
     try {
       const res = await fetch('/api/settings/organization', {
         method: 'PUT',
@@ -236,17 +243,24 @@ export default function OrgSettingsContent() {
         }),
       });
       const json = await res.json();
-      if (json.success) {
-        setHasChanges(false);
+      if (!res.ok || !json.success || json.data?.updated !== true) {
+        throw new Error('SETTINGS_SAVE_FAILED');
       }
+      // A successful write does not imply these settings are enforced by the platform.
+      setNotEnforced(Array.isArray(json.data.notEnforced)
+        ? json.data.notEnforced.filter((key: unknown): key is string => typeof key === 'string')
+        : []);
+      setHasChanges(false);
     } catch {
-      // save failed — keep dirty state
+      // Never display a false save-success state or clear unsaved edits after a failed request.
+      setSaveError(true);
     } finally {
       setSaving(false);
     }
   };
 
   const handleDiscard = () => {
+    setSaveError(false);
     setLoading(true);
     setHasChanges(false);
     loadSettings();
@@ -274,6 +288,11 @@ export default function OrgSettingsContent() {
       >
         <PageHeading title={t('settings.title')} description={t('settings.subtitle')} />
 
+        {saveError && (
+          <div role="alert" className="mt-4 rounded-lg border border-destructive p-4 text-sm text-destructive">
+            {isFrench ? 'Les paramètres n’ont pas été enregistrés. Vos modifications sont conservées; veuillez réessayer.' : 'Settings were not saved. Your changes are preserved; please try again.'}
+          </div>
+        )}
         <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
@@ -760,6 +779,15 @@ export default function OrgSettingsContent() {
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('settings.securityCompliance')}</h2>
                   <p className="text-gray-600">{t('settings.securityComplianceDescription')}</p>
                 </div>
+                <div role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                  <p className="font-semibold">{isFrench ? 'Préférences enregistrées, non appliquées' : 'Stored preferences, not enforced controls'}</p>
+                  <p className="mt-1">{isFrench
+                    ? 'Les options de sécurité ci-dessous ne sont pas appliquées par les mécanismes de connexion, de session ou de mot de passe. Ne les considérez pas comme des protections actives.'
+                    : 'The security options below are not enforced by sign-in, session or password mechanisms. Do not rely on them as active protections.'}</p>
+                  {notEnforced.length > 0 && (
+                    <p className="mt-2 break-words">{isFrench ? 'Champs enregistrés sans application : ' : 'Saved but unenforced fields: '}{notEnforced.join(', ')}</p>
+                  )}
+                </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -859,92 +887,21 @@ export default function OrgSettingsContent() {
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('settings.billingSubscription')}</h2>
                   <p className="text-gray-600">{t('settings.billingSubscriptionDescription')}</p>
                 </div>
-
-                <div className="space-y-4">
-                  <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{orgSettings.billing.plan}</h3>
-                        <p className="text-sm text-gray-600">{orgSettings.billing.memberCount} members</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-gray-900">$299</p>
-                        <p className="text-sm text-gray-600">{t('settings.perMonth')}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Check size={16} className="text-green-600" />
-                      <span>{t('settings.unlimitedGrievanceCases')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Check size={16} className="text-green-600" />
-                      <span>{t('settings.advancedAnalytics')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Check size={16} className="text-green-600" />
-                      <span>{t('settings.prioritySupport')}</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">{t('settings.paymentMethod')}</p>
-                        <p className="text-sm text-gray-600">{orgSettings.billing.paymentMethod}</p>
-                      </div>
-                      <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        {t('settings.update')}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-3">{t('settings.recentInvoices')}</h3>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('settings.date')}</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('settings.amount')}</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('settings.status')}</th>
-                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">{t('settings.action')}</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          <tr>
-                            <td className="px-4 py-3 text-sm text-gray-900">Dec 1, 2024</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">$299.00</td>
-                            <td className="px-4 py-3">
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                                <Check size={12} />
-                                {t('settings.paid')}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <button className="text-blue-600 hover:text-blue-700 text-sm" aria-label="Download December 2024 invoice">
-                                <Download size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-4 py-3 text-sm text-gray-900">Nov 1, 2024</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">$299.00</td>
-                            <td className="px-4 py-3">
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                                <Check size={12} />
-                                {t('settings.paid')}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <button className="text-blue-600 hover:text-blue-700 text-sm" aria-label="Download November 2024 invoice">
-                                <Download size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900">{orgSettings.billing.plan}</h3>
+                  <p className="mt-1 text-sm text-gray-700">
+                    {orgSettings.billing.memberCount} {isFrench ? 'membres' : 'members'}
+                  </p>
+                </div>
+                <div role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                  <p className="font-semibold">
+                    {isFrench ? 'Facturation non disponible sur cette page' : 'Billing records unavailable on this page'}
+                  </p>
+                  <p className="mt-1">
+                    {isFrench
+                      ? 'Aucune source de facturation autorisée n’est connectée à cet écran. Les prix, les paiements, les factures et les droits du forfait ne sont pas vérifiés ici. Pour obtenir une facture ou modifier un paiement, utilisez le processus de facturation approuvé par votre organisation.'
+                      : 'No authoritative billing source is connected to this screen. Prices, payments, invoices and plan entitlements are not verified here. Use your organization’s approved billing process to obtain invoices or change a payment method.'}
+                  </p>
                 </div>
               </div>
             )}

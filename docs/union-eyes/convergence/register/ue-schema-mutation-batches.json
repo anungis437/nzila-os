@@ -1,0 +1,2966 @@
+{
+  "schemaVersion": 1,
+  "mission": "UE-CURSOR-FINAL-CLOSURE",
+  "applyNow": false,
+  "note": "Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
+  "censusCount": 202,
+  "sourceMutationBaselineSum": 13,
+  "mutationBaselineSum": 0,
+  "mutationLiveSum": 0,
+  "graphComplete": true,
+  "unresolvedCount": 0,
+  "unresolvedSample": [],
+  "batches": [
+    {
+      "id": "mutation-finance-latent",
+      "order": 1,
+      "ratchet": "mutation-scope",
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "Before any financial-service job is mounted, put the job tenant into the WHERE of each flagged update. dues_transactions uses eq(organizationId, tenantId) with the tenantId argument, not the id just loaded. payments and notification_queue declare tenantId; call inOrganization(row.tenantId, callerTenantId), implemented as equality on that column. The caller tenant comes from the job argument. Do not copy the tenant off the row loaded by the same id. Do not insert an unused organization identifier to satisfy the scanner. Do not issue a financial mandate. services/financial-service is not an approval path. Do not edit the mutation scanner.",
+      "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts and apps/union-eyes/lib/finance/__tests__/finance-canonical.test.ts",
+      "applyNow": true,
+      "entryCount": 4,
+      "statementCount": 7,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "mutation-clc-sync-log",
+      "order": 2,
+      "ratchet": "mutation-scope",
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "clc_sync_log is TENANT_RLS_REQUIRED and is served by the organization-scoped routes app/api/clc/sync, app/api/clc/dashboard and app/api/clc/remittances. The partnership service has no caller organization and no production, dynamic, or worker importer. It must not insert or update that table. Django ClcSyncLogViewSet still names the relation and is not changed here. Do not drop the relation. Do not edit the mutation scanner.",
+      "proof": "apps/union-eyes/lib/services/external-data/__tests__/clc-partnership-service.test.ts",
+      "applyNow": true,
+      "entryCount": 1,
+      "statementCount": 1,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "mutation-pilot-rebind",
+      "order": 3,
+      "ratchet": "mutation-scope",
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The rebind compares verifiedOrganizationId with the previous organization. The scanner ignores comments when it measures the distance to .where( and when it reads the predicate, so a comment cannot hide that predicate and cannot supply an organization token. Whitespace between statements still counts. The compare-and-set is unchanged.",
+      "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+      "applyNow": true,
+      "entryCount": 1,
+      "statementCount": 1,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "mutation-workbook-unclaimed",
+      "order": 4,
+      "ratchet": "mutation-scope",
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "A workbook has no organization until it is claimed. The Stripe fulfilment update and the claim update require claimedByUserId to be null beside the existing credential guards. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token, and writes the organization returned for the authenticated user. In-process PGlite proves one of two serialized transactions wins and the other caller organization is not stored. Native two-session proof stays READY_FOR_VS_EXECUTION. Do not invent an organization column.",
+      "proof": "apps/union-eyes/db/__tests__/workbook-unclaimed-owner.pglite.test.ts",
+      "applyNow": true,
+      "entryCount": 2,
+      "statementCount": 2,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "mutation-location-retention",
+      "order": 5,
+      "ratchet": "mutation-scope",
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "Each retention delete names the owning userId and expiresAt. The sweep reads the expired owners, deletes that user's expired rows, and writes one deletion log in the same transaction. A runtime session cannot see another member's rows, so complete coverage still requires the system role. In-process PGlite proves both members' expired rows go, live rows stay, and a failed log rolls the deletes back. Native combined-schema proof stays READY_FOR_VS_EXECUTION.",
+      "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+      "applyNow": true,
+      "entryCount": 2,
+      "statementCount": 2,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-live-unreferenced-blocked",
+      "order": 9,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "A production file names this relation. Reclassify it before any retirement.",
+      "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
+      "applyNow": false,
+      "entryCount": 10,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-verify-dead-required",
+      "order": 10.5,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "A kept Drizzle relation, a public schema export, a compatibility re-export, or a service that still reads or writes this declaration keeps it. accessibility_audits, accessibility_issues, financial_audit_log, gss_applications, indigenous_member_data, and member_addresses stay because those services name them. The sixteen dependency holds stay because a kept relation or the public user_sessions export names them. Duplicate pgTable bodies for accessibility, indigenous data, and LMBP immigration now re-export the domain declaration. None of these six services is reached from an App Router entry, so retention is not a finished persona. Census column gaps are not evolved here. Do not retire any of these to shrink the census. Do not DROP the relation.",
+      "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
+      "applyNow": false,
+      "entryCount": 20,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-django-defined",
+      "order": 12,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "Django still defines this relation. Do not retire the declaration and do not generate a stub-evolution migration for it.",
+      "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
+      "applyNow": false,
+      "entryCount": 1,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-verify-reachable-blocked",
+      "order": 14,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "A production entry reaches the relation and the stub generator refuses it (enum collision, pgvector, a required column without a Django base default, or an absent table). Do not generate a tranche for it.",
+      "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts",
+      "applyNow": false,
+      "entryCount": 12,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-contained-deny-all",
+      "order": 15,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "No runtime authority is granted. Do not evolve the stub and do not grant the runtime role access. The census entry stays until a capability is enabled and a reviewed migration lands, or the declaration is retired under a later decision.",
+      "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
+      "entryCount": 116,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-global-reference",
+      "order": 16,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "Global reference data. Shape and seed need an owner decision. Do not emit a tenant migration.",
+      "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
+      "entryCount": 15,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-system-only",
+      "order": 17,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "System-only shape. Do not emit a tenant migration.",
+      "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
+      "entryCount": 7,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-create-relation",
+      "order": 18,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "The declared relation is absent. Do not invent a CREATE. These names stay equal to tooling/db/canonical-schema/oracle-binding.json dispositionExcluded. Keys and RLS need a reviewed design.",
+      "proof": "tooling/db/canonical-schema/oracle-binding.json",
+      "applyNow": false,
+      "entryCount": 10,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-individual-decision",
+      "order": 19,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "Enum-name collision, pgvector, or a missing runtime privilege. The stub generator already refuses these. Do not evolve them in a tranche.",
+      "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts",
+      "applyNow": false,
+      "entryCount": 5,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-registry-gap",
+      "order": 20,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "No storage-authority entry. Classify the relation before any evolution.",
+      "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
+      "entryCount": 4,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "schema-separate-database",
+      "order": 21,
+      "ratchet": "census",
+      "execution": "hold",
+      "shrink": "none",
+      "action": "The relation belongs to another database. Do not evolve it on this lineage.",
+      "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
+      "entryCount": 2,
+      "statementCount": 0,
+      "liveStatementCount": 0
+    }
+  ],
+  "schema": [
+    {
+      "table": "accessibility_audits",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "lib/accessibility/accessibility-service.ts inserts and updates accessibilityAudits. The domain declaration stays. No route reaches that service. The census column gap is not evolved here."
+    },
+    {
+      "table": "accessibility_issues",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "lib/accessibility/accessibility-service.ts inserts accessibilityIssues for an audit. The domain declaration stays. No route reaches that service. The census column gap is not evolved here."
+    },
+    {
+      "table": "account_balance_reconciliation",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "address_change_history",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "address_validation_cache",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [
+        "required-undeclared:address_line1"
+      ]
+    },
+    {
+      "table": "ai_budgets",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "alert_recipients",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "anti_scab_violations",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "arbitrator_profiles",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "arms_length_verification",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "audit_security.failed_login_attempts",
+      "batchId": "schema-registry-gap",
+      "disposition": "REGISTRY_GAP",
+      "registryClass": "UNREGISTERED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": false,
+      "djangoDefined": false,
+      "blockers": [
+        "non-public-schema",
+        "table-absent"
+      ]
+    },
+    {
+      "table": "audit_security.rate_limit_events",
+      "batchId": "schema-registry-gap",
+      "disposition": "REGISTRY_GAP",
+      "registryClass": "UNREGISTERED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": false,
+      "djangoDefined": false,
+      "blockers": [
+        "non-public-schema",
+        "table-absent"
+      ]
+    },
+    {
+      "table": "audit_security.security_events",
+      "batchId": "schema-registry-gap",
+      "disposition": "REGISTRY_GAP",
+      "registryClass": "UNREGISTERED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": false,
+      "blockers": [
+        "non-public-schema"
+      ]
+    },
+    {
+      "table": "autopay_settings",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "award_history",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "award_templates",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "band_council_consent",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "band_councils",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "bank_of_canada_rates",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "bank_reconciliation",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "A production file reads this relation: lib/services/audit-trail-service.ts"
+    },
+    {
+      "table": "bargaining_team_members",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "benefit_comparisons",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "blind_trust_registry",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "break_glass_activations",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "break_glass_system",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "budget_pool",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "budgetReservations.poolId references budgetPool, and finance summary plus financial-insights read budget_pool. The declaration stays."
+    },
+    {
+      "table": "budget_reservations",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "cba_contacts",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "cba_footnotes",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "cba_intel_agreements",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_benchmark_snapshots",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_clauses",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_documents",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_extraction_runs",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_findings",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_freshness_log",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_ingestion_jobs",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_review_decisions",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_sources",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_intel_wage_adjustments",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "cba_version_history",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "certification_alerts",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "certification_audit_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "certification_compliance_reports",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "certification_types",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "clc_bargaining_trends",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "clc_chart_of_accounts",
+      "batchId": "schema-separate-database",
+      "disposition": "SEPARATE_DATABASE",
+      "registryClass": "SEPARATE_DATABASE_BOUNDARY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "clc_oauth_tokens",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "clc_per_capita_benchmarks",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "clc_union_density",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "clc_webhook_log",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "clc_sync_log relations name clcWebhookLog. The declaration stays."
+    },
+    {
+      "table": "cnesst_filings",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "conflict_audit_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "conflict_disclosures",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "conflict_of_interest_policy",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "consent_records",
+      "batchId": "schema-individual-decision",
+      "disposition": "INDIVIDUAL_DECISION",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "enum-collision:consent_status"
+      ]
+    },
+    {
+      "table": "continuing_education",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "contribution_rates",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "cpi_adjusted_pricing",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "cpi_data",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "cross_border_transactions",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "cross_org_access_log",
+      "batchId": "schema-system-only",
+      "disposition": "SYSTEM_ONLY_SHAPE",
+      "registryClass": "SYSTEM_ONLY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "currency_enforcement_audit",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "currency_enforcement_policy",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "currency_enforcement_violations",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "currency_exchange_rates",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "customer_nps_surveys",
+      "batchId": "schema-system-only",
+      "disposition": "SYSTEM_ONLY_SHAPE",
+      "registryClass": "SYSTEM_ONLY",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "customer_onboarding_milestones",
+      "batchId": "schema-system-only",
+      "disposition": "SYSTEM_ONLY_SHAPE",
+      "registryClass": "SYSTEM_ONLY",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "data_classification_policy",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [
+        "required-undeclared:allow_greivance_participation"
+      ]
+    },
+    {
+      "table": "disaster_recovery_drills",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "donation_receipts",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "donations",
+      "batchId": "schema-separate-database",
+      "disposition": "SEPARATE_DATABASE",
+      "registryClass": "SEPARATE_DATABASE_BOUNDARY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "dues_rates",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "memberDuesLedgerRelations names duesRates. The declaration stays."
+    },
+    {
+      "table": "dunning_cases",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "dunning_policies",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "dunning_steps",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "emergency_declarations",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "employer_access_attempts",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "event_attendees",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "event_reminders",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "calendar_events relations name eventReminders. The declaration stays."
+    },
+    {
+      "table": "exchange_rates",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "external_document_files",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "external_document_libraries",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "external_document_permissions",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "external_document_sites",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "federation_remittances",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "fee_settlement_lines",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "financial_audit_log",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "lib/services/audit-trail-service.ts inserts and queries financialAuditLog. The signature AuditTrailService is a different class and does not own this table. The declaration stays. Do not invent a finance officer. The census column gap is not evolved here."
+    },
+    {
+      "table": "firewall_compliance_audit",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "fmv_audit_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "fmv_benchmarks",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "fmv_policy",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "fmv_violations",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "fx_rate_audit_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "gl_account_mappings",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "A production file reads this relation: services/platform-economics/finance-outputs.ts"
+    },
+    {
+      "table": "governance_events",
+      "batchId": "schema-system-only",
+      "disposition": "SYSTEM_ONLY_SHAPE",
+      "registryClass": "SYSTEM_ONLY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "grievance_approvals",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "grievance_communications relations name grievanceApprovals. The declaration stays."
+    },
+    {
+      "table": "grievance_assignments",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "grievance_transitions relations name grievanceAssignments. The declaration stays."
+    },
+    {
+      "table": "grievance_communications",
+      "batchId": "schema-django-defined",
+      "disposition": "RETIRE_DECLARATION",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "grievance_settlements",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "A production file reads this relation: app/api/finance/summary/route.ts"
+    },
+    {
+      "table": "grievance_stages",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "grievance_transitions references grievanceStages. The declaration stays. Do not drop the physical foreign key."
+    },
+    {
+      "table": "grievance_workflows",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "grievance_stages.workflowId references grievanceWorkflows. The declaration stays. Do not drop the physical foreign key."
+    },
+    {
+      "table": "gss_applications",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [
+        "required-undeclared:met2_week_target"
+      ],
+      "holdReason": "services/lmbp-immigration-service.ts inserts, selects, and updates gssApplications, including met2WeekTarget. lmbp-immigration-schema.ts re-exports domains/compliance/immigration.ts. The declaration stays. No route reaches that service."
+    },
+    {
+      "table": "independent_appraisals",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "indigenous_data_access_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "indigenous_data_sharing_agreements",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "indigenous_member_data",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "lib/services/indigenous-data-service.ts and services/indigenous-data-service.ts read and write indigenousMemberData through the domain declaration. indigenous-data-schema.ts re-exports it. OCAP columns stay. Do not invent a band-council grant. No route reaches either service."
+    },
+    {
+      "table": "integration_sync_log",
+      "batchId": "schema-individual-decision",
+      "disposition": "INDIVIDUAL_DECISION",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "enum-collision:sync_status"
+      ]
+    },
+    {
+      "table": "integration_sync_schedules",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "integration_webhooks",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "A production file reads this relation: app/[locale]/dashboard/integrations/page.tsx"
+    },
+    {
+      "table": "international_addresses",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "joint_hs_committees",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "key_holder_registry",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "knowledge_base",
+      "batchId": "schema-individual-decision",
+      "disposition": "INDIVIDUAL_DECISION",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "pgvector"
+      ]
+    },
+    {
+      "table": "knowledge_base_articles",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "license_renewals",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "lmbp_compliance_alerts",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "lmbp_compliance_reports",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "location_tracking_config",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "lrb_agreements",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "lrb_sync_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "member_addresses",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "services/tax-slip-service.ts selects memberAddresses by userId and addressType. The declaration stays for that mailing-address read. Tax-slip generation still has no route caller. The census column gap is not evolved here."
+    },
+    {
+      "table": "member_documents",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "Member profile relations name memberDocuments, and the financial-service shadow schema still declares member_documents. The union-eyes declaration stays."
+    },
+    {
+      "table": "member_dues_issues",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "movement_trends",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "negotiation_sessions",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "newsletter_engagement",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "notification_log",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "clc_sync_log relations name notificationLog. The declaration stays."
+    },
+    {
+      "table": "organization_billing_config",
+      "batchId": "schema-system-only",
+      "disposition": "SYSTEM_ONLY_SHAPE",
+      "registryClass": "SYSTEM_ONLY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "organization_contacts",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "clc_sync_log relations name organizationContacts. The declaration stays."
+    },
+    {
+      "table": "organization_relationships",
+      "batchId": "schema-system-only",
+      "disposition": "SYSTEM_ONLY_SHAPE",
+      "registryClass": "SYSTEM_ONLY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "organization_sharing_settings",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "cross_org_access_log relations name organizationSharingSettings. The declaration stays."
+    },
+    {
+      "table": "pay_equity_exercises",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "payment_cycles",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "payments.paymentCycleId and paymentsRelations.cycle reference paymentCycles. The declaration stays. Do not drop the physical foreign key."
+    },
+    {
+      "table": "payment_disputes",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "paymentsRelations.disputes references paymentDisputes. The declaration stays."
+    },
+    {
+      "table": "payroll_deductions",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "pci_dss_encryption_keys",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "pci_dss_quarterly_scans",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "pci_dss_requirements",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "pci_dss_saq_assessments",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "precedent_citations",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "precedent_tags",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "preventive_withdrawals",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "pricing_discount_rules",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "pricing_regional_deployments",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "pricing_template_modules",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "pricing_templates",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "privacy_breaches",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "procurement_bids",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "procurement_requests",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "public_content",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "push_deliveries",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "recovery_time_objectives",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "recusal_tracking",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "remittance_approvals",
+      "batchId": "schema-system-only",
+      "disposition": "SYSTEM_ONLY_SHAPE",
+      "registryClass": "SYSTEM_ONLY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "right_of_refusal_events",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "rl1_tax_slips",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "role_tenure_history",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "steward_assignments relations name roleTenureHistory. The declaration stays."
+    },
+    {
+      "table": "safety_training_records",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "A production file reads this relation: app/api/health-safety/stats/route.ts"
+    },
+    {
+      "table": "security_events",
+      "batchId": "schema-live-unreferenced-blocked",
+      "disposition": "LIVE_UNREFERENCED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "required-undeclared:event_id"
+      ],
+      "holdReason": "A production file reads this relation: app/[locale]/dashboard/security/page.tsx"
+    },
+    {
+      "table": "segment_executions",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "member_segments relations name segmentExecutions. The declaration stays."
+    },
+    {
+      "table": "segment_exports",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "member_segments relations name segmentExports. The declaration stays."
+    },
+    {
+      "table": "separated_payment_transactions",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "shopify_config",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "signature_audit_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "signature_verification",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "signature_workflows",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "enum-collision:signature_provider"
+      ]
+    },
+    {
+      "table": "signers",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "enum-collision:signer_status"
+      ]
+    },
+    {
+      "table": "sla_policies",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "sms_campaign_recipients",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "sms_opt_outs",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "sms_templates",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "social_campaigns",
+      "batchId": "schema-individual-decision",
+      "disposition": "INDIVIDUAL_DECISION",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "enum-collision:campaign_status"
+      ]
+    },
+    {
+      "table": "staff_certifications",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "strike_fund_payment_audit",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "swiss_cold_storage",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "sync_jobs",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [
+        "enum-collision:sync_status"
+      ]
+    },
+    {
+      "table": "t106_filing_tracking",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "t4a_tax_slips",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "tax_year_end_processing",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "testimonials",
+      "batchId": "schema-global-reference",
+      "disposition": "GLOBAL_REFERENCE_SHAPE",
+      "registryClass": "GLOBAL_REFERENCE_DATA",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "ticket_comments",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "ticket_history",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "traditional_knowledge_registry",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "transaction_currency_conversions",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "transfer_pricing_documentation",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "union_only_data_tags",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "usage_aggregates",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "usage_events",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "usage_meters",
+      "batchId": "schema-verify-reachable-blocked",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "user_consents",
+      "batchId": "schema-individual-decision",
+      "disposition": "INDIVIDUAL_DECISION",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": [
+        "enum-collision:consent_status"
+      ]
+    },
+    {
+      "table": "user_management.oauth_providers",
+      "batchId": "schema-registry-gap",
+      "disposition": "REGISTRY_GAP",
+      "registryClass": "UNREGISTERED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": false,
+      "djangoDefined": false,
+      "blockers": [
+        "non-public-schema",
+        "table-absent"
+      ]
+    },
+    {
+      "table": "user_sessions",
+      "batchId": "schema-verify-dead-required",
+      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
+      "registryClass": "LATENT_UNREACHABLE",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": [],
+      "holdReason": "domains/member/user-management.ts re-exports userSessions, and organizationUsers relations name it. The public declaration stays."
+    },
+    {
+      "table": "user_uuid_mapping",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "voting_audit_log",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "voting_notifications",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "wage_progressions",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": true,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "wcb_claims",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": false,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "wcb_employer_assessments",
+      "batchId": "schema-create-relation",
+      "disposition": "CREATE_RELATION_REQUIRED",
+      "registryClass": "TENANT_RLS_REQUIRED",
+      "defects": [
+        "TABLE_ABSENT"
+      ],
+      "reachable": true,
+      "djangoDefined": false,
+      "blockers": [
+        "table-absent"
+      ]
+    },
+    {
+      "table": "webhook_events",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING",
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "weekly_threshold_tracking",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "COLUMNS_MISSING"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    },
+    {
+      "table": "whiplash_prevention_audit",
+      "batchId": "schema-contained-deny-all",
+      "disposition": "CONTAINED_DENY_ALL",
+      "registryClass": "CONTAINED_NO_AUTHORITY",
+      "defects": [
+        "REQUIRED_UNDECLARED"
+      ],
+      "reachable": false,
+      "djangoDefined": true,
+      "blockers": []
+    }
+  ],
+  "sourceMutations": [
+    {
+      "key": "app/api/payments/webhooks/stripe/route.ts|workbooks",
+      "file": "app/api/payments/webhooks/stripe/route.ts",
+      "table": "workbooks",
+      "batchId": "mutation-workbook-unclaimed",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "app/api/workbook/[id]/claim/route.ts|workbooks",
+      "file": "app/api/workbook/[id]/claim/route.ts",
+      "table": "workbooks",
+      "batchId": "mutation-workbook-unclaimed",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "lib/pilot/pilot-ownership.ts|pilot_applications",
+      "file": "lib/pilot/pilot-ownership.ts",
+      "table": "pilot_applications",
+      "batchId": "mutation-pilot-rebind",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "lib/services/external-data/clc-partnership-service.ts|clc_sync_log",
+      "file": "lib/services/external-data/clc-partnership-service.ts",
+      "table": "clc_sync_log",
+      "batchId": "mutation-clc-sync-log",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions",
+      "file": "services/financial-service/src/jobs/arrears-management-workflow.ts",
+      "table": "dues_transactions",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/financial-service/src/jobs/payment-collection-workflow.ts|dues_transactions",
+      "file": "services/financial-service/src/jobs/payment-collection-workflow.ts",
+      "table": "dues_transactions",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/financial-service/src/jobs/payment-collection-workflow.ts|payments",
+      "file": "services/financial-service/src/jobs/payment-collection-workflow.ts",
+      "table": "payments",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 3,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/financial-service/src/services/notification-service.ts|notification_queue",
+      "file": "services/financial-service/src/services/notification-service.ts",
+      "table": "notification_queue",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 2,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/geofence-privacy-service.ts|geofence_events",
+      "file": "services/geofence-privacy-service.ts",
+      "table": "geofence_events",
+      "batchId": "mutation-location-retention",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/geofence-privacy-service.ts|location_tracking",
+      "file": "services/geofence-privacy-service.ts",
+      "table": "location_tracking",
+      "batchId": "mutation-location-retention",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    }
+  ],
+  "mutations": []
+}

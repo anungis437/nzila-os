@@ -67,6 +67,7 @@ function makeQueryable(result: unknown[] = [GENERIC_ROW]) {
     from: vi.fn(() => chain),
     where: vi.fn(() => chain),
     limit: vi.fn(() => chain),
+    for: vi.fn(() => chain),
     offset: vi.fn(() => chain),
     orderBy: vi.fn(() => chain),
     leftJoin: vi.fn(() => chain),
@@ -139,6 +140,7 @@ vi.mock('@/lib/rate-limiter', () => ({
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   requireEntitlement: m.requireEntitlement,
   checkEntitlement: m.checkEntitlement,
+  checkModuleEntitlement: vi.fn().mockResolvedValue({ allowed: true }),
   PLATFORM_MODULES: {
     CORE: 'core',
     AI: 'ai',

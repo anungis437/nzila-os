@@ -2,20 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, asc, eq, isNull } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
 import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { canAdministerOrganization, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ id: string }> };
 
+/** Roles each caller level may grant. A role at or above the caller's own is never grantable here. */
+const GRANTABLE_ROLES: Record<string, string[]> = {
+  steward: ['member', 'observer'],
+  officer: ['member', 'observer', 'steward'],
+  admin: ['member', 'observer', 'steward', 'executive'],
+};
+
 const createMemberSchema = z.object({
   user_id: z.string().min(1).max(255),
   role: z.enum(['member', 'steward', 'admin', 'executive', 'observer']).default('member'),
-  status: z.enum(['active', 'inactive', 'pending', 'suspended']).default('active'),
   name: z.string().min(1).max(255),
   email: z.string().email().max(255),
   phone: z.string().max(50).optional(),
@@ -23,19 +30,40 @@ const createMemberSchema = z.object({
   membership_number: z.string().max(100).optional(),
 });
 
-export async function GET(_req: NextRequest, { params }: Params) {
+const ROSTER_PAGE_SIZE = 200;
+
+export async function GET(req: NextRequest, { params }: Params) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
-  // The caller must belong to the requested organization; reads run in its tenant context.
-  try {
-    await requireUserForOrganization(id);
-  } catch {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 });
+  // The roster carries every member's contact details, so it is for the organization's stewards and above, the
+  // administrators above it and the platform: not for any member, and not for a member who is no longer active.
+  const access = await resolveOrganizationAccess(userId);
+  if (!canAdministerOrganization(access, id)) {
+    try {
+      const caller = await requireUserForOrganization(id);
+      if ((ROLE_HIERARCHY[(caller.roles[0] ?? 'member') as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.steward) {
+        return NextResponse.json({ error: 'Forbidden: requires steward role' }, { status: 403 });
+      }
+    } catch {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
   }
+  // A removed member is not on the roster, and the roster is read a page at a time in a stable order, so a large organization is neither
+  // truncated silently nor read whole in one request.
+  const url = new URL(req.url);
+  const limit = Math.min(ROSTER_PAGE_SIZE, Math.max(1, Number.parseInt(url.searchParams.get('limit') ?? '', 10) || ROSTER_PAGE_SIZE));
+  const page = Math.max(1, Number.parseInt(url.searchParams.get('page') ?? '', 10) || 1);
   const rows = await withRLSContext({ organizationId: id }, async () =>
-    db.select().from(organizationMembers).where(eq(organizationMembers.organizationId, id)),
+    db
+      .select()
+      .from(organizationMembers)
+      .where(and(eq(organizationMembers.organizationId, id), isNull(organizationMembers.deletedAt)))
+      .orderBy(asc(organizationMembers.createdAt), asc(organizationMembers.id))
+      .limit(limit)
+      .offset((page - 1) * limit),
   );
 
   const mapped = rows.map(row => ({
@@ -55,7 +83,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     updated_at: row.updatedAt,
   }));
 
-  return NextResponse.json({ data: mapped });
+  return NextResponse.json({ data: mapped, page, limit });
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
@@ -85,9 +113,26 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Validation failed', details: parsed.error.issues.map(i => ({ path: i.path, message: i.message })) }, { status: 400 });
   }
 
-  const { user_id, role, status, name, email, phone, department, membership_number } = parsed.data;
+  const { user_id, role, name, email, phone, department, membership_number } = parsed.data;
 
-  const [created] = await withRLSContext({ organizationId: id }, async (tx) => {
+  // A caller may grant only roles below their own, never the administrator role through this route, and what they create
+  // is a pending membership: naming a user id does not give that person access, they take it up through the invitation.
+  const access = await resolveOrganizationAccess(userCtx.userId);
+  const grantorLevel = canAdministerOrganization(access, id) ? 'admin' : (userRole as string);
+  const grantable = access.platform ? GRANTABLE_ROLES.admin : (GRANTABLE_ROLES[grantorLevel] ?? []);
+  if (!grantable.includes(role)) {
+    return NextResponse.json({ error: `Forbidden: your role may not grant the ${role} role` }, { status: 403 });
+  }
+  const status = 'pending' as const;
+
+  // A user already on the roster (in any status) is a conflict the caller can act on, not a database error.
+  const isUniqueViolation = (error: unknown) => {
+    const code = (error as { code?: string; cause?: { code?: string } } | null);
+    return code?.code === '23505' || code?.cause?.code === '23505';
+  };
+  let created: Array<typeof organizationMembers.$inferSelect>;
+  try {
+    created = await withRLSContext({ organizationId: id }, async (tx) => {
     const inserted = await tx
       .insert(organizationMembers)
       .values({
@@ -113,6 +158,10 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
     return inserted;
   });
+  } catch (error) {
+    if (isUniqueViolation(error)) return NextResponse.json({ error: 'This user is already a member of the organization' }, { status: 409 });
+    throw error;
+  }
 
   return NextResponse.json({ data: created }, { status: 201 });
 }

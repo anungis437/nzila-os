@@ -7,10 +7,30 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import multer from 'multer';
 import { db, schema } from '../db';
-import { eq, and, desc, sql } from 'drizzle-orm';
-import { RemittanceParser, ReconciliationEngine } from '@union-claims/financial';
+import { eq, and, desc, inArray, isNull } from 'drizzle-orm';
+import { RemittanceParser } from '@union-claims/financial';
+import { calculateRemittanceVariance, readMatchedTransactionIds } from './remittance-reconciliation-policy';
 
 const router = Router();
+
+async function loadMatchedTransactions(
+  remittance: typeof schema.employerRemittances.$inferSelect,
+  organizationId: string,
+): Promise<TxSummaryRow[] | null> {
+  const ids = readMatchedTransactionIds(remittance.metadata)
+  if (!ids) {
+    // An unreconciled remittance truthfully has no matched payments. Never
+    // fabricate a zero-match report for one marked as already reconciled.
+    return ['reconciled', 'variance_detected', 'completed', 'needs_review'].includes(
+      String(remittance.reconciliationStatus),
+    ) ? null : []
+  }
+  const rows = await db.select().from(schema.duesTransactions).where(and(
+    eq(schema.duesTransactions.organizationId, organizationId),
+    inArray(schema.duesTransactions.id, ids),
+  )).limit(500)
+  return rows.length === ids.length ? rows : null
+}
 type AuthUser = {
   organizationId?: string;
   tenantId?: string;
@@ -31,7 +51,7 @@ type TxSummaryRow = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as any as { user: AuthUser }).user;
+  return (req as unknown as { user?: AuthUser }).user ?? {};
 }
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -73,7 +93,7 @@ const createRemittanceSchema = z.object({
 });
 
 const reconcileSchema = z.object({
-  transactionIds: z.array(z.guid()).optional(),
+  transactionIds: z.array(z.guid()).min(1).max(500).refine((ids) => new Set(ids).size === ids.length, 'Duplicate transaction IDs are not allowed').optional(),
   autoMatch: z.boolean().default(true),
 });
 
@@ -156,9 +176,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch matched transactions - note: remittanceId doesn't exist in schema
-    // Would need to add this column or use metadata for tracking
-    const transactions: TxSummaryRow[] = [];
+    const transactions = await loadMatchedTransactions(remittance, scopedOrgId);
+    if (!transactions) {
+      return res.status(409).json({ success: false, error: 'Reconciliation evidence unavailable' });
+    }
 
     res.json({
       success: true,
@@ -300,7 +321,10 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         .where(
           and(
             eq(schema.duesTransactions.organizationId, scopedOrgId),
-            sql`${schema.duesTransactions.id} = ANY(${validatedData.transactionIds})`
+            inArray(schema.duesTransactions.id, validatedData.transactionIds),
+            eq(schema.duesTransactions.transactionType, 'charge'),
+            inArray(schema.duesTransactions.status, ['pending', 'overdue']),
+            isNull(schema.duesTransactions.paidDate)
           )
         );
     } else if (validatedData.autoMatch) {
@@ -312,9 +336,19 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
           and(
             eq(schema.duesTransactions.organizationId, scopedOrgId),
             eq(schema.duesTransactions.periodStart, remittance.remittancePeriodStart),
-            eq(schema.duesTransactions.periodEnd, remittance.remittancePeriodEnd)
+            eq(schema.duesTransactions.periodEnd, remittance.remittancePeriodEnd),
+            eq(schema.duesTransactions.transactionType, 'charge'),
+            isNull(schema.duesTransactions.paidDate)
           )
         );
+    }
+
+    if (validatedData.transactionIds && transactionsToMatch.length !== validatedData.transactionIds.length) {
+      return res.status(409).json({ success: false, error: 'One or more transactions are unavailable for reconciliation' });
+    }
+
+    if (transactionsToMatch.length > 500) {
+      return res.status(413).json({ success: false, error: 'Reconciliation batch limit exceeded' });
     }
 
     if (transactionsToMatch.length === 0) {
@@ -324,47 +358,71 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
       });
     }
 
-    // Calculate matched total
-    const matchedTotal = transactionsToMatch.reduce(
-      (sum, t) => sum + Number(t.totalAmount),
-      0
-    );
-    const expectedTotal = Number(remittance.totalAmount);
-    const variance = expectedTotal - matchedTotal;
+    // Financial values are NUMERIC(..., 2): reconcile exact integer cents.
+    const { matchedAmount: matchedTotal, expectedAmount: expectedTotal, variance, varianceAmount, exactMatch } =
+      calculateRemittanceVariance(remittance.totalAmount, transactionsToMatch.map((t) => {
+        if (t.totalAmount == null) throw new Error('Dues transaction total missing')
+        return t.totalAmount
+      }));
 
-    // Update transactions - remittanceId doesn't exist in schema
-    // Store remittance link in metadata or notes field
-    await db
-      .update(schema.duesTransactions)
-      .set({
-        paidDate: remittance.remittanceDate, // Already a string from date column
-        notes: `Paid via remittance ${id}`,
-      } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
-      .where(
-        and(
+    // Transaction updates and reconciliation evidence must commit or roll back together.
+    // The tenant and remittance predicates are repeated inside the transaction.
+    const newStatus = exactMatch ? 'reconciled' : 'variance_detected';
+    const updatedRemittance = await db.transaction(async (tx) => {
+      const [current] = await tx
+        .select({ id: schema.employerRemittances.id, reconciliationStatus: schema.employerRemittances.reconciliationStatus, metadata: schema.employerRemittances.metadata })
+        .from(schema.employerRemittances)
+        .where(and(
+          eq(schema.employerRemittances.id, id),
+          eq(schema.employerRemittances.tenantId, scopedOrgId),
+        ))
+        .for('update')
+        .limit(1);
+
+      if (!current || current.reconciliationStatus === 'reconciled' || current.reconciliationStatus === 'variance_detected') {
+        throw new Error('Remittance changed while reconciling');
+      }
+
+      const updatedTransactions = await tx
+        .update(schema.duesTransactions)
+        .set({
+          paidDate: remittance.remittanceDate,
+          status: 'paid',
+          notes: `Paid via remittance ${id}`,
+        } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
+        .where(and(
           eq(schema.duesTransactions.organizationId, scopedOrgId),
-          sql`${schema.duesTransactions.id} = ANY(${transactionsToMatch.map((t) => t.id)})`
-        )
-      );
+          inArray(schema.duesTransactions.status, ['pending', 'overdue']),
+          isNull(schema.duesTransactions.paidDate),
+          inArray(schema.duesTransactions.id, transactionsToMatch.map((t) => t.id)),
+        ))
+        .returning({ id: schema.duesTransactions.id });
+      if (updatedTransactions.length !== transactionsToMatch.length) {
+        throw new Error('Transactions changed while reconciling');
+      }
 
-    // Update remittance status
-    const newStatus = Math.abs(variance) < 0.01 ? 'reconciled' : 'variance_detected';
-    
-    const [updatedRemittance] = await db
-      .update(schema.employerRemittances)
-      .set({
-        reconciliationStatus: newStatus,
-        varianceAmount: variance.toString(),
-        reconciliationDate: new Date().toISOString(),
-        reconciledBy: userId ?? fallbackUserId,
-        // Store match details in metadata
-        metadata: {
-          matchedTransactions: transactionsToMatch.length,
-          matchedAmount: matchedTotal,
-        },
-      } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
-      .where(eq(schema.employerRemittances.id, id))
-      .returning();
+      const [updated] = await tx
+        .update(schema.employerRemittances)
+        .set({
+          reconciliationStatus: newStatus,
+          varianceAmount,
+          reconciliationDate: new Date().toISOString(),
+          reconciledBy: userId ?? fallbackUserId,
+          metadata: {
+            ...(current.metadata && typeof current.metadata === 'object' && !Array.isArray(current.metadata) ? current.metadata : {}),
+            matchedTransactions: transactionsToMatch.length,
+            matchedTransactionIds: transactionsToMatch.map((t) => t.id),
+            matchedAmount: matchedTotal,
+          },
+        } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
+        .where(and(
+          eq(schema.employerRemittances.id, id),
+          eq(schema.employerRemittances.tenantId, scopedOrgId),
+        ))
+        .returning();
+      if (!updated) throw new Error('Remittance update failed');
+      return updated;
+    });
 
     res.json({
       success: true,
@@ -467,7 +525,10 @@ router.put('/:id', async (req: Request, res: Response) => {
  */
 router.post('/upload', upload.single('file'), async (req: Request, res: Response) => {
   try {
-    const { role } = getAuthUser(req);
+    const { role, organizationId, tenantId } = getAuthUser(req);
+    if (!(organizationId ?? tenantId)) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
 
     const effectiveRole = role ?? '';
     if (!['admin', 'financial_admin'].includes(effectiveRole)) {
@@ -536,128 +597,6 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
 });
 
 /**
- * POST /api/remittances/:id/reconcile
- * Auto-reconcile remittance with transactions
- */
-router.post('/:id/reconcile', async (req: Request, res: Response) => {
-  try {
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, role } = getAuthUser(req);
-    const scopedOrgId = organizationIdFromUser ?? legacyTenantId;
-    const { id } = req.params;
-
-    if (!scopedOrgId) {
-      return res.status(401).json({ success: false, error: 'Missing organization context' });
-    }
-
-    const effectiveRole = role ?? '';
-    if (!['admin', 'financial_admin'].includes(effectiveRole)) {
-      return res.status(403).json({
-        success: false,
-        error: 'Insufficient permissions',
-      });
-    }
-
-    // Fetch remittance
-    const [remittance] = await db
-      .select()
-      .from(schema.employerRemittances)
-      .where(
-        and(
-          eq(schema.employerRemittances.id, id),
-          eq(schema.employerRemittances.tenantId, scopedOrgId)
-        )
-      )
-      .limit(1);
-
-    if (!remittance) {
-      return res.status(404).json({
-        success: false,
-        error: 'Remittance not found',
-      });
-    }
-
-    // Fetch remittance details (parsed records should be stored in JSON field or separate table)
-    // For now, assuming they're in req.body.records
-    const remittanceRecords = req.body.records || [];
-
-    if (remittanceRecords.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No remittance records provided. Upload and parse file first.',
-      });
-    }
-
-    // Fetch existing transactions for the billing period
-    const transactions = await db
-      .select()
-      .from(schema.duesTransactions)
-      .where(
-        and(
-          eq(schema.duesTransactions.organizationId, scopedOrgId),
-          eq(schema.duesTransactions.transactionType, 'charge'),
-          sql`${schema.duesTransactions.periodStart} >= ${remittance.remittancePeriodStart}`,
-          sql`${schema.duesTransactions.periodEnd} <= ${remittance.remittancePeriodEnd}`
-        )
-      );
-
-    // Run reconciliation
-    const reconciliationEngine = new ReconciliationEngine();
-    const reconciliationResult = await reconciliationEngine.reconcile({
-      remittanceRecords,
-      existingTransactions: transactions.map((t) => ({
-        id: t.id,
-        memberId: t.memberId,
-        amount: Number(t.amount),
-        periodStart: t.periodStart,
-        periodEnd: t.periodEnd,
-      })),
-    });
-
-    // If auto-apply is enabled, update matched transactions
-    if (req.body.autoApply !== false && reconciliationResult.success) {
-      for (const match of reconciliationResult.matches) {
-        await db
-          .update(schema.duesTransactions)
-          .set({
-            paidDate: remittance.remittanceDate, // Already a string
-            notes: `Paid via remittance ${id}`,
-          } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
-          .where(eq(schema.duesTransactions.id, match.transactionId));
-      }
-
-      // Update remittance status
-      await db
-        .update(schema.employerRemittances)
-        .set({
-          reconciliationStatus: reconciliationResult.variances.length === 0 ? 'completed' : 'needs_review',
-          varianceAmount: reconciliationResult.summary.totalVariance.toString(),
-          metadata: {
-            matchedCount: reconciliationResult.summary.matchedCount,
-            totalVariance: reconciliationResult.summary.totalVariance,
-          },
-        } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
-        .where(eq(schema.employerRemittances.id, id));
-    }
-
-    // Generate report
-    const report = reconciliationEngine.generateReport(reconciliationResult);
-
-    res.json({
-      success: true,
-      data: {
-        reconciliation: reconciliationResult,
-        report,
-      },
-    });
-  } catch (_error) {
-    res.status(500).json({
-      success: false,
-      error: 'Internal server error',
-    });
-  }
-});
-
-/**
  * GET /api/remittances/:id/report
  * Generate reconciliation report
  */
@@ -691,10 +630,10 @@ router.get('/:id/report', async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch matched transactions
-    // Fetch matched transactions - remittanceId doesn't exist
-    // Would need to query by notes or metadata
-    const transactions: TxSummaryRow[] = [];
+    const transactions = await loadMatchedTransactions(remittance, scopedOrgId);
+    if (!transactions) {
+      return res.status(409).json({ success: false, error: 'Reconciliation evidence unavailable' });
+    }
 
     const reportData = {
       remittance: {

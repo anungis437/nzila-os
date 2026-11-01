@@ -2,7 +2,7 @@ import { and, desc, eq, gt, isNull, lte, sql, type SQL } from 'drizzle-orm'
 import { triageDesignations } from '@/db/schema/messages-schema'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
-import { CASE_ASSIGNEE_MEMBERSHIP_ROLES } from '@/lib/cases/case-permissions'
+import { CONVERSATION_ASSIGNEE_ROLES } from '@/lib/authority/capacity'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
 /**
@@ -57,19 +57,29 @@ export async function hasLiveDesignation(tx: RLSTx, actor: TriageActor, scope: T
 }
 
 /**
- * The designation holder must still hold a live staff membership. A designation is a grant on top of membership, never
- * a substitute for it: a removed, suspended or demoted holder loses the queue at once, without waiting for the
- * designation to be revoked. Canonical V2 asks the deployed predicate; the legacy lineage reads the compatibility
- * projection with the same eligible roles the assignment path uses.
+ * The designation holder must still hold a live conversation-assignee membership. A designation is a grant on top of
+ * membership, never a substitute for it: a removed, suspended or demoted holder loses the queue at once, without
+ * waiting for the designation to be revoked. An administrator title is not an assignee capacity. Canonical V2 asks
+ * public.ue_conversation_assignee_authorized; the legacy lineage reads the compatibility projection with the same
+ * stored roles.
  */
 function membershipStillEligible(organizationId: SQL | string, userId: SQL | string): SQL {
-  if (currentStateContextEnabled()) return sql`public.ue_case_assignee_authorized(${userId}, ${organizationId}::uuid) IS TRUE`
+  if (currentStateContextEnabled()) return sql`public.ue_conversation_assignee_authorized(${userId}, ${organizationId}::uuid) IS TRUE`
   return sql`EXISTS (
     SELECT 1 FROM public.organization_members om
     WHERE om.organization_id = ${organizationId}::uuid AND om.user_id = ${userId}
       AND om.status = 'active' AND om.deleted_at IS NULL
-      AND om.role IN (${sql.join(CASE_ASSIGNEE_MEMBERSHIP_ROLES.map((role) => sql`${role}`), sql`, `)})
+      AND lower(om.role) IN (${sql.join(CONVERSATION_ASSIGNEE_ROLES.map((role) => sql`${role}`), sql`, `)})
   )`
+}
+
+/**
+ * Whether a user may hold a messages designation: a live conversation-assignee membership. The case-assignee test is a
+ * different capacity (it asks whether the person may add case notes), so a messages designation must not be judged by it.
+ */
+export async function conversationAssigneeEligible(tx: RLSTx, organizationId: string, userId: string): Promise<boolean> {
+  const [row] = await tx.execute(sql`SELECT ${membershipStillEligible(organizationId, userId)} AS allowed`)
+  return (row as { allowed?: unknown } | undefined)?.allowed === true
 }
 
 /** The caller's live designation, as a predicate for use inside another query (no round trip, no rank). */
@@ -132,8 +142,8 @@ export async function grantDesignation(
   if (input.userId === actor.userId) return { kind: 'self_grant' }
   if (!(await deps.assigneeEligible(input.userId))) return { kind: 'ineligible' }
 
-  // A designation that has already lapsed must not block a fresh grant: record its end first.
-  await tx
+  // A designation that has already lapsed must not block a fresh grant: record its end first, and audit the closure.
+  const lapsed = await tx
     .update(triageDesignations)
     .set({ revokedAt: now, revokedBy: 'system:expiry' })
     .where(
@@ -145,6 +155,17 @@ export async function grantDesignation(
         lte(triageDesignations.expiresAt, now),
       ),
     )
+    .returning({ id: triageDesignations.id, expiresAt: triageDesignations.expiresAt })
+  for (const closed of lapsed) {
+    await persistAtomicAudit(tx, {
+      organizationId: actor.organizationId,
+      userId: 'system:expiry',
+      action: 'triage.designation.expire',
+      resourceType: 'triage_designations',
+      resourceId: closed.id,
+      details: { scope: input.scope, designatedUserId: input.userId, expiredAt: closed.expiresAt.toISOString(), closedDuringGrantBy: actor.userId },
+    })
+  }
   const [existing] = await tx.select({ id: triageDesignations.id }).from(triageDesignations).where(live(actor, input.scope, input.userId, now)).limit(1)
   if (existing) return { kind: 'conflict' }
 

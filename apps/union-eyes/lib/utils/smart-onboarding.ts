@@ -12,10 +12,13 @@
 
 import { db } from '@/db/db';
 import { organizations, sharedClauseLibrary } from '@/db/schema';
-import { eq, and, inArray, or, gte, sql } from 'drizzle-orm';
+import { eq, ne, and, desc, inArray, or, gte, sql, type SQL } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { cacheGet, cacheSet } from '@/lib/services/cache-service';
+import { buildClauseVisibilityCondition, isUuid, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 // =============================================================================
 // TYPES
@@ -29,7 +32,8 @@ export interface FederationSuggestion {
   organizationType: string;
   province: string | null;
   jurisdiction: string | null;
-  memberCount: number;
+  /** A band, never the exact member count: a prospective affiliate learns the scale of a federation, not its roll. */
+  sizeBand: string;
   matchScore: number;
   matchReasons: string[];
 }
@@ -48,7 +52,7 @@ export interface PeerBenchmark {
   metricName: string;
   yourValue: number;
   peerAverage: number;
-  nationalAverage: number;
+  nationalAverage: number | null;
   percentile: number;
   category: string;
 }
@@ -67,8 +71,50 @@ export interface SmartDefaults {
 // AUTO-DISCOVER PARENT FEDERATION
 // =============================================================================
 
+/** The smaller of two member counts must be at least this share of the larger for the sizes to be called similar. */
+const SIMILAR_SIZE_RATIO = 0.5;
+
+/**
+ * What a prospective affiliate may see of a federation or congress. The directory is not a property of the asker's organization or
+ * role: an officer of any organization asks, and a federation decides whether it is offered. A federation or congress is listed only
+ * when its own administrators turned listing on (`settings.affiliation.discoverable`, set through the organization settings patch they
+ * already hold), and what is shown is the minimum needed to recognise it: its name, type, province and a size band. `approvedBy` stays
+ * null until the institution decides what the directory may disclose; until then no federation is listed by default.
+ */
+export const FEDERATION_DIRECTORY_POLICY = Object.freeze({
+  listing: 'opt_in' as const,
+  settingsKey: 'affiliation.discoverable',
+  disclosedFields: Object.freeze(['id', 'name', 'organizationType', 'province', 'sizeBand'] as const),
+  approvedBy: null as string | null,
+});
+
+/** Whether the organization's own settings turn listing on. Anything but an explicit true is off. */
+export function isFederationListed(settings: unknown): boolean {
+  if (!settings || typeof settings !== 'object') return false;
+  const affiliation = (settings as { affiliation?: unknown }).affiliation;
+  return Boolean(affiliation && typeof affiliation === 'object' && (affiliation as { discoverable?: unknown }).discoverable === true);
+}
+
+const SIZE_BANDS: ReadonlyArray<readonly [number, string]> = [
+  [100, 'under 100'],
+  [500, '100 to 499'],
+  [1_000, '500 to 999'],
+  [5_000, '1,000 to 4,999'],
+  [20_000, '5,000 to 19,999'],
+];
+
+export function sizeBand(count: number | null | undefined): string {
+  if (!count || count <= 0) return 'not stated';
+  for (const [limit, label] of SIZE_BANDS) if (count < limit) return label;
+  return '20,000 or more';
+}
+
 /**
  * Auto-detect potential parent federation based on province, sector, and size
+ * 
+ * The read is an explicit cross-organization read as the system role, limited by the directory policy above: only federations and
+ * congresses that opted in, only the columns the suggestion needs. It does not depend on what the connection's database role happens
+ * to let a tenant see.
  * 
  * @param province - Province code (e.g., 'ON', 'BC')
  * @param sector - Industry sector
@@ -89,17 +135,22 @@ export async function autoDetectParentFederation(
         eq(organizations.organizationType, 'congress')
       ),
       eq(organizations.status, 'active'),
+      // Containment, not a text comparison: only a JSON boolean true lists a federation, never the string "true" or the number 1.
+      sql`${organizations.settings} @> '{"affiliation":{"discoverable":true}}'::jsonb`,
     ];
 
     if (province) {
       filters.push(eq(organizations.provinceTerritory, province.toUpperCase()));
     }
 
-    const potentialParents = await db.query.organizations.findMany({
-      where: and(...filters),
-      orderBy: (org, { desc }) => [desc(org.memberCount)],
-      limit: 10,
-    });
+    const potentialParents = await withSystemContext((tx) =>
+      tx.query.organizations.findMany({
+        columns: { id: true, name: true, organizationType: true, provinceTerritory: true, clcAffiliated: true, sectors: true, memberCount: true },
+        where: and(...filters),
+        orderBy: (org, { desc }) => [desc(org.memberCount)],
+        limit: 10,
+      }),
+    );
 
     // Score and rank suggestions
     const suggestions: FederationSuggestion[] = potentialParents.map((org) => {
@@ -118,13 +169,18 @@ export async function autoDetectParentFederation(
         matchReasons.push('CLC affiliated');
       }
 
-      // Size proximity (federations with similar-sized locals)
+      // Sector (the federation's sectors name the trades it represents)
+      if (sector && (org.sectors ?? []).some((s) => s.toLowerCase() === sector.toLowerCase())) {
+        matchScore += 25;
+        matchReasons.push(`Represents the ${sector} sector`);
+      }
+
+      // Size proximity: the score follows the ratio, and the reason is stated only when the sizes really are close.
       if (estimatedMemberCount && org.memberCount) {
-        const sizeRatio = Math.min(estimatedMemberCount, org.memberCount) / 
+        const sizeRatio = Math.min(estimatedMemberCount, org.memberCount) /
                          Math.max(estimatedMemberCount, org.memberCount);
-        const sizeScore = sizeRatio * 20;
-        matchScore += sizeScore;
-        matchReasons.push(`Similar size category`);
+        matchScore += sizeRatio * 20;
+        if (sizeRatio >= SIMILAR_SIZE_RATIO) matchReasons.push('Similar size');
       }
 
       // Organization type bonus
@@ -139,7 +195,7 @@ export async function autoDetectParentFederation(
         organizationType: org.organizationType,
         province: org.provinceTerritory,
         jurisdiction: org.provinceTerritory,
-        memberCount: org.memberCount || 0,
+        sizeBand: sizeBand(org.memberCount),
         matchScore,
         matchReasons,
       };
@@ -149,7 +205,7 @@ export async function autoDetectParentFederation(
     return suggestions.sort((a, b) => b.matchScore - a.matchScore);
   } catch (error) {
     logger.error('Failed to auto-detect parent federation', { error });
-    return [];
+    throw error;
   }
 }
 
@@ -157,8 +213,24 @@ export async function autoDetectParentFederation(
 // SMART CLAUSE DISCOVERY
 // =============================================================================
 
+/** What each reason adds to a clause's score. Only reasons that tell clauses apart carry a weight. */
+const SUGGESTION_WEIGHTS = {
+  public: 20,
+  sharedWithOrganization: 40,
+  // Per step towards the organization along its hierarchy path; the parent is the nearest ancestor and scores most.
+  proximityStep: 15,
+} as const;
+
+const UNDISCLOSED_SOURCE = 'Another organization (source not disclosed)';
+const UNKNOWN_SOURCE = 'Unknown organization';
+
 /**
- * Suggest relevant clauses from parent federation and peer organizations
+ * Suggest relevant clauses from parent federation and peer organizations: the clauses of other organizations that this organization may
+ * already read (public ones, and private ones that name it), in its own sector and province, ranked by how they reached it and how close
+ * their owner is in its hierarchy. The federation and congress sharing levels carry no weight and no reason, because no other organization
+ * can read a clause at those levels (lib/clause-library/sharing-authority.ts). The sector and province are filters, so they add nothing to
+ * the ranking and are not listed as reasons. An organization that has parents is offered its parents' clauses; one that has none is offered
+ * every clause it may read. A clause that is anonymized or unclassified never names its source.
  * 
  * @param organizationId - Current organization ID
  * @returns Array of clause suggestions with relevance scoring
@@ -167,108 +239,93 @@ export async function suggestRelevantClauses(
   organizationId: string
 ): Promise<ClauseSuggestion[]> {
   try {
-    // Fetch organization with hierarchy
-    const org = await db.query.organizations.findFirst({
-      where: eq(organizations.id, organizationId),
+    // As the caller's tenant: the row policy decides which clauses this organization may read (its own, public ones, and private ones that name
+    // it), the same rule the clause library routes apply. Nothing here widens that, so no clause is scored that the organization could not open.
+    const { ancestors, rows } = await withRLSContext({ organizationId }, async (tx) => {
+      const [org] = await tx
+        .select({ sectors: organizations.sectors, provinceTerritory: organizations.provinceTerritory, hierarchyPath: organizations.hierarchyPath })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1);
+
+      if (!org) {
+        throw new Error('Organization not found');
+      }
+
+      // The path runs from the root to the organization itself, so the ancestors are every entry but the last.
+      const ancestors = (org.hierarchyPath ?? []).filter((id) => id !== organizationId && isUuid(id));
+      const orgSector = org.sectors && org.sectors.length > 0 ? org.sectors[0] : null;
+
+      // Clauses of other organizations only: suggesting an organization its own clause is no suggestion.
+      const filters: SQL[] = [await buildClauseVisibilityCondition(organizationId), ne(sharedClauseLibrary.sourceOrganizationId, organizationId)];
+      if (orgSector) filters.push(eq(sharedClauseLibrary.sector, orgSector));
+      if (org.provinceTerritory) filters.push(eq(sharedClauseLibrary.province, org.provinceTerritory.toUpperCase()));
+      if (ancestors.length > 0) {
+        filters.push(inArray(sharedClauseLibrary.sourceOrganizationId, ancestors));
+        // Being drawn from the parents is itself a statement about the source, which an anonymized or unclassified clause does not make.
+        filters.push(eq(sharedClauseLibrary.isAnonymized, false));
+      }
+
+      const rows = await tx
+        .select({
+          id: sharedClauseLibrary.id,
+          clauseTitle: sharedClauseLibrary.clauseTitle,
+          clauseType: sharedClauseLibrary.clauseType,
+          sharingLevel: sharedClauseLibrary.sharingLevel,
+          sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
+          isAnonymized: sharedClauseLibrary.isAnonymized,
+        })
+        .from(sharedClauseLibrary)
+        .where(and(...filters))
+        .orderBy(desc(sharedClauseLibrary.createdAt))
+        .limit(50);
+
+      return { ancestors, rows };
     });
 
-    if (!org) {
-      throw new Error('Organization not found');
-    }
+    // The policy admits only these two levels for another organization. A row at any other level is not a suggestion, whatever reached this point.
+    const readable = rows.filter((clause) => clause.sharingLevel === 'public' || clause.sharingLevel === 'private');
 
-    const hierarchyPath = org.hierarchyPath || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filters: any[] = [
-      // Only public/federation/congress level clauses
-      inArray(sharedClauseLibrary.sharingLevel, ['public', 'federation', 'congress']),
-    ];
+    // Names are read only for clauses whose source the projection may disclose; the others are labelled, never guessed.
+    const names = await sourceNamesFor(readable, organizationId);
 
-    // Filter by sector if available (check first element of sectors array)
-    const orgSector = org.sectors && org.sectors.length > 0 ? org.sectors[0] : null;
-    if (orgSector) {
-      filters.push(eq(sharedClauseLibrary.sector, orgSector));
-    }
-
-    // Filter by province if available
-    if (org.provinceTerritory) {
-      filters.push(eq(sharedClauseLibrary.province, org.provinceTerritory.toUpperCase()));
-    }
-
-    // Get clauses from parent organizations in hierarchy
-    if (hierarchyPath.length > 0) {
-      filters.push(
-        inArray(sharedClauseLibrary.sourceOrganizationId, hierarchyPath)
-      );
-    }
-
-    const relevantClauses = await db.query.sharedClauseLibrary.findMany({
-      where: and(...filters),
-      with: {
-        sourceOrganization: {
-          columns: {
-            name: true,
-            organizationType: true,
-          },
-        },
-      },
-      limit: 50,
-      orderBy: (clause, { desc }) => [desc(clause.createdAt)],
-    });
-
-    // Score and rank suggestions
-    const suggestions: ClauseSuggestion[] = relevantClauses.map((clause) => {
+    const suggestions: ClauseSuggestion[] = readable.map((clause) => {
       const relevanceReasons: string[] = [];
       let relevanceScore = 0;
+      const sourceDisclosed = clauseSourceProjection(clause, organizationId) !== undefined;
 
-      // Sharing level scoring
+      // A private clause of another organization is readable here only because it names this organization in its grant list.
       if (clause.sharingLevel === 'public') {
-        relevanceScore += 20;
+        relevanceScore += SUGGESTION_WEIGHTS.public;
         relevanceReasons.push('Publicly available');
-      } else if (clause.sharingLevel === 'federation') {
-        relevanceScore += 40;
-        relevanceReasons.push('Federation-shared');
-      } else if (clause.sharingLevel === 'congress') {
-        relevanceScore += 50;
-        relevanceReasons.push('Congress-level template');
+      } else {
+        relevanceScore += SUGGESTION_WEIGHTS.sharedWithOrganization;
+        relevanceReasons.push('Shared with your organization');
       }
 
-      // Hierarchy proximity (closer in hierarchy = more relevant)
-      if (hierarchyPath.includes(clause.sourceOrganizationId)) {
-        const hierarchyIndex = hierarchyPath.indexOf(clause.sourceOrganizationId);
-        const proximityScore = (hierarchyPath.length - hierarchyIndex) * 15;
-        relevanceScore += proximityScore;
+      // A closer ancestor is worth more: the path is ordered root first, so the last ancestor is the parent. Said only for a source that may be named.
+      const ancestorIndex = sourceDisclosed ? ancestors.indexOf(clause.sourceOrganizationId) : -1;
+      if (ancestorIndex >= 0) {
+        relevanceScore += (ancestorIndex + 1) * SUGGESTION_WEIGHTS.proximityStep;
         relevanceReasons.push('From parent organization');
-      }
-
-      // Sector match
-      if (orgSector && clause.sector === orgSector) {
-        relevanceScore += 25;
-        relevanceReasons.push(`Same sector (${orgSector})`);
-      }
-
-      // Province match
-      if (org.provinceTerritory && clause.province === org.provinceTerritory.toUpperCase()) {
-        relevanceScore += 15;
-        relevanceReasons.push(`Same province (${org.provinceTerritory})`);
       }
 
       return {
         clauseId: clause.id,
         clauseTitle: clause.clauseTitle,
         clauseType: clause.clauseType,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sourceOrgName: (clause.sourceOrganization as any)?.name || 'Unknown',
+        sourceOrgName: sourceDisclosed ? names.get(clause.sourceOrganizationId) ?? UNKNOWN_SOURCE : UNDISCLOSED_SOURCE,
         sharingLevel: clause.sharingLevel,
         relevanceScore,
         relevanceReasons,
       };
     });
 
-    // Sort by relevance score
+    // The sort is stable, so equally scored clauses keep their newest-first order.
     return suggestions.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 20);
   } catch (error) {
     logger.error('Failed to suggest relevant clauses', { error });
-    return [];
+    throw error;
   }
 }
 
@@ -339,7 +396,7 @@ export async function findPeerOrganizations(
     return sectorFilteredPeers.map(p => p.id).filter(id => id !== organizationId);
   } catch (error) {
     logger.error('Failed to find peer organizations', { error });
-    return [];
+    throw error;
   }
 }
 
@@ -364,17 +421,25 @@ async function fetchNationalAverage(
   try {
     // Check cache first (24 hour TTL)
     const cached = await cacheGet<number>(cacheKey, { namespace: 'clc-api' });
-    if (cached !== null) {
+    if (typeof cached === 'number' && Number.isFinite(cached) && cached >= 0) {
       logger.info('[CLC API] Using cached national average', { metric, sector, value: cached });
       return cached;
     }
+    if (cached != null) logger.warn('[CLC API] Ignoring invalid cached national average', { metric, sector });
 
-    const CLC_API_URL = process.env.CLC_API_URL || 'https://api.clc-ctc.ca';
+    const CLC_API_URL = process.env.CLC_API_URL;
     const CLC_API_KEY = process.env.CLC_API_KEY;
 
-    if (!CLC_API_KEY) {
-      logger.warn('[CLC API] API key not configured, using fallback value');
-      return getFallbackAverage(metric);
+    // Never assume an external benchmark endpoint exists. An explicit, HTTPS-only
+    // institutional configuration is required before transmitting a request.
+    if (!CLC_API_KEY || !CLC_API_URL) {
+      logger.warn('[CLC API] Explicit endpoint and API key required; national average unavailable');
+      return null;
+    }
+    const endpoint = new URL(CLC_API_URL);
+    if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) {
+      logger.warn('[CLC API] Invalid benchmark endpoint configuration');
+      return null;
     }
 
     // Make API call to CLC
@@ -385,7 +450,7 @@ async function fetchNationalAverage(
     });
 
     const response = await fetch(
-      `${CLC_API_URL}/v1/benchmarks/national?${params}`,
+      `${endpoint.origin}${endpoint.pathname.replace(/\/$/, '')}/v1/benchmarks/national?${params}`,
       {
         method: 'GET',
         headers: {
@@ -400,17 +465,17 @@ async function fetchNationalAverage(
     if (!response.ok) {
       if (response.status === 404) {
         logger.warn('[CLC API] Metric not found', { metric, sector });
-        return getFallbackAverage(metric);
+        return null;
       }
       throw new Error(`CLC API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    const average = data?.data?.average || data?.average;
+    const average = data?.data?.average ?? data?.average;
 
-    if (typeof average !== 'number') {
-      logger.warn('[CLC API] Invalid response format', { data });
-      return getFallbackAverage(metric);
+    if (typeof average !== 'number' || !Number.isFinite(average) || average < 0) {
+      logger.warn('[CLC API] Invalid response format', { metric, sector });
+      return null;
     }
 
     // Cache result for 24 hours
@@ -429,24 +494,8 @@ async function fetchNationalAverage(
       sector,
       message: error instanceof Error ? error.message : 'Unknown error'
     });
-    return getFallbackAverage(metric);
+    return null;
   }
-}
-
-/**
- * Get fallback averages when CLC API is unavailable
- * Based on historical Canadian labour statistics
- */
-function getFallbackAverage(metric: string): number {
-  const fallbacks: Record<string, number> = {
-    memberCount: 2500,
-    perCapitaRate: 45.0, // CAD per member per month
-    staffCount: 8,
-    budgetSize: 1250000, // CAD
-    grievanceResolutionDays: 45,
-  };
-  
-  return fallbacks[metric] || 0;
 }
 
 // =============================================================================
@@ -482,6 +531,8 @@ export async function getPeerBenchmarks(
       });
 
       const peerCounts = peers.map(p => p.memberCount || 0).filter(c => c > 0);
+      // A roster with no measured member counts cannot yield a meaningful average or percentile.
+      if (peerCounts.length === 0) return benchmarks;
       const peerAverage = peerCounts.reduce((a, b) => a + b, 0) / peerCounts.length;
 
       // Calculate percentile (simplified)
@@ -499,7 +550,8 @@ export async function getPeerBenchmarks(
         metricName: 'Member Count',
         yourValue: org.memberCount,
         peerAverage: Math.round(peerAverage),
-        nationalAverage: nationalAverage ?? Math.round(peerAverage),
+        // A peer sample is not a national measurement; unavailable data stays unknown.
+        nationalAverage,
         percentile: Math.round(percentile),
         category: 'Membership',
       });
@@ -515,7 +567,7 @@ export async function getPeerBenchmarks(
     return benchmarks;
   } catch (error) {
     logger.error('Failed to get peer benchmarks', { error });
-    return [];
+    throw error;
   }
 }
 

@@ -19,6 +19,8 @@
 import { useState } from 'react';
 import type { ReportTierId } from '@/lib/icra/types';
 import { COPY } from '@/lib/icra/copy';
+import { ICRA_PAID_REPORT_PRICES } from '@/lib/icra/pricing';
+import { TurnstileWidget, isTurnstileConfigured } from './TurnstileWidget';
 
 interface ICRAReportGateProps {
   /** Name of the locked section, shown as the chapter title. */
@@ -37,11 +39,6 @@ interface ICRAReportGateProps {
   chapters?: readonly string[];
   locale?: 'en-CA' | 'fr-CA';
 }
-
-const TIER_PRICE: Record<Exclude<ReportTierId, 'continuity_reflection'>, string> = {
-  executive_continuity_brief: '$1,200 CAD',
-  institutional_continuity_diagnostic: '$6,500 CAD',
-};
 
 const TIER_NAME: Record<Exclude<ReportTierId, 'continuity_reflection'>, string> = {
   executive_continuity_brief: 'Leadership Briefing Report',
@@ -72,6 +69,8 @@ export function ICRAReportGate({
   locale = 'en-CA',
 }: ICRAReportGateProps) {
   const [loading, setLoading] = useState(false);
+  // The checkout is challenged when a Turnstile site key is configured; an unconfigured environment reports an empty token.
+  const [challengeToken, setChallengeToken] = useState<string | null>(isTurnstileConfigured() ? null : '');
   const [error, setError] = useState<string | null>(null);
 
   const isBrief = requiredTier === 'executive_continuity_brief';
@@ -80,7 +79,7 @@ export function ICRAReportGate({
     : COPY.reportGate.diagnosticCtaLabel;
 
   const resolvedLabel = ctaLabel ?? defaultLabel;
-  const price = TIER_PRICE[requiredTier];
+  const price = ICRA_PAID_REPORT_PRICES[requiredTier].label;
   const tierName = TIER_NAME[requiredTier];
   const formatLines = TIER_FORMAT[requiredTier];
   const chapterEyebrow =
@@ -95,7 +94,7 @@ export function ICRAReportGate({
       const res = await fetch('/api/icra/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessmentId, tierId: requiredTier, locale }),
+        body: JSON.stringify({ assessmentId, tierId: requiredTier, locale, turnstileToken: challengeToken ?? '' }),
       });
       const data = (await res.json()) as { url?: string; error?: string; tierId?: string };
       if (res.status === 409 && data.tierId) {
@@ -202,9 +201,10 @@ export function ICRAReportGate({
                 {error}
               </p>
             )}
-            <button
+            {isTurnstileConfigured() && <TurnstileWidget onVerified={setChallengeToken} locale={locale} />}
+<button
               onClick={handleCheckout}
-              disabled={loading}
+              disabled={loading || challengeToken === null}
               className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-stone-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 print:hidden"
             >
               <span>{loading ? 'Opening secure checkout…' : resolvedLabel}</span>

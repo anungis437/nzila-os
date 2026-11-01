@@ -62,6 +62,9 @@ export const workbooks = pgTable(
     claimedByUserId: text('claimed_by_user_id'),
     claimedOrgId: uuid('claimed_org_id'),
     claimedAt: timestamp('claimed_at', { withTimezone: true }),
+    // Bearer capability of an UNCLAIMED workbook (hash only; see lib/workbook/workbook-capability.ts). Revoked when the workbook is claimed.
+    capabilityTokenHash: varchar('capability_token_hash', { length: 64 }),
+    capabilityTokenExpiresAt: timestamp('capability_token_expires_at', { withTimezone: true }),
     // UTM
     utmSource: varchar('utm_source', { length: 128 }),
     utmMedium: varchar('utm_medium', { length: 128 }),
@@ -124,6 +127,17 @@ export const workbookMemoryHolders = pgTable(
     successorIdentified: boolean('successor_identified').notNull().default(false),
     stewardshipDensity: numeric('stewardship_density', { precision: 5, scale: 2 }),
     notes: text('notes'),
+    // Whether a notice that this person is recorded here has been RECORDED (platform 0055). The default is the honest state of every row.
+    noticeState: varchar('notice_state', { length: 16 }).notNull().default('not_recorded'),
+    notifiedAt: timestamp('notified_at', { withTimezone: true }),
+    notifiedBy: varchar('notified_by', { length: 255 }),
+    noticeChannel: varchar('notice_channel', { length: 32 }),
+    noticeReference: varchar('notice_reference', { length: 255 }),
+    // What a recorded notice rests on (platform 0057): 'none', 'self_reported' (a person's statement) or 'delivery_verified' (a registered verifier confirmed it).
+    noticeEvidence: varchar('notice_evidence', { length: 24 }).notNull().default('none'),
+    noticeVerifiedAt: timestamp('notice_verified_at', { withTimezone: true }),
+    noticeVerifiedBy: varchar('notice_verified_by', { length: 64 }),
+    noticeProviderReference: varchar('notice_provider_reference', { length: 255 }),
     capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

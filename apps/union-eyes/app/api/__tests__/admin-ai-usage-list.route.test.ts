@@ -2,13 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
-  withSystemContext: vi.fn(),
+  withOrgOwnedContext: vi.fn(),
+  currentStateContextEnabled: vi.fn(),
   db: { execute: vi.fn() },
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
+vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { forbidden: (message: string) => new Error(message) } }));
 vi.mock('@/db/db', () => ({ db: m.db }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/db/org-owned-context', () => ({ withOrgOwnedContext: m.withOrgOwnedContext }));
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: m.currentStateContextEnabled }));
 vi.mock('@/lib/api/standardized-responses', () => ({ standardSuccessResponse: (data: unknown) => new Response(JSON.stringify(data), { status: 200 }) }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -23,13 +25,14 @@ describe('admin/ai-usage route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withOrgOwnedContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.currentStateContextEnabled.mockReturnValue(false);
     m.db.execute.mockResolvedValueOnce([{ id: 'ai_1', model: 'gpt-4o-mini' }]).mockResolvedValueOnce([{ total: 1 }]);
   });
 
   it('returns AI audit entries', async () => {
     const { GET } = await loadRoute();
-    const response = await GET({ request: { url: 'http://localhost/api/admin/ai-usage?page=2&limit=25' } });
+    const response = await GET({ request: { url: 'http://localhost/api/admin/ai-usage?page=2&limit=25' }, organizationId: '11111111-1111-4111-8111-111111111111' });
     const json = await response.json();
 
     expect(response.status).toBe(200);

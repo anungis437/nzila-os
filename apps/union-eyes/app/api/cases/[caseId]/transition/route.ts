@@ -75,7 +75,8 @@ export async function PATCH(
       );
     }
 
-    const { targetStatus, reason } = parsed.data;
+    const { reason } = parsed.data;
+    const targetStatus = normalizeTargetStatus(parsed.data.targetStatus);
 
     // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
@@ -147,9 +148,12 @@ export async function PATCH(
       await tx.insert(claimUpdates).values({
         claimId: claimHistoryReference(claim.claimId),
         updateType: 'status_change',
-        message: reason
-          ? `Status changed: ${fromStatus} → ${toDbStatus}. Reason: ${reason}`
-          : `Status changed: ${fromStatus} → ${toDbStatus}`,
+        // Member-visible history must not contain the staff's transition reason:
+        // it may include confidential evidence, third-party identity or legal strategy.
+        // The reason remains in the restricted atomic audit. The separate evidence-pack
+        // bridge currently does not ingest its supplied artifacts and is not
+        // relied upon as proof of this confidential reason.
+        message: `Status changed: ${fromStatus} → ${toDbStatus}`,
         createdBy: userId,
         isInternal: false,
         visibilityScope: 'member',
@@ -158,7 +162,6 @@ export async function PATCH(
           toStatus: toDbStatus,
           cupeFromStatus: cupeCurrentStatus,
           cupeToStatus: targetStatus,
-          reason: reason ?? null,
         },
       });
 
@@ -313,6 +316,16 @@ function mapDbStatusToCupe(dbStatus: string): string {
     closed: 'closed',
   };
   return mapping[dbStatus] ?? dbStatus;
+}
+
+/**
+ * Callers send either a CUPE vocabulary id or a claim_status name (the workbench and the next-actions route use the
+ * claim vocabulary). A claim name that is not itself a CUPE id is translated; anything else stays unknown and is refused.
+ */
+function normalizeTargetStatus(requested: string): string {
+  if (toLifecycleState('cupe', requested)) return requested;
+  const claimToCupe = mapDbStatusToCupe(requested);
+  return toLifecycleState('cupe', claimToCupe) ? claimToCupe : requested;
 }
 
 /**

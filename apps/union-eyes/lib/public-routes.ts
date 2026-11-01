@@ -10,6 +10,8 @@
  * @module lib/public-routes
  */
 
+import scheduledJobs from './operations/scheduled-jobs.json';
+
 /**
  * Public API routes that don&apos;t require authentication
  * 
@@ -27,7 +29,7 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth_core/health/',   // Trailing-slash variant used by E2E helpers
   '/api/health/liveness',      // Kubernetes liveness probe
   '/api/status',               // System status endpoint for ops dashboards
-  '/api/docs/openapi.json',    // Public API documentation (describes public endpoints only)
+  // OpenAPI inventory is restricted to administrators at the handler and proxy.
   
   // ========================================================================
   // WEBHOOKS
@@ -64,6 +66,13 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth/methods',           // Discover allowed sign-in methods for an email/org
   '/api/auth/mfa/challenge',     // Consume MFA challenge token post-password (token IS the credential)
   
+  // ========================================================================
+  // SCIM PROVISIONING
+  // Justification: the caller is an identity provider with no session. Every handler authenticates the organization's SCIM bearer
+  // token (lib/scim/scim-token.ts) and acts only for the organization that token belongs to.
+  // ========================================================================
+  '/api/scim/v2/',
+
   // ========================================================================
   // PUBLIC TRACKING/ANALYTICS
   // Justification: Email opens/clicks tracking, must work without auth
@@ -102,16 +111,9 @@ export const PUBLIC_API_ROUTES = new Set([
  * SECURITY: These routes check X-CRON-SECRET header matches CRON_SECRET env var
  * Justification: Background jobs must run without user authentication
  */
-export const CRON_API_ROUTES = new Set([
-  '/api/cron/analytics/daily-metrics',  // Daily analytics aggregation
-  '/api/cron/education-reminders',      // Send education course reminders
-  '/api/cron/monthly-dues',             // Process monthly dues payments
-  '/api/cron/monthly-per-capita',       // CLC per-capita reporting
-  '/api/cron/overdue-notifications',    // Send overdue claim notifications
-  '/api/cron/scheduled-reports',        // Generate scheduled reports
-  '/api/rewards/cron',                  // Process rewards point expiration
-  '/api/cron/external-data-sync',       // Sync data from external systems
-]);
+// Derived from the scheduled-jobs manifest, the one place a scheduled route is declared, so the edge check cannot drift from the
+// jobs that are actually scheduled. (The path is matched without its query string.)
+export const CRON_API_ROUTES = new Set<string>(scheduledJobs.jobs.map((job) => job.path.split('?')[0]));
 
 // =============================================================================
 // PUBLIC & CRON ROUTE HELPERS

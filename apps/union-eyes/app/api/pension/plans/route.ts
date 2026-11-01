@@ -1,42 +1,52 @@
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
-import { db } from '@/db/db';
+import { PENSION_ADMIN_ROLES, isPensionAdministrator } from '@/lib/pension/pension-authority';
+import { PLAN_STATUSES, PLAN_TYPES, activeEnrolmentCount, memberSafePlan, planFigureFields } from '@/lib/pension/plan-input';
 import { pensionPlans } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createPlanSchema = z.object({
   planName: z.string().max(255),
-  planType: z.enum(['defined_benefit', 'defined_contribution', 'hybrid', 'target_benefit']).optional(),
-  status: z.enum(['active', 'frozen', 'terminated', 'pending_approval']).optional(),
-  activeMembers: z.number().int().min(0).optional(),
-  totalAssets: z.string().optional(),
-  fundingStatus: z.string().optional(),
-  description: z.string().optional(),
-});
+  planType: z.enum(PLAN_TYPES).optional(),
+  status: z.enum(PLAN_STATUSES).optional(),
+  ...planFigureFields,
+  description: z.string().max(4000).optional(),
+}).strict();
 
 export const dynamic = 'force-dynamic';
+
+// A list answers at most this many rows per page; offset pages through the rest.
+const LIST_LIMIT = 200;
 
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List pension plans', description: 'List all pension plans for the organization' },
   },
-  async ({ request: _request, organizationId }) => {
-    const plans = await db
-      .select()
-      .from(pensionPlans)
-      .where(eq(pensionPlans.organizationId, organizationId!))
-      .orderBy(desc(pensionPlans.createdAt));
-    return plans;
+  async ({ request, organizationId, userId, user }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const page = listPage(request, LIST_LIMIT);
+    // A member sees which plans exist; the assets and funding figures are an administrator's record and the active-member count is
+    // counted from enrolments, not typed.
+    const administrator = isPensionAdministrator(user?.role);
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      const rows = await tx
+        .select({ plan: pensionPlans, activeMembers: activeEnrolmentCount(pensionPlans.id) })
+        .from(pensionPlans)
+        .where(eq(pensionPlans.organizationId, organizationId))
+        .orderBy(desc(pensionPlans.createdAt)).limit(page.limit).offset(page.offset);
+      return rows.map(({ plan, activeMembers }) => (administrator ? { ...plan, activeMembers } : memberSafePlan(plan)));
+    });
   },
 );
 
 export const POST = withApi(
   {
     auth: { required: true, roles: PENSION_ADMIN_ROLES },
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: { tags: ['Pension'], summary: 'Create pension plan', description: 'Create a new pension plan' },
   },
   async ({ body, organizationId, userId }) => {

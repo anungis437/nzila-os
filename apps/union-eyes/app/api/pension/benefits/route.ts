@@ -1,7 +1,8 @@
 import { withApi, ApiError } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { pensionBenefitClaims } from '@/db/schema';
+import { pensionBenefitClaims, pensionMembers } from '@/db/schema';
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import { isPensionAdministrator, ownPensionIdentities } from '@/lib/pension/pension-authority';
 import { z } from 'zod';
@@ -10,13 +11,17 @@ import { z } from 'zod';
 // trustees, which is not implemented, so a submission is always filed as pending and cannot carry a decision.
 const createBenefitClaimSchema = z.object({
   memberId: z.guid(),
-  memberName: z.string().max(255),
-  claimType: z.string().max(100),
-  amount: z.string(),
-  notes: z.string().optional(),
+  // The member's name is read from the pension member row; accepted and ignored for compatibility.
+  memberName: z.string().max(255).optional(),
+  claimType: z.string().trim().min(1).max(100),
+  amount: z.string().regex(/^(?!0+(\.0+)?$)\d{1,10}(\.\d{1,2})?$/, 'amount must be a positive amount with at most two decimals'),
+  notes: z.string().max(4000).optional(),
 });
 
 export const dynamic = 'force-dynamic';
+
+// A list answers at most this many rows per page; offset pages through the rest.
+const LIST_LIMIT = 200;
 
 export const GET = withApi(
   {
@@ -24,6 +29,7 @@ export const GET = withApi(
     openapi: { tags: ['Pension'], summary: 'List benefit claims', description: 'Benefit claims: your own, or the organization\'s for a pension administrator' },
   },
   async ({ request, organizationId, userId, user }) => {
+    const page = listPage(request, LIST_LIMIT);
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const url = new URL(request.url);
     const memberId = url.searchParams.get('memberId');
@@ -37,7 +43,7 @@ export const GET = withApi(
         if (own.length === 0 || (memberId && !own.includes(memberId))) return [];
         conditions.push(inArray(pensionBenefitClaims.memberId, memberId ? [memberId] : own));
       }
-      return tx.select().from(pensionBenefitClaims).where(and(...conditions)).orderBy(desc(pensionBenefitClaims.createdAt));
+      return tx.select().from(pensionBenefitClaims).where(and(...conditions)).orderBy(desc(pensionBenefitClaims.createdAt)).limit(page.limit).offset(page.offset);
     });
   },
 );
@@ -56,9 +62,15 @@ export const POST = withApi(
       if (!own.includes(parsed.memberId)) {
         throw ApiError.forbidden('A benefit claim can only be submitted for yourself');
       }
+      const [member] = await tx
+        .select({ name: pensionMembers.name })
+        .from(pensionMembers)
+        .where(and(eq(pensionMembers.id, parsed.memberId), eq(pensionMembers.organizationId, organizationId)))
+        .limit(1);
+      if (!member) throw ApiError.notFound('Pension member');
       const [claim] = await tx
         .insert(pensionBenefitClaims)
-        .values({ ...parsed, organizationId, status: 'pending', submittedDate: new Date() })
+        .values({ ...parsed, memberName: member.name, organizationId, status: 'pending', submittedDate: new Date() })
         .returning();
       await persistAtomicAudit(tx, {
         organizationId,

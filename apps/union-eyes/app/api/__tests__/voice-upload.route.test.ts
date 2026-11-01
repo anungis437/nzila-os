@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   checkEntitlement: vi.fn(),
+  audit: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
@@ -18,6 +19,10 @@ vi.mock('@/lib/services/entitlements', () => ({
   checkEntitlement: m.checkEntitlement,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_context: unknown, cb: (tx: unknown) => Promise<unknown>) => cb({}),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR' },
   standardErrorResponse: (_code: string, message: string) =>
@@ -31,10 +36,15 @@ async function loadRoute() {
   return import('../voice/upload/route');
 }
 
-function buildRequest(file?: File, language?: string) {
+function buildRequest(file?: File, language?: string, consent: 'valid' | 'missing' | 'stale' = 'valid') {
   const form = new FormData();
   if (file) form.append('file', file);
   if (language) form.append('language', language);
+  if (consent !== 'missing') {
+    form.append('disclosureNoticeVersion', consent === 'stale' ? 'old' : 'v1');
+    form.append('disclosureAcknowledged', 'true');
+    form.append('participantPermissionConfirmed', 'true');
+  }
   return new NextRequest('http://localhost/api/voice/upload', {
     method: 'POST',
     body: form,
@@ -50,6 +60,11 @@ describe('voice/upload route', () => {
     );
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: null });
     m.checkEntitlement.mockResolvedValue({ allowed: true });
+    m.audit.mockResolvedValue(undefined);
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_VERSION = 'v1';
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_EN_CA = 'External transcription notice';
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_FR_CA = 'Avis de transcription externe';
+    process.env.UE_VOICE_DISCLOSURE_APPROVAL_REFERENCE = 'institutional-review-pending-fixture';
     process.env.AZURE_OPENAI_WHISPER_ENDPOINT = 'https://example.openai.azure.com';
     process.env.AZURE_OPENAI_WHISPER_API_KEY = 'key1';
     process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT = 'whisper';
@@ -149,4 +164,44 @@ describe('voice/upload route', () => {
     const file = new File([new Uint8Array([1, 2, 3])], 'ok.wav', { type: 'audio/wav' });
     await expect(POST(buildRequest(file))).rejects.toThrow('entitlement service down');
   });
+  it('refuses missing, stale and unconfigured disclosure before any external call', async () => {
+    const { POST } = await loadRoute();
+    const file = new File(['voice'], 'ok.wav', { type: 'audio/wav' });
+    const send = vi.mocked(fetch);
+    expect((await POST(buildRequest(file, undefined, 'missing'))).status).toBe(400);
+    expect((await POST(buildRequest(file, undefined, 'stale'))).status).toBe(409);
+    delete process.env.UE_VOICE_DISCLOSURE_APPROVAL_REFERENCE;
+    expect((await POST(buildRequest(file))).status).toBe(503);
+    expect(send).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('refuses external transmission when the disclosure audit cannot persist', async () => {
+    const { POST } = await loadRoute();
+    m.audit.mockRejectedValueOnce(new Error('audit storage unavailable'));
+    const response = await POST(buildRequest(new File(['voice'], 'ok.wav', { type: 'audio/wav' })));
+    expect(response.status).toBe(500);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('audits version and approval reference before transmitting any audio', async () => {
+    const { POST } = await loadRoute();
+    const order: string[] = [];
+    m.audit.mockImplementation(async (_tx: unknown, event: any) => {
+      expect(event.details).toMatchObject({
+        noticeVersion: 'v1',
+        approvalReference: 'institutional-review-pending-fixture',
+        participantPermissionAsserted: true,
+      });
+      order.push('audit');
+    });
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      order.push('external');
+      return { ok: true, status: 200, json: async () => ({ text: 'hello' }) };
+    }));
+    const response = await POST(buildRequest(new File(['voice'], 'ok.wav', { type: 'audio/wav' })));
+    expect(response.status).toBe(200);
+    expect(order).toEqual(['audit', 'external']);
+  });
+
 });

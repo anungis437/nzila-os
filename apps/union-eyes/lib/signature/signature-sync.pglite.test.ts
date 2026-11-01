@@ -80,7 +80,7 @@ describe('SignatureService.syncDocumentStatus', () => {
     const eventTime = new Date('2026-02-20T14:15:16.000Z');
     observe('completed', { completedAt: eventTime });
     const before = Date.now();
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: true });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: true });
     const row = await doc();
     expect(row.status).toBe('completed');
     expect(new Date(row.provider_acknowledged_at as string).toISOString()).toBe(eventTime.toISOString());
@@ -94,7 +94,7 @@ describe('SignatureService.syncDocumentStatus', () => {
   it('records a completion that carries no provider time without inventing one, and it stays historical', async () => {
     await seed({ status: 'signed' });
     observe('completed');
-    await SignatureService.syncDocumentStatus(DOC);
+    await SignatureService.syncDocumentStatus(DOC, ORG);
     const row = await doc();
     expect(row).toMatchObject({ status: 'completed', provider_acknowledged_at: null, completed_at: null });
     expect(row.provider_status_observed_at).not.toBeNull();
@@ -104,9 +104,9 @@ describe('SignatureService.syncDocumentStatus', () => {
   it('is idempotent: a replay changes nothing and writes no second record', async () => {
     await seed({ status: 'signed' });
     observe('completed', { completedAt: new Date('2026-02-20T14:15:16.000Z') });
-    await SignatureService.syncDocumentStatus(DOC);
+    await SignatureService.syncDocumentStatus(DOC, ORG);
     const first = await doc();
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: false, reason: 'no_change' });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'no_change' });
     expect(await doc()).toEqual(first);
     expect(await audits()).toEqual(['signature.provider_status_sync']);
   });
@@ -114,7 +114,7 @@ describe('SignatureService.syncDocumentStatus', () => {
   it('lets a concurrent pair of syncs apply exactly once', async () => {
     await seed({ status: 'signed' });
     observe('completed', { completedAt: new Date('2026-02-20T14:15:16.000Z') });
-    const results = await Promise.all([SignatureService.syncDocumentStatus(DOC), SignatureService.syncDocumentStatus(DOC)]);
+    const results = await Promise.all([SignatureService.syncDocumentStatus(DOC, ORG), SignatureService.syncDocumentStatus(DOC, ORG)]);
     expect(results.filter((r) => r.synced)).toHaveLength(1);
     expect(await audits()).toEqual(['signature.provider_status_sync']);
   });
@@ -122,16 +122,16 @@ describe('SignatureService.syncDocumentStatus', () => {
   it('refuses to regress a terminal document on a stale or replayed observation', async () => {
     await seed({ status: 'completed', ack: '2026-02-20T14:15:16.000Z' });
     observe('sent');
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: false, reason: 'terminal_is_final' });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'terminal_is_final' });
     expect((await doc()).status).toBe('completed');
   });
 
   it('moves a document forward only', async () => {
     await seed({ status: 'viewed' });
     observe('delivered');
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: false, reason: 'stale_observation' });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'stale_observation' });
     observe('signed');
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: true });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: true });
     expect((await doc()).status).toBe('signed');
     expect((await doc()).provider_acknowledged_at).toBeNull();
   });
@@ -140,16 +140,16 @@ describe('SignatureService.syncDocumentStatus', () => {
     await seed({ status: 'completed' });
     const first = new Date('2026-02-20T14:15:16.000Z');
     observe('completed', { completedAt: first });
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: true });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: true });
     observe('completed', { completedAt: new Date('2026-02-21T00:00:00.000Z') });
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: false, reason: 'no_change' });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'no_change' });
     expect(new Date((await doc()).provider_acknowledged_at as string).toISOString()).toBe(first.toISOString());
   });
 
   it('leaves the stored state untouched when the provider is unavailable', async () => {
     await seed({ status: 'sent' });
     state.providerFails = true;
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: false, reason: 'provider_unavailable' });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'provider_unavailable' });
     expect((await doc()).status).toBe('sent');
     expect(await audits()).toEqual([]);
   });
@@ -157,19 +157,19 @@ describe('SignatureService.syncDocumentStatus', () => {
   it('does not call, or trust, the built-in internal provider, and ignores a document with no envelope', async () => {
     await seed({ provider: 'internal', status: 'sent' });
     observe('completed', { completedAt: new Date('2026-02-20T14:15:16.000Z') });
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: false, reason: 'not_external_provider' });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'not_external_provider' });
     expect((await doc()).status).toBe('sent');
     await resetDocumentDatabase(pg);
     await pg.exec('TRUNCATE signature_audit_trail, document_signers, signature_documents');
     await seed({ envelope: null });
-    expect(await SignatureService.syncDocumentStatus(DOC)).toEqual({ synced: false, reason: 'no_envelope' });
+    expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'no_envelope' });
   });
 
   it('writes nothing when the mandatory audit cannot be written', async () => {
     await seed({ status: 'signed' });
     await q(`INSERT INTO audit_fault_actions(action) VALUES ('signature.provider_status_sync')`);
     observe('completed', { completedAt: new Date('2026-02-20T14:15:16.000Z') });
-    await expect(SignatureService.syncDocumentStatus(DOC)).rejects.toThrow();
+    await expect(SignatureService.syncDocumentStatus(DOC, ORG)).rejects.toThrow();
     expect(await doc()).toMatchObject({ status: 'signed', provider_acknowledged_at: null });
     expect((await q('SELECT 1 FROM signature_audit_trail')).rows).toHaveLength(0);
   });
@@ -178,7 +178,7 @@ describe('SignatureService.syncDocumentStatus', () => {
     await seed({ status: 'sent', signerStatus: 'sent' });
     const signedAt = new Date('2026-02-19T08:00:00.000Z');
     observe('signed', {}, [{ signerId: 'sig-1', email: 'rep@example.org', status: 'signed', signedAt }]);
-    await SignatureService.syncDocumentStatus(DOC);
+    await SignatureService.syncDocumentStatus(DOC, ORG);
     const row = await signer();
     expect(row.status).toBe('signed');
     expect(utc(String(row.signed_at_utc))).toBe(signedAt.toISOString());
@@ -188,14 +188,14 @@ describe('SignatureService.syncDocumentStatus', () => {
     await pg.exec('TRUNCATE signature_audit_trail, document_signers, signature_documents');
     await seed({ status: 'viewed', signerStatus: 'declined' });
     observe('signed', {}, [{ signerId: 'sig-1', email: 'rep@example.org', status: 'signed', signedAt }]);
-    await SignatureService.syncDocumentStatus(DOC);
+    await SignatureService.syncDocumentStatus(DOC, ORG);
     expect((await signer()).status).toBe('declined');
 
     await resetDocumentDatabase(pg);
     await pg.exec('TRUNCATE signature_audit_trail, document_signers, signature_documents');
     await seed({ status: 'viewed', signerStatus: 'viewed' });
     observe('declined', {}, [{ signerId: 'sig-1', email: 'rep@example.org', status: 'declined' }]);
-    await SignatureService.syncDocumentStatus(DOC);
+    await SignatureService.syncDocumentStatus(DOC, ORG);
     expect(await signer()).toMatchObject({ status: 'declined', declined_at: null });
   });
 });

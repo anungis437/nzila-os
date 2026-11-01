@@ -168,6 +168,10 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       );
     }
 
+    if (!context.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const queryId = searchParams.get('query_id');
 
@@ -192,6 +196,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
           eq(aiUsageMetrics.requestId, queryId),
           eq(aiUsageMetrics.operation, 'feedback'),
           eq(aiUsageMetrics.organizationId, context.organizationId),
+          eq(aiUsageMetrics.userId, context.userId),
         ),
       );
 

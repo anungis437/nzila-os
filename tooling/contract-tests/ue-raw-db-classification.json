@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "invariant": "INV-31b \u2014 Raw DB import is distinguished from UNSAFE raw DB import. Every sensitive-domain route that touches the database directly must carry an explicit classification. Unclassified sensitive direct DB usage and forbidden-direct-db usage fail the contract test; all other classifications are tolerated (some are migration-tracked).",
+  "invariant": "INV-31b — Raw DB import is distinguished from UNSAFE raw DB import. Every sensitive-domain route that touches the database directly must carry an explicit classification. Unclassified sensitive direct DB usage and forbidden-direct-db usage fail the contract test; all other classifications are tolerated (some are migration-tracked).",
   "scope": {
     "appRoot": "apps/union-eyes",
     "sensitiveDomains": [
@@ -281,6 +281,10 @@
     "app/api/grievances/[id]/route.ts": {
       "category": "requires-rls-context",
       "reason": "Grievance item GET under withOrganizationAuth + withRLSContext."
+    },
+    "app/api/pilot/events/route.ts": {
+      "category": "requires-rls-context",
+      "reason": "Authenticated pilot event route derives actor and organization from the session; case ownership and all tracking reads/writes use the transaction handle passed by withRLSContext, with explicit organization predicates."
     }
   }
 }

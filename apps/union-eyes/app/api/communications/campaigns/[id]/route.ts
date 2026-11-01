@@ -12,7 +12,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Notifications"],
   orgScoped: true,
   itemRoute: true,
-  readRole: 'member',
+  readRole: 'steward',
+  blockedPatchFields: ['status', 'sentAt', 'completedAt', 'stats', 'audienceCount'],
   writeRole: 'steward',
 });
 export { GET, PATCH, DELETE };

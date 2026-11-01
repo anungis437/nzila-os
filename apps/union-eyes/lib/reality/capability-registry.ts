@@ -139,6 +139,30 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     notes: 'Financial submission: requires a governed remittance approval record (see the finance source findings) and an external acknowledgement before it may report success.',
   },
   {
+    id: 'UE-ACTION-CARBON-ACCOUNTING',
+    title: 'Carbon accounting: dashboard, infrastructure monitoring and claim validation',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/carbon/dashboard/route.ts', 'app/api/carbon/infrastructure/route.ts', 'app/api/carbon/validate/route.ts'],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501',
+      'previously returned literal emissions totals, renewable percentages and a certification-eligibility verdict with success true and status 200 (DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200)',
+    ],
+    targetWave: 7,
+    notes: 'No emissions data is collected. A measurement pipeline and a governed methodology must exist before any figure or certification outcome is returned.',
+  },
+  {
+    id: 'UE-ACTION-TAX-DOCUMENTS',
+    title: 'Tax slips, T106, RL-1 and COPE receipt generation',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/tax/slips/route.ts', 'app/api/tax/t106/route.ts', 'app/api/tax/rl-1/generate/route.ts', 'app/api/tax/cope/receipts/route.ts'],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501 on GET and POST',
+      'previously a generic CRUD collection over per_capita_remittances readable by any member (DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER)',
+    ],
+    targetWave: 5,
+    notes: 'Tax documents need a governed financial mandate, validated amounts and an audit record before generation. The per-capita remittance ledger is served by the finance routes under financial authority.',
+  },
+  {
     id: 'UE-ACTION-TAX-CRA-EXPORT',
     title: 'CRA tax export',
     state: 'NOT_IMPLEMENTED',
@@ -1009,6 +1033,53 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'whose protocol per operating model needs stakeholder validation).',
   },
   {
+    id: 'UE-REP-PROTOCOL-GOVERNANCE',
+    title: 'Representation protocol: administrator-saved, separately approved, audited',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/app/api/admin/representation-protocol/route.ts',
+      'apps/union-eyes/lib/representation/protocol-service.ts',
+    ],
+    evidence: [
+      'lib/representation/protocol-service.ts — saveRepresentationProtocol, submitLegacyRepresentationProtocolForApproval, approveRepresentationProtocol and resetRepresentationProtocol each write persistAtomicAudit in the same transaction as the protocol change',
+      'lib/representation/protocol-service.ts approveRepresentationProtocol — SELF_APPROVAL_FORBIDDEN: a protocol is approved only by someone other than its author',
+      'lib/representation/__tests__/protocol-resolution.test.ts, lib/__tests__/representation-protocol.test.ts and app/api/__tests__/admin-representation-protocol.route.test.ts — resolution, separation of duties and route behaviour with mocked persistence',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED, not REAL: assignment, filing and escalation consume only an approved (executable) protocol, but the model is a single ' +
+      'organization-wide setting. The GET read is logged by the API audit logger, not recorded atomically. There is no per-office, ' +
+      'per-jurisdiction or per-affiliate protocol, and the protocol is not yet a mandate (UE-REP-MANDATE-RECUSAL-DELEGATION). ' +
+      'Source and mocked-persistence evidence only; no native or browser run. Added so that a real, separation-of-duties flow is owned by ' +
+      'a named capability (DEF-0B1-REP-PROTOCOL-NOT-IN-CAPABILITY-MODEL); the frozen register entry is unchanged.',
+  },
+  {
+    id: 'UE-SSO-SIGN-IN',
+    title: 'Enterprise SSO sign-in, token exchange, provisioning and SCIM driven by a stored provider',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [],
+    evidence: [
+      'app/api/enterprise/sso/providers/route.ts and [id]/route.ts — the only readers and writers of sso_providers; every response and audit record carries lib/reality/configuration-effect.ts SSO_SIGN_IN_EFFECT (inEffect: false)',
+      'no sign-in, token-exchange, provisioning or SCIM code reads sso_providers, and the OIDC client-secret decryption helper has no caller',
+    ],
+    targetWave: 2,
+    notes:
+      'Provider configuration can be stored, and a provider is created disabled unless the administrator asks otherwise, but nothing consumes it: enabling a provider or auto-provisioning does not change how anyone signs in. A consumer needs the identity-provider protocol work and a real provider to qualify against; the stored configuration says so on every read and write rather than implying an effect.',
+  },
+  {
+    id: 'UE-EXT-INTEGRATION-SYNC',
+    title: 'Integration synchronization driven by a stored api_integrations configuration',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [],
+    evidence: [
+      'app/api/extensions/[id]/route.ts — reads, updates and deletes api_integrations rows; every response and audit record carries lib/reality/configuration-effect.ts INTEGRATION_SYNC_EFFECT (inEffect: false)',
+      'no route creates a row and nothing outside that route and the schema reads the table or its apiEndpoint',
+    ],
+    targetWave: 2,
+    notes:
+      'Enabling an integration, setting a sync frequency or repointing an endpoint is recorded but starts and redirects nothing, because no synchronization runs from the configuration. A creation path was deliberately not added: it would store more configuration that nothing consumes. The synchronization worker and its provider qualification are the missing capability.',
+  },
+  {
     id: 'UE-REP-MANDATE-RECUSAL-DELEGATION',
     title: 'Representative mandate model: recusal, territory, privileged-matter restriction, temporary delegation',
     state: 'NOT_IMPLEMENTED',
@@ -1030,7 +1101,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: [],
     evidence: [
       'Union-side referral, consent and disclosure records exist (see UE-WORKAID-UNION-SIDE-DISCLOSURE); no counsel-side connector, transmission, acknowledgement, WSIB/WSIAT filing or Clio code exists',
-      'No navigation entry, route or component presents WorkAid progress; the representative experience shows no specialist status feed',
+      'Member and staff screens show union-side consent, document release and referral status. They do not show counsel progress, acknowledgement or a specialist feed',
     ],
     targetWave: 3,
     readinessImpact: 'non_blocking',
@@ -1048,7 +1119,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     id: 'UE-WORKAID-UNION-SIDE-DISCLOSURE',
     title: 'WorkAid union-side consent, referral record, document authorisation and revocation',
     state: 'LIMITED',
-    ownedBy: ['lib/authority/store/workaid-disclosure.ts', 'app/api/workaid/consents/route.ts', 'app/api/workaid/referrals/route.ts'],
+    ownedBy: ['lib/authority/store/workaid-disclosure.ts', 'app/api/workaid/consents/route.ts', 'app/api/workaid/referrals/route.ts', 'components/workaid/workaid-journey.tsx'],
     evidence: [
       'db/__tests__/workaid-union-side.pglite.test.ts — consent scope, per-document authorisation, revocation, recusal and removed-representative denial, audit-fault rollback, cross-tenant isolation (PGlite on the real kernel storage; not a native or credentialed run)',
       'Counsel reads fail closed (COUNSEL_NOT_VERIFIABLE) because no CounselAssertionVerifier is configured',
@@ -1057,8 +1128,8 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     readinessImpact: 'non_blocking',
     disposition: 'OPTIONAL_NATIVE_CAPABILITY',
     notes:
-      'A union-side record only: a referral is not delivery to counsel, no counsel HTTP route or UI exists, and no consent text has been authored ' +
-      '(consent capture is refused until a legally approved wording version is recorded). Two external gates stay separate and closed: ' +
+      'A union-side record only: a referral is not delivery to counsel, and no counsel HTTP route or counsel UI exists. Member and staff screens call the union-side routes. ' +
+      'Consent capture stays refused until a legally approved wording version is recorded. Two external gates stay separate and closed: ' +
       'counsel-side activation (a counsel-side system and its issuer allow-list) and key custody (UE-CONV-G-003).',
   },
 ] as const;

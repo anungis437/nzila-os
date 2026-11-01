@@ -14,9 +14,13 @@ import { insertRelationship, revokeRelationship } from '../../lib/authority/stor
 import { declareOwnRecusal } from '../../lib/authority/store/lifecycle'
 import { recordCounselAcceptance, referToWorkAid } from '../../lib/authority/store/workflow'
 import {
+  adoptConsentWording,
   authoriseWorkAidDocument,
   createWorkAidShare,
   grantWorkAidConsent,
+  listOpenConsentWordingProposals,
+  proposeConsentWording,
+  listCaseWorkAidReferrals,
   listMemberWorkAidConsents,
   listReferableWorkAidConsents,
   loadCurrentConsentText,
@@ -24,6 +28,7 @@ import {
   recordConsentText,
   referMatterToWorkAid,
   retireConsentText,
+  withdrawConsentWordingProposal,
   revokeWorkAidConsent,
   revokeWorkAidDocumentAuthorisation,
 } from '../../lib/authority/store/workaid-disclosure'
@@ -111,8 +116,8 @@ const grant = (caseId: string, over: Partial<Parameters<typeof grantWorkAidConse
 
 const refer = (user: string, matterId: string, categories?: string[], org = ORG) => k.as(user, org)((t) => referMatterToWorkAid(t, k.deps, { organizationId: org, referrerUserId: user, matterId, categories }))
 const authorise = (matterId: string, documentId: string, member: string = U.member) => k.as(member)((t) => authoriseWorkAidDocument(t, k.deps, { organizationId: ORG, memberUserId: member, matterId, documentId }))
-const share = (user: string, matterId: string, o: { categories?: string[]; docs?: string[] } = {}, deps = k.deps) =>
-  k.as(user)((t) => createWorkAidShare(t, deps, { organizationId: ORG, actorUserId: user, matterId, categories: o.categories, documentAuthorisationIds: o.docs }))
+const share = (user: string, matterId: string, o: { categories?: string[]; docs?: string[]; confirm?: boolean } = {}, deps = k.deps) =>
+  k.as(user)((t) => createWorkAidShare(t, deps, { organizationId: ORG, actorUserId: user, matterId, categories: o.categories, documentAuthorisationIds: o.docs, confirm: o.confirm ?? true }))
 const revoke = (consentId: string, user: string = U.member) => k.as(user)((t) => revokeWorkAidConsent(t, k.deps, { organizationId: ORG, revokerUserId: user, consentId }))
 const engage = (matterId: string, counsel = COUNSEL) =>
   k.as(U.vp)((t) =>
@@ -265,6 +270,58 @@ describe('referral: consent first, then an authorised referrer', () => {
     expect(await audits('refer')).toBe(before + 1)
     await expect(refer(rep.user, matterId)).rejects.toThrow(/already been referred/)
     expect(consentId).toBeTruthy()
+  })
+
+  it('shows a recorded referral only to a principal the kernel still allows, without member or referrer identity', async () => {
+    const c = await newCase()
+    const rep = await newRep(c)
+    const { matterId } = await grant(c, { categories: ['case_summary', 'case_timeline'] })
+    await refer(rep.user, matterId, ['case_summary'])
+    const seen = await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))
+    expect(seen).toEqual([expect.objectContaining({ matterId, scopeStatus: 'recorded', referredCategories: ['case_summary'], releasedCategories: [], withdrawn: false, counselAccepted: false })])
+    expect(JSON.stringify(seen)).not.toContain(U.member)
+    expect(JSON.stringify(seen)).not.toContain(rep.user)
+    expect(await k.as(U.steward2)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: U.steward2, caseId: c }))).toEqual([])
+    expect(await k.as(U.steward, ORG_B)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG_B, actorUserId: U.steward, caseId: c }))).toEqual([])
+    await share(rep.user, matterId, { categories: ['case_summary'] })
+    const released = await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))
+    expect(released[0].releasedCategories).toEqual(['case_summary'])
+    const mine = await k.as(U.member)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member }))
+    expect(mine.find((row) => row.matterId === matterId)?.releasedCategories).toEqual(['case_summary'])
+    await k.as(rep.user)((t) => declareOwnRecusal(t, { organizationId: ORG, principalUserId: rep.user, resourceType: 'case', resourceId: c, reason: 'conflict of interest' }))
+    expect(await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))).toEqual([])
+  })
+
+  it('fails closed when referral provenance is missing, malformed, or wider than the categories referred', async () => {
+    const c = await newCase()
+    const rep = await newRep(c)
+    const { matterId, consentId } = await grant(c, { categories: ['case_summary', 'case_timeline'] })
+    await refer(rep.user, matterId, ['case_summary'])
+    await expect(k.as(rep.user)((t) => t.query(`UPDATE ue_authority_workaid_matters SET referred_categories = ARRAY['case_summary','case_timeline']::text[] WHERE id = $1`, [matterId]))).rejects.toThrow(/may only change/)
+    await expect(share(rep.user, matterId, { categories: ['case_timeline'] })).rejects.toThrow(/REFERRAL_SCOPE_EXCEEDED/)
+    await expect(share(rep.user, matterId, { categories: ['case_summary'], confirm: false })).rejects.toThrow(/RELEASE_UNCONFIRMED/)
+    expect(await count('ue_authority_workaid_shares', 'matter_id = $1', [matterId])).toBe(0)
+
+    await k.asAdmin(() => db.query(`UPDATE public.audit_logs SET details = jsonb_set(details, '{categories}', '["not-a-category"]'::jsonb) WHERE organization_id = $1 AND action = 'authority.workaid.refer' AND resource_id = $2`, [ORG, matterId]))
+    const malformed = await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))
+    expect(malformed[0]).toMatchObject({ scopeStatus: 'unavailable', referredCategories: [] })
+    expect(malformed[0].referredCategories).not.toContain('case_timeline')
+
+    await k.asAdmin(() => db.query(`UPDATE public.audit_logs SET details = jsonb_set(details, '{categories}', '["case_summary","case_timeline"]'::jsonb) WHERE organization_id = $1 AND action = 'authority.workaid.refer' AND resource_id = $2`, [ORG, matterId]))
+    const conflict = await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))
+    expect(conflict[0]).toMatchObject({ scopeStatus: 'conflict', referredCategories: [] })
+
+    await k.asAdmin(() => db.query(`UPDATE public.audit_logs SET details = jsonb_set(details, '{categories}', '["case_summary"]'::jsonb) WHERE organization_id = $1 AND action = 'authority.workaid.refer' AND resource_id = $2`, [ORG, matterId]))
+    await share(rep.user, matterId, { categories: ['case_summary'] })
+    const live = await k.as(U.member)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member }))
+    const row = live.find((item) => item.consentId === consentId)
+    expect(row?.disclosureHistory).toEqual([expect.objectContaining({ categories: ['case_summary'], effective: true, deliveredToCounsel: false, counselAcknowledged: false })])
+    expect(row).toMatchObject({ notificationDelivered: false, notificationPolicy: 'not_adopted' })
+    expect(JSON.stringify(row?.disclosureHistory)).not.toContain(rep.user)
+    await revoke(consentId)
+    const after = await k.as(U.member)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member }))
+    expect(after.find((item) => item.consentId === consentId)?.disclosureHistory[0]).toMatchObject({ effective: false, withdrawalReason: 'consent_revoked', deliveredToCounsel: false, counselAcknowledged: false })
+    await expect(share(rep.user, matterId, { categories: ['case_summary'] })).rejects.toThrow(/CONSENT_NOT_LIVE|no live referral/)
   })
 
   it('the member refers their own matter (creator relationship); a different member cannot', async () => {
@@ -617,5 +674,38 @@ describe('storage is append-only, actor-bound and tenant-isolated', () => {
     const other = await k.as(U.member2)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member2 }))
     expect(other.find((x) => x.consentId === f.consentId)).toBeUndefined()
     await expect(k.as(U.member2)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member }))).rejects.toThrow(/ACTOR_NOT_SESSION/)
+  })
+})
+
+describe('consent wording adoption requires a second executive', () => {
+  const version = 'fixture-adoption-1'
+  const body = 'TEST FIXTURE WORDING ONLY (not approved legal text): second-executive adoption sample.'
+
+  it('keeps capture closed until a different executive adopts the stored text', async () => {
+    const propose = (user: string) => k.as(user)((t) => proposeConsentWording(t, k.deps, { organizationId: ORG, proposerUserId: user, version, body }))
+    await expect(propose(U.steward)).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    await expect(propose(U.president)).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    const proposalId = await propose(U.vp)
+    await expect(k.as(U.vp)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.vp, proposalId }))).rejects.toThrow(/WORDING_ADOPTION_SEGREGATION/)
+    await expect(k.as(U.treasurer)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.treasurer, proposalId }))).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    expect(await k.as(U.member)((t) => loadCurrentConsentText(t, ORG))).toMatchObject({ version: 'v1' })
+
+    await k.grantOffice(U.treasurer, U.president, U.vp)
+    const open = await k.as(U.treasurer)((t) => listOpenConsentWordingProposals(t, k.deps, { organizationId: ORG, reviewerUserId: U.treasurer }))
+    expect(open.find((row) => row.id === proposalId)).toMatchObject({ version, body, ownProposal: false })
+    const own = await k.as(U.vp)((t) => listOpenConsentWordingProposals(t, k.deps, { organizationId: ORG, reviewerUserId: U.vp }))
+    expect(own.find((row) => row.id === proposalId)?.ownProposal).toBe(true)
+
+    const adopted = await k.as(U.treasurer)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.treasurer, proposalId }))
+    expect(adopted.version).toBe(version)
+    expect(await k.as(U.member)((t) => loadCurrentConsentText(t, ORG))).toMatchObject({ version, bodySha256: adopted.bodySha256 })
+    const caseId = await newCase()
+    const granted = await grant(caseId, { textVersion: version, acknowledgedTextSha256: adopted.bodySha256 })
+    expect(granted.matterId).toMatch(/^[0-9a-f-]{36}$/)
+
+    expect((await k.as(U.member, ORG_B)((t) => t.query<{ n: string }>(`SELECT count(*)::text n FROM ue_authority_workaid_consent_text_proposals`))).rows[0].n).toBe('0')
+    await expect(k.as(U.treasurer, ORG_B)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG_B, adopterUserId: U.treasurer, proposalId }))).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    await expect(k.as(U.treasurer)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.treasurer, proposalId: newUuid() }))).rejects.toThrow(/NOT_FOUND|no consent wording proposal/)
+    await expect(k.as(U.vp)((t) => withdrawConsentWordingProposal(t, k.deps, { organizationId: ORG, proposerUserId: U.vp, proposalId }))).rejects.toMatchObject({ code: 'ALREADY_TERMINAL' })
   })
 })

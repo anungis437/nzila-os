@@ -239,6 +239,8 @@ export class SendGridAdapter implements EmailProvider {
             type: att.contentType || 'application/octet-stream',
           })),
           custom_args: message.metadata,
+          // Preserve RFC 8058 List-Unsubscribe headers across the SendGrid fallback.
+          headers: message.headers,
         }),
       });
 

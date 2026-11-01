@@ -1,6 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+// The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
+// route's own behaviour as a caller who may read and administer the organization.
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: false, direct: new Map([['11111111-1111-4111-8111-111111111111', 'member']]), descendants: new Set() }),
+  canReadOrganization: () => true,
+  canAdministerOrganization: () => true,
+  readableOrganizationIds: () => null,
+  directRoleIn: () => 'admin',
+  UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
+}));
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   requireUserForOrganization: vi.fn(),
@@ -8,13 +18,15 @@ const m = vi.hoisted(() => ({
   audit: vi.fn(),
   selectQueue: [] as unknown[][],
   executeQueue: [] as unknown[][],
+  rlsContexts: [] as unknown[],
   updateQueue: [] as unknown[][],
 }));
 
 function makeSelectChain(rows: unknown[]) {
   const chain: any = {
     from: vi.fn(() => chain),
-    where: vi.fn(async () => rows),
+    // A select may end at where or continue with limit (the reparent helper's lookups).
+    where: vi.fn(() => Object.assign(Promise.resolve(rows), { limit: async () => rows })),
   };
   return chain;
 }
@@ -37,7 +49,10 @@ const mockDb: any = {
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb),
+  withRLSContext: async (...args: unknown[]) => {
+    if (args.length > 1) m.rlsContexts.push(args[0]);
+    return (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(mockDb);
+  },
   withSystemContext: async (fn: () => Promise<unknown>) => fn(),
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -69,6 +84,7 @@ describe('organizations/[id] route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.executeQueue = [];
+    m.rlsContexts = [];
     m.updateQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.requireUserForOrganization.mockResolvedValue({ roles: ['admin'], userId: 'u1' });
@@ -102,6 +118,7 @@ describe('organizations/[id] route', () => {
     const json = await response.json();
     expect(json.data.id).toBe('11111111-1111-4111-8111-111111111111');
     expect(json.data.totalClaims).toBe(5);
+    expect(m.rlsContexts).toContainEqual({ organizationId: orgRow.id });
   });
 
   it('PATCH returns 403 when org auth check fails', async () => {
@@ -172,7 +189,8 @@ describe('organizations/[id] route', () => {
 
   it('PATCH lets platform governance change the parent affiliation', async () => {
     const { PATCH } = await loadRoute();
-    m.selectQueue.push([orgRow]);
+    // The route's own read, then the reparent helper's three reads: this organization's current parent, the new parent, the descendants.
+    m.selectQueue.push([orgRow], [{ parentId: null }], [{ id: '22222222-2222-4222-8222-222222222222', hierarchyPath: [], hierarchyLevel: 0 }], []);
     m.updateQueue.push([{ ...orgRow, parentId: '22222222-2222-4222-8222-222222222222' }]);
 
     const response = await PATCH(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', {
@@ -194,16 +212,30 @@ describe('organizations/[id] route', () => {
     expect(m.audit).not.toHaveBeenCalled();
   });
 
-  it('DELETE archives organization', async () => {
+  it('DELETE refuses a local administrator without platform archival authority before any write', async () => {
     const { DELETE } = await loadRoute();
-    m.updateQueue.push([{ ...orgRow, status: 'archived' }]);
+    m.requireSystemAdmin.mockRejectedValueOnce(new Error('platform authority required'));
 
-    const response = await DELETE(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', { method: 'DELETE' }), {
-      params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }),
+    const response = await DELETE(new NextRequest('http://localhost/api/organizations/' + orgRow.id, { method: 'DELETE' }), {
+      params: Promise.resolve({ id: orgRow.id }),
     });
 
-    expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.data.status).toBe('archived');
+    expect(response.status).toBe(403);
+    expect(m.requireSystemAdmin).toHaveBeenCalledTimes(1);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('DELETE refuses direct archival even for a platform administrator until dual approval is implemented', async () => {
+    const { DELETE } = await loadRoute();
+    const response = await DELETE(new NextRequest('http://localhost/api/organizations/' + orgRow.id, { method: 'DELETE' }), {
+      params: Promise.resolve({ id: orgRow.id }),
+    });
+
+    expect(response.status).toBe(501);
+    expect(m.requireSystemAdmin).toHaveBeenCalledTimes(1);
+    expect((await response.json()).error).toMatch(/institutional lifecycle workflow/i);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });

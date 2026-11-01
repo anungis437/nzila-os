@@ -10,6 +10,7 @@
  */
 
 import { db } from "@/db/db";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import {
   arbitrationDecisions,
   arbitratorProfiles,
@@ -29,6 +30,37 @@ export type ArbitratorProfile = typeof arbitratorProfiles.$inferSelect;
 export type ArbitrationDecisionSummary = Omit<ArbitrationDecision, 'fullText'> & {
   fullText?: string;
 };
+
+// arbitration_decisions is shared across organizations and has no organization column, so what a row permits is on the row:
+// a decision marked not public, or carrying an access restriction, is never read through this library.
+function sharedDecisions(): SQL {
+  return and(
+    eq(arbitrationDecisions.isPublic, true),
+    or(sql`${arbitrationDecisions.accessRestrictions} is null`, eq(arbitrationDecisions.accessRestrictions, '')),
+  ) as SQL;
+}
+
+// precedent_value is an enum that sorts as declared (high, medium, low), so ordering by the column puts the least valuable decision first.
+const precedentRank = sql<number>`case ${arbitrationDecisions.precedentValue} when 'high' then 3 when 'medium' then 2 when 'low' then 1 else 0 end`;
+
+/** The text of a search term with the LIKE wildcards taken literally, so a broad pattern cannot scan the whole text column. */
+function containing(term: string): string {
+  return `%${term.replace(/[\\%_]/g, '\\$&')}%`;
+}
+
+export class PrecedentFilterError extends Error {
+  readonly code = 'INVALID_PRECEDENT_FILTER';
+}
+
+/** A filter value that is not one of the column's declared values is refused, never cast through to the database. */
+function checkedValues<T extends string>(values: string[] | undefined, allowed: readonly string[] | undefined, name: string): T[] | undefined {
+  if (!values || values.length === 0) return undefined;
+  if (allowed) {
+    const rejected = values.find((value) => !allowed.includes(value));
+    if (rejected !== undefined) throw new PrecedentFilterError(`Invalid ${name} filter value`);
+  }
+  return values as T[];
+}
 
 type TribunalFilter = ArbitrationDecision['tribunal'];
 type DecisionTypeFilter = ArbitrationDecision['decisionType'];
@@ -83,19 +115,13 @@ export async function getPrecedentById(
 ): Promise<ArbitrationDecisionSummary | null> {
   try {
     const decision = await db.query.arbitrationDecisions.findFirst({
-      where: eq(arbitrationDecisions.id, id),
+      where: and(eq(arbitrationDecisions.id, id), sharedDecisions()),
     });
 
     if (!decision) return null;
 
-    // Increment view count
-    await db
-      .update(arbitrationDecisions)
-      .set({ 
-        viewCount: sql`${arbitrationDecisions.viewCount} + 1`,
-        updatedAt: new Date()
-      })
-      .where(eq(arbitrationDecisions.id, id));
+    // A read no longer counts itself. The old counter was a write by any tenant to a row owned by another, which a tenant may not
+    // make once the library has an owner (platform 0051 / cache 0041); view_count is no longer maintained.
 
     // Optionally exclude full text if not needed
     if (!options.includeFullText) {
@@ -118,7 +144,7 @@ export async function getPrecedentByCaseNumber(
 ): Promise<ArbitrationDecision | null> {
   try {
     const decision = await db.query.arbitrationDecisions.findFirst({
-      where: eq(arbitrationDecisions.caseNumber, caseNumber),
+      where: and(eq(arbitrationDecisions.caseNumber, caseNumber), sharedDecisions()),
     });
 
     return decision || null;
@@ -146,41 +172,30 @@ export async function listPrecedents(
     const offset = (page - 1) * limit;
 
     // Build WHERE conditions
-    const conditions: SQL[] = [];
+    const conditions: SQL[] = [sharedDecisions()];
 
-    if (filters.tribunal && filters.tribunal.length > 0) {
-      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as TribunalFilter[]));
-    }
+    const tribunals = checkedValues<TribunalFilter>(filters.tribunal, arbitrationDecisions.tribunal?.enumValues, 'tribunal');
+    if (tribunals) conditions.push(inArray(arbitrationDecisions.tribunal, tribunals));
 
-    if (filters.decisionType && filters.decisionType.length > 0) {
-      conditions.push(
-        inArray(arbitrationDecisions.decisionType, filters.decisionType as DecisionTypeFilter[])
-      );
-    }
+    const decisionTypes = checkedValues<DecisionTypeFilter>(filters.decisionType, arbitrationDecisions.decisionType?.enumValues, 'decisionType');
+    if (decisionTypes) conditions.push(inArray(arbitrationDecisions.decisionType, decisionTypes));
 
-    if (filters.outcome && filters.outcome.length > 0) {
-      conditions.push(inArray(arbitrationDecisions.outcome, filters.outcome as OutcomeFilter[]));
-    }
+    const outcomes = checkedValues<OutcomeFilter>(filters.outcome, arbitrationDecisions.outcome?.enumValues, 'outcome');
+    if (outcomes) conditions.push(inArray(arbitrationDecisions.outcome, outcomes));
 
-    if (filters.precedentValue && filters.precedentValue.length > 0) {
-      conditions.push(
-        inArray(
-          arbitrationDecisions.precedentValue,
-          filters.precedentValue as PrecedentValueFilter[]
-        )
-      );
-    }
+    const precedentValues = checkedValues<PrecedentValueFilter>(filters.precedentValue, arbitrationDecisions.precedentValue?.enumValues, 'precedentValue');
+    if (precedentValues) conditions.push(inArray(arbitrationDecisions.precedentValue, precedentValues));
 
     if (filters.arbitrator) {
-      conditions.push(like(arbitrationDecisions.arbitrator, `%${filters.arbitrator}%`));
+      conditions.push(like(arbitrationDecisions.arbitrator, containing(filters.arbitrator)));
     }
 
     if (filters.union) {
-      conditions.push(like(arbitrationDecisions.union, `%${filters.union}%`));
+      conditions.push(like(arbitrationDecisions.union, containing(filters.union)));
     }
 
     if (filters.employer) {
-      conditions.push(like(arbitrationDecisions.employer, `%${filters.employer}%`));
+      conditions.push(like(arbitrationDecisions.employer, containing(filters.employer)));
     }
 
     if (filters.jurisdiction) {
@@ -188,7 +203,7 @@ export async function listPrecedents(
     }
 
     if (filters.sector) {
-      conditions.push(like(arbitrationDecisions.sector, `%${filters.sector}%`));
+      conditions.push(like(arbitrationDecisions.sector, containing(filters.sector)));
     }
 
     if (filters.dateFrom) {
@@ -202,10 +217,10 @@ export async function listPrecedents(
     if (filters.searchQuery) {
       conditions.push(
         or(
-          like(arbitrationDecisions.caseTitle, `%${filters.searchQuery}%`),
-          like(arbitrationDecisions.caseNumber, `%${filters.searchQuery}%`),
-          like(arbitrationDecisions.summary, `%${filters.searchQuery}%`),
-          like(arbitrationDecisions.headnote, `%${filters.searchQuery}%`)
+          like(arbitrationDecisions.caseTitle, containing(filters.searchQuery)),
+          like(arbitrationDecisions.caseNumber, containing(filters.searchQuery)),
+          like(arbitrationDecisions.summary, containing(filters.searchQuery)),
+          like(arbitrationDecisions.headnote, containing(filters.searchQuery))
         )!
       );
     }
@@ -250,16 +265,23 @@ export async function listPrecedents(
 /**
  * Create a new arbitration decision
  */
-export async function createPrecedent(data: NewArbitrationDecision): Promise<ArbitrationDecision> {
+export async function createPrecedent(
+  scope: { organizationId: string },
+  data: Omit<NewArbitrationDecision, 'sourceOrganizationId' | 'isPublic' | 'accessRestrictions'>,
+): Promise<ArbitrationDecision> {
   try {
-    const [newDecision] = await db
+    // The decision is owned by the organization that supplies it and is not shared until it is reviewed, whatever the caller sends.
+    const [newDecision] = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
       .insert(arbitrationDecisions)
       .values({
         ...data,
+        sourceOrganizationId: scope.organizationId,
+        isPublic: false,
+        accessRestrictions: 'pending_review',
         createdAt: new Date(),
         updatedAt: new Date(),
       })
-      .returning();
+      .returning());
 
     // Update arbitrator profile if exists
     if (data.arbitrator) {
@@ -277,18 +299,20 @@ export async function createPrecedent(data: NewArbitrationDecision): Promise<Arb
  * Update an arbitration decision
  */
 export async function updatePrecedent(
+  scope: { organizationId: string },
   id: string,
-  data: Partial<NewArbitrationDecision>
+  data: Partial<Omit<NewArbitrationDecision, 'id' | 'sourceOrganizationId' | 'isPublic' | 'accessRestrictions'>>,
 ): Promise<ArbitrationDecision | null> {
   try {
-    const [updated] = await db
+    // Only the supplying organization changes its decision; publication and ownership are not editable here.
+    const [updated] = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
       .update(arbitrationDecisions)
       .set({
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(arbitrationDecisions.id, id))
-      .returning();
+      .where(and(eq(arbitrationDecisions.id, id), eq(arbitrationDecisions.sourceOrganizationId, scope.organizationId)))
+      .returning());
 
     return updated || null;
   } catch (error) {
@@ -300,13 +324,14 @@ export async function updatePrecedent(
 /**
  * Delete a precedent
  */
-export async function deletePrecedent(id: string): Promise<boolean> {
+export async function deletePrecedent(scope: { organizationId: string }, id: string): Promise<boolean> {
   try {
-    await db
+    const removed = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
       .delete(arbitrationDecisions)
-      .where(eq(arbitrationDecisions.id, id));
+      .where(and(eq(arbitrationDecisions.id, id), eq(arbitrationDecisions.sourceOrganizationId, scope.organizationId)))
+      .returning({ id: arbitrationDecisions.id }));
 
-    return true;
+    return removed.length > 0;
   } catch (error) {
     logger.error("Error deleting precedent", { error, id });
     throw new Error("Failed to delete precedent");
@@ -325,35 +350,28 @@ export async function searchPrecedents(
   filters: Omit<PrecedentFilters, "searchQuery"> = {},
   limit: number = 50
 ): Promise<ArbitrationDecision[]> {
+  const precedentValues = checkedValues<PrecedentValueFilter>(filters.precedentValue, arbitrationDecisions.precedentValue?.enumValues, 'precedentValue');
+  const tribunals = checkedValues<TribunalFilter>(filters.tribunal, arbitrationDecisions.tribunal?.enumValues, 'tribunal');
   try {
     const conditions: SQL[] = [
+      sharedDecisions(),
       or(
-        like(arbitrationDecisions.caseTitle, `%${query}%`),
-        like(arbitrationDecisions.caseNumber, `%${query}%`),
-        like(arbitrationDecisions.summary, `%${query}%`),
-        like(arbitrationDecisions.headnote, `%${query}%`),
-        like(arbitrationDecisions.fullText, `%${query}%`)
+        like(arbitrationDecisions.caseTitle, containing(query)),
+        like(arbitrationDecisions.caseNumber, containing(query)),
+        like(arbitrationDecisions.summary, containing(query)),
+        like(arbitrationDecisions.headnote, containing(query)),
+        like(arbitrationDecisions.fullText, containing(query))
       )!
     ];
 
-    if (filters.precedentValue && filters.precedentValue.length > 0) {
-      conditions.push(
-        inArray(
-          arbitrationDecisions.precedentValue,
-          filters.precedentValue as PrecedentValueFilter[]
-        )
-      );
-    }
-
-    if (filters.tribunal && filters.tribunal.length > 0) {
-      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as TribunalFilter[]));
-    }
+    if (precedentValues) conditions.push(inArray(arbitrationDecisions.precedentValue, precedentValues));
+    if (tribunals) conditions.push(inArray(arbitrationDecisions.tribunal, tribunals));
 
     const results = await db
       .select()
       .from(arbitrationDecisions)
       .where(and(...conditions))
-      .orderBy(desc(arbitrationDecisions.precedentValue), desc(arbitrationDecisions.citationCount))
+      .orderBy(desc(precedentRank), desc(arbitrationDecisions.citationCount))
       .limit(limit);
 
     return results;
@@ -375,8 +393,8 @@ export async function getPrecedentsByIssueType(
     const results = await db
       .select()
       .from(arbitrationDecisions)
-      .where(sql`${arbitrationDecisions.issueTypes}::jsonb ? ${issueType}`)
-      .orderBy(desc(arbitrationDecisions.precedentValue), desc(arbitrationDecisions.decisionDate))
+      .where(and(sharedDecisions(), sql`${arbitrationDecisions.issueTypes}::jsonb ? ${issueType}`))
+      .orderBy(desc(precedentRank), desc(arbitrationDecisions.decisionDate))
       .limit(limit);
 
     return results;
@@ -399,16 +417,23 @@ export async function getRelatedPrecedents(
     if (!decision) return [];
 
     // Find related decisions based on similar criteria
-    const conditions: SQL[] = [];
+    const conditions: SQL[] = [sharedDecisions()];
 
-    if (decision.issueTypes) {
-      // Would use vector similarity or JSONB overlap in production
-      conditions.push(sql`${arbitrationDecisions.issueTypes}::jsonb && ${decision.issueTypes}::jsonb`);
+    // Any shared issue type. jsonb has no && operator, and a JS array bound as one parameter is not JSON: ask whether each of the strings
+    // is an element of the stored array (?) with each one as its own parameter, as the issue-type lookup does.
+    const issueTypes = Array.isArray(decision.issueTypes)
+      ? (decision.issueTypes as unknown[]).filter((type): type is string => typeof type === "string")
+      : [];
+    if (issueTypes.length > 0) {
+      conditions.push(or(...issueTypes.map((type) => sql`${arbitrationDecisions.issueTypes}::jsonb ? ${type}`)) as SQL);
     }
 
     if (decision.sector) {
       conditions.push(eq(arbitrationDecisions.sector, decision.sector));
     }
+
+    // A decision with no issue type and no sector has nothing that relates it to another, so there is nothing to return.
+    if (conditions.length === 1) return [];
 
     // Exclude the current decision
     conditions.push(sql`${arbitrationDecisions.id} != ${decisionId}`);
@@ -417,7 +442,7 @@ export async function getRelatedPrecedents(
       .select()
       .from(arbitrationDecisions)
       .where(and(...conditions))
-      .orderBy(desc(arbitrationDecisions.precedentValue))
+      .orderBy(desc(precedentRank))
       .limit(limit);
 
     return related;
@@ -559,6 +584,7 @@ export async function getPrecedentStatistics() {
         count: sql<number>`count(*)::int`,
       })
       .from(arbitrationDecisions)
+      .where(sharedDecisions())
       .groupBy(arbitrationDecisions.outcome);
 
     const byTribunal = await db
@@ -567,11 +593,13 @@ export async function getPrecedentStatistics() {
         count: sql<number>`count(*)::int`,
       })
       .from(arbitrationDecisions)
+      .where(sharedDecisions())
       .groupBy(arbitrationDecisions.tribunal);
 
     const [{ total }] = await db
       .select({ total: sql<number>`count(*)::int` })
-      .from(arbitrationDecisions);
+      .from(arbitrationDecisions)
+      .where(sharedDecisions());
 
     return {
       total,
@@ -592,6 +620,7 @@ export async function getMostCitedPrecedents(limit: number = 10): Promise<Arbitr
     const precedents = await db
       .select()
       .from(arbitrationDecisions)
+      .where(sharedDecisions())
       .orderBy(desc(arbitrationDecisions.citationCount))
       .limit(limit);
 

@@ -32,8 +32,8 @@ import { logger } from '@/lib/logger'
 import type { Action, AuthorityRequest, Decision } from '../ontology'
 import { FINANCE_CAPACITIES } from '../policies/finance'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
-import { AuthorityStoreError, type SqlExecutor } from './executor'
-import { canonicalMembershipSource } from './identity'
+import { AuthorityStoreError, isUuid, type SqlExecutor } from './executor'
+import { activeMembershipSource } from './active-membership-source'
 import { financeSourceReadiness, loadFinancialTransaction } from './resources'
 import { drizzleExecutor, kernelDeps } from './route-adapter'
 import { recordFinancialStep, type FinancialStep } from './workflow'
@@ -56,6 +56,7 @@ export type FinancialDutyCode =
   | 'FINANCIAL_MANDATES_NOT_ISSUED'
   | 'NOT_FOUND'
   | 'DUTY_NOT_HELD'
+  | 'SEGREGATION_OF_DUTIES'
   | 'STEP_REFUSED'
   | 'FACT_MISMATCH'
   | 'INVALID_REQUEST'
@@ -65,6 +66,7 @@ export const FINANCIAL_DUTY_STATUS: Record<FinancialDutyCode, number> = {
   FINANCIAL_MANDATES_NOT_ISSUED: 403,
   NOT_FOUND: 404,
   DUTY_NOT_HELD: 403,
+  SEGREGATION_OF_DUTIES: 403,
   STEP_REFUSED: 409,
   FACT_MISMATCH: 409,
   INVALID_REQUEST: 422,
@@ -157,8 +159,14 @@ async function liveFinancialMandateCount(exec: SqlExecutor, organizationId: stri
   return Number(row?.n ?? 0)
 }
 
+/** Refuses when this organization has no live financial mandate. Does not treat a role or an administrator title as one. */
+export async function assertLiveFinancialMandate(exec: SqlExecutor, organizationId: string): Promise<void> {
+  if (!isUuid(organizationId)) throw new FinancialDutyError('INVALID_REQUEST', 'organizationId must be a uuid')
+  if ((await liveFinancialMandateCount(exec, organizationId)) === 0) throw mandatesNotIssuedError()
+}
+
 async function holdsFinancialCapacity(exec: SqlExecutor, organizationId: string, userId: string): Promise<boolean> {
-  const rows = await canonicalMembershipSource(exec, organizationId, [userId])
+  const rows = await activeMembershipSource(exec, organizationId, [userId])
   return rows.some(
     (m) => m.userId === userId && m.organizationId === organizationId && m.status === 'active' && m.capacities.some((c) => FINANCE_CAPACITIES.includes(c)),
   )

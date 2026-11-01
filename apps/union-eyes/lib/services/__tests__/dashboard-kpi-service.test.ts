@@ -461,12 +461,12 @@ describe("dashboard-kpi-service", () => {
     expect(cacheSetMock).toHaveBeenCalledTimes(1);
   });
 
-  it("buildLeadershipDashboard handles empty inputs with default compliance values", () => {
+  it("buildLeadershipDashboard reports unknown, not 100, for compliance rates with nothing to measure", () => {
     const result = buildLeadershipDashboard([], [], "weekly", iso("2026-01-12T00:00:00.000Z"));
 
     expect(result.kpi.activeGrievances).toBe(0);
-    expect(result.compliance.metrics.deadlineAdherence).toBe(100);
-    expect(result.compliance.metrics.documentationRate).toBe(100);
+    expect(result.compliance.metrics.deadlineAdherence).toBeNull();
+    expect(result.compliance.metrics.documentationRate).toBeNull();
     expect(result.compliance.alerts).toEqual([]);
   });
 

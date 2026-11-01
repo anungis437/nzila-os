@@ -55,9 +55,11 @@ describe('ai/semantic-search route', () => {
     const createSelectChain = () => {
       const chain: {
         from: () => unknown;
+        where: () => unknown;
         then: (resolve: (value: unknown[]) => unknown, reject: (reason: unknown) => unknown) => Promise<unknown>;
       } = {
         from: () => chain,
+        where: () => chain,
         then: (resolve, reject) => Promise.resolve((m.selectQueue.shift() ?? []) as unknown[]).then(resolve, reject),
       };
       return chain;

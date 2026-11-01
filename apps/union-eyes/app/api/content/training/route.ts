@@ -3,6 +3,7 @@
  * Returns training courses from PostgreSQL.
  */
 import { withApi } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -15,16 +16,18 @@ export const GET = withApi(
     const orgId = ctx.organizationId;
     const url = new URL(ctx.request.url);
     const activeOnly = url.searchParams.get('active') !== 'false';
+    const page = listPage(ctx.request, 200);
 
     // duration_label, completion_count and materials_url are not stored columns: they are derived
-    // from the canonical duration, registration and materials fields.
+    // from the canonical duration, registration and materials fields. A completion is a registration marked completed:
+    // attending a session is not finishing the course.
     let query = sql`
       SELECT tc.id, tc.course_code, tc.course_name, tc.course_description,
              tc.course_category, tc.delivery_method, tc.duration_hours,
              CASE WHEN tc.duration_hours IS NOT NULL THEN tc.duration_hours::text || ' hours' END AS duration_label,
              (SELECT count(*)::int FROM course_registrations cr
                WHERE cr.course_id = tc.id AND cr.organization_id = tc.organization_id
-                 AND cr.attended IS TRUE) AS completion_count,
+                 AND cr.completed IS TRUE) AS completion_count,
              tc.is_active, tc.is_mandatory,
              tc.course_materials_url AS materials_url, tc.created_at, tc.updated_at
       FROM training_courses tc
@@ -35,7 +38,8 @@ export const GET = withApi(
       query = sql`${query} AND tc.is_active = true`;
     }
 
-    query = sql`${query} ORDER BY tc.is_mandatory DESC, completion_count DESC`;
+    // The id breaks ties so a page is stable while the list is paged through.
+    query = sql`${query} ORDER BY tc.is_mandatory DESC, completion_count DESC, tc.id LIMIT ${page.limit} OFFSET ${page.offset}`;
 
     const result = await withRLSContext(async () => db.execute(query));
     const rows = Array.from(result);

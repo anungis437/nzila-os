@@ -288,3 +288,8 @@ apps/trustcore/gtm/
 
 # HubSpot config file
 hubspot.config.yml
+
+# Local runtime acceptance state (tooling/scripts/ue-runtime-up.mjs)
+.ue-runtime/
+# Gate 0 execution-evidence logs are hash-pinned by committed records, so they must be committed with them (R-38).
+!docs/union-eyes/convergence/evidence/gate0-source-verification/*.log

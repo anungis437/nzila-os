@@ -72,7 +72,7 @@ export function buildIndexableContent(interview: ExitInterview): string {
 
 export type IndexResult =
   | { indexed: true; knowledgeBaseId: string }
-  | { indexed: false; reason: string };
+  | { indexed: false; reason: string; failed?: true };
 
 /**
  * Index a single exit interview into the vector knowledge base.
@@ -228,6 +228,7 @@ export async function indexExitInterview(
         .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
       await audit(tx, 'exit_interview.index.failed', { error: err instanceof Error ? err.message : String(err) }, 'failure');
     }).catch(() => {});
-    return { indexed: false, reason: String(err) };
+    // The error text stays in the audit record; the caller is told only that indexing failed.
+    return { indexed: false, reason: 'Indexing failed', failed: true };
   }
 }

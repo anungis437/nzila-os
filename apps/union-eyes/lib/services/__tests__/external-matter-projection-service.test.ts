@@ -34,7 +34,7 @@ describe('external matter projection', () => {
       step: 'triage',
       filedDate: '2026-09-15T00:00:00.000Z',
       responseDeadline: '2026-09-30T00:00:00.000Z',
-      summary: 'External-safe summary',
+      summary: null,
     });
     expect(projected).not.toHaveProperty('internalUnionNotes');
     expect(projected).not.toHaveProperty('internalAssignmentRationale');
@@ -45,6 +45,16 @@ describe('external matter projection', () => {
     for (const sentinel of internalSentinels) {
       expect(serialized).not.toContain(sentinel);
     }
+  });
+
+  it('does not disclose an internal summary even when it is populated', () => {
+    const projected = toExternalMatterProjection({
+      id: 'matter-a',
+      summary: 'PRIVATE internal description that must not reach counsel',
+      description: 'PRIVATE confidential union strategy',
+    });
+    expect(projected.summary).toBeNull();
+    expect(JSON.stringify(projected)).not.toContain('PRIVATE');
   });
 
   it('does not fall back to internal description when external summary is absent', () => {

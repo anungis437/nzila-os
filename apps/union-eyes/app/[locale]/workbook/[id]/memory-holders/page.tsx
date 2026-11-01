@@ -10,7 +10,10 @@ import { notFound } from 'next/navigation';
 import { db } from '@/db';
 import { workbookMemoryHolders, workbooks } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
-import { verifyClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { auditWorkbookRead } from '@/lib/workbook/claimed-write-audit';
+import { readWorkbookCapabilityCookie } from '@/lib/workbook/workbook-capability';
+import { projectHolder } from '@/lib/workbook/holder-notice';
 import { isFrench } from '@/lib/workbook/copy';
 import MemoryHoldersClient from './MemoryHoldersClient';
 
@@ -29,30 +32,47 @@ export default async function MemoryHoldersPage({
   // lib/workbook/access-control.ts. Renders a generic not-found rather than
   // a distinguishable "forbidden" response, matching this page's existing
   // anti-surveillance posture (never reveal existence via response shape).
-  const access = await verifyClaimedWorkbookAccess(id);
-  if (!access.ok) notFound();
+  // The unclaimed workbook's bearer capability (cookie) or the claimant / same-organization authority is resolved first, then the read runs
+  // inside the execution context that matches it, and is recorded before the people it names are served. A refusal is a generic not-found,
+  // matching this page's anti-surveillance posture (never reveal existence via response shape).
+  const capability = await readWorkbookCapabilityCookie(id);
+  const loaded = await withClaimedWorkbookAccess({ workbookId: id, operation: 'read', capability }, async (authority) => {
+    const [wb] = await db
+      .select({ id: workbooks.id })
+      .from(workbooks)
+      .where(eq(workbooks.id, id))
+      .limit(1);
+    if (!wb) return null;
 
-  const [wb] = await db
-    .select({ id: workbooks.id })
-    .from(workbooks)
-    .where(eq(workbooks.id, id))
-    .limit(1);
-  if (!wb) notFound();
+    await auditWorkbookRead(authority, {
+      action: 'workbook.memory_holder.read',
+      resourceType: 'workbook_memory_holders',
+      resourceId: id,
+      details: { authority: authority.kind, surface: 'page' },
+    });
 
-  const rows = await db
-    .select({
-      id: workbookMemoryHolders.id,
-      role: workbookMemoryHolders.role,
-      displayName: workbookMemoryHolders.displayName,
-      responsibility: workbookMemoryHolders.responsibility,
-      tenureBand: workbookMemoryHolders.tenureBand,
-      criticality: workbookMemoryHolders.criticality,
-      successorIdentified: workbookMemoryHolders.successorIdentified,
-      notes: workbookMemoryHolders.notes,
-    })
-    .from(workbookMemoryHolders)
-    .where(eq(workbookMemoryHolders.workbookId, id))
-    .orderBy(workbookMemoryHolders.capturedAt);
+    const holders = await db
+      .select({
+        id: workbookMemoryHolders.id,
+        role: workbookMemoryHolders.role,
+        displayName: workbookMemoryHolders.displayName,
+        responsibility: workbookMemoryHolders.responsibility,
+        tenureBand: workbookMemoryHolders.tenureBand,
+        criticality: workbookMemoryHolders.criticality,
+        successorIdentified: workbookMemoryHolders.successorIdentified,
+        notes: workbookMemoryHolders.notes,
+        noticeState: workbookMemoryHolders.noticeState,
+        noticeEvidence: workbookMemoryHolders.noticeEvidence,
+      })
+      .from(workbookMemoryHolders)
+      .where(eq(workbookMemoryHolders.workbookId, id))
+      .orderBy(workbookMemoryHolders.capturedAt);
+    return { holders, viewer: authority.kind };
+  });
+  if (!loaded.ok || !loaded.value) notFound();
+  // A name or note whose notice does not meet the policy reaches the page only for the claimant; for anyone else it is withheld here, on the
+  // server, so it is not in the page payload at all.
+  const rows = loaded.value.holders.map((holder) => projectHolder(holder, loaded.value!.viewer));
 
   const cartography = runStewardshipCartography(
     rows.map((h) => ({

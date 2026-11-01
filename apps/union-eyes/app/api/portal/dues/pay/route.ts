@@ -9,14 +9,14 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
-import { db } from '@/db/db'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { requireUserForOrganization } from '@/lib/api-auth-guard'
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema'
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, sql } from 'drizzle-orm'
 import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework'
+import { listPage } from '@/lib/api/list-page'
 import { stripe } from '@/lib/stripe'
-import { DuesInitiationError, initiateDuesPayment } from '@/lib/dues/dues-payment-service'
+import { DuesInitiationError, initiateDuesPayment, DUES_PAYMENT_KIND } from '@/lib/dues/dues-payment-service'
 import { assertMemberDuesPaymentEnabled } from '@/lib/dues/member-dues-flag'
 import { createLogger } from '@nzila/os-core'
 
@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing organizationId' }, { status: 400 })
     }
 
-    const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '20', 10), 100)
+    // A non-numeric limit is the default: NaN never reaches the query.
+    const page = listPage(req, 100, 20)
 
     // The organization comes from the client; only a live canonical member may read its ledger.
     try {
@@ -47,8 +48,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const payments = await withRLSContext({ organizationId: orgId }, async () =>
-      db
+    const { payments, attempts } = await withRLSContext({ organizationId: orgId }, async (tx) => {
+      const payments = await tx
         .select({
           id: memberDuesLedger.id,
           type: memberDuesLedger.transactionType,
@@ -57,17 +58,36 @@ export async function GET(req: NextRequest) {
           date: memberDuesLedger.transactionDate,
           description: memberDuesLedger.description,
           paymentMethod: memberDuesLedger.paymentMethod,
-          paymentReference: memberDuesLedger.paymentReference,
           receiptNumber: memberDuesLedger.receiptNumber,
           status: memberDuesLedger.status,
         })
         .from(memberDuesLedger)
-        .where(and(eq(memberDuesLedger.userId, userId), eq(memberDuesLedger.organizationId, orgId)))
-        .orderBy(desc(memberDuesLedger.transactionDate))
-        .limit(limit),
-    )
+        // Payment history is payments: charges, credits, adjustments and write-offs are the ledger, and the processor's own
+        // payment reference is not a member-facing field.
+        .where(and(eq(memberDuesLedger.userId, userId), eq(memberDuesLedger.organizationId, orgId), eq(memberDuesLedger.transactionType, 'payment')))
+        .orderBy(desc(memberDuesLedger.transactionDate), desc(memberDuesLedger.id))
+        .limit(page.limit)
+        .offset(page.offset)
 
-    return NextResponse.json({ success: true, data: { payments } })
+      // Initiated payments are not ledger entries until a verified provider event settles them.
+      // Expose a separate bounded attempt history so the member can see pending/failed/cancelled
+      // outcomes without misrepresenting an attempted charge as a posted payment.
+      const result = (await tx.execute(sql`SELECT id::text AS id, amount::text AS amount,
+              status, created_at AS "createdAt"
+          FROM dues_transactions
+          WHERE organization_id = ${orgId}::uuid AND member_id = ${userId}
+            AND transaction_type = 'payment'
+            AND metadata->>'kind' = ${DUES_PAYMENT_KIND}
+            AND status IN ('pending', 'failed', 'cancelled')
+          ORDER BY created_at DESC, id DESC
+          LIMIT ${page.limit} OFFSET ${page.offset}`)) as unknown
+      const attempts = Array.isArray(result)
+        ? result
+        : ((result as { rows?: unknown[] } | null)?.rows ?? [])
+      return { payments, attempts }
+    })
+
+    return NextResponse.json({ success: true, data: { payments, attempts } })
   } catch (error) {
     logger.error('[portal/dues/pay] GET Error:', error instanceof Error ? error : { detail: error })
     return NextResponse.json(

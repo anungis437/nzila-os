@@ -437,7 +437,10 @@ describe('governance review register and WorkAid referral', () => {
     await k.grantMandate('governance_review', adverseReviewer, ['monitor'], { scope: { resourceIds: [review] } })
     const d = await decide(adverseReviewer, 'review:monitor', 'governance_review', review)
     expect(d.effect).toBe('deny')
-    expect(codes(d)).toContain('ADVERSE_PARTY')
+    // The database no longer shows the review to the person it names, so the denial is the non-disclosing "not found",
+    // never ADVERSE_PARTY (the pure-kernel rule is pinned in lib/authority/__tests__/kernel-governance.test.ts).
+    expect(codes(d)).toContain('RESOURCE_FACTS_MISSING')
+    expect(codes(d)).not.toContain('ADVERSE_PARTY')
     // Powers are independent: a monitor cannot enforce or issue findings.
     expect((await decide(U.auditor, 'review:enforce', 'governance_review', review)).effect).toBe('deny')
     expect((await decide(U.auditor, 'review:issue_finding', 'governance_review', review)).effect).toBe('deny')
@@ -456,7 +459,7 @@ describe('governance review register and WorkAid referral', () => {
     expect(await refer(['status'])).toBe(matter)
     // One live referral per case, enforced by the database even if the kernel is bypassed.
     await expect(k.as('user_assignee')(async (t) => {
-      await t.query(`INSERT INTO ue_authority_workaid_matters (organization_id, member_user_id, case_id, referred_by) VALUES ($1,$2,$3,$4)`, [ORG, U.member, CASE, 'user_assignee'])
+      await t.query(`INSERT INTO ue_authority_workaid_matters (organization_id, member_user_id, case_id, referred_by, referred_categories) VALUES ($1,$2,$3,$4,ARRAY['status']::text[])`, [ORG, U.member, CASE, 'user_assignee'])
       await auditAuthorityMutation(t, { organizationId: ORG, action: 'test.raw', resourceType: 'ue_authority_workaid_matters' })
     })).rejects.toThrow(/workaid_case_uq/)
   })

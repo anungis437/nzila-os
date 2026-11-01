@@ -197,7 +197,8 @@ describe('savePerCapitaRemittances', () => {
 
     const r = await calc.savePerCapitaRemittances([baseCalc]);
 
-    expect(r).toEqual({ saved: 0, errors: 1 });
+    // a failed save is counted, logged and attributed to the remitting organization (Gate 0 F01: never silently dropped)
+    expect(r).toEqual({ saved: 0, errors: 1, failedOrganizationIds: [baseCalc.fromOrganizationId] });
   });
 
   it('never rewrites a remittance that is no longer pending, and writes no audit for it', async () => {
@@ -205,7 +206,7 @@ describe('savePerCapitaRemittances', () => {
 
     const r = await calc.savePerCapitaRemittances([baseCalc]);
 
-    expect(r).toEqual({ saved: 0, errors: 0 });
+    expect(r).toEqual({ saved: 0, errors: 0, failedOrganizationIds: [] });
     expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
@@ -343,7 +344,7 @@ describe('processMonthlyPerCapita', () => {
     pushSel([]); // calculateAllPerCapita -> no orgs
     pushSel([]); // markOverdueRemittances update
     const r = await calc.processMonthlyPerCapita();
-    expect(r).toEqual({ calculated: 0, saved: 0, errors: 0, overdueMarked: 0 });
+    expect(r).toEqual({ calculated: 0, saved: 0, errors: 0, overdueMarked: 0, failedOrganizationIds: [], calculationFailed: 0 });
   });
 });
 

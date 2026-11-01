@@ -30,6 +30,11 @@ describe('public-routes', () => {
       expect(PUBLIC_API_ROUTES.has('/api/webhooks/clc')).toBe(true);
     });
 
+    it('opens only the token-authenticated SCIM surface, not the administrator token route', () => {
+      expect(isPublicRoute('/api/scim/v2/00000000-0000-0000-0000-000000000001/Users')).toBe(true);
+      expect(isPublicRoute('/api/enterprise/sso/scim-token')).toBe(false);
+    });
+
     it('includes tracking prefix routes', () => {
       expect(PUBLIC_API_ROUTES.has('/api/communications/track/')).toBe(true);
       expect(PUBLIC_API_ROUTES.has('/api/communications/unsubscribe/')).toBe(true);

@@ -89,6 +89,10 @@ export const PUT = withApi(
       }
     }
 
+    for (const [name, value] of [['includeNational', includeNational], ['autoApply', autoApply]] as const) {
+      if (value !== undefined && typeof value !== 'boolean') throw ApiError.badRequest(`${name} must be a boolean`);
+    }
+
     // Validate levels
     if (preferredLevels) {
       if (!Array.isArray(preferredLevels)) {
@@ -142,6 +146,7 @@ export const PUT = withApi(
         return { ...updated, isConfigured: true };
       }
 
+      // One row per member and organization (unique index, migration 0046): two concurrent first saves settle on the same row.
       const [created] = await tx
         .insert(memberJurisdictionPreferences)
         .values({
@@ -151,6 +156,10 @@ export const PUT = withApi(
           preferredLevels: preferredLevels ?? [],
           includeNational: includeNational ?? true,
           autoApply: autoApply ?? true,
+        })
+        .onConflictDoUpdate({
+          target: [memberJurisdictionPreferences.userId, memberJurisdictionPreferences.organizationId],
+          set: data,
         })
         .returning();
       await persistAtomicAudit(tx, {

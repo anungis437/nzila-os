@@ -18,7 +18,7 @@ vi.mock('@/db/schema/icra-schema', () => ({
   icraAssessments: { id: 'id' },
   icraMaturityProfiles: { profilePayload: 'profilePayload', assessmentId: 'assessmentId' },
 }));
-vi.mock('@/lib/rate-limit', () => ({ rateLimit: m.rateLimit }));
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.rateLimit }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -54,11 +54,11 @@ async function loadRoute() {
 describe('icra/results/[id] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.rateLimit.mockReturnValue({ success: true });
+    m.rateLimit.mockResolvedValue({ allowed: true });
   });
 
   it('returns 429 when rate limited', async () => {
-    m.rateLimit.mockReturnValueOnce({ success: false });
+    m.rateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
     const { GET } = await loadRoute();
     const response = await GET(req(), { params: Promise.resolve({ id: ASSESSMENT_ID }) });
 

@@ -11,6 +11,7 @@ const m = vi.hoisted(() => ({
   generatePdfMock: vi.fn(),
   withSystemContext: vi.fn(),
   logger: { error: vi.fn() },
+  limited: false,
 }));
 
 function makeSelectChain(rows: unknown[]) {
@@ -31,6 +32,12 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: {}, icraMaturityProfiles: {} }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+// The rate limiter is proven in lib/public-intake; here the guard passes the request through unless a test limits it.
+vi.mock('@/lib/public-intake/guard', () => ({
+  guardPublicIntake: async () => (m.limited
+    ? { ok: false, response: new Response(JSON.stringify({ error: { code: 'RATE_LIMITED' } }), { status: 429 }) }
+    : { ok: true, json: undefined }),
+}));
 vi.mock('@/lib/icra/types', () => ({}));
 vi.mock('@/lib/icra/org-context-mapper', () => ({ mapCtxToOrganizationContext: (x: any) => x }));
 vi.mock('@/lib/icra-pdf/reportDataMapper', () => ({ mapToPdfReportData: () => ({ generatedAt: new Date() }) }));
@@ -54,7 +61,18 @@ describe('icra/report/[assessmentId] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
+    m.limited = false;
     m.generatePdfMock.mockResolvedValue(Buffer.from('pdf-data'));
+  });
+
+  it('refuses a limited caller before any lookup or render (DEF-0B8-ICRA-READ-ROUTES-HAVE-NO-LIMITER)', async () => {
+    const { GET } = await loadRoute();
+    m.limited = true;
+    m.selectQueue.push([{ shouldNotBeRead: true }]);
+    const response = await GET(req(), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) });
+    expect(response.status).toBe(429);
+    expect(m.selectQueue).toHaveLength(1);
+    expect(m.generatePdfMock).not.toHaveBeenCalled();
   });
 
   it('returns 400 for missing assessment id', async () => {
@@ -128,5 +146,27 @@ describe('icra/report/[assessmentId] route', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toBe('application/pdf');
+  });
+
+  // DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER: the submit routes write submitted, and nothing
+  // writes completed, so every paid assessment answered 422.
+  it('serves the paid PDF for an assessment the submit routes left as submitted', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(
+      [{ id: 'a1', status: 'submitted', reportTierId: 'executive_continuity_brief', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }],
+      [{ profilePayload: { dimensions: [], maturityBand: 'band_1' } }],
+    );
+    const response = await GET(req(), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) });
+    expect(response.status).toBe(200);
+  });
+
+  it.each(['draft', 'in_progress'])('still refuses an assessment that is %s, and the tier and capability checks still apply', async (status) => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'a1', status, reportTierId: 'executive_continuity_brief', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    expect((await GET(req(), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) })).status).toBe(422);
+    m.selectQueue.push([{ id: 'a1', status: 'submitted', reportTierId: 'free_tier', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    expect((await GET(req(), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) })).status).toBe(403);
+    m.selectQueue.push([{ id: 'a1', status: 'submitted', reportTierId: 'executive_continuity_brief', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    expect((await GET(req(false), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) })).status).toBe(401);
   });
 });

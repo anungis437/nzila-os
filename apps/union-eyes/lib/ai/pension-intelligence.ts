@@ -17,7 +17,7 @@
 
 import { db } from '@/db/db';
 import { eq, and, sum, count } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import {
   pensionPlans,
   pensionMembers,
@@ -144,7 +144,7 @@ export async function analyzePensionFunding(
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.PENSION_FUNDING_ANALYSIS,
     input: prompt,
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('pension_financial'),
   });
 
   const parsed = parseFundingResponse(aiResult.content ?? '', fundingRatio, totalAssets, plan.activeMembers ?? 0);
@@ -223,7 +223,7 @@ export async function projectMemberBenefit(
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.PENSION_BENEFIT_PROJECTION,
     input: prompt,
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('pension_financial'),
   });
 
   const parsed = parseProjectionResponse(
@@ -304,7 +304,7 @@ export async function summarizeTrusteeReport(
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.PENSION_TRUSTEE_SUMMARY,
     input: prompt,
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('pension_financial'),
   });
 
   const parsed = parseTrusteeResponse(aiResult.content ?? '', plan.planName);

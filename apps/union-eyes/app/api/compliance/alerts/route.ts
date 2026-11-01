@@ -43,11 +43,12 @@ export const GET = withOrganizationAuth(async (_request, context) => {
       .from(complianceAlerts)
       .innerJoin(employers, eq(employers.id, complianceAlerts.employerId))
       .where(eq(complianceAlerts.orgId, organizationId))
-      .orderBy(desc(complianceAlerts.createdAt));
+      .orderBy(desc(complianceAlerts.createdAt))
+      .limit(500);
 
     return standardSuccessResponse(alerts);
   } catch (error) {
     logger.error("Failed to list compliance alerts", { error: error instanceof Error ? error.message : String(error) });
-    return standardSuccessResponse([]);
+    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Compliance alerts are temporarily unavailable");
   }
 });

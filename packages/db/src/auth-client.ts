@@ -2,6 +2,9 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { sql } from 'drizzle-orm'
 import * as schema from './schema'
+import { inviterAuthorityLockUserId, lockInviterAuthority } from './auth-inviter-lock'
+
+export { lockInviterAuthority }
 import {
   AUTH_EXECUTION_ROLES,
   authContextSettings,
@@ -58,6 +61,8 @@ export async function executeAuthContext<T>(
     await tx.execute(sql.raw(`SET LOCAL ROLE "${role}"`))
     for (const [key, value] of Object.entries(settings))
       await tx.execute(sql`SELECT set_config(${key}, ${value}, true)`)
+    const inviter = inviterAuthorityLockUserId(context)
+    if (inviter) await lockInviterAuthority(tx, inviter)
     return callback(tx as unknown as Database)
   })
 }

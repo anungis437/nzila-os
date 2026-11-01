@@ -30,6 +30,15 @@ vi.mock('@/lib/services/ai/auto-classification-service', () => ({
   batchClassifyClauses: m.batchClassifyClauses,
 }));
 
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: (_op: unknown, run: () => Promise<unknown>) => run(),
+  operationAuditResponse: () => null,
+}));
+
+vi.mock('@/lib/ai/ai-feature-guard', () => ({ guardAiFeature: vi.fn(async () => null) }));
+vi.mock('@/lib/services/feature-flags', () => ({ AI_FEATURES: { AI_EXTRACT_CLAUSES: 'AI_EXTRACT_CLAUSES' } }));
+vi.mock('@nzila/policies', () => ({ enforceAISafety: vi.fn() }));
+
 async function loadRoute() {
   return import('../ai/classify/route');
 }

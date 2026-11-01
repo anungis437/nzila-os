@@ -21,7 +21,7 @@ const m = vi.hoisted(() => ({
   embedPersistedAdaptiveContext: vi.fn(),
 }));
 
-vi.mock('@/lib/rate-limit', () => ({ rateLimit: m.rateLimit }));
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.rateLimit }));
 vi.mock('@/lib/icra/observability', () => ({
   hashIp: m.hashIp,
   fireAndForgetEvent: m.fireAndForgetEvent,
@@ -72,7 +72,7 @@ describe('icra/submit route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.hashIp.mockReturnValue('ip_hash_1');
-    m.rateLimit.mockReturnValue({ success: true });
+    m.rateLimit.mockResolvedValue({ allowed: true });
     m.verifyTurnstileToken.mockResolvedValue({ success: true });
     m.classifyOrgContext.mockReturnValue({ orgType: 'local' });
     m.routeQuestionBank.mockReturnValue({
@@ -127,7 +127,7 @@ describe('icra/submit route', () => {
 
   it('returns 429 when submission rate limit is exceeded', async () => {
     const { POST } = await loadRoute();
-    m.rateLimit.mockReturnValueOnce({ success: false });
+    m.rateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
 
     const response = await POST(new NextRequest('http://localhost/api/icra/submit', {
       method: 'POST',

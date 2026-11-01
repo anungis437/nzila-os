@@ -220,7 +220,8 @@ describe('round 46 user-isolation ratchet: push_devices route', () => {
   it('forces profileId server-side on create via a named, independently tested helper', () => {
     const src = source('app/api/mobile/devices/route.ts');
     expect(src).toContain('export function buildPushDeviceCreateValues');
-    expect(src).toContain('beforeCreate: (values, { userId }) => buildPushDeviceCreateValues(values, userId)');
+    expect(src).toContain('buildPushDeviceCreateValues(values, userId)');
+    expect(src).toContain('await requirePushDeviceProfile(organizationId, userId)');
   });
 });
 

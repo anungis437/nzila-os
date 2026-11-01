@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { SQL } from 'drizzle-orm';
+import { SQL, getTableName } from 'drizzle-orm';
+import { analyticsMetrics } from '@/db/schema';
 import type { PgTable } from 'drizzle-orm/pg-core';
-import { enforceCreateSecurityInvariants, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
+import { bindCreatePathIdentifier, enforceCreateSecurityInvariants, assertGenericWritePayload, parseCrudPagination, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues, shapeCrudResponseRow } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -233,5 +234,90 @@ describe('crud-factory validateMergeJsonColumnValues (PR #752 round 25)', () => 
 
   it('only validates columns actually listed in mergeJsonColumns', () => {
     expect(() => validateMergeJsonColumnValues({ notes: [] }, ['responses'])).not.toThrow();
+  });
+});
+
+
+describe('generic CRUD mass-assignment gate', () => {
+  const table = { id: { name: 'id' }, name: { name: 'name' }, organizationId: { name: 'organization_id' }, createdBy: { name: 'created_by' }, status: { name: 'status' } } as unknown as PgTable;
+  const options = { primaryKey: 'id', blockedFields: ['status'] };
+  it('accepts only ordinary schema-backed business fields', () => {
+    expect(assertGenericWritePayload({ name: 'Valid' }, table, options)).toEqual({ name: 'Valid' });
+  });
+  it.each(['id', 'organizationId', 'createdBy', 'createdAt', 'updatedAt', 'approvedBy', 'verifiedAt', 'status', 'unknownField'])('rejects caller-controlled %s', (field) => {
+    expect(() => assertGenericWritePayload({ [field]: 'attacker' }, table, options)).toThrow();
+  });
+  it('rejects non-object payloads', () => {
+    expect(() => assertGenericWritePayload([], table, options)).toThrow();
+    expect(() => assertGenericWritePayload(null, table, options)).toThrow();
+  });
+});
+
+
+describe('generic CRUD pagination boundaries', () => {
+  it('uses default pagination with safe offsets', () => {
+    expect(parseCrudPagination(new URLSearchParams())).toEqual({ page: 1, limit: 50, offset: 0 });
+    expect(parseCrudPagination(new URLSearchParams('page=3&limit=20'))).toEqual({ page: 3, limit: 20, offset: 40 });
+  });
+  it.each(['page=0', 'page=-1', 'page=1.5', 'page=NaN', 'page=10001', 'page=9007199254740993', 'limit=0', 'limit=101', 'limit=Infinity', 'limit=2junk'])('rejects malformed or excessive pagination %s', (query) => {
+    expect(() => parseCrudPagination(new URLSearchParams(query))).toThrow();
+  });
+});
+
+
+describe('generic analytics metric read confidentiality', () => {
+  it('uses the canonical Drizzle table name for the generic analytics aliases', () => {
+    expect(getTableName(analyticsMetrics)).toBe('analytics_metrics');
+  });
+
+  it('redacts historical case identifiers and other metadata on every analytics_metrics read', () => {
+    const stored = {
+      id: 'metric-1',
+      organizationId: 'org-1',
+      metricType: 'claims_volume',
+      metricValue: '2',
+      metadata: { claimIds: ['case-private-1', 'case-private-2'], internalNotes: 'restricted' },
+    };
+    const projected = shapeCrudResponseRow(stored, 'analytics_metrics');
+    expect(projected).toEqual({
+      id: 'metric-1', organizationId: 'org-1', metricType: 'claims_volume', metricValue: '2',
+    });
+    expect(JSON.stringify(projected)).not.toContain('case-private');
+    expect(stored.metadata.claimIds).toHaveLength(2); // Projection never modifies stored evidence.
+  });
+
+  it('enforces the analytics redaction even if an alias provides an empty omit list', () => {
+    expect(shapeCrudResponseRow({ metadata: { claimIds: ['secret'] }, metricValue: '1' }, 'analytics_metrics', []))
+      .toEqual({ metricValue: '1' });
+  });
+
+  it('preserves explicit credential redactions for other tables and leaves ordinary fields intact', () => {
+    expect(shapeCrudResponseRow({ id: 'x', accessToken: 'secret', name: 'calendar' }, 'external_calendar_connections', ['accessToken']))
+      .toEqual({ id: 'x', name: 'calendar' });
+    expect(shapeCrudResponseRow({ id: 'x', metadata: { public: true } }, 'other_table'))
+      .toEqual({ id: 'x', metadata: { public: true } });
+    expect(shapeCrudResponseRow(undefined, 'analytics_metrics')).toBeUndefined();
+  });
+});
+
+
+describe('nested collection POST parent binding (DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID)', () => {
+  const binding = { paramName: 'surveyId', field: 'surveyId' };
+  it('derives surveyId from the URL when omitted from JSON', () => {
+    const values: Record<string, unknown> = {};
+    expect(bindCreatePathIdentifier(values, { surveyId: 'survey-A' }, binding)).toBe('survey-A');
+    expect(values.surveyId).toBe('survey-A');
+  });
+  it('permits a matching legacy body surveyId', () => {
+    expect(bindCreatePathIdentifier({ surveyId: 'survey-A' }, { surveyId: 'survey-A' }, binding)).toBe('survey-A');
+  });
+  it('rejects a mismatched body identifier without changing the body', () => {
+    const values = { surveyId: 'survey-B' };
+    expect(() => bindCreatePathIdentifier(values, { surveyId: 'survey-A' }, binding)).toThrow();
+    expect(values.surveyId).toBe('survey-B');
+  });
+  it('rejects a missing or blank path identifier instead of trusting JSON', () => {
+    expect(() => bindCreatePathIdentifier({ surveyId: 'survey-B' }, {}, binding)).toThrow();
+    expect(() => bindCreatePathIdentifier({}, { surveyId: ' ' }, binding)).toThrow();
   });
 });

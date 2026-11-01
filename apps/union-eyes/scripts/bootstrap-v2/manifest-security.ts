@@ -6,6 +6,12 @@ import { inspectAuthPrivilegeExpectations } from './auth-privileges'
 import { FRAMEWORK_FUNCTIONS, FRAMEWORK_ROLES } from './framework-contract'
 import { inspectFrameworkPrivileges } from './framework-privileges'
 import { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
+import { CASE_ASSIGNEE_PREDICATE, CASE_ASSIGNEE_PREDICATE_OWNER } from '../../db/auth/case-assignee-predicate'
+import { CONVERSATION_ASSIGNEE_PREDICATE } from '../../db/auth/conversation-assignee-predicate'
+
+const ASSIGNEE_COMPANION_SIGNATURES: string[] = [CASE_ASSIGNEE_PREDICATE, CONVERSATION_ASSIGNEE_PREDICATE].map(
+  (name) => `${name.replace(/^public\./, '')}(text,uuid)`,
+)
 
 export interface InstallerMembership {
   role: string
@@ -181,6 +187,17 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
           entry.signature.startsWith(`user_management.${expected.name}(`) &&
           entry.owner === expected.owner,
       )
+    )
+      continue
+    // Auth-owned companions installed after the security statements; their exact owner, body and ACL are verified separately by
+    // catalog admission (caseAssigneePredicateViolations / conversationAssigneePredicateViolations). Anything else stays undeclared.
+    if (
+      plan.authExecution &&
+      ASSIGNEE_COMPANION_SIGNATURES.includes(entry.signature) &&
+      entry.owner === CASE_ASSIGNEE_PREDICATE_OWNER &&
+      entry.definer &&
+      entry.config?.length === 1 &&
+      entry.config[0] === 'search_path=pg_catalog'
     )
       continue
     if (

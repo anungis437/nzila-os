@@ -154,7 +154,7 @@ export default function CampaignScheduler() {
     try {
       setLoading(true);
       const [campRes, postsRes] = await Promise.all([
-        fetch('/api/v2/social-media/campaigns'),
+        fetch('/api/social-media/campaigns'),
         fetch('/api/v2/social-media/scheduled-posts'),
       ]);
       if (campRes.ok) {

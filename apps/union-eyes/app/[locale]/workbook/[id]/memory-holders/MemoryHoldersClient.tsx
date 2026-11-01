@@ -30,6 +30,10 @@ interface Holder {
   criticality: Criticality | null;
   successorIdentified: boolean;
   notes: string | null;
+  /** The server withheld this person's name and note: the notice to them does not meet the policy and the viewer is not the claimant. */
+  identifyingDetailWithheld?: boolean;
+  /** Whether this person's name and note may be changed: only once the notice to them meets the policy. */
+  identifyingDetailWritable?: boolean;
 }
 
 type Cartography = CartographyResult;
@@ -74,6 +78,10 @@ function copy(locale: Locale) {
     successor: fr ? 'Successeur identifi\u00e9' : 'Successor identified',
     notes: fr ? 'Notes (priv\u00e9es)' : 'Notes (private)',
     remove: fr ? 'Retirer' : 'Remove',
+    detailWithheld: fr ? 'Retenu : la personne n\u2019a pas \u00e9t\u00e9 avis\u00e9e de fa\u00e7on v\u00e9rifi\u00e9e' : 'Withheld: the person has not been verifiably notified',
+    detailLocked: fr
+      ? 'Un nom ou une note ne peut \u00eatre inscrit que lorsqu\u2019un avis \u00e0 la personne a \u00e9t\u00e9 confirm\u00e9 comme livr\u00e9.'
+      : 'A name or note can be entered only once a notice to the person is confirmed as delivered.',
     none: fr ? 'Aucun porteur enregistr\u00e9.' : 'No holders recorded yet.',
     densityLabel: fr ? 'Densit\u00e9 de gestion' : 'Stewardship density',
     densityDescription: fr
@@ -222,6 +230,9 @@ export default function MemoryHoldersClient({
                         <input
                           type="text"
                           defaultValue={h.displayName ?? ''}
+                          disabled={h.identifyingDetailWritable !== true}
+                          placeholder={h.identifyingDetailWithheld ? t.detailWithheld : undefined}
+                          title={h.identifyingDetailWritable === true ? undefined : t.detailLocked}
                           onBlur={(e) => {
                             const v = e.target.value.trim();
                             const next = v.length === 0 ? null : v;
@@ -313,6 +324,9 @@ export default function MemoryHoldersClient({
                         <textarea
                           rows={2}
                           defaultValue={h.notes ?? ''}
+                          disabled={h.identifyingDetailWritable !== true}
+                          placeholder={h.identifyingDetailWithheld ? t.detailWithheld : undefined}
+                          title={h.identifyingDetailWritable === true ? undefined : t.detailLocked}
                           onBlur={(e) => {
                             const v = e.target.value;
                             const next = v.trim().length === 0 ? null : v;

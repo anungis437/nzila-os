@@ -6,8 +6,10 @@
  * @module app/api/admin/billing-cycles/preview
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
+import { resolveBillingPeriod } from '@/lib/finance/billing-period-input';
+import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
@@ -44,7 +46,12 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
+    }
     const validation = previewSchema.safeParse(body);
 
     if (!validation.success) {
@@ -57,18 +64,23 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     const { organizationId, frequency, periodStart, periodEnd } = validation.data;
 
-    // Calculate period dates if not provided
-    let start: Date;
-    let end: Date;
-
-    if (periodStart && periodEnd) {
-      start = new Date(periodStart);
-      end = new Date(periodEnd);
-    } else {
-      const dates = BillingCycleService.calculatePeriodDates(frequency);
-      start = dates.periodStart;
-      end = dates.periodEnd;
+    try {
+      await requireBillingCycleAuthority(organizationId, user.id);
+    } catch {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Live financial execution mandate required for target organization');
     }
+
+    const period = resolveBillingPeriod(
+      { periodStart, periodEnd },
+      () => BillingCycleService.calculatePeriodDates(frequency),
+    );
+    if (!period) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Invalid billing period: supply both valid ISO boundaries in chronological order',
+      );
+    }
+    const { periodStart: start, periodEnd: end } = period;
 
     logger.info('Previewing billing cycle', {
       organizationId,
@@ -87,6 +99,15 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       dryRun: true, // Always dry run for preview
       executedBy: user.id,
     });
+
+    if (!result.success) {
+      return NextResponse.json({
+        ...result,
+        preview: true,
+        success: false,
+        message: 'Preview incomplete: some members could not be calculated; no charges were created.',
+      }, { status: 422 });
+    }
 
     return standardSuccessResponse({
       preview: true,

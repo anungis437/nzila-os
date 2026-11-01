@@ -211,6 +211,230 @@
       "when": 1758850000000,
       "tag": "0028_location_deletion_log_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1758860000000,
+      "tag": "0029_message_thread_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1758870000000,
+      "tag": "0030_message_retention_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1758880000000,
+      "tag": "0031_reachable_stub_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1758890000000,
+      "tag": "0032_notification_callback_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1758900000000,
+      "tag": "0033_election_certificate_successions",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1758910000000,
+      "tag": "0034_election_organization_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1758920000000,
+      "tag": "0035_election_supersession_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1758930000000,
+      "tag": "0036_workaid_consent_wording_proposals",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1758940000000,
+      "tag": "0037_workaid_referral_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1758950000000,
+      "tag": "0038_gate0_integrity_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1758960000000,
+      "tag": "0039_committee_memberships_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1758970000000,
+      "tag": "0040_gate0_integrity_enforcement",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1758980000000,
+      "tag": "0041_room_bookings_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1758990000000,
+      "tag": "0042_tenant_scoped_uniqueness",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1759000000000,
+      "tag": "0043_knowledge_transfer_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1759010000000,
+      "tag": "0044_anti_scab_author",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1759020000000,
+      "tag": "0045_contact_submissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1759030000000,
+      "tag": "0046_row_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1759040000000,
+      "tag": "0047_ml_prediction_feedback",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1759050000000,
+      "tag": "0048_sso_scim_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1759060000000,
+      "tag": "0049_claim_status_transitions",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1759070000000,
+      "tag": "0050_survey_anonymity",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1759080000000,
+      "tag": "0051_arbitration_decision_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1759090000000,
+      "tag": "0052_shared_clause_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1759100000000,
+      "tag": "0053_email_address_suppressions",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1759110000000,
+      "tag": "0054_public_intake_audit_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1759120000000,
+      "tag": "0055_workbook_holder_notice",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1759130000000,
+      "tag": "0056_workbook_capability",
+      "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1759140000000,
+      "tag": "0057_workbook_holder_notice_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1759150000000,
+      "tag": "0058_pilot_fixture_rows",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1759160000000,
+      "tag": "0059_scim_provisioned_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1759170000000,
+      "tag": "0060_reachable_stub_shape_2",
+      "breakpoints": true
     }
   ]
 }

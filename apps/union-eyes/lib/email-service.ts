@@ -10,6 +10,7 @@
 
 import { Resend, type CreateEmailOptions } from 'resend';
 import { logger } from '@/lib/logger';
+import { extractAddress, suppressedAddressHashes, isAddressSuppressed } from '@/lib/communications/address-suppression';
 
 // Lazy initialize Resend client to avoid errors during build
 let resend: Resend | null = null;
@@ -165,6 +166,42 @@ function attachObservability(
   };
 }
 
+type Screened =
+  | { blocked: false; error?: undefined; payload: CreateEmailOptions; suppressedCount: number }
+  | { blocked: true; error?: undefined; payload: CreateEmailOptions; suppressedCount: number }
+  | { blocked: false; error: string; payload: CreateEmailOptions; suppressedCount: 0 };
+
+async function screenSuppressedRecipients(payload: CreateEmailOptions): Promise<Screened> {
+  const lists = (['to', 'cc', 'bcc'] as const).map((field) => {
+    const value = payload[field];
+    return { field, values: value === undefined ? [] : Array.isArray(value) ? value : [value] };
+  });
+  const addresses = lists.flatMap((list) => list.values).map((entry) => extractAddress(String(entry))).filter((a): a is string => a !== null);
+  if (addresses.length === 0) return { blocked: false, payload, suppressedCount: 0 };
+  let suppressed: Set<string>;
+  try {
+    suppressed = await suppressedAddressHashes(addresses);
+  } catch (error) {
+    return { blocked: false, error: error instanceof Error ? error.message : 'unknown', payload, suppressedCount: 0 };
+  }
+  if (suppressed.size === 0) return { blocked: false, payload, suppressedCount: 0 };
+
+  const keep = (entry: unknown) => {
+    const address = extractAddress(String(entry));
+    return address === null || !isAddressSuppressed(suppressed, address);
+  };
+  const next: Record<string, unknown> = { ...payload };
+  for (const list of lists) {
+    if (list.values.length === 0) continue;
+    next[list.field] = list.values.filter(keep);
+  }
+  const remainingTo = (next.to as unknown[] | undefined) ?? [];
+  const suppressedCount = lists.reduce((n, list) => n + list.values.filter((v) => !keep(v)).length, 0);
+  // With no primary recipient left there is nothing to send, whatever is left in cc or bcc.
+  if (remainingTo.length === 0) return { blocked: true, payload, suppressedCount };
+  return { blocked: false, payload: next as unknown as CreateEmailOptions, suppressedCount };
+}
+
 export async function sendResendEmail(
   payload: CreateEmailOptions,
   context: ResendSendContext = {},
@@ -178,8 +215,20 @@ export async function sendResendEmail(
     };
   }
 
+  // Platform-wide delivery suppression: an address that complained, or that the provider suppressed, is not written to from any
+  // organization. If the list cannot be read the send is refused (fail closed), not made unchecked.
+  const screened = await screenSuppressedRecipients(payload);
+  if (screened.blocked) {
+    logger.warn('Email not sent: every recipient address is suppressed', { feature: context.feature, suppressed: screened.suppressedCount });
+    return { success: false, error: 'Every recipient address is suppressed', code: 'ADDRESS_SUPPRESSED' };
+  }
+  if (screened.error) {
+    logger.error('Email not sent: the suppression list could not be read', { feature: context.feature, error: screened.error });
+    return { success: false, error: 'Recipient suppression could not be checked', code: 'SUPPRESSION_CHECK_UNAVAILABLE' };
+  }
+
   const maxRetries = normalizeRetryCount(context.maxRetries);
-  const finalPayload = attachObservability(payload, context);
+  const finalPayload = attachObservability(screened.payload, context);
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     const { data, error } = await client.emails.send(finalPayload);

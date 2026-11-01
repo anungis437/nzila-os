@@ -1,0 +1,10 @@
+{
+  "purpose": "The only native PostgreSQL tests that may be skipped in the combined-schema CI job, each with the reason. A skip is never counted as a pass. An entry that no longer skips fails the contract, so it must be removed.",
+  "skippedTests": [
+    {
+      "file": "message-lifecycle.postgres.test.ts",
+      "title": "reads the membership through the conversation predicate when Canonical V2 is on, as the runtime role",
+      "reason": "Needs the Canonical V2 auth topology (user_management.auth_business_org_authorized and ue_conversation_assignee_authorized), which the legacy-topology combined database this job builds does not install. The test skips itself instead of passing, so that path is not proven by this job."
+    }
+  ]
+}

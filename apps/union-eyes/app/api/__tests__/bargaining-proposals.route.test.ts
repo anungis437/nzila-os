@@ -7,7 +7,7 @@ vi.mock('@/lib/api/crud-factory', () => ({
     POST: vi.fn(async () => ({ data: { id: 'p1' } })),
   })),
 }));
-vi.mock('@/db/schema', () => ({ bargainingProposals: {} }));
+vi.mock('@/db/schema', () => ({ bargainingProposals: {}, negotiations: {} }));
 
 describe('bargaining/proposals route', () => {
   it('exports GET and POST handlers', async () => {

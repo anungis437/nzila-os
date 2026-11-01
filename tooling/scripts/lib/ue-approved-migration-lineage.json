@@ -186,6 +186,174 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "FORCE RLS for the union-side WorkAid relations created by platform 0027. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0028_workaid_consent_wording_proposal_rls",
+        "sha256": "0ea16935edf9683ecbe5e81c7e0c9466e78fde435d784e21e06e31f556a13a5c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for consent-wording proposals created by platform 0036. Does not insert wording. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0029_election_succession_rls_closure",
+        "sha256": "b61ff67df2af558991847dbc2f13dc4c9fbe48b368310a735d01e91ed639b0ee",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for the council-election supersession relations created by platform 0033 and 0034. Found by a native bootstrap: without it the catalog preflight left both relations unclassified and runtime grant activation aborted. Proven on native PostgreSQL 15 and 16; not applied to any live database."
+      },
+      {
+        "tag": "0030_precedent_explicit_share_select",
+        "sha256": "f53578b29414fd552810fcac8dbf15ad8dddfdccbe14ce419b04754e4d7ec1a9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "One additional permissive SELECT policy on arbitration_precedents for the runtime role: an explicit grant in shared_with_org_ids or sharing_level = public. Writes stay owner-only; federation and congress levels stay owner-only at the database. Proven on native PostgreSQL 15 and 16 (grant, revocation, negative disclosure); not applied to any live database."
+      },
+      {
+        "tag": "0031_feature_flags_attribution_columns",
+        "sha256": "854c69b408d6b84b722b6237e5819fc781adfe6229281e21ff59019a73ba0175",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Adds nullable created_by and last_modified_by to feature_flags: the canonical table lacked them while the ORM selected them, so every feature-flag evaluation failed. Found by running the application against native PostgreSQL; not applied to any live database."
+      },
+      {
+        "tag": "0032_grievance_events_actor_text",
+        "sha256": "2f56e25adc4806035de26301b3cc1fca93f6dadfc5be533feac476f81ed9d1d5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Changes grievance_events.actor_user_id from uuid to text: every principal is a text identifier, so recording an escalation event failed for any non-uuid actor and rolled the escalation back. Found by running the escalation journey against native PostgreSQL; proven on PG16 only; not applied to any live database."
+      },
+      {
+        "tag": "0033_external_authority_principals_text",
+        "sha256": "7a65b28bd9a044184df9dc3c3a89a0447977b86b07254ff886169b0f4b81f8c8",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Changes the nine principal columns of representation_authorities, external_matter_access_grants and external_document_access_grants from uuid to text (R-29): application principals are text identifiers, so no external counsel or specialist could ever be recorded. The four policies that name the columns are dropped and recreated unchanged. Not applied to any live database."
+      },
+      {
+        "tag": "0034_remaining_principal_columns_text",
+        "sha256": "4d67bb343548a209182560b9d6a10eaab18645d0b52eb40d612dbaf4fa38a590",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Changes six more principal columns (employer_communications.sender_user_id and created_by, employer_contacts.created_by, ai_grievance_triages.reviewed_by, ai_clause_reasonings.reviewed_by, ai_copilot_sessions.user_id) from uuid to text (R-29). No policy, view or key depends on them, so nothing is dropped. cookie_consents.user_id is deliberately unchanged because it is a foreign key to profiles(id). Not applied to any live database."
+      },
+      {
+        "tag": "0035_room_bookings_rls_closure",
+        "sha256": "ad018d652bd74f220b070fcb6f337e1a5e996205d6644989f2f01f0af9260ef7",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for room_bookings (direct organization_id) once platform 0041 evolves the table; runtime privileges SELECT, INSERT, UPDATE come from the storage-authority manifest. Not applied to any live database."
+      },
+      {
+        "tag": "0036_contact_submissions_rls_closure",
+        "sha256": "8f8080a0a906439eabe5c164eea8de0b28b092b35c3a938a9ed991f8b66591aa",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS with a system-role policy only for contact_submissions (platform 0045); runtime has no policy. Not applied to any live database."
+      },
+      {
+        "tag": "0037_ml_prediction_feedback_rls_closure",
+        "sha256": "74bed3e3d0f6257cb86aac00106ace8cc78a18dfc71b4af96de24786a7a64b0f",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Direct-organization RLS for ml_prediction_feedback"
+      },
+      {
+        "tag": "0038_scim_configurations_rls_closure",
+        "sha256": "34571a315f4427df3972421678f8f77be8c04b16515c30c66b5c23a306e9f06c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for scim_configurations"
+      },
+      {
+        "tag": "0039_claim_status_transitions_rls_closure",
+        "sha256": "6f4af8824f86074aa224851fd037c199f8366a46faf88d9f7def884d70d55b95",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only RLS for claim_status_transitions"
+      },
+      {
+        "tag": "0040_satisfaction_survey_responded_rls_closure",
+        "sha256": "d476c91c5d6947173adfcda8f0e6599e969df679a4199ce8a785f95d5b0f2200",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only RLS for satisfaction_survey_responded"
+      },
+      {
+        "tag": "0041_arbitration_decisions_owner_rls",
+        "sha256": "ac89767e26d6eac710f9bbb2a8e24505abcb5d34fc33f6932e851608b3226a34",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Public-or-owner row security for arbitration_decisions"
+      },
+      {
+        "tag": "0042_shared_clause_versions_rls_closure",
+        "sha256": "b0897771e2a578e0b073d4a735df77afa9a7cbdfea81d3c927479b5d2d209ad1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only RLS for shared_clause_versions"
+      },
+      {
+        "tag": "0043_email_address_suppressions_rls_closure",
+        "sha256": "f3d94790e1a5432eb4ef8875e08a738952a52744f83c0983075d7543d605f777",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "SYSTEM_ONLY RLS for email_address_suppressions"
+      },
+      {
+        "tag": "0044_public_intake_audit_events_rls_closure",
+        "sha256": "d2a501a4eca1809a79ef4d95fda8f767e5023d0e0cd153c94d1a396c18370e65",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "SYSTEM_ONLY append-only RLS for public_intake_audit_events"
+      },
+      {
+        "tag": "0045_audit_security_runtime_read",
+        "sha256": "6d6d9ad4c50bc149298635ee5337b279e695299e0c1cf134954d51a94bb07e76",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Org-scoped runtime SELECT on audit_security.audit_logs; the reconciled INSERT-only sink left every audit reader permission-denied natively."
+      },
+      {
+        "tag": "0046_pilot_fixture_rows_rls_closure",
+        "sha256": "d057b5e5cf6bf76993fca8d986c87da1104967697d8502f4714b3e54102ef656",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Tenant RLS for pilot_fixture_rows (organization isolation, no UPDATE)"
+      },
+      {
+        "tag": "0047_authority_reviews_visibility_rls",
+        "sha256": "6c8a727dda64ba16fc5fb7f2236a58d98c76700f9b2d6635063d6e00c9b98f0a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Restrictive SELECT policy on ue_authority_reviews: adverse parties see nothing; participants and live-mandate overseers see only their reviews"
+      },
+      {
+        "tag": "0048_clause_library_sharing_rls",
+        "sha256": "b7dc1308d39de9a0ceec576bdc4103107c35054697f3330a6a30e4e1fe15237a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Clause library sharing rule as one DB function plus a permissive SELECT policy for federation and congress readers; routes move from the system role to the runtime role"
+      },
+      {
+        "tag": "0049_scim_provisioning_functions",
+        "sha256": "db7e47992fc3e712ae5b02be149540b2400134fb36f82a51b4a9fcbe1fd29a27",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "F03-C: SCIM provisioning for a session-less machine caller - four SECURITY DEFINER functions (configuration check, provision, total, page) executable by the system role only"
+      },
+      {
+        "tag": "0050_clause_library_sharing_functions_retired",
+        "sha256": "aaf4973b1415db043b82ba829dda78b864f1fb6cc5b8a15c87e43990334976d2",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Retires the SECURITY DEFINER clause sharing helpers of 0048 that the catalog admission contract refuses"
+      },
+      {
+        "tag": "0051_scim_provisioned_users_rls_closure",
+        "sha256": "521f90aad5d4254e26324801e796076289888a28bb0360f6b3ccb96ca81d40da",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Retires the SCIM definer functions of 0049 and closes the SCIM directory and event log to the system role"
       }
     ],
     "platform": [
@@ -286,6 +454,230 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Additive evolution of the Django-created location_deletion_log stub: the evidence columns the application writes plus defaults on id, created_at and updated_at. Proven on native PostgreSQL 15 and 16; not applied to any live database."
+      },
+      {
+        "tag": "0029_message_thread_authority_scope",
+        "sha256": "c3edaa1ed46d700eb5ccb44a90e7c80fbc5b2e1b62e0d7f769901b0fe9289c01",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Extends the recusal resource check to message_thread and the non-delegable action check to message:place_legal_hold and message:release_legal_hold. Does not issue either power and has not been applied to a native or live database."
+      },
+      {
+        "tag": "0030_message_retention_authority_scope",
+        "sha256": "b88ac020e35afeed4222ce9e1eecc2fcb910beff812a7c6125ea247545979b6a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Extends the recusal resource check to message_retention and the non-delegable action check to message:adopt_retention and message:read_retention_policy. Does not issue either power and has not been applied to a native or live database."
+      },
+      {
+        "tag": "0031_reachable_stub_shape",
+        "sha256": "614d675d3b6e99cba138661dff7f32b77564df7ed9dc77d907540086b832f97e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Revised in place before any apply. Previous unqualified bytes were never executed. Type preflight plus constraint, index, policy, and grant definition fingerprints for data_anonymization_log, employment_history, job_classifications, and member_leaves. NOT NULL only when the relation is empty. No keys, no RLS change, no destructive statement. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0032_notification_callback_identity",
+        "sha256": "881bb702f123cdd545c43a578bd186519459d34a991526150531113ef0d53ec8",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Partial unique index on notification_delivery_log (external_event_id, event) and a locked owner check so one provider message belongs to one organization. Refuses existing duplicates. Does not delete a row, choose an owner, or change notification_queue. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0033_election_certificate_successions",
+        "sha256": "e7290edf6388862327de49b2fd89ad00f23f30a60e14963476f540c19ff5e8aa",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Successor relation for a certified council_elections row. Distinct issuer and reviewer, version, provenance hash, decision, dispute and recount references. Does not rewrite the certified row. Fails closed when council_elections is absent. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0034_election_organization_ownership",
+        "sha256": "069aeb4f54a65543a5267e520c70bc13ea0ea7861310256201bab43bfa21f38c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Binds one council election to one organization. Lookups join this relation and filter organization_id. Does not rewrite a certified column and does not issue a grant. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0035_election_supersession_authority_scope",
+        "sha256": "e16d811997ee4f571ef1fd25ab499d696c131e77469831fa69eefb29100c47b7",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Lets a recusal name a council election and refuses a stored delegation of governance:supersede_certified_result. Does not issue that power. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0036_workaid_consent_wording_proposals",
+        "sha256": "8eb7b651928314e4e632f5e09f0cd2bfa0904aa8408c1cac2f2d6c0556e9702a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Stores a proposed consent text until a different executive adopts it. Does not insert approved wording. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0037_workaid_referral_scope",
+        "sha256": "521c8f96d3bbe8872ef1a639ab2d4e4de3a2d407a611c1b0bdadec03ed45b603",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Adds immutable referred_categories on ue_authority_workaid_matters. New referrals must record the categories actually referred. Does not copy a broader consent. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0038_gate0_integrity_columns",
+        "sha256": "e95bb37ef864c8af05704ec2d3d3e383058db077d0d36d436a982fcb86caf6a5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Adds kpi_configurations.direction, committee_meetings.minutes_recorded_by, exit_interviews.submitted_by, cms_pages.submitted_by, one active primary contact per employer, and unique SSO provider indexes. Evolves the three nullable SSO identity keys when the combined Django bootstrap has only the minimal SSO stub. Additive and nullable; refuses existing duplicates. Source and PGlite tests pending on this revision; native and live database acceptance not established."
+      },
+      {
+        "tag": "0039_committee_memberships_shape",
+        "sha256": "493474c5698c34663f1974141003a020b209e35dc37f73121fafaf01d20762c5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Additive shape evolution of committee_memberships"
+      },
+      {
+        "tag": "0040_gate0_integrity_enforcement",
+        "sha256": "5ca1dcbaa8ce16d68a1c91be6db4681d1e7b90b150aaba2f8978f421ed30b3a1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Database enforcement: replay mode new_engine, ml_predictions model_version/subject_id, course registration uniqueness and capacity trigger"
+      },
+      {
+        "tag": "0041_room_bookings_shape",
+        "sha256": "e413a2c9f4f36d238e0745d0edb18a6b922524bbca1d2df12b85c4e3a8acfa7c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Shape evolution of room_bookings plus no-overlap trigger"
+      },
+      {
+        "tag": "0042_tenant_scoped_uniqueness",
+        "sha256": "0c91b85a6044791eeecc2544f8022776c1fdb870bd37474ecf55351ea4e28130",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Record numbers and codes unique per organization, not across every organization (nine tables)"
+      },
+      {
+        "tag": "0043_knowledge_transfer_owner",
+        "sha256": "51d5aee1562b883922ff34d5bd0f39bd4b449b9e594a7e298d5a6c14c0818d0b",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "created_by on ue_copilot_conversations and ue_reasoning_sessions (owner scoping)"
+      },
+      {
+        "tag": "0044_anti_scab_author",
+        "sha256": "1fbf51b59ea2d50972b864c97107df6811401f91544798e9c5bf48fd04dbf05d",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "created_by on anti_scab_violations (server-recorded author)"
+      },
+      {
+        "tag": "0045_contact_submissions",
+        "sha256": "c8e716d7d512ffb67e58d922eed41013b695e7b5829d1751a93d781381d1c6b9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Local record of public contact-form submissions (system-only, bounded, retention date)"
+      },
+      {
+        "tag": "0046_row_integrity",
+        "sha256": "9876831873efefa3b03d778841b9951a00d0f4762c41054c4ac27328385ee284",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Unique jurisdiction preference row per user and organization, same-organization employer parent trigger, pinned document version on external document grants"
+      },
+      {
+        "tag": "0047_ml_prediction_feedback",
+        "sha256": "e8d85f7fa4ac511bcb84697371f40b0ad64449883f22bf2019b6a7d59b28adb1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only ml_prediction_feedback (one row per prediction) replaces rewriting model_metadata.parameters on feedback"
+      },
+      {
+        "tag": "0048_sso_scim_shape",
+        "sha256": "9bca043173e7b3aebf402b6e2ba2b6022293078ba20d32bde065e3dce3448eb5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Widen the sso_providers and scim_configurations Django stubs; SCIM keeps only a token hash"
+      },
+      {
+        "tag": "0049_claim_status_transitions",
+        "sha256": "ba7d67d0fd7cebe99a7d9f249bbe8f95432c7587bbc0858f4aa89d73c5c61550",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Claim status-change moment and append-only transition history for the SLA clock"
+      },
+      {
+        "tag": "0050_survey_anonymity",
+        "sha256": "11adffd2ec58f0fc1a1e692a7089a4316eb0d21afc3eae5166bb32c5dab43ebd",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Make anonymous satisfaction responses unlinked from member and claim"
+      },
+      {
+        "tag": "0051_arbitration_decision_owner",
+        "sha256": "db9f9668b40e33676f38532f465f76b3d0ace994ab761cc03f7d90c49f76729e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Owner column and private-by-default for the shared arbitration_decisions library"
+      },
+      {
+        "tag": "0052_shared_clause_versions",
+        "sha256": "bc659adef04356134ac2dd3baea016753c2279a61332318862199d8a68e68211",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only shared clause version history"
+      },
+      {
+        "tag": "0053_email_address_suppressions",
+        "sha256": "45a20651664091ec5e9da93cf6fcf2918bc230d71725b039c81513fc993fd642",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Platform-wide system-only email address suppression"
+      },
+      {
+        "tag": "0054_public_intake_audit_events",
+        "sha256": "e691c7bd6b8f7aafa04a184ff124d2c5a99035e62603f0d81b3cec2fa6f56ce9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Platform-level append-only audit of pseudonymous public-intake access"
+      },
+      {
+        "tag": "0055_workbook_holder_notice",
+        "sha256": "fa60cfe9eb81cd91b8a57e88c0e4184d1d9d443adb55e1c0f0b2f56e453daa9e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Per-holder record of whether notice to the named person has been recorded"
+      },
+      {
+        "tag": "0056_workbook_capability",
+        "sha256": "e8635c1787c48ba516aba0e35c7f24d3a053061cdc5d512df30b0ead8fde3a83",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Separate bearer capability for an unclaimed workbook (hash and expiry, additive); the workbook id stops being the credential."
+      },
+      {
+        "tag": "0057_workbook_holder_notice_evidence",
+        "sha256": "1288b2369b53b81367108f0f83fe7b7e93681971a51e325e19ea572c150958ee",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Notice evidence level for named workbook holders (none, self_reported, delivery_verified); 0055 notices relabelled self_reported, none upgraded."
+      },
+      {
+        "tag": "0058_pilot_fixture_rows",
+        "sha256": "040bf3ef64288559b8922cc9174ed738e8290318f5132acb6fff9531eb1b213b",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "CUPE pilot bootstrap origin ledger (F03-A: a reset deletes only rows the bootstrap recorded creating)"
+      },
+      {
+        "tag": "0059_scim_provisioned_users",
+        "sha256": "6bc0e70db80a60709c6359a535a5d10fda99f60ba061ba4aac23a0097e0976b0",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "The directory of people an identity provider provisions (system-only, not roster rows) and the evolution of the scim_events_log Django stub"
+      },
+      {
+        "tag": "0060_reachable_stub_shape_2",
+        "sha256": "bce83b72aa267b9cf82ba8bfb4e07992d0269e572a11732e6357fcb68ee9e83e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Additive, guarded evolution of thirteen reachable Django-defined relations (arbitration_decisions, case_studies, wage_benchmarks, cost_of_living_data, external_data_sync_log, provincial_privacy_config, support_tickets, union_density, reserved_matter_votes, clc_organization_sync_log, webhook_receipts, automation_rules, alert_rules) to the columns their Drizzle declarations select and write. Missing columns are added nullable, enum types are created only when absent, and the transaction fails if any constraint, index, policy, grant or row-security setting changes. Tagged for an exact rollback."
       }
     ]
   }

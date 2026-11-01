@@ -44,23 +44,11 @@
       "references": 10,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "alert_rules": {
-      "disposition": "INDIVIDUAL_DECISION",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 4,
-      "reason": "enum-name collision, pgvector prerequisite or missing runtime privilege"
-    },
     "anti_scab_violations": {
       "disposition": "CREATE_RELATION_REQUIRED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "references": 2,
       "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
-    },
-    "arbitration_decisions": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 24,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
     },
     "arbitrator_profiles": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -92,12 +80,6 @@
       "references": 0,
       "reason": "no storage-authority entry: classify before any evolution"
     },
-    "automation_rules": {
-      "disposition": "INDIVIDUAL_DECISION",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 8,
-      "reason": "enum-name collision, pgvector prerequisite or missing runtime privilege"
-    },
     "autopay_settings": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -128,12 +110,6 @@
       "references": 4,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "bank_accounts": {
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 0,
-      "reason": "live registry class but no application reference; confirm and reclassify or retire"
-    },
     "bank_of_canada_rates": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -141,12 +117,6 @@
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
     "bank_reconciliation": {
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 0,
-      "reason": "live registry class but no application reference; confirm and reclassify or retire"
-    },
-    "bank_reconciliations": {
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "references": 0,
@@ -193,12 +163,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "case_studies": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 6,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
     },
     "cba_contacts": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -326,23 +290,11 @@
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "clc_organization_sync_log": {
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "references": 4,
-      "reason": "system-only relation: evolve with the system service that owns it"
-    },
     "clc_per_capita_benchmarks": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "clc_remittance_mapping": {
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 0,
-      "reason": "live registry class but no application reference; confirm and reclassify or retire"
     },
     "clc_union_density": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -361,12 +313,6 @@
       "registryClass": "TENANT_RLS_REQUIRED",
       "references": 2,
       "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
-    },
-    "committee_memberships": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 3,
-      "reason": "registry LATENT_UNREACHABLE but 3 file(s) reference the declaration; each must be shown non-executable before retirement"
     },
     "conflict_audit_log": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -402,12 +348,6 @@
       "disposition": "GLOBAL_REFERENCE_SHAPE",
       "registryClass": "GLOBAL_REFERENCE_DATA",
       "references": 6,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cost_of_living_data": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 2,
       "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
     },
     "cpi_adjusted_pricing": {
@@ -470,12 +410,6 @@
       "references": 0,
       "reason": "system-only relation: evolve with the system service that owns it"
     },
-    "data_anonymization_log": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 2,
-      "reason": "registry LATENT_UNREACHABLE but 2 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
     "data_classification_policy": {
       "disposition": "GLOBAL_REFERENCE_SHAPE",
       "registryClass": "GLOBAL_REFERENCE_DATA",
@@ -536,18 +470,6 @@
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "employment_history": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 1,
-      "reason": "registry LATENT_UNREACHABLE but 1 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
-    "erp_invoices": {
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 0,
-      "reason": "live registry class but no application reference; confirm and reclassify or retire"
-    },
     "event_attendees": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -565,12 +487,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "external_data_sync_log": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 2,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
     },
     "external_document_files": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -595,12 +511,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 1,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "feature_flags": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 4,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
     },
     "federation_remittances": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -698,12 +608,6 @@
       "references": 2,
       "reason": "registry LATENT_UNREACHABLE but 2 file(s) reference the declaration; each must be shown non-executable before retirement"
     },
-    "grievance_timeline": {
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 0,
-      "reason": "live registry class but no application reference; confirm and reclassify or retire"
-    },
     "grievance_workflows": {
       "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
       "registryClass": "LATENT_UNREACHABLE",
@@ -763,12 +667,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 4,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "job_classifications": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 3,
-      "reason": "registry LATENT_UNREACHABLE but 3 file(s) reference the declaration; each must be shown non-executable before retirement"
     },
     "joint_hs_committees": {
       "disposition": "CREATE_RELATION_REQUIRED",
@@ -848,12 +746,6 @@
       "references": 1,
       "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
     },
-    "member_leaves": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 1,
-      "reason": "registry LATENT_UNREACHABLE but 1 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
     "movement_trends": {
       "disposition": "GLOBAL_REFERENCE_SHAPE",
       "registryClass": "GLOBAL_REFERENCE_DATA",
@@ -872,23 +764,11 @@
       "references": 4,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "notification_history": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 14,
-      "reason": "registry LATENT_UNREACHABLE but 14 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
     "notification_log": {
       "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
       "registryClass": "LATENT_UNREACHABLE",
       "references": 8,
       "reason": "registry LATENT_UNREACHABLE but 8 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
-    "org_usage": {
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 0,
-      "reason": "registry LATENT_UNREACHABLE and no reference outside the schema folder; deleting the declaration needs the intra-schema foreign keys and relations that name it reworked together"
     },
     "organization_billing_config": {
       "disposition": "SYSTEM_ONLY_SHAPE",
@@ -1022,12 +902,6 @@
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "provincial_privacy_config": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 2,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
     "public_content": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -1058,12 +932,6 @@
       "references": 4,
       "reason": "system-only relation: evolve with the system service that owns it"
     },
-    "reserved_matter_votes": {
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "references": 0,
-      "reason": "system-only relation: evolve with the system service that owns it"
-    },
     "right_of_refusal_events": {
       "disposition": "CREATE_RELATION_REQUIRED",
       "registryClass": "TENANT_RLS_REQUIRED",
@@ -1081,12 +949,6 @@
       "registryClass": "LATENT_UNREACHABLE",
       "references": 1,
       "reason": "registry LATENT_UNREACHABLE but 1 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
-    "room_bookings": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 6,
-      "reason": "registry LATENT_UNREACHABLE but 6 file(s) reference the declaration; each must be shown non-executable before retirement"
     },
     "safety_training_records": {
       "disposition": "LIVE_UNREFERENCED",
@@ -1130,23 +992,11 @@
       "references": 6,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "signature_templates": {
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 0,
-      "reason": "registry LATENT_UNREACHABLE and no reference outside the schema folder; deleting the declaration needs the intra-schema foreign keys and relations that name it reworked together"
-    },
     "signature_verification": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "signature_webhooks_log": {
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 0,
-      "reason": "registry LATENT_UNREACHABLE and no reference outside the schema folder; deleting the declaration needs the intra-schema foreign keys and relations that name it reworked together"
     },
     "signature_workflows": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -1201,12 +1051,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "support_tickets": {
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "references": 1,
-      "reason": "system-only relation: evolve with the system service that owns it"
     },
     "swiss_cold_storage": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -1274,12 +1118,6 @@
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "union_density": {
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "references": 6,
-      "reason": "system-only relation: evolve with the system service that owns it"
-    },
     "union_only_data_tags": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -1340,12 +1178,6 @@
       "references": 6,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "wage_benchmarks": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 2,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
     "wage_progressions": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -1369,12 +1201,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 1,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "webhook_receipts": {
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "references": 2,
-      "reason": "system-only relation: evolve with the system service that owns it"
     },
     "weekly_threshold_tracking": {
       "disposition": "CONTAINED_DENY_ALL",

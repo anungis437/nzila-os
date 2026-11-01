@@ -9,10 +9,11 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: (_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx),
-  ApiError: {
+  ErrorCode: { RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED' },
+  ApiError: Object.assign(class extends Error { constructor(public code: string, message: string) { super(message); } }, {
     notFound: (what: string) => Object.assign(new Error(`${what} not found`), { status: 404 }),
     badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }),
-  },
+  }),
 }));
 vi.mock('@/db/db', () => ({ db: {} }));
 vi.mock('@/db/schema', () => ({
@@ -27,6 +28,7 @@ vi.mock('drizzle-orm', () => ({
   isNull: vi.fn(),
   or: vi.fn(),
   gte: vi.fn(),
+  sql: vi.fn(() => 'sql'),
 }));
 
 const chain = (rows: () => unknown[], op: string) => {
@@ -74,7 +76,7 @@ describe('notifications routes — every write is audited on the same transactio
       expect(result).toEqual({ id: 'n1' });
       expect(m.persistAtomicAudit).toHaveBeenCalledWith(
         tx,
-        expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'notification.create', resourceId: 'n1', details: expect.objectContaining({ recipientUserId: 'u2' }) }),
+        expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'notification.create', resourceId: 'n1', details: expect.objectContaining({ recipientUserId: 'u2', contentDigest: expect.stringMatching(/^[0-9a-f]{64}$/) }) }),
       );
     });
 
@@ -93,6 +95,35 @@ describe('notifications routes — every write is audited on the same transactio
 
       await expect(POST({ ...caller, body })).rejects.toThrow('audit unavailable');
     });
+
+    // Gate 0 DEF-0B9-MOB (steward notification: unbounded, unvalidated, no sender)
+    it('refuses an unbounded, unvalidated or unsafe body before any write', async () => {
+      const { POST } = await import('../notifications/route');
+      for (const bad of [
+        { ...body, title: 'x'.repeat(201) },
+        { ...body, message: 'x'.repeat(2001) },
+        { ...body, actionUrl: 'javascript:alert(1)' },
+        { ...body, actionUrl: '//evil.example/x' },
+        { ...body, expiresAt: 'not a date' },
+        { ...body, data: { blob: 'x'.repeat(5000) } },
+        { ...body, status: 'sent' },
+        {},
+      ]) {
+        await expect(POST({ ...caller, body: bad })).rejects.toMatchObject({ status: 400 });
+      }
+      expect(m.ops).not.toContain('insert');
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('attributes a steward-authored notification to its author, whatever origin the client sent', async () => {
+      const { POST } = await import('../notifications/route');
+      const values: unknown[] = [];
+      const original = tx.insert;
+      tx.insert = () => ({ values: (v: unknown) => { values.push(v); return chain(() => m.returned, 'insert'); } }) as never;
+      await POST({ ...caller, body: { ...body, data: { origin: { kind: 'system', userId: 'someone-else' }, note: 1 } } });
+      tx.insert = original;
+      expect(values[0]).toMatchObject({ data: { note: 1, origin: { kind: 'steward', userId: 'u1' } } });
+    });
   });
 
   describe('PATCH/DELETE /api/notifications/[id] (the caller\u2019s own notification)', () => {
@@ -104,6 +135,21 @@ describe('notifications routes — every write is audited on the same transactio
         tx,
         expect.objectContaining({ userId: 'u1', action: 'notification.update', resourceId: 'n1' }),
       );
+    });
+
+    it('accepts only a real boolean for read, and clears the read time when marking unread', async () => {
+      const { PATCH } = await import('../notifications/[id]/route');
+      for (const bad of ['false', 1, null, {}, undefined]) {
+        await expect(PATCH({ ...caller, params: { id: 'n1' }, body: { read: bad } })).rejects.toMatchObject({ status: 400 });
+      }
+      const sets: Record<string, unknown>[] = [];
+      const original = tx.update;
+      tx.update = () => ({ set: (v: Record<string, unknown>) => { sets.push(v); return chain(() => m.returned, 'update'); } }) as never;
+      await PATCH({ ...caller, params: { id: 'n1' }, body: { read: false } });
+      await PATCH({ ...caller, params: { id: 'n1' }, body: { read: true } });
+      tx.update = original;
+      expect(sets[0]).toEqual({ read: false, readAt: null });
+      expect(sets[1]).toMatchObject({ read: true, readAt: expect.any(Date) });
     });
 
     it('answers 404 with no audit when the notification is another member\u2019s or another organization\u2019s', async () => {
@@ -152,12 +198,26 @@ describe('notifications routes — every write is audited on the same transactio
   describe('POST /api/notifications/test', () => {
     it('creates the caller\u2019s own test notification and audits it', async () => {
       const { POST } = await import('../notifications/test/route');
-      await POST(caller);
+      m.recipient = []; // no recent unread test row to reuse
+      const result = await POST(caller) as { notification: unknown; delivery: Record<string, string>; reused: boolean };
+      expect(result.delivery).toEqual({ inApp: 'stored', push: 'not_attempted', email: 'not_attempted', sms: 'not_attempted' });
+      expect(result.reused).toBe(false);
 
       expect(m.persistAtomicAudit).toHaveBeenCalledWith(
         tx,
         expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'notification.test_create', resourceId: 'n1' }),
       );
+    });
+  });
+
+  describe('POST /api/notifications/test (repeat)', () => {
+    it('reuses a recent unread test notification instead of adding another permanent row', async () => {
+      const { POST } = await import('../notifications/test/route');
+      m.recipient = [{ id: 'existing' }];
+      const result = await POST(caller) as { reused: boolean; notification: { id: string } };
+      expect(result.reused).toBe(true);
+      expect(result.notification.id).toBe('existing');
+      expect(m.ops).not.toContain('insert');
     });
   });
 

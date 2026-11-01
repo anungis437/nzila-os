@@ -23,7 +23,7 @@ const analyticsMetricsSchema = z.object({
   periodEnd: z.string().optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request, _context) => {
+export const POST = withRoleAuth('steward', async (request, context) => {
     try {
       const body = await request.json();
     // Validate request body
@@ -59,7 +59,8 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
         metricName,
         periodType: periodType as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly',
         periodStart: new Date(periodStart),
-        periodEnd: new Date(periodEnd)
+        periodEnd: new Date(periodEnd),
+        expectedOrganizationId: context.organizationId,
       });
       
       if (!result.success) {
@@ -82,7 +83,7 @@ return standardErrorResponse(
     }
 });
 
-export const GET = withRoleAuth('member', async (request, _context) => {
+export const GET = withRoleAuth('member', async (request, context) => {
     try {
       const searchParams = request.nextUrl.searchParams;
       const metricType = searchParams.get('metricType');
@@ -97,7 +98,8 @@ export const GET = withRoleAuth('member', async (request, _context) => {
         periodType: periodType || undefined,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
-        limit
+        limit,
+        expectedOrganizationId: context.organizationId,
       });
       
       if (!result.success) {

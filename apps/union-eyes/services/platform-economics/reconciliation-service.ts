@@ -21,13 +21,16 @@ import {
   reconciliationExceptions,
   platformInvoices,
   platformPayments,
+  billingPeriods,
   paymentAllocations,
   transactionFeeEvents,
   type ReconciliationRun,
   type ReconciliationException,
 } from '@/db/schema';
-import { eq, and, gte, lte, inArray, isNull } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { eq, and, gte, lte, inArray, sql, desc } from 'drizzle-orm';
+import { ApiError } from '@/lib/api/errors';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 
 // ============================================================================
@@ -35,7 +38,7 @@ import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 // ============================================================================
 
 export interface RunReconciliationInput {
-  organizationId?: string;
+  organizationId: string;
   billingPeriodId?: string;
   periodStart: Date;
   periodEnd: Date;
@@ -63,7 +66,47 @@ export interface ReconciliationResult {
 export async function runReconciliation(
   input: RunReconciliationInput,
 ): Promise<ReconciliationResult> {
+  // Never permit an organization-less reconciliation. That legacy mode scanned
+  // and matched invoices, payments and fees from unrelated tenants in one run.
+  // A caller must supply the organization whose financial ledger is in scope.
+  if (!input.organizationId || input.organizationId.trim() === '') {
+    throw ApiError.badRequest('An organization is required for reconciliation');
+  }
+  if (input.periodEnd < input.periodStart) {
+    throw ApiError.badRequest('The reconciliation period ends before it starts');
+  }
+
   return await db.transaction(async (tx) => {
+    // 0. A run for an organization is repeatable only as a refusal: the same organization and period are reconciled once. A second run
+    // inserted a second set of exceptions beside the first, so the open-exception list doubled with every click. The lock serialises two
+    // runs started together; the billing period, when named, must be the organization's own.
+    await tx.execute(
+      sql`SELECT pg_advisory_xact_lock(hashtextextended(${`reconciliation:${input.organizationId}:${input.periodStart.toISOString()}:${input.periodEnd.toISOString()}`}, 0))`,
+    );
+    if (input.billingPeriodId) {
+      const [owned] = await tx
+        .select({ id: billingPeriods.id })
+        .from(billingPeriods)
+        .where(and(eq(billingPeriods.id, input.billingPeriodId), eq(billingPeriods.organizationId, input.organizationId)))
+        .limit(1);
+      if (!owned) throw ApiError.notFound('Billing period');
+    }
+    const [prior] = await tx
+      .select({ id: reconciliationRuns.id })
+      .from(reconciliationRuns)
+      .where(
+        and(
+          eq(reconciliationRuns.organizationId, input.organizationId),
+          eq(reconciliationRuns.periodStart, input.periodStart),
+          eq(reconciliationRuns.periodEnd, input.periodEnd),
+          inArray(reconciliationRuns.status, ['running', 'completed']),
+        ),
+      )
+      .limit(1);
+    if (prior) {
+      throw ApiError.conflict('This period has already been reconciled', { runId: prior.id });
+    }
+
     // 1. Create run record
     const [run] = await tx
       .insert(reconciliationRuns)
@@ -82,9 +125,7 @@ export async function runReconciliation(
       gte(platformInvoices.issueDate, input.periodStart),
       lte(platformInvoices.issueDate, input.periodEnd),
     ];
-    if (input.organizationId) {
-      invoiceConditions.push(eq(platformInvoices.organizationId, input.organizationId));
-    }
+    invoiceConditions.push(eq(platformInvoices.organizationId, input.organizationId));
     const invoices = await tx
       .select()
       .from(platformInvoices)
@@ -96,9 +137,7 @@ export async function runReconciliation(
       lte(platformPayments.createdAt, input.periodEnd),
       inArray(platformPayments.status, ['completed', 'refunded']),
     ];
-    if (input.organizationId) {
-      paymentConditions.push(eq(platformPayments.organizationId, input.organizationId));
-    }
+    paymentConditions.push(eq(platformPayments.organizationId, input.organizationId));
     const payments = await tx
       .select()
       .from(platformPayments)
@@ -239,9 +278,7 @@ export async function runReconciliation(
       gte(transactionFeeEvents.capturedAt, input.periodStart),
       lte(transactionFeeEvents.capturedAt, input.periodEnd),
     ];
-    if (input.organizationId) {
-      feeConditions.push(eq(transactionFeeEvents.organizationId, input.organizationId));
-    }
+    feeConditions.push(eq(transactionFeeEvents.organizationId, input.organizationId));
     const feeEvents = await tx
       .select()
       .from(transactionFeeEvents)
@@ -284,21 +321,21 @@ export async function runReconciliation(
       .where(
         and(
           eq(reconciliationRuns.id, run.id),
-          run.organizationId
-            ? eq(reconciliationRuns.organizationId, run.organizationId)
-            : isNull(reconciliationRuns.organizationId),
+          eq(reconciliationRuns.organizationId, input.organizationId),
         ),
       );
 
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
+    // The run, its matches and exceptions, and these audit records commit or roll back together: a failed audit write leaves no run, and
+    // a run that rolls back leaves no audit event behind.
+    const auditTx = tx as unknown as RLSTx;
+    await persistAtomicAudit(auditTx, {
       organizationId: input.organizationId,
-      resource: 'reconciliation_run',
+      userId: input.runBy ?? null,
+      action: 'reconciliation.run.completed',
+      resourceType: 'reconciliation_run',
       resourceId: run.id,
-      action: 'reconciliation_completed',
-      userId: input.runBy,
-      metadata: {
+      details: {
+        severity: 'high',
         totalInvoices: invoices.length,
         totalPayments: payments.length,
         totalMatches,
@@ -310,15 +347,14 @@ export async function runReconciliation(
     // CRITICAL variance alert: flag net variance above $100 as critical audit event
     const varianceCents = Math.abs(toCents(varianceCad));
     if (varianceCents > 10000) {
-      await auditLog({
-        eventType: AuditEventType.DATA_CREATE,
-        severity: AuditSeverity.CRITICAL,
+      await persistAtomicAudit(auditTx, {
         organizationId: input.organizationId,
-        resource: 'reconciliation_run',
+        userId: input.runBy ?? null,
+        action: 'reconciliation.run.critical_variance',
+        resourceType: 'reconciliation_run',
         resourceId: run.id,
-        action: 'reconciliation_critical_variance',
-        userId: input.runBy,
-        metadata: {
+        details: {
+          severity: 'critical',
           varianceCad,
           threshold: '100.00',
           totalExceptions,
@@ -356,40 +392,43 @@ export async function resolveException(
     notes: string;
   },
 ): Promise<ReconciliationException> {
-  const [updated] = await db
-    .update(reconciliationExceptions)
-    .set({
-      status: resolution.status,
-      resolvedBy: resolution.resolvedBy,
-      resolvedAt: new Date(),
-      resolutionNotes: resolution.notes,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(reconciliationExceptions.id, exceptionId),
-        eq(reconciliationExceptions.organizationId, organizationId),
-        inArray(reconciliationExceptions.status, ['open', 'under_review']),
-      ),
-    )
-    .returning();
+  // The status change and its audit record are one transaction: a failed audit write leaves the exception open, so a write-off can never
+  // stand without its record. The update is conditional on the exception still being open, so two resolvers cannot both succeed.
+  return db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(reconciliationExceptions)
+      .set({
+        status: resolution.status,
+        resolvedBy: resolution.resolvedBy,
+        resolvedAt: new Date(),
+        resolutionNotes: resolution.notes,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(reconciliationExceptions.id, exceptionId),
+          eq(reconciliationExceptions.organizationId, organizationId),
+          inArray(reconciliationExceptions.status, ['open', 'under_review']),
+        ),
+      )
+      .returning();
 
-  if (!updated) {
-    throw new Error(`Exception ${exceptionId} not found or already resolved`);
-  }
+    if (!updated) {
+      throw new Error(`Exception ${exceptionId} not found or already resolved`);
+    }
 
-  await auditLog({
-    eventType: AuditEventType.DATA_UPDATE,
-    severity: AuditSeverity.MEDIUM,
-    organizationId: updated.organizationId ?? undefined,
-    resource: 'reconciliation_exception',
-    resourceId: exceptionId,
-    action: 'exception_resolved',
-    userId: resolution.resolvedBy,
-    metadata: { status: resolution.status, notes: resolution.notes },
+    await persistAtomicAudit(tx as unknown as RLSTx, {
+      organizationId,
+      userId: resolution.resolvedBy,
+      action: 'reconciliation.exception.resolved',
+      resourceType: 'reconciliation_exception',
+      resourceId: exceptionId,
+      // The resolver's notes are free text and are kept on the exception row, not copied into the audit record.
+      details: { status: resolution.status, notesLength: resolution.notes.length },
+    });
+
+    return updated;
   });
-
-  return updated;
 }
 
 // ============================================================================
@@ -397,15 +436,17 @@ export async function resolveException(
 // ============================================================================
 
 /**
- * Get a reconciliation run with summary.
+ * Get a reconciliation run with summary. The run is looked up inside the caller's organization: an id from another
+ * organization is indistinguishable from a missing one.
  */
 export async function getReconciliationRun(
   runId: string,
+  organizationId: string,
 ): Promise<ReconciliationRun | null> {
   const [run] = await db
     .select()
     .from(reconciliationRuns)
-    .where(eq(reconciliationRuns.id, runId))
+    .where(and(eq(reconciliationRuns.id, runId), eq(reconciliationRuns.organizationId, organizationId)))
     .limit(1);
   return run ?? null;
 }
@@ -413,19 +454,32 @@ export async function getReconciliationRun(
 /**
  * List open exceptions for an org (paginated).
  */
+export const EXCEPTION_STATUSES = ['open', 'under_review', 'resolved', 'written_off'] as const;
+export const MAX_EXCEPTIONS_PER_READ = 200;
+
 export async function listExceptions(
   organizationId: string,
-  statusFilter: ('open' | 'under_review' | 'resolved' | 'written_off')[] = ['open', 'under_review'],
+  statusFilter: readonly string[] = ['open', 'under_review'],
+  limit: number = MAX_EXCEPTIONS_PER_READ,
 ): Promise<ReconciliationException[]> {
+  // A status outside the vocabulary is the caller's error, not a cast that reaches the database as an invalid enum value, and the list is
+  // bounded and ordered, so a large backlog is read in pages rather than whole.
+  const valid = statusFilter.filter((s): s is (typeof EXCEPTION_STATUSES)[number] => (EXCEPTION_STATUSES as readonly string[]).includes(s));
+  if (valid.length === 0 || valid.length !== statusFilter.length) {
+    throw ApiError.badRequest(`status must be one or more of: ${EXCEPTION_STATUSES.join(', ')}`);
+  }
+  const bounded = Math.min(MAX_EXCEPTIONS_PER_READ, Math.max(1, Math.trunc(limit) || MAX_EXCEPTIONS_PER_READ));
   return await db
     .select()
     .from(reconciliationExceptions)
     .where(
       and(
         eq(reconciliationExceptions.organizationId, organizationId),
-        inArray(reconciliationExceptions.status, statusFilter),
+        inArray(reconciliationExceptions.status, valid),
       ),
-    );
+    )
+    .orderBy(desc(reconciliationExceptions.createdAt))
+    .limit(bounded);
 }
 
 /**

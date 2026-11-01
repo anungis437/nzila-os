@@ -131,7 +131,7 @@ export { type GrievanceType } from "./domains/claims";
 export { employmentStatusEnum } from "./domains/member";
 
 // mlPredictions - ML domain is the canonical source for predictions
-export { mlPredictions } from "./domains/ml";
+export { mlPredictions, mlPredictionFeedback } from "./domains/ml";
 
 // campaignStatusEnum - communications is the canonical source
 export { campaignStatusEnum } from "./domains/communications";

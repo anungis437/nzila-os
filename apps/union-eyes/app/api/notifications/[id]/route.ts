@@ -9,6 +9,10 @@ import { inAppNotifications } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { eq, and } from 'drizzle-orm';
+import { z } from 'zod';
+
+// Only a real boolean is accepted: a truthy string used to set the read time and store text in the boolean column.
+const patchSchema = z.object({ read: z.boolean() }).strict();
 
 export const dynamic = 'force-dynamic';
 
@@ -50,19 +54,12 @@ export const PATCH = withApi(
   async ({ params, body, userId, organizationId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = await params;
-    const { read } = (body as { read?: boolean }) || {};
+    const parsed = patchSchema.safeParse(body);
+    if (!parsed.success) throw ApiError.badRequest('read must be true or false');
+    const { read } = parsed.data;
 
-    const updateData: Record<string, unknown> = {};
-    if (read !== undefined) {
-      updateData.read = read;
-      if (read) {
-        updateData.readAt = new Date();
-      }
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      throw ApiError.badRequest('No updatable fields supplied');
-    }
+    // The read time always agrees with the flag: marking unread clears it.
+    const updateData: Record<string, unknown> = { read, readAt: read ? new Date() : null };
 
     return withRLSContext({ organizationId }, async (tx) => {
       const [updated] = await tx

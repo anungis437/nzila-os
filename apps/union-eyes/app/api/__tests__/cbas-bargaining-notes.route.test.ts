@@ -98,6 +98,7 @@ describe('cbas/[id] route', () => {
     const response = await GET(json('http://x/api/cbas/c1?includeNotes=true', 'GET'));
     const body = await response.json();
     expect(m.getCba).toHaveBeenCalledWith('org-1', 'c1', { countView: false });
+    expect(m.getNotes).toHaveBeenCalledWith('c1', 'org-1');
     expect(body.bargainingNotes.map((n: { id: string }) => n.id)).toEqual(['n1', 'n3']);
   });
 });

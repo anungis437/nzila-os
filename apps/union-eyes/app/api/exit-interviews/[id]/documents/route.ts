@@ -18,7 +18,9 @@ import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewDocuments } from '@/db/schema';
-import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, normalizeRole, hasMinRole } from '@/lib/api-auth-guard';
+import { canReadInterview, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
+import { checkDocumentLocation } from '@/lib/knowledge-transfer/governance/document-location';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,21 +74,14 @@ export const POST = withApi(
       throw ApiError.forbidden('Only the interview owner or steward-level users can attach documents');
     }
 
-    // A published or archived interview is a finished record; material is attached while it is being prepared.
-    if (interview.status === 'published' || interview.status === 'archived') {
-      throw ApiError.conflict('Cannot attach documents to a published or archived interview');
+    // A reviewed, published or archived interview is no longer being prepared: what the reviewer approved is what is published.
+    if (interview.status === 'reviewed' || interview.status === 'published' || interview.status === 'archived') {
+      throw ApiError.conflict('Cannot attach documents to a reviewed, published or archived interview');
     }
 
-    // Validate fileUrl is within allowed domains (no SSRF)
-    const parsedUrl = new URL(body!.fileUrl);
-    const allowedHosts = [
-      'nzilacanadastore.blob.core.windows.net',
-      'localhost',
-      '127.0.0.1',
-    ];
-    if (!allowedHosts.some((h) => parsedUrl.hostname === h || parsedUrl.hostname.endsWith(`.${h}`))) {
-      throw ApiError.badRequest('fileUrl must point to an authorized storage host');
-    }
+    // The location must be an object in the organization's own area of the approved storage (no SSRF, no signed link, no other tenant's object).
+    const location = checkDocumentLocation(body!.fileUrl, organizationId!);
+    if (!location.ok) throw ApiError.badRequest(location.reason);
 
     const doc = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
       const [row] = await tx
@@ -130,7 +125,7 @@ export const GET = withApi(
   async ({ params, organizationId, userId, user }) => {
     // Ensure interview is in this org
     const [interview] = await db
-      .select({ id: exitInterviews.id, status: exitInterviews.status, createdBy: exitInterviews.createdBy })
+      .select({ id: exitInterviews.id, status: exitInterviews.status, createdBy: exitInterviews.createdBy, sensitivityLevel: exitInterviews.sensitivityLevel, consentGranted: exitInterviews.consentGranted })
       .from(exitInterviews)
       .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
       .limit(1);
@@ -139,9 +134,10 @@ export const GET = withApi(
 
     // The attachments (including transcripts) of a draft are as private as the draft: the interview route shows an
     // unpublished interview only to its owner and to steward-level users, and so does this one.
-    const isPublished = interview.status === 'published' || interview.status === 'archived';
-    if (!isPublished && interview.createdBy !== userId && !hasStewardPrivileges(user?.role ?? null)) {
-      throw ApiError.forbidden('You do not have permission to access this interview');
+    // The attachments (transcripts, file locations) follow the interview's sensitivity floor and consent as well.
+    const reader = await resolveInterviewReader(userId ?? null, hasStewardPrivileges(user?.role ?? null), hasMinRole);
+    if (!canReadInterview(interview, reader)) {
+      throw ApiError.notFound('Exit interview');
     }
 
     const docs = await db

@@ -116,7 +116,7 @@ export function CampaignDetailConsole({ campaignId }: { campaignId: string }) {
       setLoading(true);
       setError(null);
       // The proxy forwards to Django; try the campaigns list and pick by id
-      const res = await fetch('/api/v2/organizing/campaigns');
+      const res = await fetch('/api/organizing/campaigns');
       if (!res.ok) throw new Error('Failed to load');
       const json = await res.json();
       const items: Campaign[] = Array.isArray(json) ? json : (json?.campaigns ?? json?.data ?? []);

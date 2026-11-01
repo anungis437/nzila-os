@@ -220,20 +220,96 @@ describe('revocation: staff lose the conversation the moment their authority end
     expect(await count(`SELECT count(*) AS n FROM message_thread_assignments`)).toBe(0)
   })
 
-  it('reads the membership through the canonical predicate when canonical bootstrap is on', async () => {
+  it('reads assignee eligibility through the conversation predicate when canonical bootstrap is on', async () => {
     const id = await thread('member-1', { staffId: 'steward-1' })
+    const adminThread = await thread('member-1', { staffId: 'admin-1' })
     await asOwner(async () => {
-      await pg.exec(`CREATE OR REPLACE FUNCTION public.ue_case_assignee_authorized(target text, row_org uuid) RETURNS boolean LANGUAGE sql STABLE AS
-        $$ SELECT EXISTS (SELECT 1 FROM organization_members WHERE user_id = target AND organization_id = row_org AND status = 'active') $$`)
+      await pg.exec(`CREATE OR REPLACE FUNCTION public.ue_conversation_assignee_authorized(target text, row_org uuid) RETURNS boolean LANGUAGE sql STABLE AS
+        $$ SELECT EXISTS (
+             SELECT 1 FROM organization_members
+             WHERE user_id = target AND organization_id = row_org AND status = 'active' AND deleted_at IS NULL
+               AND lower(role) IN ('bargaining_committee','chief_steward','health_safety_rep','officer','president','secretary_treasurer','steward','vice_president')
+           ) $$`)
     })
     vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
     try {
       expect(await findReadableThread(tx(), steward, id)).not.toBeNull()
+      expect(await findReadableThread(tx(), admin, adminThread)).toBeNull()
       await setMembership('steward-1', { status: 'inactive' })
       expect(await findReadableThread(tx(), steward, id)).toBeNull()
     } finally {
       vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
     }
+  })
+
+  it('a missing conversation predicate denies the assignee and still lets the member read', async () => {
+    const id = await thread('member-1', { staffId: 'steward-1' })
+    await asOwner(async () => {
+      await pg.exec('DROP FUNCTION IF EXISTS public.ue_conversation_assignee_authorized(text, uuid)')
+    })
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+    try {
+      expect(await findReadableThread(tx(), member, id)).not.toBeNull()
+      expect(await findReadableThread(tx(), steward, id)).toBeNull()
+      expect(await inTx((t) => findReadableThread(t, member, id))).not.toBeNull()
+      expect(await inTx((t) => findReadableThread(t, steward, id))).toBeNull()
+    } finally {
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
+    }
+  })
+
+  it('ignores the actor role label and the administrator title', async () => {
+    const id = await thread('member-1', { staffId: 'steward-1' })
+    await setMembership('steward-1', { role: 'admin' })
+    expect(await findReadableThread(tx(), actor('steward-1', 'steward'), id)).toBeNull()
+    const assignedAdmin = await thread('member-1', { staffId: 'admin-1' })
+    expect(await findReadableThread(tx(), actor('admin-1', 'admin'), assignedAdmin)).toBeNull()
+    expect(await listThreads(tx(), actor('admin-1', 'admin'))).toEqual([])
+  })
+
+  it('lets a health and safety representative read only the conversation assigned to them', async () => {
+    await asOwner(async () => {
+      await pg.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,'safety-1','health_safety_rep')`, [org])
+    })
+    const own = await thread('member-1', { staffId: 'safety-1' })
+    const other = await thread('member-2', { staffId: 'steward-1' })
+    const safety = actor('safety-1')
+    expect((await listThreads(tx(), safety)).map((t) => t.id)).toEqual([own])
+    expect(await findReadableThread(tx(), safety, other)).toBeNull()
+  })
+
+  it('a stored union representative role confers no conversation', async () => {
+    await asOwner(async () => {
+      await pg.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,'rep-1','union_rep')`, [org])
+    })
+    const id = await thread('member-1', { staffId: 'rep-1' })
+    expect(await findReadableThread(tx(), actor('rep-1', 'steward'), id)).toBeNull()
+  })
+
+  it('an inactive membership denies the conversation owner', async () => {
+    const id = await thread('member-1')
+    await asOwner(async () => {
+      await pg.query(`INSERT INTO organization_members(organization_id,user_id,role,status) VALUES($1,'member-1','member','inactive')`, [org])
+    })
+    expect(await listThreads(tx(), member)).toEqual([])
+    expect(await findReadableThread(tx(), member, id)).toBeNull()
+  })
+
+  it('a recorded recusal denies that conversation and leaves another assignment readable', async () => {
+    const blocked = await thread('member-1', { staffId: 'steward-1' })
+    const open = await thread('member-2', { staffId: 'steward-1' })
+    await asOwner(async () => {
+      await pg.exec(`CREATE TABLE IF NOT EXISTS ue_authority_recusals (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, principal_user_id text NOT NULL,
+        resource_type text NOT NULL, resource_id uuid NOT NULL, reason text NOT NULL, declared_at timestamptz NOT NULL DEFAULT now(),
+        lifted_at timestamptz, lifted_by text);
+        GRANT SELECT ON ue_authority_recusals TO rt;`)
+      await pg.query(`DELETE FROM ue_authority_recusals`)
+      await pg.query(`INSERT INTO ue_authority_recusals(organization_id,principal_user_id,resource_type,resource_id,reason) VALUES($1,'steward-1','message_thread',$2,'conflict')`, [org, blocked])
+    })
+    expect(await findReadableThread(tx(), steward, blocked)).toBeNull()
+    expect(await findReadableThread(tx(), steward, open)).not.toBeNull()
+    expect(await findReadableThread(tx(), member, blocked)).not.toBeNull()
   })
 })
 
@@ -340,10 +416,10 @@ describe('notifications never carry message text', () => {
     await inTx((t) => assignThread(t, actor('triager-1'), { threadId: created.id, action: 'assign', toStaffId: 'steward-1', reason: 'dues file' }, deps))
     await postThreadMessage(tx(), steward, created.id, { body: BODY })
     await inTx((t) => markThreadRead(t, member, created.id))
-    await inTx((t) => setLegalHold(t, admin, created.id, 'place', 'HOLD-REF-9921'))
+    expect(await inTx((t) => setLegalHold(t, admin, created.id, 'place', 'HOLD-REF-9921'))).toEqual({ kind: 'forbidden' })
+    expect(await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 365, policyReference: 'POLICY-REF-1', authorityReference: 'AUTH-REF-1' }))).toEqual({ kind: 'forbidden' })
     await inTx((t) => changeThreadLifecycle(t, member, created.id, 'close'))
     await inTx((t) => changeThreadLifecycle(t, member, created.id, 'archive'))
-    await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 365, policyReference: 'POLICY-REF-1', authorityReference: 'AUTH-REF-1' }))
 
     const audit = JSON.stringify((await pg.query(`SELECT action, resource_type, metadata FROM audit_security.audit_logs`)).rows)
     expect(audit).not.toMatch(/PRIVATE-BODY-TEXT|PRIVATE-SUBJECT|HOLD-REF-9921|POLICY-REF-1|AUTH-REF-1|dues file/)
@@ -351,12 +427,10 @@ describe('notifications never carry message text', () => {
     expect(actions).toEqual(
       [
         'messages.message.create',
-        'messages.retention.adopt',
         'messages.thread.archive',
         'messages.thread.assign',
         'messages.thread.close',
         'messages.thread.create',
-        'messages.thread.hold_place',
         'messages.thread.read',
       ].sort(),
     )
@@ -386,7 +460,7 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     expect(detail).toMatchObject({ viewerRole: 'member', canReply: false, canArchive: true, retention: { audience: 'member', state: 'policy_not_adopted' } })
   })
 
-  it('takes the period only from an adopted record, by an administrator, and reports without deleting', async () => {
+  it('takes the period only from a recorded policy, and an administrator title cannot record one', async () => {
     const id = await closed()
     expect(await inTx((t) => adoptRetentionPolicy(t, steward, { retentionDays: 30, policyReference: 'p', authorityReference: 'a' }))).toEqual({ kind: 'forbidden' })
     for (const days of [0, -1, 1.5, 36501]) {
@@ -394,9 +468,14 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     }
     expect(await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 30, policyReference: ' ', authorityReference: 'a' }))).toEqual({ kind: 'invalid' })
     expect(await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 30, policyReference: 'p', authorityReference: '' }))).toEqual({ kind: 'invalid' })
+    expect(await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 30, policyReference: 'Policy 1', authorityReference: 'Resolution 9' }))).toEqual({ kind: 'forbidden' })
 
-    const adopted = await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 30, policyReference: 'Policy 1', authorityReference: 'Resolution 9' }))
-    expect(adopted).toMatchObject({ kind: 'ok', policy: { retentionDays: 30, adoptedBy: 'admin-1' } })
+    await asOwner(async () => {
+      await pg.query(
+        `INSERT INTO message_retention_policies(organization_id,policy_reference,authority_reference,retention_days,adopted_by) VALUES($1,'Policy 1','Resolution 9',30,$2)`,
+        [org, admin.userId],
+      )
+    })
     expect(await retentionOf(id, new Date(Date.now() + 10 * DAY))).toMatchObject({ state: 'retained' })
     expect(await retentionOf(id, new Date(Date.now() + 31 * DAY))).toMatchObject({ state: 'retention_elapsed' })
     // Reporting that a period has elapsed deletes nothing.
@@ -405,8 +484,14 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     expect(await getThreadDetail(tx(), member, id, new Date(Date.now() + 90 * DAY))).toMatchObject({ retention: { audience: 'member', state: 'retained' } })
     expect(await getThreadDetail(tx(), steward, id, new Date())).toBeNull()
 
-    // A second adoption supersedes the first; exactly one policy is live and history is kept.
-    await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 365, policyReference: 'Policy 2', authorityReference: 'Resolution 12' }))
+    // A later recorded policy supersedes the first. The application write is mandate-gated and is not reached here.
+    await asOwner(async () => {
+      await pg.query(`UPDATE message_retention_policies SET superseded_at=now(), superseded_by=$2 WHERE organization_id=$1 AND superseded_at IS NULL`, [org, admin.userId])
+      await pg.query(
+        `INSERT INTO message_retention_policies(organization_id,policy_reference,authority_reference,retention_days,adopted_by) VALUES($1,'Policy 2','Resolution 12',365,$2)`,
+        [org, admin.userId],
+      )
+    })
     expect(await count(`SELECT count(*) AS n FROM message_retention_policies WHERE superseded_at IS NULL`)).toBe(1)
     expect(await count(`SELECT count(*) AS n FROM message_retention_policies`)).toBe(2)
     expect(await retentionOf(id, new Date(Date.now() + 31 * DAY))).toMatchObject({ state: 'retained' })
@@ -416,17 +501,22 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     })
   })
 
-  it('rolls an adoption back when its audit record cannot be written', async () => {
+  it('an unauthorized adoption writes nothing, including when the audit insert is revoked', async () => {
     await asOwner(async () => {
       await pg.exec('REVOKE INSERT ON audit_security.audit_logs FROM rt')
     })
-    await expect(inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 30, policyReference: 'p', authorityReference: 'a' }))).rejects.toThrow()
+    expect(await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 30, policyReference: 'p', authorityReference: 'a' }))).toEqual({ kind: 'forbidden' })
     expect(await count(`SELECT count(*) AS n FROM message_retention_policies`)).toBe(0)
   })
 
-  it('a legal hold overrides every other position, is administrator-only, and is hidden from the member', async () => {
+  it('a legal hold is not an administrator role, and a recorded hold still overrides retention without granting a read', async () => {
     const id = await closed({ staffId: 'steward-1' })
-    await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 1, policyReference: 'p', authorityReference: 'a' }))
+    await asOwner(async () => {
+      await pg.query(
+        `INSERT INTO message_retention_policies(organization_id,policy_reference,authority_reference,retention_days,adopted_by) VALUES($1,'p','a',1,$2)`,
+        [org, admin.userId],
+      )
+    })
     const later = new Date(Date.now() + 10 * DAY)
     expect(await retentionOf(id, later)).toMatchObject({ state: 'retention_elapsed' })
 
@@ -434,20 +524,26 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     expect(await inTx((t) => setLegalHold(t, admin, id, 'place', '  '))).toEqual({ kind: 'invalid_reference' })
     expect(await inTx((t) => setLegalHold(t, admin, 'not-a-uuid', 'place', 'MATTER-1'))).toEqual({ kind: 'not_found' })
     expect(await inTx((t) => setLegalHold(t, actor('admin-9', 'admin', foreignOrg), id, 'place', 'MATTER-1'))).toEqual({ kind: 'not_found' })
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'release', 'MATTER-1'))).toEqual({ kind: 'conflict', code: 'NOT_HELD' })
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'ok', held: true })
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'conflict', code: 'ALREADY_HELD' })
+    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
+    expect(await inTx((t) => setLegalHold(t, admin, id, 'release', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
+    expect(await count(`SELECT count(*) AS n FROM message_thread_lifecycle WHERE action LIKE 'hold%'`)).toBe(0)
 
+    await pg.query(
+      `INSERT INTO message_thread_lifecycle(organization_id,thread_id,action,acted_by,acted_via,reference) VALUES($1,$2,'hold_place',$3,'organization_administrator','MATTER-1')`,
+      [org, id, admin.userId],
+    )
     expect(await retentionOf(id, later)).toEqual({ state: 'legal_hold' })
     expect(await getThreadDetail(tx(), steward, id, later)).toMatchObject({ viewerRole: 'assignee', retention: { audience: 'staff', state: 'legal_hold' } })
     const memberDetail = JSON.stringify(await getThreadDetail(tx(), member, id, later))
     expect(memberDetail).toContain('"state":"retained"')
     expect(memberDetail).not.toMatch(/legal|hold|MATTER-1/)
-    // A hold grants the administrator no read of the conversation.
     expect(await findReadableThread(tx(), admin, id)).toBeNull()
     expect(await listThreadMessages(tx(), admin, id)).toBeNull()
 
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'release', 'MATTER-1 closed'))).toEqual({ kind: 'ok', held: false })
+    await pg.query(
+      `INSERT INTO message_thread_lifecycle(organization_id,thread_id,action,acted_by,acted_via,reference) VALUES($1,$2,'hold_release',$3,'organization_administrator','MATTER-1 closed')`,
+      [org, id, admin.userId],
+    )
     expect(await retentionOf(id, later)).toMatchObject({ state: 'retention_elapsed' })
     expect((await pg.query<{ action: string }>(`SELECT action FROM message_thread_lifecycle WHERE action LIKE 'hold%' ORDER BY seq`)).rows.map((r) => r.action)).toEqual(['hold_place', 'hold_release'])
   })
@@ -458,13 +554,18 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     await asOwner(async () => {
       await pg.exec('REVOKE INSERT ON audit_security.audit_logs FROM rt')
     })
-    await expect(inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).rejects.toThrow()
+    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
     expect(await count(`SELECT count(*) AS n FROM message_thread_lifecycle`)).toBe(0)
   })
 
   it('refuses to count a closed conversation whose closing was never recorded', async () => {
     const id = await thread('member-1', { status: 'closed' })
-    await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 1, policyReference: 'p', authorityReference: 'a' }))
+    await asOwner(async () => {
+      await pg.query(
+        `INSERT INTO message_retention_policies(organization_id,policy_reference,authority_reference,retention_days,adopted_by) VALUES($1,'p','a',1,$2)`,
+        [org, admin.userId],
+      )
+    })
     expect(await retentionOf(id, new Date(Date.now() + 100 * DAY))).toEqual({ state: 'closure_unrecorded' })
   })
 

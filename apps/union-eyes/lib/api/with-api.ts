@@ -50,6 +50,7 @@ import {
 } from './standardized-responses';
 import { ApiError } from './errors';
 import { secretsEqual } from './secret-compare';
+import { expectedCronSecret, presentedCronSecret } from './cron-secret';
 import {
   ROLE_HIERARCHY,
   getCurrentUser,
@@ -84,9 +85,19 @@ import {
  * Every property is optional so the simplest possible route is:
  *   `withApi({}, async () => ({ greeting: 'hello' }))`
  */
+/**
+ * Verifies the credential of a machine caller (an identity provider, a scanner) and resolves to who it is, or throws an ApiError
+ * (unauthorized, forbidden, not found, rate limited). It receives the request and the route params and reads no user session.
+ */
+export type MachineAuthenticator<TMachine = unknown> = (
+  request: NextRequest,
+  params: Record<string, string>,
+) => Promise<TMachine> | TMachine;
+
 export interface WithApiOptions<
   TBody extends z.ZodTypeAny = z.ZodNever,
   TQuery extends z.ZodTypeAny = z.ZodNever,
+  TMachine = unknown,
 > {
   // ── Authentication ────────────────────────────────────────────────────────
 
@@ -100,6 +111,12 @@ export interface WithApiOptions<
     minRole?: UserRole;
     /** Validate cron secret header instead of user auth */
     cron?: boolean;
+    /**
+     * Authenticate a machine caller with its own credential instead of a user session. The route is not public: the verifier decides who the
+     * caller is, and the handler receives it as `machine`. No session is read and no user is attached, so a browser session can never stand in
+     * for the credential. It replaces user authentication entirely and cannot be combined with `required: true`, `roles`, `minRole` or `cron`.
+     */
+    machine?: MachineAuthenticator<TMachine>;
   };
 
   // ── Org Scope ────────────────────────────────────────────────────────────────
@@ -216,6 +233,7 @@ export interface WithApiOptions<
 export interface ApiContext<
   TBody = unknown,
   TQuery = unknown,
+  TMachine = unknown,
 > {
   /** The raw Next.js request */
   request: NextRequest;
@@ -233,6 +251,8 @@ export interface ApiContext<
   params: Record<string, string>;
   /** Trace-id for the request (also sent in response headers) */
   traceId: string;
+  /** The caller verified by `auth.machine`; undefined on every other route. */
+  machine: TMachine;
 }
 
 /**
@@ -244,7 +264,7 @@ export interface ApiContext<
  */
 type HandlerReturn = Record<string, unknown> | any[] | NextResponse | void | null;
 
-type HandlerFn<TBody, TQuery> = (ctx: ApiContext<TBody, TQuery>) => Promise<HandlerReturn> | HandlerReturn;
+type HandlerFn<TBody, TQuery, TMachine = unknown> = (ctx: ApiContext<TBody, TQuery, TMachine>) => Promise<HandlerReturn> | HandlerReturn;
 
 // ─── Trace-ID generator ─────────────────────────────────────────────────────
 
@@ -293,12 +313,18 @@ function bodyReader(request: NextRequest): { json(): Promise<unknown> } {
 export function withApi<
   TBody extends z.ZodTypeAny = z.ZodNever,
   TQuery extends z.ZodTypeAny = z.ZodNever,
+  TMachine = unknown,
 >(
-  options: WithApiOptions<TBody, TQuery>,
-  handler: HandlerFn<z.infer<TBody>, z.infer<TQuery>>,
+  options: WithApiOptions<TBody, TQuery, TMachine>,
+  handler: HandlerFn<z.infer<TBody>, z.infer<TQuery>, TMachine>,
 ) {
+  // A machine credential replaces user authentication; mixing the two would leave it unclear which one decides.
+  const machineAuthenticator = options.auth?.machine;
+  if (machineAuthenticator && (options.auth?.cron || options.auth?.required === true || options.auth?.roles || options.auth?.minRole)) {
+    throw new Error('withApi: auth.machine replaces user authentication and cannot be combined with auth.required, roles, minRole or cron');
+  }
   // Pre-compute auth requirements
-  const requireAuth = options.auth?.required !== false && !options.auth?.cron;
+  const requireAuth = options.auth?.required !== false && !options.auth?.cron && !machineAuthenticator;
   const requireCron = options.auth?.cron === true;
   const requireOrg = options.requireOrg ?? requireAuth; // default: enforce org for auth'd routes
   const minRoleLevel = options.auth?.minRole
@@ -338,19 +364,24 @@ export function withApi<
       // Accepts both x-cron-secret and Authorization: Bearer headers.
       // Checks CRON_SECRET_KEY first, falls back to CRON_SECRET for compat.
       if (requireCron) {
-        const xCronHeader = request.headers.get('x-cron-secret');
-        const authBearer = request.headers.get('authorization')?.replace('Bearer ', '');
-        const cronSecret = xCronHeader || authBearer || '';
-        const expected = process.env.CRON_SECRET_KEY ?? process.env.CRON_SECRET ?? '';
-        if (!secretsEqual(cronSecret, expected)) {
+        // The presentation and precedence rule is shared with the edge check and the rewards route (lib/api/cron-secret.ts).
+        if (!secretsEqual(presentedCronSecret(request.headers), expectedCronSecret())) {
           return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Invalid cron secret', undefined, traceId);
         }
+      }
+
+      // ── 2b. Machine authentication ─────────────────────────────────────
+      // The route's own verifier decides who the caller is (for example an identity provider's bearer token bound to one organization). It
+      // throws an ApiError to refuse, which the handler below turns into the response. No session is read, so none can stand in for it.
+      let machine: TMachine = undefined as TMachine;
+      if (machineAuthenticator) {
+        machine = await machineAuthenticator(request, params);
       }
 
       // ── 3. User authentication ─────────────────────────────────────────
       let user: AuthUser | null = null;
 
-      if (requireAuth || !requireCron) {
+      if (requireAuth || (!requireCron && !machineAuthenticator)) {
         try {
           user = await getCurrentUser();
         } catch (error) {
@@ -617,7 +648,7 @@ export function withApi<
       }
 
       // ── 8. Execute handler ─────────────────────────────────────────────
-      const ctx: ApiContext<z.infer<TBody>, z.infer<TQuery>> = {
+      const ctx: ApiContext<z.infer<TBody>, z.infer<TQuery>, TMachine> = {
         request,
         user,
         userId: user?.id ?? null,
@@ -626,6 +657,7 @@ export function withApi<
         query,
         params,
         traceId,
+        machine,
       };
 
       const runHandler = async () => handler(ctx);

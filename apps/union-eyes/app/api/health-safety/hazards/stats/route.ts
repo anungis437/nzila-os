@@ -3,7 +3,7 @@
  * Summary statistics for workplace hazard reports.
  * Returns { total, open, inProgress, resolved, critical, avgResolutionTime }.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -19,7 +19,9 @@ export const GET = withApi(
     },
   },
   async ({ organizationId }) => {
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+    // With no organization the query used to run unscoped (1=1) and count every tenant's rows; it now refuses.
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const orgFilter = sql`organization_id = ${organizationId}`;
 
     const rows = Array.from(
       await withRLSContext(async () =>
@@ -33,7 +35,7 @@ export const GET = withApi(
             avg(EXTRACT(EPOCH FROM (resolution_date - reported_date)) / 86400.0)
               FILTER (WHERE resolution_date IS NOT NULL) AS avg_resolution_days
           FROM hazard_reports
-          WHERE ${orgFilter}
+          WHERE ${orgFilter} AND status <> 'archived'
         `)
       )
     );
@@ -48,7 +50,7 @@ export const GET = withApi(
       critical: Number(row.critical ?? 0),
       avgResolutionTime: row.avg_resolution_days != null
         ? Math.round(Number(row.avg_resolution_days) * 10) / 10
-        : 0,
+        : null, // Unknown is not zero: no route records the dates this is measured from.
     };
   },
 );

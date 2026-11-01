@@ -12,8 +12,18 @@ export const GET = withExternalMatterResourceAuth(
     resolve: resolveExternalGrievanceResource,
   },
   async (_request, context) => {
+    // Select only approved external columns. grievances.description is internal union material,
+    // not a reviewed counsel-safe summary; never fetch it under an external view grant.
     const [row] = await db
-      .select()
+      .select({
+        id: grievances.id,
+        caseNumber: grievances.grievanceNumber,
+        title: grievances.title,
+        status: grievances.status,
+        step: grievances.step,
+        filedDate: grievances.filedDate,
+        responseDeadline: grievances.responseDeadline,
+      })
       .from(grievances)
       .where(
         and(

@@ -13,6 +13,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { socialCampaigns, socialPosts } from '@/db/schema/social-media-schema';
 import { eq, and, ilike, or, gte, lte, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
+import { summarizePosts, averageEngagementRate, figuresRecorded, goalProgress } from '@/lib/social-media/campaign-figures';
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
@@ -96,27 +97,22 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
           const posts = await db
             .select({
               impressionsCount: socialPosts.impressionsCount,
+              reachCount: socialPosts.reachCount,
+              engagementRate: socialPosts.engagementRate,
               likesCount: socialPosts.likesCount,
               commentsCount: socialPosts.commentsCount,
               sharesCount: socialPosts.sharesCount,
             })
             .from(socialPosts)
-            .where(eq(socialPosts.campaignId, campaign.id));
+            .where(and(eq(socialPosts.campaignId, campaign.id), eq(socialPosts.organizationId, campaign.organizationId)));
 
-          const metrics = {
-            total_posts: posts.length,
-            total_impressions: posts.reduce((sum, p) => sum + (p.impressionsCount || 0), 0),
-            total_engagement: posts.reduce((sum, p) => sum + (p.likesCount || 0) + (p.commentsCount || 0) + (p.sharesCount || 0), 0),
-            total_likes: posts.reduce((sum, p) => sum + (p.likesCount || 0), 0),
-            total_comments: posts.reduce((sum, p) => sum + (p.commentsCount || 0), 0),
-            total_shares: posts.reduce((sum, p) => sum + (p.sharesCount || 0), 0),
-            total_clicks: 0,
-          };
+          const metrics = summarizePosts(posts);
 
           return {
             ...campaign,
             metrics,
-            goal_progress: undefined,
+            figures_recorded: figuresRecorded(posts),
+            goal_progress: goalProgress(campaign, metrics, averageEngagementRate(posts)),
           };
         })
       );
@@ -138,17 +134,35 @@ return NextResponse.json(
 });
 
 
+const campaignPlatforms = z.enum(['facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok']);
+const campaignStatuses = z.enum(['planning', 'active', 'paused', 'completed', 'cancelled']);
+const campaignGoalSchema = z.object({
+  metric: z.enum(['impressions', 'engagement_rate', 'conversions']),
+  target_value: z.number().finite().positive(),
+}).strict().refine(
+  goal => goal.metric === 'engagement_rate'
+    ? goal.target_value <= 100
+    : Number.isSafeInteger(goal.target_value),
+  { message: 'Count goals must be integers and engagement rate must not exceed 100' },
+);
 const socialMediaCampaignsSchema = z.object({
-  name: z.string().min(1, 'name is required'),
-  description: z.string().optional(),
-  platforms: z.array(z.string()).optional(),
+  name: z.string().trim().min(1, 'name is required').max(200),
+  description: z.string().max(5000).optional(),
+  platforms: z.array(campaignPlatforms).min(1).max(6).optional(),
   start_date: z.string().datetime().optional(),
   end_date: z.string().datetime().optional(),
-  goals: z.array(z.any()).optional(),
-  hashtags: z.unknown().optional(),
-  target_audience: z.unknown().optional(),
-  status: z.unknown().optional(),
-});
+  goals: z.array(campaignGoalSchema).max(3).refine(
+    goals => new Set(goals.map(goal => goal.metric)).size === goals.length,
+    'Duplicate campaign goal metrics are not allowed',
+  ).optional(),
+  hashtags: z.array(z.string().regex(/^[A-Za-z0-9_]{1,80}$/)).max(30).optional(),
+  target_audience: z.string().max(2000).optional(),
+  status: campaignStatuses.optional(),
+}).strict();
+const socialMediaCampaignUpdateSchema = socialMediaCampaignsSchema.partial().refine(
+  body => Object.keys(body).length > 0,
+  'At least one campaign field is required',
+);
 
 export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
@@ -192,7 +206,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       );
     }
     
-    const { name, description, platforms, start_date, end_date, goals, hashtags, target_audience, status: _status } = validation.data;
+    const { name, description, platforms, start_date, end_date, goals, hashtags, target_audience, status } = validation.data;
 
       // Validate required fields
       if (!name) {
@@ -221,23 +235,8 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
         }
       }
 
-      // Validate goals
-      if (goals) {
-        for (const goal of goals) {
-          if (!goal.metric || !goal.target_value) {
-            return NextResponse.json(
-              { error: 'Each goal must have a metric and target value' },
-              { status: 400 }
-            );
-          }
-          if (goal.target_value <= 0) {
-            return standardErrorResponse(
-              ErrorCode.VALIDATION_ERROR,
-              'Target value must be positive'
-            );
-          }
-        }
-      }
+      // Goals are mapped to real persisted columns; unsupported metrics are rejected by the schema.
+      const goalByMetric = new Map((goals ?? []).map(goal => [goal.metric, goal.target_value]));
 
       // Create campaign and record the audit together
       const campaign = await withRLSContext({ organizationId }, async (tx) => {
@@ -250,9 +249,13 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
             platforms: platforms || [],
             startDate: start_date ? start_date.split('T')[0] : new Date().toISOString().split('T')[0],
             endDate: end_date ? end_date.split('T')[0] : null,
-            campaignHashtags: Array.isArray(hashtags) ? hashtags as string[] : [],
-            targetAudience: target_audience as string | undefined,
-            status: 'active',
+            campaignHashtags: hashtags ?? [],
+            targetAudience: target_audience,
+            status: status ?? 'planning',
+            goalImpressions: goalByMetric.get('impressions') ?? null,
+            goalEngagementRate: goalByMetric.has('engagement_rate')
+              ? goalByMetric.get('engagement_rate')!.toFixed(2) : null,
+            goalConversions: goalByMetric.get('conversions') ?? null,
             createdBy: userId,
           })
           .returning();
@@ -316,8 +319,11 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
     );
       }
 
-      const body = await request.json();
-      const { name, description, platforms, start_date, end_date, hashtags, target_audience, status } = body;
+      const parsed = socialMediaCampaignUpdateSchema.safeParse(await request.json());
+      if (!parsed.success) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid campaign update', parsed.error.flatten());
+      }
+      const { name, description, platforms, start_date, end_date, hashtags, target_audience, status, goals } = parsed.data;
 
       // Validate dates if provided
       if (start_date && end_date) {
@@ -343,6 +349,13 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
       if (hashtags !== undefined) updateData.campaignHashtags = hashtags;
       if (target_audience !== undefined) updateData.targetAudience = target_audience;
       if (status !== undefined) updateData.status = status;
+      if (goals !== undefined) {
+        const goalByMetric = new Map(goals.map(goal => [goal.metric, goal.target_value]));
+        updateData.goalImpressions = goalByMetric.get('impressions') ?? null;
+        updateData.goalEngagementRate = goalByMetric.has('engagement_rate')
+          ? goalByMetric.get('engagement_rate')!.toFixed(2) : null;
+        updateData.goalConversions = goalByMetric.get('conversions') ?? null;
+      }
 
       const updatedCampaign = await withRLSContext({ organizationId }, async (tx) => {
         const [row] = await tx

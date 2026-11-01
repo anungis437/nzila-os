@@ -4,7 +4,7 @@
  * Enterprise identity management with SAML/OIDC SSO and SCIM 2.0 provisioning
  */
 
-import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, integer, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { organizations } from "../schema-organizations";
 
@@ -49,12 +49,12 @@ export const ssoProviders = pgTable("sso_providers", {
   // { 'IdP-Admin': 'admin', 'IdP-Member': 'member' }
   
   // Settings
-  autoProvision: boolean("auto_provision").default(true), // Auto-create users on first login
-  justInTimeProvisioning: boolean("just_in_time_provisioning").default(true),
+  autoProvision: boolean("auto_provision").notNull().default(false), // Auto-create users on first login
+  justInTimeProvisioning: boolean("just_in_time_provisioning").notNull().default(false),
   requireGroups: text("require_groups").array(), // Required IdP groups
   
   // Status
-  enabled: boolean("enabled").default(true),
+  enabled: boolean("enabled").notNull().default(false),
   
   // Metadata
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
@@ -64,7 +64,10 @@ export const ssoProviders = pgTable("sso_providers", {
   createdBy: varchar("created_by", { length: 255 }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
-});
+}, (table) => [
+  uniqueIndex("sso_providers_org_saml_entity_idx").on(table.organizationId, table.samlEntityId).where(sql`${table.samlEntityId} IS NOT NULL`),
+  uniqueIndex("sso_providers_org_oidc_issuer_client_idx").on(table.organizationId, table.oidcIssuer, table.oidcClientId).where(sql`${table.oidcIssuer} IS NOT NULL`),
+]);
 
 /**
  * SCIM Configuration Table
@@ -80,16 +83,18 @@ export const scimConfigurations = pgTable("scim_configurations", {
   baseUrl: varchar("base_url", { length: 500 }).notNull(), // https://union-eyes.com/scim/v2/{orgId}
   
   // Authentication
-  bearerToken: text("bearer_token").notNull(), // Long-lived token for IdP
-  tokenHash: varchar("token_hash", { length: 255 }), // SHA-256 hash for lookup
+  // No bearer_token column (platform 0048): the token is shown once at issue or rotation; only its SHA-256 is kept.
+  tokenHash: varchar("token_hash", { length: 64 }),
   tokenCreatedAt: timestamp("token_created_at", { withTimezone: true }).defaultNow(),
   tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+  tokenLastUsedAt: timestamp("token_last_used_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
   
   // Settings
-  enabled: boolean("enabled").default(true),
-  syncUsers: boolean("sync_users").default(true),
-  syncGroups: boolean("sync_groups").default(true),
-  deprovisionAction: varchar("deprovision_action", { length: 50 }).default('suspend'), 
+  enabled: boolean("enabled").notNull().default(false),
+  syncUsers: boolean("sync_users").notNull().default(true),
+  syncGroups: boolean("sync_groups").notNull().default(true),
+  deprovisionAction: varchar("deprovision_action", { length: 50 }).notNull().default('suspend'), 
   // 'suspend' | 'delete' | 'archive'
   
   // Filtering
@@ -102,8 +107,8 @@ export const scimConfigurations = pgTable("scim_configurations", {
   
   // Stats
   lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
-  usersSynced: integer("users_synced").default(0),
-  groupsSynced: integer("groups_synced").default(0),
+  usersSynced: integer("users_synced").notNull().default(0),
+  groupsSynced: integer("groups_synced").notNull().default(0),
   
   // Audit trail
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -201,6 +206,39 @@ export const scimEventsLog = pgTable("scim_events_log", {
   // Metadata
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
 });
+
+/**
+ * SCIM Provisioned Users (platform 0059, closed to the system role by cache 0051)
+ * The directory of people an identity provider provisioned. They are not roster rows: pending, never active, and not linked to an account.
+ * A live person is unique per organization by lower-cased userName and by externalId; a deprovision is a state change, never a removal.
+ */
+export const scimProvisionedUsers = pgTable("scim_provisioned_users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  configId: uuid("config_id").notNull().references(() => scimConfigurations.id),
+  userName: varchar("user_name", { length: 320 }).notNull(),
+  userNameKey: varchar("user_name_key", { length: 320 }).notNull(),
+  externalId: varchar("external_id", { length: 255 }),
+  displayName: text("display_name"),
+  email: varchar("email", { length: 320 }),
+  // 'pending' | 'suspended' | 'inactive' | 'revoked'
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  provisionedAt: timestamp("provisioned_at", { withTimezone: true }).notNull().defaultNow(),
+  deprovisionedAt: timestamp("deprovisioned_at", { withTimezone: true }),
+  // 'suspend' | 'archive' | 'delete'
+  deprovisionedAction: varchar("deprovisioned_action", { length: 10 }),
+  // 'scim' | 'organization'
+  deprovisionedBy: varchar("deprovisioned_by", { length: 20 }),
+  // 'patch' | 'put' | 'delete'
+  deprovisionedVia: varchar("deprovisioned_via", { length: 10 }),
+  reactivatedAt: timestamp("reactivated_at", { withTimezone: true }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  userNameUq: uniqueIndex("scim_provisioned_users_user_name_uq").on(table.organizationId, table.userNameKey).where(sql`${table.deletedAt} IS NULL`),
+  externalIdUq: uniqueIndex("scim_provisioned_users_external_id_uq").on(table.organizationId, table.externalId).where(sql`${table.deletedAt} IS NULL AND ${table.externalId} IS NOT NULL`),
+}));
 
 /**
  * MFA Configuration Table

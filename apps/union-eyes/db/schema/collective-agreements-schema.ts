@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, jsonb, pgEnum, index, boolean } from "drizzle-orm/pg-core";
+import { uniqueIndex, pgTable, uuid, varchar, text, timestamp, integer, jsonb, pgEnum, index, boolean } from "drizzle-orm/pg-core";
 
 // Enums for Collective Bargaining Agreements
 export const jurisdictionEnum = pgEnum("cba_jurisdiction", [
@@ -38,7 +38,7 @@ export const collectiveAgreements = pgTable("collective_agreements", {
   organizationId: uuid("organization_id").notNull(),
   
   // Core identification
-  cbaNumber: varchar("cba_number", { length: 100 }).notNull().unique(),
+  cbaNumber: varchar("cba_number", { length: 100 }).notNull(),
   title: varchar("title", { length: 500 }).notNull(),
   jurisdiction: jurisdictionEnum("jurisdiction").notNull(),
   language: cbaLanguageEnum("language").notNull().default("en"),
@@ -100,6 +100,8 @@ export const collectiveAgreements = pgTable("collective_agreements", {
   supersededBy: uuid("superseded_by"),
   precedesId: uuid("precedes_id"),
 }, (table) => ({
+  // One number per organization, not one across all organizations (platform migration 0042).
+  uqOrgCbaNumber: uniqueIndex("uq_collective_agreements_org_cba_number").on(table.organizationId, table.cbaNumber),
   organizationIdx: index("cba_organization_idx").on(table.organizationId),
   jurisdictionIdx: index("cba_jurisdiction_idx").on(table.jurisdiction),
   employerIdx: index("cba_employer_idx").on(table.employerName),

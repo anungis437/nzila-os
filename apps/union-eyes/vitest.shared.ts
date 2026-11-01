@@ -21,6 +21,9 @@ export const heavyTests = [
   "lib/member-integrity/__tests__/member-query-importers.test.ts",
 ];
 
+/** Runs in every worker before its test file: the tests resolve application files from the application directory (see the file). */
+export const sharedSetupFiles = [path.resolve(__dirname, "vitest.working-directory.ts")];
+
 export const sharedResolve = {
   alias: {
     "@": path.resolve(__dirname, "."),

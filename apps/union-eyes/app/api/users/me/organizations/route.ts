@@ -8,11 +8,10 @@
  * Legacy PLATFORM_ADMIN_USER_IDS can still enumerate all organizations when V2 is off.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@nzila/platform-auth/entra/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
-import { profiles } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { createLogger } from '@nzila/os-core'
 import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
@@ -41,90 +40,16 @@ export async function GET(_req: NextRequest) {
 
     const isAdmin = await isPlatformAdminUser(userId);
 
-    // Fetch memberships by current auth user ID.
-    let memberships = await db
+    // Memberships are those bound to the authenticated user id.
+    const memberships = await db
       .select()
       .from(organizationMembers)
       .where(eq(organizationMembers.userId, userId));
 
-    // Self-heal legacy/seeded memberships that were created by email but not
-    // yet linked to the current Entra object ID.
-    if (memberships.length === 0) {
-      const user = await currentUser();
-      let userEmail = user?.emailAddresses?.[0]?.emailAddress?.trim();
-
-      if (!userEmail) {
-        const profileRow = await db
-          .select({ email: profiles.email })
-          .from(profiles)
-          .where(eq(profiles.userId, userId))
-          .limit(1);
-        userEmail = profileRow[0]?.email?.trim();
-      }
-
-      logger.info('[/api/users/me/organizations] No direct memberships by userId', {
-        userId,
-        hasEmail: Boolean(userEmail),
-        emailPreview: userEmail ? `${userEmail.slice(0, 3)}***` : null,
-      });
-
-      if (userEmail) {
-        const emailMemberships = await db
-          .select()
-          .from(organizationMembers)
-          .where(sql`lower(${organizationMembers.email}) = lower(${userEmail})`);
-
-        logger.info('[/api/users/me/organizations] Memberships by email lookup', {
-          userId,
-          matchCount: emailMemberships.length,
-        });
-
-        if (emailMemberships.length > 0) {
-          await db
-            .update(organizationMembers)
-            .set({ userId })
-            .where(sql`lower(${organizationMembers.email}) = lower(${userEmail})`);
-
-          memberships = await db
-            .select()
-            .from(organizationMembers)
-            .where(eq(organizationMembers.userId, userId));
-
-          logger.info('[/api/users/me/organizations] Linked memberships by email', {
-            userId,
-            email: userEmail,
-            linkedCount: emailMemberships.length,
-          });
-        } else {
-          // Fallback for older seeded data: membership rows may have no email,
-          // but profile.email still maps to a legacy userId.
-          const legacyProfiles = await db
-            .select({ legacyUserId: profiles.userId })
-            .from(profiles)
-            .where(sql`lower(${profiles.email}) = lower(${userEmail})`)
-            .limit(1);
-
-          const legacyUserId = legacyProfiles[0]?.legacyUserId;
-          if (legacyUserId && legacyUserId !== userId) {
-            await db
-              .update(organizationMembers)
-              .set({ userId })
-              .where(eq(organizationMembers.userId, legacyUserId));
-
-            memberships = await db
-              .select()
-              .from(organizationMembers)
-              .where(eq(organizationMembers.userId, userId));
-
-            logger.info('[/api/users/me/organizations] Linked memberships by legacy profile userId', {
-              userId,
-              legacyUserId,
-              linkedCount: memberships.length,
-            });
-          }
-        }
-      }
-    }
+    // A membership is never linked to the caller here. An e-mail address is not proof of identity (the provider can
+    // return an unverified one, and a roster row may carry any address), so matching on it used to rebind every
+    // membership of that address, in any organization, and every membership of another user id, to the caller.
+    // A membership is bound to an identity by accepting an invitation or by the canonical onboarding flow.
 
     logger.info('[/api/users/me/organizations] Membership resolution complete', {
       userId,
@@ -146,11 +71,10 @@ export async function GET(_req: NextRequest) {
       const orgIds = [...new Set(memberships.map(m => m.organizationId))];
 
       if (orgIds.length > 0) {
-        const allOrgs = await db.select().from(organizations);
-        orgs = allOrgs.filter(o =>
-          orgIds.includes(o.id) ||
-          orgIds.includes(o.slug ?? ''),
-        );
+        orgs = await db
+          .select()
+          .from(organizations)
+          .where(inArray(organizations.id, orgIds));
       }
 
       logger.info('[/api/users/me/organizations] Non-admin org resolution complete', {
@@ -170,8 +94,8 @@ export async function GET(_req: NextRequest) {
         sector: o.sectors?.[0] ?? null,
         jurisdiction: o.provinceTerritory ?? null,
         description: o.description ?? null,
-        createdAt: o.createdAt?.toISOString() ?? new Date().toISOString(),
-        updatedAt: o.updatedAt?.toISOString() ?? new Date().toISOString(),
+        createdAt: o.createdAt?.toISOString() ?? null,
+        updatedAt: o.updatedAt?.toISOString() ?? null,
       })),
       memberships: memberships.map(m => ({
         id: m.id,
@@ -179,7 +103,7 @@ export async function GET(_req: NextRequest) {
         userId: m.userId,
         role: m.role,
         isPrimary: m.isPrimary ?? false,
-        joinedAt: m.joinedAt?.toISOString() ?? m.createdAt?.toISOString() ?? new Date().toISOString(),
+        joinedAt: m.joinedAt?.toISOString() ?? m.createdAt?.toISOString() ?? null,
       })),
     });
   } catch (error) {

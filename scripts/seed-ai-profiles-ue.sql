@@ -24,6 +24,18 @@ VALUES
    '["public","internal"]'::jsonb,
    true, false, 'balanced', 'system'),
 
+  -- ue-chatbot-moderation: safety classification of a member message before retrieval or generation. Member text is classed
+  -- 'sensitive' at the gateway, so this profile admits that class; the chatbot refuses the message if the call is refused.
+  ('c0000001-0000-4000-8000-000000000003',
+   '00000000-0000-0000-0000-000000000000',
+   'union-eyes', 'prod', 'ue-chatbot-moderation', true,
+   '["openai","azure_openai"]'::jsonb,
+   '["gpt-4o"]'::jsonb,
+   '["text"]'::jsonb,
+   '["chat","generate"]'::jsonb,
+   '["public","internal","sensitive"]'::jsonb,
+   false, true, 'balanced', 'system'),
+
   -- ue-embeddings: embeddings for RAG
   ('c0000001-0000-4000-8000-000000000002',
    '00000000-0000-0000-0000-000000000000',

@@ -74,24 +74,6 @@ export interface RecurringEventInstance {
   isException: boolean;
 }
 
-export interface MeetingRoom {
-  id: string;
-  name: string;
-  capacity: number;
-  location: string;
-  amenities: string[];
-  isAvailable: boolean;
-}
-
-export interface RoomBooking {
-  id: string;
-  roomId: string;
-  eventId: string;
-  startTime: Date;
-  endTime: Date;
-  bookedBy: string;
-}
-
 export interface AvailabilitySlot {
   start: Date;
   end: Date;
@@ -604,88 +586,9 @@ export async function getEventAttendees(eventId: string): Promise<EventAttendee[
 // Meeting Rooms
 // ============================================================================
 
-/**
- * List meeting rooms
- */
-export async function listMeetingRooms(
-  filters?: {
-    location?: string;
-    minCapacity?: number;
-    amenities?: string[];
-  }
-): Promise<MeetingRoom[]> {
-  try {
-    // In production, query meeting_rooms table
-    return [];
-  } catch (error) {
-    logger.error("Error listing meeting rooms", { error, filters });
-    throw new Error("Failed to list meeting rooms");
-  }
-}
-
-/**
- * Check room availability
- */
-export async function checkRoomAvailability(
-  roomId: string,
-  _startTime: Date,
-  _endTime: Date
-): Promise<boolean> {
-  try {
-    // In production, query room_bookings table
-    // Check for overlapping bookings
-    return true;
-  } catch (error) {
-    logger.error("Error checking room availability", { error, roomId });
-    throw new Error("Failed to check room availability");
-  }
-}
-
-/**
- * Book meeting room
- */
-export async function bookMeetingRoom(
-  roomId: string,
-  eventId: string,
-  startTime: Date,
-  endTime: Date,
-  bookedBy: string
-): Promise<RoomBooking> {
-  try {
-    const available = await checkRoomAvailability(roomId, startTime, endTime);
-    if (!available) {
-      throw new Error("Room is not available for the requested time");
-    }
-
-    // In production, insert into room_bookings table
-    const booking: RoomBooking = {
-      id: `booking-${Date.now()}`,
-      roomId,
-      eventId,
-      startTime,
-      endTime,
-      bookedBy,
-    };
-
-    return booking;
-  } catch (error) {
-    logger.error("Error booking meeting room", { error, roomId });
-    throw new Error("Failed to book meeting room");
-  }
-}
-
-/**
- * Cancel room booking
- */
-export async function cancelRoomBooking(bookingId: string): Promise<boolean> {
-  try {
-    // In production, delete from room_bookings table
-    return true;
-  } catch (error) {
-    logger.error("Error canceling room booking", { error, bookingId });
-    throw new Error("Failed to cancel room booking");
-  }
-}
+// Room listing, availability and booking live in lib/services/room-booking-service.ts, which applies the room's own rules
+// under the caller's organization. The placeholders that stood here answered "available" for every request, returned a
+// generated booking id without storing anything, and reported a cancellation that cancelled nothing.
 
 // ============================================================================
 // Availability Scheduling

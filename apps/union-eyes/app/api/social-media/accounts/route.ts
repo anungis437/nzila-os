@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 /**
  * Social Media Accounts API Routes - Phase 10
@@ -7,6 +6,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  * Supports OAuth flows, token refresh, and account management.
  */
 
+import { openToken, openOptionalToken, sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { createMetaClient } from '@/lib/social-media/meta-api-client';
@@ -72,15 +72,16 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         .orderBy(desc(socialAccounts.connectedAt));
 
       // Audit log
-      await logApiAuditEvent({
-        userId,
-        organizationId,
-        action: 'LIST_SOCIAL_ACCOUNTS',
-        dataType: 'SOCIAL_MEDIA',
-        success: true,
-        metadata: { count: accounts.length },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      // The canonical audit record: the earlier log line dropped the action, organization and platform the caller passed.
+      await withRLSContext({ organizationId, userId }, (tx) =>
+        persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social_account.list',
+          resourceType: 'social_accounts',
+          details: { count: accounts.length },
+        }),
+      );
 
       return NextResponse.json({ accounts });
     } catch (error) {
@@ -99,7 +100,8 @@ const socialMediaAccountsSchema = z.object({
   }),
 });
 
-export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+// Connecting or disconnecting the organization's publishing identity is an administrator's act, not a steward's.
+export const POST = withRoleAuth('admin', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 
@@ -164,7 +166,6 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
             'pages_manage_engagement',
             'instagram_basic',
             'instagram_content_publish',
-            'business_management',
           ];
           authUrl = metaClient.getAuthorizationUrl(redirectUri, scopes, state);
           break;
@@ -197,7 +198,6 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
           const scopes = [
             'r_organization_social',
             'w_organization_social',
-            'rw_organization_admin',
             'r_basicprofile',
           ];
           authUrl = linkedInClient.getAuthorizationUrl(redirectUri, scopes, state);
@@ -228,15 +228,15 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       cookieStore.set('oauth_user_id', userId, cookieOpts);
 
       // Audit log
-      await logApiAuditEvent({
-        userId,
-        organizationId,
-        action: 'INITIATE_SOCIAL_CONNECT',
-        dataType: 'SOCIAL_MEDIA',
-        success: true,
-        metadata: { platform },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      await withRLSContext({ organizationId, userId }, (tx) =>
+        persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social_account.connect_initiated',
+          resourceType: 'social_accounts',
+          details: { platform },
+        }),
+      );
 
       return NextResponse.json({ auth_url: authUrl });
     } catch (_error) {
@@ -249,7 +249,7 @@ return NextResponse.json(
     }
 });
 
-export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+export const DELETE = withRoleAuth('admin', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 
@@ -293,21 +293,24 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
     );
       }
 
-      // Revoke tokens on the platform (if supported)
+      // Revoke tokens on the platform (if supported). The local credential is removed either way, but the outcome is recorded and
+      // reported: a token the platform still honours is not described as disconnected.
+      let platformTokenRevoked: 'revoked' | 'not_required' | 'failed' = 'not_required';
       try {
         switch (account.platform) {
           case 'twitter': {
             const twitterClient = createTwitterClient(
-              account.accessToken,
-              account.refreshToken || undefined
+              (await openToken(account.accessToken)),
+              (await openOptionalToken(account.refreshToken))
             );
             await twitterClient.revokeToken();
+            platformTokenRevoked = 'revoked';
             break;
           }
           // Meta and LinkedIn don&apos;t require explicit revocation
         }
       } catch (_revokeError) {
-// Continue with deletion even if revocation fails
+        platformTokenRevoked = 'failed';
       }
 
       // Delete account and record the audit together — org predicate is defense-in-depth on top of
@@ -325,7 +328,7 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
           action: 'social.account.disconnect',
           resourceType: 'social_accounts',
           resourceId: accountId,
-          details: { platform: account.platform },
+          details: { platform: account.platform, platformTokenRevoked },
         });
         return true;
       });
@@ -334,8 +337,11 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       }
 
       return NextResponse.json({
-        message: 'Account disconnected successfully',
+        message: platformTokenRevoked === 'failed'
+          ? 'Account disconnected here, but the platform token could not be revoked and stays valid until it expires or is revoked at the platform'
+          : 'Account disconnected successfully',
         account_id: accountId,
+        platform_token_revoked: platformTokenRevoked,
       });
     } catch (_error) {
 return NextResponse.json(
@@ -382,6 +388,11 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
     );
       }
 
+      // A suspended or disconnected account is not brought back by a token refresh; it is reconnected on purpose.
+      if (account.status === 'suspended' || account.status === 'disconnected') {
+        return standardErrorResponse(ErrorCode.CONFLICT, `A ${account.status} account must be reconnected, not refreshed`);
+      }
+
       // Refresh token based on platform
       let newAccessToken: string;
       let newRefreshToken: string | null = null;
@@ -391,8 +402,8 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
         switch (account.platform) {
           case 'facebook':
           case 'instagram': {
-            const metaClient = createMetaClient(account.accessToken);
-            const tokenData = await metaClient.getLongLivedToken(account.accessToken);
+            const metaClient = createMetaClient((await openToken(account.accessToken)));
+            const tokenData = await metaClient.getLongLivedToken((await openToken(account.accessToken)));
             newAccessToken = tokenData.access_token;
             expiresIn = tokenData.expires_in;
             break;
@@ -403,8 +414,8 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
               throw new Error('No refresh token available');
             }
             const twitterClient = createTwitterClient(
-              account.accessToken,
-              account.refreshToken
+              (await openToken(account.accessToken)),
+              (await openToken(account.refreshToken))
             );
             const tokenData = await twitterClient.refreshAccessToken();
             newAccessToken = tokenData.access_token;
@@ -417,7 +428,7 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
             if (!account.refreshToken) {
               throw new Error('No refresh token available');
             }
-            const linkedInClient = createLinkedInClient(account.accessToken);
+            const linkedInClient = createLinkedInClient((await openToken(account.accessToken)));
             const tokenData = await linkedInClient.refreshAccessToken(account.refreshToken);
             newAccessToken = tokenData.access_token;
             newRefreshToken = tokenData.refresh_token || null;
@@ -428,8 +439,31 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
           default:
             throw new Error('Unsupported platform');
         }
+      } catch (providerError) {
+        // Only the platform refusing the refresh marks a connected account expired; a storage failure below does not.
+        await withRLSContext({ organizationId }, async (tx) => {
+          const rows = await tx
+            .update(socialAccounts)
+            .set({
+              status: 'expired',
+              updatedAt: new Date(),
+            })
+            .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId), eq(socialAccounts.status, 'active')))
+            .returning({ id: socialAccounts.id });
+          await persistAtomicAudit(tx, {
+            organizationId,
+            userId,
+            action: 'social.account.token_refresh_failed',
+            resourceType: 'social_accounts',
+            resourceId: account_id,
+            details: { platform: account.platform, markedExpired: rows.length > 0 },
+          });
+        });
 
-        // Update account with new tokens — org predicate is defense-in-depth on top of
+        throw providerError;
+      }
+
+      // Update account with new tokens — org predicate is defense-in-depth on top of
         // the org-scoped SELECT above; trusted org is passed explicitly rather than
         // letting withRLSContext silently re-resolve org through an independent auth path.
         const expiresAt = new Date(Date.now() + expiresIn * 1000);
@@ -437,11 +471,12 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
           const rows = await tx
             .update(socialAccounts)
             .set({
-              accessToken: newAccessToken,
+              accessToken: await sealToken(newAccessToken),
               tokenExpiresAt: expiresAt,
-              status: 'active',
+              // An expired account is reconnected by a successful refresh; any other state is kept as it was.
+              status: account.status === 'expired' ? 'active' : account.status,
               updatedAt: new Date(),
-              ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+              ...(newRefreshToken ? { refreshToken: await sealToken(newRefreshToken) } : {}),
             })
             .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
             .returning({ id: socialAccounts.id });
@@ -460,30 +495,6 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
           message: 'Token refreshed successfully',
           expires_at: expiresAt.toISOString(),
         });
-      } catch (error) {
-        // Update account status to error — org predicate is defense-in-depth (see above).
-        await withRLSContext({ organizationId }, async (tx) => {
-          const rows = await tx
-            .update(socialAccounts)
-            .set({
-              status: 'expired',
-              updatedAt: new Date(),
-            })
-            .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
-            .returning({ id: socialAccounts.id });
-          if (rows.length === 0) return;
-          await persistAtomicAudit(tx, {
-            organizationId,
-            userId,
-            action: 'social.account.token_refresh_failed',
-            resourceType: 'social_accounts',
-            resourceId: account_id,
-            details: { platform: account.platform },
-          });
-        });
-
-        throw error;
-      }
     } catch (_error) {
 return NextResponse.json(
         {

@@ -1,29 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
-import { db } from '@/db';
 import { campaigns, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
 function requireOrgAccess(_request: NextRequest): boolean {
   return true;
-}
-
-function incrementStat(stats: any, key: string): Record<string, unknown> {
-  const current =
-    typeof stats === 'object' && stats !== null && !Array.isArray(stats)
-      ? (stats as Record<string, unknown>)
-      : {};
-
-  const currentValue = typeof current[key] === 'number' ? current[key] : 0;
-  return {
-    ...current,
-    [key]: currentValue + 1,
-  };
 }
 
 function getSafeRedirectUrl(url: string | null): string | null {
@@ -88,69 +75,66 @@ export async function GET(request: NextRequest) {
     return linkRejectionResponse();
   }
 
-  await withSystemContext(async () => {
-    const [existing] = await db
-      .select({
-        id: messageLog.id,
-        organizationId: messageLog.organizationId,
-        clickedAt: messageLog.clickedAt,
-        openedAt: messageLog.openedAt,
-        status: messageLog.status,
-      })
-      .from(messageLog)
-      .where(
-        and(
-          eq(messageLog.campaignId, campaignId),
-          eq(messageLog.recipientId, recipientId),
-          ...(messageId ? [eq(messageLog.providerMessageId, messageId)] : []),
-        ),
-      )
-      .limit(1);
-
-    if (!existing) {
-      return;
-    }
-
-    if (!existing.clickedAt) {
-      const updatePayload: {
-        status: 'clicked';
-        clickedAt: Date;
-        openedAt?: Date;
-      } = {
-        status: 'clicked',
-        clickedAt: new Date(),
-      };
-      if (!existing.openedAt) {
-        updatePayload.openedAt = new Date();
-      }
-
-      await db
-        .update(messageLog)
-        .set(updatePayload)
-        .where(and(eq(messageLog.id, existing.id), eq(messageLog.organizationId, existing.organizationId)));
-
-      const [campaign] = await db
-        .select({ stats: campaigns.stats })
-        .from(campaigns)
-        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)))
+  try {
+    await withSystemContext(async (tx) => {
+      const [existing] = await tx
+        .select({
+          id: messageLog.id,
+          organizationId: messageLog.organizationId,
+          clickedAt: messageLog.clickedAt,
+          openedAt: messageLog.openedAt,
+        })
+        .from(messageLog)
+        .where(
+          and(
+            eq(messageLog.campaignId, campaignId),
+            eq(messageLog.recipientId, recipientId),
+            ...(messageId ? [eq(messageLog.providerMessageId, messageId)] : []),
+          ),
+        )
         .limit(1);
 
-      if (campaign) {
-        let nextStats = incrementStat(campaign.stats, 'clicked');
-        if (existing.status !== 'opened' && existing.status !== 'clicked') {
-          nextStats = incrementStat(nextStats, 'opened');
-        }
+      if (!existing || existing.clickedAt) return;
 
-        await db
-          .update(campaigns)
-          .set({
-            stats: nextStats,
-            updatedAt: new Date(),
-          })
-          .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)));
-      }
-    }
-  });
+      // Simultaneous clicks may all read an unclicked row; the conditional UPDATE elects one winner, and only that winner counts and audits.
+      const now = new Date();
+      const firstOpen = !existing.openedAt;
+      const [claimed] = await tx
+        .update(messageLog)
+        .set({ status: 'clicked', clickedAt: now, ...(firstOpen ? { openedAt: now } : {}) })
+        .where(and(eq(messageLog.id, existing.id), eq(messageLog.organizationId, existing.organizationId), isNull(messageLog.clickedAt)))
+        .returning({ id: messageLog.id });
+      if (!claimed) return;
+
+      // The increments run in PostgreSQL so concurrent events keep every count; the click implies an open only when none was recorded.
+      const [updatedCampaign] = await tx
+        .update(campaigns)
+        .set({
+          stats: firstOpen
+            ? sql`jsonb_set(jsonb_set(COALESCE(${campaigns.stats}, '{}'::jsonb), '{clicked}', to_jsonb(COALESCE((${campaigns.stats}->>'clicked')::integer, 0) + 1), true), '{opened}', to_jsonb(COALESCE((${campaigns.stats}->>'opened')::integer, 0) + 1), true)`
+            : sql`jsonb_set(COALESCE(${campaigns.stats}, '{}'::jsonb), '{clicked}', to_jsonb(COALESCE((${campaigns.stats}->>'clicked')::integer, 0) + 1), true)`,
+          updatedAt: now,
+        })
+        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)))
+        .returning({ id: campaigns.id });
+      if (!updatedCampaign) throw new Error('Campaign was not found for an authorized tracking event');
+
+      await persistAtomicAudit(tx, {
+        organizationId: existing.organizationId,
+        userId: 'system:communications-tracking',
+        action: 'campaign.message.clicked',
+        resourceType: 'message_log',
+        resourceId: existing.id,
+        details: { campaignId, impliedOpen: firstOpen },
+      });
+    });
+  } catch (error) {
+    // The redirect of a verified link must not depend on the analytics write; a failed transaction counts nothing.
+    logger.error('[communications/click-track] Tracking write rolled back', {
+      campaignId,
+      error: error instanceof Error ? error.name : 'unknown',
+    });
+  }
 
   return NextResponse.redirect(redirectTarget, { status: 302 });
 }

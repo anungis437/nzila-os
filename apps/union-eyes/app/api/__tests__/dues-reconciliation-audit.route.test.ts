@@ -4,6 +4,7 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withRLSContext: vi.fn(),
   audit: vi.fn(),
+  requireLiveFinancialMandate: vi.fn(),
   rows: [] as unknown[],
   tx: { update: vi.fn() },
 }));
@@ -21,6 +22,7 @@ vi.mock('@/lib/api/framework', async () => {
 });
 vi.mock('@/lib/finance/financial-authority', () => ({ FINANCIAL_MEMBER_DATA_ROLES: ['admin'] }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: m.requireLiveFinancialMandate }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({
   remittanceLineItems: { remittanceId: 'remittanceId', organizationId: 'organizationId' },
@@ -41,7 +43,11 @@ describe.each([
     vi.clearAllMocks();
     m.rows = [{ id: 'l1' }];
     m.withApi.mockImplementation((_cfg: unknown, handler: (c: any) => Promise<unknown>) => (c: any) => handler(c));
-    m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(m.tx));
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
+    m.withRLSContext.mockImplementation(async (a: unknown, b?: unknown) => {
+      const fn = (typeof a === 'function' ? a : b) as (tx: unknown) => Promise<unknown>;
+      return fn(m.tx);
+    });
     m.tx.update.mockReturnValue({
       set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => m.rows) })) })),
     });

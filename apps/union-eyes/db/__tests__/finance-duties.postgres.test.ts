@@ -24,8 +24,17 @@ const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 const state = vi.hoisted(() => ({ db: null as unknown }))
 const m = vi.hoisted(() => ({ audit: vi.fn() }))
+const membership = vi.hoisted(() => ({ legacy: false }))
 // Only the best-effort refusal logger is a double; every transactional audit write is real.
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }))
+// The real membership source is used unless a test pins the legacy one; the pin exists only so the V2 audit-sink test below can run on this legacy database.
+vi.mock('@/lib/authority/store/active-membership-source', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/authority/store/active-membership-source')>()
+  const { canonicalMembershipSource } = await import('../../lib/authority/store/identity')
+  const activeMembershipSource: typeof actual.activeMembershipSource = (exec, organizationId, userIds) =>
+    membership.legacy ? canonicalMembershipSource(exec, organizationId, userIds) : actual.activeMembershipSource(exec, organizationId, userIds)
+  return { ...actual, activeMembershipSource }
+})
 
 type Tx = { execute: (q: unknown) => Promise<unknown> }
 type Role = 'union_eyes_runtime' | 'union_eyes_system'
@@ -166,8 +175,12 @@ describe.skipIf(!URL)('governed financial duties on the combined deployed schema
     await pool?.end()
     await admin?.end()
   })
-  afterEach(() => {
+  afterEach(async () => {
+    // A failed assertion must never leave a fault armed for the next financial journey.
+    // Clearing this disposable-database fixture does not alter production audit behavior.
     delete process.env.UE_CANONICAL_BOOTSTRAP_V2
+    membership.legacy = false
+    await clearFaults()
     m.audit.mockClear()
   })
 
@@ -371,7 +384,15 @@ describe.skipIf(!URL)('governed financial duties on the combined deployed schema
       await step(P.treasurer, PAY2, 'prepared')
       expect(await steps(PAY2, 'prepared')).toBe(1)
 
-      // Under Canonical V2 the business audit joins the hash chain: the same atomicity holds against that sink.
+      // This test runs the legacy-lineage runtime role against its real audit sink.
+      // Canonical V2 requires a live auth session and the auth-owned membership reader, so flipping an environment
+      // flag does not make this database V2. The missing-reader refusal and the hash-chained sink are covered below.
+    })
+
+    it('with the Canonical V2 flag on, an audit fault on the hash-chained sink also rolls the step back (membership read through the legacy source)', async () => {
+      // Only the membership read is pinned to the legacy source: the definer reader needs a V2-provisioned database (see the fail-closed test).
+      // The flag still selects the business-audit branch, so this proves that sink's atomicity, not end-to-end Canonical V2.
+      membership.legacy = true
       process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1'
       const PAY3 = randomUUID()
       await addPayment(PAY3, '13.00', P.member)
@@ -382,6 +403,26 @@ describe.skipIf(!URL)('governed financial duties on the combined deployed schema
       await register(P.treasurer, PAY3)
       expect(await steps(PAY3, 'registered')).toBe(1)
       expect(await scalar(`SELECT count(*) AS n FROM public.audit_logs WHERE action = 'finance.payment.registered' AND organization_id = $1 AND resource_id = $2`, [ORG_A, PAY3])).toBe(1)
+    })
+
+    it('fails closed when Canonical V2 is requested without its auth-owned membership reader', async () => {
+      // This combined legacy fixture has no live V2 session/reader. If that changes,
+      // the suite must be upgraded to a real session-bound V2 acceptance rather than
+      // silently treating this test as proof of the canonical audit chain.
+      const reader = await admin.query(`SELECT to_regprocedure('user_management.ue_authority_membership_rows(uuid,text[])') AS fn`)
+      expect(reader.rows[0].fn, 'legacy fixture unexpectedly contains the V2 reader; run session-bound V2 qualification').toBeNull()
+      const pay = randomUUID()
+      await addPayment(pay, '13.00', P.member)
+      process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1'
+      try {
+        const error = await register(P.treasurer, pay).then(() => null, (e: { message?: string; cause?: { message?: string } }) => e)
+        expect(error, 'V2 must not succeed without its live identity authority').not.toBeNull()
+        expect(`${error?.message} ${error?.cause?.message}`).toMatch(/ue_authority_membership_rows/)
+        expect(await steps(pay, 'registered')).toBe(0)
+        expect(await scalar(`SELECT count(*) AS n FROM public.audit_logs WHERE action = 'finance.payment.registered' AND organization_id = $1 AND resource_id = $2`, [ORG_A, pay])).toBe(0)
+      } finally {
+        delete process.env.UE_CANONICAL_BOOTSTRAP_V2
+      }
     })
 
     it('lets exactly one of two truly concurrent executions win, on separate connections', async () => {

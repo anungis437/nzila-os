@@ -16,8 +16,17 @@ import { eq, sql } from "drizzle-orm";
  */
 export const POST = withRoleAuth('member', async (req, context: BaseAuthContext) => {
   try {
-    const body = await req.json();
-    const { easeRating, category, comment, trigger } = body;
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "A JSON object is required" }, { status: 400 });
+    }
+    const { easeRating, category, trigger } = body as Record<string, unknown> & { easeRating: number; category?: string; trigger: string };
+    // The comment is free text kept as written: it must be text and is bounded.
+    const rawComment = (body as Record<string, unknown>).comment;
+    if (rawComment !== undefined && rawComment !== null && (typeof rawComment !== "string" || rawComment.length > 2000)) {
+      return NextResponse.json({ error: "comment must be text of at most 2000 characters" }, { status: 400 });
+    }
+    const comment = typeof rawComment === "string" && rawComment.trim().length > 0 ? rawComment.trim() : null;
     const userId = context.userId;
     const organizationId = context.organizationId;
 
@@ -124,12 +133,14 @@ export const GET = withRoleAuth('admin', async (req, context: BaseAuthContext) =
       WHERE organization_id = ${orgId}
     `));
 
-    const recent = await withRLSContext(async () => db
+    const recentRows = await withRLSContext(async () => db
       .select()
       .from(pilotFeedback)
       .where(eq(pilotFeedback.organizationId, orgId))
       .orderBy(sql`created_at DESC`)
       .limit(10));
+    // The administrator reads what was said, not who said it: the author's user id is not returned.
+    const recent = (recentRows as Array<Record<string, unknown>>).map(({ userId: _author, ...entry }) => entry);
 
     return NextResponse.json({
       summary: (summary as Record<string, unknown>[])[0] ?? {},

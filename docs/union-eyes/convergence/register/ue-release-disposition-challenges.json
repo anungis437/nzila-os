@@ -1,0 +1,408 @@
+{
+  "schemaVersion": 1,
+  "register": "INDEPENDENT_RELEASE_DISPOSITION_CHALLENGES",
+  "tranche": "GATE-0B.11",
+  "anchorCommit": "b091158a8df04eb82c837ab0b53b115e1be70e90",
+  "note": "Independent reviewer challenge of the Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence: no frozen defect, disposition, hash or review queue entry is changed, no remediation is claimed, and containment is recorded as not verified because Gate 0B.11 executes no runtime role or row-level-security proof. A challenge stays open until executed containment proof and the named institutional decisions are on file.",
+  "provisionalPositions": [
+    "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF"
+  ],
+  "challenges": [
+    {
+      "id": "CHALLENGE-0B10-OPL-01",
+      "challengedDefectId": "DEF-0B10-OPL-01",
+      "impactedOperations": [
+        "organizations/route.ts|GET"
+      ],
+      "legacyBranch": {
+        "description": "GET /api/organizations has one code path and no canonical branch. It authenticates a session user and reads the organizations table inside withRLSContext. When the flag is 1, withRLSContext switches the transaction to the union_eyes_runtime role; when the flag is unset or 0 the same call only sets the app.current_org_id setting and stays on the connection role, so the legacy mode is the same route with the role switch absent, not a separate handler that can be removed or proven unreachable.",
+        "featureFlag": {
+          "name": "UE_CANONICAL_BOOTSTRAP_V2",
+          "legacyValues": [
+            "unset",
+            "0"
+          ],
+          "canonicalValue": "1",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+              "quote": "if (flag !== undefined && flag !== '0' && flag !== '1')"
+            },
+            {
+              "ref": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+              "quote": "return flag === '1'"
+            }
+          ]
+        },
+        "evidence": [
+          {
+            "ref": "apps/union-eyes/app/api/organizations/route.ts",
+            "quote": "const rows = await db.select().from(organizations).where(where);"
+          },
+          {
+            "ref": "apps/union-eyes/app/api/organizations/route.ts",
+            "quote": "const mapped = await withRLSContext(async () => {"
+          },
+          {
+            "ref": "apps/union-eyes/lib/db/with-rls-context.ts",
+            "quote": "await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)"
+          },
+          {
+            "ref": "apps/union-eyes/lib/db/with-rls-context.ts",
+            "quote": "await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`)"
+          }
+        ]
+      },
+      "reachabilityInIntendedReleaseConfiguration": {
+        "summary": "Nothing in the source excludes the legacy path from a released runtime. The Azure container-app template sets the flag to 1, but that is a deployment parameter and not a code guard: the flag reader accepts an unset flag and 0, no startup check refuses them in production, and the repository CI workflows deliberately run the union-eyes application with the flag at 0.",
+        "canonicalValueInDeploymentTemplate": {
+          "ref": "infrastructure/bicep/ue-v2/modules/apps.bicep",
+          "quote": "{ name: 'UE_CANONICAL_BOOTSTRAP_V2', value: '1' }"
+        },
+        "legacyValueInRepositoryWorkflows": [
+          {
+            "ref": ".github/workflows/e2e.yml",
+            "quote": "UE_CANONICAL_BOOTSTRAP_V2: '0'"
+          }
+        ],
+        "legacyValueDocumentedAsRuntime": {
+          "ref": "docs/union-eyes/production/UE_RELEASE_PLAN_REFREEZE.md",
+          "quote": "`UE_CANONICAL_BOOTSTRAP_V2=0`, no configured canonical auth database credentials,"
+        },
+        "flagReaderAcceptsLegacyValues": {
+          "ref": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+          "quote": "if (flag !== undefined && flag !== '0' && flag !== '1')"
+        },
+        "startupRefusalOfLegacyValue": "NOT_FOUND",
+        "legacyBranchExcludedFromReleasedRuntime": false
+      },
+      "dataFieldsExposed": [
+        {
+          "field": "email",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "email: row.email,"
+        },
+        {
+          "field": "phone",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "phone: row.phone,"
+        },
+        {
+          "field": "website",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "website: row.website,"
+        },
+        {
+          "field": "address",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "address: row.address,"
+        },
+        {
+          "field": "charter_number",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "charter_number: row.charterNumber,"
+        },
+        {
+          "field": "subscription_tier",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "subscription_tier: row.subscriptionTier,"
+        },
+        {
+          "field": "billing_contact_id",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "billing_contact_id: row.billingContactId,"
+        },
+        {
+          "field": "settings",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "settings: row.settings ?? {},"
+        },
+        {
+          "field": "features_enabled",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "features_enabled: row.featuresEnabled ?? [],"
+        },
+        {
+          "field": "member_count",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "member_count: row.memberCount,"
+        },
+        {
+          "field": "created_by",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "created_by: row.createdBy,"
+        },
+        {
+          "field": "legacy_org_id",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "legacy_org_id: row.legacyOrgId,"
+        },
+        {
+          "field": "activeClaims",
+          "ref": "apps/union-eyes/app/api/organizations/route.ts",
+          "quote": "activeClaims: claimsByOrg[row.id] ?? 0,"
+        }
+      ],
+      "scopeActuallyEnforced": {
+        "routeLevelOrganizationPredicate": "NONE: the only filters are the optional parent and status query parameters, both caller supplied.",
+        "routeLevelHierarchyPredicate": "NONE: the parent query parameter selects the children of any organization id the caller names; no ancestor or descendant relation to the caller organization is tested.",
+        "confinementDependsOn": "The database role of the connection and the 0108 organizations policy (a tenant sees only its own organization row) in the canonical mode; in the legacy mode only the role of the connection.",
+        "evidence": [
+          {
+            "ref": "apps/union-eyes/app/api/organizations/route.ts",
+            "quote": "if (parentId) conditions.push(eq(organizations.parentId, parentId));"
+          },
+          {
+            "ref": "apps/union-eyes/db/migrations/0108_rls_tenant_isolation_foundation.sql",
+            "quote": "SELECT ue_create_direct_org_rls_policy('organizations', 'id', FALSE); -- a tenant sees only its own org row"
+          }
+        ]
+      },
+      "existingAuthenticatedAudience": {
+        "audience": "Any caller holding a session user id: no role floor, no membership test and no mandate.",
+        "evidence": [
+          {
+            "ref": "apps/union-eyes/app/api/organizations/route.ts",
+            "quote": "if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });"
+          }
+        ]
+      },
+      "requiredAudience": {
+        "statement": "The source does not establish an audience for another organization record. Cross-organization visibility can be legitimate only if an adopted decision names the audience and the permitted fields; until it does, the required audience is the caller own organization and the permitted fields are the operational minimum.",
+        "decisionIds": [
+          "UE-INST-ORGANIZATION-RECORD-AUTHORITY",
+          "UE-INST-FEDERATION-AFFILIATE-DATA-SHARING"
+        ],
+        "sourceEstablishesAudienceAndFields": false
+      },
+      "containment": {
+        "verified": false,
+        "executedProof": [],
+        "claimedMechanisms": [
+          "withRLSContext switches to union_eyes_runtime when the flag is 1.",
+          "Migration 0108 restricts a tenant to its own organization row."
+        ],
+        "whyTheClaimedMechanismsAreNotContainment": [
+          "The role switch is conditional on a deployment flag the code accepts unset or 0.",
+          "The policy confines only a connection role that is subject to row-level security; no executed proof on file shows the released role is.",
+          "A legacy path that exists is reachable by definition until it is removed or the runtime refuses to start with it."
+        ],
+        "requiredProof": [
+          "An executed proof, on a database that carries migration 0108, that the role the released DATABASE_URL connects as is subject to the organizations row-level-security policy (the policy is bypassed by a superuser, a table owner and any role with BYPASSRLS, and a policy that is not enabled and forced for the connecting role confines nothing).",
+          "An executed proof that a caller of one organization receives no row of another organization from the route in the intended release configuration, including the case of the flag unset and the flag at 0.",
+          "Either a code or deployment guard that makes the released runtime refuse to start with the flag unset or 0, or removal of the legacy branch; the deployment template alone is not a guard.",
+          "An institutional decision naming which organization fields a signed-in user of another organization may read and the audience that holds that permission, followed by a field projection that returns only those fields."
+        ]
+      },
+      "reviewerPosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "status": "AWAITING_CONTAINMENT_PROOF_AND_INSTITUTIONAL_DECISION",
+      "blocksGate": 14,
+      "modifiesFrozenDefect": false,
+      "remediationClaimed": false,
+      "challengedDefectSha256": "b0a1a20403d41c3c15c3a756cd6bdff54db1fd1c37bb04f4178a755bf3c59d55",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "frozenReleaseBlocking": false,
+      "challengedTranche": "0B.10"
+    },
+    {
+      "id": "CHALLENGE-0B10-OPL-07",
+      "challengedDefectId": "DEF-0B10-OPL-07",
+      "impactedOperations": [
+        "organizations/tree/route.ts|GET"
+      ],
+      "legacyBranch": {
+        "description": "GET /api/organizations/tree has an explicit legacy branch selected by the flag: with the flag at 1 it returns the active organizations of the private memberships of the caller; with the flag unset or 0 it authenticates a session user and returns every organization row through the shared db client, with no withRLSContext, no membership test and no limit. The route comment states the flag-off behavior as intended: it retains the legacy flat organization list.",
+        "featureFlag": {
+          "name": "UE_CANONICAL_BOOTSTRAP_V2",
+          "legacyValues": [
+            "unset",
+            "0"
+          ],
+          "canonicalValue": "1",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+              "quote": "if (flag !== undefined && flag !== '0' && flag !== '1')"
+            },
+            {
+              "ref": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+              "quote": "return flag === '1'"
+            }
+          ]
+        },
+        "evidence": [
+          {
+            "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+            "quote": "if (currentStateContextEnabled()) {"
+          },
+          {
+            "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+            "quote": "return NextResponse.json(await getCanonicalOrganizationTree())"
+          },
+          {
+            "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+            "quote": " * Flag-off retains the legacy flat organization list."
+          },
+          {
+            "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+            "quote": ".from(organizations)"
+          },
+          {
+            "ref": "apps/union-eyes/lib/auth/canonical-organization-selection.ts",
+            "quote": "eq(organizations.status, 'active'),"
+          }
+        ]
+      },
+      "reachabilityInIntendedReleaseConfiguration": {
+        "summary": "Nothing in the source excludes the legacy path from a released runtime. The Azure container-app template sets the flag to 1, but that is a deployment parameter and not a code guard: the flag reader accepts an unset flag and 0, no startup check refuses them in production, and the repository CI workflows deliberately run the union-eyes application with the flag at 0.",
+        "canonicalValueInDeploymentTemplate": {
+          "ref": "infrastructure/bicep/ue-v2/modules/apps.bicep",
+          "quote": "{ name: 'UE_CANONICAL_BOOTSTRAP_V2', value: '1' }"
+        },
+        "legacyValueInRepositoryWorkflows": [
+          {
+            "ref": ".github/workflows/e2e.yml",
+            "quote": "UE_CANONICAL_BOOTSTRAP_V2: '0'"
+          }
+        ],
+        "legacyValueDocumentedAsRuntime": {
+          "ref": "docs/union-eyes/production/UE_RELEASE_PLAN_REFREEZE.md",
+          "quote": "`UE_CANONICAL_BOOTSTRAP_V2=0`, no configured canonical auth database credentials,"
+        },
+        "flagReaderAcceptsLegacyValues": {
+          "ref": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+          "quote": "if (flag !== undefined && flag !== '0' && flag !== '1')"
+        },
+        "startupRefusalOfLegacyValue": "NOT_FOUND",
+        "legacyBranchExcludedFromReleasedRuntime": false
+      },
+      "dataFieldsExposed": [
+        {
+          "field": "id",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "id: o.id,"
+        },
+        {
+          "field": "name",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "name: o.name,"
+        },
+        {
+          "field": "slug",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "slug: o.slug,"
+        },
+        {
+          "field": "organization_type",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "organization_type: o.organizationType ?? 'union',"
+        },
+        {
+          "field": "parentId",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "parentId: o.parentId ?? null,"
+        },
+        {
+          "field": "sector",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "sector: (o.sectors ?? [])[0] ?? null,"
+        },
+        {
+          "field": "jurisdiction",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "jurisdiction: o.provinceTerritory ?? null,"
+        },
+        {
+          "field": "description",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "description: o.description ?? null,"
+        },
+        {
+          "field": "hierarchyLevel",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "hierarchyLevel: o.hierarchyLevel ?? 0,"
+        },
+        {
+          "field": "memberCount",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "memberCount: o.memberCount ?? 0,"
+        },
+        {
+          "field": "status",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "status: o.status ?? 'active',"
+        },
+        {
+          "field": "createdAt",
+          "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+          "quote": "createdAt: o.createdAt?.toISOString() ?? new Date().toISOString(),"
+        }
+      ],
+      "scopeActuallyEnforced": {
+        "routeLevelOrganizationPredicate": "NONE in the legacy branch: the select has no where clause, no limit and no filter on type or status, so platform, archived, suspended and inactive organizations are included. The canonical branch lists only the active organizations of the private memberships of the caller.",
+        "routeLevelHierarchyPredicate": "NONE in the legacy branch: the whole parent and child hierarchy is returned; the hierarchy relation between organizations is treated as visibility and authorizes nothing.",
+        "confinementDependsOn": "The row-level-security role of the shared db client, with no organization context set; a confined connection with no organization context would return an empty tree for every caller, which is a different defect and not containment.",
+        "evidence": [
+          {
+            "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+            "quote": ".orderBy(asc(organizations.hierarchyLevel), asc(organizations.name));"
+          },
+          {
+            "ref": "apps/union-eyes/db/migrations/0108_rls_tenant_isolation_foundation.sql",
+            "quote": "SELECT ue_create_direct_org_rls_policy('organizations', 'id', FALSE); -- a tenant sees only its own org row"
+          }
+        ]
+      },
+      "existingAuthenticatedAudience": {
+        "audience": "Any caller holding a session user id in the legacy branch: no role floor, no membership test and no mandate.",
+        "evidence": [
+          {
+            "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+            "quote": "const { userId } = await auth();"
+          },
+          {
+            "ref": "apps/union-eyes/app/api/organizations/tree/route.ts",
+            "quote": "if (!userId) {"
+          }
+        ]
+      },
+      "requiredAudience": {
+        "statement": "The source does not establish that a signed-in user may see the identity, size, jurisdiction, description and parent affiliation of organizations they do not belong to. The canonical branch shows the intended boundary (own memberships); an organization directory open to every signed-in user is legitimate only if an adopted decision declares it a public directory and names its fields.",
+        "decisionIds": [
+          "UE-INST-ORGANIZATION-RECORD-AUTHORITY",
+          "UE-INST-FEDERATION-AFFILIATE-DATA-SHARING",
+          "UE-INST-ONBOARDING-CROSS-ORGANIZATION-DISCLOSURE"
+        ],
+        "sourceEstablishesAudienceAndFields": false
+      },
+      "containment": {
+        "verified": false,
+        "executedProof": [],
+        "claimedMechanisms": [
+          "The canonical branch is membership scoped when the flag is 1.",
+          "Migration 0108 restricts a tenant to its own organization row."
+        ],
+        "whyTheClaimedMechanismsAreNotContainment": [
+          "The legacy branch is selected by a flag the code accepts unset or 0, and the repository CI runs the application at 0.",
+          "The legacy branch sets no organization context at all, so the policy has no tenant identity to confine the read to.",
+          "A legacy path that exists is reachable by definition until it is removed or the runtime refuses to start with it."
+        ],
+        "requiredProof": [
+          "An executed proof, on a database that carries migration 0108, that the role the released DATABASE_URL connects as is subject to the organizations row-level-security policy (the policy is bypassed by a superuser, a table owner and any role with BYPASSRLS, and a policy that is not enabled and forced for the connecting role confines nothing).",
+          "An executed proof that a caller of one organization receives no row of another organization from the route in the intended release configuration, including the case of the flag unset and the flag at 0.",
+          "Either a code or deployment guard that makes the released runtime refuse to start with the flag unset or 0, or removal of the legacy branch; the deployment template alone is not a guard.",
+          "An institutional decision naming which organization fields a signed-in user of another organization may read and the audience that holds that permission, followed by a field projection that returns only those fields."
+        ]
+      },
+      "reviewerPosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "status": "AWAITING_CONTAINMENT_PROOF_AND_INSTITUTIONAL_DECISION",
+      "blocksGate": 14,
+      "modifiesFrozenDefect": false,
+      "remediationClaimed": false,
+      "challengedDefectSha256": "9057d09cf224366763a84bcea85314a1772464505230b28f2f964a4c7377dc22",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "frozenReleaseBlocking": false,
+      "challengedTranche": "0B.10"
+    }
+  ]
+}

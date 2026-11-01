@@ -13,13 +13,13 @@ import { withOrganizationAuth } from '@/lib/organization-middleware'
 import { hasMinRole } from '@/lib/api-auth-guard'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
-import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from '@/lib/audit/cape-audit-events'
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses'
 import { eq, desc, and } from 'drizzle-orm'
+import { isUniqueViolation } from '@/lib/db/unique-violation'
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
@@ -75,6 +75,13 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     // The contact and its audit record commit together.
     const contact = await withRLSContext({ organizationId }, async (tx) => {
+      // An employer has one primary contact: naming a new one demotes the previous one in the same transaction.
+      if (data.isPrimary) {
+        await tx
+          .update(employerContacts)
+          .set({ isPrimary: false, updatedAt: new Date() })
+          .where(and(eq(employerContacts.organizationId, organizationId), eq(employerContacts.employerId, data.employerId), eq(employerContacts.isPrimary, true)))
+      }
       const [row] = await tx
         .insert(employerContacts)
         .values({
@@ -103,29 +110,21 @@ export const POST = withOrganizationAuth(async (request, context) => {
       return row
     })
 
-    await emitCapeAuditEvent({
-      eventType: CAPE_AUDIT_EVENTS.EMPLOYER_CONTACT_ADDED,
-      userId,
-      organizationId,
-      resource: 'employer_contacts',
-      resourceId: contact.id,
-      details: {
-        employerId: data.employerId,
-        contactName: data.name,
-        role: data.role,
-      },
-    })
-
+    // The in-transaction audit record is the only one: the earlier second event carried the contact's name into the audit log after the commit.
     return standardSuccessResponse(contact)
-  } catch (_error) {
+  } catch (error) {
+    // The unique index admits one active primary contact per employer; a concurrent create that lost the race is a conflict.
+    if (isUniqueViolation(error)) return standardErrorResponse(ErrorCode.CONFLICT, 'This employer already has a primary contact')
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to add employer contact')
   }
 })
 
 // ── GET ─────────────────────────────────────────────────────────────────────
 
+const LIST_LIMIT = 200
+
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context
+  const { organizationId, userId } = context
 
   try {
     const canAccess = await hasMinRole('steward')
@@ -141,13 +140,26 @@ export const GET = withOrganizationAuth(async (request, context) => {
       conditions.push(eq(employerContacts.employerId, employerId))
     }
 
-    const rows = await db
-      .select()
-      .from(employerContacts)
-      .where(and(...conditions))
-      .orderBy(desc(employerContacts.createdAt))
+    // Employer representatives' names and contact details are personal information: the list is bounded and each read is audited.
+    const rows = await withRLSContext({ organizationId }, async (tx) => {
+      const found = await tx
+        .select()
+        .from(employerContacts)
+        .where(and(...conditions))
+        .orderBy(desc(employerContacts.createdAt))
+        .limit(LIST_LIMIT)
+      await persistAtomicAudit(tx, {
+        userId,
+        organizationId,
+        resourceType: 'employer_contacts',
+        action: 'employer_contact.list',
+        resourceId: employerId ?? 'all',
+        details: { returned: found.length, truncated: found.length === LIST_LIMIT },
+      })
+      return found
+    })
 
-    return standardSuccessResponse(rows)
+    return standardSuccessResponse(rows, { pageSize: LIST_LIMIT, hasMore: rows.length === LIST_LIMIT })
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to list employer contacts')
   }

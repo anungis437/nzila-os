@@ -25,12 +25,19 @@ import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
+import { financeViewMandateDenial } from '@/lib/finance/finance-view-mandate';
 
 const projectionQuerySchema = z.object({
   targetRetirementAge: z.coerce.number().int().min(55).max(75),
 });
 
 export const GET = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
+  // 0. A live mandate must cover this particular pension member (or the organization ledger).
+  const memberId = request.nextUrl.pathname.split('/').at(-2) ?? '';
+  if (!memberId) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Pension member identifier is required');
+  const noMandate = await financeViewMandateDenial(context.organizationId!, context.userId!, memberId);
+  if (noMandate) return noMandate;
+
   // 1. Rate limit
   const rl = await checkRateLimit(`ai-pension-projection:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
   if (!rl.allowed) {
@@ -61,7 +68,6 @@ export const GET = withRoleAuth('officer', async (request: NextRequest, context:
   }
 
   // 5. Execute
-  const memberId = request.nextUrl.pathname.split('/').at(-2) ?? '';
   try {
     const result = await projectMemberBenefit({
       memberId,

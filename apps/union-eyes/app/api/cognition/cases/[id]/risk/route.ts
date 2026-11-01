@@ -10,6 +10,7 @@ import { hasMinRole } from '@/lib/api-auth-guard';
 import { auditLog } from '@/lib/audit-logger';
 import { AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { scoreGrievanceRisk } from '@/lib/cognition/ue-adapter';
+import { visibleCaseIds } from '@/lib/cognition/case-visibility';
 
 export const GET = withOrganizationAuth(async (
   _request: NextRequest,
@@ -22,6 +23,11 @@ export const GET = withOrganizationAuth(async (
   const allowed = await hasMinRole('steward');
   if (!allowed) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  // A steward scores the cases the case authority lets them read; any other case is not found.
+  if (!(await visibleCaseIds(context.organizationId, context.userId, [params.id])).has(params.id)) {
+    return NextResponse.json({ error: 'Grievance not found' }, { status: 404 });
   }
 
   const snap = await scoreGrievanceRisk(context.organizationId, params.id);

@@ -43,6 +43,8 @@ export interface RevokeMemberAccessResult {
   authMembershipDisabled: boolean;
   caseAccessRevokedCount: number;
   localStatusUpdated: boolean;
+  /** False when the attempt could not be recorded before the revocation ran (the revocation still ran: denial is the safe direction). */
+  intentRecorded: boolean;
   errors: string[];
 }
 
@@ -94,6 +96,25 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   let authMembershipDisabled = false;
   let caseAccessRevokedCount = 0;
   let localStatusUpdated = false;
+
+  // Revocation spans three stores (sessions, platform-auth membership, the local row) that cannot share one transaction, so the
+  // attempt is made durable first: a process that stops part-way leaves an attempt with no outcome, which is visible and safe to
+  // repeat. Unlike a grant, a revocation that cannot be recorded is still carried out, because denying access is the safe direction;
+  // the final record then says the attempt was not recorded.
+  let intentRecorded = true;
+  try {
+    await withSystemContext((tx) => persistAtomicAudit(tx as RLSTx, {
+      organizationId: input.organizationId,
+      userId: input.actorUserId,
+      action: input.newLocalStatus === 'deleted' ? 'member.access.delete_attempt' : 'member.access.deactivate_attempt',
+      resourceType: 'organization_members',
+      resourceId: input.membershipId,
+      details: { targetUserId: input.authUserId },
+    }));
+  } catch (err) {
+    intentRecorded = false;
+    logger.error('member_revocation_attempt_not_recorded', { membershipId: input.membershipId, error: err });
+  }
 
   // 1. Revoke all active sessions for the REAL auth user id, via the
   // SYSTEM auth DB credential (cross-user operation).
@@ -188,6 +209,7 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
             sessionsRevoked,
             authMembershipDisabled,
             liveCaseRelationships: caseAccessRevokedCount,
+            attemptRecorded: intentRecorded,
             incompleteSteps: errors.length > 0 ? errors : undefined,
           },
         },
@@ -217,6 +239,7 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
     authMembershipDisabled,
     caseAccessRevokedCount,
     localStatusUpdated,
+    intentRecorded,
     errors,
   };
 }

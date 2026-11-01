@@ -25,6 +25,7 @@ type Guard =
   | 'WITH_API'
   | 'WITH_API_PUBLIC'
   | 'WITH_API_CRON'
+  | 'WITH_API_MACHINE'
   | 'LEGACY_ROLE_WRAPPER'
   | 'ORGANIZATION_MIDDLEWARE'
   | 'REQUIRE_API_AUTH'
@@ -36,6 +37,7 @@ type Guard =
 
 const GUARD_PATTERNS: [Guard, RegExp][] = [
   ['WITH_API_CRON', /withApi\s*\(\s*\{[^}]*cron\s*:\s*true/s],
+  ['WITH_API_MACHINE', /withApi\s*\(\s*\{[^}]*machine\s*:/s],
   ['WITH_API_PUBLIC', /withApi\s*\(\s*\{[^}]*required\s*:\s*false/s],
   ['WITH_API', /\bwithApi\s*\(/],
   ['ORGANIZATION_MIDDLEWARE', /\bwithOrganizationAuth\s*\(/],
@@ -154,6 +156,10 @@ function bindControl(
       basis: 'withApi required:false; public by design',
     },
     WITH_API_CRON: { control: 'CRON_CREDENTIAL', basis: 'withApi auth.cron credential' },
+    WITH_API_MACHINE: {
+      control: 'MACHINE_CREDENTIAL',
+      basis: 'withApi auth.machine: the route\'s declared credential verifier decides the caller; no user session is read',
+    },
     LEGACY_ROLE_WRAPPER: {
       control: 'ROLE_AUTHORIZATION',
       basis: 'role wrapper over canonical session',
@@ -235,7 +241,7 @@ export function buildCallerControlGraph() {
     const exceptionReasons: string[] = []
     if (['NONE', 'DIRECT_AUTH_ONLY', 'WITH_API_PUBLIC'].includes(guard))
       exceptionReasons.push('BYPASSES_SHARED_AUTHORIZATION_GUARD')
-    if (guard === 'WITH_API_CRON' || guard === 'WEBHOOK_SIGNATURE')
+    if (guard === 'WITH_API_CRON' || guard === 'WITH_API_MACHINE' || guard === 'WEBHOOK_SIGNATURE')
       exceptionReasons.push('NON_HUMAN_CREDENTIAL_GUARD')
     if (context.system) exceptionReasons.push('PRIVILEGED_SYSTEM_AUTHORITY')
     if (context.tenant && context.explicit) exceptionReasons.push('MANUAL_DATABASE_CONTEXT')

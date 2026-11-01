@@ -21,6 +21,7 @@ export {
   claimTypeEnum,
   visibilityScopeEnum,
   claims,
+  claimStatusTransitions,
   claimUpdates,
   type Claim,
   type NewClaim,

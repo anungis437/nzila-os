@@ -10,7 +10,7 @@
  * Env vars:
  *   STRIPE_PRICE_ICRA_BRIEF        — Stripe Price ID for Leadership Briefing Report (optional)
  *   STRIPE_PRICE_ICRA_DIAGNOSTIC   — Stripe Price ID for Institutional Continuity Diagnostic (optional)
- *   NEXT_PUBLIC_APP_URL            — Base URL used for success/cancel redirect (fallback: http://localhost:3000)
+ *   NEXT_PUBLIC_APP_URL            — Canonical HTTPS origin for payment redirects (required in production)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,11 +19,12 @@ import { eq } from 'drizzle-orm';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
   type CapabilityDenialReason,
 } from '@/lib/icra/assessment-capability';
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access';
+import { resolveIcraEmailOrigin } from '@/lib/icra/email-results-origin';
+import { ICRA_PAID_REPORT_PRICES } from '@/lib/icra/pricing';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
@@ -41,26 +42,22 @@ const bodySchema = z.object({
 
 // ── Pricing (CAD) — midpoint of published ranges, override via env ──────────
 
-const BRIEF_AMOUNT_CENTS = 120000; // $1,200 CAD (canonical)
-const DIAGNOSTIC_AMOUNT_CENTS = 650000; // $6,500 CAD (canonical)
-
 function buildLineItems(
   tierId: 'executive_continuity_brief' | 'institutional_continuity_diagnostic',
   currency: string,
+  verifiedPriceId?: string,
 ) {
-  const priceIdBrief = process.env.STRIPE_PRICE_ICRA_BRIEF;
-  const priceIdDiagnostic = process.env.STRIPE_PRICE_ICRA_DIAGNOSTIC;
 
   if (tierId === 'executive_continuity_brief') {
-    if (priceIdBrief) {
-      return [{ price: priceIdBrief, quantity: 1 }];
+    if (verifiedPriceId) {
+      return [{ price: verifiedPriceId, quantity: 1 }];
     }
     return [
       {
         price_data: {
           currency,
           product_data: { name: 'Leadership Briefing Report' },
-          unit_amount: BRIEF_AMOUNT_CENTS,
+          unit_amount: ICRA_PAID_REPORT_PRICES.executive_continuity_brief.amountCents,
         },
         quantity: 1,
       },
@@ -68,15 +65,15 @@ function buildLineItems(
   }
 
   // institutional_continuity_diagnostic
-  if (priceIdDiagnostic) {
-    return [{ price: priceIdDiagnostic, quantity: 1 }];
+  if (verifiedPriceId) {
+    return [{ price: verifiedPriceId, quantity: 1 }];
   }
   return [
     {
       price_data: {
         currency,
         product_data: { name: 'Institutional Continuity Diagnostic' },
-        unit_amount: DIAGNOSTIC_AMOUNT_CENTS,
+        unit_amount: ICRA_PAID_REPORT_PRICES.institutional_continuity_diagnostic.amountCents,
       },
       quantity: 1,
     },
@@ -86,7 +83,7 @@ function buildLineItems(
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const intake = await guardPublicIntake(request, { bucket: 'checkout' });
+  const intake = await guardPublicIntake(request, { bucket: 'checkout', challenge: true });
   if (!intake.ok) return intake.response;
 
   const parse = bodySchema.safeParse(intake.json);
@@ -102,26 +99,30 @@ export async function POST(request: NextRequest) {
   // Verify the assessment exists AND the caller holds its capability
   // (prevent arbitrary UUID injection / unlocking someone else's report).
   let existingTierId: string | null = null;
+  let assessmentStatus: string | null = null;
   try {
     const capResult = await withSystemContext(async (tx): Promise<
-      { denied: CapabilityDenialReason; tierId: null } | { denied: null; tierId: string }
+      { denied: CapabilityDenialReason; tierId: null; status: null } | { denied: null; tierId: string; status: string }
     > => {
       const [row] = await tx
         .select({
           reportTierId: icraAssessments.reportTierId,
+          status: icraAssessments.status,
           capabilityTokenHash: icraAssessments.capabilityTokenHash,
           capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+          claimedAt: icraAssessments.claimedAt,
+          claimedOrgId: icraAssessments.claimedOrgId,
+          claimedByUserId: icraAssessments.claimedByUserId,
         })
         .from(icraAssessments)
         .where(eq(icraAssessments.id, assessmentId))
         .limit(1);
 
-      const presented = extractCapabilityToken(request, assessmentId);
-      const capCheck = checkCapability(presented, row);
+      const capCheck = await authorizeAssessmentAccess(request, assessmentId, row);
       if (!capCheck.ok) {
-        return { denied: capCheck.reason, tierId: null };
+        return { denied: capCheck.reason, tierId: null, status: null };
       }
-      return { denied: null, tierId: row!.reportTierId ?? 'continuity_reflection' };
+      return { denied: null, tierId: row!.reportTierId ?? 'continuity_reflection', status: String(row!.status) };
     });
 
     if (capResult.denied) {
@@ -131,9 +132,16 @@ export async function POST(request: NextRequest) {
       );
     }
     existingTierId = capResult.tierId;
+    assessmentStatus = capResult.status;
   } catch (err) {
     logger.error('[icra-checkout] DB lookup failed', { assessmentId, err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+
+  // A report is bought for an assessment that has been submitted: a draft has no results to unlock, and a purchase made against it
+  // would be paid for and then refused by the report route.
+  if (assessmentStatus !== 'submitted' && assessmentStatus !== 'completed') {
+    return NextResponse.json({ error: 'The assessment must be submitted before a report can be purchased' }, { status: 409 });
   }
 
   // Idempotency: already at or above this tier
@@ -152,19 +160,55 @@ export async function POST(request: NextRequest) {
   }
 
   // Build the checkout session
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  // The buyer is sent back to this origin after paying. Outside development a missing configuration is a refusal, not a redirect to a
+  // host that is not the application: a customer would pay and land on localhost.
+  const baseUrl = resolveIcraEmailOrigin(
+    process.env.NEXT_PUBLIC_APP_URL,
+    'http://localhost:3000',
+    process.env.NODE_ENV === 'production',
+  );
+  if (!baseUrl) {
+    logger.error('[icra-checkout] canonical HTTPS application origin is not configured or invalid');
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   const successUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}?tier_unlocked=${tierId}`;
   const cancelUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}`;
 
+  // The public report gate advertises CAD 1,200 / CAD 6,500. A configured
+  // Stripe Price ID is not authority to charge a different amount or currency.
+  // Verify the live Price before creating a payable session (fail closed if
+  // Stripe is unavailable, the Price was archived, or the amount changed).
   const currency = (process.env.STRIPE_DEFAULT_CURRENCY ?? 'CAD').toLowerCase();
+  if (currency !== 'cad') {
+    logger.error('[icra-checkout] configured currency conflicts with published CAD pricing');
+    return NextResponse.json({ error: 'Checkout pricing unavailable' }, { status: 503 });
+  }
+  const configuredPriceId = (tierId === 'executive_continuity_brief'
+    ? process.env.STRIPE_PRICE_ICRA_BRIEF
+    : process.env.STRIPE_PRICE_ICRA_DIAGNOSTIC)?.trim();
+  const expectedAmount = ICRA_PAID_REPORT_PRICES[tierId].amountCents;
 
   try {
     const stripe = getStripeClient();
+    if (configuredPriceId) {
+      try {
+        const price = await stripe.prices.retrieve(configuredPriceId);
+        if (price.id !== configuredPriceId || !price.active ||
+            price.currency.toLowerCase() !== 'cad' ||
+            price.unit_amount !== expectedAmount ||
+            price.type !== 'one_time' || price.recurring != null) {
+          logger.error('[icra-checkout] Stripe Price does not match published tier pricing', { tierId });
+          return NextResponse.json({ error: 'Checkout pricing unavailable' }, { status: 503 });
+        }
+      } catch {
+        logger.error('[icra-checkout] unable to verify configured Stripe Price', { tierId });
+        return NextResponse.json({ error: 'Checkout pricing unavailable' }, { status: 503 });
+      }
+    }
     const checkoutParams = {
       mode: 'payment',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      line_items: buildLineItems(tierId, currency) as any,
+      line_items: buildLineItems(tierId, currency, configuredPriceId) as any,
       managed_payments: { enabled: true },
       success_url: successUrl,
       cancel_url: cancelUrl,

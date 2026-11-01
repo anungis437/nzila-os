@@ -119,7 +119,10 @@ export const arbitrationDecisions = pgTable("arbitration_decisions", {
   embedding: text("embedding"), // Vector embedding as text
   
   // Public access
-  isPublic: boolean("is_public").default(true),
+  // Private by default (platform 0051): a new decision is not published to every organization.
+  isPublic: boolean("is_public").default(false),
+  // The organization that supplied the decision; NULL for a platform-supplied one (platform 0051).
+  sourceOrganizationId: uuid("source_organization_id"),
   accessRestrictions: text("access_restrictions"),
   
   // Audit

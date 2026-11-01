@@ -13,8 +13,10 @@
  * ORGANIZATIONALLY FRAMED — not about individuals, about organizational resilience.
  */
 
-import { and, eq } from 'drizzle-orm';
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
+import { ApiError } from '@/lib/api/errors';
 import { exitInterviews } from '@/db/schema';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { DependencyNode, PropagationMap } from '../propagation/propagation-models';
@@ -38,7 +40,8 @@ async function loadPublishedInterviews(orgId: string) {
   return db
     .select()
     .from(exitInterviews)
-    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 }
 
 /**
@@ -58,10 +61,16 @@ export async function simulateContinuityImpact(
   const baselineContinuityScore = calculateBaselineContinuity(propagationMap, interviews.length);
 
   // Identify affected nodes
-  const affectedNodes = propagationMap.nodes.filter((n) => scenario.affectedNodeIds.includes(n.id));
+  // A node is affected when it is named or when it is associated with an affected role.
+  const affectedRoles = new Set((scenario.affectedRoles ?? []).map((role) => role.trim().toLowerCase()).filter(Boolean));
+  const affectedNodes = propagationMap.nodes.filter(
+    (n) =>
+      scenario.affectedNodeIds.includes(n.id) ||
+      (n.associatedRoles ?? []).some((role) => affectedRoles.has(role.trim().toLowerCase())),
+  );
   if (affectedNodes.length === 0) {
-    // Safety: if no direct matches, return minimal impact
-    return buildMinimalSimulation(orgId, scenario, baselineContinuityScore);
+    // A scenario that matches nothing says nothing about resilience; it must not be answered with a reassuring result.
+    throw ApiError.badRequest('The scenario matches no dependency node or role in this organization, so nothing was simulated.');
   }
 
   // Compute per-domain impacts
@@ -362,31 +371,4 @@ function assessRedundancy(affectedNodes: DependencyNode[], _propagationMap: Prop
   if (singleSourceCount === affectedNodes.length) return 'none';
   if (singleSourceCount >= Math.ceil(affectedNodes.length * 0.5)) return 'weak';
   return 'moderate';
-}
-
-function buildMinimalSimulation(
-  orgId: string,
-  scenario: SimulationScenario,
-  baselineContinuityScore: number,
-): ContinuitySimulationResult {
-  return {
-    organizationId: orgId,
-    generatedAt: new Date().toISOString(),
-    scenario,
-    baselineContinuityScore,
-    immediateImpactScore: 20,
-    twelveWeekProjection: baselineContinuityScore - 15,
-    overallImpactSeverity: 'low',
-    domainImpacts: [],
-    degradationTimeline: [],
-    exacerbatedWeaknesses: [],
-    immediateActions: ['Review scenario parameters and retry'],
-    mitigation30Day: [],
-    remediation90Day: [],
-    recoveryEffortEstimate: 'low',
-    autonomousRecoveryProbability: 85,
-    governanceBodiesAffected: 0,
-    complianceRiskCreated: false,
-    executiveSummary: 'Scenario parameters did not match available organizational knowledge. Review and retry.',
-  };
 }

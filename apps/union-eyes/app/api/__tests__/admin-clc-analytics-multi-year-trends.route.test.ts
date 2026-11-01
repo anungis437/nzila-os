@@ -19,60 +19,92 @@ vi.mock('@/lib/rate-limiter', () => ({
 vi.mock('@/services/clc/compliance-reports', () => ({ analyzeMultiYearTrends: m.analyzeMultiYearTrends }));
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
 vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR' },
+  ErrorCode: {
+    AUTH_REQUIRED: 'AUTH_REQUIRED',
+    FORBIDDEN: 'FORBIDDEN',
+    VALIDATION_ERROR: 'VALIDATION_ERROR',
+    INTERNAL_ERROR: 'INTERNAL_ERROR',
+  },
   standardErrorResponse: m.standardErrorResponse,
 }));
 
 async function loadRoute() {
   return import('../admin/clc/analytics/multi-year-trends/route');
 }
+const request = (query = '') =>
+  new NextRequest('http://localhost/api/admin/clc/analytics/multi-year-trends' + query);
+const authorized = { userId: 'user-1', organizationId: 'org-1' };
 
-describe('admin/clc/analytics/multi-year-trends route', () => {
+describe('admin/clc/analytics/multi-year-trends route: tenant and financial controls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withRoleAuth.mockImplementation((_role: string, handler: any) =>
-      (request: NextRequest, context: any = { userId: 'u1' }) => handler(request, context));
+      (req: NextRequest, context: any = authorized) => handler(req, context));
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
-    m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '49' });
-    m.analyzeMultiYearTrends.mockResolvedValue({ years: 5, trend: [] });
-    m.standardErrorResponse.mockImplementation((code: string, message: string) =>
-      new Response(JSON.stringify({ code, message }), { status: code === 'VALIDATION_ERROR' ? 400 : 500 }));
+    m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '0' });
+    m.analyzeMultiYearTrends.mockResolvedValue({ years: [2024, 2025, 2026], trend: [] });
+    m.standardErrorResponse.mockImplementation((code: string, message: string) => {
+      const status: Record<string, number> = {
+        AUTH_REQUIRED: 401, FORBIDDEN: 403, VALIDATION_ERROR: 400, INTERNAL_ERROR: 500,
+      };
+      return new Response(JSON.stringify({ code, message }), { status: status[code] ?? 500 });
+    });
   });
 
-  it('returns 429 when rate limit is exceeded', async () => {
+  it('denies a missing authenticated actor before rate limiting or financial access', async () => {
     const { GET } = await loadRoute();
-    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 120 });
+    const response = await GET(request(), { userId: undefined, organizationId: 'org-1' });
+    expect(response.status).toBe(401);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
+  });
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/multi-year-trends?years=5'));
+  it('denies a missing organization before rate limiting or financial access', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(request(), { userId: 'user-1', organizationId: null });
+    expect(response.status).toBe(403);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
+  });
 
+  it('rate-limits before querying financial data', async () => {
+    const { GET } = await loadRoute();
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
+    const response = await GET(request('?years=5'), authorized);
     expect(response.status).toBe(429);
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
   });
 
-  it('returns 400 for invalid years parameter', async () => {
+  it.each(['4', '5foo', '3.5', '', 'NaN', '0', 'Infinity'])(
+    'rejects unsupported or malformed years=%s without financial access',
+    async years => {
+      const { GET } = await loadRoute();
+      const response = await GET(request('?years=' + encodeURIComponent(years)), authorized);
+      expect(response.status).toBe(400);
+      expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
+    },
+  );
+
+  it('uses only the authenticated tenant and no-store cache headers', async () => {
     const { GET } = await loadRoute();
-
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/multi-year-trends?years=4'));
-
-    expect(response.status).toBe(400);
-  });
-
-  it('returns trends for valid years parameter', async () => {
-    const { GET } = await loadRoute();
-
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/multi-year-trends?years=10'));
-    const payload = await response.json();
-
+    const response = await GET(request('?years=5&organizationId=org-2'), authorized);
     expect(response.status).toBe(200);
-    expect(payload).toMatchObject({ years: 5, trend: [] });
-    expect(m.analyzeMultiYearTrends).toHaveBeenCalledWith({ years: 10 });
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(m.analyzeMultiYearTrends).toHaveBeenCalledWith({ years: 5, organizationId: 'org-1' });
+    expect(m.checkRateLimit).toHaveBeenCalledWith('user-1', expect.anything());
   });
 
-  it('returns 500 when trend analysis fails', async () => {
+  it('uses five years when the parameter is absent', async () => {
     const { GET } = await loadRoute();
-    m.analyzeMultiYearTrends.mockRejectedValueOnce(new Error('service down'));
+    const response = await GET(request(), authorized);
+    expect(response.status).toBe(200);
+    expect(m.analyzeMultiYearTrends).toHaveBeenCalledWith({ years: 5, organizationId: 'org-1' });
+  });
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/multi-year-trends?years=5'));
-
+  it('returns an error rather than synthetic data when the service fails', async () => {
+    const { GET } = await loadRoute();
+    m.analyzeMultiYearTrends.mockRejectedValueOnce(new Error('database unavailable'));
+    const response = await GET(request('?years=3'), authorized);
     expect(response.status).toBe(500);
   });
 });

@@ -83,12 +83,12 @@ export const authorityKernelEntries: StorageAuthorityEntry[] = [
   tenant('ue_authority_disclosure_consents', 'Member-issued referral consents and counsel-issued disclosure records. UPDATE is limited by trigger to revocation.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_approval_requests', 'Governance approval requests. Status resolves only as a consequence of a decision row, enforced by trigger.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_approval_decisions', 'One-person-one-vote approval decisions, validated by trigger under a row lock on the request. Immutable after insert.', ['SELECT', 'INSERT']),
-  tenant('ue_authority_events', 'In-transaction record of every authority mutation, written by trigger. Immutable. A deferred constraint trigger refuses commit unless the canonical audit chain names the event.', ['SELECT', 'INSERT']),
+  tenant('ue_authority_events', 'In-transaction record of every authority mutation, written by trigger. Immutable. A deferred constraint trigger refuses commit unless the canonical audit chain names the event. Cache 0047 adds a restrictive SELECT policy so an event of a governance review is visible only where that review is; events of every other relation stay organization-readable.', ['SELECT', 'INSERT']),
   tenant('ue_authority_issuance_rules', 'Versioned, provenance-backed issuance policy. Inactive until activated with a real source instrument and two approvers other than the drafter. UPDATE is limited by trigger to activation and retirement.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_acceptances', 'Holder acceptance of a mandate or delegation that requires it. Insert-only, one per instrument, holder only.', ['SELECT', 'INSERT']),
   tenant('ue_authority_requests', 'Idempotency records for authority operations. The result may be written once.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_financial_steps', 'Append-only financial workflow ledger (registered, prepared, approved, executed, reconciled, voided) with trigger-enforced ordering and segregation of duties. Snapshots the amount at registration.', ['SELECT', 'INSERT']),
-  tenant('ue_authority_reviews', 'Governance review register: complainant, adverse parties, classification, remediation owner. UPDATE is limited by trigger to status and remediation owner.', ['SELECT', 'INSERT', 'UPDATE']),
+  tenant('ue_authority_reviews', 'Governance review register: complainant, adverse parties, classification, remediation owner. UPDATE is limited by trigger to status and remediation owner. Cache 0047 adds a restrictive SELECT policy: a principal named as adverse sees nothing, and every other principal sees only the reviews they opened or filed or that a live, accepted, unrecused governance_review mandate names.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_workaid_matters', 'Union-side WorkAid referral references only; never counsel content. UPDATE is limited by trigger to counsel acceptance and withdrawal.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_counsel_engagements', 'Institution-recorded appointment of counsel to one matter: capacity, information barrier and term. References only. UPDATE is limited by trigger to revocation.', ['SELECT', 'INSERT', 'UPDATE']),
   tenant('ue_authority_counsel_nonces', 'Durable single-use register of consumed counsel assertion nonces (SHA-256 only). Insert-only; uniqueness is the replay control.', ['SELECT', 'INSERT']),
@@ -97,4 +97,18 @@ export const authorityKernelEntries: StorageAuthorityEntry[] = [
   workaidTenant('ue_authority_workaid_document_auths', 'Per-document authorisation by the consenting member, bounded by the consent. UPDATE is limited by trigger to revocation, which is terminal and immediate.', ['SELECT', 'INSERT', 'UPDATE']),
   workaidTenant('ue_authority_workaid_shares', 'What the union has released toward counsel (categories or one authorised document). UPDATE is limited by trigger to invalidation, written in the same transaction as the revocation that causes it.', ['SELECT', 'INSERT', 'UPDATE']),
   workaidTenant('ue_authority_workaid_counsel_access', 'Append-only record of each manifest served to a verified counsel session. Insert-only; every UPDATE is refused by trigger.', ['SELECT', 'INSERT']),
+  {
+    ...workaidTenant(
+      'ue_authority_workaid_consent_text_proposals',
+      'A proposed consent text supplied by the institution. UPDATE is limited by trigger to adoption by a different executive or withdrawal by the proposer. Adoption is what inserts a current consent text. No wording is stored by the migration.',
+      ['SELECT', 'INSERT', 'UPDATE'],
+    ),
+    scopeDisposition: 'OTHER_EXPLICITLY_JUSTIFIED' as const,
+    reason: 'Direct organization_id uuid NOT NULL, created by unqualified platform migration 0036 and protected by scoped 0028 (FORCE RLS). Not a Drizzle census declaration: the census stays 231 until VS Code regenerates it. A proposal is not current consent wording. Reached only through lib/authority/store/workaid-disclosure inside runAuthorityTransaction on the tenant runtime identity. No DELETE. No schema authority.',
+    supportingCapability: [
+      ...WORKAID_SUPPORT,
+      'db/migrations-platform/0036_workaid_consent_wording_proposals.sql',
+      'db/migrations-cache/0028_workaid_consent_wording_proposal_rls.sql',
+    ],
+  },
 ]

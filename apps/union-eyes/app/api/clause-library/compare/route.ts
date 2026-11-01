@@ -13,23 +13,16 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
-import { organizations } from '@/db/schema-organizations';
 import { and, eq, inArray, sql } from 'drizzle-orm';
-import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { canReadSharedClause } from '@/lib/clause-library/sharing-authority';
+import { canReadSharedClause, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
+import { commonKeywords } from '@/lib/clause-library/common-keywords';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: { tags: ['Clause-library'], summary: 'Compare endpoint (GET stub)' },
-  },
-  async () => {
-    return { message: 'Use POST with clauseIds array to compare clauses' };
-  },
-);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const POST = withApi(
   {
@@ -37,19 +30,23 @@ export const POST = withApi(
     openapi: { tags: ['Clause-library'], summary: 'Compare multiple clauses' },
   },
   async ({ request, userId, organizationId }) => {
-    const body = await request.json();
-    const { clauseIds } = body;
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const body = await request.json().catch(() => null);
+    const clauseIds: unknown = body?.clauseIds;
 
-    if (!clauseIds || !Array.isArray(clauseIds) || clauseIds.length < 2) {
+    if (!Array.isArray(clauseIds) || clauseIds.length < 2) {
       throw ApiError.badRequest('At least 2 clause IDs are required');
+    }
+    if (!clauseIds.every((id) => typeof id === 'string' && UUID.test(id))) {
+      throw ApiError.badRequest('Every clause ID must be a valid id');
     }
 
     if (clauseIds.length > 10) {
       throw ApiError.badRequest('Maximum 10 clauses can be compared at once');
     }
 
-    return withSystemContext(async (tx) => {
+    // As the tenant: the policy already withholds what this organization may not read, and the per-row rule below states the same rule.
+    return withRLSContext({ organizationId }, async (tx) => {
       const rows = await tx
         .select({
           id: sharedClauseLibrary.id,
@@ -58,16 +55,15 @@ export const POST = withApi(
           clauseText: sharedClauseLibrary.clauseText,
           clauseType: sharedClauseLibrary.clauseType,
           sharingLevel: sharedClauseLibrary.sharingLevel,
+          isAnonymized: sharedClauseLibrary.isAnonymized,
           sharedWithOrgIds: sharedClauseLibrary.sharedWithOrgIds,
           sector: sharedClauseLibrary.sector,
           province: sharedClauseLibrary.province,
           effectiveDate: sharedClauseLibrary.effectiveDate,
           expiryDate: sharedClauseLibrary.expiryDate,
           sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-          organizationName: organizations.name,
         })
         .from(sharedClauseLibrary)
-        .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
         .where(inArray(sharedClauseLibrary.id, clauseIds));
 
       const authorizedRows = (
@@ -88,6 +84,7 @@ export const POST = withApi(
         .from(clauseLibraryTags)
         .where(inArray(clauseLibraryTags.clauseId, authorizedIds));
 
+      const sourceNames = await sourceNamesFor(authorizedRows, organizationId);
       const clauses = authorizedRows.map((r) => ({
         id: r.id,
         clauseNumber: r.clauseNumber,
@@ -99,13 +96,13 @@ export const POST = withApi(
         province: r.province,
         effectiveDate: r.effectiveDate,
         expiryDate: r.expiryDate,
-        sourceOrganization: { id: r.sourceOrganizationId, organizationName: r.organizationName },
+        sourceOrganization: clauseSourceProjection({ ...r, organizationName: sourceNames.get(r.sourceOrganizationId) ?? null }, organizationId),
         tags: allTags.filter((t) => t.clauseId === r.id).map((t) => ({ tagName: t.tagName })),
       }));
 
-      // The counter lives on rows other organizations own, so it is written under the system role. Each increment is
-      // bound to the owning organization the read authorization was evaluated against, and is audited to the comparer.
-      for (const authorized of authorizedRows) {
+      // The usage counter is the owner own record: a comparison by another organization is a read and changes nothing
+      // it owns, so only the caller own clauses are counted.
+      for (const authorized of authorizedRows.filter((row) => row.sourceOrganizationId === organizationId)) {
         await tx
           .update(sharedClauseLibrary)
           .set({ comparisonCount: sql`${sharedClauseLibrary.comparisonCount} + 1` })
@@ -138,7 +135,7 @@ export const POST = withApi(
             uniqueTypes: types.size,
             uniqueSectors: sectorSet.size,
           },
-          commonKeywords: [],
+          commonKeywords: commonKeywords(clauses.map((c) => c.clauseText)),
         },
       };
     });

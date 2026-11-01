@@ -275,29 +275,43 @@ describe("notifications routes", () => {
     expect(r.statusCode).toBe(500);
   });
 
-  it("processes pending notifications", async () => {
+  it("processes pending notifications for the header tenant", async () => {
     svc.notify.processPendingNotifications.mockResolvedValue(5);
-    const r = await invokeRoute(notificationsRouter, "post", "/process", { body: { batchSize: "10" } });
+    const r = await invokeRoute(notificationsRouter, "post", "/process", { headers: ORG_HEADERS, body: { batchSize: "10" } });
     expect(r.statusCode).toBe(200);
     expect((r.body as any).processed).toBe(5);
+    expect(svc.notify.processPendingNotifications).toHaveBeenCalledWith("org-1", 10);
+  });
+
+  it("refuses to process notifications without a tenant", async () => {
+    const r = await invokeRoute(notificationsRouter, "post", "/process", { body: { batchSize: "10" } });
+    expect(r.statusCode).toBe(400);
+    expect(svc.notify.processPendingNotifications).not.toHaveBeenCalled();
   });
 
   it("returns 500 on process error", async () => {
     svc.notify.processPendingNotifications.mockRejectedValue(new Error("boom"));
-    const r = await invokeRoute(notificationsRouter, "post", "/process", { body: {} });
+    const r = await invokeRoute(notificationsRouter, "post", "/process", { headers: ORG_HEADERS, body: {} });
     expect(r.statusCode).toBe(500);
   });
 
-  it("retries failed notifications", async () => {
+  it("retries failed notifications for the header tenant", async () => {
     svc.notify.retryFailedNotifications.mockResolvedValue(2);
-    const r = await invokeRoute(notificationsRouter, "post", "/retry-failed", { body: { maxAttempts: "5" } });
+    const r = await invokeRoute(notificationsRouter, "post", "/retry-failed", { headers: ORG_HEADERS, body: { maxAttempts: "5" } });
     expect(r.statusCode).toBe(200);
     expect((r.body as any).retried).toBe(2);
+    expect(svc.notify.retryFailedNotifications).toHaveBeenCalledWith("org-1", 5);
+  });
+
+  it("refuses to retry notifications without a tenant", async () => {
+    const r = await invokeRoute(notificationsRouter, "post", "/retry-failed", { body: {} });
+    expect(r.statusCode).toBe(400);
+    expect(svc.notify.retryFailedNotifications).not.toHaveBeenCalled();
   });
 
   it("returns 500 on retry error", async () => {
     svc.notify.retryFailedNotifications.mockRejectedValue(new Error("boom"));
-    const r = await invokeRoute(notificationsRouter, "post", "/retry-failed", { body: {} });
+    const r = await invokeRoute(notificationsRouter, "post", "/retry-failed", { headers: ORG_HEADERS, body: {} });
     expect(r.statusCode).toBe(500);
   });
 

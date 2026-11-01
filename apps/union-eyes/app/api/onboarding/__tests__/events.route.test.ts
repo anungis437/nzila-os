@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   persistAtomicAudit: vi.fn(),
   withRLSContext: vi.fn(),
   insertValues: vi.fn(),
+  verify: vi.fn(),
 }))
 
 const tx = {
@@ -20,6 +21,7 @@ vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }))
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }))
 vi.mock('@/db/schema', () => ({ pilotEvents: { id: 'id' } }))
+vi.mock('@/lib/pilot/onboarding-event-evidence', () => ({ verifyOnboardingMilestone: m.verify }))
 
 const ctx = { organizationId: 'org_1', userId: 'u1' }
 const post = async (body: unknown, route: 'events' | 'transfers' = 'events') => {
@@ -39,6 +41,7 @@ describe('onboarding/events route — event and audit commit together', () => {
     vi.clearAllMocks()
     m.hasMinRole.mockResolvedValue(true)
     m.persistAtomicAudit.mockResolvedValue(undefined)
+    m.verify.mockResolvedValue({ ok: true, evidence: { memberRole: 'steward' } })
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (t: unknown) => Promise<unknown>) => fn(tx))
   })
 
@@ -85,10 +88,37 @@ describe('onboarding/events route — event and audit commit together', () => {
     expect(m.withRLSContext).not.toHaveBeenCalled()
   })
 
-  it('the transfers route delegates to the same audited handler', async () => {
-    const res = await post({ eventType: 'user_invited', targetUserId: 'u3' }, 'transfers')
+  it('F06 A4: records nothing when the organization data does not show the milestone the caller asserts', async () => {
+    m.verify.mockResolvedValueOnce({ ok: false, reason: 'the target member does not hold that role' })
 
-    expect(res.status).toBe(200)
-    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1)
+    const res = await post({ eventType: 'role_assigned', targetUserId: 'u2', role: 'admin' })
+
+    expect(res.status).toBe(409)
+    expect(JSON.stringify(await res.json())).toContain('does not hold that role')
+    expect(m.insertValues).not.toHaveBeenCalled()
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled()
+    expect(m.verify).toHaveBeenCalledWith(tx, 'org_1', 'role_assigned', 'u2', 'admin')
+  })
+
+  it('F06 A4: stamps the event and audit with what was verified', async () => {
+    await post({ eventType: 'role_assigned', targetUserId: 'u2', role: 'steward' })
+
+    expect(m.insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: expect.objectContaining({ verifiedAgainst: 'organization_members' }) }),
+    )
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({ details: expect.objectContaining({ evidence: { memberRole: 'steward' } }) }),
+    )
+  })
+
+  it('the transfers route no longer reuses the audited handler: it answers 501 and records nothing', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { resolve } = await import('node:path')
+    const source = readFileSync(resolve(__dirname, '../transfers/route.ts'), 'utf8')
+
+    expect(source).toContain('ApiError.notImplemented')
+    expect(source).not.toContain('persistAtomicAudit')
+    expect(source).not.toContain('events/route')
   })
 })

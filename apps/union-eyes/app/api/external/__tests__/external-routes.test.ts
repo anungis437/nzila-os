@@ -23,11 +23,13 @@ const mocks = vi.hoisted(() => {
     authorizeExternalDocumentAccess: vi.fn(),
     generateSasUrl: vi.fn(),
     resolveStoredBlob: vi.fn(),
+    audit: vi.fn(),
   };
 });
 
 vi.mock('@/db/db', () => ({ db: mocks.db }));
 vi.mock('@/lib/api-auth-guard', () => ({ requireUser: mocks.requireUser }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: mocks.withRLSContext,
   withExplicitUserContext: mocks.withExplicitUserContext,
@@ -36,14 +38,15 @@ vi.mock('@/lib/services/external-resource-authorization-service', () => ({
   authorizeExternalMatterAccess: mocks.authorizeExternalMatterAccess,
   authorizeExternalDocumentAccess: mocks.authorizeExternalDocumentAccess,
 }));
-vi.mock('@/lib/blob-client', () => ({ generateSasUrl: mocks.generateSasUrl }));
+vi.mock('@/lib/blob-client', () => ({ generateSasUrl: mocks.generateSasUrl, readBlobBounded: vi.fn(), BlobTooLargeError: class extends Error {} }));
 vi.mock('@/lib/services/document-blob-integrity-service', () => ({ resolveStoredBlob: mocks.resolveStoredBlob }));
 
 describe('external resource routes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.selectQueue.length = 0;
-    mocks.withRLSContext.mockImplementation(async (_context: unknown, operation: () => Promise<unknown>) => operation());
+    mocks.audit.mockReset().mockResolvedValue(undefined);
+    mocks.withRLSContext.mockImplementation(async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) => operation(mocks.db));
     mocks.withExplicitUserContext.mockImplementation(async (_userId: string, operation: () => Promise<unknown>) => operation());
     mocks.requireUser.mockResolvedValue({ userId: '11111111-1111-1111-1111-111111111111', organizationId: '22222222-2222-2222-2222-222222222222' });
     mocks.authorizeExternalMatterAccess.mockResolvedValue({
@@ -152,7 +155,7 @@ describe('external resource routes', () => {
     expect(response.status).toBe(200);
     expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(expect.objectContaining({
       matterId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    }));
+    }), { recordAllowed: false });
   });
 
   it('resolves the dynamic grievance id from a promised params object', async () => {
@@ -182,7 +185,7 @@ describe('external resource routes', () => {
     expect(response.status).toBe(200);
     expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(expect.objectContaining({
       matterId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    }));
+    }), { recordAllowed: false });
   });
 
   it('denies exact matter routes when a revoked or otherwise invalid authority is reported', async () => {
@@ -257,6 +260,50 @@ describe('external resource routes', () => {
     expect(mocks.generateSasUrl).not.toHaveBeenCalled();
   });
 
+  const uploadActor = '11111111-1111-1111-1111-111111111111';
+  const uploadMatter = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const uploadOrg = '99999999-9999-9999-9999-999999999999';
+
+  function seedMatterGrant(over: Record<string, unknown> = {}) {
+    mocks.selectQueue.push([{
+      id: '44444444-4444-4444-4444-444444444444',
+      authorityId: '33333333-3333-3333-3333-333333333333',
+      organizationId: uploadOrg,
+      userId: uploadActor,
+      representativeOrganizationId: '22222222-2222-2222-2222-222222222222',
+      matterType: 'grievance',
+      matterId: uploadMatter,
+      status: 'active',
+      revokedAt: null,
+      expiresAt: null,
+      canUploadDocuments: true,
+      canViewDocuments: true,
+      canDownloadDocuments: false,
+      grantedBy: 'union-issuer',
+      ...over,
+    }]);
+  }
+
+  async function postUpload(body: Record<string, unknown>) {
+    const { POST } = await import('@/app/api/external/grievances/[id]/documents/upload/route');
+    return POST(
+      new Request(`https://example.test/api/external/grievances/${uploadMatter}/documents/upload?organizationId=${uploadOrg}`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+      { params: { id: uploadMatter } },
+    );
+  }
+
+  const uploadBody = {
+    title: 'Specialist upload',
+    filename: 'specialist-upload.pdf',
+    blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
+    documentType: 'evidence',
+    mimeType: 'application/pdf',
+    fileSize: 1234,
+  };
+
   it('populates the live document org id compatibility column for external uploads', async () => {
     const insertedDocument = {
       id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
@@ -273,39 +320,144 @@ describe('external resource routes', () => {
       })),
     };
     mocks.db.insert.mockImplementation(tx.insert);
+    seedMatterGrant();
 
-    const { POST } = await import('@/app/api/external/grievances/[id]/documents/upload/route');
-    const response = await POST(
-      new Request('https://example.test/api/external/grievances/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/documents/upload?organizationId=99999999-9999-9999-9999-999999999999', {
-        method: 'POST',
-        body: JSON.stringify({
-          title: 'Specialist upload',
-          filename: 'specialist-upload.pdf',
-          blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
-          documentType: 'evidence',
-          mimeType: 'application/pdf',
-          fileSize: 1234,
-        }),
-      }),
-      { params: { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' } },
-    );
+    const response = await postUpload(uploadBody);
 
     expect(response.status).toBe(201);
     expect(mocks.withExplicitUserContext).toHaveBeenCalledWith(
-      '11111111-1111-1111-1111-111111111111',
+      uploadActor,
       expect.any(Function),
-      '99999999-9999-9999-9999-999999999999',
+      uploadOrg,
     );
     expect(valuesByTable[0]).toMatchObject({
-      organizationId: '99999999-9999-9999-9999-999999999999',
-      orgId: '99999999-9999-9999-9999-999999999999',
+      organizationId: uploadOrg,
+      orgId: uploadOrg,
       category: 'other',
       blobContainer: 'union-eyes',
       blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
       contentType: 'application/pdf',
       sizeBytes: 1234,
       sha256: '0'.repeat(64),
-      uploadedBy: '11111111-1111-1111-1111-111111111111',
+      uploadedBy: uploadActor,
+      privacyLabel: 'case_restricted',
     });
+    expect(valuesByTable[3]).toMatchObject({
+      grantedBy: 'union-issuer',
+      canView: true,
+      canDownload: false,
+      canShare: false,
+      userId: uploadActor,
+      matterGrantId: '44444444-4444-4444-4444-444444444444',
+    });
+  });
+
+  // DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE
+  it('refuses a stored object another document already holds, and inserts nothing', async () => {
+    seedMatterGrant();
+    mocks.selectQueue.push([{ id: 'existing-document' }]);
+
+    const response = await postUpload(uploadBody);
+
+    expect(response.status).toBe(409);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+
+  it('refuses a stored object that is already a version of another document', async () => {
+    seedMatterGrant();
+    mocks.selectQueue.push([], [{ id: 'existing-version' }]);
+
+    const response = await postUpload(uploadBody);
+
+    expect(response.status).toBe(409);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+
+  it('rejects a privilege label before any external upload insert', async () => {
+    const response = await postUpload({ ...uploadBody, privacyLabel: 'privileged' });
+    expect(response.status).toBe(400);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+    expect(mocks.db.select).not.toHaveBeenCalled();
+  });
+
+  it('refuses an external upload when the representative issued the matter grant', async () => {
+    seedMatterGrant({ grantedBy: uploadActor });
+    const response = await postUpload(uploadBody);
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body).toEqual({ error: 'Forbidden' });
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+});
+
+describe('external resource middleware: a read and its record are one transaction (F06 A5)', () => {
+  const GRIEVANCE = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const ORGANIZATION = '99999999-9999-9999-9999-999999999999';
+  const read = async () => {
+    const { GET } = await import('@/app/api/external/grievances/[id]/route');
+    return GET(new Request(`https://example.test/api/external/grievances/${GRIEVANCE}?organizationId=${ORGANIZATION}`), { id: GRIEVANCE });
+  };
+  const row = { id: GRIEVANCE, grievanceNumber: 'GRV-1', title: 'T', type: 'individual', status: 'filed', priority: 'medium', step: 'step_1', filedDate: new Date('2026-01-01T00:00:00.000Z') };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.selectQueue.length = 0;
+    mocks.audit.mockReset().mockResolvedValue(undefined);
+    mocks.withRLSContext.mockImplementation(async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) => operation(mocks.db));
+    mocks.requireUser.mockResolvedValue({ userId: '11111111-1111-1111-1111-111111111111', organizationId: '22222222-2222-2222-2222-222222222222' });
+    mocks.authorizeExternalMatterAccess.mockResolvedValue({ allowed: true, reason: 'allowed', authorityId: 'auth-1', matterGrantId: 'grant-1' });
+  });
+
+  it('records the read, with the decision it rested on, on the same transaction as the read', async () => {
+    mocks.selectQueue.push([row]);
+
+    const response = await read();
+
+    expect(response.status).toBe(200);
+    expect(mocks.audit).toHaveBeenCalledTimes(1);
+    expect(mocks.audit).toHaveBeenCalledWith(
+      mocks.db,
+      expect.objectContaining({
+        organizationId: ORGANIZATION,
+        userId: '11111111-1111-1111-1111-111111111111',
+        action: 'external.resource.read',
+        resourceId: expect.any(String),
+        details: expect.objectContaining({ reason: 'allowed', authorityId: 'auth-1', matterGrantId: 'grant-1', method: 'GET', status: 200, routeResourceId: GRIEVANCE }),
+      }),
+    );
+  });
+
+  it('does not write a separate allowed-decision row for a read: the decision is folded into the read record', async () => {
+    mocks.selectQueue.push([row]);
+    await read();
+    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(expect.anything(), { recordAllowed: false });
+  });
+
+  it('releases nothing when the read cannot be recorded', async () => {
+    mocks.selectQueue.push([row]);
+    mocks.audit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await read();
+
+    expect(response.status).toBe(403);
+    expect(JSON.stringify(await response.json())).not.toContain('GRV-1');
+  });
+
+  it('records no read when the grant is refused, and still lets the decision service record the refusal', async () => {
+    mocks.authorizeExternalMatterAccess.mockResolvedValue({ allowed: false, reason: 'no_matter_grant', authorityId: 'auth-1' });
+
+    const response = await read();
+
+    expect(response.status).toBe(403);
+    expect(mocks.audit).not.toHaveBeenCalled();
+  });
+
+  it('records no read for a response that is not a successful read', async () => {
+    mocks.selectQueue.push([]);
+
+    const response = await read();
+
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(mocks.audit).not.toHaveBeenCalled();
   });
 });

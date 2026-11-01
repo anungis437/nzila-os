@@ -8,7 +8,9 @@ import {
   type ExternalMatterAccessGrant,
   type RepresentationAuthority,
 } from '@/db/schema/representation-authority-schema';
-import { auditLog, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { logger } from '@/lib/logger';
 import { evaluateRepresentationAuthority } from './representation-authority-service';
 
 export type ExternalMatterPermission =
@@ -39,6 +41,8 @@ export interface ExternalAuthorizationDecision {
   authorityId?: string;
   matterGrantId?: string;
   documentGrantId?: string;
+  /** The version the grant is pinned to; null or absent means the grant predates version pinning. */
+  documentVersionNo?: number | null;
 }
 
 function isActiveGrant(grant: {
@@ -209,6 +213,7 @@ export function evaluateExternalDocumentAccess(input: {
     authorityId: matterDecision.authorityId,
     matterGrantId: matterDecision.matterGrantId,
     documentGrantId: grant.id,
+    documentVersionNo: (grant as { documentVersionNo?: number | null }).documentVersionNo ?? null,
   };
 }
 
@@ -218,7 +223,7 @@ export async function authorizeExternalMatterAccess(input: {
   matterType: RepresentationAuthority['matterType'];
   matterId: string;
   requiredPermission: ExternalMatterPermission;
-}): Promise<ExternalAuthorizationDecision> {
+}, options: { recordAllowed?: boolean } = {}): Promise<ExternalAuthorizationDecision> {
   const [authority] = await db
     .select()
     .from(representationAuthorities)
@@ -259,7 +264,11 @@ export async function authorizeExternalMatterAccess(input: {
     authority,
     matterGrant,
   });
-  await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: input.matterType, resourceId: input.matterId });
+  // A read records its allowed decision itself, in the same transaction as the read (see external-resource-middleware), so the decision
+  // and the read are one record rather than a decision row followed by an unrecorded read. A refusal is always recorded here.
+  if (!(decision.allowed && options.recordAllowed === false)) {
+    await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: input.matterType, resourceId: input.matterId });
+  }
   return decision;
 }
 
@@ -344,22 +353,31 @@ export async function auditExternalAuthorizationDecision(params: {
   resource: string;
   resourceId: string;
 }) {
-  return auditLog({
-    eventType: params.decision.allowed
-      ? 'external_authorization.allowed'
-      : 'external_authorization.denied',
-    severity: params.decision.allowed ? AuditSeverity.LOW : AuditSeverity.MEDIUM,
-    userId: params.actorUserId,
-    organizationId: params.organizationId,
-    resource: params.resource,
-    resourceId: params.resourceId,
-    action: 'authorize',
-    details: {
-      reason: params.decision.reason,
-      authorityId: params.decision.authorityId,
-      matterGrantId: params.decision.matterGrantId,
-      documentGrantId: params.decision.documentGrantId,
-    },
-    outcome: params.decision.allowed ? 'success' : 'failure',
+  // A refusal for someone who holds no authority at all is not an event of the organization they named: any signed-in user can name any
+  // organization id, and the named organization's audit trail must not take rows from strangers. It is kept in the application log.
+  if (!params.decision.allowed && !params.decision.authorityId) {
+    logger.warn('External authorization refused: no authority held', { resource: params.resource, reason: params.decision.reason });
+    return;
+  }
+  // The record is mandatory, not best-effort: an allowed decision releases the outside party's data only once its record exists. A
+  // failure to write it throws, and the external-resource middleware answers 403 instead of serving the data.
+  await withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    await persistAtomicAudit(
+      tx,
+      {
+        organizationId: params.organizationId,
+        userId: params.actorUserId,
+        action: params.decision.allowed ? 'external_authorization.allowed' : 'external_authorization.denied',
+        resourceType: params.resource,
+        resourceId: params.resourceId,
+        details: {
+          reason: params.decision.reason,
+          authorityId: params.decision.authorityId,
+          matterGrantId: params.decision.matterGrantId,
+          documentGrantId: params.decision.documentGrantId,
+        },
+      },
+      params.decision.allowed ? 'success' : 'failure',
+    );
   });
 }

@@ -78,6 +78,29 @@ export function capacitiesForRole(role: string | null | undefined): readonly Cap
 }
 
 /**
+ * Capacities that may read, reply, close, or archive a conversation they are assigned to.
+ * An organization administrator has only `member` and is absent. Assignment is the relationship;
+ * the capacity is eligibility, not a tenant-wide read.
+ */
+export const CONVERSATION_ASSIGNEE_CAPACITIES: readonly Capacity[] = ['steward', 'chief_steward', 'officer', 'executive']
+
+/** True when the stored role carries one of the conversation-assignee capacities. */
+export function conversationAssigneeEligible(role: string | null | undefined): boolean {
+  const capacities = capacitiesForRole(role)
+  return CONVERSATION_ASSIGNEE_CAPACITIES.some((capacity) => capacities.includes(capacity))
+}
+
+/**
+ * Stored role names that conversationAssigneeEligible accepts, sorted for a stable SQL predicate.
+ * health_safety_rep and bargaining_committee are included because the capacity table gives them
+ * steward. union_rep, staff_rep, national_officer, executive, ceo, governance, and business_agent
+ * are absent: they are not in ROLE_CAPACITIES, so they confer nothing.
+ */
+export const CONVERSATION_ASSIGNEE_ROLES: readonly string[] = Object.keys(ROLE_CAPACITIES)
+  .filter((role) => conversationAssigneeEligible(role))
+  .sort()
+
+/**
  * Capacities that may be earned only by a recorded appointment, never by role.
  * `auditor`, `trustee`, `governance_reviewer` and `privacy_officer` are bestowed
  * by a mandate; the loader adds them from the mandate's source instrument.

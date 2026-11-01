@@ -1,0 +1,203 @@
+{
+  "record": "native-postgresql-sweep-v2",
+  "baseCommit": "d82edf7060c4d1db85cdd88d9f7ff27ff2ae6fa8 (plus the working-tree fixes committed with this record)",
+  "method": "Each suite runs in its own clean child process with exactly the variables it documents (UE_AUTHORITY_COMBINED_URL on a freshly provisioned Django-migrate + approved-bootstrap database; server URLs for the suites that create their own databases; UE_CENSUS_URL for the census). The provisioning helper also runs in a child process: sweep v1 leaked DATABASE_URL and QA_TEST_ENV into every suite and produced false failures. Scratch databases are dropped before and after.",
+  "pg16": [
+    {
+      "version": "PG16",
+      "suite": "atomic-audit-fault.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  6 passed (6)"
+    },
+    {
+      "version": "PG16",
+      "suite": "authority-kernel-combined.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  10 passed (10)"
+    },
+    {
+      "version": "PG16",
+      "suite": "authority-kernel-django-audit.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  4 passed (4)"
+    },
+    {
+      "version": "PG16",
+      "suite": "authority-kernel-storage.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  11 passed (11)"
+    },
+    {
+      "version": "PG16",
+      "suite": "automation-rules-ownership-migration-postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  11 passed (11)"
+    },
+    {
+      "version": "PG16",
+      "suite": "canonical-schema-census.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  4 passed (4)"
+    },
+    {
+      "version": "PG16",
+      "suite": "document-intake.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  10 passed (10)"
+    },
+    {
+      "version": "PG16",
+      "suite": "finance-duties.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  21 passed (21)"
+    },
+    {
+      "version": "PG16",
+      "suite": "location-retention.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  5 passed (5)"
+    },
+    {
+      "version": "PG16",
+      "suite": "message-lifecycle.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  26 passed | 1 skipped (27)"
+    },
+    {
+      "version": "PG16",
+      "suite": "migration-0031-feature-flags-attribution.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  5 passed (5)"
+    },
+    {
+      "version": "PG16",
+      "suite": "migration-0032-grievance-events-actor.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  6 passed (6)"
+    },
+    {
+      "version": "PG16",
+      "suite": "organizations-read-authority.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  10 passed (10)"
+    },
+    {
+      "version": "PG16",
+      "suite": "p4-authority-state-attest.postgres.test.ts",
+      "result": "Test Files  1 failed (1) | Tests  1 failed (1)"
+    },
+    {
+      "version": "PG16",
+      "suite": "rewards-anniversary-concurrency.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  2 passed (2)"
+    },
+    {
+      "version": "PG16",
+      "suite": "rls-0108-schema-compatibility-postgres.test.ts",
+      "result": "Test Files  1 failed (1) | Tests  17 failed (17)"
+    },
+    {
+      "version": "PG16",
+      "suite": "round58-complete-production-geometry-remediation.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  11 passed (11)"
+    },
+    {
+      "version": "PG16",
+      "suite": "tenant-isolation-remediation.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  24 passed (24)"
+    },
+    {
+      "version": "PG16",
+      "suite": "thread-assignment.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  3 passed (3)"
+    },
+    {
+      "version": "PG16",
+      "suite": "workaid-union-side.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  5 passed (5)"
+    }
+  ],
+  "pg15SelectedSuites": [
+    {
+      "version": "PG15",
+      "suite": "authority-kernel-django-audit.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  4 passed (4)"
+    },
+    {
+      "version": "PG15",
+      "suite": "authority-kernel-storage.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  11 passed (11)"
+    },
+    {
+      "version": "PG15",
+      "suite": "automation-rules-ownership-migration-postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  11 passed (11)"
+    },
+    {
+      "version": "PG15",
+      "suite": "canonical-schema-census.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  4 passed (4)"
+    },
+    {
+      "version": "PG15",
+      "suite": "migration-0031-feature-flags-attribution.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  5 passed (5)"
+    },
+    {
+      "version": "PG15",
+      "suite": "migration-0032-grievance-events-actor.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  6 passed (6)"
+    },
+    {
+      "version": "PG15",
+      "suite": "organizations-read-authority.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  10 passed (10)"
+    },
+    {
+      "version": "PG15",
+      "suite": "p4-authority-state-attest.postgres.test.ts",
+      "result": "Test Files  1 failed (1) | Tests  1 failed (1)"
+    },
+    {
+      "version": "PG15",
+      "suite": "rls-0108-schema-compatibility-postgres.test.ts",
+      "result": "Test Files  1 failed (1) | Tests  17 failed (17)"
+    },
+    {
+      "version": "PG15",
+      "suite": "round58-complete-production-geometry-remediation.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  11 passed (11)"
+    },
+    {
+      "version": "PG15",
+      "suite": "tenant-isolation-remediation.postgres.test.ts",
+      "result": "Test Files  1 passed (1) | Tests  24 passed (24)"
+    }
+  ],
+  "isolationNote": "rls-0108 drops and recreates the cluster-wide roles union_eyes_runtime and union_eyes_system, so it fails whenever any other database on the cluster still holds grants to them. It passes 17/17 on a cluster with no other databases: PG16 and PG15 standalone. This is suite isolation, not a product defect.",
+  "previouslyOmittedFive": {
+    "authority-kernel-django-audit": "PASS 4/4 on PG16 and PG15",
+    "automation-rules-ownership-migration": "PASS 11/11 on PG16 and PG15 (needed a Windows shell option in the test)",
+    "rls-0108-schema-compatibility": "PASS 17/17 standalone on PG16 and PG15",
+    "round58-complete-production-geometry-remediation": "PASS 11/11 on PG16 and PG15",
+    "p4-authority-state-attest": "PARTIAL: stages 1-4 pass (apply enforcement, grant-order fix, round59 geometry closure, p4 attestation); stage 5 (post-apply verifier) fails with 67 gaps in about 20 tables. Historical chain vs the current storage-authority manifest: the manifest has grown past what the three frozen SQL files provide. The 690 gaps originally reported were reduced to 67 by scoping the fixture to the tables the historical SQL names; the rest are real differences and are not hidden."
+  },
+  "p4ResidualGapTables": [
+    "deadline_reassignment_convergence",
+    "deadline_reminder_executions",
+    "django_migrations",
+    "icra_assessment_answers",
+    "icra_maturity_profiles",
+    "icra_governance_flags",
+    "icra_continuity_scores",
+    "icra_assessments",
+    "icra_followup_recommendations",
+    "geofence_events",
+    "dues_transactions",
+    "deadline_reminders",
+    "icra_organizations",
+    "location_tracking",
+    "member_dues_ledger",
+    "pilot_metrics",
+    "platform_invoices",
+    "org_subscriptions",
+    "ingestion_batches",
+    "workbook_purchases",
+    "document_versions",
+    "ml_predictions",
+    "workbooks"
+  ],
+  "fixturesRepaired": [
+    "automation-rules-ownership test and p4 attest test launch pnpm/npx through a shell on Windows (a .cmd shim cannot be launched without one)",
+    "p4-disposable-fixture: the generic stub set already contains django_migrations (the manifest classifies it), so the later CREATE TABLE IF NOT EXISTS was a silent no-op and the INSERT failed; the stub is replaced by the real ledger shape and its grants restored",
+    "p4-disposable-fixture: stubs only the tables the three historical SQL files name, so the verifier does not demand policies the historical chain was never meant to create"
+  ],
+  "containerNote": "The long-lived PG16 container had accumulated about 120 scratch databases over three days and entered crash recovery (several minutes of fsync). All scratch databases were dropped; sweeps keep the cluster small."
+}

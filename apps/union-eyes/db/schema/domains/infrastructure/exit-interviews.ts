@@ -172,6 +172,7 @@ export const exitInterviews = pgTable(
     // --- end Handover Lifecycle Layer ---
 
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
+    submittedBy: text('submitted_by'),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     reviewedBy: text('reviewed_by'),
     publishedAt: timestamp('published_at', { withTimezone: true }),

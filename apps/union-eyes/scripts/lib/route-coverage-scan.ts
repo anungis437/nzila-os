@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, relative, sep } from 'node:path'
+import { invokesTarget } from './call-reach'
 
 /**
  * Route-coverage scan (UE-CONV-K-008). Reads every app/api route file and records, from its source text, how the
@@ -10,7 +11,7 @@ import { dirname, join, relative, sep } from 'node:path'
 export type RouteGuard =
   | 'CRUD_FACTORY' | 'WITH_API' | 'WITH_API_PUBLIC' | 'ROLE_AUTH' | 'ADMIN_AUTH' | 'ORG_AUTH' | 'SESSION_AUTH' | 'CRON_SECRET'
   | 'WEBHOOK_SIGNATURE' | 'PLATFORM_AUTH_HANDLER' | 'CAPABILITY_TOKEN' | 'RETIRED' | 'DELEGATED' | 'NONE'
-export type RouteAudit = 'COMPUTE_ONLY' | 'EXEMPT_UNATTRIBUTABLE' | 'EXEMPT_BALLOT_SECRECY' | 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
+export type RouteAudit = 'COMPUTE_ONLY' | 'EXEMPT_UNATTRIBUTABLE' | 'EXEMPT_BALLOT_SECRECY' | 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'INTENT_OUTCOME' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
 export type RouteData = 'TENANT_TX' | 'SYSTEM_CONTEXT' | 'CRUD_TENANT_TX' | 'AMBIENT_DB' | 'NONE'
 
 export interface RouteEntry {
@@ -58,8 +59,12 @@ function guardOf(source: string): RouteGuard {
   if (/notImplemented\(/.test(source) && !/\.(insert|update|delete)\(|persistAtomicAudit/.test(source)) return 'RETIRED'
   if (/@nzila\/platform-auth\/[\w/-]*handlers/.test(source)) return 'PLATFORM_AUTH_HANDLER'
   if (/crudRoutes\(/.test(source)) return 'CRUD_FACTORY'
-  if (/withAdminAuth|withSystemAdminAuth/.test(source)) return 'ADMIN_AUTH'
-  if (/withRoleAuth|withEnhancedRoleAuth|withSecureAPI|withMinRole|withApiAuth/.test(source)) return 'ROLE_AUTH'
+  // The identity provider's bearer token is the credential (lib/scim/scim-token.ts); the route acts for the token's organization.
+  if (/authenticateScimRequest\(/.test(source)) return 'CAPABILITY_TOKEN'
+  // requireSystemAdmin( is an administrator gate applied inside the handler; hasMinRole( is a role gate. Both were missed and the route
+  // was reported as holding a bare session check.
+  if (/withAdminAuth|withSystemAdminAuth|requireSystemAdmin\(/.test(source)) return 'ADMIN_AUTH'
+  if (/withRoleAuth|withEnhancedRoleAuth|withSecureAPI|withMinRole|withApiAuth|\bhasMinRole\(/.test(source)) return 'ROLE_AUTH'
   if (/withOrganizationAuth|withOrganizationMiddleware|withExternalResourceAuth|external-resource-middleware/.test(source)) return 'ORG_AUTH'
   if (/withApi\(/.test(source)) return /required:\s*false/.test(source) ? 'WITH_API_PUBLIC' : 'WITH_API'
   if (/CRON_SECRET|verifyCronAuth|cronAuth/i.test(source)) return 'CRON_SECRET'
@@ -79,9 +84,10 @@ function dataOf(source: string, guard: RouteGuard): RouteData {
 }
 
 /**
- * Ballot-casting routes carry no per-ballot audit row on purpose (G12): a row with the member and a timestamp would let a
- * reader of the audit log link a member to a ballot. The ballot row under the anonymous voter id is the participation
- * record, and the session lifecycle around it is audited. The manifest test pins this list and its justification.
+ * Ballot-casting routes carry no per-ballot choice audit on purpose (G12): a row with the member and a choice, or a
+ * member and a receipt that points at a choice, would let a reader link a voter to a selection. Acceptance, eligibility,
+ * proxy authorization and recount are audited by lib/voting/ballot-process-audit.ts without that pair. The manifest test
+ * pins this list: the route file itself must not call persistAtomicAudit.
  */
 export const BALLOT_SECRECY_EXEMPT_ROUTES = ['voting/sessions/[id]/vote/route.ts', 'governance/elections/sessions/[id]/vote/route.ts']
 
@@ -108,13 +114,20 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
  * imports no function whose name says it changes state.
  */
 export const READ_ONLY_POST_ROUTES = [
-  'ai/classify/route.ts', 'ai/mamba/route.ts', 'ai/match-precedents/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
-  'ai/search/route.ts', 'ai/semantic-search/route.ts', 'ai/summarize/route.ts', 'carbon/validate/route.ts',
+  // POST is a guarded, explicit HTTP 501; no role repair or data mutation occurs.
+  'admin/fix-super-admin-roles/route.ts',
+  // ai/classify, ai/match-precedents, ai/search and ai/summarize now write an atomic audit record, so they are audited routes, not read-only.
+  // The education reminder job only reads and sends email; it writes no row, and its per-send outcome is the job result.
+  'cron/education-reminders/route.ts',
+  'ai/mamba/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
+  'ai/semantic-search/route.ts', 'carbon/validate/route.ts',
+  // voice/transcribe writes an atomic audit record of each transcription, so it is an audited route, not read-only.
+  'calendar-sync/connections/route.ts',
   'clause-library/search/route.ts', 'cognition/precedents/route.ts', 'compliance/validate/route.ts', 'emergency/pipeda/route.ts',
   'exit-interviews/graph-query/route.ts', 'exit-interviews/mitigation-comparison/route.ts', 'exit-interviews/scenarios/route.ts',
   'exit-interviews/search/route.ts', 'exit-interviews/simulation/route.ts', 'labour-standards/[jurisdiction]/compliance-check/route.ts',
-  'members/segments/preview/route.ts', 'ml/query/route.ts', 'precedents/search/route.ts', 'reports/execute/route.ts',
-  'social-media/analytics/route.ts', 'v2/[...path]/route.ts', 'voice/transcribe/route.ts', 'voice/upload/route.ts',
+  'members/segments/preview/route.ts', 'pension/t4a/route.ts', 'precedents/search/route.ts', 'profile/roles/route.ts',
+  'social-media/analytics/route.ts', 'v2/[...path]/route.ts',
   'voting/verify/route.ts', 'workspace/telemetry/route.ts',
 ]
 
@@ -125,6 +138,11 @@ export const READ_ONLY_POST_ROUTES = [
  * so the exemption is a statement about what the route is bounded by, not a gap in attention.
  */
 export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control: RegExp }> = {
+  // These two were counted atomically audited only because every route importing the e-mail sender also reached operation-audit.ts, which
+  // contains persistAtomicAudit. They have no organization to audit against (the caller is anonymous); platform-auth records the request in
+  // its own auth audit log, and the routes are limited per client address by the proxy.
+  'auth/forgot-password/route.ts': { why: 'Anonymous password-reset request with a neutral answer; there is no organization or actor. platform-auth records password_reset_request in its own auth audit log.', control: /forgotPassword\(/ },
+  'auth/magic-link/request/route.ts': { why: 'Anonymous sign-in link request with a neutral answer; there is no organization or actor. platform-auth records magic_link_requested in its own auth audit log.', control: /requestMagicLink\(/ },
   'icra/start/route.ts': { why: 'Public pseudonymous assessment intake; no actor, no tenant.', control: /guardPublicIntake|rateLimit\(/ },
   'icra/submit/route.ts': { why: 'Public assessment submission by capability; no actor, no tenant.', control: /guardPublicIntake|rateLimit\(|assessment-capability/ },
   'icra/[assessmentId]/answer/route.ts': { why: 'Answer to a pseudonymous assessment, authorised by its capability token.', control: /assessment-capability|rateLimit\(/ },
@@ -132,18 +150,21 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'icra/[assessmentId]/capability/exchange/route.ts': { why: 'Exchanges a capability for a cookie; writes nothing audit-relevant.', control: /assessment-capability|rateLimit\(/ },
   'icra/checkout/route.ts': { why: 'Creates a payment-provider session for a pseudonymous assessment; no actor.', control: /assessment-capability|guardPublicIntake|rateLimit\(/ },
   'icra/email-results/route.ts': { why: 'Emails results of a pseudonymous assessment to its holder; no actor.', control: /assessment-capability|guardPublicIntake|rateLimit\(/ },
-  'icra/telemetry/route.ts': { why: 'Anonymous product telemetry.', control: /rateLimit\(/ },
+  'icra/telemetry/route.ts': { why: 'Anonymous product telemetry.', control: /rateLimit\(|checkRateLimit\(/ },
+  'contact/route.ts': { why: 'Public contact form: stores the submission in the system-only contact_submissions table before the CRM sync; no actor, no tenant (the row is platform-wide intake, not tenant data).', control: /guardPublicIntake/ },
+  'workbook/checkout/route.ts': { why: 'Creates a payment-provider checkout session for a pseudonymous workbook, which is a bearer reference until claimed (the claim is audited); it stores nothing for the buyer here.', control: /guardPublicIntake/ },
   'workbook/start/route.ts': { why: 'Public pseudonymous workbook intake; the id is a bearer reference until claimed (the claim is audited).', control: /guardPublicIntake/ },
+  'communications/unsubscribe/[recipientId]/route.ts': { why: 'Recipient unsubscribe by an action-bound, signed link (no session, no acting user). The append-only consent_records row it writes is the evidence of the change, and the write is confined to the organization the signed link names.', control: /verifyTrackingToken\(/ },
   'pilot/events/route.ts': { why: 'Pilot usage telemetry stamped from the session; an audit row per usage event would flood the audit log.', control: /withRoleAuth|withApiAuth/ },
   'location/track/route.ts': { why: 'Per-ping location telemetry of a consenting member; consent, geofence and disable changes are audited.', control: /withApiAuth/ },
   'cron/external-data-sync/route.ts': { why: 'Platform-wide reference data refresh; no acting organization.', control: /cron:\s*true/ },
   'cron/location-retention/route.ts': { why: 'Platform-wide 24-hour retention sweep over user-scoped location rows; no acting organization. Its evidence row (location_deletion_log) commits in the same system transaction, so a failed evidence write keeps the data for the next run.', control: /cron:\s*true/ },
   'whop/create-checkout/route.ts': { why: 'Creates a payment-provider checkout session for the signed-in user, who may hold no organization yet; nothing is stored here.', control: /requireUser/ },
   'organizations/switch/route.ts': { why: 'Session rotation is owned and audited by platform-auth; the legacy branch only validates membership and stores nothing.', control: /auth\(\)/ },
-  'cron/sla-watchdog/route.ts': { why: 'Emits deadline events and metrics only; no acting organization.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
+  'cron/sla-watchdog/route.ts': { why: 'Platform-wide scan with no acting organization; it writes one deduplicated inbox alert per claim, kind and deadline inside each organization\'s own context (an audit row per alert would double every alert), plus metrics.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
 }
 
-const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit/
+const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit|performAtomicAuditedOperation/
 
 /**
  * Platform-auth services whose audit record is part of the operation (a failed write fails and rolls back the change).
@@ -192,14 +213,71 @@ function reachable(root: string, file: string, source: string, depth: number, se
   return out
 }
 
+/** The generic-CRUD governance class of each table, read from lib/api/crud-governance.ts (the one place that decides it). */
+function crudGovernanceByTable(root: string): Map<string, string> {
+  const text = readFileSync(join(root, 'lib', 'api', 'crud-governance.ts'), 'utf8').replace(/\/\/[^\n]*/g, '')
+  const out = new Map<string, string>()
+  for (const m of text.matchAll(/const (DENIED|SUBJECT_OWNED|OWN_ROWS_READ|READ_ONLY|OPERATIONAL) = \[([\s\S]*?)\] as const/g)) {
+    for (const name of m[2].matchAll(/'([\w]+)'/g)) out.set(name[1], m[1])
+  }
+  return out
+}
+
+function schemaTableNames(root: string): Map<string, string> {
+  const out = new Map<string, string>()
+  const visit = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name)
+      if (entry.isDirectory()) visit(path)
+      else if (/\.ts$/.test(entry.name)) {
+        for (const m of readFileSync(path, 'utf8').matchAll(/export const (\w+)\s*=\s*pgTable\(\s*["'`](\w+)["'`]/g)) out.set(m[1], m[2])
+      }
+    }
+  }
+  visit(join(root, 'db', 'schema'))
+  return out
+}
+
+/**
+ * A generic CRUD route whose table is not OPERATIONAL (or SUBJECT_OWNED with an owner column) refuses every write with a 403 in
+ * assertCrudWrite, so exporting POST/PATCH/DELETE does not make it a route that changes state. It was reported as mutating, with a
+ * CRUD_ATOMIC audit, which overstated both.
+ */
+function crudWritesRefused(source: string, tables: Map<string, string>, names: Map<string, string>): boolean {
+  const variable = /crudRoutes\(\s*\{[\s\S]*?\btable:\s*(\w+)/.exec(source)?.[1]
+  const name = variable ? names.get(variable) : undefined
+  if (!name) return false
+  const governance = tables.get(name) ?? 'DENIED'
+  if (governance === 'OPERATIONAL') return false
+  if (governance === 'SUBJECT_OWNED' && /\bownerColumn\s*:/.test(source)) return false
+  return true
+}
+
 function auditOf(route: string, source: string, guard: RouteGuard, mutating: boolean, imports: string[]): RouteAudit {
   if (!mutating) return 'READ_ONLY'
   if (BALLOT_SECRECY_EXEMPT_ROUTES.includes(route)) return 'EXEMPT_BALLOT_SECRECY'
   if (route in COMPUTE_ONLY_ROUTES || READ_ONLY_POST_ROUTES.includes(route)) return 'COMPUTE_ONLY'
   if (route in UNATTRIBUTABLE_WRITE_ROUTES) return 'EXEMPT_UNATTRIBUTABLE'
+  // The legacy event item API delegates PATCH/DELETE to the canonical handler, whose tenant-locked
+  // transaction commits its mutation and mandatory audit together. This is a narrow, pinned alias:
+  // the manifest ratchet checks both the delegate and the canonical audited implementation.
+  if (route === 'events/[id]/route.ts' &&
+      /from ['"]@\/app\/api\/calendar\/events\/\[id\]\/route['"]/.test(source) &&
+      /canonicalPATCH\(request/.test(source) && /canonicalDELETE\(request/.test(source)) {
+    return 'ATOMIC_SERVICE'
+  }
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
-  if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
+  // performAuditedOperation records the intent, then runs the effect, then records the outcome, each in its own transaction (see
+  // lib/audit/operation-audit.ts). That is a durable two-phase record, not an atomic one: the effect and its audit row do not commit
+  // together. operation-audit.ts itself contains persistAtomicAudit, so a route that only reaches it through that module is not atomic.
+  // The route is two-phase if it calls the operation itself or invokes a named operation that reaches it (lib/../call-reach.ts). A module that merely
+  // contains the call in an unrelated function does not make every route that imports it two-phase.
+  const reached = imports.filter((f) => !f.endsWith('operation-audit.ts'))
+  if (/\bperformAuditedOperation\(/.test(source) || invokesTarget(source, reached)) {
+    return 'INTENT_OUTCOME'
+  }
+  if (reached.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
   if (AUTH_AUDITED_CALL.test(source) || KERNEL_AUDITED_CALL.test(source)) return 'ATOMIC_SERVICE'
   // A mutating method whose handler and everything it reaches contain no write is read-only in effect.
   if (!WRITE_TOKEN.test(source) && !imports.some((f) => WRITE_TOKEN.test(readFileSync(f, 'utf8')))) return 'NO_WRITES_FOUND'
@@ -209,12 +287,14 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
 
 export function scanRoutes(root: string): RouteEntry[] {
   const api = join(root, 'app', 'api')
+  const governance = crudGovernanceByTable(root)
+  const tableNames = schemaTableNames(root)
   const entries = walk(api)
     .map((file) => {
       const source = readFileSync(file, 'utf8')
       const methods = methodsOf(source)
-      const mutating = methods.some((m) => MUTATING.has(m))
       const guard = guardOf(source)
+      const mutating = methods.some((m) => MUTATING.has(m)) && !(guard === 'CRUD_FACTORY' && crudWritesRefused(source, governance, tableNames))
       return {
         route: relative(api, file).split(sep).join('/'),
         methods,

@@ -9,13 +9,15 @@
  * organization, never from the request body (prevents ownership spoofing).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { organizations, congressMemberships, collectiveAgreements } from '@/db/schema';
+import { collectiveAgreements } from '@/db/schema';
 import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { buildClauseVisibilityCondition, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { buildClauseVisibilityCondition, sharingChangeDenial, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
+import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
+import { assertOriginalClauseOwned } from '@/lib/clause-library/original-clause';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,10 +42,9 @@ export const GET = withApi(
     const sharingLevels = url.searchParams.get('sharingLevels')?.split(',').filter(Boolean) || [];
     const includeExpired = url.searchParams.get('includeExpired') === 'true';
 
-    // Federation and congress reads are not covered by ue_shared_library_select
-    // (owner, explicit share, or public only). LIST stays on the system role
-    // and applies buildClauseVisibilityCondition. CREATE is an owner write.
-    return await withSystemContext(async () => {
+    // The tenant policy admits the owner, explicit grants and public clauses, and the predicate below states the same rule, so this read runs as the
+    // tenant like every other and the item read asks the same question. CREATE is an owner write.
+    return await withRLSContext({ organizationId }, async (tx) => {
       const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
       const conditions: ReturnType<typeof eq>[] = [visibilityCondition];
 
@@ -79,7 +80,7 @@ export const GET = withApi(
       const where = and(...conditions);
 
       const [rows, countResult] = await Promise.all([
-        db
+        tx
           .select({
             id: sharedClauseLibrary.id,
             clauseNumber: sharedClauseLibrary.clauseNumber,
@@ -87,43 +88,28 @@ export const GET = withApi(
             clauseText: sharedClauseLibrary.clauseText,
             clauseType: sharedClauseLibrary.clauseType,
             sharingLevel: sharedClauseLibrary.sharingLevel,
+            isAnonymized: sharedClauseLibrary.isAnonymized,
             sector: sharedClauseLibrary.sector,
             province: sharedClauseLibrary.province,
             effectiveDate: sharedClauseLibrary.effectiveDate,
             expiryDate: sharedClauseLibrary.expiryDate,
             viewCount: sharedClauseLibrary.viewCount,
             sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-            organizationName: organizations.name,
             createdAt: sharedClauseLibrary.createdAt,
           })
           .from(sharedClauseLibrary)
-          .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
-          .leftJoin(
-            congressMemberships,
-            and(
-              eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
-              eq(congressMemberships.status, 'active'),
-            ),
-          )
           .where(where)
           .orderBy(sharedClauseLibrary.createdAt)
           .limit(limit)
           .offset((page - 1) * limit),
-        db
+        tx
           .select({ count: sql<number>`count(*)::int` })
           .from(sharedClauseLibrary)
-          .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
-          .leftJoin(
-            congressMemberships,
-            and(
-              eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
-              eq(congressMemberships.status, 'active'),
-            ),
-          )
           .where(where),
       ]);
 
       const total = countResult[0]?.count ?? 0;
+      const sourceNames = await sourceNamesFor(rows, organizationId);
       const clauses = rows.map((r) => ({
         id: r.id,
         clauseNumber: r.clauseNumber,
@@ -136,10 +122,9 @@ export const GET = withApi(
         effectiveDate: r.effectiveDate,
         expiryDate: r.expiryDate,
         viewCount: r.viewCount,
-        sourceOrganization: {
-          id: r.sourceOrganizationId,
-          organizationName: r.organizationName,
-        },
+        // A shared anonymized clause must not reveal its source union by
+        // returning the organization id/name in the collection response.
+        sourceOrganization: clauseSourceProjection({ ...r, organizationName: sourceNames.get(r.sourceOrganizationId) ?? null }, organizationId),
         createdAt: r.createdAt,
       }));
 
@@ -162,12 +147,13 @@ export const POST = withApi(
       summary: 'Create a new shared clause',
     },
   },
-  async ({ request, userId, organizationId }) => {
+  async ({ request, userId, organizationId, user }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     if (!userId) throw ApiError.badRequest('Authenticated user is required to create a clause.');
-    const body = await request.json();
+    const body = parseClauseBody(await request.json().catch(() => null), 'create');
+    assertMayPublish(user?.role, body.sharingLevel);
 
-    const denial = await withSystemContext(() =>
+    const denial = await withRLSContext({ organizationId }, () =>
       sharingChangeDenial(organizationId, {
         sharingLevel: body.sharingLevel,
         sharedWithOrgIds: body.sharedWithOrgIds,
@@ -186,6 +172,7 @@ export const POST = withApi(
           .limit(1);
         if (!agreement) throw ApiError.notFound('agreement', body.sourceCbaId);
       }
+      await assertOriginalClauseOwned(tx, body.originalClauseId, organizationId);
 
       const [created] = await tx
         .insert(sharedClauseLibrary)

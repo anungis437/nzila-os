@@ -4,14 +4,17 @@
  * caller may see come from the member-directory policy (case-context for stewards).
  */
 import { NextResponse } from 'next/server';
-import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
-import { eq, and, isNull, or, ilike, sql } from 'drizzle-orm';
+import { eq, and, asc, isNull, or, ilike, sql } from 'drizzle-orm';
+import { ApiError, withApi } from '@/lib/api/framework';
+import { likeContaining, SEARCH_TERM_MAX_LENGTH } from '@/lib/api/like-pattern';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { memberDirectoryAccess } from '@/lib/members/directory-access';
 
 export const dynamic = 'force-dynamic';
+
+const PAGE_SIZE = 50;
 
 export const GET = withApi(
   {
@@ -24,7 +27,10 @@ export const GET = withApi(
   },
   async ({ request, organizationId, userId, user }) => {
     const url = new URL(request.url);
-    const q = url.searchParams.get('q') || '';
+    const q = (url.searchParams.get('q') || '').trim();
+    if (q.length > SEARCH_TERM_MAX_LENGTH) throw ApiError.badRequest(`q must be at most ${SEARCH_TERM_MAX_LENGTH} characters`);
+    const pageSize = Math.min(Math.max(Number(url.searchParams.get('limit') ?? PAGE_SIZE) || PAGE_SIZE, 1), PAGE_SIZE);
+    const offset = Math.max(Number(url.searchParams.get('offset') ?? 0) || 0, 0);
 
     // Org scope comes from the authenticated session (resolved + enforced by
     // withApi), never from a client-suppliable value — a prior version of
@@ -65,8 +71,8 @@ export const GET = withApi(
       if (q) {
         conditions.push(
           or(
-            ilike(organizationMembers.name, `%${q}%`),
-            ilike(organizationMembers.email, `%${q}%`),
+            ilike(organizationMembers.name, likeContaining(q)),
+            ilike(organizationMembers.email, likeContaining(q)),
           )!,
         );
       }
@@ -75,7 +81,9 @@ export const GET = withApi(
         .select()
         .from(organizationMembers)
         .where(and(...conditions))
-        .limit(50);
+        .orderBy(asc(organizationMembers.name), asc(organizationMembers.id))
+        .limit(pageSize)
+        .offset(offset);
 
       const members = rows.map(m => ({
         id: m.id,

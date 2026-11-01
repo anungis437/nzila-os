@@ -1,17 +1,24 @@
 /**
- * CRUD collection route for perCapitaRemittances
+ * GET|POST /api/tax/cope/receipts
+ *
+ * This path was a generic CRUD collection over per_capita_remittances, the organization's per-capita remittance
+ * ledger, readable by any member and presented as COPE receipts. It generated no tax document and disclosed the ledger.
+ * Tax document generation is not implemented, so the route answers 501 and reads and writes nothing.
+ * Capability: UE-ACTION-TAX-DOCUMENTS.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { perCapitaRemittances } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: perCapitaRemittances,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+
+const notImplemented = async () => {
+  throw ApiError.notImplemented('COPE receipt generation is not implemented: nothing was generated or read.');
+};
+
+const options = () => ({
+  auth: { required: true as const, minRole: 'member' as const },
+  openapi: { tags: ['Billing'], summary: 'COPE receipts (not implemented)', description: 'Not implemented: answers 501.' },
 });
-export { GET, POST };
+
+export const GET = withApi(options(), notImplemented);
+export const POST = withApi(options(), notImplemented);

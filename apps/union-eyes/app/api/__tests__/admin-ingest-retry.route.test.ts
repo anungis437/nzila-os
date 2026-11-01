@@ -123,6 +123,8 @@ describe('admin/ingest/retry route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.retried).toBe(0);
+    expect(json.queued).toBe(0);
+    expect(json.succeeded).toBe(0);
   });
 
   it('POST retries failed records and reports counts', async () => {
@@ -136,7 +138,9 @@ describe('admin/ingest/retry route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.retried).toBe(2);
-    expect(json.succeeded).toBe(2);
+    expect(json.queued).toBe(2);
+    expect(json.succeeded).toBe(0);
+    expect(json.message).toMatch(/queued for retry; processing has not completed/);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'ingest.retry', organizationId: 'org_1', userId: 'u1', resourceId: 'b1' }));
   });
 

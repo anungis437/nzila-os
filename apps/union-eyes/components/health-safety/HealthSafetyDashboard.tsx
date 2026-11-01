@@ -47,10 +47,13 @@ export interface SafetyMetrics {
   hazardTrend: "up" | "down" | "stable";
   inspectionsDue: number;
   inspectionsCompleted: number;
-  inspectionComplianceRate: number;
-  daysWithoutIncident: number;
+  /** null when nothing was measured (no inspections in the period). */
+  inspectionComplianceRate: number | null;
+  /** null when no incident is on record. */
+  daysWithoutIncident: number | null;
   criticalAlerts: number;
-  trainingCompliance: number;
+  /** null: training compliance is not measured. */
+  trainingCompliance: number | null;
   ppeInventoryLow: number;
 }
 
@@ -228,11 +231,11 @@ export function HealthSafetyDashboard({
           subtitle={`${metrics.inspectionsCompleted}/${metrics.inspectionsDue + metrics.inspectionsCompleted}`}
           icon={ClipboardCheck}
           description="Completed on time"
-          variant={metrics.inspectionComplianceRate >= 90 ? "success" : "warning"}
+          variant={(metrics.inspectionComplianceRate ?? 0) >= 90 ? "success" : "warning"}
         />
         <SafetyMetricsCard
           title="Days Without Incident"
-          value={metrics.daysWithoutIncident}
+          value={metrics.daysWithoutIncident ?? '—'}
           icon={CheckCircle2}
           description="Current streak"
           variant="success"
@@ -273,7 +276,7 @@ export function HealthSafetyDashboard({
                 <CardTitle className="text-sm font-medium">Training Compliance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metrics.trainingCompliance}%</div>
+                <div className="text-2xl font-bold">{metrics.trainingCompliance === null ? 'Not measured' : `%`}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Members up-to-date with safety training
                 </p>
@@ -338,22 +341,22 @@ export function HealthSafetyDashboard({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">OH&S Training Compliance</span>
-                      <Badge variant={metrics.trainingCompliance >= 90 ? "default" : "secondary"}>
-                        {metrics.trainingCompliance}%
+                      <Badge variant={(metrics.trainingCompliance ?? 0) >= 90 ? "default" : "secondary"}>
+                        {metrics.trainingCompliance === null ? 'Not measured' : `%`}
                       </Badge>
                     </div>
-                    <Progress value={metrics.trainingCompliance} className="h-2" />
+                    <Progress value={metrics.trainingCompliance ?? 0} className="h-2" />
                     <p className="text-xs text-muted-foreground">Members with up-to-date safety training</p>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Inspection Compliance</span>
-                      <Badge variant={metrics.inspectionComplianceRate >= 90 ? "default" : "secondary"}>
-                        {metrics.inspectionComplianceRate}%
+                      <Badge variant={(metrics.inspectionComplianceRate ?? 0) >= 90 ? "default" : "secondary"}>
+                        {metrics.inspectionComplianceRate === null ? 'Not measured' : `%`}
                       </Badge>
                     </div>
-                    <Progress value={metrics.inspectionComplianceRate} className="h-2" />
+                    <Progress value={metrics.inspectionComplianceRate ?? 0} className="h-2" />
                     <p className="text-xs text-muted-foreground">
                       {metrics.inspectionsCompleted} of {metrics.inspectionsDue + metrics.inspectionsCompleted} inspections completed on time
                     </p>
@@ -382,7 +385,7 @@ export function HealthSafetyDashboard({
                   <CardTitle className="text-sm font-medium">Days Without Incident</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{metrics.daysWithoutIncident}</div>
+                  <div className="text-2xl font-bold text-green-600">{metrics.daysWithoutIncident ?? '—'}</div>
                   <p className="text-xs text-muted-foreground mt-1">Current safety streak</p>
                 </CardContent>
               </Card>

@@ -110,7 +110,7 @@ export function OrganizingConsole() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch('/api/v2/organizing/campaigns');
+      const res = await fetch('/api/organizing/campaigns');
       if (res.ok) {
         const json = await res.json();
         // withApi wraps as { success, data: { data: [...], pagination } }

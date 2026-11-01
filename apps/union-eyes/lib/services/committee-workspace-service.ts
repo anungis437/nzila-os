@@ -130,13 +130,23 @@ export async function updateMeeting(
 ) {
   // Minutes and their approval have their own operations; a generic update cannot rewrite them.
   const { minutes: _minutes, minutesApprovedBy: _by, minutesApprovedAt: _at, organizationId: _org, committeeId: _committee, ...changes } = data;
+  // Once the minutes are approved, the recorded decisions, the agenda and the meeting status are part of the approved record.
+  const touchesApprovedRecord = (['decisions', 'agendaItems', 'agenda', 'status'] as const).some((key) => key in changes);
   return withRLSContext(async (tx) => {
     const [updated] = await tx
       .update(committeeMeetings)
       .set({ ...changes, updatedAt: sql`now()` })
-      .where(and(eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId)))
+      .where(and(eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId), touchesApprovedRecord ? isNull(committeeMeetings.minutesApprovedAt) : undefined))
       .returning();
-    if (!updated) return null;
+    if (!updated) {
+      if (!touchesApprovedRecord) return null;
+      const [exists] = await tx
+        .select({ id: committeeMeetings.id })
+        .from(committeeMeetings)
+        .where(and(eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId)));
+      if (exists) throw ApiError.conflict('The decisions, agenda and status of a meeting with approved minutes cannot be changed');
+      return null;
+    }
     await persistAtomicAudit(tx, {
       organizationId: updated.organizationId,
       userId: data.updatedBy ?? 'system',
@@ -160,7 +170,7 @@ export async function recordMinutes(
     // minutes that were approved in the meantime.
     const [updated] = await tx
       .update(committeeMeetings)
-      .set({ minutes, status: 'completed', updatedBy, updatedAt: sql`now()` })
+      .set({ minutes, status: 'completed', minutesRecordedBy: updatedBy, updatedBy, updatedAt: sql`now()` })
       .where(and(eq(committeeMeetings.id, meetingId), isNull(committeeMeetings.minutesApprovedAt), eq(committeeMeetings.organizationId, organizationId)))
       .returning();
     if (!updated) return null;

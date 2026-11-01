@@ -17,7 +17,7 @@ const m = vi.hoisted(() => ({
   eq: vi.fn(),
 }));
 
-vi.mock('@/lib/rate-limit', () => ({ rateLimit: m.rateLimit }));
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.rateLimit }));
 vi.mock('@/lib/email-service', () => ({ sendEmail: m.sendEmail, isValidEmail: m.isValidEmail }));
 vi.mock('@/lib/icra/observability', () => ({ fireAndForgetEvent: m.fireAndForgetEvent, hashIp: m.hashIp }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
@@ -34,7 +34,7 @@ function req(bodyObj: Record<string, unknown>, authorized = true) {
   return new NextRequest('http://localhost/api/icra/email-results', {
     method: 'POST',
     headers,
-    body: JSON.stringify(bodyObj),
+    body: JSON.stringify({ acknowledgeLinkAccess: true, ...bodyObj }),
   });
 }
 
@@ -45,7 +45,7 @@ async function loadRoute() {
 describe('icra/email-results route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.rateLimit.mockReturnValue({ success: true });
+    m.rateLimit.mockResolvedValue({ allowed: true });
     m.isValidEmail.mockReturnValue(true);
     m.hashIp.mockReturnValue('ip_hash_1');
     m.sendEmail.mockResolvedValue({ success: true });
@@ -62,7 +62,7 @@ describe('icra/email-results route', () => {
 
   it('returns 429 when rate-limited', async () => {
     const { POST } = await loadRoute();
-    m.rateLimit.mockReturnValueOnce({ success: false });
+    m.rateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
 
     const response = await POST(new NextRequest('http://localhost/api/icra/email-results', { method: 'POST' }));
     expect(response.status).toBe(429);
@@ -77,6 +77,25 @@ describe('icra/email-results route', () => {
     }));
 
     expect(response.status).toBe(400);
+  });
+
+  // DEF-0B8-ICRA-EMAIL-RESULTS-SENDS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS
+  it('refuses to mail the link until the respondent acknowledges that anyone holding it can open the results', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(req({ assessmentId: 'a1', email: 'a@example.com', acknowledgeLinkAccess: false }));
+    expect(response.status).toBe(400);
+    expect((await response.json()).code).toBe('LINK_ACCESS_ACKNOWLEDGEMENT_REQUIRED');
+    expect(m.sendEmail).not.toHaveBeenCalled();
+  });
+
+  // DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS
+  it('uses the shared limiter, answers 503 when it is unavailable in production, and never sends', async () => {
+    const { POST } = await loadRoute();
+    m.rateLimit.mockResolvedValueOnce({ allowed: false, error: 'redis down', resetIn: 30 });
+    const response = await POST(req({ assessmentId: 'a1', email: 'a@example.com' }));
+    expect(response.status).toBe(503);
+    expect(m.sendEmail).not.toHaveBeenCalled();
+    expect(m.rateLimit).toHaveBeenCalledWith(expect.stringContaining('icra-email-results:'), expect.objectContaining({ limit: 5, window: 3600 }));
   });
 
   it('returns 400 for invalid email', async () => {
@@ -102,7 +121,7 @@ describe('icra/email-results route', () => {
     const response = await POST(new NextRequest('http://localhost/api/icra/email-results', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: 'Bearer wrong-token' },
-      body: JSON.stringify({ assessmentId: 'a1', email: 'a@example.com' }),
+      body: JSON.stringify({ assessmentId: 'a1', email: 'a@example.com', acknowledgeLinkAccess: true }),
     }));
 
     expect(response.status).toBe(401);
@@ -157,6 +176,34 @@ describe('icra/email-results route', () => {
     const emailArgs = m.sendEmail.mock.calls[0][0];
     expect(emailArgs.html).toContain(`#cap=${encodeURIComponent(TOKEN)}`);
     expect(emailArgs.html).not.toContain('?cap=');
+  });
+
+  it('refuses to send a capability-bearing link without a canonical origin in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', '');
+    try {
+      const { POST } = await loadRoute();
+      const response = await POST(req({ assessmentId: 'a1', email: 'a@example.com' }));
+      expect(response.status).toBe(503);
+      expect(m.sendEmail).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('uses the configured HTTPS destination rather than the request host for the secret link', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://union-eyes.example/');
+    try {
+      const { POST } = await loadRoute();
+      const response = await POST(req({ assessmentId: 'a1', email: 'a@example.com' }));
+      expect(response.status).toBe(200);
+      const html = m.sendEmail.mock.calls[0][0].html as string;
+      expect(html).toContain('https://union-eyes.example/en-CA/continuity-assessment/results/a1#cap=');
+      expect(html).not.toContain('localhost');
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('does not affect the persisted capability hash when email delivery fails', async () => {

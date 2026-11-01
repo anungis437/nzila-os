@@ -3,7 +3,8 @@
  *
  * Streams the Governance Entropy Workbook PDF. Tier-gated: only available
  * for tiers >= workbook_self_guided. Unclaimed workbooks (no buyer bound)
- * are rejected.
+ * are rejected: the holder of the workbook's capability is told to claim it
+ * first, and anyone else is told the workbook is not there.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -12,7 +13,10 @@ import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { generateWorkbookPdf } from '@/lib/workbook-pdf/generateWorkbookPdf';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { extractWorkbookCapability } from '@/lib/workbook/workbook-capability';
+import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -24,7 +28,7 @@ const ELIGIBLE_TIERS = new Set([
 ]);
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: workbookId } = await params;
@@ -34,9 +38,9 @@ export async function GET(
     // the tier read and every protected PDF child read then run inside the DB
     // execution context that matches the resolved authority. The export
     // surface is claimed-only: an unclaimed (pre-claim) workbook has no
-    // identity-bound owner and cannot be exported by the bearer id alone.
+    // identity-bound owner and is not exported on the strength of its capability.
     const access = await withClaimedWorkbookAccess(
-      { workbookId, operation: 'read' },
+      { workbookId, operation: 'read', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         if (authority.kind === 'preclaim') {
           return { kind: 'unclaimed' as const };
@@ -59,6 +63,14 @@ export async function GET(
         if (!buffer) {
           return { kind: 'not_found' as const };
         }
+        // The register names the people who hold the organization's knowledge: the export is recorded before it is
+        // returned, and fails closed if the record cannot be written.
+        await auditClaimedWorkbookWrite(authority, {
+          action: 'workbook.export',
+          resourceType: 'workbooks',
+          resourceId: workbookId,
+          details: { format: 'pdf', authority: authority.kind, bytes: buffer.byteLength },
+        });
         return { kind: 'ok' as const, buffer };
       },
     );
@@ -90,7 +102,7 @@ export async function GET(
       },
     });
   } catch (err) {
-    logger.error('[workbook-export] render error', { workbookId, err });
+    logger.error('[workbook-export] render error', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json(
       { error: 'Failed to render workbook PDF' },
       { status: 503 },

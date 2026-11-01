@@ -54,11 +54,12 @@ export const GET = withOrganizationAuth(async (_request, context) => {
       .from(employerReports)
       .innerJoin(employers, eq(employers.id, employerReports.employerId))
       .where(inArray(employerReports.employerId, employerIds))
-      .orderBy(desc(employerReports.createdAt));
+      .orderBy(desc(employerReports.createdAt))
+      .limit(500);
 
     return standardSuccessResponse(reports);
   } catch (error) {
     logger.error("Failed to list compliance reports", { error: error instanceof Error ? error.message : String(error) });
-    return standardSuccessResponse([]);
+    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Compliance reports are temporarily unavailable");
   }
 });

@@ -1,0 +1,66 @@
+const { addBatch } = require('./f06-ledger-lib.cjs')
+const A = 'apps/union-eyes/'
+addBatch({
+  id: 'B119-F06-FINAL-SAFETY-HARDENING',
+  family: 'F06 final hardening: two unsafe provisional defaults made fail-closed, report differencing bounded, two-phase audit routes reviewed',
+  test: A + 'db/__tests__/pilot-acceptance-denial.postgres.test.ts',
+  previousEvidence: {},
+  items: [
+    {
+      prefix: 'DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS',
+      status: 'IMPLEMENTED_PENDING_QUALIFICATION',
+      fresh: true,
+      files: [
+        A + 'lib/pilot/counterpart-acceptance.ts',
+        A + 'lib/pilot/acceptance-denial.ts',
+        A + 'app/api/pilot/apply/[id]/commercial-transition/route.ts',
+        A + 'app/api/contracts/route.ts',
+        A + 'db/rls-storage-authority/reference-latent.ts',
+        A + 'lib/operations/catalog-authority-contract.json',
+        A + 'lib/pilot/__tests__/counterpart-acceptance.test.ts',
+        A + 'app/api/__tests__/pilot-commercial-transition.route.test.ts',
+      ],
+      explanation: 'The last permissive part is closed. The unapproved acceptance policy defaulted to letting an administrator\'s recorded statement activate a contract, issue an invoice and open a subscription; it now requires a provider-verified acceptance, and "operator_recorded" is honoured only when the policy also names an approver, so the setting alone changes nothing. Every state from the signed contract onward (contract_signed, invoice_issued, pilot_active, pilot_complete, subscription_offered, subscription_active) rests on the acceptance: pilot_active, pilot_complete and subscription_offered used to write the pilot\'s own status from the state name alone and now refuse without an accepted contract of sufficient evidence; the subscription read its evidence from the pilot\'s own responses record and now reads it from the contract. A refused attempt rolls the transition back and is recorded in its own transaction (audit entry with no name; the claim kept on the contract as an unverified claim that never appears as an acceptance and never changes status or signer, deduplicated and bounded). A move back to an earlier state is not refused. Contracts activated under the earlier default are not rewritten: classifyAcceptanceStanding names them activated_on_unverified_acceptance (also on GET /api/contracts) and they cannot advance the pilot until their acceptance is verified. The system role could not read commercial_contracts natively (INSERT and UPDATE only, while every transition reads the contract), so the manifest now declares SELECT; a native test on PG15 and PG16 runs the denial recorder as that role. Replaced tests, disclosed: the route tests that activated a contract or invoice on the default policy now run under an explicitly approved operator-recorded policy or a verified contract, and the "policy requires verification" test now asserts the default.',
+      remaining: 'No signature provider or acceptance verifier is registered, so contract_signed cannot complete in this release and the pilot cannot reach the dependent states; registering one needs a provider decision and credentials. The acceptance policy is still unapproved, and permitting operator-recorded acceptance needs both the setting and an approver. Natively the system role still lacks INSERT on platform_invoices, platform_invoice_line_items and org_subscriptions and SELECT on subscription_plans, so the invoice and subscription effects could not run even with a verified acceptance; granting that is a finance-mandate decision and was not made (finance freeze). The generic /api/contracts POST is a separate surface and was not changed.',
+    },
+    {
+      prefix: 'DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION',
+      status: 'IMPLEMENTED_PENDING_QUALIFICATION',
+      fresh: true,
+      files: [
+        A + 'lib/workbook/holder-notice.ts',
+        A + 'db/migrations-platform/0057_workbook_holder_notice_evidence.sql',
+        A + 'db/migrations-platform/0057_workbook_holder_notice_evidence.rollback.sql',
+        A + 'db/schema/workbook-schema.ts',
+        A + 'app/api/workbook/[id]/memory-holders/route.ts',
+        A + 'app/api/workbook/[id]/memory-holders/[holderId]/route.ts',
+        A + 'app/[locale]/workbook/[id]/memory-holders/page.tsx',
+        A + 'app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient.tsx',
+        A + 'lib/workbook/__tests__/holder-notice.test.ts',
+        A + 'app/api/__tests__/workbook-memory-holders.route.test.ts',
+        A + 'db/__tests__/migration-0057-workbook-holder-notice-evidence.postgres.test.ts',
+      ],
+      explanation: 'The named people stay protected until a notice to them is actually confirmed. A recorded notice is now one of three stored levels (platform 0057): none, self_reported (a person with authority said they were told; nothing confirmed it) and delivery_verified (a registered verifier confirmed it; provider, reference and time kept). Notices recorded under 0055 are relabelled self_reported, never upgraded, and the constraint refuses a delivery-verified row without its evidence. The unapproved policy requires delivery_verified for a display name or private note, and a looser requirement counts only with an approver. A name or note can therefore not be newly written until a verifier exists (clearing one is always allowed), the refusal is recorded without the value, and what already exists is withheld from every reader except the claimant (peers and the capability bearer get null and a withheld flag; the page, which read the names directly with no projection at all, now applies the same projection on the server so the value is not in the payload). The role, responsibility and every other field still work, so the workbook serves people who are not named, and the client disables the name and note fields unless they are writable. Nothing is sent and no one is marked notified without evidence. Replaced tests, disclosed: the holder-notice unit file and the route tests that pinned the earlier boolean policy, "recorded" counts and unconditional peer reads were rewritten for the evidence model; the PATCH audit pin now clears a note instead of writing one.',
+      remaining: 'No delivery verifier is registered, so a person can be named only once an institution approves a looser notice requirement or code registers a verifier for a channel. Who must tell the named person, how, and in what words is an institutional and legal decision. Migration 0057 is unqualified in a deployment environment; the claimant can still read what they entered, read-only, because the schema records no author. PUBLIC_INTAKE_AUDIT_KEY must be provisioned for the unclaimed surface.',
+    },
+    {
+      prefix: 'DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL',
+      status: 'PARTIAL',
+      files: [
+        A + 'lib/reports/report-field-authority.ts',
+        A + 'app/api/reports/execute/route.ts',
+        A + 'lib/reports/__tests__/report-field-authority.test.ts',
+        A + 'app/api/__tests__/reports-execute.route.test.ts',
+      ],
+      explanation: 'Differencing by date window is now refused rather than left to a budget: two filters that differ by a day give two large cells whose counts subtract to one person\'s date, which cell size cannot prevent. For anyone below an administrator a filter on a date column (*_at, *_date, whatever its class, including the executor-side column named in fieldName) may only cut at the start of a month; a day, an instant, a list or a pattern is refused as a restricted use and the refusal is recorded without the value. The question budgets are also bounded across shapes: a harmless extra filter is a new shape, so the source is additionally limited to 60 cell reports an hour per organization, refused and recorded as repeated_questions_of_one_source. The disclosure policy version is now provisional-2.',
+      remaining: 'No institution has approved the field-class policy: it is the provisional conservative default (approvedBy null), so the offices that may reproduce member or claim columns are not named by a decision. Consent for member contact fields is not modelled. Differencing is bounded, not eliminated: month-level windows and attribute filters still subtract (bounded by cell size, complementary suppression, the 12-an-hour shape budget, the 60-an-hour source budget, the per-officer 30-an-hour execution limit, and recorded shapes). A rate limiter that fails open in development weakens the budgets there.',
+    },
+    {
+      prefix: 'DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME',
+      status: 'PARTIAL',
+      files: [A + 'lib/__tests__/intent-outcome-routes-reviewed.test.ts'],
+      explanation: 'Every one of the 36 routes the manifest labels INTENT_OUTCOME is reviewed against the frozen finding and pinned with its reason in a ratchet test that fails when the set changes. No database-only operation remains two-phase: the 11 routes of the frozen operations list are external (job queue, blob storage, e-mail, in-process PKI store), bulk with per-record partial progress by design (ingest, up to 5000 records with continue-on-error), or finance-frozen (billing cycles); database optimize and feature flags were converted in B115. Four routes (chatbot sessions, copilot session outcome, integration configure and activate) are labelled two-phase only because a module they import also holds an unrelated provider call; their own effect is already one transaction with its audit row, which the test checks in source. The classification was not changed.',
+      remaining: 'Billing-cycle generation is finance-frozen and was not changed. Operations whose effect is outside our database remain durable two-phase records by nature. The PKI sign, verify and cancel operations act on an in-process store, which is a separate capability defect. The scanner labels by transitive import, so it over-states the four atomic routes; fixing the scanner would change the manifest and was not done. The bootstrap-v2 source-plan commitments for the changed pilot overview and database optimize routes need regenerating with the Python wheelhouse (UE_V2_WHEELHOUSE) at admission.',
+    },
+  ],
+})

@@ -8,7 +8,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { authorityKernelEntries } from '../rls-storage-authority/authority-kernel'
-import { newUuid, ORG, ORG_B, PLATFORM_SQL, RLS_SQL, U, WORKAID_PLATFORM_SQL, WORKAID_RLS_SQL } from './authority-kernel-harness'
+import { newUuid, ORG, ORG_B, PLATFORM_SQL, RLS_SQL, U, WORKAID_PLATFORM_SQL, WORKAID_RLS_SQL, WORKAID_WORDING_RLS_SQL, WORKAID_WORDING_SQL } from './authority-kernel-harness'
 import { daysAhead, freshDb, kit, minutesAgo } from './authority-kernel-testkit'
 import { auditAuthorityMutation } from '../../lib/authority/store/audit'
 import { declareOwnRecusal, issueDelegation } from '../../lib/authority/store/lifecycle'
@@ -55,12 +55,20 @@ const insertMandate = (o = mandate(), holder = U.chief, issuer = U.president) =>
     o.granted === '$3' ? [ORG, holder, issuer] : [ORG, holder])
 
 describe('migration structure', () => {
-  it('registry, migrations and RLS closures agree on exactly the same 21 relations (16 kernel + 5 WorkAid union-side)', () => {
-    const created = [...PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g), ...WORKAID_PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g)].map((m) => m[1]).sort()
-    const protectedTables = [...RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g), ...WORKAID_RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g)].map((m) => m[1]).sort()
+  it('registry, migrations and RLS closures agree on the kernel relations plus the WorkAid union-side relations', () => {
+    const created = [
+      ...PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g),
+      ...WORKAID_PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g),
+      ...WORKAID_WORDING_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g),
+    ].map((m) => m[1]).sort()
+    const protectedTables = [
+      ...RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g),
+      ...WORKAID_RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g),
+      ...WORKAID_WORDING_RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g),
+    ].map((m) => m[1]).sort()
     expect(authorityKernelEntries.map((e) => e.table).sort()).toEqual(created)
     expect(protectedTables).toEqual(created)
-    expect(created).toHaveLength(21)
+    expect(created).toHaveLength(authorityKernelEntries.length)
   })
 
   it('no registry entry grants DELETE, and no table is writable beyond its declared DML', async () => {
@@ -70,14 +78,23 @@ describe('migration structure', () => {
     }
   })
 
-  it('every relation has FORCE RLS and the five canonical policies', async () => {
+  it('every relation has FORCE RLS and the five canonical policies; the review register and its event history add one restrictive visibility policy each', async () => {
     await k.asAdmin(async () => {
+      const narrowed = ['ue_authority_reviews', 'ue_authority_events']
       for (const e of authorityKernelEntries) {
         const c = await db.query<{ relrowsecurity: boolean; relforcerowsecurity: boolean }>(`SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE oid = $1::regclass`, [e.table])
         expect(c.rows[0], e.table).toEqual({ relrowsecurity: true, relforcerowsecurity: true })
         const p = await db.query<{ n: string }>(`SELECT count(*)::text n FROM pg_policies WHERE tablename = $1`, [e.table])
-        expect(Number(p.rows[0].n), e.table).toBe(5)
+        expect(Number(p.rows[0].n), e.table).toBe(narrowed.includes(e.table) ? 6 : 5)
       }
+      const visibility = await db.query<{ tablename: string; policyname: string; permissive: string; cmd: string; roles: string }>(
+        `SELECT tablename, policyname, permissive, cmd, roles::text roles FROM pg_policies WHERE permissive = 'RESTRICTIVE' AND tablename = ANY ($1::text[]) ORDER BY tablename`,
+        [authorityKernelEntries.map((e) => e.table)],
+      )
+      expect(visibility.rows).toEqual([
+        { tablename: 'ue_authority_events', policyname: 'ue_authority_events_review_visibility', permissive: 'RESTRICTIVE', cmd: 'SELECT', roles: '{union_eyes_runtime}' },
+        { tablename: 'ue_authority_reviews', policyname: 'ue_authority_reviews_visibility', permissive: 'RESTRICTIVE', cmd: 'SELECT', roles: '{union_eyes_runtime}' },
+      ])
     })
   })
 

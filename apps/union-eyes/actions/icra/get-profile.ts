@@ -13,7 +13,8 @@
 import { eq } from 'drizzle-orm'
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema'
 import { withSystemContext } from '@/lib/db/with-rls-context'
-import { checkCapability, type CapabilityDenialReason } from '@/lib/icra/assessment-capability'
+import type { CapabilityDenialReason } from '@/lib/icra/assessment-capability'
+import { authorizeAssessmentToken } from '@/lib/icra/assessment-access'
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types'
 
 export type GetAuthorizedIcraProfileResult =
@@ -35,12 +36,15 @@ export async function getAuthorizedIcraProfile(
       .select({
         capabilityTokenHash: icraAssessments.capabilityTokenHash,
         capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        claimedAt: icraAssessments.claimedAt,
+        claimedOrgId: icraAssessments.claimedOrgId,
+        claimedByUserId: icraAssessments.claimedByUserId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
       .limit(1)
 
-    const check = checkCapability(capabilityToken, assessment)
+    const check = await authorizeAssessmentToken(capabilityToken, assessment)
     if (!check.ok) return { ok: false, reason: check.reason }
 
     const rows = await tx

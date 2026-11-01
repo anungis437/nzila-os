@@ -13,6 +13,7 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: {
     notFound: (msg: string) => Object.assign(new Error(msg), { status: 404 }),
     conflict: (msg: string) => Object.assign(new Error(msg), { status: 409 }),
+    internal: (msg: string) => Object.assign(new Error(msg), { status: 500 }),
   },
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
@@ -54,6 +55,15 @@ describe('exit-interviews/[id]/index route', () => {
     });
     // Lookup is scoped to the caller organization, not just the interview id.
     expect(eq).toHaveBeenCalledWith('organizationId', 'org_1');
+  });
+
+  // DEF-0B7-EXC-INDEX-FAILURE-RETURNS-200-WITH-RAW-ERROR-TEXT
+  it('answers a failed indexing as a 500 without the error text', async () => {
+    m.db.select.mockReturnValueOnce({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ id: 'ei_1', status: 'published', sensitivityLevel: 'public_internal', consentGranted: true }]) })) })) } as any);
+    m.indexExitInterview.mockResolvedValueOnce({ indexed: false, reason: 'Indexing failed', failed: true });
+    const { POST } = await loadRoute();
+
+    await expect(POST({ params: { id: 'ei_1' }, organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject({ status: 500, message: 'Indexing failed' });
   });
 
   it('refuses to index an interview that is not published', async () => {

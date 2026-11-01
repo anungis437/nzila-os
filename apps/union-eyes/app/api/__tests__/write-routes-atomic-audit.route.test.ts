@@ -123,7 +123,7 @@ describe('targets POST', () => {
 describe('satisfaction POST (a steward creating a survey by hand)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.selected = [{ memberId: 'member_1', assignedTo: 'lro_1' }];
+    m.selected = [{ memberId: 'member_1', assignedTo: 'lro_1', status: 'closed' }];
     m.createSatisfactionSurvey.mockResolvedValue({ id: 'srv1' });
   });
 
@@ -146,10 +146,18 @@ describe('satisfaction POST (a steward creating a survey by hand)', () => {
     m.selected = [];
     await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 404 });
 
-    m.selected = [{ memberId: 'someone_else', assignedTo: 'lro_1' }];
+    m.selected = [{ memberId: 'someone_else', assignedTo: 'lro_1', status: 'closed' }];
     await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
 
-    m.selected = [{ memberId: 'member_1', assignedTo: 'another_lro' }];
+    m.selected = [{ memberId: 'member_1', assignedTo: 'another_lro', status: 'closed' }];
+    await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
+
+    // DEF-0B11-IDS-SATISFACTION-CREATE-DOES-NOT-CHECK-CLAIM-STATE-AND-ACCEPTS-ANY-REPRESENTATIVE-ID-ON-AN-UNASSIGNED-CLAIM
+    for (const status of ['submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation', 'rejected']) {
+      m.selected = [{ memberId: 'member_1', assignedTo: 'lro_1', status }];
+      await expect(POST({ ...caller, body }), status).rejects.toMatchObject({ status: 409 });
+    }
+    m.selected = [{ memberId: 'member_1', assignedTo: null, status: 'resolved' }];
     await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
 
     expect(m.createSatisfactionSurvey).not.toHaveBeenCalled();
@@ -164,31 +172,30 @@ describe('mobile/sync POST (device registration)', () => {
     m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
-  const request = {
-    json: async () => ({ deviceToken: 'tok', deviceId: 'device-1', platform: 'ios' }),
-  };
+  // The route takes the parsed body from the framework context.
+  const request = { body: { deviceToken: 'tok-12345678', deviceId: 'device-1', platform: 'ios' } };
 
   it('registers the caller\u2019s device and audits it without the device token', async () => {
     const { POST } = await import('../mobile/sync/route');
-    const result = await POST({ ...caller, request });
+    const result = await POST({ ...caller, ...request });
 
-    expect(result).toEqual({ id: 'dev1' });
+    expect(result).toEqual({ device: { id: 'dev1' }, sync: { performed: false, reason: 'registration_only' } });
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       tx,
-      expect.objectContaining({ userId: 'u1', action: 'mobile.device.register', resourceId: 'dev1', details: { platform: 'ios', deviceId: 'device-1' } }),
+      expect.objectContaining({ userId: 'u1', action: 'mobile.device.register', resourceId: 'dev1', details: { platform: 'ios', deviceId: 'device-1', pushCapable: true } }),
     );
-    expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('"tok"');
+    expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('tok-12345678');
   });
 
   it('refuses a device already registered to another account, and a hijack that raced past the check, writing no audit', async () => {
     const { POST } = await import('../mobile/sync/route');
 
     m.selected = [{ userId: 'victim' }];
-    await expect(POST({ ...caller, request })).rejects.toMatchObject({ status: 409 });
+    await expect(POST({ ...caller, ...request })).rejects.toMatchObject({ status: 409 });
 
     m.selected = [];
     m.returned = []; // the ownership predicate on the upsert matched nothing
-    await expect(POST({ ...caller, request })).rejects.toMatchObject({ status: 409 });
+    await expect(POST({ ...caller, ...request })).rejects.toMatchObject({ status: 409 });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 });

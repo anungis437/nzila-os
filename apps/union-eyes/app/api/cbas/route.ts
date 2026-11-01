@@ -64,8 +64,18 @@ export const GET = withRoleAuth('member', async (req: NextRequest, context: Base
   const search = url.searchParams.get('search');
   if (search) filters.searchQuery = search;
 
-  const page = parseInt(url.searchParams.get('page') || '1', 10);
-  const limit = parseInt(url.searchParams.get('limit') || '20', 10);
+  // An invalid or oversized page request is refused, never clamped into an unbounded scan.
+  const bounded = (raw: string | null, fallback: number, max: number) => {
+    if (raw === null) return fallback;
+    if (!/^[1-9][0-9]{0,5}$/.test(raw)) return null;
+    const parsed = Number(raw);
+    return parsed <= max ? parsed : null;
+  };
+  const page = bounded(url.searchParams.get('page'), 1, 10000);
+  const limit = bounded(url.searchParams.get('limit'), 20, 100);
+  if (page === null || limit === null) {
+    return NextResponse.json({ error: 'Invalid pagination: page must be 1..10000 and limit 1..100' }, { status: 400 });
+  }
 
   try {
     const result = await withRLSContext({ organizationId }, async () => listCBAs(filters, { page, limit }));

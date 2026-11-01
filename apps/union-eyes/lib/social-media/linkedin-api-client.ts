@@ -470,8 +470,13 @@ export class LinkedInAPIClient {
     }
 
     // Fetch the image
-    const imageResponse = await fetch(imageUrl);
+    // A redirect could leave the host that was just checked, so none is followed; only a bounded image is taken.
+    const imageResponse = await fetch(imageUrl, { redirect: 'error' });
+    if (!imageResponse.ok) throw new Error(`Image fetch failed with status ${imageResponse.status}`);
+    const imageType = imageResponse.headers?.get?.('content-type') ?? '';
+    if (imageType && !imageType.toLowerCase().startsWith('image/')) throw new Error('Blocked image URL: not an image');
     const imageBuffer = await imageResponse.arrayBuffer();
+    if (imageBuffer.byteLength > 8 * 1024 * 1024) throw new Error('Blocked image URL: image larger than 8 MB');
 
     // Upload to LinkedIn
     await fetch(uploadUrl, {

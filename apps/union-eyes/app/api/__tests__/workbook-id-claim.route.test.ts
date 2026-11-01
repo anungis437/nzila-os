@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
@@ -9,7 +10,10 @@ const m = vi.hoisted(() => ({
   selectQueue: [] as unknown[][],
   withSystemContext: vi.fn(),
   persistAtomicAudit: vi.fn(),
+  checkRateLimit: vi.fn(),
 }));
+
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.checkRateLimit }));
 
 function makeSelectChain(rows: unknown[]) {
   const chain: any = {
@@ -71,6 +75,7 @@ async function postClaim(claimToken?: string) {
 describe('workbook/[id]/claim route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 60 });
     m.updateQueue = [];
     m.selectQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
@@ -169,7 +174,7 @@ describe('workbook/[id]/claim route', () => {
     expect(mockTx.select).not.toHaveBeenCalled();
     expect(m.logger.info).toHaveBeenCalledWith(
       '[workbook-claim] Workbook claimed',
-      { workbookId: 'w1', userId: 'u1', orgId: 'org_1' },
+      { workbookRef: opaqueRef('w1'), userId: 'u1', orgId: 'org_1' },
     );
   });
 
@@ -222,7 +227,35 @@ describe('workbook/[id]/claim route', () => {
     expect(response.status).toBe(500);
     expect(m.logger.error).toHaveBeenCalledWith(
       '[workbook-claim] Claim failed',
-      { workbookId: 'w1', err: expect.any(Error) },
+      { workbookRef: opaqueRef('w1'), err: expect.any(Error) },
     );
+  });
+
+  // DEF-0B12-WBK-CLAIM-HAS-NO-RATE-LIMIT-AND-READS-AN-UNCAPPED-BODY
+  it('rate limits claim attempts and never reads the body of a refused request', async () => {
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 120 });
+    const response = await postClaim();
+    expect(response.status).toBe(429);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('refuses an oversized body with 413 before parsing it', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/workbook/w1/claim', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ claimToken: 'x'.repeat(20_000) }),
+    }), { params: Promise.resolve({ id: 'w1' }) });
+    expect(response.status).toBe(413);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  // DEF-0B12-WBK-ROUTES-LOG-THE-BEARER-WORKBOOK-ID
+  it('logs an opaque reference for the workbook, never the identifier that acts as a capability', async () => {
+    m.updateQueue.push([{ id: 'w1' }]);
+    await postClaim();
+    const logged = JSON.stringify(m.logger.info.mock.calls);
+    expect(logged).not.toContain('"w1"');
+    expect(logged).toContain(opaqueRef('w1'));
   });
 });

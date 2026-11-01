@@ -71,12 +71,12 @@ export const GET = withApi(
     entitlement: 'union_knowledge_suite',
     query: GetCopilotQuerySchema,
   },
-  async ({ organizationId, query }) => {
+  async ({ organizationId, userId, query }) => {
     if (query.conversationId) {
-      const messages = await loadConversationHistory(organizationId!, query.conversationId);
+      const messages = await loadConversationHistory(organizationId!, query.conversationId, userId!);
       return { data: { messages } };
     }
-    const conversations = await listConversations(organizationId!, query.limit);
+    const conversations = await listConversations(organizationId!, userId!, query.limit);
     return { data: { conversations } };
   },
 );

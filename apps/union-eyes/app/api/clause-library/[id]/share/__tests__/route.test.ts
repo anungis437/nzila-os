@@ -3,9 +3,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Owner-only sharing reads and writes run in the caller's tenant RLS context.
 //
 // TBS-02 mock contract: withSystemContext executing the callback is not
-// tenant success. Tenant SELECT matches ue_shared_library_select (owner,
-// explicit share, or public). Tenant UPDATE applies only when the witnessed
-// parent source org equals the RLS org. System context does not apply that
+// tenant success. Tenant SELECT admits what the sharing policy admits for a
+// row (owner, explicit share or public; the federation and congress levels are
+// owner-only, see lib/clause-library/sharing-authority.ts). Tenant UPDATE applies only when
+// the witnessed parent source org equals the RLS org. System context does not apply that
 // write filter. Cross-org denial must still hold when isSharedClauseOwner
 // is stubbed open.
 
@@ -32,6 +33,8 @@ const h = vi.hoisted(() => {
   ) =>
     row.sourceOrganizationId === orgId ||
     row.sharingLevel === 'public' ||
+    row.sharingLevel === 'federation' ||
+    row.sharingLevel === 'congress' ||
     (Array.isArray(row.sharedWithOrgIds) && row.sharedWithOrgIds.includes(orgId));
 
   const mutationPermitted = () => {
@@ -240,46 +243,48 @@ describe('clause-library/[id]/share route', () => {
   it('POST 404s a non-owner and does not update sharing', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     h.isSharedClauseOwner.mockReturnValue(false);
-    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
+    h.allowPrivilegedRead.current = true;
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    // A caller who does not own the clause learns nothing from the sharing rule: the ownership check answers first.
+    expect(h.sharingChangeDenial).not.toHaveBeenCalled();
   });
 
   it('POST updates sharing for the owner and ignores a body organization id', async () => {
-    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
     pushSel([{
       id: 'clause-1',
-      sharingLevel: 'federation',
-      sharedWithOrgIds: ['org-c'],
+      sharingLevel: 'public',
+      sharedWithOrgIds: ['00000000-0000-4000-8000-0000000000c3'],
       isAnonymized: true,
       anonymizedEmployerName: 'Employer',
     }]);
-    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
+    h.allowPrivilegedRead.current = true;
     const { POST } = await loadHandlers();
 
     const result = (await POST({
       request: req('clause-1', {
-        sharingLevel: 'federation',
-        sharedWithOrgIds: ['org-c'],
+        sharingLevel: 'public',
+        sharedWithOrgIds: ['00000000-0000-4000-8000-0000000000c3'],
         sourceOrganizationId: 'attacker-controlled-org',
       }),
       organizationId: 'org-a',
     userId: 'user-1',
+      user: { role: 'officer' },
     })) as { sharing: { sharingLevel: string } };
 
-    expect(result.sharing.sharingLevel).toBe('federation');
+    expect(result.sharing.sharingLevel).toBe('public');
     expect(h.applied.updates).toBe(1);
-    expect(h.updatePayloads[0].sharingLevel).toBe('federation');
-    expect(h.updatePayloads[0].sharedWithOrgIds).toEqual(['org-c']);
+    expect(h.updatePayloads[0].sharingLevel).toBe('public');
+    expect(h.updatePayloads[0].sharedWithOrgIds).toEqual(['00000000-0000-4000-8000-0000000000c3']);
     expect(h.updatePayloads[0].sourceOrganizationId).toBeUndefined();
     expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
     expect(h.persistAtomicAudit).toHaveBeenCalledWith(
@@ -287,26 +292,40 @@ describe('clause-library/[id]/share route', () => {
       expect.objectContaining({ organizationId: 'org-a', userId: 'user-1', action: 'clause_library.sharing.update', resourceId: 'clause-1' }),
     );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-a', expect.any(Object), 'private');
   });
 
-  it('POST 403s an unauthorized sharing change before any tenant read, write, or audit', async () => {
+  it('POST 403s an unavailable sharing change for the owner, after the ownership check and before any write or audit', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
     h.allowPrivilegedRead.current = true;
     h.sharingChangeDenial.mockResolvedValue({ status: 403, message: 'not allowed to share' });
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-a', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'federation' }), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 403 });
-    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-a', expect.objectContaining({ sharingLevel: 'federation' }), 'private');
+    expect(h.withRLSContext).toHaveBeenCalledTimes(1);
     expect(h.calls.update).toBe(0);
     expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('POST judges a level against the level the clause already has, so a clause stored at a withdrawn level can still be saved', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'congress' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
+    pushSel([{ id: 'clause-1', sharingLevel: 'congress', isAnonymized: true, anonymizedEmployerName: 'Employer' }]);
+    h.allowPrivilegedRead.current = true;
+    const { POST } = await loadHandlers();
+
+    await POST({ request: req('clause-1', { sharingLevel: 'congress', isAnonymized: true }), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } });
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-a', expect.objectContaining({ sharingLevel: 'congress' }), 'congress');
   });
 
   it('POST rejects an empty sharing update before opening a tenant transaction', async () => {
     const { POST } = await loadHandlers();
 
-    await expect(POST({ request: req('clause-1', {}), organizationId: 'org-a', userId: 'user-1' })).rejects.toMatchObject({ status: 400 });
+    await expect(POST({ request: req('clause-1', {}), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } })).rejects.toMatchObject({ status: 400 });
     expect(h.calls.update).toBe(0);
     expect(h.withRLSContext).not.toHaveBeenCalled();
     expect(h.withSystemContext).not.toHaveBeenCalled();
@@ -316,35 +335,35 @@ describe('clause-library/[id]/share route', () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private', sharedWithOrgIds: [] }]);
     pushSel([{ id: 'clause-1', sharingLevel: 'public' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
-    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
+    h.allowPrivilegedRead.current = true;
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).not.toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    expect(h.sharingChangeDenial).not.toHaveBeenCalled();
   });
 
   it('POST does not apply a cross-org share update when the row is publicly readable and the owner predicate is stubbed open', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     pushSel([{ id: 'clause-1', sharingLevel: 'congress' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
-    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
+    h.allowPrivilegedRead.current = true;
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'congress' }), organizationId: 'org-b', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'congress' }), organizationId: 'org-b', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(1);
     expect(h.applied.updates).toBe(0);
     expect(h.updatePayloads).toHaveLength(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-b', expect.any(Object), 'public');
   });
 
   it('does not treat a system-context share write as tenant success', async () => {

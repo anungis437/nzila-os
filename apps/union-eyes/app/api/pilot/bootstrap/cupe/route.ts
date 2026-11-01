@@ -1,55 +1,57 @@
 /**
  * POST /api/pilot/bootstrap/cupe
  *
- * One-click pilot packaging endpoint:
- * - seeds CUPE pilot org + members + demo grievances
- * - initializes onboarding checklist
- * - emits pilot events
- * - returns demo script for guided activation
+ * One-click pilot packaging endpoint for platform staff: creates (or finds) the CUPE pilot organization, seeds its members and demo
+ * grievances, initializes the onboarding checklist and emits pilot events.
+ *
+ * It acts across organizations, so it needs platform-staff authority (a role title is not enough) and a pilot or demo runtime. The system
+ * role creates the organization and writes its marker; the tenant rows are written as the runtime role bound to that organization, so
+ * the operator needs an active membership in it. Every row the bootstrap creates is recorded in the origin ledger, and a reset deletes
+ * exactly those rows and refuses when the organization holds any other (lib/pilot/fixture-bootstrap.ts). `dryRun` rehearses the request
+ * without changing anything.
  */
-
-import { withApi, z, RATE_LIMITS, ApiError } from '@/lib/api/framework';
-import { readFile } from 'fs/promises';
-import { resolve } from 'path';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { organizations } from '@/db/schema-organizations';
-import { organizationMembers, pilotChecklistItems, pilotEvents } from '@/db/schema';
-import { grievances } from '@/db/schema/domains/claims/grievances';
-import { eq } from 'drizzle-orm';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding';
+import { ApiError, RATE_LIMITS, withApi, z } from '@/lib/api/framework';
 import { assertPilotDemoMutationRuntime } from '@/lib/config/pilot-demo-runtime';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { logger } from '@/lib/logger';
+import {
+  FixtureUnavailableError,
+  applyFixture,
+  fixtureSlug,
+  loadCupeFixture,
+  recordFixtureDenial,
+  resolveFixtureOrganization,
+} from '@/lib/pilot/fixture-bootstrap';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 const bodySchema = z.object({
   reset: z.boolean().default(false),
+  // A reset names the organization it will clear, so it cannot be triggered by a stray or replayed request.
+  confirmReset: z.string().optional(),
+  // Runs the same statements and rolls them back; only the rehearsal is recorded.
+  dryRun: z.boolean().default(false),
   includeDemoScript: z.boolean().default(true),
 });
 
-const CUPE_PILOT_JSON = resolve(
-  process.cwd(),
-  'fixtures/cupe/pilot-org/cupe-pilot-setup.json',
-);
-
-const CHECKLIST_IDS = [
-  'org_profile_configured',
-  'team_invited',
-  'first_case_created',
-  'sla_watchdog_enabled',
-  'billing_connected',
-] as const;
+const DEMO_SCRIPT = [
+  'Open the dashboard and verify the CUPE fixture organization context.',
+  'Navigate to Cases and inspect the fixture grievances actually persisted.',
+  'Open pilot onboarding and review the canonical checklist; uncompleted tasks remain pending.',
+  'Verify SLA, summary and billing features separately before demonstrating their outcomes.',
+];
 
 export const POST = withApi(
   {
-    // Seeds and, with `reset`, deletes the members and grievances of a fixed organization across tenants: platform
-    // authority only, and only where the deployment is explicitly a pilot or demo runtime.
     auth: { minRole: 'system_admin' },
     body: bodySchema,
     rateLimit: RATE_LIMITS.ORG_WRITE,
     openapi: {
       tags: ['Pilot'],
-      summary: 'Bootstrap CUPE pilot org with demo-ready dataset',
+      summary: 'Bootstrap or reset the CUPE pilot organization from the fixture, recording every row it creates',
     },
   },
-  async ({ body, userId }) => {
+  async ({ body, userId, organizationId: actingOrganizationId }) => {
     if (!userId) throw ApiError.unauthorized();
 
     let runtimeMode: string;
@@ -59,180 +61,98 @@ export const POST = withApi(
       throw ApiError.forbidden(error instanceof Error ? error.message : 'Pilot bootstrap is disabled in this runtime');
     }
 
-    const jsonContent = await readFile(CUPE_PILOT_JSON, 'utf-8');
-    const fixture = JSON.parse(jsonContent) as {
-      org: { name: string; slug?: string };
-      members: Array<{ id: string; first_name: string; last_name: string; email: string; role: string; member_number?: string }>;
-      cases: Array<{ number: string; case_type: string; status: string; priority?: string; title: string; description: string; filed_at?: string; filed_by: string }>;
-      worksites: Array<{ id: string }>;
-    };
+    await requirePlatformStaffAuthority({ userId, organizationId: actingOrganizationId }, 'platform.pilot_fixture.manage');
 
-    const slug = fixture.org.slug ?? 'cupe-local-123';
+    let fixture;
+    try {
+      fixture = await loadCupeFixture();
+    } catch (error) {
+      if (error instanceof FixtureUnavailableError) throw ApiError.internal(error.message);
+      throw error;
+    }
 
-    // Every write below, and the audit record, is one system transaction: a failure leaves no half-seeded organization.
-    const outcome = await withSystemContext(async (tx) => {
-      const existingOrg = await tx
-        .select()
-        .from(organizations)
-        .where(eq(organizations.slug, slug))
-        .limit(1);
+    const slug = fixtureSlug(fixture);
+    if (body.reset && !body.dryRun && body.confirmReset !== slug) {
+      throw ApiError.badRequest('reset requires confirmReset to name the organization slug');
+    }
 
-      let orgId = existingOrg[0]?.id;
+    const resolved = await withSystemContext((tx) =>
+      resolveFixtureOrganization(tx, { slug, name: fixture.org.name, userId, dryRun: body.dryRun, runtimeMode }),
+    );
+    if (resolved.kind === 'refused') {
+      throw ApiError.conflict(
+        'An organization already exists at the fixture slug but was not created by the pilot bootstrap, so none of its rows can be proven to be fixture data. Nothing was changed.',
+      );
+    }
+    if (resolved.kind === 'would_create') {
+      return {
+        success: true,
+        dryRun: true,
+        organizationId: null,
+        organizationName: fixture.org.name,
+        wouldCreateOrganization: true,
+        reset: body.reset,
+        planned: { members: fixture.members.length, cases: fixture.cases.length },
+        demoScript: [],
+      };
+    }
 
-      if (orgId && body.reset) {
-        await tx.delete(grievances).where(eq(grievances.organizationId, orgId));
-        await tx.delete(organizationMembers).where(eq(organizationMembers.organizationId, orgId));
-        await tx.delete(pilotChecklistItems).where(eq(pilotChecklistItems.organizationId, orgId));
-      }
-
-      if (!orgId) {
-        const [newOrg] = await tx
-          .insert(organizations)
-          .values({
-            name: fixture.org.name,
-            slug,
-            organizationType: 'local',
-            hierarchyPath: [],
-          })
-          .returning({ id: organizations.id });
-        orgId = newOrg.id;
-      }
-
-      if (!orgId) throw ApiError.internal('Failed to resolve bootstrap organization');
-      const organizationId = orgId;
-
-      let membersInserted = 0;
-      for (const m of fixture.members) {
-        await tx
-          .insert(organizationMembers)
-          .values({
-            userId: m.id,
-            organizationId,
-            name: `${m.first_name} ${m.last_name}`,
-            email: m.email,
-            role: m.role,
-            status: 'active',
-            membershipNumber: m.member_number,
-          })
-          .onConflictDoNothing();
-        membersInserted += 1;
-      }
-
-      let casesInserted = 0;
-      for (const c of fixture.cases) {
-        const grievantMember = fixture.members.find((m) => m.id === c.filed_by);
-
-        await tx
-          .insert(grievances)
-          .values({
-            grievanceNumber: c.number,
-            organizationId,
-            type: c.case_type === 'wage_dispute'
-              ? 'contract'
-              : c.case_type === 'harassment'
-                ? 'harassment'
-                : c.case_type === 'discipline'
-                  ? 'discipline'
-                  : c.case_type === 'benefits_denial'
-                    ? 'contract'
-                    : 'other',
-            status: c.status === 'settled'
-              ? 'settled'
-              : c.status === 'investigating'
-                ? 'investigating'
-                : c.status === 'acknowledged'
-                  ? 'acknowledged'
-                  : 'filed',
-            priority:
-              c.priority === 'low' || c.priority === 'medium' || c.priority === 'high' || c.priority === 'urgent'
-                ? c.priority
-                : 'medium',
-            title: c.title,
-            description: c.description,
-            grievantName: grievantMember ? `${grievantMember.first_name} ${grievantMember.last_name}` : undefined,
-            grievantEmail: grievantMember?.email,
-            filedDate: c.filed_at ? new Date(c.filed_at) : undefined,
-          })
-          .onConflictDoNothing();
-        casesInserted += 1;
-      }
-
-      for (const itemId of CHECKLIST_IDS) {
-        const done = itemId === 'org_profile_configured' || itemId === 'team_invited' || itemId === 'first_case_created';
-        await tx
-          .insert(pilotChecklistItems)
-          .values({
-            organizationId,
-            itemId,
-            completed: done,
-            completedAt: done ? new Date() : null,
-            completedBy: userId,
-          })
-          .onConflictDoNothing();
-      }
-
-      const sessionId = `pilot-bootstrap:${organizationId}`;
-      await tx.insert(pilotEvents).values([
-        {
-          userId,
+    const { organizationId } = resolved;
+    let result;
+    try {
+      result = await withRLSContext({ organizationId, userId }, (tx) =>
+        applyFixture(tx, {
           organizationId,
-          sessionId,
-          eventType: 'org_created',
-          metadata: { source: 'api/pilot/bootstrap/cupe', reset: body.reset },
-        },
-        {
           userId,
-          organizationId,
-          sessionId,
-          eventType: 'feature_used',
-          metadata: { feature: 'one_click_bootstrap' },
-        },
-      ]);
-
-      await persistAtomicAudit(tx, {
-        organizationId,
-        userId,
-        action: 'pilot.bootstrap.cupe',
-        resourceType: 'organizations',
-        resourceId: organizationId,
-        details: {
+          fixture,
           reset: body.reset,
+          dryRun: body.dryRun,
+          organizationCreated: resolved.created,
           runtimeMode,
-          membersInserted,
-          casesInserted,
-          worksites: fixture.worksites.length,
-        },
-      });
+        }),
+      );
+    } catch (error) {
+      if (!(error instanceof AuthOrgBindingError)) throw error;
+      try {
+        await withSystemContext((tx) =>
+          recordFixtureDenial(tx, { organizationId, userId, runtimeMode, reason: 'membership_required', details: { code: error.code } }),
+        );
+      } catch (recordError) {
+        // The refusal stands whether or not it could be recorded.
+        logger.error('pilot_fixture_denial_not_recorded', { error: recordError instanceof Error ? recordError.message : 'unknown' });
+      }
+      throw ApiError.forbidden(
+        'The fixture organization exists, but its members and grievances are tenant data: they can be seeded or reset only by an operator who holds an active membership in it. Nothing was changed.',
+      );
+    }
 
-      return { organizationId, membersInserted, casesInserted };
-    });
-
-    const { organizationId: orgId, membersInserted, casesInserted } = outcome;
-
-    const demoScript = [
-      'Open dashboard and verify seeded CUPE organization context.',
-      'Navigate to Cases and show pre-seeded grievance lifecycle across statuses.',
-      'Run /api/cron/sla-watchdog then show SLA risk and breach events in analytics.',
-      'Trigger weekly summary endpoint and review generated recommendations.',
-      'Open Billing replay endpoint on a generated invoice to prove lineage and deterministic replay.',
-    ];
+    if (result.kind === 'refused') {
+      throw ApiError.conflict(
+        result.reason === 'foreign_rows'
+          ? `Reset refused: the organization holds ${result.foreign.members} member rows and ${result.foreign.grievances} grievance rows that this bootstrap did not create. Nothing was changed.`
+          : 'Reset refused: a fixture row is still referenced by records this bootstrap did not create. Nothing was changed.',
+      );
+    }
 
     return {
       success: true,
-      organizationId: orgId,
+      dryRun: result.dryRun,
+      organizationId,
       organizationName: fixture.org.name,
+      organizationCreated: resolved.created,
       reset: body.reset,
       seeded: {
-        worksites: fixture.worksites.length,
-        members: membersInserted,
-        cases: casesInserted,
+        worksites: 0,
+        worksitesAvailableInFixtureNotSeeded: fixture.worksites.length,
+        members: result.seeded.members,
+        cases: result.seeded.cases,
       },
-      onboarding: {
-        checklistInitialized: CHECKLIST_IDS.length,
-        completed: 3,
-        pending: 2,
-      },
-      demoScript: body.includeDemoScript ? demoScript : [],
+      alreadyPresent: result.alreadyPresent,
+      caseNumbersInUse: result.caseNumbersInUse,
+      removed: result.removed,
+      clearedStale: result.clearedStale,
+      onboarding: result.onboarding,
+      demoScript: body.includeDemoScript ? DEMO_SCRIPT : [],
     };
   },
 );

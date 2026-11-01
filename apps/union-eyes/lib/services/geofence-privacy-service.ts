@@ -46,8 +46,7 @@ export async function requestLocationPermission(
   const existingConsent = await db.query.memberLocationConsent
     .findFirst({
       where: eq(memberLocationConsent.userId, userId)
-    })
-    .catch(() => null);
+    });
 
   if (existingConsent && existingConsent.consentStatus === 'opted_in') {
     return {
@@ -112,10 +111,11 @@ export async function trackLocation(
     });
 
     return { success: true };
-  } catch (error) {
+  } catch {
+    // Do not expose database error details to a member-facing caller.
     return {
       success: false,
-      error: `Failed to track location: ${error}`
+      error: 'Failed to track location. Please retry or contact support.'
     };
   }
 }
@@ -136,10 +136,10 @@ export async function revokeLocationConsent(
       success: true,
       message: 'Location tracking disabled. You can re-enable anytime.'
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
-      message: `Error revoking consent: ${error}`
+      message: 'Unable to revoke location consent. Please retry or contact support.'
     };
   }
 }
@@ -159,8 +159,7 @@ export async function getLocationConsentStatus(
   const consent = await db.query.memberLocationConsent
     .findFirst({
       where: eq(memberLocationConsent.userId, userId)
-    })
-    .catch(() => null);
+    });
 
   return {
     status: (consent?.consentStatus as 'opted_in' | 'opted_out' | 'never_asked') || 'never_asked',
@@ -181,9 +180,9 @@ export async function verifyNoBackgroundTracking(): Promise<{
   message: string;
 }> {
   // Check all location records have trackingType = 'foreground_only'
-  const backgroundRecords = await db.query.locationTracking
-    .findMany()
-    .catch(() => []);
+  // A failed or incomplete compliance read is NOT evidence of compliance.
+  // Let the failure propagate so no report can claim a clean bill of health.
+  const backgroundRecords = await db.query.locationTracking.findMany();
 
   const hasBackgroundTracking = backgroundRecords.some(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -14,6 +14,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 import { isRetiredNoOpRoute } from './retired-routes'
+import { isReexportAliasOfAcceptedRoute } from './route-aliases'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -207,8 +208,16 @@ describe('INV-11 — Every API route has authorization', () => {
       it(`${relPath} — has authorization guard`, () => {
         const content = readFileSync(route, 'utf-8')
 
-        // Route must contain at least one auth pattern
-        const hasAuth = AUTH_PATTERNS.some((pattern) => content.includes(pattern)) || isRetiredNoOpRoute(content)
+        // Route must contain at least one auth pattern. A route that only re-exports another route is as authorized as that route: one carrying
+        // an auth pattern, or one this contract already lists as public.
+        const hasOwnAuth = (text: string) => AUTH_PATTERNS.some((pattern) => text.includes(pattern)) || isRetiredNoOpRoute(text)
+        const isPublicTarget = (file: string) => {
+          const target = relative(ROOT, file).replace(/\\/g, '/').replace(/%5F/gi, '_')
+          return PUBLIC_ROUTE_PATTERNS.some((p) => target.includes(p))
+        }
+        const hasAuth =
+          hasOwnAuth(content) ||
+          isReexportAliasOfAcceptedRoute(route, content, (file, text) => isPublicTarget(file) || hasOwnAuth(text))
 
         expect(
           hasAuth,

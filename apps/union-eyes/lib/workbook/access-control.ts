@@ -38,6 +38,7 @@ import { eq } from 'drizzle-orm';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withExplicitUserContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { workbookCapabilityHolds } from '@/lib/workbook/workbook-capability';
 
 export type WorkbookAccessResult =
   | { ok: true }
@@ -59,6 +60,9 @@ export interface ClaimedWorkbookAuthority {
   operation?: 'read' | 'write';
 }
 
+/** The lowest organization role that may act on a claimed workbook as a same-organization peer. */
+const PEER_MIN_ROLE = 'steward';
+
 type AuthorityDecision =
   | { ok: true; authority: ClaimedWorkbookAuthority }
   | { ok: false; status: 401 | 403 | 404; error: string };
@@ -71,13 +75,15 @@ type AuthorityDecision =
  * yet been established. Only ownership columns of the single workbook cross
  * this boundary — no child data is exposed by the lookup itself.
  */
-async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<AuthorityDecision> {
+async function resolveClaimedWorkbookAuthority(workbookId: string, capability: string | null): Promise<AuthorityDecision> {
   const ownership = await withSystemContext(async (tx) => {
     const [wb] = await tx
       .select({
         id: workbooks.id,
         claimedByUserId: workbooks.claimedByUserId,
         claimedOrgId: workbooks.claimedOrgId,
+        capabilityTokenHash: workbooks.capabilityTokenHash,
+        capabilityTokenExpiresAt: workbooks.capabilityTokenExpiresAt,
       })
       .from(workbooks)
       .where(eq(workbooks.id, workbookId))
@@ -90,7 +96,11 @@ async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<Auth
   }
 
   if (!ownership.claimedByUserId) {
-    // Unclaimed: the workbookId itself is the bearer credential.
+    // Unclaimed: the workbook's bearer capability is the credential, never its identifier (which is in URLs). Whatever is wrong with it
+    // (missing, wrong, expired, never issued) answers as a workbook that is not there, so the response does not say which workbooks exist.
+    if (!workbookCapabilityHolds(capability, ownership)) {
+      return { ok: false, status: 404, error: 'Workbook not found' };
+    }
     return {
       ok: true,
       authority: {
@@ -133,6 +143,14 @@ async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<Auth
     return { ok: false, status: 403, error: 'Forbidden' };
   }
 
+  // The workbook names individuals who have no notice that they are recorded, so a peer needs a role in the organization, not just a
+  // membership: a plain member who shares the organization is not admitted to read, change or delete them.
+  // Loaded here, not at the top: the guard is heavy and only a peer needs it.
+  const { hasRoleInOrganization } = await import('@/lib/api-auth-guard');
+  if (!(await hasRoleInOrganization(ownerOrgId, PEER_MIN_ROLE, userId))) {
+    return { ok: false, status: 403, error: 'Forbidden' };
+  }
+
   return {
     ok: true,
     authority: {
@@ -149,8 +167,8 @@ async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<Auth
  * Boolean authority check (backward-compatible surface). Delegates to the
  * single authority resolver — no protected child data is read here.
  */
-export async function verifyClaimedWorkbookAccess(workbookId: string): Promise<WorkbookAccessResult> {
-  const decision = await resolveClaimedWorkbookAuthority(workbookId);
+export async function verifyClaimedWorkbookAccess(workbookId: string, capability: string | null = null): Promise<WorkbookAccessResult> {
+  const decision = await resolveClaimedWorkbookAuthority(workbookId, capability);
   if (!decision.ok) {
     return { ok: false, status: decision.status, error: decision.error };
   }
@@ -175,10 +193,10 @@ export type WithClaimedWorkbookAccessResult<T> =
  * and same_org paths in particular).
  */
 export async function withClaimedWorkbookAccess<T>(
-  args: { workbookId: string; operation: 'read' | 'write' },
+  args: { workbookId: string; operation: 'read' | 'write'; /** The presented bearer capability of an unclaimed workbook; ignored for a claimed one. */ capability?: string | null },
   callback: (authority: ClaimedWorkbookAuthority) => Promise<T>,
 ): Promise<WithClaimedWorkbookAccessResult<T>> {
-  const decision = await resolveClaimedWorkbookAuthority(args.workbookId);
+  const decision = await resolveClaimedWorkbookAuthority(args.workbookId, args.capability ?? null);
   if (!decision.ok) {
     return decision;
   }

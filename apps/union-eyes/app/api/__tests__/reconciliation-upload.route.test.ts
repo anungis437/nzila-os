@@ -1,29 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
 
-const m = vi.hoisted(() => ({
-  withApi: vi.fn(),
-  listExceptions: vi.fn(),
-}));
+// DEF-0B11-PRP-RECONCILIATION-BANK-AND-UPLOAD-PATHS-ARE-NAMED-FOR-BANK-FEEDS-BUT-LIST-RUNS-AND-EXCEPTIONS: the upload path listed exceptions and the bank
+// path listed runs under names that promise a file intake and a bank feed. Neither exists, so both answer 501 behind the officer floor. Runs and exceptions
+// are read through the reconciliation process and queue routes.
+describe.each(['bank', 'upload'])('reconciliation/%s route', (name) => {
+  const source = readFileSync(resolve(__dirname, '../reconciliation', name, 'route.ts'), 'utf8');
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }) } }));
-vi.mock('@/services/platform-economics', () => ({ listExceptions: m.listExceptions }));
-
-async function loadRoute() {
-  return import('../reconciliation/upload/route');
-}
-
-describe('reconciliation/upload route', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.listExceptions.mockResolvedValue([{ id: 'ex_1', status: 'open' }]);
-  });
-
-  it('lists reconciliation exceptions', async () => {
-    const { GET } = await loadRoute();
-    const result = await GET({ request: new Request('http://localhost/api/reconciliation/upload?status=open,under_review'), organizationId: 'org_1' });
-
-    expect(result).toEqual({ exceptions: [{ id: 'ex_1', status: 'open' }] });
-    expect(m.listExceptions).toHaveBeenCalledWith('org_1', ['open', 'under_review']);
+  it('answers 501 behind the officer floor and reads nothing', () => {
+    expect(source).toContain('ApiError.notImplemented');
+    expect(source).toContain("minRole: 'officer'");
+    expect(source).not.toContain('listExceptions');
+    expect(source).not.toContain('reconciliationRuns');
   });
 });

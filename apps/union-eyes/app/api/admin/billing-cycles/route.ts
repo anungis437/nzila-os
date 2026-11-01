@@ -9,6 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
+import { resolveBillingPeriod } from '@/lib/finance/billing-period-input';
+import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
@@ -56,7 +58,12 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
 
     // Parse and validate request body
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
+    }
     const validation = billingCycleSchema.safeParse(body);
 
     if (!validation.success) {
@@ -69,18 +76,25 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     const { organizationId, frequency, periodStart, periodEnd, dryRun } = validation.data;
 
-    // Calculate period dates if not provided
-    let start: Date;
-    let end: Date;
-
-    if (periodStart && periodEnd) {
-      start = new Date(periodStart);
-      end = new Date(periodEnd);
-    } else {
-      const dates = BillingCycleService.calculatePeriodDates(frequency);
-      start = dates.periodStart;
-      end = dates.periodEnd;
+    // A platform role is not a financial mandate for the caller-selected union.
+    // Authorize the target ledger before a preview, audit intent or charge.
+    try {
+      await requireBillingCycleAuthority(organizationId, user.id);
+    } catch {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Live financial execution mandate required for target organization');
     }
+
+    const period = resolveBillingPeriod(
+      { periodStart, periodEnd },
+      () => BillingCycleService.calculatePeriodDates(frequency),
+    );
+    if (!period) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Invalid billing period: supply both valid ISO boundaries in chronological order',
+      );
+    }
+    const { periodStart: start, periodEnd: end } = period;
 
     logger.info('Generating billing cycle', {
       organizationId,
@@ -116,6 +130,15 @@ export const POST = withApiAuth(async (request: NextRequest) => {
           },
           generate,
         );
+
+    if (dryRun && !result.success) {
+      return NextResponse.json({
+        ...result,
+        preview: true,
+        success: false,
+        message: 'Preview incomplete: some members could not be calculated; no charges were created.',
+      }, { status: 422 });
+    }
 
     if (dryRun) {
       logger.info('Billing cycle preview completed', {
@@ -186,18 +209,13 @@ export const GET = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    // Billing cycle history - returns cycles from the billing system
-    // No dedicated billing_cycle_history table exists yet; return empty with proper semantics
-
-    logger.info('Retrieving billing cycle history', {
-      organizationId,
-      userId: user.id,
-    });
-
-    return standardSuccessResponse({
-      cycles: [],
-      total: 0,
-    });
+    // There is no authoritative billing-cycle history store. An HTTP 200
+    // with [] would falsely certify that this organization has no history.
+    logger.warn('Billing cycle history unavailable', { organizationId, userId: user.id });
+    return NextResponse.json(
+      { success: false, error: { code: 'NOT_IMPLEMENTED', message: 'Billing-cycle history is not implemented' }, capabilityState: 'NOT_IMPLEMENTED' },
+      { status: 501 },
+    );
   } catch (error) {
     logger.error('Error retrieving billing cycle history', { error });
 

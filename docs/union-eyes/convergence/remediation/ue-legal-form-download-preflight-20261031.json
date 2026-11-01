@@ -1,0 +1,25 @@
+{
+  "record": "UE_GATE0_SOURCE_PATCH_AWAITING_QUALIFICATION",
+  "defectId": "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
+  "branch": "agents/ue-cursor-final-closure",
+  "baselineCommit": "bc6ffc433f8db61ea943b3f3f0bbdf4f772ebe2a",
+  "files": [
+    "apps/union-eyes/components/organizing/LabourBoardFormGenerator.tsx",
+    "apps/union-eyes/lib/organizing/verified-pdf-response.ts",
+    "apps/union-eyes/lib/organizing/__tests__/verified-pdf-response.test.ts"
+  ],
+  "state": "PARTIAL",
+  "source": "PATCHED_NOT_EXECUTABLY_QUALIFIED",
+  "unit": "NOT_RUN",
+  "nativePg15": "NOT_RUN",
+  "nativePg16": "NOT_RUN",
+  "httpBrowser": "NOT_RUN",
+  "staging": "NOT_RUN",
+  "institutionalRatifications": "OUTSTANDING",
+  "qualificationClosed": false,
+  "originalPopulation": 777,
+  "notes": [
+    "The generation endpoint already refuses unsupported work with 501. The client now checks HTTP success, application/pdf content type, PDF magic bytes, and a 20 MB safety ceiling before creating a downloadable file. A 501 or JSON success-looking response produces an accessible visible error instead of a mislabeled PDF. Template selection now fills the selected template, and the federal information link no longer falsely advertises electronic filing. Focused regression tests are committed but not executed on this HEAD.",
+    "A real jurisdiction-specific PDF generator, template authority/legal review, PDF content validation, and exact-HEAD unit, native PostgreSQL, HTTP/browser and staging acceptance remain outstanding; the client explicitly preserves entered values on refusal."
+  ]
+}

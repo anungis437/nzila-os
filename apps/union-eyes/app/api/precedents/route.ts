@@ -14,6 +14,7 @@ import {
 import { createPrecedentAudited } from "@/lib/services/precedent-audited-service";
 import { tribunalTypeEnum, decisionTypeEnum, outcomeEnum, precedentValueEnum } from "@/db/schema";
 import { z } from "zod";
+import { toPublicPrecedentSummary } from "@/lib/precedents/public-decision-view";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
  
@@ -32,13 +33,28 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
+// DEF-0B11-PRP-PRECEDENT-COLLECTION-GET-TAKES-UNBOUNDED-LIMIT-AND-PAGE-FROM-THE-QUERY-STRING
+// Reject rather than silently clamp invalid pagination: a caller must not request an unbounded scan.
+function boundedPositiveInt(raw: string | null, fallback: number, max: number): number | null {
+  if (raw === null) return fallback;
+  if (!/^[1-9][0-9]{0,5}$/.test(raw)) return null;
+  const parsed = Number(raw);
+  return Number.isSafeInteger(parsed) && parsed <= max ? parsed : null;
+}
+
 export const GET = withRoleAuth('member', async (request, _context) => {
   try {
       const { searchParams } = new URL(request.url);
       
+      const page = boundedPositiveInt(searchParams.get("page"), 1, 10000);
+      const mostCited = searchParams.get("mostCited") === "true";
+      const limit = boundedPositiveInt(searchParams.get("limit"), mostCited ? 10 : 20, 100);
+      if (page === null || limit === null) {
+        return NextResponse.json({ error: "Invalid pagination: page must be 1..10000 and limit 1..100" }, { status: 400 });
+      }
+
       // Check for special modes
       const statistics = searchParams.get("statistics") === "true";
-      const mostCited = searchParams.get("mostCited") === "true";
       const issueType = searchParams.get("issueType");
 
       // Return statistics
@@ -49,16 +65,16 @@ export const GET = withRoleAuth('member', async (request, _context) => {
 
       // Return most cited
       if (mostCited) {
-        const limit = parseInt(searchParams.get("limit") || "10");
+        // Reuse validated, bounded collection limit.
         const precedents = await getMostCitedPrecedents(limit);
-        return NextResponse.json({ precedents });
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary) });
       }
 
       // Return by issue type
       if (issueType) {
-        const limit = parseInt(searchParams.get("limit") || "20");
+        // Reuse validated, bounded collection limit.
         const precedents = await getPrecedentsByIssueType(issueType, limit);
-        return NextResponse.json({ precedents, count: precedents.length });
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary), count: precedents.length });
       }
 
       // Build filters
@@ -127,14 +143,16 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       }
 
       // Pagination
-      const page = parseInt(searchParams.get("page") || "1");
-      const limit = parseInt(searchParams.get("limit") || "20");
+      // Reuse validated, bounded collection page and limit.
       const sortBy = searchParams.get("sortBy") || "decisionDate";
-      const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
+      const sortOrder = searchParams.get("sortOrder") || "desc";
+      if (!["decisionDate", "citationCount", "createdAt"].includes(sortBy) || !["asc", "desc"].includes(sortOrder)) {
+        return NextResponse.json({ error: "Invalid sort field or order" }, { status: 400 });
+      }
 
-      const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder });
+      const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder: sortOrder as "asc" | "desc" });
 
-      return NextResponse.json(result);
+      return NextResponse.json({ ...result, precedents: result.precedents.map(toPublicPrecedentSummary) });
     } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
@@ -190,11 +208,11 @@ export const POST = withRoleAuth('content_manager', async (request, context) => 
       );
     }
 
-      // Create precedent
+      // Create a non-public draft. Publication requires an independent reviewed workflow. 
       const precedent = await createPrecedentAudited({ organizationId, userId }, validation.data);
 
       return standardSuccessResponse(
-      {  precedent  }
+      { precedent, publicationStatus: 'pending_review', publiclyDiscoverable: false }
     );
     } catch (error) {
 // Handle unique constraint violations
