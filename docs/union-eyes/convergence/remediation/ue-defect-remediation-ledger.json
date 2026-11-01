@@ -1285,6 +1285,20 @@
       ],
       "correction": "Pause and resume now check finance:execute on the particular subscription inside the same tenant-RLS transaction as the conditional status transition, event and atomic audit; route preflight removed. Service refuses missing or unrelated mandate before writes.",
       "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16 concurrency and tenant-role tests, HTTP/browser/staging, provider reconciliation, independent reviewer and institutional persona/authority ratification. No additional implementation or CLOSED credit."
+    },
+    "DEF-0B1-BILLING-TARGET-ORG-UNBOUND": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-billing-cycle-service-transaction-mandate-and-partial-refusal-20261101.md",
+      "files": [
+        "apps/union-eyes/lib/services/billing-cycle-service.ts",
+        "apps/union-eyes/lib/__tests__/billing-cycle-transaction-safety.test.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
+        "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts"
+      ],
+      "correction": "Transaction-owning billing service now requires a live finance:execute ledger-wide mandate for the target organization; a member processing failure aborts the real transaction rather than returning a successful partial charge. Both preview routes return 422 for incomplete calculations.",
+      "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16 with tenant-role/rollback/mandate proof, real HTTP/browser/staging; atomic audit and exactly-once cycle generation, institutional mandate issuance and independent reviewer/persona ratification. Zero additional implementation or CLOSED credit."
     }
   }
 }
