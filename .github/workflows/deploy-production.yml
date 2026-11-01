@@ -285,7 +285,8 @@ jobs:
           node scripts/release/verify-oci-provenance.mjs \
             staging-artifacts/artifact-manifest.json \
             "$GITHUB_SHA" "$GITHUB_REPOSITORY" \
-            "ops/deploy-evidence/oci-provenance-${GITHUB_RUN_ID}.json"
+            "ops/deploy-evidence/oci-provenance-${GITHUB_RUN_ID}.json" \
+            "${{ needs.verify-artifact.outputs.source_run_id }}"
 
       # EXC-001: Hard-block deploy if prod and staging resource groups are the same.
       # The canonical prod RG is nzila-canada-prod-rg (see infrastructure/gitops/environments/production.yml).

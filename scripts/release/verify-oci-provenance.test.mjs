@@ -4,20 +4,25 @@ import { verifyOciProvenance } from './verify-oci-provenance.mjs'
 
 const SHA='a'.repeat(40), REPO='anungis437/nzila-os'
 const IMAGE='nzilacanadaacr.azurecr.io/nzila/web@sha256:'+'b'.repeat(64)
-const manifest=()=>({deployTargets:[{name:'nzila-os-web',image:IMAGE}]})
+const manifest=()=>({source_workflow:'deploy-staging',commit_sha:SHA,run_id:'123456',
+  attestation_ref:'release-attestation.json',deployTargets:[{name:'nzila-os-web',image:IMAGE}]})
 const proof=()=>JSON.stringify([{verificationResult:{
   signature:{certificate:{subject:'GitHub OIDC'}},
   verifiedTimestamps:[{timestamp:'2026-11-01T00:00:00Z'}],
   statement:{predicateType:'https://slsa.dev/provenance/v1',
     subject:[{name:IMAGE.split('@sha256:')[0],digest:{sha256:'b'.repeat(64)}}]},
 }}])
-const opts=extra=>({manifest:manifest(),sourceSha:SHA,repository:REPO,verifier:()=>proof(),...extra})
+const opts=extra=>({manifestRaw:JSON.stringify(manifest()),sourceSha:SHA,repository:REPO,
+  stagingRunId:'123456',verifier:()=>proof(),...extra})
 
 test('requires canonical GitHub signer, exact source/ref and digest subject',()=>{
   let args
   const receipt=verifyOciProvenance(opts({verifier:(cmd,a)=>{assert.equal(cmd,'gh');args=a;return proof()}}))
   assert.equal(receipt.verdict,'OCI_PROVENANCE_VERIFIED')
   assert.equal(receipt.targets[0].image,IMAGE)
+  assert.equal(receipt.stagingRunId,'123456')
+  assert.match(receipt.manifestSha256,/^[0-9a-f]{64}$/)
+  assert.match(receipt.targets[0].verifiedOutputSha256,/^[0-9a-f]{64}$/)
   for(const value of ['--source-digest',SHA,'--source-ref','refs/heads/main',
     '--signer-workflow',REPO+'/.github/workflows/gitops-deploy.yml',
     '--deny-self-hosted-runners','--repo',REPO]) assert.ok(args.includes(value),value)
@@ -43,6 +48,21 @@ test('rejects mutable, foreign, conflicting and duplicate targets',()=>{
     [{name:'demo',image:'nzilacanadaacr.azurecr.io/nzila/web:latest'}],
     [{name:'demo',image:IMAGE,imageRef:'other@sha256:'+'b'.repeat(64)}],
     [{name:'demo',image:IMAGE},{name:'demo',image:IMAGE}],
-  ]) assert.throws(()=>verifyOciProvenance(opts({manifest:{deployTargets:bad}})),/noncanonical|duplicate/)
+  ]) assert.throws(()=>verifyOciProvenance(opts({manifestRaw:JSON.stringify({...manifest(),deployTargets:bad})})),/noncanonical|duplicate/)
+})
+test('binds exact signed staging bytes, source SHA and run ID; rejects substitutions',()=>{
+  const a=verifyOciProvenance(opts())
+  const b=verifyOciProvenance(opts({manifestRaw:JSON.stringify(manifest(),null,2)}))
+  assert.notEqual(a.manifestSha256,b.manifestSha256)
+  for(const bad of [
+    {stagingRunId:'999999'},
+    {stagingRunId:'0'},
+    {manifestRaw:JSON.stringify({...manifest(),run_id:'999999'})},
+    {manifestRaw:JSON.stringify({...manifest(),commit_sha:'f'.repeat(40)})},
+    {manifestRaw:JSON.stringify({...manifest(),source_workflow:'other'})},
+    {manifestRaw:JSON.stringify({...manifest(),attestation_ref:'other.json'})},
+  ]) assert.throws(()=>verifyOciProvenance(opts(bad)),/source\/run mismatch/)
+  assert.throws(()=>verifyOciProvenance(opts({manifestRaw:'{'})),/malformed signed/)
+  assert.throws(()=>verifyOciProvenance(opts({manifestRaw:undefined})),/manifest bytes required/)
 })
 // Mocked unit tests establish policy behavior only, never Sigstore or production certification.

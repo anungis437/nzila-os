@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** P0 #1038: live Sigstore/SLSA OCI verification; never grants release authority. */
 import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -10,9 +11,23 @@ const SIGNER = REPO + '/.github/workflows/gitops-deploy.yml'
 const IMAGE = /^nzilacanadaacr\.azurecr\.io\/nzila\/[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?@sha256:[0-9a-f]{64}$/
 const deny = message => { throw new Error('OCI_PROVENANCE_DENIED: ' + message) }
 
-export function verifyOciProvenance({manifest, sourceSha, repository, verifier = execFileSync, now = new Date()}) {
+export function verifyOciProvenance({manifestRaw, sourceSha, repository, stagingRunId, verifier = execFileSync, now = new Date()}) {
   if (!/^[0-9a-f]{40}$/.test(sourceSha ?? '') || repository !== REPO) deny('untrusted source identity')
-  if (!Number.isFinite(now.getTime()) || !Array.isArray(manifest?.deployTargets) ||
+  // Bind the receipt to EXACT signed staging bytes, not reserialized JSON.
+  if (typeof manifestRaw !== 'string' && !Buffer.isBuffer(manifestRaw)) deny('signed manifest bytes required')
+  const bytes = Buffer.from(manifestRaw)
+  if (bytes.length < 2 || bytes.length > 2_097_152) deny('signed manifest size out of bounds')
+  let manifest
+  try { manifest = JSON.parse(bytes.toString('utf8')) }
+  catch { deny('malformed signed staging manifest') }
+  if (!/^[1-9][0-9]{0,19}$/.test(stagingRunId ?? '') ||
+      manifest?.source_workflow !== 'deploy-staging' ||
+      manifest.commit_sha !== sourceSha ||
+      manifest.run_id !== stagingRunId ||
+      manifest.attestation_ref !== 'release-attestation.json') {
+    deny('signed staging manifest source/run mismatch')
+  }
+  if (!Number.isFinite(now.getTime()) || !Array.isArray(manifest.deployTargets) ||
       manifest.deployTargets.length === 0) deny('missing manifest or receipt time')
   const seenNames = new Set(), seenImages = new Set(), targets = []
   for (const target of manifest.deployTargets) {
@@ -32,11 +47,12 @@ export function verifyOciProvenance({manifest, sourceSha, repository, verifier =
       '--signer-workflow',SIGNER,'--source-digest',sourceSha,
       '--source-ref','refs/heads/main','--deny-self-hosted-runners','--format','json',
     ]
-    let evidence
+    let evidence, verifiedOutput
     try {
-      evidence = JSON.parse(String(verifier('gh', args, {
+      verifiedOutput = String(verifier('gh', args, {
         encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:120000,maxBuffer:2097152,
-      })))
+      }))
+      evidence = JSON.parse(verifiedOutput)
     } catch { deny('live GitHub/Sigstore verification unavailable for ' + name) }
     const [subject, digest] = image.split('@sha256:')
     if (!Array.isArray(evidence) || !evidence.some(item => {
@@ -47,21 +63,23 @@ export function verifyOciProvenance({manifest, sourceSha, repository, verifier =
         Array.isArray(v.statement.subject) &&
         v.statement.subject.some(s => s?.name === subject && s?.digest?.sha256 === digest)
     })) deny('cryptographically verified OCI subject or witness missing for ' + name)
-    targets.push({name,image,verifiedAttestations:evidence.length})
+    targets.push({name,image,verifiedAttestations:evidence.length,
+      verifiedOutputSha256:createHash('sha256').update(verifiedOutput).digest('hex')})
   }
   return {
     schemaVersion:1,verdict:'OCI_PROVENANCE_VERIFIED',
     verifier:'github_cli_sigstore',repository:REPO,signerWorkflow:SIGNER,
-    sourceSha,verifiedAt:now.toISOString(),targets,
+    sourceSha,stagingRunId,manifestSha256:createHash('sha256').update(bytes).digest('hex'),
+    verifiedAt:now.toISOString(),targets,
   }
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
   try {
-    const [manifestPath,sourceSha,repository,receiptPath] = process.argv.slice(2)
-    if (!manifestPath || !receiptPath) deny('signed manifest and exclusive receipt required')
-    const manifest = JSON.parse(readFileSync(manifestPath,'utf8'))
-    const receipt = verifyOciProvenance({manifest,sourceSha,repository})
+    const [manifestPath,sourceSha,repository,receiptPath,stagingRunId] = process.argv.slice(2)
+    if (!manifestPath || !receiptPath || !stagingRunId) deny('signed manifest, staging run and exclusive receipt required')
+    const manifestRaw = readFileSync(manifestPath)
+    const receipt = verifyOciProvenance({manifestRaw,sourceSha,repository,stagingRunId})
     writeFileSync(receiptPath,JSON.stringify(receipt,null,2)+'\n',{flag:'wx',mode:0o600})
     console.log('Verified independent OCI provenance for '+receipt.targets.length+' target(s)')
   } catch (error) {
