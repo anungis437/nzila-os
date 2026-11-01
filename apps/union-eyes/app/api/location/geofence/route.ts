@@ -136,7 +136,23 @@ export const GET = withApiAuth(async (req: NextRequest) => {
     }
 
     const trustedUnionLocalId = await getOrganizationIdForUser(user.id);
-    const result = await GeofencePrivacyService.checkGeofenceEntry(user.id, lat, lon, geofenceId, trustedUnionLocalId);
+    // This GET can persist a consented entry event. Keep the tenant-scoped
+    // read, event write and privacy audit in one transaction; a failed audit
+    // must roll back the event rather than returning false success.
+    const result = await withRLSContext({ organizationId: trustedUnionLocalId }, async (tx) => {
+      const outcome = await GeofencePrivacyService.checkGeofenceEntry(user.id, lat, lon, geofenceId, trustedUnionLocalId, tx);
+      if (outcome.recorded) {
+        await persistAtomicAudit(tx, {
+          organizationId: trustedUnionLocalId,
+          userId: user.id,
+          action: 'location.geofence.entry',
+          resourceType: 'geofences',
+          resourceId: geofenceId,
+          details: { eventType: 'entry' }, // Never include GPS coordinates.
+        });
+      }
+      return outcome;
+    });
 
     return NextResponse.json({
       userId: user.id,

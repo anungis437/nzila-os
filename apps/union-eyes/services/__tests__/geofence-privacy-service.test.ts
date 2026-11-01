@@ -421,3 +421,31 @@ describe('geofence-privacy-service', () => {
     });
   });
 });
+
+describe('geofence service authority boundary', () => {
+  it('refuses a forged strike association before any geofence write', async () => {
+    h.db.insert.mockClear();
+    await expect(S.createGeofence({
+      name: 'Picket', geofenceType: 'strike_line', centerLatitude: 45.5,
+      centerLongitude: -73.6, radiusMeters: 50, strikeId: 'foreign-strike',
+    }, 'org-1')).rejects.toThrow('organization-bound resolver');
+    expect(h.db.insert).not.toHaveBeenCalled();
+  });
+
+  it('reads a geofence through the supplied tenant transaction, never the ambient db', async () => {
+    h.db.select.mockClear();
+    const fence = {
+      id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000',
+      centerLongitude: '-73.50000000', radiusMeters: '100',
+    };
+    const tx = {
+      select: vi.fn(() => ({
+        from: () => ({ where: () => ({ limit: async () => [fence] }) }),
+      })),
+    };
+    const result = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1', tx as any);
+    expect(result).toMatchObject({ inside: true, recorded: false });
+    expect(tx.select).toHaveBeenCalledTimes(1);
+    expect(h.db.select).not.toHaveBeenCalled();
+  });
+});

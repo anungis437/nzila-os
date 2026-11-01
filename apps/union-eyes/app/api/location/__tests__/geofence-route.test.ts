@@ -127,9 +127,30 @@ describe('location/geofence route (round 52 — tenant/identity IDOR fix)', () =
       'http://localhost/api/location/geofence?userId=attacker-supplied-victim-id&geofenceId=g1&latitude=45.5&longitude=-73.6',
     ));
 
-    expect(m.checkGeofenceEntry).toHaveBeenCalledWith('caller-own-id', 45.5, -73.6, 'g1', 'caller-org');
+    expect(m.checkGeofenceEntry).toHaveBeenCalledWith('caller-own-id', 45.5, -73.6, 'g1', 'caller-org', m.tx);
     const json = await response.json();
     expect(json.userId).toBe('caller-own-id');
+  });
+
+  it('GET records a consented entry and coordinate-free audit in the same tenant transaction', async () => {
+    const { GET } = await loadRoute();
+    m.checkGeofenceEntry.mockResolvedValueOnce({ inside: true, distance: 1, recorded: true });
+    const response = await GET(new NextRequest('http://localhost/api/location/geofence?geofenceId=g1&latitude=45.5&longitude=-73.6'));
+    expect(response.status).toBe(200);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
+      organizationId: 'caller-org', userId: 'caller-own-id',
+      action: 'location.geofence.entry', resourceId: 'g1',
+    }));
+    expect(JSON.stringify(m.persistAtomicAudit.mock.calls[0][1])).not.toContain('45.5');
+    expect(JSON.stringify(m.persistAtomicAudit.mock.calls[0][1])).not.toContain('-73.6');
+  });
+
+  it('GET fails instead of reporting a persisted entry when its atomic audit fails', async () => {
+    const { GET } = await loadRoute();
+    m.checkGeofenceEntry.mockResolvedValueOnce({ inside: true, distance: 1, recorded: true });
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+    const response = await GET(new NextRequest('http://localhost/api/location/geofence?geofenceId=g1&latitude=45.5&longitude=-73.6'));
+    expect(response.status).toBe(500);
   });
 
   it('GET returns 401 when unauthenticated', async () => {

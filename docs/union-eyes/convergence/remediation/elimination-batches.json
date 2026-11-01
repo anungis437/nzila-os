@@ -9650,6 +9650,22 @@
       ],
       "correction": "Removes tenant-runtime INSERT privilege from global location_tracking_config, consistent with fail-closed read-only policy lookup; adds least-privilege manifest regression.",
       "remaining": "Exact-HEAD tests, catalog-contract and real PG15/16 grant reconciliation, HTTP/browser/staging, independent reviewer, owner-persona and institutional tracking-policy decisions. Migration 0048 SECURITY DEFINER preflight remains blocked; do not bypass."
+    },
+    {
+      "id": "UE-GEOFENCE-TENANT-TRANSACTION-AUDIT-20261101",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-geofence-tenant-transaction-and-audit-20261101.md",
+      "sourceBaseline": "c4fab8f99970e76c32ac2b2d59cb5eb908d1bc19",
+      "files": [
+        "apps/union-eyes/services/geofence-privacy-service.ts",
+        "apps/union-eyes/app/api/location/geofence/route.ts",
+        "apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts",
+        "apps/union-eyes/app/api/location/__tests__/geofence-route.test.ts"
+      ],
+      "correction": "Binds geofence GET's lookup, consent, policy, event write and coordinate-free atomic audit to one tenant RLS transaction; direct service geofence creation refuses unverified strike associations.",
+      "remaining": "Focused/full tests, PG15/16, HTTP/browser/staging, institutional tracking policy and independent ratification. Migration 0048 catalog privilege preflight remains blocked."
     }
   ]
 }

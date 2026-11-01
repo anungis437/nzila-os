@@ -296,6 +296,11 @@ export class GeofencePrivacyService {
    * Create geofence (strike line, union hall, etc.)
    */
   static async createGeofence(geofence: GeofenceDefinition, trustedUnionLocalId: string, tx: RLSTx = db) {
+    // Do not allow direct service callers to bypass the HTTP boundary and
+    // assert an unverified strike association that can authorize GPS events.
+    if (geofence.strikeId !== undefined && geofence.strikeId !== null) {
+      throw new Error("Geofence strike association requires an organization-bound resolver");
+    }
     const [created] = await tx
       .insert(geofences)
       .values({
@@ -325,9 +330,10 @@ export class GeofencePrivacyService {
     latitude: number,
     longitude: number,
     geofenceId: string,
-    trustedUnionLocalId: string
+    trustedUnionLocalId: string,
+    tx: RLSTx = db
   ): Promise<{ inside: boolean; distance: number; recorded: boolean }> {
-    const geofence = await db
+    const geofence = await tx
       .select()
       .from(geofences)
       .where(eq(geofences.id, geofenceId))
@@ -362,14 +368,14 @@ export class GeofencePrivacyService {
     // attendance. A fence with no verified strike link may answer the spatial
     // question but must not persist precise member coordinates.
     if (inside && fence.strikeId) {
-      const consented = await this.hasValidConsent(userId, "strike");
+      const consented = await this.hasValidConsent(userId, "strike", tx);
       if (consented) {
-        const config = await this.getConfig();
+        const config = await this.getConfig(tx);
         if (config.locationTrackingEnabled === true &&
             config.backgroundTrackingAllowed === false &&
             config.explicitOptInRequired === true &&
             config.autoDeletionEnabled === true) {
-          await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude);
+          await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude, tx);
           recorded = true;
         }
       }
@@ -414,12 +420,13 @@ export class GeofencePrivacyService {
     geofenceId: string,
     eventType: "entry" | "exit",
     latitude: number,
-    longitude: number
+    longitude: number,
+    tx: RLSTx = db
   ) {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + this.MAX_RETENTION_HOURS);
 
-    await db.insert(geofenceEvents).values({
+    await tx.insert(geofenceEvents).values({
       userId,
       geofenceId,
       eventType,
