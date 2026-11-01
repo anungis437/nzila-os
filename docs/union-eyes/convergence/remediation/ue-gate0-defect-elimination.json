@@ -1140,7 +1140,7 @@
       "newlyImplemented": 0,
       "outstandingAfter": 188,
       "partial": 0,
-      "evidenceCommit": null
+      "evidenceCommit": "9350a03b8"
     }
   ],
   "entries": {
@@ -8442,7 +8442,7 @@
         {
           "batch": "B118-F06-R7-WORKBOOK-CAPABILITY-AND-NATIVE-GRANTS",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "9350a03b8",
           "files": [
             "apps/union-eyes/lib/workbook/workbook-capability.ts",
             "apps/union-eyes/lib/workbook/access-control.ts",

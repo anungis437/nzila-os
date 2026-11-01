@@ -9023,7 +9023,7 @@
     {
       "id": "B118-F06-R7-WORKBOOK-CAPABILITY-AND-NATIVE-GRANTS",
       "family": "F06 R7: an unclaimed workbook is reached by a capability, not its identifier, and its path works under the real roles",
-      "evidenceCommit": null,
+      "evidenceCommit": "9350a03b8",
       "items": [],
       "touches": [
         {
