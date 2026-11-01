@@ -126,6 +126,15 @@ export const POST = withApiAuth(async (request: NextRequest) => {
           generate,
         );
 
+    if (dryRun && !result.success) {
+      return NextResponse.json({
+        ...result,
+        preview: true,
+        success: false,
+        message: 'Preview incomplete: some members could not be calculated; no charges were created.',
+      }, { status: 422 });
+    }
+
     if (dryRun) {
       logger.info('Billing cycle preview completed', {
         organizationId,
