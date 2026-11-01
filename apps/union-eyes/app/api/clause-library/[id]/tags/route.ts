@@ -11,13 +11,12 @@
  * different — possibly another organization's — clause, as long as they
  * knew or guessed its id).
  *
- * POST/DELETE run in the caller's tenant RLS context. Child writes are
- * owner-only under ue_shared_library_child_write. GET stays on the system
- * role because federation/congress parent visibility is not in
- * ue_shared_library_select and must not be added by weakening RLS.
+ * GET/POST/DELETE run in the caller's tenant RLS context. Child writes are
+ * owner-only under ue_shared_library_child_write. The current select policy
+ * admits the same permitted sharing visibility as canReadSharedClause.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import type { db } from '@/db/db';
 import { clauseLibraryTags, sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { eq, and, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -32,7 +31,7 @@ export const dynamic = 'force-dynamic';
 const tagOfOwnedClause = (clauseId: string, organizationId: string) =>
   sql`${clauseLibraryTags.clauseId} IN (SELECT id FROM shared_clause_library WHERE id = ${clauseId} AND source_organization_id = ${organizationId})`;
 
-async function getClauseAuthorityRow(id: string, executor: typeof db = db) {
+async function getClauseAuthorityRow(id: string, executor: typeof db) {
   const [clause] = await executor
     .select({
       id: sharedClauseLibrary.id,
@@ -58,14 +57,14 @@ export const GET = withApi(
 
     // As the tenant: the clause and its tags are admitted by the select policies (cache 0048 covers federation and congress), and
     // canReadSharedClause asks the same database function.
-    return withRLSContext({ organizationId }, async () => {
-      const clause = await getClauseAuthorityRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const clause = await getClauseAuthorityRow(id, tx);
       if (!clause || !(await canReadSharedClause(organizationId, clause))) {
         throw ApiError.notFound('clause', id);
       }
 
       // The tag names and ids only: the author's user id is owner-internal and a reader of a shared clause does not receive it.
-      const tags = await db
+      const tags = await tx
         .select({ id: clauseLibraryTags.id, clauseId: clauseLibraryTags.clauseId, tagName: clauseLibraryTags.tagName })
         .from(clauseLibraryTags)
         .where(eq(clauseLibraryTags.clauseId, id));
