@@ -86,7 +86,7 @@ jobs:
           appendFileSync(process.env.GITHUB_ENV, 'UE_AUTHORITY_COMBINED_URL=' + connection + '\n')
           NODE
 
-      - name: Run actual PostgreSQL migration and RLS tests, never all-skipped
+      # Run the real converged-table tests for precedent privacy, clause sharing,\n      # finance duties, document intake, and WorkAid disclosure on both PG versions.\n      - name: Run actual PostgreSQL migration and RLS tests, never all-skipped
         shell: bash
         env:
           NODE_OPTIONS: --max-old-space-size=6144
@@ -100,6 +100,11 @@ jobs:
             db/__tests__/migration-0033-external-authority-principals.postgres.test.ts \
             db/__tests__/migration-0034-remaining-principals.postgres.test.ts \
             db/__tests__/tenant-isolation-remediation.postgres.test.ts \
+            db/__tests__/precedent-library.postgres.test.ts \
+            db/__tests__/clause-library-visibility.postgres.test.ts \
+            db/__tests__/finance-duties.postgres.test.ts \
+            db/__tests__/document-intake.postgres.test.ts \
+            db/__tests__/workaid-union-side.postgres.test.ts \
             --reporter=default --reporter=json \
             --outputFile=../../artifacts/ue-native-pg/results.json
 
@@ -125,6 +130,11 @@ jobs:
             'migration-0033-external-authority-principals',
             'migration-0034-remaining-principals',
             'tenant-isolation-remediation',
+            'precedent-library',
+            'clause-library-visibility',
+            'finance-duties',
+            'document-intake',
+            'workaid-union-side',
           ]
           const paths = suites.map((s) => String(s.name))
           const missing = required.filter((name) => !paths.some((p) => p.includes(name)))
