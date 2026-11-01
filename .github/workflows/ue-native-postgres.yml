@@ -6,6 +6,7 @@ on:
       - 'apps/union-eyes/**'
       - 'tooling/scripts/ue-runtime-up.mjs'
       - 'tooling/scripts/lib/ue-disposable-container-ownership*.mjs'
+      - 'tooling/scripts/lib/ue-native-*'
       - 'tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'
       - '.github/workflows/ue-native-postgres.yml'
   workflow_dispatch:
@@ -51,6 +52,9 @@ jobs:
       - name: Prove disposable Docker ownership contracts
         run: node --test tooling/scripts/lib/ue-disposable-container-ownership.test.mjs
 
+      - name: Prove the native results contract
+        run: node --test tooling/scripts/lib/ue-native-results-contract.test.mjs
+
       - name: Prove runner is disposable and owns the selected Docker names
         shell: bash
         run: |
@@ -75,7 +79,7 @@ jobs:
             exit 1
           }
 
-      - name: Set isolated combined-schema URL without printing generated credentials
+      - name: Set isolated database URLs without printing generated credentials
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -83,78 +87,53 @@ jobs:
           import { runtimeEnv } from './tooling/scripts/ue-runtime-up.mjs'
           const connection = runtimeEnv().DATABASE_URL
           console.log('::add-mask::' + new URL(connection).password)
-          appendFileSync(process.env.GITHUB_ENV, 'UE_AUTHORITY_COMBINED_URL=' + connection + '\n')
+          const onDatabase = (database, host) => {
+            const url = new URL(connection)
+            url.pathname = '/' + database
+            if (host) url.hostname = host
+            return url.toString()
+          }
+          appendFileSync(process.env.GITHUB_ENV, [
+            // The pristine converged database: every native test file runs in its own clone of it.
+            'UE_NATIVE_TEMPLATE_URL=' + connection,
+            // The server, for the suites that create and drop their own databases.
+            'UE_AUTHORITY_PG_URL=' + onDatabase('postgres'),
+            // A scratch database for the legacy RLS-enforcement suites, which drop real table names: never the converged one.
+            // Its host must read "localhost", which those suites use to decide that TLS is not required.
+            'RLS_ENFORCEMENT_TEST_URL=' + onDatabase('ue_rls_scratch', 'localhost'),
+          ].join('\n') + '\n')
           NODE
 
-      # Run the real converged-table tests for precedent privacy, clause sharing,
-      # finance duties, document intake, and WorkAid disclosure on both PG versions.
-      - name: Run actual PostgreSQL migration and RLS tests, never all-skipped
+      - name: Create the scratch database for the legacy RLS-enforcement suites
+        shell: bash
+        run: docker exec ue-runtime-pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ue_rls_scratch'
+
+      - name: Run every native PostgreSQL test, each file in its own clone of the converged database
         shell: bash
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          UE_AUTHORITY_DJANGO: '1'
+          UE_OWNERSHIP_NATIVE_PROOF: '1'
+          UE_ELECTION_SUCCESSION_NATIVE_PROOF: '1'
+          UE_AUTHORITY_IDENTITY_NATIVE: '1'
+          UE_AUTHORITY_NATIVE_IMAGE: postgres:${{ matrix.pg }}-alpine
         run: |
           set -euo pipefail
           mkdir -p artifacts/ue-native-pg
           pnpm --filter @nzila/union-eyes exec vitest run --config vitest.native.config.ts --maxWorkers=1 \
-            db/__tests__/migration-0030-precedent-explicit-share-select.postgres.test.ts \
-            db/__tests__/migration-0031-feature-flags-attribution.postgres.test.ts \
-            db/__tests__/migration-0032-grievance-events-actor.postgres.test.ts \
-            db/__tests__/migration-0033-external-authority-principals.postgres.test.ts \
-            db/__tests__/migration-0034-remaining-principals.postgres.test.ts \
-            db/__tests__/tenant-isolation-remediation.postgres.test.ts \
-            db/__tests__/precedent-library.postgres.test.ts \
-            db/__tests__/clause-library-visibility.postgres.test.ts \
-            db/__tests__/finance-duties.postgres.test.ts \
-            db/__tests__/document-intake.postgres.test.ts \
-            db/__tests__/workaid-union-side.postgres.test.ts \
             --reporter=default --reporter=json \
             --outputFile=../../artifacts/ue-native-pg/results.json
 
-      - name: Verify required tests actually ran and write proof
+      - name: Verify every native test ran and passed, and write proof
         shell: bash
         env:
           SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           PG_VERSION: ${{ matrix.pg }}
         run: |
-          node <<'NODE'
-          const fs = require('node:fs')
-          const file = 'artifacts/ue-native-pg/results.json'
-          const r = JSON.parse(fs.readFileSync(file, 'utf8'))
-          const total = Number(r.numTotalTests ?? 0)
-          const passed = Number(r.numPassedTests ?? 0)
-          const failed = Number(r.numFailedTests ?? 0)
-          const skipped = Number(r.numPendingTests ?? 0)
-          const suites = r.testResults ?? []
-          const required = [
-            'migration-0030-precedent-explicit-share-select',
-            'migration-0031-feature-flags-attribution',
-            'migration-0032-grievance-events-actor',
-            'migration-0033-external-authority-principals',
-            'migration-0034-remaining-principals',
-            'tenant-isolation-remediation',
-            'precedent-library',
-            'clause-library-visibility',
-            'finance-duties',
-            'document-intake',
-            'workaid-union-side',
-          ]
-          const paths = suites.map((s) => String(s.name))
-          const missing = required.filter((name) => !paths.some((p) => p.includes(name)))
-          if (!r.success || passed < 17 || failed !== 0 || skipped !== 0 || total !== passed || missing.length) {
-            throw new Error(JSON.stringify({ total, passed, failed, skipped, missing }))
-          }
-          fs.writeFileSync('artifacts/ue-native-pg/receipt.json', JSON.stringify({
-            kind: 'UE-COMBINED-SCHEMA-NATIVE-PG',
-            sourceSha: process.env.SOURCE_SHA,
-            postgresMajor: process.env.PG_VERSION,
-            runId: process.env.GITHUB_RUN_ID,
-            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
-            total, passed, failed, skipped,
-            status: 'PASS',
-            evidenceClass: 'NATIVE_POSTGRES',
-            limitation: 'Disposable synthetic QA database; not real-login, Azure immutable-audit, or staging acceptance',
-          }, null, 2) + '\n')
-          NODE
+          node tooling/scripts/lib/ue-native-results-contract.mjs \
+            --results artifacts/ue-native-pg/results.json \
+            --expected-skips tooling/scripts/lib/ue-native-expected-skips.json \
+            --receipt artifacts/ue-native-pg/receipt.json
 
       - name: Upload exact-SHA, version-scoped evidence
         if: always()
