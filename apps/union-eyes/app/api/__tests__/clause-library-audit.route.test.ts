@@ -190,6 +190,8 @@ describe('clause-library/[id]/share POST', () => {
     // Authorization to change sharing is evaluated only after a tenant-scoped owner read.
     h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private' }]);
     await expect(POST(ctx('/api/clause-library/k1/share', { sharingLevel: 'congress' }))).rejects.toMatchObject({ status: 403 });
+    // The denial is judged against the level the clause has now, so a clause stored at a withdrawn level stays editable.
+    expect(h.denial).toHaveBeenCalledWith('org-1', expect.objectContaining({ sharingLevel: 'congress' }), 'private');
     expect(h.audit).not.toHaveBeenCalled();
   });
 
