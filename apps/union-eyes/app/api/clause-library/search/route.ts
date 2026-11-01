@@ -12,7 +12,7 @@ import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { ilike, or, and } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { buildClauseVisibilityCondition, clauseSourceName } from '@/lib/clause-library/sharing-authority';
+import { buildClauseVisibilityCondition, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
@@ -33,7 +33,6 @@ async function searchClauses(q: string, organizationId: string) {
         sector: sharedClauseLibrary.sector,
         province: sharedClauseLibrary.province,
         sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-        organizationName: clauseSourceName(),
       })
       .from(sharedClauseLibrary)
       .where(and(
@@ -45,6 +44,7 @@ async function searchClauses(q: string, organizationId: string) {
       ))
       .limit(50);
 
+    const sourceNames = await sourceNamesFor(rows, organizationId);
     return rows.map((r) => ({
       id: r.id,
       clauseNumber: r.clauseNumber,
@@ -54,7 +54,7 @@ async function searchClauses(q: string, organizationId: string) {
       sharingLevel: r.sharingLevel,
       sector: r.sector,
       province: r.province,
-      sourceOrganization: clauseSourceProjection(r, organizationId),
+      sourceOrganization: clauseSourceProjection({ ...r, organizationName: sourceNames.get(r.sourceOrganizationId) ?? null }, organizationId),
     }));
   });
 }

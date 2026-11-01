@@ -176,7 +176,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { notFound: h.notFound, badRequest: h.badRequest } }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
-  clauseSourceName: () => null,
+  sourceNamesFor: async () => new Map<string, string>(),
   canReadSharedClause: h.canReadSharedClause,
   isSharedClauseOwner: h.isSharedClauseOwner,
 }));

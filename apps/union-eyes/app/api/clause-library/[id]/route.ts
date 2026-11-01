@@ -11,9 +11,9 @@
  *
  * Every read and write runs in the caller's tenant RLS context. ue_shared_library_update
  * and ue_shared_library_delete restrict writes to the source org, matching
- * isSharedClauseOwner, and the select policies (owner, explicit share, public and,
- * through public.ue_clause_readable_by since cache 0048, federation and congress)
- * admit exactly what canReadSharedClause admits.
+ * isSharedClauseOwner, and the select policies (owner, explicit share and public)
+ * admit exactly what canReadSharedClause admits. Federation and congress sharing
+ * are readable by the owner only (see lib/clause-library/sharing-authority.ts).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
@@ -21,7 +21,7 @@ import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agre
 import { and, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { canReadSharedClause, clauseSourceName, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 import { clauseTextSha256, recordClauseVersion } from '@/lib/clause-library/version-history';
@@ -48,7 +48,6 @@ async function getClauseRow(id: string, executor: typeof db = db) {
       viewCount: sharedClauseLibrary.viewCount,
       version: sharedClauseLibrary.version,
       sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-      organizationName: clauseSourceName(),
       createdBy: sharedClauseLibrary.createdBy,
       createdAt: sharedClauseLibrary.createdAt,
       updatedAt: sharedClauseLibrary.updatedAt,
@@ -60,7 +59,12 @@ async function getClauseRow(id: string, executor: typeof db = db) {
   return rows[0] ?? null;
 }
 
-function formatClause(r: Awaited<ReturnType<typeof getClauseRow>>, callerOrgId: string | null, tags: { id: string; tagName: string }[]) {
+function formatClause(
+  r: Awaited<ReturnType<typeof getClauseRow>>,
+  callerOrgId: string | null,
+  tags: { id: string; tagName: string }[],
+  sourceName: string | null,
+) {
   const isOwner = callerOrgId ? r!.sourceOrganizationId === callerOrgId : false;
   return {
     id: r!.id,
@@ -81,7 +85,7 @@ function formatClause(r: Awaited<ReturnType<typeof getClauseRow>>, callerOrgId: 
     expiryDate: r!.expiryDate,
     viewCount: r!.viewCount,
     version: r!.version,
-    sourceOrganization: clauseSourceProjection(r!, callerOrgId ?? ''),
+    sourceOrganization: clauseSourceProjection({ ...r!, organizationName: sourceName }, callerOrgId ?? ''),
     createdBy: isOwner ? r!.createdBy : undefined,
     createdAt: r!.createdAt,
     updatedAt: r!.updatedAt,
@@ -100,14 +104,15 @@ export const GET = withApi(
     const id = url.pathname.split('/').filter(Boolean).pop()!;
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    // As the tenant: the policy withholds what this organization may not read, and canReadSharedClause asks the same database function.
+    // As the tenant: the policy withholds what this organization may not read, and canReadSharedClause states the same rule.
     return withRLSContext({ organizationId }, async () => {
       const row = await getClauseRow(id);
       if (!row || !(await canReadSharedClause(organizationId, row))) {
         throw ApiError.notFound('clause', id);
       }
       const tags = await db.select().from(clauseLibraryTags).where(eq(clauseLibraryTags.clauseId, id));
-      return formatClause(row, organizationId, tags);
+      const sourceNames = await sourceNamesFor([row], organizationId);
+      return formatClause(row, organizationId, tags, sourceNames.get(row.sourceOrganizationId) ?? null);
     });
   },
 );

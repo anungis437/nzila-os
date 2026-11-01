@@ -3,9 +3,6 @@
  * handlers run their actual statements. Used to prove mutation isolation: a row of another organization is not
  * modified and the same-organization path still is.
  */
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle, type PgliteDatabase } from 'drizzle-orm/pglite';
 import { ddl } from '@/lib/documents/test-support/pglite-document-database';
@@ -15,21 +12,6 @@ export type TestTable = Parameters<typeof ddl>[0];
 export interface TableDatabase {
   pg: PGlite;
   db: PgliteDatabase<Record<string, never>>;
-}
-
-const CACHE_MIGRATIONS = fileURLToPath(new URL('../../../../db/migrations-cache/', import.meta.url));
-
-/**
- * The named CREATE FUNCTION statements of a real cache migration, in the order given, so that a fixture runs the production rule and not a copy
- * of it. A function the migration does not define is an error, not an omission.
- */
-export function migrationFunctions(migrationFile: string, names: string[]): string[] {
-  const statements = readFileSync(join(CACHE_MIGRATIONS, migrationFile), 'utf8').replace(/\r\n/g, '\n').split('--> statement-breakpoint');
-  return names.map((name) => {
-    const found = statements.find((statement) => new RegExp(`^\\s*(?:--[^\\n]*\\n\\s*)*CREATE OR REPLACE FUNCTION public\\.${name}\\(`).test(statement));
-    if (!found) throw new Error(`${migrationFile} defines no function ${name}`);
-    return found.trim();
-  });
 }
 
 const BUILTIN_ARRAY_ELEMENTS = new Set(['text', 'varchar', 'integer', 'int', 'uuid', 'numeric', 'boolean', 'jsonb', 'bigint', 'smallint', 'timestamp', 'date']);

@@ -32,7 +32,9 @@ describe('Gate 0 batch B101: PostgreSQL migrations 0048-0051 and 0038-0041', () 
     const auth = src('lib/scim/scim-token.ts')
     expect(auth).toContain('timingSafeEqual')
     expect(auth).toContain('eq(scimConfigurations.tokenHash, presented)')
-    expect(src('app/api/scim/v2/[organizationId]/Users/route.ts')).toContain('authenticateScimRequest')
+    // The route no longer authenticates inline: it declares the SCIM credential as its machine credential, and that credential is the hash check.
+    expect(src('app/api/scim/v2/[organizationId]/Users/route.ts')).toContain('auth: { machine: scimCaller }')
+    expect(src('lib/scim/route-support.ts')).toContain('authenticateScimRequest')
   })
 
   it('starts every SLA clock at the last status change, never at an edit', () => {

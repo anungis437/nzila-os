@@ -208,6 +208,39 @@ export const scimEventsLog = pgTable("scim_events_log", {
 });
 
 /**
+ * SCIM Provisioned Users (platform 0059, closed to the system role by cache 0051)
+ * The directory of people an identity provider provisioned. They are not roster rows: pending, never active, and not linked to an account.
+ * A live person is unique per organization by lower-cased userName and by externalId; a deprovision is a state change, never a removal.
+ */
+export const scimProvisionedUsers = pgTable("scim_provisioned_users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  configId: uuid("config_id").notNull().references(() => scimConfigurations.id),
+  userName: varchar("user_name", { length: 320 }).notNull(),
+  userNameKey: varchar("user_name_key", { length: 320 }).notNull(),
+  externalId: varchar("external_id", { length: 255 }),
+  displayName: text("display_name"),
+  email: varchar("email", { length: 320 }),
+  // 'pending' | 'suspended' | 'inactive' | 'revoked'
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  provisionedAt: timestamp("provisioned_at", { withTimezone: true }).notNull().defaultNow(),
+  deprovisionedAt: timestamp("deprovisioned_at", { withTimezone: true }),
+  // 'suspend' | 'archive' | 'delete'
+  deprovisionedAction: varchar("deprovisioned_action", { length: 10 }),
+  // 'scim' | 'organization'
+  deprovisionedBy: varchar("deprovisioned_by", { length: 20 }),
+  // 'patch' | 'put' | 'delete'
+  deprovisionedVia: varchar("deprovisioned_via", { length: 10 }),
+  reactivatedAt: timestamp("reactivated_at", { withTimezone: true }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  userNameUq: uniqueIndex("scim_provisioned_users_user_name_uq").on(table.organizationId, table.userNameKey).where(sql`${table.deletedAt} IS NULL`),
+  externalIdUq: uniqueIndex("scim_provisioned_users_external_id_uq").on(table.organizationId, table.externalId).where(sql`${table.deletedAt} IS NULL AND ${table.externalId} IS NOT NULL`),
+}));
+
+/**
  * MFA Configuration Table
  * Multi-factor authentication settings
  */

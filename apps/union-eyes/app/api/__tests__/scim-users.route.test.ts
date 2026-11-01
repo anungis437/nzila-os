@@ -1,27 +1,23 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { createScimDatabase, type ScimDatabase } from '@/lib/scim/__tests__/scim-pglite';
+
+// The SCIM users collection route, run against the REAL platform 0059 migration on PGlite: the route's actual statements, the real data layer and the
+// real event log, with the identity provider's token check and the audit chain replaced by their contracts. What the same route does against the combined
+// schema as the real roles, under concurrency, is proved in db/__tests__/scim-provisioning.postgres.test.ts.
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   persistAtomicAudit: vi.fn(),
   auth: null as unknown,
   limit: null as unknown,
-  calls: [] as Array<{ text: string; values: unknown[] }>,
-  results: [] as unknown[],
+  database: null as unknown,
+  system: vi.fn(),
+  tenant: vi.fn(() => { throw new Error('a SCIM route has no session, so it never opens a tenant context'); }),
 }));
-
-// The route reaches the database only through the SCIM functions of cache migration 0049; each call is recorded with its text and parameters, and
-// the next queued result answers it. What the functions do on a real database is proved in db/__tests__/scim-provisioning.postgres.test.ts.
-const mockTx = {
-  execute: vi.fn(async (query: { strings: readonly string[]; values: unknown[] }) => {
-    m.calls.push({ text: query.strings.join('?'), values: query.values });
-    const next = m.results.shift();
-    if (next instanceof Error) throw next;
-    return next ?? [];
-  }),
-};
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
@@ -38,48 +34,37 @@ vi.mock('@/lib/api/framework', () => ({
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: vi.fn(async () => { if (m.limit instanceof Error) throw m.limit; return m.limit; }) }));
 // The identity provider's bearer-token check is exercised in lib/scim/__tests__; here it is the route's contract with it that matters.
 vi.mock('@/lib/scim/scim-token', () => ({ authenticateScimRequest: vi.fn(async () => m.auth) }));
-const contexts = vi.hoisted(() => ({
-  system: vi.fn(),
-  tenant: vi.fn(() => { throw new Error('a SCIM route has no session, so it never opens a tenant context'); }),
-}));
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: contexts.system,
-  withRLSContext: contexts.tenant,
-}));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.system, withRLSContext: m.tenant }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
-vi.mock('drizzle-orm', () => ({
-  sql: Object.assign((strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }), {}),
-}));
 
 async function loadRoute() {
   return import('../scim/v2/[organizationId]/Users/route');
 }
 
+const ORG = randomUUID();
+let database: ScimDatabase;
+let config: string;
 // An identity provider has no signed-in user: the route receives only the request and the path parameters.
-const ctx = { params: { organizationId: 'org_1' } };
-const SCIM_OK = { ok: true, organizationId: 'org_1', configurationId: 'cfg_1', syncUsers: true };
+const ctx = { params: { organizationId: ORG } };
 
 const provision = (body: unknown) =>
-  new NextRequest('http://localhost/api/scim/v2/org_1/Users', {
+  new NextRequest(`http://localhost/api/scim/v2/${ORG}/Users`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.7' },
     body: JSON.stringify(body),
   });
+const listUrl = (query = '') => new NextRequest(`http://localhost/api/scim/v2/${ORG}/Users${query}`);
 
-const memberColumns = (over: Record<string, unknown> = {}) => ({
-  o_id: 'm-new',
-  o_user_id: 'scim:org_1:jane@example.com',
-  o_name: 'Jane Doe',
-  o_email: 'jane@example.com',
-  o_status: 'pending',
-  o_joined_at: null,
-  o_created_at: '2026-01-01T00:00:00.000Z',
-  o_updated_at: '2026-01-01T00:00:00.000Z',
-  o_metadata: { scim: { userName: 'jane@example.com', externalId: 'idp-1', link: 'unlinked' } },
-  ...over,
-});
-const provisioned = (outcome: string, over: Record<string, unknown> = {}) => [{ o_outcome: outcome, ...memberColumns(over) }];
-const notLive = () => Object.assign(new Error('Failed query'), { cause: { code: '42501' } });
+const rows = async () => (await database.pg.query<Record<string, any>>('SELECT * FROM scim_provisioned_users ORDER BY created_at, id')).rows;
+const events = async () => (await database.pg.query<Record<string, any>>('SELECT * FROM scim_events_log ORDER BY created_at, id')).rows;
+const seed = async (count: number, prefix = 'person') => {
+  for (let i = 1; i <= count; i += 1) {
+    await database.pg.query(
+      `INSERT INTO scim_provisioned_users (organization_id, config_id, user_name, user_name_key, display_name, email) VALUES ($1, $2, $3, $3, $4, $3)`,
+      [ORG, config, `${prefix}${i}@example.test`, `Person ${i}`],
+    );
+  }
+};
 
 const bodyOf = async (response: Response) => (await response.json()) as Record<string, any>;
 // A refusal inside the handler is a SCIM error (RFC 7644 section 3.12), not the framework's envelope: that is what an identity provider reads.
@@ -95,15 +80,23 @@ async function expectScimError(promise: Promise<Response>, status: number, expec
   });
 }
 
+beforeAll(async () => {
+  database = await createScimDatabase();
+  m.database = database;
+});
+afterAll(async () => {
+  await database.pg.close();
+});
+
 describe('scim users route', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
-    m.calls = [];
-    m.results = [];
-    m.auth = SCIM_OK;
+    await database.reset();
+    config = await database.configuration(ORG);
+    m.auth = { ok: true, organizationId: ORG, configurationId: config, syncUsers: true };
     m.limit = { allowed: true, resetIn: 60 };
     m.persistAtomicAudit.mockResolvedValue(undefined);
-    contexts.system.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockTx));
+    m.system.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => database.db.transaction(async (tx) => fn(tx)));
 
     // The framework runs the route's declared machine credential before its handler and hands the verified caller to it.
     m.withApi.mockImplementation(
@@ -121,29 +114,26 @@ describe('scim users route', () => {
     expect(source).not.toMatch(/required\s*:\s*false/);
   });
 
-  it('GET returns SCIM list response with pagination', async () => {
+  it('GET returns the SCIM list response with pagination, the live total, and the person\u2019s own attributes', async () => {
     const { GET } = await loadRoute();
-    m.results = [[{ total: '1' }], [memberColumns({ o_id: 'm1', o_user_id: 'john@example.com', o_email: 'john@example.com', o_name: 'John Smith', o_status: 'active', o_metadata: null })]];
+    await seed(3);
 
-    const response = await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users?startIndex=1&count=10'), ctx);
+    const response = await GET(listUrl('?startIndex=1&count=2'), ctx);
     const result = await bodyOf(response);
 
     // The body is the SCIM list response itself, not wrapped in the framework's envelope.
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toContain('application/scim+json');
     expect(result.schemas).toEqual(['urn:ietf:params:scim:api:messages:2.0:ListResponse']);
-    expect(result.totalResults).toBe(1);
-    expect(result.itemsPerPage).toBe(1);
-    expect(result.Resources[0]).toMatchObject({ id: 'm1', userName: 'john@example.com', active: true });
+    expect(result).toMatchObject({ totalResults: 3, itemsPerPage: 2, startIndex: 1 });
+    expect(result.Resources[0]).toMatchObject({ userName: 'person1@example.test', active: false, name: { formatted: 'Person 1' } });
   });
 
   it('GET refuses to list another organization\u2019s users, whatever the path names', async () => {
     const { GET } = await loadRoute();
 
-    await expect(
-      GET(new NextRequest('http://localhost/api/scim/v2/org_2/Users'), { ...ctx, params: { organizationId: 'org_2' } }),
-    ).rejects.toMatchObject({ status: 404 });
-    expect(mockTx.execute).not.toHaveBeenCalled();
+    await expect(GET(new NextRequest('http://localhost/api/scim/v2/other/Users'), { params: { organizationId: 'other' } })).rejects.toMatchObject({ status: 404 });
+    expect(m.system).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -155,27 +145,27 @@ describe('scim users route', () => {
   ])('answers %s with %i and touches no data', async (_label, auth, status) => {
     const { GET, POST } = await loadRoute();
     m.auth = auth;
-    await expect(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx)).rejects.toMatchObject({ status });
-    await expect(POST(provision({ userName: 'jane@example.com' }), ctx)).rejects.toMatchObject({ status });
-    expect(contexts.system).not.toHaveBeenCalled();
-    expect(mockTx.execute).not.toHaveBeenCalled();
+    await expect(GET(listUrl(), ctx)).rejects.toMatchObject({ status });
+    await expect(POST(provision({ userName: 'jane@example.test' }), ctx)).rejects.toMatchObject({ status });
+    expect(m.system).not.toHaveBeenCalled();
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(await rows()).toEqual([]);
   });
 
   it('answers 429 before any token lookup when the client is over its limit, and refuses when the limiter is unavailable', async () => {
     const { GET } = await loadRoute();
     m.limit = { allowed: false, resetIn: 30 };
-    await expect(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx)).rejects.toMatchObject({ status: 429 });
+    await expect(GET(listUrl(), ctx)).rejects.toMatchObject({ status: 429 });
     m.limit = new Error('redis down');
-    await expect(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx)).rejects.toMatchObject({ status: 502 });
-    expect(mockTx.execute).not.toHaveBeenCalled();
+    await expect(GET(listUrl(), ctx)).rejects.toMatchObject({ status: 502 });
+    expect(m.system).not.toHaveBeenCalled();
   });
 
   it('POST refuses provisioning when user sync is switched off for the organization', async () => {
     const { POST } = await loadRoute();
-    m.auth = { ...SCIM_OK, syncUsers: false };
-    await expectScimError(POST(provision({ userName: 'jane@example.com' }), ctx), 403, { detail: 'not enabled' });
-    expect(mockTx.execute).not.toHaveBeenCalled();
+    m.auth = { ok: true, organizationId: ORG, configurationId: config, syncUsers: false };
+    await expectScimError(POST(provision({ userName: 'jane@example.test' }), ctx), 403, { detail: 'not enabled' });
+    expect(m.system).not.toHaveBeenCalled();
   });
 
   it('POST throws bad request when userName is missing', async () => {
@@ -184,114 +174,133 @@ describe('scim users route', () => {
     await expectScimError(POST(provision({ name: { givenName: 'No', familyName: 'User' } }), ctx), 400, { scimType: 'invalidValue', detail: 'userName' });
   });
 
-  it('POST provisions a user, maps to a SCIM payload and audits on the same transaction', async () => {
+  it('POST provisions a pending person, answers the SCIM resource, audits and logs the event on the same transaction, and invents nothing', async () => {
     const { POST } = await loadRoute();
-    m.results = [provisioned('created')];
 
     const response = await POST(
       provision({
-        userName: 'jane@example.com',
+        userName: 'jane@example.test',
         externalId: 'idp-1',
         name: { givenName: 'Jane', familyName: 'Doe' },
-        emails: [{ value: 'jane@example.com', primary: true }],
+        emails: [{ value: 'jane@example.test', primary: true }],
       }),
       ctx,
     );
 
     expect(response.status).toBe(201);
-    expect(await bodyOf(response)).toMatchObject({ id: 'm-new', userName: 'jane@example.com', externalId: 'idp-1', active: false, name: { formatted: 'Jane Doe' } });
+    const created = await bodyOf(response);
+    expect(created).toMatchObject({ userName: 'jane@example.test', externalId: 'idp-1', active: false, name: { formatted: 'Jane Doe' }, emails: [{ value: 'jane@example.test' }] });
+    expect(await rows()).toMatchObject([{ id: created.id, organization_id: ORG, config_id: config, status: 'pending', external_id: 'idp-1', display_name: 'Jane Doe', email: 'jane@example.test', deleted_at: null }]);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
-      mockTx,
+      expect.anything(),
       expect.objectContaining({
-        organizationId: 'org_1',
-        userId: 'system:scim:cfg_1',
+        organizationId: ORG,
+        userId: `system:scim:${config}`,
         action: 'scim.user.provision',
-        resourceId: 'm-new',
-        details: { provisionedUserName: 'jane@example.com', externalId: 'idp-1', outcome: 'created' },
+        resourceType: 'scim_provisioned_users',
+        resourceId: created.id,
+        details: { provisionedUserName: 'jane@example.test', externalId: 'idp-1', outcome: 'created' },
       }),
     );
+    expect(await events()).toMatchObject([
+      { config_id: config, organization_id: ORG, event_type: 'user.created', resource_type: 'User', resource_id: created.id, operation: 'POST', request_path: `/api/scim/v2/${ORG}/Users`, status: 'success', status_code: 201, authenticated_as: `scim:${config}`, ip_address: '203.0.113.7', request_body: null, response_body: null },
+    ]);
+  });
+
+  it('POST stores no name and no e-mail address that the identity provider did not send', async () => {
+    const { POST } = await loadRoute();
+    const created = await bodyOf(await POST(provision({ userName: 'bare@example.test' }), ctx));
+    expect(created).toMatchObject({ userName: 'bare@example.test', name: { formatted: '' }, emails: [] });
+    expect(await rows()).toMatchObject([{ display_name: null, email: null, external_id: null }]);
   });
 
   it('POST refuses to provision into another organization', async () => {
     const { POST } = await loadRoute();
 
     await expect(
-      POST(provision({ userName: 'jane@example.com' }), { ...ctx, params: { organizationId: 'org_2' } }),
+      POST(provision({ userName: 'jane@example.test' }), { params: { organizationId: 'other' } }),
     ).rejects.toMatchObject({ status: 404 });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
-    expect(mockTx.execute).not.toHaveBeenCalled();
+    expect(m.system).not.toHaveBeenCalled();
   });
 
   it.each([
-    ['the user already exists', 'exists', 'userName'],
-    ['another person already has the externalId', 'external_id_conflict', 'externalId'],
-  ])('POST answers a conflict and writes no audit when %s', async (_label, outcome, word) => {
+    ['the user already exists', { userName: 'JANE@example.test' }, 'userName'],
+    ['another person already has the externalId', { userName: 'other@example.test', externalId: 'idp-1' }, 'externalId'],
+  ])('POST answers a conflict and writes no audit and no event when %s', async (_label, body, word) => {
     const { POST } = await loadRoute();
-    m.results = [outcome === 'exists' ? provisioned('exists') : [{ o_outcome: outcome, ...memberColumns({ o_id: null, o_user_id: null, o_status: null }) }]];
+    await POST(provision({ userName: 'jane@example.test', externalId: 'idp-1' }), ctx);
+    m.persistAtomicAudit.mockClear();
+    const eventsBefore = (await events()).length;
 
-    await expectScimError(POST(provision({ userName: 'jane@example.com', externalId: 'idp-1' }), ctx), 409, { scimType: 'uniqueness', detail: word });
+    await expectScimError(POST(provision(body), ctx), 409, { scimType: 'uniqueness', detail: word });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect((await events()).length).toBe(eventsBefore);
+    expect(await rows()).toHaveLength(1);
   });
 
-  it('POST fails the provisioning when its audit cannot be written', async () => {
+  it('POST fails the provisioning when its audit cannot be written, and leaves nothing behind', async () => {
     const { POST } = await loadRoute();
-    m.results = [provisioned('created')];
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
 
-    await expect(POST(provision({ userName: 'jane@example.com' }), ctx)).rejects.toThrow('audit unavailable');
+    await expect(POST(provision({ userName: 'jane@example.test' }), ctx)).rejects.toThrow('audit unavailable');
+    expect(await rows()).toEqual([]);
+    expect(await events()).toEqual([]);
   });
 
   // DEF-0B11-IDS-SCIM-LIST-INCLUDES-REMOVED-MEMBERS-AS-ACTIVE-AND-READS-THE-WHOLE-ROSTER-BEFORE-PAGING
-  it('GET pages in SQL from the requested start index and reports the live total', async () => {
+  it('GET pages in SQL from the requested start index, reports the live total, and leaves out a removed person', async () => {
     const { GET } = await loadRoute();
-    m.results = [[{ total: 37 }], [memberColumns({ o_id: 'm1', o_user_id: 'a', o_email: 'a@example.com', o_name: 'A B', o_status: 'active', o_metadata: null })]];
-    const result = await bodyOf(await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users?startIndex=21&count=10'), ctx));
-    expect(m.calls[1].text).toContain('ue_scim_list_members');
-    expect(m.calls[1].values).toEqual(['cfg_1', 'org_1', 20, 10]);
-    expect(result.totalResults).toBe(37);
+    await seed(25);
+    await database.pg.query(`UPDATE scim_provisioned_users SET deleted_at = now() WHERE user_name_key = 'person25@example.test'`);
+    const result = await bodyOf(await GET(listUrl('?startIndex=21&count=10'), ctx));
+    expect(result).toMatchObject({ totalResults: 24, startIndex: 21, itemsPerPage: 4 });
+    expect(result.Resources.map((r: { userName: string }) => r.userName)).toEqual(['person21@example.test', 'person22@example.test', 'person23@example.test', 'person24@example.test']);
   });
 
-  it('GET with count=0 reads only the total', async () => {
+  it('GET with count=0 reads only the total, and a count that is not a number reads as zero', async () => {
     const { GET } = await loadRoute();
-    m.results = [[{ total: 5 }]];
-    expect(await bodyOf(await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users?count=0'), ctx))).toMatchObject({ totalResults: 5, itemsPerPage: 0, Resources: [] });
-    expect(m.calls).toHaveLength(1);
+    await seed(5);
+    expect(await bodyOf(await GET(listUrl('?count=0'), ctx))).toMatchObject({ totalResults: 5, itemsPerPage: 0, Resources: [] });
+    expect(await bodyOf(await GET(listUrl('?count=abc'), ctx))).toMatchObject({ totalResults: 5, itemsPerPage: 0, Resources: [] });
+    expect(await bodyOf(await GET(listUrl('?startIndex=-3&count=2'), ctx))).toMatchObject({ startIndex: 1, itemsPerPage: 2 });
   });
 
   // DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE
-  it('POST asks for a person and nothing else: it passes no role and no status, so naming a user cannot activate it or raise its role', async () => {
+  it('POST asks for a person and nothing else: a role or status in the body changes nothing, so naming a user cannot activate or promote it', async () => {
     const { POST } = await loadRoute();
-    m.results = [provisioned('created')];
-    await POST(provision({ userName: 'jane@example.com', externalId: 'idp-1', role: 'admin', status: 'active' }), ctx);
-    expect(m.calls[0].text).toContain('ue_scim_provision_member');
-    expect(m.calls[0].values).toEqual(['cfg_1', 'org_1', 'jane@example.com', 'idp-1', 'jane@example.com', 'jane@example.com']);
+    await POST(provision({ userName: 'jane@example.test', externalId: 'idp-1', role: 'admin', status: 'active', active: true }), ctx);
+    expect(await rows()).toMatchObject([{ status: 'pending', deprovisioned_at: null }]);
+    expect(Object.keys((await rows())[0])).not.toContain('role');
   });
 
-  it('POST provisions a removed member again and audits that as a re-provisioning', async () => {
+  it('POST provisions a removed person again and audits that as a re-provisioning', async () => {
     const { POST } = await loadRoute();
-    m.results = [provisioned('reprovisioned')];
-    const response = await POST(provision({ userName: 'jane@example.com' }), ctx);
+    await seed(1, 'jane');
+    await database.pg.query(`UPDATE scim_provisioned_users SET deleted_at = now(), status = 'revoked', deprovisioned_at = now(), deprovisioned_by = 'scim', deprovisioned_action = 'delete'`);
+    const response = await POST(provision({ userName: 'jane1@example.test' }), ctx);
     expect(response.status).toBe(201);
-    expect(await bodyOf(response)).toMatchObject({ id: 'm-new', active: false });
-    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockTx, expect.objectContaining({ action: 'scim.user.reprovision', details: expect.objectContaining({ outcome: 'reprovisioned' }) }));
+    expect(await bodyOf(response)).toMatchObject({ active: false });
+    expect(await rows()).toMatchObject([{ status: 'pending', deleted_at: null, deprovisioned_at: null }]);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'scim.user.reprovision', details: expect.objectContaining({ outcome: 'reprovisioned' }) }));
   });
 
   it('answers a configuration the database no longer finds live with a refusal, and audits nothing', async () => {
     const { GET, POST } = await loadRoute();
-    m.results = [notLive()];
-    await expectScimError(POST(provision({ userName: 'jane@example.com' }), ctx), 403);
-    m.results = [notLive()];
-    await expectScimError(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx), 403);
+    // The token was valid a moment ago; the configuration is revoked before the operation runs.
+    await database.pg.query('UPDATE scim_configurations SET revoked_at = now() WHERE id = $1', [config]);
+    await expectScimError(POST(provision({ userName: 'jane@example.test' }), ctx), 403);
+    await expectScimError(GET(listUrl(), ctx), 403);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(await rows()).toEqual([]);
   });
 
   it('runs in the system context for every operation and never opens a tenant context, which a session-less caller cannot have', async () => {
     const { GET, POST } = await loadRoute();
-    m.results = [[{ total: 0 }], [], provisioned('created')];
-    await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx);
-    await POST(provision({ userName: 'jane@example.com' }), ctx);
-    expect(contexts.system).toHaveBeenCalledTimes(2);
-    expect(contexts.tenant).not.toHaveBeenCalled();
+    await GET(listUrl(), ctx);
+    await POST(provision({ userName: 'jane@example.test' }), ctx);
+    expect(m.system).toHaveBeenCalledTimes(2);
+    expect(m.tenant).not.toHaveBeenCalled();
   });
 
   // DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500
@@ -303,51 +312,56 @@ describe('scim users route', () => {
     ['an oversized externalId', { userName: 'a', externalId: 'e'.repeat(256) }],
     ['a non-string externalId', { userName: 'a', externalId: 12 }],
     ['a malformed e-mail', { userName: 'a', emails: [{ value: 'not-an-email' }] }],
-    ['too many e-mails', { userName: 'a', emails: Array.from({ length: 11 }, () => ({ value: 'a@example.com' })) }],
+    ['too many e-mails', { userName: 'a', emails: Array.from({ length: 11 }, () => ({ value: 'a@example.test' })) }],
   ])('POST answers 400, writing and auditing nothing, for %s', async (_label, body) => {
     const { POST } = await loadRoute();
     await expectScimError(POST(provision(body), ctx), 400, { scimType: 'invalidValue' });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
-    expect(mockTx.execute).not.toHaveBeenCalled();
+    expect(m.system).not.toHaveBeenCalled();
+    expect(await rows()).toEqual([]);
   });
 
   it('POST answers 400 for a body that is not JSON', async () => {
     const { POST } = await loadRoute();
-    const request = new NextRequest('http://localhost/api/scim/v2/org_1/Users', { method: 'POST', body: 'not json' });
+    const request = new NextRequest(`http://localhost/api/scim/v2/${ORG}/Users`, { method: 'POST', body: 'not json' });
     await expectScimError(POST(request, ctx), 400, { scimType: 'invalidValue' });
   });
 
   it('GET looks one person up by userName or externalId, which is how an identity provider asks whether a person already exists', async () => {
     const { GET } = await loadRoute();
-    m.results = [[memberColumns()], []];
+    await POST_ONE('Jane@Example.test', 'idp-1');
 
-    const found = await bodyOf(await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users?filter=' + encodeURIComponent('userName eq "Jane@Example.com"')), ctx));
-    expect(m.calls[0].text).toContain('ue_scim_find_member');
-    expect(m.calls[0].values).toEqual(['cfg_1', 'org_1', 'userName', 'Jane@Example.com']);
-    expect(found).toMatchObject({ totalResults: 1, startIndex: 1, itemsPerPage: 1, Resources: [{ id: 'm-new', userName: 'jane@example.com' }] });
+    const found = await bodyOf(await GET(listUrl('?filter=' + encodeURIComponent('userName eq "JANE@example.test"')), ctx));
+    expect(found).toMatchObject({ totalResults: 1, startIndex: 1, itemsPerPage: 1, Resources: [{ userName: 'Jane@Example.test', externalId: 'idp-1' }] });
+    const byExternal = await bodyOf(await GET(listUrl('?filter=' + encodeURIComponent('externalId eq "idp-1"')), ctx));
+    expect(byExternal.Resources).toHaveLength(1);
 
-    const none = await bodyOf(await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users?filter=' + encodeURIComponent('externalId eq "idp-404"')), ctx));
-    expect(m.calls[1].values).toEqual(['cfg_1', 'org_1', 'externalId', 'idp-404']);
+    const none = await bodyOf(await GET(listUrl('?filter=' + encodeURIComponent('externalId eq "idp-404"')), ctx));
     expect(none).toMatchObject({ totalResults: 0, Resources: [] });
   });
 
   it('GET refuses a filter it does not support instead of running it as if it matched nobody, so no duplicate is provisioned', async () => {
     const { GET } = await loadRoute();
     for (const filter of ['emails.value co "example"', 'userName sw "j"', 'userName eq "a" or userName eq "b"', 'active eq true']) {
-      await expectScimError(GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users?filter=' + encodeURIComponent(filter)), ctx), 400, { scimType: 'invalidFilter' });
+      await expectScimError(GET(listUrl('?filter=' + encodeURIComponent(filter)), ctx), 400, { scimType: 'invalidFilter' });
     }
-    expect(mockTx.execute).not.toHaveBeenCalled();
+    expect(m.system).not.toHaveBeenCalled();
   });
 
   it('gives each person its location when the public address of the application is configured', async () => {
     const { GET } = await loadRoute();
     process.env.NEXT_PUBLIC_APP_URL = 'https://app.example.test/';
     try {
-      m.results = [[{ total: 1 }], [memberColumns({ o_id: '11111111-1111-4111-8111-111111111111' })]];
-      const list = await bodyOf(await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users'), ctx));
-      expect(list.Resources[0].meta.location).toBe('https://app.example.test/api/scim/v2/org_1/Users/11111111-1111-4111-8111-111111111111');
+      await seed(1);
+      const list = await bodyOf(await GET(listUrl(), ctx));
+      expect(list.Resources[0].meta.location).toBe(`https://app.example.test/api/scim/v2/${ORG}/Users/${list.Resources[0].id}`);
     } finally {
       delete process.env.NEXT_PUBLIC_APP_URL;
     }
   });
+
+  async function POST_ONE(userName: string, externalId: string) {
+    const { POST } = await loadRoute();
+    return POST(provision({ userName, externalId }), ctx);
+  }
 });

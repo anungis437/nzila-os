@@ -1,18 +1,19 @@
 /**
  * SCIM 2.0 Users endpoint
- * GET  /api/scim/v2/[organizationId]/Users — the people this stream provisioned, one page at a time, or one person by filter
+ * GET  /api/scim/v2/[organizationId]/Users — the people this organization's directory holds, one page at a time, or one person by filter
  *                                            (userName eq "x" or externalId eq "x"; any other filter is a 400)
- * POST /api/scim/v2/[organizationId]/Users — provision a person: pending, role member, not linked to anyone's account
+ * POST /api/scim/v2/[organizationId]/Users — provision a person: pending, never active, not linked to anyone's account, not a member
  * One person: GET, PATCH, PUT and DELETE on Users/[id] (deprovision by the organization's own configured action).
  *
  * The caller is an identity provider, not a signed-in person (lib/scim/route-support.ts): the route declares the SCIM bearer token as its machine
  * credential, so the framework verifies it and reads no session. The tenant connection needs a session user and the system role holds no INSERT on
- * the membership table, so every operation runs in the system context through the database functions of cache migration 0049
- * (lib/scim/provisioned-members.ts), which confine a SCIM configuration to the people it provisioned. Answers are SCIM resources and SCIM errors
- * (lib/scim/responses.ts), not the framework's envelope, because that is what an identity provider reads.
+ * the membership table, so the people a stream provisions are rows of their own directory (public.scim_provisioned_users, platform 0059) that only
+ * the system role reaches (lib/scim/provisioned-members.ts). Answers are SCIM resources and SCIM errors (lib/scim/responses.ts), not the framework's
+ * envelope, because that is what an identity provider reads.
  */
 import { withApi } from '@/lib/api/framework';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { recordScimEvent, scimTraceOf } from '@/lib/scim/events-log';
 import { parseScimFilter } from '@/lib/scim/filter';
 import { findScimMembers, listScimMembers, provisionScimMember, toScimUser, type ScimMember } from '@/lib/scim/provisioned-members';
 import { handleScim, ScimHttpError, scimJson } from '@/lib/scim/responses';
@@ -62,7 +63,7 @@ export const GET = withApi(
 
       const startIndex = Math.max(1, Number.parseInt(url.searchParams.get('startIndex') || '1', 10) || 1);
       const count = Math.min(100, Math.max(0, Number.parseInt(url.searchParams.get('count') || '50', 10) || 0));
-      // A removed member is not a user of the organization, and the page is read in SQL with the count, not by loading the whole roster.
+      // A removed person is not a user of the organization, and the page is read in SQL with the count, not by loading the whole directory.
       const { total, members } = await withSystemContext((tx) => listScimMembers(tx, ref, { startIndex, count }));
       return scimJson(listResponse(ref.organizationId, members, total, startIndex));
     }),
@@ -89,16 +90,15 @@ export const POST = withApi(
 
       const primaryEmail = emails?.find((e) => e.primary)?.value ?? emails?.[0]?.value;
 
-      const fullName = [name?.givenName, name?.familyName].filter(Boolean).join(' ') || userName;
+      // Nothing is invented for what the identity provider did not send: no name falls back to the userName and no e-mail address is guessed.
+      const fullName = [name?.givenName, name?.familyName].filter(Boolean).join(' ') || null;
+      const trace = scimTraceOf(request);
+      const ref = { configurationId: machine.configurationId, organizationId };
 
       const member = await withSystemContext(async (tx) => {
-        // The IdP names a person; it does not assert that person's platform identity. The member is keyed by a provisional, organization-scoped
-        // key and stays pending (naming a user does not give that user access) until a verified binding exists; see SCIM_MEMBER_LINK.
-        const { outcome, member: provisioned } = await provisionScimMember(
-          tx,
-          { configurationId: machine.configurationId, organizationId },
-          { userName, externalId, name: fullName, email: primaryEmail ?? userName },
-        );
+        // The IdP names a person; it does not assert that person's platform identity. The person is a pending directory entry (naming a user does not
+        // give that user access and does not make them a member) until a verified binding exists; see SCIM_MEMBER_LINK.
+        const { outcome, member: provisioned } = await provisionScimMember(tx, ref, { userName, externalId, name: fullName, email: primaryEmail ?? null });
         if (outcome === 'exists') throw new ScimHttpError(409, 'A user with this userName already exists in the organization', 'uniqueness');
         if (outcome === 'external_id_conflict') throw new ScimHttpError(409, 'Another user of the organization already has this externalId', 'uniqueness');
         if (!provisioned) throw new Error('SCIM provisioning returned no member');
@@ -107,10 +107,11 @@ export const POST = withApi(
           organizationId,
           userId: `system:scim:${machine.configurationId}`,
           action: outcome === 'created' ? 'scim.user.provision' : 'scim.user.reprovision',
-          resourceType: 'organization_members',
+          resourceType: 'scim_provisioned_users',
           resourceId: provisioned.id,
           details: { provisionedUserName: userName, ...(externalId ? { externalId } : {}), outcome },
         });
+        await recordScimEvent(tx, ref, trace, { eventType: 'user.created', resourceId: provisioned.id, operation: 'POST', statusCode: 201 });
         return provisioned;
       });
       const location = scimLocation(organizationId, member.id);

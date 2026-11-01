@@ -16,7 +16,7 @@ import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agre
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { canReadSharedClause, clauseSourceName } from '@/lib/clause-library/sharing-authority';
+import { canReadSharedClause, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
 import { commonKeywords } from '@/lib/clause-library/common-keywords';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
@@ -45,7 +45,7 @@ export const POST = withApi(
       throw ApiError.badRequest('Maximum 10 clauses can be compared at once');
     }
 
-    // As the tenant: the policy already withholds what this organization may not read, and the per-row rule below is the same database function.
+    // As the tenant: the policy already withholds what this organization may not read, and the per-row rule below states the same rule.
     return withRLSContext({ organizationId }, async (tx) => {
       const rows = await tx
         .select({
@@ -62,7 +62,6 @@ export const POST = withApi(
           effectiveDate: sharedClauseLibrary.effectiveDate,
           expiryDate: sharedClauseLibrary.expiryDate,
           sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-          organizationName: clauseSourceName(),
         })
         .from(sharedClauseLibrary)
         .where(inArray(sharedClauseLibrary.id, clauseIds));
@@ -85,6 +84,7 @@ export const POST = withApi(
         .from(clauseLibraryTags)
         .where(inArray(clauseLibraryTags.clauseId, authorizedIds));
 
+      const sourceNames = await sourceNamesFor(authorizedRows, organizationId);
       const clauses = authorizedRows.map((r) => ({
         id: r.id,
         clauseNumber: r.clauseNumber,
@@ -96,7 +96,7 @@ export const POST = withApi(
         province: r.province,
         effectiveDate: r.effectiveDate,
         expiryDate: r.expiryDate,
-        sourceOrganization: clauseSourceProjection(r, organizationId),
+        sourceOrganization: clauseSourceProjection({ ...r, organizationName: sourceNames.get(r.sourceOrganizationId) ?? null }, organizationId),
         tags: allTags.filter((t) => t.clauseId === r.id).map((t) => ({ tagName: t.tagName })),
       }));
 

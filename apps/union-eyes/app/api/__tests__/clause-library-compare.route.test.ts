@@ -13,7 +13,7 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/db/schema/domains/agreements/shared-library', () => ({ sharedClauseLibrary: { id: 'id', clauseNumber: 'clauseNumber', clauseTitle: 'clauseTitle', clauseText: 'clauseText', clauseType: 'clauseType', sharingLevel: 'sharingLevel', sharedWithOrgIds: 'sharedWithOrgIds', sector: 'sector', province: 'province', effectiveDate: 'effectiveDate', expiryDate: 'expiryDate', sourceOrganizationId: 'sourceOrganizationId', comparisonCount: 'comparisonCount' }, clauseLibraryTags: { clauseId: 'clauseId', tagName: 'tagName' } }));
 vi.mock('@/db/schema-organizations', () => ({ organizations: { id: 'id', name: 'name' } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
-vi.mock('@/lib/clause-library/sharing-authority', () => ({ canReadSharedClause: m.canReadSharedClause, clauseSourceName: () => 'owner-name' }));
+vi.mock('@/lib/clause-library/sharing-authority', () => ({ canReadSharedClause: m.canReadSharedClause, sourceNamesFor: async () => new Map<string, string>() }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq'), inArray: vi.fn(() => 'inArray'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };

@@ -15,7 +15,7 @@ import { collectiveAgreements } from '@/db/schema';
 import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { buildClauseVisibilityCondition, clauseSourceName, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { buildClauseVisibilityCondition, sharingChangeDenial, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 import { assertOriginalClauseOwned } from '@/lib/clause-library/original-clause';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
@@ -43,8 +43,8 @@ export const GET = withApi(
     const sharingLevels = url.searchParams.get('sharingLevels')?.split(',').filter(Boolean) || [];
     const includeExpired = url.searchParams.get('includeExpired') === 'true';
 
-    // The sharing rule is one database function (cache 0048) that the tenant policy also applies, so this read runs as the tenant like every
-    // other and the predicate below is the same rule the item read asks. CREATE is an owner write.
+    // The tenant policy admits the owner, explicit grants and public clauses, and the predicate below states the same rule, so this read runs as the
+    // tenant like every other and the item read asks the same question. CREATE is an owner write.
     return await withRLSContext({ organizationId }, async () => {
       const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
       const conditions: ReturnType<typeof eq>[] = [visibilityCondition];
@@ -96,7 +96,6 @@ export const GET = withApi(
             expiryDate: sharedClauseLibrary.expiryDate,
             viewCount: sharedClauseLibrary.viewCount,
             sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-            organizationName: clauseSourceName(),
             createdAt: sharedClauseLibrary.createdAt,
           })
           .from(sharedClauseLibrary)
@@ -111,6 +110,7 @@ export const GET = withApi(
       ]);
 
       const total = countResult[0]?.count ?? 0;
+      const sourceNames = await sourceNamesFor(rows, organizationId);
       const clauses = rows.map((r) => ({
         id: r.id,
         clauseNumber: r.clauseNumber,
@@ -125,7 +125,7 @@ export const GET = withApi(
         viewCount: r.viewCount,
         // A shared anonymized clause must not reveal its source union by
         // returning the organization id/name in the collection response.
-        sourceOrganization: clauseSourceProjection(r, organizationId),
+        sourceOrganization: clauseSourceProjection({ ...r, organizationName: sourceNames.get(r.sourceOrganizationId) ?? null }, organizationId),
         createdAt: r.createdAt,
       }));
 

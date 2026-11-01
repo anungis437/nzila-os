@@ -4,8 +4,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 //
 // TBS-02 mock contract: withSystemContext executing the callback is not
 // tenant success. Tenant SELECT admits what the sharing policy admits for a
-// row (owner, explicit share, public, or a federation/congress level decided
-// by public.ue_clause_readable_by, cache 0048). Tenant UPDATE applies only when
+// row (owner, explicit share or public; the federation and congress levels are
+// owner-only, see lib/clause-library/sharing-authority.ts). Tenant UPDATE applies only when
 // the witnessed parent source org equals the RLS org. System context does not apply that
 // write filter. Cross-org denial must still hold when isSharedClauseOwner
 // is stubbed open.

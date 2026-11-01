@@ -1,11 +1,12 @@
 /**
  * What an identity provider's change to a provisioned person does, as one unit on the caller's system transaction: the attribute update, the
- * restoration or the deprovision, and the audit of each effective change. The database functions of cache 0049 decide what is allowed (only a
- * person this configuration provisioned, only through the organization's own configured action); this applies them in order and records them.
- * A change that changed nothing is not audited, and a refusal writes nothing.
+ * restoration or the deprovision, and the audit and event-log row of each effective change. The statements of provisioned-members.ts decide what is
+ * allowed (only a person of this organization's directory, only through the organization's own configured action); this applies them in order and
+ * records them. A change that changed nothing is not audited, and a refusal writes nothing.
  */
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { recordScimEvent, type ScimEventOperation, type ScimTrace } from '@/lib/scim/events-log';
 import type { ScimUserChanges } from '@/lib/scim/patch';
 import { ScimHttpError } from '@/lib/scim/responses';
 import {
@@ -19,6 +20,7 @@ import {
 
 const principal = (ref: ScimConfigurationRef) => `system:scim:${ref.configurationId}`;
 const notFound = () => new ScimHttpError(404, 'User not found');
+const RESOURCE = 'scim_provisioned_users';
 
 // The stored name is one string; a change to the given or family name keeps the other part as it is.
 function composeName(current: string | null, changes: ScimUserChanges): string | undefined {
@@ -29,14 +31,13 @@ function composeName(current: string | null, changes: ScimUserChanges): string |
   return [given, family].filter(Boolean).join(' ') || undefined;
 }
 
-/** The userName a person was provisioned under: the key is scim:<organization>:<lower-cased userName>. */
-const provisionedUserName = (member: ScimMember, ref: ScimConfigurationRef) => member.userId.slice(`scim:${ref.organizationId}:`.length);
-
 export interface ScimChangeResult {
   member: ScimMember;
   /** The person was deprovisioned by this request (not already so). */
   deprovisioned: ScimDeprovisionAction | null;
 }
+
+const operationOf = (via: 'patch' | 'put' | 'delete'): ScimEventOperation => (via === 'patch' ? 'PATCH' : via === 'put' ? 'PUT' : 'DELETE');
 
 export async function applyScimUserChanges(
   tx: RLSTx,
@@ -44,10 +45,11 @@ export async function applyScimUserChanges(
   memberId: string,
   changes: ScimUserChanges,
   via: 'patch' | 'put',
+  trace: ScimTrace,
 ): Promise<ScimChangeResult> {
   const current = await getScimMember(tx, ref, memberId);
   if (!current) throw notFound();
-  if (changes.userName !== undefined && changes.userName.toLowerCase() !== provisionedUserName(current, ref)) {
+  if (changes.userName !== undefined && changes.userName.toLowerCase() !== current.userName.toLowerCase()) {
     throw new ScimHttpError(400, 'userName identifies the person and is not changed by an update', 'mutability');
   }
 
@@ -66,14 +68,14 @@ export async function applyScimUserChanges(
       const fields = [
         ...(updated && updated.name !== current.name ? ['name'] : []),
         ...(updated && updated.email !== current.email ? ['email'] : []),
-        ...(changes.externalId !== undefined ? ['externalId'] : []),
+        ...(updated && updated.externalId !== current.externalId ? ['externalId'] : []),
       ];
       if (updated && updated.status !== current.status) {
         await persistAtomicAudit(tx, {
           organizationId: ref.organizationId,
           userId: principal(ref),
           action: 'scim.user.reactivate',
-          resourceType: 'organization_members',
+          resourceType: RESOURCE,
           resourceId: updated.id,
           details: { from: current.status, to: updated.status, via },
         });
@@ -83,11 +85,12 @@ export async function applyScimUserChanges(
           organizationId: ref.organizationId,
           userId: principal(ref),
           action: 'scim.user.update',
-          resourceType: 'organization_members',
+          resourceType: RESOURCE,
           resourceId: member.id,
           details: { fields, via },
         });
       }
+      await recordScimEvent(tx, ref, trace, { eventType: 'user.updated', resourceId: member.id, operation: operationOf(via), statusCode: 200 });
     }
   }
 
@@ -102,17 +105,23 @@ export async function applyScimUserChanges(
         organizationId: ref.organizationId,
         userId: principal(ref),
         action: 'scim.user.deprovision',
-        resourceType: 'organization_members',
+        resourceType: RESOURCE,
         resourceId: member.id,
         details: { action: result.action, from: current.status, via },
       });
+      await recordScimEvent(tx, ref, trace, { eventType: 'user.deleted', resourceId: member.id, operation: operationOf(via), statusCode: 200 });
     }
   }
   return { member, deprovisioned };
 }
 
 /** DELETE: the organization's configured deprovision action. A person already deprovisioned stays so, and the request is answered as done. */
-export async function removeScimUser(tx: RLSTx, ref: ScimConfigurationRef, memberId: string): Promise<{ deprovisioned: ScimDeprovisionAction | null }> {
+export async function removeScimUser(
+  tx: RLSTx,
+  ref: ScimConfigurationRef,
+  memberId: string,
+  trace: ScimTrace,
+): Promise<{ deprovisioned: ScimDeprovisionAction | null }> {
   const result = await deprovisionScimMember(tx, ref, memberId, 'delete');
   if (result.outcome === 'not_found') throw notFound();
   if (result.outcome === 'deprovisioned') {
@@ -120,10 +129,11 @@ export async function removeScimUser(tx: RLSTx, ref: ScimConfigurationRef, membe
       organizationId: ref.organizationId,
       userId: principal(ref),
       action: 'scim.user.deprovision',
-      resourceType: 'organization_members',
+      resourceType: RESOURCE,
       resourceId: result.member?.id,
       details: { action: result.action, via: 'delete' },
     });
+    if (result.member) await recordScimEvent(tx, ref, trace, { eventType: 'user.deleted', resourceId: result.member.id, operation: 'DELETE', statusCode: 204 });
   }
   return { deprovisioned: result.outcome === 'deprovisioned' ? result.action : null };
 }

@@ -1,29 +1,24 @@
 /**
- * shared_clause_library sharing authority — OWNER_PLUS_EXPLICIT_SHARING_AUTHORITY
- * (round 55), enforced by the database since cache 0048.
+ * shared_clause_library sharing authority — OWNER_PLUS_EXPLICIT_SHARING_AUTHORITY (round 55), enforced by the database.
  *
- * The table has NO organization-scoped RLS-style single-owner model: a row
- * has one OWNER (`sourceOrganizationId`) plus a `sharingLevel` that may grant
- * READ to other organizations (`private` + explicit `sharedWithOrgIds`,
- * `federation`, `congress`, or `public`). Cross-org READ access must never
- * imply WRITE access — mutation (content, sharing settings, tags, delete)
- * remains owner-only regardless of sharingLevel, matching
- * ClauseSharingControls.tsx's documented levels (private/federation/
- * congress/public) and the org hierarchy already modeled in
- * db/schema-organizations.ts (organizationType, hierarchyPath, clcAffiliated)
- * and db/schema/congress-memberships-schema.ts.
+ * The table has NO organization-scoped RLS-style single-owner model: a row has one OWNER (`sourceOrganizationId`) plus a `sharingLevel` that may
+ * grant READ to other organizations. Cross-org READ access must never imply WRITE access — mutation (content, sharing settings, tags, delete)
+ * remains owner-only regardless of sharingLevel.
  *
- * The rule is ONE database function, public.ue_clause_readable_by
- * (db/migrations-cache/0048_clause_library_sharing_rls.sql). The tenant policy
- * on the table admits federation and congress rows through it, and this module
- * asks the same function, so the list, search, compare and item reads run as the
- * tenant (never the system role) and cannot disagree with each other or with the
- * policy. The function is the only place that reads other organizations'
- * hierarchy and congress membership.
+ * What the tenant role can read is the policy of cache 0011/0012 and nothing more: the owner, an organization named in the explicit grant list of a
+ * `private` clause, and everyone for a `public` clause. This module states the same rule for the item read and for the list predicate, so the list,
+ * search, compare and item reads run as the tenant (never the system role) and cannot disagree with each other or with the policy.
+ *
+ * The `federation` and `congress` levels are NOT readable by another organization. Evaluating them means reading other organizations' hierarchy and
+ * congress membership, which a tenant policy cannot see, and the only way found to do it was a SECURITY DEFINER function executable by the runtime
+ * role — which the catalog admission contract refuses (cache 0048 was retired by 0050 for that reason). A clause shared at those levels is therefore
+ * readable by its owner only (fail closed) until an approved way to evaluate the hierarchy exists, and the share routes refuse to set them.
  */
-import { sql, type SQL } from 'drizzle-orm';
-import { db } from '@/db/db';
+import { sql, inArray, type SQL } from 'drizzle-orm';
+import { organizations } from '@/db/schema-organizations';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export interface ClauseSharingRow {
   sourceOrganizationId: string;
@@ -33,58 +28,23 @@ export interface ClauseSharingRow {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** A raw query answers an array on the production driver and { rows } on others; both are rows. */
-const rowsOf = <T,>(result: unknown): T[] =>
-  Array.isArray(result) ? (result as T[]) : ((result as { rows?: T[] } | null)?.rows ?? []);
-
-/** A uuid[] literal built only from well-formed ids, so a stored value can never change the statement. */
-const uuidArray = (ids: readonly string[] | null | undefined): SQL => {
-  const clean = (ids ?? []).filter((id) => UUID_RE.test(id));
-  return sql`${`{${clean.join(',')}}`}::uuid[]`;
-};
-
 /**
- * Nearest federation (or the organization itself when it is one): the deepest
- * federation on the org's materialized `hierarchyPath`. Null if the org has no
- * federation ancestor (e.g. a bare congress root, or an org outside any federation).
- */
-export async function getFederationAncestorId(orgId: string): Promise<string | null> {
-  const rows = rowsOf<{ id: string | null }>(await db.execute(sql`SELECT public.ue_clause_federation_ancestor(${orgId}::uuid)::text AS id`));
-  return rows[0]?.id ?? null;
-}
-
-/**
- * Congress-level sharing requires the organization to be CLC-affiliated AND
- * hold an active congress_memberships row — matches
- * lib/auth/hierarchy-access-control.ts's validateSharingLevel congress check.
- */
-export async function isOrgCongressEligible(orgId: string): Promise<boolean> {
-  const rows = rowsOf<{ eligible: boolean | null }>(await db.execute(sql`SELECT public.ue_clause_congress_eligible(${orgId}::uuid) AS eligible`));
-  return rows[0]?.eligible === true;
-}
-
-/**
- * Item-level READ authorization: true if callerOrgId may see this specific
- * clause row's full content. Owner always reads regardless of sharingLevel.
- * Unknown/unrecognized sharingLevel values fail closed (return false). The
- * answer is the database function's, the same one the tenant policy and the
- * list predicate use.
+ * Item-level READ authorization: true if callerOrgId may see this specific clause row's full content. Owner always reads regardless of
+ * sharingLevel. An unrecognized sharingLevel, and the federation and congress levels, fail closed (false for anyone but the owner). This is the
+ * rule of the tenant policy, so a row the policy admitted is a row this admits.
  */
 export async function canReadSharedClause(callerOrgId: string, clause: ClauseSharingRow): Promise<boolean> {
   if (!UUID_RE.test(callerOrgId) || !UUID_RE.test(clause.sourceOrganizationId)) return false;
-  const rows = rowsOf<{ readable: boolean | null }>(
-    await db.execute(
-      sql`SELECT public.ue_clause_readable_by(${clause.sourceOrganizationId}::uuid, ${clause.sharingLevel}::text, ${uuidArray(clause.sharedWithOrgIds)}, ${callerOrgId}::uuid) AS readable`,
-    ),
-  );
-  return rows[0]?.readable === true;
+  const caller = callerOrgId.toLowerCase();
+  if (clause.sourceOrganizationId.toLowerCase() === caller) return true;
+  if (clause.sharingLevel === 'public') return true;
+  if (clause.sharingLevel === 'private') return (clause.sharedWithOrgIds ?? []).some((id) => typeof id === 'string' && id.toLowerCase() === caller);
+  return false;
 }
 
 /**
- * Owner-only mutation authority. Broad reader visibility (federation,
- * congress, public, or an explicit private grant) never implies write:
- * only the source organization may change content, sharing settings, tags,
- * or delete the row.
+ * Owner-only mutation authority. Broad reader visibility (public, or an explicit private grant) never implies write: only the source organization
+ * may change content, sharing settings, tags, or delete the row.
  */
 export function isSharedClauseOwner(callerOrgId: string, clause: { sourceOrganizationId: string }): boolean {
   return clause.sourceOrganizationId === callerOrgId;
@@ -93,25 +53,26 @@ export function isSharedClauseOwner(callerOrgId: string, clause: { sourceOrganiz
 export const SHARING_LEVELS = ['private', 'federation', 'congress', 'public'] as const;
 const MAX_EXPLICIT_GRANTS = 200;
 
+/** The levels another organization cannot read yet (see the header). */
+export const UNAVAILABLE_SHARING_LEVELS: readonly string[] = ['federation', 'congress'];
+
 /**
- * Whether the owner organization may set this sharing configuration. A level the organization does not qualify for
- * (federation without a federation ancestor, congress without an active CLC membership) is refused instead of stored,
- * so a clause can never be shared at a scope the owner has no standing in. The checks read the organization hierarchy
- * across tenants through the database functions, which a tenant transaction may call.
+ * Whether the owner organization may set this sharing configuration. A level that no other organization could read (federation and congress) is
+ * refused instead of stored, so a clause is never marked as shared with a group that cannot see it.
  */
 export async function sharingChangeDenial(
-  ownerOrgId: string,
+  _ownerOrgId: string,
   change: { sharingLevel?: unknown; sharedWithOrgIds?: unknown },
 ): Promise<{ status: 400 | 403; message: string } | null> {
   if (change.sharingLevel !== undefined) {
     if (typeof change.sharingLevel !== 'string' || !(SHARING_LEVELS as readonly string[]).includes(change.sharingLevel)) {
       return { status: 400, message: `sharingLevel must be one of ${SHARING_LEVELS.join(', ')}` };
     }
-    if (change.sharingLevel === 'federation' && !(await getFederationAncestorId(ownerOrgId))) {
-      return { status: 403, message: 'Federation sharing requires membership of a federation' };
-    }
-    if (change.sharingLevel === 'congress' && !(await isOrgCongressEligible(ownerOrgId))) {
-      return { status: 403, message: 'Congress sharing requires an active congress membership' };
+    if (UNAVAILABLE_SHARING_LEVELS.includes(change.sharingLevel)) {
+      return {
+        status: 403,
+        message: `Sharing at the ${change.sharingLevel} level is not available: another organization's hierarchy cannot be evaluated safely yet, so only private, public and explicit grants are offered`,
+      };
     }
   }
   if (change.sharedWithOrgIds !== undefined && change.sharedWithOrgIds !== null) {
@@ -128,16 +89,30 @@ export async function sharingChangeDenial(
 }
 
 /**
- * SQL WHERE condition equal to `canReadSharedClause` for each row, for
- * LIST/SEARCH/COMPARE queries — avoids fetch-then-filter (which would both
- * leak unauthorized rows into application memory and break pagination
- * totals). It is the database function itself, so no join against
- * organizations or congress_memberships is needed to evaluate it.
+ * SQL WHERE condition equal to `canReadSharedClause` for each row, for LIST/SEARCH/COMPARE queries — avoids fetch-then-filter (which would both
+ * leak unauthorized rows into application memory and break pagination totals). The tenant policy admits the same rows, so this is the explicit
+ * statement of a rule the database also enforces.
  */
 export async function buildClauseVisibilityCondition(callerOrgId: string): Promise<SQL> {
   if (!UUID_RE.test(callerOrgId)) return sql`false`;
-  return sql`public.ue_clause_readable_by(${sharedClauseLibrary.sourceOrganizationId}, ${sharedClauseLibrary.sharingLevel}, ${sharedClauseLibrary.sharedWithOrgIds}, ${callerOrgId}::uuid)`;
+  return sql`(${sharedClauseLibrary.sourceOrganizationId} = ${callerOrgId}::uuid
+    OR ${sharedClauseLibrary.sharingLevel} = 'public'
+    OR (${sharedClauseLibrary.sharingLevel} = 'private' AND ${callerOrgId}::uuid = ANY (COALESCE(${sharedClauseLibrary.sharedWithOrgIds}, '{}'::uuid[]))))`;
 }
 
-/** The owner's name as the database discloses it: only for a clause the caller's bound organization may read. */
-export const clauseSourceName = (): SQL<string | null> => sql<string | null>`public.ue_clause_source_name(${sharedClauseLibrary.id})`;
+/**
+ * The owning organization's name, for the clauses a caller has already been admitted to read and whose source the projection may disclose (not an
+ * anonymized clause of another organization). A tenant cannot read another organization's row, so the names are read by id on the system role,
+ * which can read organizations; the ids come only from rows the tenant policy returned, so this is never a directory of organizations.
+ */
+export async function sourceNamesFor(
+  rows: ReadonlyArray<{ sourceOrganizationId: string; isAnonymized?: boolean | null }>,
+  callerOrgId: string,
+): Promise<Map<string, string>> {
+  const ids = [
+    ...new Set(rows.filter((row) => clauseSourceProjection({ sourceOrganizationId: row.sourceOrganizationId, isAnonymized: row.isAnonymized }, callerOrgId)).map((row) => row.sourceOrganizationId)),
+  ].filter((id) => UUID_RE.test(id));
+  if (ids.length === 0) return new Map();
+  const found = await withSystemContext((tx) => tx.select({ id: organizations.id, name: organizations.name }).from(organizations).where(inArray(organizations.id, ids)));
+  return new Map(found.map((organization) => [organization.id, organization.name] as [string, string]));
+}

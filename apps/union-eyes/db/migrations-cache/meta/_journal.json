@@ -330,6 +330,20 @@
       "when": 1790430000000,
       "tag": "0049_scim_provisioning_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790440000000,
+      "tag": "0050_clause_library_sharing_functions_retired",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1790450000000,
+      "tag": "0051_scim_provisioned_users_rls_closure",
+      "breakpoints": true
     }
   ]
 }

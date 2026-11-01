@@ -1,17 +1,19 @@
 /**
  * F03-B on real PostgreSQL: who may read a shared clause, through the list route and the item rule (lib/clause-library/sharing-authority.ts).
  *
- * DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS. The list, item, tags, compare and search reads run on the system role, which bypasses
- * row-level security, so the only boundary between organizations is the hand-written predicate. This runs the unmodified list route and the
+ * DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS. The list, item, tags, compare and search reads used to run on the system role, which holds no
+ * privilege on these tables, and the only boundary between organizations was a hand-written predicate. This runs the unmodified list route and the
  * unmodified sharing rule against the combined Django + Drizzle schema as the real roles, over a fixed hierarchy (a federation with two locals,
  * a local outside it, a local in another federation, congress members and a non-member), and proves that
- *   - for every caller and every clause the list returns exactly the clauses the independent expectation names, so no organization reads
- *     another's private, federation, congress or unknown-level clause, and nothing it may read is withheld;
- *   - the list and the item rule (canReadSharedClause, which guards the item, tags, compare and search reads) agree on every pair, so
- *     a clause is never listed that its own page would refuse;
- *   - an owner's clause of an unknown or retired sharing level is read by nobody else;
- *   - the tenant runtime role, which cannot bypass row-level security, never reads more than the rule allows (the policy is a floor).
- * Nested federations (a federation inside a federation) are not modelled by the rule: the nearest federation is then ambiguous.
+ *   - for every caller and every clause the list returns exactly the clauses the independent expectation names: the owner's own clauses, the clauses
+ *     that name the caller in an explicit grant, and the public ones, and nothing else;
+ *   - a clause shared at the federation or congress level, or at an unknown or retired level, is read by its owner only, whatever the hierarchy says
+ *     (cache 0048 evaluated those levels with SECURITY DEFINER functions that the catalog admission contract refuses, and 0050 retired them);
+ *   - the list and the item rule (canReadSharedClause, which guards the item, tags, compare and search reads) agree on every pair, so a clause is
+ *     never listed that its own page would refuse;
+ *   - the tenant runtime role, which cannot bypass row-level security, reads exactly what the rule allows, with no application predicate (the policy
+ *     of cache 0011/0012 is the floor and the rule states the same thing), and a clause's tags follow the clause;
+ *   - no ue_clause_* function exists, and the owner's name is read for the clauses the caller may read, on the system role, by id.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
@@ -114,7 +116,8 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
     await insertOrg(O.c, `Local C ${tag}`, 'local', [O.c], true)
     await insertOrg(O.fed2, `Federation Two ${tag}`, 'federation', [O.fed2], false)
     await insertOrg(O.d, `Local D ${tag}`, 'local', [O.fed2, O.d], true)
-    // A and C are active members of a congress; D is CLC-affiliated but holds no membership; B is neither.
+    // A and C are active members of a congress; D is CLC-affiliated but holds no membership; B is neither. None of it admits a reader: the
+    // federation and congress levels are readable by the owner only.
     for (const org of [O.a, O.c]) {
       await admin.query(`INSERT INTO congress_memberships (id, organization_id, congress_id, status, joined_at, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, 'active', now(), now(), now())`, [org, O.congress])
     }
@@ -136,9 +139,9 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
 
   // The expectation is written out, not derived from the code under test.
   const EXPECTED: Record<string, string[]> = {
-    a: ['a-private', 'a-private-to-c', 'a-federation', 'a-congress', 'a-public', 'a-retired-level', 'c-congress'],
-    b: ['a-federation', 'a-public'],
-    c: ['a-private-to-c', 'a-congress', 'a-public', 'c-congress', 'c-private'],
+    a: ['a-private', 'a-private-to-c', 'a-federation', 'a-congress', 'a-public', 'a-retired-level'],
+    b: ['a-public'],
+    c: ['a-private-to-c', 'a-public', 'c-congress', 'c-private'],
     d: ['a-public', 'd-federation'],
   }
   const listed = async (org: string) => {
@@ -166,16 +169,32 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
       const org = O[name as keyof typeof O]
       const fromList = new Set(await listed(org))
       for (const row of rows) {
-        const item = await inRole('union_eyes_system', null, () => sharing!.canReadSharedClause(org, { sourceOrganizationId: row.source, sharingLevel: row.sharing_level, sharedWithOrgIds: row.shared }))
+        const item = await sharing!.canReadSharedClause(org, { sourceOrganizationId: row.source, sharingLevel: row.sharing_level, sharedWithOrgIds: row.shared })
         expect(fromList.has(row.id), `${name} ${keysOf([row.id])[0]}`).toBe(item)
       }
     }
   })
 
-  it('an organization outside every hierarchy and membership reads only what is public to it', async () => {
+  it('an organization outside every hierarchy and membership reads only what is public', async () => {
     const stranger = randomUUID()
     await insertOrg(stranger, `Stranger ${tag}`, 'local', [stranger], false)
     expect(keysOf(await listed(stranger))).toEqual(['a-public'])
+  })
+
+  it('a federation or congress clause is read by its owner alone, even by an organization of the same federation or a congress member', async () => {
+    const { sql } = await import('drizzle-orm')
+    const visibleTo = (org: string, key: string) =>
+      inRole('union_eyes_runtime', org, async (tx) =>
+        ((await (tx as unknown as { execute: (q: unknown) => Promise<Array<{ id: string }>> }).execute(
+          sql`SELECT id::text id FROM shared_clause_library WHERE id = ${clauseIds[key]}::uuid`,
+        )) as Array<{ id: string }>).length === 1,
+      )
+    expect(await visibleTo(O.a, 'a-federation')).toBe(true)
+    expect(await visibleTo(O.b, 'a-federation')).toBe(false)
+    expect(await visibleTo(O.c, 'a-congress')).toBe(false)
+    expect(await visibleTo(O.c, 'c-congress')).toBe(true)
+    expect(await visibleTo(O.a, 'c-congress')).toBe(false)
+    expect(await visibleTo(O.b, 'a-retired-level')).toBe(false)
   })
 
   it('the tenant runtime role, which cannot bypass row-level security, reads exactly what the rule allows, with no application predicate', async () => {
@@ -192,34 +211,53 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
     }
   })
 
-  it('a clause\'s tags follow the clause: a federation reader reads the tags of a federation clause and a stranger reads none', async () => {
+  it("a clause's tags follow the clause: a granted organization reads the tags of a private clause that names it, and nobody else does", async () => {
     const { sql } = await import('drizzle-orm')
-    await admin.query(`INSERT INTO clause_library_tags (id, clause_id, tag_name, created_by, created_at) VALUES (gen_random_uuid(), $1, 'wage-parity', 'creator', now())`, [clauseIds['a-federation']])
-    const tagsFor = (org: string) =>
+    await admin.query(`INSERT INTO clause_library_tags (id, clause_id, tag_name, created_by, created_at) VALUES (gen_random_uuid(), $1, 'wage-parity', 'creator', now())`, [clauseIds['a-private-to-c']])
+    await admin.query(`INSERT INTO clause_library_tags (id, clause_id, tag_name, created_by, created_at) VALUES (gen_random_uuid(), $1, 'federation-only', 'creator', now())`, [clauseIds['a-federation']])
+    const tagsFor = (org: string, key: string) =>
       inRole('union_eyes_runtime', org, async (tx) =>
         ((await (tx as unknown as { execute: (q: unknown) => Promise<Array<{ tag_name: string }>> }).execute(
-          sql`SELECT tag_name FROM clause_library_tags WHERE clause_id = ${clauseIds['a-federation']}::uuid`,
+          sql`SELECT tag_name FROM clause_library_tags WHERE clause_id = ${clauseIds[key]}::uuid`,
         )) as Array<{ tag_name: string }>).map((r) => r.tag_name),
       )
-    expect(await tagsFor(O.a)).toEqual(['wage-parity'])
-    expect(await tagsFor(O.b)).toEqual(['wage-parity'])
-    expect(await tagsFor(O.c)).toEqual([])
-    expect(await tagsFor(O.d)).toEqual([])
+    expect(await tagsFor(O.a, 'a-private-to-c')).toEqual(['wage-parity'])
+    expect(await tagsFor(O.c, 'a-private-to-c')).toEqual(['wage-parity'])
+    expect(await tagsFor(O.b, 'a-private-to-c')).toEqual([])
+    expect(await tagsFor(O.d, 'a-private-to-c')).toEqual([])
+    expect(await tagsFor(O.a, 'a-federation')).toEqual(['federation-only'])
+    expect(await tagsFor(O.b, 'a-federation')).toEqual([])
   })
 
-  it('the sharing functions are not a directory: the owner name is returned only for a clause the caller may read, and the functions are not executable by PUBLIC', async () => {
-    const { sql } = await import('drizzle-orm')
-    const nameFor = (org: string, key: string) =>
-      inRole('union_eyes_runtime', org, async (tx) =>
-        ((await (tx as unknown as { execute: (q: unknown) => Promise<Array<{ n: string | null }>> }).execute(
-          sql`SELECT public.ue_clause_source_name(${clauseIds[key]}::uuid) AS n`,
-        )) as Array<{ n: string | null }>)[0]?.n ?? null,
-      )
-    expect(await nameFor(O.b, 'a-federation')).toContain('Local A')
-    expect(await nameFor(O.d, 'a-federation')).toBeNull()
-    expect(await nameFor(O.d, 'a-private')).toBeNull()
-    const acl = await admin.query(`SELECT proname, has_function_privilege('public', p.oid, 'EXECUTE') AS pub FROM pg_proc p WHERE proname LIKE 'ue_clause_%'`)
-    expect(acl.rows.length).toBeGreaterThanOrEqual(4)
-    for (const row of acl.rows) expect(row.pub, row.proname).toBe(false)
+  it('no ue_clause_* function exists any more, and no SECURITY DEFINER function is executable by a business role', async () => {
+    const helpers = await admin.query(`SELECT proname FROM pg_proc WHERE proname LIKE 'ue_clause_%'`)
+    expect(helpers.rows).toEqual([])
+    const definers = await admin.query(
+      `SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE p.prosecdef AND n.nspname = 'public'
+          AND (has_function_privilege('union_eyes_runtime', p.oid, 'EXECUTE') OR has_function_privilege('union_eyes_system', p.oid, 'EXECUTE') OR has_function_privilege('public', p.oid, 'EXECUTE'))`,
+    )
+    expect(definers.rows).toEqual([])
+  })
+
+  it("the owner's name is read by id on the system role, only for a source the projection may disclose", async () => {
+    const names = await sharing!.sourceNamesFor(
+      [
+        { sourceOrganizationId: O.a, isAnonymized: false },
+        { sourceOrganizationId: O.c, isAnonymized: true },
+        { sourceOrganizationId: O.d, isAnonymized: null },
+      ],
+      O.b,
+    )
+    expect([...names.keys()]).toEqual([O.a])
+    expect(names.get(O.a)).toBe(`Local A ${tag}`)
+    const own = await sharing!.sourceNamesFor([{ sourceOrganizationId: O.c, isAnonymized: true }], O.c)
+    expect(own.get(O.c)).toBe(`Local C ${tag}`)
+  })
+
+  it('the share refusal is not stored: a federation or congress level is denied before any write', async () => {
+    expect(await sharing!.sharingChangeDenial(O.a, { sharingLevel: 'federation' })).toMatchObject({ status: 403 })
+    expect(await sharing!.sharingChangeDenial(O.a, { sharingLevel: 'congress' })).toMatchObject({ status: 403 })
+    expect(await sharing!.sharingChangeDenial(O.a, { sharingLevel: 'public' })).toBeNull()
   })
 })

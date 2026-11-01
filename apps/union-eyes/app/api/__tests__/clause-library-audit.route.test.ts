@@ -57,7 +57,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
-  clauseSourceName: () => null,
+  sourceNamesFor: async () => new Map<string, string>(),
   sharingChangeDenial: h.denial,
   isSharedClauseOwner: h.isOwner,
   canReadSharedClause: h.canRead,

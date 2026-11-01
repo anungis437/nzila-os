@@ -340,6 +340,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "F03-C: SCIM provisioning for a session-less machine caller - four SECURITY DEFINER functions (configuration check, provision, total, page) executable by the system role only"
+      },
+      {
+        "tag": "0050_clause_library_sharing_functions_retired",
+        "sha256": "aaf4973b1415db043b82ba829dda78b864f1fb6cc5b8a15c87e43990334976d2",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Retires the SECURITY DEFINER clause sharing helpers of 0048 that the catalog admission contract refuses"
+      },
+      {
+        "tag": "0051_scim_provisioned_users_rls_closure",
+        "sha256": "521f90aad5d4254e26324801e796076289888a28bb0360f6b3ccb96ca81d40da",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Retires the SCIM definer functions of 0049 and closes the SCIM directory and event log to the system role"
       }
     ],
     "platform": [
@@ -650,6 +664,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "CUPE pilot bootstrap origin ledger (F03-A: a reset deletes only rows the bootstrap recorded creating)"
+      },
+      {
+        "tag": "0059_scim_provisioned_users",
+        "sha256": "6bc0e70db80a60709c6359a535a5d10fda99f60ba061ba4aac23a0097e0976b0",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "The directory of people an identity provider provisions (system-only, not roster rows) and the evolution of the scim_events_log Django stub"
       }
     ]
   }

@@ -34,7 +34,9 @@ describe('shared-clause source attribution', () => {
       'app/api/clause-library/compare/route.ts',
     ]) {
       const route = readFileSync(join(root, path), 'utf8');
-      expect(route).toContain('sourceOrganization: clauseSourceProjection(r, organizationId)');
+      // The name comes from sourceNamesFor, so the projection is applied to the row together with the looked-up name.
+      expect(route).toContain('sourceOrganization: clauseSourceProjection({ ...r, organizationName: ');
+      expect(route).toContain('sourceNamesFor(');
     }
     for (const path of [
       'app/api/clause-library/search/route.ts',

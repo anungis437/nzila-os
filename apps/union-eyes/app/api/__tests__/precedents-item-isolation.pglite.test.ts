@@ -1,9 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PGlite } from '@electric-sql/pglite';
 import { organizations } from '@/db/schema-organizations';
-import { congressMemberships } from '@/db/schema';
 import { arbitrationPrecedents, precedentCitations, precedentTags } from '@/db/schema/arbitration-precedents-schema';
-import { createTableDatabase, migrationFunctions } from './support/pglite-tables';
+import { createTableDatabase } from './support/pglite-tables';
 
 // DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION:
 // the generic route filtered on a column the table does not have, so any precedent was readable, writable and
@@ -77,11 +76,7 @@ const ctx = (organizationId: string, id: string, body?: unknown) => ({
 });
 
 beforeAll(async () => {
-  // The read rule is the production database function (cache 0048), not a copy of it.
-  const created = await createTableDatabase(
-    [organizations, congressMemberships, arbitrationPrecedents, precedentTags, precedentCitations],
-    migrationFunctions('0048_clause_library_sharing_rls.sql', ['ue_clause_federation_ancestor', 'ue_clause_congress_eligible', 'ue_clause_readable_by']),
-  );
+  const created = await createTableDatabase([organizations, arbitrationPrecedents, precedentTags, precedentCitations]);
   pg = created.pg;
   state.db = created.db;
   state.audit = audit;
@@ -92,7 +87,7 @@ afterAll(async () => { await pg.close(); });
 beforeEach(async () => {
   audit.mockClear();
   audit.mockResolvedValue(undefined);
-  await pg.exec('TRUNCATE precedent_citations, precedent_tags, arbitration_precedents, congress_memberships, organizations CASCADE');
+  await pg.exec('TRUNCATE precedent_citations, precedent_tags, arbitration_precedents, organizations CASCADE');
   await insertOrg(ORG_A, 'Alpha');
   await insertOrg(ORG_B, 'Bravo');
   await insertPrecedent(P_A_PRIVATE, ORG_A, 'private');
@@ -164,9 +159,10 @@ describe('PATCH /api/precedents/[id]', () => {
     await expect((PATCH as any)(ctx(ORG_A, P_A_PRIVATE, { caseTitle: 'x' }))).rejects.toThrow('audit down');
   });
 
-  it('refuses a federation share the owner has no standing for', async () => {
+  it('refuses a federation share: no other organization can read that level yet, so it is not stored', async () => {
     const { PATCH } = await import('../precedents/[id]/route');
     await expect((PATCH as any)(ctx(ORG_A, P_A_PRIVATE, { sharingLevel: 'federation' }))).rejects.toMatchObject({ status: 403 });
+    await expect((PATCH as any)(ctx(ORG_A, P_A_PRIVATE, { sharingLevel: 'congress' }))).rejects.toMatchObject({ status: 403 });
     expect((await row(P_A_PRIVATE)).sharing_level).toBe('private');
   });
 });
