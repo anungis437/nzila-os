@@ -247,6 +247,11 @@ export class GeofencePrivacyService {
       ? "strike"
       : tracking.purpose === "event" ? "event" : null;
     if (!consentContext) throw new Error("Location tracking purpose is not covered by the current consent");
+    // There is no organization-bound strike/event register lookup for these IDs.
+    // Never persist a caller-provided association as a verified institutional fact.
+    if (tracking.strikeId || tracking.eventId) {
+      throw new Error("Location tracking cannot link an unverified strike or event");
+    }
     const hasConsent = await this.hasValidConsent(tracking.userId, consentContext, tx);
     if (!hasConsent) {
       throw new Error("Location tracking requires explicit opt-in consent");

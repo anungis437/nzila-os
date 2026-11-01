@@ -55,6 +55,12 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     }
 
     const { latitude, longitude, accuracy, altitude, purpose, activityType, strikeId, eventId } = validation.data;
+    // Until an organization-bound strike/event ownership resolver exists, a
+    // caller-supplied UUID is not a verified link and cannot be stored.
+    if (strikeId || eventId) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR,
+        'Strike and event linkage is unavailable until organization ownership can be verified');
+    }
 
     // Track location (the service verifies consent). The point and its audit record commit together; the audit names
     // the purpose and the strike or event, never the coordinates.

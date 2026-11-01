@@ -9633,8 +9633,8 @@
         "apps/union-eyes/app/api/location/track/route.ts",
         "apps/union-eyes/app/api/__tests__/location-track.route.test.ts"
       ],
-      "correction": "Restricts precise location tracking to explicit strike/picket or event consent; rejects meeting/organizing; missing global policy no longer creates an enabled configuration; unsafe policy refuses; unlinked geofence lookups do not persist coordinates.",
-      "remaining": "Exact-HEAD focused/full tests, native PG15/16, HTTP/browser/staging, independent review, owner persona and institutional location-purpose ratification. No implementation or CLOSED credit."
+      "correction": "Restricts precise location tracking to explicit strike/picket or event consent; rejects meeting/organizing; missing global policy no longer creates an enabled configuration; unsafe policy refuses; unlinked geofence lookups do not persist coordinates. Caller-provided strikeId/eventId associations now fail closed until an organization-bound resolver exists.",
+      "remaining": "Exact-HEAD focused/full tests, native PG15/16, HTTP/browser/staging, independent review, owner persona and institutional location-purpose ratification. No implementation or CLOSED credit. Storage-authority manifest still declares INSERT for global location_tracking_config despite the removed lazy creation; grant and catalog-contract reconciliation remain outstanding."
     }
   ]
 }

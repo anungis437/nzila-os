@@ -9,3 +9,9 @@ Source correction: strike/picket requires strike permission; event requires even
 Regression tests authored in `apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts` and `apps/union-eyes/app/api/__tests__/location-track.route.test.ts`. They cover unapproved purposes, cross-purpose consent, missing/unsafe configuration, geofence persistence, and absence of a false compliance claim.
 
 **Qualification:** Source-level only; focused Vitest, complete application/contract, native PostgreSQL 15/16 RLS, HTTP/browser/staging and institutional consent-policy acceptance are not established. Frozen 777-defect provenance and release-debt index are unchanged. No implementation, CLOSED, human ratification or GO credit.
+
+## Additional source correction: unverified links
+The tracking route previously accepted arbitrary `strikeId` and `eventId` UUIDs without checking their organization ownership, and the service would persist them as associations. Both the route and service now refuse these associations until an organization-bound lookup is implemented; tracking without those identifiers remains available under the appropriate consent. Adversarial regression tests cover both link types and no-write behavior.
+
+## Remaining storage-authority reconciliation
+`apps/union-eyes/db/rls-storage-authority/reference-latent.ts` still declares runtime INSERT on the global `location_tracking_config` table and describes lazy default creation. This no longer matches the corrected read-only service. Removing that grant requires the source-governed privilege contract and migration to be reconciled and qualified; **this commit does not alter or bypass the privilege preflight**.

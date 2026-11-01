@@ -220,6 +220,15 @@ describe('geofence-privacy-service', () => {
       expect(h.db.insert).not.toHaveBeenCalled();
     });
 
+    it('rejects caller-provided strike or event associations without a verified organization-bound resolver', async () => {
+      h.db.select.mockClear();
+      h.db.insert.mockClear();
+      await expect(S.trackLocation({ ...tr, strikeId: '11111111-1111-4111-8111-111111111111' })).rejects.toThrow('unverified strike or event');
+      await expect(S.trackLocation({ ...tr, purpose: 'event', eventId: '22222222-2222-4222-8222-222222222222' })).rejects.toThrow('unverified strike or event');
+      expect(h.db.select).not.toHaveBeenCalled();
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
     it('does not treat strike consent as event consent', async () => {
       pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true, allowedDuringEvents: false }]);
       await expect(S.trackLocation({ ...tr, purpose: 'event' })).rejects.toThrow('explicit opt-in consent');

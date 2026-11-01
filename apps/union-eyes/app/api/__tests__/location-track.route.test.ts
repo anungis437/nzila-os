@@ -133,6 +133,22 @@ describe('location/track route (PR #752 round 49 — self-service location-track
     expect(m.trackLocation).not.toHaveBeenCalled();
   });
 
+  it('POST refuses unverified strike and event associations without storing a point', async () => {
+    const { POST } = await loadRoute();
+    for (const [purpose, link] of [
+      ['strike', { strikeId: '11111111-1111-4111-8111-111111111111' }],
+      ['event', { eventId: '22222222-2222-4222-8222-222222222222' }],
+    ] as const) {
+      const response = await POST(new NextRequest('http://localhost/api/location/track', {
+        method: 'POST',
+        body: JSON.stringify({ latitude: 45.5, longitude: -73.6, purpose, ...link }),
+      }));
+      expect(response.status).toBe(400);
+    }
+    expect(m.trackLocation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   it('POST returns validation error for invalid coordinates', async () => {
     const { POST } = await loadRoute();
 
