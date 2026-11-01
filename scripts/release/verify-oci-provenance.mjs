@@ -11,7 +11,7 @@ const SIGNER = REPO + '/.github/workflows/gitops-deploy.yml'
 const IMAGE = /^nzilacanadaacr\.azurecr\.io\/nzila\/[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?@sha256:[0-9a-f]{64}$/
 const deny = message => { throw new Error('OCI_PROVENANCE_DENIED: ' + message) }
 const canonicalUtcTimestamp = value => typeof value === 'string' &&
-  /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/.test(value) &&
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
   Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value
 
 

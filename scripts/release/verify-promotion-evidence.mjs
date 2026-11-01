@@ -11,7 +11,7 @@ import { pathToFileURL } from 'node:url'
 
 function deny(message) { throw new Error('PROMOTION_EVIDENCE_DENIED: ' + message) }
 const canonicalUtcTimestamp = value => typeof value === 'string' &&
-  /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/.test(value) &&
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
   Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value
 
 function sha256(buf) { return createHash('sha256').update(buf).digest('hex') }
