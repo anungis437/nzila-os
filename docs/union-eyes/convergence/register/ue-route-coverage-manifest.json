@@ -37,12 +37,12 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 165,
-   "ATOMIC_SERVICE": 110,
+   "ATOMIC_SERVICE": 115,
    "COMPUTE_ONLY": 31,
    "CRUD_ATOMIC": 86,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 28,
-   "INTENT_OUTCOME": 36,
+   "INTENT_OUTCOME": 31,
    "NO_WRITES_FOUND": 10,
    "NONE": 213
   },
@@ -1152,7 +1152,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/employers/[id]/risk/route.ts",
@@ -3276,7 +3276,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "claims/[id]/defensibility-pack/route.ts",
@@ -8630,7 +8630,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "integrations/framework/[id]/sync/route.ts",
@@ -8655,7 +8655,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "integrations/shopify/webhooks/route.ts",
@@ -10543,7 +10543,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "payments/webhooks/stripe/route.ts",

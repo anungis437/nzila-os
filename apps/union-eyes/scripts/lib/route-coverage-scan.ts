@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, relative, sep } from 'node:path'
+import { invokesTarget } from './call-reach'
 
 /**
  * Route-coverage scan (UE-CONV-K-008). Reads every app/api route file and records, from its source text, how the
@@ -270,8 +271,10 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
   // performAuditedOperation records the intent, then runs the effect, then records the outcome, each in its own transaction (see
   // lib/audit/operation-audit.ts). That is a durable two-phase record, not an atomic one: the effect and its audit row do not commit
   // together. operation-audit.ts itself contains persistAtomicAudit, so a route that only reaches it through that module is not atomic.
+  // The route is two-phase if it calls the operation itself or invokes a named operation that reaches it (lib/../call-reach.ts). A module that merely
+  // contains the call in an unrelated function does not make every route that imports it two-phase.
   const reached = imports.filter((f) => !f.endsWith('operation-audit.ts'))
-  if (/\bperformAuditedOperation\(/.test(source) || reached.some((f) => /\bperformAuditedOperation\(/.test(readFileSync(f, 'utf8')))) {
+  if (/\bperformAuditedOperation\(/.test(source) || invokesTarget(source, reached)) {
     return 'INTENT_OUTCOME'
   }
   if (reached.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
