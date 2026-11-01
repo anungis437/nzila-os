@@ -2,7 +2,7 @@
 /** P0 #1038: live Sigstore/SLSA OCI verification; never grants release authority. */
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { readFileSync, writeFileSync, lstatSync } from 'node:fs'
+import { writeFileSync, openSync, closeSync, fstatSync, readSync, constants } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -15,23 +15,41 @@ const canonicalUtcTimestamp = value => typeof value === 'string' &&
   Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value
 
 
-/** Refuse oversized or redirected on-disk staging evidence before allocating. */
+/**
+ * Open the signed staging manifest without following a symlink, then inspect
+ * the opened descriptor (not the pathname). A path may be replaced between
+ * lstat(path) and readFileSync(path), so pathname preflight is insufficient.
+ * Read at most the approved byte budget plus one and reject concurrent writes.
+ */
 export function readSignedManifestFile(path) {
-  let bytes
+  let fd
   try {
-    const stat = lstatSync(path)
-    if (!stat.isFile() || stat.size < 2 || stat.size > 2_097_152) {
+    fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK)
+    const before = fstatSync(fd, { bigint: true })
+    if (!before.isFile() || before.size < 2n || before.size > 2_097_152n) {
       deny('signed staging manifest file size or type invalid')
     }
-    bytes = readFileSync(path)
-    if (bytes.length < 2 || bytes.length > 2_097_152) {
-      deny('signed staging manifest file size or type invalid')
+    const expectedSize = Number(before.size)
+    const buffer = Buffer.allocUnsafe(expectedSize + 1)
+    let length = 0
+    while (length < buffer.length) {
+      const count = readSync(fd, buffer, length, buffer.length - length, null)
+      if (count === 0) break
+      length += count
     }
+    const after = fstatSync(fd, { bigint: true })
+    if (length !== expectedSize || after.size !== before.size ||
+        after.mtimeNs !== before.mtimeNs || after.ctimeNs !== before.ctimeNs ||
+        after.ino !== before.ino || after.dev !== before.dev) {
+      deny('signed staging manifest changed during bounded read')
+    }
+    return buffer.subarray(0, length)
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('OCI_PROVENANCE_DENIED:')) throw error
     deny('signed staging manifest file missing or unreadable')
+  } finally {
+    if (fd !== undefined) closeSync(fd)
   }
-  return bytes
 }
 
 export function verifyOciProvenance({manifestRaw, sourceSha, repository, stagingRunId, verifier = execFileSync, now = new Date()}) {
