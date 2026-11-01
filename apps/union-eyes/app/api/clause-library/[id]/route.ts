@@ -16,7 +16,7 @@
  * are readable by the owner only (see lib/clause-library/sharing-authority.ts).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import type { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { and, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -28,7 +28,7 @@ import { clauseTextSha256, recordClauseVersion } from '@/lib/clause-library/vers
 
 export const dynamic = 'force-dynamic';
 
-async function getClauseRow(id: string, executor: typeof db = db) {
+async function getClauseRow(id: string, executor: typeof db) {
   const rows = await executor
     .select({
       id: sharedClauseLibrary.id,
@@ -105,12 +105,12 @@ export const GET = withApi(
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
     // As the tenant: the policy withholds what this organization may not read, and canReadSharedClause states the same rule.
-    return withRLSContext({ organizationId }, async () => {
-      const row = await getClauseRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const row = await getClauseRow(id, tx);
       if (!row || !(await canReadSharedClause(organizationId, row))) {
         throw ApiError.notFound('clause', id);
       }
-      const tags = await db.select().from(clauseLibraryTags).where(eq(clauseLibraryTags.clauseId, id));
+      const tags = await tx.select().from(clauseLibraryTags).where(eq(clauseLibraryTags.clauseId, id));
       const sourceNames = await sourceNamesFor([row], organizationId);
       return formatClause(row, organizationId, tags, sourceNames.get(row.sourceOrganizationId) ?? null);
     });
