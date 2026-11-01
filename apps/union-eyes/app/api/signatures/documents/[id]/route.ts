@@ -142,7 +142,12 @@ export const POST = withApiAuth(async (
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
     }
     const result = await SignatureService.syncDocumentStatus(params.id, organizationId);
-    return NextResponse.json({ success: true, ...result });
+    // A provider outage or an unlinked envelope is not a successful refresh.
+    // Idempotent/no-op observations remain HTTP 200 but disclose synced=false.
+    const status = result.reason === 'provider_unavailable' ? 503
+      : result.reason === 'no_envelope' ? 409
+      : 200;
+    return NextResponse.json({ success: result.synced, ...result }, { status });
   } catch (error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to refresh document status', error);
   }
