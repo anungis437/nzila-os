@@ -69,7 +69,8 @@ test('binds exact signed staging bytes, source SHA and run ID; rejects substitut
 test('rejects missing, stale and future signed staging build times before OCI verification',()=>{
   const now = new Date('2026-11-01T12:00:00.000Z')
   for (const built_at of [
-    undefined, 'invalid',
+    undefined, 'invalid', '2026-11-01T12:00:00Z',
+    '2026-11-01T07:00:00.000-05:00', '2026-02-30T12:00:00.000Z',
     '2026-10-24T11:59:59.000Z',
     '2026-11-01T12:05:01.000Z',
   ]) {

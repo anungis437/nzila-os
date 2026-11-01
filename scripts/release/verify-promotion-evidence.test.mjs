@@ -242,6 +242,25 @@ test('signed staging evidence rejects impossible chronology', () => {
   } finally { x.cleanup() }
 })
 
+test('signed timestamps must be canonical UTC with millisecond precision', () => {
+  const x = makeFixture()
+  try {
+    for (const bad of [
+      '2026-11-01T12:00:00Z', '2026-11-01T07:00:00.000-05:00',
+      '2026-02-30T12:00:00.000Z', '11/01/2026',
+    ]) {
+      x.manifest.built_at = bad
+      x.write()
+      assert.throws(() => x.verify(), /staging evidence stale or from future/, bad)
+      x.manifest.built_at = new Date().toISOString()
+      x.attestation.timestamp = bad
+      x.write()
+      assert.throws(() => x.verify(), /staging evidence stale or from future/, bad)
+      x.attestation.timestamp = new Date().toISOString()
+    }
+  } finally { x.cleanup() }
+})
+
 test('signed but unsafe high-severity scan is denied', () => {
   const x = makeFixture()
   try {

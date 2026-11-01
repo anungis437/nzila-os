@@ -10,6 +10,10 @@ const REPO = 'anungis437/nzila-os'
 const SIGNER = REPO + '/.github/workflows/gitops-deploy.yml'
 const IMAGE = /^nzilacanadaacr\.azurecr\.io\/nzila\/[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?@sha256:[0-9a-f]{64}$/
 const deny = message => { throw new Error('OCI_PROVENANCE_DENIED: ' + message) }
+const canonicalUtcTimestamp = value => typeof value === 'string' &&
+  /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/.test(value) &&
+  Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value
+
 
 export function verifyOciProvenance({manifestRaw, sourceSha, repository, stagingRunId, verifier = execFileSync, now = new Date()}) {
   if (!/^[0-9a-f]{40}$/.test(sourceSha ?? '') || repository !== REPO) deny('untrusted source identity')
@@ -28,7 +32,7 @@ export function verifyOciProvenance({manifestRaw, sourceSha, repository, staging
     deny('signed staging manifest source/run mismatch')
   }
   const current = now.getTime()
-  const builtAt = Date.parse(manifest.built_at ?? '')
+  const builtAt = canonicalUtcTimestamp(manifest.built_at) ? Date.parse(manifest.built_at) : NaN
   if (!Number.isFinite(current) || !Number.isFinite(builtAt) ||
       builtAt > current + 5 * 60_000 ||
       builtAt < current - 7 * 24 * 60 * 60_000) {
