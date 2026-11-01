@@ -301,6 +301,72 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     expect(mockDb.update).not.toHaveBeenCalled();
     expect(m.withSystemContext).not.toHaveBeenCalled();
   });
+
+  it('refuses colon-delimiter injection in a signed campaign or recipient identifier', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET, POST } = await loadRoute();
+    const forgedRecipient = 'r1:other';
+    const forgedCampaign = 'c1:other';
+    const recipientToken = token('secret', `c1:${forgedRecipient}:unsubscribe`);
+    const campaignToken = token('secret', `${forgedCampaign}:r1:unsubscribe`);
+    const recipientContext = { params: Promise.resolve({ recipientId: forgedRecipient }) };
+    const campaignContext = { params: Promise.resolve({ recipientId: 'r1' }) };
+
+    const recipientResponse = await POST(new NextRequest(
+      `http://localhost/api/communications/unsubscribe/r1%3Aother?campaignId=c1&token=${recipientToken}`,
+      { method: 'POST' },
+    ), recipientContext);
+    const campaignResponse = await POST(new NextRequest(
+      `http://localhost/api/communications/unsubscribe/r1?campaignId=c1%3Aother&token=${campaignToken}`,
+      { method: 'POST' },
+    ), campaignContext);
+    const previewResponse = await GET(new NextRequest(
+      `http://localhost/api/communications/unsubscribe/r1?campaignId=c1%3Aother&token=${campaignToken}`,
+    ), campaignContext);
+
+    expect(recipientResponse.status).toBe(400);
+    expect(campaignResponse.status).toBe(400);
+    expect(previewResponse.status).toBe(400);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(mockDb.insert).not.toHaveBeenCalled();
+  });
+
+  it('rejects duplicate authority parameters before checking a token or touching storage', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET, POST } = await loadRoute();
+    const t = token('secret', 'c1:r1:unsubscribe');
+    const ctx = { params: Promise.resolve({ recipientId: 'r1' }) };
+    const duplicateCampaign = await POST(new NextRequest(
+      `http://localhost/api/communications/unsubscribe/r1?campaignId=c1&campaignId=c2&token=${t}`,
+      { method: 'POST' },
+    ), ctx);
+    const duplicateToken = await POST(new NextRequest(
+      `http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${t}&token=${t}`,
+      { method: 'POST' },
+    ), ctx);
+    const duplicateScope = await GET(new NextRequest(
+      `http://localhost/api/communications/unsubscribe/r1?scope=all&scope=all&token=${t}`,
+    ), ctx);
+
+    expect(duplicateCampaign.status).toBe(400);
+    expect(duplicateToken.status).toBe(400);
+    expect(duplicateScope.status).toBe(400);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
+  it('refuses oversized capability identifiers without database activity', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { POST } = await loadRoute();
+    const recipientId = 'r'.repeat(257);
+    const response = await POST(new NextRequest(
+      `http://localhost/api/communications/unsubscribe/${recipientId}?campaignId=c1&token=invalid`,
+      { method: 'POST' },
+    ), { params: Promise.resolve({ recipientId }) });
+    expect(response.status).toBe(400);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
   it('GET is a scanner-safe confirmation only; POST is required to revoke consent', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const { GET, POST } = await loadRoute();
