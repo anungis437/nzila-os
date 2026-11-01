@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, rmSync, truncateSync, renameSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createHash, generateKeyPairSync, sign } from 'node:crypto'
@@ -51,6 +51,28 @@ function makeFixture(algorithm = 'ed25519', sbomDocument = {
     verify: () => verifyPromotionEvidence({ directory, expectedCommit: COMMIT, expectedRunId: RUN, publicKeyPem, sourceLockfilePath }),
     cleanup: () => rmSync(directory, { recursive: true, force: true }) }
 }
+test('promotion evidence refuses oversized artifacts and symlinks before JSON parsing', () => {
+  for (const [name, limit] of [
+    ['artifact-manifest.json', 2_097_152],
+    ['sbom.json', 134_217_728],
+    ['release-attestation.json', 4_194_304],
+  ]) {
+    const x = makeFixture()
+    try {
+      truncateSync(join(x.directory, name), limit + 1)
+      assert.throws(() => x.verify(), /invalid artifact size or type/, name)
+    } finally { x.cleanup() }
+  }
+  const x = makeFixture()
+  try {
+    const path = join(x.directory, 'sbom.json')
+    const original = join(x.directory, 'sbom-original.json')
+    renameSync(path, original)
+    symlinkSync(original, path)
+    assert.throws(() => x.verify(), /invalid artifact size or type for sbom.json/)
+  } finally { x.cleanup() }
+})
+
 test('nested canonical hashing preserves modifications', () => {
   assert.notEqual(hash(JSON.stringify(canonical({ nested: { role: 'user' } }))),
     hash(JSON.stringify(canonical({ nested: { role: 'admin' } }))))

@@ -4,7 +4,7 @@
  * This is not a grant of release authority: the GitHub production environment
  * still requires its own human approval and protected deployment identity.
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, lstatSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { createHash, createPublicKey, verify } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
@@ -45,9 +45,30 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   if (verificationKey.asymmetricKeyType !== 'ed25519') {
     deny('attestation verification key must be Ed25519')
   }
+  // Untrusted run artifacts must not exhaust the promotion verifier.
+  // Bound allocations before parsing, and refuse symlinks or special files.
+  const artifactLimits = Object.freeze({
+    'artifact-manifest.json': 2_097_152,
+    'sbom.json': 134_217_728,
+    'release-attestation.json': 4_194_304,
+  })
   const load = name => {
+    const path = join(directory, name)
+    const limit = artifactLimits[name]
     let raw
-    try { raw = readFileSync(join(directory, name)) } catch { deny('missing ' + name) }
+    try {
+      const metadata = lstatSync(path)
+      if (!metadata.isFile() || metadata.size < 2 || metadata.size > limit) {
+        deny('invalid artifact size or type for ' + name)
+      }
+      raw = readFileSync(path)
+      if (raw.length < 2 || raw.length > limit) {
+        deny('invalid artifact size or type for ' + name)
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('PROMOTION_EVIDENCE_DENIED:')) throw error
+      deny('missing or unreadable ' + name)
+    }
     let obj
     try { obj = JSON.parse(raw.toString('utf8')) } catch { deny('malformed ' + name) }
     return { obj, raw }
