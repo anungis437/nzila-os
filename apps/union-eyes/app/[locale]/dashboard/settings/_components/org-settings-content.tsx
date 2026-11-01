@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useLocale, useTranslations } from 'next-intl';
 import { PageHeading } from '@/components/dashboard/page-heading';
 import { Card } from "@/components/ui/card";
-import { Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Check, Download, Info, Loader2 } from "lucide-react";
+import { Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Info, Loader2 } from "lucide-react";
 
 type OrgSettingsSection = "general" | "branding" | "members" | "integrations" | "notifications" | "security" | "billing";
 
@@ -887,92 +887,21 @@ export default function OrgSettingsContent() {
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('settings.billingSubscription')}</h2>
                   <p className="text-gray-600">{t('settings.billingSubscriptionDescription')}</p>
                 </div>
-
-                <div className="space-y-4">
-                  <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{orgSettings.billing.plan}</h3>
-                        <p className="text-sm text-gray-600">{orgSettings.billing.memberCount} members</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-gray-900">$299</p>
-                        <p className="text-sm text-gray-600">{t('settings.perMonth')}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Check size={16} className="text-green-600" />
-                      <span>{t('settings.unlimitedGrievanceCases')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Check size={16} className="text-green-600" />
-                      <span>{t('settings.advancedAnalytics')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Check size={16} className="text-green-600" />
-                      <span>{t('settings.prioritySupport')}</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">{t('settings.paymentMethod')}</p>
-                        <p className="text-sm text-gray-600">{orgSettings.billing.paymentMethod}</p>
-                      </div>
-                      <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        {t('settings.update')}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-3">{t('settings.recentInvoices')}</h3>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('settings.date')}</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('settings.amount')}</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('settings.status')}</th>
-                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">{t('settings.action')}</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          <tr>
-                            <td className="px-4 py-3 text-sm text-gray-900">Dec 1, 2024</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">$299.00</td>
-                            <td className="px-4 py-3">
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                                <Check size={12} />
-                                {t('settings.paid')}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <button className="text-blue-600 hover:text-blue-700 text-sm" aria-label="Download December 2024 invoice">
-                                <Download size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-4 py-3 text-sm text-gray-900">Nov 1, 2024</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">$299.00</td>
-                            <td className="px-4 py-3">
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                                <Check size={12} />
-                                {t('settings.paid')}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <button className="text-blue-600 hover:text-blue-700 text-sm" aria-label="Download November 2024 invoice">
-                                <Download size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900">{orgSettings.billing.plan}</h3>
+                  <p className="mt-1 text-sm text-gray-700">
+                    {orgSettings.billing.memberCount} {isFrench ? 'membres' : 'members'}
+                  </p>
+                </div>
+                <div role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                  <p className="font-semibold">
+                    {isFrench ? 'Facturation non disponible sur cette page' : 'Billing records unavailable on this page'}
+                  </p>
+                  <p className="mt-1">
+                    {isFrench
+                      ? 'Aucune source de facturation autorisée n’est connectée à cet écran. Les prix, les paiements, les factures et les droits du forfait ne sont pas vérifiés ici. Pour obtenir une facture ou modifier un paiement, utilisez le processus de facturation approuvé par votre organisation.'
+                      : 'No authoritative billing source is connected to this screen. Prices, payments, invoices and plan entitlements are not verified here. Use your organization’s approved billing process to obtain invoices or change a payment method.'}
+                  </p>
                 </div>
               </div>
             )}
