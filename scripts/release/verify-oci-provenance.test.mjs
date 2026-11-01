@@ -40,7 +40,7 @@ test('signed OCI manifest reads retain exact bytes and reject replaced paths',()
   try {
     const path=join(directory,'manifest.json')
     const target=join(directory,'other.json')
-    const original=Buffer.from(JSON.stringify(manifest())+'\\n')
+    const original=Buffer.from(JSON.stringify(manifest()) + String.fromCharCode(10))
     writeFileSync(path,original)
     writeFileSync(target,JSON.stringify({...manifest(),run_id:'999999'}))
     const read=readSignedManifestFile(path)
