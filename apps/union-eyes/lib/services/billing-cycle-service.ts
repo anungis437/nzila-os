@@ -24,6 +24,7 @@ import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { moneyToNumber } from '@/lib/decimal-safe';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { type RLSTx } from '@/lib/db/with-rls-context';
 
 // =============================================================================
@@ -119,6 +120,15 @@ export class BillingCycleService {
     try {
        
       return await withRLSContext({ organizationId, userId: executedBy }, async (tx: RLSTx) => {
+        // Route-level preflights are not sufficient: scheduler and direct service callers also reach this write.
+        // The live ledger-wide execution mandate must be checked on the SAME tenant transaction as all charges.
+        await requireLiveFinancialMandate(tx, {
+          organizationId,
+          userId: executedBy,
+          action: 'finance:execute',
+          requiresLedger: true,
+        });
+
         // Step 1: Get all active members
         const activeMembers = await this.getActiveMembersForBilling(tx, organizationId, periodStart);
 
@@ -171,7 +181,13 @@ export class BillingCycleService {
           }
         }
 
-        // Step 3: Calculate totals
+        // Step 3: A real billing run is all-or-nothing. A partial run must not commit charges for
+        // some members while reporting success for the cycle. Throw INSIDE withRLSContext so
+        // PostgreSQL rolls back every charge in this transaction. Preview keeps diagnostics.
+        const failedResults = results.filter((r) => !r.success);
+        if (!dryRun && failedResults.length > 0) {
+          throw new Error('Billing cycle aborted: one or more member calculations failed');
+        }
         const successResults = results.filter((r) => r.success && !r.skipped);
         const totalAmount = successResults.reduce((sum, r) => sum + (r.amount || 0), 0);
         const breakdown = successResults.reduce(
@@ -195,7 +211,7 @@ export class BillingCycleService {
         });
 
         return {
-          success: true,
+          success: failedResults.length === 0,
           cycleId,
           organizationId,
           periodStart,
