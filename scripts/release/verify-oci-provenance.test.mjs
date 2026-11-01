@@ -35,6 +35,24 @@ test('OCI CLI refuses oversized or symlinked manifest evidence before loading by
   } finally { rmSync(directory,{recursive:true,force:true}) }
 })
 
+test('signed OCI manifest reads retain exact bytes and reject replaced paths',()=>{
+  const directory=mkdtempSync(join(tmpdir(),'nzila-oci-fd-'))
+  try {
+    const path=join(directory,'manifest.json')
+    const target=join(directory,'other.json')
+    const original=Buffer.from(JSON.stringify(manifest())+'\\n')
+    writeFileSync(path,original)
+    writeFileSync(target,JSON.stringify({...manifest(),run_id:'999999'}))
+    const read=readSignedManifestFile(path)
+    assert.ok(Buffer.isBuffer(read))
+    assert.deepEqual(read,original)
+    rmSync(path)
+    symlinkSync(target,path)
+    assert.throws(()=>readSignedManifestFile(path),/file missing or unreadable|file size or type invalid/)
+    assert.throws(()=>readSignedManifestFile(directory),/file size or type invalid|file missing or unreadable/)
+  } finally { rmSync(directory,{recursive:true,force:true}) }
+})
+
 test('requires canonical GitHub signer, exact source/ref and digest subject',()=>{
   let args
   const receipt=verifyOciProvenance(opts({verifier:(cmd,a)=>{assert.equal(cmd,'gh');args=a;return proof()}}))
