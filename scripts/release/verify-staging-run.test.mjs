@@ -22,8 +22,10 @@ function validRun() {
         'Assert staging deployment identity is configured (fail-closed)',
         'Azure login (OIDC, staging-scoped)',
         'Staging boundary gate (fail-closed)',
+        'ACR login',
         'Require real staging deployment implementation',
         'Run smoke tests',
+        'Ingest GitHub Actions CI evidence',
         'Ingest Azure runtime evidence (live)',
       ].map(name => ({ name, status: 'completed', conclusion: 'success' })),
     },
@@ -125,8 +127,10 @@ test('a green staging job without independently completed deployment and runtime
     'Assert staging deployment identity is configured (fail-closed)',
     'Azure login (OIDC, staging-scoped)',
     'Staging boundary gate (fail-closed)',
+    'ACR login',
     'Require real staging deployment implementation',
     'Run smoke tests',
+    'Ingest GitHub Actions CI evidence',
     'Ingest Azure runtime evidence (live)',
   ]
   for (const name of names) {
@@ -171,7 +175,7 @@ test('green deploy cannot substitute missing, skipped or duplicate prerequisite 
 })
 
 test('smoke and runtime evidence must follow deployment in staging execution order', () => {
-  for (const [first, second] of [[2, 3], [3, 4], [4, 5]]) {
+  for (const [first, second] of [[2, 3], [3, 4], [4, 5], [5, 6], [6, 7]]) {
     const run = validRun()
     const steps = run.jobs[0].steps
     ;[steps[first], steps[second]] = [steps[second], steps[first]]
