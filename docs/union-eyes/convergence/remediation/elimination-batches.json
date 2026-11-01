@@ -9602,5 +9602,24 @@
       "correction": "Pause/resume finance:execute resource mandate is now checked inside the same tenant/principal RLS transaction as status transition, subscription event and atomic audit. The separate route-level preflight is removed. Missing mandate refuses before writes.",
       "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16 adversarial concurrency and tenant-role tests, HTTP/browser/staging, provider reconciliation and institutional reviewer/persona/authority decisions. Defect remains PARTIAL; no additional implementation or CLOSED credit."
     }
-  }
+  },
+  "crossCuttingSourceEvidence": [
+    {
+      "id": "UE-ORG-CREATE-TRANSACTION-20261101",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-organization-create-transaction-integrity-20261101.md",
+      "sourceCommits": [
+        "e5e06c71cdeb0b64b69f93b83c3d72d9f1888a3d",
+        "555ed187ea62ae9d9d1eab2cc2311bdb962b0c04"
+      ],
+      "files": [
+        "apps/union-eyes/app/api/organizations/route.ts",
+        "apps/union-eyes/app/api/__tests__/organizations.route.test.ts"
+      ],
+      "correction": "Parent lookup and organization INSERT now use the same withSystemContext transaction handle as the atomic audit; no false success on audit failure.",
+      "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16 forced rollback, HTTP/browser/staging and independent reviewer/persona/institutional authority. The separate scoped 0048 SECURITY DEFINER privilege preflight remains blocked."
+    }
+  ]
 }
