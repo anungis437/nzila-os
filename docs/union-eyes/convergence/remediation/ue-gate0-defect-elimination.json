@@ -17411,6 +17411,17 @@
       ],
       "correction": "All three pension AI routes now require a live financial view mandate covering the requested member/plan or organization ledger, rather than any unrelated financial resource. Identifier resolved before the model/feature gate.",
       "remaining": "Exact-HEAD focused/full Vitest/contract, PG15/16, HTTP/browser/staging, plan-to-member delegation policy, independent reviewer, persona and institutional ratification. Defect remains PARTIAL and no completion credit is claimed."
+    },
+    "DEF-0B9-ML-SLA-LIST-GET-SKIPS-THE-FEATURE-GATE-AND-SAFETY-CHECK-THE-POST-APPLIES": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "683853344a45f94e3e5e9dd3a95f24812b2d4c41",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-sla-risk-list-rls-context-20261101.md",
+      "files": [
+        "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+        "apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts"
+      ],
+      "correction": "SLA prediction list now reads inside the authenticated organization's RLS transaction instead of the bare shared database handle. It retains organization/type predicates and a 25-row limit; failed RLS transaction refuses rather than producing a false success.",
+      "remaining": "Exact-HEAD focused and full Vitest/contract, native PG15/16 tenant-role isolation, HTTP/browser/staging and independent review. The separate SLA scoring heuristic still accepts caller-supplied transition count and previous-breach flag; no implementation or CLOSED credit."
     }
   }
 }
