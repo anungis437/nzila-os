@@ -10395,6 +10395,25 @@
       ],
       "correction": "Thirteen reachable Django-defined relations (alert_rules, arbitration_decisions, automation_rules, case_studies, clc_organization_sync_log, cost_of_living_data, external_data_sync_log, provincial_privacy_config, reserved_matter_votes, support_tickets, union_density, wage_benchmarks, webhook_receipts) take the shape their Drizzle declarations select and write. Measured on databases built from scratch by Django migrate plus the approved bootstrap, PG16 and PG15: plain-select failures 203 to 190, reachable and failing 78 to 65, parity findings 2,758 to 2,519 (MISSING_COLUMN -205, NO_DB_DEFAULT -34), the thirteen relations at zero and nothing else changed. The census shrinks 231 to 202: 13 exits are earned by 0060, 16 were stale baseline entries (9 retired declarations, 7 already evolved by earlier migrations), computed against the pre-0060 database. The migration changes no access (guard, native snapshot test, unchanged catalog contract). Follow-up B129: the precedent library is proven on the converged table under the real roles (14 native tests, PG15 and PG16), which exposed and fixed three precedent-service defects (enum ordering, jsonb overlap).",
       "remaining": "the 65 reachable declarations that still fail a plain select (33 relations Django never created, 32 contained, individual-decision, finance-frozen or owned by another change); NO_DB_DEFAULT and TYPE_MISMATCH outside the census ratchet; staging-clone qualification of 0060; independent reviewer. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-NATIVE-PG-CI-JOURNEY-COVERAGE-20261101",
+      "status": "CI_COVERAGE_EXPANDED_PENDING_EXACT_SHA_NATIVE_RESULTS",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "defectReference": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-native-pg-ci-journey-expansion-20261101.md",
+      "sourceBaseline": "bc4cca2c78d8f8a9a917706f3d4a68cffe255631",
+      "files": [
+        ".github/workflows/ue-native-postgres.yml",
+        "apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/clause-library-visibility.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/finance-duties.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/document-intake.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/workaid-union-side.postgres.test.ts"
+      ],
+      "correction": "PG15 and PG16 combined-schema CI now requires five additional real-role native suites for precedent privacy, clause visibility, financial duties, document intake and union-side WorkAid consent; all five filenames are mandatory in the receipt and all-skipped fails.",
+      "remaining": "Exact-HEAD expanded native CI results and receipt artifacts, fix any failures; HTTP/browser/staging and independent Gate 0C.4 institutional authority and persona ratification. No defect or CLOSED credit."
     }
   ]
 }
