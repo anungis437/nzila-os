@@ -229,3 +229,22 @@ test('source lockfile path is mandatory and cannot be inferred from staging arti
     }), /trusted source lockfile unavailable/)
   } finally { x.cleanup() }
 })
+
+test('signed bundle provenance refuses duplicate or noncanonical identities', () => {
+  const x = makeFixture()
+  try {
+    const valid = x.attestation.artifactDigests[0]
+    for (const invalid of [
+      [valid, { ...valid, digest: 'f'.repeat(64) }],
+      [{ ...valid, name: '../demo' }],
+      [{ ...valid, name: 'Demo' }],
+      [{ ...valid, fileCount: Number.MAX_SAFE_INTEGER + 1 }],
+      [{ ...valid, fileCount: 1.5 }],
+      [null],
+    ]) {
+      x.attestation.artifactDigests = invalid
+      x.write() // Valid signature cannot make ambiguous metadata safe.
+      assert.throws(() => x.verify(), /incomplete or ambiguous source\\/bundle digest evidence/)
+    }
+  } finally { x.cleanup() }
+})

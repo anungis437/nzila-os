@@ -79,12 +79,18 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
       attestation.trivySummary?.ran !== true ||
       attestation.trivySummary?.critical !== 0 ||
       attestation.trivySummary?.high !== 0) deny('mandatory recorded quality/security proof absent')
+  // A signed bundle list is still ambiguous when it repeats an identity:
+  // downstream consumers may select the first or last digest for the same
+  // name. Require unique, canonical names and safe positive file counts.
+  const bundles = attestation.artifactDigests
   if (!/^[0-9a-f]{64}$/i.test(attestation.lockfileHash ?? '') ||
-      !Array.isArray(attestation.artifactDigests) ||
-      !attestation.artifactDigests.length ||
-      attestation.artifactDigests.some(x => !x.name || !Number.isInteger(x.fileCount) ||
-        x.fileCount < 1 || !/^[0-9a-f]{64}$/i.test(x.digest ?? ''))) {
-    deny('incomplete source/bundle digest evidence')
+      !Array.isArray(bundles) || !bundles.length ||
+      bundles.some(x => !x || typeof x !== 'object' || Array.isArray(x) ||
+        typeof x.name !== 'string' || !/^[a-z][a-z0-9-]*$/.test(x.name) ||
+        !Number.isSafeInteger(x.fileCount) || x.fileCount < 1 ||
+        !/^[0-9a-f]{64}$/i.test(x.digest ?? '')) ||
+      new Set(bundles.map(x => x.name)).size !== bundles.length) {
+    deny('incomplete or ambiguous source/bundle digest evidence')
   }
   // A signed lockfileHash is not source provenance unless it matches the
   // independently checked-out Git commit being promoted. The production
