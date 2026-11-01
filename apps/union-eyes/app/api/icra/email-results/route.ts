@@ -40,6 +40,7 @@ import {
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability'
 import { isAssessmentClaimed } from '@/lib/icra/assessment-access'
+import { resolveIcraEmailOrigin } from '@/lib/icra/email-results-origin'
 import { checkRateLimit } from '@/lib/rate-limiter'
 import { sendEmail, isValidEmail } from '@/lib/email-service'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
@@ -151,9 +152,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
-    `${req.nextUrl.protocol}//${req.nextUrl.host}`
+  // Never put a capability in an email link derived from a request Host header.
+  // In production the canonical HTTPS application origin must be configured.
+  const baseUrl = resolveIcraEmailOrigin(
+    process.env.NEXT_PUBLIC_APP_URL,
+    req.nextUrl.origin,
+    process.env.NODE_ENV === 'production',
+  )
+  if (!baseUrl) {
+    return NextResponse.json({ error: 'Results email links are temporarily unavailable.' }, { status: 503 })
+  }
   const resultsUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}#cap=${encodeURIComponent(presented as string)}`
   const copy = COPY[locale]
 
