@@ -10135,6 +10135,22 @@
   },
   "crossCuttingSourceEvidence": [
     {
+      "id": "UE-ORG-CREATE-INPUT-CALENDAR-20261101",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-organization-input-calendar-integrity-20261101.md",
+      "sourceCommits": [
+        "ffdf27e87581b3c55fb80085f28db60b6a38ebb2"
+      ],
+      "files": [
+        "apps/union-eyes/app/api/organizations/route.ts",
+        "apps/union-eyes/app/api/organizations/__tests__/route.post-record-fields.test.ts"
+      ],
+      "correction": "Refuses malformed/non-object JSON before DB access and rejects impossible affiliation calendar dates instead of normalizing them; regression tests cover valid leap-day handling.",
+      "remaining": "Exact-HEAD focused/full Vitest, native PG15/16, HTTP/browser/staging, independent review and institutional authority. No defect completion or CLOSED credit."
+    },
+    {
       "id": "UE-CI-FIXTURES-QA-CLOCK-20261101",
       "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
       "defectCredit": 0,
