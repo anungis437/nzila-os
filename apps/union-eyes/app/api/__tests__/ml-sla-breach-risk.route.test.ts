@@ -114,7 +114,7 @@ describe('ml/predictions/sla-breach-risk route', () => {
 
   it('presents a rule-based score as one: no confidence, no interval and no training date', async () => {
     const result = await call({})();
-    expect(result.method).toBe('rule_based_heuristic_v1');
+    expect(result.method).toBe('rule_based_verified_case_facts_v2');
     expect(result.confidence).toBeNull();
     expect(result.model).toEqual({ type: 'sla_breach_risk', version: 'sla-risk-v2' });
     const stored = m.inserted.find((row) => row.predictionType === 'sla_breach_risk');
