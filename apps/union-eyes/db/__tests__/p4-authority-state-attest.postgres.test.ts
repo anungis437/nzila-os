@@ -74,8 +74,9 @@ function runScript(scriptRelPath: string, extraArgs: string[], extraEnv: Record<
       }
     );
     return { status: 0, output };
-  } catch (error: any) {
-    return { status: typeof error?.status === "number" ? error.status : 1, output: `${error?.stdout ?? ""}${error?.stderr ?? ""}` };
+  } catch (error) {
+    const failure = error as { status?: unknown; stdout?: unknown; stderr?: unknown };
+    return { status: typeof failure.status === "number" ? failure.status : 1, output: `${failure.stdout ?? ""}${failure.stderr ?? ""}` };
   }
 }
 

@@ -1,5 +1,5 @@
 /**
- * Proves the per-file database isolation of the native project (apps/union-eyes/vitest.native-isolation.ts).
+ * Proves the per-file database isolation of the native project (apps/union-eyes/scripts/runtime/native-test-database-isolation.ts).
  *
  * With UE_NATIVE_TEMPLATE_URL set, this file must be running in a clone of the template, a write in the clone must not
  * reach the template, and the clone must start from the template's pristine state. It skips when the variable is not set,

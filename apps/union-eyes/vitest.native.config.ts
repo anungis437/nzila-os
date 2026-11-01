@@ -4,7 +4,7 @@
  * instead run against an explicitly provisioned disposable combined database.
  * Never substitute PGlite for the native RLS role/grant tests here.
  *
- * With UE_NATIVE_TEMPLATE_URL set, every file runs in its own clone of that database (see vitest.native-isolation.ts).
+ * With UE_NATIVE_TEMPLATE_URL set, every file runs in its own clone of that database (see scripts/runtime/native-test-database-isolation.ts).
  */
 import path from 'node:path'
 import { defineConfig } from 'vitest/config'
@@ -16,7 +16,7 @@ export default defineConfig({
   resolve: sharedResolve,
   test: {
     name: 'union-eyes-native',
-    setupFiles: [...sharedSetupFiles, path.resolve(__dirname, 'vitest.native-isolation.ts')],
+    setupFiles: [...sharedSetupFiles, path.resolve(__dirname, 'scripts/runtime/native-test-database-isolation.ts')],
     include: ['db/__tests__/*.postgres.test.ts', 'db/__tests__/*.native.test.ts'],
     exclude: ['**/node_modules/**', '**/.git/**', '**/.next/**'],
     testTimeout: 180_000,
