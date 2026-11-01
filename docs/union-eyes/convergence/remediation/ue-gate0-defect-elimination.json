@@ -17480,6 +17480,19 @@
     }
   },
   "uncreditedSourceEvidence": {
+    "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "c7897732bf1326977317ef3a4303b0624aff7c58",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-subscription-financial-mandate-20261101.md",
+      "files": [
+        "apps/union-eyes/app/api/billing/subscriptions/route.ts",
+        "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/billing-subscriptions.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/billing-subscriptions-mandates.route.test.ts"
+      ],
+      "correction": "Collection/detail reads require live finance:view scoped to subscription/ledger under tenant RLS; pause/resume/cancel require resource-specific finance:execute, metadata PATCH requires finance:prepare; item writes and audit share tenant transaction; collection is bounded and paginated.",
+      "remaining": "Focused/full Vitest and contract, native PG15/16 cross-tenant and mandate fixtures, HTTP/browser/staging, commercial/provider cancellation reconciliation, independent reviewer, owner-persona and institutional authority ratification. Pause/resume preflight and service mutation are separate transactions. Defect stays PARTIAL, no new credit."
+    },
     "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD": {
       "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
       "evidenceCommit": "110428200635f61b1023d3db04b05364f802de13",
