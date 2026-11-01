@@ -736,11 +736,17 @@ export class SignatureService {
   static async voidDocument(
     documentId: string,
     voidedBy: string,
-    reason: string
+    reason: string,
+    organizationId: string,
   ) {
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, documentId),
-    });
+    // The document is resolved under the caller's tenant before any provider
+    // side effect. A sender's identity alone is not a tenant authorization.
+    if (!organizationId) throw new SignatureAuthorityError("FORBIDDEN", "Organization context required");
+    const document = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.signatureDocuments.findFirst({
+        where: and(eq(signatureDocuments.id, documentId), eq(signatureDocuments.organizationId, organizationId)),
+      }),
+    );
 
     if (!document) {
       throw new Error("Document not found");
