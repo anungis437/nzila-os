@@ -1,0 +1,48 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { verifyOciProvenance } from './verify-oci-provenance.mjs'
+
+const SHA='a'.repeat(40), REPO='anungis437/nzila-os'
+const IMAGE='nzilacanadaacr.azurecr.io/nzila/web@sha256:'+'b'.repeat(64)
+const manifest=()=>({deployTargets:[{name:'nzila-os-web',image:IMAGE}]})
+const proof=()=>JSON.stringify([{verificationResult:{
+  signature:{certificate:{subject:'GitHub OIDC'}},
+  verifiedTimestamps:[{timestamp:'2026-11-01T00:00:00Z'}],
+  statement:{predicateType:'https://slsa.dev/provenance/v1',
+    subject:[{name:IMAGE.split('@sha256:')[0],digest:{sha256:'b'.repeat(64)}}]},
+}}])
+const opts=extra=>({manifest:manifest(),sourceSha:SHA,repository:REPO,verifier:()=>proof(),...extra})
+
+test('requires canonical GitHub signer, exact source/ref and digest subject',()=>{
+  let args
+  const receipt=verifyOciProvenance(opts({verifier:(cmd,a)=>{assert.equal(cmd,'gh');args=a;return proof()}}))
+  assert.equal(receipt.verdict,'OCI_PROVENANCE_VERIFIED')
+  assert.equal(receipt.targets[0].image,IMAGE)
+  for(const value of ['--source-digest',SHA,'--source-ref','refs/heads/main',
+    '--signer-workflow',REPO+'/.github/workflows/gitops-deploy.yml',
+    '--deny-self-hosted-runners','--repo',REPO]) assert.ok(args.includes(value),value)
+})
+test('rejects forged/missing witnessed subjects despite a successful mocked command',()=>{
+  const p=JSON.parse(proof())
+  p[0].verificationResult.statement.subject[0].digest.sha256='f'.repeat(64)
+  assert.throws(()=>verifyOciProvenance(opts({verifier:()=>JSON.stringify(p)})),/verified OCI subject/)
+  p[0].verificationResult.statement.subject[0].digest.sha256='b'.repeat(64)
+  p[0].verificationResult.verifiedTimestamps=[]
+  assert.throws(()=>verifyOciProvenance(opts({verifier:()=>JSON.stringify(p)})),/witness missing/)
+  assert.throws(()=>verifyOciProvenance(opts({verifier:()=> '[]'})),/witness missing/)
+})
+test('fails closed on offline verifier, malformed output and untrusted source',()=>{
+  assert.throws(()=>verifyOciProvenance(opts({verifier:()=>{throw Error('offline')}})),/verification unavailable/)
+  assert.throws(()=>verifyOciProvenance(opts({verifier:()=>'{'})),/verification unavailable/)
+  assert.throws(()=>verifyOciProvenance(opts({repository:'attacker/repo'})),/untrusted source/)
+  assert.throws(()=>verifyOciProvenance(opts({sourceSha:'f'.repeat(39)})),/untrusted source/)
+})
+test('rejects mutable, foreign, conflicting and duplicate targets',()=>{
+  for(const bad of [
+    [{name:'demo',image:'example.invalid/app@sha256:'+'b'.repeat(64)}],
+    [{name:'demo',image:'nzilacanadaacr.azurecr.io/nzila/web:latest'}],
+    [{name:'demo',image:IMAGE,imageRef:'other@sha256:'+'b'.repeat(64)}],
+    [{name:'demo',image:IMAGE},{name:'demo',image:IMAGE}],
+  ]) assert.throws(()=>verifyOciProvenance(opts({manifest:{deployTargets:bad}})),/noncanonical|duplicate/)
+})
+// Mocked unit tests establish policy behavior only, never Sigstore or production certification.

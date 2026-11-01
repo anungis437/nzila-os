@@ -272,6 +272,21 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}           # W2-4: No stored credentials
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # #1038: a signed manifest is not source-to-image provenance. After
+      # independent human approval, verify the exact ACR OCI subject against
+      # GitHub/Sigstore source, protected ref and canonical GitOps signer.
+      # ACR login uses the production OIDC identity (AcrPull only).
+      - name: Verify independently attested OCI source-to-image integrity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          az acr login --name nzilacanadaacr
+          node scripts/release/verify-oci-provenance.mjs \
+            staging-artifacts/artifact-manifest.json \
+            "$GITHUB_SHA" "$GITHUB_REPOSITORY" \
+            "ops/deploy-evidence/oci-provenance-${GITHUB_RUN_ID}.json"
+
       # EXC-001: Hard-block deploy if prod and staging resource groups are the same.
       # The canonical prod RG is nzila-canada-prod-rg (see infrastructure/gitops/environments/production.yml).
       # Never read the RG from a shared secret — that's what caused the blast-radius violation.

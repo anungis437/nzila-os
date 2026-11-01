@@ -198,6 +198,10 @@ jobs:
   # ── Build and push images ─────────────────────────────────────────────────
   build:
     needs: [plan, validate, migration-safety]
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     if: needs.plan.outputs.has_apps == 'true'
     runs-on: ubuntu-latest
     name: Build Images
@@ -335,6 +339,7 @@ jobs:
           exit 1
 
       - name: Resolve immutable image digest (BR-5 evidence)
+        id: digest
         run: |
           set -euo pipefail
           VERSION="${{ needs.plan.outputs.version }}"
@@ -349,6 +354,16 @@ jobs:
           esac
           echo "nzila/${APP}@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
           echo "Resolved digest for ${APP}: ${DIGEST}"
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+      # Sign the exact pushed OCI subject using the GitHub OIDC/Sigstore builder.
+      - name: Attest pushed OCI image provenance (P0 #1038)
+        uses: actions/attest@v4
+        with:
+          subject-name: nzilacanadaacr.azurecr.io/nzila/${{ matrix.app }}
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false
 
   # ── Deploy to environment ─────────────────────────────────────────────────
   deploy:
