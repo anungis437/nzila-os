@@ -17466,14 +17466,19 @@
         "sourceCommits": [
           "4ba6e535dcee10c5389ab0702d97f9ff22c92257",
           "c52e28953b58df2d53b3b297736a07a86693be43",
-          "e8f351a3a33e0b44d198756102c203f801ffa481"
+          "e8f351a3a33e0b44d198756102c203f801ffa481",
+          "3d8add96a3b98d681464a8ddb8430eeaeb59c250"
         ],
         "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-icra-checkout-stripe-price-parity-20261101.md",
         "files": [
           "apps/union-eyes/app/api/icra/checkout/route.ts",
-          "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
+          "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts",
+          "apps/union-eyes/lib/icra/pricing.ts",
+          "apps/union-eyes/components/icra/ICRAReportGate.tsx",
+          "apps/union-eyes/lib/icra/tiers.ts",
+          "apps/union-eyes/lib/icra/copy.ts"
         ],
-        "correction": "Configured Stripe Price IDs are retrieved and checked for exact published CAD amount, active one-time status and currency before a payable session is created. Unverifiable/mismatched prices and non-CAD default currency fail closed.",
+        "correction": "Configured Stripe Price IDs are retrieved and checked for exact published CAD amount, active one-time status and currency before a payable session is created. Unverifiable/mismatched prices and non-CAD default currency fail closed. Public gate, revenue tiers and canonical copy now consume the same published price constants as checkout.",
         "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16, real Stripe Price and checkout HTTP/browser/staging acceptance, tax and payment-webhook qualification, institutional pricing decision and independent reviewer/persona/authority ratification. No CLOSED or implementation credit."
       }
     },
