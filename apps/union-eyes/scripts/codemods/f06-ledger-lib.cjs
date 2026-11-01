@@ -24,10 +24,14 @@ function addBatch({ id, family, test, items, previousEvidence }) {
   if (!ledger.batches.some((x) => x.id === id)) {
     const all = ledger.batches.flatMap((b) => b.items)
     const fresh = []
+    const touches = []
     for (const it of items) {
       const prefix = resolveId(it.prefix)
       const found = it.fresh ? undefined : all.find((i) => i.prefix === prefix)
       const files = [...new Set([...(it.files || []), ...(test ? [test] : [])])]
+      // Every defect a batch touches is recorded on the batch, including one upgraded in place (which adds nothing to `items`), so the
+      // commit and files of each step are recoverable per defect. Credit is still counted only from `items`.
+      touches.push({ defectId: prefix, status: it.status, files })
       if (found) {
         found.status = it.status
         if (it.remaining) found.remaining = it.remaining
@@ -38,7 +42,7 @@ function addBatch({ id, family, test, items, previousEvidence }) {
         fresh.push({ prefix, status: it.status, files, explanation: it.explanation, ...(it.remaining ? { remaining: it.remaining } : {}) })
       }
     }
-    ledger.batches.push({ id, family, evidenceCommit: null, items: fresh })
+    ledger.batches.push({ id, family, evidenceCommit: null, items: fresh, touches })
   }
   for (const batch of ledger.batches.filter((x) => x.id === id)) {
     for (const it of batch.items) for (const f of it.files) if (!fs.existsSync(path.resolve(root, f))) throw new Error('missing file ' + f)

@@ -4,12 +4,18 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 
-const state = vi.hoisted(() => ({ db: null as unknown, audit: [] as Array<Record<string, unknown>> }))
+const state = vi.hoisted(() => ({ db: null as unknown, pg: null as unknown, audit: [] as Array<Record<string, unknown>> }))
 
 vi.mock('@/db', () => ({
   db: new Proxy({}, { get: (_t, p) => { const d = state.db as Record<PropertyKey, unknown> | null; const v = d?.[p]; return typeof v === 'function' ? (v as (...a: unknown[]) => unknown).bind(d) : v } }),
 }))
-vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: async (_tx: unknown, entry: Record<string, unknown>) => { state.audit.push(entry) } }))
+// Records the entry and writes it to the legacy audit table, the platform record the seal is later checked against.
+vi.mock('@/lib/audit/atomic-audit', () => ({
+  persistAtomicAudit: async (_tx: unknown, entry: Record<string, unknown>) => {
+    state.audit.push(entry)
+    await (state.pg as { query: (t: string, p: unknown[]) => Promise<unknown> }).query('INSERT INTO audit_security.audit_logs (organization_id, action, resource_id, metadata) VALUES ($1, $2, $3, $4)', [entry.organizationId, entry.action, entry.resourceId, JSON.stringify(entry.details)])
+  },
+}))
 vi.mock('@/lib/services/notification-service', () => ({ NotificationService: {} }))
 vi.mock('@/lib/services/document-storage-service', () => ({ default: class {} }))
 vi.mock('@/lib/blob-client', () => ({ readBlobBounded: vi.fn() }))
@@ -32,7 +38,10 @@ const log = (eventType: string, description = eventType, doc = DOC) =>
 beforeAll(async () => {
   pg = new PGlite()
   state.db = drizzle(pg)
+  state.pg = pg
   await pg.exec(`
+    CREATE SCHEMA audit_security;
+    CREATE TABLE audit_security.audit_logs (organization_id uuid, action text, resource_id uuid, metadata jsonb);
     CREATE TABLE signature_audit_trail (
       id uuid primary key default gen_random_uuid(), created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
       document_id uuid, signer_id uuid, event_type text not null, event_description text not null, actor_user_id text, actor_email text,
@@ -40,7 +49,7 @@ beforeAll(async () => {
   `)
 })
 afterAll(async () => { await pg.close() })
-beforeEach(async () => { state.audit.length = 0; await pg.exec('TRUNCATE signature_audit_trail') })
+beforeEach(async () => { state.audit.length = 0; await pg.exec('TRUNCATE signature_audit_trail; TRUNCATE audit_security.audit_logs') })
 
 describe('signature audit chain on real SQL', () => {
   it('chains events one after another from sequence 1, each hash following the one before', async () => {
@@ -143,5 +152,74 @@ describe('sealing at completion', () => {
     const statement = await integrity()
     expect(statement).toMatchObject({ hashChained: false, chainVerified: false, sealed: false, unchainedEvents: 1 })
     expect(String(statement.notice)).toContain('not tamper-evident')
+  })
+})
+
+describe('the trail checked against the seal in the platform audit log', () => {
+  const integrityOf = async (documentStatus = 'completed') => {
+    const rows = (await q(`SELECT event_type, metadata FROM signature_audit_trail WHERE document_id = $1`, [DOC])).rows as Array<{ event_type: string; metadata: unknown }>
+    return (AuditTrailService as unknown as { integrityStatement(d: string, l: Array<{ eventType: string; metadata: unknown }>, tx: unknown, c: { organizationId: string; documentStatus: string }): Promise<Record<string, unknown>> })
+      .integrityStatement(DOC, rows.map((r) => ({ eventType: r.event_type, metadata: r.metadata })), state.db, { organizationId: ORG, documentStatus })
+  }
+  const sealed = async () => { await log('document_sent'); await log('document_signed'); await log('document_completed'); await AuditTrailService.seal(DOC, ORG, state.db as never) }
+
+  it('corroborates an untouched sealed trail', async () => {
+    await sealed()
+
+    const statement = await integrityOf()
+    expect(statement).toMatchObject({ chainVerified: true, sealed: true, sealRecord: 'corroborated' })
+    expect(String(statement.notice)).toContain('matches the platform audit log')
+  })
+
+  it('shows the removal of the newest events even though the shortened chain still verifies', async () => {
+    await sealed()
+    await q(`DELETE FROM signature_audit_trail WHERE (metadata->>'chainSeq')::int >= 3`)
+
+    expect(await AuditTrailService.verifyChain(DOC)).toMatchObject({ ok: true, chained: 2 })
+    const statement = await integrityOf()
+    expect(statement).toMatchObject({ chainVerified: true, sealed: false, sealRecord: 'history_missing' })
+    expect(String(statement.notice)).toContain('may have been removed')
+  })
+
+  it('shows the removal of the seal event alone', async () => {
+    await sealed()
+    await q(`DELETE FROM signature_audit_trail WHERE event_type = 'document_sealed'`)
+
+    expect(await integrityOf()).toMatchObject({ chainVerified: true, sealed: false, sealRecord: 'seal_event_missing' })
+  })
+
+  it('shows a rewritten and rechained trail by the head the platform recorded', async () => {
+    await sealed()
+    await q(`UPDATE audit_security.audit_logs SET metadata = jsonb_set(metadata, '{chainHead}', '"sha256:not-the-head"')`)
+
+    expect(await integrityOf()).toMatchObject({ sealed: false, sealRecord: 'head_mismatch' })
+  })
+
+  it('says the seal could not be checked when the platform record is absent, and does not call that corroboration', async () => {
+    await sealed()
+    await q('TRUNCATE audit_security.audit_logs')
+
+    const statement = await integrityOf()
+    expect(statement).toMatchObject({ sealed: true, sealRecord: 'none' })
+    expect(String(statement.notice)).toContain('could not be checked')
+  })
+
+  it('does not describe a completed but never sealed document as merely incomplete', async () => {
+    await log('document_sent'); await log('document_completed')
+
+    const statement = await integrityOf('completed')
+    expect(statement).toMatchObject({ sealed: false, sealRecord: 'none' })
+    expect(String(statement.notice)).toContain('has no seal')
+    expect(String(statement.notice)).not.toContain('document is not complete')
+  })
+
+  it('reports an unreadable platform record as unavailable, and leaves the caller\'s transaction usable', async () => {
+    await sealed()
+    await q('ALTER TABLE audit_security.audit_logs RENAME TO audit_logs_away')
+    try {
+      expect(await integrityOf()).toMatchObject({ sealRecord: 'unavailable', chainVerified: true })
+    } finally {
+      await q('ALTER TABLE audit_security.audit_logs_away RENAME TO audit_logs')
+    }
   })
 })

@@ -20,7 +20,8 @@ import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
 import DocumentStorageService from "@/lib/services/document-storage-service";
-import { chainHash, verifyChain, type ChainVerification } from "./audit-chain";
+import { chainHash, checkAgainstWitness, verifyChain, type ChainVerification, type ChainWitness, type StoredChainRow } from "./audit-chain";
+import { readSealWitnesses } from "./seal-witness";
 import { loadChainRows, nextChainLink } from "./audit-chain-store";
 import { verifySignatureDocumentFile } from "./file-integrity";
 
@@ -1019,32 +1020,67 @@ export class AuditTrailService {
           actorEmail: entry.actorEmail,
           ipAddress: entry.ipAddress,
         })),
-        integrity: await this.integrityStatement(documentId, auditLog, tx),
+        integrity: await this.integrityStatement(documentId, auditLog, tx, { organizationId, documentStatus: String(document.status) }),
         generatedAt: new Date(),
       };
     });
   }
 
-  private static async integrityStatement(documentId: string, auditLog: Array<{ eventType: string; metadata: unknown }>, tx: RLSTx) {
+  private static async integrityStatement(
+    documentId: string,
+    auditLog: Array<{ eventType: string; metadata: unknown }>,
+    tx: RLSTx,
+    context?: { organizationId: string; documentStatus: string },
+  ) {
     const verification = await this.verifyChain(documentId, tx);
     const seal = auditLog.find((entry) => entry.eventType === "document_sealed")?.metadata as { sealedHead?: string; sealedEvents?: number } | undefined;
     const rows = await loadChainRows(tx, documentId);
     const sealedRow = seal?.sealedEvents ? rows.find((row) => (row.metadata as { chainSeq?: number } | null)?.chainSeq === seal.sealedEvents) : undefined;
-    const sealed = Boolean(verification.ok && seal?.sealedHead && sealedRow?.hashChain === seal.sealedHead);
+    const sealedInTrail = Boolean(verification.ok && seal?.sealedHead && sealedRow?.hashChain === seal.sealedHead);
+    const witness = context ? await this.sealWitness(rows, context.organizationId, documentId, Boolean(seal), tx) : { status: "not_checked" as const };
+    const tampered = witness.status === "history_missing" || witness.status === "head_mismatch" || witness.status === "seal_event_missing";
+    const sealed = sealedInTrail && !tampered;
     const base = {
       hashChained: verification.chained > 0,
       chainVerified: verification.ok && verification.chained > 0,
       chainedEvents: verification.chained,
       unchainedEvents: verification.legacyUnchained,
       sealed,
+      sealRecord: witness.status,
       ...(verification.ok ? {} : { brokenAtSequence: verification.brokenAtSeq, brokenReason: verification.reason }),
     };
     if (!verification.ok) return { ...base, notice: `The audit trail was altered: its hash chain does not verify from event ${verification.brokenAtSeq} (${verification.reason}). Do not rely on it as evidence.` };
+    if (tampered) return { ...base, notice: `The audit trail does not match the seal recorded in the platform audit log (${witness.status}). Events at the end of the trail may have been removed or the trail rewritten. Do not rely on it as evidence.` };
     if (verification.chained === 0) return { ...base, notice: "Unchained record from before hash chaining. It is not tamper-evident and is not a certified e-signature audit." };
+    const completed = context?.documentStatus === "completed";
+    const sealState = sealed
+      ? witness.status === "corroborated"
+        ? "Hash chain verified and sealed at completion, and the seal matches the platform audit log"
+        : "Hash chain verified and sealed at completion; the seal could not be checked against the platform audit log, so removal of the newest events cannot be ruled out"
+      : completed
+        ? "Hash chain verified, but this completed document has no seal: the end of the trail cannot be checked against a record kept elsewhere"
+        : "Hash chain verified; the trail has not been sealed (the document is not complete), so removal of its newest events would not be detectable";
     return {
       ...base,
-      notice: `${sealed ? "Hash chain verified and sealed at completion" : "Hash chain verified; the trail has not been sealed (the document is not complete)"}. ${verification.legacyUnchained > 0 ? `${verification.legacyUnchained} earlier event(s) predate chaining and are not covered. ` : ""}Tamper-evident against changes to the stored rows; not a qualified or certified e-signature audit, and the signer address and any signer-supplied field are as recorded, not independently verified.`,
+      notice: `${sealState}. ${verification.legacyUnchained > 0 ? `${verification.legacyUnchained} earlier event(s) predate chaining and are not covered. ` : ""}Tamper-evident against changes to the stored rows; not a qualified or certified e-signature audit, and the signer address and any signer-supplied field are as recorded, not independently verified.`,
     };
+  }
+
+  /** Checks the stored trail against the seal records in the platform audit log. A failed read is reported as unavailable, never as intact. */
+  private static async sealWitness(rows: StoredChainRow[], organizationId: string, documentId: string, sealInTrail: boolean, tx: RLSTx) {
+    let witnesses: ChainWitness[];
+    try {
+      // A savepoint, so a failed read cannot poison the caller's transaction.
+      witnesses = await tx.transaction((savepoint) => readSealWitnesses(savepoint as RLSTx, organizationId, documentId));
+    } catch {
+      return { status: "unavailable" as const };
+    }
+    if (witnesses.length === 0) return { status: "none" as const };
+    for (const witness of witnesses) {
+      const check = checkAgainstWitness(rows, witness);
+      if (check.status !== "matches") return { status: check.status };
+    }
+    return sealInTrail ? { status: "corroborated" as const } : { status: "seal_event_missing" as const };
   }
 }
 

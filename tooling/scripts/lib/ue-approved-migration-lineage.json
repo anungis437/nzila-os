@@ -305,6 +305,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "SYSTEM_ONLY append-only RLS for public_intake_audit_events"
+      },
+      {
+        "tag": "0045_audit_security_runtime_read",
+        "sha256": "6d6d9ad4c50bc149298635ee5337b279e695299e0c1cf134954d51a94bb07e76",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Org-scoped runtime SELECT on audit_security.audit_logs; the reconciled INSERT-only sink left every audit reader permission-denied natively."
       }
     ],
     "platform": [

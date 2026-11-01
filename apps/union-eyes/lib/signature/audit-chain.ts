@@ -100,3 +100,28 @@ export function verifyChain(rows: StoredChainRow[]): ChainVerification {
   }
   return { ok: true, chained: chainedRows.length, legacyUnchained, head: previous }
 }
+
+/** What a record kept outside the trail says the chain looked like at one point: its head after `events` chained events. */
+export interface ChainWitness {
+  head: string
+  events: number
+}
+
+export type WitnessCheck =
+  | { status: 'matches'; eventsAfterWitness: number }
+  | { status: 'history_missing'; chainedEvents: number; witnessedEvents: number }
+  | { status: 'head_mismatch'; witnessedEvents: number }
+
+/**
+ * Checks the stored trail against a witness recorded elsewhere. The chain alone cannot show that its newest events were removed: a
+ * shorter chain still verifies. A witness can: if the trail no longer reaches the witnessed sequence, events were removed from the
+ * end; if it reaches it with a different hash, the rows were rewritten and rechained.
+ */
+export function checkAgainstWitness(rows: StoredChainRow[], witness: ChainWitness): WitnessCheck {
+  const sequenced = rows.map((row) => ({ row, seq: seqOf(row) })).filter((entry): entry is { row: StoredChainRow; seq: number } => entry.seq !== null)
+  const longest = sequenced.reduce((max, entry) => Math.max(max, entry.seq), 0)
+  const at = sequenced.find((entry) => entry.seq === witness.events)
+  if (!at) return { status: 'history_missing', chainedEvents: longest, witnessedEvents: witness.events }
+  if (at.row.hashChain !== witness.head) return { status: 'head_mismatch', witnessedEvents: witness.events }
+  return { status: 'matches', eventsAfterWitness: longest - witness.events }
+}

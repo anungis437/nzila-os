@@ -6,19 +6,66 @@
  * here, in the same transaction as the organization's own suppression, consent record and audit entry, and the single sending function
  * (lib/email-service.ts) refuses to send to an address on the list.
  *
- * This is a DELIVERY suppression, not consent: it does not revoke the recipient's consent anywhere. The table holds the SHA-256 of the
- * lower-cased address, never the address. It is system-only; a suppression is lifted only by a platform administrator (audited).
+ * This is a DELIVERY suppression, not consent: it does not revoke the recipient's consent anywhere. The table holds a one-way digest of the
+ * normalized address, never the address. It is system-only; a suppression is lifted only by a platform administrator (audited).
+ *
+ * Digest. An unkeyed SHA-256 of an address can be reversed by anyone holding the table, by hashing candidate addresses, which would
+ * disclose who has complained. With EMAIL_SUPPRESSION_HASH_KEY configured (32+ characters, not a placeholder) new suppressions are stored as
+ * HMAC-SHA-256 under that key. Lookups and lifts always try both the keyed and the plain digest, so a suppression recorded before the key
+ * was set, or while it is unset, is still honoured: a digest change never makes a suppressed address deliverable again. Without the key the
+ * plain digest is used and a warning is logged once; the key is a privacy control and its absence must not switch the protection off.
+ *
+ * Normalization. The address is trimmed, Unicode-normalized, lower-cased, and its domain converted to ASCII (punycode) with any trailing dot
+ * removed, so the same mailbox written in a different case, form or IDN spelling is the same address. Plus-addressing and dots are NOT
+ * folded: providers treat them differently, and folding would suppress a different person's mailbox.
  */
-import { createHash } from 'node:crypto'
-import { and, inArray, isNull, eq } from 'drizzle-orm'
+import { createHash, createHmac } from 'node:crypto'
+import { domainToASCII } from 'node:url'
+import { and, inArray, isNull } from 'drizzle-orm'
 import { emailAddressSuppressions } from '@/db/schema/domains/communications/email-address-suppressions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { logger } from '@/lib/logger'
 
 export type SuppressionReason = 'complaint' | 'provider_suppressed'
 
-export const normalizeAddress = (address: string) => address.trim().toLowerCase()
+export function normalizeAddress(address: string): string {
+  const trimmed = address.trim().normalize('NFC')
+  const at = trimmed.lastIndexOf('@')
+  if (at <= 0) return trimmed.toLowerCase()
+  const local = trimmed.slice(0, at).toLowerCase()
+  const rawDomain = trimmed.slice(at + 1).replace(/\.$/, '').toLowerCase()
+  return `${local}@${domainToASCII(rawDomain) || rawDomain}`
+}
 
-export const addressSha256 = (address: string) => createHash('sha256').update(normalizeAddress(address), 'utf8').digest('hex')
+const MIN_KEY_LENGTH = 32
+const PLACEHOLDERS = new Set(['changeme', 'change-me', 'change_me', 'placeholder', 'your-secret', 'replace-me', 'replace_me', 'todo', 'example'])
+let warnedUnkeyed = false
+
+function digestKey(): string | null {
+  const value = (process.env.EMAIL_SUPPRESSION_HASH_KEY ?? '').trim()
+  return value.length >= MIN_KEY_LENGTH && !PLACEHOLDERS.has(value.toLowerCase()) ? value : null
+}
+
+const plainDigest = (address: string) => createHash('sha256').update(normalizeAddress(address), 'utf8').digest('hex')
+
+/** The digest new suppressions are stored under: keyed when a key is configured, plain otherwise. */
+export function addressSha256(address: string): string {
+  const key = digestKey()
+  if (key) return createHmac('sha256', key).update(normalizeAddress(address), 'utf8').digest('hex')
+  if (!warnedUnkeyed) {
+    warnedUnkeyed = true
+    logger.warn('EMAIL_SUPPRESSION_HASH_KEY is not configured: address suppressions are stored as an unkeyed digest')
+  }
+  return plainDigest(address)
+}
+
+/** Every digest a suppression of this address may be stored under, for lookups and lifts. */
+export function addressDigests(address: string): string[] {
+  return [...new Set([addressSha256(address), plainDigest(address)])]
+}
+
+/** Whether the address is among the suppressed digests returned by suppressedAddressHashes. */
+export const isAddressSuppressed = (suppressed: ReadonlySet<string>, address: string): boolean => addressDigests(address).some((digest) => suppressed.has(digest))
 
 /** `Name <a@b.c>` or `a@b.c` to `a@b.c`; null when no address can be read. */
 export function extractAddress(recipient: string): string | null {
@@ -63,7 +110,7 @@ export async function suppressAddress(
 
 /** The hashes among `addresses` that are suppressed right now (a lifted suppression does not count). */
 export async function suppressedAddressHashes(addresses: string[]): Promise<Set<string>> {
-  const hashes = [...new Set(addresses.map(addressSha256))]
+  const hashes = [...new Set(addresses.flatMap(addressDigests))]
   if (hashes.length === 0) return new Set()
   const rows = await withSystemContext((tx) =>
     tx
@@ -82,7 +129,7 @@ export async function liftAddressSuppression(
   const lifted = await tx
     .update(emailAddressSuppressions)
     .set({ liftedAt: new Date(), liftedBy: input.liftedBy, liftReason: input.reason, updatedAt: new Date() })
-    .where(and(eq(emailAddressSuppressions.addressSha256, addressSha256(input.address)), isNull(emailAddressSuppressions.liftedAt)))
+    .where(and(inArray(emailAddressSuppressions.addressSha256, addressDigests(input.address)), isNull(emailAddressSuppressions.liftedAt)))
     .returning({ id: emailAddressSuppressions.id })
   return lifted.length > 0
 }

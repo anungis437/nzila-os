@@ -295,6 +295,13 @@
       "when": 1790380000000,
       "tag": "0044_public_intake_audit_events_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790390000000,
+      "tag": "0045_audit_security_runtime_read",
+      "breakpoints": true
     }
   ]
 }

@@ -10,7 +10,7 @@
 
 import { Resend, type CreateEmailOptions } from 'resend';
 import { logger } from '@/lib/logger';
-import { extractAddress, suppressedAddressHashes, addressSha256 } from '@/lib/communications/address-suppression';
+import { extractAddress, suppressedAddressHashes, isAddressSuppressed } from '@/lib/communications/address-suppression';
 
 // Lazy initialize Resend client to avoid errors during build
 let resend: Resend | null = null;
@@ -188,7 +188,7 @@ async function screenSuppressedRecipients(payload: CreateEmailOptions): Promise<
 
   const keep = (entry: unknown) => {
     const address = extractAddress(String(entry));
-    return address === null || !suppressed.has(addressSha256(address));
+    return address === null || !isAddressSuppressed(suppressed, address);
   };
   const next: Record<string, unknown> = { ...payload };
   for (const list of lists) {

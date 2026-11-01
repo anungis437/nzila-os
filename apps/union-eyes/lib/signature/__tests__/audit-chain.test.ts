@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CHAIN_PREFIX, chainHash, verifyChain, type ChainableEvent, type StoredChainRow } from '../audit-chain'
+import { CHAIN_PREFIX, chainHash, checkAgainstWitness, verifyChain, type ChainableEvent, type StoredChainRow } from '../audit-chain'
 
 const DOC = '00000000-0000-4000-8000-0000000000d1'
 
@@ -109,5 +109,44 @@ describe('signature audit chain', () => {
     const b = chainHash(null, { ...event(1), geolocation: { region: 'ON', country: 'CA' } }, 1)
 
     expect(a).toBe(b)
+  })
+})
+
+describe('chain checked against a witness kept elsewhere', () => {
+  const witnessAt = (rows: StoredChainRow[], events: number) => ({ head: rows[events - 1].hashChain as string, events })
+
+  it('matches an untouched trail and counts the events recorded after the witness', () => {
+    const rows = build(5)
+    expect(checkAgainstWitness(rows, witnessAt(rows, 3))).toEqual({ status: 'matches', eventsAfterWitness: 2 })
+  })
+
+  it('shows the deletion of the newest events, which the chain alone cannot', () => {
+    const rows = build(5)
+    const witness = witnessAt(rows, 5)
+    const truncated = rows.slice(0, 3)
+
+    expect(verifyChain(truncated).ok).toBe(true)
+    expect(checkAgainstWitness(truncated, witness)).toEqual({ status: 'history_missing', chainedEvents: 3, witnessedEvents: 5 })
+  })
+
+  it('shows a rewrite whose later hashes were recomputed to verify', () => {
+    const rows = build(4)
+    const witness = witnessAt(rows, 4)
+    const forged: StoredChainRow[] = []
+    let previous: string | null = null
+    for (const row of rows) {
+      const seq = (row.metadata as { chainSeq: number }).chainSeq
+      const edited = seq === 2 ? { ...row, eventDescription: 'someone else signed' } : row
+      const hash: string = chainHash(previous, edited, seq)
+      forged.push({ ...edited, hashChain: hash })
+      previous = hash
+    }
+
+    expect(verifyChain(forged).ok).toBe(true)
+    expect(checkAgainstWitness(forged, witness)).toEqual({ status: 'head_mismatch', witnessedEvents: 4 })
+  })
+
+  it('treats a trail with no event at the witnessed sequence as missing history, including an empty one', () => {
+    expect(checkAgainstWitness([], { head: 'sha256:x', events: 1 })).toEqual({ status: 'history_missing', chainedEvents: 0, witnessedEvents: 1 })
   })
 })

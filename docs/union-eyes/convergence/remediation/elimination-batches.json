@@ -399,10 +399,13 @@
             "apps/union-eyes/app/api/admin/email-suppressions/route.ts",
             "apps/union-eyes/app/api/__tests__/admin-email-suppressions.route.test.ts",
             "apps/union-eyes/db/__tests__/migration-0053-email-address-suppressions.postgres.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts",
+            "apps/union-eyes/lib/email/report-email-templates.ts",
+            "apps/union-eyes/lib/email/__tests__/report-email-templates.test.ts",
+            "apps/union-eyes/db/__tests__/audit-reader.postgres.test.ts"
           ],
-          "explanation": "A complaint or suppression now creates the preference row when none exists, writes a revoked consent record and the audit entry, and applies once per message in the same transaction. A complaint or provider suppression now ends the recipient's subscriptions to the organization's own distribution lists as well as its preference, and is recorded platform-wide in a governed mechanism: platform 0053 adds email_address_suppressions (SHA-256 of the address only, no plaintext; cache 0043 makes it SYSTEM_ONLY), the webhook writes it in the same transaction as the consent record and the audit entry (only when the event names exactly one recipient; several are not guessed), and the single sending function refuses a suppressed address from any organization and fails closed if the list cannot be read. It is a delivery suppression, not consent, so other organizations' consent records are untouched. A platform administrator lifts one only through an audited route (reason required, row kept); a later complaint clears the lift. Proven on native PostgreSQL 15 and 16 and against a real SQL engine through the webhook.",
-          "remaining": "Only lib/email-service.ts is gated; any other code that talks to a provider directly would bypass the list (none was found)."
+          "explanation": "A complaint or suppression now creates the preference row when none exists, writes a revoked consent record and the audit entry, and applies once per message in the same transaction. A complaint or provider suppression now ends the recipient's subscriptions to the organization's own distribution lists as well as its preference, and is recorded platform-wide in a governed mechanism: platform 0053 adds email_address_suppressions (SHA-256 of the address only, no plaintext; cache 0043 makes it SYSTEM_ONLY), the webhook writes it in the same transaction as the consent record and the audit entry (only when the event names exactly one recipient; several are not guessed), and the single sending function refuses a suppressed address from any organization and fails closed if the list cannot be read. It is a delivery suppression, not consent, so other organizations' consent records are untouched. A platform administrator lifts one only through an audited route (reason required, row kept); a later complaint clears the lift. Proven on native PostgreSQL 15 and 16 and against a real SQL engine through the webhook. R6 privacy and false-negative review of the address suppression. The stored digest was an unkeyed SHA-256, reversible by hashing candidate addresses; new suppressions are now HMAC-SHA-256 under EMAIL_SUPPRESSION_HASH_KEY when it is set, and lookups and lifts try both the keyed and the plain digest so nothing recorded earlier becomes deliverable. Normalization now covers Unicode form and internationalized domains (punycode, trailing dot); plus-addressing and dots are deliberately not folded. The scheduled-report mailer had a SendGrid path that bypassed the suppression list and, because it swallowed every error with no fall-through, reported success when it sent nothing; it and the unknown-provider branch now fail instead, leaving the one screened sending function.",
+          "remaining": "Set EMAIL_SUPPRESSION_HASH_KEY; until then new suppressions use the unkeyed digest (a warning is logged once). Hard bounces are not recorded platform-wide, and a complaint on a multi-recipient message cannot be attributed to one address, so is not recorded. Plus-addressed variants are separate mailboxes. A suppression recorded under a key is not found if the key is later removed."
         },
         {
           "prefix": "DEF-0B6-SYS-RESEND-LEDGER-CALLBACK-OUTSIDE-TRANSACTION",
@@ -8030,10 +8033,13 @@
             "apps/union-eyes/app/api/audits/route.ts",
             "apps/union-eyes/app/api/audits/[id]/route.ts",
             "apps/union-eyes/app/api/__tests__/audits-id.route.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts",
+            "apps/union-eyes/db/migrations-cache/0045_audit_security_runtime_read.sql",
+            "apps/union-eyes/db/migrations-cache/0045_audit_security_runtime_read.rollback.sql",
+            "apps/union-eyes/db/__tests__/audit-reader.postgres.test.ts"
           ],
-          "explanation": "The audits list and detail routes now read through lib/audit/audit-reader.ts in the caller's tenant transaction: the legacy audit_security.audit_logs always, and in canonical mode the hash-chained public.audit_logs that persistAtomicAudit actually writes (including the audit.entry.read record the detail route writes). Each entry says which store it came from; the canonical store records no severity or outcome, so those are null, not invented. No details, changes, addresses or session data are returned from either store, and the page is bounded.",
-          "remaining": "Proven with mocked transactions only; the canonical read has not been run against the combined PostgreSQL database."
+          "explanation": "The audits list and detail routes now read through lib/audit/audit-reader.ts in the caller's tenant transaction: the legacy audit_security.audit_logs always, and in canonical mode the hash-chained public.audit_logs that persistAtomicAudit actually writes (including the audit.entry.read record the detail route writes). Each entry says which store it came from; the canonical store records no severity or outcome, so those are null, not invented. No details, changes, addresses or session data are returned from either store, and the page is bounded. R6 re-check of the credited audit reader on real PostgreSQL as union_eyes_runtime: the credit rested on mocked transactions, and natively the legacy audit_security.audit_logs half failed with \"permission denied\" (the table was reconciled to an INSERT-only runtime sink), as did the activities, ai-usage, compliance audit-log and case-export readers that read it. Cache migration 0045 adds an organization-scoped SELECT policy and grant for the runtime role (rows without an organization stay invisible; UPDATE and DELETE stay ungranted). A native test now runs list, read-by-id and has-action against both stores as the runtime role on PG15 and PG16, including cross-organization reads and the append-only refusal.",
+          "remaining": "Other readers of audit_security.audit_logs were not individually re-qualified natively beyond the grant they now have. The legacy store cannot hold a system-actor row from the runtime role (its insert policy requires user_id = the current user), so system-attributed audit in non-canonical mode relies on the canonical ledger."
         },
         {
           "prefix": "DEF-0B1-REP-PROTOCOL-NOT-IN-CAPABILITY-MODEL",
@@ -8067,6 +8073,50 @@
           "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make). The two database-only operations that were still two-phase, the CBA registry seed and the benchmark snapshot, now write the change and a single hash-chained audit record in one system-scope transaction (a failed audit write rolls the whole seed or snapshot back; the seed fails fast so a swallowed statement error cannot leave an aborted transaction reporting a partial result). performAtomicAuditedOperation and performAuditedOperation gain resultDetails, so the record carries what the work did. Re-examined every remaining two-phase route for a single-transaction option. The platform ANALYZE, a database-only statement that was still intent/outcome, now runs with its audit record in one system-scope transaction. It also claimed database-wide statistics were updated although the system role analyzes only tables it owns (measured natively on PostgreSQL 15 and 16: 0 of 730 tables); the answer now reports the tables analyzed and skipped, and says plainly when nothing was updated. The feature-flag cache refresh no longer reports a committed change as having taken effect when the refresh failed: the refresh throws on failure (the request path keeps serving its cache), performAtomicAuditedOperation reports a failed after-commit step through afterCommitReport and records it durably as <action>.after_commit_failed, and the route answers committed / cacheRefreshed / propagationSeconds with a warning. The remaining INTENT_OUTCOME routes act outside the transaction (AI and other providers, mail, payments, queues, calendar and integration sync, PKI signing, bulk import with per-record continuation, ANALYZE-free storage reads), which is what the two-phase contract is for.",
           "remaining": "Billing-cycle generation is finance-frozen and was not changed. Operations whose effect is outside our database remain durable two-phase records by nature. The PKI workflow cancel acts on an in-process store and is a separate capability defect. The bootstrap-v2 source-plan commitments for the changed pilot overview and database optimize routes need regenerating with the Python wheelhouse (UE_V2_WHEELHOUSE) at admission."
         }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B1-MANIFEST-DETECTOR",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+            "apps/union-eyes/lib/__tests__/route-scan-classification.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B3-AUDITS-LEGACY-TABLE-NOT-CANONICAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/audit/audit-reader.ts",
+            "apps/union-eyes/lib/audit/__tests__/audit-reader.test.ts",
+            "apps/union-eyes/app/api/audits/route.ts",
+            "apps/union-eyes/app/api/audits/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/audits-id.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B1-REP-PROTOCOL-NOT-IN-CAPABILITY-MODEL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/reality/capability-registry.ts",
+            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/audit/operation-audit.ts",
+            "apps/union-eyes/lib/audit/__tests__/operation-audit.test.ts",
+            "apps/union-eyes/lib/feature-flags.ts",
+            "apps/union-eyes/app/api/admin/feature-flags/route.ts",
+            "apps/union-eyes/app/api/__tests__/admin-feature-flags.route.test.ts",
+            "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+          ]
+        }
       ]
     },
     {
@@ -8093,6 +8143,72 @@
             "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
           ],
           "explanation": "runReconciliation writes its completed and critical-variance audit records with persistAtomicAudit on the run's own transaction, and resolveException updates the exception and writes its record in one transaction (the notes stay on the exception row and only their length reaches the audit record). A failed audit write abandons the run or leaves the exception open, and a rolled-back run leaves no audit event. This changes audit atomicity only; no financial mandate, ledger effect or principal changed (the finance freeze stands)."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B3-BILLING-AUDIT-NOT-ATOMIC",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+            "apps/union-eyes/services/platform-economics/billing-service.ts",
+            "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0052_shared_clause_versions.sql",
+            "apps/union-eyes/db/migrations-cache/0042_shared_clause_versions_rls_closure.sql",
+            "apps/union-eyes/db/schema/domains/agreements/shared-library.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/lib/clause-library/version-history.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/versions/route.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts",
+            "apps/union-eyes/db/__tests__/migration-0052-shared-clause-versions.postgres.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/icra/report/[assessmentId]/review/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-report-review.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0053_email_address_suppressions.sql",
+            "apps/union-eyes/db/migrations-cache/0043_email_address_suppressions_rls_closure.sql",
+            "apps/union-eyes/db/schema/domains/communications/email-address-suppressions.ts",
+            "apps/union-eyes/db/rls-storage-authority/communications-notifications.ts",
+            "apps/union-eyes/lib/communications/address-suppression.ts",
+            "apps/union-eyes/lib/communications/__tests__/address-suppression.test.ts",
+            "apps/union-eyes/lib/email-service.ts",
+            "apps/union-eyes/lib/__tests__/email-service.test.ts",
+            "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+            "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts",
+            "apps/union-eyes/app/api/admin/email-suppressions/route.ts",
+            "apps/union-eyes/app/api/__tests__/admin-email-suppressions.route.test.ts",
+            "apps/union-eyes/db/__tests__/migration-0053-email-address-suppressions.postgres.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-PRP-RECONCILIATION-AUDIT-IS-A-SEPARATE-EVENT-NOT-COMMITTED-WITH-THE-RECONCILIATION-WRITES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+            "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+          ]
         }
       ]
     },
@@ -8182,6 +8298,90 @@
           "explanation": "Every provider list, create, update and delete response, and the create and update audit records, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-SSO-SIGN-IN), so a configured provider is no longer reported as though it governed sign-in. A provider can no longer be created or updated as enabled or auto-provisioning while nothing reads it at sign-in: those claims are not stored, the refusal is a specific blocked operation (auth.sso.federated_sign_in) and is recorded durably as sso.provider.activate_blocked, and a provider is stored staged with its effect stated. The list judges each stored provider (SAML or OIDC completeness; secrets and certificates are checked for presence and never returned) and reports what remains: the institution's approval of the identity provider, verified ownership of the sign-in email domains, and platform authentication federation, each with its owner. Nothing is activated and no approval is invented.",
           "remaining": "No sign-in, token-exchange, provisioning or SCIM code reads the stored provider. The consumer needs the institution's approval of an identity provider for the organization, domain-ownership verification, platform authentication that federates through organization-configured providers, and a real provider to qualify against."
         }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/pilot/apply/[id]/commercial-transition/route.ts",
+            "apps/union-eyes/lib/pilot/write-payloads.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-commercial-transition.route.test.ts",
+            "apps/union-eyes/app/[locale]/dashboard/admin/pilots/page.tsx",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-PIL-ORGANIZATION-VERIFICATION-CHECKS-ONLY-THAT-THE-TARGET-ORGANIZATION-ROW-EXISTS-AND-RECORDS-NO-PROOF-OR-REASON",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/pilot/pilot-ownership.ts",
+            "apps/union-eyes/app/api/pilot/apply/[id]/verify-organization/route.ts",
+            "apps/union-eyes/lib/pilot/__tests__/pilot-ownership.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-PIL-ONBOARDING-CHECKLIST-ITEMS-ARE-TOGGLED-BY-THE-CALLER-WITH-NO-CHECK-THAT-THE-STEP-HAPPENED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/pilot/onboarding-checklist-evidence.ts",
+            "apps/union-eyes/lib/audit/audit-reader.ts",
+            "apps/union-eyes/app/api/pilot/onboarding/route.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-onboarding.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B9-ASM-ONBOARDING-EVENTS-RECORD-CALLER-ASSERTED-MILESTONES-AS-EVENT-AND-AUDIT-ROWS-WITHOUT-PERFORMING-OR-VERIFYING-THEM",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/pilot/onboarding-event-evidence.ts",
+            "apps/union-eyes/app/api/onboarding/events/route.ts",
+            "apps/union-eyes/app/api/onboarding/__tests__/events.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-PIL-PILOT-OVERVIEW-LISTS-EVERY-ENROLLED-ORGANIZATION-WITH-ITS-FIGURES-TO-ANY-OFFICER-OF-THE-PLATFORM-ORGANIZATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/pilot/overview/route.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-overview.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/employer-execution/payroll-run-transitions.ts",
+            "apps/union-eyes/app/api/__tests__/employer-payroll-run-id.route.test.ts",
+            "apps/union-eyes/app/api/employer-execution/__tests__/execution-routes-hardening.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/reality/configuration-effect.ts",
+            "apps/union-eyes/app/api/extensions/[id]/route.ts",
+            "apps/union-eyes/lib/reality/capability-registry.ts",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/reality/configuration-effect.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+            "apps/union-eyes/lib/reality/capability-registry.ts",
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+          ]
+        }
       ]
     },
     {
@@ -8248,6 +8448,91 @@
           "explanation": "The two effects are separated and each is recorded for what it is. Removal from the platform is a durable intent and outcome (with whether it was already gone); the row then reads deleted in one transaction with social.post.deleted. A platform failure now returns 502 PLATFORM_REMOVAL_FAILED with the row still published (true: the post is still live); a failure of the local step returns 502 LOCAL_STATE_PENDING, never \"deleted\", and repeating the deletion completes it because a platform answer that the post is already gone counts as removed. deletePost keeps its contract for other callers.",
           "remaining": "The already-removed detection reads the platform error text, since the platform clients expose no typed not-found."
         }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/benchmark/[id]/route.ts",
+            "apps/union-eyes/lib/audit/operation-audit.ts",
+            "apps/union-eyes/lib/audit/__tests__/operation-audit.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B4-CBA-INTEL-AUDIT-NOT-ATOMIC",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/run/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/extraction/route.ts",
+            "apps/union-eyes/lib/services/cba-intelligence/seed-sources.ts",
+            "apps/union-eyes/lib/services/cba-intelligence/__tests__/seed-sources.test.ts",
+            "apps/union-eyes/app/api/__tests__/cba-benchmark-snapshot.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts",
+            "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B2-REVOCATION-MULTI-STORE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/member-access-revocation-service.ts",
+            "apps/union-eyes/lib/services/__tests__/member-access-revocation-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+            "apps/union-eyes/lib/blob-client.ts",
+            "apps/union-eyes/app/api/external/documents/[id]/download/route.pglite.test.ts",
+            "apps/union-eyes/app/api/external/documents/[id]/download/projection.test.ts",
+            "apps/union-eyes/app/api/external/__tests__/external-routes.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/dues/dues-payment-service.ts",
+            "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/posts/route.ts",
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-OPL-10",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/auth/organization-selection-audit.ts",
+            "apps/union-eyes/lib/auth/canonical-organization-selection.ts",
+            "apps/union-eyes/lib/auth/__tests__/organization-selection-audit.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ]
+        }
       ]
     },
     {
@@ -8296,6 +8581,77 @@
           ],
           "explanation": "The claim is bound to the purchaser: the paid-tier webhook records the buyer's e-mail on the assessment, and the claiming account's own e-mail must equal it (case-insensitive), as part of the single conditional write that consumes the token. An account without a verified e-mail, a different e-mail, or an assessment with no recorded purchaser cannot claim it (403, nothing consumed or audited); the audit row records that the purchaser e-mail matched. The claim write also clears the stored capability hash and expiry in the same conditional update that decides the winner, and the claiming browser's cookie is cleared. One gate, authorizeAssessmentAccess, now decides every capability-bearing path (profile, answer, submit, results, report, checkout, resume, and the profile and adaptive-resolution actions the results page uses): an unclaimed assessment keeps pseudonymous capability access, while a claimed one ignores the capability even if a hash survived and admits only the claiming account while it is still a member of the claiming organization, or an administrator of that organization. A plain peer, another organization's administrator and an anonymous holder of the old link are refused (403/401). A claimed assessment cannot mint a new capability cookie and its link cannot be mailed. The ICRA capability ratchet recognizes the new gate. Proven natively on PostgreSQL 15 and 16: six concurrent claimants yield exactly one winner, the capability is gone from the row, and refused claims leave the capability intact."
         }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B4-CHATBOT-MODERATION-BYPASSES-AI-CONTROL-PLANE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/ai/chatbot-service.ts",
+            "apps/union-eyes/lib/ai/ai-client.ts",
+            "scripts/seed-ai-profiles-ue.sql",
+            "apps/union-eyes/lib/ai/__tests__/chatbot-service.test.ts",
+            "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/external-resource-middleware.ts",
+            "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+            "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+            "apps/union-eyes/app/api/external/__tests__/external-routes.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/reports/report-config-validation.ts",
+            "apps/union-eyes/app/api/reports/execute/route.ts",
+            "apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/icra/[assessmentId]/claim/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-assessmentId-claim.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/voice/transcribe/route.ts",
+            "apps/union-eyes/app/api/__tests__/voice-transcribe.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/__tests__/route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/__tests__/route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        }
       ]
     },
     {
@@ -8321,10 +8677,12 @@
             "apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
             "apps/union-eyes/app/api/signatures/sign/__tests__/route.test.ts",
             "apps/union-eyes/db/__tests__/signature-audit-trail-append-only.postgres.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s52-f06-a6-signature-evidence-integrity.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s52-f06-a6-signature-evidence-integrity.test.ts",
+            "apps/union-eyes/lib/signature/seal-witness.ts",
+            "apps/union-eyes/db/__tests__/audit-reader.postgres.test.ts"
           ],
-          "explanation": "The trail is now tamper-evident. Every event carries a sequence number and a hash over its content and its predecessor's hash (the existing hash_chain column; no migration), written under a per-document advisory lock so concurrent events cannot fork the chain; changing, removing, reordering or forging an event breaks verification at that sequence number (proven on real SQL, including concurrent logging, a changed row, a deleted row, a forged seal and a trail from before chaining). Completion seals the trail: the verified head becomes the last chained event and is repeated in the platform's own hash-chained audit log, and a trail whose chain does not verify is not sealed. The report states what verification found (chained events, unchained earlier events, verified, sealed, where it broke), never a constant. Signing recomputes the stored file hash and refuses a mismatch, and records \"verified\" or why it could not be checked (\"unverified:not_own_storage\") on the signing event. The signer address is taken from the trusted end of the proxy chain (UE_TRUSTED_PROXY_HOPS, default 1) with its provenance recorded and no address recorded when none is trustworthy, where it used to be the first client-supplied value or the string \"unknown\"; a browser-reported position is no longer stored; the signature must be an inline PNG or JPEG of bounded size, not a link. Proven on native PostgreSQL 15 and 16: the runtime role can read and add trail events but not update, delete or truncate them, and the system role holds no write.",
-          "remaining": "Tamper-evident, not tamper-proof and not a qualified or certified e-signature audit: someone who can rewrite every later row can recompute the chain, and truncating a sealed trail's tail is only caught against the platform-audit anchor, which the report does not read back (audit details are not exposed). A document whose stored address is not this organization's own storage cannot have its file re-hashed and is recorded as unverified. UE_TRUSTED_PROXY_HOPS must match the deployment's proxy depth, and the deployed proxy must append the connecting address."
+          "explanation": "The trail is now tamper-evident. Every event carries a sequence number and a hash over its content and its predecessor's hash (the existing hash_chain column; no migration), written under a per-document advisory lock so concurrent events cannot fork the chain; changing, removing, reordering or forging an event breaks verification at that sequence number (proven on real SQL, including concurrent logging, a changed row, a deleted row, a forged seal and a trail from before chaining). Completion seals the trail: the verified head becomes the last chained event and is repeated in the platform's own hash-chained audit log, and a trail whose chain does not verify is not sealed. The report states what verification found (chained events, unchained earlier events, verified, sealed, where it broke), never a constant. Signing recomputes the stored file hash and refuses a mismatch, and records \"verified\" or why it could not be checked (\"unverified:not_own_storage\") on the signing event. The signer address is taken from the trusted end of the proxy chain (UE_TRUSTED_PROXY_HOPS, default 1) with its provenance recorded and no address recorded when none is trustworthy, where it used to be the first client-supplied value or the string \"unknown\"; a browser-reported position is no longer stored; the signature must be an inline PNG or JPEG of bounded size, not a link. Proven on native PostgreSQL 15 and 16: the runtime role can read and add trail events but not update, delete or truncate them, and the system role holds no write. R6 re-check of the chain claims: a shortened chain still verified, the seal was checked only against the same table, and a completed document with no seal was described as \"not complete\". The seal the platform audit log already held is now read back (both stores, head and count only) and the trail is checked against it: events removed from the end, a rewritten and rechained trail, and a removed seal event are each reported, and the document is not called sealed. A read that fails is reported as unavailable (inside a savepoint), never as intact; a missing platform record is reported as \"could not be checked\", not corroboration; a completed unsealed document says it has no seal. Tail deletion, rewrite-and-rechain, seal removal and the savepoint behaviour are tested on PGlite, and the read-back and the runtime role's inability to update or delete the trail on PG15 and PG16.",
+          "remaining": "A trail is still checkable only from its seal: removal of the newest events of a document that has not been sealed is undetectable, because no earlier head is recorded elsewhere. Someone who can rewrite both the trail and the platform audit log can still forge both."
         },
         {
           "prefix": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
@@ -8338,31 +8696,150 @@
           "explanation": "A signer sees no other signer's e-mail address, network address, device, location or free-text description in the status, the audit trail or the report; the sender sees everything. The report rows now carry their owners (the signer's user id, the actor's user id) so a signer's own rows are recognised and shown whole instead of being withheld with everyone else's; the report no longer packs an actor's e-mail into one field that no redaction rule could read (actor), and actorEmail is shown only on the viewer's own event; the report's description key is the one the redaction drops for others (eventDescription). Four tests added.",
           "remaining": "A signer still sees co-signers' names, signing status and platform user ids, which signing in a sequence needs."
         }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/signature/audit-chain.ts",
+            "apps/union-eyes/lib/signature/audit-chain-store.ts",
+            "apps/union-eyes/lib/signature/signer-network-address.ts",
+            "apps/union-eyes/lib/signature/file-integrity.ts",
+            "apps/union-eyes/lib/signature/signature-service.ts",
+            "apps/union-eyes/app/api/signatures/sign/route.ts",
+            "apps/union-eyes/lib/signature/__tests__/audit-chain.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/audit-chain.pglite.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/signer-network-address.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/file-integrity.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/signature-service.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
+            "apps/union-eyes/app/api/signatures/sign/__tests__/route.test.ts",
+            "apps/union-eyes/db/__tests__/signature-audit-trail-append-only.postgres.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s52-f06-a6-signature-evidence-integrity.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/signature/signature-service.ts",
+            "apps/union-eyes/lib/signature/__tests__/signature-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s52-f06-a6-signature-evidence-integrity.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/signature/signer-privacy.ts",
+            "apps/union-eyes/lib/signature/signature-service.ts",
+            "apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s52-f06-a6-signature-evidence-integrity.test.ts"
+          ]
+        }
       ]
     },
     {
       "id": "B111-F06-A5-REPORT-SMALL-GROUP-SUPPRESSION",
       "family": "F06 A5: an officer report cannot identify people through a small group",
       "evidenceCommit": "b15818963",
-      "items": []
+      "items": [],
+      "touches": [
+        {
+          "defectId": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/reports/report-config-validation.ts",
+            "apps/union-eyes/app/api/reports/execute/route.ts",
+            "apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+          ]
+        }
+      ]
     },
     {
       "id": "B112-F06-R1-ICRA-OWNERSHIP-AND-CAPABILITY-REVOCATION",
       "family": "F06 R1: a claimed ICRA assessment belongs to its organization and its bearer link is withdrawn",
       "evidenceCommit": "a18276a62",
-      "items": []
+      "items": [],
+      "touches": [
+        {
+          "defectId": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/icra/assessment-access.ts",
+            "apps/union-eyes/lib/icra/assessment-capability.ts",
+            "apps/union-eyes/app/api/icra/[assessmentId]/claim/route.ts",
+            "apps/union-eyes/app/api/icra/[assessmentId]/capability/exchange/route.ts",
+            "apps/union-eyes/app/api/icra/[assessmentId]/profile/route.ts",
+            "apps/union-eyes/app/api/icra/[assessmentId]/answer/route.ts",
+            "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts",
+            "apps/union-eyes/app/api/icra/results/[id]/route.ts",
+            "apps/union-eyes/app/api/icra/report/[assessmentId]/route.ts",
+            "apps/union-eyes/app/api/icra/checkout/route.ts",
+            "apps/union-eyes/app/api/icra/start/route.ts",
+            "apps/union-eyes/app/api/icra/email-results/route.ts",
+            "apps/union-eyes/actions/icra/get-profile.ts",
+            "apps/union-eyes/actions/icra/get-adaptive-resolution.ts",
+            "apps/union-eyes/lib/icra/__tests__/assessment-access.test.ts",
+            "apps/union-eyes/lib/icra/__tests__/assessment-capability-contract.test.ts",
+            "apps/union-eyes/db/__tests__/icra-claim-capability-revocation.postgres.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s53-f06-r1-icra-claim-capability.test.ts"
+          ]
+        }
+      ]
     },
     {
       "id": "B113-F06-R2-REPORT-FIELD-AUTHORITY",
       "family": "F06 R2: report field authority, classification and anti-reconstruction",
       "evidenceCommit": "84fc8ef23",
-      "items": []
+      "items": [],
+      "touches": [
+        {
+          "defectId": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/reports/report-field-authority.ts",
+            "apps/union-eyes/lib/reports/report-disclosure-limits.ts",
+            "apps/union-eyes/lib/reports/report-config-validation.ts",
+            "apps/union-eyes/lib/report-executor.ts",
+            "apps/union-eyes/app/api/reports/execute/route.ts",
+            "apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts",
+            "apps/union-eyes/lib/reports/__tests__/report-disclosure.pglite.test.ts",
+            "apps/union-eyes/lib/__tests__/report-executor.test.ts",
+            "apps/union-eyes/lib/reports/__tests__/report-field-authority.test.ts"
+          ]
+        }
+      ]
     },
     {
       "id": "B114-F06-R3-PSEUDONYMOUS-WORKBOOK-AUDIT",
       "family": "F06 R3: durable audit evidence for pseudonymous workbook access and mutation",
       "evidenceCommit": "cb737a972",
-      "items": []
+      "items": [],
+      "touches": [
+        {
+          "defectId": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0054_public_intake_audit_events.sql",
+            "apps/union-eyes/db/migrations-platform/0054_public_intake_audit_events.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0044_public_intake_audit_events_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0044_public_intake_audit_events_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/domains/infrastructure/public-intake-audit.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/lib/public-intake/intake-audit.ts",
+            "apps/union-eyes/lib/workbook/claimed-write-audit.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
+            "apps/union-eyes/app/api/__tests__/workbook-memory-holders.route.test.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/__tests__/route.test.ts",
+            "apps/union-eyes/db/__tests__/migration-0054-public-intake-audit-events.postgres.test.ts",
+            "apps/union-eyes/db/__tests__/rls-storage-authority-registry-composition.test.ts",
+            "apps/union-eyes/lib/public-intake/__tests__/intake-audit.test.ts"
+          ]
+        }
+      ]
     },
     {
       "id": "B115-F06-R4-SIGNATURE-EXPIRY-AND-OPERATION-STATE",
@@ -8383,13 +8860,150 @@
           ],
           "explanation": "Every stored term now operates or is refused. Expiry: besides refusing an expired attempt, a cron-authenticated sweep (every 30 minutes, registered in scheduled-jobs.json) finds overdue open internal documents across organizations by system authority (a cross-organization SELECT on signature_documents only, keyset-paged and bounded) and expires each inside its own organization in one transaction with its unsettled signers lapsed, its trail event and its platform audit record; a failing document rolls back whole, is reported (and the run answers 500) while the rest are still expired, and a provider-held document is left to the provider sync. Authentication evidence the platform cannot supply is refused in every signature action: a second-factor request is not created and is not signed; a \"digital\" (certificate) or \"wet\" (physical) signature, which would be stored under a stronger name than the evidence supports, is refused before anything is read. Proven natively on PostgreSQL 15 and 16 as the system and runtime roles: the grant and policies suffice, organizations stay isolated, and an injected audit-write fault leaves the document, its signers and its trail exactly as they were."
         }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/signature/signature-service.ts",
+            "apps/union-eyes/app/api/cron/signature-expiry/route.ts",
+            "apps/union-eyes/lib/operations/scheduled-jobs.json",
+            "apps/union-eyes/db/rls-storage-authority/documents-evidence.ts",
+            "apps/union-eyes/lib/signature/__tests__/signature-service-record-signature.test.ts",
+            "apps/union-eyes/db/__tests__/signature-expiry.postgres.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/signature-expiry.pglite.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/audit/operation-audit.ts",
+            "apps/union-eyes/lib/feature-flags.ts",
+            "apps/union-eyes/app/api/admin/feature-flags/route.ts",
+            "apps/union-eyes/app/api/admin/database/optimize/route.ts",
+            "apps/union-eyes/lib/audit/__tests__/operation-audit.test.ts",
+            "apps/union-eyes/lib/__tests__/feature-flags.test.ts",
+            "apps/union-eyes/app/api/__tests__/admin-feature-flags.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/admin-database-optimize.route.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/signature-expiry.pglite.test.ts"
+          ]
+        }
       ]
     },
     {
       "id": "B116-F06-R5-PROVIDER-AND-INSTITUTIONAL-DEPENDENCY-ISOLATION",
       "family": "F06 R5: contracts, guarded states and specific blocked operations for SSO, integration sync, commercial acceptance, knowledge entitlement and notice",
+      "evidenceCommit": "9cf25c94a",
+      "items": [],
+      "touches": [
+        {
+          "defectId": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/governance/kb-entitlement.ts",
+            "apps/union-eyes/app/api/knowledge-base/route.ts",
+            "apps/union-eyes/app/api/knowledge-base/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/knowledge-base-entitlement.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/pilot/counterpart-acceptance.ts",
+            "apps/union-eyes/app/api/pilot/apply/[id]/commercial-transition/route.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-commercial-transition.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0055_workbook_holder_notice.sql",
+            "apps/union-eyes/db/migrations-platform/0055_workbook_holder_notice.rollback.sql",
+            "apps/union-eyes/db/schema/workbook-schema.ts",
+            "apps/union-eyes/lib/workbook/holder-notice.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+            "apps/union-eyes/lib/workbook/__tests__/holder-notice.test.ts",
+            "apps/union-eyes/db/__tests__/migration-0055-workbook-holder-notice.postgres.test.ts",
+            "apps/union-eyes/app/api/__tests__/workbook-memory-holders.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/reality/configuration-effect.ts",
+            "apps/union-eyes/lib/reality/activation-guard.ts",
+            "apps/union-eyes/app/api/extensions/[id]/route.ts",
+            "apps/union-eyes/lib/reality/__tests__/configuration-effect.test.ts",
+            "apps/union-eyes/lib/reality/__tests__/activation-guard.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/reality/configuration-effect.ts",
+            "apps/union-eyes/lib/reality/activation-guard.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts",
+            "apps/union-eyes/lib/reality/__tests__/configuration-effect.test.ts",
+            "apps/union-eyes/lib/reality/__tests__/activation-guard.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B117-F06-R6-EVIDENCE-AND-REGRESSION-INTEGRITY",
+      "family": "F06 R6: earlier credited evidence verified against the real schema, roles and failure modes",
       "evidenceCommit": null,
-      "items": []
+      "items": [],
+      "touches": [
+        {
+          "defectId": "DEF-0B3-AUDITS-LEGACY-TABLE-NOT-CANONICAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0045_audit_security_runtime_read.sql",
+            "apps/union-eyes/db/migrations-cache/0045_audit_security_runtime_read.rollback.sql",
+            "apps/union-eyes/db/__tests__/audit-reader.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/signature/audit-chain.ts",
+            "apps/union-eyes/lib/signature/seal-witness.ts",
+            "apps/union-eyes/lib/signature/signature-service.ts",
+            "apps/union-eyes/lib/signature/__tests__/audit-chain.test.ts",
+            "apps/union-eyes/lib/signature/__tests__/audit-chain.pglite.test.ts",
+            "apps/union-eyes/db/__tests__/audit-reader.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/communications/address-suppression.ts",
+            "apps/union-eyes/lib/email-service.ts",
+            "apps/union-eyes/lib/email/report-email-templates.ts",
+            "apps/union-eyes/lib/communications/__tests__/address-suppression.test.ts",
+            "apps/union-eyes/lib/email/__tests__/report-email-templates.test.ts",
+            "apps/union-eyes/db/__tests__/audit-reader.postgres.test.ts"
+          ]
+        }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {

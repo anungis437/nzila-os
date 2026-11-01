@@ -12,13 +12,23 @@ const resolve = (prefix) => {
   return hits[0]
 }
 const entries = {}
+const histories = {}
 const out = []
 let outstanding = register.length
 for (const batch of batches.batches) {
   const before = outstanding
   const corrected = []
+  // Provenance: every defect a batch touched, with the batch's evidence commit and the files it changed. `touches` also covers a defect
+  // upgraded in place, which adds nothing to `items`. It never changes a status or a count; credit comes only from `items` below.
+  const touched = new Set()
+  for (const touch of batch.touches || []) {
+    const id = resolve(touch.defectId)
+    touched.add(id)
+    ;(histories[id] ||= []).push({ batch: batch.id, status: touch.status, evidenceCommit: batch.evidenceCommit ?? null, files: touch.files })
+  }
   for (const item of batch.items) {
     const id = resolve(item.prefix)
+    if (!touched.has(id)) (histories[id] ||= []).push({ batch: batch.id, status: item.status, evidenceCommit: batch.evidenceCommit ?? null, files: item.files })
     if (entries[id] && entries[id].status === 'IMPLEMENTED_PENDING_QUALIFICATION') throw new Error(`double counted: ${id}`)
     entries[id] = { status: item.status, batch: batch.id, files: item.files, explanation: item.explanation, ...(item.remaining ? { remaining: item.remaining } : {}) }
     if (item.status === 'IMPLEMENTED_PENDING_QUALIFICATION') corrected.push(id)
@@ -51,5 +61,9 @@ const doc = {
   ...(batches.uncreditedSourceEvidence ? { uncreditedSourceEvidence: batches.uncreditedSourceEvidence } : {}),
 }
 for (const id of Object.keys(entries)) if (!ids.has(id)) throw new Error(`not in register: ${id}`)
+for (const [id, history] of Object.entries(histories)) {
+  if (!entries[id]) throw new Error(`a batch touches a defect that no batch credits or records: ${id}`)
+  entries[id].history = history
+}
 fs.writeFileSync(path.join(__dirname, 'ue-gate0-defect-elimination.json'), JSON.stringify(doc, null, 2) + '\n')
 console.log(JSON.stringify({ totals: doc.totals, batches: out }))

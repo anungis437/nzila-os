@@ -103,7 +103,7 @@ describe('B44 signature routes', () => {
     const service = read('lib/signature/signature-service.ts')
     expect(service.match(/\.limit\(USER_DOCUMENT_LIMIT\)/g)).toHaveLength(2)
     expect(service).not.toContain('hashChained: false')
-    expect(service).toContain('integrity: await this.integrityStatement(documentId, auditLog, tx)')
+    expect(service).toContain('integrity: await this.integrityStatement(documentId, auditLog, tx, {')
   })
 })
 
