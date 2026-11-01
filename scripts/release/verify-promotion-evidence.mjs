@@ -55,10 +55,27 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
       manifest.attestation_ref !== 'release-attestation.json' ||
       attestation.version !== '2.0' ||
       attestation.environment !== 'staging') deny('source commit or provenance does not match')
-  if (sbom.obj.bomFormat !== 'CycloneDX' ||
+  // A signed hash of syntactically valid JSON is not proof of a usable SBOM.
+  // Reject placeholder components, missing package identities and ambiguous
+  // bom-ref collisions before accepting this as release evidence.
+  const components = sbom.obj?.components
+  const refs = Array.isArray(components)
+    ? components.filter(component => typeof component?.['bom-ref'] === 'string')
+        .map(component => component['bom-ref'])
+    : []
+  if (sbom.obj?.bomFormat !== 'CycloneDX' ||
       typeof sbom.obj.specVersion !== 'string' ||
-      !Array.isArray(sbom.obj.components) ||
-      sbom.obj.components.length === 0) deny('SBOM is empty or not a valid populated CycloneDX document')
+      !/^1\\.(?:[4-9]|[1-9][0-9]+)$/.test(sbom.obj.specVersion) ||
+      !Array.isArray(components) || components.length === 0 ||
+      components.some(component =>
+        !component || typeof component !== 'object' || Array.isArray(component) ||
+        typeof component.type !== 'string' || !component.type.trim() ||
+        typeof component.name !== 'string' || !component.name.trim() ||
+        (component['bom-ref'] !== undefined &&
+          (typeof component['bom-ref'] !== 'string' || !component['bom-ref'].trim()))) ||
+      new Set(refs).size !== refs.length) {
+    deny('SBOM is empty, ambiguous or not a valid populated CycloneDX document')
+  }
   const sbomDigest = sha256(sbom.raw)
   if (manifest.artifact_digest !== sbomDigest ||
       manifest.sbom_hash !== sbomDigest ||

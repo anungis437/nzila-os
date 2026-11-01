@@ -11,14 +11,16 @@ const RUN = '123456'
 const IMAGE = 'example.invalid/app@sha256:' + 'b'.repeat(64)
 const hash = text => createHash('sha256').update(text).digest('hex')
 
-function makeFixture(algorithm = 'ed25519') {
+function makeFixture(algorithm = 'ed25519', sbomDocument = {
+  bomFormat: 'CycloneDX', specVersion: '1.6',
+  components: [{ type: 'library', name: 'test', version: '1' }],
+}) {
   const directory = mkdtempSync(join(tmpdir(), 'nzila-promotion-test-'))
   const { publicKey, privateKey } = algorithm === 'rsa-2048'
     ? generateKeyPairSync('rsa', { modulusLength: 2048 })
     : generateKeyPairSync('ed25519')
   const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' }).toString()
-  const sbom = JSON.stringify({ bomFormat: 'CycloneDX', specVersion: '1.6',
-    components: [{ name: 'test', version: '1' }] }) + '\n'
+  const sbom = JSON.stringify(sbomDocument) + '\n'
   const sbomDigest = hash(sbom)
   const sourceLockfilePath = join(directory, 'pnpm-lock.yaml')
   const lockfile = 'lockfileVersion: 9.0\n'
@@ -167,6 +169,32 @@ test('non-CycloneDX SBOM rejected', () => {
   } finally { x.cleanup() }
 })
 
+test('even a correctly signed SBOM rejects placeholder or ambiguous components', () => {
+  const baseline = { bomFormat: 'CycloneDX', specVersion: '1.6' }
+  for (const components of [
+    [{ name: 'missing-type' }],
+    [{ type: 'library', name: '' }],
+    [null],
+    [{ type: 'library', name: 'a', 'bom-ref': 'same' },
+      { type: 'library', name: 'b', 'bom-ref': 'same' }],
+    [{ type: 'library', name: 'a', 'bom-ref': '' }],
+  ]) {
+    const x = makeFixture('ed25519', { ...baseline, components })
+    try {
+      assert.throws(() => x.verify(), /SBOM is empty, ambiguous or not a valid populated CycloneDX/)
+    } finally { x.cleanup() }
+  }
+})
+test('signed populated CycloneDX SBOM with unique component references remains valid', () => {
+  const x = makeFixture('ed25519', {
+    bomFormat: 'CycloneDX', specVersion: '1.6',
+    components: [
+      { type: 'application', name: 'app', 'bom-ref': 'app-1' },
+      { type: 'library', name: 'dependency', 'bom-ref': 'pkg-1' },
+    ],
+  })
+  try { assert.equal(x.verify().commitSha, COMMIT) } finally { x.cleanup() }
+})
 test('substituted staging run ID is denied', () => {
   const x = makeFixture()
   try {
