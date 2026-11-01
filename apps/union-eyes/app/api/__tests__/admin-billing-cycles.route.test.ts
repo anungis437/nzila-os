@@ -187,4 +187,72 @@ describe('admin/billing-cycles route', () => {
     expect(m.performAuditedOperation).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [
+        "impossible calendar date",
+        {
+            "periodStart": "2026-02-30",
+            "periodEnd": "2026-03-01"
+        }
+    ],
+    [
+        "reversed period",
+        {
+            "periodStart": "2026-03-02",
+            "periodEnd": "2026-03-01"
+        }
+    ],
+    [
+        "partial period",
+        {
+            "periodStart": "2026-03-01"
+        }
+    ],
+    [
+        "ambiguous local timestamp",
+        {
+            "periodStart": "2026-03-01T00:00:00",
+            "periodEnd": "2026-03-31T00:00:00"
+        }
+    ],
+    [
+        "invalid timezone",
+        {
+            "periodStart": "2026-03-01T00:00:00+15:00",
+            "periodEnd": "2026-03-31"
+        }
+    ]
+])('rejects %s without generating a financial cycle', async (_label, period) => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly', ...period }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
+    expect(m.performAuditedOperation).not.toHaveBeenCalled();
+  });
+
+  it('accepts a real leap day and preserves exact supplied period boundaries', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly', periodStart: '2028-02-29', periodEnd: '2028-03-01', dryRun: true }),
+    }));
+    expect(response.status).toBe(200);
+    expect(m.BillingCycleService.generateBillingCycle).toHaveBeenCalledWith(expect.objectContaining({
+      periodStart: new Date('2028-02-29T00:00:00.000Z'),
+      periodEnd: new Date('2028-03-01T00:00:00.000Z'),
+    }));
+  });
+
+  it('returns validation failure for malformed JSON without billing', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: '{',
+    }));
+    expect(response.status).toBe(400);
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
+  });
+
 });

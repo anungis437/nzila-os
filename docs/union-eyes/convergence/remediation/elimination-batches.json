@@ -10466,6 +10466,23 @@
       ],
       "correction": "remittances-routes.test.ts targeted a pre-transaction reconcile handler and a second, engine-based handler that commit 4b8a6f6e3 removed as unreachable; 8 of its 40 tests failed, which fails pnpm --filter financial-service test, the step governance:audit runs through financial-service:health, and no CI job runs that file. Test-only repair: the harness supports db.transaction and row-lock chains; the six tests of the removed handler are deleted with its dead engine mock; the two reconcile tests are rewritten for the transactional flow and joined by tests for exact cents, unavailable ids (409), batch limit (413), duplicate ids (400), a missing dues total (generic 500, nothing written), a concurrent change (nothing recorded), and the report refusing a reconciled remittance that carries no transaction references. No finance source, mandate, principal or table is changed. financial-service: 32 files, 576 tests pass (previously 8 failing).",
       "remaining": "Pull-request CI runs only remittance-reconciliation-policy.test.ts for this service; running the whole suite in a workflow is a separate, finance-adjacent decision. The finance and pension freeze is unchanged. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-BILLING-PERIOD-BOUNDARY-INTEGRITY-20261101",
+      "status": "SOURCE_CHANGED_TESTS_ADDED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-billing-period-boundary-integrity-20261101.md",
+      "sourceBaseline": "f3cdcafa30b2082208f7ee10908fe069676598a7",
+      "files": [
+        "apps/union-eyes/lib/finance/billing-period-input.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
+        "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts"
+      ],
+      "correction": "Administrator billing-cycle execution and preview now share strict ISO period parsing, reject impossible/reversed/partial/ambiguous boundaries and malformed JSON before billing, and preserve valid leap dates. Adversarial route tests added.",
+      "remaining": "Exact-HEAD route unit tests, complete contract/Vitest, native PG15/16, HTTP/browser/staging, finance exactly-once and atomic audit, independent reviewer and institutional mandates. No defect or CLOSED credit."
     }
   ]
 }
