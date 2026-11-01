@@ -1,6 +1,6 @@
 /**
  * schema-retire-declaration: the three Drizzle declarations are gone.
- * The census file still names them. The physical relations are not dropped.
+ * The regenerated census no longer names them. The physical relations are not dropped.
  * Django still defines the two signature tables.
  */
 import { readdirSync, readFileSync } from 'node:fs'
@@ -38,7 +38,7 @@ function rel(file: string): string {
 }
 
 describe('schema-retire-declaration', () => {
-  it('removes the three Drizzle declarations and leaves the census rows', () => {
+  it('removes the three Drizzle declarations, so the regenerated census and disposition no longer list them', () => {
     const declared = new Set<string>()
     for (const value of Object.values(schema as Record<string, unknown>)) {
       if (!is(value, PgTable)) continue
@@ -51,8 +51,8 @@ describe('schema-retire-declaration', () => {
     const census = JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-census.json'), 'utf8')).entries as { table: string }[]
     const disposition = JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-disposition.json'), 'utf8')).entries as Record<string, { disposition: string }>
     for (const table of RETIRED) {
-      expect(census.some((entry) => entry.table === table)).toBe(true)
-      expect(disposition[table].disposition).toBe('RETIRE_DECLARATION')
+      expect(census.some((entry) => entry.table === table), `${table} is still in the census`).toBe(false)
+      expect(disposition[table], `${table} still has a disposition`).toBeUndefined()
     }
   })
 

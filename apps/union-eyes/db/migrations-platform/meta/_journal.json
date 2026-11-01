@@ -428,6 +428,13 @@
       "when": 1759160000000,
       "tag": "0059_scim_provisioned_users",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1759170000000,
+      "tag": "0060_reachable_stub_shape_2",
+      "breakpoints": true
     }
   ]
 }

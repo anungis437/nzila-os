@@ -117,7 +117,6 @@
       "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/db/migrations*/**", "**/reports/**", "apps/union-eyes/backend/**/migrations/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
       "allowed": [
         { "file": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts", "reason": "Writes the legacy column with the deadline convergence task; migrate to assignCase" },
-        { "file": "apps/union-eyes/app/api/grievances/[id]/convert/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/app/api/grievances/[id]/status/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
         { "file": "apps/union-eyes/backend/grievances/models.py", "reason": "Column definition (the record being retired as an authority source)" },
         { "file": "apps/union-eyes/backend/grievances/views.py", "reason": "Legacy consumer; migrate to kernel assignments" },

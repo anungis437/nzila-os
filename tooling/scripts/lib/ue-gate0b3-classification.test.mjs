@@ -173,7 +173,7 @@ test('cumulative counts and the 1,644 operations are preserved', () => {
   assert.equal(countsAt(ACCEPTED['0B.3']).classified, 279)
   assert.equal(base.ownership.entries.length, 1646, "canonical universe after Gate 0C.1")
   assert.equal(matrix.routeOwnership.operations, 1646)
-  assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).censusCount, 231)
+  assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).censusCount, 202)
 })
 
 test('Gate 0 stays IN_PROGRESS, validates the third tranche and keeps the three unjustified exposures release blocking', () => {

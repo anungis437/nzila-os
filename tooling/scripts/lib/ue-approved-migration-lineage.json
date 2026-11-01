@@ -671,6 +671,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "The directory of people an identity provider provisions (system-only, not roster rows) and the evolution of the scim_events_log Django stub"
+      },
+      {
+        "tag": "0060_reachable_stub_shape_2",
+        "sha256": "bce83b72aa267b9cf82ba8bfb4e07992d0269e572a11732e6357fcb68ee9e83e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Additive, guarded evolution of thirteen reachable Django-defined relations (arbitration_decisions, case_studies, wage_benchmarks, cost_of_living_data, external_data_sync_log, provincial_privacy_config, support_tickets, union_density, reserved_matter_votes, clc_organization_sync_log, webhook_receipts, automation_rules, alert_rules) to the columns their Drizzle declarations select and write. Missing columns are added nullable, enum types are created only when absent, and the transaction fails if any constraint, index, policy, grant or row-security setting changes. Tagged for an exact rollback."
       }
     ]
   }

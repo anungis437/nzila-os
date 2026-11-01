@@ -141,7 +141,7 @@ test('cumulative counts, the 1,644 operations, the schema census and the persona
   assert.equal(countsAt(ACCEPTED['0B.2']).classified, 180)
   assert.equal(base.ownership.entries.length, 1646, "canonical universe after Gate 0C.1")
   assert.equal(matrix.routeOwnership.operations, 1646)
-  assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).censusCount, 231)
+  assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).censusCount, 202)
   assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).individuallyReclassified, false)
   const anchoredMatrix = JSON.parse(atAnchor(FILES.matrix))
   assert.deepEqual(matrix.proposedPersonaBaselines, anchoredMatrix.proposedPersonaBaselines)

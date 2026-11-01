@@ -5,6 +5,9 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { is } from 'drizzle-orm'
+import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
+import * as declarations from '../schema'
 import { buildSchemaMutationBatches } from '../../scripts/lib/schema-mutation-batches'
 
 const REGISTER = path.resolve(__dirname, '../../../../docs/union-eyes/convergence/register')
@@ -16,6 +19,49 @@ describe('schema and mutation batch program', () => {
 
   it('matches the committed program', () => {
     expect(program).toEqual(committed)
+  })
+
+  // The census was regenerated against a database built by Django migrate plus the approved bootstrap (231 -> 202).
+  // A table may only leave a ratchet by being evolved or by having its declaration retired, so each exit is tied to its source.
+  it('explains every table that left the census: its declaration is retired or a registered migration evolved it', () => {
+    const census = new Set((JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-census.json'), 'utf8')).entries as { table: string }[]).map((entry) => entry.table))
+    const declared = new Set(
+      Object.values(declarations as Record<string, unknown>)
+        .filter((value) => is(value, PgTable))
+        .map((value) => getTableConfig(value as PgTable).name),
+    )
+    const retiredDeclarations = [
+      'bank_accounts', 'bank_reconciliations', 'clc_remittance_mapping', 'erp_invoices', 'grievance_timeline',
+      'notification_history', 'org_usage', 'signature_templates', 'signature_webhooks_log',
+    ]
+    for (const table of retiredDeclarations) {
+      expect(declared.has(table), `${table} is still declared`).toBe(false)
+      expect(census.has(table), `${table} is still in the census`).toBe(false)
+    }
+    const evolvedBy: Record<string, string[]> = {
+      'db/migrations-platform/0031_reachable_stub_shape.sql': ['data_anonymization_log', 'employment_history', 'job_classifications', 'member_leaves'],
+      'db/migrations-platform/0039_committee_memberships_shape.sql': ['committee_memberships'],
+      'db/migrations-platform/0041_room_bookings_shape.sql': ['room_bookings'],
+      'db/migrations-cache/0031_feature_flags_attribution_columns.sql': ['feature_flags'],
+      'db/migrations-platform/0060_reachable_stub_shape_2.sql': [
+        'alert_rules', 'arbitration_decisions', 'automation_rules', 'case_studies', 'clc_organization_sync_log', 'cost_of_living_data',
+        'external_data_sync_log', 'provincial_privacy_config', 'reserved_matter_votes', 'support_tickets', 'union_density',
+        'wage_benchmarks', 'webhook_receipts',
+      ],
+    }
+    const appRoot = path.resolve(__dirname, '../..')
+    for (const [file, tables] of Object.entries(evolvedBy)) {
+      const sql = readFileSync(path.join(appRoot, file), 'utf8')
+      for (const table of tables) {
+        expect(census.has(table), `${table} is still in the census`).toBe(false)
+        const alters = new RegExp(`ALTER\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?(?:ONLY\\s+)?(?:public\\.)?"?${table}"?[\\s(;]`, 'i')
+        expect(alters.test(sql), `${file} does not alter ${table}`).toBe(true)
+      }
+    }
+    const explained = [...retiredDeclarations, ...Object.values(evolvedBy).flat()]
+    expect(new Set(explained).size, 'a table is explained twice').toBe(explained.length)
+    const originalCensusSize = 231
+    expect(explained.length, 'a table left the census without an explanation').toBe(originalCensusSize - census.size)
   })
 
   it('covers the census and the mutation baseline without adding a row', () => {
@@ -78,47 +124,19 @@ describe('schema and mutation batch program', () => {
     expect(retention?.liveStatementCount).toBe(0)
     expect(retention?.execution).toBe('implemented')
     expect(retention?.applyNow).toBe(true)
-    const retire = program.batches.find((batch) => batch.id === 'schema-retire-declaration')
-    expect(retire?.entryCount).toBe(3)
-    expect(retire?.sourceRetired).toBe(true)
-    expect(retire?.applyNow).toBe(false)
-    expect(retire?.execution).toBe('cursor-then-vs')
-    expect(retire?.action).toContain('READY_FOR_VS_EXECUTION')
-    expect(retire?.action).toContain('Do not DROP')
-    expect(retire?.action).not.toContain('totalStorage = 0')
-    const unreferenced = program.batches.find((batch) => batch.id === 'schema-live-unreferenced')
-    expect(unreferenced?.entryCount).toBe(5)
-    expect(unreferenced?.sourceRetired).toBe(true)
-    expect(unreferenced?.applyNow).toBe(false)
-    expect(unreferenced?.action).toContain('READY_FOR_VS_EXECUTION')
-    expect(unreferenced?.action).toContain('Do not DROP')
-    const removed = ['bank_accounts', 'bank_reconciliations', 'clc_remittance_mapping', 'erp_invoices', 'grievance_timeline']
-    const retained = ['budget_pool', 'dues_rates', 'gl_account_mappings', 'grievance_settlements', 'integration_webhooks', 'payment_cycles', 'payment_disputes', 'safety_training_records']
-    for (const table of removed) {
-      const row = program.schema.find((entry) => entry.table === table)
-      expect(row?.batchId).toBe('schema-live-unreferenced')
-      expect(row?.declarationRemoved).toBe(true)
+    // These four batches emptied when the census was regenerated against the real schema: every entry left it, and the
+    // 'explains every table that left the census' test says why each was allowed to.
+    for (const id of ['schema-retire-declaration', 'schema-live-unreferenced', 'schema-verify-dead-module', 'schema-evolve-reachable']) {
+      expect(program.batches.some((batch) => batch.id === id), id).toBe(false)
     }
+    const retained = ['budget_pool', 'dues_rates', 'gl_account_mappings', 'grievance_settlements', 'integration_webhooks', 'payment_cycles', 'payment_disputes', 'safety_training_records']
     for (const table of retained) {
       const row = program.schema.find((entry) => entry.table === table)
       expect(row?.batchId).toBe('schema-live-unreferenced-blocked')
       expect(row?.declarationRemoved).toBeUndefined()
       expect(row?.holdReason).toBeTruthy()
     }
-    expect(program.censusCount).toBe(231)
-    const evolve = program.batches.find((batch) => batch.id === 'schema-evolve-reachable')
-    expect(evolve?.entryCount).toBe(6)
-    expect(evolve?.applyNow).toBe(false)
-    expect(evolve?.action).toContain('0031_reachable_stub_shape')
-    expect(evolve?.action).toContain('0039_committee_memberships_shape')
-    expect(evolve?.action).toContain('0041_room_bookings_shape')
-    expect(program.schema.find((entry) => entry.table === 'room_bookings')?.batchId).toBe('schema-evolve-reachable')
-    expect(program.schema.find((entry) => entry.table === 'committee_memberships')?.batchId).toBe('schema-evolve-reachable')
-    expect(evolve?.action).toContain('READY_FOR_VS_EXECUTION')
-    expect(evolve?.action).toContain('no DROP')
-    const history = program.schema.find((entry) => entry.table === 'notification_history')
-    expect(history?.declarationRemoved).toBe(true)
-    expect(history?.batchId).toBe('schema-verify-dead-module')
+    expect(program.censusCount).toBe(202)
     for (const table of ['user_sessions', 'member_documents', 'grievance_stages', 'grievance_workflows']) {
       const row = program.schema.find((entry) => entry.table === table)
       expect(row?.batchId).toBe('schema-verify-dead-required')

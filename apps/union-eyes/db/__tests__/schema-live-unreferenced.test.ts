@@ -1,7 +1,7 @@
 /**
  * schema-live-unreferenced: five union-eyes declarations are gone.
  * Eight stay because a kept declaration or a production SQL reader names them.
- * The census file still names every relation. No platform migration drops one.
+ * The regenerated census names only the eight kept relations. No platform migration drops one.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -50,9 +50,8 @@ describe('schema-live-unreferenced', () => {
     for (const table of RETAINED) expect(declared.has(table)).toBe(true)
 
     const census = JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-census.json'), 'utf8')).entries as { table: string }[]
-    for (const table of [...REMOVED, ...RETAINED]) {
-      expect(census.some((entry) => entry.table === table)).toBe(true)
-    }
+    for (const table of REMOVED) expect(census.some((entry) => entry.table === table), `${table} is still in the census`).toBe(false)
+    for (const table of RETAINED) expect(census.some((entry) => entry.table === table), `${table} left the census`).toBe(true)
   })
 
   it('leaves Django models and does not drop the relations', () => {

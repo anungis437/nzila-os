@@ -3,7 +3,7 @@
   "mission": "UE-CURSOR-FINAL-CLOSURE",
   "applyNow": false,
   "note": "Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
-  "censusCount": 231,
+  "censusCount": 202,
   "sourceMutationBaselineSum": 13,
   "mutationBaselineSum": 0,
   "mutationLiveSum": 0,
@@ -77,34 +77,6 @@
       "liveStatementCount": 0
     },
     {
-      "id": "schema-retire-declaration",
-      "order": 6,
-      "ratchet": "census",
-      "execution": "cursor-then-vs",
-      "shrink": "census",
-      "action": "org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. signature_documents.template_id stays a column without a Drizzle foreign key. Django SignatureTemplates and SignatureWebhooksLog stay, and their view sets stay. The unwired admin-actions module no longer returns a storage figure. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. Do not hand-delete the census row. Do not DROP the relation.",
-      "proof": "apps/union-eyes/db/__tests__/schema-retire-declaration.test.ts",
-      "applyNow": false,
-      "entryCount": 3,
-      "statementCount": 0,
-      "liveStatementCount": 0,
-      "sourceRetired": true
-    },
-    {
-      "id": "schema-live-unreferenced",
-      "order": 8,
-      "ratchet": "census",
-      "execution": "cursor-then-vs",
-      "shrink": "census",
-      "action": "bank_accounts, bank_reconciliations, erp_invoices, clc_remittance_mapping, and grievance_timeline are no longer union-eyes Drizzle declarations. Django still defines those relations. packages/db exec-data.ts still declares erp_invoices for the console reader. No DROP was added. The census file still lists them. Census regeneration is READY_FOR_VS_EXECUTION. budget_pool, dues_rates, gl_account_mappings, grievance_settlements, integration_webhooks, payment_cycles, payment_disputes, and safety_training_records stay declared because a kept declaration or a production SQL reader names them. Do not hand-delete the census row. Do not DROP the relation.",
-      "proof": "apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
-      "applyNow": false,
-      "entryCount": 5,
-      "statementCount": 0,
-      "liveStatementCount": 0,
-      "sourceRetired": true
-    },
-    {
       "id": "schema-live-unreferenced-blocked",
       "order": 9,
       "ratchet": "census",
@@ -114,19 +86,6 @@
       "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
       "applyNow": false,
       "entryCount": 10,
-      "statementCount": 0,
-      "liveStatementCount": 0
-    },
-    {
-      "id": "schema-verify-dead-module",
-      "order": 10,
-      "ratchet": "census",
-      "execution": "cursor-then-vs",
-      "shrink": "census",
-      "action": "No production entry reaches a file that names this relation, and no kept declaration names it. Retire the app Drizzle declaration together with dead importers and their tests. Do not delete a shadow pgTable file and do not DROP the relation. grievance_communications is not in this batch.",
-      "proof": "apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
-      "applyNow": false,
-      "entryCount": 1,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -153,19 +112,6 @@
       "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
       "applyNow": false,
       "entryCount": 1,
-      "statementCount": 0,
-      "liveStatementCount": 0
-    },
-    {
-      "id": "schema-evolve-reachable",
-      "order": 13,
-      "ratchet": "census",
-      "execution": "prepared-evolve",
-      "shrink": "census",
-      "action": "Platform migration 0031_reachable_stub_shape evolves data_anonymization_log, employment_history, job_classifications, and member_leaves. Platform migrations 0039_committee_memberships_shape and 0041_room_bookings_shape evolve committee_memberships and room_bookings the same way. Additive columns and defaults only. NOT NULL only when the relation is empty. No keys, no RLS, no DROP. Revised in place before any apply: existing columns must match the expected type, and the migration refuses a change to constraint, index, policy, or grant definitions, or to row security. It is registered UNQUALIFIED. Do not apply it here. Census regeneration after apply is READY_FOR_VS_EXECUTION.",
-      "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
-      "applyNow": false,
-      "entryCount": 6,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -204,7 +150,7 @@
       "action": "Global reference data. Shape and seed need an owner decision. Do not emit a tenant migration.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
       "applyNow": false,
-      "entryCount": 22,
+      "entryCount": 15,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -217,7 +163,7 @@
       "action": "System-only shape. Do not emit a tenant migration.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
       "applyNow": false,
-      "entryCount": 12,
+      "entryCount": 7,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -243,7 +189,7 @@
       "action": "Enum-name collision, pgvector, or a missing runtime privilege. The stub generator already refuses these. Do not evolve them in a tranche.",
       "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts",
       "applyNow": false,
-      "entryCount": 7,
+      "entryCount": 5,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -368,18 +314,6 @@
       "blockers": []
     },
     {
-      "table": "alert_rules",
-      "batchId": "schema-individual-decision",
-      "disposition": "INDIVIDUAL_DECISION",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "anti_scab_violations",
       "batchId": "schema-create-relation",
       "disposition": "CREATE_RELATION_REQUIRED",
@@ -392,18 +326,6 @@
       "blockers": [
         "table-absent"
       ]
-    },
-    {
-      "table": "arbitration_decisions",
-      "batchId": "schema-global-reference",
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
     },
     {
       "table": "arbitrator_profiles",
@@ -475,18 +397,6 @@
       ]
     },
     {
-      "table": "automation_rules",
-      "batchId": "schema-individual-decision",
-      "disposition": "INDIVIDUAL_DECISION",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "autopay_settings",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -548,21 +458,6 @@
       "blockers": []
     },
     {
-      "table": "bank_accounts",
-      "batchId": "schema-live-unreferenced",
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
-    },
-    {
       "table": "bank_of_canada_rates",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -587,21 +482,6 @@
       "djangoDefined": true,
       "blockers": [],
       "holdReason": "A production file reads this relation: lib/services/audit-trail-service.ts"
-    },
-    {
-      "table": "bank_reconciliations",
-      "batchId": "schema-live-unreferenced",
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
     },
     {
       "table": "bargaining_team_members",
@@ -682,18 +562,6 @@
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "case_studies",
-      "batchId": "schema-global-reference",
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
       "defects": [
         "COLUMNS_MISSING"
       ],
@@ -982,19 +850,6 @@
       "blockers": []
     },
     {
-      "table": "clc_organization_sync_log",
-      "batchId": "schema-system-only",
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "clc_per_capita_benchmarks",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -1005,21 +860,6 @@
       "reachable": false,
       "djangoDefined": true,
       "blockers": []
-    },
-    {
-      "table": "clc_remittance_mapping",
-      "batchId": "schema-live-unreferenced",
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
     },
     {
       "table": "clc_union_density",
@@ -1060,19 +900,6 @@
       "blockers": [
         "table-absent"
       ]
-    },
-    {
-      "table": "committee_memberships",
-      "batchId": "schema-evolve-reachable",
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": [],
-      "holdReason": "committees relations name committeeMemberships. The declaration stays."
     },
     {
       "table": "conflict_audit_log",
@@ -1142,18 +969,6 @@
     },
     {
       "table": "contribution_rates",
-      "batchId": "schema-global-reference",
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "cost_of_living_data",
       "batchId": "schema-global-reference",
       "disposition": "GLOBAL_REFERENCE_SHAPE",
       "registryClass": "GLOBAL_REFERENCE_DATA",
@@ -1296,19 +1111,6 @@
       ]
     },
     {
-      "table": "data_anonymization_log",
-      "batchId": "schema-evolve-reachable",
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "data_classification_policy",
       "batchId": "schema-global-reference",
       "disposition": "GLOBAL_REFERENCE_SHAPE",
@@ -1440,34 +1242,6 @@
       "blockers": []
     },
     {
-      "table": "employment_history",
-      "batchId": "schema-evolve-reachable",
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "erp_invoices",
-      "batchId": "schema-live-unreferenced",
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
-    },
-    {
       "table": "event_attendees",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -1503,19 +1277,6 @@
         "REQUIRED_UNDECLARED"
       ],
       "reachable": false,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "external_data_sync_log",
-      "batchId": "schema-global-reference",
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": true,
       "djangoDefined": true,
       "blockers": []
     },
@@ -1566,18 +1327,6 @@
       "defects": [
         "COLUMNS_MISSING",
         "REQUIRED_UNDECLARED"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "feature_flags",
-      "batchId": "schema-global-reference",
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "defects": [
-        "COLUMNS_MISSING"
       ],
       "reachable": true,
       "djangoDefined": true,
@@ -1792,22 +1541,6 @@
       "holdReason": "grievance_transitions references grievanceStages. The declaration stays. Do not drop the physical foreign key."
     },
     {
-      "table": "grievance_timeline",
-      "batchId": "schema-live-unreferenced",
-      "disposition": "LIVE_UNREFERENCED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
-    },
-    {
       "table": "grievance_workflows",
       "batchId": "schema-verify-dead-required",
       "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
@@ -1936,18 +1669,6 @@
         "COLUMNS_MISSING"
       ],
       "reachable": false,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "job_classifications",
-      "batchId": "schema-evolve-reachable",
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
       "djangoDefined": true,
       "blockers": []
     },
@@ -2118,18 +1839,6 @@
       ]
     },
     {
-      "table": "member_leaves",
-      "batchId": "schema-evolve-reachable",
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "movement_trends",
       "batchId": "schema-global-reference",
       "disposition": "GLOBAL_REFERENCE_SHAPE",
@@ -2167,22 +1876,6 @@
       "blockers": []
     },
     {
-      "table": "notification_history",
-      "batchId": "schema-verify-dead-module",
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
-    },
-    {
       "table": "notification_log",
       "batchId": "schema-verify-dead-required",
       "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
@@ -2195,22 +1888,6 @@
       "djangoDefined": true,
       "blockers": [],
       "holdReason": "clc_sync_log relations name notificationLog. The declaration stays."
-    },
-    {
-      "table": "org_usage",
-      "batchId": "schema-retire-declaration",
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "TABLE_ABSENT"
-      ],
-      "reachable": false,
-      "djangoDefined": false,
-      "blockers": [
-        "no-declaration",
-        "table-absent"
-      ],
-      "declarationRemoved": true
     },
     {
       "table": "organization_billing_config",
@@ -2499,18 +2176,6 @@
       "blockers": []
     },
     {
-      "table": "provincial_privacy_config",
-      "batchId": "schema-global-reference",
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "public_content",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -2572,18 +2237,6 @@
       "blockers": []
     },
     {
-      "table": "reserved_matter_votes",
-      "batchId": "schema-system-only",
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "right_of_refusal_events",
       "batchId": "schema-create-relation",
       "disposition": "CREATE_RELATION_REQUIRED",
@@ -2621,19 +2274,6 @@
       "djangoDefined": true,
       "blockers": [],
       "holdReason": "steward_assignments relations name roleTenureHistory. The declaration stays."
-    },
-    {
-      "table": "room_bookings",
-      "batchId": "schema-evolve-reachable",
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": [],
-      "holdReason": "calendar_events relations name roomBookings. The financial-service shadow schema also declares room_bookings. The union-eyes declaration stays."
     },
     {
       "table": "safety_training_records",
@@ -2731,21 +2371,6 @@
       "blockers": []
     },
     {
-      "table": "signature_templates",
-      "batchId": "schema-retire-declaration",
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
-    },
-    {
       "table": "signature_verification",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -2757,22 +2382,6 @@
       "reachable": false,
       "djangoDefined": true,
       "blockers": []
-    },
-    {
-      "table": "signature_webhooks_log",
-      "batchId": "schema-retire-declaration",
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": false,
-      "djangoDefined": true,
-      "blockers": [
-        "no-declaration"
-      ],
-      "declarationRemoved": true
     },
     {
       "table": "signature_workflows",
@@ -2887,18 +2496,6 @@
         "REQUIRED_UNDECLARED"
       ],
       "reachable": false,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "support_tickets",
-      "batchId": "schema-system-only",
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
       "djangoDefined": true,
       "blockers": []
     },
@@ -3040,18 +2637,6 @@
       "blockers": []
     },
     {
-      "table": "union_density",
-      "batchId": "schema-system-only",
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "union_only_data_tags",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -3187,18 +2772,6 @@
       "blockers": []
     },
     {
-      "table": "wage_benchmarks",
-      "batchId": "schema-global-reference",
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "defects": [
-        "COLUMNS_MISSING"
-      ],
-      "reachable": true,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
       "table": "wage_progressions",
       "batchId": "schema-contained-deny-all",
       "disposition": "CONTAINED_DENY_ALL",
@@ -3249,19 +2822,6 @@
         "REQUIRED_UNDECLARED"
       ],
       "reachable": false,
-      "djangoDefined": true,
-      "blockers": []
-    },
-    {
-      "table": "webhook_receipts",
-      "batchId": "schema-system-only",
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "defects": [
-        "COLUMNS_MISSING",
-        "REQUIRED_UNDECLARED"
-      ],
-      "reachable": true,
       "djangoDefined": true,
       "blockers": []
     },
