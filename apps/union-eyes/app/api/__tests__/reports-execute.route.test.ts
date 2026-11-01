@@ -221,7 +221,7 @@ describe('reports/execute field authority (F06 A5)', () => {
     expect(m.execute).not.toHaveBeenCalled();
     expect(m.audit).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: 'report.execute.denied', details: { dataSource: 'claims', restricted: ['claims'] } }),
+      expect.objectContaining({ action: 'report.execute.denied', details: { dataSource: 'claims', restricted: ['claims.claim_number'] } }),
       'failure',
     );
   });
@@ -258,6 +258,67 @@ describe('reports/execute field authority (F06 A5)', () => {
       expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ adminOnlySelections: ['organization_members.email'] }) }),
     );
   });
+
+  it('records which fields, filters and classes were disclosed and never a filter value or a row', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+    m.execute.mockResolvedValue({ success: true, data: [{ status: 'open', id_count: 30, ue_group_size: 30, ue_group_people: 20 }], rowCount: 1, executionTimeMs: 1 });
+
+    await run({
+      dataSourceId: 'claims',
+      fields: [{ fieldId: 'status', fieldName: 'Status' }, claimCount.fields[0]],
+      groupBy: ['status'],
+      filters: [{ fieldId: 'priority', operator: 'eq', value: 'a-secret-priority' }],
+    });
+
+    const entry = m.audit.mock.calls.map((call) => call[1]).find((e) => e.action === 'report.execute');
+    expect(entry.details).toMatchObject({
+      authority: 'officer',
+      classesReturned: ['matter'],
+      filteredBy: ['claims.priority'],
+      groupedBy: ['claims.status'],
+      fieldPolicy: { approvedBy: null },
+    });
+    expect(entry.details.fields).toEqual(['claims.status', 'claims.id']);
+    expect(JSON.stringify(entry)).not.toContain('a-secret-priority');
+    expect(JSON.stringify(entry)).not.toContain('"rows"');
+  });
+
+  it('bounds how often an officer may ask the same question with different values, records the refusal, and runs nothing', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+    m.checkRateLimit.mockImplementation(async (key: string) => (String(key).startsWith('report-shape:') ? { allowed: false, resetIn: 900 } : { allowed: true, resetIn: 0 }));
+
+    const response = await run({ ...claimCount, filters: [{ fieldId: 'priority', operator: 'eq', value: 'high' }] });
+
+    expect(response.status).toBe(429);
+    expect(m.execute).not.toHaveBeenCalled();
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'report.execute.denied', details: expect.objectContaining({ reason: 'repeated_question_shape' }) }),
+      'failure',
+    );
+    const key = String(m.checkRateLimit.mock.calls.find((call) => String(call[0]).startsWith('report-shape:'))?.[0]);
+    expect(key).toContain('org_1:u1:');
+  });
+
+  it('does not spend the question budget on an administrator or on a row listing an officer may run', async () => {
+    m.hasMinRole.mockResolvedValue(true);
+    await run(claimCount);
+    m.hasMinRole.mockResolvedValue(false);
+    await run({ dataSourceId: 'organization_members', fields: [{ fieldId: 'status', fieldName: 'Status' }] });
+
+    expect(m.checkRateLimit.mock.calls.some((call) => String(call[0]).startsWith('report-shape:'))).toBe(false);
+  });
+
+  it('runs every report inside the caller\'s own organization whatever the body names, and refuses a filter on the organization column', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+    const refused = await run({ ...claimCount, filters: [{ fieldId: 'organization_id', operator: 'eq', value: 'org_2' }] });
+    expect(refused.status).toBe(400);
+    expect(m.execute).not.toHaveBeenCalled();
+
+    const response = await run({ ...claimCount, organizationId: 'org_2' });
+    expect(response.status).toBe(200);
+    expect(m.execute).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('reports/execute small-group suppression (F06 A5)', () => {
@@ -270,29 +331,46 @@ describe('reports/execute small-group suppression (F06 A5)', () => {
     );
   };
   const rows = [
-    { status: 'open', id_count: 12, ue_group_size: 12 },
-    { status: 'rare', id_count: 2, ue_group_size: 2 },
-    { status: 'edge', id_count: 5, ue_group_size: 5 },
+    { status: 'open', id_count: 12, ue_group_size: 12, ue_group_people: 12 },
+    { status: 'rare', id_count: 2, ue_group_size: 2, ue_group_people: 2 },
+    { status: 'edge', id_count: 5, ue_group_size: 5, ue_group_people: 5 },
+    { status: 'many', id_count: 9, ue_group_size: 9, ue_group_people: 9 },
   ];
 
   beforeEach(() => {
     vi.clearAllMocks();
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.audit.mockReset().mockResolvedValue(undefined);
-    m.execute.mockResolvedValue({ success: true, data: rows.map((r) => ({ ...r })), rowCount: 3, executionTimeMs: 3 });
+    m.execute.mockResolvedValue({ success: true, data: rows.map((r) => ({ ...r })), rowCount: 4, executionTimeMs: 3 });
   });
 
-  it('has the server add its own count, withholds groups under five, strips the count, and says how many were withheld', async () => {
+  it('has the server add its own counts, withholds groups under five and the smallest neighbour, strips the counts, and says how many were withheld', async () => {
     m.hasMinRole.mockResolvedValue(false);
 
     const body = await (await run(grouped)).json();
 
     const sent = m.execute.mock.calls[0][0];
-    expect(sent.fields.at(-1)).toMatchObject({ fieldId: 'id', aggregation: 'count', alias: 'ue_group_size' });
-    expect(body.data).toEqual([{ status: 'open', id_count: 12 }, { status: 'edge', id_count: 5 }]);
-    expect(JSON.stringify(body)).not.toContain('ue_group_size');
-    expect(body).toMatchObject({ rowCount: 2, suppressedGroups: 1 });
-    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ suppressedGroups: 1 }) }));
+    expect(sent.fields.at(-1)).toMatchObject({ fieldId: 'id', table: 'claims', aggregation: 'count_distinct', alias: 'ue_group_size' });
+    expect(sent.fields.at(-2)).toMatchObject({ fieldId: 'member_id', table: 'claims', aggregation: 'count_distinct', alias: 'ue_group_people' });
+    // 'rare' is withheld for its size; 'edge', the smallest released cell, goes with it so the pair cannot be recovered by subtraction.
+    expect(body.data).toEqual([{ status: 'open', id_count: 12 }, { status: 'many', id_count: 9 }]);
+    expect(JSON.stringify(body)).not.toContain('ue_group_');
+    expect(body).toMatchObject({ rowCount: 2, suppressedGroups: 2 });
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ suppressedGroups: 2 }) }));
+  });
+
+  it('withholds a group with many claims but fewer than five people behind them', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+    m.execute.mockResolvedValue({
+      success: true,
+      data: [{ status: 'open', id_count: 40, ue_group_size: 40, ue_group_people: 3 }, { status: 'closed', id_count: 30, ue_group_size: 30, ue_group_people: 20 }, { status: 'stale', id_count: 20, ue_group_size: 20, ue_group_people: 12 }],
+      rowCount: 3,
+      executionTimeMs: 1,
+    });
+
+    const body = await (await run(grouped)).json();
+
+    expect(body.data.map((r: { status: string }) => r.status)).toEqual(['closed']);
   });
 
   it('does not suppress for an administrator or add a column', async () => {
@@ -306,12 +384,17 @@ describe('reports/execute small-group suppression (F06 A5)', () => {
     expect(body).not.toHaveProperty('suppressedGroups');
   });
 
-  it('leaves an ungrouped officer report alone', async () => {
+  it('withholds an ungrouped officer aggregate over fewer than five people and releases one over enough', async () => {
     m.hasMinRole.mockResolvedValue(false);
-    m.execute.mockResolvedValue({ success: true, data: [{ id_count: 3 }], rowCount: 1, executionTimeMs: 1 });
+    const total = { dataSourceId: 'claims', fields: [{ fieldId: 'id', fieldName: 'Claims', aggregation: 'count' }] };
 
-    const body = await (await run({ dataSourceId: 'claims', fields: [{ fieldId: 'id', fieldName: 'Claims', aggregation: 'count' }] })).json();
+    m.execute.mockResolvedValue({ success: true, data: [{ id_count: 3, ue_group_size: 3, ue_group_people: 3 }], rowCount: 1, executionTimeMs: 1 });
+    const small = await (await run(total)).json();
+    expect(small.data).toEqual([]);
+    expect(small).toMatchObject({ suppressedGroups: 1 });
 
-    expect(body.data).toEqual([{ id_count: 3 }])
+    m.execute.mockResolvedValue({ success: true, data: [{ id_count: 30, ue_group_size: 30, ue_group_people: 25 }], rowCount: 1, executionTimeMs: 1 });
+    const large = await (await run(total)).json();
+    expect(large.data).toEqual([{ id_count: 30 }]);
   });
 });

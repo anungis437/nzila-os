@@ -1,74 +1,31 @@
 import { getDataSource, DATA_SOURCES, type ReportConfig } from '@/lib/report-executor';
+import { assessReportDisclosure } from './report-field-authority';
+
+export { suppressSmallGroups, withGroupSizeField, SMALL_GROUP_MIN, GROUP_SIZE_ALIAS, GROUP_PEOPLE_ALIAS, OFFICER_REPORT_ROW_CAP } from './report-disclosure-limits';
+
+/**
+ * What an officer may not do with this configuration, by field class (see report-field-authority.ts); empty when the request is within
+ * officer authority. Kept under its earlier name: the route calls it before anything runs.
+ */
+export function adminOnlyReportSelections(config: ReportConfig): string[] {
+  return assessReportDisclosure(config).restricted;
+}
 
 /**
  * SECURITY: the data sources and columns a report may use are those of the executor's registry (the same ones /api/reports/datasources
  * advertises); the executor refuses anything else, so this route keeps no second, different list.
  */
-const ALLOWED_AGGREGATIONS = ['count', 'sum', 'avg', 'min', 'max', 'distinct'];
+// The executor's own aggregations. The list this route used to accept named `distinct`, which the executor does not know: it fell through to
+// the plain column, so a field marked `distinct` was an unaggregated row listing that looked like an aggregate to the authority check. It is
+// now the executor's count_distinct, and anything the executor would not aggregate is refused.
+const ALLOWED_AGGREGATIONS = ['count', 'count_distinct', 'sum', 'avg', 'min', 'max'];
+const LEGACY_AGGREGATIONS: Record<string, string> = { distinct: 'count_distinct' };
 // The executor's own vocabulary. The names this route used to accept (equals, contains, ...) were not the executor's, and the executor skipped
 // a filter whose operator it did not know, so such a filter was dropped and every row came back. The earlier names are translated, and
 // anything else is refused.
 const ALLOWED_OPERATORS = ['eq', 'ne', 'gt', 'lt', 'gte', 'lte', 'like', 'ilike', 'in', 'not_in', 'is_null', 'is_not_null', 'between'];
 const LEGACY_OPERATORS: Record<string, string> = { equals: 'eq', not_equals: 'ne', contains: 'ilike', greater_than: 'gt', less_than: 'lt' };
 const ALLOWED_SORT_DIRECTIONS = ['asc', 'desc'];
-
-/**
- * Row-level disclosure that the officer role title does not carry. A report may count claims, but listing claim rows, and selecting,
- * grouping, filtering or sorting on member e-mail (a filter on it is a search oracle), is member and matter data that needs an
- * administrator. Returns what the configuration touches that needs that authority; empty when an officer may run it.
- */
-const ADMIN_ONLY_FIELDS: Record<string, readonly string[]> = { organization_members: ['email'] };
-const ADMIN_ONLY_ROW_SOURCES = new Set(['claims', 'claim_deadlines']);
-export const OFFICER_REPORT_ROW_CAP = 500;
-
-/**
- * Small-group suppression for a grouped report an officer runs: a group of fewer than SMALL_GROUP_MIN members or claims can identify
- * the people in it, so its row is withheld. The group size is measured by the server with a count it adds itself, never taken from
- * a column the caller chose, and the added column is removed before the rows leave.
- */
-export const SMALL_GROUP_MIN = 5;
-export const GROUP_SIZE_ALIAS = 'ue_group_size';
-
-export function withGroupSizeField(config: ReportConfig): ReportConfig {
-  if (!config.groupBy || config.groupBy.length === 0) return config;
-  return {
-    ...config,
-    fields: [...config.fields, { fieldId: 'id', fieldName: 'Group size', aggregation: 'count', alias: GROUP_SIZE_ALIAS }],
-  };
-}
-
-export function suppressSmallGroups<T extends Record<string, unknown>>(rows: T[]): { rows: Array<Omit<T, 'ue_group_size'>>; suppressed: number } {
-  const kept: Array<Omit<T, 'ue_group_size'>> = [];
-  let suppressed = 0;
-  for (const row of rows) {
-    const { [GROUP_SIZE_ALIAS]: size, ...rest } = row as Record<string, unknown>;
-    if (Number(size) < SMALL_GROUP_MIN || !Number.isFinite(Number(size))) suppressed += 1;
-    else kept.push(rest as Omit<T, 'ue_group_size'>);
-  }
-  return { rows: kept, suppressed };
-}
-
-export function adminOnlyReportSelections(config: ReportConfig): string[] {
-  const touched: string[] = [];
-  const fields = Array.isArray(config.fields) ? config.fields : [];
-  // In a grouped query the plain fields are the group keys, so only an ungrouped plain field lists rows.
-  const rowLevel = !(config.groupBy && config.groupBy.length > 0) && fields.some((field) => field && !field.aggregation);
-  if (ADMIN_ONLY_ROW_SOURCES.has(config.dataSourceId) && rowLevel) touched.push(config.dataSourceId);
-
-  const protectedFields = ADMIN_ONLY_FIELDS[config.dataSourceId] ?? [];
-  const referenced = [
-    ...fields.filter((field) => field && !field.aggregation).map((field) => field.fieldId),
-    ...(config.groupBy ?? []),
-    ...(config.filters ?? []).map((filter) => filter.fieldId),
-    ...(config.having ?? []).map((filter) => filter.fieldId),
-    ...(config.sortBy ?? []).map((rule) => rule.fieldId),
-  ];
-  for (const field of protectedFields) {
-    if (referenced.includes(field)) touched.push(`${config.dataSourceId}.${field}`);
-  }
-  return touched;
-}
-
 /**
  * SECURITY: Validate report configuration against allowlists
  */
@@ -91,6 +48,10 @@ export function validateReportConfig(config: ReportConfig): string | null {
   for (const field of config.fields) {
     if (!allowedColumns.includes(field.fieldId)) {
       return `Invalid field: ${field.fieldId}`;
+    }
+    if (field.aggregation) {
+      const translated = LEGACY_AGGREGATIONS[field.aggregation as string];
+      if (translated) (field as { aggregation: string }).aggregation = translated;
     }
     if (field.aggregation && !ALLOWED_AGGREGATIONS.includes(field.aggregation)) {
       return `Invalid aggregation: ${field.aggregation}`;

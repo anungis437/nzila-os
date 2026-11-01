@@ -782,14 +782,19 @@ describe('report-executor', () => {
       expect(result.success).toBe(true);
     });
 
-    it('falls back to raw column for unknown aggregation', async () => {
+    // F06 R2 (replaces "falls back to raw column for unknown aggregation"): an aggregation the executor does not run listed the plain column
+    // under an aggregate's name, which the authority check read as an aggregate. It is now refused as an invalid configuration.
+    it('refuses an unknown aggregation instead of answering with the raw column', async () => {
       mocks.mockExecute.mockResolvedValue([]);
       const executor = new ReportExecutor('org-1');
       const result = await executor.execute({
         dataSourceId: 'claims',
         fields: [{ fieldId: 'status', fieldName: 'Status', aggregation: 'median' as 'count' }],
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.kind).toBe('invalid');
+      expect(result.error).toContain('Unsupported aggregation');
+      expect(mocks.mockExecute).not.toHaveBeenCalled();
     });
   });
 

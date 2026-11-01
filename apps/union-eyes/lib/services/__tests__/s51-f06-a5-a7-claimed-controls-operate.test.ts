@@ -25,12 +25,12 @@ describe('F06 batch 5 (A5 + A7): controls that were claimed are the controls tha
   })
 
   it('report execution needs an administrator to list claim rows or touch member e-mail, and bounds an officer page', () => {
-    const validation = src('lib/reports/report-config-validation.ts')
-    expect(validation).toContain("organization_members: ['email']")
-    expect(validation).toContain('OFFICER_REPORT_ROW_CAP = 500')
+    const authority = src('lib/reports/report-field-authority.ts')
+    expect(authority).toContain("email: 'identifier'")
+    expect(src('lib/reports/report-disclosure-limits.ts')).toContain('OFFICER_REPORT_ROW_CAP = 500')
     const route = src('app/api/reports/execute/route.ts')
     expect(route).toContain("action: 'report.execute.denied'")
-    expect(route.indexOf('adminOnlyReportSelections(config)')).toBeLessThan(route.indexOf('executor.execute('))
+    expect(route.indexOf('assessReportDisclosure(config)')).toBeLessThan(route.indexOf('executor.execute('))
     expect(route).toContain('suppressSmallGroups(')
   })
 

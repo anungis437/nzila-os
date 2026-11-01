@@ -451,7 +451,8 @@ export class ReportExecutor {
             fieldSQL = sql`STRING_AGG(${safeColumnName(columnName)}, ', ')`;
             break;
           default:
-            fieldSQL = safeColumnName(columnName);
+            // An aggregation this switch does not run is refused, never answered with the plain column: that listed rows under an aggregate's name.
+            throw new Error(`Unsupported aggregation: ${String(field.aggregation)}`);
         }
       } else {
         // Regular field
