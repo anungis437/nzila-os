@@ -130,6 +130,54 @@ describe('organizations route', () => {
     expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'organization.create', userId: 'u1', organizationId: 'org_1' }));
   });
 
+  it('POST uses the same system transaction for parent lookup, creation and audit', async () => {
+    const { POST } = await loadRoute();
+    m.rowsQueue.push([{ hierarchyPath: ['root-id'], hierarchyLevel: 1 }]);
+
+    // A distinct transaction handle makes an accidental use of the shared
+    // connection observable. A mock that passes the same object would miss
+    // a parent-read/insert escaping the audit transaction.
+    const tx = {
+      select: vi.fn((...args: unknown[]) => mockDb.select(...args)),
+      insert: vi.fn((...args: unknown[]) => mockDb.insert(...args)),
+    };
+    m.withSystemContext.mockImplementationOnce(async (work: (handle: typeof tx) => Promise<unknown>) => work(tx));
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Child', slug: 'child', type: 'local', parent_id: 'parent-id' }),
+    }));
+
+    expect(response.status).toBe(201);
+    expect(tx.select).toHaveBeenCalledTimes(1);
+    expect(tx.insert).toHaveBeenCalledTimes(1);
+    expect(m.audit).toHaveBeenCalledWith(tx, expect.objectContaining({
+      action: 'organization.create', organizationId: 'org_1',
+    }));
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
+    expect(mockDb.insert).toHaveBeenCalledTimes(1);
+  });
+
+  it('POST rolls back rather than acknowledging creation when the atomic audit fails', async () => {
+    const { POST } = await loadRoute();
+    m.audit.mockRejectedValueOnce(new Error('audit persistence refused'));
+    const tx = {
+      select: vi.fn((...args: unknown[]) => mockDb.select(...args)),
+      insert: vi.fn((...args: unknown[]) => mockDb.insert(...args)),
+    };
+    m.withSystemContext.mockImplementationOnce(async (work: (handle: typeof tx) => Promise<unknown>) => {
+      // The production helper owns the rollback. The test verifies the route
+      // propagates the failure rather than returning a false HTTP 201.
+      return work(tx);
+    });
+    await expect(POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Child', slug: 'child', type: 'local' }),
+    }))).rejects.toThrow('audit persistence refused');
+    expect(tx.insert).toHaveBeenCalledTimes(1);
+    expect(m.audit).toHaveBeenCalledTimes(1);
+  });
+
   it('POST returns 400 for an invalid organization type', async () => {
     const { POST } = await loadRoute();
 
