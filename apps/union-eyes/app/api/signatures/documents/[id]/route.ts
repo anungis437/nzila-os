@@ -29,10 +29,15 @@ export const GET = withApiAuth(async (
     );
     }
     
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
+    }
+
     const documentId = params.id;
     
     // SECURITY FIX: Verify user has access to this document (prevent IDOR)
-    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id, user.organizationId ?? '');
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id, organizationId);
     if (!hasAccess) {
       return standardErrorResponse(
       ErrorCode.FORBIDDEN,
@@ -40,7 +45,7 @@ export const GET = withApiAuth(async (
     );
     }
 
-    const document = await SignatureService.getDocumentStatus(documentId, user.organizationId ?? '');
+    const document = await SignatureService.getDocumentStatus(documentId, organizationId);
 
     return NextResponse.json(signatureViewForViewer(projectSignaturePayload(document), user.id, document.sentBy));
   } catch (error) {
@@ -73,10 +78,15 @@ export const PATCH = withApiAuth(async (
     }
     
     const userId = user.id;
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
+    }
+
     const documentId = params.id;
     
     // SECURITY FIX: Verify user has access to this document (prevent IDOR)
-    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, userId, user.organizationId ?? '');
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, userId, organizationId);
     if (!hasAccess) {
       return standardErrorResponse(
       ErrorCode.FORBIDDEN,
@@ -90,7 +100,7 @@ export const PATCH = withApiAuth(async (
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A void action with a reason of at most 1000 characters is required');
     }
 
-    await SignatureService.voidDocument(documentId, userId, parsed.data.reason);
+    await SignatureService.voidDocument(documentId, userId, parsed.data.reason, organizationId);
 
     return NextResponse.json({
       success: true,
@@ -123,11 +133,15 @@ export const POST = withApiAuth(async (
     if (!user || !user.id) {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
     }
-    const sender = await SignatureService.getDocumentSender(params.id, user.organizationId ?? '');
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
+    }
+    const sender = await SignatureService.getDocumentSender(params.id, organizationId);
     if (!sender || sender !== user.id) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
     }
-    const result = await SignatureService.syncDocumentStatus(params.id, user.organizationId ?? '');
+    const result = await SignatureService.syncDocumentStatus(params.id, organizationId);
     return NextResponse.json({ success: true, ...result });
   } catch (error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to refresh document status', error);
