@@ -17798,6 +17798,30 @@
         "correction": "The alert reader now returns only allowlisted signal kind and nonnegative safe-integer count; unknown signal and all other raw trigger JSON fields are redacted. Existing officer role floor and tenant RLS are preserved.",
         "remaining": "Focused/full Vitest and contract, native PG15/16, HTTP/browser/staging, institutional officer audience decision, independent reviewer and owner persona ratification. No CLOSED or additional implementation credit."
       }
+    },
+    "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": null,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-social-oauth-ambiguous-callback-and-linkedin-page-20261101.md",
+      "files": [
+        "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+        "apps/union-eyes/lib/social-media/oauth-callback-safety.ts",
+        "apps/union-eyes/lib/social-media/__tests__/oauth-callback-safety.test.ts"
+      ],
+      "correction": "Reject duplicate/contradictory OAuth callback authority parameters before cookie consumption; require exactly one LinkedIn publishing organization rather than silently selecting the first.",
+      "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16, HTTP/browser/staging, real OAuth provider acceptance, explicit LinkedIn multi-page selection journey, independent reviewer and institutional/persona ratifications. No additional implementation or CLOSED credit."
+    },
+    "DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY-WITH-ADMIN-LEVEL-SCOPES-AND-PICKS-THE-FIRST-PAGE-AUTOMATICALLY": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": null,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-social-oauth-ambiguous-callback-and-linkedin-page-20261101.md",
+      "files": [
+        "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+        "apps/union-eyes/lib/social-media/oauth-callback-safety.ts",
+        "apps/union-eyes/lib/social-media/__tests__/oauth-callback-safety.test.ts"
+      ],
+      "correction": "Reject duplicate/contradictory OAuth callback authority parameters before cookie consumption; require exactly one LinkedIn publishing organization rather than silently selecting the first.",
+      "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16, HTTP/browser/staging, real OAuth provider acceptance, explicit LinkedIn multi-page selection journey, independent reviewer and institutional/persona ratifications. No additional implementation or CLOSED credit."
     }
   }
 }

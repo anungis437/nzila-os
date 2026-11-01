@@ -19,6 +19,7 @@ import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { validateOAuthCallbackContext } from '@/lib/social-media/oauth-callback-state';
+import { parseOAuthCallbackParameters, selectUniquePublishingOrganization } from '@/lib/social-media/oauth-callback-safety';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
@@ -48,10 +49,13 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'No organization found');
     }
 
-    const searchParams = request.nextUrl.searchParams;
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
-    const providerError = searchParams.get('error');
+    // Reject ambiguous provider redirects before consuming the legitimate pending OAuth state.
+    // Duplicate parameters and simultaneous code/error values cannot be given an authority interpretation.
+    const callbackParameters = parseOAuthCallbackParameters(request.nextUrl.searchParams);
+    if (!callbackParameters.ok) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Ambiguous OAuth callback parameters');
+    }
+    const { code, state, providerError } = callbackParameters;
 
     const storedState = cookieStore.get('oauth_state')?.value ?? null;
     const storedPlatform = cookieStore.get('oauth_platform')?.value ?? null;
@@ -165,11 +169,15 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
         const linkedInClient = createLinkedInClient();
         const tokenData = await linkedInClient.getAccessToken(authorizedCode, redirectUri);
         const orgs = await createLinkedInClient(tokenData.access_token).getOrganizations();
-        const org = orgs[0];
+        // A provider may return several administered organizations. Never silently bind
+        // the first one as this union's publishing identity without an explicit selection.
+        const org = selectUniquePublishingOrganization(orgs);
         if (!org) {
           return standardErrorResponse(
             ErrorCode.VALIDATION_ERROR,
-            'No LinkedIn Organization Page found. You must administer a Company Page to connect.'
+            orgs.length > 1
+              ? 'Multiple LinkedIn Organization Pages found. Explicit Page selection is required before connecting.'
+              : 'No LinkedIn Organization Page found. You must administer a Company Page to connect.'
           );
         }
 
