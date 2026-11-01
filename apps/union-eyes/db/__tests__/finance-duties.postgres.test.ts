@@ -166,8 +166,11 @@ describe.skipIf(!URL)('governed financial duties on the combined deployed schema
     await pool?.end()
     await admin?.end()
   })
-  afterEach(() => {
+  afterEach(async () => {
+    // A failed assertion must never leave a fault armed for the next financial journey.
+    // Clearing this disposable-database fixture does not alter production audit behavior.
     delete process.env.UE_CANONICAL_BOOTSTRAP_V2
+    await clearFaults()
     m.audit.mockClear()
   })
 
@@ -371,17 +374,30 @@ describe.skipIf(!URL)('governed financial duties on the combined deployed schema
       await step(P.treasurer, PAY2, 'prepared')
       expect(await steps(PAY2, 'prepared')).toBe(1)
 
-      // Under Canonical V2 the business audit joins the hash chain: the same atomicity holds against that sink.
+      // This suite exercises the legacy-lineage runtime role and its real audit sink.
+      // Canonical V2 requires a live auth session and the auth-owned membership reader;
+      // flipping an environment flag does not install that topology or prove V2 atomicity.
+      // Its missing-reader refusal is covered separately below.
+    })
+
+    it('fails closed when Canonical V2 is requested without its auth-owned membership reader', async () => {
+      // This combined legacy fixture has no live V2 session/reader. If that changes,
+      // the suite must be upgraded to a real session-bound V2 acceptance rather than
+      // silently treating this test as proof of the canonical audit chain.
+      const reader = await admin.query(`SELECT to_regprocedure('user_management.ue_authority_membership_rows(uuid,text[])') AS fn`)
+      expect(reader.rows[0].fn, 'legacy fixture unexpectedly contains the V2 reader; run session-bound V2 qualification').toBeNull()
+      const pay = randomUUID()
+      await addPayment(pay, '13.00', P.member)
       process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1'
-      const PAY3 = randomUUID()
-      await addPayment(PAY3, '13.00', P.member)
-      await failAudit('finance.payment.registered')
-      await faultRaised(register(P.treasurer, PAY3))
-      expect(await steps(PAY3, 'registered')).toBe(0)
-      await clearFaults()
-      await register(P.treasurer, PAY3)
-      expect(await steps(PAY3, 'registered')).toBe(1)
-      expect(await scalar(`SELECT count(*) AS n FROM public.audit_logs WHERE action = 'finance.payment.registered' AND organization_id = $1 AND resource_id = $2`, [ORG_A, PAY3])).toBe(1)
+      try {
+        const error = await register(P.treasurer, pay).then(() => null, (e: { message?: string; cause?: { message?: string } }) => e)
+        expect(error, 'V2 must not succeed without its live identity authority').not.toBeNull()
+        expect(`${error?.message} ${error?.cause?.message}`).toMatch(/ue_authority_membership_rows/)
+        expect(await steps(pay, 'registered')).toBe(0)
+        expect(await scalar(`SELECT count(*) AS n FROM public.audit_logs WHERE action = 'finance.payment.registered' AND organization_id = $1 AND resource_id = $2`, [ORG_A, pay])).toBe(0)
+      } finally {
+        delete process.env.UE_CANONICAL_BOOTSTRAP_V2
+      }
     })
 
     it('lets exactly one of two truly concurrent executions win, on separate connections', async () => {
