@@ -41,6 +41,10 @@ export function verifyOciProvenance({manifestRaw, sourceSha, repository, staging
   }
   if (!Array.isArray(manifest.deployTargets) ||
       manifest.deployTargets.length === 0) deny('missing manifest deployment targets')
+  // Bound external cryptographic verification work before spawning any gh
+  // subprocess. A large but valid signed manifest must not exhaust runner
+  // time, GitHub API budgets or the production approval window.
+  if (manifest.deployTargets.length > 32) deny('signed manifest exceeds 32 deployment targets')
   const seenNames = new Set(), seenImages = new Set(), targets = []
   for (const target of manifest.deployTargets) {
     if (!target || typeof target !== 'object' || Array.isArray(target)) deny('malformed target')
