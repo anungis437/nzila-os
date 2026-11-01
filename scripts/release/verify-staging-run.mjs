@@ -94,8 +94,10 @@ export function verifyStagingRun(run, expectedCommit, expectedRunId, expectedWor
     'Assert staging deployment identity is configured (fail-closed)',
     'Azure login (OIDC, staging-scoped)',
     'Staging boundary gate (fail-closed)',
+    'ACR login',
     'Require real staging deployment implementation',
     'Run smoke tests',
+    'Ingest GitHub Actions CI evidence',
     'Ingest Azure runtime evidence (live)',
   ]
   // GitHub returns steps in execution order; smoke before deploy or
