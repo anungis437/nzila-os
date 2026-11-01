@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   persistAtomicAudit: vi.fn(),
+  appendIntake: vi.fn(),
   runStewardshipCartography: vi.fn(() => ({ density: { index: 0 } })),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -59,6 +60,8 @@ vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 // Disclosed adaptation (B102): a same-organization peer needs a steward role; the role check is a seam here.
 vi.mock('@/lib/api-auth-guard', () => ({ hasRoleInOrganization: vi.fn(async () => true) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+// The pseudonymous audit store has its own native coverage; here only what each route asks it to record is observed.
+vi.mock('@/lib/public-intake/intake-audit', () => ({ appendPublicIntakeAudit: m.appendIntake }));
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,
 }));
@@ -95,6 +98,7 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     m.lockOverride = null;
     m.runStewardshipCartography.mockReturnValue({ density: { index: 0 } });
     m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.appendIntake.mockReset().mockResolvedValue({ subjectRef: 'ref', contentHash: 'hash' });
   });
 
   describe('GET', () => {
@@ -115,6 +119,41 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
       expect(response.status).toBe(200);
       expect(m.auth).not.toHaveBeenCalled();
+      // F06 R3: the read of the people an unclaimed workbook names is recorded under the pseudonymous authority, before it is served,
+      // with no organization, no actor and no consent invented, and never the workbook id as a value to record.
+      expect(m.appendIntake).toHaveBeenCalledTimes(1);
+      expect(m.appendIntake.mock.calls[0][1]).toMatchObject({ action: 'workbook.memory_holder.read', operation: 'read', subjectKind: 'unclaimed_workbook', subjectId: 'w1', resourceRef: null });
+      expect(JSON.stringify(m.appendIntake.mock.calls[0][1])).not.toMatch(/organizationId|userId/);
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+      expect(m.appendIntake.mock.invocationCallOrder[0]).toBeLessThan(m.runStewardshipCartography.mock.invocationCallOrder[0]);
+    });
+
+    it('does not read the people an unclaimed workbook names when the read cannot be recorded', async () => {
+      const { GET } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([{ id: 'holder_1' }]);
+      m.appendIntake.mockRejectedValueOnce(new Error('audit store down'));
+
+      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+
+      expect(response.status).toBe(503);
+      expect(m.runStewardshipCartography).not.toHaveBeenCalled();
+      expect(JSON.stringify(await response.json())).not.toContain('holder_1');
+    });
+
+    it('records a claimed workbook read under the claiming organization and the acting person', async () => {
+      const { GET } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+
+      expect((await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).status).toBe(200);
+
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', action: 'workbook.memory_holder.read' }),
+      );
+      expect(m.appendIntake).not.toHaveBeenCalled();
     });
 
     it('serves the claimant', async () => {
@@ -358,6 +397,46 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
       expect(m.auth).not.toHaveBeenCalled();
       // The insert ran under the pre-claim (system) context.
       expect(mockDb.insert).toHaveBeenCalledTimes(1);
+      // F06 R3 (replaces "records nothing for a pre-claim workbook"): the mutation is recorded in the same transaction under the
+      // pseudonymous authority, by field names and counts only: the role and responsibility typed by the visitor are not evidence.
+      expect(m.appendIntake).toHaveBeenCalledTimes(1);
+      expect(m.appendIntake.mock.calls[0][1]).toMatchObject({ action: 'workbook.memory_holder.create', operation: 'create', subjectKind: 'unclaimed_workbook', resourceRef: 'holder_new' });
+      expect(JSON.stringify(m.appendIntake.mock.calls[0][1])).not.toMatch(/Founder|origin story/);
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('does not keep an unclaimed workbook write that cannot be recorded', async () => {
+      const { POST } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([]);
+      m.insertQueue.push([{ id: 'holder_new' }]);
+      m.appendIntake.mockRejectedValueOnce(new Error('audit store down'));
+
+      const response = await POST(req({ role: 'Founder', responsibility: 'Holds the origin story' }), { params: Promise.resolve({ id: 'w1' }) });
+
+      expect(response.status).toBe(503);
+      expect(m.runStewardshipCartography).not.toHaveBeenCalled();
+    });
+
+    it('records an unclaimed update and delete by reference, with the fields changed and nothing typed', async () => {
+      const { PATCH, DELETE } = await loadItemRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.updateQueue.push([{ id: 'h1' }]);
+      await PATCH(
+        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'PATCH', body: JSON.stringify({ displayName: 'A Real Name', notes: 'private note' }) }),
+        { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) },
+      );
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.deleteQueue.push([{ id: 'h1' }]);
+      await DELETE(
+        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE' }),
+        { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) },
+      );
+
+      const entries = m.appendIntake.mock.calls.map((call) => call[1]);
+      expect(entries.map((e) => [e.operation, e.resourceRef])).toEqual([['update', 'h1'], ['delete', 'h1']]);
+      expect(entries[0].details).toEqual({ fields: ['displayName', 'notes'] });
+      expect(JSON.stringify(entries)).not.toMatch(/A Real Name|private note/);
     });
   });
 });

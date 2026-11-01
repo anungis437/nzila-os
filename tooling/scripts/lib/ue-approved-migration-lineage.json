@@ -298,6 +298,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "SYSTEM_ONLY RLS for email_address_suppressions"
+      },
+      {
+        "tag": "0044_public_intake_audit_events_rls_closure",
+        "sha256": "d2a501a4eca1809a79ef4d95fda8f767e5023d0e0cd153c94d1a396c18370e65",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "SYSTEM_ONLY append-only RLS for public_intake_audit_events"
       }
     ],
     "platform": [
@@ -573,6 +580,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Platform-wide system-only email address suppression"
+      },
+      {
+        "tag": "0054_public_intake_audit_events",
+        "sha256": "e691c7bd6b8f7aafa04a184ff124d2c5a99035e62603f0d81b3cec2fa6f56ce9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Platform-level append-only audit of pseudonymous public-intake access"
       }
     ]
   }

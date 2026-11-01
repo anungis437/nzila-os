@@ -1219,6 +1219,17 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     reviewPriority: "NONE",
   },
   {
+    table: "public_intake_audit_events",
+    classification: "SYSTEM_ONLY",
+    reason: "Created by platform 0054 with cache 0044: the platform-level, append-only audit of pseudonymous public-intake access (today the people an unclaimed workbook names). It names no organization and no actor because an unclaimed subject has none; the subject is a keyed HMAC of the bearer identifier, never the identifier, and one subject's events form a hash chain. The system role holds SELECT and INSERT only, UPDATE, DELETE and TRUNCATE are refused by trigger, and no tenant session can read or change it.",
+    supportingCapability: ["lib/public-intake/intake-audit.ts","lib/workbook/claimed-write-audit.ts","app/api/workbook/[id]/memory-holders/route.ts","app/api/workbook/[id]/memory-holders/[holderId]/route.ts"],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ["SELECT","INSERT"],
+    invocationAuthority: "SYSTEM_SCHEDULE",
+    dbExecutionPrincipal: "SYSTEM_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
     table: "public_events",
     classification: "LATENT_UNREACHABLE",
     reason: "Zero references to the 'publicEvents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",

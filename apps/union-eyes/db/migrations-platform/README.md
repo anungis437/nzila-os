@@ -77,6 +77,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0051_arbitration_decision_owner` | Give arbitration_decisions an owning organization and default new rows to private Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0052_shared_clause_versions` | Append-only history of the text a shared clause had before each change and when it was deleted. Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0053_email_address_suppressions` | Platform-wide, system-only delivery suppression of an address that complained or that the provider suppressed (SHA-256 of the address, no plaintext). Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0054_public_intake_audit_events` | Platform-level, system-only, append-only audit of pseudonymous public-intake access (a keyed reference of the bearer identifier, a per-subject hash chain, no organization and no actor). Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 

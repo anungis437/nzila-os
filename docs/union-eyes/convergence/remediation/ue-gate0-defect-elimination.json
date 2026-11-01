@@ -1095,6 +1095,15 @@
       "newlyImplemented": 0,
       "outstandingAfter": 191,
       "partial": 0,
+      "evidenceCommit": "84fc8ef23"
+    },
+    {
+      "id": "B114-F06-R3-PSEUDONYMOUS-WORKBOOK-AUDIT",
+      "family": "F06 R3: durable audit evidence for pseudonymous workbook access and mutation",
+      "outstandingBefore": 191,
+      "newlyImplemented": 0,
+      "outstandingAfter": 191,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -4273,10 +4282,23 @@
         "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts",
         "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
         "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/__tests__/route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts",
+        "apps/union-eyes/db/migrations-platform/0054_public_intake_audit_events.sql",
+        "apps/union-eyes/db/migrations-platform/0054_public_intake_audit_events.rollback.sql",
+        "apps/union-eyes/db/migrations-cache/0044_public_intake_audit_events_rls_closure.sql",
+        "apps/union-eyes/db/migrations-cache/0044_public_intake_audit_events_rls_closure.rollback.sql",
+        "apps/union-eyes/db/schema/domains/infrastructure/public-intake-audit.ts",
+        "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+        "apps/union-eyes/lib/public-intake/intake-audit.ts",
+        "apps/union-eyes/lib/workbook/claimed-write-audit.ts",
+        "apps/union-eyes/app/api/__tests__/workbook-memory-holders.route.test.ts",
+        "apps/union-eyes/app/api/workbook/[id]/memory-holders/__tests__/route.test.ts",
+        "apps/union-eyes/db/__tests__/migration-0054-public-intake-audit-events.postgres.test.ts",
+        "apps/union-eyes/db/__tests__/rls-storage-authority-registry-composition.test.ts",
+        "apps/union-eyes/lib/public-intake/__tests__/intake-audit.test.ts"
       ],
-      "explanation": "The collection reads and writes run through the public-intake guard (rate limit; body cap on writes). Claimed-workbook writes were already audited. A miss on a claimed workbook (a PATCH or DELETE that matched no holder) is recorded as an attempt (update_not_found, delete_not_found) rather than leaving no trace. The collection and item routes are behind the public-intake guard and the per-workbook cap of 200 holders was already in place. Two tests that pinned \"a miss records nothing\" were replaced (disclosed).",
-      "remaining": "An unclaimed workbook has no tenant or actor to attribute a record to, so its bearer-identifier reads and writes still leave none; that is the pseudonymous design and attributing it needs a decision on a platform-level pseudonymous trail."
+      "explanation": "The collection reads and writes run through the public-intake guard (rate limit; body cap on writes). Claimed-workbook writes were already audited. A miss on a claimed workbook (a PATCH or DELETE that matched no holder) is recorded as an attempt (update_not_found, delete_not_found) rather than leaving no trace. The collection and item routes are behind the public-intake guard and the per-workbook cap of 200 holders was already in place. Two tests that pinned \"a miss records nothing\" were replaced (disclosed). Pseudonymous audit authority: reads, creates, updates and deletes of the people an unclaimed workbook names are now recorded in a deliberately scoped, platform-level, append-only store (platform 0054, cache 0044, SYSTEM_ONLY, system role SELECT and INSERT only, UPDATE/DELETE/TRUNCATE refused by trigger). No organization, actor or consent is invented: the subject is a keyed HMAC of the bearer identifier (the identifier itself is never written; without PUBLIC_INTAKE_AUDIT_KEY nothing can be recorded and the surface fails closed), details are limited to field names and counts so a typed name, role or note is never evidence, and one subject's events form a hash chain whose fork is also refused by a unique index. A read is recorded before the data is read, in the same transaction, and a mutation commits with its record; if the record cannot be written the read or write does not happen. Claimed workbooks keep their ownership and role controls and now also record reads (previously only writes) under the claiming organization and the acting person. Native PostgreSQL 15 and 16 prove the migrations (twice, rollback and re-apply), the role boundary, concurrent writers on separate connections not forking a chain, and that the verifier catches a rewritten event and a removed middle event.",
+      "remaining": "The workbook identifier is still the bearer credential and still travels in the start response and in page and checkout redirect URLs (there is no separate capability as ICRA has), and a display name and notes of up to 4,000 characters are still accepted. The verifier cannot see removal of the newest events without a head recorded outside the writer. PUBLIC_INTAKE_AUDIT_KEY must be provisioned before the surface can operate. Migrations 0054 and 0044 are unqualified in a deployment environment."
     },
     "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",

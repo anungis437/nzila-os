@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   withClaimedWorkbookAccess: vi.fn(),
   auditClaimedWorkbookWrite: vi.fn(),
+  auditWorkbookRead: vi.fn(),
   runStewardshipCartography: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -36,6 +37,7 @@ vi.mock('@/lib/workbook/access-control', () => ({
 }));
 vi.mock('@/lib/workbook/claimed-write-audit', () => ({
   auditClaimedWorkbookWrite: m.auditClaimedWorkbookWrite,
+  auditWorkbookRead: m.auditWorkbookRead,
 }));
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,
@@ -79,6 +81,7 @@ describe('workbook/[id]/memory-holders route', () => {
     m.selectQueue = [];
     m.runStewardshipCartography.mockReturnValue({ score: 0 });
     m.auditClaimedWorkbookWrite.mockResolvedValue(undefined);
+    m.auditWorkbookRead.mockResolvedValue(undefined);
     allowAccess();
   });
 

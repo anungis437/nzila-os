@@ -19,7 +19,7 @@ import { db } from '@/db';
 import { workbooks, workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
-import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
+import { auditClaimedWorkbookWrite, auditWorkbookRead } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
@@ -96,7 +96,17 @@ export async function GET(
     // inside the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'read' },
-      async () => loadCartography(workbookId),
+      async (authority) => {
+        // The people this workbook names have no notice that they are recorded: the read is recorded first, and does not happen if the
+        // record cannot be written (an unclaimed workbook under the pseudonymous public-intake audit, a claimed one under its organization).
+        await auditWorkbookRead(authority, {
+          action: 'workbook.memory_holder.read',
+          resourceType: 'workbook_memory_holders',
+          resourceId: workbookId,
+          details: { authority: authority.kind },
+        });
+        return loadCartography(workbookId);
+      },
     );
     if (!access.ok) {
       return NextResponse.json({ error: access.error }, { status: access.status });
