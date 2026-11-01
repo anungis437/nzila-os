@@ -8294,6 +8294,17 @@
         "apps/union-eyes/app/api/voice/__tests__/disclosure.route.test.ts"
       ],
       "remaining": "Exact-HEAD focused/full tests, native PG15/16, HTTP/browser/provider, approved per-institution notice, consent semantics and independent review. No implementation or qualification credit assigned."
+    },
+    "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "e877055b8b5b97bdccd14e8293cf59f9d5f8f21f",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-security-settings-enforcement-disclosure-20261031.md",
+      "files": [
+        "apps/union-eyes/app/api/settings/organization/route.ts",
+        "apps/union-eyes/app/[locale]/dashboard/settings/_components/org-settings-content.tsx",
+        "apps/union-eyes/lib/services/__tests__/s47-settings-enforcement-ui.test.ts"
+      ],
+      "remaining": "Security settings still are not enforced by authentication/session/password controls. Focused test, exact-HEAD full suite, native PostgreSQL 15/16, HTTP/browser/staging and institutional review are unqualified. Defect stays PARTIAL; no closure or implementation credit."
     }
   }
 }
