@@ -7,6 +7,7 @@ import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { rowsVisibleToGrant } from '@/lib/finance/principal-financial-authority';
+import { listPage } from '@/lib/api/list-page';
 import { orgSubscriptions } from '@/db/schema';
 import { desc } from 'drizzle-orm';
 import { pauseSubscription, resumeSubscription } from '@/services/platform-economics';
@@ -28,8 +29,9 @@ export const GET = withApi(
       summary: 'List organization subscriptions',
     },
   },
-  async ({ organizationId, userId }) => {
+  async ({ organizationId, userId, request }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const page = listPage(request);
     // A role and entitlement are not financial authority. The caller sees only
     // subscriptions named by their live view mandate, or the organization ledger.
     const subscriptions = await withRLSContext({ organizationId, userId }, async (tx) => {
@@ -39,9 +41,10 @@ export const GET = withApi(
         .from(orgSubscriptions)
         .where(rowsVisibleToGrant(grant, organizationId, orgSubscriptions.organizationId, orgSubscriptions.id))
         .orderBy(desc(orgSubscriptions.createdAt))
-        .limit(200);
+        .limit(page.limit)
+        .offset(page.offset);
     });
-    return { subscriptions };
+    return { subscriptions, page };
   },
 );
 
