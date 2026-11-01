@@ -142,6 +142,41 @@ describe('icra/checkout route', () => {
     }
   });
 
+  it.each([
+    'http://external.example',
+    'https://external.example/redirect',
+    'https://user:password@external.example',
+    'https://external.example/?next=other',
+  ])('refuses unsafe production checkout return URL %s before creating a paid session', async (configured) => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', configured);
+    try {
+      const { POST } = await loadRoute();
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body()));
+      expect(response.status).toBe(503);
+      expect(m.stripeCreate).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('uses the configured canonical HTTPS origin for Stripe return URLs', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://union-eyes.example/');
+    try {
+      const { POST } = await loadRoute();
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body()));
+      expect(response.status).toBe(200);
+      const params = m.stripeCreate.mock.calls[0][0];
+      expect(params.success_url).toMatch(/^https:\/\/union-eyes\.example\//);
+      expect(params.cancel_url).toMatch(/^https:\/\/union-eyes\.example\//);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it('returns checkout url on successful session creation', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
