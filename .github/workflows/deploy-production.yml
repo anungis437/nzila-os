@@ -236,6 +236,7 @@ jobs:
       - name: Verify authenticated independent production approval
         env:
           GH_TOKEN: ${{ github.token }}
+          STAGING_RUN_ID: ${{ needs.verify-artifact.outputs.source_run_id }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/nzila-production-review"
@@ -246,7 +247,7 @@ jobs:
           # workflow ID through authenticated GitHub API before approval proof.
           PRODUCTION_WORKFLOW_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/deploy-production.yml" --jq '.id')
           mkdir -p ops/deploy-evidence
-          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA" "ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json" "$PRODUCTION_WORKFLOW_ID"
+          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA" "ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json" "$PRODUCTION_WORKFLOW_ID" "$STAGING_RUN_ID"
 
       # Jobs have isolated filesystems: download again after the independent
       # GitHub Environment approval, then re-verify the exact signed artifact.

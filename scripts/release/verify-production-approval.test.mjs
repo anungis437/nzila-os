@@ -20,11 +20,22 @@ function fixture() {
       run_started_at:'2026-10-30T14:01:00Z'},
     approvals:[{id:890,state:'approved',user:{id:202,login:'security-reviewer',type:'User'},
       created_at:'2026-10-30T14:15:00Z',environments:[{name:'production'}]}],
-    expectedRunId:'12345',expectedWorkflowId:'67890',expectedSha:SHA,now:NOW,
+    expectedRunId:'12345',expectedWorkflowId:'67890',expectedStagingRunId:'54321',expectedSha:SHA,now:NOW,
   }
 }
 test('only a distinct individually entitled human on same run is accepted',()=>{
-  assert.equal(verifyProductionApproval(fixture()).verdict,'APPROVED')
+  const receipt=verifyProductionApproval(fixture())
+  assert.equal(receipt.verdict,'APPROVED')
+  assert.equal(receipt.runId,'12345')
+  assert.equal(receipt.workflowId,'67890')
+  assert.equal(receipt.stagingRunId,'54321')
+  assert.equal(receipt.runAttempt,1)
+})
+test('production approval receipts require exact verified staging run coordinates',()=>{
+  for (const invalid of [undefined,null,'','0','-1','1.5','other-run',0]) {
+    const f=fixture();f.expectedStagingRunId=invalid
+    assert.throws(()=>verifyProductionApproval(f),/invalid request coordinates/)
+  }
 })
 test('completed, cancelled, queued or otherwise inactive runs cannot mint approval receipts',()=>{
   for (const status of ['completed','cancelled','queued','waiting',undefined]) {
@@ -188,12 +199,15 @@ test('CLI writes a minimal, non-overwritable receipt only after authenticated re
     }
     const cli=fileURLToPath(new URL('./verify-production-approval.mjs',import.meta.url))
     const receipt=join(dir,'verified-approval.json')
-    const args=[cli,dir,'12345',SHA,receipt,'67890']
+    const args=[cli,dir,'12345',SHA,receipt,'67890','54321']
     const ok=spawnSync(process.execPath,args,{encoding:'utf8'})
     assert.equal(ok.status,0,ok.stderr)
     const saved=JSON.parse(readFileSync(receipt,'utf8'))
     assert.equal(saved.schemaVersion,1)
     assert.equal(saved.approvalRef,'890')
+    assert.equal(saved.workflowId,'67890')
+    assert.equal(saved.stagingRunId,'54321')
+    assert.equal(saved.runAttempt,1)
     assert.equal(saved.reviewer,'security-reviewer')
     assert.equal(saved.sourceSha,SHA)
     assert.equal('approvals' in saved,false)
@@ -202,7 +216,7 @@ test('CLI writes a minimal, non-overwritable receipt only after authenticated re
     f.approvals[0].user.login='developer'
     writeFileSync(join(dir,'approvals.json'),JSON.stringify(f.approvals))
     const denied=join(dir,'denied-approval.json')
-    const failed=spawnSync(process.execPath,[cli,dir,'12345',SHA,denied,'67890'],{encoding:'utf8'})
+    const failed=spawnSync(process.execPath,[cli,dir,'12345',SHA,denied,'67890','54321'],{encoding:'utf8'})
     assert.notEqual(failed.status,0,'self-approval must be rejected')
     assert.equal(existsSync(denied),false,'denied approval must leave no receipt')
   } finally { rmSync(dir,{recursive:true,force:true}) }
