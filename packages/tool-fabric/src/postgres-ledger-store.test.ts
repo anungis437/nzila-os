@@ -47,6 +47,28 @@ function auditRecord(prevHash: string, seq: number, orgId = ORG, id: string = ra
 }
 
 describe('P0 Postgres Trust Ledger CAS adapter',()=>{
+  it('rejects malformed and unsafe expected CAS heads without opening a transaction', async () => {
+    const db = fake()
+    const store = new PostgresAtomicTrustLedgerStore(db)
+    const entry = auditRecord(LEDGER_GENESIS_HASH, 1)
+    for (const head of [
+      null,
+      { revision: -1, headHash: LEDGER_GENESIS_HASH },
+      { revision: 0.5, headHash: LEDGER_GENESIS_HASH },
+      { revision: '0', headHash: LEDGER_GENESIS_HASH },
+      { revision: Number.MAX_SAFE_INTEGER, headHash: LEDGER_GENESIS_HASH },
+      { revision: Number.MAX_SAFE_INTEGER + 1, headHash: LEDGER_GENESIS_HASH },
+      { revision: 0, headHash: 'INVALID' },
+      { revision: 0, headHash: LEDGER_GENESIS_HASH.toUpperCase().replace(/0/g, 'F') },
+    ]) {
+      await expect(store.compareAndAppend(ORG, head as never, entry))
+        .rejects.toThrow(LedgerConflictError)
+    }
+    await expect(store.compareAndAppend(ORG, null as never, null as never))
+      .rejects.toThrow(LedgerConflictError)
+    expect(db.commits).toBe(0)
+  })
+
   it('rejects missing authenticated transactional client',()=>{
     expect(()=>new PostgresAtomicTrustLedgerStore({} as never)).toThrow(LedgerStoreUnavailableError)
   })

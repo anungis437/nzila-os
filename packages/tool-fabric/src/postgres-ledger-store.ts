@@ -208,6 +208,15 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
 
   async compareAndAppend(orgId: string, expected: LedgerHead, entry: AuditEntry): Promise<LedgerHead> {
     assertStream(orgId)
+    // CAS coordinates are security inputs. Reject malformed, negative and
+    // unsafe revisions before arithmetic or any database transaction. A
+    // MAX_SAFE_INTEGER head cannot be advanced without losing JS precision.
+    if (!expected || !Number.isSafeInteger(expected.revision) ||
+        expected.revision < 0 || expected.revision >= Number.MAX_SAFE_INTEGER ||
+        typeof expected.headHash !== 'string' ||
+        !/^[0-9a-f]{64}$/.test(expected.headHash)) {
+      throw new LedgerConflictError('Invalid expected persistent trust head')
+    }
     if (!trustLedgerAuditEntrySchema.safeParse(entry).success || entry.orgId !== orgId ||
         entry.prevHash !== expected.headHash ||
         entry.payload.seq !== expected.revision + 1 ||
