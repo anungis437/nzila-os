@@ -83,7 +83,7 @@ describe('S5 input validation and bounds', () => {
   })
 
   it('lets only the version the scorer implements be named, so no model row is created for a typed string', () => {
-    expect(SLA_MODEL_VERSION).toBe('sla-risk-v1')
+    expect(SLA_MODEL_VERSION).toBe('sla-risk-v2')
     const route = read('app/api/ml/predictions/sla-breach-risk/route.ts')
     expect(route).toContain('z.literal(SLA_MODEL_VERSION)')
     expect(route).toContain('const selectedVersion = SLA_MODEL_VERSION')
