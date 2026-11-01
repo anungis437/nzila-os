@@ -4,7 +4,16 @@ const m = vi.hoisted(() => {
   const state = { selected: [] as unknown[][], updated: [] as unknown[][] };
   const tx = {
     select: vi.fn(() => ({
-      from: vi.fn(() => ({ where: vi.fn(async () => state.selected.shift() ?? []) })),
+      from: vi.fn(() => {
+        const query = {
+          where: vi.fn(() => query),
+          for: vi.fn(async () => state.selected.shift() ?? []),
+          // A normal GET awaits the query without acquiring a row lock.
+          then: (resolve: (rows: unknown[]) => unknown, reject: (error: unknown) => unknown) =>
+            Promise.resolve(state.selected.shift() ?? []).then(resolve, reject),
+        };
+        return query;
+      }),
     })),
     update: vi.fn(() => ({
       set: vi.fn(() => ({
@@ -108,6 +117,8 @@ describe('subscription detail: mandate-bound reads, metadata and cancellation', 
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
       organizationId: 'org-1', action: 'billing.subscription.metadata_update', resourceId: id,
     }));
+    const query = m.tx.select.mock.results.at(-1)?.value.from.mock.results.at(-1)?.value;
+    expect(query.for).toHaveBeenCalledWith('update');
   });
 
   it('DELETE refuses cancellation before lookup when the execute mandate is absent', async () => {
