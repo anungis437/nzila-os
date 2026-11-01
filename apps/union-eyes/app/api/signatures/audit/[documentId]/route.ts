@@ -25,6 +25,14 @@ export const GET = withApiAuth(async (
     );
     }
 
+    // A signed-in identity without an active tenant cannot read signer identities,
+    // IP addresses or audit events. Do not delegate an empty tenant to a mockable
+    // downstream access check; reject before any document lookup.
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
+    }
+
     const documentId = params.documentId;
 
     // SECURITY FIX (PR #752 round 49): verify the caller has access to this
@@ -33,7 +41,7 @@ export const GET = withApiAuth(async (
     // any document's signer identities, IPs, and timestamps by guessing a
     // documentId). Reuses the same check already applied to
     // app/api/signatures/documents/[id]/route.ts.
-    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id, user.organizationId ?? '');
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id, organizationId);
     if (!hasAccess) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
@@ -41,7 +49,7 @@ export const GET = withApiAuth(async (
       );
     }
     
-    const senderId = await SignatureService.getDocumentSender(documentId, user.organizationId ?? '');
+    const senderId = await SignatureService.getDocumentSender(documentId, organizationId);
 
     // Get query params
     const { searchParams } = new URL(req.url);
@@ -49,7 +57,7 @@ export const GET = withApiAuth(async (
 
     if (format === "report") {
       // Generate comprehensive audit report
-      const report = await AuditTrailService.generateAuditReport(documentId, user.organizationId ?? '');
+      const report = await AuditTrailService.generateAuditReport(documentId, organizationId);
       
       return NextResponse.json({
         report: signatureViewForViewer(report, user.id, senderId),
@@ -57,7 +65,7 @@ export const GET = withApiAuth(async (
       });
     } else {
       // Return raw audit trail
-      const auditTrail = await AuditTrailService.getDocumentAudit(documentId, user.organizationId ?? '');
+      const auditTrail = await AuditTrailService.getDocumentAudit(documentId, organizationId);
       
       return NextResponse.json({
         documentId,
