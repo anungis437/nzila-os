@@ -47,13 +47,12 @@ const DIAGNOSTIC_AMOUNT_CENTS = 650000; // $6,500 CAD (canonical)
 function buildLineItems(
   tierId: 'executive_continuity_brief' | 'institutional_continuity_diagnostic',
   currency: string,
+  verifiedPriceId?: string,
 ) {
-  const priceIdBrief = process.env.STRIPE_PRICE_ICRA_BRIEF;
-  const priceIdDiagnostic = process.env.STRIPE_PRICE_ICRA_DIAGNOSTIC;
 
   if (tierId === 'executive_continuity_brief') {
-    if (priceIdBrief) {
-      return [{ price: priceIdBrief, quantity: 1 }];
+    if (verifiedPriceId) {
+      return [{ price: verifiedPriceId, quantity: 1 }];
     }
     return [
       {
@@ -68,8 +67,8 @@ function buildLineItems(
   }
 
   // institutional_continuity_diagnostic
-  if (priceIdDiagnostic) {
-    return [{ price: priceIdDiagnostic, quantity: 1 }];
+  if (verifiedPriceId) {
+    return [{ price: verifiedPriceId, quantity: 1 }];
   }
   return [
     {
@@ -212,7 +211,7 @@ export async function POST(request: NextRequest) {
     const checkoutParams = {
       mode: 'payment',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      line_items: buildLineItems(tierId, currency) as any,
+      line_items: buildLineItems(tierId, currency, configuredPriceId) as any,
       managed_payments: { enabled: true },
       success_url: successUrl,
       cancel_url: cancelUrl,
