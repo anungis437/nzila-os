@@ -10414,6 +10414,20 @@
       ],
       "correction": "PG15 and PG16 combined-schema CI now requires five additional real-role native suites for precedent privacy, clause visibility, financial duties, document intake and union-side WorkAid consent; all five filenames are mandatory in the receipt and all-skipped fails.",
       "remaining": "Exact-HEAD expanded native CI results and receipt artifacts, fix any failures; HTTP/browser/staging and independent Gate 0C.4 institutional authority and persona ratification. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-NATIVE-FINANCE-AUDIT-FIXTURE-ISOLATION-20261101",
+      "status": "TEST_SOURCE_CORRECTED_EXACT_SHA_NATIVE_REQUALIFICATION_PENDING",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "defectReference": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-native-finance-audit-fixture-isolation-20261101.md",
+      "sourceBaseline": "275ac8e687b09025472b6d8db2521ab54f39f564",
+      "files": [
+        "apps/union-eyes/db/__tests__/finance-duties.postgres.test.ts"
+      ],
+      "correction": "Both PG15/16 expanded native CI jobs exposed a legacy-lineage financial test switching on Canonical V2 without its auth-owned membership reader. First missing-function failure left a disposable audit fault armed, cascading to two other tests. Test now always clears fault injection, keeps legacy audit rollback proof in its actual topology, and separately asserts that missing V2 reader refuses without financial-step or audit persistence.",
+      "remaining": "Exact-HEAD PG15/16, full Vitest/contract, HTTP/browser/staging; genuine session-bound Canonical V2 financial audit/rollback native proof; independent reviewer, owner persona and institutional mandate ratification. No defect or CLOSED credit."
     }
   ]
 }
