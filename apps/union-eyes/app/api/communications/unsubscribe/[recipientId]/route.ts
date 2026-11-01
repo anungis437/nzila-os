@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { and, eq, inArray, ne } from 'drizzle-orm';
 
-import { db } from '@/db';
 import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
 import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { verifyTrackingToken } from '@/lib/communications/tracking-token';
