@@ -67,8 +67,11 @@ test('binds exact signed staging bytes, source SHA and run ID; rejects substitut
 })
 test('OCI receipt rejects signed but noncanonical Azure deployment identities',()=>{
   for(const name of [
-    'Demo', 'demo--prod', 'demo\\nprod', 'demo/prod', '-demo', 'demo-',
-    'd', 'a'.repeat(33), 'demo\\\\nprod',
+    'Demo', 'demo--prod', 'demo' + String.fromCharCode(10) + 'prod',
+    'demo' + String.fromCharCode(13) + 'prod',
+    'demo' + String.fromCharCode(0) + 'prod',
+    'demo/prod', '-demo', 'demo-', 'd', 'a'.repeat(33),
+    'demo' + String.fromCharCode(92) + 'nprod',
   ]) {
     assert.throws(()=>verifyOciProvenance(opts({manifestRaw:JSON.stringify({
       ...manifest(),deployTargets:[{name,image:IMAGE}],
