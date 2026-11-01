@@ -16,6 +16,7 @@ const histories = {}
 const out = []
 let outstanding = register.length
 for (const batch of batches.batches) {
+  if (!Array.isArray(batch.items)) throw new Error(`batch ${batch.id} has no items: source evidence that earns no defect credit belongs in crossCuttingSourceEvidence, not in batches`)
   const before = outstanding
   const corrected = []
   // Provenance: every defect a batch touched, with the batch's evidence commit and the files it changed. `touches` also covers a defect

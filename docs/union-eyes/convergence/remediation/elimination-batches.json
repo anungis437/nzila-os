@@ -1525,9 +1525,19 @@
             "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
             "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
             "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
-            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts",
+            "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts"
           ],
-          "explanation": "The SCIM list excludes removed members, counts and pages in SQL from the requested start index, and no longer loads the whole roster. F03-C: the list and its count now run in ue_scim_list_members and ue_scim_member_total, confined to live scim:-keyed members, with the page cut in SQL from a startIndex that is at least 1 and a count clamped to 0-100 (RFC 7644: a value that is not a number or is negative reads as 0, which returns the total only), and a filter that supports only userName eq and externalId eq (anything else is a 400 invalidFilter)."
+          "explanation": "The SCIM list excludes removed members, counts and pages in SQL from the requested start index, and no longer loads the whole roster. F03-C: the list and its count now run in ue_scim_list_members and ue_scim_member_total, confined to live scim:-keyed members, with the page cut in SQL from a startIndex that is at least 1 and a count clamped to 0-100 (RFC 7644: a value that is not a number or is negative reads as 0, which returns the total only), and a filter that supports only userName eq and externalId eq (anything else is a 400 invalidFilter). B124: the list and its count are statements on the directory instead of functions: live rows only (deleted_at is null, so a person removed by the delete action is not listed), paged in SQL, with the same bounded startIndex and count and the same two supported filters (userName eq and externalId eq; anything else is a 400 invalidFilter). Every listed person is reported as not active, because a provisioned person is never active before a link and acceptance rule exists."
         },
         {
           "prefix": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID",
@@ -1554,10 +1564,19 @@
             "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
             "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
             "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
-            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts"
           ],
-          "explanation": "Provisioning creates a pending membership, not an active one, so naming a user grants no access until the person accepts. A provisioned person is keyed scim:<organizationId>:<userName> (lower-cased), so a userName that matches a real user of another organization can no longer make that user a member here, and the membership stays pending until the person accepts. The organization comes from the bearer token, never the path. F03-C: the identity-provider subject is now read and kept (externalId), one live person per externalId per organization is enforced under an advisory lock because the native table has no unique index, a removed member with the same key is revived rather than answering 409, and a deprovision this stream made can be reversed while a suspension the organization made is left alone (outcome held). A provisioned person is still created pending with role member and no status or role from the payload.",
-          "remaining": "A provisioned person is not yet linked to that person's own account. The key scim:<organization>:<userName> can never equal a session user id, so a provisioned person has no access until a linking and acceptance rule exists. An e-mail match is deliberately not that rule (users/me/organizations documents why), and the identity-provider federation that would carry a verified subject is not implemented. The open decision is recorded as the blocked operation UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY (SCIM_MEMBER_LINK) and is not invented. No CLOSED credit."
+          "explanation": "Provisioning creates a pending membership, not an active one, so naming a user grants no access until the person accepts. A provisioned person is keyed scim:<organizationId>:<userName> (lower-cased), so a userName that matches a real user of another organization can no longer make that user a member here, and the membership stays pending until the person accepts. The organization comes from the bearer token, never the path. F03-C: the identity-provider subject is now read and kept (externalId), one live person per externalId per organization is enforced under an advisory lock because the native table has no unique index, a removed member with the same key is revived rather than answering 409, and a deprovision this stream made can be reversed while a suspension the organization made is left alone (outcome held). A provisioned person is still created pending with role member and no status or role from the payload. B124: the userName is no longer stored as a membership user id at all. A provisioned person is a row of the identity-provider directory (public.scim_provisioned_users) that keeps the identity-provider subject (externalId) and the userName as separate fields, in the status pending, never active, with no role and no link to any account, so the identifier of an existing user of another organization can no longer make that user a member of this one, and no row of organization_members is written. A removed person with the same userName is revived in place (reprovisioned) instead of answering 409, one live person per userName and per externalId is a partial unique index of the database (not only an advisory lock), and a name or e-mail the identity provider did not send is stored as null, never as the userName.",
+          "remaining": "A provisioned person is not yet linked to that person own account, so a provisioned person has no access until a linking and acceptance rule exists. An e-mail match is deliberately not that rule (users/me/organizations documents why), and the identity-provider federation that would carry a verified subject is not implemented. The open decision is recorded as the blocked operation UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY (SCIM_MEMBER_LINK) and is not invented. No CLOSED credit."
         },
         {
           "prefix": "DEF-0B11-IDS-SATISFACTION-PENDING-LIST-HAS-NO-ORGANIZATION-PREDICATE",
@@ -1967,9 +1986,19 @@
             "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
             "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
             "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
-            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts",
+            "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts"
           ],
-          "explanation": "The body is parsed with a bounded schema (userName 1-320, names at most 100, at most 10 well-formed e-mails); malformed, oversized or non-JSON input is a 400 naming the field, with nothing written or audited. F03-C: create, replace and patch bodies are parsed by bounded parsers (parseScimUserResource and parseScimPatch, including Entra-style capitalised operations and string booleans, Okta path-less value objects and the emails[type eq \"work\"].value path). Malformed, oversized or unsupported input is a 400 SCIM error naming the problem (invalidSyntax, invalidPath or invalidValue) with nothing written or audited."
+          "explanation": "The body is parsed with a bounded schema (userName 1-320, names at most 100, at most 10 well-formed e-mails); malformed, oversized or non-JSON input is a 400 naming the field, with nothing written or audited. F03-C: create, replace and patch bodies are parsed by bounded parsers (parseScimUserResource and parseScimPatch, including Entra-style capitalised operations and string booleans, Okta path-less value objects and the emails[type eq \"work\"].value path). Malformed, oversized or unsupported input is a 400 SCIM error naming the problem (invalidSyntax, invalidPath or invalidValue) with nothing written or audited. B124: the provisioning route bounds its body with a schema (userName 1 to 320 characters, externalId 1 to 255, name parts at most 100, at most ten e-mail values each a valid address of at most 320), so malformed or oversized input is a 400 naming the field and nothing reaches the database. Status unchanged; this records that the check survived the move to the directory."
         },
         {
           "prefix": "DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER",
@@ -7930,10 +7959,16 @@
             "apps/union-eyes/app/api/__tests__/clause-library-compare.route.test.ts",
             "apps/union-eyes/app/api/__tests__/clause-library-audit.route.test.ts",
             "apps/union-eyes/app/api/clause-library/[id]/tags/__tests__/route.test.ts",
-            "apps/union-eyes/app/api/clause-library/[id]/share/__tests__/route.test.ts"
+            "apps/union-eyes/app/api/clause-library/[id]/share/__tests__/route.test.ts",
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.sql",
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.rollback.sql",
+            "apps/union-eyes/db/rls-storage-authority/governance.ts",
+            "apps/union-eyes/app/api/__tests__/precedents-item-isolation.pglite.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-anonymization.contract.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
           ],
-          "explanation": "The system-role list, search and compare paths now apply a shared source-organization projection. For an anonymized or unclassified clause, cross-organization readers do not receive the source organization id/name; the source owner retains attribution. Search and compare explicitly select the anonymization flag instead of silently omitting it. A unit test covers the disclosure rule and a source contract asserts use in all three routes. The item GET now uses the same source projection and treats an unset anonymization flag as not permission to disclose the original employer; a route regression exercises this legacy-null case. F03-B: the list, search, compare, item and tags reads no longer run on the system role, and the boundary between organizations is no longer a hand-written predicate alone. Cache migration 0048 makes the sharing rule one database rule: public.ue_clause_readable_by (owner, public, explicit grant, same federation, both congress-eligible) with ue_clause_federation_ancestor, ue_clause_congress_eligible and ue_clause_source_name, as pinned-search_path SECURITY DEFINER functions revoked from PUBLIC, and permissive SELECT policies on shared_clause_library and clause_library_tags (a tag follows its parent). The tenant runtime role reads exactly the permitted rows with no application predicate, and sharing-authority.ts and every route ask the same functions, so the route and the policy cannot drift. The native proof found that the earlier system-role reads could not run on the bootstrapped schema: the system role holds no privilege on these tables (requiredSystemPrivileges is empty), so they failed with permission denied; the routes now run as the tenant. Native proof on PostgreSQL 15 and 16 (nine tests): a fixed hierarchy matrix, the real list route as the runtime role, the list equal to the item rule on every pair, tags following the clause, and the functions neither executable by PUBLIC nor a directory. Replaced or adapted tests, disclosed: sharing-authority.test.ts was rewritten (its five tests pinned the removed mocked database helpers) to pin delegation to the database functions, the strict-true admission, the malformed-id fail-closed and the grant-literal sanitising; the route tests now assert the tenant context and that the system role is not used, and their stale mocks and header comments were corrected; clause-library-audit.route.test.ts also repaired a stale DELETE case (the version-history insert added in F06 batch 2 consumed its queued result).",
-          "remaining": "Anonymisation of clause free text, real HTTP response checks and independent review are outstanding. Where federations nest, the rule now uses the deepest federation on the path (the earlier code was nondeterministic); that semantic needs institutional confirmation. The frozen 0B4 register still describes the routes as system-role reads; it is a historical record and is not rewritten. No CLOSED credit."
+          "explanation": "The system-role list, search and compare paths now apply a shared source-organization projection. For an anonymized or unclassified clause, cross-organization readers do not receive the source organization id/name; the source owner retains attribution. Search and compare explicitly select the anonymization flag instead of silently omitting it. A unit test covers the disclosure rule and a source contract asserts use in all three routes. The item GET now uses the same source projection and treats an unset anonymization flag as not permission to disclose the original employer; a route regression exercises this legacy-null case. F03-B: the list, search, compare, item and tags reads no longer run on the system role, and the boundary between organizations is no longer a hand-written predicate alone. Cache migration 0048 makes the sharing rule one database rule: public.ue_clause_readable_by (owner, public, explicit grant, same federation, both congress-eligible) with ue_clause_federation_ancestor, ue_clause_congress_eligible and ue_clause_source_name, as pinned-search_path SECURITY DEFINER functions revoked from PUBLIC, and permissive SELECT policies on shared_clause_library and clause_library_tags (a tag follows its parent). The tenant runtime role reads exactly the permitted rows with no application predicate, and sharing-authority.ts and every route ask the same functions, so the route and the policy cannot drift. The native proof found that the earlier system-role reads could not run on the bootstrapped schema: the system role holds no privilege on these tables (requiredSystemPrivileges is empty), so they failed with permission denied; the routes now run as the tenant. Native proof on PostgreSQL 15 and 16 (nine tests): a fixed hierarchy matrix, the real list route as the runtime role, the list equal to the item rule on every pair, tags following the clause, and the functions neither executable by PUBLIC nor a directory. Replaced or adapted tests, disclosed: sharing-authority.test.ts was rewritten (its five tests pinned the removed mocked database helpers) to pin delegation to the database functions, the strict-true admission, the malformed-id fail-closed and the grant-literal sanitising; the route tests now assert the tenant context and that the system role is not used, and their stale mocks and header comments were corrected; clause-library-audit.route.test.ts also repaired a stale DELETE case (the version-history insert added in F06 batch 2 consumed its queued result). B124 CORRECTION of the F03-B account above, which described a design that was refused and is retired. The database functions public.ue_clause_readable_by, ue_clause_federation_ancestor, ue_clause_congress_eligible and ue_clause_source_name (cache 0048) are SECURITY DEFINER functions executable by the tenant runtime role, which the catalog admission contract refuses (a fresh combined bootstrap on PostgreSQL 15 and 16 stopped at its privilege preflight, which the earlier native tests missed because they applied the migrations directly). Cache 0050 drops them and the two policies that called them, with a rollback that restores the 0048 objects. The rule is now stated once, without any function: an organization reads a clause it owns, a clause at the public level, and a private clause that names it in the explicit grant list. That is exactly what the unchanged tenant policies of cache 0011 and 0012 admit, and lib/clause-library/sharing-authority.ts (the item rule canReadSharedClause and the list predicate buildClauseVisibilityCondition) repeats it, so the list, search, compare, item and tags reads still run as the tenant and cannot disagree with the policy. The federation and congress levels are owner-only (fail closed) and the create, update and share routes refuse to set them with a 403, so a clause is never marked as shared with a group that cannot read it. The name of the owning organization of a clause the caller may read, and whose source the projection discloses, is read by id on the system role (sourceNamesFor); the ids come only from rows the tenant policy returned, so it is not a directory of organizations. Re-proven on native PostgreSQL 15 and 16 (twelve tests: the unmodified list route for four organizations against a written-out expectation, the list equal to the item rule on every pair, a stranger reading only what is public, the federation and congress levels readable by the owner alone, the tenant runtime role reading exactly what the rule allows with no application predicate, tags following the clause, no ue_clause_ function left and no SECURITY DEFINER function executable by a business role, the owner name read by id, and the refused share not stored) and by the enforced catalog admission preflight on both versions (ADMITTED, 874 manifest entries). Replaced or adapted tests, disclosed: sharing-authority.test.ts and clause-library-visibility.postgres.test.ts were rewritten for the function-free rule, precedents-item-isolation.pglite.test.ts dropped the 0048 function fixture and strengthened the federation and congress refusal, and the route tests, mocks and header comments that named the removed functions were corrected. The congress_memberships manifest entry no longer lists the clause routes as its readers, because none reads it any more.",
+          "remaining": "Anonymisation of clause free text, real HTTP response checks and independent review are outstanding. No other organization can read a federation- or congress-level clause: that capability is withheld, not reconciled, until an approved way to evaluate another organization hierarchy exists (an affiliation projection kept by trigger functions that nobody can execute, or an approved bounded-owner definer; neither is built and the prerequisite is recorded, not invented). The congress_memberships runtime SELECT grant now has no caller and stays until that decision is made. The frozen 0B4 register still describes the routes as system-role reads; it is a historical record and is not rewritten. No CLOSED credit."
         }
       ]
     },
@@ -8006,10 +8041,19 @@
             "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
             "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
             "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
-            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts"
           ],
-          "explanation": "The SCIM Users route now authenticates the identity provider by the organization's bearer token, not a browser session: only the SHA-256 is stored (platform 0048 has no bearer_token column and hashes a legacy plaintext one), the lookup is by hash with a constant-time compare, a disabled, revoked or expired configuration authenticates nothing, the token (not the path) decides the organization, and the surface is rate limited per client and refuses when the limiter is unavailable. A signed-in administrator issues, rotates and revokes the token at /api/enterprise/sso/scim-token (shown once, audited atomically). The SCIM prefix is public at the edge and the token route is not. Proven on native PostgreSQL 15 and 16 (hash and per-organization uniqueness, tenant isolation, system lookup by hash). F03-C: the SCIM surface is now a full user lifecycle for an identity provider. GET one user, PATCH, PUT and DELETE exist next to list and create, with ServiceProviderConfig, and every answer is an RFC 7644 message (the error body, the string status and the list envelope) emitted through a machine-credential mode in withApi that reads no browser session and attaches no user (it refuses to combine with required, roles, minRole or cron). The organization still comes from the bearer token and never from the path. deprovision_action is consumed in the database: suspend, archive or delete is a state change on the roster row (delete is a soft delete plus a revoked status, no row is removed), an already inactive member is reported as unchanged, and a restoration is allowed only for a deprovision this stream made. SCIM sees and changes only members it provisioned (scim:-keyed rows), so an identity-provider call can never remove an account holder. Only effective changes are audited (scim.user.update, .reactivate, .deprovision), with field names and no values, in the same transaction as the change. Eight SECURITY DEFINER functions (cache 0049, rollback shipped) are executable by the system role only, with PUBLIC revoked. Proven on native PostgreSQL 15 and 16 (17 tests: the real route, real token authentication, the real functions, the real audit chain and the system role; the migration applied twice and rolled back to zero functions). Replaced test, disclosed: scim-users.route.test.ts was rewritten from the framework envelope to the SCIM wire format.",
-          "remaining": "No scim_events_log row is written per provisioning event: the physical relation is a four-column Django stub with no row security and no grants, so its shape is a separate schema change. There is no Groups resource: mapping identity-provider groups to roles is an institutional authority decision that is not made (a role in a SCIM payload is refused today). The attribute mapping is stored but not consumed. Real HTTP acceptance and independent review are outstanding. No CLOSED credit."
+          "explanation": "The SCIM Users route now authenticates the identity provider by the organization's bearer token, not a browser session: only the SHA-256 is stored (platform 0048 has no bearer_token column and hashes a legacy plaintext one), the lookup is by hash with a constant-time compare, a disabled, revoked or expired configuration authenticates nothing, the token (not the path) decides the organization, and the surface is rate limited per client and refuses when the limiter is unavailable. A signed-in administrator issues, rotates and revokes the token at /api/enterprise/sso/scim-token (shown once, audited atomically). The SCIM prefix is public at the edge and the token route is not. Proven on native PostgreSQL 15 and 16 (hash and per-organization uniqueness, tenant isolation, system lookup by hash). F03-C: the SCIM surface is now a full user lifecycle for an identity provider. GET one user, PATCH, PUT and DELETE exist next to list and create, with ServiceProviderConfig, and every answer is an RFC 7644 message (the error body, the string status and the list envelope) emitted through a machine-credential mode in withApi that reads no browser session and attaches no user (it refuses to combine with required, roles, minRole or cron). The organization still comes from the bearer token and never from the path. deprovision_action is consumed in the database: suspend, archive or delete is a state change on the roster row (delete is a soft delete plus a revoked status, no row is removed), an already inactive member is reported as unchanged, and a restoration is allowed only for a deprovision this stream made. SCIM sees and changes only members it provisioned (scim:-keyed rows), so an identity-provider call can never remove an account holder. Only effective changes are audited (scim.user.update, .reactivate, .deprovision), with field names and no values, in the same transaction as the change. Eight SECURITY DEFINER functions (cache 0049, rollback shipped) are executable by the system role only, with PUBLIC revoked. Proven on native PostgreSQL 15 and 16 (17 tests: the real route, real token authentication, the real functions, the real audit chain and the system role; the migration applied twice and rolled back to zero functions). Replaced test, disclosed: scim-users.route.test.ts was rewritten from the framework envelope to the SCIM wire format. B124 CORRECTION of the F03-C account above: the eight SECURITY DEFINER functions of cache 0049 were refused by the catalog admission contract in the same way, and cache 0051 drops them (that retirement is one-way: rolling back 0049 restores them). A provisioned person is no longer a row of the membership table, because the system role holds no INSERT on organization_members and widening it was refused. The people an identity provider provisions are rows of their own directory, public.scim_provisioned_users (platform 0059, rollback shipped: id, organization, configuration, userName and its lower-case key, externalId, name, e-mail, status, the deprovision fields and a soft delete), which only the system role reaches (select, insert and update, no delete) under forced row security. Provisioning, listing, reading, updating and deprovisioning are plain statements in the system transaction of the caller; inside it the configuration row is locked with FOR SHARE so a disabled or removed stream cannot write, and advisory locks make concurrent calls deterministic. The Django stub scim_events_log is evolved (platform 0059: the missing columns, defaults, constraints and an index) and every created, updated and deleted event now writes one row with no body, the path without its query string and a truncated address, append-only for the system role (select and insert). Proven on native PostgreSQL 15 and 16 (seventeen tests against the real tables, the real routes, real token authentication and the system role), and the migrations 0051, 0059 and 0050 were rolled back in that order and then applied forward twice on both versions by hand (the 0051 rollback leaves the 0049 functions retired by design; a run by hand, not a committed test), after which the enforced catalog admission preflight admitted both. Replaced tests, disclosed: provisioned-members.test.ts, scim-users.route.test.ts and scim-user-by-id.route.test.ts were rewritten for the directory (they pinned the removed functions and the roster rows), a new PGlite helper applies the real 0059 migration unmodified, and s44-gate0-pg-migrations.test.ts now pins the machine-credential declaration of the route and the token check in lib/scim/route-support.ts instead of an inline call that the F03-C refactor had already moved.",
+          "remaining": "The attribute mapping is stored but not consumed. There is no Groups resource: mapping identity-provider groups to roles is an institutional authority decision that is not made (a role in a SCIM payload is refused today). A provisioned person is not linked to an account (see the sibling defect). Real HTTP acceptance and independent review are outstanding. No CLOSED credit."
         }
       ]
     },
@@ -9513,7 +9557,7 @@
     {
       "id": "B123-F03-C-SCIM-USER-LIFECYCLE",
       "family": "F03-C: SCIM user lifecycle through a session-less machine credential, with provisioned members confined to the identity-provider stream",
-      "evidenceCommit": null,
+      "evidenceCommit": "bb1b76633",
       "items": [],
       "touches": [
         {
@@ -9623,18 +9667,189 @@
       ]
     },
     {
-      "id": "UE-LOCATION-POLICY-PACKAGED-CATALOG-PARITY-20261101",
-      "status": "SOURCE_CHANGED_TEST_AUTHORED_NOT_QUALIFIED",
-      "defectCredit": 0,
-      "closureCredit": 0,
-      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-location-policy-packaged-catalog-parity-20261101.md",
-      "sourceBaseline": "bb1b76633612a85714ecce4f20ea901e2ba75a2b",
-      "files": [
-        "apps/union-eyes/lib/operations/catalog-authority-contract.json",
-        "apps/union-eyes/lib/operations/catalog-authority-contract.test.ts"
+      "id": "B124-F03-ADMISSION-REDESIGN-CLAUSE-SHARING-AND-SCIM-DIRECTORY",
+      "family": "F03-B and F03-C redesign: the catalog admission contract refuses SECURITY DEFINER functions executable by the runtime or system role, so the clause sharing rule and the SCIM store are rebuilt without them",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CLAUSE-LIBRARY-FEDERATION-PREDICATES-DISAGREE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.sql",
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.rollback.sql",
+            "apps/union-eyes/lib/clause-library/sharing-authority.ts",
+            "apps/union-eyes/app/api/clause-library/route.ts",
+            "apps/union-eyes/app/api/clause-library/search/route.ts",
+            "apps/union-eyes/app/api/clause-library/compare/route.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/governance.ts",
+            "apps/union-eyes/db/__tests__/clause-library-visibility.postgres.test.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/sharing-authority.test.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts",
+            "apps/union-eyes/app/api/__tests__/precedents-item-isolation.pglite.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-compare.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-audit.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-anonymization.contract.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/share/__tests__/route.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/tags/__tests__/route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ],
+          "explanation": "The two predicates the finding names no longer exist. The nearest-federation-ancestor test of the item rule and the anywhere-in-the-path test of the list predicate were both removed with the federation and congress levels (cache 0050, lib/clause-library/sharing-authority.ts), so the list, search, compare, item and tags reads apply one rule that is also the tenant row policy, and a nested federation can no longer make them differ. The native test compares the list result with the item rule for every pair of organizations and clauses over a fixed hierarchy (a federation with two locals, a local outside it, a local of another federation, congress members and a non-member) on PostgreSQL 15 and 16, and shows that no hierarchy path or congress membership changes what an organization may read; the unit tests pin the single rule and the refusal to set an unavailable level.",
+          "remaining": "The disagreement is removed by withholding the federation and congress levels (owner-only), not by deciding what a nested federation should mean: that semantic, and the capability of sharing within a federation or congress, remain an institutional decision and unbuilt engineering. Real HTTP checks and independent review are outstanding. No CLOSED credit."
+        }
       ],
-      "correction": "Reconciles the digest-bound packaged catalog authority for the global location_tracking_config singleton with the canonical SELECT-only manifest. Adds an explicit regression invariant forbidding runtime INSERT and system grants. Existing 777-defect provenance unchanged.",
-      "remaining": "Exact-HEAD focused and full tests, native PG15/16 catalog privilege reconciliation, HTTP/browser/staging, independent reviewer and institutional location-policy authority. Separate SECURITY DEFINER migration 0048/0049 preflight remains safety-blocked and must not be bypassed."
+      "touches": [
+        {
+          "defectId": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.sql",
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.rollback.sql",
+            "apps/union-eyes/lib/clause-library/sharing-authority.ts",
+            "apps/union-eyes/app/api/clause-library/route.ts",
+            "apps/union-eyes/app/api/clause-library/search/route.ts",
+            "apps/union-eyes/app/api/clause-library/compare/route.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/governance.ts",
+            "apps/union-eyes/db/__tests__/clause-library-visibility.postgres.test.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/sharing-authority.test.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts",
+            "apps/union-eyes/app/api/__tests__/precedents-item-isolation.pglite.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-compare.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-audit.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-anonymization.contract.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/share/__tests__/route.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/tags/__tests__/route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B4-CLAUSE-LIBRARY-FEDERATION-PREDICATES-DISAGREE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.sql",
+            "apps/union-eyes/db/migrations-cache/0050_clause_library_sharing_functions_retired.rollback.sql",
+            "apps/union-eyes/lib/clause-library/sharing-authority.ts",
+            "apps/union-eyes/app/api/clause-library/route.ts",
+            "apps/union-eyes/app/api/clause-library/search/route.ts",
+            "apps/union-eyes/app/api/clause-library/compare/route.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/governance.ts",
+            "apps/union-eyes/db/__tests__/clause-library-visibility.postgres.test.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/sharing-authority.test.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/source-projection.test.ts",
+            "apps/union-eyes/app/api/__tests__/precedents-item-isolation.pglite.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-compare.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-audit.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-anonymization.contract.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/share/__tests__/route.test.ts",
+            "apps/union-eyes/app/api/clause-library/[id]/tags/__tests__/route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-LIST-INCLUDES-REMOVED-MEMBERS-AS-ACTIVE-AND-READS-THE-WHOLE-ROSTER-BEFORE-PAGING",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.sql",
+            "apps/union-eyes/db/migrations-platform/0059_scim_provisioned_users.rollback.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.sql",
+            "apps/union-eyes/db/migrations-cache/0051_scim_provisioned_users_rls_closure.rollback.sql",
+            "apps/union-eyes/db/schema/sso-scim-schema.ts",
+            "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+            "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/events-log.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-pglite.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {
@@ -9865,6 +10080,20 @@
       ],
       "correction": "Binds geofence GET's lookup, consent, policy, event write and coordinate-free atomic audit to one tenant RLS transaction; direct service geofence creation refuses unverified strike associations.",
       "remaining": "Focused/full tests, PG15/16, HTTP/browser/staging, institutional tracking policy and independent ratification. Migration 0048 catalog privilege preflight remains blocked."
+    },
+    {
+      "id": "UE-LOCATION-POLICY-PACKAGED-CATALOG-PARITY-20261101",
+      "status": "SOURCE_CHANGED_TEST_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-location-policy-packaged-catalog-parity-20261101.md",
+      "sourceBaseline": "bb1b76633612a85714ecce4f20ea901e2ba75a2b",
+      "files": [
+        "apps/union-eyes/lib/operations/catalog-authority-contract.json",
+        "apps/union-eyes/lib/operations/catalog-authority-contract.test.ts"
+      ],
+      "correction": "Reconciles the digest-bound packaged catalog authority for the global location_tracking_config singleton with the canonical SELECT-only manifest. Adds an explicit regression invariant forbidding runtime INSERT and system grants. Existing 777-defect provenance unchanged.",
+      "remaining": "Exact-HEAD focused and full tests, native PG15/16 catalog privilege reconciliation, HTTP/browser/staging, independent reviewer and institutional location-policy authority. Separate SECURITY DEFINER migration 0048/0049 preflight remains safety-blocked and must not be bypassed."
     }
   ]
 }
