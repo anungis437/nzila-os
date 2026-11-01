@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { PageHeading } from '@/components/dashboard/page-heading';
 import { Card } from "@/components/ui/card";
 import { Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Check, Download, Info, Loader2 } from "lucide-react";
@@ -60,11 +60,14 @@ const DEFAULT_SETTINGS = {
 
 export default function OrgSettingsContent() {
   const t = useTranslations();
+  const isFrench = useLocale().startsWith('fr');
   const [activeSection, setActiveSection] = useState<OrgSettingsSection>("general");
   const [hasChanges, setHasChanges] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const [notEnforced, setNotEnforced] = useState<string[]>([]);
   
   const [orgSettings, setOrgSettings] = useState(DEFAULT_SETTINGS);
 
@@ -77,6 +80,9 @@ export default function OrgSettingsContent() {
       const json = await res.json();
       if (!json.success || !json.data?.organization) throw new Error('SETTINGS_UNAVAILABLE');
       if (json.success && json.data?.organization) {
+        setNotEnforced(Array.isArray(json.data.notEnforced)
+          ? json.data.notEnforced.filter((key: unknown): key is string => typeof key === 'string')
+          : []);
         const org = json.data.organization;
         const s = org.settings ?? {};
         setOrgSettings(prev => ({
@@ -197,6 +203,7 @@ export default function OrgSettingsContent() {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError(false);
     try {
       const res = await fetch('/api/settings/organization', {
         method: 'PUT',
@@ -236,17 +243,24 @@ export default function OrgSettingsContent() {
         }),
       });
       const json = await res.json();
-      if (json.success) {
-        setHasChanges(false);
+      if (!res.ok || !json.success || json.data?.updated !== true) {
+        throw new Error('SETTINGS_SAVE_FAILED');
       }
+      // A successful write does not imply these settings are enforced by the platform.
+      setNotEnforced(Array.isArray(json.data.notEnforced)
+        ? json.data.notEnforced.filter((key: unknown): key is string => typeof key === 'string')
+        : []);
+      setHasChanges(false);
     } catch {
-      // save failed — keep dirty state
+      // Never display a false save-success state or clear unsaved edits after a failed request.
+      setSaveError(true);
     } finally {
       setSaving(false);
     }
   };
 
   const handleDiscard = () => {
+    setSaveError(false);
     setLoading(true);
     setHasChanges(false);
     loadSettings();
@@ -274,6 +288,11 @@ export default function OrgSettingsContent() {
       >
         <PageHeading title={t('settings.title')} description={t('settings.subtitle')} />
 
+        {saveError && (
+          <div role="alert" className="mt-4 rounded-lg border border-destructive p-4 text-sm text-destructive">
+            {isFrench ? 'Les paramètres n’ont pas été enregistrés. Vos modifications sont conservées; veuillez réessayer.' : 'Settings were not saved. Your changes are preserved; please try again.'}
+          </div>
+        )}
         <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
@@ -759,6 +778,15 @@ export default function OrgSettingsContent() {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('settings.securityCompliance')}</h2>
                   <p className="text-gray-600">{t('settings.securityComplianceDescription')}</p>
+                </div>
+                <div role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                  <p className="font-semibold">{isFrench ? 'Préférences enregistrées, non appliquées' : 'Stored preferences, not enforced controls'}</p>
+                  <p className="mt-1">{isFrench
+                    ? 'Les options de sécurité ci-dessous ne sont pas appliquées par les mécanismes de connexion, de session ou de mot de passe. Ne les considérez pas comme des protections actives.'
+                    : 'The security options below are not enforced by sign-in, session or password mechanisms. Do not rely on them as active protections.'}</p>
+                  {notEnforced.length > 0 && (
+                    <p className="mt-2 break-words">{isFrench ? 'Champs enregistrés sans application : ' : 'Saved but unenforced fields: '}{notEnforced.join(', ')}</p>
+                  )}
                 </div>
 
                 <div className="space-y-4">
