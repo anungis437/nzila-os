@@ -10279,6 +10279,23 @@
       ],
       "correction": "Reconciles the digest-bound packaged catalog authority for the global location_tracking_config singleton with the canonical SELECT-only manifest. Adds an explicit regression invariant forbidding runtime INSERT and system grants. Existing 777-defect provenance unchanged.",
       "remaining": "Exact-HEAD focused and full tests, native PG15/16 catalog privilege reconciliation, HTTP/browser/staging, independent reviewer and institutional location-policy authority. Separate SECURITY DEFINER migration 0048/0049 preflight remains safety-blocked and must not be bypassed."
+    },
+    {
+      "id": "UE-CLAUSE-SHARING-GET-TENANT-TRANSACTION-20261101",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "defectReference": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-clause-sharing-read-tenant-transaction-20261101.md",
+      "sourceBaseline": "f902f8b705fe0b230d45088bc4a6c306ee2ff945",
+      "sourceCommit": "9b55a6d1c3a810d1127189514c9ee7f412d683a2",
+      "testCommit": "43a614ce4238306537a32c20d8d134bef9dac9d6",
+      "files": [
+        "apps/union-eyes/app/api/clause-library/[id]/share/route.ts",
+        "apps/union-eyes/app/api/__tests__/clause-library-audit.route.test.ts"
+      ],
+      "correction": "GET clause-sharing owner configuration now SELECTs through the caller's tenant-scoped RLS transaction instead of the module-level db handle; adds transaction, non-owner and tenantless regression assertions. Corrects the POST standing-denial fixture to supply the prerequisite owned clause.",
+      "remaining": "Exact-head whole Vitest/contract, real PG15/16 adversarial tenant read, HTTP/browser/staging and independent reviewer/persona/institutional ratification. No additional implemented or CLOSED credit."
     }
   ]
 }
