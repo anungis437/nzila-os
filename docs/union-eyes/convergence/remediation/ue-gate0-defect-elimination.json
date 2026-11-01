@@ -17460,7 +17460,22 @@
         "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts",
         "apps/union-eyes/lib/icra/email-results-origin.ts"
       ],
-      "remaining": "Canonical production HTTPS redirect source-level correction requires exact-HEAD executable/PG15/16/HTTP/Stripe qualification. Actual displayed price and configured Stripe Price IDs still require authoritative parity and institutional pricing decision; no implementation or CLOSED credit."
+      "remaining": "Canonical production HTTPS redirect source-level correction requires exact-HEAD executable/PG15/16/HTTP/Stripe qualification. Actual displayed price and configured Stripe Price IDs still require authoritative parity and institutional pricing decision; no implementation or CLOSED credit.",
+      "supplementalPriceParityEvidence": {
+        "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+        "sourceCommits": [
+          "4ba6e535dcee10c5389ab0702d97f9ff22c92257",
+          "c52e28953b58df2d53b3b297736a07a86693be43",
+          "e8f351a3a33e0b44d198756102c203f801ffa481"
+        ],
+        "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-icra-checkout-stripe-price-parity-20261101.md",
+        "files": [
+          "apps/union-eyes/app/api/icra/checkout/route.ts",
+          "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
+        ],
+        "correction": "Configured Stripe Price IDs are retrieved and checked for exact published CAD amount, active one-time status and currency before a payable session is created. Unverifiable/mismatched prices and non-CAD default currency fail closed.",
+        "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16, real Stripe Price and checkout HTTP/browser/staging acceptance, tax and payment-webhook qualification, institutional pricing decision and independent reviewer/persona/authority ratification. No CLOSED or implementation credit."
+      }
     },
     "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE": {
       "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
