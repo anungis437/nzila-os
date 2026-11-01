@@ -328,6 +328,12 @@ jobs:
             )
           ' staging-artifacts/artifact-manifest.json > staging-artifacts/artifact-manifest.filtered.json
 
+          # #1038: require the selected set to match every approved signed target.
+          # Reject silent omissions, extra targets or changed image/destination.
+          node scripts/release/verify-deploy-selection.mjs \
+            staging-artifacts/artifact-manifest.json \
+            staging-artifacts/artifact-manifest.filtered.json "$APPROVED"
+
           # BR-5 image immutability gate (fail-closed): every approved production
           # deploy target MUST reference an immutable @sha256 digest. A mutable
           # tag (:latest / :sha / :env) is not accepted as production promotion
