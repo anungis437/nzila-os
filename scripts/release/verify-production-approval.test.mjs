@@ -30,11 +30,31 @@ test('only a distinct individually entitled human on same run is accepted',()=>{
   assert.equal(receipt.workflowId,'67890')
   assert.equal(receipt.stagingRunId,'54321')
   assert.equal(receipt.runAttempt,1)
+  assert.equal(receipt.reviewerId,202)
+  assert.deepEqual(receipt.initiatorActorIds,[101])
 })
 test('production approval receipts require exact verified staging run coordinates',()=>{
   for (const invalid of [undefined,null,'','0','-1','1.5','other-run',0]) {
     const f=fixture();f.expectedStagingRunId=invalid
     assert.throws(()=>verifyProductionApproval(f),/invalid request coordinates/)
+  }
+})
+test('unsafe, coercible and noncanonical GitHub run coordinates fail closed',()=>{
+  for (const invalid of ['9007199254740992', '01', '1e3', ' 12345', -1, 1.5]) {
+    const f=fixture();f.expectedRunId=invalid
+    assert.throws(()=>verifyProductionApproval(f),/invalid request coordinates/)
+  }
+  for (const key of ['expectedWorkflowId','expectedStagingRunId']) {
+    for (const invalid of ['9007199254740992','01','1e3']) {
+      const f=fixture();f[key]=invalid
+      assert.throws(()=>verifyProductionApproval(f),/invalid request coordinates/)
+    }
+  }
+  for (const key of ['id','workflow_id']) {
+    for (const invalid of ['12345',null,Number.MAX_SAFE_INTEGER+1]) {
+      const f=fixture();f.run[key]=invalid
+      assert.throws(()=>verifyProductionApproval(f),/untrusted numeric workflow identity/)
+    }
   }
 })
 test('completed, cancelled, queued or otherwise inactive runs cannot mint approval receipts',()=>{
@@ -209,6 +229,8 @@ test('CLI writes a minimal, non-overwritable receipt only after authenticated re
     assert.equal(saved.stagingRunId,'54321')
     assert.equal(saved.runAttempt,1)
     assert.equal(saved.reviewer,'security-reviewer')
+    assert.equal(saved.reviewerId,202)
+    assert.deepEqual(saved.initiatorActorIds,[101])
     assert.equal(saved.sourceSha,SHA)
     assert.equal('approvals' in saved,false)
     const replay=spawnSync(process.execPath,args,{encoding:'utf8'})

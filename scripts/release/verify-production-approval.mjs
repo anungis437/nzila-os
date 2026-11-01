@@ -18,14 +18,21 @@ const identity = user => {
   return login && Number.isSafeInteger(user?.id) && user.id > 0 &&
     ['User', 'Bot'].includes(user?.type) ? { id: user.id, login } : null
 }
+// GitHub IDs arrive as JSON numbers in authenticated API responses. Refuse
+// unsafe integers and coercible strings; decimal text is accepted only at
+// the CLI boundary, never as an authenticated run identity.
+const coordinate = value => /^[1-9][0-9]*$/.test(String(value ?? '')) &&
+  Number.isSafeInteger(Number(value)) && Number(value) > 0
 const matches = entry => Array.isArray(entry?.environments) &&
   entry.environments.some(e => String(e?.name ?? '').toLowerCase() === 'production')
 
 export function verifyProductionApproval({environment,run,approvals,expectedRunId,expectedSha,expectedWorkflowId,expectedStagingRunId,now=new Date()}) {
-  if (!/^[1-9][0-9]*$/.test(String(expectedRunId ?? '')) ||
-      !/^[1-9][0-9]*$/.test(String(expectedWorkflowId ?? '')) ||
+  if (!coordinate(expectedRunId) || !coordinate(expectedWorkflowId) ||
       !/^[0-9a-f]{40}$/i.test(expectedSha ?? '') ||
-      !/^[1-9][0-9]*$/.test(String(expectedStagingRunId ?? ''))) deny('invalid request coordinates')
+      !coordinate(expectedStagingRunId)) deny('invalid request coordinates')
+  if (!Number.isSafeInteger(run?.id) || !Number.isSafeInteger(run?.workflow_id)) {
+    deny('untrusted numeric workflow identity')
+  }
   // Display names can be duplicated across workflow files. Require the
   // immutable workflow ID independently resolved from deploy-production.yml.
   if (String(run?.id) !== String(expectedRunId) ||
@@ -112,7 +119,9 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
     runId:String(expectedRunId),workflowId:String(expectedWorkflowId),
     stagingRunId:String(expectedStagingRunId),runAttempt:run.run_attempt,
     sourceSha:expectedSha,environment:'production',
-    reviewer,approvalRef:String(last.id),reviewedAt:new Date(at).toISOString(),
+    reviewer,reviewerId:reviewerIdentity.id,
+    initiatorActorIds:[...initiatorIds].sort((a,b)=>a-b),
+    approvalRef:String(last.id),reviewedAt:new Date(at).toISOString(),
   })
 }
 
