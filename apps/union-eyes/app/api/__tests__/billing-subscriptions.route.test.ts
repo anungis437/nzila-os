@@ -7,7 +7,8 @@ const m = vi.hoisted(() => {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
-      limit: vi.fn(async () => (state.selectRows.shift() ?? []) as unknown[]),
+      limit: vi.fn(() => chain),
+      offset: vi.fn(async () => (state.selectRows.shift() ?? []) as unknown[]),
     };
     return chain;
   };
@@ -69,9 +70,9 @@ describe('billing/subscriptions route', () => {
     const { GET } = await loadRoute();
     m.state.selectRows.push([{ id: 'sub_1' }]);
 
-    const result = await GET({ organizationId: 'org_1', userId: 'u1' });
+    const result = await GET({ organizationId: 'org_1', userId: 'u1', request: { url: 'https://example.test/api/billing/subscriptions?limit=25&offset=50' } });
 
-    expect(result).toMatchObject({ subscriptions: [{ id: 'sub_1' }] });
+    expect(result).toMatchObject({ subscriptions: [{ id: 'sub_1' }], page: { limit: 25, offset: 50 } });
     expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1', userId: 'u1' }, expect.any(Function));
     expect(m.requireLiveFinancialMandate).toHaveBeenCalledWith(m.db, {
       organizationId: 'org_1', userId: 'u1', action: 'finance:view',
@@ -143,7 +144,7 @@ describe('billing/subscriptions route', () => {
 
   it('GET requires the caller identity even with an organization context', async () => {
     const { GET } = await loadRoute();
-    await expect(GET({ organizationId: 'org_1' })).rejects.toThrow('Organization context required');
+    await expect(GET({ organizationId: 'org_1', request: { url: 'https://example.test/api/billing/subscriptions' } })).rejects.toThrow('Organization context required');
     expect(m.db.select).not.toHaveBeenCalled();
   });
 });
