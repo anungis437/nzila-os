@@ -18,7 +18,7 @@ export const GET = withApiAuth(async (
 ) => {
   try {
     const user = await getCurrentUser();
-    if (!user) {
+    if (!user || !user.id) {
       return standardErrorResponse(
       ErrorCode.AUTH_REQUIRED,
       'Unauthorized'
@@ -33,7 +33,7 @@ export const GET = withApiAuth(async (
     // any document's signer identities, IPs, and timestamps by guessing a
     // documentId). Reuses the same check already applied to
     // app/api/signatures/documents/[id]/route.ts.
-    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id);
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id, user.organizationId ?? '');
     if (!hasAccess) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
@@ -41,7 +41,7 @@ export const GET = withApiAuth(async (
       );
     }
     
-    const senderId = await SignatureService.getDocumentSender(documentId);
+    const senderId = await SignatureService.getDocumentSender(documentId, user.organizationId ?? '');
 
     // Get query params
     const { searchParams } = new URL(req.url);
@@ -49,7 +49,7 @@ export const GET = withApiAuth(async (
 
     if (format === "report") {
       // Generate comprehensive audit report
-      const report = await AuditTrailService.generateAuditReport(documentId);
+      const report = await AuditTrailService.generateAuditReport(documentId, user.organizationId ?? '');
       
       return NextResponse.json({
         report: signatureViewForViewer(report, user.id, senderId),
@@ -57,7 +57,7 @@ export const GET = withApiAuth(async (
       });
     } else {
       // Return raw audit trail
-      const auditTrail = await AuditTrailService.getDocumentAudit(documentId);
+      const auditTrail = await AuditTrailService.getDocumentAudit(documentId, user.organizationId ?? '');
       
       return NextResponse.json({
         documentId,

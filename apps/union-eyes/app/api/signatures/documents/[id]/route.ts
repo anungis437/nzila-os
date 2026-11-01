@@ -32,7 +32,7 @@ export const GET = withApiAuth(async (
     const documentId = params.id;
     
     // SECURITY FIX: Verify user has access to this document (prevent IDOR)
-    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id);
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id, user.organizationId ?? '');
     if (!hasAccess) {
       return standardErrorResponse(
       ErrorCode.FORBIDDEN,
@@ -40,7 +40,7 @@ export const GET = withApiAuth(async (
     );
     }
 
-    const document = await SignatureService.getDocumentStatus(documentId);
+    const document = await SignatureService.getDocumentStatus(documentId, user.organizationId ?? '');
 
     return NextResponse.json(signatureViewForViewer(projectSignaturePayload(document), user.id, document.sentBy));
   } catch (error) {
@@ -76,7 +76,7 @@ export const PATCH = withApiAuth(async (
     const documentId = params.id;
     
     // SECURITY FIX: Verify user has access to this document (prevent IDOR)
-    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, userId);
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, userId, user.organizationId ?? '');
     if (!hasAccess) {
       return standardErrorResponse(
       ErrorCode.FORBIDDEN,
@@ -123,11 +123,11 @@ export const POST = withApiAuth(async (
     if (!user || !user.id) {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
     }
-    const sender = await SignatureService.getDocumentSender(params.id);
+    const sender = await SignatureService.getDocumentSender(params.id, user.organizationId ?? '');
     if (!sender || sender !== user.id) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
     }
-    const result = await SignatureService.syncDocumentStatus(params.id);
+    const result = await SignatureService.syncDocumentStatus(params.id, user.organizationId ?? '');
     return NextResponse.json({ success: true, ...result });
   } catch (error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to refresh document status', error);

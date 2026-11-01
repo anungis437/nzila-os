@@ -7424,10 +7424,14 @@
       "files": [
         "apps/union-eyes/lib/signature/signature-service.ts",
         "apps/union-eyes/lib/signature/signer-verification.ts",
-        "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
+        "apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+        "apps/union-eyes/app/api/signatures/audit/[documentId]/route.ts",
+        "apps/union-eyes/lib/signature/__tests__/signature-service.test.ts",
+        "apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts"
       ],
-      "explanation": "A signer user id must now be an active member of the sending organization when the request is created, so a user of another organization cannot be named as a signer, and the status and audit views are projected per viewer.",
-      "remaining": "verifyDocumentAccess, getDocumentStatus and the audit reads still look the document up by id through the shared handle with no tenant context; they need an organization-bound read path."
+      "explanation": "A signer user id must now be an active member of the sending organization when the request is created, so a user of another organization cannot be named as a signer, and the status and audit views are projected per viewer. Additional source correction: sender, access, status, provider-sync and audit-report reads now require the authenticated organization, use withRLSContext and organization predicates, and the audit-chain integrity read uses the same tenant transaction.",
+      "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16 with real RLS and cross-tenant fixtures, HTTP/browser/staging, signature-provider acceptance and independent institutional review are outstanding. Other signature service write helpers still require a separate authorization audit; no CLOSED credit."
     },
     "DEF-0B9-ASM-ONBOARDING-AUDIT-EVENTS-ARE-EMITTED-ON-AN-IN-PROCESS-BUS-WITH-NO-SUBSCRIBER": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -8173,6 +8177,18 @@
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts"
       ],
       "remaining": "Exact-HEAD focused/full tests, native PostgreSQL 15/16, HTTP/browser and provider interoperability, atomic consent/audit qualification, independent reviewer and institutional ratification. Original defect remains PARTIAL; no new implementation or closure credit."
+    },
+    "DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-WITH-NO-ORGANIZATION-PREDICATE-AND-ACCEPT-ANY-USER-ID-A-SENDER-TYPED-AS-SIGNER": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-signature-read-tenant-context-20261031.md",
+      "files": [
+        "apps/union-eyes/lib/signature/signature-service.ts",
+        "apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+        "apps/union-eyes/app/api/signatures/audit/[documentId]/route.ts",
+        "apps/union-eyes/lib/signature/__tests__/signature-service.test.ts",
+        "apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts"
+      ],
+      "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16 with real RLS and cross-tenant fixtures, HTTP/browser/staging, signature-provider acceptance and independent institutional review are outstanding. Other signature service write helpers still require a separate authorization audit; no CLOSED credit."
     }
   }
 }

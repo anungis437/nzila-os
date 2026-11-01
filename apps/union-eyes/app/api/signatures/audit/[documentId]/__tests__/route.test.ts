@@ -43,7 +43,7 @@ describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApiAuth.mockImplementation((handler: any) => handler);
-    m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id' });
+    m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id', organizationId: 'org-own' });
     m.verifyDocumentAccess.mockResolvedValue(true);
     m.getDocumentSender.mockResolvedValue('caller-own-id');
     m.getDocumentAudit.mockResolvedValue([{ id: 'evt_1' }]);
@@ -59,7 +59,7 @@ describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant
     );
 
     expect(response.status).toBe(403);
-    expect(m.verifyDocumentAccess).toHaveBeenCalledWith('doc_victim', 'caller-own-id');
+    expect(m.verifyDocumentAccess).toHaveBeenCalledWith('doc_victim', 'caller-own-id', 'org-own');
     expect(m.getDocumentAudit).not.toHaveBeenCalled();
   });
 
@@ -74,7 +74,19 @@ describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant
 
     expect(response.status).toBe(200);
     expect(payload.events).toEqual([{ id: 'evt_1' }]);
-    expect(m.getDocumentAudit).toHaveBeenCalledWith('doc_own');
+    expect(m.getDocumentAudit).toHaveBeenCalledWith('doc_own', 'org-own');
+  });
+
+  it('fails closed when the authenticated user has no current organization', async () => {
+    const { GET } = await loadRoute();
+    m.getCurrentUser.mockResolvedValueOnce({ id: 'caller-own-id' });
+    const response = await GET(
+      new NextRequest('http://localhost/api/signatures/audit/doc_own'),
+      { params: { documentId: 'doc_own' } },
+    );
+    expect(response.status).toBe(403);
+    expect(m.verifyDocumentAccess).toHaveBeenCalledWith('doc_own', 'caller-own-id', '');
+    expect(m.getDocumentAudit).not.toHaveBeenCalled();
   });
 
   it('returns 401 when unauthenticated', async () => {

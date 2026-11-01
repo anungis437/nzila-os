@@ -250,58 +250,41 @@ export class SignatureService {
     return document;
   }
 
-  /** The user who sent the document, or null when it does not exist. */
-  static async getDocumentSender(documentId: string): Promise<string | null> {
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, documentId),
-      columns: { sentBy: true },
-    });
+  /** Read the sender only inside the authenticated organization's tenant context. */
+  static async getDocumentSender(documentId: string, organizationId: string): Promise<string | null> {
+    if (!organizationId) return null;
+    const document = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.signatureDocuments.findFirst({
+        where: and(eq(signatureDocuments.id, documentId), eq(signatureDocuments.organizationId, organizationId)),
+        columns: { sentBy: true },
+      }),
+    );
     return document?.sentBy ?? null;
   }
 
-  /**
-   * Verify user has access to document (SECURITY FIX: Prevent IDOR)
-   */
-  static async verifyDocumentAccess(
-    documentId: string,
-    userId: string
-  ): Promise<boolean> {
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, documentId),
-      with: {
-        signers: true,
-      },
+  /** A sender or assigned signer may read a document only within their current organization. */
+  static async verifyDocumentAccess(documentId: string, userId: string, organizationId: string): Promise<boolean> {
+    if (!organizationId || !userId) return false;
+    return withRLSContext({ organizationId }, async (tx) => {
+      const document = await tx.query.signatureDocuments.findFirst({
+        where: and(eq(signatureDocuments.id, documentId), eq(signatureDocuments.organizationId, organizationId)),
+        with: { signers: true },
+      });
+      if (!document) return false;
+      return document.sentBy === userId || document.signers.some((signer) => signer.userId === userId);
     });
-
-    if (!document) {
-      return false;
-    }
-
-    // A signature document is visible to the person who sent it and to its signers, which is also what the user's
-    // own document list shows. Membership of the organization is not a relationship to the document.
-    const isSender = document.sentBy === userId;
-    const isSigner = document.signers.some((s) => s.userId === userId);
-
-    return isSender || isSigner;
   }
 
-  /**
-   * Get document status
-   */
-  static async getDocumentStatus(documentId: string) {
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, documentId),
-      with: {
-        signers: true,
-      },
-    });
-
-    if (!document) {
-      throw new Error("Document not found");
-    }
-
-    // A read never calls the provider or writes a row; the sender refreshes explicitly through syncDocumentStatus. It does say when an open
-    // request has run out, so an expired request is not shown as awaiting signatures.
+  /** The status read is tenant-bound and does not call the provider or mutate state. */
+  static async getDocumentStatus(documentId: string, organizationId: string) {
+    if (!organizationId) throw new Error("Organization context required");
+    const document = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.signatureDocuments.findFirst({
+        where: and(eq(signatureDocuments.id, documentId), eq(signatureDocuments.organizationId, organizationId)),
+        with: { signers: true },
+      }),
+    );
+    if (!document) throw new Error("Document not found");
     const runOut = Boolean(document.expiresAt && document.expiresAt.getTime() < Date.now() && !FINAL_DOCUMENT_STATES.includes(document.status as (typeof FINAL_DOCUMENT_STATES)[number]));
     return { ...document, effectiveStatus: runOut ? "expired" : document.status };
   }
@@ -316,10 +299,13 @@ export class SignatureService {
    * together, and the update is conditional on the status that was judged, so two concurrent syncs or a replay cannot
    * apply twice.
    */
-  static async syncDocumentStatus(documentId: string): Promise<{ synced: boolean; reason?: string }> {
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, documentId),
-    });
+  static async syncDocumentStatus(documentId: string, organizationId: string): Promise<{ synced: boolean; reason?: string }> {
+    if (!organizationId) return { synced: false, reason: "missing_organization" };
+    const document = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.signatureDocuments.findFirst({
+        where: and(eq(signatureDocuments.id, documentId), eq(signatureDocuments.organizationId, organizationId)),
+      }),
+    );
 
     if (!document || !document.providerEnvelopeId) {
       return { synced: false, reason: "no_envelope" };
@@ -892,72 +878,80 @@ export class AuditTrailService {
     return { sealed: true as const, head: verification.head };
   }
 
-  static async getDocumentAudit(documentId: string) {
-    return await db
-      .select()
-      .from(signatureAuditTrail)
-      .where(eq(signatureAuditTrail.documentId, documentId))
-      .orderBy(signatureAuditTrail.timestamp);
+  static async getDocumentAudit(documentId: string, organizationId: string) {
+    if (!organizationId) throw new Error("Organization context required");
+    return withRLSContext({ organizationId }, (tx) =>
+      tx.select().from(signatureAuditTrail)
+        .where(and(
+          eq(signatureAuditTrail.documentId, documentId),
+          inArray(signatureAuditTrail.documentId, documentsOfOrganization(tx, organizationId)),
+        ))
+        .orderBy(signatureAuditTrail.timestamp),
+    );
   }
 
-  static async getSignerAudit(signerId: string) {
-    return await db
-      .select()
-      .from(signatureAuditTrail)
-      .where(eq(signatureAuditTrail.signerId, signerId))
-      .orderBy(signatureAuditTrail.timestamp);
+  static async getSignerAudit(signerId: string, organizationId: string) {
+    if (!organizationId) throw new Error("Organization context required");
+    return withRLSContext({ organizationId }, (tx) =>
+      tx.select().from(signatureAuditTrail)
+        .where(and(
+          eq(signatureAuditTrail.signerId, signerId),
+          inArray(signatureAuditTrail.documentId, documentsOfOrganization(tx, organizationId)),
+        ))
+        .orderBy(signatureAuditTrail.timestamp),
+    );
   }
 
-  /**
-   * Generate audit report for legal compliance
-   */
-  static async generateAuditReport(documentId: string) {
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, documentId),
-      with: {
-        signers: true,
-      },
+  /** Produce a tenant-bound audit report; verify the chain from the same RLS transaction. */
+  static async generateAuditReport(documentId: string, organizationId: string) {
+    if (!organizationId) throw new Error("Organization context required");
+    return withRLSContext({ organizationId }, async (tx) => {
+      const document = await tx.query.signatureDocuments.findFirst({
+        where: and(eq(signatureDocuments.id, documentId), eq(signatureDocuments.organizationId, organizationId)),
+        with: { signers: true },
+      });
+      if (!document) throw new Error("Document not found");
+      const auditLog = await tx.select().from(signatureAuditTrail)
+        .where(and(
+          eq(signatureAuditTrail.documentId, documentId),
+          inArray(signatureAuditTrail.documentId, documentsOfOrganization(tx, organizationId)),
+        ))
+        .orderBy(signatureAuditTrail.timestamp);
+      return {
+        document: {
+          id: document.id,
+          title: document.title,
+          fileHash: document.fileHash,
+          createdAt: document.createdAt,
+          completedAt: document.completedAt,
+          status: document.status,
+        },
+        signers: document.signers.map((signer) => ({
+          userId: signer.userId,
+          name: signer.name,
+          email: signer.email,
+          signedAt: signer.signedAt,
+          ipAddress: signer.ipAddress,
+          signatureType: signer.signatureType,
+        })),
+        auditTrail: auditLog.map((entry) => ({
+          timestamp: entry.timestamp,
+          event: entry.eventType,
+          eventDescription: entry.eventDescription,
+          actorUserId: entry.actorUserId,
+          actorEmail: entry.actorEmail,
+          ipAddress: entry.ipAddress,
+        })),
+        integrity: await this.integrityStatement(documentId, auditLog, tx),
+        generatedAt: new Date(),
+      };
     });
-
-    const auditLog = await this.getDocumentAudit(documentId);
-
-    return {
-      document: {
-        id: document?.id,
-        title: document?.title,
-        fileHash: document?.fileHash,
-        createdAt: document?.createdAt,
-        completedAt: document?.completedAt,
-        status: document?.status,
-      },
-      // Each row names its owner (the signer's user id, the actor's user id) so a signer's own row is recognised and every other row is
-      // redacted for them; an address or a description is never packed into one field that no redaction rule can read.
-      signers: document?.signers.map((s) => ({
-        userId: s.userId,
-        name: s.name,
-        email: s.email,
-        signedAt: s.signedAt,
-        ipAddress: s.ipAddress,
-        signatureType: s.signatureType,
-      })),
-      auditTrail: auditLog.map((entry) => ({
-        timestamp: entry.timestamp,
-        event: entry.eventType,
-        eventDescription: entry.eventDescription,
-        actorUserId: entry.actorUserId,
-        actorEmail: entry.actorEmail,
-        ipAddress: entry.ipAddress,
-      })),
-      // The integrity block states what was actually checked when the report was generated, never what a certified trail would say.
-      integrity: await this.integrityStatement(documentId, auditLog),
-      generatedAt: new Date(),
-    };
   }
 
-  private static async integrityStatement(documentId: string, auditLog: Array<{ eventType: string; metadata: unknown }>) {
-    const verification = await this.verifyChain(documentId);
+  private static async integrityStatement(documentId: string, auditLog: Array<{ eventType: string; metadata: unknown }>, tx: RLSTx) {
+    const verification = await this.verifyChain(documentId, tx);
     const seal = auditLog.find((entry) => entry.eventType === "document_sealed")?.metadata as { sealedHead?: string; sealedEvents?: number } | undefined;
-    const rows = await loadChainRows(db, documentId);
+    const rows = await loadChainRows(tx, documentId);
     const sealedRow = seal?.sealedEvents ? rows.find((row) => (row.metadata as { chainSeq?: number } | null)?.chainSeq === seal.sealedEvents) : undefined;
     const sealed = Boolean(verification.ok && seal?.sealedHead && sealedRow?.hashChain === seal.sealedHead);
     const base = {

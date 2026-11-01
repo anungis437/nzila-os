@@ -59,15 +59,36 @@ describe('SignatureService authority and atomic audit', () => {
     }));
     m.tx.transaction = async (fn: (t: unknown) => Promise<unknown>) => fn(m.tx);
     m.tx.insert = vi.fn(() => ({ values: async (v: Record<string, unknown>) => { m.trail.push(v); } }));
-    m.tx.query = { documentSigners: { findMany: async () => [{ status: 'signed' }, { status: 'sent' }] } };
+    m.tx.query = { documentSigners: { findMany: async () => [{ status: 'signed' }, { status: 'sent' }] }, signatureDocuments: { findFirst: m.documentFind } };
   });
 
   describe('verifyDocumentAccess', () => {
     it('lets the sender and a signer in, and keeps an ordinary organization member out', async () => {
-      expect(await SignatureService.verifyDocumentAccess('d1', 'sender')).toBe(true);
-      expect(await SignatureService.verifyDocumentAccess('d1', 'signer')).toBe(true);
-      expect(await SignatureService.verifyDocumentAccess('d1', 'other-member')).toBe(false);
+      expect(await SignatureService.verifyDocumentAccess('d1', 'sender', 'o1')).toBe(true);
+      expect(await SignatureService.verifyDocumentAccess('d1', 'signer', 'o1')).toBe(true);
+      expect(await SignatureService.verifyDocumentAccess('d1', 'other-member', 'o1')).toBe(false);
     });
+  });
+
+  it('fails closed without a tenant and never reads the shared document handle', async () => {
+    expect(await SignatureService.verifyDocumentAccess('d1', 'sender', '')).toBe(false);
+    await expect(SignatureService.getDocumentStatus('d1', '')).rejects.toThrow('Organization context required');
+    expect(m.documentFind).not.toHaveBeenCalled();
+  });
+
+  it('binds sender, access, status and provider-sync lookups to the organization predicate', async () => {
+    const { eq } = await import('drizzle-orm');
+    await SignatureService.getDocumentSender('d1', 'o1');
+    await SignatureService.verifyDocumentAccess('d1', 'sender', 'o1');
+    await SignatureService.getDocumentStatus('d1', 'o1');
+    await SignatureService.syncDocumentStatus('d1', 'o1');
+    expect(vi.mocked(eq).mock.calls.filter((c) => c[0] === 'signatureDocuments.organizationId' && c[1] === 'o1')).toHaveLength(4);
+  });
+
+  it('refuses another tenant even when the global document id and actor id are known', async () => {
+    m.documentFind.mockResolvedValue(null);
+    expect(await SignatureService.verifyDocumentAccess('d1', 'sender', 'o2')).toBe(false);
+    await expect(SignatureService.getDocumentStatus('d1', 'o2')).rejects.toThrow('Document not found');
   });
 
   describe('voidDocument', () => {
