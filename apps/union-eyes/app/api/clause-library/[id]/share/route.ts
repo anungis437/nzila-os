@@ -12,7 +12,6 @@
  * context. Organization id is taken from the session, never the body.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { and, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -32,8 +31,8 @@ export const GET = withApi(
     const id = url.pathname.split('/clause-library/')[1]?.split('/share')[0];
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    return withRLSContext({ organizationId }, async () => {
-      const [clause] = await db
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [clause] = await tx
         .select({
           id: sharedClauseLibrary.id,
           sharingLevel: sharedClauseLibrary.sharingLevel,
