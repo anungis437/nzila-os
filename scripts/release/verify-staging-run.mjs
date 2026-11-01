@@ -11,8 +11,9 @@ import { pathToFileURL } from 'node:url'
 function deny(message) { throw new Error('STAGING_RUN_DENIED: ' + message) }
 // API run/workflow IDs are JSON integers, never coercible strings. CLI
 // coordinates may be decimal text, but must remain exactly representable.
-const safeCoordinate = value => /^[1-9][0-9]*$/.test(String(value ?? '')) &&
-  Number.isSafeInteger(Number(value)) && Number(value) > 0
+const safeCoordinate = value => typeof value === 'string' &&
+  /^[1-9][0-9]*$/.test(value) && Number.isSafeInteger(Number(value)) &&
+  Number(value) > 0
 
 export function verifyStagingRun(run, expectedCommit, expectedRunId, expectedWorkflowId) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '') ||

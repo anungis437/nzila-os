@@ -21,8 +21,9 @@ const identity = user => {
 // GitHub IDs arrive as JSON numbers in authenticated API responses. Refuse
 // unsafe integers and coercible strings; decimal text is accepted only at
 // the CLI boundary, never as an authenticated run identity.
-const coordinate = value => /^[1-9][0-9]*$/.test(String(value ?? '')) &&
-  Number.isSafeInteger(Number(value)) && Number(value) > 0
+const coordinate = value => typeof value === 'string' &&
+  /^[1-9][0-9]*$/.test(value) && Number.isSafeInteger(Number(value)) &&
+  Number(value) > 0
 const matches = entry => Array.isArray(entry?.environments) &&
   entry.environments.some(e => String(e?.name ?? '').toLowerCase() === 'production')
 

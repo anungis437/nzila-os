@@ -45,7 +45,7 @@ test('a same-name but different workflow ID cannot substitute canonical staging'
     /missing trusted commit or run coordinate/)
 })
 test('unsafe or coerced GitHub staging coordinates cannot authorize promotion', () => {
-  for (const value of ['9007199254740992','01','1e3',' 123456',0,-1]) {
+  for (const value of ['9007199254740992','01','1e3',' 123456',123456,789,0,-1]) {
     assert.throws(() => verifyStagingRun(validRun(), SHA, value, WORKFLOW_ID),
       /missing trusted commit or run coordinate/)
     assert.throws(() => verifyStagingRun(validRun(), SHA, RUN_ID, value),

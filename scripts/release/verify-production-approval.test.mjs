@@ -40,12 +40,12 @@ test('production approval receipts require exact verified staging run coordinate
   }
 })
 test('unsafe, coercible and noncanonical GitHub run coordinates fail closed',()=>{
-  for (const invalid of ['9007199254740992', '01', '1e3', ' 12345', -1, 1.5]) {
+  for (const invalid of ['9007199254740992', '01', '1e3', ' 12345', 12345, -1, 1.5]) {
     const f=fixture();f.expectedRunId=invalid
     assert.throws(()=>verifyProductionApproval(f),/invalid request coordinates/)
   }
   for (const key of ['expectedWorkflowId','expectedStagingRunId']) {
-    for (const invalid of ['9007199254740992','01','1e3']) {
+    for (const invalid of ['9007199254740992','01','1e3',67890]) {
       const f=fixture();f[key]=invalid
       assert.throws(()=>verifyProductionApproval(f),/invalid request coordinates/)
     }
