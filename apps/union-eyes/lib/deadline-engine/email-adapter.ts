@@ -31,11 +31,13 @@ export interface DeliverReminderInput {
 }
 
 const TRANSIENT_STATUS_CODES = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
+// The suppression list being unreadable is a condition of this platform that passes: the reminder is retried, not dead-lettered.
+const TRANSIENT_CODES = /^(ECONNRESET|ETIMEDOUT|EAI_AGAIN|SUPPRESSION_CHECK_UNAVAILABLE)$/i;
 
 function failureOutcome(message: string, statusCode?: number, code?: string): DeliveryOutcome {
   const isTransient = statusCode !== undefined ? TRANSIENT_STATUS_CODES.has(statusCode)
     : /timeout|ECONNRESET|ETIMEDOUT|EAI_AGAIN/i.test(message)
-      || /^(ECONNRESET|ETIMEDOUT|EAI_AGAIN)$/i.test(code ?? '');
+      || TRANSIENT_CODES.test(code ?? '');
   return { kind: isTransient ? 'transient_failure' : 'permanent_failure', provider: 'resend', message, code, statusCode };
 }
 

@@ -49,17 +49,46 @@ describe('enterprise/sso/providers/[id]', () => {
     m.audit.mockResolvedValue(undefined);
   });
 
-  it('enables a complete provider and audits the fields without any credential value', async () => {
+  it('refuses to turn a provider on while nothing reads it at sign-in, records the attempt, and changes nothing', async () => {
     const { PATCH } = await route();
-    const result = (await PATCH(ctx({ enabled: true }) as never)) as { changed: string[] };
-    expect(result.changed).toEqual(['enabled']);
-    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'sso.provider.update', details: { fields: ['enabled'], enabled: true } }));
+    await expect(PATCH(ctx({ enabled: true }) as never)).rejects.toMatchObject({
+      status: 409,
+      message: expect.stringContaining('auth.sso.federated_sign_in is not available'),
+    });
+    expect(m.setValues).toHaveLength(0);
+    expect(m.audit).toHaveBeenCalledTimes(1);
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        action: 'sso.provider.activate_blocked',
+        resourceId: ID,
+        details: { blockedOperation: 'auth.sso.federated_sign_in', capability: 'UE-SSO-SIGN-IN', requested: ['enabled'] },
+      }),
+      'failure',
+    );
   });
 
-  it('refuses to enable a provider that is not complete for its type', async () => {
-    m.existing = [{ ...oidc, oidcIssuer: null }];
+  it('refuses auto-provisioning for the same reason, and names everything that was asked for', async () => {
     const { PATCH } = await route();
-    await expect(PATCH(ctx({ enabled: true }) as never)).rejects.toMatchObject({ status: 400 });
+    await expect(PATCH(ctx({ autoProvision: true }) as never)).rejects.toMatchObject({ status: 409, message: expect.stringContaining('autoProvision cannot be turned on') });
+    await expect(PATCH(ctx({ enabled: true, autoProvision: true }) as never)).rejects.toMatchObject({ status: 409, message: expect.stringContaining('enabled and autoProvision cannot be turned on') });
+    expect(m.setValues).toHaveLength(0);
+  });
+
+  it('still turns a provider off, and says that this changes no sign-in', async () => {
+    m.existing = [{ ...oidc, enabled: true }];
+    m.updateReturn = [{ id: ID, enabled: false }];
+    const { PATCH } = await route();
+    const result = (await PATCH(ctx({ enabled: false }) as never)) as { changed: string[]; effect: { inEffect: boolean } };
+    expect(result.changed).toEqual(['enabled']);
+    expect(result.effect.inEffect).toBe(false);
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'sso.provider.update', details: { fields: ['enabled'], enabled: false, inEffect: false } }));
+  });
+
+  it('refuses to leave a provider that is already enabled incomplete for its type', async () => {
+    m.existing = [{ ...oidc, enabled: true, oidcIssuer: null }];
+    const { PATCH } = await route();
+    await expect(PATCH(ctx({ name: 'Okta renamed' }) as never)).rejects.toMatchObject({ status: 400 });
     expect(m.audit).not.toHaveBeenCalled();
   });
 
@@ -88,9 +117,9 @@ describe('enterprise/sso/providers/[id]', () => {
     await expect(DELETE(ctx(undefined) as never)).rejects.toMatchObject({ status: 404 });
   });
 
-  it('deletes a provider and records the removal', async () => {
+  it('deletes a provider, records the removal, and says that this changes no sign-in', async () => {
     const { DELETE } = await route();
-    expect(await DELETE(ctx(undefined) as never)).toEqual({ id: ID, deleted: true });
-    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'sso.provider.delete' }));
+    expect(await DELETE(ctx(undefined) as never)).toMatchObject({ id: ID, deleted: true, effect: { inEffect: false, blockedOperation: { operation: 'auth.sso.federated_sign_in' } } });
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'sso.provider.delete', details: { name: 'Okta', providerType: 'oidc', wasEnabled: false } }));
   });
 });

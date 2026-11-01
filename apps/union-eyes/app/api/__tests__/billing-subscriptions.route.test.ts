@@ -85,7 +85,7 @@ describe('billing/subscriptions route', () => {
   it('GET fails closed when no financial view mandate exists', async () => {
     const { GET } = await loadRoute();
     m.requireLiveFinancialMandate.mockRejectedValueOnce(new Error('FINANCIAL_MANDATES_NOT_ISSUED'));
-    await expect(GET({ organizationId: 'org_1', userId: 'u1' })).rejects.toThrow('FINANCIAL_MANDATES_NOT_ISSUED');
+    await expect(GET({ organizationId: 'org_1', userId: 'u1', request: { url: 'https://example.test/api/billing/subscriptions' } })).rejects.toThrow('FINANCIAL_MANDATES_NOT_ISSUED');
     expect(m.db.select).not.toHaveBeenCalled();
   });
 

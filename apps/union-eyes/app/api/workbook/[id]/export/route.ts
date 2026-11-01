@@ -3,7 +3,8 @@
  *
  * Streams the Governance Entropy Workbook PDF. Tier-gated: only available
  * for tiers >= workbook_self_guided. Unclaimed workbooks (no buyer bound)
- * are rejected.
+ * are rejected: the holder of the workbook's capability is told to claim it
+ * first, and anyone else is told the workbook is not there.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -12,6 +13,7 @@ import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { generateWorkbookPdf } from '@/lib/workbook-pdf/generateWorkbookPdf';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { extractWorkbookCapability } from '@/lib/workbook/workbook-capability';
 import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
@@ -26,7 +28,7 @@ const ELIGIBLE_TIERS = new Set([
 ]);
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: workbookId } = await params;
@@ -36,9 +38,9 @@ export async function GET(
     // the tier read and every protected PDF child read then run inside the DB
     // execution context that matches the resolved authority. The export
     // surface is claimed-only: an unclaimed (pre-claim) workbook has no
-    // identity-bound owner and cannot be exported by the bearer id alone.
+    // identity-bound owner and is not exported on the strength of its capability.
     const access = await withClaimedWorkbookAccess(
-      { workbookId, operation: 'read' },
+      { workbookId, operation: 'read', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         if (authority.kind === 'preclaim') {
           return { kind: 'unclaimed' as const };

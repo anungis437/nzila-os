@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import { APP_REGISTRY } from '@nzila/platform-contracts/registry'
 
 import { isRetiredNoOpRoute } from './retired-routes'
+import { isReexportAliasOfAcceptedRoute } from './route-aliases'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -98,6 +99,32 @@ describe('Org-scope enforcement patterns', () => {
     (a) => a.requiresOrgScope,
   )
 
+  // The org-scope guards this contract accepts in a route's own text.
+  const hasOrgGuardIn = (content: string) =>
+    isRetiredNoOpRoute(content) ||
+    content.includes('withOrgScope') ||
+    content.includes('requireOrgAccess') ||
+    /await\s+getCaseActor\s*\(/.test(content) ||
+    content.includes('requireVerifiedOrgAccess') ||   // ABR CourtLens — Phase 2C.6
+    content.includes('requireVerifiedPermission') ||  // ABR CourtLens — Phase 2C.6
+    content.includes('resolveOrgContext') ||
+    content.includes('withApi(') ||
+    content.includes('withApiAuth(') ||
+    content.includes('withRoleAuth(') ||
+    content.includes('crudRoutes(') ||
+    content.includes('requireApiAuth(') ||
+    content.includes('withOrganizationAuth(') ||
+    content.includes('withExternalMatterResourceAuth(') ||
+    content.includes('getCurrentUser(') ||
+    content.includes('withMinRole(') ||
+    content.includes('requireUser(') ||
+    content.includes('authenticateUser(') ||
+    content.includes('verifyWebhookSignature(') ||
+    content.includes('auth()') ||
+    content.includes('getAuth(') ||
+    content.includes('requirePlatformRole(') ||
+    content.includes('cognitionRoute(')
+
   it('ORG-ENFC-001: org-scoped apps use withOrgScope or requireOrgAccess in API routes', () => {
     const violations: string[] = []
 
@@ -109,30 +136,10 @@ describe('Org-scope enforcement patterns', () => {
       for (const route of routes) {
         if (isExemptRoute(route)) continue
         const content = readFileSync(route, 'utf-8')
+        // A route that only re-exports another route is as guarded as that route: one this contract accepts, or one it already exempts.
         const hasOrgGuard =
-          isRetiredNoOpRoute(content) ||
-          content.includes('withOrgScope') ||
-          content.includes('requireOrgAccess') ||
-          /await\s+getCaseActor\s*\(/.test(content) ||
-          content.includes('requireVerifiedOrgAccess') ||   // ABR CourtLens — Phase 2C.6
-          content.includes('requireVerifiedPermission') ||  // ABR CourtLens — Phase 2C.6
-          content.includes('resolveOrgContext') ||
-          content.includes('withApi(') ||
-          content.includes('withApiAuth(') ||
-          content.includes('withRoleAuth(') ||
-          content.includes('crudRoutes(') ||
-          content.includes('requireApiAuth(') ||
-          content.includes('withOrganizationAuth(') ||
-          content.includes('withExternalMatterResourceAuth(') ||
-          content.includes('getCurrentUser(') ||
-          content.includes('withMinRole(') ||
-          content.includes('requireUser(') ||
-          content.includes('authenticateUser(') ||
-          content.includes('verifyWebhookSignature(') ||
-          content.includes('auth()') ||
-          content.includes('getAuth(') ||
-          content.includes('requirePlatformRole(') ||
-          content.includes('cognitionRoute(')
+          hasOrgGuardIn(content) ||
+          isReexportAliasOfAcceptedRoute(route, content, (file, text) => isExemptRoute(file) || hasOrgGuardIn(text))
         if (!hasOrgGuard) {
           const rel = route.replace(APPS_DIR, '').replace(/\\/g, '/')
           violations.push(`${app.id}: ${rel} — no org-scope guard`)

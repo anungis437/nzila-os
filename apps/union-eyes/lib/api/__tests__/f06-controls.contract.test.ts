@@ -18,8 +18,9 @@ describe('F06 audit, retention and read-floor controls', () => {
   // DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT
   it('the transcription route audits before it sends the recording', () => {
     const text = route('voice/transcribe');
-    expect(text.indexOf("'voice.transcribe.requested'")).toBeGreaterThan(0);
-    expect(text.indexOf("'voice.transcribe.requested'")).toBeLessThan(text.indexOf('transcribeAudioWithLanguage(buffer'));
+    // The disclosure to the external speech service is acknowledged and recorded before the audio is read, let alone sent.
+    expect(text.indexOf("'voice.transcribe.disclosure_acknowledged'")).toBeGreaterThan(0);
+    expect(text.indexOf("'voice.transcribe.disclosure_acknowledged'")).toBeLessThan(text.indexOf('transcribeAudioWithLanguage(buffer'));
   });
 
   // DEF-0B10-PEN-PLAN-DELETE-REMOVES-THE-PLAN-ROW-WITH-NO-DEPENDENT-CHECK-OR-SNAPSHOT

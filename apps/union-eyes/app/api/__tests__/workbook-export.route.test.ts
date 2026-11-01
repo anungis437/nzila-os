@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { issueWorkbookCapability } from '@/lib/workbook/workbook-capability';
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
@@ -52,6 +53,15 @@ async function loadRoute() {
   return import('../workbook/[id]/export/route');
 }
 
+// An unclaimed workbook's only credential is its capability; the row carries the hash and expiry the authority checks.
+const unclaimedRow = (capability: ReturnType<typeof issueWorkbookCapability>) => ({
+  id: 'w1',
+  claimedByUserId: null,
+  claimedOrgId: null,
+  capabilityTokenHash: capability.tokenHash,
+  capabilityTokenExpiresAt: capability.expiresAt,
+});
+
 describe('workbook/[id]/export route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -85,16 +95,28 @@ describe('workbook/[id]/export route', () => {
     expect(response.status).toBe(404);
   });
 
-  it('returns 403 when workbook is not claimed', async () => {
+  it('returns 403 to the holder of the capability of a workbook that is not claimed, before any PDF work', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+    const capability = issueWorkbookCapability();
+    m.selectQueue.push([unclaimedRow(capability)]);
 
-    const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
+    const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export', { headers: { authorization: `Bearer ${capability.token}` } }), {
       params: Promise.resolve({ id: 'w1' }),
     });
 
     expect(response.status).toBe(403);
     // Unclaimed export is rejected before any PDF work.
+    expect(m.generateWorkbookPdf).not.toHaveBeenCalled();
+  });
+
+  it('answers an unclaimed workbook as not found without its capability, or with the wrong one, so it does not say which workbooks exist', async () => {
+    const { GET } = await loadRoute();
+    const capability = issueWorkbookCapability();
+    for (const headers of [{}, { authorization: `Bearer ${issueWorkbookCapability().token}` }]) {
+      m.selectQueue.push([unclaimedRow(capability)]);
+      const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export', { headers }), { params: Promise.resolve({ id: 'w1' }) });
+      expect(response.status).toBe(404);
+    }
     expect(m.generateWorkbookPdf).not.toHaveBeenCalled();
   });
 

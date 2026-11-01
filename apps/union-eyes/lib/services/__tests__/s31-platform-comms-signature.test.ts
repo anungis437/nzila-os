@@ -33,10 +33,13 @@ describe('Gate 0 batch B87: platform reads, communications tracking and signatur
     const route = src('app/api/communications/unsubscribe/[recipientId]/route.ts')
     expect(route).toContain('for (const orgId of organizationIds)')
     expect(route).toContain('unsubscribe-all')
-    expect(route).toContain("scope !== 'all'")
+    // Exactly one authority scope: a campaign, or the separately signed all-organizations action. The guard is the target schema.
+    expect(route).toContain("scope: z.enum(['all']).nullable()")
+    expect(route).toContain('Exactly one unsubscribe authority scope is required')
     expect(route).toContain('revokeEmailForOrganization(tx, orgId, recipientId, reason, null)')
     expect(route).toContain("requestedReason === 'manual'")
-    const helper = route.slice(route.indexOf('async function revokeEmailForOrganization'), route.indexOf('export async function GET'))
+    // The per-organization writes live in the consent-revocation service, which the route calls on its own system transaction.
+    const helper = src('lib/communications/consent-revocation.ts')
     expect(helper).toContain("status: 'revoked'")
     expect(helper).toContain('update(newsletterListSubscribers)')
   })

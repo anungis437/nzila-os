@@ -27,7 +27,14 @@ function addBatch({ id, family, test, items, previousEvidence }) {
     const touches = []
     for (const it of items) {
       const prefix = resolveId(it.prefix)
-      const found = it.fresh ? undefined : all.find((i) => i.prefix === prefix)
+      // The ledger stores the prefix each earlier batch was written with (hand-written batches use short ones), so compare resolved ids.
+      const found = it.fresh ? undefined : all.find((i) => {
+        try {
+          return resolveId(i.prefix) === prefix
+        } catch {
+          return i.prefix === prefix
+        }
+      })
       const files = [...new Set([...(it.files || []), ...(test ? [test] : [])])]
       // Every defect a batch touches is recorded on the batch, including one upgraded in place (which adds nothing to `items`), so the
       // commit and files of each step are recoverable per defect. Credit is still counted only from `items`.

@@ -36,9 +36,11 @@ describe('B55 workflow integrity', () => {
     expect(route).toContain('withSystemContext(async (tx) => {')
     const body = route.slice(route.indexOf('withSystemContext(async (tx)'), route.indexOf('return new NextResponse(confirmationHtml'))
     expect(body).not.toMatch(/await db[.\n]/)
-    // The per-organization writes moved into one helper that runs on the same transaction (B87), so the list update is asserted on the whole route.
+    // The per-organization writes moved into one service that runs on the same transaction (B87, then lib/communications), so the list update is
+    // asserted on the service and the call on the route.
     expect(body).toContain('revokeEmailForOrganization(tx, orgId')
-    expect(route).toContain('update(newsletterListSubscribers)')
-    expect(route).toContain("status: 'unsubscribed', unsubscribedAt")
+    const service = read('lib/communications/consent-revocation.ts')
+    expect(service).toContain('update(newsletterListSubscribers)')
+    expect(service).toContain("status: 'unsubscribed', unsubscribedAt")
   })
 })

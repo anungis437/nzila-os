@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import type { PGlite } from '@electric-sql/pglite';
 import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
 import { notificationDeliveryLog } from '@/db/schema/domains/communications';
+import { emailAddressSuppressions } from '@/db/schema/domains/communications/email-address-suppressions';
 import { createTableDatabase } from './support/pglite-tables';
 
 // UE-CONV-K-006: the public/callback communications routes run with no tenant bound. Every statement derives the
@@ -88,7 +89,11 @@ async function preference(id: string) {
 }
 
 beforeAll(async () => {
-  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog, newsletterDistributionLists, newsletterListSubscribers]);
+  // The suppression ledger's one-row-per-digest key is what its upsert targets (platform 0053, cache 0043).
+  const created = await createTableDatabase(
+    [campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog, newsletterDistributionLists, newsletterListSubscribers, emailAddressSuppressions],
+    ['CREATE UNIQUE INDEX email_address_suppressions_address_sha256_uq ON email_address_suppressions (address_sha256)'],
+  );
   pg = created.pg;
   state.db = created.db;
   process.env.COMMUNICATIONS_TRACKING_SECRET = SECRET;
@@ -104,7 +109,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await pg.exec('TRUNCATE consent_records, communication_preferences, message_log, campaigns');
+  await pg.exec('TRUNCATE consent_records, communication_preferences, message_log, campaigns, email_address_suppressions');
   await insertCampaign(CAMPAIGN_A, ORG_A);
   await insertCampaign(CAMPAIGN_OF_B, ORG_B);
 });
@@ -229,8 +234,8 @@ describe('communications/unsubscribe — organization-bound mutation', () => {
 });
 
 describe('communications/webhooks/resend — organization-bound mutation', () => {
-  async function deliver(type: string, emailId: string) {
-    state.event = { type, created_at: '2026-01-01T00:00:00.000Z', data: { email_id: emailId, to: ['member@example.org'] } };
+  async function deliver(type: string, emailId: string, to: string[] = ['member@example.org']) {
+    state.event = { type, created_at: '2026-01-01T00:00:00.000Z', data: { email_id: emailId, to } };
     const { POST } = await import('../communications/webhooks/resend/route');
     return POST(new NextRequest('http://localhost/api/communications/webhooks/resend', {
       method: 'POST',
@@ -269,5 +274,45 @@ describe('communications/webhooks/resend — organization-bound mutation', () =>
     expect(response.status).toBe(200);
     expect(await preference(ownPref)).toEqual({ email_enabled: false, globally_unsubscribed: true });
     expect(await preference(foreignPref)).toEqual({ email_enabled: true, globally_unsubscribed: false });
+  });
+
+  it('records a complaint on one address as a platform-wide suppression held only as a digest, attributed to the organization that received it', async () => {
+    await insertLog(ORG_A, CAMPAIGN_A, 'r1', 'prov-w-4');
+
+    expect((await deliver('email.complained', 'prov-w-4')).status).toBe(200);
+
+    const rows = (await pg.query<Record<string, unknown>>('SELECT * FROM email_address_suppressions')).rows;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      address_sha256: crypto.createHash('sha256').update('member@example.org').digest('hex'),
+      reason: 'complaint',
+      source_organization_id: ORG_A,
+      lifted_at: null,
+    });
+    // The digest is all that is stored: no column holds the address.
+    expect(JSON.stringify(rows[0])).not.toContain('member@example.org');
+  });
+
+  it('does not guess which of several recipients complained: the organization is suppressed for its own recipient and no address is listed platform-wide', async () => {
+    await insertLog(ORG_A, CAMPAIGN_A, 'r1', 'prov-w-5');
+    const ownPref = await insertPreference(ORG_A, 'r1');
+
+    const response = await deliver('email.complained', 'prov-w-5', ['one@example.org', 'two@example.org']);
+
+    expect(response.status).toBe(200);
+    expect(await preference(ownPref)).toEqual({ email_enabled: false, globally_unsubscribed: true });
+    expect((await pg.query('SELECT 1 FROM email_address_suppressions')).rows).toHaveLength(0);
+  });
+
+  it('renews one suppression per address when the same address complains again, and clears an earlier lift', async () => {
+    await insertLog(ORG_A, CAMPAIGN_A, 'r1', 'prov-w-6');
+    await insertLog(ORG_A, CAMPAIGN_A, 'r1', 'prov-w-7');
+
+    await deliver('email.complained', 'prov-w-6');
+    await pg.query(`UPDATE email_address_suppressions SET lifted_at = now(), lifted_by = 'admin-1', lift_reason = 'confirmed in error'`);
+    await deliver('email.complained', 'prov-w-7');
+
+    const rows = (await pg.query<{ lifted_at: string | null; lifted_by: string | null; lift_reason: string | null }>('SELECT lifted_at, lifted_by, lift_reason FROM email_address_suppressions')).rows;
+    expect(rows).toEqual([{ lifted_at: null, lifted_by: null, lift_reason: null }]);
   });
 });

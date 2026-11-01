@@ -333,6 +333,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Clause library sharing rule as one DB function plus a permissive SELECT policy for federation and congress readers; routes move from the system role to the runtime role"
+      },
+      {
+        "tag": "0049_scim_provisioning_functions",
+        "sha256": "db7e47992fc3e712ae5b02be149540b2400134fb36f82a51b4a9fcbe1fd29a27",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "F03-C: SCIM provisioning for a session-less machine caller - four SECURITY DEFINER functions (configuration check, provision, total, page) executable by the system role only"
       }
     ],
     "platform": [

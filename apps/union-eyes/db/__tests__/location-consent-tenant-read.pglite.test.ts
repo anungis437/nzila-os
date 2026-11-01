@@ -9,8 +9,13 @@ import { GeofencePrivacyService } from '@/services/geofence-privacy-service'
 
 let pg: PGlite
 let scopedDb: ReturnType<typeof drizzle>
+const savedNotice = { version: process.env.UE_LOCATION_CONSENT_NOTICE_VERSION, text: process.env.UE_LOCATION_CONSENT_NOTICE_TEXT }
 
 beforeAll(async () => {
+  // A consent is valid only for the notice version currently configured, and for none when no notice is configured; the stored rows below
+  // acknowledged version 1.0 unless they say otherwise.
+  process.env.UE_LOCATION_CONSENT_NOTICE_VERSION = '1.0'
+  process.env.UE_LOCATION_CONSENT_NOTICE_TEXT = 'notice'
   pg = new PGlite()
   await pg.exec(`
     CREATE ROLE union_eyes_runtime NOSUPERUSER NOBYPASSRLS NOLOGIN;
@@ -48,12 +53,19 @@ beforeAll(async () => {
     VALUES
       ('member-a', 'opted_in', 'strike', 'notice', '1.0', true, false, now() + interval '1 day'),
       ('member-b', 'opted_in', 'event', 'notice', '1.0', false, true, now() + interval '1 day'),
-      ('member-expired', 'opted_in', 'strike', 'notice', '1.0', true, false, now() - interval '1 day');
+      ('member-expired', 'opted_in', 'strike', 'notice', '1.0', true, false, now() - interval '1 day'),
+      ('member-old-notice', 'opted_in', 'strike', 'notice', '0.9', true, false, now() + interval '1 day');
   `)
   scopedDb = drizzle(pg)
 })
 
-afterAll(async () => { await pg?.close() })
+afterAll(async () => {
+  await pg?.close()
+  for (const [name, value] of [['UE_LOCATION_CONSENT_NOTICE_VERSION', savedNotice.version], ['UE_LOCATION_CONSENT_NOTICE_TEXT', savedNotice.text]] as const) {
+    if (value === undefined) delete process.env[name]
+    else process.env[name] = value
+  }
+})
 
 describe('location consent status uses the supplied tenant transaction', () => {
   it('allows own consent but cannot read another member through the runtime role', async () => {
@@ -63,6 +75,24 @@ describe('location consent status uses the supplied tenant transaction', () => {
       expect(await GeofencePrivacyService.hasValidConsent('member-a', 'event', scopedDb as never)).toBe(false)
       expect(await GeofencePrivacyService.hasValidConsent('member-b', 'event', scopedDb as never)).toBe(false)
     } finally {
+      await pg.exec('RESET ROLE')
+    }
+  })
+
+  it('a consent given to a superseded notice is not valid, and none is valid when no notice is configured', async () => {
+    await pg.exec("SET ROLE union_eyes_runtime; SELECT set_config('app.current_user_id', 'member-old-notice', false)")
+    try {
+      expect(await GeofencePrivacyService.hasValidConsent('member-old-notice', 'strike', scopedDb as never)).toBe(false)
+    } finally {
+      await pg.exec('RESET ROLE')
+    }
+    await pg.exec("SET ROLE union_eyes_runtime; SELECT set_config('app.current_user_id', 'member-a', false)")
+    const configured = process.env.UE_LOCATION_CONSENT_NOTICE_TEXT
+    delete process.env.UE_LOCATION_CONSENT_NOTICE_TEXT
+    try {
+      expect(await GeofencePrivacyService.hasValidConsent('member-a', 'strike', scopedDb as never)).toBe(false)
+    } finally {
+      process.env.UE_LOCATION_CONSENT_NOTICE_TEXT = configured
       await pg.exec('RESET ROLE')
     }
   })

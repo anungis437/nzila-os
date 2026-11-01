@@ -1507,9 +1507,27 @@
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
-            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts"
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
           ],
-          "explanation": "The SCIM list excludes removed members, counts and pages in SQL from the requested start index, and no longer loads the whole roster."
+          "explanation": "The SCIM list excludes removed members, counts and pages in SQL from the requested start index, and no longer loads the whole roster. F03-C: the list and its count now run in ue_scim_list_members and ue_scim_member_total, confined to live scim:-keyed members, with the page cut in SQL from a startIndex that is at least 1 and a count clamped to 0-100 (RFC 7644: a value that is not a number or is negative reads as 0, which returns the total only), and a filter that supports only userName eq and externalId eq (anything else is a 400 invalidFilter)."
         },
         {
           "prefix": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID",
@@ -1518,10 +1536,28 @@
             "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
             "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
             "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts",
-            "apps/union-eyes/db/__tests__/migrations-0048-0051-gate0.postgres.test.ts"
+            "apps/union-eyes/db/__tests__/migrations-0048-0051-gate0.postgres.test.ts",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
           ],
-          "explanation": "Provisioning creates a pending membership, not an active one, so naming a user grants no access until the person accepts. A provisioned person is keyed scim:<organizationId>:<userName> (lower-cased), so a userName that matches a real user of another organization can no longer make that user a member here, and the membership stays pending until the person accepts. The organization comes from the bearer token, never the path.",
-          "remaining": "The identity provider subject (externalId) is still not read, the provisional key is not linked to the person's account at sign-in, and a removed member with the same key still answers 409."
+          "explanation": "Provisioning creates a pending membership, not an active one, so naming a user grants no access until the person accepts. A provisioned person is keyed scim:<organizationId>:<userName> (lower-cased), so a userName that matches a real user of another organization can no longer make that user a member here, and the membership stays pending until the person accepts. The organization comes from the bearer token, never the path. F03-C: the identity-provider subject is now read and kept (externalId), one live person per externalId per organization is enforced under an advisory lock because the native table has no unique index, a removed member with the same key is revived rather than answering 409, and a deprovision this stream made can be reversed while a suspension the organization made is left alone (outcome held). A provisioned person is still created pending with role member and no status or role from the payload.",
+          "remaining": "A provisioned person is not yet linked to that person's own account. The key scim:<organization>:<userName> can never equal a session user id, so a provisioned person has no access until a linking and acceptance rule exists. An e-mail match is deliberately not that rule (users/me/organizations documents why), and the identity-provider federation that would carry a verified subject is not implemented. The open decision is recorded as the blocked operation UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY (SCIM_MEMBER_LINK) and is not invented. No CLOSED credit."
         },
         {
           "prefix": "DEF-0B11-IDS-SATISFACTION-PENDING-LIST-HAS-NO-ORGANIZATION-PREDICATE",
@@ -1913,9 +1949,27 @@
           "files": [
             "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
             "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
-            "apps/union-eyes/scripts/codemods/f05-scim-body.cjs"
+            "apps/union-eyes/scripts/codemods/f05-scim-body.cjs",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
           ],
-          "explanation": "The body is parsed with a bounded schema (userName 1-320, names at most 100, at most 10 well-formed e-mails); malformed, oversized or non-JSON input is a 400 naming the field, with nothing written or audited."
+          "explanation": "The body is parsed with a bounded schema (userName 1-320, names at most 100, at most 10 well-formed e-mails); malformed, oversized or non-JSON input is a 400 naming the field, with nothing written or audited. F03-C: create, replace and patch bodies are parsed by bounded parsers (parseScimUserResource and parseScimPatch, including Entra-style capitalised operations and string booleans, Okta path-less value objects and the emails[type eq \"work\"].value path). Malformed, oversized or unsupported input is a 400 SCIM error naming the problem (invalidSyntax, invalidPath or invalidValue) with nothing written or audited."
         },
         {
           "prefix": "DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER",
@@ -7933,10 +7987,29 @@
             "apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
             "apps/union-eyes/lib/public-routes.ts",
             "apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts",
-            "apps/union-eyes/db/__tests__/migrations-0048-0051-gate0.postgres.test.ts"
+            "apps/union-eyes/db/__tests__/migrations-0048-0051-gate0.postgres.test.ts",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
           ],
-          "explanation": "The SCIM Users route now authenticates the identity provider by the organization's bearer token, not a browser session: only the SHA-256 is stored (platform 0048 has no bearer_token column and hashes a legacy plaintext one), the lookup is by hash with a constant-time compare, a disabled, revoked or expired configuration authenticates nothing, the token (not the path) decides the organization, and the surface is rate limited per client and refuses when the limiter is unavailable. A signed-in administrator issues, rotates and revokes the token at /api/enterprise/sso/scim-token (shown once, audited atomically). The SCIM prefix is public at the edge and the token route is not. Proven on native PostgreSQL 15 and 16 (hash and per-organization uniqueness, tenant isolation, system lookup by hash).",
-          "remaining": "The route still offers only list and create: no get, replace, patch or delete of a user (so a deprovision cannot be sent), no groups, no ServiceProviderConfig, and no scim_events_log row per provisioning event; deprovision_action and the attribute mapping are stored but not consumed."
+          "explanation": "The SCIM Users route now authenticates the identity provider by the organization's bearer token, not a browser session: only the SHA-256 is stored (platform 0048 has no bearer_token column and hashes a legacy plaintext one), the lookup is by hash with a constant-time compare, a disabled, revoked or expired configuration authenticates nothing, the token (not the path) decides the organization, and the surface is rate limited per client and refuses when the limiter is unavailable. A signed-in administrator issues, rotates and revokes the token at /api/enterprise/sso/scim-token (shown once, audited atomically). The SCIM prefix is public at the edge and the token route is not. Proven on native PostgreSQL 15 and 16 (hash and per-organization uniqueness, tenant isolation, system lookup by hash). F03-C: the SCIM surface is now a full user lifecycle for an identity provider. GET one user, PATCH, PUT and DELETE exist next to list and create, with ServiceProviderConfig, and every answer is an RFC 7644 message (the error body, the string status and the list envelope) emitted through a machine-credential mode in withApi that reads no browser session and attaches no user (it refuses to combine with required, roles, minRole or cron). The organization still comes from the bearer token and never from the path. deprovision_action is consumed in the database: suspend, archive or delete is a state change on the roster row (delete is a soft delete plus a revoked status, no row is removed), an already inactive member is reported as unchanged, and a restoration is allowed only for a deprovision this stream made. SCIM sees and changes only members it provisioned (scim:-keyed rows), so an identity-provider call can never remove an account holder. Only effective changes are audited (scim.user.update, .reactivate, .deprovision), with field names and no values, in the same transaction as the change. Eight SECURITY DEFINER functions (cache 0049, rollback shipped) are executable by the system role only, with PUBLIC revoked. Proven on native PostgreSQL 15 and 16 (17 tests: the real route, real token authentication, the real functions, the real audit chain and the system role; the migration applied twice and rolled back to zero functions). Replaced test, disclosed: scim-users.route.test.ts was rewritten from the framework envelope to the SCIM wire format.",
+          "remaining": "No scim_events_log row is written per provisioning event: the physical relation is a four-column Django stub with no row security and no grants, so its shape is a separate schema change. There is no Groups resource: mapping identity-provider groups to roles is an institutional authority decision that is not made (a role in a SCIM payload is refused today). The attribute mapping is stored but not consumed. Real HTTP acceptance and independent review are outstanding. No CLOSED credit."
         }
       ]
     },
@@ -9345,7 +9418,7 @@
     {
       "id": "B122-F03-B-TENANT-BOUNDARIES-AND-SHARED-DATA-AUTHORITY",
       "family": "F03-B: the shared datasets, the federation directory, the parent picker, the e-signature reads and the clause library",
-      "evidenceCommit": null,
+      "evidenceCommit": "a93226754",
       "items": [
         {
           "prefix": "DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE",
@@ -9433,6 +9506,118 @@
             "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts",
             "apps/union-eyes/app/api/clause-library/[id]/tags/__tests__/route.test.ts",
             "apps/union-eyes/app/api/clause-library/[id]/share/__tests__/route.test.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B123-F03-C-SCIM-USER-LIFECYCLE",
+      "family": "F03-C: SCIM user lifecycle through a session-less machine credential, with provisioned members confined to the identity-provider stream",
+      "evidenceCommit": null,
+      "items": [],
+      "touches": [
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-LIST-INCLUDES-REMOVED-MEMBERS-AS-ACTIVE-AND-READS-THE-WHOLE-ROSTER-BEFORE-PAGING",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.sql",
+            "apps/union-eyes/db/migrations-cache/0049_scim_provisioning_functions.rollback.sql",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/lib/scim/responses.ts",
+            "apps/union-eyes/lib/scim/filter.ts",
+            "apps/union-eyes/lib/scim/patch.ts",
+            "apps/union-eyes/lib/scim/user-operations.ts",
+            "apps/union-eyes/lib/scim/route-support.ts",
+            "apps/union-eyes/lib/api/with-api.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+            "apps/union-eyes/lib/api/__tests__/with-api-machine.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/provisioned-members.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-patch.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/scim-filter-responses.test.ts",
+            "apps/union-eyes/lib/scim/__tests__/session-less-caller.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
           ]
         }
       ]

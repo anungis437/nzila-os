@@ -126,13 +126,17 @@ describe('round 37: OAuth callback state/replay/PKCE/org-binding/credential-expo
     m.cookieStore.values = {};
   });
 
-  it('required test #11 / negative: missing state is rejected', async () => {
+  it('required test #11 / negative: missing state is rejected before any provider contact and does not consume the pending connection', async () => {
     seedInitiationCookies();
     const { GET } = await loadRoute();
 
     const response = await GET(callbackRequest({ code: 'auth-code' }));
 
-    expect(response.status).toBe(400);
+    // A missing state cannot match the stored one: the same FORBIDDEN refusal as a wrong state.
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.cookieStore.values.oauth_state).toBe(STATE);
+    expect(m.createMetaClient).not.toHaveBeenCalled();
   });
 
   it('state mismatch is rejected', async () => {
@@ -267,16 +271,73 @@ describe('round 37: OAuth callback state/replay/PKCE/org-binding/credential-expo
     expect(m.cookieStore.values.oauth_user_id).toBe('');
   });
 
-  it('cookies are cleared even on a terminal failure path', async () => {
+  it('a forged or mismatched callback does not consume the legitimate pending connection', async () => {
     seedInitiationCookies();
     const { GET } = await loadRoute();
 
     await GET(callbackRequest({ code: 'auth-code', state: 'wrong-state' }));
 
+    // Clearing here would let anyone who can send the browser to this URL cancel the user's own pending connection.
+    expect(m.cookieStore.values).toMatchObject({
+      oauth_state: STATE,
+      oauth_platform: 'facebook',
+      oauth_organization_id: ORG_B,
+      oauth_user_id: USER_B,
+    });
+  });
+
+  it('an ambiguous callback (a repeated parameter, or a code together with an error) is refused before the pending connection is touched', async () => {
+    seedInitiationCookies();
+    const { GET } = await loadRoute();
+
+    const repeated = await GET(new NextRequest(`http://localhost/api/social-media/accounts/callback?code=auth-code&state=${STATE}&state=${STATE}`));
+    const both = await GET(callbackRequest({ code: 'auth-code', error: 'access_denied', state: STATE }));
+
+    expect(repeated.status).toBe(400);
+    expect(both.status).toBe(400);
+    expect(m.cookieStore.values.oauth_state).toBe(STATE);
+    expect(m.createMetaClient).not.toHaveBeenCalled();
+  });
+
+  it('cookies are consumed once the callback validates, even when the provider exchange then fails', async () => {
+    seedInitiationCookies();
+    m.createMetaClient.mockReturnValue({
+      getAccessToken: vi.fn(async () => { throw new Error('provider unavailable'); }),
+    });
+    const { GET } = await loadRoute();
+
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
+
+    expect(response.status).toBe(500);
+    expect(m.insertedValues).toHaveLength(0);
     expect(m.cookieStore.values.oauth_state).toBe('');
     expect(m.cookieStore.values.oauth_platform).toBe('');
     expect(m.cookieStore.values.oauth_organization_id).toBe('');
     expect(m.cookieStore.values.oauth_user_id).toBe('');
+  });
+
+  it('an account that manages several Pages or organizations is not connected to an arbitrary one', async () => {
+    seedInitiationCookies();
+    m.createMetaClient.mockReturnValue({
+      getAccessToken: vi.fn(async () => ({ access_token: 'short-lived', expires_in: 3600 })),
+      getLongLivedToken: vi.fn(async () => ({ access_token: 'long-lived', expires_in: 5_000_000 })),
+      getUserPages: vi.fn(async () => [
+        { id: 'page-1', name: 'One', access_token: 'token-1' },
+        { id: 'page-2', name: 'Two', access_token: 'token-2' },
+      ]),
+    });
+    const { GET } = await loadRoute();
+    const facebook = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
+    expect(facebook.status).toBe(400);
+
+    seedInitiationCookies({ platform: 'linkedin' });
+    const getAccessToken = vi.fn(async () => ({ access_token: 'li-access', expires_in: 1800 }));
+    const getOrganizations = vi.fn(async () => [{ id: 'org-1', localizedName: 'One' }, { id: 'org-2', localizedName: 'Two' }]);
+    m.createLinkedInClient.mockImplementation((accessToken?: string) => (accessToken ? { getOrganizations } : { getAccessToken }));
+    const linkedin = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
+    expect(linkedin.status).toBe(400);
+
+    expect(m.insertedValues).toHaveLength(0);
   });
 
   it('no organization context is rejected before any provider call is made', async () => {

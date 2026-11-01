@@ -49,6 +49,21 @@ describe('voice disclosure authority', () => {
     expect(checkVoiceDisclosure(requestFields('notice-2026-10', 'true', 'false'))).toMatchObject({ allowed: false, status: 400 });
   });
 
+  it('treats a request that states no notice version as a bad request, not as a changed notice', () => {
+    expect(checkVoiceDisclosure(new FormData())).toMatchObject({ allowed: false, status: 400 });
+    const withoutVersion = requestFields();
+    withoutVersion.delete('disclosureNoticeVersion');
+    expect(checkVoiceDisclosure(withoutVersion)).toMatchObject({ allowed: false, status: 400 });
+    expect(checkVoiceDisclosure(requestFields(''))).toMatchObject({ allowed: false, status: 400 });
+    const asFile = requestFields();
+    asFile.set('disclosureNoticeVersion', new File(['x'], 'version.txt'));
+    expect(checkVoiceDisclosure(asFile)).toMatchObject({ allowed: false, status: 400 });
+  });
+
+  it('answers a stale version before it asks about the acknowledgment, so the client re-reads the notice first', () => {
+    expect(checkVoiceDisclosure(requestFields('old', 'false', 'false'))).toMatchObject({ allowed: false, status: 409 });
+  });
+
   it('does not treat client-supplied approval metadata as institutional authority', () => {
     delete process.env.UE_VOICE_DISCLOSURE_APPROVAL_REFERENCE;
     const form = requestFields();

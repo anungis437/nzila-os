@@ -3,7 +3,7 @@ import type { PGlite } from '@electric-sql/pglite';
 import { organizations } from '@/db/schema-organizations';
 import { congressMemberships } from '@/db/schema';
 import { arbitrationPrecedents, precedentCitations, precedentTags } from '@/db/schema/arbitration-precedents-schema';
-import { createTableDatabase } from './support/pglite-tables';
+import { createTableDatabase, migrationFunctions } from './support/pglite-tables';
 
 // DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION:
 // the generic route filtered on a column the table does not have, so any precedent was readable, writable and
@@ -77,7 +77,11 @@ const ctx = (organizationId: string, id: string, body?: unknown) => ({
 });
 
 beforeAll(async () => {
-  const created = await createTableDatabase([organizations, congressMemberships, arbitrationPrecedents, precedentTags, precedentCitations]);
+  // The read rule is the production database function (cache 0048), not a copy of it.
+  const created = await createTableDatabase(
+    [organizations, congressMemberships, arbitrationPrecedents, precedentTags, precedentCitations],
+    migrationFunctions('0048_clause_library_sharing_rls.sql', ['ue_clause_federation_ancestor', 'ue_clause_congress_eligible', 'ue_clause_readable_by']),
+  );
   pg = created.pg;
   state.db = created.db;
   state.audit = audit;

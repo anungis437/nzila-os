@@ -49,6 +49,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 const org = '11111111-1111-4111-8111-111111111111';
 const id = '22222222-2222-4222-8222-222222222222';
 const ctx = { organizationId: org, userId: 'officer-1', params: { id } };
+type RouteHandler = (context: Record<string, unknown>) => Promise<unknown>;
 
 describe('audit item officer disclosure boundary', () => {
   beforeEach(() => {
@@ -68,10 +69,11 @@ describe('audit item officer disclosure boundary', () => {
   it('requires officer authorization and returns a redacted projection with mandatory read audit', async () => {
     const { GET } = await import('../audits/[id]/route');
     expect(m.options).toMatchObject({ auth: { minRole: 'officer' }, requireOrg: true });
-    const result = await (GET as Function)(ctx);
+    const result = await (GET as unknown as RouteHandler)(ctx);
     expect(result).toEqual({
       auditId: id, action: 'case.updated', resourceType: 'grievances',
       resourceId: null, severity: 'info', outcome: 'success',
+      source: 'legacy',
       createdAt: new Date('2026-10-01T12:00:00Z'),
     });
     expect(m.scopes).toEqual([{ organizationId: org, userId: 'officer-1' }]);
@@ -85,8 +87,8 @@ describe('audit item officer disclosure boundary', () => {
 
   it('rejects missing organization context and malformed IDs without querying', async () => {
     const { GET } = await import('../audits/[id]/route');
-    await expect((GET as Function)({ ...ctx, organizationId: null })).rejects.toMatchObject({ code: 'FORBIDDEN' });
-    await expect((GET as Function)({ ...ctx, params: { id: 'not-a-uuid' } })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await expect((GET as unknown as RouteHandler)({ ...ctx, organizationId: null })).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    await expect((GET as unknown as RouteHandler)({ ...ctx, params: { id: 'not-a-uuid' } })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     expect(m.predicates).toHaveLength(0);
     expect(m.audit).not.toHaveBeenCalled();
   });
@@ -94,13 +96,13 @@ describe('audit item officer disclosure boundary', () => {
   it('does not reveal or audit a missing scoped row', async () => {
     m.rows = [];
     const { GET } = await import('../audits/[id]/route');
-    await expect((GET as Function)(ctx)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect((GET as unknown as RouteHandler)(ctx)).rejects.toMatchObject({ code: 'NOT_FOUND' });
     expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('fails closed if read-audit persistence fails', async () => {
     m.audit.mockRejectedValueOnce(new Error('audit unavailable'));
     const { GET } = await import('../audits/[id]/route');
-    await expect((GET as Function)(ctx)).rejects.toThrow('audit unavailable');
+    await expect((GET as unknown as RouteHandler)(ctx)).rejects.toThrow('audit unavailable');
   });
 });

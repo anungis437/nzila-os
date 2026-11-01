@@ -36,7 +36,12 @@ export function checkVoiceDisclosure(
   if (!notice) {
     return { allowed: false, status: 503, error: 'Institutionally approved voice disclosure is not configured' };
   }
-  if (formData.get('disclosureNoticeVersion') !== notice.version) {
+  // A request that states no notice version never showed the notice: that is a bad request. A different version means the notice changed.
+  const statedVersion = formData.get('disclosureNoticeVersion');
+  if (typeof statedVersion !== 'string' || statedVersion === '') {
+    return { allowed: false, status: 400, error: 'Explicit disclosure acknowledgment and recording permission confirmation are required' };
+  }
+  if (statedVersion !== notice.version) {
     return { allowed: false, status: 409, error: 'Voice disclosure notice has changed; review it before submitting audio' };
   }
   if (formData.get('disclosureAcknowledged') !== 'true'

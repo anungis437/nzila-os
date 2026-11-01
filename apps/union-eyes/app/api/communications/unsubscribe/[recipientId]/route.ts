@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { and, eq, inArray, ne } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 
-import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
-import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { campaigns, communicationPreferences, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { revokeEmailForOrganization } from '@/lib/communications/consent-revocation';
 import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
 
@@ -98,63 +99,6 @@ function confirmationHtml(locale: string): string {
 <p>If you change your mind, you can re-enable communications in your dashboard preferences.</p>
 </main></body></html>`;
 }
-
-async function revokeEmailForOrganization(
-  tx: RLSTx,
-  organizationId: string,
-  recipientId: string,
-  reason: string,
-  campaignId: string | null,
-): Promise<void> {
-  const now = new Date();
-  const [existingPreference] = await tx
-    .select({ id: communicationPreferences.id })
-    .from(communicationPreferences)
-    .where(and(eq(communicationPreferences.organizationId, organizationId), eq(communicationPreferences.userId, recipientId)))
-    .limit(1);
-
-  if (existingPreference) {
-    await tx
-      .update(communicationPreferences)
-      .set({ emailEnabled: false, globallyUnsubscribed: true, unsubscribedAt: now, unsubscribeReason: reason, updatedAt: now })
-      .where(and(eq(communicationPreferences.id, existingPreference.id), eq(communicationPreferences.organizationId, organizationId)));
-  } else {
-    await tx.insert(communicationPreferences).values({
-      organizationId,
-      userId: recipientId,
-      emailEnabled: false,
-      globallyUnsubscribed: true,
-      unsubscribedAt: now,
-      unsubscribeReason: reason,
-    });
-  }
-
-  // An unsubscribe also ends the recipient's subscriptions to this organization's distribution lists.
-  await tx
-    .update(newsletterListSubscribers)
-    .set({ status: 'unsubscribed', unsubscribedAt: now })
-    .where(
-      and(
-        eq(newsletterListSubscribers.profileId, recipientId),
-        ne(newsletterListSubscribers.status, 'unsubscribed'),
-        inArray(
-          newsletterListSubscribers.listId,
-          tx.select({ id: newsletterDistributionLists.id }).from(newsletterDistributionLists).where(eq(newsletterDistributionLists.organizationId, organizationId)),
-        ),
-      ),
-    );
-
-  await tx.insert(consentRecords).values({
-    organizationId,
-    userId: recipientId,
-    consentType: 'email_marketing',
-    channel: 'email',
-    status: 'revoked',
-    method: 'unsubscribe_link',
-    metadata: { reason, campaignId },
-  });
-}
-
 
 /**
  * Link scanners and mail clients routinely prefetch GET URLs. A GET must not

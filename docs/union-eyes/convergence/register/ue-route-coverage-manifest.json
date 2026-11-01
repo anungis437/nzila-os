@@ -1,12 +1,12 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1008,
-  "mutating": 681,
+  "routes": 1010,
+  "mutating": 682,
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 20,
-   "CAPABILITY_TOKEN": 13,
+   "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 141,
    "DELEGATED": 17,
@@ -17,12 +17,12 @@
    "ROLE_AUTH": 171,
    "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 290,
+   "WITH_API": 293,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 19,
-   "CAPABILITY_TOKEN": 9,
+   "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 1,
    "CRUD_FACTORY": 85,
    "DELEGATED": 11,
@@ -33,11 +33,11 @@
    "ROLE_AUTH": 98,
    "SESSION_AUTH": 31,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 183
+   "WITH_API": 185
   },
   "mutatingByAudit": {
    "ATOMIC": 164,
-   "ATOMIC_SERVICE": 116,
+   "ATOMIC_SERVICE": 117,
    "COMPUTE_ONLY": 31,
    "CRUD_ATOMIC": 86,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -50,8 +50,8 @@
    "AMBIENT_DB": 13,
    "CRUD_TENANT_TX": 86,
    "NONE": 339,
-   "SYSTEM_CONTEXT": 59,
-   "TENANT_TX": 184
+   "SYSTEM_CONTEXT": 61,
+   "TENANT_TX": 183
   }
  },
  "routes": [
@@ -11548,16 +11548,43 @@
    "audit": "ATOMIC_SERVICE"
   },
   {
+   "route": "scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+   "methods": [
+    "GET"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "READ_ONLY"
+  },
+  {
+   "route": "scim/v2/[organizationId]/Users/[id]/route.ts",
+   "methods": [
+    "DELETE",
+    "GET",
+    "PATCH",
+    "PUT"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "SYSTEM_CONTEXT",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
    "route": "scim/v2/[organizationId]/Users/route.ts",
    "methods": [
     "GET",
     "POST"
    ],
    "mutating": true,
-   "guard": "CAPABILITY_TOKEN",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
   },
   {

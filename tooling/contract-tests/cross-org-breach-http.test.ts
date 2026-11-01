@@ -66,6 +66,7 @@ const SYSTEM_SKIP = (path: string) => {
          rel.includes('/api/auth_core/') ||
          rel.includes('/api/icra/') ||         // ICRA — pseudonymous public diagnostic (no org context) [legacy alias]
          rel.includes('/api/ocra/') ||         // OCRA — canonical alias of /api/icra (OCI↔OCRA convergence Phase 2)
+         rel.includes('/api/contact/') ||      // Public marketing contact form: anonymous, bounded and challenge-guarded, stored with no tenant (every other contract lists it as public)
          rel.includes('/api/workbook/')      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential)
 }
 

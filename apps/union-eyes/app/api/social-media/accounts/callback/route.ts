@@ -196,7 +196,7 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
 
     // organizationId/userId come only from the trusted, authenticated server
     // context (withRoleAuth) — never from query params, provider payload, or state.
-        // Provider tokens are stored sealed, never as plaintext.
+    // Provider tokens are stored sealed, never as plaintext.
     const sealedAccessToken = await sealToken(accessToken);
     const sealedRefreshToken = await sealOptionalToken(refreshToken);
     const [account] = await withRLSContext({ organizationId }, async (tx) => {

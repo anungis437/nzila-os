@@ -6,13 +6,14 @@
  */
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import { sharedResolve } from './vitest.shared'
+import { sharedResolve, sharedSetupFiles } from './vitest.shared'
 
 export default defineConfig({
   plugins: [react()],
   resolve: sharedResolve,
   test: {
     name: 'union-eyes-native',
+    setupFiles: sharedSetupFiles,
     include: ['db/__tests__/*.postgres.test.ts', 'db/__tests__/*.native.test.ts'],
     exclude: ['**/node_modules/**', '**/.git/**', '**/.next/**'],
     testTimeout: 180_000,

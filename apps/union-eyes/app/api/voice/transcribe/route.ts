@@ -98,7 +98,8 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       return NextResponse.json({
         text: text.trim(),
         language,
-        // Duration is not returned: the speech adapter provides text, not measured seconds.\n        // Audio byte length is not elapsed recording time.
+        // Duration is not returned: the speech adapter provides text, not measured seconds.
+        // Audio byte length is not elapsed recording time.
         success: true,
       });
 

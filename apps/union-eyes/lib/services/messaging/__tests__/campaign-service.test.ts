@@ -330,15 +330,39 @@ describe('CampaignService', () => {
 
   // ── processMessageQueue ───────────────────────────────────────────────
   describe('processMessageQueue', () => {
-    it('processes queued messages via email', async () => {
-      const msg = { id: 'msg-1', channelType: 'email', recipientEmail: 'a@b.com', subject: 'Hi', bodySnippet: 'body', campaignId: 'c1', retryCount: 0 };
-      // First select: queued messages
-      mocks.mockSelect.mockReturnValueOnce(chain([msg]));
-      // Update after send
-      mocks.mockUpdate.mockReturnValue(chain([{ id: 'msg-1' }]));
+    it('processes queued messages via email, each carrying its campaign-bound one-click unsubscribe', async () => {
+      process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+      try {
+        // A campaign email is sent only with a recipient and a campaign to bind the unsubscribe capability to.
+        const msg = { id: 'msg-1', organizationId: 'org-1', channelType: 'email', recipientId: 'member-1', recipientEmail: 'a@b.com', subject: 'Hi', bodySnippet: 'body', campaignId: 'c1', retryCount: 0 };
+        // First select: queued messages
+        mocks.mockSelect.mockReturnValueOnce(chain([msg]));
+        // Update after send
+        mocks.mockUpdate.mockReturnValue(chain([{ id: 'msg-1' }]));
 
-      await service.processMessageQueue(10);
-      expect((mockEmailService.send as ReturnType<typeof vi.fn>)).toHaveBeenCalled();
+        await service.processMessageQueue(10);
+        expect(mockEmailService.send).toHaveBeenCalledTimes(1);
+        const sent = (mockEmailService.send as ReturnType<typeof vi.fn>).mock.calls[0][0];
+        expect(sent).toMatchObject({ to: 'a@b.com', subject: 'Hi', metadata: { messageLogId: 'msg-1', campaignId: 'c1' } });
+        expect(sent.headers['List-Unsubscribe']).toContain('/api/communications/unsubscribe/member-1');
+      } finally {
+        delete process.env.COMMUNICATIONS_TRACKING_SECRET;
+      }
+    });
+
+    it('does not send an email that has no recipient to bind its unsubscribe to, and records the failure instead', async () => {
+      process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+      try {
+        const msg = { id: 'msg-3', organizationId: 'org-1', channelType: 'email', recipientEmail: 'a@b.com', subject: 'Hi', bodySnippet: 'body', campaignId: 'c1', retryCount: 0 };
+        mocks.mockSelect.mockReturnValueOnce(chain([msg]));
+        mocks.mockUpdate.mockReturnValue(chain([{ id: 'msg-3' }]));
+
+        await service.processMessageQueue(10);
+        expect(mockEmailService.send).not.toHaveBeenCalled();
+        expect(mocks.mockUpdate).toHaveBeenCalledTimes(1);
+      } finally {
+        delete process.env.COMMUNICATIONS_TRACKING_SECRET;
+      }
     });
 
     it('marks message as failed on send error', async () => {
