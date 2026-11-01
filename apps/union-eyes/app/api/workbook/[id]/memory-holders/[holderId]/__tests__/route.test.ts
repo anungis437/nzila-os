@@ -165,7 +165,7 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write' },
+      { workbookId: 'w1', operation: 'write', capability: null },
       expect.any(Function),
     );
   });
@@ -187,11 +187,12 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
 
     const response = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
       method: 'DELETE',
+      headers: { cookie: 'wbk_cap_w1=tok-1' },
     }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write' },
+      { workbookId: 'w1', operation: 'write', capability: 'tok-1' },
       expect.any(Function),
     );
   });

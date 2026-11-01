@@ -135,7 +135,7 @@ describe('workbook/[id]/memory-holders route', () => {
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'read' },
+      { workbookId: 'w1', operation: 'read', capability: null },
       expect.any(Function),
     );
   });
@@ -163,7 +163,7 @@ describe('workbook/[id]/memory-holders route', () => {
 
     expect(response.status).toBe(201);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write' },
+      { workbookId: 'w1', operation: 'write', capability: null },
       expect.any(Function),
     );
   });

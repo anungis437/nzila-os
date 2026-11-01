@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 641,
- "partial": 80,
- "outstanding": 136,
- "accountedFor": 136,
+ "corrected": 642,
+ "partial": 79,
+ "outstanding": 135,
+ "accountedFor": 135,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -110,20 +110,20 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 7,
+   "defects": 6,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 6,
+    "MEDIUM": 5,
     "LOW": 0
    },
-   "namedRoutes": 2,
+   "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
     "0B.7": 2,
     "0B.10": 1,
     "0B.11": 1,
-    "0B.12": 2
+    "0B.12": 1
    }
   },
   {
@@ -563,11 +563,6 @@
    },
    {
     "id": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",
     "severity": "MEDIUM",
     "partial": true
    },

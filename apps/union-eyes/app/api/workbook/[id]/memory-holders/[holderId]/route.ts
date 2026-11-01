@@ -11,6 +11,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { extractWorkbookCapability } from '@/lib/workbook/workbook-capability';
 import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
@@ -74,7 +75,7 @@ export async function PATCH(
     // Authorization is resolved first; the protected update then runs inside
     // the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
-      { workbookId, operation: 'write' },
+      { workbookId, operation: 'write', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         // A notice is attributed to the identified person who records it; an unclaimed workbook has none, and that is reported rather than faked.
         assertNoticeContract({ writesIdentifyingDetail, notice, authorityKind: authority.kind });
@@ -142,7 +143,7 @@ export async function DELETE(
     // Authorization is resolved first; the protected delete then runs inside
     // the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
-      { workbookId, operation: 'write' },
+      { workbookId, operation: 'write', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         const orgId = authority.claimedOrgId;
         const removed = await db

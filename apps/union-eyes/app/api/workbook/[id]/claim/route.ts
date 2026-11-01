@@ -21,6 +21,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
+import { clearWorkbookCapabilityCookie } from '@/lib/workbook/workbook-capability';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -73,6 +74,9 @@ export async function POST(
           claimedAt,
           claimToken: null,
           claimTokenExpiresAt: null,
+          // The bearer capability of the unclaimed workbook ends with the claim, in this same statement; ownership authority applies from here.
+          capabilityTokenHash: null,
+          capabilityTokenExpiresAt: null,
           status: 'active',
           updatedAt: claimedAt,
         })
@@ -126,7 +130,9 @@ export async function POST(
 
     logger.info('[workbook-claim] Workbook claimed', { workbookRef: opaqueRef(workbookId), userId, orgId });
 
-    return NextResponse.json({ ok: true, workbookId, organizationId: orgId });
+    const response = NextResponse.json({ ok: true, workbookId, organizationId: orgId });
+    clearWorkbookCapabilityCookie(response, workbookId);
+    return response;
   } catch (err) {
     logger.error('[workbook-claim] Claim failed', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Failed to claim workbook' }, { status: 500 });

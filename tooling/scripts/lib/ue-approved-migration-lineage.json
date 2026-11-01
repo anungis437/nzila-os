@@ -601,6 +601,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Per-holder record of whether notice to the named person has been recorded"
+      },
+      {
+        "tag": "0056_workbook_capability",
+        "sha256": "e8635c1787c48ba516aba0e35c7f24d3a053061cdc5d512df30b0ead8fde3a83",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Separate bearer capability for an unclaimed workbook (hash and expiry, additive); the workbook id stops being the credential."
       }
     ]
   }

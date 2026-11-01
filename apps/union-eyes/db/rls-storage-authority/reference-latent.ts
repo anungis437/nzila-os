@@ -3264,9 +3264,11 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     reason: "CLOSED (round 50, state-machine root and fan-out cascade authority — direct child of the now-closed workbooks root, USER_RLS_REQUIRED): no direct ownership column; authority derives entirely through workbookId -> workbooks. SECURITY DEFECT FOUND AND FIXED here (see the workbooks entry for the full write-up): the API routes and the page's own server component previously checked only workbook EXISTENCE, not the claimed-ownership rule required once a workbook is identity-linked. Fixed via the shared lib/workbook/access-control.ts helper (verifyClaimedWorkbookAccess), applied to GET/POST (route.ts), PATCH/DELETE ([holderId]/route.ts), and the memory-holders page server component; regression tests added for all three.",
     supportingCapability: ["app/api/workbook/[id]/memory-holders/route.ts","app/api/workbook/[id]/memory-holders/[holderId]/route.ts","app/[locale]/workbook/[id]/memory-holders/page.tsx","app/api/workbook/[id]/memory-holders/__tests__/route.test.ts","app/api/workbook/[id]/memory-holders/[holderId]/__tests__/route.test.ts","lib/workbook/access-control.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
-    requiredSystemPrivileges: [],
-    invocationAuthority: "TENANT_USER",
-    dbExecutionPrincipal: "TENANT_RUNTIME",
+    // The unclaimed (bearer-capability) and same-organization paths run under the bounded system context (lib/workbook/access-control.ts), which
+    // held no privilege on this table: every such read and write was refused natively. The claimant path stays tenant runtime under RLS.
+    requiredSystemPrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
     reviewPriority: "NONE",
   },
   {
@@ -3286,9 +3288,10 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     reason: "CLOSED (round 50, state-machine root and fan-out cascade authority — direct child of the now-closed workbooks root): no direct ownership column; authority derives through workbookId -> workbooks. Sole write path is app/api/workbook/start/route.ts, seeding one row per WORKBOOK_MODULE_IDS immediately after creating the SAME freshly-generated workbookId in the same request (no client-suppliable workbookId, no cross-workbook injection possible). No separate read/update route exists for this table today (module status advancement is a documented product gap, not an authority defect) — the module hub page (app/[locale]/workbook/[id]/page.tsx) only reads workbooks.status/reportTierId, never workbook_modules directly.",
     supportingCapability: ["app/[locale]/workbook/start/page.tsx","app/api/workbook/start/route.ts"],
     requiredRuntimePrivileges: ["INSERT"],
-    requiredSystemPrivileges: [],
-    invocationAuthority: "TENANT_USER",
-    dbExecutionPrincipal: "TENANT_RUNTIME",
+    // The public start route seeds the module rows of a new unclaimed workbook under the system context; the system role had no privilege here.
+    requiredSystemPrivileges: ["INSERT"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
     reviewPriority: "NONE",
   },
   {
@@ -3330,7 +3333,9 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     reason: "CLOSED (round 50, state-machine root and fan-out cascade authority): the Governance Entropy Workbook™ is a deliberately pseudonymous product (own doc comment: 'A workbook can exist with no user account'). No organization_id column. STATE MACHINE: status draft -> awaiting_claim (Stripe webhook, on purchase) -> active (claim) -> [no further transitions found]. OWNERSHIP MODEL (two phases, both proven safe): (1) UNCLAIMED — the workbookId itself is the bearer credential by design (app/api/workbook/start/route.ts creates with no auth, matching its own docstring 'No authentication required'); (2) CLAIMED — app/api/workbook/[id]/claim/route.ts requires authentication + a single-use claimToken verified against the exact row (eq(workbooks.id, workbookId) AND eq(workbooks.claimToken, claimToken)), rejects already-claimed/expired tokens, and nulls the token after use (replay-proof) — stamping claimedByUserId/claimedOrgId/claimedAt, matching this app's USER_RLS_REQUIRED archetype (member_location_consent, round 17) once claimed. SECURITY DEFECT FOUND AND FIXED: 3 surfaces that read/write IDENTITY-LINKED child data for a workbook only checked workbook EXISTENCE, not the claimed-ownership rule the product's own design already documented and already correctly implemented in app/api/workbook/[id]/export/route.ts — app/api/workbook/[id]/memory-holders/route.ts (GET+POST), its [holderId]/route.ts sibling (PATCH+DELETE), and app/[locale]/workbook/[id]/memory-holders/page.tsx (a server component querying workbookMemoryHolders, including free-text notes, directly with no auth at all). Any caller who ever held a workbookId (e.g. from the anonymous pre-claim phase, a shared link, or logs) could keep reading/editing/deleting institutional-succession data indefinitely after the workbook became identity-linked. Fixed by extracting the export route's proven ownership check into a shared lib/workbook/access-control.ts (verifyClaimedWorkbookAccess) and applying it to all 3 surfaces; 15 new tests across 3 test files.",
     supportingCapability: ["app/[locale]/workbook/[id]/memory-holders/page.tsx","app/[locale]/workbook/[id]/page.tsx","app/[locale]/workbook/start/page.tsx","app/api/payments/webhooks/stripe/route.ts","app/api/workbook/[id]/claim/route.ts","app/api/workbook/[id]/export/route.ts","app/api/workbook/[id]/memory-holders/route.ts","app/api/workbook/checkout/route.ts","app/api/workbook/start/route.ts","lib/workbook/access-control.ts","lib/workbook/__tests__/access-control.test.ts","lib/hubspot/syncWorkbookPurchase.ts","lib/oci/facilitation/facilitationGuide.ts","lib/workbook-pdf/generateWorkbookPdf.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
-    requiredSystemPrivileges: ["SELECT","UPDATE"],
+    // INSERT: the public start route creates the unclaimed workbook under the system context. Neither principal could insert one before: the
+    // runtime insert policy needs claimed_by_user_id = the current user, and the system role held only SELECT and UPDATE.
+    requiredSystemPrivileges: ["SELECT","INSERT","UPDATE"],
     invocationAuthority: "MIXED",
     dbExecutionPrincipal: "MIXED",
     reviewPriority: "NONE",

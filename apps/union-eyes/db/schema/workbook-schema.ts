@@ -62,6 +62,9 @@ export const workbooks = pgTable(
     claimedByUserId: text('claimed_by_user_id'),
     claimedOrgId: uuid('claimed_org_id'),
     claimedAt: timestamp('claimed_at', { withTimezone: true }),
+    // Bearer capability of an UNCLAIMED workbook (hash only; see lib/workbook/workbook-capability.ts). Revoked when the workbook is claimed.
+    capabilityTokenHash: varchar('capability_token_hash', { length: 64 }),
+    capabilityTokenExpiresAt: timestamp('capability_token_expires_at', { withTimezone: true }),
     // UTM
     utmSource: varchar('utm_source', { length: 128 }),
     utmMedium: varchar('utm_medium', { length: 128 }),

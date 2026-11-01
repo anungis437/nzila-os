@@ -1,14 +1,12 @@
 /**
- * /workbook/start \u2014 entry point.
+ * /workbook/start — entry point.
  *
- * Server component: creates a pseudonymous workbook via the start API and
- * server-side redirects to the workbook hub. UTM params on the URL are
+ * Renders the start control only. Creating the workbook is a guarded POST to /api/workbook/start (rate limit, body cap, bot challenge),
+ * which also issues the workbook's capability; a page render that inserted rows could do none of that. UTM params on the URL are
  * forwarded into the workbook record for attribution.
  */
 
-import { redirect } from 'next/navigation';
-import { db } from '@/db';
-import { workbooks, workbookModules, WORKBOOK_MODULE_IDS } from '@/db/schema/workbook-schema';
+import WorkbookStartClient from './WorkbookStartClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,34 +19,12 @@ export default async function WorkbookStartPage({
 }) {
   const { locale } = await params;
   const sp = await searchParams;
-  const utmSource = typeof sp.utm_source === 'string' ? sp.utm_source : null;
-  const utmMedium = typeof sp.utm_medium === 'string' ? sp.utm_medium : null;
-  const utmCampaign = typeof sp.utm_campaign === 'string' ? sp.utm_campaign : null;
+  const pick = (value: string | string[] | undefined) => (typeof value === 'string' ? value.slice(0, 128) : null);
 
-  const [wb] = await db
-    .insert(workbooks)
-    .values({
-      locale,
-      utmSource,
-      utmMedium,
-      utmCampaign,
-    })
-    .returning({ id: workbooks.id });
-
-  if (!wb) {
-    throw new Error('Failed to create workbook');
-  }
-
-  await db
-    .insert(workbookModules)
-    .values(
-      WORKBOOK_MODULE_IDS.map((moduleId) => ({
-        workbookId: wb.id,
-        moduleId,
-        status: 'not_started',
-      })),
-    )
-    .onConflictDoNothing();
-
-  redirect(`/${locale}/workbook/${wb.id}/memory-holders`);
+  return (
+    <WorkbookStartClient
+      locale={locale}
+      utm={{ source: pick(sp.utm_source), medium: pick(sp.utm_medium), campaign: pick(sp.utm_campaign) }}
+    />
+  );
 }

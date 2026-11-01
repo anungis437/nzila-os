@@ -400,6 +400,13 @@
       "when": 1759120000000,
       "tag": "0055_workbook_holder_notice",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1759130000000,
+      "tag": "0056_workbook_capability",
+      "breakpoints": true
     }
   ]
 }

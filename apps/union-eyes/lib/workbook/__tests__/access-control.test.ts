@@ -78,14 +78,42 @@ describe('claimed-workbook access control', () => {
       expect(m.withSystemContext).toHaveBeenCalledTimes(1);
     });
 
-    it('allows an unclaimed workbook via the bearer id alone (pseudonymous by design)', async () => {
+    it('admits an unclaimed workbook only to the holder of its capability, never to its identifier alone', async () => {
       const { verifyClaimedWorkbookAccess } = await loadModule();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      const { issueWorkbookCapability } = await import('@/lib/workbook/workbook-capability');
+      const cap = issueWorkbookCapability();
+      const row = { id: 'w1', claimedByUserId: null, claimedOrgId: null, capabilityTokenHash: cap.tokenHash, capabilityTokenExpiresAt: cap.expiresAt };
 
-      const result = await verifyClaimedWorkbookAccess('w1');
-
-      expect(result).toEqual({ ok: true });
+      m.selectQueue.push([row]);
+      expect(await verifyClaimedWorkbookAccess('w1', cap.token)).toEqual({ ok: true });
       expect(m.auth).not.toHaveBeenCalled();
+
+      // The identifier alone, a wrong capability, and a row with no capability on record all answer as a workbook that is not there.
+      for (const presented of [null, issueWorkbookCapability().token]) {
+        m.selectQueue.push([row]);
+        expect(await verifyClaimedWorkbookAccess('w1', presented)).toEqual({ ok: false, status: 404, error: 'Workbook not found' });
+      }
+      m.selectQueue.push([{ ...row, capabilityTokenHash: null, capabilityTokenExpiresAt: null }]);
+      expect(await verifyClaimedWorkbookAccess('w1', cap.token)).toEqual({ ok: false, status: 404, error: 'Workbook not found' });
+    });
+
+    it('refuses an expired capability as a workbook that is not there', async () => {
+      const { verifyClaimedWorkbookAccess } = await loadModule();
+      const { issueWorkbookCapability } = await import('@/lib/workbook/workbook-capability');
+      const cap = issueWorkbookCapability(new Date('2020-01-01T00:00:00Z'));
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null, capabilityTokenHash: cap.tokenHash, capabilityTokenExpiresAt: cap.expiresAt }]);
+
+      expect(await verifyClaimedWorkbookAccess('w1', cap.token)).toEqual({ ok: false, status: 404, error: 'Workbook not found' });
+    });
+
+    it('ignores the capability once the workbook is claimed: ownership authority applies', async () => {
+      const { verifyClaimedWorkbookAccess } = await loadModule();
+      const { issueWorkbookCapability } = await import('@/lib/workbook/workbook-capability');
+      const cap = issueWorkbookCapability();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner', capabilityTokenHash: cap.tokenHash, capabilityTokenExpiresAt: cap.expiresAt }]);
+      m.auth.mockResolvedValueOnce({ userId: null });
+
+      expect(await verifyClaimedWorkbookAccess('w1', cap.token)).toEqual({ ok: false, status: 401, error: 'Authentication required' });
     });
 
     it('returns 401 for a claimed workbook when the caller is unauthenticated', async () => {
@@ -200,10 +228,12 @@ describe('claimed-workbook access control', () => {
 
     it('runs the preclaim callback under a bounded system context', async () => {
       const { withClaimedWorkbookAccess } = await loadModule();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      const { issueWorkbookCapability } = await import('@/lib/workbook/workbook-capability');
+      const cap = issueWorkbookCapability();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null, capabilityTokenHash: cap.tokenHash, capabilityTokenExpiresAt: cap.expiresAt }]);
 
       const cb = vi.fn(async () => 'PRECLAIM');
-      const result = await withClaimedWorkbookAccess({ workbookId: 'w1', operation: 'write' }, cb);
+      const result = await withClaimedWorkbookAccess({ workbookId: 'w1', operation: 'write', capability: cap.token }, cb);
 
       expect(result.ok).toBe(true);
       if (result.ok) expect(result.authority.kind).toBe('preclaim');

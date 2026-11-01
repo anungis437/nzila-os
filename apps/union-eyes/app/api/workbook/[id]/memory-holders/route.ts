@@ -19,6 +19,7 @@ import { db } from '@/db';
 import { workbooks, workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { extractWorkbookCapability } from '@/lib/workbook/workbook-capability';
 import { auditClaimedWorkbookWrite, auditWorkbookRead } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
@@ -103,7 +104,7 @@ export async function GET(
     // Authorization is resolved first; the protected cartography read then runs
     // inside the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
-      { workbookId, operation: 'read' },
+      { workbookId, operation: 'read', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         // The people this workbook names have no notice that they are recorded: the read is recorded first, and does not happen if the
         // record cannot be written (an unclaimed workbook under the pseudonymous public-intake audit, a claimed one under its organization).
@@ -153,7 +154,7 @@ export async function POST(
     // Authorization is resolved first; the protected insert + cartography read
     // then run inside the DB execution context that matches the authority.
     const access = await withClaimedWorkbookAccess(
-      { workbookId, operation: 'write' },
+      { workbookId, operation: 'write', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         // A notice is attributed to the identified person who records it; an unclaimed workbook has none, and that is reported rather than faked.
         const writesIdentifyingDetail = IDENTIFYING_FIELDS.some((field) => parse.data[field] !== undefined && parse.data[field] !== null);

@@ -73,9 +73,19 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withExplicitUserContext: (_userId: string, cb: any) => cb(),
 }));
 
-function req(body?: unknown) {
+// Disclosed adaptation (F06 R7): an unclaimed workbook is no longer reached by its identifier alone, so the predicate that decides whether a
+// presented capability is the workbook's own is a seam here, and the requests below present 'cap-ok'. The real predicate (hash, expiry,
+// constant-time comparison) is proven in lib/workbook/__tests__/workbook-capability.test.ts and access-control.test.ts; these tests prove
+// the routes extract the presented capability and hand it to the boundary, and that without it nothing is read or written.
+vi.mock('@/lib/workbook/workbook-capability', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/workbook/workbook-capability')>()),
+  workbookCapabilityHolds: (presented: string | null) => presented === 'cap-ok',
+}));
+
+function req(body?: unknown, capability: string | null = 'cap-ok') {
   return new NextRequest('http://localhost/api/workbook/w1/memory-holders', {
     method: body === undefined ? 'GET' : 'POST',
+    ...(capability ? { headers: { authorization: `Bearer ${capability}` } } : {}),
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 }
@@ -100,6 +110,48 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.appendIntake.mockReset().mockResolvedValue({ subjectRef: 'ref', contentHash: 'hash' });
   });
+
+  describe('unclaimed workbook without its capability (F06 R7)', () => {
+    const row = [{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]
+    const params = { params: Promise.resolve({ id: 'w1' }) }
+
+    it('answers a read as a workbook that is not there, reads nothing and records nothing', async () => {
+      const { GET } = await loadListRoute()
+      m.selectQueue.push(row)
+
+      const response = await GET(req(undefined, null), params)
+
+      expect(response.status).toBe(404)
+      expect(await response.json()).toEqual({ error: 'Workbook not found' })
+      expect(m.appendIntake).not.toHaveBeenCalled()
+      expect(m.runStewardshipCartography).not.toHaveBeenCalled()
+      expect(m.selectQueue).toHaveLength(0)
+    })
+
+    it('refuses a write made with the identifier and a wrong capability, and writes nothing', async () => {
+      const { POST } = await loadListRoute()
+      m.selectQueue.push(row)
+
+      const response = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }, 'cap-wrong'), params)
+
+      expect(response.status).toBe(404)
+      expect(mockDb.insert).not.toHaveBeenCalled()
+      expect(m.appendIntake).not.toHaveBeenCalled()
+    })
+
+    it('refuses a change and a removal the same way', async () => {
+      const { PATCH, DELETE } = await loadItemRoute()
+      const itemParams = { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) }
+      const itemUrl = 'http://localhost/api/workbook/w1/memory-holders/h1'
+
+      m.selectQueue.push(row)
+      expect((await PATCH(new NextRequest(itemUrl, { method: 'PATCH', body: JSON.stringify({ role: 'x' }) }), itemParams)).status).toBe(404)
+      m.selectQueue.push(row)
+      expect((await DELETE(new NextRequest(itemUrl, { method: 'DELETE' }), itemParams)).status).toBe(404)
+      expect(mockDb.update).not.toHaveBeenCalled()
+      expect(mockDb.delete).not.toHaveBeenCalled()
+    })
+  })
 
   describe('GET', () => {
     it('refuses to return a misleading partial cartography for an oversized legacy workbook', async () => {
@@ -382,7 +434,7 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
   describe('notice to the named people (F06 R5)', () => {
     const itemParams = { params: Promise.resolve({ id: 'w1', holderId: 'holder_1' }) };
-    const patch = (body: unknown) => new NextRequest('http://localhost/api/workbook/w1/memory-holders/holder_1', { method: 'PATCH', body: JSON.stringify(body) });
+    const patch = (body: unknown) => new NextRequest('http://localhost/api/workbook/w1/memory-holders/holder_1', { method: 'PATCH', headers: { authorization: 'Bearer cap-ok' }, body: JSON.stringify(body) });
     const setCalls = () => mockDb.update.mock.results.flatMap((r) => (r.value as { set: ReturnType<typeof vi.fn> }).set.mock.calls.map((c) => c[0] as Record<string, unknown>));
 
     it('records a notice for a claimed workbook attributed to the acting person, with the time and channel', async () => {
@@ -489,13 +541,13 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
       m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
       m.updateQueue.push([{ id: 'h1' }]);
       await PATCH(
-        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'PATCH', body: JSON.stringify({ displayName: 'A Real Name', notes: 'private note' }) }),
+        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'PATCH', headers: { authorization: 'Bearer cap-ok' }, body: JSON.stringify({ displayName: 'A Real Name', notes: 'private note' }) }),
         { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) },
       );
       m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
       m.deleteQueue.push([{ id: 'h1' }]);
       await DELETE(
-        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE' }),
+        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE', headers: { authorization: 'Bearer cap-ok' } }),
         { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) },
       );
 
