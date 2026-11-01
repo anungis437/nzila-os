@@ -6,7 +6,8 @@ const m = vi.hoisted(() => {
     const chain = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
-      orderBy: vi.fn(async () => (state.selectRows.shift() ?? []) as unknown[]),
+      orderBy: vi.fn(() => chain),
+      limit: vi.fn(async () => (state.selectRows.shift() ?? []) as unknown[]),
     };
     return chain;
   };
