@@ -9635,6 +9635,21 @@
       ],
       "correction": "Restricts precise location tracking to explicit strike/picket or event consent; rejects meeting/organizing; missing global policy no longer creates an enabled configuration; unsafe policy refuses; unlinked geofence lookups do not persist coordinates. Caller-provided strikeId/eventId associations now fail closed until an organization-bound resolver exists.",
       "remaining": "Exact-HEAD focused/full tests, native PG15/16, HTTP/browser/staging, independent review, owner persona and institutional location-purpose ratification. No implementation or CLOSED credit. Storage-authority manifest still declares INSERT for global location_tracking_config despite the removed lazy creation; grant and catalog-contract reconciliation remain outstanding."
+    },
+    {
+      "id": "UE-LOCATION-CONFIG-READ-ONLY-PRIVILEGE-20261101",
+      "status": "SOURCE_CHANGED_TEST_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-location-config-read-only-privilege-20261101.md",
+      "sourceBaseline": "8a5f606cd1f664cda752ddbdb3e66cd42f384b91",
+      "files": [
+        "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+        "apps/union-eyes/db/__tests__/rls-storage-authority-manifest-invariants.test.ts",
+        "apps/union-eyes/services/geofence-privacy-service.ts"
+      ],
+      "correction": "Removes tenant-runtime INSERT privilege from global location_tracking_config, consistent with fail-closed read-only policy lookup; adds least-privilege manifest regression.",
+      "remaining": "Exact-HEAD tests, catalog-contract and real PG15/16 grant reconciliation, HTTP/browser/staging, independent reviewer, owner-persona and institutional tracking-policy decisions. Migration 0048 SECURITY DEFINER preflight remains blocked; do not bypass."
     }
   ]
 }

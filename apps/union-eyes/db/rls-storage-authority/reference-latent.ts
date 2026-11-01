@@ -2743,9 +2743,9 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
   {
     table: "location_tracking_config",
     classification: "GLOBAL_REFERENCE_DATA",
-    reason: "CLOSED round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, LOCATION_AND_GEOFENCE family): a platform-wide singleton config row (db/schema/domains/compliance/geofence.ts's own comment: 'Location tracking configuration (global settings)'). Read/lazily-created only by the private getConfig() helper in services/geofence-privacy-service.ts, called internally from the self-service trackLocation/requestLocationConsent flows; values (backgroundTrackingAllowed=false, retention hours, etc.) are hardcoded defaults, never accepted from client input, and no route exposes an update endpoint for this config. No tenant/user column exists and none is needed — this genuinely means the same thing platform-wide.",
-    supportingCapability: ["services/geofence-privacy-service.ts"],
-    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    reason: "CLOSED round 52 scope disposition, amended Gate 0 remediation 2026-11-01: this is a platform-wide singleton location policy with no tenant/user column. The private getConfig() in services/geofence-privacy-service.ts now reads the approved row without lazy creation and fails closed if absent. The tenant runtime needs SELECT only; no member request may create or mutate platform-wide tracking policy. Django LocationTrackingConfigViewSet remains denied by DenyAllPermission. Institutional approval and native grant/catalog qualification are still outstanding; this manifest change is not release approval.",
+    supportingCapability: ["services/geofence-privacy-service.ts", "backend/compliance/views.py"],
+    requiredRuntimePrivileges: ["SELECT"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
