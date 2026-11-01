@@ -39,7 +39,7 @@ describe('admin/billing-cycles route', () => {
     m.requireBillingCycleAuthority.mockResolvedValue(undefined);
     m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
     m.BillingCycleService.calculatePeriodDates.mockReturnValue({ periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') });
-    m.BillingCycleService.generateBillingCycle.mockResolvedValue({ cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
+    m.BillingCycleService.generateBillingCycle.mockResolvedValue({ success: true, cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -169,4 +169,22 @@ describe('admin/billing-cycles route', () => {
     expect(payload).not.toHaveProperty('cycles');
     expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
   });
+  it('does not present a partial dry-run as a successful financial preview', async () => {
+    const { POST } = await loadRoute();
+    m.BillingCycleService.generateBillingCycle.mockResolvedValueOnce({
+      success: false, transactionsCreated: 0, totalAmount: 0,
+      members: { processed: 1, success: 0, failed: 1, skipped: 0 },
+      errors: [{ memberId: 'member-1', error: 'calculation unavailable' }],
+    });
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly', dryRun: true }),
+    }));
+    const payload = await response.json();
+    expect(response.status).toBe(422);
+    expect(payload).toMatchObject({ preview: true, success: false });
+    expect(payload.errors).toHaveLength(1);
+    expect(m.performAuditedOperation).not.toHaveBeenCalled();
+  });
+
 });
