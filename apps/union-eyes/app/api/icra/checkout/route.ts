@@ -19,11 +19,10 @@ import { eq } from 'drizzle-orm';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
   type CapabilityDenialReason,
 } from '@/lib/icra/assessment-capability';
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
@@ -113,13 +112,15 @@ export async function POST(request: NextRequest) {
           status: icraAssessments.status,
           capabilityTokenHash: icraAssessments.capabilityTokenHash,
           capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+          claimedAt: icraAssessments.claimedAt,
+          claimedOrgId: icraAssessments.claimedOrgId,
+          claimedByUserId: icraAssessments.claimedByUserId,
         })
         .from(icraAssessments)
         .where(eq(icraAssessments.id, assessmentId))
         .limit(1);
 
-      const presented = extractCapabilityToken(request, assessmentId);
-      const capCheck = checkCapability(presented, row);
+      const capCheck = await authorizeAssessmentAccess(request, assessmentId, row);
       if (!capCheck.ok) {
         return { denied: capCheck.reason, tierId: null, status: null };
       }

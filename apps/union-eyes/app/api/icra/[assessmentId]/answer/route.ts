@@ -11,10 +11,9 @@ import { withSystemContext } from '@/lib/db/with-rls-context'
 import { hasRecordedConsent } from '@/lib/icra/consent'
 import { checkRateLimit } from '@/lib/rate-limiter'
 import {
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability'
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access'
 
 const answerSchema = z.object({
   questionId: z.string().min(1).max(64),
@@ -80,8 +79,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
       }
 
-      const presented = extractCapabilityToken(request, assessmentId)
-      const capCheck = checkCapability(presented, assessment)
+      const capCheck = await authorizeAssessmentAccess(request, assessmentId, assessment)
       if (!capCheck.ok) {
         return NextResponse.json(
           { error: 'Not authorized to modify this assessment' },

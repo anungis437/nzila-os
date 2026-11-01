@@ -20,6 +20,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import { isClaimExpired } from '@/lib/icra/claim-tokens';
+import { clearCapabilityCookie } from '@/lib/icra/assessment-capability';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -92,6 +93,9 @@ export async function POST(
         claimedAt,
         claimToken: null,
         claimTokenExpiresAt: null,
+        // The same write withdraws the bearer capability: from this instant the old link/cookie holder is not the owner.
+        capabilityTokenHash: null,
+        capabilityTokenExpiresAt: null,
       })
       .where(
         and(
@@ -116,7 +120,9 @@ export async function POST(
 
       logger.info('[icra-claim] Assessment claimed', { assessmentId, userId, orgId });
 
-      return NextResponse.json({ ok: true, assessmentId, organizationId: orgId });
+      const claimedResponse = NextResponse.json({ ok: true, assessmentId, organizationId: orgId });
+      clearCapabilityCookie(claimedResponse, assessmentId);
+      return claimedResponse;
     }
 
     const [row] = await tx

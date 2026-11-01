@@ -31,6 +31,7 @@ import {
   capabilityDenialStatus,
   setCapabilityCookie,
 } from '@/lib/icra/assessment-capability';
+import { isAssessmentClaimed } from '@/lib/icra/assessment-access';
 
 const bodySchema = z.object({
   capability: z.string().min(16).max(256),
@@ -75,10 +76,21 @@ export async function POST(request: Request, { params }: RouteContext) {
       .select({
         capabilityTokenHash: icraAssessments.capabilityTokenHash,
         capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        claimedAt: icraAssessments.claimedAt,
+        claimedOrgId: icraAssessments.claimedOrgId,
+        claimedByUserId: icraAssessments.claimedByUserId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
       .limit(1);
+
+    // A claimed assessment has withdrawn its bearer capability: there is nothing to exchange, and no cookie is issued for it.
+    if (assessment && isAssessmentClaimed(assessment)) {
+      return NextResponse.json(
+        { error: 'This assessment has been claimed. Sign in with the owning organization to open it.' },
+        { status: capabilityDenialStatus('claimed') },
+      );
+    }
 
     const check = checkCapability(capability, assessment);
     if (!check.ok) {

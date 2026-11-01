@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 585,
-    "partial": 83,
+    "implementedPendingQualification": 586,
+    "partial": 82,
     "qualificationVerified": 0,
-    "unresolved": 192,
+    "unresolved": 191,
     "externalBlockers": 0
   },
   "batches": [
@@ -1056,26 +1056,35 @@
       "id": "B109-F06-A5-A7-CLAIMED-CONTROLS-OPERATE",
       "family": "F06 A5 + A7: a control the code names is the control that operates (AI control plane, external reads, report fields, claim binding, entitlement)",
       "outstandingBefore": 195,
-      "newlyImplemented": 1,
-      "outstandingAfter": 194,
-      "partial": 1,
+      "newlyImplemented": 2,
+      "outstandingAfter": 193,
+      "partial": 0,
       "evidenceCommit": "23493f86a"
     },
     {
       "id": "B110-F06-A6-SIGNATURE-EVIDENCE-INTEGRITY",
       "family": "F06 A6: signature evidence is chained, checked at signing and not self-asserted",
-      "outstandingBefore": 194,
+      "outstandingBefore": 193,
       "newlyImplemented": 2,
-      "outstandingAfter": 192,
+      "outstandingAfter": 191,
       "partial": 0,
       "evidenceCommit": "d12cf6a0e"
     },
     {
       "id": "B111-F06-A5-REPORT-SMALL-GROUP-SUPPRESSION",
       "family": "F06 A5: an officer report cannot identify people through a small group",
-      "outstandingBefore": 192,
+      "outstandingBefore": 191,
       "newlyImplemented": 0,
-      "outstandingAfter": 192,
+      "outstandingAfter": 191,
+      "partial": 0,
+      "evidenceCommit": "b15818963"
+    },
+    {
+      "id": "B112-F06-R1-ICRA-OWNERSHIP-AND-CAPABILITY-REVOCATION",
+      "family": "F06 R1: a claimed ICRA assessment belongs to its organization and its bearer link is withdrawn",
+      "outstandingBefore": 191,
+      "newlyImplemented": 0,
+      "outstandingAfter": 191,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -6575,15 +6584,31 @@
       "explanation": "The Google import already counted failures and threw; the Microsoft import now counts a failed event, no longer counts a failed cancellation as deleted (the handler throws), stores the delta link only when every event was applied, throws MicrosoftCalendarImportError otherwise, and a failed delta-link write is no longer swallowed."
     },
     "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B109-F06-A5-A7-CLAIMED-CONTROLS-OPERATE",
       "files": [
         "apps/union-eyes/app/api/icra/[assessmentId]/claim/route.ts",
         "apps/union-eyes/app/api/__tests__/icra-assessmentId-claim.route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts",
+        "apps/union-eyes/lib/icra/assessment-access.ts",
+        "apps/union-eyes/lib/icra/assessment-capability.ts",
+        "apps/union-eyes/app/api/icra/[assessmentId]/capability/exchange/route.ts",
+        "apps/union-eyes/app/api/icra/[assessmentId]/profile/route.ts",
+        "apps/union-eyes/app/api/icra/[assessmentId]/answer/route.ts",
+        "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts",
+        "apps/union-eyes/app/api/icra/results/[id]/route.ts",
+        "apps/union-eyes/app/api/icra/report/[assessmentId]/route.ts",
+        "apps/union-eyes/app/api/icra/checkout/route.ts",
+        "apps/union-eyes/app/api/icra/start/route.ts",
+        "apps/union-eyes/app/api/icra/email-results/route.ts",
+        "apps/union-eyes/actions/icra/get-profile.ts",
+        "apps/union-eyes/actions/icra/get-adaptive-resolution.ts",
+        "apps/union-eyes/lib/icra/__tests__/assessment-access.test.ts",
+        "apps/union-eyes/lib/icra/__tests__/assessment-capability-contract.test.ts",
+        "apps/union-eyes/db/__tests__/icra-claim-capability-revocation.postgres.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s53-f06-r1-icra-claim-capability.test.ts"
       ],
-      "explanation": "The claim is bound to the purchaser: the paid-tier webhook records the buyer's e-mail on the assessment, and the claiming account's own e-mail must equal it (case-insensitive), as part of the single conditional write that consumes the token. An account without a verified e-mail, a different e-mail, or an assessment with no recorded purchaser cannot claim it (403, nothing consumed or audited); the audit row records that the purchaser e-mail matched.",
-      "remaining": "The pseudonymous capability token is still valid after the claim, because every ICRA read route authorizes only through that capability and no account-based access path exists for a claimed assessment; revoking it would lock the claiming organization out."
+      "explanation": "The claim is bound to the purchaser: the paid-tier webhook records the buyer's e-mail on the assessment, and the claiming account's own e-mail must equal it (case-insensitive), as part of the single conditional write that consumes the token. An account without a verified e-mail, a different e-mail, or an assessment with no recorded purchaser cannot claim it (403, nothing consumed or audited); the audit row records that the purchaser e-mail matched. The claim write also clears the stored capability hash and expiry in the same conditional update that decides the winner, and the claiming browser's cookie is cleared. One gate, authorizeAssessmentAccess, now decides every capability-bearing path (profile, answer, submit, results, report, checkout, resume, and the profile and adaptive-resolution actions the results page uses): an unclaimed assessment keeps pseudonymous capability access, while a claimed one ignores the capability even if a hash survived and admits only the claiming account while it is still a member of the claiming organization, or an administrator of that organization. A plain peer, another organization's administrator and an anonymous holder of the old link are refused (403/401). A claimed assessment cannot mint a new capability cookie and its link cannot be mailed. The ICRA capability ratchet recognizes the new gate. Proven natively on PostgreSQL 15 and 16: six concurrent claimants yield exactly one winner, the capability is gone from the row, and refused claims leave the capability intact."
     },
     "DEF-0B6-SYS-OBSERVABILITY-SWEEP-NO-DEDUPE-REPEATS-EVERY-RUN": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",

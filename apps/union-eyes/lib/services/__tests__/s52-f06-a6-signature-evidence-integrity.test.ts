@@ -24,7 +24,7 @@ describe('F06 batch 6 (A6): signature evidence is chained, checked and not self-
   it('the audit report states what verification found and no longer a constant', () => {
     const service = src('lib/signature/signature-service.ts')
     expect(service).not.toContain('hashChained: false')
-    expect(service).toContain('integrity: await this.integrityStatement(documentId, auditLog)')
+    expect(service).toContain('integrity: await this.integrityStatement(documentId, auditLog, tx)')
     expect(service).toContain('the signer address and any signer-supplied field are as recorded, not independently verified')
   })
 

@@ -16,10 +16,9 @@ import { checkRateLimit } from '@/lib/rate-limiter';
 import { clientAddress } from '@/lib/public-intake/guard';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability';
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access';
 import { logger } from '@/lib/logger';
 
 interface Params {
@@ -51,13 +50,15 @@ export async function GET(req: NextRequest, { params }: Params): Promise<NextRes
         .select({
           capabilityTokenHash: icraAssessments.capabilityTokenHash,
           capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+          claimedAt: icraAssessments.claimedAt,
+          claimedOrgId: icraAssessments.claimedOrgId,
+          claimedByUserId: icraAssessments.claimedByUserId,
         })
         .from(icraAssessments)
         .where(eq(icraAssessments.id, id))
         .limit(1);
 
-      const presented = extractCapabilityToken(req, id);
-      const capCheck = checkCapability(presented, assessment);
+      const capCheck = await authorizeAssessmentAccess(req, id, assessment);
       if (!capCheck.ok) {
         return NextResponse.json(
           { error: 'Not authorized to view these results' },

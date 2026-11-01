@@ -54,7 +54,9 @@ const ICRA_TABLE_EXPORTS = [
  */
 const RECOGNIZED_AUTHORIZATION_CALLS: RegExp[] = [
   /checkCapability\s*\(/,
-  /getAuthorizedIcraProfile\s*\(/, // delegates to checkCapability() internally
+  /authorizeAssessmentAccess\s*\(/, // wraps checkCapability() for unclaimed assessments and requires the owning account for claimed ones
+  /authorizeAssessmentToken\s*\(/, // same rule for server actions that resolve the capability themselves
+  /getAuthorizedIcraProfile\s*\(/, // delegates to authorizeAssessmentToken() internally
   /getIcraAdaptiveResolution\s*\(/, // delegates to checkCapability() internally
 ];
 

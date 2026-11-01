@@ -12,11 +12,10 @@ import {
   generateCapabilityToken,
   hashCapabilityToken,
   computeCapabilityExpiry,
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
   setCapabilityCookie,
 } from '@/lib/icra/assessment-capability'
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access'
 
 const startSchema = z.object({
   locale: z.string().min(2).max(16).optional(),
@@ -137,14 +136,16 @@ export async function GET(request: Request) {
         submittedAt: icraAssessments.submittedAt,
         capabilityTokenHash: icraAssessments.capabilityTokenHash,
         capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        claimedAt: icraAssessments.claimedAt,
+        claimedOrgId: icraAssessments.claimedOrgId,
+        claimedByUserId: icraAssessments.claimedByUserId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, id))
       .limit(1)
     const row = rows[0]
 
-    const presented = extractCapabilityToken(request, id)
-    const check = checkCapability(presented, row)
+    const check = await authorizeAssessmentAccess(request, id, row)
     if (!check.ok) {
       return NextResponse.json({ error: 'Not authorized to resume this assessment' }, { status: capabilityDenialStatus(check.reason) })
     }

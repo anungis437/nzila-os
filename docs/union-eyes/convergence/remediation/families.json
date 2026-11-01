@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 638,
- "partial": 83,
- "outstanding": 139,
- "accountedFor": 139,
+ "corrected": 639,
+ "partial": 82,
+ "outstanding": 138,
+ "accountedFor": 138,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -110,10 +110,10 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 10,
+   "defects": 9,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 9,
+    "MEDIUM": 8,
     "LOW": 0
    },
    "namedRoutes": 2,
@@ -121,7 +121,7 @@
    "tranches": {
     "0B.1": 1,
     "0B.7": 2,
-    "0B.8": 2,
+    "0B.8": 1,
     "0B.10": 1,
     "0B.11": 2,
     "0B.12": 2
@@ -554,11 +554,6 @@
    },
    {
     "id": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
     "severity": "MEDIUM",
     "partial": true
    },

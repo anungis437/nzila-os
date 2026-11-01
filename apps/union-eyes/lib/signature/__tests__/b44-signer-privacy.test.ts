@@ -103,7 +103,7 @@ describe('B44 signature routes', () => {
     const service = read('lib/signature/signature-service.ts')
     expect(service.match(/\.limit\(USER_DOCUMENT_LIMIT\)/g)).toHaveLength(2)
     expect(service).not.toContain('hashChained: false')
-    expect(service).toContain('integrity: await this.integrityStatement(documentId, auditLog)')
+    expect(service).toContain('integrity: await this.integrityStatement(documentId, auditLog, tx)')
   })
 })
 
@@ -142,6 +142,6 @@ describe('F06 A6: the audit report is readable by the signer whose rows they are
     const service = readFileSync(join(fileURLToPath(new URL('../../../', import.meta.url)), 'lib/signature/signature-service.ts'), 'utf8')
     expect(service).not.toContain('actor: entry.actorEmail || entry.actorUserId')
     expect(service).toContain('actorUserId: entry.actorUserId')
-    expect(service).toContain('userId: s.userId')
+    expect(service).toContain('userId: signer.userId')
   })
 })

@@ -94,8 +94,8 @@ describe('signature audit chain on real SQL', () => {
 describe('sealing at completion', () => {
   const integrity = async () => {
     const rows = (await q(`SELECT event_type, metadata FROM signature_audit_trail WHERE document_id = $1`, [DOC])).rows as Array<{ eventType: string; metadata: unknown }>
-    return (AuditTrailService as unknown as { integrityStatement(d: string, l: Array<{ eventType: string; metadata: unknown }>): Promise<Record<string, unknown>> })
-      .integrityStatement(DOC, rows.map((r) => ({ eventType: (r as unknown as { event_type: string }).event_type, metadata: r.metadata })))
+    return (AuditTrailService as unknown as { integrityStatement(d: string, l: Array<{ eventType: string; metadata: unknown }>, tx: unknown): Promise<Record<string, unknown>> })
+      .integrityStatement(DOC, rows.map((r) => ({ eventType: (r as unknown as { event_type: string }).event_type, metadata: r.metadata })), state.db)
   }
 
   it('records the verified head as the last chained event and in the platform audit log', async () => {

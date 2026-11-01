@@ -39,6 +39,7 @@ import {
   checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability'
+import { isAssessmentClaimed } from '@/lib/icra/assessment-access'
 import { checkRateLimit } from '@/lib/rate-limiter'
 import { sendEmail, isValidEmail } from '@/lib/email-service'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
@@ -129,11 +130,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         id: icraAssessments.id,
         capabilityTokenHash: icraAssessments.capabilityTokenHash,
         capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        claimedAt: icraAssessments.claimedAt,
+        claimedOrgId: icraAssessments.claimedOrgId,
+        claimedByUserId: icraAssessments.claimedByUserId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
       .limit(1)
 
+    // A claimed assessment has no bearer capability to mail: its owner signs in. Mailing a link that carries one would hand out access
+    // the claim withdrew.
+    if (assessment && isAssessmentClaimed(assessment)) return { ok: false as const, reason: 'claimed' as const }
     return checkCapability(presented, assessment)
   })
 

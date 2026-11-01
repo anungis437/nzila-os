@@ -17,10 +17,9 @@ import type { Answer } from '@/lib/icra/types'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { guardPublicIntake } from '@/lib/public-intake/guard'
 import {
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability'
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access'
 
 interface RouteContext {
   params: Promise<{ assessmentId: string }>
@@ -44,8 +43,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
       }
 
-      const presented = extractCapabilityToken(request, assessmentId)
-      const capCheck = checkCapability(presented, assessment)
+      const capCheck = await authorizeAssessmentAccess(request, assessmentId, assessment)
       if (!capCheck.ok) {
         return NextResponse.json(
           { error: 'Not authorized to submit this assessment' },
