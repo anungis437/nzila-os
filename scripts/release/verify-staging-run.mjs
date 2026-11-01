@@ -54,6 +54,38 @@ export function verifyStagingRun(run, expectedCommit, expectedRunId, expectedWor
       deny('staging prerequisite gate or artifact build did not independently complete')
     }
   }
+  // A green prerequisite job can conceal skipped or continue-on-error
+  // security steps. Require the actual GitHub step outcomes for the exact
+  // staging run, including the gates that produce the signed artifact.
+  const prerequisiteSteps = [
+    ['Staging Pre-Deploy Gates', [
+      'Emergency acknowledgement gate (manual dispatch only)',
+      'Lint', 'Typecheck', 'Fast tests', 'Governance check',
+      'Sync change records from main', 'Change window validation',
+      'Contract tests', 'Migration safety gate', 'SLO gate',
+    ]],
+    ['Build & Attest', [
+      'Build', 'Generate SBOM', 'Compute artifact digest',
+      'Save artifact manifest', 'Generate build attestation',
+      'Upload artifacts',
+    ]],
+  ]
+  for (const [jobName, stepNames] of prerequisiteSteps) {
+    const job = run.jobs.find(candidate => candidate?.name === jobName)
+    if (!Array.isArray(job?.steps)) {
+      deny('staging prerequisite step evidence unavailable for ' + jobName)
+    }
+    let previous = -1
+    for (const stepName of stepNames) {
+      const matches = job.steps.filter(step => step?.name === stepName)
+      const index = job.steps.findIndex(step => step?.name === stepName)
+      if (matches.length !== 1 || matches[0].status !== 'completed' ||
+          matches[0].conclusion !== 'success' || index <= previous) {
+        deny('staging prerequisite step missing, failed, duplicated or out of order: ' + stepName)
+      }
+      previous = index
+    }
+  }
   // A green job label is not proof that the deployment, boundary gate,
   // smoke checks and live runtime evidence steps actually executed. GitHub
   // job steps are fetched for this exact run by the promotion workflow.

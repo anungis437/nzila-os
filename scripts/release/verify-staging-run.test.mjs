@@ -27,8 +27,21 @@ function validRun() {
         'Ingest Azure runtime evidence (live)',
       ].map(name => ({ name, status: 'completed', conclusion: 'success' })),
     },
-      { name: 'Staging Pre-Deploy Gates', status: 'completed', conclusion: 'success' },
-      { name: 'Build & Attest', status: 'completed', conclusion: 'success' },
+      { name: 'Staging Pre-Deploy Gates', status: 'completed', conclusion: 'success',
+        steps: [
+          'Emergency acknowledgement gate (manual dispatch only)',
+          'Lint', 'Typecheck', 'Fast tests', 'Governance check',
+          'Sync change records from main', 'Change window validation',
+          'Contract tests', 'Migration safety gate', 'SLO gate',
+        ].map(name => ({ name, status: 'completed', conclusion: 'success' })),
+      },
+      { name: 'Build & Attest', status: 'completed', conclusion: 'success',
+        steps: [
+          'Build', 'Generate SBOM', 'Compute artifact digest',
+          'Save artifact manifest', 'Generate build attestation',
+          'Upload artifacts',
+        ].map(name => ({ name, status: 'completed', conclusion: 'success' })),
+      },
     ],
   }
 }
@@ -171,4 +184,37 @@ test('staging release snapshot must not fabricate independent policy verificatio
   const workflow = readFileSync(new URL('../../.github/workflows/deploy-staging.yml', import.meta.url), 'utf8')
   assert.match(workflow, /"policy_engine_status": "not_independently_attested"/)
   assert.doesNotMatch(workflow, /"policy_engine_status": "pass"/)
+})
+
+test('a green prerequisite job cannot hide skipped, failed, missing, duplicate or reordered mandatory steps', () => {
+  for (const jobName of ['Staging Pre-Deploy Gates', 'Build & Attest']) {
+    const base = validRun().jobs.find(job => job.name === jobName)
+    for (const step of base.steps) {
+      const missing = validRun()
+      missing.jobs.find(job => job.name === jobName).steps =
+        base.steps.filter(candidate => candidate.name !== step.name)
+      assert.throws(() => verifyStagingRun(missing, SHA, RUN_ID, WORKFLOW_ID),
+        /staging prerequisite step/, step.name)
+      for (const conclusion of ['skipped', 'failure', 'cancelled', null]) {
+        const invalid = validRun()
+        invalid.jobs.find(job => job.name === jobName).steps
+          .find(candidate => candidate.name === step.name).conclusion = conclusion
+        assert.throws(() => verifyStagingRun(invalid, SHA, RUN_ID, WORKFLOW_ID),
+          /staging prerequisite step/, step.name)
+      }
+    }
+    const duplicate = validRun()
+    const duplicateSteps = duplicate.jobs.find(job => job.name === jobName).steps
+    duplicateSteps.push({ ...duplicateSteps[0] })
+    assert.throws(() => verifyStagingRun(duplicate, SHA, RUN_ID, WORKFLOW_ID),
+      /staging prerequisite step/)
+    const reversed = validRun()
+    reversed.jobs.find(job => job.name === jobName).steps.reverse()
+    assert.throws(() => verifyStagingRun(reversed, SHA, RUN_ID, WORKFLOW_ID),
+      /staging prerequisite step/)
+    const absent = validRun()
+    delete absent.jobs.find(job => job.name === jobName).steps
+    assert.throws(() => verifyStagingRun(absent, SHA, RUN_ID, WORKFLOW_ID),
+      /staging prerequisite step evidence unavailable/)
+  }
 })
