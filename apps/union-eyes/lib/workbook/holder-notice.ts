@@ -65,6 +65,7 @@ export interface NoticeDeliveryVerifier {
   verify(notice: { channel: NoticeChannel; reference: string }): Promise<{ verified: boolean; providerReference?: string }>;
 }
 
+// ga-check:exempt adapter registry: holds the delivery verifier code approved for each channel (none ship), never a record or any state.
 const verifiers = new Map<NoticeChannel, NoticeDeliveryVerifier>();
 export const registerNoticeDeliveryVerifier = (channel: NoticeChannel, verifier: NoticeDeliveryVerifier): void => void verifiers.set(channel, verifier);
 export const clearNoticeDeliveryVerifiers = (): void => verifiers.clear();

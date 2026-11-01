@@ -49,6 +49,7 @@ export async function limitModelRun(organizationId: string): Promise<void> {
 
 const MEMO_TTL_MS = 30_000;
 const MEMO_MAX_ENTRIES = 200;
+// ga-check:exempt per-instance memo of a recomputable result: keyed by organization, 30 seconds, 200 entries at most, complete runs only, never a source of truth.
 const memo = new Map<string, { at: number; result: OrchestrationResult }>();
 
 export async function memoizeAggregateRun(

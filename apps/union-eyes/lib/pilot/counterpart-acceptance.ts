@@ -57,6 +57,7 @@ export const isAcceptanceDependentState = (state: string): state is AcceptanceDe
 /** The evidence an effect rests on: a verification level, or none at all (no accepted contract exists). */
 export type AcceptanceEvidenceLevel = AcceptanceVerification['status'] | 'none';
 
+// ga-check:exempt adapter registry: holds the verifier code approved for each channel (none ship), never a record or any state.
 const verifiers = new Map<AcceptanceChannel, AcceptanceVerifier>();
 
 export function registerAcceptanceVerifier(channel: AcceptanceChannel, verifier: AcceptanceVerifier): void {
