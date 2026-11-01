@@ -49,6 +49,26 @@ describe('POST /api/organizations record fields', () => {
     expect(m.values).toHaveBeenCalledWith(expect.objectContaining({ description: 'A local', provinceTerritory: 'ON', charterNumber: 'C-9', affiliationDate: '2020-05-01' }));
   });
 
+  it('rejects malformed or non-object JSON before opening a system transaction', async () => {
+    const { POST } = await import('../route');
+    for (const raw of ['{', 'null', '[]', '42']) {
+      const res = await POST(new Request('http://localhost/api/organizations', { method: 'POST', body: raw }) as never);
+      expect(res.status, raw).toBe(400);
+    }
+    expect(m.values).not.toHaveBeenCalled();
+  });
+
+  it('rejects normalized impossible calendar days but accepts leap-day affiliation', async () => {
+    for (const date of ['2020-02-31', '2021-02-29', '2020-04-31']) {
+      const res = await post({ name: 'Local 9', slug: 'local-9', type: 'local', affiliation_date: date });
+      expect(res.status, date).toBe(400);
+    }
+    expect(m.values).not.toHaveBeenCalled();
+    const valid = await post({ name: 'Local 9', slug: 'local-9', type: 'local', affiliation_date: '2020-02-29' });
+    expect(valid.status).toBe(201);
+    expect(m.values).toHaveBeenCalledWith(expect.objectContaining({ affiliationDate: '2020-02-29' }));
+  });
+
   it('stores null for a field that is not supplied', async () => {
     await post({ name: 'Local 9', slug: 'local-9', type: 'local' });
     expect(m.values).toHaveBeenCalledWith(expect.objectContaining({ description: null, provinceTerritory: null, charterNumber: null, affiliationDate: null }));

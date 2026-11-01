@@ -190,7 +190,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden: system administrator privileges required' }, { status: 403 });
   }
 
-  const body = await req.json();
+  // Malformed JSON, null and arrays are client errors, never an unhandled 500 or a partial create.
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Request body must be a JSON object' }, { status: 400 });
+  }
 
   // Known callers post the organization type under three different field names
   // (type, organization_type, organizationType) — normalize rather than pick one
@@ -224,7 +228,12 @@ export async function POST(req: NextRequest) {
   if ([description, provinceTerritory, charterNumber, affiliationDate].includes('invalid')) {
     return NextResponse.json({ error: 'description, province_territory, charter_number and affiliation_date must be text' }, { status: 400 });
   }
-  if (affiliationDate && (!/^\d{4}-\d{2}-\d{2}$/.test(affiliationDate as string) || Number.isNaN(Date.parse(affiliationDate as string)))) {
+  // Date.parse normalizes impossible days (e.g. 2020-02-31) instead of rejecting them.
+  // Round-trip the UTC calendar date so a claimed affiliation date is never silently changed.
+  const affiliationInstant = affiliationDate ? new Date(`${affiliationDate}T00:00:00.000Z`) : null;
+  if (affiliationDate && (!/^\d{4}-\d{2}-\d{2}$/.test(affiliationDate as string)
+    || !Number.isFinite(affiliationInstant!.getTime())
+    || affiliationInstant!.toISOString().slice(0, 10) !== affiliationDate)) {
     return NextResponse.json({ error: 'affiliation_date must be a calendar date (YYYY-MM-DD)' }, { status: 400 });
   }
 
