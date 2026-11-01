@@ -2,15 +2,15 @@
 
 **Defect:** `DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ` (existing PARTIAL, not CLOSED).
 
-**Branch:** `agents/ue-cursor-final-closure`. Source and regression commits: `bc0b8cec32b805d602b01dccf74800a4ec794f40`, `7bd93290c78e2ed1dc6910bf4df314b7319f21ab`, `785a8777d59d446b3b98b32dcc30cc416c709811`, `7d6ea677f072d0f863a810aa23a9a9f1e1e8722c`, `03947304b3d6454400c022f30f31cd1d4ddfdd52`, `262974e23992cfbc99a8544914a03226f1f87385`, `b97b82c40bd4a0510bd5543f84e9349cc1d966ce`.
+**Branch:** `agents/ue-cursor-final-closure`. Source and regression commits: `bc0b8cec32b805d602b01dccf74800a4ec794f40`, `7bd93290c78e2ed1dc6910bf4df314b7319f21ab`, `785a8777d59d446b3b98b32dcc30cc416c709811`, `7d6ea677f072d0f863a810aa23a9a9f1e1e8722c`, `03947304b3d6454400c022f30f31cd1d4ddfdd52`, `262974e23992cfbc99a8544914a03226f1f87385`, `b97b82c40bd4a0510bd5543f84e9349cc1d966ce`, `1b9b5b85487ff5a5ccd028e312d296148c21c3b0`, `96282019adac6ae4769d697b69510566c38ee65a`, `199fd98fe4b00a3c6ecd3f612c5479afb9cda5c2`.
 
 ## Engineering correction (source inspection only)
 
 - Subscription collection GET now requires authenticated organization and principal, reads inside `withRLSContext`, checks a live `finance:view` mandate, filters records to the mandate's resource IDs or organization ledger, and pages at a bounded limit/offset. A role title or entitlement alone is insufficient.
 - Subscription detail GET requires a live `finance:view` mandate naming that subscription or the ledger before its tenant-scoped read.
 - Collection POST pause/resume checks `finance:execute` for the exact subscription ID before invoking the existing organization-scoped service. The service's own transaction remains separate from the mandate preflight; this is **not** a claim of atomic external side-effect authorization.
-- Item PATCH checks `finance:prepare` for the exact subscription, reads the current row, preserves server-owned commercial metadata, conditionally updates and appends the audit record in the same tenant transaction.
-- Item DELETE checks `finance:execute` for the exact subscription, reads and conditionally cancels it and appends the audit record in the same tenant transaction.
+- Item PATCH checks `finance:prepare` for the exact subscription, locks the current row (`FOR UPDATE`), preserves server-owned commercial metadata, updates and appends the audit record in the same tenant transaction. Row locking avoids stale-provenance races without comparing PostgreSQL microsecond timestamps to JavaScript millisecond timestamps.
+- Item DELETE checks `finance:execute` for the exact subscription, locks the current row (`FOR UPDATE`), conditionally cancels it and appends the audit record in the same tenant transaction.
 - All routes refuse missing organization or principal. No default mandate is invented. If financial mandates are unissued, the existing authority kernel fails closed.
 
 ## Regression evidence authored, not executed
