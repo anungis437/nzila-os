@@ -61,6 +61,7 @@ jobs:
           node scripts/engineering/p0-static-guard.mjs
           node --test scripts/engineering/p0-static-guard.test.mjs
           node --test scripts/release/verify-promotion-evidence.test.mjs
+          node --test scripts/release/verify-oci-provenance.test.mjs
           node --test scripts/release/verify-staging-run.test.mjs
           node --test scripts/release/verify-production-approval.test.mjs
           node --test scripts/release/artifact-tree.test.mjs

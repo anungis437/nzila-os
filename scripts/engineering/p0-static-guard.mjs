@@ -114,6 +114,10 @@ export function checkRepository() {
   requireText('.github/workflows/ci.yml', 'node scripts/engineering/p0-static-guard.mjs')
   validateProtectedReleaseWorkflow(read('.github/workflows/deploy-production.yml'))
   requireText('.github/workflows/deploy-production.yml', 'verify-staging-run.mjs')
+  // #1038: the release workflow must not lose its exact-image Sigstore gate.
+  requireText('.github/workflows/deploy-production.yml', 'verify-oci-provenance.mjs')
+  requireText('.github/workflows/gitops-deploy.yml', 'Attest pushed OCI image provenance (P0 #1038)')
+  requireText('.github/workflows/ci.yml', 'node --test scripts/release/verify-oci-provenance.test.mjs')
   console.log('P0 structural governance: PASS (not release authorization)')
   return true
 }
