@@ -86,7 +86,9 @@ jobs:
           appendFileSync(process.env.GITHUB_ENV, 'UE_AUTHORITY_COMBINED_URL=' + connection + '\n')
           NODE
 
-      # Run the real converged-table tests for precedent privacy, clause sharing,\n      # finance duties, document intake, and WorkAid disclosure on both PG versions.\n      - name: Run actual PostgreSQL migration and RLS tests, never all-skipped
+      # Run the real converged-table tests for precedent privacy, clause sharing,
+      # finance duties, document intake, and WorkAid disclosure on both PG versions.
+      - name: Run actual PostgreSQL migration and RLS tests, never all-skipped
         shell: bash
         env:
           NODE_OPTIONS: --max-old-space-size=6144
