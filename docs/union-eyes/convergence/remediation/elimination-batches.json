@@ -10135,6 +10135,26 @@
   },
   "crossCuttingSourceEvidence": [
     {
+      "id": "UE-CI-FIXTURES-QA-CLOCK-20261101",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-ci-regression-and-qa-clock-integrity-20261101.md",
+      "sourceCommits": [
+        "4ddb14902a84e451ba81e6842e9500d84aeb8968"
+      ],
+      "files": [
+        "apps/union-eyes/app/api/organizations/__tests__/route.post-record-fields.test.ts",
+        "apps/union-eyes/app/api/organizations/__tests__/route.post-system-boundary.test.ts",
+        "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/scim-user-by-id.route.test.ts",
+        "apps/union-eyes/scripts/runtime/db-inspect.ts",
+        "apps/union-eyes/scripts/runtime/__tests__/db-inspect.qa-clock.test.ts"
+      ],
+      "correction": "Aligns organization atomic transaction fixtures, deterministic SCIM pagination and event-set tests; QA clock helper now refuses to claim success when the protective status-clock trigger prevents a backdate.",
+      "remaining": "Exact-HEAD Vitest/contract, PG15/16, browser/staging acceptance; legitimate SLA-preserving case escalation journey qualification; independent reviewer, persona and institutional decisions. No defect completion or CLOSED credit."
+    },
+    {
       "id": "UE-ORG-CREATE-TRANSACTION-20261101",
       "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
       "defectCredit": 0,
