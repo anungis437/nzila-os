@@ -104,3 +104,14 @@ test('OCI receipt rejects signed but noncanonical Azure deployment identities',(
   assert.equal(result.targets[0].name,'demo-prod-2')
 })
 // Mocked unit tests establish policy behavior only, never Sigstore or production certification.
+
+test('OCI receipt denies noncanonical or unsafe staging coordinates',()=>{
+  for (const bad of [123456, '0123456', '1e3', ' 123456', '9007199254740992', null]) {
+    assert.throws(()=>verifyOciProvenance(opts({stagingRunId:bad})),/source\/run mismatch/,String(bad))
+  }
+  for (const bad of [123456, '0123456', '9007199254740992', null]) {
+    assert.throws(()=>verifyOciProvenance(opts({
+      stagingRunId:String(bad),manifestRaw:JSON.stringify({...manifest(),run_id:bad}),
+    })),/source\/run mismatch/,String(bad))
+  }
+})

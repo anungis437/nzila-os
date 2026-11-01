@@ -24,7 +24,8 @@ export function verifyOciProvenance({manifestRaw, sourceSha, repository, staging
   let manifest
   try { manifest = JSON.parse(bytes.toString('utf8')) }
   catch { deny('malformed signed staging manifest') }
-  if (!/^[1-9][0-9]{0,19}$/.test(stagingRunId ?? '') ||
+  if (typeof stagingRunId !== 'string' || !/^[1-9][0-9]*$/.test(stagingRunId) ||
+      !Number.isSafeInteger(Number(stagingRunId)) || Number(stagingRunId) <= 0 ||
       manifest?.source_workflow !== 'deploy-staging' ||
       manifest.commit_sha !== sourceSha ||
       manifest.run_id !== stagingRunId ||
