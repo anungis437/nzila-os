@@ -14,6 +14,12 @@ const canonicalUtcTimestamp = value => typeof value === 'string' &&
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
   Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value
 
+// Run IDs are canonical decimal strings at the CLI boundary. Reject numeric
+// coercion, leading zeros and IDs outside JavaScript safe integer precision.
+const canonicalRunId = value => typeof value === 'string' &&
+  /^[1-9][0-9]*$/.test(value) && Number.isSafeInteger(Number(value)) &&
+  Number(value) > 0
+
 function sha256(buf) { return createHash('sha256').update(buf).digest('hex') }
 export function canonical(value) {
   if (Array.isArray(value)) return value.map(canonical)
@@ -28,7 +34,7 @@ export function computeSignedPayloadDigest(attestation) {
 }
 export function verifyPromotionEvidence({ directory, expectedCommit, expectedRunId, publicKeyPem, sourceLockfilePath, now = new Date() }) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '')) deny('missing/invalid expected commit SHA')
-  if (!/^[1-9][0-9]*$/.test(String(expectedRunId ?? ''))) deny('missing/invalid trusted staging run ID')
+  if (!canonicalRunId(expectedRunId)) deny('missing/invalid trusted staging run ID')
   if (typeof publicKeyPem !== 'string' || !publicKeyPem.includes('BEGIN PUBLIC KEY')) deny('independently provisioned verification key unavailable')
   // A 512-bit RSA key produces a 64-byte signature, the same length as
   // Ed25519. Signature length and crypto.verify() alone do not enforce the
@@ -53,8 +59,8 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   if (manifest.source_workflow !== 'deploy-staging' ||
       manifest.commit_sha !== expectedCommit ||
       attestation.commitSha !== expectedCommit ||
-      String(manifest.run_id) !== String(expectedRunId) ||
-      String(attestation.stagingRunId) !== String(expectedRunId) ||
+      !canonicalRunId(manifest.run_id) || manifest.run_id !== expectedRunId ||
+      !canonicalRunId(attestation.stagingRunId) || attestation.stagingRunId !== expectedRunId ||
       attestation.manifestDigest !== sha256(manifestFile.raw) ||
       manifest.attestation_ref !== 'release-attestation.json' ||
       attestation.version !== '2.0' ||

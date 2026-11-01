@@ -325,3 +325,27 @@ test('signed bundle provenance refuses duplicate or noncanonical identities', ()
     }
   } finally { x.cleanup() }
 })
+
+test('promotion run coordinates reject coercion, unsafe integers and signed aliases', () => {
+  const x = makeFixture()
+  try {
+    for (const bad of [123456, '0123456', '1e3', ' 123456', '9007199254740992', 0, null]) {
+      assert.throws(() => verifyPromotionEvidence({
+        directory: x.directory, expectedCommit: COMMIT, expectedRunId: bad,
+        publicKeyPem: x.publicKeyPem, sourceLockfilePath: x.sourceLockfilePath,
+      }), /missing\/invalid trusted staging run ID/, String(bad))
+    }
+    for (const bad of [123456, '0123456', '9007199254740992', null]) {
+      x.manifest.run_id = bad
+      x.write()
+      assert.throws(() => x.verify(), /source commit or provenance does not match/, String(bad))
+      x.manifest.run_id = RUN
+      x.attestation.stagingRunId = bad
+      x.write()
+      assert.throws(() => x.verify(), /source commit or provenance does not match/, String(bad))
+      x.attestation.stagingRunId = RUN
+    }
+    x.write()
+    assert.equal(x.verify().commitSha, COMMIT)
+  } finally { x.cleanup() }
+})
