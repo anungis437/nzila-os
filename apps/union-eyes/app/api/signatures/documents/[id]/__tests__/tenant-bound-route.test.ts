@@ -79,6 +79,19 @@ describe('signature document tenant boundary', () => {
     expect(m.voidDocument).toHaveBeenCalledWith('doc_own', 'sender', 'duplicate', 'org-own');
   });
 
+  it.each([
+    [{ synced: false, reason: 'provider_unavailable' }, 503],
+    [{ synced: false, reason: 'no_envelope' }, 409],
+    [{ synced: false, reason: 'already_applied' }, 200],
+  ] as const)('POST never invents a successful sync for %j', async (result, status) => {
+    const { POST } = await import('../route');
+    m.syncDocumentStatus.mockResolvedValueOnce(result);
+    const response = await POST(request('POST'), params);
+    expect(response.status).toBe(status);
+    expect(await response.json()).toMatchObject({ success: false, synced: false, reason: result.reason });
+    expect(m.syncDocumentStatus).toHaveBeenCalledWith('doc_own', 'org-own');
+  });
+
   it('POST refuses a different sender before contacting the provider', async () => {
     const { POST } = await import('../route');
     m.getDocumentSender.mockResolvedValueOnce('someone-else');
