@@ -9,7 +9,6 @@
  * organization, never from the request body (prevents ownership spoofing).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { collectiveAgreements } from '@/db/schema';
 import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
@@ -45,7 +44,7 @@ export const GET = withApi(
 
     // The tenant policy admits the owner, explicit grants and public clauses, and the predicate below states the same rule, so this read runs as the
     // tenant like every other and the item read asks the same question. CREATE is an owner write.
-    return await withRLSContext({ organizationId }, async () => {
+    return await withRLSContext({ organizationId }, async (tx) => {
       const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
       const conditions: ReturnType<typeof eq>[] = [visibilityCondition];
 
@@ -81,7 +80,7 @@ export const GET = withApi(
       const where = and(...conditions);
 
       const [rows, countResult] = await Promise.all([
-        db
+        tx
           .select({
             id: sharedClauseLibrary.id,
             clauseNumber: sharedClauseLibrary.clauseNumber,
@@ -103,7 +102,7 @@ export const GET = withApi(
           .orderBy(sharedClauseLibrary.createdAt)
           .limit(limit)
           .offset((page - 1) * limit),
-        db
+        tx
           .select({ count: sql<number>`count(*)::int` })
           .from(sharedClauseLibrary)
           .where(where),
