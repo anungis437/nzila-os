@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hasMinRole, withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { ReportExecutor, type ReportConfig } from '@/lib/report-executor';
-import { adminOnlyReportSelections, OFFICER_REPORT_ROW_CAP, validateReportConfig } from '@/lib/reports/report-config-validation';
+import { adminOnlyReportSelections, OFFICER_REPORT_ROW_CAP, suppressSmallGroups, validateReportConfig, withGroupSizeField } from '@/lib/reports/report-config-validation';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -141,7 +141,16 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
 
     // Execute report using secured ReportExecutor
     const executor = new ReportExecutor(organizationId);
-    const result = await executor.execute(config);
+    // An officer's grouped report withholds groups too small to be anonymous; the server adds the count it measures them by.
+    const result = await executor.execute(isAdministrator ? config : withGroupSizeField(config));
+
+    let suppressedGroups = 0;
+    if (result.success && !isAdministrator && config.groupBy && config.groupBy.length > 0) {
+      const filtered = suppressSmallGroups((result.data ?? []) as Array<Record<string, unknown>>);
+      result.data = filtered.rows;
+      result.rowCount = filtered.rows.length;
+      suppressedGroups = filtered.suppressed;
+    }
 
     // A refused configuration is the caller's error and a failed query is ours; neither is a 200, and neither is recorded as a success.
     if (!result.success) {
@@ -191,6 +200,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
           filterCount: config.filters?.length ?? 0,
           rowCount: result.rowCount,
           adminOnlySelections: adminOnly,
+          suppressedGroups,
           limit: config.limit ?? null,
         },
       }),
@@ -201,6 +211,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       data: result.data,
       rowCount: result.rowCount,
       executionTime: result.executionTimeMs,
+      ...(suppressedGroups > 0 ? { suppressedGroups, suppressionNote: 'Groups with fewer than 5 members or claims are withheld.' } : {}),
     });
   } catch (error: any) {
     logApiAuditEvent({

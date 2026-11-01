@@ -21,10 +21,38 @@ const ADMIN_ONLY_FIELDS: Record<string, readonly string[]> = { organization_memb
 const ADMIN_ONLY_ROW_SOURCES = new Set(['claims', 'claim_deadlines']);
 export const OFFICER_REPORT_ROW_CAP = 500;
 
+/**
+ * Small-group suppression for a grouped report an officer runs: a group of fewer than SMALL_GROUP_MIN members or claims can identify
+ * the people in it, so its row is withheld. The group size is measured by the server with a count it adds itself, never taken from
+ * a column the caller chose, and the added column is removed before the rows leave.
+ */
+export const SMALL_GROUP_MIN = 5;
+export const GROUP_SIZE_ALIAS = 'ue_group_size';
+
+export function withGroupSizeField(config: ReportConfig): ReportConfig {
+  if (!config.groupBy || config.groupBy.length === 0) return config;
+  return {
+    ...config,
+    fields: [...config.fields, { fieldId: 'id', fieldName: 'Group size', aggregation: 'count', alias: GROUP_SIZE_ALIAS }],
+  };
+}
+
+export function suppressSmallGroups<T extends Record<string, unknown>>(rows: T[]): { rows: Array<Omit<T, 'ue_group_size'>>; suppressed: number } {
+  const kept: Array<Omit<T, 'ue_group_size'>> = [];
+  let suppressed = 0;
+  for (const row of rows) {
+    const { [GROUP_SIZE_ALIAS]: size, ...rest } = row as Record<string, unknown>;
+    if (Number(size) < SMALL_GROUP_MIN || !Number.isFinite(Number(size))) suppressed += 1;
+    else kept.push(rest as Omit<T, 'ue_group_size'>);
+  }
+  return { rows: kept, suppressed };
+}
+
 export function adminOnlyReportSelections(config: ReportConfig): string[] {
   const touched: string[] = [];
   const fields = Array.isArray(config.fields) ? config.fields : [];
-  const rowLevel = fields.some((field) => field && !field.aggregation);
+  // In a grouped query the plain fields are the group keys, so only an ungrouped plain field lists rows.
+  const rowLevel = !(config.groupBy && config.groupBy.length > 0) && fields.some((field) => field && !field.aggregation);
   if (ADMIN_ONLY_ROW_SOURCES.has(config.dataSourceId) && rowLevel) touched.push(config.dataSourceId);
 
   const protectedFields = ADMIN_ONLY_FIELDS[config.dataSourceId] ?? [];

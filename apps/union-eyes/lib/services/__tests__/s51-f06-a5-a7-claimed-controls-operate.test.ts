@@ -30,7 +30,8 @@ describe('F06 batch 5 (A5 + A7): controls that were claimed are the controls tha
     expect(validation).toContain('OFFICER_REPORT_ROW_CAP = 500')
     const route = src('app/api/reports/execute/route.ts')
     expect(route).toContain("action: 'report.execute.denied'")
-    expect(route.indexOf('adminOnlyReportSelections(config)')).toBeLessThan(route.indexOf('executor.execute(config)'))
+    expect(route.indexOf('adminOnlyReportSelections(config)')).toBeLessThan(route.indexOf('executor.execute('))
+    expect(route).toContain('suppressSmallGroups(')
   })
 
   it('an ICRA claim is the purchaser\'s: the account e-mail must be the one recorded at purchase', () => {

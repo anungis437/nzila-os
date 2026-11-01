@@ -259,3 +259,59 @@ describe('reports/execute field authority (F06 A5)', () => {
     );
   });
 });
+
+describe('reports/execute small-group suppression (F06 A5)', () => {
+  const grouped = { dataSourceId: 'claims', fields: [{ fieldId: 'status', fieldName: 'Status' }, { fieldId: 'id', fieldName: 'Claims', aggregation: 'count' }], groupBy: ['status'] };
+  const run = async (config: unknown) => {
+    const { POST } = await import('../reports/execute/route');
+    return POST(
+      new NextRequest('http://localhost/api/reports/execute', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ config }) }),
+      { userId: 'u1', organizationId: 'org_1' },
+    );
+  };
+  const rows = [
+    { status: 'open', id_count: 12, ue_group_size: 12 },
+    { status: 'rare', id_count: 2, ue_group_size: 2 },
+    { status: 'edge', id_count: 5, ue_group_size: 5 },
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
+    m.audit.mockReset().mockResolvedValue(undefined);
+    m.execute.mockResolvedValue({ success: true, data: rows.map((r) => ({ ...r })), rowCount: 3, executionTimeMs: 3 });
+  });
+
+  it('has the server add its own count, withholds groups under five, strips the count, and says how many were withheld', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+
+    const body = await (await run(grouped)).json();
+
+    const sent = m.execute.mock.calls[0][0];
+    expect(sent.fields.at(-1)).toMatchObject({ fieldId: 'id', aggregation: 'count', alias: 'ue_group_size' });
+    expect(body.data).toEqual([{ status: 'open', id_count: 12 }, { status: 'edge', id_count: 5 }]);
+    expect(JSON.stringify(body)).not.toContain('ue_group_size');
+    expect(body).toMatchObject({ rowCount: 2, suppressedGroups: 1 });
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ suppressedGroups: 1 }) }));
+  });
+
+  it('does not suppress for an administrator or add a column', async () => {
+    m.hasMinRole.mockResolvedValue(true);
+    m.execute.mockResolvedValue({ success: true, data: [{ status: 'rare', id_count: 2 }], rowCount: 1, executionTimeMs: 1 });
+
+    const body = await (await run(grouped)).json();
+
+    expect(m.execute.mock.calls[0][0].fields).toHaveLength(2);
+    expect(body.data).toEqual([{ status: 'rare', id_count: 2 }]);
+    expect(body).not.toHaveProperty('suppressedGroups');
+  });
+
+  it('leaves an ungrouped officer report alone', async () => {
+    m.hasMinRole.mockResolvedValue(false);
+    m.execute.mockResolvedValue({ success: true, data: [{ id_count: 3 }], rowCount: 1, executionTimeMs: 1 });
+
+    const body = await (await run({ dataSourceId: 'claims', fields: [{ fieldId: 'id', fieldName: 'Claims', aggregation: 'count' }] })).json();
+
+    expect(body.data).toEqual([{ id_count: 3 }])
+  });
+});
