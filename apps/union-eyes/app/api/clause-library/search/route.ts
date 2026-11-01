@@ -8,7 +8,6 @@
  * lib/clause-library/sharing-authority.ts.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { ilike, or, and } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -18,10 +17,10 @@ import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 export const dynamic = 'force-dynamic';
 
 async function searchClauses(q: string, organizationId: string) {
-  return withRLSContext({ organizationId }, async () => {
+  return withRLSContext({ organizationId }, async (tx) => {
     const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
 
-    const rows = await db
+    const rows = await tx
       .select({
         id: sharedClauseLibrary.id,
         clauseNumber: sharedClauseLibrary.clauseNumber,
