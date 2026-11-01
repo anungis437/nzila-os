@@ -13,7 +13,6 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from "@/lib/api/standardized-responses";
-import { db } from "@/db/db";
 import { pilotEnrollments } from "@/db/schema/domains/pilot/pilot-enrollments";
 import { pilotMilestones } from "@/db/schema/domains/pilot/pilot-milestones";
 import { organizations } from "@/db/schema-organizations";
@@ -67,13 +66,13 @@ export async function GET(request?: Request) {
         resourceType: "pilot_enrollments",
         details: { limit, offset },
       },
-      async () => {
-      const [{ total }] = (await db
+      async (tx) => {
+      const [{ total }] = (await tx
         .select({ total: sql<number>`count(*)` })
         .from(pilotEnrollments)
         .where(eq(pilotEnrollments.status, "active"))) as Array<{ total: number | string }>;
 
-      const enrollments = await db
+      const enrollments = await tx
         .select({
           enrollment: pilotEnrollments,
           orgName: organizations.name,
@@ -91,11 +90,11 @@ export async function GET(request?: Request) {
 
       // One query per figure for the whole page, not three per organization.
       const milestoneRows = orgIds.length
-        ? await db.select().from(pilotMilestones).where(inArray(pilotMilestones.organizationId, orgIds))
+        ? await tx.select().from(pilotMilestones).where(inArray(pilotMilestones.organizationId, orgIds))
         : [];
       const memberStatRows = orgIds.length
         ? Array.from(
-            await db.execute(sql`
+            await tx.execute(sql`
               SELECT
                 organization_id::text AS organization_id,
                 COUNT(*) FILTER (WHERE role IN ('organizer', 'steward', 'president', 'vp', 'officer'))
@@ -115,7 +114,7 @@ export async function GET(request?: Request) {
         : [];
       const caseStatRows = orgIds.length
         ? Array.from(
-            await db.execute(sql`
+            await tx.execute(sql`
               SELECT
                 organization_id::text AS organization_id,
                 COUNT(*) AS cases_managed,
