@@ -5813,7 +5813,8 @@
         "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
         "apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts",
         "docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md",
-        "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md"
+        "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
+        "docs/union-eyes/convergence/remediation/evidence/ue-unsubscribe-capability-target-20261031.md"
       ],
       "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation; outbound campaign emails now carry a campaign/recipient-bound RFC 8058 one-click POST capability, with SendGrid header forwarding. Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
       "remaining": "Exact-HEAD focused/full unit and contract, native PostgreSQL 15/16, HTTP/browser and staging proof; live provider one-click interoperability; independent institutional ratification. No CLOSED credit."
@@ -8162,6 +8163,16 @@
         "apps/union-eyes/lib/services/__tests__/s47-settings-enforcement-ui.test.ts"
       ],
       "remaining": "Security settings still are not enforced by authentication/session/password controls. Focused test, exact-HEAD full suite, native PostgreSQL 15/16, HTTP/browser/staging and institutional review are unqualified. Defect stays PARTIAL; no closure or implementation credit."
+    },
+    "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceCommit": "99f9244a6aa4d539bd4a23c272a26388ad9e75d4",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-unsubscribe-capability-target-20261031.md",
+      "files": [
+        "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts",
+        "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts"
+      ],
+      "remaining": "Exact-HEAD focused/full tests, native PostgreSQL 15/16, HTTP/browser and provider interoperability, atomic consent/audit qualification, independent reviewer and institutional ratification. Original defect remains PARTIAL; no new implementation or closure credit."
     }
   }
 }
