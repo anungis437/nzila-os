@@ -12,11 +12,13 @@
 
 import { db } from '@/db/db';
 import { organizations, sharedClauseLibrary } from '@/db/schema';
-import { eq, and, inArray, or, gte, sql } from 'drizzle-orm';
+import { eq, ne, and, desc, inArray, or, gte, sql, type SQL } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { cacheGet, cacheSet } from '@/lib/services/cache-service';
+import { buildClauseVisibilityCondition, isUuid, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 // =============================================================================
 // TYPES
@@ -211,8 +213,24 @@ export async function autoDetectParentFederation(
 // SMART CLAUSE DISCOVERY
 // =============================================================================
 
+/** What each reason adds to a clause's score. Only reasons that tell clauses apart carry a weight. */
+const SUGGESTION_WEIGHTS = {
+  public: 20,
+  sharedWithOrganization: 40,
+  // Per step towards the organization along its hierarchy path; the parent is the nearest ancestor and scores most.
+  proximityStep: 15,
+} as const;
+
+const UNDISCLOSED_SOURCE = 'Another organization (source not disclosed)';
+const UNKNOWN_SOURCE = 'Unknown organization';
+
 /**
- * Suggest relevant clauses from parent federation and peer organizations
+ * Suggest relevant clauses from parent federation and peer organizations: the clauses of other organizations that this organization may
+ * already read (public ones, and private ones that name it), in its own sector and province, ranked by how they reached it and how close
+ * their owner is in its hierarchy. The federation and congress sharing levels carry no weight and no reason, because no other organization
+ * can read a clause at those levels (lib/clause-library/sharing-authority.ts). The sector and province are filters, so they add nothing to
+ * the ranking and are not listed as reasons. An organization that has parents is offered its parents' clauses; one that has none is offered
+ * every clause it may read. A clause that is anonymized or unclassified never names its source.
  * 
  * @param organizationId - Current organization ID
  * @returns Array of clause suggestions with relevance scoring
@@ -221,104 +239,89 @@ export async function suggestRelevantClauses(
   organizationId: string
 ): Promise<ClauseSuggestion[]> {
   try {
-    // Fetch organization with hierarchy
-    const org = await db.query.organizations.findFirst({
-      where: eq(organizations.id, organizationId),
+    // As the caller's tenant: the row policy decides which clauses this organization may read (its own, public ones, and private ones that name
+    // it), the same rule the clause library routes apply. Nothing here widens that, so no clause is scored that the organization could not open.
+    const { ancestors, rows } = await withRLSContext({ organizationId }, async (tx) => {
+      const [org] = await tx
+        .select({ sectors: organizations.sectors, provinceTerritory: organizations.provinceTerritory, hierarchyPath: organizations.hierarchyPath })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1);
+
+      if (!org) {
+        throw new Error('Organization not found');
+      }
+
+      // The path runs from the root to the organization itself, so the ancestors are every entry but the last.
+      const ancestors = (org.hierarchyPath ?? []).filter((id) => id !== organizationId && isUuid(id));
+      const orgSector = org.sectors && org.sectors.length > 0 ? org.sectors[0] : null;
+
+      // Clauses of other organizations only: suggesting an organization its own clause is no suggestion.
+      const filters: SQL[] = [await buildClauseVisibilityCondition(organizationId), ne(sharedClauseLibrary.sourceOrganizationId, organizationId)];
+      if (orgSector) filters.push(eq(sharedClauseLibrary.sector, orgSector));
+      if (org.provinceTerritory) filters.push(eq(sharedClauseLibrary.province, org.provinceTerritory.toUpperCase()));
+      if (ancestors.length > 0) {
+        filters.push(inArray(sharedClauseLibrary.sourceOrganizationId, ancestors));
+        // Being drawn from the parents is itself a statement about the source, which an anonymized or unclassified clause does not make.
+        filters.push(eq(sharedClauseLibrary.isAnonymized, false));
+      }
+
+      const rows = await tx
+        .select({
+          id: sharedClauseLibrary.id,
+          clauseTitle: sharedClauseLibrary.clauseTitle,
+          clauseType: sharedClauseLibrary.clauseType,
+          sharingLevel: sharedClauseLibrary.sharingLevel,
+          sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
+          isAnonymized: sharedClauseLibrary.isAnonymized,
+        })
+        .from(sharedClauseLibrary)
+        .where(and(...filters))
+        .orderBy(desc(sharedClauseLibrary.createdAt))
+        .limit(50);
+
+      return { ancestors, rows };
     });
 
-    if (!org) {
-      throw new Error('Organization not found');
-    }
+    // The policy admits only these two levels for another organization. A row at any other level is not a suggestion, whatever reached this point.
+    const readable = rows.filter((clause) => clause.sharingLevel === 'public' || clause.sharingLevel === 'private');
 
-    const hierarchyPath = org.hierarchyPath || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filters: any[] = [
-      // Only public/federation/congress level clauses
-      inArray(sharedClauseLibrary.sharingLevel, ['public', 'federation', 'congress']),
-    ];
+    // Names are read only for clauses whose source the projection may disclose; the others are labelled, never guessed.
+    const names = await sourceNamesFor(readable, organizationId);
 
-    // Filter by sector if available (check first element of sectors array)
-    const orgSector = org.sectors && org.sectors.length > 0 ? org.sectors[0] : null;
-    if (orgSector) {
-      filters.push(eq(sharedClauseLibrary.sector, orgSector));
-    }
-
-    // Filter by province if available
-    if (org.provinceTerritory) {
-      filters.push(eq(sharedClauseLibrary.province, org.provinceTerritory.toUpperCase()));
-    }
-
-    // Get clauses from parent organizations in hierarchy
-    if (hierarchyPath.length > 0) {
-      filters.push(
-        inArray(sharedClauseLibrary.sourceOrganizationId, hierarchyPath)
-      );
-    }
-
-    const relevantClauses = await db.query.sharedClauseLibrary.findMany({
-      where: and(...filters),
-      with: {
-        sourceOrganization: {
-          columns: {
-            name: true,
-            organizationType: true,
-          },
-        },
-      },
-      limit: 50,
-      orderBy: (clause, { desc }) => [desc(clause.createdAt)],
-    });
-
-    // Score and rank suggestions
-    const suggestions: ClauseSuggestion[] = relevantClauses.map((clause) => {
+    const suggestions: ClauseSuggestion[] = readable.map((clause) => {
       const relevanceReasons: string[] = [];
       let relevanceScore = 0;
+      const sourceDisclosed = clauseSourceProjection(clause, organizationId) !== undefined;
 
-      // Sharing level scoring
+      // A private clause of another organization is readable here only because it names this organization in its grant list.
       if (clause.sharingLevel === 'public') {
-        relevanceScore += 20;
+        relevanceScore += SUGGESTION_WEIGHTS.public;
         relevanceReasons.push('Publicly available');
-      } else if (clause.sharingLevel === 'federation') {
-        relevanceScore += 40;
-        relevanceReasons.push('Federation-shared');
-      } else if (clause.sharingLevel === 'congress') {
-        relevanceScore += 50;
-        relevanceReasons.push('Congress-level template');
+      } else {
+        relevanceScore += SUGGESTION_WEIGHTS.sharedWithOrganization;
+        relevanceReasons.push('Shared with your organization');
       }
 
-      // Hierarchy proximity (closer in hierarchy = more relevant)
-      if (hierarchyPath.includes(clause.sourceOrganizationId)) {
-        const hierarchyIndex = hierarchyPath.indexOf(clause.sourceOrganizationId);
-        const proximityScore = (hierarchyPath.length - hierarchyIndex) * 15;
-        relevanceScore += proximityScore;
+      // A closer ancestor is worth more: the path is ordered root first, so the last ancestor is the parent. Said only for a source that may be named.
+      const ancestorIndex = sourceDisclosed ? ancestors.indexOf(clause.sourceOrganizationId) : -1;
+      if (ancestorIndex >= 0) {
+        relevanceScore += (ancestorIndex + 1) * SUGGESTION_WEIGHTS.proximityStep;
         relevanceReasons.push('From parent organization');
-      }
-
-      // Sector match
-      if (orgSector && clause.sector === orgSector) {
-        relevanceScore += 25;
-        relevanceReasons.push(`Same sector (${orgSector})`);
-      }
-
-      // Province match
-      if (org.provinceTerritory && clause.province === org.provinceTerritory.toUpperCase()) {
-        relevanceScore += 15;
-        relevanceReasons.push(`Same province (${org.provinceTerritory})`);
       }
 
       return {
         clauseId: clause.id,
         clauseTitle: clause.clauseTitle,
         clauseType: clause.clauseType,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sourceOrgName: (clause.sourceOrganization as any)?.name || 'Unknown',
+        sourceOrgName: sourceDisclosed ? names.get(clause.sourceOrganizationId) ?? UNKNOWN_SOURCE : UNDISCLOSED_SOURCE,
         sharingLevel: clause.sharingLevel,
         relevanceScore,
         relevanceReasons,
       };
     });
 
-    // Sort by relevance score
+    // The sort is stable, so equally scored clauses keep their newest-first order.
     return suggestions.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 20);
   } catch (error) {
     logger.error('Failed to suggest relevant clauses', { error });

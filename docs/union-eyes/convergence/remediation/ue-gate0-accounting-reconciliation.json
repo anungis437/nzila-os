@@ -3,20 +3,20 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 651,
-    "ledgerImplemented": 598,
-    "creditedByEarlierRuns": 53,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 22,
+    "overlayImplemented": 652,
+    "ledgerImplemented": 600,
+    "creditedByEarlierRuns": 52,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 21,
     "overlayPartial": 72,
     "ledgerPartial": 72,
-    "unresolvedByOverlay": 126,
+    "unresolvedByOverlay": 125,
     "qualificationVerified": 0,
     "closed": 0
   },
   "agreement": {
-    "creditedByBoth": 598,
-    "sameBatchLabel": 571,
-    "differentBatchLabel": 27
+    "creditedByBoth": 600,
+    "sameBatchLabel": 572,
+    "differentBatchLabel": 28
   },
   "batchLabelDifferences": [
     {
@@ -33,6 +33,11 @@
       "defectId": "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
+      "overlayBatch": "GATE0-CLAUSE-SHARING-ANONYMIZATION",
+      "ledgerBatch": "B125-F03-B-FEDERATION-AND-CONGRESS-LEVELS-WITHDRAWN-EVERYWHERE"
     },
     {
       "defectId": "DEF-0B4-OHS-COMMITTEE-ROSTER-MEMBER-READ",
@@ -449,17 +454,6 @@
       "regressionTest": "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
       "files": [
         "apps/union-eyes/lib/ai/chatbot-service.ts"
-      ],
-      "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
-      "batch": "GATE0-CLAUSE-SHARING-ANONYMIZATION",
-      "sourceCommit": "b46d981ef6ce6ce706eeddd693dbd43b9459b0b8",
-      "regressionTest": "apps/union-eyes/app/api/__tests__/clause-library-anonymization.contract.test.ts",
-      "files": [
-        "apps/union-eyes/app/api/clause-library/[id]/route.ts",
-        "apps/union-eyes/app/api/clause-library/route.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

@@ -5,8 +5,11 @@
  * 
  * Suggest relevant clauses based on:
  * - Parent organization hierarchy
- * - Sector/province similarity
- * - Sharing level availability
+ * - Sector and province (filters: the suggestions are for the organization's own sector and province)
+ * - How the clause reached the organization (public, or shared with it)
+ *
+ * Only clauses the organization may already read are suggested (lib/utils/smart-onboarding.ts); a clause whose source is anonymized or
+ * unclassified is offered without naming its owner.
  */
 
 import { z } from 'zod';

@@ -59,26 +59,37 @@ const SHARING_LEVELS = [
     label: "Private",
     description: "Only accessible to your organization and explicitly granted organizations",
     icon: EyeOff,
+    available: true,
   },
   {
     value: "federation",
     label: "Federation",
-    description: "Shared with all organizations in your federation",
+    description:
+      "Not available yet: no other organization can read a clause at this level, so it cannot be selected",
     icon: Building2,
+    available: false,
   },
   {
     value: "congress",
     label: "Congress",
-    description: "Shared with all CLC member organizations across all federations",
+    description:
+      "Not available yet: no other organization can read a clause at this level, so it cannot be selected",
     icon: Building2,
+    available: false,
   },
   {
     value: "public",
     label: "Public",
     description: "Publicly accessible to all users",
     icon: Eye,
+    available: true,
   },
 ] as const;
+
+type SharingLevel = (typeof SHARING_LEVELS)[number]["value"];
+
+const isOffered = (value: string): value is SharingLevel =>
+  SHARING_LEVELS.some((level) => level.value === value && level.available);
 
 export function ClauseSharingControls({
   open,
@@ -149,16 +160,36 @@ export function ClauseSharingControls({
           {/* Sharing Level */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Sharing Level</Label>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <RadioGroup value={sharingLevel} onValueChange={(value: any) => setSharingLevel(value)}>
+            {!isOffered(currentSettings.sharingLevel) && (
+              <Alert data-testid="withdrawn-level-notice">
+                <AlertDescription>
+                  This clause is stored at the {currentSettings.sharingLevel} level, which no other organization
+                  can read, so only your organization sees it. Choose Private or Public to change who can read it.
+                </AlertDescription>
+              </Alert>
+            )}
+            <RadioGroup
+              value={sharingLevel}
+              onValueChange={(value: string) => {
+                if (isOffered(value)) setSharingLevel(value);
+              }}
+            >
               <div className="space-y-3">
                 {SHARING_LEVELS.map((level) => {
                   const Icon = level.icon;
                   return (
                     <div key={level.value} className="flex items-start space-x-3">
-                      <RadioGroupItem value={level.value} id={level.value} className="mt-1" />
+                      <RadioGroupItem
+                        value={level.value}
+                        id={level.value}
+                        className="mt-1"
+                        disabled={!level.available}
+                      />
                       <div className="flex-1">
-                        <Label htmlFor={level.value} className="flex items-center gap-2 cursor-pointer">
+                        <Label
+                          htmlFor={level.value}
+                          className={`flex items-center gap-2 ${level.available ? "cursor-pointer" : "cursor-not-allowed text-muted-foreground"}`}
+                        >
                           <Icon className="h-4 w-4" />
                           <span className="font-medium">{level.label}</span>
                         </Label>
@@ -237,15 +268,12 @@ export function ClauseSharingControls({
           </div>
 
           {/* Privacy Warning */}
-          {(sharingLevel === "congress" || sharingLevel === "public") && (
+          {sharingLevel === "public" && (
             <Alert>
               <AlertDescription>
-                <strong>Privacy Notice:</strong> This clause will be accessible to{" "}
-                {sharingLevel === "congress"
-                  ? "all CLC member organizations"
-                  : "all users, including those outside the CLC"}
-                . Member names are always redacted, but ensure no other sensitive information is
-                included.
+                <strong>Privacy Notice:</strong> This clause will be accessible to all users, including
+                those outside the CLC. Member names are always redacted, but ensure no other sensitive
+                information is included.
               </AlertDescription>
             </Alert>
           )}

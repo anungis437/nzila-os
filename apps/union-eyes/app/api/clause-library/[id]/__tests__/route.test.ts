@@ -295,21 +295,35 @@ describe('clause-library/[id] item route (round 55)', () => {
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    // A caller who does not own the clause learns nothing from the sharing rule: the ownership check answers first.
+    expect(h.sharingChangeDenial).not.toHaveBeenCalled();
   });
 
-  it('PATCH 403s an unauthorized sharing change before any read, write, or audit', async () => {
+  it('PATCH 403s an unavailable sharing change for the owner, after the ownership check and before any write or audit', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
     h.allowPrivilegedRead.current = true;
     h.sharingChangeDenial.mockResolvedValue({ status: 403, message: 'not allowed to share' });
     const { PATCH } = await loadHandlers();
 
     await expect(
-      PATCH({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } }),
+      PATCH({ request: req('clause-1', { sharingLevel: 'federation' }), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 403 });
-    // The only tenant context opened is the one that computes the denial; nothing is read, written or audited after it.
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-a', expect.objectContaining({ sharingLevel: 'federation' }), 'private');
     expect(h.withRLSContext).toHaveBeenCalledTimes(1);
     expect(h.calls.update).toBe(0);
     expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('PATCH judges a sharing level against the level the clause already has, so a clause stored at a withdrawn level stays editable', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'federation', clauseTitle: 'Same' }]);
+    pushSel([{ id: 'clause-1' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
+    h.allowPrivilegedRead.current = true;
+    const { PATCH } = await loadHandlers();
+
+    await PATCH({ request: req('clause-1', { sharingLevel: 'federation' }), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } });
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-a', expect.objectContaining({ sharingLevel: 'federation' }), 'federation');
   });
 
   it('PATCH 404s when tenant visibility does not return another organization clause', async () => {
@@ -323,11 +337,11 @@ describe('clause-library/[id] item route (round 55)', () => {
     expect(h.calls.update).toBe(0);
     expect(h.isSharedClauseOwner).not.toHaveBeenCalled();
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    expect(h.sharingChangeDenial).not.toHaveBeenCalled();
   });
 
   it('PATCH succeeds for the owner and ignores a body organization id', async () => {
-    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
     pushSel([{ id: 'clause-1', clauseTitle: 'Updated' }]);
     h.allowPrivilegedRead.current = true;
@@ -348,7 +362,7 @@ describe('clause-library/[id] item route (round 55)', () => {
       expect.objectContaining({ organizationId: 'org-a', action: 'clause_library.update', resourceId: 'clause-1' }),
     );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-a', expect.any(Object), 'private');
     // the text being replaced is kept, on the same transaction, before the overwrite
     expect(versions.record).toHaveBeenCalledWith(h.db, expect.objectContaining({ organizationId: 'org-a', recordedBy: 'user-1', kind: 'replaced', clause: expect.objectContaining({ id: 'clause-1' }) }));
   });
@@ -449,7 +463,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    expect(h.sharingChangeDenial).not.toHaveBeenCalled();
   });
 
   it('PATCH does not apply a cross-org write when the row is publicly readable and the owner predicate is stubbed open', async () => {
@@ -467,7 +481,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     expect(h.applied.updates).toBe(0);
     expect(h.updatePayloads).toHaveLength(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-b', expect.any(Object), 'public');
   });
 
   it('DELETE does not apply a cross-org write when an explicit share makes the row readable and the owner predicate is stubbed open', async () => {

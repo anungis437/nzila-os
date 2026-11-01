@@ -74,6 +74,8 @@ describe.skipIf(!URL)('the federation directory on the combined schema, as the r
   }, 120_000)
 
   afterAll(async () => {
+    // Rows that every later run of the directory would otherwise see: remove what this run added.
+    await admin?.query('DELETE FROM organizations WHERE id = ANY($1::uuid[])', [Object.values(ids)]).catch(() => undefined)
     await pool?.end().catch(() => undefined)
     await admin?.end().catch(() => undefined)
   })

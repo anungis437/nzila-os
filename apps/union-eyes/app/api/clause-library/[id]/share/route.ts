@@ -77,11 +77,6 @@ export const POST = withApi(
       throw ApiError.badRequest('No sharing fields to update');
     }
 
-    const denial = await withRLSContext({ organizationId }, () => sharingChangeDenial(organizationId, updates));
-    if (denial) {
-      throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
-    }
-
     return withRLSContext({ organizationId }, async (tx) => {
       const [clause] = await tx
         .select({
@@ -95,6 +90,12 @@ export const POST = withApi(
 
       if (!clause || !isSharedClauseOwner(organizationId, clause)) {
         throw ApiError.notFound('clause', id);
+      }
+
+      // Judged against the level the clause has now, so re-sending a level that is no longer offered is not a change.
+      const denial = await sharingChangeDenial(organizationId, updates, clause.sharingLevel);
+      if (denial) {
+        throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
       }
 
       const [updated] = await tx

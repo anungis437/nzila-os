@@ -130,6 +130,19 @@ describe('sharingChangeDenial', () => {
     expect(await sharingChangeDenial(A, { sharedWithOrgIds: null })).toBeNull();
     expect(await sharingChangeDenial(A, {})).toBeNull();
   });
+
+  it('does not treat re-sending the level a clause already has as a change, so a clause stored at a withdrawn level stays editable', async () => {
+    const { sharingChangeDenial } = await import('../sharing-authority');
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation' }, 'federation')).toBeNull();
+    expect(await sharingChangeDenial(A, { sharingLevel: 'congress' }, 'congress')).toBeNull();
+    // Moving to a withdrawn level, or from one withdrawn level to the other, is still a change and is refused.
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation' }, 'private')).toMatchObject({ status: 403 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'congress' }, 'federation')).toMatchObject({ status: 403 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation' }, null)).toMatchObject({ status: 403 });
+    // An unknown level is refused whatever the clause has now, and the grant list is still validated.
+    expect(await sharingChangeDenial(A, { sharingLevel: 'galaxy' }, 'galaxy')).toMatchObject({ status: 400 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation', sharedWithOrgIds: ['not-a-uuid'] }, 'federation')).toMatchObject({ status: 400 });
+  });
 });
 
 describe('sourceNamesFor', () => {

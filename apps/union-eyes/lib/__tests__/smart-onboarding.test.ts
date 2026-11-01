@@ -6,10 +6,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
   mockOrgFindFirst: vi.fn(),
   mockOrgFindMany: vi.fn(),
-  mockClauseFindMany: vi.fn(),
   mockCacheGet: vi.fn(),
   mockCacheSet: vi.fn(),
   directoryQueries: [] as Array<Record<string, unknown> | undefined>,
+  // The clause suggestions read as the caller's tenant: one result per select, in the order the code asks.
+  selectResults: [] as unknown[],
+  selects: [] as Array<{ columns: unknown; where?: unknown; orderBy?: unknown; limit?: number }>,
+  tenantContexts: [] as unknown[],
+  names: new Map<string, string>(),
+  nameLookups: [] as Array<{ rows: unknown; caller: string }>,
 }));
 
 vi.mock('@/db/db', () => ({
@@ -26,15 +31,6 @@ vi.mock('@/db/db', () => ({
           return mocks.mockOrgFindMany();
         },
       },
-      sharedClauseLibrary: {
-        findMany: (...args: any[]) => {
-          const opts = args[0] as Record<string, unknown> | undefined;
-          if (opts && typeof opts.orderBy === 'function') {
-            (opts.orderBy as (...args: any[]) => unknown)({}, { desc: (x: any) => x, asc: (x: any) => x });
-          }
-          return mocks.mockClauseFindMany();
-        },
-      },
     },
   },
 }));
@@ -47,6 +43,7 @@ vi.mock('@/db/schema', () => ({
     sectors: 'sectors', parentId: 'parentId', hierarchyPath: 'hierarchyPath',
   },
   sharedClauseLibrary: {
+    id: 'clauseId', clauseTitle: 'clauseTitle', clauseType: 'clauseType', isAnonymized: 'isAnonymized',
     sharingLevel: 'sharingLevel', sector: 'sector',
     province: 'province', sourceOrganizationId: 'sourceOrganizationId',
     createdAt: 'createdAt',
@@ -55,8 +52,10 @@ vi.mock('@/db/schema', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((...a: any[]) => ({ _t: 'eq', _a: a })),
+  ne: vi.fn((...a: any[]) => ({ _t: 'ne', _a: a })),
   and: vi.fn((...a: any[]) => ({ _t: 'and', _a: a })),
   or: vi.fn((...a: any[]) => ({ _t: 'or', _a: a })),
+  desc: vi.fn((...a: any[]) => ({ _t: 'desc', _a: a })),
   inArray: vi.fn((...a: any[]) => ({ _t: 'inArray', _a: a })),
   gte: vi.fn((...a: any[]) => ({ _t: 'gte', _a: a })),
   sql: Object.assign(vi.fn((...a: any[]) => ({ _t: 'sql', _a: a })), { raw: vi.fn() }),
@@ -66,8 +65,30 @@ vi.mock('@/lib/logger', () => ({
   logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
 }));
 
-// The federation directory is an explicit cross-organization read as the system role; the stand-in records the query it was given.
+// The federation directory is an explicit cross-organization read as the system role; the stand-in records the query it was given. The clause
+// suggestions are a tenant read: the stand-in records the context it was opened for and answers each select from a queue.
 vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: (options: unknown, fn: (tx: unknown) => unknown) => {
+    mocks.tenantContexts.push(options);
+    const tx = {
+      select: (columns: unknown) => {
+        const query: { columns: unknown; where?: unknown; orderBy?: unknown; limit?: number } = { columns };
+        mocks.selects.push(query);
+        const chain = {
+          from: () => chain,
+          where: (condition: unknown) => { query.where = condition; return chain; },
+          orderBy: (order: unknown) => { query.orderBy = order; return chain; },
+          limit: (count: number) => {
+            query.limit = count;
+            const next = mocks.selectResults.shift();
+            return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
+          },
+        };
+        return chain;
+      },
+    };
+    return fn(tx);
+  },
   withSystemContext: (fn: (tx: unknown) => unknown) =>
     fn({
       query: {
@@ -83,6 +104,16 @@ vi.mock('@/lib/db/with-rls-context', () => ({
         },
       },
     }),
+}));
+
+// The sharing rule and the source names have their own tests (and a native proof against the real policies); here they are stand-ins.
+vi.mock('@/lib/clause-library/sharing-authority', () => ({
+  buildClauseVisibilityCondition: async (caller: string) => ({ _t: 'visibility', caller }),
+  isUuid: (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value),
+  sourceNamesFor: async (rows: unknown, caller: string) => {
+    mocks.nameLookups.push({ rows, caller });
+    return mocks.names;
+  },
 }));
 
 vi.mock('@/lib/services/cache-service', () => ({
@@ -136,17 +167,31 @@ const FED = {
   sectors: ['public'],
 };
 
-const SHARED_CLAUSE = {
+// Clause suggestions: an organization three levels down (root, parent, itself), and the clauses a tenant read could return for it.
+const CLAUSE_ORG = '00000000-0000-4000-8000-0000000000a1';
+const PARENT = '00000000-0000-4000-8000-0000000000b1';
+const ROOT = '00000000-0000-4000-8000-0000000000b2';
+const PEER = '00000000-0000-4000-8000-0000000000c1';
+
+const clauseOrg = (over: Record<string, unknown> = {}) => ({
+  sectors: ['public'],
+  provinceTerritory: 'on',
+  hierarchyPath: [ROOT, PARENT, CLAUSE_ORG],
+  ...over,
+});
+
+const clauseRow = (over: Record<string, unknown> = {}) => ({
   id: 'sc-1',
   clauseTitle: 'Wage Grid',
   clauseType: 'wages',
-  sharingLevel: 'federation',
-  sector: 'public',
-  province: 'ON',
-  sourceOrganizationId: 'fed-1',
-  createdAt: new Date(),
-  sourceOrganization: { name: 'CUPE Ontario', organizationType: 'federation' },
-};
+  sharingLevel: 'public',
+  sourceOrganizationId: PARENT,
+  isAnonymized: false,
+  ...over,
+});
+
+/** What the code asked of the clause table, as the stand-in drizzle helpers recorded it. */
+const clauseFilters = () => (mocks.selects[1].where as { _a: Array<{ _t: string; _a: unknown[] }> })._a;
 
 /* ------------------------------------------------------------------ */
 /*  Tests                                                             */
@@ -157,6 +202,12 @@ describe('smart-onboarding', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockFetch.mockReset();
+    mocks.selectResults.length = 0;
+    mocks.selects.length = 0;
+    mocks.tenantContexts.length = 0;
+    mocks.directoryQueries.length = 0;
+    mocks.nameLookups.length = 0;
+    mocks.names.clear();
     delete process.env.CLC_API_KEY;
     delete process.env.CLC_API_URL;
   });
@@ -300,96 +351,169 @@ describe('smart-onboarding', () => {
   // suggestRelevantClauses
   // ================================================================
   describe('suggestRelevantClauses', () => {
-    it('returns scored clause suggestions', async () => {
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue([SHARED_CLAUSE]);
+    // Org row first, then the clauses, as the code asks for them.
+    const given = (org: Record<string, unknown> | undefined, clauses: unknown[] = []) => {
+      mocks.selectResults.push(org ? [org] : [], clauses);
+    };
 
-      const results = await suggestRelevantClauses('org-1');
+    it('reads as the caller tenant and asks only for clauses of other organizations that it may already read', async () => {
+      given(clauseOrg(), [clauseRow()]);
+      await suggestRelevantClauses(CLAUSE_ORG);
+
+      expect(mocks.tenantContexts).toEqual([{ organizationId: CLAUSE_ORG }]);
+      expect(mocks.directoryQueries).toHaveLength(0);
+      expect(mocks.selects).toHaveLength(2);
+      const filters = clauseFilters();
+      expect(filters).toContainEqual({ _t: 'visibility', caller: CLAUSE_ORG });
+      expect(filters).toContainEqual({ _t: 'ne', _a: ['sourceOrganizationId', CLAUSE_ORG] });
+      expect(filters).toContainEqual({ _t: 'eq', _a: ['sector', 'public'] });
+      expect(filters).toContainEqual({ _t: 'eq', _a: ['province', 'ON'] });
+      // The parents are every entry of the path but the organization itself, root first, and only a source that may be named is drawn from them.
+      expect(filters).toContainEqual({ _t: 'inArray', _a: ['sourceOrganizationId', [ROOT, PARENT]] });
+      expect(filters).toContainEqual({ _t: 'eq', _a: ['isAnonymized', false] });
+      expect(mocks.selects[1].limit).toBe(50);
+    });
+
+    it('returns scored clause suggestions with the name of a source that may be named', async () => {
+      mocks.names.set(PARENT, 'CUPE Ontario');
+      given(clauseOrg(), [clauseRow()]);
+
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
       expect(results).toHaveLength(1);
-      expect(results[0].clauseId).toBe('sc-1');
+      expect(results[0]).toMatchObject({ clauseId: 'sc-1', clauseTitle: 'Wage Grid', clauseType: 'wages', sourceOrgName: 'CUPE Ontario', sharingLevel: 'public' });
       expect(results[0].relevanceScore).toBeGreaterThan(0);
-      expect(results[0].sourceOrgName).toBe('CUPE Ontario');
+      expect(mocks.nameLookups[0].caller).toBe(CLAUSE_ORG);
     });
 
-    it('scores federation-shared clauses higher than public', async () => {
-      const publicClause = { ...SHARED_CLAUSE, id: 'sc-2', sharingLevel: 'public', sourceOrganizationId: 'other' };
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue([SHARED_CLAUSE, publicClause]);
+    it('scores a clause shared with the organization above a public one, and gives each its true reason', async () => {
+      given(clauseOrg({ hierarchyPath: [CLAUSE_ORG] }), [
+        clauseRow({ id: 'public', sourceOrganizationId: PEER }),
+        clauseRow({ id: 'granted', sharingLevel: 'private', sourceOrganizationId: PEER }),
+      ]);
 
-      const results = await suggestRelevantClauses('org-1');
-      const fedResult = results.find(r => r.clauseId === 'sc-1');
-      const pubResult = results.find(r => r.clauseId === 'sc-2');
-      expect(fedResult!.relevanceScore).toBeGreaterThan(pubResult!.relevanceScore);
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results.map((r) => r.clauseId)).toEqual(['granted', 'public']);
+      expect(results[0]).toMatchObject({ relevanceScore: 40, relevanceReasons: ['Shared with your organization'] });
+      expect(results[1]).toMatchObject({ relevanceScore: 20, relevanceReasons: ['Publicly available'] });
     });
 
-    it('scores congress-level clauses highest', async () => {
-      const congressClause = { ...SHARED_CLAUSE, id: 'sc-3', sharingLevel: 'congress', sourceOrganizationId: 'congress-1' };
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue([congressClause]);
+    it('gives the federation and congress levels no weight and no reason: no other organization can read them', async () => {
+      given(clauseOrg(), [
+        clauseRow({ id: 'fed', sharingLevel: 'federation' }),
+        clauseRow({ id: 'congress', sharingLevel: 'congress' }),
+        clauseRow({ id: 'retired', sharingLevel: 'retired' }),
+        clauseRow({ id: 'public' }),
+      ]);
 
-      const results = await suggestRelevantClauses('org-1');
-      expect(results[0].relevanceReasons).toContain('Congress-level template');
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results.map((r) => r.clauseId)).toEqual(['public']);
+      const text = JSON.stringify(results);
+      expect(text).not.toMatch(/Federation-shared|Congress-level/);
     });
 
-    it('awards hierarchy proximity score', async () => {
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue([SHARED_CLAUSE]);
+    it('ranks the nearest parent above a farther ancestor, because the path runs from the root', async () => {
+      given(clauseOrg(), [
+        clauseRow({ id: 'from-root', sourceOrganizationId: ROOT }),
+        clauseRow({ id: 'from-parent', sourceOrganizationId: PARENT }),
+      ]);
 
-      const results = await suggestRelevantClauses('org-1');
-      // sourceOrganizationId = 'fed-1' which is in hierarchyPath
-      expect(results[0].relevanceReasons).toContain('From parent organization');
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results.map((r) => r.clauseId)).toEqual(['from-parent', 'from-root']);
+      expect(results[0]).toMatchObject({ relevanceScore: 20 + 2 * 15, relevanceReasons: ['Publicly available', 'From parent organization'] });
+      expect(results[1]).toMatchObject({ relevanceScore: 20 + 1 * 15 });
     });
 
-    it('awards sector match score', async () => {
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue([SHARED_CLAUSE]);
+    it('adds no weight and no reason for the sector and province, which are filters and so are the same for every clause', async () => {
+      given(clauseOrg({ hierarchyPath: [CLAUSE_ORG] }), [clauseRow({ sourceOrganizationId: PEER })]);
 
-      const results = await suggestRelevantClauses('org-1');
-      expect(results[0].relevanceReasons).toContain('Same sector (public)');
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results[0].relevanceScore).toBe(20);
+      expect(results[0].relevanceReasons).toEqual(['Publicly available']);
+      expect(JSON.stringify(results)).not.toMatch(/Same sector|Same province/);
     });
 
-    it('awards province match score', async () => {
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue([SHARED_CLAUSE]);
+    it('does not name the source of an anonymized or unclassified clause, nor say that it comes from a parent', async () => {
+      mocks.names.set(PARENT, 'CUPE Ontario');
+      mocks.names.set(PEER, 'CUPE Local 9');
+      given(clauseOrg({ hierarchyPath: [CLAUSE_ORG] }), [
+        clauseRow({ id: 'anonymized', isAnonymized: true, sourceOrganizationId: PEER }),
+        clauseRow({ id: 'unclassified', isAnonymized: null, sourceOrganizationId: PEER }),
+        clauseRow({ id: 'named', isAnonymized: false, sourceOrganizationId: PEER }),
+      ]);
 
-      const results = await suggestRelevantClauses('org-1');
-      expect(results[0].relevanceReasons).toContain('Same province (ON)');
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      const byId = Object.fromEntries(results.map((r) => [r.clauseId, r]));
+      expect(byId.anonymized.sourceOrgName).toBe('Another organization (source not disclosed)');
+      expect(byId.unclassified.sourceOrgName).toBe('Another organization (source not disclosed)');
+      expect(byId.named.sourceOrgName).toBe('CUPE Local 9');
+      expect(JSON.stringify(results)).not.toMatch(/Unknown/);
     });
 
+    it('does not say that an anonymized clause comes from a parent even if one is handed back', async () => {
+      mocks.names.set(PARENT, 'CUPE Ontario');
+      given(clauseOrg(), [clauseRow({ isAnonymized: true, sourceOrganizationId: PARENT })]);
+
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results[0].relevanceReasons).toEqual(['Publicly available']);
+      expect(results[0].sourceOrgName).toBe('Another organization (source not disclosed)');
+    });
+
+    it('labels a source that may be named but whose name cannot be read, instead of guessing', async () => {
+      given(clauseOrg(), [clauseRow()]);
+
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results[0].sourceOrgName).toBe('Unknown organization');
+    });
     it('refuses clause discovery for an unknown organization', async () => {
-      mocks.mockOrgFindFirst.mockResolvedValue(null);
-      await expect(suggestRelevantClauses('missing')).rejects.toThrow('Organization not found');
+      given(undefined);
+      await expect(suggestRelevantClauses('00000000-0000-4000-8000-0000000000ff')).rejects.toThrow('Organization not found');
+      // Nothing is read from the clause table for an organization that could not be read.
+      expect(mocks.selects).toHaveLength(1);
     });
 
     it('returns at most 20 suggestions', async () => {
-      const clauses = Array.from({ length: 30 }, (_, i) => ({
-        ...SHARED_CLAUSE,
-        id: `sc-${i}`,
-        sourceOrganizationId: 'other',
-      }));
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue(clauses);
+      const clauses = Array.from({ length: 30 }, (_, i) => clauseRow({ id: `sc-${i}`, sourceOrganizationId: PEER }));
+      given(clauseOrg({ hierarchyPath: [CLAUSE_ORG] }), clauses);
 
-      const results = await suggestRelevantClauses('org-1');
-      expect(results.length).toBeLessThanOrEqual(20);
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results).toHaveLength(20);
     });
 
-    it('handles org with no sectors or province', async () => {
-      const orgNoMeta = { ...ORG, sectors: [], provinceTerritory: null, hierarchyPath: [] };
-      mocks.mockOrgFindFirst.mockResolvedValue(orgNoMeta);
-      mocks.mockClauseFindMany.mockResolvedValue([SHARED_CLAUSE]);
+    it('keeps the newest first among clauses that score the same', async () => {
+      given(clauseOrg({ hierarchyPath: [CLAUSE_ORG] }), [
+        clauseRow({ id: 'newest', sourceOrganizationId: PEER }),
+        clauseRow({ id: 'older', sourceOrganizationId: PEER }),
+      ]);
 
-      const results = await suggestRelevantClauses('org-1');
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results.map((r) => r.clauseId)).toEqual(['newest', 'older']);
+    });
+
+    it('offers an organization with no parents every clause it may read, anonymized ones included, without naming their source', async () => {
+      given(clauseOrg({ hierarchyPath: [CLAUSE_ORG] }), [clauseRow({ isAnonymized: true, sourceOrganizationId: PEER })]);
+
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
       expect(results).toHaveLength(1);
+      const filters = clauseFilters();
+      expect(filters.some((f) => f._t === 'inArray')).toBe(false);
+      expect(filters).not.toContainEqual({ _t: 'eq', _a: ['isAnonymized', false] });
+      expect(results[0].sourceOrgName).toBe('Another organization (source not disclosed)');
     });
 
-    it('handles clause with no sourceOrganization', async () => {
-      const clause = { ...SHARED_CLAUSE, sourceOrganization: null };
-      mocks.mockOrgFindFirst.mockResolvedValue(ORG);
-      mocks.mockClauseFindMany.mockResolvedValue([clause]);
+    it('treats only the entries of the path that are ids as parents, and never the organization itself', async () => {
+      given(clauseOrg({ hierarchyPath: ['ue-qa-primary', PARENT, CLAUSE_ORG] }), []);
 
-      const results = await suggestRelevantClauses('org-1');
-      expect(results[0].sourceOrgName).toBe('Unknown');
+      await suggestRelevantClauses(CLAUSE_ORG);
+      expect(clauseFilters()).toContainEqual({ _t: 'inArray', _a: ['sourceOrganizationId', [PARENT]] });
+    });
+
+    it('handles an organization with no sector or province', async () => {
+      given(clauseOrg({ sectors: [], provinceTerritory: null, hierarchyPath: [] }), [clauseRow({ sourceOrganizationId: PEER })]);
+
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
+      expect(results).toHaveLength(1);
+      const filters = clauseFilters();
+      expect(filters.some((f) => f._t === 'eq' && (f._a[0] === 'sector' || f._a[0] === 'province'))).toBe(false);
     });
   });
 
@@ -611,14 +735,13 @@ describe('smart-onboarding', () => {
       // runSmartOnboarding calls:
       // 1. findFirst (org) — the orchestrator lookup
       // 2. autoDetectParentFederation → findMany (federations)
-      // 3. suggestRelevantClauses → findFirst (org) + clauseFindMany
+      // 3. suggestRelevantClauses → a tenant read of the organization and of the clauses (not the shared client)
       // 4. getPeerBenchmarks → findFirst (org) + findPeerOrganizations → findFirst + findMany + findMany (counts)
 
       const orgWithParent = { ...ORG, parentId: 'fed-1' };
 
       mocks.mockOrgFindFirst
         .mockResolvedValueOnce(orgWithParent)   // runSmartOnboarding
-        .mockResolvedValueOnce(orgWithParent)   // suggestRelevantClauses
         .mockResolvedValueOnce(orgWithParent)   // getPeerBenchmarks
         .mockResolvedValueOnce(orgWithParent);  // findPeerOrganizations
 
@@ -627,7 +750,7 @@ describe('smart-onboarding', () => {
         .mockResolvedValueOnce([{ id: 'peer-1', sectors: ['public'] }]) // findPeerOrganizations
         .mockResolvedValueOnce([{ memberCount: 900 }]); // peer counts
 
-      mocks.mockClauseFindMany.mockResolvedValue([SHARED_CLAUSE]);
+      mocks.selectResults.push([clauseOrg()], [clauseRow()]);
       mocks.mockCacheGet.mockResolvedValue(null);
 
       const result = await runSmartOnboarding('org-1');
@@ -655,7 +778,9 @@ describe('smart-onboarding', () => {
       const result = await runSmartOnboarding('org-1');
       expect(result.clauseSuggestions).toEqual([]);
       expect(result.onboardingComplete.clausesImported).toBe(false);
-      expect(mocks.mockClauseFindMany).not.toHaveBeenCalled();
+      // No parent, so no clause is looked for: neither the tenant context nor the clause table is opened.
+      expect(mocks.tenantContexts).toHaveLength(0);
+      expect(mocks.selects).toHaveLength(0);
     });
 
     it('throws when org not found', async () => {
@@ -834,48 +959,15 @@ describe('smart-onboarding', () => {
   // ================================================================
   describe('suggestRelevantClauses — branches', () => {
     it('handles org with no sector, no province, empty hierarchy', async () => {
-      const orgBare = {
-        ...ORG,
-        sectors: [],
-        provinceTerritory: null,
-        hierarchyPath: null,
-      };
-      mocks.mockOrgFindFirst.mockResolvedValueOnce(orgBare);
-      mocks.mockClauseFindMany.mockResolvedValueOnce([]);
+      mocks.selectResults.push([clauseOrg({ sectors: [], provinceTerritory: null, hierarchyPath: null })], []);
 
-      const results = await suggestRelevantClauses('org-1');
+      const results = await suggestRelevantClauses(CLAUSE_ORG);
       expect(results).toEqual([]);
     });
 
-    it('scores clauses by sharing level and hierarchy proximity', async () => {
-      mocks.mockOrgFindFirst.mockResolvedValueOnce(ORG);
-      mocks.mockClauseFindMany.mockResolvedValueOnce([
-        {
-          ...SHARED_CLAUSE,
-          sharingLevel: 'congress',
-          sourceOrganizationId: 'congress-1',
-          sourceOrganization: { name: 'CLC', organizationType: 'congress' },
-        },
-        {
-          ...SHARED_CLAUSE,
-          id: 'sc-pub',
-          sharingLevel: 'public',
-          province: 'ON',
-          sector: 'public',
-          sourceOrganizationId: 'other-1',
-          sourceOrganization: { name: 'Other', organizationType: 'union' },
-        },
-      ]);
-
-      const results = await suggestRelevantClauses('org-1');
-      expect(results.length).toBe(2);
-      // Congress-level clause from hierarchy should score higher
-      expect(results[0].sharingLevel).toBe('congress');
-    });
-
     it('propagates clause discovery errors', async () => {
-      mocks.mockOrgFindFirst.mockRejectedValueOnce(new Error('db err'));
-      await expect(suggestRelevantClauses('org-1')).rejects.toThrow('db err');
+      mocks.selectResults.push(new Error('db err'));
+      await expect(suggestRelevantClauses(CLAUSE_ORG)).rejects.toThrow('db err');
     });
   });
 
@@ -979,14 +1071,13 @@ describe('smart-onboarding', () => {
     it('includes clause suggestions when parentId is set', async () => {
       mocks.mockOrgFindFirst
         .mockResolvedValueOnce(ORG)               // runSmartOnboarding
-        .mockResolvedValueOnce(ORG)               // suggestRelevantClauses
         .mockResolvedValueOnce(ORG)               // getPeerBenchmarks
         .mockResolvedValueOnce(ORG);              // findPeerOrganizations
       mocks.mockOrgFindMany
         .mockResolvedValueOnce([])                // autoDetectParentFederation
         .mockResolvedValueOnce([{ id: 'peer-1', sectors: ['public'] }])  // findPeerOrganizations
         .mockResolvedValueOnce([{ memberCount: 900 }]);  // peer query
-      mocks.mockClauseFindMany.mockResolvedValueOnce([SHARED_CLAUSE]);
+      mocks.selectResults.push([clauseOrg()], [clauseRow()]);  // suggestRelevantClauses, as the tenant
       mocks.mockCacheGet.mockResolvedValue(null);
 
       const result = await runSmartOnboarding('org-1');

@@ -129,11 +129,6 @@ export const PATCH = withApi(
     assertMayPublish(user?.role, body.sharingLevel);
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    const denial = await withRLSContext({ organizationId }, () => sharingChangeDenial(organizationId, body));
-    if (denial) {
-      throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
-    }
-
     return withRLSContext({ organizationId }, async (tx) => {
       const existing = await getClauseRow(id, tx);
       // Fail closed identically whether the row is missing or the caller
@@ -142,6 +137,12 @@ export const PATCH = withApi(
       // the owner predicate still rejects public/explicit-share readers.
       if (!existing || !isSharedClauseOwner(organizationId, existing)) {
         throw ApiError.notFound('clause', id);
+      }
+
+      // Judged against the level the clause has now, so a clause stored at a level that is no longer offered can still be edited.
+      const denial = await sharingChangeDenial(organizationId, body, existing.sharingLevel);
+      if (denial) {
+        throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
       }
 
       const updateData: Record<string, unknown> = { updatedAt: new Date() };

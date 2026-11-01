@@ -28,6 +28,9 @@ export interface ClauseSharingRow {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Whether a value is a UUID, for ids that arrive as free text (such as the entries of an organization hierarchy path). */
+export const isUuid = (value: string): boolean => UUID_RE.test(value);
+
 /**
  * Item-level READ authorization: true if callerOrgId may see this specific clause row's full content. Owner always reads regardless of
  * sharingLevel. An unrecognized sharingLevel, and the federation and congress levels, fail closed (false for anyone but the owner). This is the
@@ -58,17 +61,19 @@ export const UNAVAILABLE_SHARING_LEVELS: readonly string[] = ['federation', 'con
 
 /**
  * Whether the owner organization may set this sharing configuration. A level that no other organization could read (federation and congress) is
- * refused instead of stored, so a clause is never marked as shared with a group that cannot see it.
+ * refused instead of stored, so a clause is never marked as shared with a group that cannot see it. Sending the level the clause already has is
+ * not a change (`currentSharingLevel`), so a clause stored at one of those levels before they were withdrawn stays editable.
  */
 export async function sharingChangeDenial(
   _ownerOrgId: string,
   change: { sharingLevel?: unknown; sharedWithOrgIds?: unknown },
+  currentSharingLevel?: string | null,
 ): Promise<{ status: 400 | 403; message: string } | null> {
   if (change.sharingLevel !== undefined) {
     if (typeof change.sharingLevel !== 'string' || !(SHARING_LEVELS as readonly string[]).includes(change.sharingLevel)) {
       return { status: 400, message: `sharingLevel must be one of ${SHARING_LEVELS.join(', ')}` };
     }
-    if (UNAVAILABLE_SHARING_LEVELS.includes(change.sharingLevel)) {
+    if (UNAVAILABLE_SHARING_LEVELS.includes(change.sharingLevel) && change.sharingLevel !== currentSharingLevel) {
       return {
         status: 403,
         message: `Sharing at the ${change.sharingLevel} level is not available: another organization's hierarchy cannot be evaluated safely yet, so only private, public and explicit grants are offered`,

@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 651,
+ "corrected": 652,
  "partial": 72,
- "outstanding": 126,
- "accountedFor": 126,
+ "outstanding": 125,
+ "accountedFor": 125,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -84,10 +84,10 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 24,
+   "defects": 23,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 20,
+    "MEDIUM": 19,
     "LOW": 0
    },
    "namedRoutes": 1,
@@ -99,7 +99,6 @@
     "0B.6": 2,
     "0B.7": 9,
     "0B.8": 1,
-    "0B.9": 1,
     "0B.10": 1,
     "0B.11": 4,
     "0B.12": 1
@@ -473,10 +472,6 @@
     "id": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B9-ASM-CLAUSE-RELEVANCE-SCORES-SHARING-LEVELS-AND-SOURCE-NAMES-THAT-THE-ROW-LEVEL-POLICIES-WITHHOLD",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
