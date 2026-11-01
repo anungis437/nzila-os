@@ -264,11 +264,28 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
   });
 }
 
+/** Only expose stable, non-identifying signal facts; triggerData is an untrusted JSON payload and may later contain case/member detail. */
+const PUBLIC_REALTIME_SIGNALS = new Set([
+  'sla_breach_imminent',
+  'ingestion_failures',
+  'payment_reconciliation_failures',
+]);
+
+function publicRealtimeTriggerData(value: unknown): { signal?: string; count?: number } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const data = value as Record<string, unknown>;
+  if (typeof data.signal !== 'string' || !PUBLIC_REALTIME_SIGNALS.has(data.signal)) return {};
+  if (typeof data.count !== 'number' || !Number.isSafeInteger(data.count) || data.count < 0) {
+    return { signal: data.signal };
+  }
+  return { signal: data.signal, count: data.count };
+}
+
 export async function getRecentRealtimeAlerts(organizationId: string, limit = 25) {
   if (!organizationId) throw new Error('Organization context required');
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('Invalid alert page size');
   // A tenant predicate is not a substitute for executing under the tenant's runtime RLS role.
-  return withRLSContext({ organizationId }, (tx) => tx
+  const rows = await withRLSContext({ organizationId }, (tx) => tx
     .select({
       executionId: alertExecutions.id,
       status: alertExecutions.status,
@@ -290,4 +307,6 @@ export async function getRecentRealtimeAlerts(organizationId: string, limit = 25
     )
     .orderBy(desc(alertExecutions.createdAt))
     .limit(limit));
+  // Redact at the service boundary, so all callers receive the same allowlisted payload.
+  return rows.map(({ triggerData, ...row }) => ({ ...row, triggerData: publicRealtimeTriggerData(triggerData) }));
 }

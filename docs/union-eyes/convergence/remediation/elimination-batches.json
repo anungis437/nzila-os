@@ -9316,7 +9316,17 @@
         "apps/union-eyes/services/observability/__tests__/realtime-alerting-service.pglite.test.ts"
       ],
       "correction": "Realtime alert inbox reader now executes under tenant runtime RLS instead of privileged shared DB handle; explicit tenant/limit guards. Alert sweep excludes caller-controlled legacy v1 SLA scores from institutional alerts; native SQL regression authored.",
-      "remaining": "Exact-HEAD focused/full Vitest, PG15/16, HTTP/browser, real alert delivery and independent review. Officer audience/redaction and model-based alert threshold require institutional decisions. No implementation or CLOSED credit."
+      "remaining": "Exact-HEAD focused/full Vitest, PG15/16, HTTP/browser, real alert delivery and independent review. Officer audience/redaction and model-based alert threshold require institutional decisions. No implementation or CLOSED credit.",
+      "supplementalRedaction": {
+        "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+        "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-observability-alert-trigger-redaction-20261101.md",
+        "files": [
+          "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+          "apps/union-eyes/services/observability/__tests__/realtime-alerting-service.test.ts"
+        ],
+        "correction": "The alert reader now returns only allowlisted signal kind and nonnegative safe-integer count; unknown signal and all other raw trigger JSON fields are redacted. Existing officer role floor and tenant RLS are preserved.",
+        "remaining": "Focused/full Vitest and contract, native PG15/16, HTTP/browser/staging, institutional officer audience decision, independent reviewer and owner persona ratification. No CLOSED or additional implementation credit."
+      }
     }
   }
 }

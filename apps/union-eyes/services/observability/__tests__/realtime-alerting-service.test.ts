@@ -90,6 +90,42 @@ describe('observability/realtime-alerting-service', () => {
       expect(h.scopes).toEqual([]);
     });
 
+    it('returns only approved signal metadata and strips sensitive nested trigger fields', async () => {
+      pushSel([{
+        executionId: 'exec-redact',
+        triggerData: {
+          organizationId: 'org-1',
+          signal: 'ingestion_failures',
+          count: 3,
+          memberId: 'member-private',
+          caseId: 'case-private',
+          externalProviderError: 'provider token',
+          details: { name: 'private person', email: 'private@example.test' },
+        },
+      }]);
+      const rows = await getRecentRealtimeAlerts('org-1');
+      expect(rows).toEqual([{
+        executionId: 'exec-redact',
+        triggerData: { signal: 'ingestion_failures', count: 3 },
+      }]);
+      expect(JSON.stringify(rows)).not.toMatch(/member-private|case-private|provider token|private person/);
+    });
+
+    it('fails closed for unknown signal kinds and malformed count data', async () => {
+      pushSel([
+        { executionId: 'unknown', triggerData: { signal: 'sensitive_new_alert', count: 7, name: 'private' } },
+        { executionId: 'malformed', triggerData: { signal: 'payment_reconciliation_failures', count: '999', account: 'secret' } },
+        { executionId: 'null', triggerData: null },
+      ]);
+      const rows = await getRecentRealtimeAlerts('org-1');
+      expect(rows.map((row) => row.triggerData)).toEqual([
+        {},
+        { signal: 'payment_reconciliation_failures' },
+        {},
+      ]);
+      expect(JSON.stringify(rows)).not.toContain('secret');
+    });
+
     it('respects a custom limit', async () => {
       pushSel([]);
       const rows = await getRecentRealtimeAlerts('org-1', 5);
