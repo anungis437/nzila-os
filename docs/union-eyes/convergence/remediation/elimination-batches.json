@@ -10296,6 +10296,24 @@
       ],
       "correction": "GET clause-sharing owner configuration now SELECTs through the caller's tenant-scoped RLS transaction instead of the module-level db handle; adds transaction, non-owner and tenantless regression assertions. Corrects the POST standing-denial fixture to supply the prerequisite owned clause.",
       "remaining": "Exact-head whole Vitest/contract, real PG15/16 adversarial tenant read, HTTP/browser/staging and independent reviewer/persona/institutional ratification. No additional implemented or CLOSED credit."
+    },
+    {
+      "id": "UE-CLAUSE-LIBRARY-READ-FAMILY-TENANT-TRANSACTIONS-20261101",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "defectReference": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-clause-library-read-family-tenant-transactions-20261101.md",
+      "sourceBaseline": "02502667440582bda1459386c9bdf282d590ed56",
+      "files": [
+        "apps/union-eyes/app/api/clause-library/[id]/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/tags/route.ts",
+        "apps/union-eyes/app/api/clause-library/search/route.ts",
+        "apps/union-eyes/app/api/clause-library/route.ts",
+        "apps/union-eyes/app/api/__tests__/clause-library-audit.route.test.ts"
+      ],
+      "correction": "Closes four additional clause read paths that entered withRLSContext but queried via module db: item+tags, tag list, search and paginated collection+count. All now use tx; item/tag helper defaults to unscoped db removed. Adversarial tests distinguish unscoped reads and reject tenantless requests.",
+      "remaining": "Exact-HEAD whole app/contract Vitest, PG15/16 adversarial owner/shared/foreign tenant reads, HTTP/browser/staging, independent reviewer and owner/institutional ratification. No defect or CLOSED credit."
     }
   ]
 }
