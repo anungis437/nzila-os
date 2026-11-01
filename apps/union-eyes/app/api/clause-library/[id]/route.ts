@@ -9,20 +9,19 @@
  * (the explicit private-grant list) is only returned to the owner — it is
  * owner-internal sharing configuration, not shared clause content.
  *
- * Mutations run in the caller's tenant RLS context. ue_shared_library_update
- * and ue_shared_library_delete already restrict writes to the source org,
- * matching isSharedClauseOwner. GET stays on the system role: federation and
- * congress visibility is not expressed by ue_shared_library_select (owner,
- * explicit share, or public only) and must not be added by weakening RLS.
+ * Every read and write runs in the caller's tenant RLS context. ue_shared_library_update
+ * and ue_shared_library_delete restrict writes to the source org, matching
+ * isSharedClauseOwner, and the select policies (owner, explicit share, public and,
+ * through public.ue_clause_readable_by since cache 0048, federation and congress)
+ * admit exactly what canReadSharedClause admits.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
-import { organizations } from '@/db/schema-organizations';
 import { and, eq } from 'drizzle-orm';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { canReadSharedClause, clauseSourceName, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 import { clauseTextSha256, recordClauseVersion } from '@/lib/clause-library/version-history';
@@ -49,13 +48,12 @@ async function getClauseRow(id: string, executor: typeof db = db) {
       viewCount: sharedClauseLibrary.viewCount,
       version: sharedClauseLibrary.version,
       sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-      organizationName: organizations.name,
+      organizationName: clauseSourceName(),
       createdBy: sharedClauseLibrary.createdBy,
       createdAt: sharedClauseLibrary.createdAt,
       updatedAt: sharedClauseLibrary.updatedAt,
     })
     .from(sharedClauseLibrary)
-    .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
     .where(eq(sharedClauseLibrary.id, id))
     .limit(1);
 
@@ -102,10 +100,8 @@ export const GET = withApi(
     const id = url.pathname.split('/').filter(Boolean).pop()!;
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    // PRIVILEGED_CROSS_TENANT_REVIEW: federation/congress readers are not
-    // visible under ue_shared_library_select. Keep this read on the system
-    // role and apply canReadSharedClause. Do not widen the runtime policy.
-    return withSystemContext(async () => {
+    // As the tenant: the policy withholds what this organization may not read, and canReadSharedClause asks the same database function.
+    return withRLSContext({ organizationId }, async () => {
       const row = await getClauseRow(id);
       if (!row || !(await canReadSharedClause(organizationId, row))) {
         throw ApiError.notFound('clause', id);
@@ -128,7 +124,7 @@ export const PATCH = withApi(
     assertMayPublish(user?.role, body.sharingLevel);
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    const denial = await withSystemContext(() => sharingChangeDenial(organizationId, body));
+    const denial = await withRLSContext({ organizationId }, () => sharingChangeDenial(organizationId, body));
     if (denial) {
       throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
     }

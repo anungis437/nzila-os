@@ -107,7 +107,7 @@ export default function NewOrganizationPage() {
   useEffect(() => {
     const loadOrganizations = async () => {
       try {
-        const response = await fetch("/api/organizations?status=active");
+        const response = await fetch("/api/organizations?status=active&purpose=parent");
         const data = await response.json();
         setAvailableOrganizations(data.data || []);
       } catch (_error) {

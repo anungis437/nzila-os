@@ -5,6 +5,7 @@ import {
   getBenchmarkSnapshots,
 } from "@/lib/services/cba-intelligence/benchmark-service";
 import { getAgreementById } from "@/lib/services/cba-intelligence/extraction-service";
+import { canReadUnreviewed } from "@/lib/services/cba-intelligence/review-visibility";
 import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { performAtomicAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 
@@ -38,8 +39,12 @@ export const GET = withApi(
       summary: "Compute or retrieve benchmark for an agreement",
     },
   },
-  async ({ params, query }) => {
+  async ({ params, query, userId }) => {
     const agreementId = params.id;
+
+    // The benchmark of an agreement no reviewer has approved, and its saved history, are the curators' to read: to anyone else it does not exist.
+    const agreement = await getAgreementById(agreementId);
+    if (!agreement || (agreement.reviewStatus !== "approved" && !(await canReadUnreviewed(userId)))) throw ApiError.notFound("Agreement not found");
 
     // Return saved snapshots if requested
     if (query.history) {
@@ -49,9 +54,6 @@ export const GET = withApi(
       });
       return { data: snapshots };
     }
-
-    const agreement = await getAgreementById(agreementId);
-    if (!agreement) throw ApiError.notFound("Agreement not found");
 
     const { history: _history, page: _page, limit: _limit, ...filters } = query;
     const result = await findComparableAgreements(agreementId, filters as Record<string, unknown>);

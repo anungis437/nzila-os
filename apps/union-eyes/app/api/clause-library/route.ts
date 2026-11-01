@@ -11,11 +11,11 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { organizations, congressMemberships, collectiveAgreements } from '@/db/schema';
+import { collectiveAgreements } from '@/db/schema';
 import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { buildClauseVisibilityCondition, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { buildClauseVisibilityCondition, clauseSourceName, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 import { assertOriginalClauseOwned } from '@/lib/clause-library/original-clause';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
@@ -43,10 +43,9 @@ export const GET = withApi(
     const sharingLevels = url.searchParams.get('sharingLevels')?.split(',').filter(Boolean) || [];
     const includeExpired = url.searchParams.get('includeExpired') === 'true';
 
-    // Federation and congress reads are not covered by ue_shared_library_select
-    // (owner, explicit share, or public only). LIST stays on the system role
-    // and applies buildClauseVisibilityCondition. CREATE is an owner write.
-    return await withSystemContext(async () => {
+    // The sharing rule is one database function (cache 0048) that the tenant policy also applies, so this read runs as the tenant like every
+    // other and the predicate below is the same rule the item read asks. CREATE is an owner write.
+    return await withRLSContext({ organizationId }, async () => {
       const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
       const conditions: ReturnType<typeof eq>[] = [visibilityCondition];
 
@@ -97,18 +96,10 @@ export const GET = withApi(
             expiryDate: sharedClauseLibrary.expiryDate,
             viewCount: sharedClauseLibrary.viewCount,
             sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-            organizationName: organizations.name,
+            organizationName: clauseSourceName(),
             createdAt: sharedClauseLibrary.createdAt,
           })
           .from(sharedClauseLibrary)
-          .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
-          .leftJoin(
-            congressMemberships,
-            and(
-              eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
-              eq(congressMemberships.status, 'active'),
-            ),
-          )
           .where(where)
           .orderBy(sharedClauseLibrary.createdAt)
           .limit(limit)
@@ -116,14 +107,6 @@ export const GET = withApi(
         db
           .select({ count: sql<number>`count(*)::int` })
           .from(sharedClauseLibrary)
-          .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
-          .leftJoin(
-            congressMemberships,
-            and(
-              eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
-              eq(congressMemberships.status, 'active'),
-            ),
-          )
           .where(where),
       ]);
 
@@ -171,7 +154,7 @@ export const POST = withApi(
     const body = parseClauseBody(await request.json().catch(() => null), 'create');
     assertMayPublish(user?.role, body.sharingLevel);
 
-    const denial = await withSystemContext(() =>
+    const denial = await withRLSContext({ organizationId }, () =>
       sharingChangeDenial(organizationId, {
         sharingLevel: body.sharingLevel,
         sharedWithOrgIds: body.sharedWithOrgIds,

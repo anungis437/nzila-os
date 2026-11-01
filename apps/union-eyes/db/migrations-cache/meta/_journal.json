@@ -316,6 +316,13 @@
       "when": 1790410000000,
       "tag": "0047_authority_reviews_visibility_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790420000000,
+      "tag": "0048_clause_library_sharing_rls",
+      "breakpoints": true
     }
   ]
 }

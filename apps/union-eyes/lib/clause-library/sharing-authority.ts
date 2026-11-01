@@ -1,6 +1,6 @@
 /**
  * shared_clause_library sharing authority — OWNER_PLUS_EXPLICIT_SHARING_AUTHORITY
- * (round 55).
+ * (round 55), enforced by the database since cache 0048.
  *
  * The table has NO organization-scoped RLS-style single-owner model: a row
  * has one OWNER (`sourceOrganizationId`) plus a `sharingLevel` that may grant
@@ -12,10 +12,17 @@
  * congress/public) and the org hierarchy already modeled in
  * db/schema-organizations.ts (organizationType, hierarchyPath, clcAffiliated)
  * and db/schema/congress-memberships-schema.ts.
+ *
+ * The rule is ONE database function, public.ue_clause_readable_by
+ * (db/migrations-cache/0048_clause_library_sharing_rls.sql). The tenant policy
+ * on the table admits federation and congress rows through it, and this module
+ * asks the same function, so the list, search, compare and item reads run as the
+ * tenant (never the system role) and cannot disagree with each other or with the
+ * policy. The function is the only place that reads other organizations'
+ * hierarchy and congress membership.
  */
-import { and, eq, inArray, or, sql, type SQL } from 'drizzle-orm';
+import { sql, type SQL } from 'drizzle-orm';
 import { db } from '@/db/db';
-import { organizations, congressMemberships } from '@/db/schema';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 
 export interface ClauseSharingRow {
@@ -24,33 +31,26 @@ export interface ClauseSharingRow {
   sharedWithOrgIds?: string[] | null;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A raw query answers an array on the production driver and { rows } on others; both are rows. */
+const rowsOf = <T,>(result: unknown): T[] =>
+  Array.isArray(result) ? (result as T[]) : ((result as { rows?: T[] } | null)?.rows ?? []);
+
+/** A uuid[] literal built only from well-formed ids, so a stored value can never change the statement. */
+const uuidArray = (ids: readonly string[] | null | undefined): SQL => {
+  const clean = (ids ?? []).filter((id) => UUID_RE.test(id));
+  return sql`${`{${clean.join(',')}}`}::uuid[]`;
+};
+
 /**
- * Nearest ancestor (or self) of organizationType 'federation', derived from
- * the org's materialized `hierarchyPath` (root-to-self ancestor id array).
- * Returns null if the org has no federation ancestor (e.g. a bare congress
- * root, or an org outside any federation).
+ * Nearest federation (or the organization itself when it is one): the deepest
+ * federation on the org's materialized `hierarchyPath`. Null if the org has no
+ * federation ancestor (e.g. a bare congress root, or an org outside any federation).
  */
 export async function getFederationAncestorId(orgId: string): Promise<string | null> {
-  const [org] = await db
-    .select({
-      id: organizations.id,
-      organizationType: organizations.organizationType,
-      hierarchyPath: organizations.hierarchyPath,
-    })
-    .from(organizations)
-    .where(eq(organizations.id, orgId))
-    .limit(1);
-  if (!org) return null;
-  if (org.organizationType === 'federation') return org.id;
-
-  const ancestorIds = org.hierarchyPath ?? [];
-  if (ancestorIds.length === 0) return null;
-
-  const ancestors = await db
-    .select({ id: organizations.id, organizationType: organizations.organizationType })
-    .from(organizations)
-    .where(inArray(organizations.id, ancestorIds));
-  return ancestors.find((a) => a.organizationType === 'federation')?.id ?? null;
+  const rows = rowsOf<{ id: string | null }>(await db.execute(sql`SELECT public.ue_clause_federation_ancestor(${orgId}::uuid)::text AS id`));
+  return rows[0]?.id ?? null;
 }
 
 /**
@@ -59,51 +59,25 @@ export async function getFederationAncestorId(orgId: string): Promise<string | n
  * lib/auth/hierarchy-access-control.ts's validateSharingLevel congress check.
  */
 export async function isOrgCongressEligible(orgId: string): Promise<boolean> {
-  const [org] = await db
-    .select({ clcAffiliated: organizations.clcAffiliated })
-    .from(organizations)
-    .where(eq(organizations.id, orgId))
-    .limit(1);
-  if (!org?.clcAffiliated) return false;
-
-  const [membership] = await db
-    .select({ id: congressMemberships.id })
-    .from(congressMemberships)
-    .where(and(eq(congressMemberships.organizationId, orgId), eq(congressMemberships.status, 'active')))
-    .limit(1);
-  return !!membership;
+  const rows = rowsOf<{ eligible: boolean | null }>(await db.execute(sql`SELECT public.ue_clause_congress_eligible(${orgId}::uuid) AS eligible`));
+  return rows[0]?.eligible === true;
 }
 
 /**
  * Item-level READ authorization: true if callerOrgId may see this specific
  * clause row's full content. Owner always reads regardless of sharingLevel.
- * Unknown/unrecognized sharingLevel values fail closed (return false).
+ * Unknown/unrecognized sharingLevel values fail closed (return false). The
+ * answer is the database function's, the same one the tenant policy and the
+ * list predicate use.
  */
 export async function canReadSharedClause(callerOrgId: string, clause: ClauseSharingRow): Promise<boolean> {
-  if (clause.sourceOrganizationId === callerOrgId) return true;
-
-  switch (clause.sharingLevel) {
-    case 'public':
-      return true;
-    case 'private':
-      return (clause.sharedWithOrgIds ?? []).includes(callerOrgId);
-    case 'federation': {
-      // Sequential (not Promise.all): keeps call ordering deterministic
-      // for callers and tests alike; both lookups are cheap indexed reads.
-      const callerFed = await getFederationAncestorId(callerOrgId);
-      if (!callerFed) return false;
-      const ownerFed = await getFederationAncestorId(clause.sourceOrganizationId);
-      return callerFed === ownerFed;
-    }
-    case 'congress': {
-      const callerEligible = await isOrgCongressEligible(callerOrgId);
-      if (!callerEligible) return false;
-      const ownerEligible = await isOrgCongressEligible(clause.sourceOrganizationId);
-      return ownerEligible;
-    }
-    default:
-      return false;
-  }
+  if (!UUID_RE.test(callerOrgId) || !UUID_RE.test(clause.sourceOrganizationId)) return false;
+  const rows = rowsOf<{ readable: boolean | null }>(
+    await db.execute(
+      sql`SELECT public.ue_clause_readable_by(${clause.sourceOrganizationId}::uuid, ${clause.sharingLevel}::text, ${uuidArray(clause.sharedWithOrgIds)}, ${callerOrgId}::uuid) AS readable`,
+    ),
+  );
+  return rows[0]?.readable === true;
 }
 
 /**
@@ -117,14 +91,13 @@ export function isSharedClauseOwner(callerOrgId: string, clause: { sourceOrganiz
 }
 
 export const SHARING_LEVELS = ['private', 'federation', 'congress', 'public'] as const;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_EXPLICIT_GRANTS = 200;
 
 /**
  * Whether the owner organization may set this sharing configuration. A level the organization does not qualify for
  * (federation without a federation ancestor, congress without an active CLC membership) is refused instead of stored,
- * so a clause can never be shared at a scope the owner has no standing in. Run under the system role: the checks read
- * the organization hierarchy across tenants.
+ * so a clause can never be shared at a scope the owner has no standing in. The checks read the organization hierarchy
+ * across tenants through the database functions, which a tenant transaction may call.
  */
 export async function sharingChangeDenial(
   ownerOrgId: string,
@@ -155,40 +128,16 @@ export async function sharingChangeDenial(
 }
 
 /**
- * SQL WHERE condition equivalent to `canReadSharedClause` evaluated per row,
- * for LIST/SEARCH/COMPARE queries — avoids fetch-then-filter (which would
- * both leak unauthorized rows into application memory and break pagination
- * totals). The caller's own federation ancestor + congress eligibility are
- * resolved ONCE per request, not per row.
- *
- * REQUIRES the query to already `leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))`
- * (the existing pattern in these routes, for `organizationName`) AND
- * `leftJoin(congressMemberships, and(eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId), eq(congressMemberships.status, 'active')))`
- * so the federation/congress predicates can reference the joined source
- * org's `hierarchyPath` / `clcAffiliated` and the joined active membership
- * row in SQL.
+ * SQL WHERE condition equal to `canReadSharedClause` for each row, for
+ * LIST/SEARCH/COMPARE queries — avoids fetch-then-filter (which would both
+ * leak unauthorized rows into application memory and break pagination
+ * totals). It is the database function itself, so no join against
+ * organizations or congress_memberships is needed to evaluate it.
  */
 export async function buildClauseVisibilityCondition(callerOrgId: string): Promise<SQL> {
-  const callerFederationId = await getFederationAncestorId(callerOrgId);
-  const callerCongressEligible = await isOrgCongressEligible(callerOrgId);
-
-  const conditions: SQL[] = [
-    eq(sharedClauseLibrary.sourceOrganizationId, callerOrgId),
-    eq(sharedClauseLibrary.sharingLevel, 'public'),
-    sql`(${sharedClauseLibrary.sharingLevel} = 'private' AND ${callerOrgId} = ANY(${sharedClauseLibrary.sharedWithOrgIds}))`,
-  ];
-
-  if (callerFederationId) {
-    conditions.push(
-      sql`(${sharedClauseLibrary.sharingLevel} = 'federation' AND (${sharedClauseLibrary.sourceOrganizationId} = ${callerFederationId} OR ${callerFederationId} = ANY(${organizations.hierarchyPath})))`,
-    );
-  }
-
-  if (callerCongressEligible) {
-    conditions.push(
-      sql`(${sharedClauseLibrary.sharingLevel} = 'congress' AND ${organizations.clcAffiliated} = true AND ${congressMemberships.id} IS NOT NULL)`,
-    );
-  }
-
-  return or(...conditions)!;
+  if (!UUID_RE.test(callerOrgId)) return sql`false`;
+  return sql`public.ue_clause_readable_by(${sharedClauseLibrary.sourceOrganizationId}, ${sharedClauseLibrary.sharingLevel}, ${sharedClauseLibrary.sharedWithOrgIds}, ${callerOrgId}::uuid)`;
 }
+
+/** The owner's name as the database discloses it: only for a clause the caller's bound organization may read. */
+export const clauseSourceName = (): SQL<string | null> => sql<string | null>`public.ue_clause_source_name(${sharedClauseLibrary.id})`;

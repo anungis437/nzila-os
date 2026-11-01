@@ -15,7 +15,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { and, eq } from 'drizzle-orm';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
@@ -77,7 +77,7 @@ export const POST = withApi(
       throw ApiError.badRequest('No sharing fields to update');
     }
 
-    const denial = await withSystemContext(() => sharingChangeDenial(organizationId, updates));
+    const denial = await withRLSContext({ organizationId }, () => sharingChangeDenial(organizationId, updates));
     if (denial) {
       throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
     }

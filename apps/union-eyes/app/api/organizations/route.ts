@@ -54,12 +54,19 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const parentId = searchParams.get('parent');
   const statusFilter = searchParams.get('status');
+  const purpose = searchParams.get('purpose');
   const includeStats = searchParams.get('include_stats') === 'true';
 
   if (parentId && !UUID_PATTERN.test(parentId)) return NextResponse.json({ error: 'Invalid parent organization id' }, { status: 400 });
   if (statusFilter && !STATUS_FILTER_PATTERN.test(statusFilter)) return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+  if (purpose !== null && purpose !== 'parent') return NextResponse.json({ error: 'Invalid purpose' }, { status: 400 });
 
   const access = await resolveOrganizationAccess(userId);
+  // The organizations a caller may read are not the organizations they may choose as a parent. A parent is attached or changed only
+  // with platform governance (creating an organization and changing its parent both require it), so the candidates are every
+  // organization for a platform administrator and none for anyone else; an empty picker says that instead of offering rows the
+  // server would refuse.
+  if (purpose === 'parent' && !access.platform) return NextResponse.json({ data: [], purpose, assignable: false });
   const readable = readableOrganizationIds(access);
   if (readable && readable.length === 0) return NextResponse.json({ data: [] });
 
@@ -154,7 +161,7 @@ export async function GET(req: NextRequest) {
     });
   });
 
-  return NextResponse.json({ data: mapped });
+  return NextResponse.json({ data: mapped, ...(purpose ? { purpose, assignable: true } : {}) });
 }
 
 /** POST /api/organizations — create organization in DB */

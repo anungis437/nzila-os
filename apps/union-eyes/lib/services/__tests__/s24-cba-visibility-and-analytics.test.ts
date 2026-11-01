@@ -1,25 +1,42 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { reviewStatusFilter } from '@/lib/services/cba-intelligence/review-visibility'
+import { CBA_DATASET_AUTHORITY, reviewStatusFilter } from '@/lib/services/cba-intelligence/review-visibility'
 import { clientAddress } from '@/lib/public-intake/guard'
 
 const src = (path: string) => readFileSync(join(process.cwd(), path), 'utf8').replace(/\r\n/g, '\n')
 
 describe('Gate 0 batch B80: CBA review visibility, analytics honesty and organization binding', () => {
-  it('shows a member only approved extractions and lets a reviewer name a status', () => {
+  it('shows a reader only approved extractions and lets only a curator name a status', () => {
     expect(reviewStatusFilter(false, undefined)).toBe('approved')
     expect(reviewStatusFilter(false, 'pending_review')).toBe('approved')
     expect(reviewStatusFilter(true, 'pending_review')).toBe('pending_review')
     expect(reviewStatusFilter(true, undefined)).toBeUndefined()
   })
 
-  it('applies the visibility rule to the list, the export and the agreement with its wages and clauses', () => {
-    expect(src('app/api/cba-intelligence/agreements/route.ts')).toContain('reviewStatusFilter(await hasMinRole("steward")')
-    expect(src('app/api/cba-intelligence/agreements/export/route.ts')).toContain('reviewStatusFilter(await hasMinRole("steward")')
+  // DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE (F03-B): the review queue was decided by an organization steward floor, which is a role title in
+  // one organization and no authority over a dataset every organization reads and the platform curates.
+  it('applies the visibility rule to the list, the export and the agreement with its wages and clauses, decided by platform authority and never a role floor', () => {
+    expect(src('app/api/cba-intelligence/agreements/route.ts')).toContain('reviewStatusFilter(await canReadUnreviewed(userId)')
+    expect(src('app/api/cba-intelligence/agreements/export/route.ts')).toContain('reviewStatusFilter(await canReadUnreviewed(userId)')
     const item = src('app/api/cba-intelligence/agreements/[id]/route.ts')
-    expect(item).toContain('(!reviewer && agreement.reviewStatus !== "approved")')
-    expect(item).toContain('approvedOnly: !reviewer')
+    expect(item).toContain('(!curator && agreement.reviewStatus !== "approved")')
+    expect(item).toContain('approvedOnly: !curator')
+    for (const route of ['agreements', 'agreements/export', 'agreements/[id]', 'benchmark/[id]']) {
+      expect(src(`app/api/cba-intelligence/${route}/route.ts`), route).not.toMatch(/hasMinRole\(\s*["']steward["']\s*\)/)
+    }
+  })
+
+  it('states who curates the shared dataset and who may read it, and holds no organization\'s own data', () => {
+    expect(CBA_DATASET_AUTHORITY).toMatchObject({
+      scope: 'platform_shared',
+      holdsTenantData: false,
+      curator: 'platform_staff',
+      unreviewedVisibleTo: 'platform_staff',
+      readers: { entitlement: 'commercial_reporting', floor: 'member', sees: 'approved' },
+      readerScopeApprovedBy: null,
+    })
+    expect(Object.isFrozen(CBA_DATASET_AUTHORITY)).toBe(true)
   })
 
   it('does not return who saved a benchmark snapshot', () => {

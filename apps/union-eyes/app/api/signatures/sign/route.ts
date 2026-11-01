@@ -33,13 +33,16 @@ const signatureSchema = z.object({
 });
 export async function POST(req: NextRequest) {
   try {
-    // Authentication guard
-    const { userId } = await requireApiAuth();
+    // The signer acts inside the organization they are authenticated in: the signer and the document are looked up there and nowhere else.
+    const { userId, organizationId } = await requireApiAuth({ orgScoped: true });
     if (!userId) {
       return standardErrorResponse(
         ErrorCode.AUTH_REQUIRED,
         'Unauthorized'
       );
+    }
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
     }
 
     const body = await req.json();
@@ -69,6 +72,7 @@ export async function POST(req: NextRequest) {
     const signer = await SignatureService.recordSignature({
       signerId,
       actorUserId: userId,
+      organizationId,
       signatureImageUrl,
       signatureType,
       ipAddress,
@@ -88,7 +92,11 @@ export async function POST(req: NextRequest) {
         error.message,
       );
     }
-return standardErrorResponse(
+    // requireApiAuth refuses with Unauthorized or Forbidden; those are the caller's answer, not a server fault.
+    const refusal = error instanceof Error ? error.message : '';
+    if (refusal.startsWith('Unauthorized')) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
+    if (refusal.startsWith('Forbidden')) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
+    return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to record signature',
       error

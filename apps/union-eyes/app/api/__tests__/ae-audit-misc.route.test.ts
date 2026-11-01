@@ -150,7 +150,8 @@ describe('extensions/[id]', () => {
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'integration.update', organizationId: 'org-1', userId: 'u1', resourceId: 'i1' }));
 
     h.queue.push([]);
-    await expect(PATCH({ params: { id: 'i1' }, request: { json: async () => ({ enabled: true }) }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
+    // Switching on is refused while no synchronization runs (activation guard, tested with the guard), so the missing-integration 404 is exercised by switching off.
+    await expect(PATCH({ params: { id: 'i1' }, request: { json: async () => ({ enabled: false }) }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
 
     h.audit.mockClear();
     h.queue.push([{ id: 'i1' }], [], [{ id: 'i1', name: 'N' }]); // owned, no sync history, deleted

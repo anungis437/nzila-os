@@ -20,7 +20,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { clauseLibraryTags, sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { eq, and, sql } from 'drizzle-orm';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
 import { parseClauseTagBody } from '@/lib/clause-library/tag-body';
@@ -56,10 +56,9 @@ export const GET = withApi(
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    // PRIVILEGED_CROSS_TENANT_REVIEW: federation/congress readers are not
-    // visible under ue_shared_library_select / child select. Keep this read
-    // on the system role. Do not widen the runtime policy.
-    return withSystemContext(async () => {
+    // As the tenant: the clause and its tags are admitted by the select policies (cache 0048 covers federation and congress), and
+    // canReadSharedClause asks the same database function.
+    return withRLSContext({ organizationId }, async () => {
       const clause = await getClauseAuthorityRow(id);
       if (!clause || !(await canReadSharedClause(organizationId, clause))) {
         throw ApiError.notFound('clause', id);

@@ -326,6 +326,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Restrictive SELECT policy on ue_authority_reviews: adverse parties see nothing; participants and live-mandate overseers see only their reviews"
+      },
+      {
+        "tag": "0048_clause_library_sharing_rls",
+        "sha256": "b7dc1308d39de9a0ceec576bdc4103107c35054697f3330a6a30e4e1fe15237a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Clause library sharing rule as one DB function plus a permissive SELECT policy for federation and congress readers; routes move from the system role to the runtime role"
       }
     ],
     "platform": [

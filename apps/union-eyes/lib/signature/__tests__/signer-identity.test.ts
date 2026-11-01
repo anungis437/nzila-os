@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   upload: vi.fn(),
   documentFind: vi.fn(),
   signerFind: vi.fn(),
+  joined: [] as unknown[],
 }));
 
 vi.mock('@/db', () => ({
@@ -19,7 +20,14 @@ vi.mock('@/db/schema-organizations', () => ({ organizationMembers: { userId: 'us
 vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), or: vi.fn(), desc: vi.fn(), notInArray: vi.fn(), inArray: vi.fn(() => 'in'), isNull: vi.fn() }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) =>
-    fn({ select: () => ({ from: () => ({ where: async () => m.members }) }) }),
+    fn({
+      select: () => ({
+        from: () => ({
+          where: async () => m.members,
+          innerJoin: () => ({ where: () => ({ limit: async () => m.joined }) }),
+        }),
+      }),
+    }),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn() }));
 vi.mock('../providers', () => ({ default: { getProvider: () => ({ name: 'internal', createEnvelope: m.createEnvelope }), getDefaultProvider: () => ({ name: 'internal', createEnvelope: m.createEnvelope }) } }));
@@ -82,6 +90,7 @@ describe('SignatureService.createSignatureRequest and recordSignature — identi
   beforeEach(() => {
     vi.clearAllMocks();
     m.members = [];
+    m.joined = [];
   });
 
   const request = (signers: Array<Record<string, unknown>>) => ({
@@ -105,10 +114,9 @@ describe('SignatureService.createSignatureRequest and recordSignature — identi
 
   it('refuses to record a signature locally on a document held by a signature provider', async () => {
     const { SignatureService } = await import('../signature-service');
-    m.signerFind.mockResolvedValue({ id: 'sg1', documentId: 'd1', userId: 'actor', name: 'A', email: 'a@x.example' });
-    m.documentFind.mockResolvedValue({ id: 'd1', organizationId: 'org-1', status: 'sent', provider: 'docusign' });
+    m.joined = [{ signer: { id: 'sg1', documentId: 'd1', userId: 'actor', name: 'A', email: 'a@x.example' }, document: { id: 'd1', organizationId: 'org-1', status: 'sent', provider: 'docusign' } }];
     await expect(
-      SignatureService.recordSignature({ signerId: 'sg1', actorUserId: 'actor', signatureImageUrl: 'https://x.example/s.png', signatureType: 'electronic' }),
+      SignatureService.recordSignature({ signerId: 'sg1', actorUserId: 'actor', organizationId: 'org-1', signatureImageUrl: 'https://x.example/s.png', signatureType: 'electronic' }),
     ).rejects.toThrow('signed through its signature provider');
   });
 });

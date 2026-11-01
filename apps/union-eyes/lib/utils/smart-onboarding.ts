@@ -15,6 +15,7 @@ import { organizations, sharedClauseLibrary } from '@/db/schema';
 import { eq, and, inArray, or, gte, sql } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { cacheGet, cacheSet } from '@/lib/services/cache-service';
 
 // =============================================================================
@@ -29,7 +30,8 @@ export interface FederationSuggestion {
   organizationType: string;
   province: string | null;
   jurisdiction: string | null;
-  memberCount: number;
+  /** A band, never the exact member count: a prospective affiliate learns the scale of a federation, not its roll. */
+  sizeBand: string;
   matchScore: number;
   matchReasons: string[];
 }
@@ -71,7 +73,46 @@ export interface SmartDefaults {
 const SIMILAR_SIZE_RATIO = 0.5;
 
 /**
+ * What a prospective affiliate may see of a federation or congress. The directory is not a property of the asker's organization or
+ * role: an officer of any organization asks, and a federation decides whether it is offered. A federation or congress is listed only
+ * when its own administrators turned listing on (`settings.affiliation.discoverable`, set through the organization settings patch they
+ * already hold), and what is shown is the minimum needed to recognise it: its name, type, province and a size band. `approvedBy` stays
+ * null until the institution decides what the directory may disclose; until then no federation is listed by default.
+ */
+export const FEDERATION_DIRECTORY_POLICY = Object.freeze({
+  listing: 'opt_in' as const,
+  settingsKey: 'affiliation.discoverable',
+  disclosedFields: Object.freeze(['id', 'name', 'organizationType', 'province', 'sizeBand'] as const),
+  approvedBy: null as string | null,
+});
+
+/** Whether the organization's own settings turn listing on. Anything but an explicit true is off. */
+export function isFederationListed(settings: unknown): boolean {
+  if (!settings || typeof settings !== 'object') return false;
+  const affiliation = (settings as { affiliation?: unknown }).affiliation;
+  return Boolean(affiliation && typeof affiliation === 'object' && (affiliation as { discoverable?: unknown }).discoverable === true);
+}
+
+const SIZE_BANDS: ReadonlyArray<readonly [number, string]> = [
+  [100, 'under 100'],
+  [500, '100 to 499'],
+  [1_000, '500 to 999'],
+  [5_000, '1,000 to 4,999'],
+  [20_000, '5,000 to 19,999'],
+];
+
+export function sizeBand(count: number | null | undefined): string {
+  if (!count || count <= 0) return 'not stated';
+  for (const [limit, label] of SIZE_BANDS) if (count < limit) return label;
+  return '20,000 or more';
+}
+
+/**
  * Auto-detect potential parent federation based on province, sector, and size
+ * 
+ * The read is an explicit cross-organization read as the system role, limited by the directory policy above: only federations and
+ * congresses that opted in, only the columns the suggestion needs. It does not depend on what the connection's database role happens
+ * to let a tenant see.
  * 
  * @param province - Province code (e.g., 'ON', 'BC')
  * @param sector - Industry sector
@@ -92,17 +133,22 @@ export async function autoDetectParentFederation(
         eq(organizations.organizationType, 'congress')
       ),
       eq(organizations.status, 'active'),
+      // Containment, not a text comparison: only a JSON boolean true lists a federation, never the string "true" or the number 1.
+      sql`${organizations.settings} @> '{"affiliation":{"discoverable":true}}'::jsonb`,
     ];
 
     if (province) {
       filters.push(eq(organizations.provinceTerritory, province.toUpperCase()));
     }
 
-    const potentialParents = await db.query.organizations.findMany({
-      where: and(...filters),
-      orderBy: (org, { desc }) => [desc(org.memberCount)],
-      limit: 10,
-    });
+    const potentialParents = await withSystemContext((tx) =>
+      tx.query.organizations.findMany({
+        columns: { id: true, name: true, organizationType: true, provinceTerritory: true, clcAffiliated: true, sectors: true, memberCount: true },
+        where: and(...filters),
+        orderBy: (org, { desc }) => [desc(org.memberCount)],
+        limit: 10,
+      }),
+    );
 
     // Score and rank suggestions
     const suggestions: FederationSuggestion[] = potentialParents.map((org) => {
@@ -147,7 +193,7 @@ export async function autoDetectParentFederation(
         organizationType: org.organizationType,
         province: org.provinceTerritory,
         jurisdiction: org.provinceTerritory,
-        memberCount: org.memberCount || 0,
+        sizeBand: sizeBand(org.memberCount),
         matchScore,
         matchReasons,
       };

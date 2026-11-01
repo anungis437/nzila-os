@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
-const m = vi.hoisted(() => ({ recordSignature: vi.fn() }))
+const m = vi.hoisted(() => ({ recordSignature: vi.fn(), auth: vi.fn() }))
 
-vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: async () => ({ userId: 'signer-1' }) }))
+vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: m.auth }))
 vi.mock('@/lib/signature/signature-service', () => ({
   SignatureService: { recordSignature: m.recordSignature },
   SignatureAuthorityError: class SignatureAuthorityError extends Error {
@@ -12,7 +12,7 @@ vi.mock('@/lib/signature/signature-service', () => ({
 }))
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', VALIDATION_ERROR: 'VALIDATION_ERROR', FORBIDDEN: 'FORBIDDEN', INTERNAL_ERROR: 'INTERNAL_ERROR' },
-  standardErrorResponse: (code: string, message: string) => new Response(JSON.stringify({ code, message }), { status: code === 'INTERNAL_ERROR' ? 500 : code === 'FORBIDDEN' ? 403 : 400 }),
+  standardErrorResponse: (code: string, message: string) => new Response(JSON.stringify({ code, message }), { status: code === 'INTERNAL_ERROR' ? 500 : code === 'FORBIDDEN' ? 403 : code === 'AUTH_REQUIRED' ? 401 : 400 }),
 }))
 
 const SIGNER = '00000000-0000-4000-8000-0000000000a1'
@@ -31,6 +31,7 @@ describe('signatures/sign route inputs (F06 A6)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     delete process.env.UE_TRUSTED_PROXY_HOPS
+    m.auth.mockReset().mockResolvedValue({ userId: 'signer-1', organizationId: 'org-1' })
     m.recordSignature.mockResolvedValue({ id: SIGNER, status: 'signed' })
   })
 
@@ -56,6 +57,41 @@ describe('signatures/sign route inputs (F06 A6)', () => {
     await sign({ geolocation: { latitude: 45.4, longitude: -75.7 } })
 
     expect(m.recordSignature.mock.calls[0][0]).not.toHaveProperty('geolocation')
+  })
+
+  // The signer and the document are looked up inside the organization the caller is authenticated in, and nowhere else.
+  it('acts inside the authenticated organization and passes it, with the signer, to the service', async () => {
+    const response = await sign({})
+
+    expect(response.status).toBe(200)
+    expect(m.auth).toHaveBeenCalledWith({ orgScoped: true })
+    expect(m.recordSignature).toHaveBeenCalledWith(expect.objectContaining({ signerId: SIGNER, actorUserId: 'signer-1', organizationId: 'org-1' }))
+  })
+
+  it('refuses a caller with no organization context, and records nothing', async () => {
+    m.auth.mockResolvedValue({ userId: 'signer-1', organizationId: null })
+    const response = await sign({})
+
+    expect(response.status).toBe(403)
+    expect(m.recordSignature).not.toHaveBeenCalled()
+  })
+
+  it('answers an unauthenticated or organization-less session with its own status and not a server fault', async () => {
+    m.auth.mockRejectedValue(new Error('Unauthorized: Authentication required'))
+    expect((await sign({})).status).toBe(401)
+    m.auth.mockRejectedValue(new Error('Forbidden: Organization context unavailable'))
+    expect((await sign({})).status).toBe(403)
+    m.auth.mockRejectedValue(new Error('connection reset'))
+    expect((await sign({})).status).toBe(500)
+    expect(m.recordSignature).not.toHaveBeenCalled()
+  })
+
+  it('answers a signer that is not the caller\'s, or not in the organization, with a refusal and not a server fault', async () => {
+    const { SignatureAuthorityError } = await import('@/lib/signature/signature-service')
+    m.recordSignature.mockRejectedValue(new SignatureAuthorityError('FORBIDDEN', 'You are not authorized to sign as this signer'))
+    const response = await sign({})
+
+    expect(response.status).toBe(403)
   })
 
   it.each([

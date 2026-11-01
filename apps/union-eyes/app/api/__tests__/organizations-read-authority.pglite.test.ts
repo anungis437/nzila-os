@@ -232,6 +232,25 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     state.userId = 'u-admin-fed';
     expect((await listed('/api/organizations?parent=not-a-uuid')).status).toBe(400);
     expect((await listed("/api/organizations?status=active'%20OR%201=1")).status).toBe(400);
+    expect((await listed('/api/organizations?purpose=everything')).status).toBe(400);
+  });
+
+  // DEF-0B10-OPL-02: what a caller may read is not what they may choose as a parent.
+  it('offers parent candidates only to a platform administrator, and an honest empty list to everyone else, however much they can read', async () => {
+    const candidates = async (user: string) => {
+      state.userId = user;
+      return (await listed('/api/organizations?purpose=parent')).json();
+    };
+    state.platformAdmins.add('platform-1');
+    const platform = await candidates('platform-1');
+    expect(platform).toMatchObject({ purpose: 'parent', assignable: true });
+    expect((platform.data as Array<{ id: string }>).map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    for (const user of ['u-admin-fed', 'u-admin-a', 'u-officer-a', 'u-member-a', 'nobody']) {
+      expect(await candidates(user), user).toEqual({ data: [], purpose: 'parent', assignable: false });
+    }
+    // The same federation administrator still reads the locals below when no purpose is named.
+    state.userId = 'u-admin-fed';
+    expect(await names(await listed())).toEqual([FED, LOCAL_A, LOCAL_B].sort());
   });
 
   it('confines the tree to what the caller may read, in the legacy mode', async () => {

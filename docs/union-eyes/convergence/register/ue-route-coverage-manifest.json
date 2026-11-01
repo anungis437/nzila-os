@@ -14,10 +14,10 @@
    "ORG_AUTH": 12,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 223,
-   "ROLE_AUTH": 174,
+   "ROLE_AUTH": 171,
    "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 287,
+   "WITH_API": 290,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -49,9 +49,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 13,
    "CRUD_TENANT_TX": 86,
-   "NONE": 340,
-   "SYSTEM_CONTEXT": 65,
-   "TENANT_TX": 177
+   "NONE": 339,
+   "SYSTEM_CONTEXT": 59,
+   "TENANT_TX": 184
   }
  },
  "routes": [
@@ -2493,7 +2493,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -3047,7 +3047,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3059,7 +3059,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3071,7 +3071,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3409,7 +3409,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -3422,7 +3422,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -3436,7 +3436,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -3460,7 +3460,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -3473,7 +3473,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -3486,7 +3486,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {

@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   insertValues: vi.fn(),
   documentFind: vi.fn(),
   audit: vi.fn(),
+  joined: [] as unknown[],
 }));
 
 vi.mock('@/db', () => ({
@@ -44,7 +45,15 @@ vi.mock('@/db', () => ({
 vi.mock('@/lib/db/with-rls-context', async () => ({
   withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => {
     const { db } = await import('@/db');
-    return fn({ ...db, select: () => ({ from: () => ({ where: async () => [{ id: 'doc-1' }] }) }) });
+    return fn({
+      ...db,
+      select: () => ({
+        from: () => ({
+          where: async () => [{ id: 'doc-1' }],
+          innerJoin: () => ({ where: () => ({ limit: async () => mocks.joined }) }),
+        }),
+      }),
+    });
   },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
@@ -67,6 +76,10 @@ const OWNER_USER_ID = 'user-owner';
 const ATTACKER_USER_ID = 'user-attacker';
 const SIGNER_ID = 'signer-1';
 const DOCUMENT_ID = 'doc-1';
+const ORGANIZATION_ID = 'org-1';
+const DOCUMENT = { id: DOCUMENT_ID, organizationId: ORGANIZATION_ID, status: 'sent', provider: 'internal' };
+/** The organization-bound lookup finds a signer together with its document, or nothing. */
+const found = (signer: Record<string, unknown>) => [{ signer, document: DOCUMENT }];
 
 describe('SignatureService.recordSignature ownership verification', () => {
   beforeEach(() => {
@@ -79,7 +92,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
     });
     mocks.insertValues.mockResolvedValue(undefined);
     mocks.findMany.mockResolvedValue([{ status: 'pending' }]);
-    mocks.documentFind.mockResolvedValue({ id: 'doc-1', organizationId: 'org-1', status: 'sent', provider: 'internal' });
+    mocks.joined = [];
     mocks.audit.mockResolvedValue(undefined);
   });
 
@@ -90,6 +103,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
       SignatureService.recordSignature({
         signerId: SIGNER_ID,
         actorUserId: OWNER_USER_ID,
+        organizationId: ORGANIZATION_ID,
         signatureImageUrl: 'https://example.com/sig.png',
         signatureType,
       })
@@ -100,7 +114,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
   });
 
   it('rejects when the signer row belongs to a different user (impersonation attempt)', async () => {
-    mocks.findFirst.mockResolvedValue({
+    mocks.joined = found({
       id: SIGNER_ID,
       documentId: DOCUMENT_ID,
       userId: OWNER_USER_ID,
@@ -112,6 +126,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
       SignatureService.recordSignature({
         signerId: SIGNER_ID,
         actorUserId: ATTACKER_USER_ID,
+        organizationId: ORGANIZATION_ID,
         signatureImageUrl: 'https://example.com/sig.png',
         signatureType: 'electronic',
       })
@@ -121,7 +136,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
   });
 
   it('rejects signing an external signer record (null userId) via the authenticated-session flow', async () => {
-    mocks.findFirst.mockResolvedValue({
+    mocks.joined = found({
       id: SIGNER_ID,
       documentId: DOCUMENT_ID,
       userId: null,
@@ -133,6 +148,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
       SignatureService.recordSignature({
         signerId: SIGNER_ID,
         actorUserId: ATTACKER_USER_ID,
+        organizationId: ORGANIZATION_ID,
         signatureImageUrl: 'https://example.com/sig.png',
         signatureType: 'electronic',
       })
@@ -141,13 +157,14 @@ describe('SignatureService.recordSignature ownership verification', () => {
     expect(mocks.updateSet).not.toHaveBeenCalled();
   });
 
-  it('rejects when the signer record does not exist', async () => {
-    mocks.findFirst.mockResolvedValue(undefined);
+  it('rejects when the signer record does not exist in the caller\'s organization (an id of another organization looks the same)', async () => {
+    mocks.joined = [];
 
     await expect(
       SignatureService.recordSignature({
         signerId: 'does-not-exist',
         actorUserId: OWNER_USER_ID,
+        organizationId: ORGANIZATION_ID,
         signatureImageUrl: 'https://example.com/sig.png',
         signatureType: 'electronic',
       })
@@ -157,7 +174,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
   });
 
   it('allows the owning signer to record their own signature', async () => {
-    mocks.findFirst.mockResolvedValue({
+    mocks.joined = found({
       id: SIGNER_ID,
       documentId: DOCUMENT_ID,
       userId: OWNER_USER_ID,
@@ -178,11 +195,15 @@ describe('SignatureService.recordSignature ownership verification', () => {
     const result = await SignatureService.recordSignature({
       signerId: SIGNER_ID,
       actorUserId: OWNER_USER_ID,
+      organizationId: ORGANIZATION_ID,
       signatureImageUrl: 'https://example.com/sig.png',
       signatureType: 'electronic',
     });
 
     expect(result.status).toBe('signed');
     expect(mocks.updateSet).toHaveBeenCalledTimes(1);
+    // The signer and the document were found on the organization's own transaction, never through the shared handle.
+    expect(mocks.findFirst).not.toHaveBeenCalled();
+    expect(mocks.documentFind).not.toHaveBeenCalled();
   });
 });

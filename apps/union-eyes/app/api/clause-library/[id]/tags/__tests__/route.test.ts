@@ -7,9 +7,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // successful mutation persists its audit row on the same tx handle.
 //
 // TBS-02 mock contract: withSystemContext is not a stand-in for tenant
-// write success. Tenant SELECT matches ue_shared_library_select. Tenant
-// child INSERT/DELETE apply only when the witnessed parent source org
-// equals the RLS org (ue_shared_library_child_write). System context does
+// write success. Tenant SELECT admits what the sharing policy admits for a
+// row (ue_shared_library_select_sharing, cache 0048). Tenant child
+// INSERT/DELETE apply only when the witnessed parent source org equals the
+// RLS org (ue_shared_library_child_write). System context does
 // not apply that write filter. Cross-org denial must still hold when
 // isSharedClauseOwner is stubbed open.
 
@@ -36,6 +37,8 @@ const h = vi.hoisted(() => {
   ) =>
     row.sourceOrganizationId === orgId ||
     row.sharingLevel === 'public' ||
+    row.sharingLevel === 'federation' ||
+    row.sharingLevel === 'congress' ||
     (Array.isArray(row.sharedWithOrgIds) && row.sharedWithOrgIds.includes(orgId));
 
   const mutationPermitted = () => {
@@ -173,6 +176,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { notFound: h.notFound, badRequest: h.badRequest } }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
+  clauseSourceName: () => null,
   canReadSharedClause: h.canReadSharedClause,
   isSharedClauseOwner: h.isSharedClauseOwner,
 }));
@@ -236,8 +240,9 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     const { GET } = await loadHandlers();
 
     await expect(GET({ request: req('clause-1'), organizationId: 'org-b' })).rejects.toMatchObject({ status: 404 });
-    expect(h.withSystemContext).toHaveBeenCalled();
-    expect(h.withRLSContext).not.toHaveBeenCalled();
+    // The read runs as the caller's tenant: the sharing rule is a database function the policy also applies (cache 0048), never the system role.
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
   });
 
   it('GET returns tags when the caller can read the parent clause (non-owner federation/public reader)', async () => {
@@ -249,8 +254,9 @@ describe('clause-library/[id]/tags route (round 55)', () => {
 
     const result = (await GET({ request: req('clause-1'), organizationId: 'org-b' })) as { tags: unknown[] };
     expect(result.tags).toEqual([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'wages' }]);
-    expect(h.withSystemContext).toHaveBeenCalled();
-    expect(h.withRLSContext).not.toHaveBeenCalled();
+    // The read runs as the caller's tenant: the sharing rule is a database function the policy also applies (cache 0048), never the system role.
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
   });
 
   it('POST 404s (fails closed) for a non-owner even if they can read the clause', async () => {

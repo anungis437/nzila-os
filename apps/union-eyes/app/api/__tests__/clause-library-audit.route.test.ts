@@ -11,7 +11,7 @@ const h = vi.hoisted(() => ({
 
 function chain(): Record<string, unknown> {
   const c: Record<string, unknown> = {};
-  for (const m of ['select', 'from', 'leftJoin', 'limit', 'insert', 'values', 'update', 'set', 'delete', 'returning', 'orderBy']) c[m] = () => c;
+  for (const m of ['select', 'from', 'leftJoin', 'limit', 'insert', 'values', 'update', 'set', 'delete', 'returning', 'orderBy', 'onConflictDoNothing']) c[m] = () => c;
   c.where = (...a: unknown[]) => {
     h.where(...a);
     return c;
@@ -33,6 +33,7 @@ vi.mock('@/db/db', () => ({ db: chain() }));
 vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
   sharedClauseLibrary: new Proxy({}, { get: (_t, p) => `scl.${String(p)}` }),
   clauseLibraryTags: new Proxy({}, { get: (_t, p) => `tag.${String(p)}` }),
+  sharedClauseVersions: new Proxy({}, { get: (_t, p) => `ver.${String(p)}` }),
 }));
 vi.mock('@/db/schema-organizations', () => ({ organizations: new Proxy({}, { get: (_t, p) => `org.${String(p)}` }) }));
 vi.mock('@/db/schema', () => ({
@@ -56,6 +57,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
+  clauseSourceName: () => null,
   sharingChangeDenial: h.denial,
   isSharedClauseOwner: h.isOwner,
   canReadSharedClause: h.canRead,
@@ -138,7 +140,8 @@ describe('clause-library/[id]/share POST', () => {
 describe('clause-library/[id] PATCH and DELETE', () => {
   it('DELETE audits the deletion and a non-owner gets 404', async () => {
     const { DELETE } = await import('../clause-library/[id]/route');
-    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', clauseNumber: '1', sharingLevel: 'private' }], [{ id: 'k1' }]);
+    // The clause read, the final-text version insert, then the delete.
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', clauseNumber: '1', sharingLevel: 'private' }], [], [{ id: 'k1' }]);
     await DELETE(ctx('/api/clause-library/k1', undefined));
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'clause_library.delete', resourceId: 'k1' }));
 

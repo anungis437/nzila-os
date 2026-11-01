@@ -10,16 +10,15 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { organizations, congressMemberships } from '@/db/schema';
-import { eq, ilike, or, and } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { buildClauseVisibilityCondition } from '@/lib/clause-library/sharing-authority';
+import { ilike, or, and } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { buildClauseVisibilityCondition, clauseSourceName } from '@/lib/clause-library/sharing-authority';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
 async function searchClauses(q: string, organizationId: string) {
-  return withSystemContext(async () => {
+  return withRLSContext({ organizationId }, async () => {
     const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
 
     const rows = await db
@@ -34,17 +33,9 @@ async function searchClauses(q: string, organizationId: string) {
         sector: sharedClauseLibrary.sector,
         province: sharedClauseLibrary.province,
         sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-        organizationName: organizations.name,
+        organizationName: clauseSourceName(),
       })
       .from(sharedClauseLibrary)
-      .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
-      .leftJoin(
-        congressMemberships,
-        and(
-          eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
-          eq(congressMemberships.status, 'active'),
-        ),
-      )
       .where(and(
         visibilityCondition,
         or(

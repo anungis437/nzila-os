@@ -480,6 +480,8 @@ export class SignatureService {
     ipProvenance?: Record<string, unknown>;
     userAgent?: string;
     geolocation?: any;
+    /** The authenticated organization the signer is acting in: the signer and the document are looked up inside it and nowhere else. */
+    organizationId: string;
   }) {
     // What this release can evidence is a signature drawn by an authenticated platform user. A certificate-based ("digital") signature
     // asserts cryptographic evidence and a "wet" one a physical signature; neither exists here, so a record labelled with either would
@@ -487,20 +489,18 @@ export class SignatureService {
     if (data.signatureType !== "electronic") {
       throw new SignatureAuthorityError("CONFLICT", `A ${data.signatureType} signature cannot be recorded: this release can evidence only an electronic signature by an authenticated user`);
     }
-    const existingSigner = await db.query.documentSigners.findFirst({
-      where: eq(documentSigners.id, data.signerId),
-    });
-    if (!existingSigner) {
-      throw new Error("Signer not found");
+    if (!data.organizationId) throw new SignatureAuthorityError("FORBIDDEN", "Organization context required");
+    // Under row-level security a lookup outside the organization's context sees no row at all, and one that named no organization would
+    // have to bypass it: the signer and the document are read together inside the organization the caller is authenticated in. A signer
+    // id from another organization answers "not found", the same as an id that does not exist.
+    const found = await withRLSContext({ organizationId: data.organizationId }, (tx) => this.findSignerInOrganization(tx, data.signerId, data.organizationId));
+    if (!found) {
+      throw new SignatureAuthorityError("FORBIDDEN", "Signer not found");
     }
+    const { signer: existingSigner, document } = found;
     if (existingSigner.userId === null || existingSigner.userId !== data.actorUserId) {
-      throw new Error("You are not authorized to sign as this signer");
+      throw new SignatureAuthorityError("FORBIDDEN", "You are not authorized to sign as this signer");
     }
-
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, existingSigner.documentId),
-    });
-    if (!document) throw new Error("Document not found");
     // A document held by a signature provider is signed with that provider. Recording a signature here would mark
     // signers signed, and the document completed, without the provider ever having been asked.
     if (document.provider !== "internal") {
@@ -805,25 +805,31 @@ export class SignatureService {
   }
 
   /**
-   * Send reminder to signer
+   * The signer row with its document, found only inside the given organization: the document's own organization is part of the lookup, so
+   * a signer id of another organization is "not found" and not an existence oracle. Runs on the caller's tenant transaction.
    */
-  static async sendReminder(signerId: string) {
-    const signer = await db.query.documentSigners.findFirst({
-      where: eq(documentSigners.id, signerId),
-    });
-
-    if (!signer) {
-      throw new Error("Signer not found");
+  private static async findSignerInOrganization(tx: RLSTx, signerId: string, organizationId: string) {
+    const [row] = await tx
+      .select({ signer: documentSigners, document: signatureDocuments })
+      .from(documentSigners)
+      .innerJoin(signatureDocuments, eq(documentSigners.documentId, signatureDocuments.id))
+      .where(and(eq(documentSigners.id, signerId), eq(signatureDocuments.organizationId, organizationId)))
+      .limit(1);
+    return row ?? null;
+  }
+  /**
+   * Send reminder to signer. Only the sender of the document may do this, in the sender's own organization, and only to a signer who has not
+   * yet settled on a document that is still open: a reminder says "please sign", which is false for anyone else.
+   */
+  static async sendReminder(signerId: string, requestedBy: string, organizationId: string) {
+    if (!organizationId || !requestedBy) throw new SignatureAuthorityError("FORBIDDEN", "Organization context required");
+    const found = await withRLSContext({ organizationId }, (tx) => this.findSignerInOrganization(tx, signerId, organizationId));
+    if (!found) throw new SignatureAuthorityError("FORBIDDEN", "Signer not found");
+    const { signer, document } = found;
+    if (document.sentBy !== requestedBy) throw new SignatureAuthorityError("FORBIDDEN", "Only the sender of a document can send a reminder");
+    if ((FINAL_DOCUMENT_STATES as readonly string[]).includes(document.status) || (SETTLED_SIGNER_STATES as readonly string[]).includes(signer.status)) {
+      throw new SignatureAuthorityError("CONFLICT", "A reminder is sent only to a signer who has not yet signed an open document");
     }
-
-    const document = await db.query.signatureDocuments.findFirst({
-      where: eq(signatureDocuments.id, signer.documentId),
-    });
-
-    if (!document) {
-      throw new Error("Document not found");
-    }
-
     // Send email reminder
     try {
       const notificationService = new NotificationService();
@@ -854,53 +860,61 @@ export class SignatureService {
 // Continue with audit log even if notification fails
     }
 
-    await AuditTrailService.log({
-      documentId: signer.documentId,
-      signerId,
-      eventType: "reminder_sent",
-      eventDescription: `Reminder sent to ${signer.name}`,
-      actorEmail: signer.email,
-    });
+    await withRLSContext({ organizationId }, (tx) =>
+      AuditTrailService.log({
+        documentId: signer.documentId,
+        signerId,
+        eventType: "reminder_sent",
+        eventDescription: `Reminder sent to ${signer.name}`,
+        actorUserId: requestedBy,
+        actorEmail: signer.email,
+      }, tx),
+    );
   }
 
   /**
    * Get documents for user
    */
   static async getUserDocuments(userId: string, organizationId: string) {
-    // Documents sent by user
-    const sent = await db
-      .select()
-      .from(signatureDocuments)
-      .where(
-        and(
-          eq(signatureDocuments.sentBy, userId),
-          eq(signatureDocuments.organizationId, organizationId)
+    if (!organizationId || !userId) throw new Error("Organization context required");
+    // Both lists are read on the organization's own transaction: outside it row-level security shows the caller nothing, and a read that
+    // reached past it would depend on the predicate alone.
+    return withRLSContext({ organizationId }, async (tx) => {
+      // Documents sent by user
+      const sent = await tx
+        .select()
+        .from(signatureDocuments)
+        .where(
+          and(
+            eq(signatureDocuments.sentBy, userId),
+            eq(signatureDocuments.organizationId, organizationId)
+          )
         )
-      )
-      .orderBy(desc(signatureDocuments.createdAt))
-      .limit(USER_DOCUMENT_LIMIT);
+        .orderBy(desc(signatureDocuments.createdAt))
+        .limit(USER_DOCUMENT_LIMIT);
 
-    // Documents to be signed by user
-    const toSign = await db
-      .select({
-        document: signatureDocuments,
-        signer: documentSigners,
-      })
-      .from(documentSigners)
-      .innerJoin(
-        signatureDocuments,
-        eq(documentSigners.documentId, signatureDocuments.id)
-      )
-      .where(
-        and(
-          eq(documentSigners.userId, userId),
-          eq(signatureDocuments.organizationId, organizationId)
+      // Documents to be signed by user
+      const toSign = await tx
+        .select({
+          document: signatureDocuments,
+          signer: documentSigners,
+        })
+        .from(documentSigners)
+        .innerJoin(
+          signatureDocuments,
+          eq(documentSigners.documentId, signatureDocuments.id)
         )
-      )
-      .orderBy(desc(signatureDocuments.createdAt))
-      .limit(USER_DOCUMENT_LIMIT);
+        .where(
+          and(
+            eq(documentSigners.userId, userId),
+            eq(signatureDocuments.organizationId, organizationId)
+          )
+        )
+        .orderBy(desc(signatureDocuments.createdAt))
+        .limit(USER_DOCUMENT_LIMIT);
 
-    return { sent, toSign };
+      return { sent, toSign };
+    });
   }
 }
 

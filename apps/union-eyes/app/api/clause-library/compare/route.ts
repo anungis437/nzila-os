@@ -13,11 +13,10 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
-import { organizations } from '@/db/schema-organizations';
 import { and, eq, inArray, sql } from 'drizzle-orm';
-import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { canReadSharedClause } from '@/lib/clause-library/sharing-authority';
+import { canReadSharedClause, clauseSourceName } from '@/lib/clause-library/sharing-authority';
 import { commonKeywords } from '@/lib/clause-library/common-keywords';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
@@ -46,7 +45,8 @@ export const POST = withApi(
       throw ApiError.badRequest('Maximum 10 clauses can be compared at once');
     }
 
-    return withSystemContext(async (tx) => {
+    // As the tenant: the policy already withholds what this organization may not read, and the per-row rule below is the same database function.
+    return withRLSContext({ organizationId }, async (tx) => {
       const rows = await tx
         .select({
           id: sharedClauseLibrary.id,
@@ -62,10 +62,9 @@ export const POST = withApi(
           effectiveDate: sharedClauseLibrary.effectiveDate,
           expiryDate: sharedClauseLibrary.expiryDate,
           sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-          organizationName: organizations.name,
+          organizationName: clauseSourceName(),
         })
         .from(sharedClauseLibrary)
-        .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
         .where(inArray(sharedClauseLibrary.id, clauseIds));
 
       const authorizedRows = (

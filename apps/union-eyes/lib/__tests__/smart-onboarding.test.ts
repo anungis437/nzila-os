@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   mockClauseFindMany: vi.fn(),
   mockCacheGet: vi.fn(),
   mockCacheSet: vi.fn(),
+  directoryQueries: [] as Array<Record<string, unknown> | undefined>,
 }));
 
 vi.mock('@/db/db', () => ({
@@ -65,6 +66,25 @@ vi.mock('@/lib/logger', () => ({
   logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
 }));
 
+// The federation directory is an explicit cross-organization read as the system role; the stand-in records the query it was given.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (fn: (tx: unknown) => unknown) =>
+    fn({
+      query: {
+        organizations: {
+          findMany: (...args: any[]) => {
+            const opts = args[0] as Record<string, unknown> | undefined;
+            mocks.directoryQueries.push(opts);
+            if (opts && typeof opts.orderBy === 'function') {
+              (opts.orderBy as (...args: any[]) => unknown)({}, { desc: (x: any) => x, asc: (x: any) => x });
+            }
+            return mocks.mockOrgFindMany();
+          },
+        },
+      },
+    }),
+}));
+
 vi.mock('@/lib/services/cache-service', () => ({
   cacheGet: mocks.mockCacheGet,
   cacheSet: mocks.mockCacheSet,
@@ -79,6 +99,9 @@ vi.stubGlobal('fetch', mockFetch);
 /* ------------------------------------------------------------------ */
 import {
   autoDetectParentFederation,
+  FEDERATION_DIRECTORY_POLICY,
+  isFederationListed,
+  sizeBand,
   suggestRelevantClauses,
   findPeerOrganizations,
   getPeerBenchmarks,
@@ -221,6 +244,55 @@ describe('smart-onboarding', () => {
       mocks.mockOrgFindMany.mockResolvedValue([FED]);
       const results = await autoDetectParentFederation(null, null);
       expect(results).toHaveLength(1);
+    });
+
+    // DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE
+    it('reads only the columns a suggestion needs, as the system role, and only federations that turned listing on', async () => {
+      mocks.directoryQueries.length = 0;
+      mocks.mockOrgFindMany.mockResolvedValue([FED]);
+      await autoDetectParentFederation('ON', 'public');
+      expect(mocks.directoryQueries).toHaveLength(1);
+      const query = mocks.directoryQueries[0] as { columns: Record<string, boolean>; limit: number; where: { _a: unknown[] } };
+      expect(Object.keys(query.columns).sort()).toEqual(['clcAffiliated', 'id', 'memberCount', 'name', 'organizationType', 'provinceTerritory', 'sectors']);
+      expect(query.columns).not.toHaveProperty('settings');
+      expect(query.columns).not.toHaveProperty('email');
+      expect(query.limit).toBe(10);
+      const predicates = JSON.stringify(query.where._a);
+      expect(predicates).toContain('affiliation');
+      expect(predicates).toContain('discoverable');
+    });
+
+    it('discloses a size band and never the exact member count', async () => {
+      mocks.mockOrgFindMany.mockResolvedValue([{ ...FED, memberCount: 50321 }]);
+      const [suggestion] = await autoDetectParentFederation('ON', 'public', 1000);
+      expect(suggestion.sizeBand).toBe('20,000 or more');
+      expect(Object.keys(suggestion).sort()).toEqual(['id', 'jurisdiction', 'matchReasons', 'matchScore', 'name', 'organizationType', 'province', 'sizeBand']);
+      expect(JSON.stringify(suggestion)).not.toContain('50321');
+    });
+
+    it('scores the size from the exact count but reports only the band', async () => {
+      mocks.mockOrgFindMany.mockResolvedValue([{ ...FED, memberCount: 2000 }]);
+      const [suggestion] = await autoDetectParentFederation('ON', null, 1000);
+      expect(suggestion.matchReasons).toContain('Similar size');
+      expect(suggestion.sizeBand).toBe('1,000 to 4,999');
+    });
+  });
+
+  describe('the federation directory policy', () => {
+    it('lists nobody by default and only an explicit true turns listing on', () => {
+      expect(FEDERATION_DIRECTORY_POLICY.listing).toBe('opt_in');
+      expect(FEDERATION_DIRECTORY_POLICY.approvedBy).toBeNull();
+      for (const settings of [undefined, null, {}, [], 'yes', { affiliation: null }, { affiliation: {} }, { affiliation: { discoverable: 'true' } }, { affiliation: { discoverable: 1 } }, { discoverable: true }]) {
+        expect(isFederationListed(settings)).toBe(false);
+      }
+      expect(isFederationListed({ affiliation: { discoverable: true } })).toBe(true);
+    });
+
+    it('bands a member count without stating it', () => {
+      expect([null, undefined, 0, -5, 99, 100, 499, 500, 999, 1000, 4999, 5000, 19999, 20000, 2_000_000].map(sizeBand)).toEqual([
+        'not stated', 'not stated', 'not stated', 'not stated', 'under 100', '100 to 499', '100 to 499', '500 to 999', '500 to 999',
+        '1,000 to 4,999', '1,000 to 4,999', '5,000 to 19,999', '5,000 to 19,999', '20,000 or more', '20,000 or more',
+      ]);
     });
   });
 

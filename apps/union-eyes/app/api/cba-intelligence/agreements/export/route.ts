@@ -1,8 +1,7 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { listAgreements } from "@/lib/services/cba-intelligence/extraction-service";
 import { NextResponse } from "next/server";
-import { hasMinRole } from "@/lib/api-auth-guard";
-import { reviewStatusFilter } from "@/lib/services/cba-intelligence/review-visibility";
+import { canReadUnreviewed, reviewStatusFilter } from "@/lib/services/cba-intelligence/review-visibility";
 
 const LIST_PAGE_SIZE = 100;
 const MAX_EXPORT_ROWS = 10000;
@@ -55,8 +54,8 @@ export const GET = withApi(
       summary: "Export CBA agreements as CSV",
     },
   },
-  async ({ query: requested }) => {
-    const query = { ...requested, reviewStatus: reviewStatusFilter(await hasMinRole("steward"), requested.reviewStatus) };
+  async ({ query: requested, userId }) => {
+    const query = { ...requested, reviewStatus: reviewStatusFilter(await canReadUnreviewed(userId), requested.reviewStatus) };
     // listAgreements serves at most 100 rows a page whatever limit is asked, so the export reads every page. When the
     // matching set is larger than the export bound the request is refused: a file that silently stops at the first page is not
     // the export that was asked for.

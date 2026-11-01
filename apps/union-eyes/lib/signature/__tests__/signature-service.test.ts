@@ -9,6 +9,10 @@ const m = vi.hoisted(() => ({
   queue: [] as unknown[][],
   signerUpdate: [] as unknown[],
   voidUpdate: [] as unknown[],
+  joined: [] as unknown[],
+  contexts: [] as unknown[],
+  sent: [] as unknown[],
+  toSign: [] as unknown[],
   tx: {} as Record<string, any>,
   trail: [] as Record<string, unknown>[],
 }));
@@ -22,7 +26,10 @@ vi.mock('@/db/schema', () => {
 });
 vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), or: vi.fn(() => 'or'), desc: vi.fn(), notInArray: vi.fn(() => 'notIn'), inArray: vi.fn(() => 'in'), lt: vi.fn(() => 'lt') }));
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx),
+  withRLSContext: async (org: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+    m.contexts.push(org);
+    return fn(m.tx);
+  },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('../providers', () => ({ default: { getProvider: () => ({ voidEnvelope: m.voidEnvelope }), getDefaultProvider: vi.fn() } }));
@@ -49,7 +56,16 @@ describe('SignatureService authority and atomic audit', () => {
     m.audit.mockResolvedValue(undefined);
     m.signerFind.mockResolvedValue(SIGNER);
     m.documentFind.mockResolvedValue({ ...DOC, signers: [SIGNER] });
-    m.tx.select = vi.fn(() => ({ from: () => ({ where: async () => (m.queue.length ? m.queue.shift()! : m.open) }) }));
+    m.contexts = [];
+    m.joined = [{ signer: { ...SIGNER }, document: { ...DOC } }];
+    m.sent = [];
+    m.toSign = [];
+    m.tx.select = vi.fn(() => ({
+      from: () => ({
+        where: async () => (m.queue.length ? m.queue.shift()! : m.open),
+        innerJoin: () => ({ where: () => ({ limit: async () => m.joined }) }),
+      }),
+    }));
     m.tx.update = vi.fn((table: string) => ({
       set: () => ({
         where: () => ({
@@ -126,8 +142,53 @@ describe('SignatureService authority and atomic audit', () => {
     });
   });
 
+  describe('sendReminder', () => {
+    const joined = (document: Record<string, unknown> = {}, signer: Record<string, unknown> = {}) => [{ signer: { ...SIGNER, status: 'pending', ...signer }, document: { ...DOC, ...document } }];
+    beforeEach(() => {
+      m.joined = joined();
+    });
+
+    // The reminder said "please sign" to whoever the caller named, with no sender, organization or state check, and read through the bare handle.
+    it('is refused without an organization or a requester, before anything is read', async () => {
+      await expect(SignatureService.sendReminder('sg1', 'sender', '')).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      await expect(SignatureService.sendReminder('sg1', '', 'o1')).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(m.tx.select).not.toHaveBeenCalled();
+    });
+
+    it('does not find a signer of another organization, and binds the lookup to the organization', async () => {
+      const { eq } = await import('drizzle-orm');
+      vi.mocked(eq).mockClear();
+      m.joined = [];
+      await expect(SignatureService.sendReminder('sg1', 'sender', 'o2')).rejects.toThrow('Signer not found');
+      expect(vi.mocked(eq).mock.calls.some((c) => c[0] === 'signatureDocuments.organizationId' && c[1] === 'o2')).toBe(true);
+      expect(m.trail).toHaveLength(0);
+    });
+
+    it('refuses anyone but the sender', async () => {
+      await expect(SignatureService.sendReminder('sg1', 'signer', 'o1')).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(m.trail).toHaveLength(0);
+    });
+
+    it.each(['completed', 'voided', 'declined', 'expired'])('does not remind anyone on a %s document', async (status) => {
+      m.joined = joined({ status });
+      await expect(SignatureService.sendReminder('sg1', 'sender', 'o1')).rejects.toMatchObject({ code: 'CONFLICT' });
+      expect(m.trail).toHaveLength(0);
+    });
+
+    it.each(['signed', 'declined', 'authentication_failed', 'expired'])('does not remind a signer who is already %s', async (status) => {
+      m.joined = joined({}, { status });
+      await expect(SignatureService.sendReminder('sg1', 'sender', 'o1')).rejects.toMatchObject({ code: 'CONFLICT' });
+      expect(m.trail).toHaveLength(0);
+    });
+
+    it('lets the sender remind a signer who has not signed an open document, and records the event on the tenant transaction', async () => {
+      await SignatureService.sendReminder('sg1', 'sender', 'o1');
+      expect(m.trail[0]).toMatchObject({ eventType: 'reminder_sent', actorUserId: 'sender', signerId: 'sg1', documentId: 'd1' });
+    });
+  });
+
   describe('recordSignature', () => {
-    const input = { signerId: 'sg1', actorUserId: 'signer', signatureImageUrl: 'https://x.test/s.png', signatureType: 'electronic' as const };
+    const input = { signerId: 'sg1', actorUserId: 'signer', organizationId: 'o1', signatureImageUrl: 'https://x.test/s.png', signatureType: 'electronic' as const };
 
     // DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT
     // Extended in F06 batch 6 (A6): the refusal rolls the signing transaction back, so the expiry itself is recorded on its own.
@@ -150,7 +211,7 @@ describe('SignatureService authority and atomic audit', () => {
     });
 
     it('refuses to sign a request that stored a second-factor requirement this release cannot perform, writing nothing', async () => {
-      m.documentFind.mockResolvedValue({ ...DOC, requireAuthentication: true, signers: [SIGNER] });
+      m.joined = [{ signer: { ...SIGNER }, document: { ...DOC, requireAuthentication: true } }];
       await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('second factor') });
       expect(m.tx.update).not.toHaveBeenCalled();
       expect(m.audit).not.toHaveBeenCalled();
@@ -184,20 +245,20 @@ describe('SignatureService authority and atomic audit', () => {
     });
 
     it('makes a later signer wait for the earlier ones when signing is sequential', async () => {
-      m.signerFind.mockResolvedValue({ ...SIGNER, signingOrder: 2 });
+      m.joined = [{ signer: { ...SIGNER, signingOrder: 2 }, document: { ...DOC } }];
       m.queue = [[{ id: 'd1' }], [{ expiresAt: null, sequentialSigning: true }], [{ id: 'sg0', status: 'sent' }]];
       await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('earlier signer') });
       expect(m.tx.update).not.toHaveBeenCalled();
     });
 
     it('signs when sequential signing is on and every earlier signer has signed', async () => {
-      m.signerFind.mockResolvedValue({ ...SIGNER, signingOrder: 2 });
+      m.joined = [{ signer: { ...SIGNER, signingOrder: 2 }, document: { ...DOC } }];
       m.queue = [[{ id: 'd1' }], [{ expiresAt: null, sequentialSigning: true }], [{ id: 'sg0', status: 'signed' }]];
       await expect(SignatureService.recordSignature(input)).resolves.toMatchObject({ status: 'signed' });
     });
 
     it('refuses a caller who is not the signer', async () => {
-      await expect(SignatureService.recordSignature({ ...input, actorUserId: 'someone-else' })).rejects.toThrow('not authorized');
+      await expect(SignatureService.recordSignature({ ...input, actorUserId: 'someone-else' })).rejects.toMatchObject({ code: 'FORBIDDEN', message: expect.stringContaining('not authorized') });
       expect(m.audit).not.toHaveBeenCalled();
     });
 
@@ -237,6 +298,69 @@ describe('SignatureService authority and atomic audit', () => {
     it('fails the signature when its audit cannot be written', async () => {
       m.audit.mockRejectedValue(new Error('audit down'));
       await expect(SignatureService.recordSignature(input)).rejects.toThrow('audit down');
+    });
+
+    // DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-...: the signer and its document were read through the shared handle,
+    // outside any tenant context, so under row-level security the lookup found nothing and nothing bound it to the caller's organization.
+    it('is refused without an organization, before anything is read', async () => {
+      await expect(SignatureService.recordSignature({ ...input, organizationId: '' })).rejects.toMatchObject({ code: 'FORBIDDEN', message: expect.stringContaining('Organization context') });
+      expect(m.contexts).toHaveLength(0);
+      expect(m.tx.select).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('finds the signer and its document on the caller\'s tenant transaction and never through the shared handle', async () => {
+      await SignatureService.recordSignature(input);
+      expect(m.contexts[0]).toEqual({ organizationId: 'o1' });
+      expect(m.signerFind).not.toHaveBeenCalled();
+    });
+
+    it('does not find a signer of another organization, answers as if it did not exist, and writes nothing', async () => {
+      const { eq } = await import('drizzle-orm');
+      vi.mocked(eq).mockClear();
+      m.joined = [];
+      await expect(SignatureService.recordSignature({ ...input, organizationId: 'o2' })).rejects.toMatchObject({ code: 'FORBIDDEN', message: 'Signer not found' });
+      expect(m.contexts).toEqual([{ organizationId: 'o2' }]);
+      expect(vi.mocked(eq).mock.calls.some((c) => c[0] === 'signatureDocuments.organizationId' && c[1] === 'o2')).toBe(true);
+      expect(m.tx.update).not.toHaveBeenCalled();
+      expect(m.trail).toHaveLength(0);
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('refuses a signer row with no platform user, which no session can be', async () => {
+      m.joined = [{ signer: { ...SIGNER, userId: null }, document: { ...DOC } }];
+      await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(m.tx.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getUserDocuments', () => {
+    const lists = () => {
+      m.tx.select = vi.fn(() => ({
+        from: () => ({
+          where: () => ({ orderBy: () => ({ limit: async () => m.sent }) }),
+          innerJoin: () => ({ where: () => ({ orderBy: () => ({ limit: async () => m.toSign }) }) }),
+        }),
+      }));
+    };
+
+    it('reads both lists on the organization\'s own transaction, bound to the organization', async () => {
+      const { eq } = await import('drizzle-orm');
+      lists();
+      m.sent = [{ id: 'd1' }];
+      m.toSign = [{ document: { id: 'd2' }, signer: { id: 'sg2' } }];
+      vi.mocked(eq).mockClear();
+      expect(await SignatureService.getUserDocuments('signer', 'o1')).toEqual({ sent: [{ id: 'd1' }], toSign: [{ document: { id: 'd2' }, signer: { id: 'sg2' } }] });
+      expect(m.contexts).toEqual([{ organizationId: 'o1' }]);
+      expect(vi.mocked(eq).mock.calls.filter((c) => c[0] === 'signatureDocuments.organizationId' && c[1] === 'o1')).toHaveLength(2);
+    });
+
+    it('is refused without an organization or a user, before anything is read', async () => {
+      lists();
+      await expect(SignatureService.getUserDocuments('signer', '')).rejects.toThrow('Organization context required');
+      await expect(SignatureService.getUserDocuments('', 'o1')).rejects.toThrow('Organization context required');
+      expect(m.contexts).toHaveLength(0);
+      expect(m.tx.select).not.toHaveBeenCalled();
     });
   });
 });

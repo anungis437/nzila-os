@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   getSnapshots: vi.fn(),
   requireSystemAdmin: vi.fn(),
   operation: vi.fn(),
+  isPlatformAdmin: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -20,7 +21,7 @@ vi.mock('@/lib/api/framework', () => ({
     conflict: (r: string) => Object.assign(new Error(r), { status: 409 }),
   },
 }));
-vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: () => m.requireSystemAdmin() }));
+vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: () => m.requireSystemAdmin(), isPlatformAdminUser: (id: string) => m.isPlatformAdmin(id) }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAtomicAuditedOperation: m.operation,
   operationAuditResponse: (e: unknown) => ((e as { code?: string })?.code === 'OPERATION_AUDIT_UNAVAILABLE' ? { status: 409, body: { error: { message: 'not performed' } } } : null),
@@ -38,7 +39,9 @@ describe('cba-intelligence/benchmark/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.requireSystemAdmin.mockResolvedValue(undefined);
-    m.getAgreement.mockResolvedValue({ id: 'a1' });
+    m.isPlatformAdmin.mockResolvedValue(false);
+    m.getAgreement.mockResolvedValue({ id: 'a1', reviewStatus: 'approved' });
+    m.getSnapshots.mockResolvedValue([]);
     m.findComparable.mockResolvedValue({ targetAgreementId: 'a1', comparableCount: 2, comparables: [] });
     m.save.mockResolvedValue({ id: 's1' });
     m.operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
@@ -49,6 +52,23 @@ describe('cba-intelligence/benchmark/[id]', () => {
     const result = await (GET as never as (c: unknown) => Promise<{ data: unknown }>)({ ...ctx, query: {} });
     expect(result.data).toMatchObject({ comparableCount: 2 });
     expect(m.save).not.toHaveBeenCalled();
+  });
+
+  // DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE: an organization's steward holds a role floor, not authority over the platform's review queue.
+  it('GET shows the benchmark or the saved history of an unapproved agreement only to platform staff, and to everyone else it does not exist', async () => {
+    const { GET } = await import('../cba-intelligence/benchmark/[id]/route');
+    const read = (query: Record<string, unknown>) => (GET as never as (c: unknown) => Promise<{ data: unknown }>)({ ...ctx, query });
+    m.getAgreement.mockResolvedValue({ id: 'a1', reviewStatus: 'pending_review' });
+    for (const query of [{}, { history: true }]) {
+      await expect(read(query)).rejects.toMatchObject({ status: 404 });
+    }
+    expect(m.findComparable).not.toHaveBeenCalled();
+    expect(m.getSnapshots).not.toHaveBeenCalled();
+    m.isPlatformAdmin.mockResolvedValue(true);
+    expect((await read({})).data).toMatchObject({ comparableCount: 2 });
+    expect((await read({ history: true })).data).toEqual([]);
+    m.getAgreement.mockResolvedValue(null);
+    await expect(read({})).rejects.toMatchObject({ status: 404 });
   });
 
   it('GET refuses a query that still asks it to save', async () => {

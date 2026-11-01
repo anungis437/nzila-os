@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 646,
- "partial": 76,
- "outstanding": 131,
- "accountedFor": 131,
+ "corrected": 650,
+ "partial": 72,
+ "outstanding": 127,
+ "accountedFor": 127,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -47,22 +47,21 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 14,
+   "defects": 10,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 9,
+    "MEDIUM": 5,
     "LOW": 3
    },
-   "namedRoutes": 4,
+   "namedRoutes": 3,
    "namedFiles": 0,
    "tranches": {
     "0B.2": 1,
-    "0B.4": 2,
+    "0B.4": 1,
     "0B.6": 3,
     "0B.8": 1,
-    "0B.9": 1,
-    "0B.10": 3,
-    "0B.11": 3
+    "0B.10": 2,
+    "0B.11": 2
    }
   },
   {
@@ -337,11 +336,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
     "severity": "MEDIUM",
     "partial": true
@@ -362,18 +356,8 @@
     "partial": true
    },
    {
-    "id": "DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
     "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-OPL-02",
-    "severity": "MEDIUM",
     "partial": true
    },
    {
@@ -383,11 +367,6 @@
    },
    {
     "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-WITH-NO-ORGANIZATION-PREDICATE-AND-ACCEPT-ANY-USER-ID-A-SENDER-TYPED-AS-SIGNER",
     "severity": "MEDIUM",
     "partial": true
    },
