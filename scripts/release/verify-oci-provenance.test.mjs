@@ -115,3 +115,34 @@ test('OCI receipt denies noncanonical or unsafe staging coordinates',()=>{
     })),/source\/run mismatch/,String(bad))
   }
 })
+
+
+test('bounds cryptographic verification fanout before invoking any external verifier',()=>{
+  let calls=0
+  const oversized=Array.from({length:33},(_,i)=>({
+    name:'nzila-os-web'+i,
+    image:'nzilacanadaacr.azurecr.io/nzila/web'+i+'@sha256:'+i.toString(16).padStart(64,'0'),
+  }))
+  assert.throws(()=>verifyOciProvenance(opts({
+    manifestRaw:JSON.stringify({...manifest(),deployTargets:oversized}),
+    verifier:()=>{calls++;throw Error('verifier must not be invoked')},
+  })),/exceeds 32 deployment targets/)
+  assert.equal(calls,0)
+  const atLimit=oversized.slice(0,32)
+  const valid=verifyOciProvenance(opts({
+    manifestRaw:JSON.stringify({...manifest(),deployTargets:atLimit}),
+    verifier:(_cmd,args)=>{
+      calls++
+      const subject=args[2].slice('oci://'.length)
+      const [name,digest]=subject.split('@sha256:')
+      return JSON.stringify([{verificationResult:{
+        signature:{certificate:{subject:'GitHub OIDC'}},
+        verifiedTimestamps:[{timestamp:'2026-11-01T00:00:00Z'}],
+        statement:{predicateType:'https://slsa.dev/provenance/v1',
+          subject:[{name,digest:{sha256:digest}}]},
+      }}])
+    },
+  }))
+  assert.equal(valid.targets.length,32)
+  assert.equal(calls,32)
+})
