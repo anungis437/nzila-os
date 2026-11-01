@@ -184,7 +184,7 @@ describe('clause-library/[id]/share GET', () => {
 });
 
 describe('clause-library/[id]/share POST', () => {
-  it('refuses a sharing scope the owner has no standing in, before touching the clause', async () => {
+  it('refuses a sharing scope the owner has no standing in, after verifying ownership and before mutation', async () => {
     const { POST } = await import('../clause-library/[id]/share/route');
     h.denial.mockResolvedValue({ status: 403, message: 'Congress sharing requires an active congress membership' });
     // Authorization to change sharing is evaluated only after a tenant-scoped owner read.
