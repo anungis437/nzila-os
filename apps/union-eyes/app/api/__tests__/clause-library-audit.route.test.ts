@@ -7,6 +7,7 @@ const h = vi.hoisted(() => ({
   where: vi.fn(),
   isOwner: vi.fn(),
   canRead: vi.fn(),
+  unscopedRead: vi.fn(),
 }));
 
 function chain(): Record<string, unknown> {
@@ -29,7 +30,7 @@ vi.mock('@/lib/api/framework', () => ({
     notFound: (resource: string) => Object.assign(new Error(`${resource} not found`), { status: 404 }),
   },
 }));
-vi.mock('@/db/db', () => ({ db: chain() }));
+vi.mock('@/db/db', () => ({ db: { ...chain(), select: () => { h.unscopedRead(); return chain(); } } }));
 vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
   sharedClauseLibrary: new Proxy({}, { get: (_t, p) => `scl.${String(p)}` }),
   clauseLibraryTags: new Proxy({}, { get: (_t, p) => `tag.${String(p)}` }),
@@ -78,6 +79,7 @@ beforeEach(() => {
   h.where.mockReset();
   h.isOwner.mockReset().mockReturnValue(true);
   h.canRead.mockReset().mockResolvedValue(true);
+  h.unscopedRead.mockReset();
 });
 
 describe('clause-library/[id]/tags', () => {
@@ -108,10 +110,38 @@ describe('clause-library/[id]/tags', () => {
   });
 });
 
+describe('clause-library/[id]/share GET', () => {
+  it('reads sharing configuration through the tenant-scoped transaction, not the module database handle', async () => {
+    const { GET } = await import('../clause-library/[id]/share/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private', sharedWithOrgIds: [] }]);
+    await expect(GET(ctx('/api/clause-library/k1/share', undefined))).resolves.toMatchObject({
+      sharing: { id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private' },
+    });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('does not disclose another organization\'s sharing configuration or perform a module-level read', async () => {
+    const { GET } = await import('../clause-library/[id]/share/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-2', sharingLevel: 'private' }]);
+    h.isOwner.mockReturnValue(false);
+    await expect(GET(ctx('/api/clause-library/k1/share', undefined))).rejects.toMatchObject({ status: 404 });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('refuses a missing organization context before any database read', async () => {
+    const { GET } = await import('../clause-library/[id]/share/route');
+    await expect(GET({ ...ctx('/api/clause-library/k1/share', undefined), organizationId: null })).rejects.toMatchObject({ status: 400 });
+    expect(h.where).not.toHaveBeenCalled();
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+});
+
 describe('clause-library/[id]/share POST', () => {
   it('refuses a sharing scope the owner has no standing in, before touching the clause', async () => {
     const { POST } = await import('../clause-library/[id]/share/route');
     h.denial.mockResolvedValue({ status: 403, message: 'Congress sharing requires an active congress membership' });
+    // Authorization to change sharing is evaluated only after a tenant-scoped owner read.
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private' }]);
     await expect(POST(ctx('/api/clause-library/k1/share', { sharingLevel: 'congress' }))).rejects.toMatchObject({ status: 403 });
     expect(h.audit).not.toHaveBeenCalled();
   });
