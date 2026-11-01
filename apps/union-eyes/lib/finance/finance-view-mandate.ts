@@ -7,16 +7,16 @@ import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-respons
  * Financial and pension intelligence reads dues, arrears, remittances, ledger and pension data of the organization. An
  * officer role title is not authority over those records: the caller needs a live financial view mandate.
  */
-export async function assertFinanceViewMandate(organizationId: string, userId: string): Promise<void> {
+export async function assertFinanceViewMandate(organizationId: string, userId: string, resourceId?: string): Promise<void> {
   await withRLSContext({ organizationId, userId }, (tx) =>
-    requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view' }),
+    requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', ...(resourceId ? { resourceId } : {}) }),
   )
 }
 
 /** The same check for a handler that answers with a Response instead of throwing: null when the caller holds the mandate. */
-export async function financeViewMandateDenial(organizationId: string, userId: string): Promise<NextResponse | null> {
+export async function financeViewMandateDenial(organizationId: string, userId: string, resourceId?: string): Promise<NextResponse | null> {
   try {
-    await assertFinanceViewMandate(organizationId, userId)
+    await assertFinanceViewMandate(organizationId, userId, resourceId)
     return null
   } catch {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'A live financial view mandate is required')

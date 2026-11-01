@@ -24,6 +24,16 @@ describe('finance view mandate', () => {
     expect(m.requireLive).toHaveBeenCalledWith(m.tx, { organizationId: 'org-1', userId: 'user-1', action: 'finance:view' })
   })
 
+  it('requires resource-scoped financial authority for pension intelligence, not merely an unrelated mandate', async () => {
+    m.requireLive.mockResolvedValueOnce({});
+    await assertFinanceViewMandate('org-1', 'user-1', 'plan-1');
+    expect(m.requireLive).toHaveBeenCalledWith(m.tx, {
+      organizationId: 'org-1', userId: 'user-1', action: 'finance:view', resourceId: 'plan-1',
+    });
+    m.requireLive.mockRejectedValueOnce(new Error('unrelated plan mandate'));
+    expect((await financeViewMandateDenial('org-1', 'user-1', 'plan-2'))?.status).toBe(403);
+  });
+
   it('lets the mandate refusal through unchanged', async () => {
     m.requireLive.mockRejectedValue(new Error('no mandate'))
     await expect(assertFinanceViewMandate('org-1', 'user-1')).rejects.toThrow('no mandate')

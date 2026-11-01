@@ -1,0 +1,7 @@
+# Pension AI object-level financial mandate: source remediation, 2026-11-01
+
+Source anchor before this change: a1fcacf29aea292898dc253441d02020a1456689. The frozen Gate 0 defect is `DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE`, still PARTIAL. This change does not alter frozen classification or claim qualification.
+
+The three pension intelligence routes previously checked only that the officer held *some* live financial-view mandate, then allowed any pension member or plan in the organization. They now resolve the URL resource identifier before any rate limit, feature gate or data read and pass it to `requireLiveFinancialMandate` via `financeViewMandateDenial`. The principal financial authority engine accepts the target only when a live `finance:view` mandate covers that resource or the organization ledger. An unrelated plan/member grant cannot authorize this call. Empty identifiers are rejected before the check.
+
+Focused tests were authored in `lib/finance/__tests__/finance-view-mandate.test.ts` and `lib/api/__tests__/f05-b39-mandate.contract.test.ts`. They must be executed; source modification alone is not UNIT_VERIFIED, NATIVE_VERIFIED, E2E_VERIFIED or CLOSED. Native PostgreSQL 15/16, full Vitest/contract, production HTTP/browser and staging remain separate qualification gates. Resource-to-plan delegation for member projections, member self-service projection policy, institutional authority, and independent reviewer/persona ratification remain unresolved. No fabricated actuarial verification or GO is claimed.

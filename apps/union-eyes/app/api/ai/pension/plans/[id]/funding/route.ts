@@ -23,8 +23,10 @@ import { enforceAISafety } from '@nzila/policies';
 import { financeViewMandateDenial } from '@/lib/finance/finance-view-mandate';
 
 export const GET = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
-  // 0. Pension figures need a live financial view mandate, not only an officer role title.
-  const noMandate = await financeViewMandateDenial(context.organizationId!, context.userId!);
+  // 0. A live mandate must cover this particular pension plan (or the organization ledger).
+  const planId = request.nextUrl.pathname.split('/').at(-2) ?? '';
+  if (!planId) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Pension plan identifier is required');
+  const noMandate = await financeViewMandateDenial(context.organizationId!, context.userId!, planId);
   if (noMandate) return noMandate;
 
   // 1. Rate limit
@@ -45,7 +47,6 @@ export const GET = withRoleAuth('officer', async (request: NextRequest, context:
   enforceAISafety({ origin: 'pension-funding', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'pension_financial' });
 
   // 4. Execute
-  const planId = request.nextUrl.pathname.split('/').at(-2) ?? '';
   try {
     const result = await analyzePensionFunding({
       planId,

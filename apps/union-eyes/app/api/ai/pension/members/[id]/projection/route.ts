@@ -32,8 +32,10 @@ const projectionQuerySchema = z.object({
 });
 
 export const GET = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
-  // 0. Pension figures need a live financial view mandate, not only an officer role title.
-  const noMandate = await financeViewMandateDenial(context.organizationId!, context.userId!);
+  // 0. A live mandate must cover this particular pension member (or the organization ledger).
+  const memberId = request.nextUrl.pathname.split('/').at(-2) ?? '';
+  if (!memberId) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Pension member identifier is required');
+  const noMandate = await financeViewMandateDenial(context.organizationId!, context.userId!, memberId);
   if (noMandate) return noMandate;
 
   // 1. Rate limit
@@ -66,7 +68,6 @@ export const GET = withRoleAuth('officer', async (request: NextRequest, context:
   }
 
   // 5. Execute
-  const memberId = request.nextUrl.pathname.split('/').at(-2) ?? '';
   try {
     const result = await projectMemberBenefit({
       memberId,

@@ -16,6 +16,9 @@ describe('F05 financial intelligence needs a live mandate', () => {
     expect(mandate).toBeGreaterThan(0)
     expect(mandate).toBeLessThan(source.indexOf('checkRateLimit('))
     expect(mandate).toBeLessThan(source.indexOf('guardAiFeature('))
+    const resource = route.includes('/members/') ? 'memberId' : 'planId'
+    expect(source).toContain(`financeViewMandateDenial(context.organizationId!, context.userId!, ${resource})`)
+    expect(source.indexOf(`const ${resource} = request.nextUrl.pathname`)).toBeLessThan(mandate)
   })
 
   it('the finance analysis checks the mandate before the feature gate and the report', () => {
