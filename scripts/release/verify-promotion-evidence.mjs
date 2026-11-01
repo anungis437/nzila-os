@@ -159,8 +159,11 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   // first truthy alias lets an immutable image mask a conflicting mutable
   // imageRef/digest that a downstream deployer might actually consume.
   // Require every supplied alias to be the same complete immutable reference.
+  // The signed staging manifest must identify only the canonical Azure
+  // registry and immutable image subjects that the independent OCI verifier
+  // can attest. A signed foreign registry is not a promotable Nzila image.
   const pinned = ref => typeof ref === 'string' &&
-    /^[a-zA-Z0-9][a-zA-Z0-9._:/-]*@sha256:[0-9a-f]{64}$/i.test(ref)
+    /^nzilacanadaacr\.azurecr\.io\/nzila\/[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?@sha256:[0-9a-f]{64}$/.test(ref)
   // The production deployer resolves target identity by containerAppName,
   // then app, then name. Reject conflicting aliases and duplicate resolved
   // identities: otherwise a signed manifest can describe two images for the
@@ -170,7 +173,12 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   // when the manifest itself carries a valid signature.
   const canonicalContainerAppName = id => typeof id === 'string' &&
     /^[a-z](?!.*--)[a-z0-9-]{0,30}[a-z0-9]$/.test(id)
-  const seenTargets = new Set()
+  const seenTargets = new Set(), seenImages = new Set()
+  // The independent OCI verifier has the same bounded target budget. Refuse
+  // an oversized signed manifest before accepting promotion evidence.
+  if (Array.isArray(manifest.deployTargets) && manifest.deployTargets.length > 32) {
+    deny('signed deployment target count exceeds 32')
+  }
   if (!Array.isArray(manifest.deployTargets) || !manifest.deployTargets.length ||
       manifest.deployTargets.some(target => {
         if (!target || typeof target !== 'object' || Array.isArray(target)) return true
@@ -185,8 +193,13 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
         const refs = ['image', 'imageRef', 'digest']
           .filter(key => target[key] !== undefined && target[key] !== null)
           .map(key => target[key])
-        return refs.length === 0 || refs.some(ref => !pinned(ref)) ||
-          new Set(refs).size !== 1
+        if (refs.length === 0 || refs.some(ref => !pinned(ref)) ||
+            new Set(refs).size !== 1) return true
+        // A single image must not be silently promoted under multiple
+        // destinations; this matches the independently verified OCI contract.
+        if (seenImages.has(refs[0])) return true
+        seenImages.add(refs[0])
+        return false
       })) deny('deployment target is absent, mutable or conflicting (including duplicated identities)')
   return {
     commitSha: expectedCommit,

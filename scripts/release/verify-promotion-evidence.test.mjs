@@ -8,7 +8,7 @@ import { canonical, computeSignedPayloadDigest, verifyPromotionEvidence } from '
 
 const COMMIT = 'a'.repeat(40)
 const RUN = '123456'
-const IMAGE = 'example.invalid/app@sha256:' + 'b'.repeat(64)
+const IMAGE = 'nzilacanadaacr.azurecr.io/nzila/web@sha256:' + 'b'.repeat(64)
 const hash = text => createHash('sha256').update(text).digest('hex')
 
 function makeFixture(algorithm = 'ed25519', sbomDocument = {
@@ -347,5 +347,31 @@ test('promotion run coordinates reject coercion, unsafe integers and signed alia
     }
     x.write()
     assert.equal(x.verify().commitSha, COMMIT)
+  } finally { x.cleanup() }
+})
+
+
+test('signed promotion rejects foreign OCI registries, duplicate image subjects and oversized target sets', () => {
+  const x = makeFixture()
+  try {
+    x.manifest.deployTargets = [{ name: 'demo', image: 'attacker.invalid/app@sha256:' + 'b'.repeat(64) }]
+    x.write() // A valid signature does not authorize an unrelated image registry.
+    assert.throws(() => x.verify(), /deployment target is absent, mutable or conflicting/)
+
+    x.manifest.deployTargets = [{ name: 'demo', image: IMAGE }, { name: 'other', image: IMAGE }]
+    x.write() // Different destination names must not reuse one signed image subject.
+    assert.throws(() => x.verify(), /deployment target is absent, mutable or conflicting/)
+
+    const targets = Array.from({ length: 33 }, (_, i) => ({
+      name: 'app' + i,
+      image: 'nzilacanadaacr.azurecr.io/nzila/web' + i + '@sha256:' + i.toString(16).padStart(64, '0'),
+    }))
+    x.manifest.deployTargets = targets
+    x.write()
+    assert.throws(() => x.verify(), /signed deployment target count exceeds 32/)
+
+    x.manifest.deployTargets = targets.slice(0, 32)
+    x.write()
+    assert.equal(x.verify().targetCount, 32)
   } finally { x.cleanup() }
 })
