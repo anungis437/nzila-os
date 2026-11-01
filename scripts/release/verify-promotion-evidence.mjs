@@ -71,14 +71,21 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
     valid = verify(null, Buffer.from(digest, 'hex'), verificationKey, Buffer.from(attestation.signature, 'hex'))
   } catch { valid = false }
   if (!valid) deny('attestation signature verification failed')
+  // A signed report with negative, fractional or unsafe severity counts is
+  // not valid scan evidence, even if critical and high happen to equal zero.
+  const scan = attestation.trivySummary
+  const validCount = value => Number.isSafeInteger(value) && value >= 0
   if (attestation.contractTestResult !== 'pass' ||
       attestation.sloGateResult !== 'pass' ||
       attestation.secretScanSummary?.ran !== true ||
       attestation.secretScanSummary?.clean !== true ||
-      attestation.secretScanSummary?.findings !== 0 ||
-      attestation.trivySummary?.ran !== true ||
-      attestation.trivySummary?.critical !== 0 ||
-      attestation.trivySummary?.high !== 0) deny('mandatory recorded quality/security proof absent')
+      !validCount(attestation.secretScanSummary?.findings) ||
+      attestation.secretScanSummary.findings !== 0 ||
+      scan?.ran !== true ||
+      !['critical', 'high', 'medium', 'low'].every(key => validCount(scan[key])) ||
+      scan.critical !== 0 || scan.high !== 0) {
+    deny('mandatory recorded quality/security proof absent')
+  }
   // A signed bundle list is still ambiguous when it repeats an identity:
   // downstream consumers may select the first or last digest for the same
   // name. Require unique, canonical names and safe positive file counts.
@@ -116,6 +123,11 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   if (!Number.isFinite(stagedAt) || !Number.isFinite(attestedAt) ||
       stagedAt > current + 5 * 60_000 || attestedAt > current + 5 * 60_000 ||
       stagedAt < current - ttl || attestedAt < current - ttl) deny('staging evidence stale or from future')
+  // The attestation must follow the build it signs, within a bounded window.
+  // A valid signature over impossible chronology is not source provenance.
+  if (attestedAt < stagedAt || attestedAt - stagedAt > 60 * 60_000) {
+    deny('signed attestation chronology does not follow staging build')
+  }
   // A target may carry multiple historical aliases. Checking only the
   // first truthy alias lets an immutable image mask a conflicting mutable
   // imageRef/digest that a downstream deployer might actually consume.

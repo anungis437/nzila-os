@@ -184,6 +184,36 @@ test('manifest target tampering is denied by signed manifest hash', () => {
     assert.throws(() => x.verify(), /source commit or provenance/)
   } finally { x.cleanup() }
 })
+test('signed scan evidence rejects impossible severity counters', () => {
+  const x = makeFixture()
+  try {
+    for (const [bucket, count] of [
+      ['medium', -1], ['low', -3], ['medium', 1.5],
+      ['low', Number.MAX_SAFE_INTEGER + 1],
+    ]) {
+      x.attestation.trivySummary = { ran: true, critical: 0, high: 0, medium: 0, low: 0 }
+      x.attestation.trivySummary[bucket] = count
+      x.write()
+      assert.throws(() => x.verify(), /mandatory recorded quality\/security proof absent/)
+    }
+  } finally { x.cleanup() }
+})
+
+test('signed staging evidence rejects impossible chronology', () => {
+  const x = makeFixture()
+  try {
+    const now = Date.now()
+    x.manifest.built_at = new Date(now).toISOString()
+    x.attestation.timestamp = new Date(now - 60_000).toISOString()
+    x.write()
+    assert.throws(() => x.verify(), /attestation chronology/)
+    x.manifest.built_at = new Date(now - 2 * 60 * 60_000).toISOString()
+    x.attestation.timestamp = new Date(now - 30 * 60_000).toISOString()
+    x.write()
+    assert.throws(() => x.verify(), /attestation chronology/)
+  } finally { x.cleanup() }
+})
+
 test('signed but unsafe high-severity scan is denied', () => {
   const x = makeFixture()
   try {
