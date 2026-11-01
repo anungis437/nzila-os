@@ -85,7 +85,23 @@ describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant
       { params: { documentId: 'doc_own' } },
     );
     expect(response.status).toBe(403);
-    expect(m.verifyDocumentAccess).toHaveBeenCalledWith('doc_own', 'caller-own-id', '');
+    expect(m.verifyDocumentAccess).not.toHaveBeenCalled();
+    expect(m.getDocumentSender).not.toHaveBeenCalled();
+    expect(m.generateAuditReport).not.toHaveBeenCalled();
+    expect(m.getDocumentAudit).not.toHaveBeenCalled();
+  });
+
+  it('rejects an explicitly empty tenant even for report format, before any signature lookup', async () => {
+    const { GET } = await loadRoute();
+    m.getCurrentUser.mockResolvedValueOnce({ id: 'caller-own-id', organizationId: '' });
+    const response = await GET(
+      new NextRequest('http://localhost/api/signatures/audit/doc_own?format=report'),
+      { params: { documentId: 'doc_own' } },
+    );
+    expect(response.status).toBe(403);
+    expect(m.verifyDocumentAccess).not.toHaveBeenCalled();
+    expect(m.getDocumentSender).not.toHaveBeenCalled();
+    expect(m.generateAuditReport).not.toHaveBeenCalled();
     expect(m.getDocumentAudit).not.toHaveBeenCalled();
   });
 
