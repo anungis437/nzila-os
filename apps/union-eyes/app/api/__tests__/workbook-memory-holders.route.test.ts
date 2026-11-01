@@ -380,6 +380,72 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     });
   });
 
+  describe('notice to the named people (F06 R5)', () => {
+    const itemParams = { params: Promise.resolve({ id: 'w1', holderId: 'holder_1' }) };
+    const patch = (body: unknown) => new NextRequest('http://localhost/api/workbook/w1/memory-holders/holder_1', { method: 'PATCH', body: JSON.stringify(body) });
+    const setCalls = () => mockDb.update.mock.results.flatMap((r) => (r.value as { set: ReturnType<typeof vi.fn> }).set.mock.calls.map((c) => c[0] as Record<string, unknown>));
+
+    it('records a notice for a claimed workbook attributed to the acting person, with the time and channel', async () => {
+      const { PATCH } = await loadItemRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_shared' }]);
+      m.updateQueue.push([{ id: 'holder_1' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'peer_1' });
+      m.getOrganizationIdForUser.mockResolvedValueOnce('org_shared');
+
+      const response = await PATCH(patch({ notice: { channel: 'in_person', reference: 'meeting 3' } }), itemParams);
+
+      expect(response.status).toBe(200);
+      expect(setCalls()[0]).toMatchObject({ noticeState: 'notified', notifiedBy: 'peer_1', noticeChannel: 'in_person', noticeReference: 'meeting 3' });
+      expect(setCalls()[0].notifiedAt).toBeInstanceOf(Date);
+      expect(setCalls()[0]).not.toHaveProperty('notice');
+    });
+
+    it('cannot record a notice for an unclaimed workbook, which has nobody to attribute it to, and names the blocked operation', async () => {
+      const { PATCH } = await loadItemRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+
+      const response = await PATCH(patch({ notice: { channel: 'email' } }), itemParams);
+      const payload = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(payload.error.code).toBe('NOTICE_REQUIRES_CLAIM');
+      expect(payload.blockedOperation).toMatchObject({ operation: 'workbook.memory_holder.record_notice', policyApprovedBy: null });
+      expect(mockDb.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a name or note without a notice, as a blocked operation, when the policy conditions naming a person on one', async () => {
+      const { HOLDER_NOTICE_POLICY } = await import('@/lib/workbook/holder-notice');
+      HOLDER_NOTICE_POLICY.identifyingDetailsRequireNotice = true;
+      try {
+        const { PATCH } = await loadItemRoute();
+        m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+        m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+
+        const response = await PATCH(patch({ displayName: 'A Person' }), itemParams);
+
+        expect(response.status).toBe(409);
+        expect((await response.json()).blockedOperation).toMatchObject({ operation: 'workbook.memory_holder.write_identifying_detail' });
+        expect(mockDb.update).not.toHaveBeenCalled();
+      } finally {
+        HOLDER_NOTICE_POLICY.identifyingDetailsRequireNotice = false;
+      }
+    });
+
+    it('shows the reader how many of the named people have a recorded notice', async () => {
+      const { GET } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([
+        { id: 'h1', role: 'A', displayName: 'N1', notes: null, noticeState: 'notified' },
+        { id: 'h2', role: 'B', displayName: 'N2', notes: null, noticeState: 'not_recorded' },
+      ]);
+
+      const body = await (await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).json();
+
+      expect(body.notice).toEqual({ holders: 2, noticeRecorded: 1, noticeNotRecorded: 1 });
+      expect(body.holders.map((h: { identifyingDetailWithheld: boolean }) => h.identifyingDetailWithheld)).toEqual([false, false]);
+    });
+  });
+
   describe('preclaim capability', () => {
     it('creates a memory holder under the pre-claim bearer (unclaimed workbook)', async () => {
       const { POST } = await loadListRoute();

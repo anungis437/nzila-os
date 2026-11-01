@@ -13,7 +13,8 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 import { validateSsoProviderInput } from '@/lib/sso/provider-input';
 import { isUniqueViolation } from '@/lib/db/unique-violation';
-import { SSO_SIGN_IN_EFFECT, withConfigurationEffect } from '@/lib/reality/configuration-effect';
+import { SSO_SIGN_IN_EFFECT, ssoReadiness, withConfigurationEffect } from '@/lib/reality/configuration-effect';
+import { refuseUnavailableActivation, requestedActivation } from '@/lib/reality/activation-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,12 +35,15 @@ export const GET = withApi(
       .from(ssoProviders)
       .where(eq(ssoProviders.organizationId, organizationId));
 
-    // Never echo raw credential material back to the client.
-    return providers.map(({ samlCertificate, oidcClientSecret, ...safe }) => withConfigurationEffect({
-      ...safe,
-      samlCertificate: samlCertificate ? true : null,
-      oidcClientSecret: oidcClientSecret ? true : null,
-    }, SSO_SIGN_IN_EFFECT));
+    // Never echo raw credential material back to the client. The readiness is judged on the stored row and reports presence only.
+    return providers.map((raw) => {
+      const { samlCertificate, oidcClientSecret, ...safe } = raw;
+      return withConfigurationEffect({
+        ...safe,
+        samlCertificate: samlCertificate ? true : null,
+        oidcClientSecret: oidcClientSecret ? true : null,
+      }, SSO_SIGN_IN_EFFECT, ssoReadiness(raw));
+    });
   },
 );
 
@@ -91,6 +95,17 @@ export const POST = withApi(
     if (!name || !providerType || !attributeMapping) {
       throw ApiError.badRequest('name, providerType, and attributeMapping are required');
     }
+
+    // Nothing reads a provider at sign-in, so a provider cannot be created already enabled or auto-provisioning: that would be a claim the
+    // platform cannot keep. It is stored staged, and the attempt to turn it on is recorded as a blocked operation.
+    await refuseUnavailableActivation({
+      effect: SSO_SIGN_IN_EFFECT,
+      asked: requestedActivation({ enabled, autoProvision }, ['enabled', 'autoProvision']),
+      organizationId,
+      userId,
+      action: 'sso.provider.activate_blocked',
+      resourceType: 'sso_providers',
+    });
 
     // A provider is created disabled and without auto-provisioning unless the administrator asks otherwise, and one that is enabled
     // must be complete for its type.

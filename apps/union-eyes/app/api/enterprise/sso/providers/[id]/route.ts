@@ -17,6 +17,7 @@ import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 import { validateSsoProviderInput } from '@/lib/sso/provider-input';
 import { isUniqueViolation } from '@/lib/db/unique-violation';
 import { SSO_SIGN_IN_EFFECT, withConfigurationEffect } from '@/lib/reality/configuration-effect';
+import { refuseUnavailableActivation, requestedActivation } from '@/lib/reality/activation-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,16 @@ export const PATCH = withApi(
     for (const key of ['enabled', 'autoProvision'] as const) {
       if (patch[key] !== undefined && typeof patch[key] !== 'boolean') throw ApiError.badRequest(`${key} must be true or false`);
     }
+    // Turning a provider on is refused while nothing reads it at sign-in (lib/reality/activation-guard.ts); turning it off is not.
+    await refuseUnavailableActivation({
+      effect: SSO_SIGN_IN_EFFECT,
+      asked: requestedActivation(patch, ['enabled', 'autoProvision']),
+      organizationId,
+      userId,
+      action: 'sso.provider.activate_blocked',
+      resourceType: 'sso_providers',
+      resourceId: params.id,
+    });
     const assignable: readonly string[] = AUTH_TENANT_ASSIGNABLE_ROLES;
     if (patch.roleMapping !== undefined && patch.roleMapping !== null) {
       if (typeof patch.roleMapping !== 'object' || Array.isArray(patch.roleMapping)) throw ApiError.badRequest('roleMapping must be an object of group to role');

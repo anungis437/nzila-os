@@ -124,6 +124,12 @@ export const workbookMemoryHolders = pgTable(
     successorIdentified: boolean('successor_identified').notNull().default(false),
     stewardshipDensity: numeric('stewardship_density', { precision: 5, scale: 2 }),
     notes: text('notes'),
+    // Whether a notice that this person is recorded here has been RECORDED (platform 0055). The default is the honest state of every row.
+    noticeState: varchar('notice_state', { length: 16 }).notNull().default('not_recorded'),
+    notifiedAt: timestamp('notified_at', { withTimezone: true }),
+    notifiedBy: varchar('notified_by', { length: 255 }),
+    noticeChannel: varchar('notice_channel', { length: 32 }),
+    noticeReference: varchar('notice_reference', { length: 255 }),
     capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

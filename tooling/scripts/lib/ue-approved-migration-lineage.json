@@ -587,6 +587,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Platform-level append-only audit of pseudonymous public-intake access"
+      },
+      {
+        "tag": "0055_workbook_holder_notice",
+        "sha256": "fa60cfe9eb81cd91b8a57e88c0e4184d1d9d443adb55e1c0f0b2f56e453daa9e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Per-holder record of whether notice to the named person has been recorded"
       }
     ]
   }

@@ -12,7 +12,8 @@ import { z } from 'zod';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { assertPublicHttpUrl } from '@/lib/security/outbound-url';
-import { INTEGRATION_SYNC_EFFECT, withConfigurationEffect } from '@/lib/reality/configuration-effect';
+import { INTEGRATION_SYNC_EFFECT, integrationReadiness, withConfigurationEffect } from '@/lib/reality/configuration-effect';
+import { refuseUnavailableActivation, requestedActivation } from '@/lib/reality/activation-guard';
 
 const updateIntegrationSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -66,7 +67,7 @@ export const GET = withApi(
 
     if (!integration) throw ApiError.notFound('Integration');
 
-    return withConfigurationEffect(publicIntegration(integration), INTEGRATION_SYNC_EFFECT);
+    return withConfigurationEffect(publicIntegration(integration), INTEGRATION_SYNC_EFFECT, integrationReadiness(integration));
   },
 );
 
@@ -92,6 +93,16 @@ export const PATCH = withApi(
     if (apiEndpoint !== undefined) updates.apiEndpoint = apiEndpoint;
 
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    // Switching an integration on is refused while no synchronization runs from it (lib/reality/activation-guard.ts); switching it off is not.
+    await refuseUnavailableActivation({
+      effect: INTEGRATION_SYNC_EFFECT,
+      asked: requestedActivation({ enabled }, ['enabled']),
+      organizationId,
+      userId,
+      action: 'integration.activate_blocked',
+      resourceType: 'api_integrations',
+      resourceId: params.id,
+    });
     return withRLSContext({ organizationId }, async (tx) => {
       const [updated] = await tx
         .update(apiIntegrations)

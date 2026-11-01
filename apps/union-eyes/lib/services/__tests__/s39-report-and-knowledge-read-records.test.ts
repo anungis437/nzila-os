@@ -16,7 +16,10 @@ describe('Gate 0 batch B95: durable records for report execution and knowledge-b
   it('applies the access columns to a parent organization\'s knowledge-base rows and audits a document read', () => {
     for (const file of ['app/api/knowledge-base/route.ts', 'app/api/knowledge-base/[id]/route.ts']) {
       const route = src(file)
-      expect(route).toContain('knowledgeBaseOrganizationCondition(orgId, parentId)')
+      // F06 R5: the list goes through the entitlement-aware scope, which itself applies the access-column condition; the item keeps the
+      // full condition and then checks the entitlement for a parent's row.
+      expect(route).toMatch(/knowledgeBaseOrganizationCondition\(orgId, parentId\)|knowledgeBaseReadScope\(orgId, parentId, hasSuite\)/)
+      expect(src('lib/knowledge-transfer/governance/kb-entitlement.ts')).toContain('knowledgeBaseOrganizationCondition(orgId, parentId)')
       expect(route).not.toContain('inArray(knowledgeBase.organizationId, orgIds)')
     }
     const item = src('app/api/knowledge-base/[id]/route.ts')

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, BaseAuthContext, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import { knowledgeBaseSourceCondition, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 import { knowledgeBaseOrganizationCondition } from '@/lib/knowledge-transfer/governance/kb-visibility';
+import { readerHasKnowledgeSuite, KNOWLEDGE_READ_POLICY } from '@/lib/knowledge-transfer/governance/kb-entitlement';
 import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
@@ -62,6 +63,25 @@ export const GET = withApiAuth(async (
 
   if (!row) {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+  }
+
+  // A parent's shared row reaches this organization only with the knowledge suite entitlement. The attempt is a specific blocked
+  // operation and is recorded as one, before anything is returned.
+  if (row.organizationId !== orgId && KNOWLEDGE_READ_POLICY.parentSharedRowsRequireSuite && !(await readerHasKnowledgeSuite(orgId))) {
+    await withRLSContext({ organizationId: orgId, userId: user?.id }, (tx) =>
+      persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId: user?.id ?? null,
+        action: 'knowledge_base.read_denied',
+        resourceType: 'knowledge_base',
+        resourceId: id,
+        details: { reason: 'union_knowledge_suite_required', policyVersion: KNOWLEDGE_READ_POLICY.version, policyApprovedBy: KNOWLEDGE_READ_POLICY.approvedBy },
+      }, 'failure'),
+    );
+    return NextResponse.json(
+      { error: { code: 'ENTITLEMENT_REQUIRED', message: 'This document is shared by a parent organization and needs the union knowledge suite' } },
+      { status: 403 },
+    );
   }
 
   // Who opened which document is recorded before the content is returned.

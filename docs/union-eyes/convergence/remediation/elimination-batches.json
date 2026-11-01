@@ -7686,16 +7686,18 @@
         },
         {
           "prefix": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/lib/knowledge-transfer/governance/kb-visibility.ts",
             "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/kb-visibility.test.ts",
             "apps/union-eyes/app/api/knowledge-base/route.ts",
             "apps/union-eyes/app/api/knowledge-base/[id]/route.ts",
-            "apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts",
+            "apps/union-eyes/lib/knowledge-transfer/governance/kb-entitlement.ts",
+            "apps/union-eyes/app/api/__tests__/knowledge-base-entitlement.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
           ],
-          "explanation": "A parent organization's knowledge-base row is now served to a child only when it is public or names the child in allowed_organizations (the access columns decide); the list search matches the title and summary the list returns, not the full content of rows whose content it does not show; and opening a document writes knowledge_base.read to the audit log before the content is returned. Exit-interview copies were already governed by the interview reader condition.",
-          "remaining": "The routes still apply no union_knowledge_suite entitlement, because the same table serves organizations without that suite and which of them may read it is a product decision."
+          "explanation": "A parent organization's knowledge-base row is now served to a child only when it is public or names the child in allowed_organizations (the access columns decide); the list search matches the title and summary the list returns, not the full content of rows whose content it does not show; and opening a document writes knowledge_base.read to the audit log before the content is returned. Exit-interview copies were already governed by the interview reader condition. The union_knowledge_suite entitlement now applies to the one kind of read it can govern: a parent organization's shared rows reaching a child. An organization's own rows are read without it; a parent's shared rows are withheld from the list (the answer says withheld.parentShared with the reason) and, when opened by id, refused with 403 ENTITLEMENT_REQUIRED and recorded as knowledge_base.read_denied naming the policy and that it is unapproved. An entitlement that cannot be determined is not held (fail closed). The policy is explicit and provisional (approvedBy null), shaped like the authority kernel's document classes, so which organizations without the suite may read what their parent shares is a named decision rather than an omission. One pinned source test was adapted to the new scope helper (disclosed)."
         }
       ]
     },
@@ -7722,10 +7724,14 @@
             "apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts",
             "apps/union-eyes/lib/reality/configuration-effect.ts",
             "apps/union-eyes/lib/reality/capability-registry.ts",
-            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts",
+            "apps/union-eyes/lib/reality/activation-guard.ts",
+            "apps/union-eyes/lib/reality/__tests__/configuration-effect.test.ts",
+            "apps/union-eyes/lib/reality/__tests__/activation-guard.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
           ],
-          "explanation": "An integration endpoint written through PATCH must now be a public http(s) address (the same rule as every other address the platform is told to call). Every read, update and delete of an integration configuration, and its audit record, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-EXT-INTEGRATION-SYNC), so a change is no longer presented as having affected a synchronization. A creation path was deliberately not added: it would store more configuration that nothing consumes.",
-          "remaining": "No synchronization runs from the configuration, so enabling an integration, a sync frequency or an endpoint change has no effect. The worker and its provider qualification are the missing capability."
+          "explanation": "An integration endpoint written through PATCH must now be a public http(s) address (the same rule as every other address the platform is told to call). Every read, update and delete of an integration configuration, and its audit record, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-EXT-INTEGRATION-SYNC), so a change is no longer presented as having affected a synchronization. A creation path was deliberately not added: it would store more configuration that nothing consumes. Switching an integration on is now refused while nothing runs from it: the claim \"enabled\" is not stored, the refusal is a specific blocked operation (integration.sync.execute, with what it requires and who owns each requirement) and is recorded durably as integration.activate_blocked before the request is rolled back; switching off and ordinary edits still work. The read states per row what stands between its stored configuration and a synchronization, judged from the row (connection completeness and credentials present; credentials are never returned) with institutional approval and an approved adapter reported unmet because nothing records them. A creation path was again deliberately not added: it would store more configuration that nothing consumes, and the governed integration framework (integration_configs with its control-plane and sync engine) is the system that does run.",
+          "remaining": "No synchronization runs from api_integrations. The consumer needs an institution's approval of the external system and the data it may exchange, credentials from that system, and an approved adapter; the worker and its provider qualification are the missing capability."
         }
       ]
     },
@@ -7935,10 +7941,19 @@
             "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts",
             "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
             "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/__tests__/route.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s51-f06-a5-a7-claimed-controls-operate.test.ts",
+            "apps/union-eyes/db/migrations-platform/0055_workbook_holder_notice.sql",
+            "apps/union-eyes/db/migrations-platform/0055_workbook_holder_notice.rollback.sql",
+            "apps/union-eyes/db/schema/workbook-schema.ts",
+            "apps/union-eyes/lib/workbook/holder-notice.ts",
+            "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
+            "apps/union-eyes/lib/workbook/__tests__/holder-notice.test.ts",
+            "apps/union-eyes/db/__tests__/migration-0055-workbook-holder-notice.postgres.test.ts",
+            "apps/union-eyes/app/api/__tests__/workbook-memory-holders.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
           ],
-          "explanation": "A same-organization peer of a claimed workbook now needs a steward role in the claimed organization (hasRoleInOrganization), not just a membership, before the memory-holder routes admit it to read, change or delete the named people. The steward role floor from B102 stands; the PATCH and DELETE audit rows are no longer written only when a row changed: an attempt that changed nothing is recorded as such.",
-          "remaining": "The named people still have no notice that they are recorded; how and by whom they are told is an institutional and legal decision no code can make."
+          "explanation": "A same-organization peer of a claimed workbook now needs a steward role in the claimed organization (hasRoleInOrganization), not just a membership, before the memory-holder routes admit it to read, change or delete the named people. The steward role floor from B102 stands; the PATCH and DELETE audit rows are no longer written only when a row changed: an attempt that changed nothing is recorded as such. The fact of notice is now durable and visible. Each named person carries whether a notice has been RECORDED, by whom, when, through which channel and with what reference (platform 0055; every existing row starts not_recorded and a half-recorded notice is refused by a constraint), a notice is recorded only by an identified person with authority over the claimed workbook and never from the request body, and an unclaimed workbook, which has nobody to attribute it to, is refused as a specific blocked operation (NOTICE_REQUIRES_CLAIM). The list shows each holder's notice state and a summary count. An explicit provisional policy (approvedBy null, off by default) can condition naming a person on a notice recorded in the same request and withhold names and notes from reads until one is recorded; when on, a refusal is a specific blocked operation naming the policy. Native PostgreSQL 15 and 16 prove the migration (twice, existing rows, constraint, rollback and re-apply).",
+          "remaining": "How and by whom the named people must be told, and whether naming them should be conditional on a notice, is an institutional and legal decision that has not been made (the policy is off and unapproved). Nothing sends a notice: recording that one was given is not the notice. Migration 0055 is unqualified in a deployment environment."
         },
         {
           "prefix": "DEF-0B9-ASM-NATIONAL-AVERAGE-BENCHMARK-FALLS-BACK-TO-HARD-CODED-LITERALS-WITH-NO-INDICATION",
@@ -8094,10 +8109,12 @@
             "apps/union-eyes/lib/pilot/write-payloads.ts",
             "apps/union-eyes/app/api/__tests__/pilot-commercial-transition.route.test.ts",
             "apps/union-eyes/app/[locale]/dashboard/admin/pilots/page.tsx",
-            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts",
+            "apps/union-eyes/lib/pilot/counterpart-acceptance.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
           ],
-          "explanation": "The transition no longer says an effect happened when it did not. Every state that writes a contract, invoice or subscription (contract_sent, contract_signed, invoice_issued, subscription_active) is refused with 409 and nothing changed when its billing account, contract or active plan is missing, where it used to push a \"staged only\" note and still commit the new state, status, score history and audit row. contract_signed needs counterpartAcceptance (who accepted for the other party, their role, the channel and an evidence reference), is refused unless a contract exists and is awaiting acceptance, and records the acceptance, the recording administrator and the fact that it was recorded by a platform operator in the contract; a replay does not overwrite it. An invoice is issued only against an accepted (active) contract. A pilot status of approved, active or completed is written only once platform-approved commercial terms exist. Seven existing tests were adapted (staged-only expectations became refusals) and eleven added; the admin UI collects the acceptance. Disclosed adaptations: the mocked state order in the route test now includes approved, pilot_active and pilot_complete.",
-          "remaining": "The counterpart's acceptance is evidence an administrator records (a document or envelope reference), not a signature the system verified. Provider-verified e-signature, or an authenticated counterpart acceptance step, needs a signing provider and a counterpart identity that this release does not have."
+          "explanation": "The transition no longer says an effect happened when it did not. Every state that writes a contract, invoice or subscription (contract_sent, contract_signed, invoice_issued, subscription_active) is refused with 409 and nothing changed when its billing account, contract or active plan is missing, where it used to push a \"staged only\" note and still commit the new state, status, score history and audit row. contract_signed needs counterpartAcceptance (who accepted for the other party, their role, the channel and an evidence reference), is refused unless a contract exists and is awaiting acceptance, and records the acceptance, the recording administrator and the fact that it was recorded by a platform operator in the contract; a replay does not overwrite it. An invoice is issued only against an accepted (active) contract. A pilot status of approved, active or completed is written only once platform-approved commercial terms exist. Seven existing tests were adapted (staged-only expectations became refusals) and eleven added; the admin UI collects the acceptance. Disclosed adaptations: the mocked state order in the route test now includes approved, pilot_active and pilot_complete. The counterpart's acceptance now has a first-class evidence level that follows every effect that rests on it. A verifier seam (AcceptanceVerifier, registered per channel; none is registered and no provider is named or activated) is asked before the transaction opens, never while the pilot row is locked, and a verifier that is absent, declines or throws leaves the acceptance operator_recorded_unverified. The channel an administrator types, including e_signature_provider, is stored as a claim beside the verification detail, the policy version and its approval state. The contract, the invoice, the subscription, the stored monetization record, the audit row and the response all carry the evidence level. An explicit provisional policy (approvedBy null) decides whether an operator-recorded acceptance may activate billing; it keeps the earlier behaviour, and setting it to require provider verification refuses contract_signed, invoice_issued and subscription_active as specific blocked operations (pilot.commercial.<state>, requiring provider_verified_acceptance) with nothing changed. Five tests added.",
+          "remaining": "Whether an operator-recorded acceptance may activate billing is an institutional and commercial decision that has not been made (the policy is provisional and unapproved). No signature provider or counterpart identity exists, so no acceptance can be provider-verified; a verifier for an approved provider and channel is the missing adapter."
         },
         {
           "prefix": "DEF-0B10-PIL-ONBOARDING-CHECKLIST-ITEMS-ARE-TOGGLED-BY-THE-CALLER-WITH-NO-CHECK-THAT-THE-STEP-HAPPENED",
@@ -8155,10 +8172,15 @@
             "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
             "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
             "apps/union-eyes/lib/reality/capability-registry.ts",
-            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts",
+            "apps/union-eyes/lib/reality/activation-guard.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts",
+            "apps/union-eyes/lib/reality/__tests__/configuration-effect.test.ts",
+            "apps/union-eyes/lib/reality/__tests__/activation-guard.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s55-f06-r5-dependency-isolation.test.ts"
           ],
-          "explanation": "Every provider list, create, update and delete response, and the create and update audit records, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-SSO-SIGN-IN), so a configured provider is no longer reported as though it governed sign-in.",
-          "remaining": "No sign-in, token-exchange, provisioning or SCIM code reads the stored provider; the consumer needs the identity-provider protocol work and a real provider to qualify against."
+          "explanation": "Every provider list, create, update and delete response, and the create and update audit records, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-SSO-SIGN-IN), so a configured provider is no longer reported as though it governed sign-in. A provider can no longer be created or updated as enabled or auto-provisioning while nothing reads it at sign-in: those claims are not stored, the refusal is a specific blocked operation (auth.sso.federated_sign_in) and is recorded durably as sso.provider.activate_blocked, and a provider is stored staged with its effect stated. The list judges each stored provider (SAML or OIDC completeness; secrets and certificates are checked for presence and never returned) and reports what remains: the institution's approval of the identity provider, verified ownership of the sign-in email domains, and platform authentication federation, each with its owner. Nothing is activated and no approval is invented.",
+          "remaining": "No sign-in, token-exchange, provisioning or SCIM code reads the stored provider. The consumer needs the institution's approval of an identity provider for the organization, domain-ownership verification, platform authentication that federates through organization-configured providers, and a real provider to qualify against."
         }
       ]
     },
@@ -8345,7 +8367,7 @@
     {
       "id": "B115-F06-R4-SIGNATURE-EXPIRY-AND-OPERATION-STATE",
       "family": "F06 R4: signature expiry sweep, honest evidence types, atomic database-only operations, truthful post-commit reports",
-      "evidenceCommit": null,
+      "evidenceCommit": "a1fcacf29",
       "items": [
         {
           "prefix": "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT",
@@ -8362,6 +8384,12 @@
           "explanation": "Every stored term now operates or is refused. Expiry: besides refusing an expired attempt, a cron-authenticated sweep (every 30 minutes, registered in scheduled-jobs.json) finds overdue open internal documents across organizations by system authority (a cross-organization SELECT on signature_documents only, keyset-paged and bounded) and expires each inside its own organization in one transaction with its unsettled signers lapsed, its trail event and its platform audit record; a failing document rolls back whole, is reported (and the run answers 500) while the rest are still expired, and a provider-held document is left to the provider sync. Authentication evidence the platform cannot supply is refused in every signature action: a second-factor request is not created and is not signed; a \"digital\" (certificate) or \"wet\" (physical) signature, which would be stored under a stronger name than the evidence supports, is refused before anything is read. Proven natively on PostgreSQL 15 and 16 as the system and runtime roles: the grant and policies suffice, organizations stay isolated, and an injected audit-write fault leaves the document, its signers and its trail exactly as they were."
         }
       ]
+    },
+    {
+      "id": "B116-F06-R5-PROVIDER-AND-INSTITUTIONAL-DEPENDENCY-ISOLATION",
+      "family": "F06 R5: contracts, guarded states and specific blocked operations for SSO, integration sync, commercial acceptance, knowledge entitlement and notice",
+      "evidenceCommit": null,
+      "items": []
     }
   ],
   "uncreditedSourceEvidence": {

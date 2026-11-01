@@ -23,6 +23,7 @@ import { auditClaimedWorkbookWrite, auditWorkbookRead } from '@/lib/workbook/cla
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
+import { assertNoticeContract, holderNoticeSchema, HolderNoticeBlocked, IDENTIFYING_FIELDS, noticeColumns, summarizeNotice, withholdUnnoticedDetail } from '@/lib/workbook/holder-notice';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -47,6 +48,8 @@ const createSchema = z.object({
   criticality: z.enum(CRITICALITIES).nullable().optional(),
   successorIdentified: z.boolean().default(false),
   notes: z.string().max(4000).nullable().optional(),
+  // Records that the named person has been told (see lib/workbook/holder-notice.ts): who recorded it and when come from the session.
+  notice: holderNoticeSchema.optional(),
 });
 
 async function loadCartography(workbookId: string) {
@@ -60,6 +63,9 @@ async function loadCartography(workbookId: string) {
       criticality: workbookMemoryHolders.criticality,
       successorIdentified: workbookMemoryHolders.successorIdentified,
       notes: workbookMemoryHolders.notes,
+      noticeState: workbookMemoryHolders.noticeState,
+      notifiedAt: workbookMemoryHolders.notifiedAt,
+      noticeChannel: workbookMemoryHolders.noticeChannel,
     })
     .from(workbookMemoryHolders)
     .where(eq(workbookMemoryHolders.workbookId, workbookId))
@@ -80,7 +86,9 @@ async function loadCartography(workbookId: string) {
     })),
   );
 
-  return { holders: rows, cartography };
+  // Whether the named people have been told is shown with them: a count, and per holder whether a notice was recorded. Under the notice
+  // policy, identifying detail of a person whose notice is not recorded is withheld.
+  return { holders: rows.map((row) => withholdUnnoticedDetail(row)), cartography, notice: summarizeNotice(rows) };
 }
 
 export async function GET(
@@ -147,6 +155,9 @@ export async function POST(
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
       async (authority) => {
+        // A notice is attributed to the identified person who records it; an unclaimed workbook has none, and that is reported rather than faked.
+        const writesIdentifyingDetail = IDENTIFYING_FIELDS.some((field) => parse.data[field] !== undefined && parse.data[field] !== null);
+        assertNoticeContract({ writesIdentifyingDetail, notice: parse.data.notice, authorityKind: authority.kind });
         // Lock the parent workbook within the authority transaction. Concurrent
         // writers serialize on this row, so a count check cannot race another
         // POST and exceed the ceiling. Recheck ownership after acquiring the
@@ -186,6 +197,7 @@ export async function POST(
             criticality: parse.data.criticality ?? null,
             successorIdentified: parse.data.successorIdentified,
             notes: parse.data.notes ?? null,
+            ...(parse.data.notice && authority.actorUserId ? noticeColumns(parse.data.notice, authority.actorUserId, new Date()) : {}),
           })
           .returning({ id: workbookMemoryHolders.id });
 
@@ -207,6 +219,9 @@ export async function POST(
 
     return NextResponse.json(access.value, { status: 201 });
   } catch (err) {
+    if (err instanceof HolderNoticeBlocked) {
+      return NextResponse.json({ error: { code: err.code, message: 'This write needs a recorded notice to the named person' }, blockedOperation: err.blockedOperation }, { status: 409 });
+    }
     if (err instanceof WorkbookMemoryHolderLimitError) {
       return NextResponse.json({ error: 'Workbook memory-holder limit reached; review required' }, { status: 409 });
     }

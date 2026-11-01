@@ -27,6 +27,12 @@ import {
 } from '@/lib/pilot/commercialization-wave1';
 import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import {
+  acceptanceEvidenceOf,
+  acceptanceMaySupport,
+  COUNTERPART_ACCEPTANCE_POLICY,
+  verifyCounterpartAcceptance,
+} from '@/lib/pilot/counterpart-acceptance';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -208,11 +214,17 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
     const now = new Date();
     const nowIso = now.toISOString();
+    // The counterpart's acceptance is checked with the signature provider it names, if a verifier has been registered for that channel (none
+    // is), BEFORE the transaction opens: a provider call is not made while the pilot row is locked. No verifier leaves it operator-recorded.
+    const acceptanceVerification =
+      targetState === 'contract_signed' && body.counterpartAcceptance ? await verifyCounterpartAcceptance(body.counterpartAcceptance) : null;
     const monetization: {
       notes: string[];
       contractId?: string;
       invoiceId?: string;
       subscriptionId?: string;
+      /** The evidence level of the counterpart acceptance this effect rests on (see lib/pilot/counterpart-acceptance.ts). */
+      acceptanceEvidence?: string;
     } = { notes: [] };
 
     let fromState!: CommercialState;
@@ -427,19 +439,34 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
         // A replay of an accepted contract keeps the original acceptance record.
         if (existingContract.status === 'pending_approval' && body.counterpartAcceptance) {
+          const evidence = acceptanceVerification?.status ?? 'operator_recorded_unverified';
+          const acceptanceDecision = acceptanceMaySupport('pilot.commercial.contract_signed', evidence);
+          if (!acceptanceDecision.allowed) {
+            throw new CommercialTransitionRejected(409, {
+              error: 'The counterpart\'s acceptance is not verified with a signature provider, and the commercial acceptance policy does not let an operator-recorded acceptance activate the contract. Nothing was changed.',
+              blockedOperation: acceptanceDecision.blocked,
+            });
+          }
           const acceptedMetadata = {
             ...((existingContract.metadata ?? {}) as Record<string, unknown>),
             counterpartAcceptance: {
               ...body.counterpartAcceptance,
               recordedBy: actorUserId,
               recordedAt: nowIso,
-              verification: 'recorded_by_platform_operator',
+              // The channel is what the administrator said it was; the evidence level is what the platform could establish.
+              verification: evidence === 'provider_verified' ? 'provider_verified' : 'recorded_by_platform_operator',
+              verificationDetail: acceptanceVerification,
+              policyVersion: COUNTERPART_ACCEPTANCE_POLICY.version,
+              policyApprovedBy: COUNTERPART_ACCEPTANCE_POLICY.approvedBy,
             },
           };
           await tx
             .update(commercialContracts)
             .set({ status: 'active', signedAt: now, signedBy: body.counterpartAcceptance.acceptedByName, updatedAt: now, metadata: acceptedMetadata })
             .where(and(eq(commercialContracts.id, existingContract.id), eq(commercialContracts.organizationId, organizationId)));
+          monetization.acceptanceEvidence = evidence;
+        } else {
+          monetization.acceptanceEvidence = acceptanceEvidenceOf(existingContract.metadata);
         }
 
         monetization.contractId = existingContract.id;
@@ -447,7 +474,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
       if (targetState === 'invoice_issued' && organizationId && billingAccountId) {
         const [acceptedContract] = await tx
-          .select({ id: commercialContracts.id })
+          .select({ id: commercialContracts.id, metadata: commercialContracts.metadata })
           .from(commercialContracts)
           .where(
             and(
@@ -461,6 +488,16 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
             error: 'No accepted contract exists for this pilot, so no invoice can be issued. Record contract_signed first. Nothing was changed.',
           });
         }
+        // The invoice rests on the acceptance, so it carries the level of evidence the acceptance has, and the policy decides whether that suffices.
+        const invoiceEvidence = acceptanceEvidenceOf(acceptedContract.metadata);
+        const invoiceDecision = acceptanceMaySupport('pilot.commercial.invoice_issued', invoiceEvidence);
+        if (!invoiceDecision.allowed) {
+          throw new CommercialTransitionRejected(409, {
+            error: 'The contract\'s acceptance is not verified with a signature provider, and the commercial acceptance policy does not let an operator-recorded acceptance support an invoice. Nothing was changed.',
+            blockedOperation: invoiceDecision.blocked,
+          });
+        }
+        monetization.acceptanceEvidence = invoiceEvidence;
 
         const invoiceNumber = buildInvoiceNumber(application.id);
 
@@ -482,6 +519,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
             metadata: {
               source: 'pilot-commercial-transition',
               pilotApplicationId: application.id,
+              acceptanceEvidence: invoiceEvidence,
               commercialTermsSnapshot: commercialTermsSnapshot?.snapshot,
               commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint,
             },
@@ -518,6 +556,17 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         // unreachable without it set; the null-check below is defensive.
         const selectedPlanId = application.verifiedSubscriptionPlanId;
 
+        // The subscription rests on the acceptance recorded at the earlier stages, whose evidence level was stored with the pilot.
+        const priorMonetization = responses.commercialMonetization as { acceptanceEvidence?: string } | undefined;
+        const subscriptionEvidence = priorMonetization?.acceptanceEvidence === 'provider_verified' ? 'provider_verified' : 'operator_recorded_unverified';
+        const subscriptionDecision = acceptanceMaySupport('pilot.commercial.subscription_active', subscriptionEvidence);
+        if (!subscriptionDecision.allowed) {
+          throw new CommercialTransitionRejected(409, {
+            error: 'The contract\'s acceptance is not verified with a signature provider, and the commercial acceptance policy does not let an operator-recorded acceptance support a subscription. Nothing was changed.',
+            blockedOperation: subscriptionDecision.blocked,
+          });
+        }
+        monetization.acceptanceEvidence = subscriptionEvidence;
         if (!selectedPlanId) {
           throw new CommercialTransitionRejected(409, {
             error: 'No approved subscription plan for this pilot. Nothing was changed.',
@@ -560,6 +609,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
                   metadata: {
                     source: 'pilot-commercial-transition',
                     pilotApplicationId: application.id,
+                    acceptanceEvidence: subscriptionEvidence,
                     commercialTermsSnapshot: commercialTermsSnapshot?.snapshot,
                     commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint,
                   },
@@ -691,6 +741,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
           invoiceId: monetization.invoiceId ?? null,
           subscriptionId: monetization.subscriptionId ?? null,
           commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint ?? null,
+          acceptanceEvidence: monetization.acceptanceEvidence ?? null,
+          acceptancePolicy: monetization.acceptanceEvidence ? { version: COUNTERPART_ACCEPTANCE_POLICY.version, approvedBy: COUNTERPART_ACCEPTANCE_POLICY.approvedBy } : null,
           counterpartAcceptanceChannel:
             targetState === 'contract_signed' ? body.counterpartAcceptance?.channel ?? null : null,
         },

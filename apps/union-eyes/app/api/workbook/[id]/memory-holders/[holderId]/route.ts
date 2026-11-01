@@ -15,6 +15,7 @@ import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
+import { assertNoticeContract, holderNoticeSchema, HolderNoticeBlocked, IDENTIFYING_FIELDS, noticeColumns } from '@/lib/workbook/holder-notice';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -39,6 +40,8 @@ const patchSchema = z.object({
   criticality: z.enum(CRITICALITIES).nullable().optional(),
   successorIdentified: z.boolean().optional(),
   notes: z.string().max(4000).nullable().optional(),
+  // Records that the named person has been told (see lib/workbook/holder-notice.ts): who recorded it and when come from the session.
+  notice: holderNoticeSchema.optional(),
 });
 
 export async function PATCH(
@@ -60,10 +63,12 @@ export async function PATCH(
     );
   }
 
+  const { notice, ...columns } = parse.data;
   const patch: Record<string, unknown> = { updatedAt: new Date() };
-  for (const [k, v] of Object.entries(parse.data)) {
+  for (const [k, v] of Object.entries(columns)) {
     if (v !== undefined) patch[k] = v;
   }
+  const writesIdentifyingDetail = IDENTIFYING_FIELDS.some((field) => columns[field] !== undefined && columns[field] !== null);
 
   try {
     // Authorization is resolved first; the protected update then runs inside
@@ -71,6 +76,9 @@ export async function PATCH(
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
       async (authority) => {
+        // A notice is attributed to the identified person who records it; an unclaimed workbook has none, and that is reported rather than faked.
+        assertNoticeContract({ writesIdentifyingDetail, notice, authorityKind: authority.kind });
+        if (notice && authority.actorUserId) Object.assign(patch, noticeColumns(notice, authority.actorUserId, new Date()));
         const orgId = authority.claimedOrgId;
         const updated = await db
           .update(workbookMemoryHolders)
@@ -113,6 +121,9 @@ export async function PATCH(
 
     return NextResponse.json({ ok: true });
   } catch (err) {
+    if (err instanceof HolderNoticeBlocked) {
+      return NextResponse.json({ error: { code: err.code, message: 'This write needs a recorded notice to the named person' }, blockedOperation: err.blockedOperation }, { status: 409 });
+    }
     logger.error('[workbook-memory-holder:patch] DB error', { workbookRef: opaqueRef(workbookId), holderId, err });
     return NextResponse.json({ error: 'Failed to update memory holder' }, { status: 503 });
   }
