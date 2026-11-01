@@ -9,6 +9,8 @@ const m = vi.hoisted(() => ({
   audit: vi.fn(),
   claim: [] as unknown[],
   inserted: [] as Array<Record<string, unknown>>,
+  rlsScopes: [] as Array<Record<string, unknown>>,
+  rlsFailure: null as Error | null,
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }) }, RATE_LIMITS: { ML_PREDICTIONS: 'ML_PREDICTIONS' }, z: require('zod') }));
@@ -19,7 +21,11 @@ vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('@/db/schema', () => ({ claims: { claimId: 'claimId', organizationId: 'organizationId', status: 'status', priority: 'priority', updatedAt: 'updatedAt', createdAt: 'createdAt' }, mlPredictions: { organizationId: 'organizationId', predictionType: 'predictionType', createdAt: 'createdAt' }, modelMetadata: { organizationId: 'organizationId', modelType: 'modelType', version: 'version', trainedAt: 'trainedAt' } }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.db),
+  withRLSContext: async (scope: Record<string, unknown>, fn: (tx: unknown) => Promise<unknown>) => {
+    m.rlsScopes.push(scope);
+    if (m.rlsFailure) throw m.rlsFailure;
+    return fn(m.db);
+  },
 }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -42,6 +48,8 @@ describe('ml/predictions/sla-breach-risk route', () => {
     m.enforceAISafety.mockReturnValue(undefined);
     m.claim = [{ status: 'open', priority: 'high', updatedAt: new Date(Date.now() - 3_600_000), createdAt: new Date(Date.now() - 3_600_000) }];
     m.inserted = [];
+    m.rlsScopes = [];
+    m.rlsFailure = null;
     // the first select is the case, the second the model record
     m.db.select
       .mockReturnValueOnce({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => m.claim) })) })) } as any)
@@ -135,6 +143,20 @@ describe('ml/predictions/sla-breach-risk route', () => {
       expect(result).toEqual({ predictions: [{ id: 'p1' }] });
       expect(m.guardAiFeature).toHaveBeenCalled();
       expect(m.enforceAISafety).toHaveBeenCalledWith(expect.objectContaining({ origin: 'sla-breach-risk', action: 'GET' }));
+    });
+
+    it('executes the prediction list inside the resolved tenant RLS transaction', async () => {
+      rows();
+      const result = await list();
+      expect(result).toEqual({ predictions: [{ id: 'p1' }] });
+      expect(m.rlsScopes).toEqual([{ organizationId: 'org_1' }]);
+    });
+
+    it('fails closed when the tenant transaction cannot be established', async () => {
+      rows();
+      m.rlsFailure = new Error('tenant transaction unavailable');
+      await expect(list()).rejects.toThrow('tenant transaction unavailable');
+      expect(m.db.select).not.toHaveBeenCalled();
     });
 
     it('returns the gate refusal and reads nothing when the feature is off', async () => {

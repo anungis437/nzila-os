@@ -2,7 +2,6 @@ import { withApi, z, RATE_LIMITS, ApiError } from '@/lib/api/framework';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
-import { db } from '@/db';
 import { claims, mlPredictions, modelMetadata } from '@/db/schema';
 import { SLA_MODEL_VERSION, SLA_SCORING_METHOD, caseFacts, computeSlaBreachProbability } from '@/lib/ml/sla-breach-score';
 import { and, desc, eq } from 'drizzle-orm';
@@ -174,17 +173,21 @@ export const GET = withApi(
 
     enforceAISafety({ origin: 'sla-breach-risk', action: 'GET', organizationId, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
-    const predictions = await db
-      .select()
-      .from(mlPredictions)
-      .where(
-        and(
-          eq(mlPredictions.organizationId, organizationId),
-          eq(mlPredictions.predictionType, 'sla_breach_risk'),
-        ),
-      )
-      .orderBy(desc(mlPredictions.createdAt))
-      .limit(25);
+    // The tenant predicate is necessary but not sufficient: enforce the same
+    // runtime-role RLS context as POST, so a failed or absent tenant context
+    // cannot fall through to the shared privileged database handle.
+    const predictions = await withRLSContext({ organizationId }, (tx) =>
+      tx.select()
+        .from(mlPredictions)
+        .where(
+          and(
+            eq(mlPredictions.organizationId, organizationId),
+            eq(mlPredictions.predictionType, 'sla_breach_risk'),
+          ),
+        )
+        .orderBy(desc(mlPredictions.createdAt))
+        .limit(25),
+    );
 
     return { predictions };
   },

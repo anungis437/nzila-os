@@ -1,0 +1,5 @@
+# Union Eyes Gate 0 — SLA prediction listing tenant transaction (2026-11-01)
+
+The SLA risk POST stores predictions inside `withRLSContext({ organizationId })`, but the corresponding GET previously queried the shared `db` handle directly. An organization predicate is not a substitute for database-enforced runtime-role tenant isolation. This source correction routes the GET read through the same RLS transaction as POST, preserves the organization and prediction-type predicates and 25-row bound, and propagates transaction failures rather than returning a fabricated empty list.
+
+The route regression now asserts exact organization context propagation and failure before any query when the RLS transaction cannot be established. No change was made to the unresolved caller-supplied transition count / previous-breach heuristic inputs. This evidence is uncredited pending focused executable tests, native PostgreSQL 15/16 cross-tenant checks, HTTP/browser acceptance, independent review and institutional authority. The original 777-defect provenance and frozen artifacts remain unchanged.
