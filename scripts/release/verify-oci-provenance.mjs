@@ -46,6 +46,9 @@ export function readSignedManifestFile(path) {
     return buffer.subarray(0, length)
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('OCI_PROVENANCE_DENIED:')) throw error
+    if (error && typeof error === 'object' && error.code === 'ELOOP') {
+      deny('signed staging manifest file size or type invalid')
+    }
     deny('signed staging manifest file missing or unreadable')
   } finally {
     if (fd !== undefined) closeSync(fd)
