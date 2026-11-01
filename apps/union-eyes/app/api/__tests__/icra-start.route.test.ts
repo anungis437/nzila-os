@@ -201,8 +201,10 @@ describe('icra/start route', () => {
         claimEmail: 'someone@example.com',
         claimToken: 'super-secret-claim-token',
         claimTokenExpiresAt: FUTURE,
-        claimedByUserId: 'user_123',
-        claimedOrgId: 'org_456',
+        // F06 R1: a claimed row no longer honours the capability (see the test below), so the DTO case uses an unclaimed row.
+        claimedAt: null,
+        claimedByUserId: null,
+        claimedOrgId: null,
       },
     ]);
     const { GET } = await loadRoute();
@@ -224,5 +226,34 @@ describe('icra/start route', () => {
     expect(keys).not.toContain('claimedOrgId');
     expect(keys).not.toContain('capabilityTokenHash');
     expect(keys).not.toContain('capabilityTokenExpiresAt');
+  });
+
+  it('GET refuses the old capability for a claimed assessment: the holder of the link is not the owner', async () => {
+    mockGetSelect([
+      {
+        id: 'a1',
+        status: 'submitted',
+        locale: 'en-CA',
+        organizationContext: { name: 'Org' },
+        questionBankVersion: 1,
+        doctrineVersion: '1.0.0',
+        reportTierId: 'continuity_reflection',
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        submittedAt: null,
+        capabilityTokenHash: TOKEN_HASH,
+        capabilityTokenExpiresAt: FUTURE,
+        claimedAt: new Date('2026-02-01T00:00:00.000Z'),
+        claimedByUserId: 'user_123',
+        claimedOrgId: 'org_456',
+      },
+    ]);
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/icra/start?assessmentId=a1', {
+      headers: { authorization: `Bearer ${TOKEN}` },
+    }));
+
+    expect(response.status).toBe(401);
+    expect(JSON.stringify(await response.json())).not.toContain('"assessment"');
   });
 });

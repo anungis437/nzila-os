@@ -8372,6 +8372,28 @@
         "apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts"
       ],
       "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16 with real RLS and cross-tenant fixtures, HTTP/browser/staging, signature-provider acceptance and independent institutional review are outstanding. Other signature service write helpers still require a separate authorization audit; no CLOSED credit."
+    },
+    "DEF-0B8-ICRA-EMAIL-RESULTS-SENDS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-icra-email-origin-integrity-20261031.md",
+      "files": [
+        "apps/union-eyes/lib/icra/email-results-origin.ts",
+        "apps/union-eyes/lib/icra/__tests__/email-results-origin.test.ts",
+        "apps/union-eyes/app/api/icra/email-results/route.ts",
+        "apps/union-eyes/app/api/__tests__/icra-email-results.route.test.ts"
+      ],
+      "correction": "Capability-bearing email links use configured canonical HTTPS origin; no production Host fallback; unsafe/missing configuration fails closed with 503 before sending.",
+      "remaining": "Exact-HEAD focused/full Vitest and contract, native PG15/16, HTTP/browser/staging acceptance, institution-approved canonical domain and independent reviewer/persona/authority ratification. Existing implementation credit unchanged; no CLOSED credit."
+    },
+    "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED": {
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-icra-checkout-origin-integrity-20261031.md",
+      "files": [
+        "apps/union-eyes/app/api/icra/checkout/route.ts",
+        "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts",
+        "apps/union-eyes/lib/icra/email-results-origin.ts"
+      ],
+      "remaining": "Canonical production HTTPS redirect source-level correction requires exact-HEAD executable/PG15/16/HTTP/Stripe qualification. Actual displayed price and configured Stripe Price IDs still require authoritative parity and institutional pricing decision; no implementation or CLOSED credit."
     }
   }
 }
