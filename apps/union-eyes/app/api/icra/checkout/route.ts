@@ -177,10 +177,38 @@ export async function POST(request: NextRequest) {
   const successUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}?tier_unlocked=${tierId}`;
   const cancelUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}`;
 
+  // The public report gate advertises CAD 1,200 / CAD 6,500. A configured
+  // Stripe Price ID is not authority to charge a different amount or currency.
+  // Verify the live Price before creating a payable session (fail closed if
+  // Stripe is unavailable, the Price was archived, or the amount changed).
   const currency = (process.env.STRIPE_DEFAULT_CURRENCY ?? 'CAD').toLowerCase();
+  if (currency !== 'cad') {
+    logger.error('[icra-checkout] configured currency conflicts with published CAD pricing');
+    return NextResponse.json({ error: 'Checkout pricing unavailable' }, { status: 503 });
+  }
+  const configuredPriceId = (tierId === 'executive_continuity_brief'
+    ? process.env.STRIPE_PRICE_ICRA_BRIEF
+    : process.env.STRIPE_PRICE_ICRA_DIAGNOSTIC)?.trim();
+  const expectedAmount = tierId === 'executive_continuity_brief'
+    ? BRIEF_AMOUNT_CENTS : DIAGNOSTIC_AMOUNT_CENTS;
 
   try {
     const stripe = getStripeClient();
+    if (configuredPriceId) {
+      try {
+        const price = await stripe.prices.retrieve(configuredPriceId);
+        if (price.id !== configuredPriceId || !price.active ||
+            price.currency.toLowerCase() !== 'cad' ||
+            price.unit_amount !== expectedAmount ||
+            price.type !== 'one_time' || price.recurring != null) {
+          logger.error('[icra-checkout] Stripe Price does not match published tier pricing', { tierId });
+          return NextResponse.json({ error: 'Checkout pricing unavailable' }, { status: 503 });
+        }
+      } catch {
+        logger.error('[icra-checkout] unable to verify configured Stripe Price', { tierId });
+        return NextResponse.json({ error: 'Checkout pricing unavailable' }, { status: 503 });
+      }
+    }
     const checkoutParams = {
       mode: 'payment',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
