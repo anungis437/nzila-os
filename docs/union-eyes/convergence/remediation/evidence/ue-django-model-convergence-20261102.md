@@ -107,7 +107,7 @@ The five Django `claim` fields now say `to_field="claim_id"`, which changes the 
 
 ## Proof
 
-Run locally on PostgreSQL 16 (native PG15 and exact-SHA CI are listed under "What is not claimed").
+Run locally on PostgreSQL 16, then on fresh PG15 and PG16 builds and in CI (below).
 
 - `ue_physical_parity --strict` on the converged database: 524 models, **0 strict findings**; advisory `TIMESTAMP_NAIVE` 361 and `NOT_NULL_ABSENT` 10 (pinned). On the database before 0070 the same command reports the 5
   `FK_TARGET_MISMATCH` findings.
@@ -117,11 +117,18 @@ Run locally on PostgreSQL 16 (native PG15 and exact-SHA CI are listed under "Wha
 - **Django suite:** 1,470 tests, `OK`, 15 skipped (pre-existing, each by design) in faithful mode (a clone of the converged database); 16 skipped in fast mode (the faithful-only parity test). Pytest health contract: 7 passed.
 - **Platform 0070 and 0071** on a clone: forward, forward again (no change), rollback (the catalog returns to the pre-migration digest, except the two CHECK constraints, which stay validated by design), forward again;
   fail-closed when the surviving key is absent; rollback refuses over a grievance row that names a `claims.claim_id` value.
-- **TypeScript:** the unit tests that read the backend and the schema files pass; ESLint is clean on the changed TypeScript.
+- **TypeScript:** the unit tests that read the backend and the schema files pass (121 files, 1,651 tests); ESLint and `tsc --noEmit` are clean on the app.
+- **Native, fresh PG15 and PG16 builds:** the six native files that touch this work pass (59 tests: `schema-convergence` with the new invariant and the 0070 round trip, `platform-0070-0071`,
+  `django-model-parity`, `reachable-stub-shape-2`, `declared-absent-relations`, `schema-convergence-behaviour`); the fresh build's catalog (15,815 columns, constraints and indexes) is byte-identical to the
+  template-derived database, so the real bootstrap (Django `migrate`, then the platform migrations through 0071) produces what the proofs above ran against.
+- **Exact-SHA CI:** the first head failed one Django test of 1,470 on both versions after the native project and its results contract had passed: `ProjectionsRunAgainstTheDatabase` assumed the converged
+  database holds no rows, and the native proofs leave authority fixtures in it. The test now asserts that each projection returns exactly the named columns for whatever rows exist (commit `36d39b349`). On that
+  head `Combined Django + Drizzle PostgreSQL 15` and `16` pass: the fresh combined build, every native file in its own clone, the results contract, the 1,470-test Django suite and the pytest health contract,
+  with the locked Python and Django versions CI uses.
 
 ## What is not claimed
 
-- Native proof on fresh PG15 and PG16 of the new and changed native tests, and exact-SHA CI for the final head, are recorded by the ledger entry, not asserted here.
+- CI for the final head of the branch is recorded by the ledger, not asserted here (a later head re-runs the whole-application suite and the production-build QA).
 - `TIMESTAMP_NAIVE` (361 columns that are `timestamp without time zone` under a `DateTimeField`; correct only for UTC sessions) and `NOT_NULL_ABSENT` (10) remain advisory with pinned ceilings; the next tranche closes them with
   the Drizzle declarations and the 128 NOT NULL columns still open on live Django tables.
 - Enabling writes through the frozen serializers is a deliberate future change that needs tenant scoping per view.

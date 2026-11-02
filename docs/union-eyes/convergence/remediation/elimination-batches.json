@@ -11133,6 +11133,41 @@
       ],
       "correction": "The Django models, the API they feed, the migration history and the Django suite now agree with the converged database. New measurement manage.py ue_physical_parity (524 models): 1,216 strict findings and 4,050 unknown columns at the start, 0 strict now (advisory TIMESTAMP_NAIVE 361 and NOT_NULL_ABSENT 10 pinned). Models: 5,103 columns added, 157 null=True removed over NOT NULL columns, enum, array and unbounded numeric fields expressed, 54 defaults converged. API: every reachable serializer that said fields = __all__ (284 of 289) lists exactly what it produced at HEAD and nothing is added (many are IsAuthenticated only and scope no tenant); 148 bare .values() calls name their columns; credentials are write-only in all 15 serializers that have one; compliance.BreakGlassActivations.secret_shares, which a contained endpoint projected at HEAD, is excluded. Migration history: 12 generated state-only migrations (5,478 operations) that change no column, constraint or index (catalog digest of 15,815 objects identical before and after migrate). Platform 0070 leaves one foreign key per column (eight columns carried two; five grievance tables carried a Django key to claims.id beside the declared key to claims.claim_id, which no row can satisfy, so none of them could be written), drops seven duplicate index definitions and validates two CHECK constraints earlier migrations left NOT VALID; platform 0071 moves six defaults that asserted a consent, an outcome or tracking by omission to false (existing rows untouched). Tests: ConvergedSchemaRunner clones the converged database (faithful, what CI runs) or patches a migrations-only database (fast); create_valid builds rows from the catalog; the suite was an ImportError before and ran 1,321 tests with 3 failures and 29 errors when collected by hand, and is 1,470 tests with 0 failures in both modes; ue-native-postgres.yml now runs it against a clone of the converged database. Native: django-model-parity, platform-0070-0071 and the schema-convergence invariants and round trip.",
       "remaining": "The measurement was wrong once (one foreign-key target per column) and the suite found it; the physical invariant is now also asserted natively. TIMESTAMP_NAIVE (361 naive timestamp columns under a DateTimeField), NOT_NULL_ABSENT (10, plus the 128 declared NOT NULL columns open on live Django tables), the 14 contested relations, the pgvector readers, the identity-reference policy and the route proofs. A finding not fixed here: 64 call sites in 15 services/api view modules create a row from every key of the request body, 48 of them in 12 modules that are IsAuthenticated only, and only governance-service has a TypeScript consumer; it is the next tranche. Whether a default channel or newsletter consent is acceptable (communication_preferences, true in every layer) is a legal decision. Native proof reaches only what the native tests run; exact-SHA CI for the final head; real-login journeys, immutable-audit and staging acceptance; independent reviewer. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-DJANGO-SERVICE-WRITE-PATHS-CONTAINED-20261102",
+      "status": "SOURCE_CHANGED_UNIT_PASS_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-django-service-write-paths-contained-20261102.md",
+      "sourceBaseline": "36d39b3491e035f6ed3390b4540adce31c38429b",
+      "sourceCommit": "e1e31237427de9ac64936c1f33291ae48c18ee0f",
+      "files": [
+        "apps/union-eyes/backend/services/api/carbon_accounting_integration_views.py",
+        "apps/union-eyes/backend/services/api/carbon_accounting_service_views.py",
+        "apps/union-eyes/backend/services/api/currency_enforcement_service_views.py",
+        "apps/union-eyes/backend/services/api/email_views.py",
+        "apps/union-eyes/backend/services/api/fcm_service_views.py",
+        "apps/union-eyes/backend/services/api/force_majeure_integration_views.py",
+        "apps/union-eyes/backend/services/api/geofence_privacy_service_views.py",
+        "apps/union-eyes/backend/services/api/governance_service_views.py",
+        "apps/union-eyes/backend/services/api/indigenous_data_service_views.py",
+        "apps/union-eyes/backend/services/api/joint_trust_fmv_service_views.py",
+        "apps/union-eyes/backend/services/api/lmbp_immigration_service_views.py",
+        "apps/union-eyes/backend/services/api/provincial_privacy_service_views.py",
+        "apps/union-eyes/backend/services/api/schema_views.py",
+        "apps/union-eyes/backend/services/api/tax_slip_service_views.py",
+        "apps/union-eyes/backend/services/api/transfer_pricing_service_views.py",
+        "apps/union-eyes/backend/services/api/twilio_sms_service_views.py",
+        "apps/union-eyes/backend/services/api/whiplash_prevention_service_views.py",
+        "apps/union-eyes/backend/services/api/workflows_test_views.py",
+        "apps/union-eyes/backend/services/tests_service_write_path_containment.py",
+        "apps/union-eyes/scripts/codemods/add-b134-ledger.cjs",
+        "docs/union-eyes/convergence/RUNTIME-ACCEPTANCE.md",
+        "docs/union-eyes/convergence/remediation/evidence/ue-django-service-write-paths-contained-20261102.md"
+      ],
+      "correction": "Eighteen generated Django service ViewSets under /api/services/ were IsAuthenticated only, with no role and mostly no tenant scope: any signed-in user could send push, SMS and email, change location-tracking and privacy configuration, approve access to indigenous traditional knowledge, change payment and currency policy, declare or lift force majeure, issue or convert a golden share, define and trigger workflows and list every model and field; 64 create paths (48 behind that permission) built the row from every key of the request body. The application calls exactly one of them (governance-service/check_status, through services/governance-service.ts, used by lib/middleware/admin-auth.ts and lib/trust/system-metrics.ts). Seventeen are contained with core.isolation.DenyAllPermission; governance-service is default-deny with check_status as its only live action. services/tests_service_write_path_containment.py (9 tests, DRF view layer): an authenticated caller reaches exactly that one action over every registered ViewSet and action, the other 150+ routes answer 403 and write nothing, an anonymous caller reaches none; reopening a ViewSet or adding a live action fails the tests.",
+      "remaining": "No HTTP-level proof (the middleware needs Redis and request signing). The four serializer-based control-plane modules (services/integration_control_plane, events, evidence_pack, compliance_snapshot) are IsAuthenticated and were not reviewed. check_status returns the global golden share to any authenticated caller (a role gate is an institutional decision). UE_V2_APPLICATION_ACTOR_MAP.json pins file hashes of these modules, was last generated on 2026-10-26 and is not regenerated. Reopening a ViewSet needs a reviewed, tenant-scoped, role-gated design and a caller. Exact-SHA CI for the final head; independent reviewer. No defect or CLOSED credit."
     }
   ]
 }

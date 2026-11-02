@@ -1,6 +1,6 @@
 # Convergence tranche 9: the Django service endpoints that nothing calls are contained
 
-Date: 2026-11-02. Branch `agents/ue-cursor-final-closure`. Base commit `36d39b349` (tranche 8 test fix); source commit `SOURCE_COMMIT_TRANCHE9`.
+Date: 2026-11-02. Branch `agents/ue-cursor-final-closure`. Base commit `36d39b349` (tranche 8 test fix); source commit `e1e31237427de9ac64936c1f33291ae48c18ee0f`.
 Credit: none (cross-cutting source evidence, `defectCredit` 0, `closureCredit` 0). Nothing is closed. `READY_FOR_STAGING` stays `NO`.
 This tranche acts on the direction "if you identify flaws or missing aspects, fix them too": tranche 8 found, while checking which Django defaults a live endpoint could change, that the generated
 service ViewSets take every key of the request body, and that anyone signed in can reach them.
