@@ -1,7 +1,7 @@
 # Convergence tranche 6: every declaration and the physical database agree
 
-Date: 2026-11-01. Branch `agents/ue-cursor-final-closure`. Base commit `5dfbd4467`. Platform migrations `0062_declared_enum_convergence`, `0063_declared_shape_convergence`,
-`0064_declared_unique_keys`, `0065_declared_absent_relations_2`.
+Date: 2026-11-01. Branch `agents/ue-cursor-final-closure`. Base commit `5dfbd4467`; source commit `fea406cbecb65440e10ce2c15bea8e04d9a129d8`. Platform migrations
+`0062_declared_enum_convergence`, `0063_declared_shape_convergence`, `0064_declared_unique_keys`, `0065_declared_absent_relations_2`.
 Credit: none for the tranche itself (cross-cutting source evidence, `defectCredit` 0, `closureCredit` 0). Nothing is closed. `READY_FOR_STAGING` stays `NO`.
 This tranche acts on the direction "address all the missing tables, columns etc.; no freeze, do everything needed, do not be stopped by outdated dispositions": the finance and pension
 freeze, the `CONTAINED_DENY_ALL` and `INDIVIDUAL_DECISION` dispositions and the "separate database" boundary no longer keep a relation out of the measurement or the repair.
