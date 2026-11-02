@@ -10906,6 +10906,27 @@
       ],
       "correction": "Registration-owner and tenant scoped education virtual join credentials with approval, session date, HTTPS and atomic access audit. Catalogue redactions preserved.",
       "remaining": "Exact-HEAD full Vitest/contract, PG15/16, HTTP/browser and staging proof, plus independent reviewer, owner-persona and institutional authorization. Zero defect or CLOSED credit."
+    },
+    {
+      "id": "UE-MEMBER-EDUCATION-ENROLLMENT-AND-JOIN-UI-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-member-learning-join-ui-20261102.md",
+      "sourceBaseline": "cfe4d16e6adaec5f54a1a87af8b722a7446e6616",
+      "sourceCommit": null,
+      "files": [
+        "apps/union-eyes/components/education/MemberSessionJoin.tsx",
+        "apps/union-eyes/components/education/__tests__/MemberSessionJoin.test.tsx",
+        "apps/union-eyes/components/education/MemberLearningPortal.tsx",
+        "apps/union-eyes/components/education/CourseCatalog.tsx",
+        "apps/union-eyes/lib/education/enrollment-selection.ts",
+        "apps/union-eyes/lib/education/__tests__/enrollment-selection.test.ts",
+        "apps/union-eyes/lib/education/crud-response.ts",
+        "apps/union-eyes/lib/education/__tests__/crud-response.test.ts"
+      ],
+      "correction": "Restores member-facing access to registration-scoped audited virtual joining details only on explicit request. Fixes course/session selection (formerly passed courseId as sessionId), nested CRUD envelope parsing, real server-confirmed enrollment responses, camelCase view-model mapping, and member certificates via authorized certification route rather than steward-only completion attestation. Inert actions replaced by governed links or explicit unavailability.",
+      "remaining": "Exact-HEAD Vitest/contract, native PG15/16, HTTP/browser and staging acceptance; paginated course/session completeness; real end-to-end registration and joining under member role; certification, cancellation, renewal and financial mandate decisions; independent reviewer, owner-persona and institutional authority. No defect closure."
     }
   ]
 }
