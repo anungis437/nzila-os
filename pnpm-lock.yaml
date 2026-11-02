@@ -6354,8 +6354,8 @@ importers:
         specifier: workspace:*
         version: link:../platform-ontology
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2
@@ -6395,8 +6395,8 @@ importers:
         specifier: '>=0.45.2'
         version: 0.45.2(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(@upstash/redis@1.37.0)(better-sqlite3@12.9.0)(gel@2.2.0)(pg@8.20.0)(postgres@3.4.8)
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@nzila/config':
         specifier: workspace:*
@@ -6943,8 +6943,8 @@ importers:
   packages/platform-lakehouse:
     dependencies:
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -6959,8 +6959,8 @@ importers:
         specifier: workspace:*
         version: link:../os-core
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -7038,8 +7038,8 @@ importers:
   packages/platform-ontology:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ^25
@@ -7294,8 +7294,8 @@ importers:
         specifier: workspace:*
         version: link:../platform-utils
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -7310,8 +7310,8 @@ importers:
         specifier: ^6.2.3
         version: 6.2.3
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       typescript:
         specifier: ^6.0.2

@@ -30,7 +30,7 @@ export const OntologyEntitySchema = z.object({
   status: z.enum(entityStatusValues).default('active'),
   tags: z.array(z.string().min(1)).default([]),
   sourceSystems: z.array(z.string().min(1)).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
@@ -43,7 +43,7 @@ export const CreateOntologyEntitySchema = z.object({
   status: z.enum(entityStatusValues).optional(),
   tags: z.array(z.string().min(1)).optional(),
   sourceSystems: z.array(z.string().min(1)).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const UpdateOntologyEntitySchema = z.object({
@@ -52,7 +52,7 @@ export const UpdateOntologyEntitySchema = z.object({
   status: z.enum(entityStatusValues).optional(),
   tags: z.array(z.string().min(1)).optional(),
   sourceSystems: z.array(z.string().min(1)).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 // ── Relationship Schema ─────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export const OntologyRelationshipSchema = z.object({
   targetEntityType: z.enum(ontologyEntityTypeValues),
   targetEntityId: z.string().uuid(),
   relationshipType: z.enum(relationshipTypeValues),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   createdAt: z.string().datetime(),
 })
 
@@ -76,7 +76,7 @@ export const CreateRelationshipSchema = z.object({
   targetEntityType: z.enum(ontologyEntityTypeValues),
   targetEntityId: z.string().uuid(),
   relationshipType: z.enum(relationshipTypeValues),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 // ── Validation Helpers ──────────────────────────────────────────────────────

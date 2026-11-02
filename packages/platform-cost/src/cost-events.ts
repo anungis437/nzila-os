@@ -31,7 +31,7 @@ export const CostEventSchema = z.object({
   ts: z.coerce.date(),
   correlationId: z.string().uuid().optional(),
   route: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type CostEvent = z.infer<typeof CostEventSchema>
