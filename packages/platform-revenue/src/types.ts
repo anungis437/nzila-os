@@ -24,8 +24,8 @@ export type BillingCycle = (typeof BillingCycle)[keyof typeof BillingCycle]
 export const SubscriptionSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
-  tier: z.nativeEnum(SubscriptionTier),
-  billingCycle: z.nativeEnum(BillingCycle),
+  tier: z.enum(SubscriptionTier),
+  billingCycle: z.enum(BillingCycle),
   monthlyPrice: z.number().nonnegative(),
   activeApps: z.array(z.string()),
   startedAt: z.string().datetime(),
@@ -47,7 +47,7 @@ export type UsageMetricType = (typeof UsageMetricType)[keyof typeof UsageMetricT
 
 export const UsageMetricSchema = z.object({
   orgId: z.string().uuid(),
-  metricType: z.nativeEnum(UsageMetricType),
+  metricType: z.enum(UsageMetricType),
   value: z.number().nonnegative(),
   periodStart: z.string().datetime(),
   periodEnd: z.string().datetime(),
@@ -71,11 +71,11 @@ export type RevenueEventType = (typeof RevenueEventType)[keyof typeof RevenueEve
 export const RevenueEventSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
-  eventType: z.nativeEnum(RevenueEventType),
+  eventType: z.enum(RevenueEventType),
   amount: z.number(),
   currency: z.string().length(3),
   appId: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   occurredAt: z.string().datetime(),
 })
 export type RevenueEvent = z.infer<typeof RevenueEventSchema>
@@ -102,14 +102,14 @@ export const UnifiedRevenueRecordSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
   appSource: z.string(),
-  revenueType: z.nativeEnum(RevenueType),
+  revenueType: z.enum(RevenueType),
   grossAmount: z.number(),
   platformFee: z.number().nonnegative(),
   netAmount: z.number(),
   currency: z.string().length(3),
   timestamp: z.string().datetime(),
-  status: z.nativeEnum(RevenueStatus),
-  metadata: z.record(z.unknown()).optional(),
+  status: z.enum(RevenueStatus),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type UnifiedRevenueRecord = z.infer<typeof UnifiedRevenueRecordSchema>
 

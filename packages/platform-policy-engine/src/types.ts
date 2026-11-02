@@ -125,7 +125,7 @@ export interface PolicyEnginePorts {
 export const policyConditionSchema = z.object({
   field: z.string().min(1),
   operator: z.enum(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in', 'not_in', 'matches']),
-  value: z.unknown(),
+  value: z.unknown().optional(),
 })
 
 export const policyRuleSchema = z.object({
@@ -153,7 +153,7 @@ export const policyDefinitionSchema = z.object({
   enabled: z.boolean(),
   scope: policyScopeSchema,
   rules: z.array(policyRuleSchema),
-  metadata: z.record(z.string()).default({}),
+  metadata: z.record(z.string(), z.string()).default({}),
 })
 
 export const policyFileSchema = z.object({
