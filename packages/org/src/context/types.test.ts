@@ -146,4 +146,35 @@ describe('schema helpers', () => {
   it('parseDbContext throws for invalid values', () => {
     expect(() => parseDbContext({ orgId: 'org-1' })).toThrow()
   })
+
+  it('preserves canonical org and database context parsing under Zod 4', () => {
+    const source = {
+      orgId: 'org-alpha', actorId: 'actor-1', role: 'org_admin',
+      permissions: ['read', 'write'], requestId: 'request-1',
+      appId: 'web', correlationId: 'corr-1', ignoredInput: 'not-persisted',
+    }
+    const org = parseOrgContext(source)
+    expect(org).toEqual({
+      orgId: source.orgId, actorId: source.actorId, role: source.role,
+      permissions: source.permissions, requestId: source.requestId,
+      appId: source.appId, correlationId: source.correlationId,
+    })
+    expect(parseDbContext(source)).toEqual({
+      orgId: source.orgId, actorId: source.actorId,
+      correlationId: source.correlationId,
+    })
+  })
+
+  it('fails closed for malformed org permissions and tenant context shapes', () => {
+    const valid = {
+      orgId: 'org-alpha', actorId: 'actor-1', role: 'org_admin',
+      permissions: ['read'], requestId: 'request-1',
+    }
+    expect(safeParseOrgContext({ ...valid, orgId: '' }).success).toBe(false)
+    expect(safeParseOrgContext({ ...valid, permissions: 'read' }).success).toBe(false)
+    expect(safeParseOrgContext({ ...valid, permissions: [null] }).success).toBe(false)
+    expect(safeParseOrgContext({ ...valid, actorId: null }).success).toBe(false)
+    expect(safeParseOrgContext({ ...valid, requestId: undefined }).success).toBe(false)
+    expect(() => parseDbContext({ orgId: '', actorId: 'actor-1' })).toThrow()
+  })
 })
