@@ -61,6 +61,11 @@ test('production evidence workflow consumes validated release identity for both 
   assert.match(workflow,/node scripts\/release\/resolve-production-release-ref\.mjs/)
   assert.match(workflow,/release-\$\{RELEASE_REF\}\.json/)
   assert.match(workflow,/change_record_ref.*\$RELEASE_REF/)
-  assert.doesNotMatch(workflow,/TAG_NAME="\$\{GITHUB_REF#refs\/tags\/\}"/)
-  assert.doesNotMatch(workflow,/release-\$\{TAG_NAME\}\.json/)
+  // Tag-shape validation legitimately uses TAG_NAME earlier in the workflow;
+  // only the evidence-generation block must never treat a branch as a tag.
+  const evidenceBlock = workflow.split('      - name: Record governance snapshot + release manifest')[1]
+    ?.split('      - name: Build release evidence pack')[0]
+  assert.ok(evidenceBlock, 'production evidence block must exist')
+  assert.doesNotMatch(evidenceBlock,/TAG_NAME="\$\{GITHUB_REF#refs\/tags\/\}"/)
+  assert.doesNotMatch(evidenceBlock,/release-\$\{TAG_NAME\}\.json/)
 })
