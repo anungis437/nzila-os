@@ -200,6 +200,33 @@ describe('BillingCycleService.calculateProRatedAmount', () => {
     const decimals = result.amount.toString().split('.')[1] || '';
     expect(decimals.length).toBeLessThanOrEqual(2);
   });
+
+  it('includes both the joining day and final day in a 31-day period', () => {
+    const start = new Date('2026-03-01T00:00:00.000Z');
+    const end = new Date('2026-03-31T23:59:59.999Z');
+    expect(Service.calculateProRatedAmount(31, new Date('2026-03-31T12:00:00Z'), start, end))
+      .toEqual({ amount: 1, isProRated: true });
+    expect(Service.calculateProRatedAmount(31, new Date('2026-03-16T23:00:00Z'), start, end))
+      .toEqual({ amount: 16, isProRated: true });
+    expect(Service.calculateProRatedAmount(31, new Date('2026-04-01T00:00:00Z'), start, end))
+      .toEqual({ amount: 0, isProRated: true });
+  });
+
+  it('counts leap-day joins and spring DST transitions by calendar day, not elapsed hours', () => {
+    const leapStart = new Date('2024-02-01T00:00:00Z');
+    const leapEnd = new Date('2024-02-29T23:59:59.999Z');
+    expect(Service.calculateProRatedAmount(29, new Date('2024-02-29T15:00:00Z'), leapStart, leapEnd).amount).toBe(1);
+    const dstStart = new Date('2026-03-01T00:00:00Z');
+    const dstEnd = new Date('2026-03-31T23:59:59.999Z');
+    expect(Service.calculateProRatedAmount(31, new Date('2026-03-08T07:00:00Z'), dstStart, dstEnd).amount).toBe(24);
+  });
+
+  it('refuses invalid proration dates rather than returning NaN as a charge', () => {
+    expect(() => Service.calculateProRatedAmount(100, new Date(NaN), periodStart, periodEnd))
+      .toThrow('Invalid dues proration calendar dates');
+    expect(() => Service.calculateProRatedAmount(100, new Date('2025-03-20'), periodEnd, periodStart))
+      .toThrow('Invalid dues proration calendar dates');
+  });
 });
 
 // ─── allocateDuesBreakdown (private static, accessed via casting) ────────────
@@ -213,12 +240,22 @@ describe('BillingCycleService.allocateDuesBreakdown', () => {
     expect(breakdown.strikeFundAmount).toBe(2);
   });
 
-  it('all parts sum to total (within rounding)', () => {
-    const amount = 157.50;
-    const b = Service.allocateDuesBreakdown(amount);
-    const total = b.duesAmount + b.copeAmount + b.pacAmount + b.strikeFundAmount;
-    // Rounding can introduce ±$0.04
-    expect(Math.abs(total - amount)).toBeLessThan(0.05);
+  it('reconciles every allocated cent to the charge, including sub-dollar amounts', () => {
+    for (const amount of [0.01, 0.03, 0.07, 0.11, 1.01, 33.33, 157.50, 999.99]) {
+      const b = Service.allocateDuesBreakdown(amount);
+      const allocatedCents = [b.duesAmount, b.copeAmount, b.pacAmount, b.strikeFundAmount]
+        .reduce((sum: number, component: number) => sum + Math.round(component * 100), 0);
+      expect(allocatedCents).toBe(Math.round(amount * 100));
+      expect(Object.values(b).every((component) => component >= 0)).toBe(true);
+    }
+  });
+
+  it('fails closed on invalid, negative or unsafe allocation values', () => {
+    for (const amount of [-1, NaN, Infinity, -Infinity]) {
+      expect(() => Service.allocateDuesBreakdown(amount)).toThrow('Invalid dues allocation amount');
+    }
+    expect(() => Service.allocateDuesBreakdown(Number.MAX_SAFE_INTEGER))
+      .toThrow('Dues allocation exceeds safe integer cents');
   });
 
   it('handles 0 amount', () => {
