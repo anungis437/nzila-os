@@ -8,7 +8,10 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: m.crudRoutes }));
 vi.mock('@/lib/api/org-references', () => ({ assertOrganizationOwns: m.assertOrganizationOwns }));
 vi.mock('@/lib/api/errors', () => ({
-  ApiError: { badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }) },
+  ApiError: {
+    badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }),
+    forbidden: (message: string) => Object.assign(new Error(message), { status: 403 }),
+  },
 }));
 vi.mock('@/db/schema', () => ({
   courseSessions: { id: 'session.id' },
@@ -98,7 +101,7 @@ describe('education session creation integrity', () => {
   });
 
   it('does not treat a missing organization as authorization to inspect another tenant course', async () => {
-    await expect(beforeCreate(valid(), { organizationId: '' })).rejects.toMatchObject({ status: 400 });
+    await expect(beforeCreate(valid(), { organizationId: '' })).rejects.toMatchObject({ status: 403 });
     expect(m.assertOrganizationOwns).not.toHaveBeenCalled();
   });
 });
