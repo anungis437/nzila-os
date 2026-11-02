@@ -33,8 +33,10 @@ export function buildEducationEnrollment(
 
 /** Unknown fee is not zero: a missing or invalid amount must never display as Free. */
 export function parseCourseFee(value: unknown): number | null {
-  if (value === null || value === undefined || value === '' ||
-      (typeof value !== 'string' && typeof value !== 'number')) return null;
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
+  if (typeof value === 'string' && !/^\\d+(?:\\.\\d{1,2})?$/.test(value)) return null;
   const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  if (!Number.isFinite(parsed) || parsed < 0 || !Number.isSafeInteger(Math.round(parsed * 100)) ||
+      Math.abs(parsed * 100 - Math.round(parsed * 100)) > 1e-7) return null;
+  return parsed;
 }
