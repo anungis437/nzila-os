@@ -720,6 +720,34 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Creates the 14 remaining declared relations that no migration created (usage, dunning, pricing, fee settlement, failed-login, rate-limit and OAuth-provider relations); all privileges revoked until the manifest grants them (UE-CONV-H-007)."
+      },
+      {
+        "tag": "0066_declared_indexes",
+        "sha256": "3e6a03565817c49ff1302f2de23d11b6f756c89d1817432387e94fc17052e651",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "798 declared indexes (plain, partial, expression, unique-where) created where the database lacks them; fail-closed, tagged, reversible."
+      },
+      {
+        "tag": "0067_declared_checks",
+        "sha256": "862bdd4be5039594184892dc4c38e3efb70fdf6edf34c3ad5ff3f005d4bf6e17",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "36 declared CHECK constraints added NOT VALID then validated; fail-closed, tagged, reversible."
+      },
+      {
+        "tag": "0068_declared_foreign_keys",
+        "sha256": "809a866fc1b186e3779ecbd5c40bcc7856fc3bac0781a74db084b97eef0749a9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "293 declared foreign keys added NOT VALID then validated (identity references and evidence tables excluded by doctrine); fail-closed, tagged, reversible."
+      },
+      {
+        "tag": "0069_declared_not_null",
+        "sha256": "06c2d8424f4dcc61f021248dd3e8a33d990ce4f55fa8f908359e2a812ec1cfbb",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "157 declared NOT NULL columns set where no row holds NULL and no live Django ViewSet can write the table (128 more wait for the Django model and API, 1 is nullable on purpose); fail-closed, reversible."
       }
     ]
   }

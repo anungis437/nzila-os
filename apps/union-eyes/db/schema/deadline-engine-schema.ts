@@ -19,7 +19,7 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 // ============================================================================
 // deadline_reminders
@@ -161,7 +161,7 @@ export const deadlineReassignmentConvergence = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    index('deadline_reassignment_convergence_pending_idx').on(t.grievanceId),
+    index('deadline_reassignment_convergence_pending_idx').on(t.grievanceId).where(sql`${t.status} = 'pending'`),
     index('deadline_reassignment_convergence_org_idx').on(t.organizationId, t.status),
   ],
 );

@@ -35,7 +35,7 @@ export const mlPredictions = pgTable("ml_predictions", {
   granularity: varchar("granularity", { length: 20 }), // 'daily', 'weekly'
   modelVersion: varchar("model_version", { length: 20 }), // the model that made the prediction (migration 0040)
   subjectId: varchar("subject_id", { length: 255 }), // the case or member the prediction scored (migration 0040)
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   organizationIdx: index("idx_ml_predictions_organization").on(table.organizationId),
   typeIdx: index("idx_ml_predictions_type").on(table.predictionType),

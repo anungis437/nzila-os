@@ -239,7 +239,7 @@ export const rewardWalletLedger = pgTable(
       .defaultNow(),
   },
   (table) => ({
-    orgUserIdx: index('reward_wallet_ledger_org_user_idx').on(
+    orgUserIdx: index('reward_wallet_ledger_org_user_id_idx').on(
       table.orgId,
       table.userId
     ),
@@ -438,8 +438,8 @@ export const automationRules = pgTable(
     triggerCount: integer('trigger_count').notNull().default(0),
     
     // Audit
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdBy: varchar('created_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
   },
   (t) => ({

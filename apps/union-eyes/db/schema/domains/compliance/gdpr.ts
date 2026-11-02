@@ -80,8 +80,7 @@ export const userConsents = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: text("user_id")
-      .notNull()
-      .references(() => profiles.userId, { onDelete: "cascade" }),
+      .notNull(),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
@@ -113,8 +112,8 @@ export const userConsents = pgTable(
       dataCategories?: string[];
     }>(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("user_consents_user_id_idx").on(table.userId),
@@ -157,7 +156,7 @@ export const cookieConsents = pgTable(
     lastUpdated: timestamp("last_updated").notNull().defaultNow(),
     expiresAt: timestamp("expires_at").notNull(), // Typically 12 months
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("cookie_consents_user_id_idx").on(table.userId),
@@ -177,8 +176,7 @@ export const gdprDataRequests = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: text("user_id")
-      .notNull()
-      .references(() => profiles.userId, { onDelete: "cascade" }),
+      .notNull(),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
@@ -221,8 +219,8 @@ export const gdprDataRequests = pgTable(
     processedBy: text("processed_by"),
     notes: text("notes"),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("gdpr_requests_user_id_idx").on(table.userId),
@@ -245,13 +243,12 @@ export const dataAnonymizationLog = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     userId: text("user_id").notNull(), // Original user ID (before anonymization)
     organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
+      .notNull(),
     
     // Operation details
     operationType: text("operation_type").notNull(), // anonymize, pseudonymize, delete
     reason: text("reason").notNull(), // RTBF request, retention policy, etc.
-    requestId: uuid("request_id").references(() => gdprDataRequests.id),
+    requestId: uuid("request_id"),
     
     // What was anonymized
     tablesAffected: jsonb("tables_affected").$type<
@@ -274,7 +271,7 @@ export const dataAnonymizationLog = pgTable(
     canReverse: boolean("can_reverse").notNull().default(false),
     backupLocation: text("backup_location"), // For reversible operations
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("anonymization_log_user_id_idx").on(table.userId),

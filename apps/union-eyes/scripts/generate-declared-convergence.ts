@@ -24,11 +24,15 @@
  *   Every column, default and relaxation it applies is tagged with the label, so --rollback undoes exactly what this migration did. A
  *   preflight and a postflight prove that no constraint, index, policy, grant or row-security setting changed.
  * --uniques adds the declared unique keys the database lacks (so ON CONFLICT can infer them). It refuses to run when duplicates exist.
+ * --indexes creates the declared indexes the database lacks (INDEX_ABSENT), including partial, expression and non-btree ones. --foreign-keys and --checks add the
+ *   declared foreign keys (FK_ABSENT) and checks (CHECK_ABSENT) NOT VALID and then validate them; a row that violates one stops the migration. --not-null sets NOT NULL on
+ *   the declared columns that are nullable (NOT_NULL_ABSENT) where no row holds NULL. Add --rollback to any of them for the rollback that undoes exactly what that migration did.
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { fitPostgresIdentifier } from './runtime/postgres-identifier'
-import { loadDeclarationSources, mergeDeclarations, type DeclaredColumn, type DeclaredTable, type Finding } from './runtime/schema-convergence'
+import { loadDeclarationSources, mergeDeclarations, NOT_NULL_DELIBERATELY_OPEN, type DeclaredColumn, type DeclaredIndex, type DeclaredTable, type Finding } from './runtime/schema-convergence'
+import { djangoLiveTables } from './runtime/django-writers'
 
 const flagValue = (name: string): string | undefined => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3)
 const registerPath = flagValue('register')
@@ -36,6 +40,14 @@ const label = flagValue('label') ?? ''
 const rollback = process.argv.includes('--rollback')
 const uniquesMode = process.argv.includes('--uniques')
 const enumsMode = process.argv.includes('--enums')
+const indexesMode = process.argv.includes('--indexes')
+const checksMode = process.argv.includes('--checks')
+const foreignKeysMode = process.argv.includes('--foreign-keys')
+const notNullMode = process.argv.includes('--not-null')
+const onlyTables = new Set((flagValue('only') ?? '').split(',').filter(Boolean))
+const exceptTables = new Set((flagValue('except') ?? '').split(',').filter(Boolean))
+/** --only=<tables> and --except=<tables> split a register between migrations that run in different bootstrap phases (a relation a later scoped migration creates). */
+const inScope = (tableLabel: string): boolean => (onlyTables.size === 0 || onlyTables.has(tableLabel)) && !exceptTables.has(tableLabel)
 if (!registerPath) throw new Error('--register=<findings.json> is required')
 if (!/^[a-z0-9][a-z0-9_-]{2,60}$/.test(label)) throw new Error('--label must be 3 to 61 characters of a-z, 0-9, _ and -')
 const marker = `platform-migration:${label}`
@@ -47,7 +59,7 @@ const q = (s: string) => `"${s.replace(/"/g, '""')}"`
 const lit = (v: string) => `'${v.replace(/'/g, "''")}'`
 
 const rawRegister = readFileSync(registerPath, 'utf8')
-const findings: Finding[] = JSON.parse(rawRegister).findings
+const findings: Finding[] = (JSON.parse(rawRegister).findings as Finding[]).filter((f) => inScope(f.table))
 const registerHash = createHash('sha256').update(rawRegister.replace(/\r\n/g, '\n')).digest('hex').slice(0, 16)
 
 function informationType(sqlType: string): { data_type: string; max_length?: number; precision?: number; scale?: number } | null {
@@ -96,7 +108,31 @@ const typeSql = (c: DeclaredColumn): string => {
 
 async function main(): Promise<void> {
   declared = new Map(mergeDeclarations(await loadDeclarationSources()).map((t) => [t.label, t]))
-  const sql = rollback ? rollbackSql() : uniquesMode ? uniqueMigration() : enumsMode ? enumMigration() : shapeMigration()
+  let sql = rollback
+    ? notNullMode
+      ? rollbackNotNull()
+      : indexesMode
+        ? rollbackIndexes()
+        : checksMode
+          ? rollbackConstraints('c')
+          : foreignKeysMode
+            ? rollbackConstraints('f')
+            : rollbackSql()
+    : notNullMode
+      ? notNullMigration()
+      : indexesMode
+        ? indexMigration()
+        : checksMode
+          ? constraintMigration('c')
+          : foreignKeysMode
+            ? constraintMigration('f')
+            : uniquesMode
+              ? uniqueMigration()
+              : enumsMode
+                ? enumMigration()
+                : shapeMigration()
+  // A migration for the scoped lineage (a relation a later scoped migration creates) names itself and its tags accordingly.
+  if (flagValue('scope') === 'scoped') sql = sql.replace(/platform-migration:/g, 'scoped-migration:').replace(/\bplatform declared /g, 'scoped declared ')
   const out = flagValue('out')
   if (out) writeFileSync(out, `${sql}\n`)
   else process.stdout.write(`${sql}\n`)
@@ -541,4 +577,290 @@ $postflight$;`
 -- Applied: ${Object.entries(summary).sort().map(([k, v]) => `${k} ${v}`).join(', ')}.
 -- ${guarded.length} relations; ${addStatements.length} column batches; ${defaults.length} defaults; ${relax.length} required columns; ${widen.length} widenings; ${retype.length} retypes.`
   return [header, preflight, ...addStatements, ...extensionBlocks, defaultsSql, relaxSql, widenSql, retypeSql, notNullSql, tag, postflight].filter(Boolean).join(SEP)
+}
+
+/** A name must fit PostgreSQL's 63 bytes; a longer one is derived deterministically (SHA-256, UTF-8 byte-aware), not left to PostgreSQL's silent truncation. */
+const fitName = fitPostgresIdentifier
+
+const REFERENTIAL_ACTION: Record<string, string> = { cascade: 'CASCADE', restrict: 'RESTRICT', 'no action': 'NO ACTION', 'set null': 'SET NULL', 'set default': 'SET DEFAULT' }
+
+function indexDdl(t: DeclaredTable, i: DeclaredIndex, name: string): string {
+  const parts = i.parts
+    .map((p) => {
+      const base = p.column !== undefined ? q(p.column) : `(${p.expression})`
+      const descending = p.order === 'desc'
+      // PostgreSQL's own defaults are NULLS LAST for ascending and NULLS FIRST for descending.
+      const nulls = p.nulls && (descending ? (p.nulls === 'last' ? ' NULLS LAST' : '') : p.nulls === 'first' ? ' NULLS FIRST' : '')
+      return `${base}${p.opClass ? ` ${p.opClass}` : ''}${descending ? ' DESC' : ''}${nulls || ''}`
+    })
+    .join(', ')
+  const options = i.withOptions ? ` WITH (${Object.entries(i.withOptions).map(([k, v]) => `${k} = ${v}`).join(', ')})` : ''
+  return `CREATE ${i.unique ? 'UNIQUE ' : ''}INDEX ${q(name)} ON ${q(t.schema)}.${q(t.name)}${i.method === 'btree' ? '' : ` USING ${i.method}`} (${parts})${options}${i.where ? ` WHERE ${i.where}` : ''}`
+}
+
+/** The declared indexes the database lacks. Each is created only when no index of that name exists; a name another relation holds, or duplicate rows under a unique index, stop the migration. */
+function indexMigration(): string {
+  const wanted = findings.filter((f) => f.kind === 'INDEX_ABSENT')
+  if (wanted.length === 0) throw new Error('the register has no INDEX_ABSENT finding')
+  const rows: Array<{ schema: string; table: string; name: string; ddl: string }> = []
+  const seen = new Set<string>()
+  const used = new Set<string>()
+  for (const f of wanted) {
+    const t = tableOf(f.table)
+    const declaredName = String(f.data?.name ?? /^(?:unique )?index (.+)$/.exec(f.detail)?.[1] ?? '')
+    const i = t.indexes.find((x) => x.name === declaredName)
+    if (!i) throw new Error(`${f.table} declares no index named ${declaredName}`)
+    if (seen.has(`${f.table}|${i.name}`)) continue
+    seen.add(`${f.table}|${i.name}`)
+    const name = fitName(i.name)
+    if (used.has(`${t.schema}.${name}`)) throw new Error(`index name ${t.schema}.${name} is used twice`)
+    used.add(`${t.schema}.${name}`)
+    for (const part of i.parts) if (part.column !== undefined) columnOf(t, part.column)
+    rows.push({ schema: t.schema, table: t.name, name, ddl: indexDdl(t, i, name) })
+  }
+  rows.sort((a, b) => a.schema.localeCompare(b.schema) || a.table.localeCompare(b.table) || a.name.localeCompare(b.name))
+  const values = rows.map((r) => `    (${lit(r.schema)}, ${lit(r.table)}, ${lit(r.name)}, ${lit(r.ddl)})`).join(',\n')
+  return `-- platform-migration:${label}: ${rows.length} declared indexes (generated by scripts/generate-declared-convergence.ts --indexes from register ${registerHash}).
+-- Fail-closed: a name that another relation holds, or duplicate rows under a unique index, stop the migration. Every index it creates is tagged, so the rollback drops exactly those.
+DO $indexes$
+DECLARE
+  r record;
+  target regclass;
+  existing regclass;
+BEGIN
+  FOR r IN
+    SELECT * FROM (VALUES
+${values}
+    ) AS v(schema_name, table_name, index_name, ddl)
+    ORDER BY schema_name, table_name, index_name
+  LOOP
+    target := to_regclass(format('%I.%I', r.schema_name, r.table_name));
+    IF target IS NULL THEN
+      RAISE EXCEPTION 'platform declared indexes fail-closed: %.% does not exist.', r.schema_name, r.table_name;
+    END IF;
+    existing := to_regclass(format('%I.%I', r.schema_name, r.index_name));
+    IF existing IS NOT NULL THEN
+      IF NOT EXISTS (SELECT 1 FROM pg_index WHERE indexrelid = existing AND indrelid = target) THEN
+        RAISE EXCEPTION 'platform declared indexes fail-closed: %.% names a relation that is not an index on %.%.', r.schema_name, r.index_name, r.schema_name, r.table_name;
+      END IF;
+      CONTINUE;
+    END IF;
+    BEGIN
+      EXECUTE r.ddl;
+    EXCEPTION WHEN unique_violation THEN
+      RAISE EXCEPTION 'platform declared indexes fail-closed: %.% holds duplicate rows, so index % cannot be unique; deduplicate them before this migration.', r.schema_name, r.table_name, r.index_name;
+    END;
+    EXECUTE format('COMMENT ON INDEX %I.%I IS %L', r.schema_name, r.index_name, ${lit(marker)});
+  END LOOP;
+END
+$indexes$;`
+}
+
+function constraintRows(kind: 'f' | 'c'): Array<{ schema: string; table: string; name: string; ddl: string }> {
+  const rows: Array<{ schema: string; table: string; name: string; ddl: string }> = []
+  const used = new Set<string>()
+  if (kind === 'f') {
+    for (const f of findings.filter((x) => x.kind === 'FK_ABSENT')) {
+      const t = tableOf(f.table)
+      const columns = (f.data?.columns as string[]) ?? []
+      const foreignTable = String(f.data?.foreignTable ?? '')
+      const fk = t.foreignKeys.find((x) => x.foreignTable === foreignTable && x.columns.join(',') === columns.join(','))
+      if (!fk) throw new Error(`${f.table} declares no foreign key over (${columns.join(', ')}) to ${foreignTable}`)
+      for (const c of fk.columns) columnOf(t, c)
+      const name = fitName(fk.name)
+      if (used.has(`${t.schema}.${t.name}.${name}`)) throw new Error(`constraint name ${name} is used twice on ${f.table}`)
+      used.add(`${t.schema}.${t.name}.${name}`)
+      const action = (value: string | undefined, clause: string) => (value && value !== 'no action' ? ` ${clause} ${REFERENTIAL_ACTION[value] ?? (() => { throw new Error(`unknown referential action ${value}`) })()}` : '')
+      const ddl = `ALTER TABLE ${q(t.schema)}.${q(t.name)} ADD CONSTRAINT ${q(name)} FOREIGN KEY (${fk.columns.map(q).join(', ')}) REFERENCES ${q(fk.foreignSchema)}.${q(fk.foreignTable)} (${fk.foreignColumns.map(q).join(', ')})${action(fk.onDelete, 'ON DELETE')}${action(fk.onUpdate, 'ON UPDATE')} NOT VALID`
+      rows.push({ schema: t.schema, table: t.name, name, ddl })
+    }
+  } else {
+    for (const f of findings.filter((x) => x.kind === 'CHECK_ABSENT')) {
+      const t = tableOf(f.table)
+      const declaredName = String(f.data?.name ?? /^check (.+)$/.exec(f.detail)?.[1] ?? '')
+      const check = t.checks.find((x) => x.name === declaredName)
+      if (!check) throw new Error(`${f.table} declares no check named ${declaredName}`)
+      const name = fitName(check.name)
+      if (used.has(`${t.schema}.${t.name}.${name}`)) throw new Error(`constraint name ${name} is used twice on ${f.table}`)
+      used.add(`${t.schema}.${t.name}.${name}`)
+      rows.push({ schema: t.schema, table: t.name, name, ddl: `ALTER TABLE ${q(t.schema)}.${q(t.name)} ADD CONSTRAINT ${q(name)} CHECK (${check.sql}) NOT VALID` })
+    }
+  }
+  if (rows.length === 0) throw new Error(`the register has no ${kind === 'f' ? 'FK_ABSENT' : 'CHECK_ABSENT'} finding`)
+  return rows.sort((a, b) => a.schema.localeCompare(b.schema) || a.table.localeCompare(b.table) || a.name.localeCompare(b.name))
+}
+
+/**
+ * The declared foreign keys or checks the database lacks. Each is added NOT VALID, so the lock is brief, then validated against the rows that already exist;
+ * a row that violates it stops the migration. A constraint is only added when none of that name exists on the relation.
+ */
+function constraintMigration(kind: 'f' | 'c'): string {
+  const rows = constraintRows(kind)
+  const what = kind === 'f' ? 'foreign keys' : 'checks'
+  const violation = kind === 'f' ? 'foreign_key_violation' : 'check_violation'
+  const values = rows.map((r) => `    (${lit(r.schema)}, ${lit(r.table)}, ${lit(r.name)}, ${lit(r.ddl)})`).join(',\n')
+  return `-- platform-migration:${label}: ${rows.length} declared ${what} (generated by scripts/generate-declared-convergence.ts --${kind === 'f' ? 'foreign-keys' : 'checks'} from register ${registerHash}).
+-- Each is added NOT VALID and then validated against the rows that already exist; a violating row stops the migration (fail-closed). Every constraint it adds is tagged, so the rollback drops exactly those.
+DO $constraints$
+DECLARE
+  r record;
+  target regclass;
+  existing "char";
+BEGIN
+  FOR r IN
+    SELECT * FROM (VALUES
+${values}
+    ) AS v(schema_name, table_name, constraint_name, ddl)
+    ORDER BY schema_name, table_name, constraint_name
+  LOOP
+    target := to_regclass(format('%I.%I', r.schema_name, r.table_name));
+    IF target IS NULL THEN
+      RAISE EXCEPTION 'platform declared ${what} fail-closed: %.% does not exist.', r.schema_name, r.table_name;
+    END IF;
+    SELECT contype INTO existing FROM pg_constraint WHERE conrelid = target AND conname = r.constraint_name;
+    IF FOUND THEN
+      IF existing <> '${kind}' THEN
+        RAISE EXCEPTION 'platform declared ${what} fail-closed: %.% already has a constraint named % that is not a ${kind === 'f' ? 'foreign key' : 'check'}.', r.schema_name, r.table_name, r.constraint_name;
+      END IF;
+      CONTINUE;
+    END IF;
+    EXECUTE r.ddl;
+    BEGIN
+      EXECUTE format('ALTER TABLE %I.%I VALIDATE CONSTRAINT %I', r.schema_name, r.table_name, r.constraint_name);
+    EXCEPTION WHEN ${violation} THEN
+      RAISE EXCEPTION 'platform declared ${what} fail-closed: rows of %.% violate %; repair or remove them before this migration.', r.schema_name, r.table_name, r.constraint_name;
+    END;
+    EXECUTE format('COMMENT ON CONSTRAINT %I ON %I.%I IS %L', r.constraint_name, r.schema_name, r.table_name, ${lit(marker)});
+  END LOOP;
+END
+$constraints$;`
+}
+
+function notNullColumns(): { rows: Array<{ schema: string; table: string; column: string }>; deferred: number; deliberate: number } {
+  const rows: Array<{ schema: string; table: string; column: string }> = []
+  const seen = new Set<string>()
+  const live = djangoLiveTables()
+  let deferred = 0
+  let deliberate = 0
+  for (const f of findings.filter((x) => x.kind === 'NOT_NULL_ABSENT')) {
+    const t = tableOf(f.table)
+    const c = columnOf(t, f.column!)
+    if (!c.notNull) throw new Error(`${f.table}.${f.column} is not declared NOT NULL by every declaration`)
+    if (seen.has(`${f.table}.${f.column}`)) continue
+    seen.add(`${f.table}.${f.column}`)
+    if (NOT_NULL_DELIBERATELY_OPEN[`${t.label}.${c.name}`]) {
+      deliberate += 1
+      continue
+    }
+    // The database may not be stricter than the loosest legitimate writer: a Django ViewSet that is not contained can store NULL in a column its model leaves null=True.
+    if (live.has(t.name)) {
+      deferred += 1
+      continue
+    }
+    rows.push({ schema: t.schema, table: t.name, column: c.name })
+  }
+  if (rows.length === 0) throw new Error('the register has no NOT_NULL_ABSENT finding')
+  return { rows: rows.sort((a, b) => a.schema.localeCompare(b.schema) || a.table.localeCompare(b.table) || a.column.localeCompare(b.column)), deferred, deliberate }
+}
+
+/** Declared NOT NULL on a nullable column: set only where no row holds NULL, so a populated relation is never given an invented value. */
+function notNullMigration(): string {
+  const { rows, deferred, deliberate } = notNullColumns()
+  const values = rows.map((r) => `    (${lit(r.schema)}, ${lit(r.table)}, ${lit(r.column)})`).join(',\n')
+  return `-- platform-migration:${label}: ${rows.length} declared NOT NULL columns (generated by scripts/generate-declared-convergence.ts --not-null from register ${registerHash}).
+-- Fail-closed: a column that holds NULL stops the migration, and nothing is invented to fill it. The rollback relaxes exactly the columns listed here.
+-- ${deferred} further declared NOT NULL columns sit on tables a live Django ViewSet can write with their model's null=True; they stay nullable until the Django model and API require them too.
+-- ${deliberate} more the platform leaves nullable on purpose (NOT_NULL_DELIBERATELY_OPEN in scripts/runtime/schema-convergence.ts gives the reason).
+DO $notnull$
+DECLARE
+  r record;
+  target regclass;
+  required boolean;
+BEGIN
+  FOR r IN
+    SELECT * FROM (VALUES
+${values}
+    ) AS v(schema_name, table_name, column_name)
+    ORDER BY schema_name, table_name, column_name
+  LOOP
+    target := to_regclass(format('%I.%I', r.schema_name, r.table_name));
+    IF target IS NULL THEN
+      RAISE EXCEPTION 'platform declared not null fail-closed: %.% does not exist.', r.schema_name, r.table_name;
+    END IF;
+    SELECT a.attnotnull INTO required FROM pg_attribute a WHERE a.attrelid = target AND a.attname = r.column_name AND a.attnum > 0 AND NOT a.attisdropped;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'platform declared not null fail-closed: %.%.% does not exist.', r.schema_name, r.table_name, r.column_name;
+    END IF;
+    IF required THEN
+      CONTINUE;
+    END IF;
+    BEGIN
+      EXECUTE format('ALTER TABLE %I.%I ALTER COLUMN %I SET NOT NULL', r.schema_name, r.table_name, r.column_name);
+    EXCEPTION WHEN not_null_violation THEN
+      RAISE EXCEPTION 'platform declared not null fail-closed: %.%.% holds NULL values; give every row a value before this migration.', r.schema_name, r.table_name, r.column_name;
+    END;
+  END LOOP;
+END
+$notnull$;`
+}
+
+function rollbackNotNull(): string {
+  const { rows } = notNullColumns()
+  const values = rows.map((r) => `    (${lit(r.schema)}, ${lit(r.table)}, ${lit(r.column)})`).join(',\n')
+  return `-- Rollback of platform-migration:${label}. It relaxes exactly the columns that migration made NOT NULL (all were nullable when it was generated).
+DO $rollback$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN
+    SELECT * FROM (VALUES
+${values}
+    ) AS v(schema_name, table_name, column_name)
+  LOOP
+    IF EXISTS (
+      SELECT 1 FROM pg_attribute a
+       WHERE a.attrelid = to_regclass(format('%I.%I', r.schema_name, r.table_name)) AND a.attname = r.column_name AND a.attnum > 0 AND NOT a.attisdropped AND a.attnotnull
+    ) THEN
+      EXECUTE format('ALTER TABLE %I.%I ALTER COLUMN %I DROP NOT NULL', r.schema_name, r.table_name, r.column_name);
+    END IF;
+  END LOOP;
+END
+$rollback$;`
+}
+
+function rollbackIndexes(): string {
+  return `-- Rollback of platform-migration:${label}. It drops exactly the indexes that migration created (they carry its tag), and nothing that existed before it.
+DO $rollback$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN
+    SELECT n.nspname AS schema_name, i.relname AS index_name
+      FROM pg_class i
+      JOIN pg_namespace n ON n.oid = i.relnamespace
+     WHERE i.relkind = 'i' AND obj_description(i.oid, 'pg_class') = ${lit(marker)}
+  LOOP
+    EXECUTE format('DROP INDEX IF EXISTS %I.%I', r.schema_name, r.index_name);
+  END LOOP;
+END
+$rollback$;`
+}
+
+function rollbackConstraints(kind: 'f' | 'c'): string {
+  return `-- Rollback of platform-migration:${label}. It drops exactly the ${kind === 'f' ? 'foreign keys' : 'checks'} that migration added (they carry its tag), and nothing that existed before it.
+DO $rollback$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN
+    SELECT n.nspname AS schema_name, c.relname AS table_name, k.conname
+      FROM pg_constraint k
+      JOIN pg_class c ON c.oid = k.conrelid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE k.contype = '${kind}' AND obj_description(k.oid, 'pg_constraint') = ${lit(marker)}
+  LOOP
+    EXECUTE format('ALTER TABLE %I.%I DROP CONSTRAINT IF EXISTS %I', r.schema_name, r.table_name, r.conname);
+  END LOOP;
+END
+$rollback$;`
 }

@@ -6,8 +6,9 @@
  *   - the strict classes are empty: every declared relation and column exists, no declared default is silently dropped, no NOT NULL column is
  *     one an insert through its declaration cannot fill, no column is narrower than declared, no declared unique key lacks the index ON CONFLICT
  *     needs, and no two declarations of one relation disagree on a type (scripts/runtime/schema-convergence.ts defines each class);
- *   - the advisory classes (foreign keys, indexes, NOT NULL, time zone, checks, declaration drift) may only shrink: each has a pinned ceiling;
- *   - platform migrations 0062 to 0065 are reversible and re-appliable: rolling them back restores the findings they closed, applying them again
+ *   - the advisory classes (declaration drift, the contested relations) may only shrink: each has a pinned ceiling; the integrity classes (foreign
+ *     keys, indexes, NOT NULL, time zone, checks) are held at zero;
+ *   - platform migrations 0062 to 0069 are reversible and re-appliable: rolling them back restores the findings they closed, applying them again
  *     closes them, and nothing else changes.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database that has no other session
@@ -18,39 +19,51 @@ import { join } from 'node:path'
 import pg from 'pg'
 import { afterAll, describe, expect, it } from 'vitest'
 import {
+  foreignKeyDoctrineViolations,
+  GRANDFATHERED_IDENTITY_REFERENCES,
   loadDeclarationSources,
   measureConvergence,
+  NOT_NULL_DELIBERATELY_OPEN,
   STRICT_KINDS,
   summarize,
   type DeclarationSource,
   type Finding,
   type FindingKind,
 } from '../../scripts/runtime/schema-convergence'
+import { djangoLiveTables } from '../../scripts/runtime/django-writers'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const APP_ROOT = join(__dirname, '..', '..')
 
 /**
  * Advisory classes that remain open. Each ceiling is the count measured on the converged database; a change that adds to one fails here, and
- * closing findings means lowering the ceiling in the same change. EXTENSION_ABSENT is the pgvector column on a server that does not offer it.
+ * closing findings means lowering the ceiling in the same change. The integrity classes (foreign keys, indexes, time zone, checks, an unvalidated
+ * constraint) are closed and held at zero. NOT NULL is closed wherever no live Django ViewSet can write the table (the database may not be stricter
+ * than the loosest legitimate writer), and 1 column is open on purpose (NOT_NULL_DELIBERATELY_OPEN); the 128 on live Django tables and that one are all
+ * that remain, and a test below holds the open set to exactly that rule.
+ * What else remains is the 14 relations that several declarations name differently, and the pgvector column on a server that does not offer the extension.
  */
 const ADVISORY_CEILING: Partial<Record<FindingKind, number>> = {
-  FK_ABSENT: 370,
-  INDEX_ABSENT: 794,
-  NOT_NULL_ABSENT: 286,
-  TZ_MISMATCH: 420,
-  CHECK_ABSENT: 36,
+  FK_ABSENT: 0,
+  INDEX_ABSENT: 0,
+  NOT_NULL_ABSENT: 129,
+  TZ_MISMATCH: 0,
+  CHECK_ABSENT: 0,
+  CONSTRAINT_NOT_VALIDATED: 0,
   SHAPE_DRIFT: 13,
   VARIANT_REQUIRED: 19,
   EXTENSION_ABSENT: 1,
 }
 
-const MIGRATIONS = [
+/** The migrations that closed the integrity classes, in order, then the ones that converged shape. */
+const INTEGRITY_MIGRATIONS = ['0066_declared_indexes', '0067_declared_checks', '0068_declared_foreign_keys', '0069_declared_not_null']
+const SHAPE_MIGRATIONS = [
   '0062_declared_enum_convergence',
   '0063_declared_shape_convergence',
   '0064_declared_unique_keys',
   '0065_declared_absent_relations_2',
 ]
+const MIGRATIONS = [...SHAPE_MIGRATIONS, ...INTEGRITY_MIGRATIONS]
 
 const sqlOf = (file: string) => readFileSync(join(APP_ROOT, 'db', 'migrations-platform', file), 'utf8')
 const strictOf = (findings: readonly Finding[]) => findings.filter((f) => STRICT_KINDS.includes(f.kind))
@@ -114,7 +127,31 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     expect(Object.keys(counts).filter((kind) => !known.has(kind))).toEqual([])
   }, 600_000)
 
-  it('rolls platform migrations 0065 to 0062 back and applies them again', async () => {
+  it('leaves a NOT NULL column open only where a live Django ViewSet can write the table, or on purpose', async () => {
+    // The database may not be stricter than the loosest legitimate writer. A Django ViewSet that is not contained can store NULL in a column its
+    // model leaves null=True, so those columns wait for the Django model and API to require them; everywhere else the declared NOT NULL is applied,
+    // except the columns the platform leaves nullable deliberately, each with the migration that says why.
+    const measured = await measure(URL!)
+    const live = djangoLiveTables(APP_ROOT)
+    const open = measured.findings.filter((f) => f.kind === 'NOT_NULL_ABSENT')
+    expect(live.size).toBeGreaterThan(100)
+    expect(
+      open.filter((f) => !live.has(f.table.split('.').pop()!) && !NOT_NULL_DELIBERATELY_OPEN[`${f.table}.${f.column}`]).map((f) => `${f.table}.${f.column}`),
+    ).toEqual([])
+    // An exception that no longer applies (the column is now NOT NULL, or undeclared) must leave the list.
+    for (const key of Object.keys(NOT_NULL_DELIBERATELY_OPEN)) expect(open.map((f) => `${f.table}.${f.column}`), `${key} is no longer open`).toContain(key)
+  }, 600_000)
+
+  it('declares no foreign key the doctrine forbids', async () => {
+    // An identity string (profiles.user_id, users.user_id) is a value, not a key, and append-only evidence carries identifiers, not foreign keys.
+    const measured = await measure(URL!)
+    expect(foreignKeyDoctrineViolations(measured.declared)).toEqual([])
+    // The grandfathered identity references are still declared, so they are still measured against the database.
+    const declaredKeys = new Set(measured.declared.flatMap((t) => t.foreignKeys.map((fk) => `${t.label}.${fk.columns.join(',')}`)))
+    expect(GRANDFATHERED_IDENTITY_REFERENCES.filter((key) => !declaredKeys.has(key))).toEqual([])
+  }, 600_000)
+
+  it('rolls the integrity migrations and then the shape migrations back and applies them again', async () => {
     const name = `ue_conv_rt_${process.pid}_${Date.now().toString(36)}`
     clones.push(name)
     const admin = new pg.Client({ connectionString: maintenanceUrl() })
@@ -147,7 +184,17 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     const before = await measure(cloneUrl.toString())
     expect(strictOf(before.findings)).toEqual([])
 
-    await run([...MIGRATIONS].reverse().map((tag) => `${tag}.rollback.sql`))
+    // The integrity migrations first: what each added is gone again, the counts are the ones their generator was given, and the shape stays converged.
+    await run([...INTEGRITY_MIGRATIONS].reverse().map((tag) => `${tag}.rollback.sql`))
+    const integrityOpen = await measure(cloneUrl.toString())
+    expect(strictOf(integrityOpen.findings)).toEqual([])
+    const integrityCounts = summarize(integrityOpen.findings)
+    expect(integrityCounts.FK_ABSENT).toBe(293)
+    expect(integrityCounts.INDEX_ABSENT).toBe(797)
+    expect(integrityCounts.CHECK_ABSENT).toBe(36)
+    expect(integrityCounts.NOT_NULL_ABSENT).toBe(286)
+
+    await run([...SHAPE_MIGRATIONS].reverse().map((tag) => `${tag}.rollback.sql`))
     const rolledBack = await measure(cloneUrl.toString())
     const open = summarize(strictOf(rolledBack.findings))
     // What the migrations added or relaxed is gone again; a widening, an enum member and a lossless retype are not reversed, by design.
@@ -162,5 +209,5 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     const reapplied = await measure(cloneUrl.toString())
     expect(strictOf(reapplied.findings), render(strictOf(reapplied.findings))).toEqual([])
     expect(summarize(reapplied.findings)).toEqual(summarize(before.findings))
-  }, 1_200_000)
+  }, 1_800_000)
 })

@@ -113,8 +113,8 @@ export const calendars = pgTable('calendars', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   isActive: boolean('is_active').default(true),
   
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -189,8 +189,8 @@ export const calendarEvents = pgTable('calendar_events', {
   cancelledBy: text('cancelled_by'),
   cancellationReason: text('cancellation_reason'),
   
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -225,8 +225,8 @@ export const eventAttendees = pgTable('event_attendees', {
   // External
   externalAttendeeId: text('external_attendee_id'),
   
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -285,8 +285,8 @@ export const meetingRooms = pgTable('meeting_rooms', {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -340,8 +340,8 @@ export const roomBookings = pgTable('room_bookings', {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -390,8 +390,8 @@ export const externalCalendarConnections = pgTable('external_calendar_connection
   // Status
   isActive: boolean('is_active').default(true),
   
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -420,7 +420,7 @@ export const eventReminders = pgTable('event_reminders', {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ============================================================================

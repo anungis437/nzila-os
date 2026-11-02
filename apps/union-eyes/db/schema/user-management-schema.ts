@@ -42,7 +42,7 @@ export const users = userManagementSchema.table("users", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => ({
   checkEmail: check("valid_email", 
-    sql`${table.email} ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'`),
+    sql`${table.email} ~* '^[^@[:space:]]+@[^@[:space:]]+\\.[^@[:space:]]+$'`),
   checkPhone: check("valid_phone", 
     sql`${table.phone} IS NULL OR ${table.phone} ~ '^\\+?[1-9]\\d{1,14}$'`),
 }));
@@ -57,7 +57,7 @@ export const organizationUsers = userManagementSchema.table("organization_users"
   permissions: jsonb("permissions").default(sql`'[]'::jsonb`),
   isActive: boolean("is_active").default(true),
   isPrimary: boolean("is_primary").default(false), // Indicates if this is the user's primary organization
-  invitedBy: varchar("invited_by", { length: 255 }).references(() => users.userId),
+  invitedBy: varchar("invited_by", { length: 255 }),
   invitedAt: timestamp("invited_at", { withTimezone: true }),
   joinedAt: timestamp("joined_at", { withTimezone: true }),
   lastAccessAt: timestamp("last_access_at", { withTimezone: true }),
@@ -75,7 +75,7 @@ export const organizationUsers = userManagementSchema.table("organization_users"
 // nullable) — corrected here, PR #752 review round 3.
 export const userSessions = pgTable("user_sessions", {
   sessionId: uuid("session_id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).references(() => users.userId, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }),
   organizationId: uuid("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   sessionToken: text("session_token").unique(),
   refreshToken: text("refresh_token").unique(),

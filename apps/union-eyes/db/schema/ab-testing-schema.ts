@@ -41,8 +41,8 @@ export const abTests = pgTable(
     segmentCriteria: jsonb('segment_criteria').$type<Record<string, any>>(), // Audience targeting
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: jsonb('metadata').notNull().default({}).$type<Record<string, any>>(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     statusIdx: index('ab_tests_status_idx').on(table.status),
@@ -69,7 +69,7 @@ export const abTestVariants = pgTable(
     impressions: integer('impressions').notNull().default(0),
     conversions: integer('conversions').notNull().default(0),
     isControl: boolean('is_control').notNull().default(false),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     testIdx: index('ab_test_variants_test_idx').on(table.testId),

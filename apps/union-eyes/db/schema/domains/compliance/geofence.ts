@@ -40,8 +40,8 @@ export const memberLocationConsent = pgTable("member_location_consent", {
   ipAddress: varchar("ip_address", { length: 45 }),
   userAgent: text("user_agent"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Location tracking data (24-hour retention only)
@@ -77,7 +77,7 @@ export const locationTracking = pgTable("location_tracking", {
   deviceType: varchar("device_type", { length: 50 }),
   appVersion: varchar("app_version", { length: 20 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Geofence definitions (strike lines, union halls, etc.)
@@ -108,8 +108,8 @@ export const geofences = pgTable("geofences", {
   notifyOnExit: boolean("notify_on_exit").notNull().default(false),
   requiresExplicitConsent: boolean("requires_explicit_consent").notNull().default(true),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Geofence entries/exits (for safety tracking)
@@ -132,7 +132,7 @@ export const geofenceEvents = pgTable("geofence_events", {
   // Purpose
   purpose: text("purpose"), // "Strike attendance", "Safety check-in"
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Location tracking audit log
@@ -155,7 +155,7 @@ export const locationTrackingAudit = pgTable("location_tracking_audit", {
   // Metadata
   metadata: jsonb("metadata"), // Additional context
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Location data deletion log (compliance tracking)
@@ -203,7 +203,7 @@ export const locationTrackingConfig = pgTable("location_tracking_config", {
   lastComplianceReview: timestamp("last_compliance_review"),
   nextComplianceReviewDue: timestamp("next_compliance_review_due"),
   
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
 });
 

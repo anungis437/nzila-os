@@ -18,7 +18,6 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import { organizations } from "../../../schema-organizations";
-import { profiles } from "../../profiles-schema";
 
 // Address type enum
 export const addressTypeEnum = pgEnum("address_type", [
@@ -49,9 +48,7 @@ export const internationalAddresses = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    userId: text("user_id").references(() => profiles.userId, {
-      onDelete: "set null",
-    }),
+    userId: text("user_id"),
     
     // Address type and status
     addressType: addressTypeEnum("address_type").notNull().default("mailing"),
@@ -136,8 +133,8 @@ export const internationalAddresses = pgTable(
     // Notes
     notes: text("notes"),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     organizationIdIdx: index("international_addresses_organization_id_idx").on(
@@ -238,8 +235,8 @@ export const countryAddressFormats = pgTable(
       drivingSide?: "left" | "right";
     }>(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     countryCodeIdx: index("country_address_formats_country_code_idx").on(
@@ -288,11 +285,11 @@ export const addressValidationCache = pgTable(
     metadata: jsonb("metadata"),
     
     // Cache control
-    expiresAt: timestamp("expires_at").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     hitCount: integer("hit_count").notNull().default(1),
-    lastHitAt: timestamp("last_hit_at").notNull().defaultNow(),
+    lastHitAt: timestamp("last_hit_at", { withTimezone: true }).notNull().defaultNow(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     inputHashIdx: index("address_validation_cache_input_hash_idx").on(
@@ -318,7 +315,7 @@ export const addressChangeHistory = pgTable(
     
     // Change details
     changeType: text("change_type").notNull(), // created, updated, deleted, validated
-    changedBy: text("changed_by").references(() => profiles.userId),
+    changedBy: text("changed_by"),
     
     // Previous values
     previousValue: jsonb("previous_value"),
@@ -328,7 +325,7 @@ export const addressChangeHistory = pgTable(
     changeReason: text("change_reason"),
     changeSource: text("change_source"), // user, system, validation, import
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     addressIdIdx: index("address_change_history_address_id_idx").on(

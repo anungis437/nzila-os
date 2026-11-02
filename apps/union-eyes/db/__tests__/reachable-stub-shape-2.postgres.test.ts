@@ -36,9 +36,13 @@ const sqlOf = (file: string) =>
     .filter(Boolean)
 const FORWARD = sqlOf('0060_reachable_stub_shape_2.sql')
 const ROLLBACK = sqlOf('0060_reachable_stub_shape_2.rollback.sql')
-// Platforms 0062 to 0065 converge the same relations afterwards (their columns use the enum types 0060 created), so a proof about what 0060 alone added or
-// removed first takes them off, newest first, inside the transaction it rolls back at the end.
+// Platforms 0062 to 0069 converge the same relations afterwards (their columns use the enum types 0060 created, and their indexes, keys and constraints sit on
+// those relations), so a proof about what 0060 alone added or removed first takes them off, newest first, inside the transaction it rolls back at the end.
 const LATER_ROLLBACKS = [
+  '0069_declared_not_null.rollback.sql',
+  '0068_declared_foreign_keys.rollback.sql',
+  '0067_declared_checks.rollback.sql',
+  '0066_declared_indexes.rollback.sql',
   '0065_declared_absent_relations_2.rollback.sql',
   '0064_declared_unique_keys.rollback.sql',
   '0063_declared_shape_convergence.rollback.sql',
@@ -229,6 +233,7 @@ describe.skipIf(!URL)('platform 0060 reachable stub shape on the real combined s
 
     it('adds no value to a relation that already holds rows: its new columns stay nullable, and an empty relation gets NOT NULL', async () => {
       await inTransaction(async () => {
+        await undoLater()
         const strict = (await taggedNullability()).filter((row) => row.is_nullable === 'NO')
         const withStrictColumns = [...new Set(strict.map((row) => row.table_name))]
         expect(withStrictColumns.length, 'no relation has a NOT NULL column added by 0060 (are the relations empty at bootstrap?)').toBeGreaterThanOrEqual(2)

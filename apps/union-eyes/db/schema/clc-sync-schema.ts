@@ -97,8 +97,8 @@ export const clcSyncLog = pgTable(
     verifiedBy: varchar("verified_by", { length: 255 }),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     initiatedBy: varchar("initiated_by", { length: 255 }),
   },
   (t) => ({
@@ -142,7 +142,7 @@ export const clcWebhookLog = pgTable(
     syncLogId: uuid("sync_log_id").references(() => clcSyncLog.id, { onDelete: "set null" }),
     
     // Processing
-    processedAt: timestamp("processed_at"),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
     processingError: text("processing_error"),
     retryCount: integer("retry_count").default(0),
     nextRetryAt: timestamp("next_retry_at"),
@@ -154,8 +154,8 @@ export const clcWebhookLog = pgTable(
     reviewedBy: varchar("reviewed_by", { length: 255 }),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     orgIdx: index("clc_webhook_log_org_idx").on(t.organizationId),

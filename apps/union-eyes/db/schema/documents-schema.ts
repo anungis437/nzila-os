@@ -47,8 +47,8 @@ export const documentFolders = pgTable('document_folders', {
   description: text('description'),
   parentFolderId: uuid('parent_folder_id'),
   createdBy: text('created_by').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
 });
 
@@ -84,7 +84,7 @@ export const documents = pgTable('documents', {
   
   // Upload information
   uploadedBy: text('uploaded_by').notNull(),
-  uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true }).defaultNow().notNull(),
   
   // Status and access
   privacyLabel: documentPrivacyLabelEnum('privacy_label').notNull().default('team_confidential'),
@@ -102,9 +102,9 @@ export const documents = pgTable('documents', {
   checksum: text('checksum'), // SHA-256 hex digest of file content
   
   // Timestamps
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  deletedAt: timestamp('deleted_at'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   
   // Additional metadata
   metadata: jsonb('metadata').default({}),

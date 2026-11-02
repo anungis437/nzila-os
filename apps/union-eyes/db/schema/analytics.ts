@@ -21,8 +21,8 @@ export const analyticsMetrics = pgTable('analytics_metrics', {
   metadata: jsonb('metadata'), // Additional context, filters applied, calculation method
   comparisonValue: numeric('comparison_value'), // Previous period value for comparison
   trend: text('trend'), // 'up', 'down', 'stable'
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgIdx: index('analytics_metrics_org_idx').on(table.organizationId),
   typeIdx: index('analytics_metrics_type_idx').on(table.metricType),
@@ -36,7 +36,7 @@ export const analyticsMetrics = pgTable('analytics_metrics', {
 export const kpiConfigurations = pgTable('kpi_configurations', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.userId),
+  createdBy: varchar('created_by', { length: 255 }).notNull(),
   name: text('name').notNull(),
   description: text('description'),
   metricType: text('metric_type').notNull(), // Links to analyticsMetrics.metricType
@@ -53,8 +53,8 @@ export const kpiConfigurations = pgTable('kpi_configurations', {
   isActive: boolean('is_active').default(true),
   displayOrder: integer('display_order'),
   dashboardLayout: jsonb('dashboard_layout'), // Position, size in grid
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgIdx: index('kpi_configurations_org_idx').on(table.organizationId),
   activeIdx: index('kpi_configurations_active_idx').on(table.isActive),
@@ -78,7 +78,7 @@ export const mlPredictions = pgTable('ml_predictions', {
   actualValue: numeric('actual_value'), // Filled in when actual data becomes available
   accuracy: numeric('accuracy'), // Calculated after actual value is known
   metadata: jsonb('metadata'), // Training data range, hyperparameters, etc.
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   validatedAt: timestamp('validated_at'), // When actual value was recorded
 }, (table) => ({
   orgIdx: index('ml_predictions_org_idx').on(table.organizationId),
@@ -107,7 +107,7 @@ export const trendAnalyses = pgTable('trend_analyses', {
   statisticalTests: jsonb('statistical_tests'), // Results of statistical significance tests
   visualizationData: jsonb('visualization_data'), // Pre-computed data for charts
   confidence: numeric('confidence'), // 0-1
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgIdx: index('trend_analyses_org_idx').on(table.organizationId),
   typeIdx: index('trend_analyses_type_idx').on(table.analysisType),
@@ -138,15 +138,15 @@ export const insightRecommendations = pgTable('insight_recommendations', {
   aiReferenceId: text('ai_reference_id'), // Opaque audit ref ID from auditAIInvocation
   relatedEntities: jsonb('related_entities'), // Links to specific claims, members, etc.
   status: text('status').default('new'), // 'new', 'acknowledged', 'in_progress', 'completed', 'dismissed'
-  acknowledgedBy: varchar('acknowledged_by', { length: 255 }).references(() => users.userId),
+  acknowledgedBy: varchar('acknowledged_by', { length: 255 }),
   acknowledgedAt: timestamp('acknowledged_at'),
-  dismissedBy: varchar('dismissed_by', { length: 255 }).references(() => users.userId),
+  dismissedBy: varchar('dismissed_by', { length: 255 }),
   dismissedAt: timestamp('dismissed_at'),
   dismissalReason: text('dismissal_reason'),
   completedAt: timestamp('completed_at'),
   notes: text('notes'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   orgIdx: index('insight_recommendations_org_idx').on(table.organizationId),
   statusIdx: index('insight_recommendations_status_idx').on(table.status),

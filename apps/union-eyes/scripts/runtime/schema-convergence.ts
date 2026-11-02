@@ -20,6 +20,7 @@
  *   SHAPE_CONFLICT                    two declarations of one physical table disagree on a column's type.
  * advisory (integrity or performance, reported but not a failed statement):
  *   FK_ABSENT, INDEX_ABSENT, NOT_NULL_ABSENT, CHECK_ABSENT, TZ_MISMATCH, SHAPE_DRIFT, EXTENSION_ABSENT.
+ *   CONSTRAINT_NOT_VALIDATED          a declared foreign key or check exists but PostgreSQL has not validated the rows that predate it.
  *   VARIANT_REQUIRED is advisory only because it cannot be closed in the database: the relation has NOT NULL columns that some of its declarations
  *   omit, so an insert through one of them fails. Loosening a real constraint to suit a stale declaration would be the wrong repair; the declarations
  *   of that relation have to be unified.
@@ -53,6 +54,7 @@ export type FindingKind =
   | 'SHAPE_DRIFT'
   | 'VARIANT_REQUIRED'
   | 'EXTENSION_ABSENT'
+  | 'CONSTRAINT_NOT_VALIDATED'
 
 export const STRICT_KINDS: readonly FindingKind[] = [
   'TABLE_ABSENT',
@@ -111,11 +113,44 @@ export interface DeclaredKey {
 }
 
 export interface DeclaredForeignKey {
+  /** The constraint name Drizzle derives (or the declaration gives). */
+  name: string
   columns: string[]
   foreignSchema: string
   foreignTable: string
   foreignColumns: string[]
   onDelete?: string
+  onUpdate?: string
+}
+
+export interface DeclaredIndexPart {
+  /** A plain column; `expression` is set instead for a computed part. */
+  column?: string
+  expression?: string
+  order?: string
+  nulls?: string
+  opClass?: string
+}
+
+export interface DeclaredIndex {
+  name: string
+  unique: boolean
+  parts: DeclaredIndexPart[]
+  /** The plain column names, in order (shorter than `parts` when a part is an expression). */
+  columns: string[]
+  method: string
+  where?: string
+  /** Storage parameters, rendered as WITH (...). */
+  withOptions?: Record<string, unknown>
+  /** A total index over plain columns: any physical index of the same method that starts with these columns serves it, whatever it is called. */
+  plain: boolean
+  origin: string
+}
+
+export interface DeclaredCheck {
+  name: string
+  /** The expression, with bare column names. */
+  sql: string
 }
 
 export interface DeclaredTable {
@@ -125,14 +160,16 @@ export interface DeclaredTable {
   columns: DeclaredColumn[]
   uniqueKeys: DeclaredKey[]
   foreignKeys: DeclaredForeignKey[]
-  indexes: DeclaredKey[]
-  checks: string[]
+  indexes: DeclaredIndex[]
+  checks: DeclaredCheck[]
   /** Every declaration file and export that declares this physical table. */
   sources: string[]
   /** Disagreements between declarations of this physical table. */
   conflicts: Array<{ column: string; severity: 'type' | 'constraint'; detail: string }>
   /** The other declarations' definitions of a column they type differently, each measured against the database as well. */
   variants: DeclaredColumn[]
+  /** The other declarations' definitions of a time column that differ only in whether they carry a time zone; measured for the zone alone. */
+  zoneVariants: DeclaredColumn[]
   /** How many distinct declarations (table objects) name this physical table. */
   variantCount: number
 }
@@ -148,12 +185,23 @@ interface PhysicalColumn {
   scale: number | null
 }
 
+export interface PhysicalIndex {
+  name: string
+  /** The plain columns, in order (an expression part has no column). */
+  columns: string[]
+  method: string
+  unique: boolean
+  partial: boolean
+  expression: boolean
+}
+
 export interface Physical {
   columns: Map<string, Map<string, PhysicalColumn>>
   uniqueSets: Map<string, Set<string>>
-  foreignKeys: Map<string, Array<{ columns: string[]; foreignTable: string; foreignColumns: string[] }>>
-  indexes: Map<string, string[][]>
-  checks: Map<string, Set<string>>
+  foreignKeys: Map<string, Array<{ name: string; columns: string[]; foreignTable: string; foreignColumns: string[]; validated: boolean }>>
+  indexes: Map<string, PhysicalIndex[]>
+  /** Check constraint name to whether PostgreSQL has validated it. */
+  checks: Map<string, Map<string, boolean>>
   enums: Map<string, Set<string>>
   extensions: Set<string>
 }
@@ -171,6 +219,12 @@ const sqlLiteral = (value: unknown, type: string): string => {
   if (value instanceof Date) return `'${value.toISOString()}'`
   const cast = /^json\b/.test(type) ? 'json' : 'jsonb'
   return `'${JSON.stringify(value).replace(/'/g, "''")}'::${cast}`
+}
+
+/** A declared index expression, predicate or check as SQL with bare column names and any bound value written inline. */
+function renderIndexSql(value: SQL): string {
+  const { sql, params } = dialect.sqlToQuery(value, 'indexes')
+  return sql.replace(/\$(\d+)/g, (_match, position: string) => sqlLiteral(params[Number(position) - 1], ''))
 }
 
 /** The SQL a declared default renders to, or null when it has no SQL form (an ORM-computed default). */
@@ -239,27 +293,47 @@ function describeTable(table: PgTable, source: string): DeclaredTable {
   }
   for (const pk of cfg.primaryKeys) uniqueKeys.push({ columns: pk.columns.map((c) => c.name), origin: `primary key ${pk.getName()}` })
   for (const u of cfg.uniqueConstraints) uniqueKeys.push({ columns: u.columns.map((c) => c.name), origin: `unique ${u.name ?? ''}`.trim() })
-  const indexes: DeclaredKey[] = []
+  const indexes: DeclaredIndex[] = []
   for (const index of cfg.indexes) {
-    const config = index.config as { name?: string; unique?: boolean; where?: unknown; columns: unknown[] }
-    const plain = config.columns.every((c) => !is(c as never, SQL) && typeof (c as { name?: unknown }).name === 'string')
-    if (!plain || config.where) continue
-    const columnNames = config.columns.map((c) => (c as { name: string }).name)
-    if (config.unique) uniqueKeys.push({ columns: columnNames, origin: `unique index ${config.name ?? ''}`.trim() })
-    else indexes.push({ columns: columnNames, origin: `index ${config.name ?? ''}`.trim() })
+    const config = index.config as { name?: string; unique?: boolean; where?: SQL; method?: string; with?: Record<string, unknown>; columns: unknown[] }
+    const parts: DeclaredIndexPart[] = config.columns.map((c) => {
+      if (is(c as never, SQL)) return { expression: renderIndexSql(c as SQL) }
+      const column = c as { name: string; indexConfig?: { order?: string; nulls?: string; opClass?: string } }
+      return { column: column.name, order: column.indexConfig?.order, nulls: column.indexConfig?.nulls, opClass: column.indexConfig?.opClass }
+    })
+    const columnNames = parts.flatMap((p) => (p.column !== undefined ? [p.column] : []))
+    const where = config.where ? renderIndexSql(config.where) : undefined
+    const method = (config.method ?? 'btree').toLowerCase()
+    const plain = parts.every((p) => p.column !== undefined) && where === undefined
+    const origin = `${config.unique ? 'unique index' : 'index'} ${config.name ?? ''}`.trim()
+    if (config.unique && plain && method === 'btree') uniqueKeys.push({ columns: columnNames, origin })
+    indexes.push({
+      name: config.name ?? '',
+      unique: Boolean(config.unique),
+      parts,
+      columns: columnNames,
+      method,
+      where,
+      withOptions: config.with && Object.keys(config.with).length ? config.with : undefined,
+      plain: plain && method === 'btree',
+      origin: config.name ? `${config.unique ? 'unique index' : 'index'} ${config.name}` : origin,
+    })
   }
   const foreignKeys: DeclaredForeignKey[] = cfg.foreignKeys.map((fk) => {
     const ref = fk.reference()
     const foreign = getTableConfig(ref.foreignTable as PgTable)
     return {
+      name: fk.getName(),
       columns: ref.columns.map((c) => c.name),
       foreignSchema: foreign.schema ?? 'public',
       foreignTable: foreign.name,
       foreignColumns: ref.foreignColumns.map((c) => c.name),
       onDelete: (fk as unknown as { onDelete?: string }).onDelete,
+      onUpdate: (fk as unknown as { onUpdate?: string }).onUpdate,
     }
   })
-  return { schema, name: cfg.name, label, columns, uniqueKeys, foreignKeys, indexes, checks: cfg.checks.map((c) => c.name), sources: [source], conflicts: [], variants: [], variantCount: 1 }
+  const checks: DeclaredCheck[] = cfg.checks.map((c) => ({ name: c.name, sql: renderIndexSql(c.value) }))
+  return { schema, name: cfg.name, label, columns, uniqueKeys, foreignKeys, indexes, checks, sources: [source], conflicts: [], variants: [], zoneVariants: [], variantCount: 1 }
 }
 
 export interface DeclarationSource {
@@ -309,14 +383,18 @@ export function mergeDeclarations(sources: readonly DeclarationSource[]): Declar
           const detail = `${first.notNull ? 'NOT NULL' : 'nullable'}${first.hasDefault ? ' default' : ''} vs ${column.notNull ? 'NOT NULL' : 'nullable'}${column.hasDefault ? ' default' : ''}`
           if (!existing.conflicts.some((c) => c.column === column.name && c.detail === detail)) existing.conflicts.push({ column: column.name, severity: 'constraint', detail })
         }
+        if (typeFamily(first.sqlType) === 'time' && typeFamily(column.sqlType) === 'time' && first.sqlType !== column.sqlType && !existing.zoneVariants.some((v) => v.name === column.name && v.sqlType === column.sqlType)) {
+          existing.zoneVariants.push(column)
+        }
       }
       const keyOf = (k: DeclaredKey) => setKey(k.columns)
+      const sameIndex = (a: DeclaredIndex, b: DeclaredIndex) => a.name === b.name || (a.plain && b.plain && a.unique === b.unique && a.method === b.method && a.columns.join(',') === b.columns.join(','))
       for (const k of described.uniqueKeys) if (!existing.uniqueKeys.some((e) => keyOf(e) === keyOf(k))) existing.uniqueKeys.push(k)
-      for (const k of described.indexes) if (!existing.indexes.some((e) => keyOf(e) === keyOf(k))) existing.indexes.push(k)
+      for (const index of described.indexes) if (!existing.indexes.some((e) => sameIndex(e, index))) existing.indexes.push(index)
       for (const fk of described.foreignKeys) {
         if (!existing.foreignKeys.some((e) => e.foreignTable === fk.foreignTable && setKey(e.columns) === setKey(fk.columns) && setKey(e.foreignColumns) === setKey(fk.foreignColumns))) existing.foreignKeys.push(fk)
       }
-      for (const check of described.checks) if (!existing.checks.includes(check)) existing.checks.push(check)
+      for (const check of described.checks) if (!existing.checks.some((e) => e.name === check.name)) existing.checks.push(check)
     }
   }
   // A column is only as strict as the loosest declaration of its table: a declaration that omits the column (or leaves it nullable) inserts
@@ -386,7 +464,7 @@ export async function readPhysical(client: Pick<Client, 'query'>, schemas: reado
     })
   }
   const constraints = await client.query(
-    `SELECT n.nspname AS schema_name, c.relname AS table_name, k.contype, k.conname,
+    `SELECT n.nspname AS schema_name, c.relname AS table_name, k.contype, k.conname, k.convalidated,
             (SELECT array_agg(a.attname::text ORDER BY u.ord) FROM unnest(k.conkey) WITH ORDINALITY u(attnum, ord)
                JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = u.attnum) AS cols,
             fc.relname AS foreign_table,
@@ -406,29 +484,30 @@ export async function readPhysical(client: Pick<Client, 'query'>, schemas: reado
       physical.uniqueSets.get(key)!.add(setKey(r.cols))
     } else if (r.contype === 'f') {
       if (!physical.foreignKeys.has(key)) physical.foreignKeys.set(key, [])
-      physical.foreignKeys.get(key)!.push({ columns: r.cols, foreignTable: r.foreign_table, foreignColumns: r.foreign_cols })
+      physical.foreignKeys.get(key)!.push({ name: r.conname, columns: r.cols, foreignTable: r.foreign_table, foreignColumns: r.foreign_cols, validated: r.convalidated })
     } else if (r.contype === 'c') {
-      if (!physical.checks.has(key)) physical.checks.set(key, new Set())
-      physical.checks.get(key)!.add(r.conname)
+      if (!physical.checks.has(key)) physical.checks.set(key, new Map())
+      physical.checks.get(key)!.set(r.conname, r.convalidated)
     }
   }
   const indexes = await client.query(
-    `SELECT n.nspname AS schema_name, c.relname AS table_name, ix.indisunique AS is_unique,
+    `SELECT n.nspname AS schema_name, c.relname AS table_name, i.relname AS index_name, am.amname AS method, ix.indisunique AS is_unique,
             (ix.indpred IS NOT NULL) AS partial, (ix.indexprs IS NOT NULL) AS has_expression,
             (SELECT array_agg(a.attname::text ORDER BY k.ord) FROM unnest(string_to_array(ix.indkey::text, ' ')::int2[]) WITH ORDINALITY k(attnum, ord)
                JOIN pg_attribute a ON a.attrelid = ix.indrelid AND a.attnum = k.attnum WHERE k.attnum > 0) AS cols
        FROM pg_index ix
        JOIN pg_class c ON c.oid = ix.indrelid
+       JOIN pg_class i ON i.oid = ix.indexrelid
+       JOIN pg_am am ON am.oid = i.relam
        JOIN pg_namespace n ON n.oid = c.relnamespace
       WHERE n.nspname = ANY($1) AND ix.indisvalid`,
     [list],
   )
   for (const r of indexes.rows) {
-    if (!r.cols) continue
     const key = relationKey(r.schema_name, r.table_name)
     if (!physical.indexes.has(key)) physical.indexes.set(key, [])
-    physical.indexes.get(key)!.push(r.cols)
-    if (r.is_unique && !r.partial && !r.has_expression) {
+    physical.indexes.get(key)!.push({ name: r.index_name, columns: r.cols ?? [], method: r.method, unique: r.is_unique, partial: r.partial, expression: r.has_expression })
+    if (r.cols && r.is_unique && !r.partial && !r.has_expression) {
       if (!physical.uniqueSets.has(key)) physical.uniqueSets.set(key, new Set())
       physical.uniqueSets.get(key)!.add(setKey(r.cols))
     }
@@ -547,17 +626,42 @@ export function compare(declared: readonly DeclaredTable[], physical: Physical):
       findings.push({ kind: 'UNIQUE_ABSENT', table: table.label, column: k.columns.join(','), detail: `${k.origin} has no unique constraint or index over (${k.columns.join(', ')})`, data: { columns: k.columns, origin: k.origin } })
     }
     for (const fk of table.foreignKeys) {
-      const have = (physical.foreignKeys.get(key) ?? []).some((p) => p.foreignTable === fk.foreignTable && setKey(p.columns) === setKey(fk.columns) && setKey(p.foreignColumns) === setKey(fk.foreignColumns))
-      if (!have) findings.push({ kind: 'FK_ABSENT', table: table.label, column: fk.columns.join(','), detail: `references ${fk.foreignTable}(${fk.foreignColumns.join(', ')})`, data: { columns: fk.columns, foreignSchema: fk.foreignSchema, foreignTable: fk.foreignTable, foreignColumns: fk.foreignColumns, onDelete: fk.onDelete } })
+      const have = (physical.foreignKeys.get(key) ?? []).find((p) => p.foreignTable === fk.foreignTable && setKey(p.columns) === setKey(fk.columns) && setKey(p.foreignColumns) === setKey(fk.foreignColumns))
+      if (!have) {
+        findings.push({
+          kind: 'FK_ABSENT',
+          table: table.label,
+          column: fk.columns.join(','),
+          detail: `references ${fk.foreignTable}(${fk.foreignColumns.join(', ')})`,
+          data: { name: fk.name, columns: fk.columns, foreignSchema: fk.foreignSchema, foreignTable: fk.foreignTable, foreignColumns: fk.foreignColumns, onDelete: fk.onDelete, onUpdate: fk.onUpdate },
+        })
+      } else if (!have.validated) {
+        findings.push({ kind: 'CONSTRAINT_NOT_VALIDATED', table: table.label, column: fk.columns.join(','), detail: `foreign key ${have.name} is not validated`, data: { name: have.name } })
+      }
     }
     const physicalIndexes = physical.indexes.get(key) ?? []
     for (const index of table.indexes) {
-      const have = physicalIndexes.some((cols) => index.columns.every((c, i) => cols[i] === c))
-      if (!have) findings.push({ kind: 'INDEX_ABSENT', table: table.label, column: index.columns.join(','), detail: index.origin, data: { columns: index.columns, origin: index.origin } })
+      // A plain unique index is a unique key, and UNIQUE_ABSENT reports it.
+      if (index.unique && index.plain) continue
+      // An index over a column that only exists where an extension is installed follows the column (EXTENSION_ABSENT reports it).
+      if (index.parts.some((part) => { const extension = table.columns.find((c) => c.name === part.column)?.extension; return extension !== undefined && !physical.extensions.has(extension) })) continue
+      const have = index.plain
+        ? physicalIndexes.some((p) => !p.partial && !p.expression && p.method === index.method && index.columns.every((c, i) => p.columns[i] === c))
+        : physicalIndexes.some((p) => p.name === truncated(index.name))
+      if (!have) findings.push({ kind: 'INDEX_ABSENT', table: table.label, column: index.columns.join(',') || index.name, detail: index.origin, data: { name: index.name, columns: index.columns, origin: index.origin } })
     }
-    const physicalChecks = physical.checks.get(key) ?? new Set<string>()
+    const physicalChecks = physical.checks.get(key) ?? new Map<string, boolean>()
     for (const check of table.checks) {
-      if (!physicalChecks.has(truncated(check))) findings.push({ kind: 'CHECK_ABSENT', table: table.label, detail: `check ${check}` })
+      const validated = physicalChecks.get(truncated(check.name))
+      if (validated === undefined) findings.push({ kind: 'CHECK_ABSENT', table: table.label, detail: `check ${check.name}`, data: { name: check.name } })
+      else if (!validated) findings.push({ kind: 'CONSTRAINT_NOT_VALIDATED', table: table.label, detail: `check ${check.name} is not validated`, data: { name: check.name } })
+    }
+    for (const column of table.zoneVariants) {
+      const p = phys.get(column.name)
+      if (!p || column.isArray || physicalFamily(p.dataType) !== 'time' || !/^timestamp/.test(column.sqlType.toLowerCase())) continue
+      if (/with time zone/.test(column.sqlType.toLowerCase()) !== /with time zone/.test(p.dataType)) {
+        findings.push({ kind: 'TZ_MISMATCH', table: table.label, column: column.name, detail: `ORM ${column.sqlType} vs database ${p.dataType}` })
+      }
     }
   }
   const unique = new Map<string, Finding>()
@@ -575,4 +679,92 @@ export function summarize(findings: readonly Finding[]): Record<string, number> 
   const counts: Record<string, number> = {}
   for (const f of findings) counts[f.kind] = (counts[f.kind] ?? 0) + 1
   return counts
+}
+
+/**
+ * Foreign-key doctrine. A declaration may not promise a foreign key the platform must not enforce.
+ *
+ * Identity strings. The identity authority gives a signed-in principal a `profiles` row only when that user first opens the dashboard
+ * (app/[locale]/dashboard/layout.tsx is the one place that inserts one), and `user_management.users` belongs to the retired credential schema.
+ * An administrator acting through the API, a mobile device, a SCIM-provisioned person or a system job has a perfectly good identity and no such row,
+ * so a `created_by`, `user_id` or `member_id` that references `profiles.user_id` or `users.user_id` would refuse the write. An actor reference is a value.
+ * Thirty such keys were created by the legacy migrations and are enforced today; removing an enforced key is a separate decision, so they stay declared
+ * (GRANDFATHERED_IDENTITY_REFERENCES) until the identity authority provisions a profile for every principal and the rest can follow.
+ *
+ * Evidence. An append-only audit or security record outlives the rows it describes and records principals that may not exist (a failed sign-in, a
+ * system actor), and a cascading delete from its parent would destroy the evidence. It carries identifiers, not foreign keys.
+ */
+export const IDENTITY_REFERENCE_PARENTS: ReadonlyArray<{ table: string; column: string }> = [
+  { table: 'profiles', column: 'user_id' },
+  { table: 'user_management.users', column: 'user_id' },
+]
+
+export const GRANDFATHERED_IDENTITY_REFERENCES: readonly string[] = [
+  'bargaining_units.bargaining_chair_id',
+  'bargaining_units.chief_steward_id',
+  'bargaining_units.created_by',
+  'bargaining_units.updated_by',
+  'committee_action_items.assigned_to',
+  'committee_action_items.completed_by',
+  'committee_action_items.created_by',
+  'committee_action_items.updated_by',
+  'committee_documents.uploaded_by',
+  'committee_intelligence_snapshots.generated_by',
+  'committee_meeting_attendees.member_id',
+  'committee_meetings.created_by',
+  'committee_meetings.minutes_approved_by',
+  'committee_meetings.updated_by',
+  'committees.chair_id',
+  'committees.created_by',
+  'committees.secretary_id',
+  'committees.updated_by',
+  'correspondence.approved_by',
+  'correspondence.assigned_signer_id',
+  'correspondence.dispatched_by',
+  'correspondence.drafted_by',
+  'correspondence.signed_by',
+  'correspondence_audit_trail.actor_user_id',
+  'employers.created_by',
+  'employers.updated_by',
+  'user_management.oauth_providers.user_id',
+  'user_signatures.user_id',
+  'worksites.created_by',
+  'worksites.updated_by',
+]
+
+/**
+ * Declared NOT NULL that the platform deliberately leaves nullable, each with the migration that says why. The declaration is what is wrong there: the
+ * database has to be able to hold the row the design describes. NOT_NULL_ABSENT keeps reporting these columns, so the exception stays visible and is pinned
+ * by the ratchet; it is never applied.
+ */
+export const NOT_NULL_DELIBERATELY_OPEN: Readonly<Record<string, string>> = {
+  'payments.amount':
+    'platform 0015_payments_transaction_source: a payment recorded before the finance authority has no amount; the authority refuses to register it, and the database has to be able to hold it',
+}
+
+export const EVIDENCE_TABLES: readonly string[] = [
+  'audit_security.audit_logs',
+  'audit_security.security_events',
+  'financial_audit_log',
+  'signature_audit_log',
+  'signature_audit_trail',
+  'cross_org_access_log',
+  'user_management.auth_audit_log',
+  'data_anonymization_log',
+]
+
+/** Every declared foreign key the doctrine forbids, as `child.column -> parent.column (reason)`. */
+export function foreignKeyDoctrineViolations(declared: readonly DeclaredTable[]): string[] {
+  const violations: string[] = []
+  for (const table of declared) {
+    for (const fk of table.foreignKeys) {
+      const parent = fk.foreignSchema === 'public' ? fk.foreignTable : `${fk.foreignSchema}.${fk.foreignTable}`
+      const identity =
+        IDENTITY_REFERENCE_PARENTS.some((p) => p.table === parent && fk.foreignColumns.length === 1 && fk.foreignColumns[0] === p.column) &&
+        !GRANDFATHERED_IDENTITY_REFERENCES.includes(`${table.label}.${fk.columns.join(',')}`)
+      const evidence = EVIDENCE_TABLES.includes(table.label)
+      if (identity || evidence) violations.push(`${table.label}.${fk.columns.join(',')} -> ${parent}.${fk.foreignColumns.join(',')} (${identity ? 'identity reference' : 'evidence table'})`)
+    }
+  }
+  return violations.sort()
 }

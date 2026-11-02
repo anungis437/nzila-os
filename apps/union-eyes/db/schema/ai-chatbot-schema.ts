@@ -21,8 +21,6 @@ import {
   date,
 } from "drizzle-orm/pg-core";
 import { organizations } from "../schema-organizations";
-import { profiles } from "./profiles-schema";
-import { users } from "../schema";
 
 // Chat session status enum
 export const chatSessionStatusEnum = pgEnum("chat_session_status", [
@@ -67,8 +65,7 @@ export const chatSessions = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: text("user_id")
-      .notNull()
-      .references(() => profiles.userId, { onDelete: "cascade" }),
+      .notNull(),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
@@ -95,8 +92,8 @@ export const chatSessions = pgTable(
     helpful: boolean("helpful"),
     feedbackComment: text("feedback_comment"),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("chat_sessions_user_id_idx").on(table.userId),
@@ -170,7 +167,7 @@ export const chatMessages = pgTable(
       flags?: string[];
     }>(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     sessionIdIdx: index("chat_messages_session_id_idx").on(table.sessionId),
@@ -238,10 +235,9 @@ export const knowledgeBase = pgTable(
     isActive: boolean("is_active").notNull().default(true),
     
     createdBy: text("created_by")
-      .notNull()
-      .references(() => profiles.userId),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     organizationIdIdx: index("knowledge_base_organization_id_idx").on(
@@ -286,7 +282,7 @@ export const aiSafetyFilters = pgTable(
     sessionId: uuid("session_id").references(() => chatSessions.id),
     messageId: uuid("message_id").references(() => chatMessages.id),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     flaggedIdx: index("ai_safety_filters_flagged_idx").on(table.flagged),
@@ -315,12 +311,12 @@ export const aiUsageMetrics = pgTable(
     tokensTotal: integer("tokens_total").notNull().default(0),
     estimatedCost: decimal("estimated_cost", { precision: 10, scale: 6 }).notNull().default("0"),
     requestId: text("request_id"),
-    userId: text("user_id").references(() => users.userId, { onDelete: "set null" }),
+    userId: text("user_id"),
     sessionId: uuid("session_id"),
     latencyMs: integer("latency_ms"),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgTimeIdx: index("idx_usage_org_time").on(table.organizationId, table.createdAt),
@@ -344,8 +340,8 @@ export const aiBudgets = pgTable(
     hardLimit: boolean("hard_limit").default(true),
     billingPeriodStart: date("billing_period_start").notNull(),
     billingPeriodEnd: date("billing_period_end").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgPeriodIdx: index("idx_budgets_org_period").on(table.organizationId, table.billingPeriodEnd),

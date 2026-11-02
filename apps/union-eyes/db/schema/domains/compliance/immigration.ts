@@ -19,15 +19,15 @@ export const foreignWorkers = pgTable("foreign_workers", {
   
   // Immigration details
   workPermitNumber: text("work_permit_number").unique().notNull(),
-  workPermitExpiry: timestamp("work_permit_expiry").notNull(),
+  workPermitExpiry: timestamp("work_permit_expiry", { withTimezone: true }).notNull(),
   countryOfOrigin: text("country_of_origin").notNull(),
   
   // Employment details
   employerId: uuid("employer_id").notNull(), // Foreign key to profiles/companies
   positionTitle: text("position_title").notNull(),
   nocCode: text("noc_code").notNull(), // National Occupational Classification code
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date"), // Contract end date (if fixed-term)
+  startDate: timestamp("start_date", { withTimezone: true }).notNull(),
+  endDate: timestamp("end_date", { withTimezone: true }), // Contract end date (if fixed-term)
   
   // LMIA/GSS pathway
   immigrationPathway: text("immigration_pathway").notNull(), // 'LMIA' | 'GSS' | 'IMP' (International Mobility Program)
@@ -37,21 +37,21 @@ export const foreignWorkers = pgTable("foreign_workers", {
   // LMBP requirements
   requiresLMBP: boolean("requires_lmbp").default(false), // Large employers (>10 workers) must provide LMBP
   lmbpLetterGenerated: boolean("lmbp_letter_generated").default(false),
-  lmbpLetterDate: timestamp("lmbp_letter_date"),
+  lmbpLetterDate: timestamp("lmbp_letter_date", { withTimezone: true }),
   
   // Skills transfer tracking (LMBP requirement)
   skillsTransferPlan: jsonb("skills_transfer_plan"), // JSON: { mentorId, goals: [], timeline: '' }
-  mentorshipStartDate: timestamp("mentorship_start_date"),
-  mentorshipEndDate: timestamp("mentorship_end_date"),
+  mentorshipStartDate: timestamp("mentorship_start_date", { withTimezone: true }),
+  mentorshipEndDate: timestamp("mentorship_end_date", { withTimezone: true }),
   
   // Compliance status
   complianceStatus: text("compliance_status").notNull().default("pending"), // 'pending' | 'compliant' | 'at_risk' | 'non_compliant'
-  lastComplianceCheck: timestamp("last_compliance_check"),
+  lastComplianceCheck: timestamp("last_compliance_check", { withTimezone: true }),
   complianceNotes: text("compliance_notes"),
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   createdBy: varchar("created_by", { length: 255 }), // Admin/HR user who created the record
 });
 
@@ -69,9 +69,9 @@ export const lmbpLetters = pgTable("lmbp_letters", {
   
   // Letter details
   letterNumber: text("letter_number").unique().notNull(), // e.g., 'LMBP-2026-001234'
-  generatedDate: timestamp("generated_date").notNull(),
-  validFrom: timestamp("valid_from").notNull(),
-  validUntil: timestamp("valid_until").notNull(), // Typically 2 years
+  generatedDate: timestamp("generated_date", { withTimezone: true }).notNull(),
+  validFrom: timestamp("valid_from", { withTimezone: true }).notNull(),
+  validUntil: timestamp("valid_until", { withTimezone: true }).notNull(), // Typically 2 years
   
   // LMBP commitments (required by IRCC)
   commitments: jsonb("commitments").notNull(), // JSON array of commitments
@@ -85,8 +85,8 @@ export const lmbpLetters = pgTable("lmbp_letters", {
   foreignWorkerIds: jsonb("foreign_worker_ids").notNull(), // Array of foreign worker UUIDs
   
   // Compliance tracking
-  complianceReportDue: timestamp("compliance_report_due"), // Annual report due date
-  lastComplianceReport: timestamp("last_compliance_report"),
+  complianceReportDue: timestamp("compliance_report_due", { withTimezone: true }), // Annual report due date
+  lastComplianceReport: timestamp("last_compliance_report", { withTimezone: true }),
   complianceStatus: text("compliance_status").default("active"), // 'active' | 'under_review' | 'non_compliant' | 'expired'
   
   // Document storage
@@ -94,8 +94,8 @@ export const lmbpLetters = pgTable("lmbp_letters", {
   letterPdfHash: text("letter_pdf_hash"), // SHA-256 hash for tamper detection
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   createdBy: varchar("created_by", { length: 255 }),
 });
 
@@ -112,7 +112,7 @@ export const gssApplications = pgTable("gss_applications", {
   
   // Application details
   applicationNumber: text("application_number").unique().notNull(), // IRCC application number
-  submissionDate: timestamp("submission_date").notNull(),
+  submissionDate: timestamp("submission_date", { withTimezone: true }).notNull(),
   gssCategory: text("gss_category").notNull(), // 'A' (unique talent) | 'B' (short-duration)
   
   // GSS Category A: Unique and specialized talent
@@ -120,8 +120,8 @@ export const gssApplications = pgTable("gss_applications", {
   // GSS Category B: Short-duration work (<30 days) or intra-company transfers
   
   // Processing timeline (2-week commitment)
-  expectedDecisionDate: timestamp("expected_decision_date").notNull(), // submission + 10 business days
-  actualDecisionDate: timestamp("actual_decision_date"),
+  expectedDecisionDate: timestamp("expected_decision_date", { withTimezone: true }).notNull(), // submission + 10 business days
+  actualDecisionDate: timestamp("actual_decision_date", { withTimezone: true }),
   processingDays: integer("processing_days"), // Actual business days taken
   met2WeekTarget: boolean("met2_week_target"), // Did IRCC meet 2-week commitment? (the Django compliance model names it met2_week_target)
   
@@ -140,8 +140,8 @@ export const gssApplications = pgTable("gss_applications", {
   complianceFlags: jsonb("compliance_flags"), // JSON: [{ type: 'missing_lmbp', severity: 'high', resolvedAt: null }, ...]
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   createdBy: varchar("created_by", { length: 255 }),
 });
 
@@ -162,9 +162,9 @@ export const mentorships = pgTable("mentorships", {
   mentorName: text("mentor_name").notNull(),
   
   // Mentorship details
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date"), // Planned end date
-  actualEndDate: timestamp("actual_end_date"),
+  startDate: timestamp("start_date", { withTimezone: true }).notNull(),
+  endDate: timestamp("end_date", { withTimezone: true }), // Planned end date
+  actualEndDate: timestamp("actual_end_date", { withTimezone: true }),
   
   // Skills transfer goals (LMBP requirement)
   skillsToTransfer: jsonb("skills_to_transfer").notNull(), // JSON: ['Python programming', 'Database optimization', 'Team leadership']
@@ -173,7 +173,7 @@ export const mentorships = pgTable("mentorships", {
   // Progress tracking
   meetingFrequency: text("meeting_frequency"), // 'weekly' | 'bi-weekly' | 'monthly'
   totalMeetings: integer("total_meetings").default(0),
-  lastMeetingDate: timestamp("last_meeting_date"),
+  lastMeetingDate: timestamp("last_meeting_date", { withTimezone: true }),
   
   // KPIs (LMBP compliance)
   completionPercentage: integer("completion_percentage").default(0), // 0-100
@@ -188,8 +188,8 @@ export const mentorships = pgTable("mentorships", {
   employerId: uuid("employer_id").notNull(),
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /**
@@ -216,9 +216,9 @@ export const lmbpComplianceAlerts = pgTable("lmbp_compliance_alerts", {
   recommendedAction: text("recommended_action"),
   
   // Alert timing
-  triggeredAt: timestamp("triggered_at").defaultNow().notNull(),
-  dueDate: timestamp("due_date"), // When action must be taken
-  resolvedAt: timestamp("resolved_at"),
+  triggeredAt: timestamp("triggered_at", { withTimezone: true }).defaultNow().notNull(),
+  dueDate: timestamp("due_date", { withTimezone: true }), // When action must be taken
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   
   // Alert status
   status: text("status").notNull().default("open"), // 'open' | 'in_progress' | 'resolved' | 'dismissed'
@@ -231,8 +231,8 @@ export const lmbpComplianceAlerts = pgTable("lmbp_compliance_alerts", {
   dashboardNotified: boolean("dashboard_notified").default(false),
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /**
@@ -246,12 +246,12 @@ export const lmbpComplianceReports = pgTable("lmbp_compliance_reports", {
   // Report details
   lmbpLetterId: uuid("lmbp_letter_id").notNull(),
   employerId: uuid("employer_id").notNull(),
-  reportingPeriodStart: timestamp("reporting_period_start").notNull(),
-  reportingPeriodEnd: timestamp("reporting_period_end").notNull(),
+  reportingPeriodStart: timestamp("reporting_period_start", { withTimezone: true }).notNull(),
+  reportingPeriodEnd: timestamp("reporting_period_end", { withTimezone: true }).notNull(),
   
   // Submission details
   submittedToIRCC: boolean("submitted_to_ircc").default(false),
-  submissionDate: timestamp("submission_date"),
+  submissionDate: timestamp("submission_date", { withTimezone: true }),
   irccConfirmationNumber: text("ircc_confirmation_number"),
   
   // Commitment progress
@@ -274,8 +274,8 @@ export const lmbpComplianceReports = pgTable("lmbp_compliance_reports", {
   supportingDocumentsUrls: jsonb("supporting_documents_urls"), // JSON: ['url1', 'url2']
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   createdBy: varchar("created_by", { length: 255 }),
 });
 

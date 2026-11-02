@@ -72,8 +72,8 @@ export const reports = pgTable('reports', {
   updatedBy: varchar('updated_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
   lastRunAt: timestamp('last_run_at'),
   runCount: integer('run_count').notNull().default(0),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================

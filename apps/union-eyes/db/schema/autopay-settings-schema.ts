@@ -47,8 +47,8 @@ export const autoPaySettings = pgTable('autopay_settings', {
   notifyDaysBefore: varchar('notify_days_before', { length: 255 }).default('3'),
   
   // Audit
-  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   createdBy: varchar('created_by', { length: 255 }),
   updatedBy: varchar('updated_by', { length: 255 }),
 });

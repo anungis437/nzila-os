@@ -32,8 +32,8 @@ export const cmsPages = pgTable('cms_pages', {
   requiresAuth: boolean('requires_auth').default(false),
   allowedRoles: text('allowed_roles').array(),
   seoConfig: jsonb('seo_config').default({}),
-  createdBy: text('created_by').references(() => profiles.userId),
-  updatedBy: text('updated_by').references(() => profiles.userId),
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
   submittedBy: text('submitted_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
@@ -58,7 +58,7 @@ export const cmsMediaLibrary = pgTable('cms_media_library', {
   caption: text('caption'),
   tags: text('tags').array(),
   folder: text('folder').default('/'),
-  uploadedBy: text('uploaded_by').references(() => profiles.userId),
+  uploadedBy: text('uploaded_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   organizationIdx: index('idx_cms_media_organization').on(table.organizationId, table.fileType),
@@ -93,7 +93,7 @@ export const donationCampaigns = pgTable('donation_campaigns', {
   seoConfig: jsonb('seo_config').default({}),
   stripeProductId: text('stripe_product_id'),
   stripePriceIds: jsonb('stripe_price_ids').default({}),
-  createdBy: text('created_by').references(() => profiles.userId),
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({

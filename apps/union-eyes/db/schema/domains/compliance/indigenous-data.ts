@@ -29,8 +29,8 @@ export const bandCouncils = pgTable("band_councils", {
   thirdPartyAccessAllowed: boolean("third_party_access_allowed").notNull().default(false),
   aggregationAllowed: boolean("aggregation_allowed").notNull().default(false),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Band Council consent for specific data collection/use
@@ -60,8 +60,8 @@ export const bandCouncilConsent = pgTable("band_council_consent", {
   revocationReason: text("revocation_reason"),
   
   approvedBy: varchar("approved_by", { length: 255 }).notNull(), // Band Council admin user
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Indigenous member cultural classification
@@ -88,8 +88,8 @@ export const indigenousMemberData = pgTable("indigenous_member_data", {
   onReserveDataOnly: boolean("on_reserve_data_only").notNull().default(false),
   preferredStorageLocation: text("preferred_storage_location"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Indigenous data access logs (OCAP® Access tracking)
@@ -112,7 +112,7 @@ export const indigenousDataAccessLog = pgTable("indigenous_data_access_log", {
   ipAddress: varchar("ip_address", { length: 45 }),
   userAgent: text("user_agent"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Indigenous data sharing agreements (inter-union or third-party)
@@ -149,8 +149,8 @@ export const indigenousDataSharingAgreements = pgTable("indigenous_data_sharing_
   terminatedAt: timestamp("terminated_at"),
   terminationReason: text("termination_reason"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Traditional knowledge protection
@@ -182,7 +182,7 @@ export const traditionalKnowledgeRegistry = pgTable("traditional_knowledge_regis
   videoUrl: text("video_url"),
   audioUrl: text("audio_url"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

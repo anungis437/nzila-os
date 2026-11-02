@@ -26,8 +26,8 @@ export const stripeConnectAccounts = pgTable("stripe_connect_accounts", {
   bankName: text("bank_name"),
   accountVerified: boolean("account_verified").notNull().default(false),
   createdBy: text("created_by").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Payment classification policy
@@ -37,15 +37,15 @@ export const paymentClassificationPolicy = pgTable("payment_classification_polic
     .defaultRandom(),
   policyName: text("policy_name").notNull(), // e.g., "Strike Fund Separation Policy"
   policyDescription: text("policy_description"),
-  effectiveDate: timestamp("effective_date").notNull(),
-  expiryDate: timestamp("expiry_date"),
+  effectiveDate: timestamp("effective_date", { withTimezone: true }).notNull(),
+  expiryDate: timestamp("expiry_date", { withTimezone: true }),
   enforceStrictSeparation: boolean("enforce_strict_separation").notNull().default(true), // Strike payments must use separate account
   allowOperationalFallback: boolean("allow_operational_fallback").notNull().default(false), // Can never use operational account for strike payments
   requireTrustAccount: boolean("require_trust_account").notNull().default(true), // Strike fund must be in trust account
   automaticClassification: boolean("automatic_classification").notNull().default(true), // Auto-detect payment type and route to correct account
   approvedBy: text("approved_by").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Payment routing rules (which account for which payment type)
@@ -61,8 +61,8 @@ export const paymentRoutingRules = pgTable("payment_routing_rules", {
   fallbackAccountId: uuid("fallback_account_id").references(() => stripeConnectAccounts.id),
   allowFallback: boolean("allow_fallback").notNull().default(false), // Can use fallback if primary fails?
   routingPriority: text("routing_priority").notNull().default("1"), // Priority order (1 = highest)
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Payment transaction log with routing enforcement
@@ -70,7 +70,7 @@ export const separatedPaymentTransactions = pgTable("separated_payment_transacti
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  transactionDate: timestamp("transaction_date").notNull().defaultNow(),
+  transactionDate: timestamp("transaction_date", { withTimezone: true }).notNull().defaultNow(),
   paymentType: text("payment_type").notNull(), // "strike_payment", "operational", "dues"
   paymentCategory: text("payment_category").notNull(),
   paymentAmount: text("payment_amount").notNull(), // In cents
@@ -89,7 +89,7 @@ export const separatedPaymentTransactions = pgTable("separated_payment_transacti
   paymentStatus: text("payment_status").notNull().default("pending"), // "pending", "completed", "failed", "refunded"
   failureReason: text("failure_reason"),
   metadata: jsonb("metadata"), // Additional payment details
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Whiplash violation detection (payments routed to wrong account)
@@ -97,7 +97,7 @@ export const whiplashViolations = pgTable("whiplash_violations", {
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  violationDate: timestamp("violation_date").notNull().defaultNow(),
+  violationDate: timestamp("violation_date", { withTimezone: true }).notNull().defaultNow(),
   violationType: text("violation_type").notNull(), // "strike_payment_to_operational", "commingled_funds", "incorrect_routing"
   severity: text("severity").notNull(), // "critical", "high", "medium", "low"
   transactionId: uuid("transaction_id").references(() => separatedPaymentTransactions.id),
@@ -111,10 +111,10 @@ export const whiplashViolations = pgTable("whiplash_violations", {
   violationStatus: text("violation_status").notNull().default("open"), // "open", "investigating", "resolved"
   detectedBy: text("detected_by"),
   resolvedBy: text("resolved_by"),
-  resolvedAt: timestamp("resolved_at"),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   resolutionNotes: text("resolution_notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Strike fund payment audit
@@ -122,7 +122,7 @@ export const strikeFundPaymentAudit = pgTable("strike_fund_payment_audit", {
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  auditDate: timestamp("audit_date").notNull().defaultNow(),
+  auditDate: timestamp("audit_date", { withTimezone: true }).notNull().defaultNow(),
   auditPeriod: text("audit_period").notNull(), // "Q1-2025", "2024"
   totalStrikePayments: text("total_strike_payments").notNull(),
   totalStrikeAmount: text("total_strike_amount").notNull(),
@@ -137,7 +137,7 @@ export const strikeFundPaymentAudit = pgTable("strike_fund_payment_audit", {
   recommendedActions: text("recommended_actions"),
   auditedBy: text("audited_by").notNull(),
   auditReport: text("audit_report"), // Link to full report
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Account balance reconciliation
@@ -145,7 +145,7 @@ export const accountBalanceReconciliation = pgTable("account_balance_reconciliat
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  reconciliationDate: timestamp("reconciliation_date").notNull().defaultNow(),
+  reconciliationDate: timestamp("reconciliation_date", { withTimezone: true }).notNull().defaultNow(),
   accountId: uuid("account_id").references(() => stripeConnectAccounts.id).notNull(),
   accountType: text("account_type").notNull(),
   stripeReportedBalance: text("stripe_reported_balance").notNull(), // Balance according to Stripe
@@ -156,7 +156,7 @@ export const accountBalanceReconciliation = pgTable("account_balance_reconciliat
   reconciliationStatus: text("reconciliation_status").notNull().default("pending"), // "pending", "reconciled", "discrepancy"
   reconciledBy: text("reconciled_by"),
   reconciliationNotes: text("reconciliation_notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Whiplash prevention audit log
@@ -164,7 +164,7 @@ export const whiplashPreventionAudit = pgTable("whiplash_prevention_audit", {
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  auditDate: timestamp("audit_date").notNull().defaultNow(),
+  auditDate: timestamp("audit_date", { withTimezone: true }).notNull().defaultNow(),
   actionType: text("action_type").notNull(), // "payment_routed", "account_created", "violation_detected", "correction_applied"
   actionDescription: text("action_description").notNull(),
   accountId: uuid("account_id").references(() => stripeConnectAccounts.id),

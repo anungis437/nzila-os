@@ -50,7 +50,7 @@ export const organizingCampaigns = pgTable(
     cardSigningProgress: decimal('card_signing_progress', { precision: 5, scale: 2 }),
 
     // Key personnel
-    leadOrganizerId: text('lead_organizer_id').references(() => profiles.userId),
+    leadOrganizerId: text('lead_organizer_id'),
     organizingTeam: uuid('organizing_team').array(),
 
     // Campaign timeline
@@ -83,8 +83,8 @@ export const organizingCampaigns = pgTable(
     // Metadata
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-    createdBy: text('created_by').references(() => profiles.userId),
-    updatedBy: text('updated_by').references(() => profiles.userId),
+    createdBy: text('created_by'),
+    updatedBy: text('updated_by'),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
   },
   (table) => ({

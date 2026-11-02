@@ -43,8 +43,8 @@ export const goldenShares = pgTable("golden_shares", {
   transferable: boolean("transferable").notNull().default(false), // Non-transferable except to successor Council
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /**
@@ -96,8 +96,8 @@ export const reservedMatterVotes = pgTable("reserved_matter_votes", {
   implementationNotes: text("implementation_notes"),
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /**
@@ -156,8 +156,8 @@ export const missionAudits = pgTable("mission_audits", {
   supportingDocumentsUrls: jsonb("supporting_documents_urls"),
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /**
@@ -169,7 +169,7 @@ export const governanceEvents = pgTable("governance_events", {
   
   // Event details
   eventType: text("event_type").notNull(), // 'golden_share_issued' | 'reserved_matter_vote' | 'mission_audit' | 'sunset_triggered' | 'share_converted'
-  eventDate: timestamp("event_date").notNull(),
+  eventDate: timestamp("event_date", { withTimezone: true }).notNull(),
   
   // Related orgs
   goldenShareId: uuid("golden_share_id"),
@@ -189,7 +189,7 @@ export const governanceEvents = pgTable("governance_events", {
   notificationsSent: boolean("notifications_sent").default(false),
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   createdBy: varchar("created_by", { length: 255 }),
 });
 
@@ -220,8 +220,8 @@ export const councilElections = pgTable("council_elections", {
   contestedResults: boolean("contested_results").default(false),
   
   // Audit trail
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Type exports

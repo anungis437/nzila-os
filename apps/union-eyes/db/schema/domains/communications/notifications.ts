@@ -99,8 +99,8 @@ export const userNotificationPreferences = pgTable('user_notification_preference
   securityAlerts: boolean('security_alerts').notNull().default(true),
   
   // Metadata
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -135,18 +135,18 @@ export const notificationTracking = pgTable('notification_tracking', {
   actionLabel: text('action_label'),
   
   // Delivery tracking
-  sentAt: timestamp('sent_at'),
-  deliveredAt: timestamp('delivered_at'),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
   failureReason: text('failure_reason'),
   failureCount: integer('failure_count').default(0),
-  lastFailureAt: timestamp('last_failure_at'),
+  lastFailureAt: timestamp('last_failure_at', { withTimezone: true }),
   
   // Additional metadata
   metadata: jsonb('metadata'),
   
   // Tracking fields
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -177,7 +177,7 @@ export const inAppNotifications = pgTable('in_app_notifications', {
   readAt: timestamp('read_at'),
   
   // Timestamps
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp('expires_at'), // Optional expiration
 }, (table) => ({
   // A system-written notice carries data.dedupeKey, so writing it twice stores it once (migration 20261103).
@@ -223,7 +223,7 @@ export const notifications = pgTable('notifications', {
   status: notificationScheduleStatusEnum('status').notNull().default('scheduled'),
   
   // Timestamps
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   sentAt: timestamp('sent_at'),
 });
 
@@ -293,8 +293,8 @@ export const notificationTemplates = pgTable('notification_templates', {
   retryDelaySeconds: text('retry_delay_seconds').default('300'),
   
   // Metadata
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
   updatedBy: text('updated_by'),
 });
@@ -338,8 +338,8 @@ export const notificationQueue = pgTable('notification_queue', {
   errorMessage: text('error_message'),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -370,7 +370,7 @@ export const notificationDeliveryLog = pgTable('notification_delivery_log', {
   metadata: jsonb('metadata'),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================

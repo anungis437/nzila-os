@@ -52,8 +52,8 @@ export const strikeFundDisbursements = pgTable("strike_fund_disbursements", {
   province: varchar("province", { length: 2 }).notNull(),
   isQuebecResident: boolean("is_quebec_resident").notNull().default(false),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // T4A tax slips (Federal)
@@ -105,8 +105,8 @@ export const t4aTaxSlips = pgTable("t4a_tax_slips", {
   originalSlipId: uuid("original_slip_id"),
   amendmentReason: text("amendment_reason"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // RL-1 tax slips (Quebec)
@@ -156,8 +156,8 @@ export const rl1TaxSlips = pgTable("rl1_tax_slips", {
   originalSlipId: uuid("original_slip_id"),
   amendmentReason: text("amendment_reason"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Year-end tax processing status
@@ -196,8 +196,8 @@ export const taxYearEndProcessing = pgTable("tax_year_end_processing", {
   processedBy: varchar("processed_by", { length: 255 }),
   notes: text("notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Weekly threshold tracking (for $500/week monitoring)
@@ -223,8 +223,8 @@ export const weeklyThresholdTracking = pgTable("weekly_threshold_tracking", {
   requiresT4A: boolean("requires_t4a").notNull().default(false),
   requiresRL1: boolean("requires_rl1").notNull().default(false),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================

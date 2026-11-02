@@ -61,8 +61,7 @@ export const crossOrgAccessLog = pgTable("cross_org_access_log", {
   // Who accessed
   userId: varchar("user_id", { length: 255 }).notNull(),
   userOrganizationId: uuid("user_organization_id")
-    .notNull()
-    .references(() => organizations.id),
+    .notNull(),
   
   // What was accessed
   resourceType: varchar("resource_type", { length: 50 }).notNull(),

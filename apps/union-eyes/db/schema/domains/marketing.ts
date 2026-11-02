@@ -106,8 +106,8 @@ export const caseStudies = pgTable(
     visibility: text('visibility').notNull().default('public'), // 'public' | 'authenticated'
     featured: boolean('featured').notNull().default(false),
     publishedAt: timestamp('published_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     categoryIdx: index('case_studies_category_idx').on(table.category),
@@ -133,8 +133,8 @@ export const testimonials = pgTable(
     photo: text('photo'),
     featured: boolean('featured').notNull().default(false),
     visibility: text('visibility').notNull().default('public'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    approvedAt: timestamp('approved_at'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    approvedAt: timestamp('approved_at', { withTimezone: true }),
   },
   (table) => ({
     typeIdx: index('testimonials_type_idx').on(table.type),
@@ -177,7 +177,7 @@ export const pilotApplications = pgTable(
     // future RLS policy use it.
     verifiedOrganizationId: uuid('verified_organization_id').references(() => organizations.id, { onDelete: 'set null' }),
     verifiedBy: text('verified_by'),
-    verifiedAt: timestamp('verified_at'),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
     // Platform-approved commercial terms (PR #752 round 25). `memberCount`
     // (above) is applicant-supplied at public intake and steward-editable
     // via ordinary PATCH; `responses.subscriptionPlanId` was never backed
@@ -194,7 +194,7 @@ export const pilotApplications = pgTable(
     verifiedPilotAmount: numeric('verified_pilot_amount', { precision: 12, scale: 2 }),
     verifiedSubscriptionPlanId: uuid('verified_subscription_plan_id'),
     commercialTermsApprovedBy: text('commercial_terms_approved_by'),
-    commercialTermsApprovedAt: timestamp('commercial_terms_approved_at'),
+    commercialTermsApprovedAt: timestamp('commercial_terms_approved_at', { withTimezone: true }),
   },
   (table) => ({
     statusIdx: index('pilot_applications_status_idx').on(table.status),
@@ -260,7 +260,7 @@ export const dataAggregationConsent = pgTable(
     consentDate: timestamp('consent_date').notNull(),
     categories: movementTrendCategoryEnum('categories').array().notNull(),
     expiresAt: timestamp('expires_at'),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgConsentIdx: index('data_aggregation_consent_org_idx').on(table.organizationId),
@@ -282,7 +282,7 @@ export const movementTrends = pgTable(
       .default(false),
     emergingPattern: boolean('emerging_pattern').notNull().default(false),
     confidenceLevel: text('confidence_level').notNull().default('medium'), // 'low' | 'medium' | 'high'
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     categoryDimensionIdx: index('movement_trends_category_dimension_idx').on(

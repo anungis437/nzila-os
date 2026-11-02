@@ -82,7 +82,7 @@ export const payments = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    memberId: varchar("member_id", { length: 255 }).references(() => profiles.userId, { onDelete: "set null" }),
+    memberId: varchar("member_id", { length: 255 }),
     
     // Payment details
     amount: decimal("amount", { precision: 19, scale: 2 }).notNull(),
@@ -113,8 +113,8 @@ export const payments = pgTable(
     failureReason: text("failure_reason"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     createdBy: varchar("created_by", { length: 255 }),
     updatedBy: varchar("updated_by", { length: 255 }),
   },
@@ -155,8 +155,8 @@ export const paymentCycles = pgTable(
     closedAt: timestamp("closed_at"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     orgIdx: index("payment_cycles_org_idx").on(t.organizationId),
@@ -175,8 +175,7 @@ export const paymentMethods = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
     memberId: varchar("member_id", { length: 255 })
-      .notNull()
-      .references(() => profiles.userId, { onDelete: "cascade" }),
+      .notNull(),
     
     // Method type
     type: paymentMethodEnum("type").notNull(),
@@ -195,8 +194,8 @@ export const paymentMethods = pgTable(
     expiresAt: timestamp("expires_at"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     orgMemberIdx: index("payment_methods_org_member_idx").on(t.organizationId, t.memberId),
@@ -235,8 +234,8 @@ export const bankReconciliation = pgTable(
     reconciliationNotes: text("reconciliation_notes"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     reconciledBy: varchar("reconciled_by", { length: 255 }),
     reconciledAt: timestamp("reconciled_at"),
   },
@@ -272,8 +271,8 @@ export const paymentDisputes = pgTable(
     resolvedAt: timestamp("resolved_at"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     filedBy: varchar("filed_by", { length: 255 }),
     resolvedBy: varchar("resolved_by", { length: 255 }),
   },

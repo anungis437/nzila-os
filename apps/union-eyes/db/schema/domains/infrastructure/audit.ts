@@ -1,7 +1,6 @@
 import { uuid, varchar, boolean, timestamp, text, jsonb, integer, pgSchema, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { organizations } from "../../../schema-organizations";
-import { users } from "../../user-management-schema";
 
 // Create audit_security schema
 export const auditSecuritySchema = pgSchema("audit_security");
@@ -9,8 +8,8 @@ export const auditSecuritySchema = pgSchema("audit_security");
 // Audit logs table - comprehensive system activity tracking
 export const auditLogs = auditSecuritySchema.table("audit_logs", {
   auditId: uuid("audit_id").primaryKey().defaultRandom(),
-  organizationId: uuid("organization_id").references(() => organizations.id),
-  userId: varchar("user_id", { length: 255 }).references(() => users.userId),
+  organizationId: uuid("organization_id"),
+  userId: varchar("user_id", { length: 255 }),
   action: varchar("action", { length: 100 }).notNull(),
   resourceType: varchar("resource_type", { length: 50 }).notNull(),
   resourceId: uuid("resource_id"),
@@ -43,8 +42,8 @@ export const auditLogs = auditSecuritySchema.table("audit_logs", {
 // Security events table - security-specific event tracking
 export const securityEvents = auditSecuritySchema.table("security_events", {
   eventId: uuid("event_id").primaryKey().defaultRandom(),
-  organizationId: uuid("organization_id").references(() => organizations.id),
-  userId: varchar("user_id", { length: 255 }).references(() => users.userId),
+  organizationId: uuid("organization_id"),
+  userId: varchar("user_id", { length: 255 }),
   eventType: varchar("event_type", { length: 50 }).notNull(),
   eventCategory: varchar("event_category", { length: 30 }).notNull(),
   severity: varchar("severity", { length: 20 }).notNull(),
@@ -55,7 +54,7 @@ export const securityEvents = auditSecuritySchema.table("security_events", {
   riskScore: integer("risk_score").default(0),
   isResolved: boolean("is_resolved").default(false),
   resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-  resolvedBy: varchar("resolved_by", { length: 255 }).references(() => users.userId),
+  resolvedBy: varchar("resolved_by", { length: 255 }),
   resolutionNotes: text("resolution_notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => ({

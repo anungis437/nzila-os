@@ -155,7 +155,7 @@ export const alertRules = pgTable('alert_rules', {
   failureCount: integer('failure_count').notNull().default(0),
   
   // Metadata
-  createdBy: text('created_by').references(() => profiles.userId),
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({

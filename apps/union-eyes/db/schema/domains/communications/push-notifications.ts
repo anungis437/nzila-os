@@ -62,8 +62,7 @@ export const pushDevices = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
     profileId: text('profile_id')
-      .notNull()
-      .references(() => profiles.userId, { onDelete: 'cascade' }),
+      .notNull(),
 
     // Device information
     deviceToken: text('device_token').notNull().unique(),
@@ -159,7 +158,7 @@ export const pushNotifications = pgTable(
     totalDismissed: integer('total_dismissed').default(0),
 
     // Metadata
-    createdBy: text('created_by').references(() => profiles.userId),
+    createdBy: text('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

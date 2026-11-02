@@ -401,8 +401,7 @@ export const committeeMemberships = pgTable(
       .notNull()
       .references(() => committees.id, { onDelete: 'cascade' }),
     memberId: text('member_id')
-      .notNull()
-      .references(() => profiles.userId, { onDelete: 'cascade' }),
+      .notNull(),
 
     // Role
     role: committeeMemberRoleEnum('role').notNull().default('member'),
@@ -415,7 +414,7 @@ export const committeeMemberships = pgTable(
 
     // Appointment/Election Details
     appointmentMethod: varchar('appointment_method', { length: 50 }), // 'elected', 'appointed', 'ex_officio'
-    appointedBy: text('appointed_by').references(() => profiles.userId),
+    appointedBy: text('appointed_by'),
     electionDate: date('election_date'),
     votesReceived: integer('votes_received'),
 
@@ -429,8 +428,8 @@ export const committeeMemberships = pgTable(
     // Metadata
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-    createdBy: text('created_by').references(() => profiles.userId),
-    updatedBy: text('updated_by').references(() => profiles.userId),
+    createdBy: text('created_by'),
+    updatedBy: text('updated_by'),
   },
   (table) => ({
     committeeIdx: index('idx_committee_memberships_committee').on(table.committeeId),
@@ -458,8 +457,7 @@ export const stewardAssignments = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
     stewardId: text('steward_id')
-      .notNull()
-      .references(() => profiles.userId, { onDelete: 'cascade' }),
+      .notNull(),
 
     // Assignment Scope
     stewardType: stewardTypeEnum('steward_type').notNull(),
@@ -479,7 +477,7 @@ export const stewardAssignments = pgTable(
     isInterim: boolean('is_interim').default(false),
 
     // Appointment Details
-    appointedBy: text('appointed_by').references(() => profiles.userId),
+    appointedBy: text('appointed_by'),
     electedDate: date('elected_date'),
     certificationDate: date('certification_date'),
 
@@ -510,8 +508,8 @@ export const stewardAssignments = pgTable(
     // Metadata
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-    createdBy: text('created_by').references(() => profiles.userId),
-    updatedBy: text('updated_by').references(() => profiles.userId),
+    createdBy: text('created_by'),
+    updatedBy: text('updated_by'),
   },
   (table) => ({
     organizationIdx: index('idx_steward_assignments_organization').on(table.organizationId),
@@ -536,8 +534,7 @@ export const roleTenureHistory = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
     memberId: text('member_id')
-      .notNull()
-      .references(() => profiles.userId, { onDelete: 'cascade' }),
+      .notNull(),
 
     // Role Information
     roleType: varchar('role_type', { length: 100 }).notNull(), // 'officer', 'steward', 'committee_member', 'trustee', etc.
@@ -563,7 +560,7 @@ export const roleTenureHistory = pgTable(
 
     // End of Role
     endReason: varchar('end_reason', { length: 100 }), // 'term_expired', 'resigned', 'removed', 'transferred', etc.
-    endedBy: text('ended_by').references(() => profiles.userId),
+    endedBy: text('ended_by'),
 
     // Performance/Notes
     notes: text('notes'),
@@ -572,8 +569,8 @@ export const roleTenureHistory = pgTable(
     // Metadata
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-    createdBy: text('created_by').references(() => profiles.userId),
-    updatedBy: text('updated_by').references(() => profiles.userId),
+    createdBy: text('created_by'),
+    updatedBy: text('updated_by'),
   },
   (table) => ({
     organizationIdx: index('idx_role_tenure_organization').on(table.organizationId),

@@ -33,8 +33,8 @@ export const swissColdStorage = pgTable("swiss_cold_storage", {
   lastAccessedAt: timestamp("last_accessed_at"),
   lastAccessedBy: varchar("last_accessed_by", { length: 255 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Break-glass emergency system
@@ -77,8 +77,8 @@ export const breakGlassSystem = pgTable("break_glass_system", {
   // Status
   status: varchar("status", { length: 20 }).notNull().default("active"), // "active", "testing", "activated"
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Disaster recovery drills
@@ -127,8 +127,8 @@ export const disasterRecoveryDrills = pgTable("disaster_recovery_drills", {
   approvedBy: varchar("approved_by", { length: 255 }),
   approvedAt: timestamp("approved_at"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Key holder registry (for Shamir's Secret Sharing)
@@ -167,8 +167,8 @@ export const keyHolderRegistry = pgTable("key_holder_registry", {
   lastVerifiedAt: timestamp("last_verified_at"),
   nextVerificationDue: timestamp("next_verification_due").notNull(),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Recovery time objectives (RTO) tracking
@@ -192,8 +192,8 @@ export const recoveryTimeObjectives = pgTable("recovery_time_objectives", {
   lastTestResult: varchar("last_test_result", { length: 20 }), // "passed", "failed", "partial"
   actualRecoveryTime: integer("actual_recovery_time"), // Actual time in last test (hours)
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Emergency declarations (used by break-glass service)
@@ -221,8 +221,8 @@ export const emergencyDeclarations = pgTable("emergency_declarations", {
   notificationSent: boolean("notification_sent").notNull().default(false),
   breakGlassActivated: boolean("break_glass_activated").notNull().default(false),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Break-glass activations (Shamir's Secret Sharing records)
@@ -233,8 +233,8 @@ export const breakGlassActivations = pgTable("break_glass_activations", {
   emergencyId: uuid("emergency_id").notNull().references(() => emergencyDeclarations.id),
   
   // Activation details
-  activationInitiatedAt: timestamp("activation_initiated_at").notNull(),
-  activationApprovedAt: timestamp("activation_approved_at"),
+  activationInitiatedAt: timestamp("activation_initiated_at", { withTimezone: true }).notNull(),
+  activationApprovedAt: timestamp("activation_approved_at", { withTimezone: true }),
   activationReason: text("activation_reason").notNull(),
   
   // Key holders' approvals (3 of 5 required)
@@ -271,7 +271,7 @@ export const breakGlassActivations = pgTable("break_glass_activations", {
   auditedBy: varchar("audited_by", { length: 255 }),
   auditReport: text("audit_report"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

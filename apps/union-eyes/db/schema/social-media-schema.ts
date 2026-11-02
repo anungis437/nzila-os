@@ -109,7 +109,7 @@ export const socialAccounts = pgTable('social_accounts', {
   accountMetadata: jsonb('account_metadata').default({}),
   
   // Audit
-  connectedBy: text('connected_by').references(() => profiles.userId),
+  connectedBy: text('connected_by'),
   connectedAt: timestamp('connected_at', { withTimezone: true }).notNull().defaultNow(),
   lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -164,7 +164,7 @@ export const socialPosts = pgTable('social_posts', {
   postMetadata: jsonb('post_metadata').default({}),
   
   // Audit
-  createdBy: text('created_by').references(() => profiles.userId),
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   deletedAt: timestamp('deleted_at', { withTimezone: true })
@@ -206,7 +206,7 @@ export const socialCampaigns = pgTable('social_campaigns', {
   campaignMetadata: jsonb('campaign_metadata').default({}),
   
   // Audit
-  createdBy: text('created_by').references(() => profiles.userId),
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 }, (table) => ({

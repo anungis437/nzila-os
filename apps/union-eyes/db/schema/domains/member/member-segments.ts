@@ -35,11 +35,11 @@ export const memberSegments = pgTable("member_segments", {
   
   // Metadata
   createdBy: text("created_by").notNull(), // Auth user ID
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   
   // Usage tracking
-  lastExecutedAt: timestamp("last_executed_at"),
+  lastExecutedAt: timestamp("last_executed_at", { withTimezone: true }),
   executionCount: integer("execution_count").default(0).notNull(),
   
   // Status

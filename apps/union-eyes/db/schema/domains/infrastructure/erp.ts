@@ -176,8 +176,7 @@ export const syncJobs = pgTable('sync_jobs', {
 export const financialAuditLog = pgTable('financial_audit_log', {
   id: uuid('id').primaryKey().defaultRandom(),
   organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
+    .notNull(),
   
   entityType: varchar('entity_type', { length: 100 }).notNull(),
   orgId: uuid('org_id').notNull(),

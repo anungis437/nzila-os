@@ -48,8 +48,8 @@ export const duesRates = pgTable('dues_rates', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
   lastModifiedBy: text('last_modified_by'),
 });
@@ -67,8 +67,8 @@ export const memberDuesLedger = pgTable('member_dues_ledger', {
   
   // Transaction Details
   transactionType: text('transaction_type').notNull(), // charge, payment, credit, adjustment, write_off
-  transactionDate: timestamp('transaction_date').notNull().defaultNow(),
-  effectiveDate: timestamp('effective_date').notNull(), // The period this applies to
+  transactionDate: timestamp('transaction_date', { withTimezone: true }).notNull().defaultNow(),
+  effectiveDate: timestamp('effective_date', { withTimezone: true }).notNull(), // The period this applies to
   
   // Amounts
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
@@ -108,7 +108,7 @@ export const memberDuesLedger = pgTable('member_dues_ledger', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit (Immutable - no updates allowed)
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
 });
 
@@ -151,8 +151,8 @@ export const memberArrears = pgTable('member_arrears', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   lastCalculatedAt: timestamp('last_calculated_at'),
 });
 
@@ -168,13 +168,13 @@ export const employerRemittances = pgTable('employer_remittances', {
   organizationId: uuid('organization_id').notNull(),
   
   // Period
-  periodStart: timestamp('period_start').notNull(),
-  periodEnd: timestamp('period_end').notNull(),
+  periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
+  periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
   fiscalYear: integer('fiscal_year').notNull(),
   fiscalMonth: integer('fiscal_month').notNull(),
   
   // Remittance Details
-  remittanceDate: timestamp('remittance_date').notNull(),
+  remittanceDate: timestamp('remittance_date', { withTimezone: true }).notNull(),
   remittanceNumber: text('remittance_number'), // Employer's reference
   
   // Amounts
@@ -212,8 +212,8 @@ export const employerRemittances = pgTable('employer_remittances', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
   lastModifiedBy: text('last_modified_by'),
 });
@@ -263,8 +263,8 @@ export const remittanceLineItems = pgTable('remittance_line_items', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================
@@ -310,8 +310,8 @@ export const remittanceExceptions = pgTable('remittance_exceptions', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================
@@ -356,8 +356,8 @@ export const paymentPlans = pgTable('payment_plans', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
   lastModifiedBy: text('last_modified_by'),
 });
@@ -376,16 +376,16 @@ export const financialPeriods = pgTable('financial_periods', {
   // Period
   fiscalYear: integer('fiscal_year').notNull(),
   fiscalMonth: integer('fiscal_month').notNull(),
-  periodStart: timestamp('period_start').notNull(),
-  periodEnd: timestamp('period_end').notNull(),
+  periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
+  periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
   
   // Status
   status: text('status').notNull().default('open'), // open, closed, locked, archived
   
   // Close Details
-  closedAt: timestamp('closed_at'),
+  closedAt: timestamp('closed_at', { withTimezone: true }),
   closedBy: text('closed_by'),
-  lockedAt: timestamp('locked_at'),
+  lockedAt: timestamp('locked_at', { withTimezone: true }),
   lockedBy: text('locked_by'),
   
   // Summary (cached for performance)
@@ -398,8 +398,8 @@ export const financialPeriods = pgTable('financial_periods', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================

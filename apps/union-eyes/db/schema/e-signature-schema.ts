@@ -17,7 +17,6 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import { organizations } from "../schema-organizations";
-import { profiles } from "./profiles-schema";
 
 // E-Signature provider enum
 export const signatureProviderEnum = pgEnum("signature_provider", [
@@ -108,8 +107,7 @@ export const signatureDocuments = pgTable(
     
     // Sender information
     sentBy: text("sent_by")
-      .notNull()
-      .references(() => profiles.userId),
+      .notNull(),
     sentAt: timestamp("sent_at"),
     
     // Completion. completedAt is the event time a provider reported, or the platform's own time for a document signed
@@ -157,8 +155,8 @@ export const signatureDocuments = pgTable(
       tags?: string[];
     }>(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     organizationIdIdx: index("signature_documents_organization_id_idx").on(
@@ -185,9 +183,7 @@ export const documentSigners = pgTable(
       .references(() => signatureDocuments.id, { onDelete: "cascade" }),
     
     // Signer details
-    userId: text("user_id").references(() => profiles.userId, {
-      onDelete: "set null",
-    }), // Null if external signer
+    userId: text("user_id"), // Null if external signer
     email: text("email").notNull(),
     name: text("name").notNull(),
     role: text("role"), // e.g., "Member", "Union Rep", "Employer"
@@ -244,8 +240,8 @@ export const documentSigners = pgTable(
       customFields?: Record<string, any>;
     }>(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     documentIdIdx: index("document_signers_document_id_idx").on(
@@ -269,11 +265,8 @@ export const signatureAuditTrail = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     documentId: uuid("document_id")
-      .notNull()
-      .references(() => signatureDocuments.id, { onDelete: "cascade" }),
-    signerId: uuid("signer_id").references(() => documentSigners.id, {
-      onDelete: "set null",
-    }),
+      .notNull(),
+    signerId: uuid("signer_id"),
     
     // Event details
     eventType: text("event_type").notNull(), // sent, viewed, signed, etc.
@@ -314,7 +307,7 @@ export const signatureAuditTrail = pgTable(
     // Blockchain/Immutability (future)
     hashChain: text("hash_chain"), // Link to previous event
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     documentIdIdx: index("signature_audit_document_id_idx").on(

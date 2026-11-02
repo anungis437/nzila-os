@@ -470,6 +470,34 @@
       "when": 1759220000000,
       "tag": "0065_declared_absent_relations_2",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1759230000000,
+      "tag": "0066_declared_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1759240000000,
+      "tag": "0067_declared_checks",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1759250000000,
+      "tag": "0068_declared_foreign_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1759260000000,
+      "tag": "0069_declared_not_null",
+      "breakpoints": true
     }
   ]
 }

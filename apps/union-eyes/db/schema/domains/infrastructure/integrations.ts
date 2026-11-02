@@ -89,8 +89,8 @@ export const integrationConfigs = pgTable('integration_configs', {
   webhookUrl: text('webhook_url'),
   enabled: boolean('enabled').default(true),
   lastSyncAt: timestamp('last_sync_at'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 export const integrationSyncLog = pgTable('integration_sync_log', {
@@ -134,8 +134,8 @@ export const integrationSyncSchedules = pgTable('integration_sync_schedules', {
   enabled: boolean('enabled').default(true),
   lastRunAt: timestamp('last_run_at'),
   nextRunAt: timestamp('next_run_at'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 /**
@@ -156,7 +156,7 @@ export const integrationApiKeys = pgTable(
     lastUsedAt: timestamp('last_used_at'),
     usageCount: integer('usage_count').default(0),
     createdBy: varchar('created_by', { length: 255 }).notNull(),
-    createdAt: timestamp('created_at').defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     revokedAt: timestamp('revoked_at'),
     revokedBy: varchar('revoked_by', { length: 255 }),
   },
@@ -186,8 +186,8 @@ export const integrationWebhooks = pgTable(
     lastSuccessAt: timestamp('last_success_at'),
     lastFailureAt: timestamp('last_failure_at'),
     createdBy: varchar('created_by', { length: 255 }).notNull(),
-    createdAt: timestamp('created_at').defaultNow(),
-    updatedAt: timestamp('updated_at').defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   },
   (table) => ({
     orgIdx: index('integration_webhooks_org_idx').on(table.organizationId),

@@ -18,9 +18,9 @@ export const messageThreads = pgTable('message_threads', {
   priority: text('priority').default('normal'), // low, normal, high, urgent
   category: text('category'), // general, grievance, dues, benefits, etc.
   isArchived: boolean('is_archived').default(false),
-  lastMessageAt: timestamp('last_message_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  lastMessageAt: timestamp('last_message_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Individual messages table
@@ -39,8 +39,8 @@ export const messages = pgTable('messages', {
   isEdited: boolean('is_edited').default(false),
   editedAt: timestamp('edited_at'),
   metadata: text('metadata'), // JSON string for additional data
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Message read receipts table
@@ -49,6 +49,6 @@ export const messageReadReceipts = pgTable('message_read_receipts', {
   messageId: uuid('message_id').notNull().references(() => messages.id, { onDelete: 'cascade' }),
   userId: text('user_id').notNull(), // Auth user ID
   readAt: timestamp('read_at').defaultNow().notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

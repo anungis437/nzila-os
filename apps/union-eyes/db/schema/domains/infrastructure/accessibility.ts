@@ -18,7 +18,6 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import { organizations } from "../../../schema-organizations";
-import { profiles } from "../../profiles-schema";
 
 // WCAG conformance level
 export const wcagLevelEnum = pgEnum("wcag_level", ["A", "AA", "AAA"]);
@@ -104,11 +103,11 @@ export const accessibilityAudits = pgTable(
     
     // Metadata
     triggeredBy: text("triggered_by"), // manual, scheduled, ci/cd, pre-deploy
-    scheduledBy: text("scheduled_by").references(() => profiles.userId),
+    scheduledBy: text("scheduled_by"),
     
     startedAt: timestamp("started_at"),
     completedAt: timestamp("completed_at"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     organizationIdIdx: index("accessibility_audits_organization_id_idx").on(
@@ -172,12 +171,12 @@ export const accessibilityIssues = pgTable(
     
     // Status and assignment
     status: a11yIssueStatusEnum("status").notNull().default("open"),
-    assignedTo: text("assigned_to").references(() => profiles.userId),
+    assignedTo: text("assigned_to"),
     priority: integer("priority").notNull().default(3), // 1-5
     
     // Resolution
     resolvedAt: timestamp("resolved_at"),
-    resolvedBy: text("resolved_by").references(() => profiles.userId),
+    resolvedBy: text("resolved_by"),
     resolutionNotes: text("resolution_notes"),
     verifiedAt: timestamp("verified_at"),
     
@@ -186,8 +185,8 @@ export const accessibilityIssues = pgTable(
     lastSeenAt: timestamp("last_seen_at").notNull().defaultNow(),
     occurrenceCount: integer("occurrence_count").notNull().default(1),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     auditIdIdx: index("accessibility_issues_audit_id_idx").on(table.auditId),
@@ -238,8 +237,8 @@ export const wcagSuccessCriteria = pgTable(
     // Keywords for search
     keywords: jsonb("keywords").$type<string[]>(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     criteriaNumberIdx: index("wcag_criteria_number_idx").on(

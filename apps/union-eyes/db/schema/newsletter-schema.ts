@@ -104,9 +104,7 @@ export const newsletterDistributionLists = pgTable(
     filterCriteria: jsonb('filter_criteria').$type<ListFilterCriteria>(),
     subscriberCount: integer('subscriber_count').default(0),
     isActive: boolean('is_active').default(true),
-    createdBy: text('created_by').references(() => profiles.userId, {
-      onDelete: 'set null',
-    }),
+    createdBy: text('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   }
@@ -126,8 +124,7 @@ export const newsletterListSubscribers = pgTable(
         onDelete: 'cascade',
       }),
     profileId: text('profile_id')
-      .notNull()
-      .references(() => profiles.userId, { onDelete: 'cascade' }),
+      .notNull(),
     email: varchar('email', { length: 255 }).notNull(),
     status: varchar('status', { length: 50 }).default('subscribed'),
     subscribedAt: timestamp('subscribed_at', { withTimezone: true }).defaultNow(),
@@ -177,9 +174,7 @@ export const newsletterCampaigns = pgTable('newsletter_campaigns', {
   tags: varchar('tags', { length: 100 }).array(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
-  createdBy: text('created_by').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
@@ -193,9 +188,7 @@ export const newsletterRecipients = pgTable('newsletter_recipients', {
   campaignId: uuid('campaign_id')
     .notNull()
     .references(() => newsletterCampaigns.id, { onDelete: 'cascade' }),
-  profileId: text('profile_id').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
+  profileId: text('profile_id'),
   email: varchar('email', { length: 255 }).notNull(),
   status: varchar('status', { length: 50 }).default('pending'),
   sentAt: timestamp('sent_at', { withTimezone: true }),
@@ -221,9 +214,7 @@ export const newsletterEngagement = pgTable('newsletter_engagement', {
   recipientId: uuid('recipient_id')
     .notNull()
     .references(() => newsletterRecipients.id, { onDelete: 'cascade' }),
-  profileId: text('profile_id').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
+  profileId: text('profile_id'),
   eventType: varchar('event_type', { length: 50 }).notNull(),
   eventData: jsonb('event_data').$type<EngagementEventData>(),
   ipAddress: inet('ip_address'),

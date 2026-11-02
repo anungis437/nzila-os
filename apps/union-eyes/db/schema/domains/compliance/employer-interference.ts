@@ -14,8 +14,8 @@ export const dataClassificationPolicy = pgTable("data_classification_policy", {
     .defaultRandom(),
   policyName: text("policy_name").notNull(), // e.g., "Employer Data Firewall Policy"
   policyDescription: text("policy_description"),
-  effectiveDate: timestamp("effective_date").notNull(),
-  expiryDate: timestamp("expiry_date"),
+  effectiveDate: timestamp("effective_date", { withTimezone: true }).notNull(),
+  expiryDate: timestamp("expiry_date", { withTimezone: true }),
   enforceStrictSeparation: boolean("enforce_strict_separation").notNull().default(true), // No employer access to union data
   allowBargainingUnitRoster: boolean("allow_bargaining_unit_roster").default(true), // Employer can see who's in bargaining unit
   allowGreivanceParticipation: boolean("allow_greivance_participation").default(true), // Employer can participate in grievances (the Django column keeps its original spelling)
@@ -23,8 +23,8 @@ export const dataClassificationPolicy = pgTable("data_classification_policy", {
   blockMembershipLists: boolean("block_membership_lists").notNull().default(true), // Employer can't access full member lists
   blockInternalDiscussions: boolean("block_internal_discussions").notNull().default(true), // Employer excluded from union discussions
   approvedBy: text("approved_by").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Data classification registry
@@ -39,8 +39,8 @@ export const dataClassificationRegistry = pgTable("data_classification_registry"
   requiresJustification: boolean("requires_justification").default(false), // Require justification for employer access requests
   dataDescription: text("data_description"),
   legalBasis: text("legal_basis"), // Legal basis for classification (Labour Relations Act section)
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Firewall access rules (who can access what)
@@ -56,8 +56,8 @@ export const firewallAccessRules = pgTable("firewall_access_rules", {
   justificationRequired: boolean("justification_required").default(false),
   requiresApproval: boolean("requires_approval").default(false),
   approverRole: text("approver_role"), // Who must approve access requests
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Access attempt log (all employer access attempts to union data)
@@ -65,7 +65,7 @@ export const employerAccessAttempts = pgTable("employer_access_attempts", {
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  attemptTimestamp: timestamp("attempt_timestamp").notNull().defaultNow(),
+  attemptTimestamp: timestamp("attempt_timestamp", { withTimezone: true }).notNull().defaultNow(),
   userId: text("user_id").notNull(),
   userEmail: text("user_email").notNull(),
   userRole: text("user_role").notNull(),
@@ -79,7 +79,7 @@ export const employerAccessAttempts = pgTable("employer_access_attempts", {
   sessionId: text("session_id"),
   flaggedForReview: boolean("flagged_for_review").default(false), // Flag suspicious access attempts
   reviewedBy: text("reviewed_by"),
-  reviewedAt: timestamp("reviewed_at"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   reviewNotes: text("review_notes"),
 });
 
@@ -88,7 +88,7 @@ export const accessJustificationRequests = pgTable("access_justification_request
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  requestDate: timestamp("request_date").notNull().defaultNow(),
+  requestDate: timestamp("request_date", { withTimezone: true }).notNull().defaultNow(),
   requestedBy: text("requested_by").notNull(), // User requesting access
   requestedByEmail: text("requested_by_email").notNull(),
   requestedByRole: text("requested_by_role").notNull(),
@@ -98,14 +98,14 @@ export const accessJustificationRequests = pgTable("access_justification_request
   businessPurpose: text("business_purpose"), // Legitimate business need
   requestStatus: text("request_status").notNull().default("pending"), // "pending", "approved", "denied"
   reviewedBy: text("reviewed_by"),
-  reviewedAt: timestamp("reviewed_at"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   reviewDecision: text("review_decision"), // "approved", "denied", "escalated"
   reviewNotes: text("review_notes"),
-  approvalExpiryDate: timestamp("approval_expiry_date"), // Temporary access only
-  accessGrantedAt: timestamp("access_granted_at"),
-  accessRevokedAt: timestamp("access_revoked_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  approvalExpiryDate: timestamp("approval_expiry_date", { withTimezone: true }), // Temporary access only
+  accessGrantedAt: timestamp("access_granted_at", { withTimezone: true }),
+  accessRevokedAt: timestamp("access_revoked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Union-only data tags (mark data as union-exclusive)
@@ -120,10 +120,10 @@ export const unionOnlyDataTags = pgTable("union_only_data_tags", {
   employerAccessBlocked: boolean("employer_access_blocked").notNull().default(true),
   classificationLevel: text("classification_level").notNull().default("union_only"),
   taggedBy: text("tagged_by").notNull(),
-  taggedAt: timestamp("tagged_at").notNull().defaultNow(),
+  taggedAt: timestamp("tagged_at", { withTimezone: true }).notNull().defaultNow(),
   tagReason: text("tag_reason"), // Why this is union-only
-  reviewDate: timestamp("review_date"), // Periodic review of classification
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  reviewDate: timestamp("review_date", { withTimezone: true }), // Periodic review of classification
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Firewall violation incidents
@@ -131,7 +131,7 @@ export const firewallViolations = pgTable("firewall_violations", {
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  violationDate: timestamp("violation_date").notNull().defaultNow(),
+  violationDate: timestamp("violation_date", { withTimezone: true }).notNull().defaultNow(),
   violationType: text("violation_type").notNull(), // "unauthorized_access_attempt", "data_leak", "improper_sharing", "firewall_bypass"
   severity: text("severity").notNull(), // "critical", "high", "medium", "low"
   userId: text("user_id").notNull(),
@@ -146,9 +146,9 @@ export const firewallViolations = pgTable("firewall_violations", {
   investigatedBy: text("investigated_by"),
   investigationNotes: text("investigation_notes"),
   resolutionAction: text("resolution_action"), // "access_revoked", "warning_issued", "policy_updated", "legal_action"
-  resolvedAt: timestamp("resolved_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Firewall compliance audit log
@@ -156,7 +156,7 @@ export const firewallComplianceAudit = pgTable("firewall_compliance_audit", {
   id: uuid("id")
     .primaryKey()
     .defaultRandom(),
-  auditDate: timestamp("audit_date").notNull().defaultNow(),
+  auditDate: timestamp("audit_date", { withTimezone: true }).notNull().defaultNow(),
   auditPeriod: text("audit_period").notNull(), // "Q1-2025", "2024", "January-2025"
   totalAccessAttempts: text("total_access_attempts").notNull(),
   totalEmployerAttempts: text("total_employer_attempts").notNull(),
@@ -168,6 +168,6 @@ export const firewallComplianceAudit = pgTable("firewall_compliance_audit", {
   recommendedActions: text("recommended_actions"),
   auditedBy: text("audited_by").notNull(),
   auditReport: text("audit_report"), // Link to full audit report
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

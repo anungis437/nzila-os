@@ -116,6 +116,8 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
     await insertOrg(O.c, `Local C ${tag}`, 'local', [O.c], true)
     await insertOrg(O.fed2, `Federation Two ${tag}`, 'federation', [O.fed2], false)
     await insertOrg(O.d, `Local D ${tag}`, 'local', [O.fed2, O.d], true)
+    // The congress is an organization of its own: a membership names it by foreign key.
+    await insertOrg(O.congress, `Congress ${tag}`, 'congress', [O.congress], false)
     // A and C are active members of a congress; D is CLC-affiliated but holds no membership; B is neither. None of it admits a reader: the
     // federation and congress levels are readable by the owner only.
     for (const org of [O.a, O.c]) {

@@ -28,7 +28,7 @@ export const conflictOfInterestPolicy = pgTable("conflict_of_interest_policy", {
   reviewCommitteeRequired: boolean("review_committee_required").notNull().default(true),
   minimumReviewers: varchar("minimum_reviewers", { length: 2 }).notNull().default("2"),
   
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
 });
 
@@ -72,8 +72,8 @@ export const blindTrustRegistry = pgTable("blind_trust_registry", {
   compliant: boolean("compliant").notNull().default(false),
   complianceNotes: text("compliance_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Conflict of interest disclosures (annual + ad-hoc)
@@ -119,8 +119,8 @@ export const conflictDisclosures = pgTable("conflict_disclosures", {
   submittedAt: timestamp("submitted_at").notNull().defaultNow(),
   overdue: boolean("overdue").notNull().default(false),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Arms-length transaction verification
@@ -159,8 +159,8 @@ export const armsLengthVerification = pgTable("arms_length_verification", {
   compliant: boolean("compliant").notNull().default(false),
   complianceNotes: text("compliance_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Recusal tracking (when conflicts require stepping aside)
@@ -196,7 +196,7 @@ export const recusalTracking = pgTable("recusal_tracking", {
   verifiedBy: varchar("verified_by", { length: 255 }),
   verifiedAt: timestamp("verified_at"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Conflict of Interest Audit Log
@@ -223,6 +223,6 @@ export const conflictAuditLog = pgTable("conflict_audit_log", {
   metadata: jsonb("metadata"),
   ipAddress: varchar("ip_address", { length: 45 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

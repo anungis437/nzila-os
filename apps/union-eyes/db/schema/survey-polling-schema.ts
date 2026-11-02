@@ -66,7 +66,7 @@ export const surveys = pgTable(
     completionRate: decimal('completion_rate', { precision: 5, scale: 2 }),
 
     // Metadata
-    createdBy: text('created_by').references(() => profiles.userId, { onDelete: 'set null' }),
+    createdBy: text('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -155,7 +155,7 @@ export const surveyResponses = pgTable(
       .references(() => surveys.id, { onDelete: 'cascade' }),
 
     // Respondent info
-    userId: text('user_id').references(() => profiles.userId, { onDelete: 'set null' }),
+    userId: text('user_id'),
     respondentEmail: varchar('respondent_email', { length: 255 }),
     respondentName: varchar('respondent_name', { length: 255 }),
 
@@ -258,7 +258,7 @@ export const polls = pgTable(
     uniqueVoters: integer('unique_voters').notNull().default(0),
 
     // Metadata
-    createdBy: text('created_by').references(() => profiles.userId, { onDelete: 'set null' }),
+    createdBy: text('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -286,7 +286,7 @@ export const pollVotes = pgTable(
       .references(() => polls.id, { onDelete: 'cascade' }),
 
     // Voter info
-    userId: text('user_id').references(() => profiles.userId, { onDelete: 'set null' }),
+    userId: text('user_id'),
     voterEmail: varchar('voter_email', { length: 255 }),
 
     // Vote data
