@@ -237,4 +237,20 @@ describe('buildCanonicalReport', () => {
       expect(result.data.org_id).toBe('org_rt')
     }
   })
+
+  it('retains namespaced dynamic extension dictionaries under Zod 4', () => {
+    const report = canonicalReportSchema.parse({
+      ...coraPayload,
+      extensions: { cora: { governance_tier: 'A', nested: { approved: true } } },
+    })
+    expect(report.extensions?.cora).toEqual({
+      governance_tier: 'A', nested: { approved: true },
+    })
+    expect(canonicalReportSchema.safeParse({
+      ...coraPayload, extensions: { cora: 'invalid-record' },
+    }).success).toBe(false)
+    expect(canonicalReportSchema.safeParse({
+      ...coraPayload, metrics: [{ ...coraPayload.metrics[0], value: 'not-number' }],
+    }).success).toBe(false)
+  })
 })

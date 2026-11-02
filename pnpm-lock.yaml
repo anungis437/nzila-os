@@ -3623,8 +3623,8 @@ importers:
         specifier: workspace:*
         version: link:../fsm-core
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2
@@ -3740,8 +3740,8 @@ importers:
         specifier: workspace:*
         version: link:../agri-core
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
 
   packages/agri-supply-chain:
     dependencies:

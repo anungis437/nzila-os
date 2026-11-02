@@ -96,8 +96,8 @@ export type CanonicalProvenanceRef = z.infer<typeof canonicalProvenanceRefSchema
 // Each app gets its own namespaced block. No cross-contamination.
 
 export const canonicalExtensionsSchema = z.object({
-  cora: z.record(z.unknown()).optional(),
-  agrimo: z.record(z.unknown()).optional(),
+  cora: z.record(z.string(), z.unknown()).optional(),
+  agrimo: z.record(z.string(), z.unknown()).optional(),
 }).strict().optional()
 
 export type CanonicalExtensions = z.infer<typeof canonicalExtensionsSchema>

@@ -155,4 +155,19 @@ describe('schema branches', () => {
     expect(ProvenanceSourceType.API).toBe('api')
     expect(ConfidenceLevel.HIGH).toBe('high')
   })
+
+  it('retains Zod 4 dynamic producer metadata, defaults and invalid-record rejection', () => {
+    const producer = createProducerSchema.parse({
+      name: 'Producer A',
+      metadata: { certification: 'organic', nested: { verified: true } },
+    })
+    expect(producer.metadata).toEqual({
+      certification: 'organic', nested: { verified: true },
+    })
+    expect(producer.contactPhone).toBeNull()
+    expect(createProducerSchema.parse({ name: 'Producer B' }).metadata).toEqual({})
+    expect(createProducerSchema.safeParse({
+      name: 'Producer A', metadata: 'not-a-record',
+    }).success).toBe(false)
+  })
 })
