@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { createHash } from 'node:crypto'
-import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync, readFileSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { parseArgs, parseManifestTargets, inspectHealthResponse } from '../../scripts/deploy-transactional'
+import { parseArgs, parseManifestTargets, inspectHealthResponse, persistDeploymentEvidence } from '../../scripts/deploy-transactional'
 
 const dirs: string[] = []
 afterEach(() => { for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true }) })
@@ -19,6 +19,29 @@ function fixture(targets: unknown[]) {
 }
 
 describe('P0 #1038 transactional production promotion boundary', () => {
+  it('atomically publishes one deployment receipt and refuses to overwrite an existing success', () => {
+    const f = fixture([{ containerAppName: 'alpha', image: image('alpha') }])
+    const output = join(f.dir, 'deploy-evidence.json')
+    persistDeploymentEvidence(output, { status: 'success', targetCount: 1 })
+    expect(JSON.parse(readFileSync(output, 'utf8'))).toMatchObject({
+      status: 'success', targetCount: 1,
+    })
+    expect(() => persistDeploymentEvidence(output, { status: 'failed' })).toThrow()
+    expect(JSON.parse(readFileSync(output, 'utf8')).status).toBe('success')
+    expect(readdirSync(f.dir).sort()).toEqual(['deploy-evidence.json', 'selected.json'])
+  })
+
+  it('does not overwrite an existing symlink or leave an authoritative partial receipt', () => {
+    const f = fixture([{ containerAppName: 'alpha', image: image('alpha') }])
+    const outside = join(f.dir, 'outside.json')
+    writeFileSync(outside, 'untouched')
+    const output = join(f.dir, 'deploy-evidence.json')
+    symlinkSync(outside, output)
+    expect(() => persistDeploymentEvidence(output, { status: 'success' })).toThrow()
+    expect(readFileSync(outside, 'utf8')).toBe('untouched')
+    expect(readdirSync(f.dir).sort()).toEqual(['deploy-evidence.json', 'outside.json', 'selected.json'])
+  })
+
   it('rejects redirected, missing-marker and oversized health responses', async () => {
     expect(await inspectHealthResponse(new Response('ready', { status: 200 }), 'ready')).toBe(true)
     expect(await inspectHealthResponse(new Response('ready', { status: 200 }))).toBe(true)

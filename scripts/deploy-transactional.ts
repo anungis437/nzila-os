@@ -8,8 +8,8 @@
  *     --resource-group <rg>
  */
 
-import { mkdirSync, writeFileSync, openSync, closeSync, fstatSync, readSync, constants } from 'node:fs'
-import { createHash } from 'node:crypto'
+import { mkdirSync, writeFileSync, openSync, closeSync, fstatSync, readSync, linkSync, unlinkSync, constants } from 'node:fs'
+import { createHash, randomBytes } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
@@ -385,6 +385,26 @@ function rollback(updatedStates: TargetState[], resourceGroup: string): void {
   }
 }
 
+/**
+ * Publish deployment evidence atomically on the runner, without replacing an
+ * earlier receipt. A failed write must be visible to the deployment rollback
+ * path; a partially written success file must never be treated as proof.
+ * This is local crash-safe publication, not independent evidence retention.
+ */
+export function persistDeploymentEvidence(path: string, evidence: Record<string, unknown>): void {
+  mkdirSync(dirname(path), { recursive: true })
+  const temporary = path + '.' + randomBytes(16).toString('hex') + '.tmp'
+  try {
+    writeFileSync(temporary, JSON.stringify(evidence, null, 2) + '\n',
+      { encoding: 'utf8', flag: 'wx', mode: 0o600, flush: true })
+    // Atomic no-clobber publication: link fails if the destination already
+    // exists (including a symlink), and never exposes a partial JSON receipt.
+    linkSync(temporary, path)
+  } finally {
+    try { unlinkSync(temporary) } catch { /* no partial temp receipt is authoritative */ }
+  }
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
   const targets = parseManifestTargets(args.manifest, args.fallbackTargetsJson, args.requireDigestPinned, args.expectedManifestSha256)
@@ -436,6 +456,11 @@ async function main(): Promise<void> {
     }
 
     evidence.status = 'success'
+    evidence.completedAt = new Date().toISOString()
+    // A successful remote mutation is not a certified success if its
+    // evidence cannot be published. Treat persistence failure as rollback.
+    persistDeploymentEvidence(args.evidenceOut, evidence)
+    return
   } catch (error) {
     evidence.status = 'failed'
     evidence.error = error instanceof Error ? error.message : String(error)
@@ -452,12 +477,16 @@ async function main(): Promise<void> {
       }
     }
 
-    throw error
-  } finally {
     evidence.completedAt = new Date().toISOString()
-    mkdirSync(dirname(args.evidenceOut), { recursive: true })
-    writeFileSync(args.evidenceOut, JSON.stringify(evidence, null, 2), 'utf8')
-    console.log(`Deployment evidence written to ${args.evidenceOut}`)
+    try {
+      persistDeploymentEvidence(args.evidenceOut, evidence)
+    } catch (receiptError) {
+      // The original deployment failure still propagates. Never fabricate
+      // a successful rollback or evidence receipt when storage is unavailable.
+      console.error('P0 #1038: failed deployment evidence unavailable: ' +
+        (receiptError instanceof Error ? receiptError.message : String(receiptError)))
+    }
+    throw error
   }
 }
 
