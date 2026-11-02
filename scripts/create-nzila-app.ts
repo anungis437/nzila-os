@@ -131,7 +131,7 @@ function scaffoldNextJsApp(name: string, port: number): void {
       next: '16.1.6',
       react: '19.2.4',
       'react-dom': '19.2.4',
-      zod: '^3.24.0',
+      zod: '^4.6.7',
     },
     devDependencies: {
       '@types/node': '^25',
@@ -269,7 +269,7 @@ function scaffoldFastifyService(name: string): void {
       fastify: '^5.0.0',
       '@fastify/helmet': '^13.0.0',
       '@fastify/rate-limit': '^10.0.0',
-      zod: '^3.24.0',
+      zod: '^4.6.7',
     },
     devDependencies: {
       '@types/node': '^25',
@@ -334,7 +334,7 @@ function scaffoldIntegrationPackage(name: string): void {
     },
     dependencies: {
       '@nzila/os-core': 'workspace:*',
-      zod: '^3.24.0',
+      zod: '^4.6.7',
     },
     devDependencies: {
       typescript: '^5.0.0',
