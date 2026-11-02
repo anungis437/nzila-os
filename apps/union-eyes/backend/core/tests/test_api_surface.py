@@ -96,7 +96,10 @@ class ProjectionsNameTheirColumns(SimpleTestCase):
 
 
 class ProjectionsRunAgainstTheDatabase(TestCase):
-    """``.values(*columns)`` must run for every recorded model, in both shapes the views use."""
+    """``.values(*columns)`` must run for every recorded model, in both shapes the views use, and return exactly the named columns.
+
+    The converged database may hold rows (the native proofs write fixtures into it), so the tables are not assumed to be empty.
+    """
 
     def test_every_projection_is_a_valid_query(self):
         from django.apps import apps
@@ -104,5 +107,9 @@ class ProjectionsRunAgainstTheDatabase(TestCase):
         for label in api_projection.projections():
             model = apps.get_model(label)
             columns = api_projection.api_columns(model)
-            self.assertEqual(list(model.objects.values(*columns)[:1]), [])
-            self.assertEqual(list(model.objects.order_by("-created_at")[:5].values(*columns)), [])
+            for rows in (
+                list(model.objects.values(*columns)[:1]),
+                list(model.objects.order_by("-created_at")[:5].values(*columns)),
+            ):
+                for row in rows:
+                    self.assertEqual(set(row), set(columns), label)
