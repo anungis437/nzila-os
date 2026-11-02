@@ -20,8 +20,7 @@
   "dependencies": {
     "@nzila/org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
-    "@nzila/ui": "workspace:*",
-    "zod": "^3.24.0"
+    "@nzila/ui": "workspace:*"
   },
   "peerDependencies": {
     "@nzila/platform-auth": "workspace:*",

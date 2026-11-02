@@ -15,8 +15,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@nzila/cfo-core": "workspace:*",
-    "zod": "^3.24.0"
+    "@nzila/cfo-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25",
