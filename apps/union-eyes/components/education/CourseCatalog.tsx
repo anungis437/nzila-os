@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { buildEducationEnrollment, type EnrollmentSession } from '@/lib/education/enrollment-selection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,11 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [enrolling, setEnrolling] = useState(false);
+  const [sessions, setSessions] = useState<EnrollmentSession[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState('');
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [enrollmentMessage, setEnrollmentMessage] = useState<string | null>(null);
+  const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,9 +97,28 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
       if (!response.ok) throw new Error('Failed to fetch courses');
       
       const data = await response.json();
-      setCourses(data.data || []);
+      if (data.success !== true || !Array.isArray(data.data)) throw new Error('Invalid catalogue response');
+      setCourses(data.data.map((c: Record<string, unknown>) => ({
+        id: String(c.id ?? ''),
+        course_code: String(c.courseCode ?? c.course_code ?? ''),
+        course_name: String(c.courseName ?? c.course_name ?? 'Course details unavailable'),
+        course_description: String(c.courseDescription ?? c.course_description ?? ''),
+        course_category: String(c.courseCategory ?? c.course_category ?? 'other'),
+        delivery_method: String(c.deliveryMethod ?? c.delivery_method ?? 'unknown'),
+        course_difficulty: String(c.courseDifficulty ?? c.course_difficulty ?? 'all_levels'),
+        duration_hours: Number(c.durationHours ?? c.duration_hours ?? 0),
+        duration_days: Number(c.durationDays ?? c.duration_days ?? 0),
+        provides_certification: c.providesCertification === true || c.provides_certification === true,
+        certification_name: String(c.certificationName ?? c.certification_name ?? ''),
+        clc_approved: c.clcApproved === true || c.clc_approved === true,
+        course_fee: Number(c.courseFee ?? c.course_fee ?? 0),
+        min_enrollment: Number(c.minEnrollment ?? c.min_enrollment ?? 0),
+        max_enrollment: Number(c.maxEnrollment ?? c.max_enrollment ?? 0),
+      })));
     } catch (_error) {
-} finally {
+      setEnrollmentError('Course catalogue could not be loaded. Please retry.');
+      setCourses([]);
+    } finally {
       setLoading(false);
     }
   }, [organizationId]);
@@ -140,34 +165,64 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
     applyFilters();
   }, [applyFilters]);
 
-  const handleEnroll = async (sessionId: string) => {
-    if (!memberId) {
-      alert('Please log in to enroll');
+  useEffect(() => {
+    if (!selectedCourse) {
+      setSessions([]);
+      setSelectedSessionId('');
       return;
     }
+    let cancelled = false;
+    setSessionsLoading(true);
+    setEnrollmentError(null);
+    setSelectedSessionId('');
+    fetch('/api/education/sessions', { cache: 'no-store' })
+      .then(async response => {
+        if (!response.ok) throw new Error('Session list unavailable');
+        const body = await response.json();
+        if (body.success !== true || !Array.isArray(body.data)) throw new Error('Invalid sessions response');
+        const scoped: EnrollmentSession[] = body.data
+          .filter((row: Record<string, unknown>) =>
+            (row.courseId ?? row.course_id) === selectedCourse.id)
+          .map((row: Record<string, unknown>) => ({
+            id: String(row.id ?? ''),
+            courseId: String(row.courseId ?? row.course_id ?? ''),
+            sessionStatus: String(row.sessionStatus ?? row.session_status ?? ''),
+            startDate: typeof (row.startDate ?? row.start_date) === 'string' ? String(row.startDate ?? row.start_date) : null,
+            endDate: typeof (row.endDate ?? row.end_date) === 'string' ? String(row.endDate ?? row.end_date) : null,
+            registrationOpenDate: typeof (row.registrationOpenDate ?? row.registration_open_date) === 'string' ? String(row.registrationOpenDate ?? row.registration_open_date) : null,
+            registrationCloseDate: typeof (row.registrationCloseDate ?? row.registration_close_date) === 'string' ? String(row.registrationCloseDate ?? row.registration_close_date) : null,
+            maxEnrollment: row.maxEnrollment == null && row.max_enrollment == null ? null : Number(row.maxEnrollment ?? row.max_enrollment),
+            registrationCount: row.registrationCount == null && row.registration_count == null ? null : Number(row.registrationCount ?? row.registration_count),
+          }));
+        if (!cancelled) setSessions(scoped);
+      })
+      .catch(() => { if (!cancelled) setEnrollmentError('Sessions could not be loaded. Enrollment is unavailable.'); })
+      .finally(() => { if (!cancelled) setSessionsLoading(false); });
+    return () => { cancelled = true; };
+  }, [selectedCourse]);
 
+  const handleEnroll = async () => {
+    if (!memberId || !selectedCourse) {
+      setEnrollmentError('Sign in and select a course before enrolling.');
+      return;
+    }
     try {
       setEnrolling(true);
+      setEnrollmentError(null);
+      const payload = buildEducationEnrollment(selectedCourse.id, selectedSessionId, sessions);
       const response = await fetch('/api/education/registrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organizationId,
-          memberId,
-          courseId: selectedCourse?.id,
-          sessionId,
-        }),
+        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to enroll');
+      const result = await response.json();
+      if (!response.ok || result.success !== true || result.data?.sessionId !== payload.sessionId) {
+        throw new Error('Registration was not confirmed');
       }
-
-      alert('Successfully enrolled in course!');
+      setEnrollmentMessage('Registration submitted. Check My Courses for its current status.');
       setSelectedCourse(null);
-    } catch (error) {
-alert(error instanceof Error ? error.message : 'Failed to enroll');
+    } catch {
+      setEnrollmentError('Registration could not be completed. Check the selected session or contact your union.');
     } finally {
       setEnrolling(false);
     }
@@ -190,6 +245,9 @@ alert(error instanceof Error ? error.message : 'Failed to enroll');
         </div>
         <Button onClick={fetchCourses}>Refresh</Button>
       </div>
+
+      {enrollmentMessage && <p role="status" className="text-sm text-green-700">{enrollmentMessage}</p>}
+      {enrollmentError && !selectedCourse && <p role="alert" className="text-sm text-destructive">{enrollmentError}</p>}
 
       {/* Filters */}
       <Card>
@@ -418,14 +476,33 @@ alert(error instanceof Error ? error.message : 'Failed to enroll');
                   </div>
                 )}
 
-                {/* Enrollment Button */}
+                {/* Enroll against a real course session, never the course ID. */}
+                <div className="space-y-2">
+                  <Label htmlFor="education-session">Available session</Label>
+                  <select id="education-session" className="w-full rounded-md border bg-background p-2 text-sm"
+                    value={selectedSessionId} onChange={event => setSelectedSessionId(event.target.value)}
+                    disabled={sessionsLoading || enrolling}>
+                    <option value="">Select a session</option>
+                    {sessions.filter(session => {
+                      try { buildEducationEnrollment(selectedCourse.id, session.id, sessions); return true; }
+                      catch { return false; }
+                    }).map(session => (
+                      <option key={session.id} value={session.id}>
+                        {session.startDate ?? 'Date to be confirmed'} — {session.id}
+                      </option>
+                    ))}
+                  </select>
+                  {sessionsLoading && <p className="text-sm text-muted-foreground">Loading available sessions…</p>}
+                  {!sessionsLoading && sessions.length === 0 && <p className="text-sm text-muted-foreground">No available sessions are listed. Contact your union for scheduling.</p>}
+                  {enrollmentError && <p role="alert" className="text-sm text-destructive">{enrollmentError}</p>}
+                </div>
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button 
-                    onClick={() => handleEnroll(selectedCourse.id)} 
+                  <Button
+                    onClick={handleEnroll}
                     className="flex-1"
-                    disabled={enrolling || !memberId}
+                    disabled={enrolling || sessionsLoading || !memberId || !selectedSessionId}
                   >
-                    {enrolling ? 'Enrolling...' : 'Enroll Now'}
+                    {enrolling ? 'Submitting registration…' : 'Enroll in selected session'}
                   </Button>
                   <Button variant="outline" onClick={() => setSelectedCourse(null)}>
                     Close
