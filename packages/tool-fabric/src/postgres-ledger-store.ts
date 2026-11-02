@@ -277,7 +277,12 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
           throw new LedgerConflictError('Persistent trust append returned invalid receipt')
         }
         const updated = await tx.unsafe(
-          'UPDATE public.tool_fabric_trust_stream SET revision = $2, head_hash = $3, updated_at = now() WHERE stream_id = $1 AND revision = $4 AND head_hash = $5 RETURNING revision::text AS revision, head_hash',
+          // PostgreSQL now() is the transaction START timestamp, not the time
+          // this locked CAS update executes. A transaction waiting behind a
+          // newer committed writer could otherwise regress updated_at and be
+          // spuriously denied by the monotonic-head trigger. Pin the value
+          // to the greater of wall-clock time and the locked existing head.
+          'UPDATE public.tool_fabric_trust_stream SET revision = $2, head_hash = $3, updated_at = GREATEST(clock_timestamp(), updated_at) WHERE stream_id = $1 AND revision = $4 AND head_hash = $5 RETURNING revision::text AS revision, head_hash',
           [orgId, current.revision + 1, entry.hash, current.revision, current.headHash],
         )
         if (updated.length !== 1) throw new LedgerConflictError('Persistent CAS stream head conflict')
