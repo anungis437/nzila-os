@@ -11190,6 +11190,39 @@
       ],
       "correction": "Session POST validates strict dates and chronological registration windows, bounded capacity, HTTPS joining URL and required fields before tenant lookup and insert; existing course ownership guard retained.",
       "remaining": "Exact-HEAD Vitest/contract, real PG15/16 route proof, HTTP/browser/staging and independent institutional review remain. No original 777-defect or CLOSED credit."
+    },
+    {
+      "id": "UE-EDUCATION-ATTENDANCE-LIFECYCLE-ROSTER-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-attendance-lifecycle-roster-20261102.md",
+      "sourceBaseline": "36e1b83ee27669537be894480785b2b0e6b11926",
+      "sourceCommits": [
+        "168a5ef3304a80e3301ba46b2c30fbce4b85230a",
+        "746c382b1a43ee0746aeee7946a04a6b0c3cf41a",
+        "a3769aa6b5351311ef0f896ef6fed5c44ba02752",
+        "9024b7ccdbd36a660acdfd4d276618112c69b80b",
+        "c587342e11786f8413807cbc7cb415a1c69961ba",
+        "0b3205f1e4c1567fe3e81068694849b24aba9f6d",
+        "57c6af79568177cb11c4e1120d872c5d6e5f4e4c"
+      ],
+      "testCommits": [
+        "4913ee05b282cfcd40ccfcf9dad6c7d243ba1f8f",
+        "368d5daaf6ae2dd940c58738fa0e22bee270faa7",
+        "fa0eef131dbb02f58d42795f84da40a1f1630bab",
+        "b705d5f9bc3fce1a47486ca78d0f30da780f9877"
+      ],
+      "files": [
+        "apps/union-eyes/app/api/education/sessions/[id]/attendance/route.ts",
+        "apps/union-eyes/app/api/education/sessions/[id]/attendance/attendance-policy.ts",
+        "apps/union-eyes/app/api/education/sessions/[id]/attendance/__tests__/attendance-policy.test.ts",
+        "apps/union-eyes/components/education/admin/attendance-client.ts",
+        "apps/union-eyes/components/education/admin/__tests__/attendance-client.test.ts",
+        "apps/union-eyes/components/education/admin/AttendanceTracker.tsx"
+      ],
+      "correction": "Audited tenant-bound attendance PATCH now refuses inactive, unapproved, cancelled, completed and unknown lifecycle records and clears stale hours; roster GET is paginated. Admin UI now consumes actual nested GET/PATCH contracts, verifies per-record persisted success, exposes partial failures, invalidates stale tenant data and exports only factual, CSV-neutralized page records.",
+      "remaining": "Exact-final-HEAD complete Vitest/contract, native PostgreSQL 15/16 route-level, real HTTP/browser/staging, session catalogue cross-page picker, governed correction workflow, independent reviewer, owner-persona ratification and institutional authority remain. No defect/CLOSED credit."
     }
   ]
 }
