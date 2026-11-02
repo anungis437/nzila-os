@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildEducationEnrollment, type EnrollmentSession } from '../enrollment-selection';
+import { buildEducationEnrollment, parseCourseFee, type EnrollmentSession } from '../enrollment-selection';
 
 const courseId = '11111111-1111-4111-8111-111111111111';
 const sessionId = '22222222-2222-4222-8222-222222222222';
@@ -31,5 +31,18 @@ describe('education enrollment session identity', () => {
     expect(() => buildEducationEnrollment(courseId, sessionId, [], '2026-11-02')).toThrow();
     expect(buildEducationEnrollment(courseId, sessionId, [active], '2026-11-01')).toEqual({ courseId, sessionId });
     expect(buildEducationEnrollment(courseId, sessionId, [active], '2026-11-10')).toEqual({ courseId, sessionId });
+  });
+});
+
+describe('course fee representation', () => {
+  it.each([null, undefined, '', 'unknown', -1, '-0.01', Number.NaN, Infinity, {}, true])(
+    'refuses unknown or invalid price %s rather than representing it as free', value => {
+      expect(parseCourseFee(value)).toBeNull();
+    },
+  );
+  it('preserves actual free and paid course fees', () => {
+    expect(parseCourseFee('0.00')).toBe(0);
+    expect(parseCourseFee('49.95')).toBe(49.95);
+    expect(parseCourseFee(125)).toBe(125);
   });
 });
