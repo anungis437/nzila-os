@@ -3,7 +3,9 @@
  * Returns CMS pages (templates, resources) from PostgreSQL.
  * Replaces the old Django proxy to /api/content/cms-pages/.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { getUserRole } from '@/lib/auth/rbac-server';
+import { hasMinRole } from '@/lib/api-auth-guard';
 import { listPage } from '@/lib/api/list-page';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
@@ -15,6 +17,12 @@ export const GET = withApi(
   { auth: { required: true, minRole: 'member' } },
   async (ctx) => {
     const orgId = ctx.organizationId;
+    if (!orgId || !ctx.userId) throw ApiError.forbidden('Organization membership required');
+    // Resolve the reader against this exact tenant. An unresolved role cannot
+    // bypass published-only or the CMS allowed_roles audience restriction.
+    const role = await getUserRole(ctx.userId, orgId);
+    if (!role || role === 'guest') throw ApiError.forbidden('Content reader role required');
+    const canManageContent = (await hasMinRole('content_manager')) || (await hasMinRole('admin'));
     const url = new URL(ctx.request.url);
     // A page is bounded: a non-numeric or negative limit is the default, and no page exceeds 200 rows.
     const page = listPage(ctx.request, 200, 50);
@@ -27,6 +35,16 @@ export const GET = withApi(
       FROM cms_pages
       WHERE organization_id = ${orgId}::uuid
     `;
+
+    // Members may see only published material explicitly available to their
+    // role. Editorial staff retain the draft/review/archived management journey.
+    // PostgreSQL text[] allowed_roles is an audience constraint, not a role
+    // escalation grant; NULL/empty means the published item is unrestricted.
+    if (!canManageContent) {
+      query = sql`${query} AND status = 'published'
+        AND (allowed_roles IS NULL OR cardinality(allowed_roles) = 0
+          OR ${role} = ANY(allowed_roles))`;
+    }
 
     if (contentType) {
       query = sql`${query} AND content_type = ${contentType}`;
@@ -52,7 +70,7 @@ export const GET = withApi(
       views: Number(r.view_count ?? 0),
       published_at: r.published_at,
       updated_at: r.updated_at,
-      created_by: r.created_by,
+      ...(canManageContent ? { created_by: r.created_by } : {}),
     }));
 
     return { templates };

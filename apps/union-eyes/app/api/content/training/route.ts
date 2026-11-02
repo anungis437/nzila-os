@@ -3,6 +3,7 @@
  * Returns training courses from PostgreSQL.
  */
 import { withApi } from '@/lib/api/framework';
+import { hasMinRole } from '@/lib/api-auth-guard';
 import { listPage } from '@/lib/api/list-page';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
@@ -15,7 +16,11 @@ export const GET = withApi(
   async (ctx) => {
     const orgId = ctx.organizationId;
     const url = new URL(ctx.request.url);
-    const activeOnly = url.searchParams.get('active') !== 'false';
+    // A member's active=false query must not disclose unpublished or retired
+    // courses. Only the established editorial/administrator role floor may
+    // deliberately request inactive course records.
+    const canManageContent = (await hasMinRole('content_manager')) || (await hasMinRole('admin'));
+    const activeOnly = !canManageContent || url.searchParams.get('active') !== 'false';
     const page = listPage(ctx.request, 200);
 
     // duration_label, completion_count and materials_url are not stored columns: they are derived
