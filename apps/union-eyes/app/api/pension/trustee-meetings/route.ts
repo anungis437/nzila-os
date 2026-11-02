@@ -12,9 +12,36 @@ import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
+/**
+ * A trustee meeting is scheduled on an actual calendar date or an explicitly
+ * timezone-qualified instant. z.coerce.date() accepts numbers and normalizes
+ * impossible dates (for example February 30), silently changing the meeting.
+ * Never infer a local timezone from a caller's input.
+ */
+const trusteeMeetingDateSchema = z.string().refine((value) => {
+  const parts = /^(\\d{4})-(\\d{2})-(\\d{2})(?:T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,3}))?(Z|([+-])(\\d{2}):(\\d{2})))?$/.exec(value);
+  if (!parts) return false;
+  const year = Number(parts[1]);
+  const month = Number(parts[2]);
+  const day = Number(parts[3]);
+  if (year < 1000 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const calendar = new Date(Date.UTC(year, month - 1, day));
+  if (calendar.getUTCFullYear() !== year || calendar.getUTCMonth() !== month - 1 || calendar.getUTCDate() !== day) return false;
+  if (parts[4] !== undefined) {
+    if (Number(parts[4]) > 23 || Number(parts[5]) > 59 || Number(parts[6]) > 59) return false;
+    if (parts[8] !== 'Z') {
+      const offsetHours = Number(parts[10]);
+      const offsetMinutes = Number(parts[11]);
+      if (offsetHours > 14 || offsetMinutes > 59 || (offsetHours === 14 && offsetMinutes !== 0)) return false;
+    }
+  }
+  return !Number.isNaN(Date.parse(value.length === 10 ? value + 'T00:00:00.000Z' : value));
+}, 'An actual ISO calendar date or timezone-qualified timestamp is required')
+  .transform((value) => new Date(value.length === 10 ? value + 'T00:00:00.000Z' : value));
+
 const createMeetingSchema = z.object({
   title: z.string().trim().min(1).max(255),
-  scheduledDate: z.coerce.date(),
+  scheduledDate: trusteeMeetingDateSchema,
   location: z.string().max(255).optional(),
   agenda: z.string().max(100000).optional(),
 });
