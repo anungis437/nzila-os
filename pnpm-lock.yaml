@@ -4897,9 +4897,6 @@ importers:
 
   packages/finance-compliance:
     dependencies:
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -4944,9 +4941,6 @@ importers:
       '@nzila/finance-core':
         specifier: workspace:*
         version: link:../finance-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -4991,9 +4985,6 @@ importers:
       '@nzila/finance-core':
         specifier: workspace:*
         version: link:../finance-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -5139,9 +5130,6 @@ importers:
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.1
-      zod:
-        specifier: ^3.25.0
-        version: 3.25.76
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -5812,9 +5800,6 @@ importers:
 
   packages/oci-confidence:
     dependencies:
-      zod:
-        specifier: ^3.25.0
-        version: 3.25.76
     devDependencies:
       vitest:
         specifier: ^5.0.5
