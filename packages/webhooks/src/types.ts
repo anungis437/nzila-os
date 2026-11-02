@@ -58,7 +58,7 @@ export const CreateWebhookSubscriptionSchema = z.object({
 
 export const WebhookEventPayloadSchema = z.object({
   event: z.string().min(1),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   idempotencyKey: z.string().uuid(),
   timestamp: z.string().datetime(),
 })
