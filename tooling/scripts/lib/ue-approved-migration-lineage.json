@@ -748,6 +748,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "157 declared NOT NULL columns set where no row holds NULL and no live Django ViewSet can write the table (128 more wait for the Django model and API, 1 is nullable on purpose); fail-closed, reversible."
+      },
+      {
+        "tag": "0070_unambiguous_constraints",
+        "sha256": "b0183ac869b158493665a929aa4ac0594e5f1086bcea967900e63532160d0627",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Eight columns that carried two foreign keys keep one (five grievance tables carried a Django key to claims.id beside the declared key to claims.claim_id, so no row could satisfy both), seven duplicate index definitions dropped, two NOT VALID CHECKs validated; fail-closed, reversible."
+      },
+      {
+        "tag": "0071_conservative_consent_defaults",
+        "sha256": "33c8c3b1d6319b0ec7ed02c33d636fe18d343dd48e22358972c4ffc4db5a3e4e",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Six column defaults move from true to false where the Django models already write false (member_contact_preferences email, phone and mail opt-in; location_tracking_config.location_tracking_enabled; separated_payment_transactions separation_enforced and correct_account_used), so a consent, an outcome or a tracking switch is never asserted by omission; existing rows are untouched; a default that is neither true nor absent is left alone; reversible."
       }
     ]
   }

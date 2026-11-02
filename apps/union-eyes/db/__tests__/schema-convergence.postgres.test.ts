@@ -8,7 +8,9 @@
  *     needs, and no two declarations of one relation disagree on a type (scripts/runtime/schema-convergence.ts defines each class);
  *   - the advisory classes (declaration drift, the contested relations) may only shrink: each has a pinned ceiling; the integrity classes (foreign
  *     keys, indexes, NOT NULL, time zone, checks) are held at zero;
- *   - platform migrations 0062 to 0069 are reversible and re-appliable: rolling them back restores the findings they closed, applying them again
+ *   - the database is unambiguous on its own terms: no column carries two foreign keys, no index is defined twice, no constraint is left unvalidated
+ *     (Django migrate and the platform bootstrap each name their own objects, so a column could carry both until platform 0070);
+ *   - platform migrations 0062 to 0070 are reversible and re-appliable: rolling them back restores the findings they closed, applying them again
  *     closes them, and nothing else changes.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database that has no other session
@@ -56,7 +58,13 @@ const ADVISORY_CEILING: Partial<Record<FindingKind, number>> = {
 }
 
 /** The migrations that closed the integrity classes, in order, then the ones that converged shape. */
-const INTEGRITY_MIGRATIONS = ['0066_declared_indexes', '0067_declared_checks', '0068_declared_foreign_keys', '0069_declared_not_null']
+const INTEGRITY_MIGRATIONS = [
+  '0066_declared_indexes',
+  '0067_declared_checks',
+  '0068_declared_foreign_keys',
+  '0069_declared_not_null',
+  '0070_unambiguous_constraints',
+]
 const SHAPE_MIGRATIONS = [
   '0062_declared_enum_convergence',
   '0063_declared_shape_convergence',
@@ -149,6 +157,43 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     // The grandfathered identity references are still declared, so they are still measured against the database.
     const declaredKeys = new Set(measured.declared.flatMap((t) => t.foreignKeys.map((fk) => `${t.label}.${fk.columns.join(',')}`)))
     expect(GRANDFATHERED_IDENTITY_REFERENCES.filter((key) => !declaredKeys.has(key))).toEqual([])
+  }, 600_000)
+
+  it('carries one foreign key per column, one index per definition, and no constraint PostgreSQL has not validated', async () => {
+    // Two keys on one column that point at different columns of a parent (a Django key to claims.id beside the declared key to claims.claim_id) cannot
+    // both hold for any row, so the table could never be written; two keys or two indexes with one definition are only a cost on every write.
+    const client = new pg.Client({ connectionString: URL! })
+    await client.connect()
+    try {
+      const keys = await client.query<{ relation: string; columns: string; keys: string }>(`
+        WITH fk AS (
+          SELECT n.nspname || '.' || t.relname AS relation, k.conname, k.confrelid::regclass::text AS parent,
+                 (SELECT string_agg(a.attname, ',' ORDER BY u.ord) FROM unnest(k.conkey) WITH ORDINALITY u(attnum, ord)
+                   JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = u.attnum) AS columns,
+                 (SELECT string_agg(a.attname, ',' ORDER BY u.ord) FROM unnest(k.confkey) WITH ORDINALITY u(attnum, ord)
+                   JOIN pg_attribute a ON a.attrelid = k.confrelid AND a.attnum = u.attnum) AS parent_columns
+            FROM pg_constraint k JOIN pg_class t ON t.oid = k.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+           WHERE k.contype = 'f' AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+        )
+        SELECT relation, columns, string_agg(conname || ' -> ' || parent || '(' || parent_columns || ')', '; ' ORDER BY conname) AS keys
+          FROM fk GROUP BY relation, columns HAVING count(*) > 1 ORDER BY 1, 2`)
+      expect(keys.rows.map((r) => `${r.relation}.${r.columns}: ${r.keys}`)).toEqual([])
+
+      const indexes = await client.query<{ relation: string; indexes: string }>(`
+        SELECT n.nspname || '.' || t.relname AS relation, string_agg(c.relname, ', ' ORDER BY c.relname) AS indexes
+          FROM pg_index i JOIN pg_class c ON c.oid = i.indexrelid JOIN pg_class t ON t.oid = i.indrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+         WHERE i.indisvalid AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
+         GROUP BY n.nspname, t.relname, t.oid, regexp_replace(pg_get_indexdef(i.indexrelid), 'INDEX \\S+ ON', 'INDEX x ON')
+        HAVING count(*) > 1 ORDER BY 1`)
+      expect(indexes.rows.map((r) => `${r.relation}: ${r.indexes}`)).toEqual([])
+
+      const unvalidated = await client.query<{ name: string }>(`
+        SELECT n.nspname || '.' || k.conname AS name FROM pg_constraint k JOIN pg_namespace n ON n.oid = k.connamespace
+         WHERE NOT k.convalidated AND n.nspname NOT IN ('pg_catalog', 'information_schema') ORDER BY 1`)
+      expect(unvalidated.rows.map((r) => r.name)).toEqual([])
+    } finally {
+      await client.end()
+    }
   }, 600_000)
 
   it('rolls the integrity migrations and then the shape migrations back and applies them again', async () => {

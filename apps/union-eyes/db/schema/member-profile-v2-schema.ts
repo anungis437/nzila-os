@@ -20,11 +20,11 @@ export const memberContactPreferences = pgTable('member_contact_preferences', {
   preferredContactMethod: text('preferred_contact_method').notNull().default('email'), // email, phone, sms, mail, in_person
   preferredLanguage: text('preferred_language').default('en'),
   
-  // Channel Opt-ins
-  emailOptIn: boolean('email_opt_in').default(true),
+  // Channel Opt-ins: consent is never assumed, so every channel starts opted out
+  emailOptIn: boolean('email_opt_in').default(false),
   smsOptIn: boolean('sms_opt_in').default(false),
-  phoneOptIn: boolean('phone_opt_in').default(true),
-  mailOptIn: boolean('mail_opt_in').default(true),
+  phoneOptIn: boolean('phone_opt_in').default(false),
+  mailOptIn: boolean('mail_opt_in').default(false),
   
   // Notification Preferences
   notificationPreferences: jsonb('notification_preferences').$type<{

@@ -498,6 +498,20 @@
       "when": 1759260000000,
       "tag": "0069_declared_not_null",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1759270000000,
+      "tag": "0070_unambiguous_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1759280000000,
+      "tag": "0071_conservative_consent_defaults",
+      "breakpoints": true
     }
   ]
 }

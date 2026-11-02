@@ -84,8 +84,8 @@ export const separatedPaymentTransactions = pgTable("separated_payment_transacti
   routedToAccountId: uuid("routed_to_account_id").references(() => stripeConnectAccounts.id).notNull(),
   routedToAccountType: text("routed_to_account_type").notNull(),
   routingRuleId: uuid("routing_rule_id").references(() => paymentRoutingRules.id),
-  separationEnforced: boolean("separation_enforced").notNull().default(true), // Was separation enforced?
-  correctAccountUsed: boolean("correct_account_used").notNull().default(true),
+  separationEnforced: boolean("separation_enforced").notNull().default(false), // Was separation enforced? Not asserted for a transaction nobody checked
+  correctAccountUsed: boolean("correct_account_used").notNull().default(false),
   paymentStatus: text("payment_status").notNull().default("pending"), // "pending", "completed", "failed", "refunded"
   failureReason: text("failure_reason"),
   metadata: jsonb("metadata"), // Additional payment details

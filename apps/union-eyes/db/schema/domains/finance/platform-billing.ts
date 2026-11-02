@@ -81,7 +81,6 @@ export const billingAccounts = pgTable('billing_accounts', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   createdBy: varchar('created_by', { length: 255 }),
 }, (t) => ({
-  orgIdx: uniqueIndex('billing_accounts_org_idx').on(t.organizationId),
   statusIdx: index('billing_accounts_status_idx').on(t.status),
 }));
 

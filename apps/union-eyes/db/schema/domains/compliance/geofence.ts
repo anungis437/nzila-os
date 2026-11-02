@@ -182,8 +182,8 @@ export const locationDeletionLog = pgTable("location_deletion_log", {
 export const locationTrackingConfig = pgTable("location_tracking_config", {
   id: uuid("id").primaryKey().defaultRandom(),
   
-  // Global settings
-  locationTrackingEnabled: boolean("location_tracking_enabled").notNull().default(true),
+  // Global settings: tracking is off until someone turns it on
+  locationTrackingEnabled: boolean("location_tracking_enabled").notNull().default(false),
   maxRetentionHours: varchar("max_retention_hours", { length: 10 }).notNull().default("24"), // Hard limit: 24 hours
   
   // Background tracking (MUST be disabled)

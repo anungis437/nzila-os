@@ -36,9 +36,10 @@ const sqlOf = (file: string) =>
     .filter(Boolean)
 const FORWARD = sqlOf('0060_reachable_stub_shape_2.sql')
 const ROLLBACK = sqlOf('0060_reachable_stub_shape_2.rollback.sql')
-// Platforms 0062 to 0069 converge the same relations afterwards (their columns use the enum types 0060 created, and their indexes, keys and constraints sit on
+// Platforms 0062 to 0070 converge the same relations afterwards (their columns use the enum types 0060 created, and their indexes, keys and constraints sit on
 // those relations), so a proof about what 0060 alone added or removed first takes them off, newest first, inside the transaction it rolls back at the end.
 const LATER_ROLLBACKS = [
+  '0070_unambiguous_constraints.rollback.sql',
   '0069_declared_not_null.rollback.sql',
   '0068_declared_foreign_keys.rollback.sql',
   '0067_declared_checks.rollback.sql',
