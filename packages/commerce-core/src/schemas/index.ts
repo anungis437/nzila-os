@@ -43,7 +43,7 @@ export const createCustomerSchema = z.object({
   email: z.string().email().nullable().default(null),
   phone: z.string().max(30).nullable().default(null),
   address: customerAddressSchema.nullable().default(null),
-  externalIds: z.record(z.string()).default({}),
+  externalIds: z.record(z.string(), z.string()).default({}),
 })
 
 // ── Opportunity ─────────────────────────────────────────────────────────────

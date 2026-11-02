@@ -107,7 +107,7 @@ export const createComplianceEventSchema = z.object({
   caseId: uuidSchema,
   eventType: z.enum(COMPLIANCE_EVENT_TYPES),
   severity: z.enum(SEVERITY_LEVELS),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 })
 
 /* ── Communication ────────────────────────────────────────── */
