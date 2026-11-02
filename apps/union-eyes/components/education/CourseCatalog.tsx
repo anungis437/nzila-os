@@ -39,7 +39,7 @@ interface Course {
   provides_certification: boolean;
   certification_name: string;
   clc_approved: boolean;
-  course_fee: number;
+  course_fee: number | null;
   min_enrollment: number;
   max_enrollment: number;
 }
@@ -111,7 +111,12 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
         provides_certification: c.providesCertification === true || c.provides_certification === true,
         certification_name: String(c.certificationName ?? c.certification_name ?? ''),
         clc_approved: c.clcApproved === true || c.clc_approved === true,
-        course_fee: Number(c.courseFee ?? c.course_fee ?? 0),
+        course_fee: (() => {
+          const raw = c.courseFee ?? c.course_fee;
+          if (raw == null || raw === '') return null;
+          const amount = Number(raw);
+          return Number.isFinite(amount) && amount >= 0 ? amount : null;
+        })(),
         min_enrollment: Number(c.minEnrollment ?? c.min_enrollment ?? 0),
         max_enrollment: Number(c.maxEnrollment ?? c.max_enrollment ?? 0),
       })));
@@ -387,7 +392,9 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
                 <div className="text-sm">
                   <Badge variant="outline">{course.course_difficulty}</Badge>
                 </div>
-                {course.course_fee > 0 ? (
+                {course.course_fee === null ? (
+                  <div className="text-sm text-muted-foreground">Fee unavailable</div>
+                ) : course.course_fee > 0 ? (
                   <div className="text-sm font-medium">${course.course_fee}</div>
                 ) : (
                   <div className="text-sm text-green-600 font-medium">Free</div>
@@ -446,7 +453,7 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
                   <div>
                     <h4 className="text-sm font-medium mb-2">Cost</h4>
                     <p className="text-sm font-semibold">
-                      {selectedCourse.course_fee > 0 ? `$${selectedCourse.course_fee}` : 'Free'}
+                      {selectedCourse.course_fee === null ? 'Fee unavailable' : selectedCourse.course_fee > 0 ? `${selectedCourse.course_fee}` : 'Free'}
                     </p>
                   </div>
                 </div>
@@ -492,13 +499,14 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
                   </select>
                   {sessionsLoading && <p className="text-sm text-muted-foreground">Loading available sessions…</p>}
                   {!sessionsLoading && sessions.length === 0 && <p className="text-sm text-muted-foreground">No available sessions are listed. Contact your union for scheduling.</p>}
+                  {selectedCourse.course_fee === null && <p className="text-sm text-muted-foreground">Course fee is unavailable; enrollment is paused until it can be confirmed.</p>}
                   {enrollmentError && <p role="alert" className="text-sm text-destructive">{enrollmentError}</p>}
                 </div>
                 <div className="flex gap-2 pt-4 border-t">
                   <Button
                     onClick={handleEnroll}
                     className="flex-1"
-                    disabled={enrolling || sessionsLoading || !memberId || !selectedSessionId}
+                    disabled={enrolling || sessionsLoading || !memberId || !selectedSessionId || selectedCourse.course_fee === null}
                   >
                     {enrolling ? 'Submitting registration…' : 'Enroll in selected session'}
                   </Button>
