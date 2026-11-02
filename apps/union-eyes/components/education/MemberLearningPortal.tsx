@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -86,29 +86,37 @@ const categoryColors: Record<string, string> = {
   labor_law: 'bg-indigo-600',
 };
 
-export function MemberLearningPortal({ organizationId: _organizationId, memberId }: MemberLearningPortalProps) {
+export function MemberLearningPortal({ organizationId, memberId }: MemberLearningPortalProps) {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [completions, setCompletions] = useState<Completion[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('my-courses');
   const [loadError, setLoadError] = useState<string | null>(null);
   const locale = useLocale();
+  const activeRequest = useRef<AbortController | null>(null);
 
   const fetchMemberData = useCallback(async () => {
+    // A tenant change or refresh invalidates all previous in-flight responses.
+    // Never retain a former organization's member records in the new view.
+    activeRequest.current?.abort();
+    const controller = new AbortController();
+    activeRequest.current = controller;
+    setRegistrations([]);
+    setCompletions([]);
     try {
       setLoading(true);
       setLoadError(null);
       
       // Fetch registrations
-      const regResponse = await fetch(`/api/education/registrations?memberId=${memberId}`);
+      const regResponse = await fetch('/api/education/registrations', { signal: controller.signal, cache: 'no-store' });
       if (regResponse.ok) {
         const regData = await regResponse.json();
         const raw = readEducationCrudRows(regData);
         // CRUD returns camelCase source rows, not the historical snake_case view model.
         // Read tenant-scoped catalogue metadata only; never read meeting credentials here.
         const [courseResult, sessionResult] = await Promise.allSettled([
-          fetch('/api/education/courses', { cache: 'no-store' }),
-          fetch('/api/education/sessions', { cache: 'no-store' }),
+          fetch('/api/education/courses', { cache: 'no-store', signal: controller.signal }),
+          fetch('/api/education/sessions', { cache: 'no-store', signal: controller.signal }),
         ]);
         const readRows = async (result: PromiseSettledResult<Response>) => {
           if (result.status !== 'fulfilled' || !result.value.ok) return [] as Record<string, unknown>[];
@@ -122,6 +130,7 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
           const candidate = text(v);
           return candidate && !Number.isNaN(Date.parse(candidate)) ? candidate : '';
         };
+        if (controller.signal.aborted) return;
         setRegistrations(raw.map((r: Record<string, unknown>) => {
           const course: Record<string, unknown> = courseById.get(text(r.courseId ?? r.course_id)) ?? {};
           const session: Record<string, unknown> = sessionById.get(text(r.sessionId ?? r.session_id)) ?? {};
@@ -148,10 +157,11 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
 
       // Members cannot call the officer/steward-only completion attestation route.
       // Read their own certifications through the member-scoped catalogue instead.
-      const compResponse = await fetch('/api/education/certifications', { cache: 'no-store' });
+      const compResponse = await fetch('/api/education/certifications', { cache: 'no-store', signal: controller.signal });
       if (compResponse.ok) {
         const compData = await compResponse.json();
         const raw = readEducationCrudRows(compData);
+        if (controller.signal.aborted) return;
         setCompletions(raw.map((r: Record<string, unknown>) => ({
           id: String(r.id ?? ''),
           course_name: String(r.course_name ?? r.courseName ?? 'Course details unavailable'),
@@ -172,14 +182,15 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
         setLoadError('Your certifications could not be loaded. Please try again.');
       }
     } catch (_error) {
-      setLoadError('Learning records could not be loaded. Please try again.');
+      if (!controller.signal.aborted) setLoadError('Learning records could not be loaded. Please try again.');
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
-  }, [memberId]);
+  }, [memberId, organizationId]);
 
   useEffect(() => {
     fetchMemberData();
+    return () => { activeRequest.current?.abort(); };
   }, [fetchMemberData]);
 
   const activeCourses = registrations.filter(r => 
