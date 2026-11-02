@@ -155,6 +155,46 @@ describe('DEF-0B10-PEN-TRUSTEE-MEETING-READS confidential read containment', () 
     )
   })
 
+  it('refuses fabricated, ambiguous or normalized trustee meeting dates before a database transaction', async () => {
+    const { POST } = await import('../pension/trustee-meetings/route')
+    const invalidDates: unknown[] = [
+      '2026-02-29', '2026-02-30', '2026-04-31', '2026-13-01',
+      '2026-11-01T09:00:00', '2026-11-01T24:00:00Z',
+      '2026-11-01T09:00:00+15:00', '2026-11-01T09:00:00+14:30',
+      '2026-11-01T09:00:00Z extra', 1793533200000, true, null,
+    ]
+    for (const scheduledDate of invalidDates) {
+      await expect((POST as any)({
+        organizationId: 'org-a', userId: 'user-a',
+        body: { title: 'Trustee review', scheduledDate },
+      })).rejects.toMatchObject({ status: 400 })
+    }
+    expect(m.rls).not.toHaveBeenCalled()
+    expect(m.audit).not.toHaveBeenCalled()
+  })
+
+  it('accepts leap days and timezone-qualified instants without changing their intended instant', async () => {
+    const { POST } = await import('../pension/trustee-meetings/route')
+    const inserted: Date[] = []
+    m.rls.mockImplementation(async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) => operation({
+      insert: () => ({
+        values: (value: { scheduledDate: Date }) => {
+          inserted.push(value.scheduledDate)
+          return { returning: async () => [{ id: 'meeting-new', ...value }] }
+        },
+      }),
+    }))
+    for (const [input, expected] of [
+      ['2028-02-29', '2028-02-29T00:00:00.000Z'],
+      ['2026-11-01T09:00:00-05:00', '2026-11-01T14:00:00.000Z'],
+      ['2026-11-01T09:00:00Z', '2026-11-01T09:00:00.000Z'],
+    ]) {
+      await (POST as any)({ organizationId: 'org-a', userId: 'user-a', body: { title: 'Trustee review', scheduledDate: input } })
+      expect(inserted.at(-1)?.toISOString()).toBe(expected)
+    }
+    expect(m.audit).toHaveBeenCalledTimes(3)
+  })
+
   it('does not claim trustee meeting creation succeeded if mandatory audit persistence fails', async () => {
     const { POST } = await import('../pension/trustee-meetings/route')
     m.rls.mockImplementationOnce(async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) =>
