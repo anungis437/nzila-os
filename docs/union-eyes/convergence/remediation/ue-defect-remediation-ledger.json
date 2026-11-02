@@ -1323,6 +1323,16 @@
       ],
       "correction": "Related finance summary per-capita and other sensitive reads now use the same explicit tenant-bound transaction as live finance:view ledger mandate verification, and an atomic financial read audit is mandatory before response. Does not by itself prove the separate CLC report defect resolved. Additionally, executive collection rate no longer fabricates 100% with no charge denominator; the UI shows N/A.",
       "remaining": "Exact-HEAD unit/contract, real PG15/16, HTTP/browser/staging, audit durability, separate CLC route review, independent reviewer and institutional decisions. No defect CLOSED or addressed-count credit. UI truthfulness exact-HEAD contract and browser tests outstanding."
+    },
+    "DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-billing-send-batch-principal-mandate-20261102.md",
+      "files": [
+        "apps/union-eyes/app/api/billing/send-batch/route.ts",
+        "apps/union-eyes/app/api/__tests__/billing-send-batch.route.test.ts"
+      ],
+      "correction": "Tenant-transaction preflight requires a live principal finance:execute ledger-wide mandate before any billing read; refuses foreign/closed periods, foreign subscriptions, multiple active subscriptions and false success on invoice failure.",
+      "remaining": "Exact-HEAD focused/full tests, native PG15/16 and RLS, HTTP/browser/staging, audit rollback and concurrent exactly-once issuance, global-handle service preflight and read/write TOCTOU, institutional mandate issuance and independent ratification. Zero additional addressed or CLOSED credit."
     }
   }
 }
