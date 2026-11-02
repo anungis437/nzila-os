@@ -21,3 +21,9 @@ The service now refuses to supersede any pending payment when the outstanding ba
 ## Outstanding acceptance obligations
 
 Exact-HEAD unit/Vitest, complete contract and security regression, native PostgreSQL 15/16 with actual RLS and concurrent Stripe-webhook ordering, signed webhook over HTTP, browser/staging acceptance, provider cancellation/reconciliation operations, refunds and disputes, and independent release qualification remain outstanding until evidenced. The 12-hour retry limit is an engineering fail-closed policy, not an institutionally ratified settlement mandate. Existing historical NATIVE_VERIFIED evidence for the earlier implementation must not be mistaken for qualification of this changed source. Gate 0C.4 independent reviewer, owner-persona ratification and institutional authority decisions remain outstanding. No PR merge or production promotion is authorized.
+
+## Native PG15/16 regression correction (follow-up)
+
+At HEAD `7854cad7b3b383096f856eb735f2d55a67c9ff05`, both PostgreSQL 15 and 16 native workflows failed one of 459 tests: the existing ten-concurrent-initiation fixture lacked a provider `retrieve` implementation. The failure was `DuesInitiationError: The existing payment intent cannot be verified for reuse`; the other 457 native tests passed, with one skipped. This is an explicit fail-closed response, not evidence of successful provider reuse.
+
+Commit `7e68b4a082bf258b2a49ddc4d82519ec63f3cbd9` updates the native test to use a shared, independent in-memory provider-intent store with both `create` and `retrieve`, preserving the actual PostgreSQL transaction and RLS execution. The fixture does not invent provider responses from database rows. A new native regression checks that balance drift refuses a second intent and leaves the original pending payment and provider reference unchanged. These tests require exact-new-HEAD PG15/16 execution; they are not credited as passed by their existence.
