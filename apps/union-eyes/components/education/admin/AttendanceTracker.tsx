@@ -60,6 +60,8 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
   const [loading, setLoading] = useState(false);
   const [selectedRegistrations, setSelectedRegistrations] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const orgGeneration = useRef(0);
   const rosterGeneration = useRef(0);
 
@@ -74,6 +76,8 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
     setRegistrations([]);
     setStats(null);
     setSelectedRegistrations(new Set());
+    setPage(1);
+    setHasMore(false);
     if (!organizationId) return;
     void (async () => {
       try {
@@ -98,16 +102,19 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
     setSelectedRegistrations(new Set());
     setRegistrations([]);
     setStats(null);
+    setHasMore(false);
     setSelectedSession(sessions.find(session => session.id === sessionId) ?? null);
     if (!sessionId) return;
     try {
       setLoading(true);
-      const response = await fetch(`/api/education/sessions/${encodeURIComponent(sessionId)}/attendance`, {
+      const response = await fetch(`/api/education/sessions/${encodeURIComponent(sessionId)}/attendance?page=${page}`, {
         cache: 'no-store',
       });
       if (!response.ok) throw new Error('Attendance roster unavailable');
       const payload = await response.json();
-      if (payload?.data?.sessionId !== sessionId || !Array.isArray(payload?.data?.registrations)) {
+      if (payload?.data?.sessionId !== sessionId || !Array.isArray(payload?.data?.registrations) ||
+        payload?.data?.pagination?.page !== page ||
+        typeof payload?.data?.pagination?.hasMore !== 'boolean') {
         throw new Error('Attendance roster response invalid');
       }
       const records: Registration[] = payload.data.registrations;
@@ -118,6 +125,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
       }
       if (generation !== rosterGeneration.current || orgAtRequest !== orgGeneration.current) return;
       setRegistrations(records);
+      setHasMore(payload.data.pagination.hasMore);
       setStats({
         total: records.length,
         attended: records.filter(row => row.attended).length,
@@ -133,7 +141,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
         setLoading(false);
       }
     }
-  }, [sessions]);
+  }, [sessions, page]);
 
   useEffect(() => {
     void fetchAttendance(selectedSessionId);
@@ -218,7 +226,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `attendance-${selectedSession.id}-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.download = `attendance-${selectedSession.id}-page-${page}-${new Date().toISOString().slice(0, 10)}.csv`;
     anchor.click();
     window.URL.revokeObjectURL(url);
   };
@@ -255,7 +263,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
           <CardDescription>Choose a session to view and manage attendance</CardDescription>
         </CardHeader>
         <CardContent>
-          <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
+          <Select value={selectedSessionId} onValueChange={(id) => { setPage(1); setSelectedSessionId(id); }}>
             <SelectTrigger>
               <SelectValue placeholder="Select a session" />
             </SelectTrigger>
@@ -275,7 +283,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Enrolled</CardTitle>
+              <CardTitle className="text-sm font-medium">Registrations on this page</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
@@ -357,6 +365,18 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {selectedSession && (
+        <div className="flex items-center justify-between gap-3" aria-label="Attendance roster pagination">
+          <span className="text-sm text-muted-foreground">Roster page {page}; exports include this page only.</span>
+          <div className="flex gap-2">
+            <Button variant="outline" disabled={page === 1 || loading || saving}
+              onClick={() => setPage(current => Math.max(1, current - 1))}>Previous</Button>
+            <Button variant="outline" disabled={!hasMore || loading || saving}
+              onClick={() => setPage(current => current + 1)}>Next</Button>
+          </div>
+        </div>
       )}
 
       {/* Attendance Roster */}
