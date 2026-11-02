@@ -28,12 +28,29 @@ let pg: PGlite
 let intentSeq = 0
 
 const gateway = () => {
-  const create = vi.fn(async (_params: Record<string, unknown>, options?: Record<string, unknown>) => ({
-    id: `pi_${String(options?.idempotencyKey)}`,
-    client_secret: `secret_${intentSeq++}`,
-  }))
+  const intents = new Map<string, {
+    id: string; client_secret: string | null; amount: number; currency: string;
+    metadata: Record<string, string>; status: string
+  }>()
+  const create = vi.fn(async (params: Record<string, unknown>, options?: Record<string, unknown>) => {
+    const id = `pi_${String(options?.idempotencyKey)}`
+    const existing = intents.get(id)
+    if (existing) return existing
+    const intent = {
+      id, client_secret: `secret_${intentSeq++}`,
+      amount: Number(params.amount), currency: String(params.currency),
+      metadata: params.metadata as Record<string, string>, status: 'requires_payment_method',
+    }
+    intents.set(id, intent)
+    return intent
+  })
+  const retrieve = vi.fn(async (id: string) => {
+    const intent = intents.get(id)
+    if (!intent) throw new Error('Unknown provider intent')
+    return intent
+  })
   const cancel = vi.fn(async () => ({}))
-  return { create, cancel, facade: { paymentIntents: { create, cancel } } }
+  return { create, retrieve, cancel, facade: { paymentIntents: { create, retrieve, cancel } } }
 }
 
 const initiate = (userId: string, g: ReturnType<typeof gateway>) =>
@@ -88,9 +105,9 @@ describe('initiateDuesPayment — one open payment per member', () => {
     expect(second.paymentId).toBe(first.paymentId)
     expect(third.paymentId).toBe(first.paymentId)
     expect(await rows(`WHERE member_id = 'member-a'`)).toHaveLength(1)
-    // The provider is asked with the same idempotency key every time, so it replays one intent.
-    const keys = g.create.mock.calls.map((call) => (call[1] as { idempotencyKey: string }).idempotencyKey)
-    expect(new Set(keys)).toEqual(new Set([`ue-dues-${first.paymentId}`]))
+    // Once linked, retries retrieve the provider intent instead of creating again.
+    expect(g.create).toHaveBeenCalledTimes(1)
+    expect(g.retrieve).toHaveBeenCalledTimes(2)
     expect(state.audit.filter((e) => e.action === 'dues.payment_initiated')).toHaveLength(1)
   })
 
