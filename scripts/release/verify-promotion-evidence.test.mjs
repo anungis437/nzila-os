@@ -334,6 +334,22 @@ test('signed lockfile digest must match the independently checked-out source', (
     assert.throws(() => x.verify(), /signed lockfile hash does not match checked-out source/)
   } finally { x.cleanup() }
 })
+test('trusted checked-out lockfile rejects symlink and oversized substitutions', () => {
+  const x = makeFixture()
+  try {
+    const original = join(x.directory, 'pnpm-lock-original.yaml')
+    renameSync(x.sourceLockfilePath, original)
+    symlinkSync(original, x.sourceLockfilePath)
+    assert.throws(() => x.verify(), /trusted source lockfile unavailable/)
+    rmSync(x.sourceLockfilePath)
+    renameSync(original, x.sourceLockfilePath)
+    assert.equal(x.verify().commitSha, COMMIT)
+    // Sparse expansion must fail before allocating or hashing unbounded bytes.
+    truncateSync(x.sourceLockfilePath, 67_108_865)
+    assert.throws(() => x.verify(), /trusted source lockfile unavailable/)
+  } finally { x.cleanup() }
+})
+
 test('a correctly signed but forged lockfile hash cannot substitute source provenance', () => {
   const x = makeFixture()
   try {

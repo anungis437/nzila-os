@@ -183,7 +183,12 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   }
   let actualLockfileHash
   try {
-    actualLockfileHash = sha256(readFileSync(sourceLockfilePath))
+    // Treat the checked-out lockfile as untrusted filesystem input too: a
+    // symlink or sparse oversized replacement must not become source proof.
+    // Read a single bounded descriptor with no-follow and mutation checks.
+    actualLockfileHash = sha256(readBoundedPromotionArtifact(
+      sourceLockfilePath, 67_108_864, 'trusted source lockfile',
+    ))
   } catch {
     deny('trusted source lockfile unavailable')
   }
