@@ -29,7 +29,7 @@ export const lineageNodeSchema = z.object({
   nodeType: lineageNodeTypeSchema,
   title: z.string().min(1),
   refId: z.string().min(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   createdAt: z.string().datetime(),
 })
 
