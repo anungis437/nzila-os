@@ -10929,6 +10929,24 @@
       ],
       "correction": "Restores member-facing access to registration-scoped audited virtual joining details only on explicit request. Fixes course/session selection (formerly passed courseId as sessionId), nested CRUD envelope parsing, real server-confirmed enrollment responses, camelCase view-model mapping, and member certificates via authorized certification route rather than steward-only completion attestation. Inert actions replaced by governed links or explicit unavailability. Enrollment POST now snapshots authoritative same-tenant course fee rather than silently writing the zero default for paid courses, and rejects unknown/malformed server fees; caller-supplied fee/paid/waived assertions remain blocked.",
       "remaining": "Exact-HEAD Vitest/contract, native PG15/16, HTTP/browser and staging acceptance; paginated course/session completeness; real end-to-end registration and joining under member role; certification, cancellation, renewal and financial mandate decisions; independent reviewer, owner-persona and institutional authority. No defect closure. Financial settlement and payment collection are not implied by registration."
+    },
+    {
+      "id": "UE-EDUCATION-JOIN-FEE-ENTITLEMENT-AND-MANIFEST-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-join-fee-entitlement-and-route-manifest-20261102.md",
+      "sourceBaseline": "fc5614701e479ed0867ad070da3c55e969a782f4",
+      "sourceCommit": "241a97376413c0823446189cfc1f0ac499308661",
+      "testCommit": "24534281198d11d12644eeb81fef7da56c54f8c2",
+      "manifestCommit": "9e78ad602ff2a39b258cff28fcf2523a5283198a",
+      "files": [
+        "apps/union-eyes/app/api/education/registrations/join/route.ts",
+        "apps/union-eyes/app/api/education/registrations/join/__tests__/route.test.ts",
+        "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json"
+      ],
+      "correction": "Protect paid education joining credentials until the stored registration has recorded payment or waiver, with unknown/malformed fee refusal. Preserve audited owner/tenant/approval gates. Reconcile new GET route into UE-CONV-K-008 manifest without changing historical defect provenance.",
+      "remaining": "Exact-HEAD Vitest/contract, native PG15/16, disposable HTTP/browser, staging and upstream payment/waiver authority verification. Gate 0C.4 independent reviewer, owner-persona and institutional decisions outstanding. No defect closure."
     }
   ]
 }
