@@ -107,15 +107,9 @@ export const GET = withRoleAuth('member', async (request, context) => {
       const filters: Record<string, any> = { organizationId, visibleToUserId: userId };
       if (cbaId) filters.cbaId = cbaId;
 
-      // Check for tags filter
-      const tags = listControls.tags;
-      if (tags) {
-        const { notes } = await listBargainingNotes(
-          { ...filters, tags },
-          { limit: listControls.limit },
-        );
-        return NextResponse.json({ notes, count: notes.length });
-      }
+      // Tags are an additional predicate, not a separate list endpoint:
+      // apply the same agreement, confidentiality, date and pagination bounds.
+      if (listControls.tags) filters.tags = listControls.tags;
 
       // Build filters
       const sessionType = searchParams.get("sessionType");
@@ -145,6 +139,10 @@ export const GET = withRoleAuth('member', async (request, context) => {
       const { page, limit, sortBy, sortOrder } = listControls;
       const result = await listBargainingNotes(filters, { page, limit, sortBy, sortOrder });
 
+      // Preserve the legacy tags response keys while exposing real total/page.
+      if (listControls.tags) {
+        return NextResponse.json({ notes: result.notes, count: result.notes.length, total: result.total, page: result.page, limit: result.limit });
+      }
       return NextResponse.json(result);
       });
     } catch (error) {
