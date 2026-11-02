@@ -115,16 +115,16 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
           return readEducationCrudRows(await result.value.json());
         };
         const [courses, sessions] = await Promise.all([readRows(courseResult), readRows(sessionResult)]);
-        const courseById = new Map(courses.map(c => [c.id, c]));
-        const sessionById = new Map(sessions.map(c => [c.id, c]));
+        const courseById = new Map<string, Record<string, unknown>>(courses.filter(c => typeof c.id === 'string').map(c => [c.id as string, c]));
+        const sessionById = new Map<string, Record<string, unknown>>(sessions.filter(c => typeof c.id === 'string').map(c => [c.id as string, c]));
         const text = (v: unknown, fallback = '') => typeof v === 'string' ? v : fallback;
         const date = (v: unknown) => {
           const candidate = text(v);
           return candidate && !Number.isNaN(Date.parse(candidate)) ? candidate : '';
         };
         setRegistrations(raw.map((r: Record<string, unknown>) => {
-          const course: Record<string, unknown> = courseById.get(r.courseId ?? r.course_id) ?? {};
-          const session: Record<string, unknown> = sessionById.get(r.sessionId ?? r.session_id) ?? {};
+          const course: Record<string, unknown> = courseById.get(text(r.courseId ?? r.course_id)) ?? {};
+          const session: Record<string, unknown> = sessionById.get(text(r.sessionId ?? r.session_id)) ?? {};
           return {
             id: text(r.id),
             session_id: text(r.sessionId ?? r.session_id) || null,
