@@ -4,7 +4,7 @@
  * This is not a grant of release authority: the GitHub production environment
  * still requires its own human approval and protected deployment identity.
  */
-import { readFileSync, openSync, closeSync, fstatSync, readSync, constants } from 'node:fs'
+import { openSync, closeSync, fstatSync, readSync, constants } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { createHash, createPublicKey, verify } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
