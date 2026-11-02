@@ -23,7 +23,7 @@ import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { moneyToNumber } from '@/lib/decimal-safe';
+import { moneyToNumber, toCents } from '@/lib/decimal-safe';
 import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { type RLSTx } from '@/lib/db/with-rls-context';
 
@@ -424,24 +424,30 @@ export class BillingCycleService {
     }
 
     const joinDate = new Date(joinedAt);
-    
-    // If joined before or on period start, charge full amount
-    if (joinDate <= periodStart) {
-      return { amount: fullAmount, isProRated: false };
+    // Ledger periods are persisted as UTC calendar dates. Use inclusive calendar days,
+    // not elapsed milliseconds: a 23:59:59.999 period end and DST changes must not
+    // remove the member's last eligible day or change the denominator.
+    const utcDay = (date: Date): number =>
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86_400_000;
+    const startDay = utcDay(periodStart);
+    const endDay = utcDay(periodEnd);
+    const joinedDay = utcDay(joinDate);
+    if (!Number.isFinite(startDay) || !Number.isFinite(endDay) ||
+        !Number.isFinite(joinedDay) || endDay < startDay) {
+      throw new Error('Invalid dues proration calendar dates');
     }
 
-    // If joined after period end, charge nothing
-    if (joinDate > periodEnd) {
+    if (joinedDay <= startDay) {
+      return { amount: fullAmount, isProRated: false };
+    }
+    if (joinedDay > endDay) {
       return { amount: 0, isProRated: true };
     }
 
-    // Pro-rate based on days in period
-    const totalDays = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24));
-    const daysActive = Math.ceil((periodEnd.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
-    const proRatedAmount = (fullAmount * daysActive) / totalDays;
-
+    const totalDays = endDay - startDay + 1;
+    const daysActive = endDay - joinedDay + 1;
     return {
-      amount: Math.round(proRatedAmount * 100) / 100,
+      amount: Math.round(toCents(fullAmount) * daysActive / totalDays) / 100,
       isProRated: true,
     };
   }
@@ -461,16 +467,25 @@ export class BillingCycleService {
     pacAmount: number;
     strikeFundAmount: number;
   } {
-    const duesAmount = totalAmount * 0.85;
-    const copeAmount = totalAmount * 0.10;
-    const pacAmount = totalAmount * 0.03;
-    const strikeFundAmount = totalAmount * 0.02;
-
+    if (!Number.isFinite(totalAmount) || totalAmount < 0) {
+      throw new Error('Invalid dues allocation amount');
+    }
+    // All components must reconcile to the charge to the cent. Independently
+    // rounding four floating-point percentages can create or lose money.
+    // These existing default percentages are NOT an institutional allocation mandate.
+    const totalCents = toCents(totalAmount);
+    if (!Number.isSafeInteger(totalCents)) {
+      throw new Error('Dues allocation exceeds safe integer cents');
+    }
+    const copeCents = Math.round(totalCents * 10 / 100);
+    const pacCents = Math.round(totalCents * 3 / 100);
+    const strikeCents = Math.round(totalCents * 2 / 100);
+    const duesCents = totalCents - copeCents - pacCents - strikeCents;
     return {
-      duesAmount: Math.round(duesAmount * 100) / 100,
-      copeAmount: Math.round(copeAmount * 100) / 100,
-      pacAmount: Math.round(pacAmount * 100) / 100,
-      strikeFundAmount: Math.round(strikeFundAmount * 100) / 100,
+      duesAmount: duesCents / 100,
+      copeAmount: copeCents / 100,
+      pacAmount: pacCents / 100,
+      strikeFundAmount: strikeCents / 100,
     };
   }
 
