@@ -17,7 +17,7 @@ The endpoint now accepts an actual ISO calendar date (interpreted at UTC midnigh
 
 ## Qualification and provenance
 
-At the source baseline `1609a8edeb0ffab86bab10e958bbf1d415869efc`, seven substantive GitHub Actions workflows were observed successful: App Floor Check, governance attestation, security regression, native PostgreSQL acceptance, full regression, and disposable HTTP/browser acceptance (six named workflows; Dependabot was skipped). Those results are **not** attributed to this correction.
+At the source baseline `1609a8edeb0ffab86bab10e958bbf1d415869efc`, six substantive GitHub Actions workflows were observed successful: App Floor Check, governance attestation, security regression, native PostgreSQL acceptance, full regression, and disposable HTTP/browser acceptance (Dependabot was skipped). Those results are **not** attributed to this correction.
 
 Exact-new-HEAD focused Vitest, complete Vitest/contract, native PG15/16, disposable HTTP/browser, deployed staging and stakeholder acceptance remain to be established by workflow results. No independently verified runtime outcome or institutional trustee mandate is asserted.
 
