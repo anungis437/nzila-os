@@ -34,6 +34,14 @@ const { GET, POST } = crudRoutes({
   staffReadsAll: true,
   readRole: 'member',
   writeRole: 'member',
+  // Enrollment accepts intent and logistical preferences only. Payment,
+  // waiver, approval, attendance and completion fields are server-owned.
+  // Refuse unsupported client fields instead of reporting a successful
+  // enrollment while silently ignoring a forged payment assertion.
+  writableFields: [
+    'courseId', 'sessionId', 'travelRequired', 'travelSubsidyRequested',
+    'accommodationRequired', 'notes',
+  ],
   // The checks below are friendly early answers; the unique index and the capacity trigger (migration 0040) settle a race.
   mapCreateError: (error) =>
     isCheckViolation(error) ? ApiError.conflict('This session is full')
@@ -41,6 +49,30 @@ const { GET, POST } = crudRoutes({
       : null,
   beforeCreate: async (values, ctx) => {
     if (!ctx.organizationId || !ctx.userId) throw ApiError.forbidden('Organization membership required');
+    // Defense in depth for direct callers and future CRUD changes. The
+    // factory may add only its own tenant/creator fields before this hook.
+    const allowed = new Set([
+      'courseId', 'sessionId', 'travelRequired', 'travelSubsidyRequested',
+      'accommodationRequired', 'notes', 'organizationId', 'createdBy',
+    ]);
+    for (const field of Object.keys(values)) {
+      if (!allowed.has(field)) throw ApiError.badRequest(`Enrollment field ${field} is not allowed`);
+    }
+    if (values.organizationId !== undefined && values.organizationId !== ctx.organizationId) {
+      throw ApiError.forbidden('Organization mismatch');
+    }
+    if (values.createdBy !== undefined && values.createdBy !== ctx.userId) {
+      throw ApiError.forbidden('Creator mismatch');
+    }
+    for (const field of ['travelRequired', 'travelSubsidyRequested', 'accommodationRequired'] as const) {
+      if (values[field] !== undefined && typeof values[field] !== 'boolean') {
+        throw ApiError.badRequest(`${field} must be a boolean`);
+      }
+    }
+    if (values.notes !== undefined && values.notes !== null &&
+      (typeof values.notes !== 'string' || values.notes.length > 2000)) {
+      throw ApiError.badRequest('notes must be text of at most 2000 characters');
+    }
     const courseId = values.courseId;
     const sessionId = values.sessionId;
     if (typeof courseId !== 'string' || typeof sessionId !== 'string') {
@@ -103,7 +135,7 @@ const { GET, POST } = crudRoutes({
       travelRequired: values.travelRequired === true,
       travelSubsidyRequested: values.travelSubsidyRequested === true,
       accommodationRequired: values.accommodationRequired === true,
-      notes: typeof values.notes === 'string' ? values.notes.slice(0, 2000) : null,
+      notes: typeof values.notes === 'string' ? values.notes : null,
     };
 
   },

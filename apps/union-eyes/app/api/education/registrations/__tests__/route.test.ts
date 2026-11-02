@@ -31,6 +31,7 @@ vi.mock('@/db/db', () => ({
 }));
 
 describe('education/registrations: self-enrollment and cross-tenant FK protections', () => {
+  let routeOptions: Record<string, unknown>;
   let beforeCreate: (
     values: Record<string, unknown>,
     ctx: { organizationId?: string | null; userId?: string | null },
@@ -40,6 +41,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     vi.clearAllMocks();
     vi.resetModules();
     m.crudRoutes.mockImplementation((opts: Record<string, unknown>) => {
+      routeOptions = opts;
       beforeCreate = opts.beforeCreate as typeof beforeCreate;
       return { GET: vi.fn(), POST: vi.fn() };
     });
@@ -55,20 +57,41 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     expect(m.select).not.toHaveBeenCalled();
   });
 
-  it('forces the member identity and ignores all client-controlled achievement/payment fields', async () => {
-    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
-      .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
-    const result = await beforeCreate({
-      courseId: 'course-1', sessionId: 'session-1', memberId: 'victim',
-      completed: true, attended: true, passed: true, feePaid: true,
-      certificateIssued: true, registrationStatus: 'completed',
-    }, { organizationId: 'org-real', userId: 'caller-own-id' });
-    expect(result).toMatchObject({
-      memberId: 'caller-own-id', organizationId: 'org-real',
-      completed: false, attended: false, passed: null, feePaid: false,
-      certificateIssued: false, registrationStatus: 'registered',
-    });
-    expect(m.select).toHaveBeenCalledTimes(3);
+  it('declares an enrollment-only write allowlist, excluding payment, approval and achievement fields', () => {
+    expect(routeOptions.writableFields).toEqual([
+      'courseId', 'sessionId', 'travelRequired', 'travelSubsidyRequested',
+      'accommodationRequired', 'notes',
+    ]);
+    for (const key of ['memberId', 'feePaid', 'feeWaived', 'courseFee', 'registrationStatus',
+      'completed', 'attended', 'passed', 'certificateIssued', 'requiresApproval']) {
+      expect(routeOptions.writableFields).not.toContain(key);
+    }
+  });
+
+  it.each(['memberId', 'feePaid', 'feeWaived', 'courseFee', 'registrationStatus',
+    'completed', 'attended', 'passed', 'certificateIssued', 'requiresApproval', 'unexpected'])(
+    'refuses forged enrollment field %s before any database read', async (field) => {
+      await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1', [field]: true },
+        { organizationId: 'org-real', userId: 'caller-own-id' })).rejects.toMatchObject({ status: 400 });
+      expect(m.select).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects tenant or creator identity mismatches before database access', async () => {
+    await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1', organizationId: 'foreign' },
+      { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 403 });
+    await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1', createdBy: 'someone-else' },
+      { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 403 });
+    expect(m.select).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['travelRequired', 'true'], ['travelSubsidyRequested', 1],
+    ['accommodationRequired', null], ['notes', 123], ['notes', 'x'.repeat(2001)],
+  ])('rejects malformed preference %s without silently coercing or truncating', async (field, value) => {
+    await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1', [field]: value },
+      { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 400 });
+    expect(m.select).not.toHaveBeenCalled();
   });
 
   it('rejects a course outside the caller organization', async () => {
@@ -119,14 +142,20 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1' }, { organizationId: 'org-real', userId: 'member' })).resolves.toMatchObject({ registrationStatus: 'registered' });
   });
 
-  it('records the authoritative paid course fee and ignores client price, payment and waiver fields', async () => {
+  it('records authoritative paid fees with no client-supplied payment or waiver authority', async () => {
     m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '49.95' }])
       .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
     const result = await beforeCreate({
       courseId: 'course-1', sessionId: 'session-1',
-      courseFee: '0.00', feePaid: true, feeWaived: true,
+      travelRequired: true, travelSubsidyRequested: false,
+      accommodationRequired: true, notes: 'Accessibility needs',
     }, { organizationId: 'org-real', userId: 'member' });
-    expect(result).toMatchObject({ courseFee: '49.95', feePaid: false, feeWaived: false });
+    expect(result).toMatchObject({
+      courseFee: '49.95', feePaid: false, feeWaived: false,
+      travelRequired: true, travelSubsidyRequested: false,
+      accommodationRequired: true, notes: 'Accessibility needs',
+      memberId: 'member', organizationId: 'org-real',
+    });
   });
 
   it.each([null, undefined, 'invalid', '-1', '1e2', '10.999'])(
