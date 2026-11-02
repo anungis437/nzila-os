@@ -25,3 +25,7 @@ Both education screens previously expected `data` to be a flat array. The actual
 Known limitations: the generic CRUD catalogue defaults to paginated results and may not include all sessions without explicit pagination. Enrollment remains disabled unless a real session is present; no invented fallback session is generated. No financial mandate or course-fee settlement is implied. Native and HTTP/browser qualification remains outstanding.
 
 Missing, malformed or negative course fees are now shown as unavailable, never as free. Enrollment is disabled until a valid nonnegative fee is present; this does not authorize charging or settlement.
+
+## Server-owned enrollment fee snapshot
+
+The registration create hook previously inserted no course fee, leaving the registration's default `course_fee=0.00` even when the authoritative course carried a positive fee. The hook now selects the active, same-tenant course's `courseFee`, validates the monetary string and writes it as a server-owned registration snapshot. Missing or malformed fees refuse registration before insert; client-supplied fee, paid and waived claims remain ignored. Adversarial route tests prove a 49.95 course remains 49.95 even when the caller submits 0.00, paid and waived, and refuse absent, negative, exponent and fractional-cent server fees. This does not collect funds, mark paid, or authorize a financial mandate.
