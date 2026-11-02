@@ -133,6 +133,17 @@ describe('CookieConsentManager', () => {
     analytics: true, marketing: false,
   };
 
+  // A transaction whose statements come from h.chainQueue in order and which remembers each chain, so a test can see what was written.
+  function recordingTx() {
+    const chains: Array<Record<string, ReturnType<typeof vi.fn>>> = [];
+    const make = () => {
+      const c = chain() as Record<string, ReturnType<typeof vi.fn>>;
+      chains.push(c);
+      return c;
+    };
+    return { tx: { select: vi.fn(make), insert: vi.fn(make), update: vi.fn(make), delete: vi.fn(make) } as never, chains };
+  }
+
   it('updates when consent exists', async () => {
     h.chainQueue = [[{ id: 'existing', organizationId: 'o', userId: null }], [{ id: 'updated' }]];
     expect(await CookieConsentManager.saveCookieConsent(data)).toEqual({ id: 'updated' });
@@ -142,11 +153,36 @@ describe('CookieConsentManager', () => {
     h.chainQueue = [[{ id: 'existing', organizationId: 'other-org', userId: null }]];
     await expect(CookieConsentManager.saveCookieConsent(data)).rejects.toThrow('belongs to another');
 
-    h.chainQueue = [[{ id: 'existing', organizationId: 'o', userId: 'owner' }]];
+    // The record belongs to the profile 'owner-profile'; this visitor's profile is a different one.
+    h.chainQueue = [[{ id: 'someone-else-profile' }], [{ id: 'existing', organizationId: 'o', userId: 'owner-profile' }]];
     await expect(CookieConsentManager.saveCookieConsent({ ...data, userId: 'someone-else' })).rejects.toThrow('belongs to another');
 
-    h.chainQueue = [[{ id: 'existing', organizationId: 'o', userId: 'owner' }]];
+    // An anonymous visitor cannot change a record a signed-in member holds.
+    h.chainQueue = [[{ id: 'existing', organizationId: 'o', userId: 'owner-profile' }]];
     await expect(CookieConsentManager.saveCookieConsent(data)).rejects.toThrow('belongs to another');
+  });
+
+  it('stores the profile uuid of a signed-in visitor, not the identity string the session carries', async () => {
+    const { tx, chains } = recordingTx();
+    h.chainQueue = [[{ id: 'profile-uuid' }], [], [{ id: 'new' }]];
+    await CookieConsentManager.saveCookieConsent({ ...data, userId: 'entra|abc' }, tx);
+    const insert = chains[2];
+    expect(insert.values).toHaveBeenCalledWith(expect.objectContaining({ userId: 'profile-uuid', consentId: 'cid' }));
+    expect(insert.values).not.toHaveBeenCalledWith(expect.objectContaining({ userId: 'entra|abc' }));
+  });
+
+  it('records a signed-in visitor with no profile row like an anonymous one', async () => {
+    const { tx, chains } = recordingTx();
+    h.chainQueue = [[], [], [{ id: 'new' }]];
+    await CookieConsentManager.saveCookieConsent({ ...data, userId: 'entra|no-profile' }, tx);
+    expect(chains[2].values).toHaveBeenCalledWith(expect.objectContaining({ userId: null }));
+  });
+
+  it('lets the profile that holds a record update it', async () => {
+    const { tx, chains } = recordingTx();
+    h.chainQueue = [[{ id: 'owner-profile' }], [{ id: 'existing', organizationId: 'o', userId: 'owner-profile' }], [{ id: 'updated' }]];
+    expect(await CookieConsentManager.saveCookieConsent({ ...data, userId: 'owner' }, tx)).toEqual({ id: 'updated' });
+    expect(chains[2].set).toHaveBeenCalledWith(expect.objectContaining({ userId: 'owner-profile', analytics: true }));
   });
 
   it('inserts when consent is new', async () => {

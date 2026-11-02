@@ -71,8 +71,10 @@ describe('round 47 TENANT_RLS_REQUIRED (anonymous-subject-legitimate): cookie_co
     expect(entry, 'cookie_consents: no manifest entry found').toBeTruthy();
     expect(entry!.classification).toBe('TENANT_RLS_REQUIRED');
     expect(entry!.requiredRuntimePrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE']);
-    expect(entry!.invocationAuthority).toBe('TENANT_USER');
-    expect(entry!.dbExecutionPrincipal).toBe('TENANT_RUNTIME');
+    // The public save has no tenant session, so it runs on the system connection (UE-CONV-H-007): the system role holds the same three commands.
+    expect(entry!.requiredSystemPrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE']);
+    expect(entry!.invocationAuthority).toBe('MIXED');
+    expect(entry!.dbExecutionPrincipal).toBe('MIXED');
   });
 });
 

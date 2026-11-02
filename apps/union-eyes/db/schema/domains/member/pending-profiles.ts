@@ -1,8 +1,8 @@
-import { pgTable, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, boolean, uuid } from "drizzle-orm/pg-core";
 import { paymentProviderEnum, membershipEnum } from "./profiles";
 
 export const pendingProfilesTable = pgTable("pending_profiles", {
-  id: text("id").primaryKey().notNull(), // UUID or generated ID
+  id: uuid("id").primaryKey().notNull(), // UUID or generated ID
   email: text("email").notNull().unique(), // User's email address - unique constraint
   token: text("token"), // Verification token from checkout
   

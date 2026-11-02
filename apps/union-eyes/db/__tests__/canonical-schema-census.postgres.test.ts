@@ -33,6 +33,7 @@ type Defect = 'TABLE_ABSENT' | 'COLUMNS_MISSING' | 'REQUIRED_UNDECLARED'
 interface Entry { table: string; defects: Defect[]; columnsMissing: string[]; requiredUndeclared: string[] }
 
 async function census(client: pg.Client): Promise<Entry[]> {
+  const extensions = new Set((await client.query<{ extname: string }>('SELECT extname FROM pg_extension')).rows.map((r) => r.extname))
   const rows = (
     await client.query<{ table_schema: string; table_name: string; column_name: string; is_nullable: string; column_default: string | null; is_generated: string; is_identity: string }>(
       `SELECT table_schema, table_name, column_name, is_nullable, column_default, is_generated, is_identity
@@ -58,7 +59,10 @@ async function census(client: pg.Client): Promise<Entry[]> {
       continue
     }
     const liveNames = new Set(cols.map((c) => c.column_name))
-    const declared = new Set(config.columns.map((c) => c.name))
+    // A column whose type an optional extension provides (pgvector) is created by platform 0063 where the server offers the extension, and is not a
+    // divergence where it does not.
+    const needsMissingExtension = (c: { getSQLType(): string }) => /^vector\b/i.test(c.getSQLType()) && !extensions.has('vector')
+    const declared = new Set(config.columns.filter((c) => !needsMissingExtension(c)).map((c) => c.name))
     const columnsMissing = [...declared].filter((c) => !liveNames.has(c)).sort()
     const requiredUndeclared = cols
       .filter((c) => c.is_nullable === 'NO' && c.column_default === null && c.is_generated === 'NEVER' && c.is_identity === 'NO' && !declared.has(c.column_name))

@@ -125,7 +125,7 @@ export const newsletterListSubscribers = pgTable(
       .references(() => newsletterDistributionLists.id, {
         onDelete: 'cascade',
       }),
-    profileId: uuid('profile_id')
+    profileId: text('profile_id')
       .notNull()
       .references(() => profiles.userId, { onDelete: 'cascade' }),
     email: varchar('email', { length: 255 }).notNull(),

@@ -22,7 +22,7 @@ import {
   externalCustomers,
   externalAccounts,
 } from '@/db/schema';
-import { eq, and, sql, between, desc } from 'drizzle-orm';
+import { eq, and, sql, between, desc, inArray } from 'drizzle-orm';
 import type { IntegrationProvider } from '../../types';
 
 // ============================================================================
@@ -497,7 +497,7 @@ export async function bulkUpdateInvoiceStatus(
       and(
         eq(externalInvoices.organizationId, organizationId),
         eq(externalInvoices.externalProvider, provider),
-        sql`${externalInvoices.id} = ANY(${invoiceIds})`
+        inArray(externalInvoices.id, invoiceIds)
       )
     );
 

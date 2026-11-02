@@ -243,18 +243,18 @@ export const breakGlassActivations = pgTable("break_glass_activations", {
   requiredSignatures: integer("required_signatures").notNull().default(3),
   signaturesReceived: integer("signatures_received").notNull().default(0),
   
-  // Signature tracking
-  signature1UserId: varchar("signature_1_user_id", { length: 255 }),
-  signature1Timestamp: timestamp("signature_1_timestamp"),
-  signature1IpAddress: varchar("signature_1_ip_address", { length: 45 }),
+  // Signature tracking (the Django compliance model names the first column signature1_user_id, so the series follows it)
+  signature1UserId: varchar("signature1_user_id", { length: 255 }),
+  signature1Timestamp: timestamp("signature1_timestamp"),
+  signature1IpAddress: varchar("signature1_ip_address", { length: 45 }),
   
-  signature2UserId: varchar("signature_2_user_id", { length: 255 }),
-  signature2Timestamp: timestamp("signature_2_timestamp"),
-  signature2IpAddress: varchar("signature_2_ip_address", { length: 45 }),
+  signature2UserId: varchar("signature2_user_id", { length: 255 }),
+  signature2Timestamp: timestamp("signature2_timestamp"),
+  signature2IpAddress: varchar("signature2_ip_address", { length: 45 }),
   
-  signature3UserId: varchar("signature_3_user_id", { length: 255 }),
-  signature3Timestamp: timestamp("signature_3_timestamp"),
-  signature3IpAddress: varchar("signature_3_ip_address", { length: 45 }),
+  signature3UserId: varchar("signature3_user_id", { length: 255 }),
+  signature3Timestamp: timestamp("signature3_timestamp"),
+  signature3IpAddress: varchar("signature3_ip_address", { length: 45 }),
   
   // Recovery log
   recoveryActionsLog: jsonb("recovery_actions_log"), // Detailed log of recovery steps

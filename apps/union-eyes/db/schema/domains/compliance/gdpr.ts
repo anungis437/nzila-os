@@ -134,9 +134,10 @@ export const cookieConsents = pgTable(
   "cookie_consents",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    userId: text("user_id").references(() => profiles.userId, {
+    // The profile row of a signed-in visitor; null for an anonymous one. It is the profile's uuid, not the identity string.
+    userId: uuid("user_id").references(() => profiles.id, {
       onDelete: "cascade",
-    }), // Optional - can track anonymous users
+    }),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),

@@ -692,6 +692,34 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "declared Drizzle relations Django never created: cnesst x6, wcb x2, dues portal x2, customer-success x2, CBA intelligence x11 (DDL only; access from the manifest)"
+      },
+      {
+        "tag": "0062_declared_enum_convergence",
+        "sha256": "aaac3bd8b2fcbe1b726d7b4d79f814ae1054617fb9f898a76b87231bcb2a4ca3",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Creates the enum types the declared columns need and adds the members the database enum types lack, so the shape migration can default to them (UE-CONV-H-007)."
+      },
+      {
+        "tag": "0063_declared_shape_convergence",
+        "sha256": "8fd0d598af554bffff7ac6f3f4474fb517abab20ae956ced134258ac65992944",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Converges every physical relation on the union of its Drizzle declarations: adds every declared column, applies declared defaults, relaxes NOT NULL columns no declaration can fill, widens narrow columns and retypes two lossless representations (UE-CONV-H-007)."
+      },
+      {
+        "tag": "0064_declared_unique_keys",
+        "sha256": "9bf2ba5f9e825142f94ba4b08ea4c20b5c2e3701e0d38e9c9ce3509d74f8edeb",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Adds the 88 declared unique keys the database lacked so ON CONFLICT can infer them; refuses to run when duplicates exist (UE-CONV-H-007)."
+      },
+      {
+        "tag": "0065_declared_absent_relations_2",
+        "sha256": "fa3a831fd978a9981092619e26b496196b2a678a6e6776eca12a146838545c91",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Creates the 14 remaining declared relations that no migration created (usage, dunning, pricing, fee settlement, failed-login, rate-limit and OAuth-provider relations); all privileges revoked until the manifest grants them (UE-CONV-H-007)."
       }
     ]
   }

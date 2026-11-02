@@ -123,7 +123,7 @@ export const gssApplications = pgTable("gss_applications", {
   expectedDecisionDate: timestamp("expected_decision_date").notNull(), // submission + 10 business days
   actualDecisionDate: timestamp("actual_decision_date"),
   processingDays: integer("processing_days"), // Actual business days taken
-  met2WeekTarget: boolean("met_2_week_target"), // Did IRCC meet 2-week commitment?
+  met2WeekTarget: boolean("met2_week_target"), // Did IRCC meet 2-week commitment? (the Django compliance model names it met2_week_target)
   
   // Application outcome
   status: text("status").notNull().default("submitted"), // 'submitted' | 'in_review' | 'approved' | 'denied' | 'withdrawn'

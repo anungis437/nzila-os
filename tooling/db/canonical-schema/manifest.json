@@ -3,7 +3,7 @@
   "description": "Published from Union Eyes runtime-schema authority oracle (disposition-adjusted REQUIRED). Not an independent table list.",
   "authoritySource": "reports/union-eyes-runtime-schema-authority-oracle.json",
   "publisherSecondSchemaAuthority": false,
-  "generatedAt": "2026-11-02T01:37:04.488Z",
+  "generatedAt": "2026-11-02T05:15:20.969Z",
   "tables": {
     "account_mappings": {
       "source": "apps/union-eyes/db/schema/domains/financial/chart-of-accounts.ts",

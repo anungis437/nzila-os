@@ -6,7 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { db, schema } from '../db';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, inArray, sql } from 'drizzle-orm';
 import {
   runArrearsDetection,
   detectOverduePayments,
@@ -218,7 +218,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         .where(
           and(
             eq(schema.duesTransactions.organizationId, organizationId),
-            sql`${schema.duesTransactions.id} = ANY(${transactionIds})`
+            inArray(schema.duesTransactions.id, transactionIds)
           )
         );
     }

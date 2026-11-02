@@ -9,9 +9,9 @@ import { describe, expect, it } from 'vitest';
  * run against a real database shows it: the CBA benchmark, the claims analytics filters, the semantic knowledge search, the GDPR claim export, the bulk
  * reward balances and others were all broken by it, behind unit tests that mock the database.
  *
- * This scans the source for the spelling and refuses a new one. A column of array type (`ANY(${organizations.hierarchyPath})`) is a real array and is pinned below, as are
- * the statements in finance code that is under the finance freeze: they fail the same way, and are not touched until the freeze is lifted. Each pinned entry must still exist, so
- * the list cannot outlive the code it excuses.
+ * This scans the source for the spelling and refuses a new one. A column of array type (`ANY(${organizations.hierarchyPath})`) is a real array and is pinned below. Each pinned
+ * entry must still exist, so the list cannot outlive the code it excuses. The three finance statements that were pinned while the finance freeze held (the CLC remittance export,
+ * arrears processing and the accounting invoice sync) were fixed when the freeze was lifted and left the list.
  */
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const SKIPPED_DIRECTORIES = new Set([
@@ -45,12 +45,6 @@ const COLUMN_ARRAYS: Pinned[] = [
   { file: 'app/api/organizations/hierarchy/route.ts', text: 'organizations.hierarchyPath', why: 'a column of array type' },
 ];
 
-const FINANCE_FROZEN: Pinned[] = [
-  { file: 'services/clc/remittance-exporter.ts', text: 'remittanceIds', why: 'CLC remittance export: finance freeze' },
-  { file: 'services/financial-service/src/routes/arrears.ts', text: 'transactionIds', why: 'arrears processing: finance freeze' },
-  { file: 'lib/integrations/adapters/accounting/sync-utils.ts', text: 'invoiceIds', why: 'accounting invoice sync: finance freeze' },
-];
-
 const hits = (() => {
   const found: Array<{ file: string; line: number; text: string }> = [];
   for (const path of sourceFiles(ROOT)) {
@@ -62,7 +56,7 @@ const hits = (() => {
   return found;
 })();
 
-const isPinned = (hit: { file: string; text: string }) => [...COLUMN_ARRAYS, ...FINANCE_FROZEN].some((pin) => pin.file === hit.file && hit.text.includes(pin.text));
+const isPinned = (hit: { file: string; text: string }) => COLUMN_ARRAYS.some((pin) => pin.file === hit.file && hit.text.includes(pin.text));
 
 describe('array parameters in ANY(...)', () => {
   it('has no statement that hands ANY a JavaScript array, outside the pinned ones', () => {
@@ -71,16 +65,13 @@ describe('array parameters in ANY(...)', () => {
   });
 
   it('keeps every pinned exception alive, so a fixed statement leaves the list', () => {
-    for (const pin of [...COLUMN_ARRAYS, ...FINANCE_FROZEN]) {
+    for (const pin of COLUMN_ARRAYS) {
       expect(hits.some((hit) => hit.file === pin.file && hit.text.includes(pin.text)), `${pin.file} (${pin.why}) no longer has the statement: remove it from the pinned list`).toBe(true);
     }
   });
 
-  it('pins the finance statements by name, so the freeze is visible in one place', () => {
-    expect(FINANCE_FROZEN.map((pin) => pin.file)).toEqual([
-      'services/clc/remittance-exporter.ts',
-      'services/financial-service/src/routes/arrears.ts',
-      'lib/integrations/adapters/accounting/sync-utils.ts',
-    ]);
+  it('has no finance statement left in the list: the freeze is lifted and each was fixed', () => {
+    const finance = ['services/clc/remittance-exporter.ts', 'services/financial-service/src/routes/arrears.ts', 'lib/integrations/adapters/accounting/sync-utils.ts'];
+    for (const file of finance) expect(hits.some((hit) => hit.file === file), `${file} hands ANY an array again`).toBe(false);
   });
 });

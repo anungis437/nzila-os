@@ -419,12 +419,12 @@ export const documentsEvidenceEntries: StorageAuthorityEntry[] = [
   {
     table: "profiles",
     classification: "USER_RLS_REQUIRED",
-    reason: "CLOSED round 56 (USER_PRIVATE_RESOURCE archetype, identity root — treated per rule 19 as a security root): profilesTable is a per-user SaaS billing/subscription profile (Stripe/Whop membership, credits, no organization_id column at all) with NATIVE PostgreSQL RLS already enabled directly in the schema (db/schema/domains/member/profiles.ts: `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` + an \"own profile only\" policy keyed on `current_setting('app.current_user_id')`, set via withRLSContext()). app/api/members/me/route.ts is crudRoutes()-backed with orgScoped:true, which is a no-op for this table (no organization_id column) — the real enforcement is the table's own native RLS policy, not the API layer. REVIEWED, NOT CHANGED: the route does not additionally restrict writes to the caller's own row at the API layer (no ownerColumn), meaning a steward could in principle create/update another user's profile row through this route; native RLS still prevents a non-privileged member from reading anyone else's row. Flagged for a future tranche to confirm whether steward-managed profile writes are an intended capability.",
-    supportingCapability: ["app/api/members/me/route.ts","app/api/profile/roles/route.ts","lib/payment-processor/examples/refactored-dues-payment-route.ts","lib/utils/member-data-utils.ts"],
+    reason: "CLOSED round 56 (USER_PRIVATE_RESOURCE archetype, identity root — treated per rule 19 as a security root): profilesTable is a per-user SaaS billing/subscription profile (Stripe/Whop membership, credits, no organization_id column at all) with NATIVE PostgreSQL RLS already enabled directly in the schema (db/schema/domains/member/profiles.ts: `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` + an \"own profile only\" policy keyed on `current_setting('app.current_user_id')`, set via withRLSContext()). app/api/members/me/route.ts is crudRoutes()-backed with orgScoped:true, which is a no-op for this table (no organization_id column) — the real enforcement is the table's own native RLS policy, not the API layer. REVIEWED, NOT CHANGED: the route does not additionally restrict writes to the caller's own row at the API layer (no ownerColumn), meaning a steward could in principle create/update another user's profile row through this route; native RLS still prevents a non-privileged member from reading anyone else's row. Flagged for a future tranche to confirm whether steward-managed profile writes are an intended capability. CONVERGENCE (UE-CONV-H-007): the system role holds SELECT on this relation (it already carries the full-access policy) so the public cookie-consent save, which has no tenant session, can resolve a signed-in visitor's profile uuid; see cookie_consents.",
+    supportingCapability: ["app/api/members/me/route.ts","app/api/profile/roles/route.ts","lib/payment-processor/examples/refactored-dues-payment-route.ts","lib/utils/member-data-utils.ts","lib/gdpr/consent-manager.ts"],
     requiredRuntimePrivileges: ["SELECT", "INSERT", "UPDATE"],
-    requiredSystemPrivileges: [],
-    invocationAuthority: "TENANT_USER",
-    dbExecutionPrincipal: "TENANT_RUNTIME",
+    requiredSystemPrivileges: ["SELECT"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
     reviewPriority: "HIGH",
   },
   {

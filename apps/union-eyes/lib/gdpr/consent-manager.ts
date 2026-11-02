@@ -167,6 +167,15 @@ export class CookieConsentManager {
     const expiresAt = new Date();
     expiresAt.setFullYear(expiresAt.getFullYear() + 1); // 12 months
 
+    // The column holds the profile row of a signed-in visitor (a uuid that references profiles.id), not the identity string the
+    // session carries. A signed-in visitor with no profile row is recorded like an anonymous one.
+    const { userId: identity, organizationId: _organizationId, ...fields } = data;
+    let profileId: string | undefined;
+    if (identity) {
+      const [profile] = await tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, identity)).limit(1);
+      profileId = profile?.id;
+    }
+
     // Check if consent already exists
     const existing = await tx
       .select()
@@ -176,33 +185,31 @@ export class CookieConsentManager {
 
     if (existing.length > 0) {
       if (existing[0].organizationId !== data.organizationId) throw new CookieConsentOwnershipError();
-      if (existing[0].userId && existing[0].userId !== data.userId) throw new CookieConsentOwnershipError();
+      if (existing[0].userId && existing[0].userId !== profileId) throw new CookieConsentOwnershipError();
       // Update existing
-      const { organizationId: _tid, ...updateFields } = data;
       const [updated] = await tx
         .update(cookieConsents)
         .set({
-          ...updateFields,
+          ...fields,
+          ...(profileId ? { userId: profileId } : {}),
           organizationId: data.organizationId,
           lastUpdated: new Date(),
           expiresAt,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+        })
         .where(and(eq(cookieConsents.consentId, data.consentId), eq(cookieConsents.organizationId, data.organizationId)))
         .returning();
 
       return updated;
     } else {
       // Insert new
-      const { organizationId: _tid2, ...insertFields } = data;
       const [consent] = await tx
         .insert(cookieConsents)
         .values({
-          ...insertFields,
+          ...fields,
+          userId: profileId ?? null,
           organizationId: data.organizationId,
           expiresAt,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+        })
         .returning();
 
       return consent;

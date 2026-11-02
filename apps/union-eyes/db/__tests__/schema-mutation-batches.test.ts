@@ -21,7 +21,7 @@ describe('schema and mutation batch program', () => {
     expect(program).toEqual(committed)
   })
 
-  // The census was regenerated against a database built by Django migrate plus the approved bootstrap (231 -> 202 -> 179).
+  // The census was regenerated against a database built by Django migrate plus the approved bootstrap (231 -> 202 -> 179 -> 1).
   // A table may only leave a ratchet by being evolved, created or having its declaration retired, so each exit is tied to its source.
   it('explains every table that left the census: its declaration is retired, a registered migration evolved it, or a registered migration created it', () => {
     const census = new Set((JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-census.json'), 'utf8')).entries as { table: string }[]).map((entry) => entry.table))
@@ -48,14 +48,49 @@ describe('schema and mutation batch program', () => {
         'external_data_sync_log', 'provincial_privacy_config', 'reserved_matter_votes', 'support_tickets', 'union_density',
         'wage_benchmarks', 'webhook_receipts',
       ],
+      // Platform 0063 converges every physical relation on its declarations: the columns it adds appear in ALTER TABLE statements, the defaults and
+      // relaxations it applies appear in the JSON specifications its DO blocks read.
+      'db/migrations-platform/0063_declared_shape_convergence.sql': [
+      'accessibility_audits', 'accessibility_issues', 'account_balance_reconciliation', 'address_change_history', 'address_validation_cache',
+      'ai_budgets', 'alert_recipients', 'arbitrator_profiles', 'arms_length_verification', 'audit_security.security_events', 'autopay_settings',
+      'award_history', 'award_templates', 'band_council_consent', 'band_councils', 'bank_of_canada_rates', 'bank_reconciliation',
+      'bargaining_team_members', 'benefit_comparisons', 'blind_trust_registry', 'break_glass_activations', 'break_glass_system', 'budget_pool',
+      'budget_reservations', 'cba_contacts', 'cba_footnotes', 'cba_version_history', 'certification_alerts', 'certification_audit_log',
+      'certification_compliance_reports', 'certification_types', 'clc_bargaining_trends', 'clc_chart_of_accounts', 'clc_oauth_tokens',
+      'clc_per_capita_benchmarks', 'clc_union_density', 'clc_webhook_log', 'conflict_audit_log', 'conflict_disclosures',
+      'conflict_of_interest_policy', 'consent_records', 'continuing_education', 'contribution_rates', 'cpi_adjusted_pricing', 'cpi_data',
+      'cross_border_transactions', 'cross_org_access_log', 'currency_enforcement_audit', 'currency_enforcement_policy',
+      'currency_enforcement_violations', 'currency_exchange_rates', 'data_classification_policy', 'disaster_recovery_drills', 'donation_receipts',
+      'donations', 'dues_rates', 'emergency_declarations', 'employer_access_attempts', 'event_attendees', 'event_reminders', 'exchange_rates',
+      'external_document_files', 'external_document_libraries', 'external_document_permissions', 'external_document_sites', 'federation_remittances',
+      'financial_audit_log', 'firewall_compliance_audit', 'fmv_audit_log', 'fmv_benchmarks', 'fmv_policy', 'fmv_violations', 'fx_rate_audit_log',
+      'gl_account_mappings', 'governance_events', 'grievance_approvals', 'grievance_assignments', 'grievance_communications',
+      'grievance_settlements', 'grievance_stages', 'grievance_workflows', 'gss_applications', 'independent_appraisals', 'indigenous_data_access_log',
+      'indigenous_data_sharing_agreements', 'indigenous_member_data', 'integration_sync_log', 'integration_sync_schedules', 'integration_webhooks',
+      'international_addresses', 'key_holder_registry', 'knowledge_base', 'knowledge_base_articles', 'license_renewals', 'lmbp_compliance_alerts',
+      'lmbp_compliance_reports', 'location_tracking_config', 'lrb_agreements', 'lrb_sync_log', 'member_addresses', 'member_documents',
+      'movement_trends', 'negotiation_sessions', 'newsletter_engagement', 'notification_log', 'organization_billing_config', 'organization_contacts',
+      'organization_relationships', 'organization_sharing_settings', 'payment_cycles', 'payment_disputes', 'pci_dss_encryption_keys',
+      'pci_dss_quarterly_scans', 'pci_dss_requirements', 'pci_dss_saq_assessments', 'precedent_citations', 'precedent_tags', 'privacy_breaches',
+      'procurement_bids', 'procurement_requests', 'public_content', 'push_deliveries', 'recovery_time_objectives', 'recusal_tracking',
+      'remittance_approvals', 'rl1_tax_slips', 'role_tenure_history', 'safety_training_records', 'security_events', 'segment_executions',
+      'segment_exports', 'separated_payment_transactions', 'shopify_config', 'signature_audit_log', 'signature_verification', 'signature_workflows',
+      'signers', 'sla_policies', 'sms_campaign_recipients', 'sms_opt_outs', 'sms_templates', 'social_campaigns', 'staff_certifications',
+      'strike_fund_payment_audit', 'swiss_cold_storage', 'sync_jobs', 't106_filing_tracking', 't4a_tax_slips', 'tax_year_end_processing',
+      'testimonials', 'ticket_comments', 'ticket_history', 'traditional_knowledge_registry', 'transaction_currency_conversions',
+      'transfer_pricing_documentation', 'union_only_data_tags', 'user_consents', 'user_sessions', 'user_uuid_mapping', 'voting_audit_log',
+      'voting_notifications', 'wage_progressions', 'webhook_events', 'weekly_threshold_tracking', 'whiplash_prevention_audit',
+      ],
     }
     const appRoot = path.resolve(__dirname, '../..')
     for (const [file, tables] of Object.entries(evolvedBy)) {
       const sql = readFileSync(path.join(appRoot, file), 'utf8')
       for (const table of tables) {
         expect(census.has(table), `${table} is still in the census`).toBe(false)
-        const alters = new RegExp(`ALTER\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?(?:ONLY\\s+)?(?:public\\.)?"?${table}"?[\\s(;]`, 'i')
-        expect(alters.test(sql), `${file} does not alter ${table}`).toBe(true)
+        const bare = table.split('.').pop()!
+        const alters = new RegExp(`ALTER\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?(?:ONLY\\s+)?(?:(?:public|audit_security)\\.)?"?${bare}"?[\\s(;]`, 'i')
+        const specified = file.includes('0063_') && sql.includes(`"t":"${bare}"`)
+        expect(alters.test(sql) || specified, `${file} does not alter ${table}`).toBe(true)
       }
     }
     // Declared relations that no migration created until platform 0061: the census listed each as TABLE_ABSENT, and every route over one answered with an undefined-relation fault.
@@ -66,6 +101,10 @@ describe('schema and mutation batch program', () => {
         'cba_intel_sources', 'cba_intel_ingestion_jobs', 'cba_intel_documents', 'cba_intel_agreements', 'cba_intel_clauses', 'cba_intel_extraction_runs',
         'cba_intel_findings', 'cba_intel_wage_adjustments', 'cba_intel_review_decisions', 'cba_intel_benchmark_snapshots', 'cba_intel_freshness_log',
       ],
+      'db/migrations-platform/0065_declared_absent_relations_2.sql': [
+      'dunning_cases', 'dunning_policies', 'dunning_steps', 'fee_settlement_lines', 'pricing_discount_rules', 'pricing_regional_deployments',
+      'pricing_template_modules', 'pricing_templates', 'usage_aggregates', 'usage_events', 'usage_meters',
+      ],
     }
     for (const [file, tables] of Object.entries(createdBy)) {
       const sql = readFileSync(path.join(appRoot, file), 'utf8')
@@ -75,7 +114,16 @@ describe('schema and mutation batch program', () => {
         expect(sql.includes(`CREATE TABLE public."${table}"`), `${file} does not create ${table}`).toBe(true)
       }
     }
-    const explained = [...retiredDeclarations, ...Object.values(evolvedBy).flat(), ...Object.values(createdBy).flat()]
+    // The three relations that live in the audit_security and user_management schemas.
+    const createdQualified = ['audit_security.failed_login_attempts', 'audit_security.rate_limit_events', 'user_management.oauth_providers']
+    const qualifiedSql = readFileSync(path.join(appRoot, 'db/migrations-platform/0065_declared_absent_relations_2.sql'), 'utf8')
+    for (const table of createdQualified) {
+      const [schema, name] = table.split('.')
+      expect(census.has(table), `${table} is still in the census`).toBe(false)
+      expect(declared.has(name), `${table} lost its declaration instead of gaining a relation`).toBe(true)
+      expect(qualifiedSql.includes(`CREATE TABLE "${schema}"."${name}"`), `0065 does not create ${table}`).toBe(true)
+    }
+    const explained = [...retiredDeclarations, ...Object.values(evolvedBy).flat(), ...Object.values(createdBy).flat(), ...createdQualified]
     expect(new Set(explained).size, 'a table is explained twice').toBe(explained.length)
     const originalCensusSize = 231
     expect(explained.length, 'a table left the census without an explanation').toBe(originalCensusSize - census.size)
@@ -116,7 +164,6 @@ describe('schema and mutation batch program', () => {
     expect(finance?.liveStatementCount).toBe(0)
     expect(finance?.execution).toBe('implemented')
     expect(finance?.applyNow).toBe(true)
-    expect(program.schema.filter((entry) => entry.table === 'grievance_communications').map((entry) => entry.batchId)).toEqual(['schema-django-defined'])
     const clc = program.batches.find((batch) => batch.id === 'mutation-clc-sync-log')
     expect(clc?.action).toContain('Do not drop the relation')
     expect(clc?.statementCount).toBe(1)
@@ -141,61 +188,17 @@ describe('schema and mutation batch program', () => {
     expect(retention?.liveStatementCount).toBe(0)
     expect(retention?.execution).toBe('implemented')
     expect(retention?.applyNow).toBe(true)
-    // These five batches emptied when the census was regenerated against the real schema: every entry left it, and the
-    // 'explains every table that left the census' test says why each was allowed to. The create-relation batch emptied because platform 0061 created every relation it named.
-    for (const id of ['schema-retire-declaration', 'schema-live-unreferenced', 'schema-verify-dead-module', 'schema-evolve-reachable', 'schema-create-relation']) {
+    // Every schema batch emptied when the census was regenerated against the converged schema (platforms 0062 to 0065 created, evolved and unified every
+    // relation the declarations name): each entry left it, and 'explains every table that left the census' says why each was allowed to.
+    for (const id of [
+      'schema-retire-declaration', 'schema-live-unreferenced', 'schema-verify-dead-module', 'schema-evolve-reachable', 'schema-create-relation',
+      'schema-contained-deny-all', 'schema-verify-dead-required', 'schema-verify-reachable-blocked', 'schema-live-unreferenced-blocked',
+      'schema-registry-gap', 'schema-global-reference', 'schema-system-only', 'schema-separate-database', 'schema-django-defined',
+      'schema-individual-decision',
+    ]) {
       expect(program.batches.some((batch) => batch.id === id), id).toBe(false)
     }
-    const retained = ['budget_pool', 'dues_rates', 'gl_account_mappings', 'grievance_settlements', 'integration_webhooks', 'payment_cycles', 'payment_disputes', 'safety_training_records']
-    for (const table of retained) {
-      const row = program.schema.find((entry) => entry.table === table)
-      expect(row?.batchId).toBe('schema-live-unreferenced-blocked')
-      expect(row?.declarationRemoved).toBeUndefined()
-      expect(row?.holdReason).toBeTruthy()
-    }
-    expect(program.censusCount).toBe(179)
-    for (const table of ['user_sessions', 'member_documents', 'grievance_stages', 'grievance_workflows']) {
-      const row = program.schema.find((entry) => entry.table === table)
-      expect(row?.batchId).toBe('schema-verify-dead-required')
-      expect(row?.declarationRemoved).toBeUndefined()
-      expect(row?.holdReason).toBeTruthy()
-    }
-    const serviceRetained = [
-      'accessibility_audits',
-      'accessibility_issues',
-      'financial_audit_log',
-      'gss_applications',
-      'indigenous_member_data',
-      'member_addresses',
-    ]
-    const dependencyHeld = [
-      'clc_webhook_log',
-      'event_reminders',
-      'grievance_approvals',
-      'grievance_assignments',
-      'grievance_stages',
-      'grievance_workflows',
-      'member_documents',
-      'notification_log',
-      'organization_contacts',
-      'organization_sharing_settings',
-      'role_tenure_history',
-      'segment_executions',
-      'segment_exports',
-      'user_sessions',
-    ]
-    const required = program.batches.find((batch) => batch.id === 'schema-verify-dead-required')
-    expect(required?.execution).toBe('hold')
-    expect(required?.shrink).toBe('none')
-    expect(required?.action).toContain('Do not DROP')
-    expect(program.schema.find((entry) => entry.table === 'financial_audit_log')?.holdReason).toContain('Do not invent a finance officer')
-    for (const table of [...serviceRetained, ...dependencyHeld]) {
-      const row = program.schema.find((entry) => entry.table === table)
-      expect(row?.batchId).toBe('schema-verify-dead-required')
-      expect(row?.declarationRemoved).toBeUndefined()
-      expect(row?.holdReason).toBeTruthy()
-    }
-    expect(program.schema.filter((entry) => entry.batchId === 'schema-verify-dead-module').map((entry) => entry.table))
-      .not.toEqual(expect.arrayContaining(serviceRetained))
+    expect(program.censusCount).toBe(0)
+    expect(program.schema).toEqual([])
   })
 })

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T01:35:36.586Z",
+  "generatedAt": "2026-11-02T05:14:34.259Z",
   "status": {
     "f60040Schema": "PARTIAL_RUNTIME_SCHEMA",
     "previousRuntimeContractCompleteness": "INSUFFICIENT",
@@ -6977,7 +6977,7 @@
     {
       "table": "cookie_consents",
       "storageAuthorityDomain": "domains/compliance/gdpr",
-      "runtimePrincipal": "tenant",
+      "runtimePrincipal": "mixed",
       "runtimePrivileges": [
         "SELECT",
         "INSERT",
@@ -26419,7 +26419,7 @@
     {
       "table": "profiles",
       "storageAuthorityDomain": "domains/member/profiles",
-      "runtimePrincipal": "tenant",
+      "runtimePrincipal": "mixed",
       "runtimePrivileges": [
         "SELECT",
         "INSERT",

@@ -21,7 +21,7 @@ test('the committed matrix matches the live inventories', () => {
   const stubs = loadMatrix().capabilities.find((item) => item.id === 'UE-CAP-H-002').scopedRoutes
   assert.equal(stubs.length, 13)
   const census = loadMatrix().capabilities.find((item) => item.id === 'UE-CAP-H-007')
-  assert.equal(census.censusCount, 179)
+  assert.equal(census.censusCount, 0)
   assert.equal(census.individuallyReclassified, false)
   assert.equal(census.primaryGate, 'schema-census')
 })

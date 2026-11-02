@@ -36,6 +36,14 @@ const sqlOf = (file: string) =>
     .filter(Boolean)
 const FORWARD = sqlOf('0060_reachable_stub_shape_2.sql')
 const ROLLBACK = sqlOf('0060_reachable_stub_shape_2.rollback.sql')
+// Platforms 0062 to 0065 converge the same relations afterwards (their columns use the enum types 0060 created), so a proof about what 0060 alone added or
+// removed first takes them off, newest first, inside the transaction it rolls back at the end.
+const LATER_ROLLBACKS = [
+  '0065_declared_absent_relations_2.rollback.sql',
+  '0064_declared_unique_keys.rollback.sql',
+  '0063_declared_shape_convergence.rollback.sql',
+  '0062_declared_enum_convergence.rollback.sql',
+].flatMap((file) => sqlOf(file))
 
 const TABLES = [
   'alert_rules', 'arbitration_decisions', 'automation_rules', 'case_studies', 'clc_organization_sync_log', 'cost_of_living_data',
@@ -64,6 +72,7 @@ describe.skipIf(!URL)('platform 0060 reachable stub shape on the real combined s
   const run = async (statements: string[]) => {
     for (const statement of statements) await admin.query(statement)
   }
+  const undoLater = () => run(LATER_ROLLBACKS)
   const inTransaction = async (work: () => Promise<void>) => {
     await admin.query('BEGIN')
     try {
@@ -194,6 +203,7 @@ describe.skipIf(!URL)('platform 0060 reachable stub shape on the real combined s
 
     it('rolls back exactly what it added and nothing else, and applying it again restores the same shape', async () => {
       await inTransaction(async () => {
+        await undoLater()
         const applied = await snapshot()
         expect(applied.tagged.length, 'platform 0060 is not applied to this database').toBeGreaterThan(0)
 
@@ -293,6 +303,7 @@ describe.skipIf(!URL)('platform 0060 reachable stub shape on the real combined s
 
     it('when an existing column has another type than its declaration', async () => {
       await inTransaction(async () => {
+        await undoLater()
         await run(ROLLBACK)
         await admin.query('ALTER TABLE public.arbitration_decisions ADD COLUMN case_title integer')
         await expect(run(FORWARD)).rejects.toThrow(/public\.arbitration_decisions\.case_title has type integer; expected character varying/)
@@ -301,6 +312,7 @@ describe.skipIf(!URL)('platform 0060 reachable stub shape on the real combined s
 
     it('when an enum of the declared name exists with other members', async () => {
       await inTransaction(async () => {
+        await undoLater()
         await run(ROLLBACK)
         expect((await rows<{ t: string | null }>(`SELECT to_regtype('public.ticket_priority')::text AS t`))[0].t, 'the rollback must remove the enum it created').toBeNull()
         await admin.query(`CREATE TYPE public.ticket_priority AS ENUM ('only_one')`)

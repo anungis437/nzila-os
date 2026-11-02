@@ -131,7 +131,7 @@ export const grievances = pgTable("grievances", {
   
   // Related records
   groupGrievanceId: uuid("group_grievance_id"),
-  relatedGrievanceIds: uuid("related_grievance_ids").array(),
+  relatedGrievanceIds: jsonb("related_grievance_ids").$type<string[]>(), // jsonb array of grievance ids, as the Django grievances model stores it
   
   // Attachments
   attachments: jsonb("attachments").$type<Array<{

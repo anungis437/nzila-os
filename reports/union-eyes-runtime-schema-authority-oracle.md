@@ -1,6 +1,6 @@
 # Union Eyes Runtime Schema Authority Oracle
 
-Generated: 2026-11-02T01:35:36.586Z
+Generated: 2026-11-02T05:14:34.259Z
 
 This report treats the storage-authority registry as the runtime-storage universe and reconciles it against repository migration history. It does not mutate Azure, does not generate migrations, and does not claim the current fresh bootstrap is complete.
 

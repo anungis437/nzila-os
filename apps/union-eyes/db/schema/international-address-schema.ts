@@ -260,7 +260,7 @@ export const addressValidationCache = pgTable(
     // Input address (normalized for lookup)
     inputHash: text("input_hash").notNull().unique(), // Hash of normalized input
     countryCode: text("country_code").notNull(),
-    addressLine1: text("address_line_1").notNull(),
+    addressLine1: text("address_line1").notNull(), // the Django auth_core column is address_line1
     locality: text("locality").notNull(),
     administrativeArea: text("administrative_area"),
     postalCode: text("postal_code"),

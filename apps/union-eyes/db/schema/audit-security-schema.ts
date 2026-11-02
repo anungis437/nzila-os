@@ -75,10 +75,9 @@ export const failedLoginAttempts = auditSecuritySchema.table("failed_login_attem
   userAgent: text("user_agent"),
   failureReason: varchar("failure_reason", { length: 100 }).notNull(),
   attemptedAt: timestamp("attempted_at", { withTimezone: true }).defaultNow(),
-}, (table) => ({
-  checkRecentAttempts: check("recent_attempts", 
-    sql`${table.attemptedAt} > NOW() - INTERVAL '30 days'`),
-}));
+});
+// Retention of old attempts is a retention job's concern. A CHECK on NOW() is evaluated only when a row is written, would reject an
+// archived row on restore, and so is not a constraint at all.
 
 // Rate limit events table - API rate limiting tracking
 export const rateLimitEvents = auditSecuritySchema.table("rate_limit_events", {
