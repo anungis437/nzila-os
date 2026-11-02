@@ -1,6 +1,6 @@
 # Convergence tranche 8: the Django models equal the physical schema, and the two writers agree
 
-Date: 2026-11-02. Branch `agents/ue-cursor-final-closure`. Base commit `e580eb19b`; source commits `bace059613238abd06ac7d7895ced5a1ddb758e8` (platform 0070, 0071 and the Drizzle declarations) and `SOURCE_COMMIT_DJANGO`
+Date: 2026-11-02. Branch `agents/ue-cursor-final-closure`. Base commit `3d92274b4`; source commits `a993155cbf8d38996a91b0cf35c3b71c7768e382` (platform 0070, 0071 and the Drizzle declarations) and `15153ab8cd88cf9787faf0d03b38545a583198dd`
 (the Django models, serializers, migration state, tests and CI wiring). Platform migrations `0070_unambiguous_constraints`, `0071_conservative_consent_defaults`.
 Credit: none for the tranche itself (cross-cutting source evidence, `defectCredit` 0, `closureCredit` 0). Nothing is closed. `READY_FOR_STAGING` stays `NO`.
 This tranche acts on the direction "django and drizzle need to work together in world class manner, hence the convergence exercise; if you identify flaws or missing aspects, fix them too":
