@@ -14,7 +14,8 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/db/schema', () => ({
   courseRegistrations: { id: 'r.id', organizationId: 'r.org', memberId: 'r.member', courseId: 'r.course',
     sessionId: 'r.session', registrationStatus: 'r.status', requiresApproval: 'r.approval',
-    approvedBy: 'r.approvedBy', cancellationDate: 'r.cancelled' },
+    approvedBy: 'r.approvedBy', cancellationDate: 'r.cancelled',
+    courseFee: 'r.fee', feePaid: 'r.paid', feeWaived: 'r.waived' },
   courseSessions: { id: 's.id', courseId: 's.course', organizationId: 's.org', sessionStatus: 's.status',
     startDate: 's.start', endDate: 's.end', virtualMeetingUrl: 's.url', virtualMeetingAccessCode: 's.code' },
 }));
@@ -23,6 +24,7 @@ vi.mock('drizzle-orm', () => ({ eq: (column: unknown, value: unknown) => ({ colu
 const sessionId = '11111111-1111-4111-8111-111111111111';
 const good = () => ({ registrationId: '22222222-2222-4222-8222-222222222222',
   registrationStatus: 'registered', requiresApproval: false, approvedBy: null, cancellationDate: null,
+  courseFee: '0.00', feePaid: false, feeWaived: false,
   sessionStatus: 'scheduled', startDate: '2026-11-02', endDate: '2026-11-03',
   virtualMeetingUrl: 'https://meet.example.test/room?token=PRIVATE', virtualMeetingAccessCode: 'SECRET' });
 const ctx = () => ({ organizationId: 'org-a', userId: 'member-a', query: { sessionId } });
@@ -74,11 +76,26 @@ describe('registration-scoped education join credentials', () => {
     ['no URL', { virtualMeetingUrl: null }], ['HTTP URL', { virtualMeetingUrl: 'http://meet.example.test' }],
     ['URL credentials', { virtualMeetingUrl: 'https://u:p@meet.example.test' }],
     ['invalid URL', { virtualMeetingUrl: 'bad' }],
+    ['unsettled paid course', { courseFee: '75.00', feePaid: false, feeWaived: false }],
+    ['unknown fee', { courseFee: null }],
+    ['malformed fee', { courseFee: '75.00oops' }],
+    ['negative fee', { courseFee: '-1.00' }],
   ])('refuses %s without disclosing or auditing', async (_name, override) => {
     m.rows = override === null ? [] : [{ ...good(), ...override }];
     const { GET } = await import('../route');
     await expect((GET as any)(ctx())).rejects.toMatchObject({ status: 404 });
     expect(m.audit).not.toHaveBeenCalled();
+  });
+  it.each([
+    ['recorded payment', { courseFee: '75.00', feePaid: true, feeWaived: false }],
+    ['recorded waiver', { courseFee: '75.00', feePaid: false, feeWaived: true }],
+    ['free registration', { courseFee: '0.00', feePaid: false, feeWaived: false }],
+  ])('allows %s without exposing payment metadata', async (_label, override) => {
+    m.rows = [{ ...good(), ...override }];
+    const { GET } = await import('../route');
+    await expect((GET as any)(ctx())).resolves.toEqual({ sessionId, joinUrl: good().virtualMeetingUrl, accessCode: 'SECRET' });
+    expect(JSON.stringify(m.audit.mock.calls)).not.toContain('75.00');
+    expect(JSON.stringify(m.audit.mock.calls)).not.toContain('feePaid');
   });
   it('permits approved registrants on the final UTC date', async () => {
     m.rows = [{ ...good(), requiresApproval: true, approvedBy: 'officer' }];
