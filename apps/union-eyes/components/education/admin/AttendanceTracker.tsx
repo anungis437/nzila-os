@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { attendanceCsvCell, patchSessionAttendance } from "./attendance-client";
+import { loadEducationSessionPage } from "./session-catalogue";
 import { Check, X, Users, Calendar, CheckCircle2, XCircle, Download } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,10 @@ interface AttendanceTrackerProps {
 
 export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessionPage, setSessionPage] = useState(1);
+  const [sessionTotalPages, setSessionTotalPages] = useState(1);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string>("");
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -64,14 +69,20 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const orgGeneration = useRef(0);
+  const sessionGeneration = useRef(0);
   const rosterGeneration = useRef(0);
 
-  // Organization switches invalidate all previously loaded tenant data and
-  // all in-flight responses, including requests that cannot be aborted.
+  // Organization switches invalidate every in-flight catalogue and roster read.
+  // A previous tenant's records must never remain visible after switching.
   useEffect(() => {
-    const generation = ++orgGeneration.current;
+    ++orgGeneration.current;
+    ++sessionGeneration.current;
     ++rosterGeneration.current;
     setSessions([]);
+    setSessionPage(1);
+    setSessionTotalPages(1);
+    setSessionLoading(false);
+    setSessionError(false);
     setSelectedSessionId("");
     setSelectedSession(null);
     setLoading(false);
@@ -81,23 +92,43 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
     setSelectedRegistrations(new Set());
     setPage(1);
     setHasMore(false);
+  }, [organizationId]);
+
+  // The generic session catalogue is paginated. Never silently present its
+  // first 100 rows as the complete list of sessions. Keep each page bounded.
+  useEffect(() => {
+    const generation = ++sessionGeneration.current;
+    const orgAtRequest = orgGeneration.current;
+    setSessions([]);
+    setSelectedSessionId("");
+    setSelectedSession(null);
+    setRegistrations([]);
+    setStats(null);
+    setSelectedRegistrations(new Set());
+    setPage(1);
+    setHasMore(false);
+    setSessionError(false);
+    setSessionTotalPages(1);
+    setSessionLoading(Boolean(organizationId));
     if (!organizationId) return;
     void (async () => {
       try {
-        const response = await fetch('/api/education/sessions?limit=100', { cache: 'no-store' });
-        if (!response.ok) throw new Error('Session catalogue unavailable');
-        const payload = await response.json();
-        const rows: unknown = payload?.data?.data;
-        if (!Array.isArray(rows)) throw new Error('Session catalogue response invalid');
-        const valid = rows.filter((row): row is Session =>
-          row && typeof row.id === 'string' && typeof row.sessionName === 'string' &&
-          typeof row.sessionCode === 'string' && typeof row.startDate === 'string');
-        if (generation === orgGeneration.current) setSessions(valid);
+        const result = await loadEducationSessionPage(organizationId, sessionPage);
+        if (generation !== sessionGeneration.current || orgAtRequest !== orgGeneration.current) return;
+        setSessions(result.sessions);
+        setSessionTotalPages(Math.max(1, result.totalPages));
       } catch {
-        if (generation === orgGeneration.current) toast.error('Failed to load sessions');
+        if (generation !== sessionGeneration.current || orgAtRequest !== orgGeneration.current) return;
+        setSessionError(true);
+        toast.error('Failed to load session catalogue');
+      } finally {
+        if (generation === sessionGeneration.current && orgAtRequest === orgGeneration.current) {
+          setSessionLoading(false);
+        }
       }
     })();
-  }, [organizationId]);
+    return () => { ++sessionGeneration.current; };
+  }, [organizationId, sessionPage]);
 
   const fetchAttendance = useCallback(async (sessionId: string) => {
     const generation = ++rosterGeneration.current;
@@ -269,7 +300,8 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
           <CardDescription>Choose a session to view and manage attendance</CardDescription>
         </CardHeader>
         <CardContent>
-          <Select value={selectedSessionId} onValueChange={(id) => { setPage(1); setSelectedSessionId(id); }}>
+          <Select value={selectedSessionId} disabled={sessionLoading || sessionError || sessions.length === 0}
+            onValueChange={(id) => { setPage(1); setSelectedSessionId(id); }}>
             <SelectTrigger>
               <SelectValue placeholder="Select a session" />
             </SelectTrigger>
@@ -281,6 +313,26 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
               ))}
             </SelectContent>
           </Select>
+          {sessionLoading && <p className="mt-2 text-sm text-muted-foreground">Loading session catalogue...</p>}
+          {sessionError && (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              Session catalogue unavailable. No session list is represented as complete.
+            </p>
+          )}
+          {!sessionLoading && !sessionError && sessions.length === 0 && (
+            <p className="mt-2 text-sm text-muted-foreground">No sessions on this catalogue page.</p>
+          )}
+          <div className="mt-3 flex items-center justify-between gap-3" aria-label="Session catalogue pagination">
+            <span className="text-sm text-muted-foreground">
+              Session catalogue page {sessionPage} of {sessionTotalPages}
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" disabled={sessionLoading || sessionError || sessionPage === 1}
+                onClick={() => setSessionPage(current => Math.max(1, current - 1))}>Previous sessions</Button>
+              <Button variant="outline" disabled={sessionLoading || sessionError || sessionPage >= sessionTotalPages}
+                onClick={() => setSessionPage(current => current + 1)}>Next sessions</Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
