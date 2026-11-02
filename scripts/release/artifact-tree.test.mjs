@@ -50,8 +50,8 @@ test('descriptor-pinned streaming hash preserves deterministic digest across rea
     const bytes = Buffer.alloc(131_079, 0x5a)
     writeFileSync(join(dir, 'large.bin'), bytes)
     const fileHash = createHash('sha256').update(bytes).digest('hex')
-    const expected = createHash('sha256').update('nzila-artifact-tree-v2\\n')
-      .update(JSON.stringify(['large.bin', bytes.length, fileHash]) + '\\n').digest('hex')
+    const expected = createHash('sha256').update('nzila-artifact-tree-v2\n')
+      .update(JSON.stringify(['large.bin', bytes.length, fileHash]) + '\n').digest('hex')
     assert.deepEqual(hashDirectory(dir), { digest: expected, fileCount: 1 })
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
