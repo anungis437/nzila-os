@@ -10510,10 +10510,11 @@
         "apps/union-eyes/lib/dues/dues-payment-service.ts",
         "apps/union-eyes/app/api/portal/dues/pay/route.ts",
         "apps/union-eyes/lib/dues/__tests__/dues-payment-service.test.ts",
-        "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts"
+        "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts"
       ],
       "correction": "Member dues initiation no longer cancels pending internal payments before uncertain external cancellation, preserves rows after ambiguous provider creation, refuses balance drift and multiple pending payments, retrieves and verifies already linked Stripe intents, bounds unlinked retries to 12 hours, and requires a guarded row update before link success. Route returns 409 for reconciliation refusal. Unit and real-SQL PGlite adversarial tests added.",
-      "remaining": "Exact-HEAD Vitest/contract/security, native PG15/16 with tenant role and concurrent signed webhook, real HTTP/browser/staging, provider reconciliation/refunds/disputes, institutional authority and independent reviewer/persona ratification. Historical native status is not qualification of new source. No defect or CLOSED credit."
+      "remaining": "Exact-HEAD Vitest/contract/security, native PG15/16 with tenant role and concurrent signed webhook, real HTTP/browser/staging, provider reconciliation/refunds/disputes, institutional authority and independent reviewer/persona ratification. Historical native status is not qualification of new source. No defect or CLOSED credit. Native PG15/16 baseline failed due to provider-retrieve fixture; corrected by 7e68b4a, exact-HEAD retest pending."
     }
   ]
 }
