@@ -110,7 +110,7 @@ interface FinancialPeriod {
 }
 
 interface ExecutiveSummary {
-  collectionRate: number;
+  collectionRate: number | null;
   totalPaid: number;
   totalCharged: number;
   uniquePayingMembers: number;
@@ -477,10 +477,12 @@ export default function FinancialOverview() {
             />
             <KpiCard
               title="Collection Rate"
-              value={`${executive?.collectionRate ?? 0}%`}
-              subtitle={`${executive?.uniquePayingMembers ?? 0} of ${executive?.totalOrgMembers ?? 0} members`}
+              value={executive?.collectionRate == null ? 'N/A' : `${executive.collectionRate}%`}
+              subtitle={executive?.totalCharged
+                ? `${executive.uniquePayingMembers} of ${executive.totalOrgMembers} members`
+                : 'No dues charges recorded'}
               icon={Percent}
-              variant={(executive?.collectionRate ?? 0) >= 90 ? 'success' : (executive?.collectionRate ?? 0) >= 75 ? 'warning' : 'danger'}
+              variant={executive?.collectionRate == null ? 'default' : executive.collectionRate >= 90 ? 'success' : executive.collectionRate >= 75 ? 'warning' : 'danger'}
             />
           </div>
 

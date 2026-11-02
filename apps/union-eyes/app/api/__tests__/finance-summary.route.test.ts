@@ -118,6 +118,21 @@ describe('finance/summary route', () => {
     expect(m.execute).toHaveBeenCalledTimes(17);
   });
 
+  it('does not manufacture a 100% collection rate when no dues charges exist', async () => {
+    m.execute.mockReset().mockResolvedValue([]);
+    m.execute
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ totalPaid: '0', totalCharged: '0', uniqueMembers: 0 }]);
+    const { GET } = await loadRoute();
+    const payload = await GET({ organizationId: 'org_1', userId: 'u1' } as any);
+    expect(payload.collectionRate).toBeNull();
+    expect(payload.totalCharged).toBe(0);
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    const uiSource = readFileSync(resolve(__dirname, '../../../components/financial/FinancialOverview.tsx'), 'utf8');
+    expect(uiSource).toContain("value={executive?.collectionRate == null ? 'N/A'");
+    expect(uiSource).toContain("No dues charges recorded");
+  });
+
   it('Round 58 Phase 0: strike fund query filters directly on organization_id, not a user_id join (multi-org fan-out fix)', async () => {
     const src = readFileSync(resolve(__dirname, '../finance/summary/route.ts'), 'utf8');
     expect(src).toMatch(/FROM strike_fund_disbursements sfd\s*\n\s*WHERE sfd\.organization_id = \$\{orgIdCast\}/);

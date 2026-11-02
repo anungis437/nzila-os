@@ -1318,10 +1318,11 @@
       "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-finance-summary-transactional-read-20261102.md",
       "files": [
         "apps/union-eyes/app/api/finance/summary/route.ts",
-        "apps/union-eyes/app/api/__tests__/finance-summary.route.test.ts"
+        "apps/union-eyes/app/api/__tests__/finance-summary.route.test.ts",
+        "apps/union-eyes/components/financial/FinancialOverview.tsx"
       ],
-      "correction": "Related finance summary per-capita and other sensitive reads now use the same explicit tenant-bound transaction as live finance:view ledger mandate verification, and an atomic financial read audit is mandatory before response. Does not by itself prove the separate CLC report defect resolved.",
-      "remaining": "Exact-HEAD unit/contract, real PG15/16, HTTP/browser/staging, audit durability, separate CLC route review, independent reviewer and institutional decisions. No defect CLOSED or addressed-count credit."
+      "correction": "Related finance summary per-capita and other sensitive reads now use the same explicit tenant-bound transaction as live finance:view ledger mandate verification, and an atomic financial read audit is mandatory before response. Does not by itself prove the separate CLC report defect resolved. Additionally, executive collection rate no longer fabricates 100% with no charge denominator; the UI shows N/A.",
+      "remaining": "Exact-HEAD unit/contract, real PG15/16, HTTP/browser/staging, audit durability, separate CLC route review, independent reviewer and institutional decisions. No defect CLOSED or addressed-count credit. UI truthfulness exact-HEAD contract and browser tests outstanding."
     }
   }
 }

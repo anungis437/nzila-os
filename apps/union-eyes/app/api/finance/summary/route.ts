@@ -60,9 +60,10 @@ export const GET = withApi(
 
     const totalPaid = Number(collectionRow?.totalPaid ?? 0);
     const totalCharged = Number(collectionRow?.totalCharged ?? 0);
+    // No charge denominator means no measurable collection rate, not 100% success.
     const collectionRate = totalCharged > 0
       ? Math.round((totalPaid / totalCharged) * 1000) / 10
-      : 100;
+      : null;
 
     // ── Member standing snapshot ──────────────────────────────────────
     const [standingRow] = await tx.execute(sql`
