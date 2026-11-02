@@ -6,6 +6,7 @@ const parse = (query: string) => parseBargainingNotesListQuery(new URLSearchPara
 describe('bargaining notes collection query bounds', () => {
   it('preserves the ordinary member list defaults', () => {
     expect(parse('')).toMatchObject({ page: 1, limit: 20, sortBy: 'sessionDate', sortOrder: 'desc' });
+    expect(parse('tags=contract')).toMatchObject({ page: 1, limit: 50, tags: ['contract'] });
   });
 
   it('accepts bounded pagination, sort, tags and valid leap-day dates', () => {
