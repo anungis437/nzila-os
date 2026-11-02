@@ -97,12 +97,25 @@ export function parseArgs(argv: string[]): ParsedArgs {
     throw new Error('Invalid expected manifest SHA-256')
   }
 
+  // Unbounded or non-finite retries can exhaust the production approval
+  // window and runner resources without ever producing health evidence.
+  // Bound the entire worst-case per-target probe budget, not just each timer.
+  const healthAttempts = Number(args['health-attempts'] ?? 8)
+  const healthDelayMs = Number(args['health-delay-ms'] ?? 5000)
+  const healthTimeoutMs = Number(args['health-timeout-ms'] ?? 15000)
+  if (!Number.isSafeInteger(healthAttempts) || healthAttempts < 1 || healthAttempts > 20 ||
+      !Number.isSafeInteger(healthDelayMs) || healthDelayMs < 0 || healthDelayMs > 30_000 ||
+      !Number.isSafeInteger(healthTimeoutMs) || healthTimeoutMs < 1000 || healthTimeoutMs > 60_000 ||
+      healthAttempts * healthTimeoutMs + (healthAttempts - 1) * healthDelayMs > 180_000) {
+    throw new Error('P0 #1038: health probe retry/time budget invalid')
+  }
+
   return {
     manifest: resolve(args.manifest ?? 'staging-artifacts/artifact-manifest.json'),
     resourceGroup,
-    healthAttempts: Number(args['health-attempts'] ?? 8),
-    healthDelayMs: Number(args['health-delay-ms'] ?? 5000),
-    healthTimeoutMs: Number(args['health-timeout-ms'] ?? 15000),
+    healthAttempts,
+    healthDelayMs,
+    healthTimeoutMs,
     evidenceOut: resolve(args['evidence-out'] ?? `ops/deploy-evidence/production-${new Date().toISOString().replace(/[:.]/g, '-')}.json`),
     fallbackTargetsJson: args['fallback-targets-json'] ?? process.env.PRODUCTION_DEPLOY_TARGETS_JSON,
     requireDigestPinned,
@@ -389,7 +402,7 @@ function rollback(updatedStates: TargetState[], resourceGroup: string): void {
  * Publish deployment evidence atomically on the runner, without replacing an
  * earlier receipt. A failed write must be visible to the deployment rollback
  * path; a partially written success file must never be treated as proof.
- * This is local crash-safe publication, not independent evidence retention.
+ * This is atomic runner publication, not independently durable evidence retention.
  */
 export function persistDeploymentEvidence(path: string, evidence: Record<string, unknown>): void {
   mkdirSync(dirname(path), { recursive: true })

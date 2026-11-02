@@ -19,6 +19,28 @@ function fixture(targets: unknown[]) {
 }
 
 describe('P0 #1038 transactional production promotion boundary', () => {
+  it('bounds all health probe retry and time inputs before any Azure operation', () => {
+    const valid = ['--resource-group', 'nzila-canada-prod-rg',
+      '--expected-manifest-sha256', 'a'.repeat(64)]
+    expect(parseArgs(valid).healthAttempts).toBe(8)
+    for (const extra of [
+      ['--health-attempts', 'Infinity'],
+      ['--health-attempts', '0'],
+      ['--health-attempts', '21'],
+      ['--health-attempts', 'NaN'],
+      ['--health-delay-ms', '-1'],
+      ['--health-delay-ms', 'Infinity'],
+      ['--health-timeout-ms', '999999'],
+      ['--health-timeout-ms', '0'],
+      ['--health-attempts', '20'],
+      ['--health-attempts', '1', '--health-timeout-ms', '180001'],
+    ]) {
+      expect(() => parseArgs([...valid, ...extra])).toThrow(/health probe retry\/time budget invalid/)
+    }
+    expect(parseArgs([...valid, '--health-attempts', '3',
+      '--health-delay-ms', '0', '--health-timeout-ms', '1000']).healthAttempts).toBe(3)
+  })
+
   it('atomically publishes one deployment receipt and refuses to overwrite an existing success', () => {
     const f = fixture([{ containerAppName: 'alpha', image: image('alpha') }])
     const output = join(f.dir, 'deploy-evidence.json')
