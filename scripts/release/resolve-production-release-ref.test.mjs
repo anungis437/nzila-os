@@ -59,7 +59,8 @@ test('CLI exposes only validated JSON and returns nonzero for untrusted refs', (
 test('production evidence workflow consumes validated release identity for both tag and dispatch', () => {
   const workflow = readFileSync(new URL('../../.github/workflows/deploy-production.yml',import.meta.url),'utf8')
   assert.match(workflow,/node scripts\/release\/resolve-production-release-ref\.mjs/)
-  assert.match(workflow,/release-\$\{RELEASE_REF\}\.json/)
+  assert.match(workflow,/RELEASE_OUTPUT="ops\/releases\/release-\$\{RELEASE_REF\}\.json"/)
+  assert.match(workflow,/RELEASE_OUTPUT="ops\/deploy-evidence\/dispatch-\$\{RELEASE_REF\}\.json"/)
   assert.match(workflow,/change_record_ref.*\$RELEASE_REF/)
   // Tag-shape validation legitimately uses TAG_NAME earlier in the workflow;
   // only the evidence-generation block must never treat a branch as a tag.
@@ -68,4 +69,6 @@ test('production evidence workflow consumes validated release identity for both 
   assert.ok(evidenceBlock, 'production evidence block must exist')
   assert.doesNotMatch(evidenceBlock,/TAG_NAME="\$\{GITHUB_REF#refs\/tags\/\}"/)
   assert.doesNotMatch(evidenceBlock,/release-\$\{TAG_NAME\}\.json/)
+  assert.doesNotMatch(evidenceBlock,/"previousVersion": "see-prior-tag"/)
+  assert.doesNotMatch(evidenceBlock,/"bumpType": "automated"/)
 })
