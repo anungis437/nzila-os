@@ -39,9 +39,9 @@ describe('push-device preference PATCH boundary', () => {
     ['oversized os version', { osVersion: 'v'.repeat(256) }],
   ])('refuses %s before the item mutation', async (_name, input) => {
     expect(() => validatePushDevicePreferences(input)).toThrow();
-    await expect(options!.beforeUpdate!(input, {
+    expect(() => options!.beforeUpdate!(input, {
       id: 'device-id', organizationId: 'org-id', userId: 'user-id', existing: {},
-    })).rejects.toThrow();
+    })).toThrow();
   });
 
   it('accepts null to clear nullable quiet hours, timezone and device name', () => {
