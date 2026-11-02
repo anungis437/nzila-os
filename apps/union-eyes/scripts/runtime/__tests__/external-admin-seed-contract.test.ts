@@ -13,7 +13,7 @@ const fixtureSource = readFileSync(new URL('../external-admin.ts', import.meta.u
 
 describe('external-counsel QA grievance fixture', () => {
   it('inserts an explicit, valid grievance type without inventing an authority or grant through HTTP', () => {
-    const match = fixtureSource.match(/INSERT INTO grievances\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)/)
+    const match = fixtureSource.match(/INSERT INTO grievances\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*`/)
     expect(match, 'grievance fixture INSERT must exist').not.toBeNull()
     const columns = match![1].split(',').map((value) => value.trim())
     const values = match![2].split(',').map((value) => value.trim())
