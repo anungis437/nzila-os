@@ -4,9 +4,10 @@
  * alone cannot prove that review protection is configured or actually used.
  * Always run with authenticated GH API responses, never agent-supplied JSON.
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readBoundedPromotionArtifact } from './verify-promotion-evidence.mjs'
 
 function deny(msg) { throw new Error('PRODUCTION_APPROVAL_DENIED: ' + msg) }
 const userName = v => typeof v?.login === 'string' ? v.login.toLowerCase() : null
@@ -130,7 +131,17 @@ if (process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)
   try {
     const [dir,runId,sha,receiptPath,workflowId,stagingRunId]=process.argv.slice(2)
     if (!dir || !runId || !sha) deny('missing input evidence')
-    const load=n=>JSON.parse(readFileSync(join(dir,n),'utf8'))
+    // These are authenticated GitHub API payloads, but the downloaded files
+    // remain untrusted input. Refuse symlinks, special files, oversized JSON
+    // and concurrent replacement before parsing or minting an approval receipt.
+    const limits = Object.freeze({
+      'environment.json': 1_048_576,
+      'run.json': 1_048_576,
+      'approvals.json': 4_194_304,
+    })
+    const load = n => JSON.parse(
+      readBoundedPromotionArtifact(join(dir,n), limits[n], n).toString('utf8')
+    )
     const proof=verifyProductionApproval({
       environment:load('environment.json'),run:load('run.json'),
       approvals:load('approvals.json'),expectedRunId:runId,expectedSha:sha,

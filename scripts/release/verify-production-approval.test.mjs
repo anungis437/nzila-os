@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync, symlinkSync, unlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -241,5 +241,39 @@ test('CLI writes a minimal, non-overwritable receipt only after authenticated re
     const failed=spawnSync(process.execPath,[cli,dir,'12345',SHA,denied,'67890','54321'],{encoding:'utf8'})
     assert.notEqual(failed.status,0,'self-approval must be rejected')
     assert.equal(existsSync(denied),false,'denied approval must leave no receipt')
+  } finally { rmSync(dir,{recursive:true,force:true}) }
+})
+
+test('CLI refuses symlinked and oversized GitHub approval API files before minting a receipt', () => {
+  const dir=mkdtempSync(join(tmpdir(),'nzila-approval-bound-'))
+  try {
+    const f=fixture(), now=Date.now()
+    f.run.created_at=new Date(now-600000).toISOString()
+    f.run.run_started_at=new Date(now-590000).toISOString()
+    f.approvals[0].created_at=new Date(now-300000).toISOString()
+    for (const name of ['environment','run','approvals']) {
+      writeFileSync(join(dir,name+'.json'),JSON.stringify(f[name]))
+    }
+    const cli=fileURLToPath(new URL('./verify-production-approval.mjs',import.meta.url))
+    const receipt=join(dir,'denied-receipt.json')
+    const args=[cli,dir,'12345',SHA,receipt,'67890','54321']
+
+    const environmentPath=join(dir,'environment.json')
+    const originalEnvironment=readFileSync(environmentPath)
+    writeFileSync(join(dir,'environment-copy.json'),originalEnvironment)
+    unlinkSync(environmentPath)
+    symlinkSync(join(dir,'environment-copy.json'),environmentPath)
+    const symlinked=spawnSync(process.execPath,args,{encoding:'utf8'})
+    assert.notEqual(symlinked.status,0,'symlinked environment proof must fail')
+    assert.match(symlinked.stderr,/invalid artifact size or type for environment.json/)
+    assert.equal(existsSync(receipt),false,'symlinked proof must not mint a receipt')
+
+    unlinkSync(environmentPath)
+    writeFileSync(environmentPath,originalEnvironment)
+    writeFileSync(join(dir,'approvals.json'),Buffer.alloc(4_194_305,0x20))
+    const oversized=spawnSync(process.execPath,args,{encoding:'utf8'})
+    assert.notEqual(oversized.status,0,'oversized approvals proof must fail')
+    assert.match(oversized.stderr,/invalid artifact size or type for approvals.json/)
+    assert.equal(existsSync(receipt),false,'oversized proof must not mint a receipt')
   } finally { rmSync(dir,{recursive:true,force:true}) }
 })
