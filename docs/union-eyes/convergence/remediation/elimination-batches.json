@@ -11212,7 +11212,8 @@
         "4913ee05b282cfcd40ccfcf9dad6c7d243ba1f8f",
         "368d5daaf6ae2dd940c58738fa0e22bee270faa7",
         "fa0eef131dbb02f58d42795f84da40a1f1630bab",
-        "b705d5f9bc3fce1a47486ca78d0f30da780f9877"
+        "b705d5f9bc3fce1a47486ca78d0f30da780f9877",
+        "d87c92af733ac166916ba8ead53c5e33071e6aed"
       ],
       "files": [
         "apps/union-eyes/app/api/education/sessions/[id]/attendance/route.ts",
@@ -11220,10 +11221,11 @@
         "apps/union-eyes/app/api/education/sessions/[id]/attendance/__tests__/attendance-policy.test.ts",
         "apps/union-eyes/components/education/admin/attendance-client.ts",
         "apps/union-eyes/components/education/admin/__tests__/attendance-client.test.ts",
-        "apps/union-eyes/components/education/admin/AttendanceTracker.tsx"
+        "apps/union-eyes/components/education/admin/AttendanceTracker.tsx",
+        "apps/union-eyes/app/api/education/sessions/[id]/attendance/__tests__/attendance-route.test.ts"
       ],
       "correction": "Audited tenant-bound attendance PATCH now refuses inactive, unapproved, cancelled, completed and unknown lifecycle records and clears stale hours; roster GET is paginated. Admin UI now consumes actual nested GET/PATCH contracts, verifies per-record persisted success, exposes partial failures, invalidates stale tenant data and exports only factual, CSV-neutralized page records. Failed roster reads now display an explicit error rather than a fabricated empty roster.",
-      "remaining": "Exact-final-HEAD complete Vitest/contract, native PostgreSQL 15/16 route-level, real HTTP/browser/staging, session catalogue cross-page picker, governed correction workflow, independent reviewer, owner-persona ratification and institutional authority remain. No defect/CLOSED credit."
+      "remaining": "Mocked route-level tests authored but not run; exact-final-HEAD complete Vitest/contract, native PostgreSQL 15/16 route-level, real HTTP/browser/staging, session catalogue cross-page picker, governed correction workflow, independent reviewer, owner-persona ratification and institutional authority remain. No defect/CLOSED credit."
     }
   ]
 }
