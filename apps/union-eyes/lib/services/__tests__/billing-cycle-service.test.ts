@@ -128,6 +128,24 @@ describe('BillingCycleService', () => {
     expect(order).toContain('read-members');
   });
 
+  it('rejects reversed or invalid dates before opening a financial transaction', async () => {
+    const validStart = new Date('2026-03-01T00:00:00Z');
+    const validEnd = new Date('2026-03-31T23:59:59Z');
+    const base = {
+      organizationId: '11111111-1111-4111-8111-111111111111',
+      frequency: 'monthly' as const,
+      executedBy: 'user-1',
+    };
+    await expect(BillingCycleService.generateBillingCycle({
+      ...base, periodStart: validEnd, periodEnd: validStart,
+    })).rejects.toThrow('Invalid billing cycle period');
+    await expect(BillingCycleService.generateBillingCycle({
+      ...base, periodStart: new Date(NaN), periodEnd: validEnd,
+    })).rejects.toThrow('Invalid billing cycle period');
+    expect(mockWithRLS).not.toHaveBeenCalled();
+    expect(mockRequireMandate).not.toHaveBeenCalled();
+  });
+
   it('BillingCycleParams has expected structure', () => {
     const params: BillingCycleParams = {
       organizationId: 'org-1',
