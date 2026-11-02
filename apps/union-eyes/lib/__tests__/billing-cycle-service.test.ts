@@ -81,6 +81,18 @@ describe('BillingCycleService.calculatePeriodDates', () => {
     });
   });
 
+  it('weekly: a Sunday on the first of a month ends that Sunday, not four weeks later', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('weekly', new Date(2026, 2, 1));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 1, 23]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 2, 1]);
+  });
+
+  it('biweekly: a Sunday on the first of a month ends thirteen days after the prior Monday', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('bi_weekly', new Date(2026, 2, 1));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 1, 23]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 2, 8]);
+  });
+
   describe('quarterly', () => {
     it('Q1 reference returns Jan 1 - Mar 31', () => {
       const ref = new Date(2025, 1, 15); // Feb = Q1
