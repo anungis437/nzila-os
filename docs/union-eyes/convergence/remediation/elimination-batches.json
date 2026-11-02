@@ -11621,6 +11621,23 @@
       ],
       "correction": "Correct the QA-only external-counsel grievance seed to include the required physical NOT NULL type, with a static regression contract. The HTTP acceptance workflow had failed before external counsel authorization tests could execute.",
       "remaining": "Exact-HEAD Vitest, native PG15/16 and HTTP/browser qualification; no authority issuance path or independent ratification; no defect closure credit."
+    },
+    {
+      "id": "UE-CALENDAR-TENANT-PAGINATION-AND-AUTH-CONTRACT-20261102",
+      "status": "SOURCE_CHANGED_PENDING_EXACT_HEAD_CI",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-calendar-event-tenant-pagination-20261102.md",
+      "sourceBaseline": "6b077fb4fc6ca8d9e81e353a67e28a2460b406f0",
+      "sourceCommit": "0a5245b9ced03f876daf4569dc368918d7c2c4f4",
+      "files": [
+        "apps/union-eyes/app/api/calendar/events/route.ts",
+        "apps/union-eyes/app/api/calendar/events/__tests__/pagination.test.ts",
+        "tooling/contract-tests/server-action-auth-required.test.ts",
+        "docs/union-eyes/convergence/remediation/evidence/ue-calendar-event-tenant-pagination-20261102.md"
+      ],
+      "correction": "Provide bounded, continuation-aware calendar event pagination under explicit tenant RLS with personal-calendar and event privacy predicates. Repair AST-based server-action contract classification that falsely treated a string comparison as a directive.",
+      "remaining": "Exact-HEAD focused and full Vitest/contract, native PG15/16 route-specific, HTTP/browser/staging and independent institutional qualification. No defect closure credit."
     }
   ]
 }
