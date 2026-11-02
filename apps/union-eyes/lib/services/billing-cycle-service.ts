@@ -512,7 +512,9 @@ export class BillingCycleService {
         const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
         start.setDate(start.getDate() + mondayOffset);
         start.setHours(0, 0, 0, 0);
-        end.setDate(start.getDate() + 13);
+        // Anchor the end to the computed Monday, not the original reference month.
+        end.setTime(start.getTime());
+        end.setDate(end.getDate() + 13);
         end.setHours(23, 59, 59, 999);
         break;
 
@@ -522,7 +524,8 @@ export class BillingCycleService {
         const mondayOff = dow === 0 ? -6 : 1 - dow;
         start.setDate(start.getDate() + mondayOff);
         start.setHours(0, 0, 0, 0);
-        end.setDate(start.getDate() + 6);
+        end.setTime(start.getTime());
+        end.setDate(end.getDate() + 6);
         end.setHours(23, 59, 59, 999);
         break;
 
