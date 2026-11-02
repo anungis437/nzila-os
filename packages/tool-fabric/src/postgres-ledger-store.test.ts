@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { randomUUID } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { computeAuditHash, type AuditEntry } from '@nzila/audit'
 import { PostgresAtomicTrustLedgerStore } from './postgres-ledger-store'
 import { computeEventHash, isAuthenticTrustEventPayload } from './ledger'
@@ -368,5 +369,14 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     await expect(new PostgresAtomicTrustLedgerStore(fake({
       revision: 1, hash: forged.hash, entries: [forged],
     })).readSnapshot(ORG)).rejects.toThrow('Persistent trust event body hash invalid')
+  })
+
+  it('migration pins all ledger relations to public regardless of DBA search_path', () => {
+    const migration = readFileSync(new URL('../sql/001_trust_ledger_pg.sql', import.meta.url), 'utf8')
+    expect(migration).toContain('CREATE TABLE IF NOT EXISTS public.tool_fabric_trust_stream (')
+    expect(migration).toContain('CREATE TABLE IF NOT EXISTS public.tool_fabric_trust_entry (')
+    expect(migration).toContain('REFERENCES public.tool_fabric_trust_stream(stream_id)')
+    expect(migration).toContain('INSERT INTO public.tool_fabric_trust_stream (')
+    expect(migration).not.toMatch(/\\b(?:CREATE TABLE IF NOT EXISTS|REFERENCES|INSERT INTO)\\s+tool_fabric_trust_/)
   })
 })
