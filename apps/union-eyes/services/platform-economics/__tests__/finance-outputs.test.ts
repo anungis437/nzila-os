@@ -40,13 +40,13 @@ const invoiceRow = {
   billing_period_id: 'bp1',
   issue_date: '2025-01-01',
   due_date: '2025-01-31',
-  subtotal_cad: '100.00',
-  discount_cad: '0.00',
-  subsidy_cad: '0.00',
-  total_cad: '100.00',
+  subtotal: '100.00',
+  tax_amount: '0.00',
+  total_amount: '100.00',
   status: 'issued',
-  paid_amount_cad: '0.00',
-  balance_due_cad: '100.00',
+  currency: 'CAD',
+  amount_paid: '0.00',
+  balance_due: '100.00',
   period_label: 'Jan 2025',
   org_name: 'Org',
 };
@@ -56,12 +56,25 @@ describe('platform-economics/finance-outputs', () => {
     it('exports an invoice with line items', async () => {
       h.execute.mockResolvedValueOnce([invoiceRow]); // invoice
       h.execute.mockResolvedValueOnce([
-        { description: 'd', quantity: '1', unit_price_cad: '100.00', amount_cad: '100.00', cost_type: 'compute' },
+        { description: 'd', quantity: '1', unit_price: '100.00', amount: '100.00', cost_type: 'usage_fee' },
       ]); // line items
       const result = await exportMasterInvoice('o1', 'inv1');
       expect(result.invoice.invoiceNumber).toBe('INV-1');
       expect(result.invoice.lineItems).toHaveLength(1);
+      expect(result.invoice.balanceDue).toBe('100.00');
       expect(h.auditLog).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads the discount and the subsidy from the negative adjustment lines, and the charges from the rest', async () => {
+      h.execute.mockResolvedValueOnce([invoiceRow]);
+      h.execute.mockResolvedValueOnce([
+        { description: 'Base', quantity: '1', unit_price: '100.00', amount: '100.00', cost_type: 'base_subscription' },
+        { description: 'Usage', quantity: '1', unit_price: '50.00', amount: '50.00', cost_type: 'usage_fee' },
+        { description: 'Discount (10%)', quantity: '1', unit_price: '-15.00', amount: '-15.00', cost_type: 'credit' },
+        { description: 'Platform Subsidy', quantity: '1', unit_price: '-5.00', amount: '-5.00', cost_type: 'subsidy' },
+      ]);
+      const { invoice } = await exportMasterInvoice('o1', 'inv1');
+      expect([invoice.subtotal, invoice.discount, invoice.subsidy]).toEqual(['150.00', '15.00', '5.00']);
     });
 
     it('throws when the invoice is missing', async () => {
@@ -73,14 +86,15 @@ describe('platform-economics/finance-outputs', () => {
   describe('exportAllocationStatement', () => {
     it('exports an allocation run', async () => {
       h.execute.mockResolvedValueOnce([
-        { id: 'ar1', billing_period_id: 'bp1', method: 'pro_rata', total_cost_pool_cad: '500.00', period_label: 'Jan' },
+        { id: 'ar1', billing_period_id: 'bp1', total_amount: '500.00', period_label: 'Jan' },
       ]); // run
       h.execute.mockResolvedValueOnce([
-        { local_id: 'l1', local_name: 'Local 1', basis_value: '10', share_percent: '50', allocated_amount_cad: '250.00' },
+        { local_id: 'l1', local_name: 'Local 1', method: 'per_member_count', basis_value: '10', weight: '50.00', allocated_amount: '250.00' },
       ]); // lines
       const result = await exportAllocationStatement('o1', 'ar1');
-      expect(result.method).toBe('pro_rata');
-      expect(result.lines).toHaveLength(1);
+      expect(result.method).toBe('per_member_count');
+      expect(result.costPool).toBe('500.00');
+      expect(result.lines).toEqual([{ localId: 'l1', localName: 'Local 1', basisValue: '10', sharePercent: '50.00', allocatedAmount: '250.00' }]);
     });
 
     it('throws when the run is missing', async () => {
@@ -90,29 +104,28 @@ describe('platform-economics/finance-outputs', () => {
   });
 
   describe('exportChargebackReport', () => {
-    it('exports chargebacks with totals (with period filter)', async () => {
+    it('exports chargebacks with their total (with period filter)', async () => {
       h.execute.mockResolvedValueOnce([
         {
           chargeback_id: 'cb1',
           period_label: 'Jan',
-          gross_amount_cad: '100.00',
-          subsidy_applied_cad: '10.00',
-          net_amount_cad: '90.00',
+          total_amount: '100.00',
+          currency: 'CAD',
           status: 'issued',
           local_name: 'Local 1',
         },
       ]);
       const result = await exportChargebackReport('o1', 'l1', 'bp1');
       expect(result.localName).toBe('Local 1');
-      expect(result.totalGross).toBe('100.00');
-      expect(result.totalNet).toBe('90.00');
+      expect(result.chargebacks).toEqual([{ chargebackId: 'cb1', periodLabel: 'Jan', amount: '100.00', currency: 'CAD', status: 'issued' }]);
+      expect(result.totalAmount).toBe('100.00');
     });
 
     it('handles empty chargebacks (no period filter)', async () => {
       h.execute.mockResolvedValueOnce([]);
       const result = await exportChargebackReport('o1', 'l1');
       expect(result.localName).toBe('l1');
-      expect(result.totalGross).toBe('0.00');
+      expect(result.totalAmount).toBe('0.00');
     });
   });
 
@@ -170,7 +183,7 @@ describe('platform-economics/finance-outputs', () => {
       h.execute.mockResolvedValueOnce([{ id: 'ar1' }]);
       // 4. exportAllocationStatement: run + lines
       h.execute.mockResolvedValueOnce([
-        { id: 'ar1', billing_period_id: 'bp1', method: 'm', total_cost_pool_cad: '0.00', period_label: 'Jan' },
+        { id: 'ar1', billing_period_id: 'bp1', total_amount: '0.00', period_label: 'Jan' },
       ]);
       h.execute.mockResolvedValueOnce([]);
       // 5. local ids

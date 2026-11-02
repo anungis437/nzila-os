@@ -87,13 +87,17 @@ async function loadContentData(orgId: string): Promise<ContentItem[]> {
 }
 
 async function loadTrainingCourses(orgId: string): Promise<TrainingCourse[]> {
+  // A course records its length in hours and keeps no completion counter: completions are the registrations marked completed (as /api/content/training derives them).
   const result = await db.execute(sql`
-    SELECT id, course_code, course_name, course_description,
-           course_category, delivery_method, duration_label,
-           completion_count, is_active, is_mandatory
-    FROM training_courses
-    WHERE organization_id = ${orgId}::uuid AND is_active = true
-    ORDER BY is_mandatory DESC, completion_count DESC
+    SELECT c.id, c.course_code, c.course_name, c.course_description,
+           c.course_category, c.delivery_method,
+           CASE WHEN c.duration_hours IS NOT NULL THEN c.duration_hours::text || ' hours' END AS duration_label,
+           (SELECT count(*)::int FROM course_registrations cr
+             WHERE cr.course_id = c.id AND cr.organization_id = c.organization_id AND cr.completed IS TRUE) AS completion_count,
+           c.is_active, c.is_mandatory
+    FROM training_courses c
+    WHERE c.organization_id = ${orgId}::uuid AND c.is_active = true
+    ORDER BY c.is_mandatory DESC, completion_count DESC
   `);
 
   return Array.from(result).map((r: Record<string, unknown>) => ({

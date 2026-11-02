@@ -42,17 +42,17 @@ export default async function AdminRewardsReportsPage({
 
   try {
     const result = await withSystemContext(async () => {
-      // Overall stats
+      // Overall stats. The recognition tables key an organization as org_id and a person as a user id; the credits an award carries are the credits its ledger entries moved.
       const overallResult = await db.execute(sql`
         SELECT
-          (SELECT COUNT(*) FROM recognition_programs WHERE organization_id = ${orgId}::uuid AND deleted_at IS NULL) AS total_programs,
-          (SELECT COUNT(*) FROM recognition_awards WHERE organization_id = ${orgId}::uuid) AS total_awards,
-          (SELECT COUNT(*) FROM recognition_awards WHERE organization_id = ${orgId}::uuid AND status = 'issued') AS issued_awards,
-          (SELECT COUNT(*) FROM recognition_awards WHERE organization_id = ${orgId}::uuid AND status = 'pending') AS pending_awards,
-          (SELECT COUNT(*) FROM recognition_awards WHERE organization_id = ${orgId}::uuid AND created_at > NOW() - INTERVAL '30 days') AS awards_this_month,
-          (SELECT COALESCE(SUM(points_value), 0) FROM recognition_awards WHERE organization_id = ${orgId}::uuid AND status = 'issued') AS total_points_issued,
-          (SELECT COUNT(DISTINCT recipient_id) FROM recognition_awards WHERE organization_id = ${orgId}::uuid AND status = 'issued') AS unique_recipients,
-          (SELECT COUNT(DISTINCT nominator_id) FROM recognition_awards WHERE organization_id = ${orgId}::uuid AND status = 'issued') AS unique_nominators
+          (SELECT COUNT(*) FROM recognition_programs WHERE org_id = ${orgId}::uuid AND status <> 'archived') AS total_programs,
+          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid) AS total_awards,
+          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'issued') AS issued_awards,
+          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'pending') AS pending_awards,
+          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND created_at > NOW() - INTERVAL '30 days') AS awards_this_month,
+          (SELECT COALESCE(SUM(amount_credits), 0) FROM reward_wallet_ledger WHERE org_id = ${orgId}::uuid AND award_id IS NOT NULL AND amount_credits > 0) AS total_points_issued,
+          (SELECT COUNT(DISTINCT recipient_user_id) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'issued') AS unique_recipients,
+          (SELECT COUNT(DISTINCT issuer_user_id) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'issued') AS unique_nominators
       `);
 
       // Recent awards
@@ -60,36 +60,36 @@ export default async function AdminRewardsReportsPage({
         SELECT
           ra.id,
           ra.status,
-          ra.points_value,
+          COALESCE((SELECT SUM(wl.amount_credits) FROM reward_wallet_ledger wl WHERE wl.award_id = ra.id AND wl.amount_credits > 0), 0) AS points_value,
           ra.created_at,
-          ra.message,
-          om_r.first_name AS recipient_first_name,
-          om_r.last_name AS recipient_last_name,
-          om_n.first_name AS nominator_first_name,
-          om_n.last_name AS nominator_last_name,
+          ra.reason AS message,
+          om_r.name AS recipient_name,
+          om_n.name AS nominator_name,
           rat.name AS award_type_name
         FROM recognition_awards ra
-        LEFT JOIN organization_members om_r ON om_r.id = ra.recipient_id
-        LEFT JOIN organization_members om_n ON om_n.id = ra.nominator_id
+        LEFT JOIN organization_members om_r ON om_r.user_id = ra.recipient_user_id AND om_r.organization_id = ra.org_id
+        LEFT JOIN organization_members om_n ON om_n.user_id = ra.issuer_user_id AND om_n.organization_id = ra.org_id
         LEFT JOIN recognition_award_types rat ON rat.id = ra.award_type_id
-        WHERE ra.organization_id = ${orgId}::uuid
+        WHERE ra.org_id = ${orgId}::uuid
         ORDER BY ra.created_at DESC
         LIMIT 10
       `);
 
-      // Top recipients by points
+      // Top recipients by credits
       const topResult = await db.execute(sql`
         SELECT
-          om.first_name,
-          om.last_name,
+          om.name,
           om.email,
           COUNT(ra.id) AS award_count,
-          COALESCE(SUM(ra.points_value), 0) AS total_points
+          COALESCE(SUM(credits.amount), 0) AS total_points
         FROM recognition_awards ra
-        JOIN organization_members om ON om.id = ra.recipient_id
-        WHERE ra.organization_id = ${orgId}::uuid
+        JOIN organization_members om ON om.user_id = ra.recipient_user_id AND om.organization_id = ra.org_id
+        LEFT JOIN LATERAL (
+          SELECT SUM(wl.amount_credits) AS amount FROM reward_wallet_ledger wl WHERE wl.award_id = ra.id AND wl.amount_credits > 0
+        ) credits ON TRUE
+        WHERE ra.org_id = ${orgId}::uuid
           AND ra.status = 'issued'
-        GROUP BY om.id, om.first_name, om.last_name, om.email
+        GROUP BY om.id, om.name, om.email
         ORDER BY total_points DESC
         LIMIT 10
       `);
@@ -210,10 +210,10 @@ export default async function AdminRewardsReportsPage({
                   <div key={award.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
                     <div>
                       <p className="font-medium">
-                        {award.recipient_first_name} {award.recipient_last_name}
+                        {award.recipient_name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {award.award_type_name ?? 'Award'} &middot; by {award.nominator_first_name ?? 'System'}
+                        {award.award_type_name ?? 'Award'} &middot; by {award.nominator_name ?? 'System'}
                       </p>
                     </div>
                     <div className="text-right">
@@ -255,7 +255,7 @@ export default async function AdminRewardsReportsPage({
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-muted-foreground w-5">#{idx + 1}</span>
                       <div>
-                        <p className="font-medium">{r.first_name} {r.last_name}</p>
+                        <p className="font-medium">{r.name}</p>
                         <p className="text-xs text-muted-foreground">{r.email}</p>
                       </div>
                     </div>

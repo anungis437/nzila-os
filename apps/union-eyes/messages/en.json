@@ -1891,8 +1891,7 @@
       "tickets": "Tickets",
       "sectors": "Sectors",
       "status": "Status",
-      "active": "Active",
-      "logins30d": "Logins (30d)"
+      "active": "Active"
     },
     "organizationsTab": {
       "title": "All Organizations"
@@ -2300,74 +2299,24 @@
       "timelineEvents": "Timeline Events:"
     }
   },
+  "platformUsageTelemetry": {
+    "title": "Usage telemetry is not collected",
+    "body": "Union Eyes does not record page views, sign-ins or feature adoption, so usage figures are not shown. The other figures on this page are read from the database."
+  },
   "analyticsAdminPage": {
     "title": "Platform Analytics",
-    "subtitle": "Cross-organization analytics, usage patterns, and feature adoption",
+    "subtitle": "Cross-organization analytics",
     "tabs": {
       "overview": "Overview",
-      "organizations": "Organizations",
-      "usage": "Usage",
-      "features": "Features"
-    },
-    "common": {
-      "acrossAllModules": "Across all modules",
-      "durationMinutesSeconds": "{minutes}m {seconds}s"
-    },
-    "overview": {
-      "organizationsTitle": "Organizations",
-      "totalMembers": "{count} total members",
-      "activeUsers30dTitle": "Active Users (30d)",
-      "fromPrevious30d": "{value}% from prev 30d",
-      "pageViews30dTitle": "Page Views (30d)",
-      "featuresTrackedTitle": "Features Tracked",
-      "usageByModuleTitle": "Usage by Module (30d)",
-      "viewsWithAvg": "{views} views · {seconds}s avg",
-      "keyMetricsTitle": "Key Metrics"
-    },
-    "metrics": {
-      "logins30d": "Logins (30d)",
-      "loginGrowth": "Login Growth",
-      "avgSessionDuration": "Avg Session Duration",
-      "casesFiled": "Cases Filed",
-      "activeAgreements": "Active Agreements"
+      "organizations": "Organizations"
     },
     "organizations": {
       "title": "Organization Insights",
       "table": {
         "organization": "Organization",
         "type": "Type",
-        "members": "Members",
-        "activeUsers": "Active Users",
-        "pageViews": "Page Views",
-        "logins": "Logins",
-        "features": "Features",
-        "avgSession": "Avg Session"
+        "members": "Members"
       }
-    },
-    "usage": {
-      "totalLogins30dTitle": "Total Logins (30d)",
-      "vsPreviousPeriod": "{value}% vs prev period",
-      "loginMethodsTitle": "Login Methods",
-      "loginMethodCount": "{count} ({percent}%)",
-      "modulePageViewsTitle": "Module Page Views (30d)",
-      "avgSeconds": "({seconds}s avg)"
-    },
-    "features": {
-      "filteredByModule": "Filtered by module:",
-      "title": "Feature Adoption",
-      "table": {
-        "feature": "Feature",
-        "module": "Module",
-        "totalUsage": "Total Usage",
-        "activeUsers": "Active Users",
-        "orgs": "Orgs",
-        "firstUsed": "First Used",
-        "lastUsed": "Last Used",
-        "adoption": "Adoption"
-      },
-      "orgCountOfTotal": "{count}/{total}",
-      "moduleSummaryTitle": "Module Summary",
-      "moduleSummaryDetail": "{features} features · {users} users"
     },
     "platformSummary": {
       "title": "Platform Summary",
@@ -9289,7 +9238,7 @@
     "customerSuccess": "Customer Success",
     "onboardingRetention": "Onboarding & retention",
     "platformAnalytics": "Platform Analytics",
-    "usageGrowthEngagement": "Usage, growth & engagement",
+    "platformAnalyticsDescription": "Organizations, members, grievances & agreements",
     "billingSubscriptions": "Billing & Subscriptions",
     "revenuePlanManagement": "Revenue & plan management",
     "browseOrganizations": "Browse Organizations",
@@ -11179,7 +11128,6 @@
     "tabOverview": "Overview",
     "tabHealth": "Customer Health",
     "tabOnboarding": "Onboarding",
-    "tabAdoption": "Adoption",
     "tabFeedback": "Feedback & NPS",
     "organizationsTitle": "Organizations",
     "activeMembersLabel": "{active} active · {members} members",
@@ -11191,29 +11139,24 @@
     "healthScoreThreshold": "health score < 60",
     "customerHealthTitle": "Customer Health",
     "healthScoresByOrg": "Health scores by organization",
-    "orgMembersLoginsLabel": "{members} members · {logins} logins (30d)",
+    "orgMembersLabel": "{members} members",
     "platformAdoptionTitle": "Platform Adoption",
-    "moduleUsageDescription": "Module usage across the platform",
     "cbasTitle": "CBAs",
     "activeNegotiatingLabel": "{active} active · {negotiating} negotiating",
     "grievancesTitle": "Grievances",
     "openResolvedLabel": "{open} open · {resolved} resolved",
     "settlementsTitle": "Settlements",
     "settlementTotalLabel": "${amount} total",
-    "featuresUsedTitle": "Features Used",
-    "acrossModulesLabel": "across {count} modules",
     "cbaHealthTitle": "CBA Health",
     "statusActive": "Active",
     "statusNegotiating": "Negotiating",
     "statusExpired": "Expired",
     "customerHealthScoresTitle": "Customer Health Scores",
-    "customerHealthScoresDescription": "Composite score based on activity, satisfaction, engagement, and status",
+    "customerHealthScoresDescription": "Composite score out of the signals that are recorded: organization status, active members, NPS, CLC affiliation and open grievances",
     "tableOrganization": "Organization",
     "tableType": "Type",
     "tableHealth": "Health",
     "tableMembers": "Members",
-    "tableLogins30d": "Logins (30d)",
-    "tablePageViews30d": "Page Views (30d)",
     "tableOpenTickets": "Open Tickets",
     "tableSatisfaction": "Satisfaction",
     "tableNps": "NPS",
@@ -11223,19 +11166,6 @@
     "openCount": "{count} open",
     "resolvedCount": "{count} resolved",
     "milestonesCompletedLabel": "{completed}/{total} milestones completed",
-    "totalFeaturesTitle": "Total Features",
-    "modulesActiveTitle": "Modules Active",
-    "totalUsageEventsTitle": "Total Usage Events",
-    "avgOrgCoverageTitle": "Avg Org Coverage",
-    "orgsSuffix": "orgs",
-    "featureAdoptionTitle": "Feature Adoption",
-    "featureAdoptionDescription": "Usage across the platform by feature",
-    "tableFeature": "Feature",
-    "tableModule": "Module",
-    "tableUsageCount": "Usage Count",
-    "tableActiveUsers": "Active Users",
-    "tableOrgCoverage": "Org Coverage",
-    "orgCoverageCount": "{count} org{count, plural, one {} other {s}}",
     "npsExcellent": "Excellent",
     "npsGood": "Good",
     "npsFair": "Fair",

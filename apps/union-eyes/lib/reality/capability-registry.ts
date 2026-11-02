@@ -1132,6 +1132,23 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'Consent capture stays refused until a legally approved wording version is recorded. Two external gates stay separate and closed: ' +
       'counsel-side activation (a counsel-side system and its issuer allow-list) and key custody (UE-CONV-G-003).',
   },
+  {
+    id: 'UE-PLATFORM-USAGE-TELEMETRY',
+    title: 'Platform usage telemetry: page views, sign-ins and feature adoption per organization',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['components/platform/usage-telemetry-notice.tsx'],
+    evidence: [
+      'No relation holds usage telemetry and nothing writes it: platform_login_events, platform_page_views and platform_feature_adoption exist in no migration, no Django model and no Drizzle declaration; the mismatch census (scripts/runtime/mismatch-census.ts, UE-CONV-H-013) found three dashboards querying them',
+      'The analytics-admin, customer-success and sector-analytics dashboards no longer query them; they show the usage-telemetry notice instead of a zero (components/platform/usage-telemetry-notice.tsx)',
+      'The customer-success health score is taken out of the signals that are recorded (status, active members, NPS, CLC affiliation, open grievances); it no longer awards points for logins or page views',
+    ],
+    targetWave: 5,
+    notes:
+      'Recording how union members move through the product is a privacy decision (purpose, consent, retention, who may see per-organization figures) that has not been made, ' +
+      'and Microsoft Entra, not the application, issues sign-in events. The dashboards under app/[locale]/dashboard/{analytics-admin,customer-success,sector-analytics} are ' +
+      'real pages over organization, member, grievance, agreement, ticket and NPS data, so they are not listed in ownedBy: an ownedBy page of a NOT_IMPLEMENTED entry is ' +
+      'treated as an unconditional 404 by getRegistryTracked404DashboardRoutes.',
+  },
 ] as const;
 
 /**

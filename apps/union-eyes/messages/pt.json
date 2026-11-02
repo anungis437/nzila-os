@@ -1885,8 +1885,7 @@
       "tickets": "Chamados",
       "sectors": "Setores",
       "status": "Status",
-      "active": "Ativo",
-      "logins30d": "Logins (30d)"
+      "active": "Ativo"
     },
     "organizationsTab": {
       "title": "Todas as Organizações"
@@ -2294,74 +2293,24 @@
       "timelineEvents": "Eventos da Linha do Tempo:"
     }
   },
+  "platformUsageTelemetry": {
+    "title": "A telemetria de uso não é coletada",
+    "body": "O Union Eyes não registra visualizações de página, logins nem a adoção de funcionalidades, portanto os dados de uso não são exibidos. Os demais dados desta página são lidos do banco de dados."
+  },
   "analyticsAdminPage": {
     "title": "Análise da Plataforma",
-    "subtitle": "Análises entre organizações, padrões de uso e adoção de funcionalidades",
+    "subtitle": "Análises entre organizações",
     "tabs": {
       "overview": "Visão Geral",
-      "organizations": "Organizações",
-      "usage": "Uso",
-      "features": "Funcionalidades"
-    },
-    "common": {
-      "acrossAllModules": "Em todos os módulos",
-      "durationMinutesSeconds": "{minutes}m {seconds}s"
-    },
-    "overview": {
-      "organizationsTitle": "Organizações",
-      "totalMembers": "{count} membros no total",
-      "activeUsers30dTitle": "Usuários Ativos (30d)",
-      "fromPrevious30d": "{value}% em relação aos 30d anteriores",
-      "pageViews30dTitle": "Visualizações de Página (30d)",
-      "featuresTrackedTitle": "Funcionalidades Monitoradas",
-      "usageByModuleTitle": "Uso por Módulo (30d)",
-      "viewsWithAvg": "{views} visualizações · {seconds}s média",
-      "keyMetricsTitle": "Métricas Principais"
-    },
-    "metrics": {
-      "logins30d": "Logins (30d)",
-      "loginGrowth": "Crescimento de Logins",
-      "avgSessionDuration": "Duração Média da Sessão",
-      "casesFiled": "Casos Registrados",
-      "activeAgreements": "Acordos Ativos"
+      "organizations": "Organizações"
     },
     "organizations": {
       "title": "Insights da Organização",
       "table": {
         "organization": "Organização",
         "type": "Tipo",
-        "members": "Membros",
-        "activeUsers": "Usuários Ativos",
-        "pageViews": "Visualizações de Página",
-        "logins": "Logins",
-        "features": "Funcionalidades",
-        "avgSession": "Sessão Média"
+        "members": "Membros"
       }
-    },
-    "usage": {
-      "totalLogins30dTitle": "Total de Logins (30d)",
-      "vsPreviousPeriod": "{value}% vs período anterior",
-      "loginMethodsTitle": "Métodos de Login",
-      "loginMethodCount": "{count} ({percent}%)",
-      "modulePageViewsTitle": "Visualizações de Página do Módulo (30d)",
-      "avgSeconds": "({seconds}s média)"
-    },
-    "features": {
-      "filteredByModule": "Filtrado por módulo:",
-      "title": "Adoção de Funcionalidades",
-      "table": {
-        "feature": "Funcionalidade",
-        "module": "Módulo",
-        "totalUsage": "Uso Total",
-        "activeUsers": "Usuários Ativos",
-        "orgs": "Orgs",
-        "firstUsed": "Primeiro Uso",
-        "lastUsed": "Último Uso",
-        "adoption": "Adoção"
-      },
-      "orgCountOfTotal": "{count}/{total}",
-      "moduleSummaryTitle": "Resumo do Módulo",
-      "moduleSummaryDetail": "{features} funcionalidades · {users} usuários"
     },
     "platformSummary": {
       "title": "Resumo da Plataforma",
@@ -9024,7 +8973,7 @@
     "customerSuccess": "Sucesso do Cliente",
     "onboardingRetention": "Integração e retenção",
     "platformAnalytics": "Análises da Plataforma",
-    "usageGrowthEngagement": "Uso, crescimento e engajamento",
+    "platformAnalyticsDescription": "Organizações, membros, reclamações e acordos",
     "billingSubscriptions": "Faturamento e Assinaturas",
     "revenuePlanManagement": "Gestão de receita e planos",
     "browseOrganizations": "Navegar por Organizações",
@@ -9412,7 +9361,6 @@
     "tabOverview": "Visão Geral",
     "tabHealth": "Saúde do Cliente",
     "tabOnboarding": "Integração",
-    "tabAdoption": "Adoção",
     "tabFeedback": "Feedback e NPS",
     "organizationsTitle": "Organizações",
     "activeMembersLabel": "{active} ativos · {members} membros",
@@ -9424,29 +9372,24 @@
     "healthScoreThreshold": "pontuação de saúde < 60",
     "customerHealthTitle": "Saúde do Cliente",
     "healthScoresByOrg": "Pontuações de saúde por organização",
-    "orgMembersLoginsLabel": "{members} membros · {logins} logins (30d)",
+    "orgMembersLabel": "{members} membros",
     "platformAdoptionTitle": "Adoção da Plataforma",
-    "moduleUsageDescription": "Uso de módulos na plataforma",
     "cbasTitle": "CBAs",
     "activeNegotiatingLabel": "{active} ativos · {negotiating} em negociação",
     "grievancesTitle": "Reclamações",
     "openResolvedLabel": "{open} abertas · {resolved} resolvidas",
     "settlementsTitle": "Acordos",
     "settlementTotalLabel": "${amount} total",
-    "featuresUsedTitle": "Recursos Utilizados",
-    "acrossModulesLabel": "em {count} módulos",
     "cbaHealthTitle": "Saúde do CBA",
     "statusActive": "Ativo",
     "statusNegotiating": "Negociando",
     "statusExpired": "Expirado",
     "customerHealthScoresTitle": "Pontuações de Saúde do Cliente",
-    "customerHealthScoresDescription": "Pontuação composta com base em atividade, satisfação, engajamento e status",
+    "customerHealthScoresDescription": "Pontuação composta com base nos sinais registrados: status da organização, membros ativos, NPS, filiação ao CLC e reclamações abertas",
     "tableOrganization": "Organização",
     "tableType": "Tipo",
     "tableHealth": "Saúde",
     "tableMembers": "Membros",
-    "tableLogins30d": "Logins (30d)",
-    "tablePageViews30d": "Visualizações de Página (30d)",
     "tableOpenTickets": "Tickets Abertos",
     "tableSatisfaction": "Satisfação",
     "tableNps": "NPS",
@@ -9456,19 +9399,6 @@
     "openCount": "{count} aberto",
     "resolvedCount": "{count} resolvido",
     "milestonesCompletedLabel": "{completed}/{total} marcos concluídos",
-    "totalFeaturesTitle": "Total de Recursos",
-    "modulesActiveTitle": "Módulos Ativos",
-    "totalUsageEventsTitle": "Total de Eventos de Uso",
-    "avgOrgCoverageTitle": "Cobertura Média da Organização",
-    "orgsSuffix": "organizações",
-    "featureAdoptionTitle": "Adoção de Funcionalidades",
-    "featureAdoptionDescription": "Uso na plataforma por funcionalidade",
-    "tableFeature": "Funcionalidade",
-    "tableModule": "Módulo",
-    "tableUsageCount": "Contagem de Uso",
-    "tableActiveUsers": "Usuários Ativos",
-    "tableOrgCoverage": "Cobertura da Organização",
-    "orgCoverageCount": "{count} organização{count, plural, one {} other {ões}}",
     "npsExcellent": "Excelente",
     "npsGood": "Bom",
     "npsFair": "Regular",

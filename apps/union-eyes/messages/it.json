@@ -1885,8 +1885,7 @@
       "tickets": "Biglietti",
       "sectors": "Settori",
       "status": "Stato",
-      "active": "Attivo",
-      "logins30d": "Accessi (30g)"
+      "active": "Attivo"
     },
     "organizationsTab": {
       "title": "Tutte le Organizzazioni"
@@ -2294,74 +2293,24 @@
       "timelineEvents": "Eventi della Cronologia:"
     }
   },
+  "platformUsageTelemetry": {
+    "title": "La telemetria di utilizzo non viene raccolta",
+    "body": "Union Eyes non registra le visualizzazioni di pagina, gli accessi né l'adozione delle funzionalità, quindi i dati di utilizzo non vengono mostrati. Gli altri dati di questa pagina sono letti dal database."
+  },
   "analyticsAdminPage": {
     "title": "Analisi della Piattaforma",
-    "subtitle": "Analisi trasversale dell'organizzazione, modelli di utilizzo e adozione delle funzionalità",
+    "subtitle": "Analisi trasversale tra organizzazioni",
     "tabs": {
       "overview": "Panoramica",
-      "organizations": "Organizzazioni",
-      "usage": "Utilizzo",
-      "features": "Funzionalità"
-    },
-    "common": {
-      "acrossAllModules": "In tutti i moduli",
-      "durationMinutesSeconds": "{minutes}m {seconds}s"
-    },
-    "overview": {
-      "organizationsTitle": "Organizzazioni",
-      "totalMembers": "{count} membri totali",
-      "activeUsers30dTitle": "Utenti Attivi (30g)",
-      "fromPrevious30d": "{value}% rispetto ai 30g precedenti",
-      "pageViews30dTitle": "Visualizzazioni di Pagina (30g)",
-      "featuresTrackedTitle": "Funzionalità Monitorate",
-      "usageByModuleTitle": "Utilizzo per Modulo (30g)",
-      "viewsWithAvg": "{views} visualizzazioni · {seconds}s media",
-      "keyMetricsTitle": "Metriche Chiave"
-    },
-    "metrics": {
-      "logins30d": "Accessi (30g)",
-      "loginGrowth": "Crescita degli Accessi",
-      "avgSessionDuration": "Durata Media della Sessione",
-      "casesFiled": "Casi Presentati",
-      "activeAgreements": "Accordi Attivi"
+      "organizations": "Organizzazioni"
     },
     "organizations": {
       "title": "Approfondimenti sull'Organizzazione",
       "table": {
         "organization": "Organizzazione",
         "type": "Tipo",
-        "members": "Membri",
-        "activeUsers": "Utenti Attivi",
-        "pageViews": "Visualizzazioni di Pagina",
-        "logins": "Accessi",
-        "features": "Funzionalità",
-        "avgSession": "Sessione Media"
+        "members": "Membri"
       }
-    },
-    "usage": {
-      "totalLogins30dTitle": "Accessi Totali (30 giorni)",
-      "vsPreviousPeriod": "{value}% rispetto al periodo precedente",
-      "loginMethodsTitle": "Metodi di Accesso",
-      "loginMethodCount": "{count} ({percent}%)",
-      "modulePageViewsTitle": "Visualizzazioni di Pagina del Modulo (30 giorni)",
-      "avgSeconds": "({seconds}s media)"
-    },
-    "features": {
-      "filteredByModule": "Filtrato per modulo:",
-      "title": "Adozione delle Funzionalità",
-      "table": {
-        "feature": "Funzionalità",
-        "module": "Modulo",
-        "totalUsage": "Utilizzo Totale",
-        "activeUsers": "Utenti Attivi",
-        "orgs": "Organizzazioni",
-        "firstUsed": "Primo Utilizzo",
-        "lastUsed": "Ultimo Utilizzo",
-        "adoption": "Adozione"
-      },
-      "orgCountOfTotal": "{count}/{total}",
-      "moduleSummaryTitle": "Riepilogo del Modulo",
-      "moduleSummaryDetail": "{features} funzionalità · {users} utenti"
     },
     "platformSummary": {
       "title": "Riepilogo della Piattaforma",
@@ -9024,7 +8973,7 @@
     "customerSuccess": "Successo del cliente",
     "onboardingRetention": "Onboarding e fidelizzazione",
     "platformAnalytics": "Analisi della piattaforma",
-    "usageGrowthEngagement": "Utilizzo, crescita e coinvolgimento",
+    "platformAnalyticsDescription": "Organizzazioni, membri, reclami e accordi",
     "billingSubscriptions": "Fatturazione e abbonamenti",
     "revenuePlanManagement": "Gestione delle entrate e dei piani",
     "browseOrganizations": "Sfoglia organizzazioni",
@@ -9412,7 +9361,6 @@
     "tabOverview": "Panoramica",
     "tabHealth": "Salute del Cliente",
     "tabOnboarding": "Onboarding",
-    "tabAdoption": "Adozione",
     "tabFeedback": "Feedback e NPS",
     "organizationsTitle": "Organizzazioni",
     "activeMembersLabel": "{active} attivi · {members} membri",
@@ -9424,29 +9372,24 @@
     "healthScoreThreshold": "punteggio di salute < 60",
     "customerHealthTitle": "Salute del Cliente",
     "healthScoresByOrg": "Punteggi di salute per organizzazione",
-    "orgMembersLoginsLabel": "{members} membri · {logins} accessi (30g)",
+    "orgMembersLabel": "{members} membri",
     "platformAdoptionTitle": "Adozione della Piattaforma",
-    "moduleUsageDescription": "Utilizzo dei moduli sulla piattaforma",
     "cbasTitle": "CBA",
     "activeNegotiatingLabel": "{active} attivi · {negotiating} in negoziazione",
     "grievancesTitle": "Reclami",
     "openResolvedLabel": "{open} aperti · {resolved} risolti",
     "settlementsTitle": "Accordi",
     "settlementTotalLabel": "${amount} totale",
-    "featuresUsedTitle": "Funzionalità Utilizzate",
-    "acrossModulesLabel": "attraverso {count} moduli",
     "cbaHealthTitle": "Salute CBA",
     "statusActive": "Attivo",
     "statusNegotiating": "In Negoziazione",
     "statusExpired": "Scaduto",
     "customerHealthScoresTitle": "Punteggi di Salute del Cliente",
-    "customerHealthScoresDescription": "Punteggio composito basato su attività, soddisfazione, coinvolgimento e stato",
+    "customerHealthScoresDescription": "Punteggio composito calcolato sui segnali registrati: stato dell'organizzazione, membri attivi, NPS, affiliazione al CLC e reclami aperti",
     "tableOrganization": "Organizzazione",
     "tableType": "Tipo",
     "tableHealth": "Salute",
     "tableMembers": "Membri",
-    "tableLogins30d": "Accessi (30g)",
-    "tablePageViews30d": "Visualizzazioni di Pagina (30g)",
     "tableOpenTickets": "Ticket Aperti",
     "tableSatisfaction": "Soddisfazione",
     "tableNps": "NPS",
@@ -9456,19 +9399,6 @@
     "openCount": "{count} aperti",
     "resolvedCount": "{count} risolti",
     "milestonesCompletedLabel": "{completed}/{total} traguardi completati",
-    "totalFeaturesTitle": "Funzionalità Totali",
-    "modulesActiveTitle": "Moduli Attivi",
-    "totalUsageEventsTitle": "Eventi di Utilizzo Totali",
-    "avgOrgCoverageTitle": "Copertura Media dell'Organizzazione",
-    "orgsSuffix": "organizzazioni",
-    "featureAdoptionTitle": "Adozione delle Funzionalità",
-    "featureAdoptionDescription": "Utilizzo sulla piattaforma per funzionalità",
-    "tableFeature": "Funzionalità",
-    "tableModule": "Modulo",
-    "tableUsageCount": "Conteggio Utilizzo",
-    "tableActiveUsers": "Utenti Attivi",
-    "tableOrgCoverage": "Copertura dell'Organizzazione",
-    "orgCoverageCount": "{count} organizzazione{count, plural, one {} other {i}}",
     "npsExcellent": "Eccellente",
     "npsGood": "Buono",
     "npsFair": "Discreto",

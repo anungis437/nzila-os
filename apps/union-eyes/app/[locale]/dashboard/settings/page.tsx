@@ -48,11 +48,17 @@ async function loadPlatformSettings(): Promise<PlatformSettingsData> {
     ? (org.features_enabled as string[])
     : [];
 
-  // Load API keys for the platform org
+  // Load API keys for the platform org. A key records whether it is active, revoked or expired and how often it was used; it does not record an environment.
   const keyRows = Array.from(
     await db.execute(sql`
-      SELECT k.id, k.name, k.key_prefix, k.environment, k.status,
-             k.scopes, k.request_count::int as request_count
+      SELECT k.id, k.name, k.key_prefix,
+             CASE
+               WHEN k.revoked_at IS NOT NULL THEN 'revoked'
+               WHEN k.expires_at IS NOT NULL AND k.expires_at < NOW() THEN 'expired'
+               WHEN k.is_active THEN 'active'
+               ELSE 'inactive'
+             END AS status,
+             k.scopes, k.usage_count::int AS request_count
       FROM integration_api_keys k
       JOIN organizations o ON o.id = k.organization_id
       WHERE o.organization_type IN ('platform', 'congress')
@@ -62,7 +68,6 @@ async function loadPlatformSettings(): Promise<PlatformSettingsData> {
     id: String(r.id),
     keyName: String(r.name),
     keyPrefix: String(r.key_prefix),
-    environment: String(r.environment),
     status: String(r.status),
     scopes: Array.isArray(r.scopes) ? (r.scopes as string[]) : [],
     requestCount: Number(r.request_count),

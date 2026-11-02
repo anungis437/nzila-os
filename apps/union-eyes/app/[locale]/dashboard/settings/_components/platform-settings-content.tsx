@@ -63,7 +63,6 @@ export interface ApiKeyRow {
   id: string;
   keyName: string;
   keyPrefix: string;
-  environment: string;
   status: string;
   scopes: string[];
   requestCount: number;
@@ -464,7 +463,6 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                           <Badge className={STATUS_COLORS[k.status] ?? "bg-gray-100 text-gray-700"}>
                             {k.status}
                           </Badge>
-                          <Badge variant="outline">{k.environment}</Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 mb-2">

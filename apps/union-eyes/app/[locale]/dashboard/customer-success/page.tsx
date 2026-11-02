@@ -17,6 +17,7 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import Link from 'next/link';
+import { UsageTelemetryNotice } from '@/components/platform/usage-telemetry-notice';
 import {
   Heart,
   Users,
@@ -59,8 +60,6 @@ interface OrgHealth {
   memberCount: number;
   activeMemberCount: number;
   clcAffiliated: boolean;
-  logins30d: number;
-  pageViews30d: number;
   openTickets: number;
   avgTicketSatisfaction: number | null;
   openGrievances: number;
@@ -87,13 +86,8 @@ interface NpsSurvey {
   submittedAt: string;
 }
 
-interface FeatureAdoption {
-  featureName: string;
-  module: string;
-  usageCount: number;
-  activeUsers: number;
-  orgCoverage: number;
-}
+// A ticket is open until it is resolved, closed or cancelled (ticket_status also has in_progress, waiting_customer and waiting_internal).
+const OPEN_TICKET = sql`NOT IN ('resolved', 'closed', 'cancelled')`;
 
 /* ── Data loaders ── */
 async function loadOverview(): Promise<OverviewStats> {
@@ -139,7 +133,7 @@ async function loadOverview(): Promise<OverviewStats> {
   const [ticketStats] = Array.from(
     await db.execute(sql`
       SELECT
-        COUNT(*) FILTER (WHERE status IN ('open', 'in-progress')) as open_tickets,
+        COUNT(*) FILTER (WHERE status ${OPEN_TICKET}) as open_tickets,
         ROUND(AVG(satisfaction_rating) FILTER (WHERE satisfaction_rating IS NOT NULL), 1) as avg_satisfaction
       FROM support_tickets
     `)
@@ -184,9 +178,7 @@ async function loadOrgHealth(): Promise<OrgHealth[]> {
       SELECT
         o.id, o.name, o.organization_type as org_type, o.status,
         o.member_count, o.active_member_count, o.clc_affiliated,
-        COALESCE((SELECT COUNT(*) FROM platform_login_events l WHERE l.organization_id = o.id AND l.logged_in_at >= NOW() - INTERVAL '30 days'), 0) as logins_30d,
-        COALESCE((SELECT COUNT(*) FROM platform_page_views pv WHERE pv.organization_id = o.id AND pv.viewed_at >= NOW() - INTERVAL '30 days'), 0) as page_views_30d,
-        COALESCE((SELECT COUNT(*) FROM support_tickets st WHERE st.organization_id = o.id AND st.status IN ('open', 'in-progress')), 0) as open_tickets,
+        COALESCE((SELECT COUNT(*) FROM support_tickets st WHERE st.organization_id = o.id AND st.status ${OPEN_TICKET}), 0) as open_tickets,
         (SELECT ROUND(AVG(st.satisfaction_rating), 1) FROM support_tickets st WHERE st.organization_id = o.id AND st.satisfaction_rating IS NOT NULL) as avg_ticket_satisfaction,
         COALESCE((SELECT COUNT(*) FROM grievances g WHERE g.organization_id = o.id AND g.status NOT IN ('settled', 'withdrawn', 'denied', 'closed')), 0) as open_grievances,
         COALESCE((SELECT COUNT(*) FROM grievances g WHERE g.organization_id = o.id AND g.status = 'settled'), 0) as resolved_grievances,
@@ -200,24 +192,20 @@ async function loadOrgHealth(): Promise<OrgHealth[]> {
     const memberCount = Number(r.member_count ?? 0);
     const activeMemberCount = Number(r.active_member_count ?? 0);
     const clcAffiliated = Boolean(r.clc_affiliated);
-    const logins30d = Number(r.logins_30d ?? 0);
-    const pageViews30d = Number(r.page_views_30d ?? 0);
     const openGrievances = Number(r.open_grievances ?? 0);
     const npsAvg = r.nps_avg ? Number(r.nps_avg) : null;
 
-    // Compute health: base 40 + activity (up to 20) + satisfaction (up to 20) + engagement (up to 20)
+    // Points are awarded for the signals that are recorded: base 40, status 10, active members 10, NPS up to 10, CLC affiliation 5, no open grievances 5. Usage telemetry is
+    // not collected, so it is not part of the score, and the total is taken out of the points that can be earned (80) so that 100% still means every recorded signal is good.
+    const MAX_RECORDED_POINTS = 80;
     let health = 40;
     if (String(r.status) === 'active') health += 10;
     if (activeMemberCount > 0) health += 10;
-    if (logins30d > 5) health += 10;
-    else if (logins30d > 0) health += 5;
-    if (pageViews30d > 10) health += 10;
-    else if (pageViews30d > 0) health += 5;
     if (npsAvg && npsAvg >= 8) health += 10;
     else if (npsAvg && npsAvg >= 6) health += 5;
     if (clcAffiliated) health += 5;
     if (openGrievances === 0) health += 5;
-    health = Math.min(100, health);
+    health = Math.round((health / MAX_RECORDED_POINTS) * 100);
 
     return {
       id: String(r.id),
@@ -227,8 +215,6 @@ async function loadOrgHealth(): Promise<OrgHealth[]> {
       memberCount,
       activeMemberCount,
       clcAffiliated,
-      logins30d,
-      pageViews30d,
       openTickets: Number(r.open_tickets ?? 0),
       avgTicketSatisfaction: r.avg_ticket_satisfaction ? Number(r.avg_ticket_satisfaction) : null,
       openGrievances,
@@ -278,28 +264,8 @@ async function loadNpsSurveys(): Promise<NpsSurvey[]> {
   return rows;
 }
 
-async function loadFeatureAdoption(): Promise<FeatureAdoption[]> {
-  const rows = Array.from(
-    await db.execute(sql`
-      SELECT feature_name, module,
-        SUM(usage_count)::int as usage_count,
-        SUM(active_users)::int as active_users,
-        COUNT(DISTINCT organization_id)::int as org_coverage
-      FROM platform_feature_adoption
-      GROUP BY feature_name, module
-      ORDER BY usage_count DESC
-    `)
-  ).map((r: Record<string, unknown>) => ({
-    featureName: String(r.feature_name),
-    module: String(r.module),
-    usageCount: Number(r.usage_count),
-    activeUsers: Number(r.active_users),
-    orgCoverage: Number(r.org_coverage),
-  }));
-  return rows;
-}
-
 /* ── Helpers ── */
+const TAB_KEYS = ['overview', 'health', 'onboarding', 'feedback'] as const;
 function healthColor(score: number) {
   if (score >= 80) return 'text-green-600';
   if (score >= 60) return 'text-yellow-600';
@@ -333,16 +299,15 @@ export default async function CustomerSuccessDashboard({
   }
 
   const params = await searchParams;
-  const tab = params.tab ?? 'overview';
+  const tab = TAB_KEYS.find((key) => key === params.tab) ?? 'overview';
 
-  const [overview, orgHealth, onboarding, npsSurveys, featureAdoption] =
+  const [overview, orgHealth, onboarding, npsSurveys] =
     await withSystemContext(() =>
       Promise.all([
         loadOverview(),
         loadOrgHealth(),
         loadOnboarding(),
         loadNpsSurveys(),
-        loadFeatureAdoption(),
       ])
     );
 
@@ -357,7 +322,6 @@ export default async function CustomerSuccessDashboard({
     { key: 'overview', label: t('tabOverview'), icon: BarChart3 },
     { key: 'health', label: t('tabHealth'), icon: Heart },
     { key: 'onboarding', label: t('tabOnboarding'), icon: Clipboard },
-    { key: 'adoption', label: t('tabAdoption'), icon: Zap },
     { key: 'feedback', label: t('tabFeedback'), icon: ThumbsUp },
   ];
 
@@ -389,6 +353,7 @@ export default async function CustomerSuccessDashboard({
       {/* ───────── OVERVIEW TAB ───────── */}
       {tab === 'overview' && (
         <>
+          <UsageTelemetryNotice />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Link href="?tab=health">
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -477,7 +442,7 @@ export default async function CustomerSuccessDashboard({
                         <div>
                           <p className="text-sm font-medium">{org.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {t('orgMembersLoginsLabel', { members: org.memberCount, logins: org.logins30d })}
+                            {t('orgMembersLabel', { members: org.memberCount })}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -505,7 +470,6 @@ export default async function CustomerSuccessDashboard({
                   <Zap className="h-5 w-5" />
                   {t('platformAdoptionTitle')}
                 </CardTitle>
-                <CardDescription>{t('moduleUsageDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -530,19 +494,11 @@ export default async function CustomerSuccessDashboard({
                       {t('settlementTotalLabel', { amount: new Intl.NumberFormat(locale).format(overview.totalSettlementValue) })}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('featuresUsedTitle')}</p>
-                    <p className="text-lg font-bold">{featureAdoption.length}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t('acrossModulesLabel', { count: new Set(featureAdoption.map((f) => f.module)).size })}
-                    </p>
-                  </div>
                 </div>
                 <div className="border-t pt-4">
                   <p className="text-sm font-medium mb-2">{t('cbaHealthTitle')}</p>
                   <div className="space-y-1">
                     {[
-                      { label: 'Active', count: overview.activeCBAs, color: 'bg-green-500' },
                       { label: t('statusActive'), count: overview.activeCBAs, color: 'bg-green-500' },
                       { label: t('statusNegotiating'), count: overview.negotiatingCBAs, color: 'bg-blue-500' },
                       { label: t('statusExpired'), count: overview.expiredCBAs, color: 'bg-red-500' },
@@ -563,6 +519,8 @@ export default async function CustomerSuccessDashboard({
 
       {/* ───────── CUSTOMER HEALTH TAB ───────── */}
       {tab === 'health' && (
+        <>
+        <UsageTelemetryNotice />
         <Card>
           <CardHeader>
             <CardTitle>{t('customerHealthScoresTitle')}</CardTitle>
@@ -579,8 +537,6 @@ export default async function CustomerSuccessDashboard({
                     <th className="pb-2 font-medium">{t('tableType')}</th>
                     <th className="pb-2 font-medium text-right">{t('tableHealth')}</th>
                     <th className="pb-2 font-medium text-right">{t('tableMembers')}</th>
-                    <th className="pb-2 font-medium text-right">{t('tableLogins30d')}</th>
-                    <th className="pb-2 font-medium text-right">{t('tablePageViews30d')}</th>
                     <th className="pb-2 font-medium text-right">{t('tableOpenTickets')}</th>
                     <th className="pb-2 font-medium text-right">{t('tableSatisfaction')}</th>
                     <th className="pb-2 font-medium text-right">{t('tableNps')}</th>
@@ -604,8 +560,6 @@ export default async function CustomerSuccessDashboard({
                         </span>
                       </td>
                       <td className="py-3 text-right">{org.activeMemberCount}/{org.memberCount}</td>
-                      <td className="py-3 text-right">{org.logins30d}</td>
-                      <td className="py-3 text-right">{org.pageViews30d}</td>
                       <td className="py-3 text-right">{org.openTickets}</td>
                       <td className="py-3 text-right">
                         {org.avgTicketSatisfaction ? `${org.avgTicketSatisfaction}/5` : t('emptyDash')}
@@ -631,6 +585,7 @@ export default async function CustomerSuccessDashboard({
             </div>
           </CardContent>
         </Card>
+        </>
       )}
 
       {/* ───────── ONBOARDING TAB ───────── */}
@@ -690,90 +645,6 @@ export default async function CustomerSuccessDashboard({
             );
           })}
         </div>
-      )}
-
-      {/* ───────── ADOPTION TAB ───────── */}
-      {tab === 'adoption' && (
-        <>
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">{t('totalFeaturesTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{featureAdoption.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">{t('modulesActiveTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {new Set(featureAdoption.map((f) => f.module)).size}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">{t('totalUsageEventsTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {featureAdoption.reduce((sum, f) => sum + f.usageCount, 0).toLocaleString()}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">{t('avgOrgCoverageTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {featureAdoption.length > 0
-                    ? (featureAdoption.reduce((sum, f) => sum + f.orgCoverage, 0) / featureAdoption.length).toFixed(1)
-                    : 0}{' '}
-                  {t('orgsSuffix')}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('featureAdoptionTitle')}</CardTitle>
-              <CardDescription>{t('featureAdoptionDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left">
-                      <th className="pb-2 font-medium">{t('tableFeature')}</th>
-                      <th className="pb-2 font-medium">{t('tableModule')}</th>
-                      <th className="pb-2 font-medium text-right">{t('tableUsageCount')}</th>
-                      <th className="pb-2 font-medium text-right">{t('tableActiveUsers')}</th>
-                      <th className="pb-2 font-medium text-right">{t('tableOrgCoverage')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {featureAdoption.map((f) => (
-                      <tr key={`${f.featureName}-${f.module}`} className="border-b last:border-0">
-                        <td className="py-2 font-medium">{f.featureName}</td>
-                        <td className="py-2">
-                          <Badge variant="outline" className="capitalize">{f.module}</Badge>
-                        </td>
-                        <td className="py-2 text-right">{f.usageCount.toLocaleString()}</td>
-                        <td className="py-2 text-right">{f.activeUsers}</td>
-                        <td className="py-2 text-right">{t('orgCoverageCount', { count: f.orgCoverage })}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </>
       )}
 
       {/* ───────── FEEDBACK & NPS TAB ───────── */}

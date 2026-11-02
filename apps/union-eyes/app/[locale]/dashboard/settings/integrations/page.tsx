@@ -73,11 +73,14 @@ interface DomainStats {
 // ── Data loaders ───────────────────────────────────────────────────────────
 
 async function loadIntegrationConfigs(orgId: string): Promise<IntegrationConfig[]> {
+  // An integration records its provider, its settings and whether it is enabled; the page's "metadata" is its settings, and its status is derived from `enabled`.
   const result = await db.execute(sql`
-    SELECT id, type, provider, status, metadata,
-           created_by, created_at, updated_at
+    SELECT id, type, provider,
+           CASE WHEN enabled THEN 'active' ELSE 'inactive' END AS status,
+           settings AS metadata,
+           created_at, updated_at
     FROM integration_configs
-    WHERE org_id = ${orgId}::uuid
+    WHERE organization_id = ${orgId}::uuid
     ORDER BY type, provider
   `);
 
@@ -87,7 +90,7 @@ async function loadIntegrationConfigs(orgId: string): Promise<IntegrationConfig[
     provider: r.provider as string,
     status: r.status as string,
     metadata: (r.metadata as Record<string, unknown>) ?? {},
-    createdBy: r.created_by as string | null,
+    createdBy: null,
     createdAt: r.created_at as string,
     updatedAt: r.updated_at as string,
   }));

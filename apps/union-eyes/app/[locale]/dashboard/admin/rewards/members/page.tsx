@@ -47,13 +47,13 @@ export default async function AdminRewardsMembersPage({
   try {
     const result = await withSystemContext(async () => {
       const searchFilter = search
-        ? sql`AND (om.first_name ILIKE ${'%' + search + '%'} OR om.last_name ILIKE ${'%' + search + '%'} OR om.email ILIKE ${'%' + search + '%'})`
+        ? sql`AND (om.name ILIKE ${'%' + search + '%'} OR om.email ILIKE ${'%' + search + '%'})`
         : sql``;
 
+      // A member's wallet is its ledger: reward_wallet_ledger records every credit movement with the balance after it, per user and organization.
       const countResult = await db.execute(sql`
         SELECT COUNT(DISTINCT om.id) AS total
         FROM organization_members om
-        LEFT JOIN reward_wallets rw ON rw.member_id = om.id
         WHERE om.organization_id = ${orgId}::uuid
           AND om.deleted_at IS NULL
           ${searchFilter}
@@ -62,8 +62,7 @@ export default async function AdminRewardsMembersPage({
       const rows = await db.execute(sql`
         SELECT
           om.id,
-          om.first_name,
-          om.last_name,
+          om.name,
           om.email,
           om.role,
           COALESCE(rw.balance, 0) AS balance,
@@ -71,11 +70,21 @@ export default async function AdminRewardsMembersPage({
           COALESCE(rw.lifetime_redeemed, 0) AS lifetime_redeemed,
           rw.updated_at AS wallet_updated_at
         FROM organization_members om
-        LEFT JOIN reward_wallets rw ON rw.member_id = om.id
+        LEFT JOIN LATERAL (
+          SELECT
+            (SELECT latest.balance_after FROM reward_wallet_ledger latest
+              WHERE latest.org_id = om.organization_id AND latest.user_id = om.user_id
+              ORDER BY latest.created_at DESC, latest.id DESC LIMIT 1) AS balance,
+            SUM(wl.amount_credits) FILTER (WHERE wl.amount_credits > 0) AS lifetime_earned,
+            -SUM(wl.amount_credits) FILTER (WHERE wl.amount_credits < 0) AS lifetime_redeemed,
+            MAX(wl.created_at) AS updated_at
+          FROM reward_wallet_ledger wl
+          WHERE wl.org_id = om.organization_id AND wl.user_id = om.user_id
+        ) rw ON TRUE
         WHERE om.organization_id = ${orgId}::uuid
           AND om.deleted_at IS NULL
           ${searchFilter}
-        ORDER BY COALESCE(rw.balance, 0) DESC, om.last_name ASC
+        ORDER BY COALESCE(rw.balance, 0) DESC, om.name ASC
         LIMIT ${perPage} OFFSET ${offset}
       `);
 
@@ -191,7 +200,7 @@ export default async function AdminRewardsMembersPage({
                 ) : (
                   members.map((m) => (
                     <tr key={m.id} className="border-b hover:bg-muted/30">
-                      <td className="p-3 font-medium">{m.first_name} {m.last_name}</td>
+                      <td className="p-3 font-medium">{m.name}</td>
                       <td className="p-3 text-muted-foreground">{m.email}</td>
                       <td className="p-3">
                         <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary">

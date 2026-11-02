@@ -6,7 +6,7 @@
  */
 import type pg from 'pg'
 import { Analyzer, type Analysis, type Finding } from './analyze'
-import type { Catalog } from './catalog'
+import type { Catalog, CatalogRelation } from './catalog'
 import { findFunctions } from './catalog'
 import { parseSql, type ParseNode } from './parse'
 import { HOLE, type SqlSite, type Variant } from './sites'
@@ -131,12 +131,28 @@ export function parametersInsideLiterals(text: string): string[] {
 export class Judge {
   private readonly analyzer: Analyzer
   private sequence = 0
+  private readonly byName = new Map<string, CatalogRelation[]>()
 
   constructor(
     private readonly client: Pick<pg.Client, 'query'>,
     private readonly catalog: Catalog,
   ) {
     this.analyzer = new Analyzer(catalog)
+    for (const relation of catalog.relations.values()) {
+      if (['pg_catalog', 'information_schema'].includes(relation.schema)) continue
+      const list = this.byName.get(relation.name) ?? []
+      list.push(relation)
+      this.byName.set(relation.name, list)
+    }
+  }
+
+  /** Every relation of this name, whichever schema holds it, in search-path order first. */
+  private sameName(name: string): CatalogRelation[] {
+    const rank = (relation: CatalogRelation): number => {
+      const index = this.catalog.searchPath.indexOf(relation.schema)
+      return index === -1 ? 99 : index
+    }
+    return [...(this.byName.get(name) ?? [])].sort((a, b) => rank(a) - rank(b))
   }
 
   async begin(): Promise<void> {
@@ -285,9 +301,22 @@ export class Judge {
     if (!text) return { variant, kind: 'none', findings: [], note: 'empty' }
     // `AND`, `OR` and `,` on their own are the glue between two fragments.
     if (/^[\s,]*(?:AND|OR)?[\s,]*$/i.test(text)) return { variant, kind: 'none', findings: [], note: 'empty' }
-    const qualified = [...text.matchAll(/"([A-Za-z0-9_]+)"\."[A-Za-z0-9_]+"/g)].map((match) => match[1])
-    const tables = [...new Set([...site.chainTables, ...qualified])]
-    const from = tables.length ? ` FROM ${tables.map(quoteIdentifier).join(', ')}` : ''
+    const referenced = new Map<string, Set<string>>()
+    for (const match of text.matchAll(/"([A-Za-z0-9_]+)"\."([A-Za-z0-9_]+)"/g)) {
+      const columns = referenced.get(match[1]) ?? new Set<string>()
+      columns.add(match[2])
+      referenced.set(match[1], columns)
+    }
+    const tables = [...new Set([...site.chainTables, ...referenced.keys()])]
+    // A drizzle column carries its table's name, not its schema: when two relations share the name (the Django stub in public, the real table in user_management),
+    // the one that has the columns the fragment names is the one it means.
+    const named = (table: string): string => {
+      const candidates = this.sameName(table)
+      const wanted = referenced.get(table) ?? new Set<string>()
+      const fits = candidates.length > 1 ? candidates.find((candidate) => [...wanted].every((column) => candidate.columns.has(column))) : undefined
+      return fits ? `${quoteIdentifier(fits.schema)}.${quoteIdentifier(fits.name)}` : quoteIdentifier(table)
+    }
+    const from = tables.length ? ` FROM ${tables.map(named).join(', ')}` : ''
     // The smallest statement each kind of clause fits in: an expression, a sort list, a predicate, a predicate that continues one (AND ...), the right of a comparison (> now()), a list that continues one (, col = $1).
     const wrappers = [`SELECT ${text}${from}`, `SELECT 1${from} ORDER BY ${text}`, `SELECT 1${from} WHERE ${text}`, `SELECT 1${from} WHERE TRUE ${text}`, `SELECT 1${from} WHERE ${HOLE} ${text}`, `SELECT ${HOLE} ${text}${from}`]
     for (const [index, wrapper] of wrappers.entries()) {

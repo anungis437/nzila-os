@@ -536,6 +536,11 @@ export function extractSites(program: ts.Program, appRoot: string): ExtractionRe
         }
       }
       if ((ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node) || ts.isTemplateExpression(node)) && !consumed.has(node)) {
+        // Text a page displays (an instruction, a help snippet) is not a statement the page runs.
+        if (node.parent && (ts.isJsxExpression(node.parent) || ts.isJsxAttribute(node.parent))) {
+          skip('jsx-text')
+          return
+        }
         const head = ts.isTemplateExpression(node) ? node.head.text : node.text
         if (head.length > 24 && STRUCTURED_START.test(head) && !/^\s*(?:import|export)\b/.test(head)) {
           const interpolated: string[] = []

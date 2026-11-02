@@ -92,7 +92,7 @@ export default function NzilaOpsDashboard() {
     { title: t('operationsCenter'), description: t('platformHealthIncidents'), href: `/${locale}/dashboard/operations`, icon: <Activity size={24} />, color: "from-blue-500 to-blue-600" },
     { title: t('supportQueue'), description: t('openTicketsEscalations'), href: `/${locale}/dashboard/support`, icon: <AlertTriangle size={24} />, color: "from-orange-500 to-orange-600" },
     { title: t('customerSuccess'), description: t('onboardingRetention'), href: `/${locale}/dashboard/customer-success`, icon: <Users size={24} />, color: "from-cyan-500 to-cyan-600" },
-    { title: t('platformAnalytics'), description: t('usageGrowthEngagement'), href: `/${locale}/dashboard/analytics-admin`, icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
+    { title: t('platformAnalytics'), description: t('platformAnalyticsDescription'), href: `/${locale}/dashboard/analytics-admin`, icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
     { title: t('billingSubscriptions'), description: t('revenuePlanManagement'), href: `/${locale}/dashboard/billing-admin`, icon: <DollarSign size={24} />, color: "from-green-500 to-green-600" },
     { title: t('browseOrganizations'), description: t('viewAllClientOrgs'), href: `/${locale}/dashboard/admin/organizations`, icon: <Globe size={24} />, color: "from-violet-500 to-violet-600" },
     { title: t('securityCompliance'), description: t('platformSecurityPosture'), href: `/${locale}/dashboard/compliance`, icon: <ShieldCheck size={24} />, color: "from-red-500 to-red-600" },
