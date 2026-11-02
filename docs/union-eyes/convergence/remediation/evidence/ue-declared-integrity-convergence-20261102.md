@@ -1,7 +1,7 @@
 # Convergence tranche 7: the declared integrity classes close (indexes, foreign keys, checks, NOT NULL, time zones)
 
-Date: 2026-11-02. Branch `agents/ue-cursor-final-closure`. Base commit `bf62586b8` (tranche 6 ledger). Platform migrations `0066_declared_indexes`, `0067_declared_checks`,
-`0068_declared_foreign_keys`, `0069_declared_not_null`.
+Date: 2026-11-02. Branch `agents/ue-cursor-final-closure`. Base commit `bf62586b8` (tranche 6 ledger); source commit `c0497cc504fe543eecfdfd69392cc56086486505`. Platform migrations
+`0066_declared_indexes`, `0067_declared_checks`, `0068_declared_foreign_keys`, `0069_declared_not_null`.
 Credit: none for the tranche itself (cross-cutting source evidence, `defectCredit` 0, `closureCredit` 0). Nothing is closed. `READY_FOR_STAGING` stays `NO`.
 This tranche acts on the direction "address all the missing tables, columns, etc.; fix everything, even if it was you who built it first": tranche 6 closed the classes that make a
 statement fail; this one closes the classes that make a declared guarantee false.
@@ -97,7 +97,18 @@ Fresh PG16 built from the shipped files (Django `migrate`, then the approved boo
   Django-writer rule and the deliberate list; no declared foreign key the doctrine forbids and every grandfathered key still declared; the integrity migrations roll back (the counts return to 293 / 797 / 36 / 286),
   then the shape migrations roll back, and everything applies again to the same measurement.
 - `db/__tests__/reachable-stub-shape-2.postgres.test.ts`, `clause-library-visibility.postgres.test.ts`: corrected as described above.
-- The whole native project, CI-faithful: see the results section.
+- **The whole native project, CI-faithful** (fresh Django + Drizzle build, each test file in its own clone, `--maxWorkers=1`, then `tooling/scripts/lib/ue-native-results-contract.mjs`), on the tree of the source commit:
+
+  | | files | tests | passed | failed | skipped | contract | leaked clones |
+  |---|---|---|---|---|---|---|---|
+  | PG15 | 57 | 594 | 593 | 0 | 1 (by design) | exit 0 | none |
+  | PG16 | 57 | 594 | 593 | 0 | 1 (by design) | exit 0 | none |
+
+  The first PG16 run, with all 286 NOT NULL columns applied, had 8 failed tests in 10 files and 77 skipped behind them: the reason for the rule above. After the rebase onto the other session's commits the
+  generator takes its constraint names from `scripts/runtime/postgres-identifier.ts` (SHA-256, UTF-8 byte-aware), which renames the 40 foreign keys whose generated name exceeds 63 bytes; that one change was
+  re-proven on a fresh PG16 build (the same measurement, 293 tagged keys) and by the five convergence native files (58 tests).
+- Also run and green: `tsc --noEmit` (exit 0), eslint on the 111 changed source files (0 errors), and the 16 unit files that read migrations or declarations (85 tests; one stale census assertion in
+  `db/__tests__/schema-live-unreferenced.test.ts` was already corrected by the other session's `8b52e630c` for the empty census).
 
 ## Found, not fixed here
 
