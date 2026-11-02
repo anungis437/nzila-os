@@ -277,3 +277,9 @@ test('CLI refuses symlinked and oversized GitHub approval API files before minti
     assert.equal(existsSync(receipt),false,'oversized proof must not mint a receipt')
   } finally { rmSync(dir,{recursive:true,force:true}) }
 })
+
+test('production workflow consumes every GitHub environment approval page before authorizing release', () => {
+  const workflow=readFileSync(new URL('../../.github/workflows/deploy-production.yml',import.meta.url),'utf8')
+  assert.match(workflow,/gh api --paginate "repos\/\$\{GITHUB_REPOSITORY\}\/actions\/runs\/\$\{GITHUB_RUN_ID\}\/approvals\?per_page=100" \| jq -s 'add'/)
+  assert.doesNotMatch(workflow,/gh api "repos\/\$\{GITHUB_REPOSITORY\}\/actions\/runs\/\$\{GITHUB_RUN_ID\}\/approvals"/)
+})
