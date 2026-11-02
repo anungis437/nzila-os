@@ -1333,6 +1333,16 @@
       ],
       "correction": "Tenant-transaction preflight requires a live principal finance:execute ledger-wide mandate before any billing read; refuses foreign/closed periods, foreign subscriptions, multiple active subscriptions and false success on invoice failure.",
       "remaining": "Exact-HEAD focused/full tests, native PG15/16 and RLS, HTTP/browser/staging, audit rollback and concurrent exactly-once issuance, global-handle service preflight and read/write TOCTOU, institutional mandate issuance and independent ratification. Zero additional addressed or CLOSED credit."
+    },
+    "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-billing-send-batch-principal-mandate-20261102.md",
+      "files": [
+        "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+        "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts"
+      ],
+      "correction": "The invoice replay route now requires a live principal finance:view ledger-wide mandate before invoice lookup, in the same tenant transaction as its mandatory access audit. Role title and entitlement alone no longer authorize lineage disclosure.",
+      "remaining": "Exact-HEAD unit/contract, native PG15/16 with RLS, HTTP/browser/staging, audit durability and institutional principal mandate issuance, owner persona and independent reviewer ratification. Zero new addressed or CLOSED credit."
     }
   }
 }
