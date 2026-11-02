@@ -188,6 +188,20 @@ describe('bargaining-notes route', () => {
     );
   });
 
+  it('GET tag filtering cannot escape its requested agreement', async () => {
+    const { GET } = await import('../bargaining-notes/route');
+    m.getCba.mockResolvedValue({ id: 'c1' });
+    m.listNotes.mockResolvedValue({ notes: [], total: 0, page: 1, limit: 20 });
+    const response = await GET(json('http://x/api/bargaining-notes?cbaId=c1&tags=seniority', 'GET'));
+    expect(response.status).toBe(200);
+    expect(m.getCba).toHaveBeenCalledWith('org-1', 'c1');
+    expect(m.listNotes).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org-1', visibleToUserId: 'u1', cbaId: 'c1', tags: ['seniority'] }),
+      expect.anything(),
+    );
+    expect(m.rlsScopes).toContainEqual({ organizationId: 'org-1', userId: 'u1' });
+  });
+
   it('GET for an agreement outside the organization is 404', async () => {
     const { GET } = await import('../bargaining-notes/route');
     m.getCba.mockResolvedValue(null);

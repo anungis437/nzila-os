@@ -68,6 +68,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
           inArray(bargainingNotes.confidentialityLevel, ['public', 'internal']),
           eq(bargainingNotes.createdBy, userId),
         ),
+        cbaId ? eq(bargainingNotes.cbaId, cbaId) : undefined,
       );
       if (timeline && cbaId) {
         const timelineData = await tx.select({
@@ -76,7 +77,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
           sessionType: bargainingNotes.sessionType,
           sessionNumber: bargainingNotes.sessionNumber,
           title: bargainingNotes.title,
-        }).from(bargainingNotes).where(and(visible, eq(bargainingNotes.cbaId, cbaId)))
+        }).from(bargainingNotes).where(visible)
           .orderBy(asc(bargainingNotes.sessionDate)).limit(500);
         return NextResponse.json({ timeline: timelineData });
       }
@@ -102,6 +103,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
       // Privileged session notes stay with their author; everyone else sees public and internal notes only
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filters: Record<string, any> = { organizationId, visibleToUserId: userId };
+      if (cbaId) filters.cbaId = cbaId;
 
       // Check for tags filter
       const tags = searchParams.get("tags");
@@ -115,10 +117,6 @@ export const GET = withRoleAuth('member', async (request, context) => {
       }
 
       // Build filters
-      if (cbaId) {
-        filters.cbaId = cbaId;
-      }
-
       const sessionType = searchParams.get("sessionType");
       if (sessionType) {
         filters.sessionType = sessionType.split(",");
