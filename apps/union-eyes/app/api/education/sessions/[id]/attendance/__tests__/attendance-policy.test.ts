@@ -22,11 +22,13 @@ describe('education attendance mutation eligibility', () => {
 
   it('refuses completed or cancelled records even if status remains registered', () => {
     expect(isAttendanceEditable({ ...active, completed: true })).toBe(false);
+    expect(isAttendanceEditable({ ...active, completed: null })).toBe(false);
     expect(isAttendanceEditable({ ...active, cancellationDate: '2026-11-02' })).toBe(false);
   });
 
   it('requires recorded approval for registrations that need approval', () => {
     expect(isAttendanceEditable({ ...active, requiresApproval: true })).toBe(false);
+    expect(isAttendanceEditable({ ...active, requiresApproval: null })).toBe(false);
     expect(isAttendanceEditable({ ...active, requiresApproval: true, approvedBy: 'officer-a' })).toBe(true);
   });
 
