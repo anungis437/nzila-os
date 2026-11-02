@@ -14,10 +14,10 @@
    "ORG_AUTH": 12,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 223,
-   "ROLE_AUTH": 171,
+   "ROLE_AUTH": 173,
    "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 294,
+   "WITH_API": 292,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -4466,7 +4466,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -4478,7 +4478,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
