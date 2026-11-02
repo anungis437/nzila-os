@@ -351,6 +351,7 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
 
     // Provider state is independent of the database: never synthesize a provider
     // response from a local dues row. All concurrent callers share this fake gateway.
+    const providerCancellationAttempts: string[] = []
     const providerIntents = new Map<string, {
       id: string; client_secret: string | null; amount: number; currency: string;
       metadata: Record<string, string>; status: string
@@ -373,7 +374,7 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
           if (!intent) throw new Error('Provider intent not found')
           return intent
         },
-        cancel: async () => ({}),
+        cancel: async (id: string) => { providerCancellationAttempts.push(id); return {} },
       },
     })
 
@@ -394,6 +395,8 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
         [USER, ORG_A],
       )
       expect(before.rows).toHaveLength(1)
+      const providerIntentCountBefore = providerIntents.size
+      const providerCancellationCountBefore = providerCancellationAttempts.length
       await admin.query(
         `INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, transaction_date, effective_date, amount, balance_before, balance_after, description, status)
          VALUES ($1, $2, 'charge', now(), now(), 5, 25, 30, 'additional assessed dues', 'posted')`,
@@ -408,6 +411,8 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       )
       expect(after.rows).toEqual(before.rows)
       expect(after.rows[0].status).toBe('pending')
+      expect(providerIntents.size).toBe(providerIntentCountBefore)
+      expect(providerCancellationAttempts).toHaveLength(providerCancellationCountBefore)
     })
 
     it('another member and another organization are unaffected, and ORG_B\'s runtime context cannot see the payment', async () => {
