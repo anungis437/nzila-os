@@ -15,7 +15,7 @@ export const naturalLanguageQuerySchema = z.object({
   orgId: z.string(),
   actor: z.string(),
   timestamp: z.string().datetime(),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 })
 
 export interface QueryResult {

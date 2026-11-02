@@ -160,7 +160,7 @@ export const SourceRecordSchema = z.object({
   sourceCategory: z.enum(Object.values(SourceSystemCategories) as [string, ...string[]]),
   sourceRecordId: z.string().min(1),
   tenantId: z.string().uuid(),
-  rawPayload: z.record(z.unknown()),
+  rawPayload: z.record(z.string(), z.unknown()),
   ingestedAt: z.string().datetime(),
 })
 
@@ -173,7 +173,7 @@ export const CanonicalRecordSchema = z.object({
   sourceRecordId: z.string().min(1),
   mappingVersion: z.number().int().positive(),
   transformationLog: z.array(z.string()),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   ingestedAt: z.string().datetime(),
   mappedAt: z.string().datetime(),
 })

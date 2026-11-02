@@ -151,7 +151,7 @@ export const PlatformEventMetadataSchema = z.object({
 export const PlatformEventSchema = z.object({
   id: z.string().uuid(),
   type: z.string().min(1),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   metadata: PlatformEventMetadataSchema,
   createdAt: z.string().datetime(),
 })

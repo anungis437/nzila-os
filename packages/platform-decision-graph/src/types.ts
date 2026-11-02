@@ -132,7 +132,7 @@ export const CreateDecisionNodeSchema = z.object({
   entityType: z.string().min(1),
   entityId: z.string().uuid(),
   summary: z.string().min(1),
-  outcome: z.record(z.unknown()),
+  outcome: z.record(z.string(), z.unknown()),
   confidence: z.number().min(0).max(1).optional(),
   policyRefs: z.array(z.string()).default([]),
   evidenceRefs: z.array(z.string()).default([]),
@@ -149,7 +149,7 @@ export const CreateDecisionEdgeSchema = z.object({
   edgeType: z.enum(
     Object.values(DecisionEdgeTypes) as [string, ...string[]],
   ),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type CreateDecisionEdgeInput = z.infer<typeof CreateDecisionEdgeSchema>
