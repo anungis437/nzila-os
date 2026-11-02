@@ -10515,6 +10515,20 @@
       ],
       "correction": "Member dues initiation no longer cancels pending internal payments before uncertain external cancellation, preserves rows after ambiguous provider creation, refuses balance drift and multiple pending payments, retrieves and verifies already linked Stripe intents, bounds unlinked retries to 12 hours, and requires a guarded row update before link success. Route returns 409 for reconciliation refusal. Unit and real-SQL PGlite adversarial tests added.",
       "remaining": "Exact-HEAD Vitest/contract/security, native PG15/16 with tenant role and concurrent signed webhook, real HTTP/browser/staging, provider reconciliation/refunds/disputes, institutional authority and independent reviewer/persona ratification. Historical native status is not qualification of new source. No defect or CLOSED credit. Native PG15/16 baseline failed due to provider-retrieve fixture; corrected by 7e68b4a, exact-HEAD retest pending."
+    },
+    {
+      "id": "UE-DUES-NATIVE-FIXTURE-AND-DURABLE-RATCHET-20261101",
+      "status": "SOURCE_TEST_FIXES_PENDING_EXACT_HEAD_QUALIFICATION",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-dues-native-ledger-fixture-and-durable-lifecycle-ratchet-20261101.md",
+      "sourceBaseline": "2af5b4cbdbd6ca4c401cb3d7a1cc3a474e03994e",
+      "files": [
+        "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+      ],
+      "correction": "Corrected native PostgreSQL dues-drift fixture to populate required balance_before, balance_after and description, and replaced stale cancellation/supersession source ratchet with fail-closed reconciliation, provider verification and atomic audit assertions. Baseline native PG15/16 failed 1 test per version (458 passed, 1 skipped); whole-app regression failed 1 obsolete ratchet. Production controls unchanged.",
+      "remaining": "Inspect exact-new-HEAD full application/contract, native PG15/16, security, HTTP/browser and staging results. Prove provider reconciliation and institutionally issued mandates separately; independent reviewer/persona/institutional ratifications outstanding. Zero defect and CLOSED credit."
     }
   ]
 }
