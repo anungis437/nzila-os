@@ -65,7 +65,7 @@ export const anomalyRuleSchema = z.object({
   ]),
   metric: z.string(),
   thresholdFactor: z.number().positive(),
-  severityMap: z.record(z.enum(['low', 'medium', 'high', 'critical'])),
+  severityMap: z.record(z.string(), z.enum(['low', 'medium', 'high', 'critical'])),
 })
 
 export interface MetricDataPoint {

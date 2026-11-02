@@ -4111,8 +4111,8 @@ importers:
   packages/clinical-timeline:
     dependencies:
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@nzila/config':
         specifier: workspace:*
@@ -4501,8 +4501,8 @@ importers:
   packages/consent-engine:
     dependencies:
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@nzila/config':
         specifier: workspace:*
@@ -4584,8 +4584,8 @@ importers:
         specifier: workspace:*
         version: link:../integrations-core
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2
@@ -6144,8 +6144,8 @@ importers:
         specifier: workspace:*
         version: link:../platform-intelligence
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -8100,8 +8100,8 @@ importers:
         specifier: workspace:*
         version: link:../zonga-core
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2

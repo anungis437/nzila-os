@@ -19,8 +19,8 @@ export enum ConsentScope {
   FULL_ACCESS = 'FULL_ACCESS',
 }
 
-export const ConsentRoleSchema = z.nativeEnum(ConsentRole)
-export const ConsentScopeSchema = z.nativeEnum(ConsentScope)
+export const ConsentRoleSchema = z.enum(ConsentRole)
+export const ConsentScopeSchema = z.enum(ConsentScope)
 
 export const AccessDecisionInput = z.object({
   actorId: z.string(),

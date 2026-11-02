@@ -24,9 +24,9 @@ export enum TimelineFlag {
   BREAK_GLASS_ACCESS = 'BREAK_GLASS_ACCESS',
 }
 
-export const TimelineEventSourceSchema = z.nativeEnum(TimelineEventSource)
-export const TimelineEventCategorySchema = z.nativeEnum(TimelineEventCategory)
-export const TimelineFlagSchema = z.nativeEnum(TimelineFlag)
+export const TimelineEventSourceSchema = z.enum(TimelineEventSource)
+export const TimelineEventCategorySchema = z.enum(TimelineEventCategory)
+export const TimelineFlagSchema = z.enum(TimelineFlag)
 
 export const TimelineEvent = z.object({
   id: z.string(),
