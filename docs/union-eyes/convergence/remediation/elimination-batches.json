@@ -10923,10 +10923,12 @@
         "apps/union-eyes/lib/education/enrollment-selection.ts",
         "apps/union-eyes/lib/education/__tests__/enrollment-selection.test.ts",
         "apps/union-eyes/lib/education/crud-response.ts",
-        "apps/union-eyes/lib/education/__tests__/crud-response.test.ts"
+        "apps/union-eyes/lib/education/__tests__/crud-response.test.ts",
+        "apps/union-eyes/app/api/education/registrations/route.ts",
+        "apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts"
       ],
-      "correction": "Restores member-facing access to registration-scoped audited virtual joining details only on explicit request. Fixes course/session selection (formerly passed courseId as sessionId), nested CRUD envelope parsing, real server-confirmed enrollment responses, camelCase view-model mapping, and member certificates via authorized certification route rather than steward-only completion attestation. Inert actions replaced by governed links or explicit unavailability.",
-      "remaining": "Exact-HEAD Vitest/contract, native PG15/16, HTTP/browser and staging acceptance; paginated course/session completeness; real end-to-end registration and joining under member role; certification, cancellation, renewal and financial mandate decisions; independent reviewer, owner-persona and institutional authority. No defect closure."
+      "correction": "Restores member-facing access to registration-scoped audited virtual joining details only on explicit request. Fixes course/session selection (formerly passed courseId as sessionId), nested CRUD envelope parsing, real server-confirmed enrollment responses, camelCase view-model mapping, and member certificates via authorized certification route rather than steward-only completion attestation. Inert actions replaced by governed links or explicit unavailability. Enrollment POST now snapshots authoritative same-tenant course fee rather than silently writing the zero default for paid courses, and rejects unknown/malformed server fees; caller-supplied fee/paid/waived assertions remain blocked.",
+      "remaining": "Exact-HEAD Vitest/contract, native PG15/16, HTTP/browser and staging acceptance; paginated course/session completeness; real end-to-end registration and joining under member role; certification, cancellation, renewal and financial mandate decisions; independent reviewer, owner-persona and institutional authority. No defect closure. Financial settlement and payment collection are not implied by registration."
     }
   ]
 }
