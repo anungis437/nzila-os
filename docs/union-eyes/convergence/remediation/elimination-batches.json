@@ -10985,6 +10985,28 @@
       "correction": "Strict enrollment-only writable-field allowlist and beforeCreate defense in depth; forged payment, waiver, approval, completion and ownership assertions fail rather than silently producing a successful enrollment. Reject invalid logistical booleans, oversized or non-text notes and tenant/creator mismatches before any database read. Preserve authoritative course fee, session/course/tenant checks and registration journey. Additionally refuse enrollment when the session status is null/unknown or the session end date is missing/past; enforce scheduled and not-ended rather than accepting null status.",
       "remaining": "Exact-HEAD whole Vitest/contract, security, real PG15/16, HTTP/browser/staging and fee/payment/waiver mandates; live temporal boundaries and race conditions need independent qualification; Gate 0C.4 reviewer, owner-persona and institutional decisions outstanding. No defect closure.",
       "followUpSourceCommit": "cc17b8c0f16d0c097d5adc318db6bef6e03de279"
+    },
+    {
+      "id": "UE-EDUCATION-ATTESTATION-LIFECYCLE-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-attestation-lifecycle-integrity-20261102.md",
+      "sourceBaseline": "42d95a3fb769ae5b61ff2e8659a1d0a56d8e1e3b",
+      "sourceCommit": "1ab336b0e0bcc199c3b76c523e780c6f963d7f63",
+      "files": [
+        "apps/union-eyes/app/api/education/certifications/route.ts",
+        "apps/union-eyes/app/api/education/completions/route.ts",
+        "apps/union-eyes/app/api/education/certifications/__tests__/candidate-integrity.test.ts",
+        "apps/union-eyes/app/api/education/completions/__tests__/completion-lifecycle.test.ts"
+      ],
+      "defectFamilies": [
+        "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
+        "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
+        "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT"
+      ],
+      "correction": "Reject client-supplied certification identity, verification, lifecycle and badge assertions; derive only a pending candidate from a completed, passed, uncancelled same-tenant registration and certifying course. Refuse completion of cancelled, waitlisted or inactive registrations despite stale attendance/pass flags; reassert status/cancellation in the locked update and preserve atomic audit.",
+      "remaining": "Exact-HEAD full Vitest/contract, native PG15/16, HTTP/browser/staging, course lifecycle evidence and institutional verification mandate. Independent reviewer, owner-persona ratification and institutional authority outstanding. No defect closure."
     }
   ]
 }
