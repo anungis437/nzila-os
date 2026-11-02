@@ -4829,9 +4829,6 @@ importers:
       '@nzila/contracts':
         specifier: workspace:*
         version: link:../contracts
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -4881,9 +4878,6 @@ importers:
       '@nzila/finance-ledger':
         specifier: workspace:*
         version: link:../finance-ledger
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -4975,9 +4969,6 @@ importers:
       '@nzila/finance-compliance':
         specifier: workspace:*
         version: link:../finance-compliance
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -5292,9 +5283,6 @@ importers:
       react:
         specifier: 19.3.1
         version: 19.3.1
-      zod:
-        specifier: ^3.25.0
-        version: 3.25.76
     devDependencies:
       '@nzila/config':
         specifier: workspace:*
@@ -5477,9 +5465,6 @@ importers:
       '@nzila/mobility-core':
         specifier: workspace:*
         version: link:../mobility-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
 
   packages/integrations-pension:
     dependencies:
@@ -5533,9 +5518,6 @@ importers:
       '@nzila/mobility-core':
         specifier: workspace:*
         version: link:../mobility-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
 
   packages/intelligence:
     dependencies:
@@ -5635,9 +5617,6 @@ importers:
       '@nzila/db':
         specifier: workspace:*
         version: link:../db
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^25
@@ -5654,9 +5633,6 @@ importers:
       '@nzila/mobility-core':
         specifier: workspace:*
         version: link:../mobility-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
 
   packages/mobility-case-engine:
     dependencies:
@@ -5731,9 +5707,6 @@ importers:
       '@nzila/mobility-core':
         specifier: workspace:*
         version: link:../mobility-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
 
   packages/nacp-core:
     dependencies:
