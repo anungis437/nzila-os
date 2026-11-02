@@ -35,9 +35,29 @@ describe('platform-pilot-metrics-types', () => {
     if (result.success) expect(result.data.valueJson).toEqual({ source: 'intake', count: 2 })
   })
 
-  it('rejects malformed UUID variants and invalid metadata record values', () => {
-    const invalid = PilotDefinitionSchema.safeParse({
+  it('rejects malformed UUID variants independently of metadata', () => {
+    const payload = {
+      id: '11111111-1111-4111-8111-111111111111',
+      orgId: '22222222-2222-4222-8222-222222222222',
+      appScope: 'zonga',
+      pilotName: 'test',
+      pilotType: 'event-creator',
+      status: 'active',
+      startedAt: new Date().toISOString(),
+      targetEndAt: null,
+      ownerUserId: null,
+      metadataJson: {},
+    }
+    expect(PilotDefinitionSchema.safeParse(payload).success).toBe(true)
+    expect(PilotDefinitionSchema.safeParse({
+      ...payload,
       id: '11111111-1111-1111-1111-111111111111',
+    }).success).toBe(false)
+  })
+
+  it('rejects non-record metadata independently of UUID validity', () => {
+    const result = PilotDefinitionSchema.safeParse({
+      id: '11111111-1111-4111-8111-111111111111',
       orgId: '22222222-2222-4222-8222-222222222222',
       appScope: 'zonga',
       pilotName: 'test',
@@ -48,7 +68,8 @@ describe('platform-pilot-metrics-types', () => {
       ownerUserId: null,
       metadataJson: [],
     })
-    expect(invalid.success).toBe(false)
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error.issues.some((issue) => issue.path.join('.') === 'metadataJson')).toBe(true)
   })
 
   it('contains required taxonomy metrics', () => {
