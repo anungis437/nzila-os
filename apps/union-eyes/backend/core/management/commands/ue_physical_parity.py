@@ -37,6 +37,9 @@ Advisory kinds
     CHECK_ABSENT            a model check constraint is not enforced by the table
     PK_ABSENT               a model primary key is not the table's primary key
     COLUMN_UNKNOWN          a nullable or defaulted column the model does not know
+    FK_DELETE_RULE_MISMATCH the model's on_delete (applied by Django, in Python) is not the database's delete rule on the key, so a DELETE
+                            that does not go through the ORM behaves differently: `risk` says whether the database destroys what the
+                            ORM protects (PROTECT/RESTRICT/DO_NOTHING over CASCADE, SET NULL or SET DEFAULT) or blocks what the ORM cascades
 
 Exit status 1 with --strict when any strict finding exists.
 """
@@ -74,7 +77,20 @@ ADVISORY_KINDS = (
     "CHECK_ABSENT",
     "PK_ABSENT",
     "COLUMN_UNKNOWN",
+    "FK_DELETE_RULE_MISMATCH",
 )
+
+# The database delete rule (pg_constraint.confdeltype) that enforces what each Django on_delete does in Python.
+DELETE_RULES_FOR_ON_DELETE = {
+    "CASCADE": ("c",),
+    "PROTECT": ("a", "r"),
+    "RESTRICT": ("a", "r"),
+    "SET_NULL": ("n",),
+    "SET_DEFAULT": ("d",),
+    "DO_NOTHING": ("a", "r"),
+    "set_on_delete": ("a", "r"),
+}
+DELETE_RULE_NAMES = {"a": "NO ACTION", "r": "RESTRICT", "c": "CASCADE", "n": "SET NULL", "d": "SET DEFAULT"}
 
 # Longest prefix first, so `timestamp with time zone` is not read as `timestamp`.
 FAMILY_PREFIXES = (
@@ -207,7 +223,7 @@ JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 WHERE i.indisunique AND i.indexprs IS NULL AND i.indisvalid
 """
 FOREIGN_KEY_TARGETS = """
-SELECT n.nspname, c.relname, a.attname, rn.nspname, rc.relname, ra.attname
+SELECT n.nspname, c.relname, a.attname, rn.nspname, rc.relname, ra.attname, k.confdeltype
 FROM pg_catalog.pg_constraint k
 JOIN pg_catalog.pg_class c ON c.oid = k.conrelid
 JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
@@ -264,9 +280,11 @@ class Catalog:
         for schema, rel, cols, partial in cursor.fetchall():
             self.unique_indexes[(schema, rel)].append({"columns": list(cols), "partial": partial})
         self.foreign_key_targets = defaultdict(lambda: defaultdict(list))
+        self.foreign_key_rules = defaultdict(lambda: defaultdict(list))
         cursor.execute(FOREIGN_KEY_TARGETS)
-        for schema, rel, col, target_schema, target_rel, target_col in cursor.fetchall():
+        for schema, rel, col, target_schema, target_rel, target_col, delete_rule in cursor.fetchall():
             self.foreign_key_targets[(schema, rel)][col].append(((target_schema, target_rel), target_col))
+            self.foreign_key_rules[(schema, rel)][col].append(delete_rule)
         self.check_definitions = defaultdict(list)
         cursor.execute(CHECK_DEFINITIONS)
         for schema, rel, name, definition in cursor.fetchall():
@@ -492,6 +510,21 @@ def measure(app_labels, include_contrib):
                             field=field.name,
                             django=f"{wanted[0][1]}.{wanted[1]}",
                             database=", ".join(f"{t[0][1]}.{t[1]}" for t in wrong),
+                        )
+                    # Django applies on_delete itself, in Python; a DELETE that does not go through the ORM (the Next.js application, SQL) gets the database's rule.
+                    expected_rules = DELETE_RULES_FOR_ON_DELETE.get(getattr(field.remote_field.on_delete, "__name__", ""), ("a", "r"))
+                    actual = sorted(set(catalog.foreign_key_rules[key].get(field.column, [])))
+                    if actual and not set(actual) & set(expected_rules):
+                        django_rule = getattr(field.remote_field.on_delete, "__name__", "?")
+                        add(
+                            "FK_DELETE_RULE_MISMATCH",
+                            field.column,
+                            field=field.name,
+                            django=django_rule,
+                            database="/".join(DELETE_RULE_NAMES.get(r, r) for r in actual),
+                            risk="DB_DESTROYS_WHAT_ORM_PROTECTS"
+                            if django_rule in ("PROTECT", "RESTRICT", "DO_NOTHING") and set(actual) & {"c", "n", "d"}
+                            else "DB_BLOCKS_WHAT_ORM_CASCADES",
                         )
         for cols in meta.unique_together:
             columns = [meta.get_field(c).column for c in cols]

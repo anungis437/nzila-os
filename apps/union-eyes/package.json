@@ -300,6 +300,7 @@
     "husky": "^9.1.7",
     "js-yaml": "^4.1.1",
     "jsdom": "^29.0.1",
+    "libpg-query": "17.8.2",
     "markdownlint-cli": "^0.48.0",
     "postcss": "^8",
     "supertest": "^7.1.4",

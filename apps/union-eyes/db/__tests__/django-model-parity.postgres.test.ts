@@ -36,6 +36,9 @@ const ADVISORY_CEILING: Record<string, number> = {
   NOT_NULL_ABSENT: 0,
   // Columns that are `timestamp without time zone` under a DateTimeField: the platform declares them naive, and retyping them is a data decision.
   TIMESTAMP_NAIVE: 361,
+  // A model's on_delete is applied by Django, in Python; the database rule is what a DELETE that does not go through the ORM gets. All of these are the safe direction
+  // (the ORM cascades where the database refuses a raw delete): the test below holds the dangerous direction at zero, and this ceiling can only fall.
+  FK_DELETE_RULE_MISMATCH: 164,
 }
 
 interface Finding {
@@ -117,6 +120,11 @@ describe.skipIf(!ENABLED)('Django models equal the physical schema', () => {
     expect(over).toEqual([])
     const unlisted = Object.keys(measure().summary).filter((k) => !(k in ADVISORY_CEILING))
     expect(unlisted).toEqual([])
+  })
+
+  it("has no foreign key whose database rule destroys what the model's on_delete protects", () => {
+    const dangerous = measure().findings.filter((f) => f.kind === 'FK_DELETE_RULE_MISMATCH' && f.detail.risk === 'DB_DESTROYS_WHAT_ORM_PROTECTS')
+    expect(render(dangerous)).toBe('')
   })
 
   it("has Django's migration state equal to the models", () => {
