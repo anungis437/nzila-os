@@ -142,7 +142,7 @@ export const AIRunRequestSchema = z.object({
   modelId: z.string().min(1),
   entityType: z.string().min(1),
   entityId: z.string().uuid(),
-  input: z.record(z.unknown()),
+  input: z.record(z.string(), z.unknown()),
   requestedBy: z.string().min(1),
 })
 

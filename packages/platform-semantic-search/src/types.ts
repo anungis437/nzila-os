@@ -107,7 +107,7 @@ export const IndexDocumentSchema = z.object({
   entityId: z.string().uuid(),
   title: z.string().min(1),
   content: z.string().min(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   tags: z.array(z.string()).default([]),
 })
 
