@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { MemberSessionJoin } from './MemberSessionJoin';
+import { readEducationCrudRows } from '@/lib/education/crud-response';
 
 interface Registration {
   id: string;
@@ -102,7 +103,7 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
       const regResponse = await fetch(`/api/education/registrations?memberId=${memberId}`);
       if (regResponse.ok) {
         const regData = await regResponse.json();
-        const raw = Array.isArray(regData.data) ? regData.data : [];
+        const raw = readEducationCrudRows(regData);
         // CRUD returns camelCase source rows, not the historical snake_case view model.
         // Read tenant-scoped catalogue metadata only; never read meeting credentials here.
         const [courseResult, sessionResult] = await Promise.allSettled([
@@ -111,8 +112,7 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
         ]);
         const readRows = async (result: PromiseSettledResult<Response>) => {
           if (result.status !== 'fulfilled' || !result.value.ok) return [] as Record<string, unknown>[];
-          const body: { data?: unknown } = await result.value.json();
-          return Array.isArray(body.data) ? body.data as Record<string, unknown>[] : [];
+          return readEducationCrudRows(await result.value.json());
         };
         const [courses, sessions] = await Promise.all([readRows(courseResult), readRows(sessionResult)]);
         const courseById = new Map(courses.map(c => [c.id, c]));
@@ -146,29 +146,30 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
         setLoadError('Your registrations could not be loaded. Please try again.');
       }
 
-      // Fetch completions
-      const compResponse = await fetch(`/api/education/completions?memberId=${memberId}`);
+      // Members cannot call the officer/steward-only completion attestation route.
+      // Read their own certifications through the member-scoped catalogue instead.
+      const compResponse = await fetch('/api/education/certifications', { cache: 'no-store' });
       if (compResponse.ok) {
         const compData = await compResponse.json();
-        const raw = Array.isArray(compData.data) ? compData.data : [];
+        const raw = readEducationCrudRows(compData);
         setCompletions(raw.map((r: Record<string, unknown>) => ({
           id: String(r.id ?? ''),
           course_name: String(r.course_name ?? r.courseName ?? 'Course details unavailable'),
           course_code: String(r.course_code ?? r.courseCode ?? ''),
           course_category: String(r.course_category ?? r.courseCategory ?? 'other'),
-          completion_date: String(r.completion_date ?? r.completionDate ?? ''),
-          passed: r.passed === true,
-          certificate_issued: r.certificateIssued === true || r.certificate_issued === true,
-          certificate_number: typeof (r.certificateNumber ?? r.certificate_number) === 'string' ? String(r.certificateNumber ?? r.certificate_number) : null,
+          completion_date: String(r.issueDate ?? r.issue_date ?? ''),
+          passed: r.verified === true && r.revoked !== true,
+          certificate_issued: r.verified === true && r.revoked !== true && r.certificationStatus === 'active',
+          certificate_number: typeof (r.certificationNumber ?? r.certification_number) === 'string' ? String(r.certificationNumber ?? r.certification_number) : null,
           certificate_url: typeof (r.certificateUrl ?? r.certificate_url) === 'string' ? String(r.certificateUrl ?? r.certificate_url) : null,
           certification_name: typeof (r.certificationName ?? r.certification_name) === 'string' ? String(r.certificationName ?? r.certification_name) : null,
           expiry_date: typeof (r.expiryDate ?? r.expiry_date) === 'string' ? String(r.expiryDate ?? r.expiry_date) : null,
-          is_expired: r.isExpired === true || r.is_expired === true,
-          expiring_soon: r.expiringSoon === true || r.expiring_soon === true,
-          days_until_expiry: typeof (r.daysUntilExpiry ?? r.days_until_expiry) === 'number' ? Number(r.daysUntilExpiry ?? r.days_until_expiry) : null,
+          is_expired: r.revoked === true || r.certificationStatus === 'expired' || (typeof r.expiryDate === 'string' && r.expiryDate < new Date().toISOString().slice(0, 10)),
+          expiring_soon: typeof r.expiryDate === 'string' && r.expiryDate >= new Date().toISOString().slice(0, 10) && r.expiryDate <= new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10),
+          days_until_expiry: typeof r.expiryDate === 'string' ? Math.ceil((Date.parse(r.expiryDate) - Date.now()) / 86400000) : null,
         })));
       } else {
-        setLoadError('Your course completions could not be loaded. Please try again.');
+        setLoadError('Your certifications could not be loaded. Please try again.');
       }
     } catch (_error) {
       setLoadError('Learning records could not be loaded. Please try again.');
@@ -249,10 +250,8 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completions.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {completions.filter(c => c.passed).length} passed
-            </p>
+            <div className="text-2xl font-bold">{registrations.filter(r => r.completed).length}</div>
+            <p className="text-xs text-muted-foreground">Completed registrations</p>
           </CardContent>
         </Card>
 
@@ -424,7 +423,7 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
                       <div>
                         <div className="font-medium text-sm">{cert.certification_name || cert.course_name}</div>
                         <div className="text-xs text-muted-foreground">
-                          Expires in {cert.days_until_expiry} days ({format(new Date(cert.expiry_date!), 'MMM d, yyyy')})
+                          Expires in {cert.days_until_expiry} days ({cert.expiry_date && !Number.isNaN(Date.parse(cert.expiry_date)) ? format(new Date(cert.expiry_date), 'MMM d, yyyy') : 'date unavailable'})
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">Contact your union for renewal options.</p>
@@ -455,12 +454,12 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Issued</span>
-                      <span className="font-medium">{format(new Date(cert.completion_date), 'MMM d, yyyy')}</span>
+                      <span className="font-medium">{cert.completion_date && !Number.isNaN(Date.parse(cert.completion_date)) ? format(new Date(cert.completion_date), 'MMM d, yyyy') : 'Date unavailable'}</span>
                     </div>
                     {cert.expiry_date && (
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Expires</span>
-                        <span className="font-medium">{format(new Date(cert.expiry_date), 'MMM d, yyyy')}</span>
+                        <span className="font-medium">{!Number.isNaN(Date.parse(cert.expiry_date)) ? format(new Date(cert.expiry_date), 'MMM d, yyyy') : 'Date unavailable'}</span>
                       </div>
                     )}
                   </div>
