@@ -15,6 +15,11 @@ The bargaining-notes collection GET previously silently coerced malformed `page`
 
 Adversarial Vitest tests were authored for normal defaults, leap-day dates, timezone-qualified timestamps, invalid dates, reversed ranges, malformed or oversized pagination, invalid sort options and oversized or empty tags. The existing manifest ratchet tests compare all 1,010 scanned routes and summary counts against generated evidence.
 
+
+## Follow-on collection semantics correction
+
+Source commit `06ada7e786d3548ff3d6c0b78dda63fddb474b1b` removes the legacy tags-only early return that ignored the requested page and the other supplied filters. Tag searches now execute the same organization, author/confidentiality, agreement, session-type, date and pagination query as ordinary listing. Legacy `notes` and `count` keys remain, with real `total`, `page` and `limit` added. Commit `0250ac37454c25fa81f58ff286e94b91b407f933` adds route-level adversarial tests for combined tag/tenant/CBA/date/session/pagination filtering, invalid input refusal before any database lookup and foreign-agreement nondisclosure. These tests are authored, **not yet reported passing at exact final HEAD**.
+
 ## Qualification boundary
 
 **Source-level:** committed and inspectable. **Unit/contract:** new tests authored; no exact-final-SHA pass yet at record creation. **Native PostgreSQL 15/16:** pending exact-final-SHA results. **Real HTTP/browser:** pending exact-final-SHA results. **Staging and independent acceptance:** not established. A generated manifest match is not a runtime security proof.
