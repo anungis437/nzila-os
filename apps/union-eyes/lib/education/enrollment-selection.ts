@@ -30,3 +30,11 @@ export function buildEducationEnrollment(
   }
   return { courseId, sessionId };
 }
+
+/** Unknown fee is not zero: a missing or invalid amount must never display as Free. */
+export function parseCourseFee(value: unknown): number | null {
+  if (value === null || value === undefined || value === '' ||
+      (typeof value !== 'string' && typeof value !== 'number')) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
