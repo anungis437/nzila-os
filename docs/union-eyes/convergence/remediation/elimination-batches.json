@@ -10630,6 +10630,23 @@
       ],
       "correction": "Every Drizzle declaration under db/schema (623 physical relations across 267 files, not the 555 the barrel exports) is now measured against the database Django migrate plus the approved bootstrap builds, by scripts/runtime/schema-convergence.ts. Platform 0062 to 0065 (guarded, tagged, reversible) close every strict class: 2,343 missing columns, 719 NOT NULL columns with no default that the ORM omits, 46 declared defaults the database silently dropped, 118 required columns no declaration can fill, 88 declared unique keys with no index, 8 narrow columns (one dropped two decimals of a per-capita rate), 5 mistyped columns, 40 enum types and 3 missing members (the grievance conversion events), and the last 14 relations no migration created. Declarations that lied about the database are corrected (62 text-for-uuid columns, a jsonb array, a time-dependent CHECK, four Django column names). Defects found by running the unmodified code: the public cookie-consent route answered 500 to every visitor (the system role had no grant on the table, and user_id is a foreign key to profiles.id, not the identity string), the intake-to-case conversion failed on its array column and enum events, every webhook insert failed on a uuid key that holds provider ids, and three finance statements the earlier ratchet had pinned under the finance freeze (lifted) failed on ANY(array). The canonical schema census goes from 179 entries to 0; plain select over the barrel fails for 1 of 568 declared tables (knowledge_base.embedding where pgvector is absent), down from 167. Native proof: schema-convergence (4), schema-convergence-behaviour (6), cookie-consent-route (5), and the whole native project on fresh PG16 and PG15.",
       "remaining": "Fourteen relations are declared by more than one non-identical declaration (two features collide on automation_rules); 19 NOT NULL columns some declarations omit cannot be closed in the database without loosening a real constraint. Foreign keys (370), indexes (794), declared NOT NULL (286), timestamp without time zone over timestamptz (420) and checks (36) are measured and pinned as advisory classes, not closed. The pgvector column exists only where the server offers the extension and its readers do not yet cope with its absence. The 11 public platform-economics relations stay closed (LATENT_UNREACHABLE) while the census marked 22 routes as reaching them; those routes are not run against the real tables. The 116 relations the manifest still holds deny-all keep no grants. Exact-SHA CI for the final head; real-login journeys, immutable-audit and staging acceptance; independent reviewer. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-GENERATED-POSTGRES-IDENTIFIER-UTF8-SHA256-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-generated-postgres-identifier-20261102.md",
+      "sourceBaseline": "bf62586b8baa1ddcf418c97be9dff53f40a7502e",
+      "sourceCommit": "8b52e630c8a4cd1c83f3e9e7196660d5d900c2a2",
+      "files": [
+        "apps/union-eyes/scripts/generate-declared-convergence.ts",
+        "apps/union-eyes/scripts/runtime/postgres-identifier.ts",
+        "apps/union-eyes/scripts/__tests__/postgres-identifier.test.ts",
+        "apps/union-eyes/db/__tests__/schema-live-unreferenced.test.ts"
+      ],
+      "correction": "Future generated unique constraint names now use UTF-8 byte-aware PostgreSQL identifier truncation and a deterministic 64-bit SHA-256 suffix rather than SHA-1 and character-count truncation; adversarial Unicode and collision tests added. Converged-schema regression now asserts an empty missing-relation census without dropping kept declarations.",
+      "remaining": "Exact-source-commit Vitest/contract, native PostgreSQL 15/16, real HTTP/browser and staging evidence; independent reviewer and owner-persona/institutional decisions. Separate unused dependency and route manifest CI failures remain. No defect or CLOSED credit."
     }
   ]
 }
