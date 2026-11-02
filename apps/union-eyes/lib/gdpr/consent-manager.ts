@@ -590,7 +590,7 @@ export class DataExportService {
       
       if (claimIds.length > 0) {
         claimNotes = await db.query.claimUpdates.findMany({
-          where: sql`${claimUpdates.claimId} = ANY(${claimIds})`
+          where: inArray(claimUpdates.claimId, claimIds)
         });
       }
 

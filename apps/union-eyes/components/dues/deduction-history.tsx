@@ -39,21 +39,24 @@ export default function DeductionHistory({ userId, onReportIssue }: DeductionHis
 
   const loadDeductions = useCallback(async () => {
     try {
-      const response = await fetch(`/api/dues/deductions?userId=${userId}`);
+      // The server knows who is asking; the request names nobody.
+      const response = await fetch('/api/dues/deductions');
       if (!response.ok) throw new Error('Failed to load deductions');
       const json = await response.json();
-      const items = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
-      setDeductions(items);
+      // The route answers { success, data: { data: rows } }: the framework's envelope around the route's own { data } body.
+      const rows = json?.data?.data ?? json?.data ?? json;
+      setDeductions(Array.isArray(rows) ? rows : []);
     } catch (_error) {
       setDeductions([]);
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, []);
 
+  // The list belongs to the signed-in member, so it is fetched again when the member shown changes.
   useEffect(() => {
     loadDeductions();
-  }, [loadDeductions]);
+  }, [loadDeductions, userId]);
 
   const getSourceLabel = (source: string) => {
     switch (source) {

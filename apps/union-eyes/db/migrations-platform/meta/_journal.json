@@ -435,6 +435,13 @@
       "when": 1759170000000,
       "tag": "0060_reachable_stub_shape_2",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1759180000000,
+      "tag": "0061_declared_absent_relations",
+      "breakpoints": true
     }
   ]
 }

@@ -21,9 +21,9 @@ describe('schema and mutation batch program', () => {
     expect(program).toEqual(committed)
   })
 
-  // The census was regenerated against a database built by Django migrate plus the approved bootstrap (231 -> 202).
-  // A table may only leave a ratchet by being evolved or by having its declaration retired, so each exit is tied to its source.
-  it('explains every table that left the census: its declaration is retired or a registered migration evolved it', () => {
+  // The census was regenerated against a database built by Django migrate plus the approved bootstrap (231 -> 202 -> 179).
+  // A table may only leave a ratchet by being evolved, created or having its declaration retired, so each exit is tied to its source.
+  it('explains every table that left the census: its declaration is retired, a registered migration evolved it, or a registered migration created it', () => {
     const census = new Set((JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-census.json'), 'utf8')).entries as { table: string }[]).map((entry) => entry.table))
     const declared = new Set(
       Object.values(declarations as Record<string, unknown>)
@@ -58,7 +58,24 @@ describe('schema and mutation batch program', () => {
         expect(alters.test(sql), `${file} does not alter ${table}`).toBe(true)
       }
     }
-    const explained = [...retiredDeclarations, ...Object.values(evolvedBy).flat()]
+    // Declared relations that no migration created until platform 0061: the census listed each as TABLE_ABSENT, and every route over one answered with an undefined-relation fault.
+    const createdBy: Record<string, string[]> = {
+      'db/migrations-platform/0061_declared_absent_relations.sql': [
+        'anti_scab_violations', 'cnesst_filings', 'joint_hs_committees', 'pay_equity_exercises', 'preventive_withdrawals', 'right_of_refusal_events',
+        'wcb_claims', 'wcb_employer_assessments', 'member_dues_issues', 'payroll_deductions', 'customer_nps_surveys', 'customer_onboarding_milestones',
+        'cba_intel_sources', 'cba_intel_ingestion_jobs', 'cba_intel_documents', 'cba_intel_agreements', 'cba_intel_clauses', 'cba_intel_extraction_runs',
+        'cba_intel_findings', 'cba_intel_wage_adjustments', 'cba_intel_review_decisions', 'cba_intel_benchmark_snapshots', 'cba_intel_freshness_log',
+      ],
+    }
+    for (const [file, tables] of Object.entries(createdBy)) {
+      const sql = readFileSync(path.join(appRoot, file), 'utf8')
+      for (const table of tables) {
+        expect(census.has(table), `${table} is still in the census`).toBe(false)
+        expect(declared.has(table), `${table} lost its declaration instead of gaining a relation`).toBe(true)
+        expect(sql.includes(`CREATE TABLE public."${table}"`), `${file} does not create ${table}`).toBe(true)
+      }
+    }
+    const explained = [...retiredDeclarations, ...Object.values(evolvedBy).flat(), ...Object.values(createdBy).flat()]
     expect(new Set(explained).size, 'a table is explained twice').toBe(explained.length)
     const originalCensusSize = 231
     expect(explained.length, 'a table left the census without an explanation').toBe(originalCensusSize - census.size)
@@ -124,9 +141,9 @@ describe('schema and mutation batch program', () => {
     expect(retention?.liveStatementCount).toBe(0)
     expect(retention?.execution).toBe('implemented')
     expect(retention?.applyNow).toBe(true)
-    // These four batches emptied when the census was regenerated against the real schema: every entry left it, and the
-    // 'explains every table that left the census' test says why each was allowed to.
-    for (const id of ['schema-retire-declaration', 'schema-live-unreferenced', 'schema-verify-dead-module', 'schema-evolve-reachable']) {
+    // These five batches emptied when the census was regenerated against the real schema: every entry left it, and the
+    // 'explains every table that left the census' test says why each was allowed to. The create-relation batch emptied because platform 0061 created every relation it named.
+    for (const id of ['schema-retire-declaration', 'schema-live-unreferenced', 'schema-verify-dead-module', 'schema-evolve-reachable', 'schema-create-relation']) {
       expect(program.batches.some((batch) => batch.id === id), id).toBe(false)
     }
     const retained = ['budget_pool', 'dues_rates', 'gl_account_mappings', 'grievance_settlements', 'integration_webhooks', 'payment_cycles', 'payment_disputes', 'safety_training_records']
@@ -136,7 +153,7 @@ describe('schema and mutation batch program', () => {
       expect(row?.declarationRemoved).toBeUndefined()
       expect(row?.holdReason).toBeTruthy()
     }
-    expect(program.censusCount).toBe(202)
+    expect(program.censusCount).toBe(179)
     for (const table of ['user_sessions', 'member_documents', 'grievance_stages', 'grievance_workflows']) {
       const row = program.schema.find((entry) => entry.table === table)
       expect(row?.batchId).toBe('schema-verify-dead-required')

@@ -39,6 +39,8 @@ import type { NextRequest } from 'next/server';
 import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { isBelowStaff, lowRoleModeFor, ownRowsScope, resolveLowRoleScope } from './crud-low-role-guard';
 import { assertCrudRead, assertCrudWrite, crudGovernanceFor, supportsGenericArchive } from './crud-governance';
+import { normalizeWriteValues, propertyOfColumn } from './crud-write-values';
+import { mapClientDatabaseError, type WriteAction } from './db-client-errors';
 
 // crud-factory's readRole/writeRole accept the full canonical role hierarchy
 // (same set withApi's auth.minRole already enforces via ROLE_HIERARCHY), not
@@ -84,6 +86,11 @@ export interface CrudOptions {
    * still reads only their own. Writes keep the owner scope, so staff reading a member's record never edits it as the member.
    */
   staffReadsAll?: boolean;
+  /**
+   * With an ownerColumn: a caller at or above the steward floor may name the owner of a new row in the body (a steward filing on behalf of a member). The
+   * owner is otherwise server-owned and a body that sets it is refused. The value is checked like any other (a uuid column takes a uuid); updates are unchanged.
+   */
+  staffMayNameOwner?: boolean;
   /**
    * A regulatory or evidentiary record that is never deleted through the generic route: DELETE answers 409 before any write, so the
    * row (and what cascades from it) survives, and the record is changed only through its governed correction or withdrawal process.
@@ -568,6 +575,15 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
   const ownRowsMode = lowRoleModeFor(table, false);
 
   /**
+   * Answers what the client caused in the statement a generic write issues as the client error it is (see db-client-errors). A route's own
+   * mapCreateError is consulted first for a create, so a route that translates a database refusal itself (a full session, a taken seat) keeps its answer.
+   */
+  function clientFault(action: WriteAction, error: unknown): Error | null {
+    const routeSpecific = action === 'create' ? opts.mapCreateError?.(error) : null;
+    return routeSpecific ?? mapClientDatabaseError(error, action, (column) => propertyOfColumn(table, column));
+  }
+
+  /**
    * Runs a generic write and its durable audit record in one tenant transaction. The audit names the fields written,
    * never their values. A write without an organization and an acting user cannot be attributed, so it is refused.
    */
@@ -581,7 +597,13 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
   ): Promise<T | undefined> {
     if (!organizationId || !userId) throw ApiError.forbidden();
     return withRLSContext({ organizationId, userId: userId === ANONYMOUS_ACTOR ? undefined : userId }, async (tx) => {
-      const row = await operation(tx);
+      // Only the write's own statement is translated: a failure of the audit that commits with it is a server fault and stays one.
+      let row: T | undefined;
+      try {
+        row = await operation(tx);
+      } catch (error) {
+        throw clientFault(action, error) ?? error;
+      }
       if (row) {
         await persistAtomicAudit(tx, {
           organizationId,
@@ -692,9 +714,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       async ({ body, params, organizationId, userId }) => {
         assertRequiredScope(organizationId, userId);
         const normalizedBody = opts.preprocessCreateBody ? opts.preprocessCreateBody(body) : body;
+        // Staff filing on behalf of a member may name the owner; for everyone else the owner column is server-owned.
+        const staffNamesOwner = Boolean(opts.ownerColumn && opts.staffMayNameOwner) && !(await isBelowStaff(userId, organizationId));
         const values = assertGenericWritePayload(normalizedBody, table, {
           primaryKey: resolvedPk,
-          ownerColumn: opts.ownerColumn,
+          ownerColumn: staffNamesOwner ? undefined : opts.ownerColumn,
           blockedFields: blockedPatchFields,
         });
         assertWritable(values);
@@ -743,6 +767,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         // A below-staff caller can only create rows about themselves.
         if (lowRole.forcedOwner) finalValues[lowRole.forcedOwner.name] = lowRole.forcedOwner.value;
 
+        // Shaped for its column after every hook has run, so a hook sees the body as it arrived and a malformed field is a 400 before a transaction opens.
+        const writeValues = normalizeWriteValues(finalValues, table);
+
         const createAudited = () => audited(organizationId, anonymous ? ANONYMOUS_ACTOR : userId, 'create', Object.keys(finalValues), async (tx) => {
           if (parentColumn && parentKeyColumn && parentOrgColumn && opts.parentScope) {
             // An indirect reference is checked like a direct one: the named parent must belong to the caller's organization.
@@ -752,7 +779,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
               : [];
             if (owned.length === 0) throw ApiError.forbidden();
           }
-          return (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined;
+          return (await tx.insert(table).values(writeValues).returning())[0] as Record<string, unknown> | undefined;
         });
         let row: Record<string, unknown> | undefined;
         try {
@@ -910,7 +937,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
               updates.updatedAt = new Date();
             }
 
-            const setValues = buildMergeSetValues(updates, table, mergeJsonColumns);
+            const setValues = buildMergeSetValues(normalizeWriteValues(updates, table), table, mergeJsonColumns);
 
             return (await tx.update(table).set(setValues).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
           }));
@@ -925,8 +952,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           updates.updatedAt = new Date();
         }
 
+        const setValues = normalizeWriteValues(updates, table);
         const row = await audited(organizationId, userId, 'update', Object.keys(updates), async (tx) => (await tx.update(table)
-          .set(updates)
+          .set(setValues)
           .where(and(...conditions))
           .returning())[0] as Record<string, unknown> | undefined);
 

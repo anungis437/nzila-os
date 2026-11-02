@@ -5,6 +5,7 @@
 
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
+import { sqlIn } from '@/lib/db/sql-in';
 import {
   recognitionAwards,
   rewardWalletLedger,
@@ -135,7 +136,7 @@ export async function exportAwardsToCSV(
       conditions.push(sql`ra.created_at <= ${filters.endDate}`);
     }
     if (filters?.status?.length) {
-      conditions.push(sql`ra.status = ANY(${filters.status})`);
+      conditions.push(sqlIn(sql`ra.status`, filters.status));
     }
     if (filters?.programId) {
       conditions.push(sql`rat.program_id = ${filters.programId}`);
@@ -242,7 +243,7 @@ export async function exportLedgerToCSV(
       conditions.push(sql`rwl.user_id = ${filters.userId}`);
     }
     if (filters?.eventType?.length) {
-      conditions.push(sql`rwl.event_type = ANY(${filters.eventType})`);
+      conditions.push(sqlIn(sql`rwl.event_type`, filters.eventType));
     }
     
     const query = sql`
@@ -397,7 +398,7 @@ export async function exportRedemptionsToCSV(
       conditions.push(sql`rr.created_at <= ${filters.endDate}`);
     }
     if (filters?.status?.length) {
-      conditions.push(sql`rr.status = ANY(${filters.status})`);
+      conditions.push(sqlIn(sql`rr.status`, filters.status));
     }
     
     const query = sql`

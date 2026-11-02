@@ -16,6 +16,7 @@
 
 import { db } from "@/db/db";
 import { eq, inArray, sql } from "drizzle-orm";
+import { sqlIn } from "@/lib/db/sql-in";
 import { organizations } from "@/db/schema-organizations";
 
 // Migration mapping table (this would be in schema, but defining inline for clarity)
@@ -200,7 +201,7 @@ export async function batchGetOrganizationIds(
       const result = await db.execute(sql`
         SELECT tenant_id, organization_id 
         FROM tenant_org_mappings 
-        WHERE tenant_id = ANY(${uncachedTenants}::text[])
+        WHERE ${sqlIn(sql`tenant_id`, uncachedTenants)}
         AND migration_status = 'completed'
       `);
 

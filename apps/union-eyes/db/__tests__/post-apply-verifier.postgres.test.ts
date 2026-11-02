@@ -5,7 +5,7 @@
  *    policy coverage and the exact privileges of union_eyes_runtime and union_eyes_system, in both directions.
  * 2. The verifier must be able to fail. A scratch database proves it detects, and then clears, each kind of gap with
  *    the real catalog queries (a unit test with a fake database could not prove those).
- * 3. Manifest entries whose table does not exist are pinned, so a new absent relation fails here.
+ * 3. Every in-scope manifest entry has a physical table, so a declared relation that nothing creates fails here.
  *
  * Needs UE_AUTHORITY_COMBINED_URL: a superuser connection to the combined database. Creates and drops its own
  * scratch database on the same server. Not a staging pass.
@@ -21,23 +21,6 @@ import {
 } from '../../scripts/rls-enforcement/post-apply-verifier-core'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
-
-// Manifest entries with no physical table in the converged schema (neither Django nor a Drizzle platform migration
-// creates them). Remove a name when its relation is created or its manifest entry is retired.
-const KNOWN_ABSENT_RELATIONS = [
-  'anti_scab_violations',
-  'cnesst_filings',
-  'customer_nps_surveys',
-  'customer_onboarding_milestones',
-  'joint_hs_committees',
-  'member_dues_issues',
-  'pay_equity_exercises',
-  'payroll_deductions',
-  'preventive_withdrawals',
-  'right_of_refusal_events',
-  'wcb_claims',
-  'wcb_employer_assessments',
-]
 
 describe.skipIf(!URL)('post-apply verifier on real PostgreSQL catalogs', () => {
   let admin: pg.Client
@@ -60,9 +43,11 @@ describe.skipIf(!URL)('post-apply verifier on real PostgreSQL catalogs', () => {
     expect(report.checked).toEqual(expect.arrayContaining(['grievances', 'documents', 'ue_authority_mandates']))
   })
 
-  it('pins the manifest entries that have no physical table', async () => {
+  it('finds a physical table for every in-scope manifest entry', async () => {
+    // Platform 0061 created the twelve row-security relations that neither Django nor an earlier migration had; an entry with no table must be
+    // created or retired, not listed here.
     const report = await verifyEntries(admin, storageAuthorityManifest)
-    expect([...report.skipped].sort()).toEqual([...KNOWN_ABSENT_RELATIONS].sort())
+    expect(report.skipped).toEqual([])
   })
 
   describe('detection and clearance, against a scratch database', () => {

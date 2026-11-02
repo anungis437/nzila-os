@@ -354,6 +354,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Retires the SCIM definer functions of 0049 and closes the SCIM directory and event log to the system role"
+      },
+      {
+        "tag": "0052_declared_absent_relations_rls_closure",
+        "sha256": "d3e434f58f5b95c10417ef22275cd87b7580de0aad1bc1cb822dee0575ba3cc9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "row security for the relations platform 0061 creates: ten tenant tables, two system-only tables; CBA intelligence is tenant-less by manifest design"
       }
     ],
     "platform": [
@@ -678,6 +685,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Additive, guarded evolution of thirteen reachable Django-defined relations (arbitration_decisions, case_studies, wage_benchmarks, cost_of_living_data, external_data_sync_log, provincial_privacy_config, support_tickets, union_density, reserved_matter_votes, clc_organization_sync_log, webhook_receipts, automation_rules, alert_rules) to the columns their Drizzle declarations select and write. Missing columns are added nullable, enum types are created only when absent, and the transaction fails if any constraint, index, policy, grant or row-security setting changes. Tagged for an exact rollback."
+      },
+      {
+        "tag": "0061_declared_absent_relations",
+        "sha256": "0de9fa949cd3a8ef2874b3aadab98efd9c3ab3eec06c810e087146fa3b12ad55",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "declared Drizzle relations Django never created: cnesst x6, wcb x2, dues portal x2, customer-success x2, CBA intelligence x11 (DDL only; access from the manifest)"
       }
     ]
   }

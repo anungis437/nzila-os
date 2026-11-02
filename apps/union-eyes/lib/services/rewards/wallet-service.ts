@@ -11,6 +11,7 @@ import {
   type RewardWalletLedgerEntry,
 } from '@/db/schema/domains/infrastructure/rewards';
 import { eq, and, desc, sql, type SQL } from 'drizzle-orm';
+import { sqlIn } from '@/lib/db/sql-in';
 
 type DbTransaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -282,7 +283,7 @@ export async function getBulkBalances(
         balance_after
       FROM ${rewardWalletLedger}
       WHERE org_id = ${orgId}
-        AND user_id = ANY(${userIds})
+        AND ${sqlIn(sql`user_id`, userIds)}
       ORDER BY user_id, created_at DESC
     )
     SELECT user_id, balance_after

@@ -344,6 +344,13 @@
       "when": 1790450000000,
       "tag": "0051_scim_provisioned_users_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1790460000000,
+      "tag": "0052_declared_absent_relations_rls_closure",
+      "breakpoints": true
     }
   ]
 }

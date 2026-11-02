@@ -6,7 +6,7 @@
 
 import { db } from '@/db';
 import { profiles, smsMessages, newsletterEngagement, surveyResponses, pollVotes, pushDeliveries, organizationMembers } from '@/db/schema';
-import { eq, gte, and, sql } from 'drizzle-orm';
+import { eq, gte, and, inArray, sql } from 'drizzle-orm';
 import { subDays, subMonths, differenceInDays } from 'date-fns';
 
 // =============================================
@@ -568,7 +568,7 @@ export async function getTopEngagedMembers(
       email: profiles.email,
     })
     .from(profiles)
-    .where(sql`${profiles.userId} = ANY(${profileIds})`);
+    .where(inArray(profiles.userId, profileIds));
 
   return topScores.map((score) => {
     const profile = profileDetails.find((p) => p.userId === score.profileId);

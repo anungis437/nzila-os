@@ -1,6 +1,6 @@
 # Union Eyes Runtime Schema Authority Oracle
 
-Generated: 2026-10-26T06:06:15.569Z
+Generated: 2026-11-02T01:35:36.586Z
 
 This report treats the storage-authority registry as the runtime-storage universe and reconciles it against repository migration history. It does not mutate Azure, does not generate migrations, and does not claim the current fresh bootstrap is complete.
 
@@ -8,23 +8,23 @@ This report treats the storage-authority registry as the runtime-storage univers
 
 - F60040_SCHEMA: PARTIAL_RUNTIME_SCHEMA
 - PREVIOUS_RUNTIME_CONTRACT_COMPLETENESS: INSUFFICIENT
-- CANONICAL_SCHEMA_AUTHORITY_CLOSURE: BLOCKED
+- CANONICAL_SCHEMA_AUTHORITY_CLOSURE: READY_FOR_BOOTSTRAP_PROOF
 - PRE_COMPLETE_RUNTIME_SCHEMA_DIGEST: f60040e62c1253d0e3aa6476e993241c331f8e02b10a16015ec83c2577a73c47
 
 ## Counts
 
-- storageAuthorityEntries: 862
-- runtimeUniverseTables: 387
-- tenantOrMixedRuntimePrincipalTables: 387
-- tablesWithNonEmptyRuntimePrivileges: 383
-- rlsRequiredTables: 363
-- runtimeTablesWithExistingCreationMigration: 377
-- runtimeTablesWithoutCreationMigration: 10
-- runtimeTablesWithOwner: 377
-- runtimeTablesWithoutSchemaOwner: 10
-- runtimeTablesWithMultipleSchemaOwners: 236
-- bootstrapParticipatingCreationTables: 161
-- bootstrapMissingCreationTables: 226
+- storageAuthorityEntries: 874
+- runtimeUniverseTables: 397
+- tenantOrMixedRuntimePrincipalTables: 397
+- tablesWithNonEmptyRuntimePrivileges: 393
+- rlsRequiredTables: 374
+- runtimeTablesWithExistingCreationMigration: 397
+- runtimeTablesWithoutCreationMigration: 0
+- runtimeTablesWithOwner: 397
+- runtimeTablesWithoutSchemaOwner: 0
+- runtimeTablesWithMultipleSchemaOwners: 238
+- bootstrapParticipatingCreationTables: 189
+- bootstrapMissingCreationTables: 208
 
 ## Lineages
 
@@ -48,23 +48,12 @@ This report treats the storage-authority registry as the runtime-storage univers
 |---|---|---|---|---|---|---|
 | ai_grievance_triages | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql | YES | 1 | 1 |
 | billing_accounts | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 3 | 1 |
-| billing_periods | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 5 | 1 |
+| billing_periods | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 6 | 1 |
 | billing_subscriptions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql | YES | 1 | 0 |
-| document_versions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql | YES | 10 | 6 |
+| document_versions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql | YES | 11 | 6 |
 | org_subscriptions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 7 | 5 |
-| pension_plans | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql | YES | 3 | 2 |
+| pension_plans | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql | YES | 4 | 2 |
 | platform_invoices | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 5 | 2 |
 | platform_payments | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 4 | 2 |
 
 ## Tables Without Creation Lineage
-
-- anti_scab_violations (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- cnesst_filings (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- joint_hs_committees (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- member_dues_issues (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- pay_equity_exercises (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- payroll_deductions (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- preventive_withdrawals (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- right_of_refusal_events (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- wcb_claims (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)
-- wcb_employer_assessments (UNKNOWN; PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE)

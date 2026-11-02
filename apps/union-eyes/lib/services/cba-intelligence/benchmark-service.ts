@@ -5,7 +5,7 @@ import {
   cbaIntelWageAdjustments,
   cbaIntelClauses,
 } from "@/db/schema";
-import { eq, and, sql, desc, type SQL, ne, ilike } from "drizzle-orm";
+import { eq, and, sql, desc, inArray, type SQL, ne, ilike } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ export async function findComparableAgreements(
     const wageRows = await db
       .select()
       .from(cbaIntelWageAdjustments)
-      .where(sql`${cbaIntelWageAdjustments.agreementId} = ANY(${allIds})`);
+      .where(inArray(cbaIntelWageAdjustments.agreementId, allIds));
 
     const clauseRows = await db
       .select({
@@ -110,7 +110,7 @@ export async function findComparableAgreements(
         clauseFamily: cbaIntelClauses.clauseFamily,
       })
       .from(cbaIntelClauses)
-      .where(sql`${cbaIntelClauses.agreementId} = ANY(${allIds})`);
+      .where(inArray(cbaIntelClauses.agreementId, allIds));
 
     // Index wages & clauses by agreement
     const wagesByAgreement = new Map<string, typeof wageRows>();

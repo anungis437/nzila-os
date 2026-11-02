@@ -11,6 +11,7 @@
 
 import { sql, SQL } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { sqlIn } from '@/lib/db/sql-in';
 import { safeColumnName } from '@/lib/safe-sql-identifiers';
 
 // ============================================================================
@@ -341,15 +342,15 @@ export async function getClaimsByDateRange(
   `;
 
   if (filters?.status && filters.status.length > 0) {
-    query = sql`${query} AND c.status = ANY(${filters.status})`;
+    query = sql`${query} AND ${sqlIn(sql`c.status`, filters.status)}`;
   }
 
   if (filters?.claimType && filters.claimType.length > 0) {
-    query = sql`${query} AND c.claim_type = ANY(${filters.claimType})`;
+    query = sql`${query} AND ${sqlIn(sql`c.claim_type`, filters.claimType)}`;
   }
 
   if (filters?.priority && filters.priority.length > 0) {
-    query = sql`${query} AND c.priority = ANY(${filters.priority})`;
+    query = sql`${query} AND ${sqlIn(sql`c.priority`, filters.priority)}`;
   }
 
   if (filters?.assignedTo) {

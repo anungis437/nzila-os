@@ -44,12 +44,6 @@
       "references": 10,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "anti_scab_violations": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
-    },
     "arbitrator_profiles": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -176,72 +170,6 @@
       "references": 6,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "cba_intel_agreements": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 3,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_benchmark_snapshots": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 1,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_clauses": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 3,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_documents": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 4,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_extraction_runs": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 2,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_findings": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 3,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_freshness_log": {
-      "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 2,
-      "reason": "registry LATENT_UNREACHABLE but 2 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
-    "cba_intel_ingestion_jobs": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 3,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_review_decisions": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 2,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_sources": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 5,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
-    "cba_intel_wage_adjustments": {
-      "disposition": "GLOBAL_REFERENCE_SHAPE",
-      "registryClass": "GLOBAL_REFERENCE_DATA",
-      "references": 3,
-      "reason": "global reference data: shape and seed need an owner decision, not a tenant migration"
-    },
     "cba_version_history": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -307,12 +235,6 @@
       "registryClass": "LATENT_UNREACHABLE",
       "references": 6,
       "reason": "registry LATENT_UNREACHABLE but 6 file(s) reference the declaration; each must be shown non-executable before retirement"
-    },
-    "cnesst_filings": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
     },
     "conflict_audit_log": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -397,18 +319,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "customer_nps_surveys": {
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "references": 0,
-      "reason": "system-only relation: evolve with the system service that owns it"
-    },
-    "customer_onboarding_milestones": {
-      "disposition": "SYSTEM_ONLY_SHAPE",
-      "registryClass": "SYSTEM_ONLY",
-      "references": 0,
-      "reason": "system-only relation: evolve with the system service that owns it"
     },
     "data_classification_policy": {
       "disposition": "GLOBAL_REFERENCE_SHAPE",
@@ -668,12 +578,6 @@
       "references": 4,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "joint_hs_committees": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
-    },
     "key_holder_registry": {
       "disposition": "CONTAINED_DENY_ALL",
       "registryClass": "CONTAINED_NO_AUTHORITY",
@@ -740,12 +644,6 @@
       "references": 3,
       "reason": "registry LATENT_UNREACHABLE but 3 file(s) reference the declaration; each must be shown non-executable before retirement"
     },
-    "member_dues_issues": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 1,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
-    },
     "movement_trends": {
       "disposition": "GLOBAL_REFERENCE_SHAPE",
       "registryClass": "GLOBAL_REFERENCE_DATA",
@@ -794,12 +692,6 @@
       "references": 6,
       "reason": "registry LATENT_UNREACHABLE but 6 file(s) reference the declaration; each must be shown non-executable before retirement"
     },
-    "pay_equity_exercises": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
-    },
     "payment_cycles": {
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
@@ -811,12 +703,6 @@
       "registryClass": "TENANT_RLS_REQUIRED",
       "references": 0,
       "reason": "live registry class but no application reference; confirm and reclassify or retire"
-    },
-    "payroll_deductions": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 1,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
     },
     "pci_dss_encryption_keys": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -853,12 +739,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 6,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "preventive_withdrawals": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
     },
     "pricing_discount_rules": {
       "disposition": "VERIFY_UNREACHABLE_THEN_RETIRE",
@@ -931,12 +811,6 @@
       "registryClass": "SYSTEM_ONLY",
       "references": 4,
       "reason": "system-only relation: evolve with the system service that owns it"
-    },
-    "right_of_refusal_events": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
     },
     "rl1_tax_slips": {
       "disposition": "CONTAINED_DENY_ALL",
@@ -1183,18 +1057,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 8,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "wcb_claims": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
-    },
-    "wcb_employer_assessments": {
-      "disposition": "CREATE_RELATION_REQUIRED",
-      "registryClass": "TENANT_RLS_REQUIRED",
-      "references": 2,
-      "reason": "declared relation does not exist in the lineage; needs a reviewed CREATE with keys and RLS scoped migration"
     },
     "webhook_events": {
       "disposition": "CONTAINED_DENY_ALL",

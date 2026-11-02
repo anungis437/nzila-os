@@ -11,6 +11,7 @@
 
 import { and, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
+import { sqlIn } from '@/lib/db/sql-in';
 import { exitInterviews } from '@/db/schema';
 import {
   getAiClient,
@@ -160,7 +161,7 @@ async function semanticSearch(
         AND kb.source_type = 'exit_interview'
         AND kb.is_active = true
         AND ei.status = 'published'
-        AND ei.sensitivity_level = ANY(${allowedSensitivityLevels}::text[])
+        AND ${sqlIn(sql`ei.sensitivity_level`, allowedSensitivityLevels)}
         AND kb.embedding IS NOT NULL
       ORDER BY kb.embedding <=> ${sql.raw(embeddingLiteral)}
       LIMIT ${limit}
@@ -222,7 +223,7 @@ export async function hybridKnowledgeSearch(
           and(
             eq(exitInterviews.organizationId, orgId),
             eq(exitInterviews.status, 'published'),
-            sql`${exitInterviews.id} = ANY(${semanticOnlyIds}::uuid[])`,
+            inArray(exitInterviews.id, semanticOnlyIds),
           ),
         );
 

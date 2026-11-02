@@ -1,24 +1,13 @@
 {
-  "generatedAt": "2026-10-26T06:06:17.915Z",
+  "generatedAt": "2026-11-02T01:37:04.489Z",
   "PUBLISHER_SECOND_SCHEMA_AUTHORITY": "NO",
   "PUBLISHER_CANONICAL_ORACLE": "PASS",
   "MISSING_REQUIRED_TABLES": 0,
   "MISSING_REQUIRED_COLUMNS": 0,
   "missingRequiredTables": [],
   "missingRequiredColumnsTables": [],
-  "publishedTableCount": 366,
-  "oracleSha256": "bc45328304ed9ef95e37bff8289575d6c82e0ece937f8ca06c8293d9dc8fe23a",
-  "dispositionExcludedCount": 10,
-  "dispositionExcluded": [
-    "anti_scab_violations",
-    "cnesst_filings",
-    "joint_hs_committees",
-    "member_dues_issues",
-    "pay_equity_exercises",
-    "payroll_deductions",
-    "preventive_withdrawals",
-    "right_of_refusal_events",
-    "wcb_claims",
-    "wcb_employer_assessments"
-  ]
+  "publishedTableCount": 378,
+  "oracleSha256": "3109a6909f03c084834c263d126b726514eafb9ff411fd9e3c22e6780776bb5f",
+  "dispositionExcludedCount": 0,
+  "dispositionExcluded": []
 }
