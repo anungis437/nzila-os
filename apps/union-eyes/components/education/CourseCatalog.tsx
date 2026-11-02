@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { buildEducationEnrollment, type EnrollmentSession } from '@/lib/education/enrollment-selection';
+import { readEducationCrudRows, assertEducationRegistrationCreated } from '@/lib/education/crud-response';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -97,8 +98,7 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
       if (!response.ok) throw new Error('Failed to fetch courses');
       
       const data = await response.json();
-      if (data.success !== true || !Array.isArray(data.data)) throw new Error('Invalid catalogue response');
-      setCourses(data.data.map((c: Record<string, unknown>) => ({
+      setCourses(readEducationCrudRows(data).map((c: Record<string, unknown>) => ({
         id: String(c.id ?? ''),
         course_code: String(c.courseCode ?? c.course_code ?? ''),
         course_name: String(c.courseName ?? c.course_name ?? 'Course details unavailable'),
@@ -179,8 +179,7 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
       .then(async response => {
         if (!response.ok) throw new Error('Session list unavailable');
         const body = await response.json();
-        if (body.success !== true || !Array.isArray(body.data)) throw new Error('Invalid sessions response');
-        const scoped: EnrollmentSession[] = body.data
+        const scoped: EnrollmentSession[] = readEducationCrudRows(body)
           .filter((row: Record<string, unknown>) =>
             (row.courseId ?? row.course_id) === selectedCourse.id)
           .map((row: Record<string, unknown>) => ({
@@ -216,9 +215,8 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
         body: JSON.stringify(payload),
       });
       const result = await response.json();
-      if (!response.ok || result.success !== true || result.data?.sessionId !== payload.sessionId) {
-        throw new Error('Registration was not confirmed');
-      }
+      if (!response.ok) throw new Error('Registration was refused');
+      assertEducationRegistrationCreated(result, payload.courseId, payload.sessionId);
       setEnrollmentMessage('Registration submitted. Check My Courses for its current status.');
       setSelectedCourse(null);
     } catch {
