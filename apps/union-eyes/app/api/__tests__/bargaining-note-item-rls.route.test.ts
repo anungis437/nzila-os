@@ -25,7 +25,7 @@ vi.mock('@/lib/api/framework', async () => {
   zUUID: z.string().uuid(),
   };
 });
-vi.mock('@/db/db', () => ({ db: { select: (...args: unknown[]) => m.bareDb(...args) } }));
+vi.mock('@/db/db', () => ({ db: { select: m.bareDb } }));
 vi.mock('@/db/schema', () => ({
   bargainingNotes: {
     id: 'id', organizationId: 'organizationId', createdBy: 'createdBy',
