@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   readBuilder: {} as any, updateBuilder: {} as any,
   eq: vi.fn((column: unknown, value: unknown) => ({ op: 'eq', column, value })),
   isNull: vi.fn((column: unknown) => ({ op: 'isNull', column })),
+  inArray: vi.fn((column: unknown, values: unknown[]) => ({ op: 'inArray', column, values })),
   and: vi.fn((...conditions: unknown[]) => ({ conditions })),
 }));
 vi.mock('@/lib/api/framework', async () => {
@@ -23,7 +24,7 @@ vi.mock('@/lib/api/framework', async () => {
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.rls }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('drizzle-orm', () => ({
-  eq: m.eq, and: m.and, isNull: m.isNull, desc: vi.fn((x: unknown) => x),
+  eq: m.eq, and: m.and, isNull: m.isNull, inArray: m.inArray, desc: vi.fn((x: unknown) => x),
 }));
 vi.mock('@/db/schema', () => ({
   courseRegistrations: {
@@ -74,6 +75,7 @@ describe('education completion attestation lifecycle', () => {
   it.each([
     ['cancelled', { cancellationDate: '2026-11-01' }],
     ['waitlisted', { registrationStatus: 'waitlisted' }],
+    ['incomplete', { registrationStatus: 'incomplete' }],
     ['unknown status', { registrationStatus: null }],
     ['withdrawn', { registrationStatus: 'cancelled' }],
     ['already completed', { completed: true, registrationStatus: 'completed' }],
@@ -98,7 +100,7 @@ describe('education completion attestation lifecycle', () => {
     expect(m.updateBuilder.where).toHaveBeenCalledWith({ conditions: expect.arrayContaining([
       { op: 'eq', column: 'reg.org', value: 'org-a' },
       { op: 'eq', column: 'reg.id', value: registrationId },
-      { op: 'eq', column: 'reg.status', value: 'registered' },
+      { op: 'inArray', column: 'reg.status', values: ['registered', 'confirmed', 'attended'] },
       { op: 'isNull', column: 'reg.cancelled' },
     ]) });
     expect(m.audit).toHaveBeenCalledWith(
@@ -109,6 +111,14 @@ describe('education completion attestation lifecycle', () => {
       }),
     );
   });
+
+  it.each(['registered', 'confirmed', 'attended'])(
+    'permits completed attendance evidence from active %s registration', async (status) => {
+      m.readBuilder.for.mockResolvedValueOnce([{ ...good(), registrationStatus: status }]);
+      await expect(post(ctx)).resolves.toHaveProperty('data.completed', true);
+      expect(m.audit).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it('fails closed when atomic audit fails', async () => {
     m.audit.mockRejectedValueOnce(new Error('audit unavailable'));

@@ -6,7 +6,7 @@ import { withApi, ApiError, z } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { courseRegistrations } from '@/db/schema';
-import { and, eq, desc, isNull } from 'drizzle-orm';
+import { and, eq, desc, isNull, inArray } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +64,11 @@ export const POST = withApi({
     // A cancelled, waitlisted or otherwise inactive registration is not a
     // valid basis for an institutional completion attestation, even if stale
     // attendance and pass flags remain in the row.
-    if (registration.registrationStatus !== 'registered' || registration.cancellationDate) {
+    // Confirmed and attended are legitimate active lifecycle states in
+    // addition to registered; do not strand learners after attendance.
+    const activeStatuses = ['registered', 'confirmed', 'attended'];
+    if (!registration.registrationStatus || !activeStatuses.includes(registration.registrationStatus) ||
+      registration.cancellationDate) {
       throw ApiError.conflict('Registration is not active');
     }
     if (!registration.attended || registration.passed !== true) {
@@ -79,7 +83,7 @@ export const POST = withApi({
     }).where(and(
       eq(courseRegistrations.organizationId, organizationId),
       eq(courseRegistrations.id, body.registrationId),
-      eq(courseRegistrations.registrationStatus, 'registered'),
+      inArray(courseRegistrations.registrationStatus, activeStatuses),
       isNull(courseRegistrations.cancellationDate),
     )).returning({ id: courseRegistrations.id, completed: courseRegistrations.completed });
     if (!updated) throw ApiError.conflict('Registration changed');

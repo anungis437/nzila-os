@@ -9,7 +9,7 @@ Frozen Gate 0B.6 defects: `DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-O
 ## Permanent source correction
 
 - Certification candidate POST accepts only `registrationId` from the client, rejects attempted identity, verification, lifecycle, badge and document fields before querying, and requires a valid UUID-shaped registration identifier. It binds the completed, passed, non-cancelled registration in the current organization to a certification-bearing course in that same organization. The created record remains `pending_verification`, never an issued or independently verified certificate.
-- Completion POST now refuses cancelled, waitlisted, unknown-status and otherwise inactive registrations, even when stale attended/passed flags are set. Its update predicate reasserts active status and no cancellation under the row lock. Audit must succeed within the transaction before the response can commit.
+- Completion POST now refuses cancelled, waitlisted, incomplete, unknown-status and otherwise inactive registrations, even when stale attended/passed flags are set. Its update predicate reasserts active status (registered, confirmed or attended) and no cancellation under the row lock, preserving legitimate post-attendance completion. Audit must succeed within the transaction before the response can commit.
 - No invented certification verification, mandate, badge generation, payment settlement or independent human ratification is asserted.
 
 ## Regression tests authored
