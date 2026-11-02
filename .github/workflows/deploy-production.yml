@@ -422,16 +422,22 @@ jobs:
           }
           EOF
 
-          # Write structured release manifest
-          cat > "ops/releases/release-${RELEASE_REF}.json" <<EOF
+          # Tag releases belong in the canonical release-manifest collection.
+          # Manual dispatches are run-scoped deployment evidence, NOT signed
+          # release tags; keep them out of release-*.json consumers that
+          # require a real tag string and semantic release ancestry.
+          if [[ "$RELEASE_TRIGGER" == "push" ]]; then
+            RELEASE_OUTPUT="ops/releases/release-${RELEASE_REF}.json"
+          else
+            RELEASE_OUTPUT="ops/deploy-evidence/dispatch-${RELEASE_REF}.json"
+          fi
+          cat > "$RELEASE_OUTPUT" <<EOF
           {
             "version": "$VERSION",
             "tag": $(jq -c 'if .trigger == "push" then .releaseRef else null end' <<< "$RELEASE_JSON"),
             "releaseRef": "$RELEASE_REF",
             "trigger": "$RELEASE_TRIGGER",
             "dispatchRunId": $(jq -c --arg run "$GITHUB_RUN_ID" 'if .trigger == "workflow_dispatch" then $run else null end' <<< "$RELEASE_JSON"),
-            "previousVersion": "see-prior-tag",
-            "bumpType": "automated",
             "gitSha": "${{ github.sha }}",
             "gitBranch": "main",
             "date": "$RELEASE_DATE",
