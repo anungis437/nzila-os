@@ -16,8 +16,9 @@ const form = z.object({
 export const GET = withApi({
   auth: { required: true, minRole: 'steward' },
   requireOrg: true,
+  query: z.object({ page: z.coerce.number().int().min(1).max(10000).default(1) }),
   openapi: { tags: ['Scheduling'], summary: 'Get course session attendance' },
-}, async ({ organizationId, userId, params }) => {
+}, async ({ organizationId, userId, params, query }) => {
   if (!organizationId || !userId) throw ApiError.forbidden('Organization required');
   const parsed = zUUID.safeParse(params.id);
   if (!parsed.success) throw ApiError.badRequest('Invalid session ID');
@@ -36,8 +37,12 @@ export const GET = withApi({
     }).from(courseRegistrations).where(and(
       eq(courseRegistrations.organizationId, organizationId),
       eq(courseRegistrations.sessionId, parsed.data),
-    )).limit(500);
-    return { sessionId: parsed.data, registrations };
+    )).orderBy(courseRegistrations.id).limit(101).offset((query.page - 1) * 100);
+    return {
+      sessionId: parsed.data,
+      registrations: registrations.slice(0, 100),
+      pagination: { page: query.page, hasMore: registrations.length > 100 },
+    };
   });
 });
 
