@@ -119,7 +119,9 @@ export const POST = withApi(
       })
     } catch (error) {
       if (error instanceof DuesInitiationError) {
-        if (error.code === 'NOTHING_DUE') throw ApiError.conflict(error.message)
+        if (error.code === 'NOTHING_DUE' || error.code === 'PENDING_PAYMENT_REQUIRES_RECONCILIATION') {
+          throw ApiError.conflict(error.message)
+        }
         throw ApiError.externalService('stripe', error.message)
       }
       throw error
