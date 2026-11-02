@@ -42,7 +42,7 @@ function dateBound(params: URLSearchParams, key: string): Date | undefined {
 
 export function parseBargainingNotesListQuery(params: URLSearchParams) {
   const page = positiveInteger(params, 'page', 1, 100_000);
-  const limit = positiveInteger(params, 'limit', 20, 100);
+  const limit = positiveInteger(params, 'limit', params.has('tags') ? 50 : 20, 100);
   const sortBy = params.get('sortBy') ?? 'sessionDate';
   const sortOrder = params.get('sortOrder') ?? 'desc';
   if (sortBy !== 'sessionDate' && sortBy !== 'createdAt') {
