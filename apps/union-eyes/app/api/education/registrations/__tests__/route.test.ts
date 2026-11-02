@@ -94,6 +94,18 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     expect(m.select).not.toHaveBeenCalled();
   });
 
+  it('preserves exactly 2000 characters of legitimate notes without truncation', async () => {
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
+      .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
+    const notes = 'n'.repeat(2000);
+    const result = await beforeCreate({
+      courseId: 'course-1', sessionId: 'session-1', notes,
+    }, { organizationId: 'org-real', userId: 'member' });
+    expect(result.notes).toBe(notes);
+    expect(result.memberId).toBe('member');
+    expect(result.feePaid).toBe(false);
+  });
+
   it('rejects a course outside the caller organization', async () => {
     m.limit.mockResolvedValueOnce([]);
     await expect(beforeCreate({
