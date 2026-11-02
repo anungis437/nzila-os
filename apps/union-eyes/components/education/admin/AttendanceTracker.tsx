@@ -58,6 +58,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [loading, setLoading] = useState(false);
+  const [rosterError, setRosterError] = useState(false);
   const [selectedRegistrations, setSelectedRegistrations] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [page, setPage] = useState(1);
@@ -73,6 +74,8 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
     setSessions([]);
     setSelectedSessionId("");
     setSelectedSession(null);
+    setLoading(false);
+    setRosterError(false);
     setRegistrations([]);
     setStats(null);
     setSelectedRegistrations(new Set());
@@ -102,6 +105,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
     setSelectedRegistrations(new Set());
     setRegistrations([]);
     setStats(null);
+    setRosterError(false);
     setHasMore(false);
     setSelectedSession(sessions.find(session => session.id === sessionId) ?? null);
     if (!sessionId) return;
@@ -125,6 +129,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
       }
       if (generation !== rosterGeneration.current || orgAtRequest !== orgGeneration.current) return;
       setRegistrations(records);
+      setRosterError(false);
       setHasMore(payload.data.pagination.hasMore);
       setStats({
         total: records.length,
@@ -134,6 +139,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
       });
     } catch {
       if (generation === rosterGeneration.current && orgAtRequest === orgGeneration.current) {
+        setRosterError(true);
         toast.error('Failed to load attendance records');
       }
     } finally {
@@ -391,6 +397,10 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
           <CardContent>
             {loading ? (
               <div className="text-center py-8">Loading attendance records...</div>
+            ) : rosterError ? (
+              <div role="alert" className="text-center py-8 text-destructive">
+                Attendance roster unavailable. No records or counts are being represented as complete.
+              </div>
             ) : registrations.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 No registrations found for this session.
