@@ -10965,6 +10965,25 @@
       ],
       "correction": "Validate owner-scoped push-device preference PATCH with the same strict time, timezone, boolean and metadata bounds used on create; reject malformed inputs before audited database mutation, retaining token redaction and tenant/owner restrictions.",
       "remaining": "Exact-HEAD Vitest/contract, native PostgreSQL 15/16, security, HTTP/browser, staging and full device journeys; independent reviewer, owner-persona and institutional authority. No defect closure."
+    },
+    {
+      "id": "UE-EDUCATION-ENROLLMENT-INPUT-INTEGRITY-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-enrollment-input-integrity-20261102.md",
+      "sourceBaseline": "869599f5f820bcfe5bf0a0e33862f7fa0645cda9",
+      "sourceCommit": "25d1c653616548edbcdfcc6dfc5726d55b505868",
+      "files": [
+        "apps/union-eyes/app/api/education/registrations/route.ts",
+        "apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts"
+      ],
+      "defectFamilies": [
+        "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+        "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT"
+      ],
+      "correction": "Strict enrollment-only writable-field allowlist and beforeCreate defense in depth; forged payment, waiver, approval, completion and ownership assertions fail rather than silently producing a successful enrollment. Reject invalid logistical booleans, oversized or non-text notes and tenant/creator mismatches before any database read. Preserve authoritative course fee, session/course/tenant checks and registration journey.",
+      "remaining": "Exact-HEAD whole Vitest/contract, security, real PG15/16, HTTP/browser/staging and fee/payment/waiver mandates; independent reviewer, owner-persona ratification and institutional decisions. No defect closure."
     }
   ]
 }
