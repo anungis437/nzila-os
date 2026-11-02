@@ -138,7 +138,7 @@ function generateFiles(name: string, options: CreateVerticalOptions): GeneratedF
             next: '^15.0.0',
             react: '^19.0.0',
             'react-dom': '^19.0.0',
-            zod: '^3.24.0',
+            zod: '^4.6.7',
           },
           devDependencies: {
             '@types/node': '^25',
