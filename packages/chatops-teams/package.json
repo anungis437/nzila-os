@@ -16,8 +16,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@nzila/integrations-core": "workspace:*",
-    "zod": "^3.24.0"
+    "@nzila/integrations-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6",
