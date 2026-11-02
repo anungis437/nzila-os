@@ -4,7 +4,7 @@ import { attendanceCsvCell, patchSessionAttendance } from '../attendance-client'
 describe('attendance client evidence boundary', () => {
   it('uses the audited PATCH route with a registration id, never the nonexistent POST', async () => {
     const request = vi.fn().mockResolvedValue({
-      ok: true, json: async () => ({ data: { id: 'reg-a', attended: true } }),
+      ok: true, json: async () => ({ data: { data: { id: 'reg-a', attended: true } } }),
     });
     await patchSessionAttendance('session-a', 'reg-a', true, request as unknown as typeof fetch);
     expect(request).toHaveBeenCalledWith('/api/education/sessions/session-a/attendance',
@@ -16,10 +16,10 @@ describe('attendance client evidence boundary', () => {
 
   it('refuses unsuccessful HTTP responses and unproven confirmations', async () => {
     for (const result of [
-      { ok: false, json: async () => ({ data: { id: 'reg-a', attended: true } }) },
+      { ok: false, json: async () => ({ data: { data: { id: 'reg-a', attended: true } } }) },
       { ok: true, json: async () => ({ message: 'success' }) },
-      { ok: true, json: async () => ({ data: { id: 'reg-b', attended: true } }) },
-      { ok: true, json: async () => ({ data: { id: 'reg-a', attended: false } }) },
+      { ok: true, json: async () => ({ data: { data: { id: 'reg-b', attended: true } } }) },
+      { ok: true, json: async () => ({ data: { data: { id: 'reg-a', attended: false } } }) },
     ]) {
       const request = vi.fn().mockResolvedValue(result);
       await expect(patchSessionAttendance('session-a', 'reg-a', true, request as unknown as typeof fetch))
