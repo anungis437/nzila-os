@@ -10647,6 +10647,21 @@
       ],
       "correction": "Future generated unique constraint names now use UTF-8 byte-aware PostgreSQL identifier truncation and a deterministic 64-bit SHA-256 suffix rather than SHA-1 and character-count truncation; adversarial Unicode and collision tests added. Converged-schema regression now asserts an empty missing-relation census without dropping kept declarations.",
       "remaining": "Exact-source-commit Vitest/contract, native PostgreSQL 15/16, real HTTP/browser and staging evidence; independent reviewer and owner-persona/institutional decisions. Separate unused dependency and route manifest CI failures remain. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-UNUSED-DIRECT-CUID2-DEPENDENCY-20261102",
+      "status": "SOURCE_CHANGED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-unused-cuid2-dependency-20261102.md",
+      "sourceBaseline": "d9b05e884af38f64d172c7d123b4678e826f8cea",
+      "sourceCommit": "43e6c83ab7f2e921d790d0b450e4b1b1d10b3c77",
+      "files": [
+        "apps/union-eyes/package.json",
+        "pnpm-lock.yaml"
+      ],
+      "correction": "Removed unused direct @paralleldrive/cuid2@3.3.0 dependency and its frozen-lock importer/resolution/snapshot while retaining transitive 2.3.1 used by formidable. No fake source import.",
+      "remaining": "Exact-SHA frozen-lock install and whole contract/Vitest, native PostgreSQL 15/16, HTTP/browser and staging verification; route manifest drift and independent Gate 0C.4 decisions. No defect or CLOSED credit."
     }
   ]
 }
