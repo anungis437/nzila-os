@@ -55,7 +55,7 @@ export const PilotDefinitionSchema = z.object({
   startedAt: z.string().datetime().nullable(),
   targetEndAt: z.string().datetime().nullable(),
   ownerUserId: z.string().min(1).nullable(),
-  metadataJson: z.record(z.unknown()).default({}),
+  metadataJson: z.record(z.string(), z.unknown()).default({}),
 })
 export type PilotDefinition = z.infer<typeof PilotDefinitionSchema>
 
@@ -76,7 +76,7 @@ export const PilotMetricEventSchema = z.object({
   metricType: PilotMetricTypeSchema,
   metricName: PilotMetricNameSchema,
   valueNumeric: z.number().optional(),
-  valueJson: z.record(z.unknown()).optional(),
+  valueJson: z.record(z.string(), z.unknown()).optional(),
   entityId: z.string().optional(),
   entityType: z.string().optional(),
   traceId: z.string().optional(),
@@ -94,7 +94,7 @@ export const PilotMetricRollupSchema = z.object({
   windowStart: z.string().datetime(),
   windowEnd: z.string().datetime(),
   valueNumeric: z.number().nullable(),
-  valueJson: z.record(z.unknown()).nullable(),
+  valueJson: z.record(z.string(), z.unknown()).nullable(),
   computedAt: z.string().datetime(),
 })
 export type PilotMetricRollup = z.infer<typeof PilotMetricRollupSchema>
@@ -111,7 +111,7 @@ export const PilotHealthScoreSchema = z.object({
   scoreWorkflow: z.number(),
   riskLevel: z.enum(['low', 'medium', 'high']),
   computedAt: z.string().datetime(),
-  rationaleJson: z.record(z.unknown()),
+  rationaleJson: z.record(z.string(), z.unknown()),
 })
 export type PilotHealthScore = z.infer<typeof PilotHealthScoreSchema>
 
@@ -147,7 +147,7 @@ export const PilotAlertSchema = z.object({
   metricName: z.string().nullable(),
   detectedAt: z.string().datetime(),
   resolvedAt: z.string().datetime().nullable(),
-  metadataJson: z.record(z.unknown()).default({}),
+  metadataJson: z.record(z.string(), z.unknown()).default({}),
 })
 export type PilotAlert = z.infer<typeof PilotAlertSchema>
 
@@ -188,7 +188,7 @@ export const PilotAlertOpsMetricsSchema = z.object({
   windowDays: z.number().int().positive(),
   mttaMinutes: z.number(),
   mttrMinutes: z.number(),
-  bySeverity: z.record(z.object({
+  bySeverity: z.record(z.string(), z.object({
     mttaMinutes: z.number(),
     mttrMinutes: z.number(),
     openCount: z.number().int().nonnegative(),
@@ -208,7 +208,7 @@ export type PilotSnapshot = z.infer<typeof PilotSnapshotSchema>
 export const PilotReportSchema = z.object({
   pilot: PilotDefinitionSchema,
   generatedAt: z.string().datetime(),
-  kpis: z.record(z.number()),
+  kpis: z.record(z.string(), z.number()),
   health: PilotHealthScoreSchema.nullable(),
   alerts: z.array(PilotAlertSchema),
   narrative: z.object({

@@ -57,6 +57,24 @@ describe('CaseIntakeRequestSchema', () => {
     expect(result.errors![0].field).toBe('severity');
   });
 
+  it('preserves all three custom enum error messages under Zod 4', () => {
+    for (const [field, expected] of [
+      ['caseType', 'Case type must be one of'],
+      ['priority', 'Priority must be one of'],
+      ['severity', 'Severity must be one of'],
+    ] as const) {
+      const result = validateIntakeRequest({ ...validIntake, [field]: '__invalid__' });
+      expect(result.success).toBe(false);
+      expect(result.errors?.find((error) => error.field === field)?.message).toContain(expected);
+    }
+  });
+
+  it('rejects non-string enum payloads rather than coercing them', () => {
+    const result = validateIntakeRequest({ ...validIntake, caseType: ['discipline'] });
+    expect(result.success).toBe(false);
+    expect(result.errors?.some((error) => error.field === 'caseType')).toBe(true);
+  });
+
   it('accepts all valid case type IDs', () => {
     for (const id of getAllCaseTypeIds()) {
       const result = validateIntakeRequest({ ...validIntake, caseType: id });

@@ -9,8 +9,8 @@ import {
 describe('platform-pilot-metrics-types', () => {
   it('validates canonical metric event payload', () => {
     const parsed = PilotMetricEventSchema.parse({
-      orgId: '11111111-1111-1111-1111-111111111111',
-      pilotId: '22222222-2222-2222-2222-222222222222',
+      orgId: '11111111-1111-4111-8111-111111111111',
+      pilotId: '22222222-2222-4222-8222-222222222222',
       appScope: 'union-eyes',
       metricType: 'operations',
       metricName: 'cases_created',
@@ -19,6 +19,36 @@ describe('platform-pilot-metrics-types', () => {
     })
 
     expect(parsed.metricName).toBe('cases_created')
+  })
+
+  it('validates arbitrary metadata keys with the Zod 4 two-argument record API', () => {
+    const result = PilotMetricEventSchema.safeParse({
+      orgId: '11111111-1111-4111-8111-111111111111',
+      pilotId: '22222222-2222-4222-8222-222222222222',
+      appScope: 'union-eyes',
+      metricType: 'operations',
+      metricName: 'cases_created',
+      occurredAt: new Date().toISOString(),
+      valueJson: { source: 'intake', count: 2 },
+    })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.valueJson).toEqual({ source: 'intake', count: 2 })
+  })
+
+  it('rejects malformed UUID variants and invalid metadata record values', () => {
+    const invalid = PilotDefinitionSchema.safeParse({
+      id: '11111111-1111-1111-1111-111111111111',
+      orgId: '22222222-2222-4222-8222-222222222222',
+      appScope: 'zonga',
+      pilotName: 'test',
+      pilotType: 'event-creator',
+      status: 'active',
+      startedAt: new Date().toISOString(),
+      targetEndAt: null,
+      ownerUserId: null,
+      metadataJson: [],
+    })
+    expect(invalid.success).toBe(false)
   })
 
   it('contains required taxonomy metrics', () => {
@@ -34,8 +64,8 @@ describe('platform-pilot-metrics-types', () => {
 
   it('validates pilot definition shape', () => {
     const parsed = PilotDefinitionSchema.parse({
-      id: '11111111-1111-1111-1111-111111111111',
-      orgId: '22222222-2222-2222-2222-222222222222',
+      id: '11111111-1111-4111-8111-111111111111',
+      orgId: '22222222-2222-4222-8222-222222222222',
       appScope: 'zonga',
       pilotName: 'MS Celebrations pilot',
       pilotType: 'event-creator',
