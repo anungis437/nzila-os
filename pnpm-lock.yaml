@@ -6242,8 +6242,8 @@ importers:
         specifier: '>=2.8.3'
         version: 2.8.3
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -6320,8 +6320,8 @@ importers:
         specifier: workspace:*
         version: link:../platform-events
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -6551,8 +6551,8 @@ importers:
   packages/platform-environment:
     dependencies:
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       typescript:
         specifier: ^6
@@ -8073,8 +8073,8 @@ importers:
         specifier: workspace:*
         version: link:../intelligence
       zod:
-        specifier: ^3.25.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       typescript:
         specifier: ^6.0.2

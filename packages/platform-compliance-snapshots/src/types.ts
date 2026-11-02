@@ -143,7 +143,7 @@ export const complianceSnapshotSchema = z.object({
   collectedBy: z.string().min(1),
   controls: z.array(complianceControlSchema),
   summary: snapshotSummarySchema,
-  metadata: z.record(z.string()),
+  metadata: z.record(z.string(), z.string()),
 })
 
 export const snapshotChainEntrySchema = z.object({
