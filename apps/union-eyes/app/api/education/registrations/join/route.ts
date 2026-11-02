@@ -20,6 +20,9 @@ export const GET = withApi({
       requiresApproval: courseRegistrations.requiresApproval,
       approvedBy: courseRegistrations.approvedBy,
       cancellationDate: courseRegistrations.cancellationDate,
+      courseFee: courseRegistrations.courseFee,
+      feePaid: courseRegistrations.feePaid,
+      feeWaived: courseRegistrations.feeWaived,
       sessionStatus: courseSessions.sessionStatus,
       startDate: courseSessions.startDate,
       endDate: courseSessions.endDate,
@@ -39,6 +42,10 @@ export const GET = withApi({
     const unavailable = () => ApiError.notFound('Session joining instructions unavailable');
     if (!row || row.registrationStatus !== 'registered' || row.cancellationDate ||
       (row.requiresApproval && !row.approvedBy) || row.sessionStatus !== 'scheduled') throw unavailable();
+    // Registration does not settle a course fee. Refuse paid-course credentials until
+    // a governed payment or waiver is recorded; malformed/unknown fees fail closed.
+    if (typeof row.courseFee !== 'string' || !/^\d{1,8}(?:\.\d{1,2})?$/.test(row.courseFee)) throw unavailable();
+    if (Number(row.courseFee) > 0 && row.feePaid !== true && row.feeWaived !== true) throw unavailable();
     const today = new Date().toISOString().slice(0, 10);
     if (!row.startDate || !row.endDate || today < row.startDate || today > row.endDate) throw unavailable();
     const url = row.virtualMeetingUrl?.trim();
