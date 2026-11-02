@@ -80,7 +80,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
         const response = await fetch('/api/education/sessions?limit=100', { cache: 'no-store' });
         if (!response.ok) throw new Error('Session catalogue unavailable');
         const payload = await response.json();
-        const rows: unknown = payload?.data;
+        const rows: unknown = payload?.data?.data;
         if (!Array.isArray(rows)) throw new Error('Session catalogue response invalid');
         const valid = rows.filter((row): row is Session =>
           row && typeof row.id === 'string' && typeof row.sessionName === 'string' &&
@@ -107,10 +107,10 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
       });
       if (!response.ok) throw new Error('Attendance roster unavailable');
       const payload = await response.json();
-      if (payload?.sessionId !== sessionId || !Array.isArray(payload?.registrations)) {
+      if (payload?.data?.sessionId !== sessionId || !Array.isArray(payload?.data?.registrations)) {
         throw new Error('Attendance roster response invalid');
       }
-      const records: Registration[] = payload.registrations;
+      const records: Registration[] = payload.data.registrations;
       if (!records.every(row => row && typeof row.id === 'string' &&
         typeof row.memberId === 'string' && typeof row.attended === 'boolean' &&
         typeof row.completed === 'boolean')) {
