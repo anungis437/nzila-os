@@ -7,7 +7,7 @@ export enum ControlStatus {
   NOT_APPLICABLE = 'NOT_APPLICABLE',
 }
 
-export const ControlStatusSchema = z.nativeEnum(ControlStatus)
+export const ControlStatusSchema = z.enum(ControlStatus)
 
 export const ControlRow = z.object({
   control: z.string(),

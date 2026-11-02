@@ -141,7 +141,7 @@ const FORBIDDEN_PAYLOAD_KEYS = new Set([
 ])
 
 const governancePayloadSchema = z
-  .record(z.unknown())
+  .record(z.string(), z.unknown())
   .refine(
     (payload) => {
       for (const key of Object.keys(payload)) {
