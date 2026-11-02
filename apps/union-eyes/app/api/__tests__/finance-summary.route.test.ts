@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   execute: vi.fn(),
   withRLSContext: vi.fn(),
   requireLiveFinancialMandate: vi.fn(),
+  persistAtomicAudit: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => {
@@ -18,17 +19,14 @@ vi.mock('@/lib/api/framework', () => {
   };
 });
 
-vi.mock('@/db', () => ({
-  db: {
-    execute: m.execute,
-  },
-}));
-
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
 }));
 vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
   requireLiveFinancialMandate: m.requireLiveFinancialMandate,
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({
+  persistAtomicAudit: m.persistAtomicAudit,
 }));
 
 async function loadRoute() {
@@ -39,9 +37,10 @@ describe('finance/summary route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (a: unknown, b?: unknown) => {
       const fn = typeof a === 'function' ? a : b;
-      return (fn as () => Promise<unknown>)();
+      return (fn as (tx: { execute: typeof m.execute }) => Promise<unknown>)({ execute: m.execute });
     });
     m.execute
       .mockResolvedValueOnce([{ year: 2026, month: 1, amount: '100', memberCount: 10, expected: '110', variance: '-10', reconciled: true, status: 'ok' }])
@@ -83,6 +82,40 @@ describe('finance/summary route', () => {
     });
     expect(payload.budgets).toHaveLength(1);
     expect(payload.perCapitaInbound.childCount).toBe(1);
+  });
+
+  it('runs mandate verification, all 17 financial reads and the access audit in one explicit tenant transaction', async () => {
+    const { GET } = await loadRoute();
+    await GET({ organizationId: 'org_1', userId: 'u1' } as any);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: 'org_1', userId: 'u1' });
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: m.execute }),
+      { organizationId: 'org_1', userId: 'u1', action: 'finance:view', requiresLedger: true },
+    );
+    expect(m.execute).toHaveBeenCalledTimes(17);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: m.execute }),
+      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'finance.summary.read' }),
+    );
+    const source = readFileSync(resolve(__dirname, '../finance/summary/route.ts'), 'utf8');
+    expect(source).not.toContain('db.execute(');
+    expect(source).not.toContain('withRLSContext(async');
+  });
+
+  it('refuses every financial query when the live mandate cannot be verified', async () => {
+    m.requireLiveFinancialMandate.mockRejectedValueOnce(new Error('MANDATE_NOT_ISSUED'));
+    const { GET } = await loadRoute();
+    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toThrow('MANDATE_NOT_ISSUED');
+    expect(m.execute).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses the response if the mandatory financial read audit fails', async () => {
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('AUDIT_UNAVAILABLE'));
+    const { GET } = await loadRoute();
+    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toThrow('AUDIT_UNAVAILABLE');
+    expect(m.execute).toHaveBeenCalledTimes(17);
   });
 
   it('Round 58 Phase 0: strike fund query filters directly on organization_id, not a user_id join (multi-org fan-out fix)', async () => {

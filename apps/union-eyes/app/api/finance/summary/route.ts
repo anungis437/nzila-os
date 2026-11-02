@@ -6,10 +6,10 @@
  * member counts, payment plans, and period trends in a single call.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,15 +21,16 @@ export const GET = withApi(
   },
   async ({ organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    await withRLSContext({ organizationId, userId }, (tx) =>
-      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
-    );
-
-    return withRLSContext(async () => {
+    // Mandate verification and every financial query share the same authenticated,
+    // tenant-bound transaction. Never preflight the grant in a separate transaction.
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, {
+        organizationId, userId, action: 'finance:view', requiresLedger: true,
+      });
     const orgIdCast = sql`${organizationId}::uuid`;
 
     // ── Remittance trend (monthly, last 12) ───────────────────────────
-    const remittanceTrend = await db.execute(sql`
+    const remittanceTrend = await tx.execute(sql`
       SELECT
         fiscal_year                       AS "year",
         fiscal_month                      AS "month",
@@ -46,7 +47,7 @@ export const GET = withApi(
     `);
 
     // ── Collection rate (ratio of payments to charges) ────────────────
-    const [collectionRow] = await db.execute(sql`
+    const [collectionRow] = await tx.execute(sql`
       SELECT
         COALESCE(SUM(CASE WHEN transaction_type = 'payment'
                           THEN ABS(amount) ELSE 0 END), 0)::numeric AS "totalPaid",
@@ -64,7 +65,7 @@ export const GET = withApi(
       : 100;
 
     // ── Member standing snapshot ──────────────────────────────────────
-    const [standingRow] = await db.execute(sql`
+    const [standingRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                               AS "totalMembers",
         COUNT(*) FILTER (WHERE arrears_status = 'current')::int     AS "currentMembers",
@@ -76,7 +77,7 @@ export const GET = withApi(
     `);
 
     // ── Active payment plans ──────────────────────────────────────────
-    const [planRow] = await db.execute(sql`
+    const [planRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                 AS "activePlans",
         COALESCE(SUM(remaining_balance::numeric), 0)  AS "totalRemaining",
@@ -87,7 +88,7 @@ export const GET = withApi(
     `);
 
     // ── Financial periods summary ─────────────────────────────────────
-    const periods = await db.execute(sql`
+    const periods = await tx.execute(sql`
       SELECT
         fiscal_year         AS "year",
         fiscal_month        AS "month",
@@ -102,7 +103,7 @@ export const GET = withApi(
     `);
 
     // ── Reconciliation health ─────────────────────────────────────────
-    const [reconRow] = await db.execute(sql`
+    const [reconRow] = await tx.execute(sql`
       SELECT
         COUNT(*) FILTER (WHERE is_reconciled)::int      AS "reconciled",
         COUNT(*) FILTER (WHERE NOT is_reconciled)::int  AS "unreconciled",
@@ -113,14 +114,14 @@ export const GET = withApi(
     `);
 
     // ── Org member count from org_members ─────────────────────────────
-    const [orgRow] = await db.execute(sql`
+    const [orgRow] = await tx.execute(sql`
       SELECT COUNT(*)::int AS "totalOrgMembers"
       FROM organization_members
       WHERE organization_id = ${organizationId}
     `);
 
     // ── Strike fund ──────────────────────────────────────────────────
-    const [strikeRow] = await db.execute(sql`
+    const [strikeRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                              AS "totalDisbursements",
         COALESCE(SUM(payment_amount), 0)                           AS "totalDisbursed",
@@ -132,7 +133,7 @@ export const GET = withApi(
     `);
 
     // ── Per-capita tax obligations ───────────────────────────────────
-    const perCapitaRows = await db.execute(sql`
+    const perCapitaRows = await tx.execute(sql`
       SELECT
         remittance_year                       AS "year",
         remittance_month                      AS "month",
@@ -156,7 +157,7 @@ export const GET = withApi(
       .reduce((s, r) => s + Number(r.amount), 0);
 
     // ── Inbound per-capita (what child orgs owe THIS org) ────────────
-    const inboundRows = await db.execute(sql`
+    const inboundRows = await tx.execute(sql`
       SELECT
         o.id                                          AS "orgId",
         o.name                                        AS "orgName",
@@ -185,7 +186,7 @@ export const GET = withApi(
     const inboundTotalOverdue = inboundArr.reduce((s, r) => s + Number(r.totalOverdue), 0);
 
     // ── Grievance / arbitration costs ────────────────────────────────
-    const [grievanceRow] = await db.execute(sql`
+    const [grievanceRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                           AS "totalClaims",
         COUNT(*) FILTER (WHERE status::text = 'open')::int      AS "openClaims",
@@ -194,7 +195,7 @@ export const GET = withApi(
       WHERE organization_id = ${orgIdCast}
     `);
 
-    const [arbRow] = await db.execute(sql`
+    const [arbRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                            AS "totalArbitrations",
         COALESCE(SUM(a.estimated_cost), 0)::numeric              AS "estimatedCost",
@@ -205,7 +206,7 @@ export const GET = withApi(
       WHERE c.organization_id = ${orgIdCast}
     `);
 
-    const [settlementRow] = await db.execute(sql`
+    const [settlementRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                            AS "totalSettlements",
         COALESCE(SUM(monetary_amount), 0)                        AS "totalSettled",
@@ -215,7 +216,7 @@ export const GET = withApi(
     `);
 
     // ── Pension health ───────────────────────────────────────────────
-    const [pensionRow] = await db.execute(sql`
+    const [pensionRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                                AS "totalMembers",
         COUNT(*) FILTER (WHERE membership_status = 'active')::int    AS "activeMembers",
@@ -224,7 +225,7 @@ export const GET = withApi(
       WHERE organization_id = ${orgIdCast}
     `);
 
-    const [contribRow] = await db.execute(sql`
+    const [contribRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                                        AS "totalContributions",
         COUNT(*) FILTER (WHERE payment_status = 'received')::int             AS "received",
@@ -238,7 +239,7 @@ export const GET = withApi(
     `);
 
     // ── GL / Budget snapshot ─────────────────────────────────────────
-    const glSummary = await db.execute(sql`
+    const glSummary = await tx.execute(sql`
       SELECT
         ca.type                                AS "accountType",
         SUM(tb.closing_balance::numeric)       AS "balance"
@@ -257,7 +258,7 @@ export const GET = withApi(
       glMap[String(row.accountType)] = Number(row.balance);
     }
 
-    const budgetRows = await db.execute(sql`
+    const budgetRows = await tx.execute(sql`
       SELECT
         name,
         total_budget::numeric        AS "totalBudget",
@@ -269,6 +270,17 @@ export const GET = withApi(
         AND status = 'active'
       ORDER BY total_budget DESC
     `);
+
+    // Sensitive consolidated financial access must leave a durable audit receipt.
+    // Failure to append the audit aborts this read rather than returning an unaudited 200.
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'finance.summary.read',
+      resourceType: 'financial_summary',
+      resourceId: organizationId,
+      details: { scope: 'organization', includesFinancialDetails: true },
+    });
 
     return {
       collectionRate,
