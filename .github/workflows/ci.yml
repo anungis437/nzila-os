@@ -65,6 +65,7 @@ jobs:
           node --test scripts/release/verify-staging-run.test.mjs
           node --test scripts/release/verify-deploy-selection.test.mjs
           node --test scripts/release/verify-production-approval.test.mjs
+          node --test scripts/release/resolve-production-release-ref.test.mjs
           node --test scripts/release/artifact-tree.test.mjs
 
       - name: Classify changed paths once
