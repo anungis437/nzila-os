@@ -14,7 +14,7 @@ import { ApiError } from '@/lib/api/errors';
  */
 function isoDate(value: unknown, field: string, optional = false): string | null {
   if (optional && (value === null || value === undefined)) return null;
-  if (typeof value !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     throw ApiError.badRequest(`${field} must be a YYYY-MM-DD calendar date`);
   }
   const parsed = new Date(`${value}T00:00:00.000Z`);
