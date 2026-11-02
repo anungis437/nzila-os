@@ -6873,9 +6873,6 @@ importers:
       '@nzila/platform-lakehouse':
         specifier: workspace:*
         version: link:../platform-lakehouse
-      zod:
-        specifier: ^3.25.0
-        version: 3.25.76
     devDependencies:
       vitest:
         specifier: ^5.0.5
@@ -6921,8 +6918,8 @@ importers:
   packages/platform-knowledge-registry:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ^25
@@ -7003,8 +7000,8 @@ importers:
         specifier: workspace:*
         version: link:../platform-contracts
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@nzila/config':
         specifier: workspace:*

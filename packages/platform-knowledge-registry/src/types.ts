@@ -129,7 +129,7 @@ export const KnowledgeAssetSchema = z.object({
   effectiveDate: z.string().datetime(),
   status: z.enum(knowledgeStatusValues),
   tags: z.array(z.string().min(1)).default([]),
-  structuredPayload: z.record(z.unknown()).default({}),
+  structuredPayload: z.record(z.string(), z.unknown()).default({}),
   textPayload: z.string().default(''),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -143,6 +143,6 @@ export const CreateKnowledgeAssetSchema = z.object({
   source: z.string().min(1),
   effectiveDate: z.string().datetime(),
   tags: z.array(z.string().min(1)).optional(),
-  structuredPayload: z.record(z.unknown()).optional(),
+  structuredPayload: z.record(z.string(), z.unknown()).optional(),
   textPayload: z.string().optional(),
 })
