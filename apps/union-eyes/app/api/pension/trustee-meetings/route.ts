@@ -19,7 +19,7 @@ import { z } from 'zod';
  * Never infer a local timezone from a caller's input.
  */
 const trusteeMeetingDateSchema = z.string().refine((value) => {
-  const parts = /^(\\d{4})-(\\d{2})-(\\d{2})(?:T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,3}))?(Z|([+-])(\\d{2}):(\\d{2})))?$/.exec(value);
+  const parts = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(Z|([+-])(\d{2}):(\d{2})))?$/.exec(value);
   if (!parts) return false;
   const year = Number(parts[1]);
   const month = Number(parts[2]);
