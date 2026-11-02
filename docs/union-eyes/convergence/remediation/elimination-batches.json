@@ -10496,7 +10496,7 @@
         "apps/union-eyes/lib/__tests__/billing-cycle-service.test.ts",
         "apps/union-eyes/lib/services/__tests__/billing-cycle-service.test.ts"
       ],
-      "correction": "Corrects monthly and quarterly default period rollover on month-end reference dates, clamps next monthly/quarterly/annual billing dates to target calendar month, rejects invalid reference dates and unsupported recurrence frequencies, and rejects invalid or reversed periods in direct service/scheduler calls before financial transaction access. Adds adversarial date and direct-service tests.",
+      "correction": "Corrects weekly/biweekly end dates crossing month boundaries, monthly and quarterly default period rollover on month-end reference dates, clamps next monthly/quarterly/annual billing dates to target calendar month, rejects invalid reference dates and unsupported recurrence frequencies, and rejects invalid or reversed periods in direct service/scheduler calls before financial transaction access. Adds adversarial date and direct-service tests.",
       "remaining": "Exact-HEAD Vitest/contract, native PostgreSQL 15/16, HTTP/browser and staging proof; original month-end schedule-anchor persistence, exactly-once billing, atomic audit, financial allocation mandates and institutional authority. No defect completion or CLOSED credit."
     }
   ]
