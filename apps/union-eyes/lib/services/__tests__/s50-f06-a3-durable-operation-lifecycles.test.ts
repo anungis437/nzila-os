@@ -43,13 +43,18 @@ describe('F06 batch 4 (A3): durable operation lifecycles, each state change reco
     expect(src('lib/blob-client.ts')).toContain('export class BlobTooLargeError')
   })
 
-  it('dues initiation records the provider link, a cancellation and a supersession, and never cancels a payment whose intent exists', () => {
+  it('dues initiation audits the provider link and refuses balance drift or ambiguous provider outcomes without orphaning an intent', () => {
     const service = src('lib/dues/dues-payment-service.ts')
+    expect(service).toContain("'dues.payment_initiated'")
     expect(service).toContain("'dues.payment_provider_intent_linked'")
-    expect(service).toContain("'dues.payment_cancelled'")
-    expect(service).toContain("reason: 'provider_intent_not_created'")
-    expect(service).toContain("reason: 'superseded_by_new_balance'")
-    expect(service).toContain('dues_payment_cancellation_not_recorded')
+    expect(service).toContain("'PENDING_PAYMENT_REQUIRES_RECONCILIATION'")
+    expect(service).toContain('toCents(open[0].amount) !== toCents(balance)')
+    expect(service).toContain('!open[0].within_retry_window')
+    expect(service).toContain('input.gateway.paymentIntents.retrieve(pending.providerIntentId)')
+    expect(service).toContain('status = \'pending\'')
+    expect(service).toContain('persistAtomicAudit(tx, {')
+    expect(service).not.toContain("'dues.payment_cancelled'")
+    expect(service).not.toContain("reason: 'superseded_by_new_balance'")
     expect(service).not.toMatch(/\.catch\(\(\) => undefined\)\s*\n\s*throw error/)
   })
 
