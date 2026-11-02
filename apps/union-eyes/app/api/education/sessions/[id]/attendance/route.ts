@@ -32,6 +32,7 @@ export const GET = withApi({
       registrationStatus: courseRegistrations.registrationStatus,
       attended: courseRegistrations.attended,
       attendanceHours: courseRegistrations.attendanceHours,
+      completed: courseRegistrations.completed,
     }).from(courseRegistrations).where(and(
       eq(courseRegistrations.organizationId, organizationId),
       eq(courseRegistrations.sessionId, parsed.data),
