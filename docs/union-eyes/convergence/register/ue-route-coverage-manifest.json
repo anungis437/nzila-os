@@ -1,7 +1,7 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1010,
+  "routes": 1011,
   "mutating": 682,
   "kernel": 60,
   "byGuard": {
@@ -17,7 +17,7 @@
    "ROLE_AUTH": 171,
    "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 293,
+   "WITH_API": 294,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -5809,6 +5809,18 @@
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
+  },
+  {
+   "route": "education/registrations/join/route.ts",
+   "methods": [
+    "GET"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "education/registrations/route.ts",
