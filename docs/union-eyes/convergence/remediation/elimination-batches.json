@@ -10498,6 +10498,22 @@
       ],
       "correction": "Corrects weekly/biweekly end dates crossing month boundaries, monthly and quarterly default period rollover on month-end reference dates, clamps next monthly/quarterly/annual billing dates to target calendar month, rejects invalid reference dates and unsupported recurrence frequencies, and rejects invalid or reversed periods in direct service/scheduler calls before financial transaction access. Adds adversarial date and direct-service tests.",
       "remaining": "Exact-HEAD Vitest/contract, native PostgreSQL 15/16, HTTP/browser and staging proof; original month-end schedule-anchor persistence, exactly-once billing, atomic audit, financial allocation mandates and institutional authority. No defect completion or CLOSED credit."
+    },
+    {
+      "id": "UE-DUES-PROVIDER-AMBIGUOUS-RETRY-SAFETY-20261101",
+      "status": "SOURCE_CHANGED_TESTS_ADDED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-dues-provider-ambiguous-retry-safety-20261101.md",
+      "sourceBaseline": "bfd69e2f4d00caa66a9f315d2eae409f9771e48f",
+      "files": [
+        "apps/union-eyes/lib/dues/dues-payment-service.ts",
+        "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+        "apps/union-eyes/lib/dues/__tests__/dues-payment-service.test.ts",
+        "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts"
+      ],
+      "correction": "Member dues initiation no longer cancels pending internal payments before uncertain external cancellation, preserves rows after ambiguous provider creation, refuses balance drift and multiple pending payments, retrieves and verifies already linked Stripe intents, bounds unlinked retries to 12 hours, and requires a guarded row update before link success. Route returns 409 for reconciliation refusal. Unit and real-SQL PGlite adversarial tests added.",
+      "remaining": "Exact-HEAD Vitest/contract/security, native PG15/16 with tenant role and concurrent signed webhook, real HTTP/browser/staging, provider reconciliation/refunds/disputes, institutional authority and independent reviewer/persona ratification. Historical native status is not qualification of new source. No defect or CLOSED credit."
     }
   ]
 }
