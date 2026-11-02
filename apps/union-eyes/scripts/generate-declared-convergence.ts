@@ -27,6 +27,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+import { fitPostgresIdentifier } from './runtime/postgres-identifier'
 import { loadDeclarationSources, mergeDeclarations, type DeclaredColumn, type DeclaredTable, type Finding } from './runtime/schema-convergence'
 
 const flagValue = (name: string): string | undefined => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3)
@@ -240,7 +241,7 @@ function uniqueMigration(): string {
     seen.add(id)
     for (const c of columns) columnOf(t, c)
     let name = `${t.name}_${columns.join('_')}_key`
-    if (name.length > 63) name = `${name.slice(0, 54)}_${createHash('sha1').update(name).digest('hex').slice(0, 8)}`
+    name = fitPostgresIdentifier(name)
     if (used.has(`${t.schema}.${name}`)) throw new Error(`constraint name ${name} is used twice`)
     used.add(`${t.schema}.${name}`)
     const cols = columns.map(q).join(', ')
