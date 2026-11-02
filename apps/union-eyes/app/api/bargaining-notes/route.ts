@@ -14,6 +14,7 @@ import {
 } from "@/lib/services/bargaining-notes-audited-service";
 import { getCbaForOrganization } from "@/lib/services/cba-audited-service";
 import { z } from "zod";
+import { InvalidBargainingNotesListQuery, parseBargainingNotesListQuery } from "@/lib/api/bargaining-notes-list-query";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { bargainingNotes } from '@/db/schema';
 import { and, or, eq, inArray, asc, desc, count } from 'drizzle-orm';
@@ -38,6 +39,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
   }
   try {
       const { searchParams } = new URL(request.url);
+      const listControls = parseBargainingNotesListQuery(searchParams);
       
       // Check for special modes
       const timeline = searchParams.get("timeline") === "true";
@@ -106,12 +108,11 @@ export const GET = withRoleAuth('member', async (request, context) => {
       if (cbaId) filters.cbaId = cbaId;
 
       // Check for tags filter
-      const tags = searchParams.get("tags");
+      const tags = listControls.tags;
       if (tags) {
-        const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50") || 50));
         const { notes } = await listBargainingNotes(
-          { ...filters, tags: tags.split(",") },
-          { limit },
+          { ...filters, tags },
+          { limit: listControls.limit },
         );
         return NextResponse.json({ notes, count: notes.length });
       }
@@ -127,15 +128,8 @@ export const GET = withRoleAuth('member', async (request, context) => {
         filters.confidentialityLevel = confidentialityLevel;
       }
 
-      const dateFrom = searchParams.get("dateFrom");
-      if (dateFrom) {
-        filters.dateFrom = new Date(dateFrom);
-      }
-
-      const dateTo = searchParams.get("dateTo");
-      if (dateTo) {
-        filters.dateTo = new Date(dateTo);
-      }
+      if (listControls.dateFrom) filters.dateFrom = listControls.dateFrom;
+      if (listControls.dateTo) filters.dateTo = listControls.dateTo;
 
       const createdBy = searchParams.get("createdBy");
       if (createdBy) {
@@ -148,16 +142,15 @@ export const GET = withRoleAuth('member', async (request, context) => {
       }
 
       // Pagination
-      const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
-      const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20") || 20));
-      const sortBy = searchParams.get("sortBy") || "sessionDate";
-      const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
-
+      const { page, limit, sortBy, sortOrder } = listControls;
       const result = await listBargainingNotes(filters, { page, limit, sortBy, sortOrder });
 
       return NextResponse.json(result);
       });
     } catch (error) {
+      if (error instanceof InvalidBargainingNotesListQuery) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, error.message);
+      }
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',
