@@ -3,6 +3,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { courseRegistrations, courseSessions } from '@/db/schema';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { and, eq } from 'drizzle-orm';
+import { attendanceHoursForUpdate, isAttendanceEditable } from './attendance-policy';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,17 +59,36 @@ export const PATCH = withApi({
       eq(courseRegistrations.sessionId, parsed.data),
       eq(courseRegistrations.organizationId, organizationId),
     );
-    const [registration] = await tx.select({ id: courseRegistrations.id })
+    const [registration] = await tx.select({
+      id: courseRegistrations.id,
+      registrationStatus: courseRegistrations.registrationStatus,
+      completed: courseRegistrations.completed,
+      cancellationDate: courseRegistrations.cancellationDate,
+      requiresApproval: courseRegistrations.requiresApproval,
+      approvedBy: courseRegistrations.approvedBy,
+      attendanceHours: courseRegistrations.attendanceHours,
+    })
       .from(courseRegistrations).where(condition).limit(1).for('update');
     if (!registration) throw ApiError.notFound('Registration not found');
+    if (!isAttendanceEditable(registration)) {
+      throw ApiError.conflict('Attendance cannot be changed for an inactive, completed or unapproved registration');
+    }
+    let attendanceHours: string | null;
+    try {
+      attendanceHours = attendanceHoursForUpdate(body.attended, body.attendanceHours, registration.attendanceHours);
+    } catch {
+      throw ApiError.badRequest('Attendance hours cannot be positive when attended is false');
+    }
     const [updated] = await tx.update(courseRegistrations).set({
       attended: body.attended,
-      attendanceHours: body.attendanceHours?.toFixed(2),
+      attendanceHours,
       updatedAt: new Date().toISOString(),
     }).where(and(
       eq(courseRegistrations.id, body.registrationId),
       eq(courseRegistrations.sessionId, parsed.data),
       eq(courseRegistrations.organizationId, organizationId),
+      eq(courseRegistrations.registrationStatus, registration.registrationStatus!),
+      eq(courseRegistrations.completed, false),
     )).returning({ id: courseRegistrations.id, attended: courseRegistrations.attended });
     if (!updated) throw ApiError.conflict('Registration changed');
     await persistAtomicAudit(tx, {
