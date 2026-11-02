@@ -10557,7 +10557,7 @@
         "apps/union-eyes/app/api/__tests__/cbas-bargaining-notes.route.test.ts",
         "apps/union-eyes/app/api/__tests__/bargaining-note-item-rls.route.test.ts"
       ],
-      "correction": "Bargaining-note item GET now reads through its tenant-scoped RLS transaction; collection timeline, statistics, session-type and service-backed listing all execute inside the authenticated tenant transaction. Existing org/author/confidentiality predicates preserved.",
+      "correction": "Bargaining-note item GET now reads through its tenant-scoped RLS transaction; collection timeline, statistics, session-type and service-backed listing all execute inside the authenticated tenant transaction. Existing org/author/confidentiality predicates preserved. Also binds all summary modes and tag searches to the requested agreement, preventing same-organization CBA filter bypass.",
       "remaining": "Exact-new-HEAD unit/contract, PG15/16, HTTP/browser/staging qualification; independent institutional confidentiality policy and Gate 0C.4 ratifications. No defect or CLOSED credit."
     }
   ]
