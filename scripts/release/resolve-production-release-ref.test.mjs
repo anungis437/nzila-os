@@ -60,7 +60,7 @@ test('production evidence workflow consumes validated release identity for both 
   const workflow = readFileSync(new URL('../../.github/workflows/deploy-production.yml',import.meta.url),'utf8')
   assert.match(workflow,/node scripts\/release\/resolve-production-release-ref\.mjs/)
   assert.match(workflow,/RELEASE_OUTPUT="ops\/releases\/release-\$\{RELEASE_REF\}\.json"/)
-  assert.match(workflow,/RELEASE_OUTPUT="ops\/deploy-evidence\/dispatch-\$\{RELEASE_REF\}\.json"/)
+  assert.match(workflow,/RELEASE_OUTPUT="ops\/deploy-evidence\/\$\{RELEASE_REF\}\.json"/)
   assert.match(workflow,/change_record_ref.*\$RELEASE_REF/)
   // Tag-shape validation legitimately uses TAG_NAME earlier in the workflow;
   // only the evidence-generation block must never treat a branch as a tag.
