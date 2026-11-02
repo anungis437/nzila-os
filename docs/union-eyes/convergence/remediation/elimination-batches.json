@@ -10670,14 +10670,15 @@
       "closureCredit": 0,
       "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-bargaining-notes-list-bounds-and-route-manifest-20261102.md",
       "sourceBaseline": "b11a68d023b4e69cf1703cea0194b9d183b5efc9",
-      "sourceCommit": "a379393423a6526fdae2ac85f53f2433c873bb55",
+      "sourceCommit": "0250ac37454c25fa81f58ff286e94b91b407f933",
       "files": [
         "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
         "apps/union-eyes/lib/api/bargaining-notes-list-query.ts",
         "apps/union-eyes/lib/api/__tests__/bargaining-notes-list-query.test.ts",
-        "apps/union-eyes/app/api/bargaining-notes/route.ts"
+        "apps/union-eyes/app/api/bargaining-notes/route.ts",
+        "apps/union-eyes/app/api/__tests__/bargaining-notes-collection-query.route.test.ts"
       ],
-      "correction": "Reconciled stale generated route data classification to tenant transaction and strict 1,010-route summary; bounded bargaining-notes pagination, tags, sort, dates and invalid query refusals, with adversarial unit tests. Preserved list/tag defaults and tenant confidentiality policy.",
+      "correction": "Reconciled stale generated route data classification to tenant transaction and strict 1,010-route summary; bounded bargaining-notes pagination, tags, sort, dates and invalid query refusals, with adversarial unit tests. Preserved list/tag defaults and tenant confidentiality policy. Tag search now applies the full agreement/confidentiality/date/session/page predicates rather than ignoring other supplied filters, with route-level adversarial regression tests.",
       "remaining": "Exact-final-SHA complete Vitest/contract, native PostgreSQL 15/16, HTTP/browser and staging acceptance; independent Gate 0C.4 reviewer/persona/institutional decisions. No defect or CLOSED credit."
     }
   ]
