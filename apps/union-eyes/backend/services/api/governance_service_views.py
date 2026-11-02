@@ -21,6 +21,7 @@ from compliance.models import (
     CouncilElections,
 )
 from core.api_projection import api_columns
+from core.isolation import DenyAllPermission
 
 
 class GovernanceServiceViewSet(viewsets.ViewSet):
@@ -31,7 +32,17 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
     mission audits, and sunset clause tracking.
     """
     
-    permission_classes = [IsAuthenticated]
+    # Only check_status has a caller (services/governance-service.ts, through lib/middleware/admin-auth.ts and
+    # lib/trust/system-metrics.ts). Every other action (issuing, voting on, auditing, sunsetting and converting a golden
+    # share, council elections) is CONTAINED (convergence tranche 9): an action is denied until it is added to LIVE_ACTIONS
+    # with a reviewed, tenant-scoped, role-gated design.
+    permission_classes = [DenyAllPermission]
+    LIVE_ACTIONS = frozenset({'check_status'})
+
+    def get_permissions(self):
+        if self.action in self.LIVE_ACTIONS:
+            return [IsAuthenticated()]
+        return super().get_permissions()
     
     @action(detail=False, methods=['post'])
     def issue_golden_share(self, request):

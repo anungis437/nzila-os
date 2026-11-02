@@ -7,7 +7,7 @@ Auto-generated: 2026-02-18 09:08
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from core.isolation import DenyAllPermission
 from rest_framework.pagination import CursorPagination
 from django.db import transaction
 from django.utils import timezone
@@ -44,7 +44,10 @@ class FcmServiceViewSet(viewsets.ViewSet):
 - POST /api/services/fcm-service/create_template/ — Create push notification template
     """
 
-    permission_classes = [IsAuthenticated]
+    # CONTAINED (convergence tranche 9): nothing calls this ViewSet (the application calls one Django service endpoint,
+    # governance-service/check_status), and its write paths take unscoped input. Reopen only with a reviewed, tenant-scoped,
+    # role-gated design.
+    permission_classes = [DenyAllPermission]
     pagination_class = FcmServicePagination
 
     def paginate_queryset(self, queryset):

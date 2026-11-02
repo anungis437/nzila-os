@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
-from rest_framework.permissions import IsAuthenticated
+from core.isolation import DenyAllPermission
 from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,10 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
     - GET /api/services/joint-trust-fmv-service/audit_log/ — Get FMV audit log
     """
 
-    permission_classes = [IsAuthenticated]
+    # CONTAINED (convergence tranche 9): nothing calls this ViewSet (the application calls one Django service endpoint,
+    # governance-service/check_status), and its write paths take unscoped input. Reopen only with a reviewed, tenant-scoped,
+    # role-gated design.
+    permission_classes = [DenyAllPermission]
     pagination_class = JointTrustFmvServicePagination
 
     def paginate_queryset(self, queryset):
