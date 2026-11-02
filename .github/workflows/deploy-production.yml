@@ -395,7 +395,15 @@ jobs:
           set -euo pipefail
           mkdir -p ops/governance-snapshots ops/releases
 
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          # A manual dispatch has refs/heads/main, NOT a signed tag. Bind
+          # evidence filenames and release URLs to a validated run-scoped
+          # identity instead of treating a branch path as a release tag.
+          RELEASE_JSON=$(node scripts/release/resolve-production-release-ref.mjs \
+            "$GITHUB_REF" "$GITHUB_EVENT_NAME" "$GITHUB_RUN_ID" "$GITHUB_SHA" "$GITHUB_REPOSITORY")
+          RELEASE_REF=$(jq -er '.releaseRef' <<< "$RELEASE_JSON")
+          VERSION=$(jq -er '.version' <<< "$RELEASE_JSON")
+          RELEASE_TRIGGER=$(jq -er '.trigger' <<< "$RELEASE_JSON")
+          CHANGELOG_URL=$(jq -er '.changelogUrl' <<< "$RELEASE_JSON")
           RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
           APPROVED="$APPROVED_APPS"
 
@@ -403,20 +411,25 @@ jobs:
           {
             "environment": "PRODUCTION",
             "commit": "${{ github.sha }}",
-            "artifact_digest": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "artifact_digest": "$(sha256sum staging-artifacts/artifact-manifest.json | cut -d ' ' -f 1)",
+            "artifact_digest_type": "staging-artifact-manifest-sha256",
             "sbom_hash": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "oci_provenance_sha256": "$(sha256sum ops/deploy-evidence/oci-provenance-${GITHUB_RUN_ID}.json | cut -d ' ' -f 1)",
+            "approval_receipt_sha256": "$(sha256sum ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json | cut -d ' ' -f 1)",
             "policy_engine_status": "not_independently_attested",
-            "change_record_ref": "$TAG_NAME",
+            "change_record_ref": "$RELEASE_REF",
             "timestamp": "$RELEASE_DATE"
           }
           EOF
 
           # Write structured release manifest
-          VERSION="${TAG_NAME#v}"
-          cat > "ops/releases/release-${TAG_NAME}.json" <<EOF
+          cat > "ops/releases/release-${RELEASE_REF}.json" <<EOF
           {
             "version": "$VERSION",
-            "tag": "$TAG_NAME",
+            "tag": $(jq -c 'if .trigger == "push" then .releaseRef else null end' <<< "$RELEASE_JSON"),
+            "releaseRef": "$RELEASE_REF",
+            "trigger": "$RELEASE_TRIGGER",
+            "dispatchRunId": $(jq -c --arg run "$GITHUB_RUN_ID" 'if .trigger == "workflow_dispatch" then $run else null end' <<< "$RELEASE_JSON"),
             "previousVersion": "see-prior-tag",
             "bumpType": "automated",
             "gitSha": "${{ github.sha }}",
@@ -424,7 +437,7 @@ jobs:
             "date": "$RELEASE_DATE",
             "artifactId": "nzila-os-${VERSION}-${{ github.sha }}",
             "releaseType": "standard",
-            "changelogUrl": "https://github.com/anungis437/nzila-os/releases/tag/${TAG_NAME}",
+            "changelogUrl": "$CHANGELOG_URL",
             "approvedApps": $(echo "$APPROVED" | jq -R 'split(",")'),
             "createdBy": "github-actions"
           }
