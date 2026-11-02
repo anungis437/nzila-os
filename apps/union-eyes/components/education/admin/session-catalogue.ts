@@ -47,10 +47,10 @@ export async function loadEducationSessionPage(
   const total = metadata.total;
   const totalPages = metadata.totalPages;
   if (metadata.page !== page || metadata.limit !== 100 ||
-    !Number.isSafeInteger(total) || (total as number) < 0 ||
-    !Number.isSafeInteger(totalPages) || (totalPages as number) < 0 ||
-    totalPages !== Math.ceil((total as number) / 100) ||
-    rows.length > 100 || rows.length > (total as number)) {
+    typeof total !== 'number' || !Number.isSafeInteger(total) || total < 0 ||
+    typeof totalPages !== 'number' || !Number.isSafeInteger(totalPages) || totalPages < 0 ||
+    totalPages !== Math.ceil(total / 100) ||
+    rows.length > 100 || rows.length > total) {
     throw new Error('Session catalogue pagination invalid');
   }
   const sessions: EducationSessionSummary[] = rows.map((row: unknown) => {
@@ -71,5 +71,5 @@ export async function loadEducationSessionPage(
       startDate: record.startDate,
     };
   });
-  return { sessions, page, totalPages: totalPages as number };
+  return { sessions, page, totalPages };
 }
