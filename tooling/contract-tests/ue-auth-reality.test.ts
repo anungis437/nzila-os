@@ -71,6 +71,8 @@ const ALLOWED_PATTERNS = [
   'apps/union-eyes/lib/auth/platform-org-role.ts',
   // role-access-flows tests: UserRole.CLERK domain role tests
   'apps/union-eyes/lib/auth/__tests__/role-access-flows.test.ts',
+  // role-catalog-consistency test: pins that the union recording-clerk role (UserRole.CLERK) is the one organization role the guard's ROLE_HIERARCHY does not list; a domain role, not the auth vendor
+  'apps/union-eyes/lib/auth/__tests__/role-catalog-consistency.test.ts',
   // Committee and correspondence UI: "clerk" is the union officer role used in role-based UI gating
   'apps/union-eyes/app/[locale]/dashboard/committees/',
   'apps/union-eyes/app/[locale]/dashboard/correspondence/',
