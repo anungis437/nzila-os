@@ -35,7 +35,7 @@ describe('education enrollment session identity', () => {
 });
 
 describe('course fee representation', () => {
-  it.each([null, undefined, '', 'unknown', -1, '-0.01', Number.NaN, Infinity, {}, true])(
+  it.each([null, undefined, '', ' ', 'unknown', '-0.01', '-1', '1e3', '0x10', '10.999', -1, 10.999, Number.NaN, Infinity, {}, true])(
     'refuses unknown or invalid price %s rather than representing it as free', value => {
       expect(parseCourseFee(value)).toBeNull();
     },
