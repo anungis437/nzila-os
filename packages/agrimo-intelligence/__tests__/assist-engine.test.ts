@@ -5,6 +5,9 @@ import {
   createInsight,
   analyseHarvestTiming,
   checkStorageCapacity,
+  RecommendationSchema,
+  AlertSchema,
+  InsightSchema,
 } from '../assist-engine'
 
 describe('Assist Engine', () => {
@@ -159,4 +162,31 @@ describe('Assist Engine', () => {
       expect(alerts).toHaveLength(0)
     })
   })
+
+  it('preserves generated recommendation, alert and insight validation on Zod 4', () => {
+    const recommendation = createRecommendation({
+      type: 'harvest_timing', title: 'Harvest', explanation: 'Crop is ready',
+      source_data_refs: [{ type: 'batch', id: 'b1' }],
+      confidence_level: 'high', priority: 'high',
+    });
+    const alert = createAlert({
+      type: 'storage_capacity', severity: 'warning', title: 'Storage',
+      explanation: 'Capacity threshold reached', source_data_refs: [],
+      confidence_level: 'medium', affected_entities: ['cp1'],
+    });
+    const insight = createInsight({
+      type: 'yield_trend', title: 'Yield', explanation: 'Yield rising',
+      source_data_refs: [], confidence_level: 'low',
+    });
+    expect(RecommendationSchema.safeParse(recommendation).success).toBe(true);
+    expect(AlertSchema.safeParse(alert).success).toBe(true);
+    expect(InsightSchema.safeParse(insight).success).toBe(true);
+    expect(AlertSchema.safeParse({ ...alert, created_at: 'invalid-date' }).success).toBe(false);
+    expect(RecommendationSchema.safeParse({
+      ...recommendation, priority: 'not-a-priority',
+    }).success).toBe(false);
+    expect(InsightSchema.safeParse({
+      ...insight, source_data_refs: [{ type: 'batch' }],
+    }).success).toBe(false);
+  });
 })

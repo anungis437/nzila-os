@@ -73,4 +73,25 @@ describe("schemas", () => {
     expect(context.role).toBeUndefined();
     expect(entry.policyDecision.allowed).toBe(false);
   });
+
+  it("retains dynamic metadata and per-role budgets under Zod 4", () => {
+    const request = aiRequestSchema.parse({
+      model: "gpt-4.1-mini", orgId: "org-1", actorId: "user-1",
+      prompt: "Hello", metadata: { region: "ca", trace: { id: "trace-1" } },
+    });
+    const budget = budgetConfigSchema.parse({
+      orgId: "org-1", monthlyCapUsd: 100,
+      roles: { steward: { monthlyCapUsd: 25 } },
+    });
+    expect(request.metadata).toEqual({ region: "ca", trace: { id: "trace-1" } });
+    expect(budget.roles?.steward?.monthlyCapUsd).toBe(25);
+    expect(aiRequestSchema.safeParse({
+      model: "gpt-4.1-mini", orgId: "org-1", actorId: "user-1",
+      prompt: "Hello", metadata: "not-an-object",
+    }).success).toBe(false);
+    expect(budgetConfigSchema.safeParse({
+      orgId: "org-1", monthlyCapUsd: 100,
+      roles: { steward: { monthlyCapUsd: -1 } },
+    }).success).toBe(false);
+  });
 });
