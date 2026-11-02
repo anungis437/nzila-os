@@ -395,8 +395,8 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       )
       expect(before.rows).toHaveLength(1)
       await admin.query(
-        `INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, transaction_date, effective_date, amount, status)
-         VALUES ($1, $2, 'charge', now(), now(), 5, 'posted')`,
+        `INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, transaction_date, effective_date, amount, balance_before, balance_after, description, status)
+         VALUES ($1, $2, 'charge', now(), now(), 5, 25, 30, 'additional assessed dues', 'posted')`,
         [USER, ORG_A],
       )
       await expect(initiateDuesPayment({
