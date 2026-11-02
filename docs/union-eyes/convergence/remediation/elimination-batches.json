@@ -11241,7 +11241,28 @@
         "apps/union-eyes/components/education/admin/__tests__/session-catalogue.test.ts"
       ],
       "correction": "Attendance session picker previously displayed only the first 100 sessions. Bounded page controls, strict generic CRUD envelope/pagination validation, cross-tenant row refusal, and tenant/page-change invalidation preserve access to later-session rosters without falsely representing a truncated catalogue as complete.",
-      "remaining": "Exact-source Vitest/contract, native PostgreSQL 15/16 route proof, HTTP/browser/staging, full journey qualification, governed attendance corrections, independent reviewer and institutional authority remain. No defect/CLOSED credit."
+      "remaining": "Exact-source Vitest/contract, native PostgreSQL 15/16 route proof, HTTP/browser/staging, full journey qualification, governed attendance corrections, independent reviewer and institutional authority remain. No defect/CLOSED credit.",
+      "followupSourceCommit": "1fb1e108ee34e75ecb439abdf4082926dd737975"
+    },
+    {
+      "id": "UE-CONTENT-CATALOGUE-PUBLISHED-AUDIENCE-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-content-catalogue-published-audience-20261102.md",
+      "sourceBaseline": "1fb1e108ee34e75ecb439abdf4082926dd737975",
+      "sourceCommit": "9aef80acde8f57b5e338a67366c9336c31dfd4d0",
+      "defectFamilies": [
+        "DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER",
+        "DEF-0B6-EDU-CONTENT-LISTS-UNBOUNDED-OR-UNVALIDATED"
+      ],
+      "files": [
+        "apps/union-eyes/app/api/content/templates/route.ts",
+        "apps/union-eyes/app/api/content/training/route.ts",
+        "apps/union-eyes/app/api/content/__tests__/content-catalogue-audience.test.ts"
+      ],
+      "correction": "Member CMS reads now require resolved tenant role, published status, allowed_roles audience membership and author redaction. Inactive-course catalogue enumeration now requires editorial or administrator role; member active=false cannot bypass.",
+      "remaining": "Exact-head complete regression and contract, native PG15/16 RLS, HTTP/browser/staging, persona qualification, content audience policy and independent institutional ratification remain. No defect/CLOSED credit."
     }
   ]
 }
