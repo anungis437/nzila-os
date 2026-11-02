@@ -349,9 +349,30 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       }
     })
 
+    // Provider state is independent of the database: never synthesize a provider
+    // response from a local dues row. All concurrent callers share this fake gateway.
+    const providerIntents = new Map<string, {
+      id: string; client_secret: string | null; amount: number; currency: string;
+      metadata: Record<string, string>; status: string
+    }>()
     const gateway = () => ({
       paymentIntents: {
-        create: async (_p: unknown, options?: { idempotencyKey?: string }) => ({ id: `pi_${options?.idempotencyKey}`, client_secret: 'secret' }),
+        create: async (params: Record<string, unknown>, options?: { idempotencyKey?: string }) => {
+          const id = `pi_${options?.idempotencyKey}`
+          const existing = providerIntents.get(id)
+          if (existing) return existing
+          const intent = {
+            id, client_secret: 'secret', amount: Number(params.amount), currency: String(params.currency),
+            metadata: params.metadata as Record<string, string>, status: 'requires_payment_method',
+          }
+          providerIntents.set(id, intent)
+          return intent
+        },
+        retrieve: async (id: string) => {
+          const intent = providerIntents.get(id)
+          if (!intent) throw new Error('Provider intent not found')
+          return intent
+        },
         cancel: async () => ({}),
       },
     })
@@ -364,6 +385,29 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       expect(new Set(results.map((r) => r.paymentId)).size).toBe(1)
       expect((await scalar(`SELECT count(*)::int AS n FROM dues_transactions WHERE member_id = $1`, [USER])).n).toBe(1)
       expect((await scalar(`SELECT status FROM dues_transactions WHERE member_id = $1`, [USER])).status).toBe('pending')
+    })
+
+    it('refuses changed dues balance without cancelling or duplicating the original provider intent', async () => {
+      const { initiateDuesPayment } = await import('../../lib/dues/dues-payment-service')
+      const before = await admin.query(
+        'SELECT id::text AS id, processor_payment_id, status FROM dues_transactions WHERE member_id = $1 AND organization_id = $2',
+        [USER, ORG_A],
+      )
+      expect(before.rows).toHaveLength(1)
+      await admin.query(
+        `INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, transaction_date, effective_date, amount, status)
+         VALUES ($1, $2, 'charge', now(), now(), 5, 'posted')`,
+        [USER, ORG_A],
+      )
+      await expect(initiateDuesPayment({
+        organizationId: ORG_A, userId: USER, gateway: gateway(), providerConfigured: true,
+      })).rejects.toMatchObject({ code: 'PENDING_PAYMENT_REQUIRES_RECONCILIATION' })
+      const after = await admin.query(
+        'SELECT id::text AS id, processor_payment_id, status FROM dues_transactions WHERE member_id = $1 AND organization_id = $2',
+        [USER, ORG_A],
+      )
+      expect(after.rows).toEqual(before.rows)
+      expect(after.rows[0].status).toBe('pending')
     })
 
     it('another member and another organization are unaffected, and ORG_B\'s runtime context cannot see the payment', async () => {
