@@ -13,9 +13,9 @@ const { GET, POST } = crudRoutes({
   tags: ["Scheduling"],
   orgScoped: true,
   readRole: 'member',
-  // Meeting URLs can contain embedded access tokens or passwords; the URL and code are visible only to verified tenant staff.
-  // Member attendance requires a separate registration-scoped join flow, not the generic session catalogue.
-  staffOnlyResponseFields: ['virtualMeetingUrl', 'virtualMeetingAccessCode'],
+  // Meeting URLs/codes can contain access secrets; accommodation locations and notes may disclose participant information.
+  // None belongs in the member-wide catalogue. Enrolled members need a separately governed registration-scoped view.
+  staffOnlyResponseFields: ['virtualMeetingUrl', 'virtualMeetingAccessCode', 'accommodationHotel', 'notes'],
   // Budget and actual cost remain confidential for every generic caller until a finance-specific read mandate is issued.
   // Do not equate the steward floor with institutional financial authority.
   omitFromResponse: ['sessionBudget', 'actualCost'],

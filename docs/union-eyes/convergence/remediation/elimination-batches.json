@@ -10889,8 +10889,8 @@
         "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
         "apps/union-eyes/lib/api/__tests__/crud-factory.test.ts"
       ],
-      "correction": "Closes member-level disclosure of course-session meeting URLs that may embed bearer tokens or join secrets. Both URL and access code now use the existing fail-closed tenant-staff projection; session budgets and actual costs remain unconditionally hidden. Contract and projection regression tests cover member, unresolved-role and authorized staff response shapes.",
-      "remaining": "Provide governed registration-scoped meeting join for enrolled members without revealing access credentials to all members; run exact-HEAD unit/contract, native PG15/16 and HTTP/browser/staging tests; obtain independent reviewer, owner persona and institutional authorization. Zero defect or CLOSED credit."
+      "correction": "Closes member-level disclosure of course-session meeting URLs (possibly embedded bearer tokens), access codes, accommodation hotel locations and internal notes. These four fields now use fail-closed tenant-staff projection; session budgets and actual costs remain unconditionally hidden. Contract and projection regression tests cover member, unresolved-role and authorized staff response shapes.",
+      "remaining": "Provide governed registration-scoped session access for enrolled members without broadly disclosing meeting secrets, accommodation or internal notes; run exact-HEAD unit/contract, native PG15/16 and HTTP/browser/staging tests; obtain independent reviewer, owner persona and institutional authorization. Zero defect or CLOSED credit."
     }
   ]
 }
