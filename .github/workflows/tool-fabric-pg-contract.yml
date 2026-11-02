@@ -154,3 +154,9 @@ jobs:
         run: |
           set -euo pipefail
           bash packages/tool-fabric/sql/test_trust_ledger_pg_backend_termination.sh
+      - name: Prove monotonic CAS when an older transaction follows a newer committed head (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          # This runs last because the backend-recovery fixture leaves the
+          # canonical test stream at revision 5. This is not a production witness.
+          bash packages/tool-fabric/sql/test_trust_ledger_pg_transaction_clock.sh
