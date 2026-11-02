@@ -7,6 +7,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pushDevices } from '@/db/schema';
+import { validatePushDevicePreferences } from '../push-device-preferences';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,5 +23,11 @@ const { GET, PATCH, DELETE } = crudRoutes({
   ownerMayDelete: true,
   writableFields: ['enabled', 'quietHoursStart', 'quietHoursEnd', 'timezone', 'deviceName', 'appVersion', 'osVersion'],
   omitFromResponse: ['deviceToken'],
+  // PATCH previously sent invalid TIME, timezone, and preference values to SQL.
+  // Reject before mutation; the factory retains tenant/owner guards and audit.
+  beforeUpdate: (updates) => {
+    validatePushDevicePreferences(updates);
+    return updates;
+  },
 });
 export { GET, PATCH, DELETE };
