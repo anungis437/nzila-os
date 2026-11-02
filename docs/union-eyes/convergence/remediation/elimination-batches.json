@@ -10662,6 +10662,23 @@
       ],
       "correction": "Removed unused direct @paralleldrive/cuid2@3.3.0 dependency and its frozen-lock importer/resolution/snapshot while retaining transitive 2.3.1 used by formidable. No fake source import.",
       "remaining": "Exact-SHA frozen-lock install and whole contract/Vitest, native PostgreSQL 15/16, HTTP/browser and staging verification; route manifest drift and independent Gate 0C.4 decisions. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-BARGAINING-NOTES-LIST-BOUNDS-AND-MANIFEST-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-bargaining-notes-list-bounds-and-route-manifest-20261102.md",
+      "sourceBaseline": "b11a68d023b4e69cf1703cea0194b9d183b5efc9",
+      "sourceCommit": "a379393423a6526fdae2ac85f53f2433c873bb55",
+      "files": [
+        "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
+        "apps/union-eyes/lib/api/bargaining-notes-list-query.ts",
+        "apps/union-eyes/lib/api/__tests__/bargaining-notes-list-query.test.ts",
+        "apps/union-eyes/app/api/bargaining-notes/route.ts"
+      ],
+      "correction": "Reconciled stale generated route data classification to tenant transaction and strict 1,010-route summary; bounded bargaining-notes pagination, tags, sort, dates and invalid query refusals, with adversarial unit tests. Preserved list/tag defaults and tenant confidentiality policy.",
+      "remaining": "Exact-final-SHA complete Vitest/contract, native PostgreSQL 15/16, HTTP/browser and staging acceptance; independent Gate 0C.4 reviewer/persona/institutional decisions. No defect or CLOSED credit."
     }
   ]
 }
