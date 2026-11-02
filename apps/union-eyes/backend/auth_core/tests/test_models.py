@@ -7,7 +7,7 @@ import uuid
 from django.test import TestCase
 from django.utils import timezone
 
-from .models import (
+from auth_core.models import (
     AddressChangeHistory,
     AddressValidationCache,
     CountryAddressFormats,
@@ -35,13 +35,14 @@ from .models import (
     UserSessions,
     UserUuidMapping,
 )
+from core.testing import create_valid
 
 
 class OrganizationsModelTest(TestCase):
     """Test Organizations model — the central multi-org model."""
 
     def test_create(self):
-        obj = Organizations.objects.create(
+        obj = create_valid(Organizations,
             name="CUPE Local 1000",
             slug="cupe-local-1000",
             organization_type="local",
@@ -55,16 +56,16 @@ class OrganizationsModelTest(TestCase):
         self.assertEqual(obj.member_count, 500)
 
     def test_str(self):
-        obj = Organizations.objects.create(
+        obj = create_valid(Organizations,
             name="PSAC", slug="psac", organization_type="union"
         )
         self.assertEqual(str(obj), "PSAC")
 
     def test_hierarchy(self):
-        parent = Organizations.objects.create(
+        parent = create_valid(Organizations,
             name="CLC", slug="clc", organization_type="congress"
         )
-        child = Organizations.objects.create(
+        child = create_valid(Organizations,
             name="CUPE",
             slug="cupe",
             organization_type="union",
@@ -77,18 +78,18 @@ class OrganizationsModelTest(TestCase):
 
 class InternationalAddressesModelTest(TestCase):
     def test_create(self):
-        obj = InternationalAddresses.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(InternationalAddresses, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
     def test_str(self):
-        obj = InternationalAddresses.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(InternationalAddresses, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class CountryAddressFormatsModelTest(TestCase):
     def test_create(self):
-        obj = CountryAddressFormats.objects.create(
+        obj = create_valid(CountryAddressFormats,
             country_code="CA",
             country_name="Canada",
             iso3_code="CAN",
@@ -105,7 +106,7 @@ class CountryAddressFormatsModelTest(TestCase):
         self.assertTrue(obj.postal_code_required)
 
     def test_str(self):
-        obj = CountryAddressFormats.objects.create(
+        obj = create_valid(CountryAddressFormats,
             country_code="US",
             country_name="United States",
             address_format="{line1}\n{city}, {state} {zip}",
@@ -116,7 +117,7 @@ class CountryAddressFormatsModelTest(TestCase):
 class AddressValidationCacheModelTest(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = AddressValidationCache.objects.create(
+        obj = create_valid(AddressValidationCache,
             input_hash="abc123hash",
             country_code="CA",
             address_line1="123 Main St",
@@ -135,7 +136,7 @@ class AddressValidationCacheModelTest(TestCase):
 
     def test_str(self):
         now = timezone.now()
-        obj = AddressValidationCache.objects.create(
+        obj = create_valid(AddressValidationCache,
             input_hash="xyz456",
             country_code="US",
             address_line1="456 Oak Ave",
@@ -151,17 +152,17 @@ class AddressValidationCacheModelTest(TestCase):
 
 class AddressChangeHistoryModelTest(TestCase):
     def test_create(self):
-        obj = AddressChangeHistory.objects.create(address_id=uuid.uuid4())
+        obj = create_valid(AddressChangeHistory, address_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        obj = AddressChangeHistory.objects.create(address_id=uuid.uuid4())
+        obj = create_valid(AddressChangeHistory, address_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class FeatureFlagsModelTest(TestCase):
     def test_create(self):
-        obj = FeatureFlags.objects.create(
+        obj = create_valid(FeatureFlags,
             name="enable_sms_campaigns",
             type="boolean",
             enabled=True,
@@ -172,44 +173,44 @@ class FeatureFlagsModelTest(TestCase):
         self.assertTrue(obj.enabled)
 
     def test_str(self):
-        obj = FeatureFlags.objects.create(name="dark_mode", enabled=False)
+        obj = create_valid(FeatureFlags, name="dark_mode", enabled=False)
         self.assertEqual(str(obj), "dark_mode")
 
 
 class OrganizationSharingSettingsModelTest(TestCase):
     def test_create(self):
-        obj = OrganizationSharingSettings.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(OrganizationSharingSettings, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        obj = OrganizationSharingSettings.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(OrganizationSharingSettings, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class CrossOrgAccessLogModelTest(TestCase):
     def test_create(self):
-        obj = CrossOrgAccessLog.objects.create(user_id="user_789")
+        obj = create_valid(CrossOrgAccessLog, user_id="user_789")
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.user_id, "user_789")
 
     def test_str(self):
-        obj = CrossOrgAccessLog.objects.create(user_id="user_790")
+        obj = create_valid(CrossOrgAccessLog, user_id="user_790")
         self.assertIsInstance(str(obj), str)
 
 
 class OrganizationSharingGrantsModelTest(TestCase):
     def test_create(self):
-        obj = OrganizationSharingGrants.objects.create(grantor_org_id=uuid.uuid4())
+        obj = create_valid(OrganizationSharingGrants, grantor_org_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        obj = OrganizationSharingGrants.objects.create(grantor_org_id=uuid.uuid4())
+        obj = create_valid(OrganizationSharingGrants, grantor_org_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class UserUuidMappingModelTest(TestCase):
     def test_create(self):
-        obj = UserUuidMapping.objects.create(
+        obj = create_valid(UserUuidMapping,
             clerk_user_id="user_abc123",
             created_at=timezone.now(),
         )
@@ -218,7 +219,7 @@ class UserUuidMappingModelTest(TestCase):
         self.assertEqual(obj.clerk_user_id, "user_abc123")
 
     def test_str(self):
-        obj = UserUuidMapping.objects.create(
+        obj = create_valid(UserUuidMapping,
             clerk_user_id="user_xyz456",
             created_at=timezone.now(),
         )
@@ -227,7 +228,7 @@ class UserUuidMappingModelTest(TestCase):
 
 class PendingProfilesModelTest(TestCase):
     def test_create(self):
-        obj = PendingProfiles.objects.create(
+        obj = create_valid(PendingProfiles,
             email="new.member@union.ca",
             token="invite-token-123",
             membership="pro",
@@ -241,7 +242,7 @@ class PendingProfilesModelTest(TestCase):
         self.assertFalse(obj.claimed)
 
     def test_str(self):
-        obj = PendingProfiles.objects.create(
+        obj = create_valid(PendingProfiles,
             email="test@test.ca",
             created_at=timezone.now(),
         )
@@ -250,7 +251,7 @@ class PendingProfilesModelTest(TestCase):
 
 class ProfilesModelTest(TestCase):
     def test_create(self):
-        obj = Profiles.objects.create(
+        obj = create_valid(Profiles,
             user_id="user_001",
             email="member@local1000.ca",
             membership="pro",
@@ -262,7 +263,7 @@ class ProfilesModelTest(TestCase):
         self.assertEqual(obj.user_id, "user_001")
 
     def test_str(self):
-        obj = Profiles.objects.create(
+        obj = create_valid(Profiles,
             user_id="user_002",
             email="p@test.ca",
             created_at=timezone.now(),
@@ -272,58 +273,58 @@ class ProfilesModelTest(TestCase):
 
 class UsersModelTest(TestCase):
     def test_create(self):
-        obj = Users.objects.create(user_id="user_100")
+        obj = create_valid(Users, user_id="user_100")
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.user_id, "user_100")
 
     def test_str(self):
-        obj = Users.objects.create(user_id="user_101")
+        obj = create_valid(Users, user_id="user_101")
         self.assertIsInstance(str(obj), str)
 
 
 class OrganizationUsersModelTest(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="OU Org", slug="test-ou", organization_type="union"
         )
-        obj = OrganizationUsers.objects.create(organization=org)
+        obj = create_valid(OrganizationUsers, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.organization_user_id)
 
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="OU Org 2", slug="test-ou-str", organization_type="union"
         )
-        obj = OrganizationUsers.objects.create(organization=org)
+        obj = create_valid(OrganizationUsers, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class UserSessionsModelTest(TestCase):
     def test_create(self):
-        obj = UserSessions.objects.create(user_id="user_200")
+        obj = create_valid(UserSessions, user_id="user_200")
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.session_id)
 
     def test_str(self):
-        obj = UserSessions.objects.create(user_id="user_201")
+        obj = create_valid(UserSessions, user_id="user_201")
         self.assertIsInstance(str(obj), str)
 
 
 class OauthProvidersModelTest(TestCase):
     def test_create(self):
-        obj = OauthProviders.objects.create(user_id="user_300")
+        obj = create_valid(OauthProviders, user_id="user_300")
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.provider_id)
 
     def test_str(self):
-        obj = OauthProviders.objects.create(user_id="user_301")
+        obj = create_valid(OauthProviders, user_id="user_301")
         self.assertIsInstance(str(obj), str)
 
 
 class MemberContactPreferencesModelTest(TestCase):
     def test_create(self):
         uid = uuid.uuid4()
-        obj = MemberContactPreferences.objects.create(
+        obj = create_valid(MemberContactPreferences,
             user_id=uid,
             organization_id=uuid.uuid4(),
             preferred_contact_method="email",
@@ -337,7 +338,7 @@ class MemberContactPreferencesModelTest(TestCase):
         self.assertTrue(obj.email_opt_in)
 
     def test_str(self):
-        obj = MemberContactPreferences.objects.create(
+        obj = create_valid(MemberContactPreferences,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
         )
@@ -347,7 +348,7 @@ class MemberContactPreferencesModelTest(TestCase):
 class MemberEmploymentDetailsModelTest(TestCase):
     def test_create(self):
         uid = uuid.uuid4()
-        obj = MemberEmploymentDetails.objects.create(
+        obj = create_valid(MemberEmploymentDetails,
             user_id=uid,
             organization_id=uuid.uuid4(),
             classification="Clerk III",
@@ -360,7 +361,7 @@ class MemberEmploymentDetailsModelTest(TestCase):
         self.assertEqual(obj.employment_status, "active")
 
     def test_str(self):
-        obj = MemberEmploymentDetails.objects.create(
+        obj = create_valid(MemberEmploymentDetails,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             classification="Tech I",
@@ -370,7 +371,7 @@ class MemberEmploymentDetailsModelTest(TestCase):
 
 class MemberConsentsModelTest(TestCase):
     def test_create(self):
-        obj = MemberConsents.objects.create(
+        obj = create_valid(MemberConsents,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             consent_type="data_processing",
@@ -384,7 +385,7 @@ class MemberConsentsModelTest(TestCase):
         self.assertEqual(obj.consent_type, "data_processing")
 
     def test_str(self):
-        obj = MemberConsents.objects.create(
+        obj = create_valid(MemberConsents,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             consent_type="marketing",
@@ -397,7 +398,7 @@ class MemberConsentsModelTest(TestCase):
 class MemberHistoryEventsModelTest(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = MemberHistoryEvents.objects.create(
+        obj = create_valid(MemberHistoryEvents,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             event_type="status_change",
@@ -412,7 +413,7 @@ class MemberHistoryEventsModelTest(TestCase):
 
     def test_str(self):
         now = timezone.now()
-        obj = MemberHistoryEvents.objects.create(
+        obj = create_valid(MemberHistoryEvents,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             event_type="join",
@@ -426,10 +427,10 @@ class MemberHistoryEventsModelTest(TestCase):
 
 class OrganizationMembersModelTest(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="OM Org", slug="test-org-members", organization_type="union"
         )
-        obj = OrganizationMembers.objects.create(
+        obj = create_valid(OrganizationMembers,
             user_id="user_500",
             organization=org,
             role="member",
@@ -444,10 +445,10 @@ class OrganizationMembersModelTest(TestCase):
         self.assertTrue(obj.is_primary)
 
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="OM Org 2", slug="test-org-members-str", organization_type="union"
         )
-        obj = OrganizationMembers.objects.create(
+        obj = create_valid(OrganizationMembers,
             user_id="user_501",
             organization=org,
             role="steward",
@@ -458,86 +459,86 @@ class OrganizationMembersModelTest(TestCase):
 
 class SsoProvidersModelTest(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SSO Org", slug="test-sso", organization_type="union"
         )
-        obj = SsoProviders.objects.create(organization=org)
+        obj = create_valid(SsoProviders, organization=org)
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SSO Org 2", slug="test-sso-str", organization_type="union"
         )
-        obj = SsoProviders.objects.create(organization=org)
+        obj = create_valid(SsoProviders, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class ScimConfigurationsModelTest(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SCIM Org", slug="test-scim", organization_type="union"
         )
-        obj = ScimConfigurations.objects.create(organization=org)
+        obj = create_valid(ScimConfigurations, organization=org)
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SCIM Org 2", slug="test-scim-str", organization_type="union"
         )
-        obj = ScimConfigurations.objects.create(organization=org)
+        obj = create_valid(ScimConfigurations, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class SsoSessionsModelTest(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SSOSess Org", slug="test-sso-sess", organization_type="union"
         )
-        provider = SsoProviders.objects.create(organization=org)
-        obj = SsoSessions.objects.create(provider=provider)
+        provider = create_valid(SsoProviders, organization=org)
+        obj = create_valid(SsoSessions, provider=provider)
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SSOSess Org 2", slug="test-sso-sess-str", organization_type="union"
         )
-        provider = SsoProviders.objects.create(organization=org)
-        obj = SsoSessions.objects.create(provider=provider)
+        provider = create_valid(SsoProviders, organization=org)
+        obj = create_valid(SsoSessions, provider=provider)
         self.assertIsInstance(str(obj), str)
 
 
 class ScimEventsLogModelTest(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SCIMEv Org", slug="test-scim-ev", organization_type="union"
         )
-        config = ScimConfigurations.objects.create(organization=org)
-        obj = ScimEventsLog.objects.create(config=config)
+        config = create_valid(ScimConfigurations, organization=org)
+        obj = create_valid(ScimEventsLog, config=config)
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="SCIMEv Org 2", slug="test-scim-ev-str", organization_type="union"
         )
-        config = ScimConfigurations.objects.create(organization=org)
-        obj = ScimEventsLog.objects.create(config=config)
+        config = create_valid(ScimConfigurations, organization=org)
+        obj = create_valid(ScimEventsLog, config=config)
         self.assertIsInstance(str(obj), str)
 
 
 class MfaConfigurationsModelTest(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="MFA Org", slug="test-mfa", organization_type="union"
         )
-        obj = MfaConfigurations.objects.create(
+        obj = create_valid(MfaConfigurations,
             user_id=uuid.uuid4(),
             organization=org,
         )
         self.assertIsNotNone(obj.id)
 
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="MFA Org 2", slug="test-mfa-str", organization_type="union"
         )
-        obj = MfaConfigurations.objects.create(user_id=uuid.uuid4(), organization=org)
+        obj = create_valid(MfaConfigurations, user_id=uuid.uuid4(), organization=org)
         self.assertIsInstance(str(obj), str)

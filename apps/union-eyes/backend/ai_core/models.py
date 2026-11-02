@@ -9,6 +9,9 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
+from decimal import Decimal
+from core.fields import UnboundedDecimalField
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -46,6 +49,14 @@ class AbTests(BaseModel):
     type = models.TextField()
     status = models.TextField(default='draft')
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='ab_tests_organization_set', null=True, blank=True)
+    confidence = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('95.00'))
+    current_sample_size = models.IntegerField(default=0)
+    end_date = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict)
+    segment_criteria = models.JSONField(null=True, blank=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    target_sample_size = models.IntegerField(default=1000)
+    winner_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'ab_tests'
@@ -56,7 +67,13 @@ class AbTests(BaseModel):
 
 class AbTestVariants(BaseModel):
     """Migrated from drizzle: ab-testing-schema.ts"""
-    test_id = models.UUIDField(null=True, blank=True)
+    test_id = models.UUIDField()
+    content = models.JSONField()
+    conversions = models.IntegerField(default=0)
+    impressions = models.IntegerField(default=0)
+    is_control = models.BooleanField(default=False)
+    name = models.TextField()
+    weight = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('50.00'))
 
     class Meta:
         db_table = 'ab_test_variants'
@@ -64,7 +81,10 @@ class AbTestVariants(BaseModel):
 
 class AbTestAssignments(BaseModel):
     """Migrated from drizzle: ab-testing-schema.ts"""
-    test_id = models.UUIDField(null=True, blank=True)
+    test_id = models.UUIDField()
+    assigned_at = models.DateTimeField(default=timezone.now)
+    user_id = models.TextField()
+    variant_id = models.UUIDField()
 
     class Meta:
         db_table = 'ab_test_assignments'
@@ -72,7 +92,12 @@ class AbTestAssignments(BaseModel):
 
 class AbTestEvents(BaseModel):
     """Migrated from drizzle: ab-testing-schema.ts"""
-    test_id = models.UUIDField(null=True, blank=True)
+    test_id = models.UUIDField()
+    event_type = models.TextField()
+    metadata = models.JSONField(null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    user_id = models.TextField()
+    variant_id = models.UUIDField()
 
     class Meta:
         db_table = 'ab_test_events'
@@ -81,6 +106,37 @@ class AbTestEvents(BaseModel):
 class AccessibilityAudits(BaseModel):
     """Migrated from drizzle: accessibility-schema.ts"""
     organization_id = models.UUIDField(null=True, blank=True)
+    accessibility_score = models.IntegerField(null=True, blank=True)
+    audit_name = models.TextField()
+    audit_type = models.TextField()
+    completed_at = models.DateTimeField(null=True, blank=True)
+    conformance_level = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['A', 'AA', 'AAA']],
+        default='AA',
+    )
+    critical_issues = models.IntegerField(default=0)
+    elements_scanned = models.IntegerField(default=0)
+    minor_issues = models.IntegerField(default=0)
+    moderate_issues = models.IntegerField(default=0)
+    pages_scanned = models.IntegerField(default=0)
+    report_data = models.JSONField(null=True, blank=True)
+    report_url = models.TextField(null=True, blank=True)
+    scan_duration_ms = models.IntegerField(null=True, blank=True)
+    scheduled_by = models.TextField(null=True, blank=True)
+    serious_issues = models.IntegerField(default=0)
+    started_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['pending', 'in_progress', 'completed', 'failed']],
+        default='pending',
+    )
+    target_environment = models.TextField()
+    target_url = models.TextField()
+    tools_used = models.JSONField(null=True, blank=True)
+    total_issues = models.IntegerField(default=0)
+    triggered_by = models.TextField(null=True, blank=True)
+    wcag_version = models.TextField(default='2.2')
 
     class Meta:
         db_table = 'accessibility_audits'
@@ -89,6 +145,45 @@ class AccessibilityAudits(BaseModel):
 class AccessibilityIssues(BaseModel):
     """Migrated from drizzle: accessibility-schema.ts"""
     audit_id = models.UUIDField(null=True, blank=True)
+    affects_color_blindness = models.BooleanField(default=False)
+    affects_keyboard_nav = models.BooleanField(default=False)
+    affects_screen_readers = models.BooleanField(default=False)
+    assigned_to = models.TextField(null=True, blank=True)
+    code_example = models.TextField(null=True, blank=True)
+    context = models.JSONField(null=True, blank=True)
+    element_html = models.TextField(null=True, blank=True)
+    element_selector = models.TextField(null=True, blank=True)
+    element_xpath = models.TextField(null=True, blank=True)
+    first_seen_at = models.DateTimeField(default=timezone.now)
+    fix_suggestion = models.TextField(null=True, blank=True)
+    impacted_users = models.TextField(null=True, blank=True)
+    issue_description = models.TextField()
+    issue_title = models.TextField()
+    last_seen_at = models.DateTimeField(default=timezone.now)
+    occurrence_count = models.IntegerField(default=1)
+    organization_id = models.UUIDField()
+    page_url = models.TextField()
+    priority = models.IntegerField(default=3)
+    resolution_notes = models.TextField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.TextField(null=True, blank=True)
+    severity = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['critical', 'serious', 'moderate', 'minor']],
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['open', 'in_progress', 'resolved', 'wont_fix', 'duplicate']],
+        default='open',
+    )
+    verified_at = models.DateTimeField(null=True, blank=True)
+    wcag_criteria = models.TextField()
+    wcag_level = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['A', 'AA', 'AAA']],
+    )
+    wcag_title = models.TextField()
+    wcag_url = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'accessibility_issues'
@@ -134,6 +229,27 @@ class AccessibilityUserTesting(BaseModel):
 class ChatSessions(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
     user_id = models.TextField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    title = models.TextField()
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['active', 'archived', 'deleted']],
+        default='active',
+    )
+    ai_provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['openai', 'anthropic', 'google', 'internal']],
+        default='openai',
+    )
+    model = models.TextField(default='gpt-4')
+    temperature = models.TextField(default='0.7', null=True, blank=True)
+    context_tags = models.JSONField(null=True, blank=True)
+    related_entity_type = models.TextField(null=True, blank=True)
+    related_entity_id = models.TextField(null=True, blank=True)
+    message_count = models.IntegerField(default=0)
+    last_message_at = models.DateTimeField(null=True, blank=True)
+    helpful = models.BooleanField(null=True, blank=True)
+    feedback_comment = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'chat_sessions'
@@ -141,7 +257,21 @@ class ChatSessions(BaseModel):
 
 class ChatMessages(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
-    session_id = models.UUIDField(null=True, blank=True)
+    session_id = models.UUIDField()
+    role = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['user', 'assistant', 'system', 'function']],
+    )
+    content = models.TextField()
+    model_used = models.TextField(null=True, blank=True)
+    tokens_used = models.IntegerField(null=True, blank=True)
+    response_time_ms = models.IntegerField(null=True, blank=True)
+    retrieved_documents = models.JSONField(null=True, blank=True)
+    citations = models.JSONField(null=True, blank=True)
+    function_calls = models.JSONField(null=True, blank=True)
+    helpful = models.BooleanField(null=True, blank=True)
+    feedback_reason = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'chat_messages'
@@ -150,6 +280,39 @@ class ChatMessages(BaseModel):
 class KnowledgeBase(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
     organization_id = models.UUIDField(null=True, blank=True)
+    allowed_organizations = models.JSONField(null=True, blank=True)
+    citation_count = models.IntegerField(default=0)
+    content = models.TextField()
+    created_by = models.TextField()
+    document_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'collective_agreement', 'union_policy', 'labor_law', 'precedent', 'faq', 'guide',
+            'other',
+        ]],
+    )
+    effective_date = models.DateTimeField(null=True, blank=True)
+    embedding_model = models.TextField(default='text-embedding-ada-002', null=True, blank=True)
+    embedding_model_version = models.TextField(
+        default='text-embedding-ada-002@1',
+        null=True,
+        blank=True,
+    )
+    expiry_date = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_public = models.BooleanField(default=False)
+    keywords = models.JSONField(null=True, blank=True)
+    language = models.TextField(default='en')
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    previous_version_id = models.UUIDField(null=True, blank=True)
+    source_id = models.TextField(null=True, blank=True)
+    source_type = models.TextField()
+    source_url = models.TextField(null=True, blank=True)
+    summary = models.TextField(null=True, blank=True)
+    tags = models.JSONField(null=True, blank=True)
+    title = models.TextField()
+    version = models.IntegerField(default=1)
+    view_count = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'knowledge_base'
@@ -192,6 +355,18 @@ class AiSafetyFilters(BaseModel):
 class AiUsageMetrics(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
     organization_id = models.UUIDField(null=True, blank=True)
+    provider = models.TextField()
+    model = models.TextField()
+    operation = models.TextField()
+    tokens_input = models.IntegerField(default=0)
+    tokens_output = models.IntegerField(default=0)
+    tokens_total = models.IntegerField(default=0)
+    estimated_cost = models.DecimalField(max_digits=10, decimal_places=6, default=Decimal('0'))
+    request_id = models.TextField(null=True, blank=True)
+    user_id = models.TextField(null=True, blank=True)
+    session_id = models.UUIDField(null=True, blank=True)
+    latency_ms = models.IntegerField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = 'ai_usage_metrics'
@@ -207,7 +382,25 @@ class AiRateLimits(BaseModel):
 
 class AiBudgets(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    alert_threshold = models.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        default=Decimal('0.80'),
+        null=True,
+        blank=True,
+    )
+    billing_period_end = models.DateField()
+    billing_period_start = models.DateField()
+    current_spend_usd = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    hard_limit = models.BooleanField(default=True, null=True, blank=True)
+    monthly_limit_usd = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         db_table = 'ai_budgets'
@@ -216,6 +409,25 @@ class AiBudgets(BaseModel):
 class MlPredictions(BaseModel):
     """Migrated from drizzle: analytics.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='ml_predictions_organization_set')
+    prediction_type = models.CharField(max_length=50)
+    prediction_date = models.DateTimeField()
+    predicted_value = UnboundedDecimalField()
+    lower_bound = UnboundedDecimalField(null=True, blank=True)
+    upper_bound = UnboundedDecimalField(null=True, blank=True)
+    confidence = UnboundedDecimalField(null=True, blank=True)
+    horizon = models.IntegerField(null=True, blank=True)
+    granularity = models.CharField(max_length=20, null=True, blank=True)
+    model_version = models.CharField(max_length=20, null=True, blank=True)
+    subject_id = models.CharField(max_length=255, null=True, blank=True)
+    accuracy = UnboundedDecimalField(null=True, blank=True)
+    actual_value = UnboundedDecimalField(null=True, blank=True)
+    confidence_interval = models.JSONField(null=True, blank=True)
+    confidence_score = UnboundedDecimalField(null=True, blank=True)
+    features = models.JSONField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    model_name = models.TextField(null=True, blank=True)
+    target_date = models.DateTimeField(null=True, blank=True)
+    validated_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'ml_predictions'
@@ -224,6 +436,11 @@ class MlPredictions(BaseModel):
 class ModelMetadata(BaseModel):
     """Migrated from drizzle: predictions.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='model_metadata_organization_set')
+    model_type = models.CharField(max_length=50)
+    version = models.CharField(max_length=20)
+    accuracy = UnboundedDecimalField(null=True, blank=True)
+    trained_at = models.DateTimeField(default=timezone.now)
+    parameters = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'model_metadata'

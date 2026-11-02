@@ -13,6 +13,8 @@ from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 from django.db.models import Func
 from django.db.models.functions import Now
+from core import defaults as column_defaults
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -203,7 +205,10 @@ class Organizations(BaseModel):
     )
     last_remittance_date = models.DateTimeField(null=True, blank=True)
     fiscal_year_end = models.DateField(
-        null=True, blank=True, help_text="e.g., March 31"
+        null=True,
+        blank=True,
+        help_text="e.g., March 31",
+        db_default='2024-12-31',
     )
 
     # Auth provider integration (was Clerk-specific; auth provider is now
@@ -334,7 +339,55 @@ class OrganizationRelationships(BaseModel):
 class InternationalAddresses(BaseModel):
     """Migrated from drizzle: addresses.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    address_line_1 = models.TextField()
+    address_line_2 = models.TextField(null=True, blank=True)
+    address_line_3 = models.TextField(null=True, blank=True)
+    address_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'mailing', 'residential', 'business', 'billing', 'shipping', 'temporary',
+        ]],
+        default='mailing',
+    )
+    administrative_area = models.TextField(null=True, blank=True)
+    administrative_area_type = models.TextField(null=True, blank=True)
+    carrier_route = models.TextField(null=True, blank=True)
+    country_code = models.TextField()
+    country_name = models.TextField()
+    deliverability = models.TextField(null=True, blank=True)
+    delivery_point = models.TextField(null=True, blank=True)
+    dependent_locality = models.TextField(null=True, blank=True)
+    formatted_address = models.TextField(null=True, blank=True)
+    geocode_accuracy = models.TextField(null=True, blank=True)
+    geocode_provider = models.TextField(null=True, blank=True)
+    geocoded_at = models.DateTimeField(null=True, blank=True)
+    is_primary = models.BooleanField(default=False)
+    is_standardized = models.BooleanField(default=False)
+    is_validated = models.BooleanField(default=False)
+    latitude = models.TextField(null=True, blank=True)
+    local_format = models.TextField(null=True, blank=True)
+    locality = models.TextField()
+    locality_type = models.TextField(null=True, blank=True)
+    longitude = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    postal_code = models.TextField(null=True, blank=True)
+    postal_code_type = models.TextField(null=True, blank=True)
+    sorting_code = models.TextField(null=True, blank=True)
+    standardized_at = models.DateTimeField(null=True, blank=True)
+    standardized_by = models.TextField(null=True, blank=True)
+    standardized_data = models.JSONField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['active', 'inactive', 'unverified', 'invalid']],
+        default='unverified',
+    )
+    sub_administrative_area = models.TextField(null=True, blank=True)
+    user_id = models.TextField(null=True, blank=True)
+    validated_at = models.DateTimeField(null=True, blank=True)
+    validated_by = models.TextField(null=True, blank=True)
+    validation_result = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "international_addresses"
@@ -355,14 +408,14 @@ class CountryAddressFormats(BaseModel):
     optional_fields = models.JSONField(default=dict, null=True, blank=True)
     address_format = models.TextField()
     display_order = models.JSONField(default=dict, null=True, blank=True)
-    postal_code_required = models.BooleanField(default=False)
+    postal_code_required = models.BooleanField(default=True)
     postal_code_pattern = models.TextField(null=True, blank=True)
     postal_code_example = models.TextField(null=True, blank=True)
     postal_code_length = models.IntegerField(null=True, blank=True)
     administrative_areas = models.JSONField(default=dict, null=True, blank=True)
     has_subdivisions = models.BooleanField(default=False)
     validation_rules = models.JSONField(default=dict, null=True, blank=True)
-    geocoding_supported = models.BooleanField(default=False)
+    geocoding_supported = models.BooleanField(default=True)
     preferred_geocoder = models.TextField(null=True, blank=True)
     standardization_provider = models.TextField(null=True, blank=True)
     standardization_available = models.BooleanField(default=False)
@@ -405,7 +458,13 @@ class AddressValidationCache(BaseModel):
 class AddressChangeHistory(BaseModel):
     """Migrated from drizzle: addresses.ts"""
 
-    address_id = models.UUIDField(null=True, blank=True)
+    address_id = models.UUIDField()
+    change_reason = models.TextField(null=True, blank=True)
+    change_source = models.TextField(null=True, blank=True)
+    change_type = models.TextField()
+    changed_by = models.TextField(null=True, blank=True)
+    new_value = models.JSONField(null=True, blank=True)
+    previous_value = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "address_change_history"
@@ -422,8 +481,10 @@ class FeatureFlags(BaseModel):
     allowed_organizations = models.JSONField(default=dict, null=True, blank=True)
     allowed_users = models.JSONField(default=dict, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    tags = models.JSONField(default=dict, null=True, blank=True)
+    tags = models.JSONField(default=list, null=True, blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    last_modified_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "feature_flags"
@@ -438,6 +499,24 @@ class OrganizationSharingSettings(BaseModel):
     """Migrated from drizzle: sharing.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    allow_congress_sharing = models.BooleanField(default=False, null=True, blank=True)
+    allow_federation_sharing = models.BooleanField(default=False, null=True, blank=True)
+    allow_province_sharing = models.BooleanField(default=False, null=True, blank=True)
+    allow_sector_sharing = models.BooleanField(default=False, null=True, blank=True)
+    allowed_sharing_levels = ArrayField(models.CharField(max_length=50), null=True, blank=True)
+    auto_share_clauses = models.BooleanField(default=False, null=True, blank=True)
+    auto_share_precedents = models.BooleanField(default=False, null=True, blank=True)
+    default_sharing_level = models.CharField(
+        max_length=50,
+        default='private',
+        null=True,
+        blank=True,
+    )
+    max_shared_clauses = models.IntegerField(null=True, blank=True)
+    max_shared_precedents = models.IntegerField(null=True, blank=True)
+    require_anonymization = models.BooleanField(default=True, null=True, blank=True)
+    sharing_approval_required = models.BooleanField(default=True, null=True, blank=True)
+    sharing_approver_role = models.CharField(max_length=50, default='admin', null=True, blank=True)
 
     class Meta:
         db_table = "organization_sharing_settings"
@@ -448,6 +527,15 @@ class CrossOrgAccessLog(BaseModel):
     """Migrated from drizzle: sharing.ts"""
 
     user_id = models.CharField(max_length=255, null=True, blank=True)
+    access_granted_via = models.CharField(max_length=50, null=True, blank=True)
+    access_type = models.CharField(max_length=50)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    resource_id = models.UUIDField()
+    resource_organization_id = models.UUIDField()
+    resource_type = models.CharField(max_length=50)
+    user_agent = models.TextField(null=True, blank=True)
+    user_organization_id = models.UUIDField()
 
     class Meta:
         db_table = "cross_org_access_log"
@@ -469,7 +557,8 @@ class UserUuidMapping(BaseModel):
 
     user_uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     clerk_user_id = models.TextField(unique=True)
-    created_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    entra_oid = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "user_uuid_mapping"
@@ -496,7 +585,7 @@ class PendingProfiles(BaseModel):
     claimed_by_user_id = models.TextField(null=True, blank=True)
     claimed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField()
-    updated_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "pending_profiles"
@@ -592,6 +681,15 @@ class UserSessions(BaseModel):
 
     session_id = models.UUIDField(default=uuid.uuid4, unique=True)
     user_id = models.CharField(max_length=255, null=True, blank=True)
+    device_info = models.JSONField(default=dict, null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    last_used_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    organization_id = models.UUIDField(null=True, blank=True)
+    refresh_token = models.TextField(null=True, blank=True)
+    session_token = models.TextField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "user_sessions"
@@ -667,7 +765,7 @@ class MemberEmploymentDetails(BaseModel):
     status_effective_date = models.DateTimeField(null=True, blank=True)
     status_reason = models.TextField(null=True, blank=True)
     expected_return_date = models.DateTimeField(null=True, blank=True)
-    benefits_eligible = models.BooleanField(default=False)
+    benefits_eligible = models.BooleanField(default=True)
     benefits_enrollment_date = models.DateTimeField(null=True, blank=True)
     pension_plan_enrolled = models.BooleanField(default=False)
     probation_end_date = models.DateTimeField(null=True, blank=True)
@@ -726,7 +824,7 @@ class MemberHistoryEvents(BaseModel):
     actor_id = models.TextField(null=True, blank=True)
     actor_name = models.TextField(null=True, blank=True)
     is_public = models.BooleanField(default=False)
-    visible_to_member = models.BooleanField(default=False)
+    visible_to_member = models.BooleanField(default=True)
     metadata = models.JSONField(default=dict, null=True, blank=True)
     created_at = models.DateTimeField()
     created_by = models.TextField(null=True, blank=True)
@@ -754,11 +852,15 @@ class OrganizationMembers(BaseModel):
         related_name="organization_members_organization_set",
     )
     role = models.TextField()
-    status = models.TextField()
+    status = models.TextField(db_default='active')
     membership_number = models.TextField(null=True, blank=True)
     is_primary = models.BooleanField(default=False)
     member_category = models.CharField(
-        choices=MEMBER_CATEGORY_CHOICES, max_length=21, null=True, blank=True
+        choices=MEMBER_CATEGORY_CHOICES,
+        max_length=21,
+        null=True,
+        blank=True,
+        db_default='full_member',
     )
     exempt_from_per_capita = models.BooleanField(default=False)
     exemption_reason = models.TextField(null=True, blank=True)
@@ -777,6 +879,10 @@ class OrganizationMembers(BaseModel):
     metadata = models.JSONField(null=True, blank=True)
     joined_at = models.DateTimeField(null=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+    exemption_approved_at = models.DateTimeField(null=True, blank=True)
+    search_vector = models.TextField(null=True, blank=True)
+    tenant_id = models.UUIDField(null=True, blank=True)
+    preferred_contact_method = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "organization_members"
@@ -797,6 +903,46 @@ class SsoProviders(BaseModel):
         on_delete=models.CASCADE,
         related_name="sso_providers_organization_set",
     )
+    saml_entity_id = models.CharField(max_length=500, null=True, blank=True)
+    oidc_issuer = models.CharField(max_length=500, null=True, blank=True)
+    oidc_client_id = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    provider_type = models.CharField(max_length=50)
+    saml_sso_url = models.CharField(max_length=500, null=True, blank=True)
+    saml_slo_url = models.CharField(max_length=500, null=True, blank=True)
+    saml_certificate = models.TextField(null=True, blank=True)
+    saml_signing_algorithm = models.CharField(
+        max_length=50,
+        default='sha256',
+        null=True,
+        blank=True,
+    )
+    saml_name_id_format = models.CharField(
+        max_length=200,
+        default='urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+        null=True,
+        blank=True,
+    )
+    oidc_client_secret = models.TextField(null=True, blank=True)
+    oidc_authorization_endpoint = models.CharField(max_length=500, null=True, blank=True)
+    oidc_token_endpoint = models.CharField(max_length=500, null=True, blank=True)
+    oidc_userinfo_endpoint = models.CharField(max_length=500, null=True, blank=True)
+    oidc_jwks_uri = models.CharField(max_length=500, null=True, blank=True)
+    oidc_scopes = ArrayField(
+        models.TextField(),
+        default=column_defaults.sso_providers__oidc_scopes,
+        null=True,
+        blank=True,
+    )
+    attribute_mapping = models.JSONField()
+    role_mapping = models.JSONField(null=True, blank=True)
+    auto_provision = models.BooleanField(default=False)
+    just_in_time_provisioning = models.BooleanField(default=False)
+    require_groups = ArrayField(models.TextField(), null=True, blank=True)
+    enabled = models.BooleanField(default=False)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "sso_providers"
@@ -811,6 +957,25 @@ class ScimConfigurations(BaseModel):
         on_delete=models.CASCADE,
         related_name="scim_configurations_organization_set",
     )
+    base_url = models.CharField(max_length=500)
+    token_hash = models.CharField(max_length=64, null=True, blank=True)
+    token_created_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    token_expires_at = models.DateTimeField(null=True, blank=True)
+    token_last_used_at = models.DateTimeField(null=True, blank=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    enabled = models.BooleanField(default=False)
+    sync_users = models.BooleanField(default=True)
+    sync_groups = models.BooleanField(default=True)
+    deprovision_action = models.CharField(max_length=50, default='suspend')
+    user_filter = models.JSONField(null=True, blank=True)
+    group_filter = models.JSONField(null=True, blank=True)
+    user_attribute_mapping = models.JSONField()
+    group_attribute_mapping = models.JSONField(null=True, blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
+    users_synced = models.IntegerField(default=0)
+    groups_synced = models.IntegerField(default=0)
+    created_by = models.CharField(max_length=255)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "scim_configurations"
@@ -825,6 +990,23 @@ class SsoSessions(BaseModel):
         on_delete=models.CASCADE,
         related_name="sso_sessions_provider_set",
     )
+    auth_level = models.CharField(max_length=50, null=True, blank=True)
+    auth_method = models.CharField(max_length=50, null=True, blank=True)
+    authenticated_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    device_fingerprint = models.CharField(max_length=255, null=True, blank=True)
+    expires_at = models.DateTimeField()
+    idp_session_id = models.CharField(max_length=255, null=True, blank=True)
+    ip_address = models.CharField(max_length=50, null=True, blank=True)
+    last_access_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    name_id = models.CharField(max_length=255, null=True, blank=True)
+    organization_id = models.UUIDField()
+    session_id = models.CharField(max_length=255)
+    session_index = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=50, default='active', null=True, blank=True)
+    terminated_at = models.DateTimeField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    user_id = models.UUIDField()
 
     class Meta:
         db_table = "sso_sessions"
@@ -839,6 +1021,21 @@ class ScimEventsLog(BaseModel):
         on_delete=models.CASCADE,
         related_name="scim_events_log_config_set",
     )
+    organization_id = models.UUIDField()
+    event_type = models.CharField(max_length=50)
+    resource_type = models.CharField(max_length=50)
+    resource_id = models.CharField(max_length=255, null=True, blank=True)
+    operation = models.CharField(max_length=50)
+    request_path = models.CharField(max_length=500, null=True, blank=True)
+    request_body = models.JSONField(null=True, blank=True)
+    response_body = models.JSONField(null=True, blank=True)
+    status = models.CharField(max_length=50)
+    status_code = models.IntegerField(null=True, blank=True)
+    error_message = models.TextField(null=True, blank=True)
+    processing_time_ms = models.IntegerField(null=True, blank=True)
+    ip_address = models.CharField(max_length=50, null=True, blank=True)
+    authenticated_as = models.CharField(max_length=255, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "scim_events_log"
@@ -854,6 +1051,21 @@ class MfaConfigurations(BaseModel):
         on_delete=models.CASCADE,
         related_name="mfa_configurations_organization_set",
     )
+    device_name = models.CharField(max_length=255, null=True, blank=True)
+    device_type = models.CharField(max_length=50, null=True, blank=True)
+    email_address = models.CharField(max_length=255, null=True, blank=True)
+    enabled = models.BooleanField(default=True, null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    method_type = models.CharField(max_length=50)
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
+    totp_backup_codes = ArrayField(models.TextField(), null=True, blank=True)
+    totp_secret = models.TextField(null=True, blank=True)
+    verified = models.BooleanField(default=False, null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    webauthn_counter = models.IntegerField(default=0, null=True, blank=True)
+    webauthn_credential_id = models.TextField(null=True, blank=True)
+    webauthn_public_key = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "mfa_configurations"

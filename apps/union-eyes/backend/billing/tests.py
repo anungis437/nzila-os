@@ -94,6 +94,7 @@ from .models import (
     WhiplashPreventionAudit,
     WhiplashViolations,
 )
+from core.testing import create_valid
 
 
 # ---------------------------------------------------------------------------
@@ -112,83 +113,83 @@ def _make_stripe_account(**overrides):
         updated_at=now,
     )
     defaults.update(overrides)
-    return StripeConnectAccounts.objects.create(**defaults)
+    return create_valid(StripeConnectAccounts, **defaults)
 
 
 # ===== 1. AutopaySettings =====
 class TestAutopaySettingsCreate(TestCase):
     def test_create(self):
-        obj = AutopaySettings.objects.create()
+        obj = create_valid(AutopaySettings)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
 
 class TestAutopaySettingsStr(TestCase):
     def test_str(self):
-        obj = AutopaySettings.objects.create()
+        obj = create_valid(AutopaySettings)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 2. ClcPerCapitaBenchmarks =====
 class TestClcPerCapitaBenchmarksCreate(TestCase):
     def test_create(self):
-        obj = ClcPerCapitaBenchmarks.objects.create()
+        obj = create_valid(ClcPerCapitaBenchmarks)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
 
 class TestClcPerCapitaBenchmarksStr(TestCase):
     def test_str(self):
-        obj = ClcPerCapitaBenchmarks.objects.create()
+        obj = create_valid(ClcPerCapitaBenchmarks)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 3. ClcUnionDensity =====
 class TestClcUnionDensityCreate(TestCase):
     def test_create(self):
-        obj = ClcUnionDensity.objects.create()
+        obj = create_valid(ClcUnionDensity)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
 
 class TestClcUnionDensityStr(TestCase):
     def test_str(self):
-        obj = ClcUnionDensity.objects.create()
+        obj = create_valid(ClcUnionDensity)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 4. ClcBargainingTrends =====
 class TestClcBargainingTrendsCreate(TestCase):
     def test_create(self):
-        obj = ClcBargainingTrends.objects.create()
+        obj = create_valid(ClcBargainingTrends)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
 
 class TestClcBargainingTrendsStr(TestCase):
     def test_str(self):
-        obj = ClcBargainingTrends.objects.create()
+        obj = create_valid(ClcBargainingTrends)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 5. ClcSyncLog =====
 class TestClcSyncLogCreate(TestCase):
     def test_create(self):
-        obj = ClcSyncLog.objects.create()
+        obj = create_valid(ClcSyncLog)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
 
 class TestClcSyncLogStr(TestCase):
     def test_str(self):
-        obj = ClcSyncLog.objects.create()
+        obj = create_valid(ClcSyncLog)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 6. ClcOauthTokens =====
 class TestClcOauthTokensCreate(TestCase):
     def test_create(self):
-        obj = ClcOauthTokens.objects.create(access_token="test-token")
+        obj = create_valid(ClcOauthTokens, access_token="test-token")
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
         self.assertEqual(obj.access_token, "test-token")
@@ -196,14 +197,14 @@ class TestClcOauthTokensCreate(TestCase):
 
 class TestClcOauthTokensStr(TestCase):
     def test_str(self):
-        obj = ClcOauthTokens.objects.create(access_token="tok")
+        obj = create_valid(ClcOauthTokens, access_token="tok")
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 7. PerCapitaRemittances =====
 class TestPerCapitaRemittancesCreate(TestCase):
     def test_create(self):
-        obj = PerCapitaRemittances.objects.create(
+        obj = create_valid(PerCapitaRemittances,
             organization_id=uuid.uuid4(),
             from_organization_id=uuid.uuid4(),
             to_organization_id=uuid.uuid4(),
@@ -223,7 +224,7 @@ class TestPerCapitaRemittancesCreate(TestCase):
 
 class TestPerCapitaRemittancesStr(TestCase):
     def test_str(self):
-        obj = PerCapitaRemittances.objects.create(
+        obj = create_valid(PerCapitaRemittances,
             organization_id=uuid.uuid4(),
             from_organization_id=uuid.uuid4(),
             to_organization_id=uuid.uuid4(),
@@ -240,164 +241,164 @@ class TestPerCapitaRemittancesStr(TestCase):
 # ===== 8. ClcChartOfAccounts =====
 class TestClcChartOfAccountsCreate(TestCase):
     def test_create(self):
-        obj = ClcChartOfAccounts.objects.create()
+        obj = create_valid(ClcChartOfAccounts)
         self.assertIsNotNone(obj.id)
 
 
 class TestClcChartOfAccountsStr(TestCase):
     def test_str(self):
-        obj = ClcChartOfAccounts.objects.create()
+        obj = create_valid(ClcChartOfAccounts)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 9. RemittanceApprovals =====
 class TestRemittanceApprovalsCreate(TestCase):
     def test_create(self):
-        obj = RemittanceApprovals.objects.create(remittance_id=uuid.uuid4())
+        obj = create_valid(RemittanceApprovals, remittance_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestRemittanceApprovalsStr(TestCase):
     def test_str(self):
-        obj = RemittanceApprovals.objects.create(remittance_id=uuid.uuid4())
+        obj = create_valid(RemittanceApprovals, remittance_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 10. ClcWebhookLog =====
 class TestClcWebhookLogCreate(TestCase):
     def test_create(self):
-        obj = ClcWebhookLog.objects.create()
+        obj = create_valid(ClcWebhookLog)
         self.assertIsNotNone(obj.id)
 
 
 class TestClcWebhookLogStr(TestCase):
     def test_str(self):
-        obj = ClcWebhookLog.objects.create()
+        obj = create_valid(ClcWebhookLog)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 11. OrganizationContacts =====
 class TestOrganizationContactsCreate(TestCase):
     def test_create(self):
-        obj = OrganizationContacts.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(OrganizationContacts, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestOrganizationContactsStr(TestCase):
     def test_str(self):
-        obj = OrganizationContacts.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(OrganizationContacts, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 12. ClcOrganizationSyncLog =====
 class TestClcOrganizationSyncLogCreate(TestCase):
     def test_create(self):
-        obj = ClcOrganizationSyncLog.objects.create()
+        obj = create_valid(ClcOrganizationSyncLog)
         self.assertIsNotNone(obj.id)
 
 
 class TestClcOrganizationSyncLogStr(TestCase):
     def test_str(self):
-        obj = ClcOrganizationSyncLog.objects.create()
+        obj = create_valid(ClcOrganizationSyncLog)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 13. ChartOfAccounts =====
 class TestChartOfAccountsCreate(TestCase):
     def test_create(self):
-        obj = ChartOfAccounts.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(ChartOfAccounts, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestChartOfAccountsStr(TestCase):
     def test_str(self):
-        obj = ChartOfAccounts.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(ChartOfAccounts, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 14. ClcRemittanceMapping =====
 class TestClcRemittanceMappingCreate(TestCase):
     def test_create(self):
-        obj = ClcRemittanceMapping.objects.create()
+        obj = create_valid(ClcRemittanceMapping)
         self.assertIsNotNone(obj.id)
 
 
 class TestClcRemittanceMappingStr(TestCase):
     def test_str(self):
-        obj = ClcRemittanceMapping.objects.create()
+        obj = create_valid(ClcRemittanceMapping)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 15. ClcApiConfig =====
 class TestClcApiConfigCreate(TestCase):
     def test_create(self):
-        obj = ClcApiConfig.objects.create()
+        obj = create_valid(ClcApiConfig)
         self.assertIsNotNone(obj.id)
 
 
 class TestClcApiConfigStr(TestCase):
     def test_str(self):
-        obj = ClcApiConfig.objects.create()
+        obj = create_valid(ClcApiConfig)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 16. DonationCampaigns (FK → Organizations) =====
 class TestDonationCampaignsCreate(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="DonCampOrg", slug="doncamborg", organization_type="union"
         )
-        obj = DonationCampaigns.objects.create(organization=org)
+        obj = create_valid(DonationCampaigns, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization, org)
 
 
 class TestDonationCampaignsStr(TestCase):
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="DCSOrg", slug="dcsorg", organization_type="union"
         )
-        obj = DonationCampaigns.objects.create(organization=org)
+        obj = create_valid(DonationCampaigns, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 17. Donations (FK → Organizations) =====
 class TestDonationsCreate(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="DonOrg", slug="donorg", organization_type="union"
         )
-        obj = Donations.objects.create(organization=org)
+        obj = create_valid(Donations, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization, org)
 
 
 class TestDonationsStr(TestCase):
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="DSOrg", slug="dsorg", organization_type="union"
         )
-        obj = Donations.objects.create(organization=org)
+        obj = create_valid(Donations, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 18. DonationReceipts (FK → Organizations) =====
 class TestDonationReceiptsCreate(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="DROrg", slug="drorg", organization_type="union"
         )
-        obj = DonationReceipts.objects.create(organization=org)
+        obj = create_valid(DonationReceipts, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization, org)
 
 
 class TestDonationReceiptsStr(TestCase):
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="DRSOrg", slug="drsorg", organization_type="union"
         )
-        obj = DonationReceipts.objects.create(organization=org)
+        obj = create_valid(DonationReceipts, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
@@ -409,7 +410,7 @@ class TestStripeConnectAccountsCreate(TestCase):
         self.assertEqual(obj.account_type, "standard")
         self.assertEqual(obj.country, "CA")
         self.assertEqual(obj.currency, "CAD")
-        self.assertFalse(obj.separate_account)
+        self.assertTrue(obj.separate_account)
 
 
 class TestStripeConnectAccountsStr(TestCase):
@@ -422,7 +423,7 @@ class TestStripeConnectAccountsStr(TestCase):
 class TestPaymentClassificationPolicyCreate(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = PaymentClassificationPolicy.objects.create(
+        obj = create_valid(PaymentClassificationPolicy,
             policy_name="Default Policy",
             effective_date=now,
             approved_by="admin",
@@ -431,13 +432,13 @@ class TestPaymentClassificationPolicyCreate(TestCase):
         )
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.policy_name, "Default Policy")
-        self.assertFalse(obj.enforce_strict_separation)
+        self.assertTrue(obj.enforce_strict_separation)
 
 
 class TestPaymentClassificationPolicyStr(TestCase):
     def test_str(self):
         now = timezone.now()
-        obj = PaymentClassificationPolicy.objects.create(
+        obj = create_valid(PaymentClassificationPolicy,
             policy_name="P",
             effective_date=now,
             approved_by="a",
@@ -452,7 +453,7 @@ class TestPaymentRoutingRulesCreate(TestCase):
     def test_create(self):
         acct = _make_stripe_account()
         now = timezone.now()
-        obj = PaymentRoutingRules.objects.create(
+        obj = create_valid(PaymentRoutingRules,
             payment_type="dues",
             payment_category="operational",
             destination_account=acct,
@@ -462,14 +463,14 @@ class TestPaymentRoutingRulesCreate(TestCase):
         )
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.destination_account, acct)
-        self.assertFalse(obj.routing_mandatory)
+        self.assertTrue(obj.routing_mandatory)
 
 
 class TestPaymentRoutingRulesStr(TestCase):
     def test_str(self):
         acct = _make_stripe_account()
         now = timezone.now()
-        obj = PaymentRoutingRules.objects.create(
+        obj = create_valid(PaymentRoutingRules,
             payment_type="dues",
             payment_category="op",
             destination_account=acct,
@@ -485,7 +486,7 @@ class TestSeparatedPaymentTransactionsCreate(TestCase):
     def test_create(self):
         acct = _make_stripe_account()
         now = timezone.now()
-        obj = SeparatedPaymentTransactions.objects.create(
+        obj = create_valid(SeparatedPaymentTransactions,
             transaction_date=now,
             payment_type="dues",
             payment_category="operational",
@@ -506,7 +507,7 @@ class TestSeparatedPaymentTransactionsStr(TestCase):
     def test_str(self):
         acct = _make_stripe_account()
         now = timezone.now()
-        obj = SeparatedPaymentTransactions.objects.create(
+        obj = create_valid(SeparatedPaymentTransactions,
             transaction_date=now,
             payment_type="dues",
             payment_category="op",
@@ -524,7 +525,7 @@ class TestSeparatedPaymentTransactionsStr(TestCase):
 class TestWhiplashViolationsCreate(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = WhiplashViolations.objects.create(
+        obj = create_valid(WhiplashViolations,
             violation_date=now,
             violation_type="misrouting",
             severity="critical",
@@ -541,7 +542,7 @@ class TestWhiplashViolationsCreate(TestCase):
 class TestWhiplashViolationsStr(TestCase):
     def test_str(self):
         now = timezone.now()
-        obj = WhiplashViolations.objects.create(
+        obj = create_valid(WhiplashViolations,
             violation_date=now,
             violation_type="x",
             severity="low",
@@ -557,7 +558,7 @@ class TestWhiplashViolationsStr(TestCase):
 class TestStrikeFundPaymentAuditCreate(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = StrikeFundPaymentAudit.objects.create(
+        obj = create_valid(StrikeFundPaymentAudit,
             audit_date=now,
             audit_period="2025-Q2",
             total_strike_payments="50",
@@ -579,7 +580,7 @@ class TestStrikeFundPaymentAuditCreate(TestCase):
 class TestStrikeFundPaymentAuditStr(TestCase):
     def test_str(self):
         now = timezone.now()
-        obj = StrikeFundPaymentAudit.objects.create(
+        obj = create_valid(StrikeFundPaymentAudit,
             audit_date=now,
             audit_period="Q1",
             total_strike_payments="1",
@@ -602,7 +603,7 @@ class TestAccountBalanceReconciliationCreate(TestCase):
     def test_create(self):
         acct = _make_stripe_account()
         now = timezone.now()
-        obj = AccountBalanceReconciliation.objects.create(
+        obj = create_valid(AccountBalanceReconciliation,
             reconciliation_date=now,
             account=acct,
             account_type="operational",
@@ -619,7 +620,7 @@ class TestAccountBalanceReconciliationStr(TestCase):
     def test_str(self):
         acct = _make_stripe_account()
         now = timezone.now()
-        obj = AccountBalanceReconciliation.objects.create(
+        obj = create_valid(AccountBalanceReconciliation,
             reconciliation_date=now,
             account=acct,
             account_type="op",
@@ -633,7 +634,7 @@ class TestAccountBalanceReconciliationStr(TestCase):
 # ===== 26. WhiplashPreventionAudit =====
 class TestWhiplashPreventionAuditCreate(TestCase):
     def test_create(self):
-        obj = WhiplashPreventionAudit.objects.create(
+        obj = create_valid(WhiplashPreventionAudit,
             audit_date=timezone.now(),
             action_type="verification",
             action_description="Verified routing rule compliance",
@@ -645,7 +646,7 @@ class TestWhiplashPreventionAuditCreate(TestCase):
 
 class TestWhiplashPreventionAuditStr(TestCase):
     def test_str(self):
-        obj = WhiplashPreventionAudit.objects.create(
+        obj = create_valid(WhiplashPreventionAudit,
             audit_date=timezone.now(),
             action_type="a",
             action_description="d",
@@ -657,82 +658,82 @@ class TestWhiplashPreventionAuditStr(TestCase):
 # ===== 27. CostCenters =====
 class TestCostCentersCreate(TestCase):
     def test_create(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="Synthetic cost-center tenant",
             slug=f"cost-center-{uuid.uuid4().hex}",
             organization_type="union",
         )
-        obj = CostCenters.objects.create(organization_id=org.id)
+        obj = create_valid(CostCenters, organization_id=org.id)
         self.assertIsNotNone(obj.id)
 
 
 class TestCostCentersStr(TestCase):
     def test_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="Synthetic cost-center tenant",
             slug=f"cost-center-{uuid.uuid4().hex}",
             organization_type="union",
         )
-        obj = CostCenters.objects.create(organization_id=org.id)
+        obj = create_valid(CostCenters, organization_id=org.id)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 28. GlAccountMappings =====
 class TestGlAccountMappingsCreate(TestCase):
     def test_create(self):
-        obj = GlAccountMappings.objects.create()
+        obj = create_valid(GlAccountMappings)
         self.assertIsNotNone(obj.id)
 
 
 class TestGlAccountMappingsStr(TestCase):
     def test_str(self):
-        obj = GlAccountMappings.objects.create()
+        obj = create_valid(GlAccountMappings)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 29. GlTransactionLog =====
 class TestGlTransactionLogCreate(TestCase):
     def test_create(self):
-        obj = GlTransactionLog.objects.create()
+        obj = create_valid(GlTransactionLog)
         self.assertIsNotNone(obj.id)
 
 
 class TestGlTransactionLogStr(TestCase):
     def test_str(self):
-        obj = GlTransactionLog.objects.create()
+        obj = create_valid(GlTransactionLog)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 30. GlTrialBalance =====
 class TestGlTrialBalanceCreate(TestCase):
     def test_create(self):
-        obj = GlTrialBalance.objects.create()
+        obj = create_valid(GlTrialBalance)
         self.assertIsNotNone(obj.id)
 
 
 class TestGlTrialBalanceStr(TestCase):
     def test_str(self):
-        obj = GlTrialBalance.objects.create()
+        obj = create_valid(GlTrialBalance)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 31. OrganizationBillingConfig =====
 class TestOrganizationBillingConfigCreate(TestCase):
     def test_create(self):
-        obj = OrganizationBillingConfig.objects.create()
+        obj = create_valid(OrganizationBillingConfig)
         self.assertIsNotNone(obj.id)
 
 
 class TestOrganizationBillingConfigStr(TestCase):
     def test_str(self):
-        obj = OrganizationBillingConfig.objects.create()
+        obj = create_valid(OrganizationBillingConfig)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 32. DuesTransactions =====
 class TestDuesTransactionsCreate(TestCase):
     def test_create(self):
-        obj = DuesTransactions.objects.create(
+        obj = create_valid(DuesTransactions,
             organization_id=uuid.uuid4(),
             member_id=uuid.uuid4(),
             transaction_type="charge",
@@ -743,7 +744,7 @@ class TestDuesTransactionsCreate(TestCase):
 
 class TestDuesTransactionsStr(TestCase):
     def test_str(self):
-        obj = DuesTransactions.objects.create(
+        obj = create_valid(DuesTransactions,
             organization_id=uuid.uuid4(),
             member_id=uuid.uuid4(),
         )
@@ -753,177 +754,177 @@ class TestDuesTransactionsStr(TestCase):
 # ===== 33. Payments =====
 class TestPaymentsCreate(TestCase):
     def test_create(self):
-        obj = Payments.objects.create()
+        obj = create_valid(Payments)
         self.assertIsNotNone(obj.id)
 
 
 class TestPaymentsStr(TestCase):
     def test_str(self):
-        obj = Payments.objects.create()
+        obj = create_valid(Payments)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 34. PaymentCycles =====
 class TestPaymentCyclesCreate(TestCase):
     def test_create(self):
-        obj = PaymentCycles.objects.create()
+        obj = create_valid(PaymentCycles)
         self.assertIsNotNone(obj.id)
 
 
 class TestPaymentCyclesStr(TestCase):
     def test_str(self):
-        obj = PaymentCycles.objects.create()
+        obj = create_valid(PaymentCycles)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 35. PaymentMethods =====
 class TestPaymentMethodsCreate(TestCase):
     def test_create(self):
-        obj = PaymentMethods.objects.create()
+        obj = create_valid(PaymentMethods)
         self.assertIsNotNone(obj.id)
 
 
 class TestPaymentMethodsStr(TestCase):
     def test_str(self):
-        obj = PaymentMethods.objects.create()
+        obj = create_valid(PaymentMethods)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 36. BankReconciliation =====
 class TestBankReconciliationCreate(TestCase):
     def test_create(self):
-        obj = BankReconciliation.objects.create()
+        obj = create_valid(BankReconciliation)
         self.assertIsNotNone(obj.id)
 
 
 class TestBankReconciliationStr(TestCase):
     def test_str(self):
-        obj = BankReconciliation.objects.create()
+        obj = create_valid(BankReconciliation)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 37. PaymentDisputes =====
 class TestPaymentDisputesCreate(TestCase):
     def test_create(self):
-        obj = PaymentDisputes.objects.create()
+        obj = create_valid(PaymentDisputes)
         self.assertIsNotNone(obj.id)
 
 
 class TestPaymentDisputesStr(TestCase):
     def test_str(self):
-        obj = PaymentDisputes.objects.create()
+        obj = create_valid(PaymentDisputes)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 38. StripeWebhookEvents =====
 class TestStripeWebhookEventsCreate(TestCase):
     def test_create(self):
-        obj = StripeWebhookEvents.objects.create()
+        obj = create_valid(StripeWebhookEvents)
         self.assertIsNotNone(obj.id)
 
 
 class TestStripeWebhookEventsStr(TestCase):
     def test_str(self):
-        obj = StripeWebhookEvents.objects.create()
+        obj = create_valid(StripeWebhookEvents)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 39. StrikeFundDisbursements =====
 class TestStrikeFundDisbursementsCreate(TestCase):
     def test_create(self):
-        obj = StrikeFundDisbursements.objects.create()
+        obj = create_valid(StrikeFundDisbursements)
         self.assertIsNotNone(obj.id)
 
 
 class TestStrikeFundDisbursementsStr(TestCase):
     def test_str(self):
-        obj = StrikeFundDisbursements.objects.create()
+        obj = create_valid(StrikeFundDisbursements)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 40. T4aTaxSlips =====
 class TestT4aTaxSlipsCreate(TestCase):
     def test_create(self):
-        obj = T4aTaxSlips.objects.create()
+        obj = create_valid(T4aTaxSlips)
         self.assertIsNotNone(obj.id)
 
 
 class TestT4aTaxSlipsStr(TestCase):
     def test_str(self):
-        obj = T4aTaxSlips.objects.create()
+        obj = create_valid(T4aTaxSlips)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 41. Rl1TaxSlips =====
 class TestRl1TaxSlipsCreate(TestCase):
     def test_create(self):
-        obj = Rl1TaxSlips.objects.create()
+        obj = create_valid(Rl1TaxSlips)
         self.assertIsNotNone(obj.id)
 
 
 class TestRl1TaxSlipsStr(TestCase):
     def test_str(self):
-        obj = Rl1TaxSlips.objects.create()
+        obj = create_valid(Rl1TaxSlips)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 42. TaxYearEndProcessing =====
 class TestTaxYearEndProcessingCreate(TestCase):
     def test_create(self):
-        obj = TaxYearEndProcessing.objects.create()
+        obj = create_valid(TaxYearEndProcessing)
         self.assertIsNotNone(obj.id)
 
 
 class TestTaxYearEndProcessingStr(TestCase):
     def test_str(self):
-        obj = TaxYearEndProcessing.objects.create()
+        obj = create_valid(TaxYearEndProcessing)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 43. WeeklyThresholdTracking =====
 class TestWeeklyThresholdTrackingCreate(TestCase):
     def test_create(self):
-        obj = WeeklyThresholdTracking.objects.create()
+        obj = create_valid(WeeklyThresholdTracking)
         self.assertIsNotNone(obj.id)
 
 
 class TestWeeklyThresholdTrackingStr(TestCase):
     def test_str(self):
-        obj = WeeklyThresholdTracking.objects.create()
+        obj = create_valid(WeeklyThresholdTracking)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 44. CurrencyEnforcementPolicy =====
 class TestCurrencyEnforcementPolicyCreate(TestCase):
     def test_create(self):
-        obj = CurrencyEnforcementPolicy.objects.create()
+        obj = create_valid(CurrencyEnforcementPolicy)
         self.assertIsNotNone(obj.id)
-        self.assertFalse(obj.enforcement_enabled)
+        self.assertTrue(obj.enforcement_enabled)
 
 
 class TestCurrencyEnforcementPolicyStr(TestCase):
     def test_str(self):
-        obj = CurrencyEnforcementPolicy.objects.create()
+        obj = create_valid(CurrencyEnforcementPolicy)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 45. BankOfCanadaRates =====
 class TestBankOfCanadaRatesCreate(TestCase):
     def test_create(self):
-        obj = BankOfCanadaRates.objects.create(rate_date=timezone.now())
+        obj = create_valid(BankOfCanadaRates, rate_date=timezone.now())
         self.assertIsNotNone(obj.id)
 
 
 class TestBankOfCanadaRatesStr(TestCase):
     def test_str(self):
-        obj = BankOfCanadaRates.objects.create(rate_date=timezone.now())
+        obj = create_valid(BankOfCanadaRates, rate_date=timezone.now())
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 46. TransactionCurrencyConversions =====
 class TestTransactionCurrencyConversionsCreate(TestCase):
     def test_create(self):
-        obj = TransactionCurrencyConversions.objects.create(
+        obj = create_valid(TransactionCurrencyConversions,
             transaction_id=uuid.uuid4(),
         )
         self.assertIsNotNone(obj.id)
@@ -931,7 +932,7 @@ class TestTransactionCurrencyConversionsCreate(TestCase):
 
 class TestTransactionCurrencyConversionsStr(TestCase):
     def test_str(self):
-        obj = TransactionCurrencyConversions.objects.create(
+        obj = create_valid(TransactionCurrencyConversions,
             transaction_id=uuid.uuid4(),
         )
         self.assertIsInstance(str(obj), str)
@@ -940,33 +941,33 @@ class TestTransactionCurrencyConversionsStr(TestCase):
 # ===== 47. CurrencyEnforcementViolations =====
 class TestCurrencyEnforcementViolationsCreate(TestCase):
     def test_create(self):
-        obj = CurrencyEnforcementViolations.objects.create()
+        obj = create_valid(CurrencyEnforcementViolations)
         self.assertIsNotNone(obj.id)
 
 
 class TestCurrencyEnforcementViolationsStr(TestCase):
     def test_str(self):
-        obj = CurrencyEnforcementViolations.objects.create()
+        obj = create_valid(CurrencyEnforcementViolations)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 48. T106FilingTracking =====
 class TestT106FilingTrackingCreate(TestCase):
     def test_create(self):
-        obj = T106FilingTracking.objects.create()
+        obj = create_valid(T106FilingTracking)
         self.assertIsNotNone(obj.id)
 
 
 class TestT106FilingTrackingStr(TestCase):
     def test_str(self):
-        obj = T106FilingTracking.objects.create()
+        obj = create_valid(T106FilingTracking)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 49. TransferPricingDocumentation =====
 class TestTransferPricingDocumentationCreate(TestCase):
     def test_create(self):
-        obj = TransferPricingDocumentation.objects.create(
+        obj = create_valid(TransferPricingDocumentation,
             transaction_id=uuid.uuid4(),
         )
         self.assertIsNotNone(obj.id)
@@ -974,7 +975,7 @@ class TestTransferPricingDocumentationCreate(TestCase):
 
 class TestTransferPricingDocumentationStr(TestCase):
     def test_str(self):
-        obj = TransferPricingDocumentation.objects.create(
+        obj = create_valid(TransferPricingDocumentation,
             transaction_id=uuid.uuid4(),
         )
         self.assertIsInstance(str(obj), str)
@@ -983,46 +984,46 @@ class TestTransferPricingDocumentationStr(TestCase):
 # ===== 50. FxRateAuditLog =====
 class TestFxRateAuditLogCreate(TestCase):
     def test_create(self):
-        obj = FxRateAuditLog.objects.create()
+        obj = create_valid(FxRateAuditLog)
         self.assertIsNotNone(obj.id)
 
 
 class TestFxRateAuditLogStr(TestCase):
     def test_str(self):
-        obj = FxRateAuditLog.objects.create()
+        obj = create_valid(FxRateAuditLog)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 51. CurrencyEnforcementAudit =====
 class TestCurrencyEnforcementAuditCreate(TestCase):
     def test_create(self):
-        obj = CurrencyEnforcementAudit.objects.create()
+        obj = create_valid(CurrencyEnforcementAudit)
         self.assertIsNotNone(obj.id)
 
 
 class TestCurrencyEnforcementAuditStr(TestCase):
     def test_str(self):
-        obj = CurrencyEnforcementAudit.objects.create()
+        obj = create_valid(CurrencyEnforcementAudit)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 52. ExchangeRates =====
 class TestExchangeRatesCreate(TestCase):
     def test_create(self):
-        obj = ExchangeRates.objects.create()
+        obj = create_valid(ExchangeRates)
         self.assertIsNotNone(obj.id)
 
 
 class TestExchangeRatesStr(TestCase):
     def test_str(self):
-        obj = ExchangeRates.objects.create()
+        obj = create_valid(ExchangeRates)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 53. CrossBorderTransactions =====
 class TestCrossBorderTransactionsCreate(TestCase):
     def test_create(self):
-        obj = CrossBorderTransactions.objects.create(
+        obj = create_valid(CrossBorderTransactions,
             transaction_date=timezone.now(),
             amount_cents=50000,
         )
@@ -1032,7 +1033,7 @@ class TestCrossBorderTransactionsCreate(TestCase):
 
 class TestCrossBorderTransactionsStr(TestCase):
     def test_str(self):
-        obj = CrossBorderTransactions.objects.create(
+        obj = create_valid(CrossBorderTransactions,
             transaction_date=timezone.now(),
             amount_cents=100,
         )
@@ -1042,210 +1043,210 @@ class TestCrossBorderTransactionsStr(TestCase):
 # ===== 54. AccountMappings =====
 class TestAccountMappingsCreate(TestCase):
     def test_create(self):
-        obj = AccountMappings.objects.create()
+        obj = create_valid(AccountMappings)
         self.assertIsNotNone(obj.id)
 
 
 class TestAccountMappingsStr(TestCase):
     def test_str(self):
-        obj = AccountMappings.objects.create()
+        obj = create_valid(AccountMappings)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 55. ErpConnectors =====
 class TestErpConnectorsCreate(TestCase):
     def test_create(self):
-        obj = ErpConnectors.objects.create()
+        obj = create_valid(ErpConnectors)
         self.assertIsNotNone(obj.id)
 
 
 class TestErpConnectorsStr(TestCase):
     def test_str(self):
-        obj = ErpConnectors.objects.create()
+        obj = create_valid(ErpConnectors)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 56. JournalEntries =====
 class TestJournalEntriesCreate(TestCase):
     def test_create(self):
-        obj = JournalEntries.objects.create()
+        obj = create_valid(JournalEntries)
         self.assertIsNotNone(obj.id)
 
 
 class TestJournalEntriesStr(TestCase):
     def test_str(self):
-        obj = JournalEntries.objects.create()
+        obj = create_valid(JournalEntries)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 57. JournalEntryLines (FK → JournalEntries) =====
 class TestJournalEntryLinesCreate(TestCase):
     def test_create(self):
-        entry = JournalEntries.objects.create()
-        obj = JournalEntryLines.objects.create(entry=entry)
+        entry = create_valid(JournalEntries)
+        obj = create_valid(JournalEntryLines, entry=entry)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.entry, entry)
 
 
 class TestJournalEntryLinesStr(TestCase):
     def test_str(self):
-        entry = JournalEntries.objects.create()
-        obj = JournalEntryLines.objects.create(entry=entry)
+        entry = create_valid(JournalEntries)
+        obj = create_valid(JournalEntryLines, entry=entry)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 58. ErpInvoices =====
 class TestErpInvoicesCreate(TestCase):
     def test_create(self):
-        obj = ErpInvoices.objects.create()
+        obj = create_valid(ErpInvoices)
         self.assertIsNotNone(obj.id)
 
 
 class TestErpInvoicesStr(TestCase):
     def test_str(self):
-        obj = ErpInvoices.objects.create()
+        obj = create_valid(ErpInvoices)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 59. BankAccounts =====
 class TestBankAccountsCreate(TestCase):
     def test_create(self):
-        obj = BankAccounts.objects.create()
+        obj = create_valid(BankAccounts)
         self.assertIsNotNone(obj.id)
 
 
 class TestBankAccountsStr(TestCase):
     def test_str(self):
-        obj = BankAccounts.objects.create()
+        obj = create_valid(BankAccounts)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 60. BankTransactions (FK → BankAccounts) =====
 class TestBankTransactionsCreate(TestCase):
     def test_create(self):
-        acct = BankAccounts.objects.create()
-        obj = BankTransactions.objects.create(bank_account=acct)
+        acct = create_valid(BankAccounts)
+        obj = create_valid(BankTransactions, bank_account=acct)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.bank_account, acct)
 
 
 class TestBankTransactionsStr(TestCase):
     def test_str(self):
-        acct = BankAccounts.objects.create()
-        obj = BankTransactions.objects.create(bank_account=acct)
+        acct = create_valid(BankAccounts)
+        obj = create_valid(BankTransactions, bank_account=acct)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 61. BankReconciliations =====
 class TestBankReconciliationsCreate(TestCase):
     def test_create(self):
-        obj = BankReconciliations.objects.create()
+        obj = create_valid(BankReconciliations)
         self.assertIsNotNone(obj.id)
 
 
 class TestBankReconciliationsStr(TestCase):
     def test_str(self):
-        obj = BankReconciliations.objects.create()
+        obj = create_valid(BankReconciliations)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 62. SyncJobs =====
 class TestSyncJobsCreate(TestCase):
     def test_create(self):
-        obj = SyncJobs.objects.create()
+        obj = create_valid(SyncJobs)
         self.assertIsNotNone(obj.id)
 
 
 class TestSyncJobsStr(TestCase):
     def test_str(self):
-        obj = SyncJobs.objects.create()
+        obj = create_valid(SyncJobs)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 63. FinancialAuditLog =====
 class TestFinancialAuditLogCreate(TestCase):
     def test_create(self):
-        obj = FinancialAuditLog.objects.create()
+        obj = create_valid(FinancialAuditLog)
         self.assertIsNotNone(obj.id)
 
 
 class TestFinancialAuditLogStr(TestCase):
     def test_str(self):
-        obj = FinancialAuditLog.objects.create()
+        obj = create_valid(FinancialAuditLog)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 64. CurrencyExchangeRates =====
 class TestCurrencyExchangeRatesCreate(TestCase):
     def test_create(self):
-        obj = CurrencyExchangeRates.objects.create()
+        obj = create_valid(CurrencyExchangeRates)
         self.assertIsNotNone(obj.id)
 
 
 class TestCurrencyExchangeRatesStr(TestCase):
     def test_str(self):
-        obj = CurrencyExchangeRates.objects.create()
+        obj = create_valid(CurrencyExchangeRates)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 65. FmvPolicy =====
 class TestFmvPolicyCreate(TestCase):
     def test_create(self):
-        obj = FmvPolicy.objects.create()
+        obj = create_valid(FmvPolicy)
         self.assertIsNotNone(obj.id)
-        self.assertFalse(obj.policy_enabled)
-        self.assertFalse(obj.fmv_verification_required)
+        self.assertTrue(obj.policy_enabled)
+        self.assertTrue(obj.fmv_verification_required)
 
 
 class TestFmvPolicyStr(TestCase):
     def test_str(self):
-        obj = FmvPolicy.objects.create()
+        obj = create_valid(FmvPolicy)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 66. CpiData =====
 class TestCpiDataCreate(TestCase):
     def test_create(self):
-        obj = CpiData.objects.create()
+        obj = create_valid(CpiData)
         self.assertIsNotNone(obj.id)
 
 
 class TestCpiDataStr(TestCase):
     def test_str(self):
-        obj = CpiData.objects.create()
+        obj = create_valid(CpiData)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 67. FmvBenchmarks =====
 class TestFmvBenchmarksCreate(TestCase):
     def test_create(self):
-        obj = FmvBenchmarks.objects.create()
+        obj = create_valid(FmvBenchmarks)
         self.assertIsNotNone(obj.id)
 
 
 class TestFmvBenchmarksStr(TestCase):
     def test_str(self):
-        obj = FmvBenchmarks.objects.create()
+        obj = create_valid(FmvBenchmarks)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 68. ProcurementRequests =====
 class TestProcurementRequestsCreate(TestCase):
     def test_create(self):
-        obj = ProcurementRequests.objects.create()
+        obj = create_valid(ProcurementRequests)
         self.assertIsNotNone(obj.id)
 
 
 class TestProcurementRequestsStr(TestCase):
     def test_str(self):
-        obj = ProcurementRequests.objects.create()
+        obj = create_valid(ProcurementRequests)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 69. ProcurementBids =====
 class TestProcurementBidsCreate(TestCase):
     def test_create(self):
-        obj = ProcurementBids.objects.create(
+        obj = create_valid(ProcurementBids,
             procurement_request_id=uuid.uuid4(),
             bidder_name="Acme Corp",
             bidder_contact="Jane Doe",
@@ -1256,7 +1257,7 @@ class TestProcurementBidsCreate(TestCase):
 
 class TestProcurementBidsStr(TestCase):
     def test_str(self):
-        obj = ProcurementBids.objects.create(
+        obj = create_valid(ProcurementBids,
             procurement_request_id=uuid.uuid4(),
             bidder_name="X",
             bidder_contact="Y",
@@ -1267,20 +1268,20 @@ class TestProcurementBidsStr(TestCase):
 # ===== 70. IndependentAppraisals =====
 class TestIndependentAppraisalsCreate(TestCase):
     def test_create(self):
-        obj = IndependentAppraisals.objects.create()
+        obj = create_valid(IndependentAppraisals)
         self.assertIsNotNone(obj.id)
 
 
 class TestIndependentAppraisalsStr(TestCase):
     def test_str(self):
-        obj = IndependentAppraisals.objects.create()
+        obj = create_valid(IndependentAppraisals)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 71. CpiAdjustedPricing =====
 class TestCpiAdjustedPricingCreate(TestCase):
     def test_create(self):
-        obj = CpiAdjustedPricing.objects.create(
+        obj = create_valid(CpiAdjustedPricing,
             item_id=uuid.uuid4(),
             item_description="Office supplies",
             original_price=Decimal("150.00"),
@@ -1292,7 +1293,7 @@ class TestCpiAdjustedPricingCreate(TestCase):
 
 class TestCpiAdjustedPricingStr(TestCase):
     def test_str(self):
-        obj = CpiAdjustedPricing.objects.create(
+        obj = create_valid(CpiAdjustedPricing,
             item_id=uuid.uuid4(),
             item_description="X",
         )
@@ -1302,33 +1303,33 @@ class TestCpiAdjustedPricingStr(TestCase):
 # ===== 72. FmvViolations =====
 class TestFmvViolationsCreate(TestCase):
     def test_create(self):
-        obj = FmvViolations.objects.create()
+        obj = create_valid(FmvViolations)
         self.assertIsNotNone(obj.id)
 
 
 class TestFmvViolationsStr(TestCase):
     def test_str(self):
-        obj = FmvViolations.objects.create()
+        obj = create_valid(FmvViolations)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 73. FmvAuditLog =====
 class TestFmvAuditLogCreate(TestCase):
     def test_create(self):
-        obj = FmvAuditLog.objects.create()
+        obj = create_valid(FmvAuditLog)
         self.assertIsNotNone(obj.id)
 
 
 class TestFmvAuditLogStr(TestCase):
     def test_str(self):
-        obj = FmvAuditLog.objects.create()
+        obj = create_valid(FmvAuditLog)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 74. DuesRates =====
 class TestDuesRatesCreate(TestCase):
     def test_create(self):
-        obj = DuesRates.objects.create(
+        obj = create_valid(DuesRates,
             organization_id=uuid.uuid4(),
             rate_name="Standard Monthly",
             rate_type="percentage",
@@ -1341,7 +1342,7 @@ class TestDuesRatesCreate(TestCase):
 
 class TestDuesRatesStr(TestCase):
     def test_str(self):
-        obj = DuesRates.objects.create(
+        obj = create_valid(DuesRates,
             organization_id=uuid.uuid4(),
             rate_name="R",
             rate_type="flat",
@@ -1353,7 +1354,7 @@ class TestDuesRatesStr(TestCase):
 class TestMemberDuesLedgerCreate(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = MemberDuesLedger.objects.create(
+        obj = create_valid(MemberDuesLedger,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             transaction_type="charge",
@@ -1369,7 +1370,7 @@ class TestMemberDuesLedgerCreate(TestCase):
 class TestMemberDuesLedgerStr(TestCase):
     def test_str(self):
         now = timezone.now()
-        obj = MemberDuesLedger.objects.create(
+        obj = create_valid(MemberDuesLedger,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             transaction_type="payment",
@@ -1382,7 +1383,7 @@ class TestMemberDuesLedgerStr(TestCase):
 # ===== 76. MemberArrears =====
 class TestMemberArrearsCreate(TestCase):
     def test_create(self):
-        obj = MemberArrears.objects.create(
+        obj = create_valid(MemberArrears,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             total_owed=Decimal("120.00"),
@@ -1393,7 +1394,7 @@ class TestMemberArrearsCreate(TestCase):
 
 class TestMemberArrearsStr(TestCase):
     def test_str(self):
-        obj = MemberArrears.objects.create(
+        obj = create_valid(MemberArrears,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
         )
@@ -1404,7 +1405,7 @@ class TestMemberArrearsStr(TestCase):
 class TestEmployerRemittancesCreate(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = EmployerRemittances.objects.create(
+        obj = create_valid(EmployerRemittances,
             employer_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             period_start=now,
@@ -1422,7 +1423,7 @@ class TestEmployerRemittancesCreate(TestCase):
 class TestEmployerRemittancesStr(TestCase):
     def test_str(self):
         now = timezone.now()
-        obj = EmployerRemittances.objects.create(
+        obj = create_valid(EmployerRemittances,
             employer_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             period_start=now,
@@ -1437,7 +1438,7 @@ class TestEmployerRemittancesStr(TestCase):
 # ===== 78. RemittanceLineItems =====
 class TestRemittanceLineItemsCreate(TestCase):
     def test_create(self):
-        obj = RemittanceLineItems.objects.create(
+        obj = create_valid(RemittanceLineItems,
             remittance_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             amount=Decimal("500.00"),
@@ -1448,7 +1449,7 @@ class TestRemittanceLineItemsCreate(TestCase):
 
 class TestRemittanceLineItemsStr(TestCase):
     def test_str(self):
-        obj = RemittanceLineItems.objects.create(
+        obj = create_valid(RemittanceLineItems,
             remittance_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
         )
@@ -1458,7 +1459,7 @@ class TestRemittanceLineItemsStr(TestCase):
 # ===== 79. RemittanceExceptions =====
 class TestRemittanceExceptionsCreate(TestCase):
     def test_create(self):
-        obj = RemittanceExceptions.objects.create(
+        obj = create_valid(RemittanceExceptions,
             remittance_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             exception_type="duplicate",
@@ -1471,7 +1472,7 @@ class TestRemittanceExceptionsCreate(TestCase):
 
 class TestRemittanceExceptionsStr(TestCase):
     def test_str(self):
-        obj = RemittanceExceptions.objects.create(
+        obj = create_valid(RemittanceExceptions,
             remittance_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             exception_type="missing",
@@ -1482,7 +1483,7 @@ class TestRemittanceExceptionsStr(TestCase):
 # ===== 80. PaymentPlans =====
 class TestPaymentPlansCreate(TestCase):
     def test_create(self):
-        obj = PaymentPlans.objects.create(
+        obj = create_valid(PaymentPlans,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             plan_name="Monthly Installment",
@@ -1495,7 +1496,7 @@ class TestPaymentPlansCreate(TestCase):
 
 class TestPaymentPlansStr(TestCase):
     def test_str(self):
-        obj = PaymentPlans.objects.create(
+        obj = create_valid(PaymentPlans,
             user_id=uuid.uuid4(),
             organization_id=uuid.uuid4(),
             plan_name="P",
@@ -1507,7 +1508,7 @@ class TestPaymentPlansStr(TestCase):
 class TestFinancialPeriodsCreate(TestCase):
     def test_create(self):
         now = timezone.now()
-        obj = FinancialPeriods.objects.create(
+        obj = create_valid(FinancialPeriods,
             organization_id=uuid.uuid4(),
             fiscal_year=2025,
             fiscal_month=6,
@@ -1522,7 +1523,7 @@ class TestFinancialPeriodsCreate(TestCase):
 class TestFinancialPeriodsStr(TestCase):
     def test_str(self):
         now = timezone.now()
-        obj = FinancialPeriods.objects.create(
+        obj = create_valid(FinancialPeriods,
             organization_id=uuid.uuid4(),
             fiscal_year=2025,
             fiscal_month=1,

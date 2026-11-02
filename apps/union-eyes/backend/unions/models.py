@@ -11,6 +11,9 @@ import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+from decimal import Decimal
+from core import defaults as column_defaults
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -43,7 +46,30 @@ class OrganizationModel(BaseModel):
 class AwardTemplates(BaseModel):
     """Migrated from drizzle: award-templates-schema.ts"""
 
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
+    approver_roles = models.JSONField(null=True, blank=True)
+    badge_color = models.CharField(max_length=20, null=True, blank=True)
+    badge_icon = models.CharField(max_length=500, null=True, blank=True)
+    badge_name = models.CharField(max_length=100, null=True, blank=True)
+    category = models.CharField(max_length=50)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    max_uses = models.IntegerField(null=True, blank=True)
+    message = models.TextField()
+    monetary_value = models.IntegerField(default=0, null=True, blank=True)
+    organization_id = models.CharField(max_length=255, null=True, blank=True)
+    per_user_limit = models.IntegerField(null=True, blank=True)
+    points_value = models.IntegerField(default=0, null=True, blank=True)
+    requires_approval = models.BooleanField(default=False, null=True, blank=True)
+    status = models.CharField(max_length=20, default='active')
+    tags = models.JSONField(null=True, blank=True)
+    total_awarded = models.IntegerField(default=0, null=True, blank=True)
+    total_value_awarded = models.IntegerField(default=0, null=True, blank=True)
+    type = models.CharField(max_length=50)
+    use_count = models.IntegerField(default=0, null=True, blank=True)
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_until = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "award_templates"
@@ -61,7 +87,22 @@ class AwardHistory(BaseModel):
         on_delete=models.CASCADE,
         related_name="award_history_template_set",
     )
-    recipient_id = models.CharField(max_length=255, null=True, blank=True)
+    recipient_id = models.CharField(max_length=255, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    awarded_at = models.DateTimeField(default=timezone.now)
+    badge_awarded = models.BooleanField(default=False, null=True, blank=True)
+    giver_id = models.CharField(max_length=255)
+    giver_name = models.CharField(max_length=255)
+    monetary_value = models.IntegerField(default=0, null=True, blank=True)
+    points_awarded = models.IntegerField(default=0, null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
+    recipient_email = models.CharField(max_length=255, null=True, blank=True)
+    recipient_name = models.CharField(max_length=255)
+    redeemed_at = models.DateTimeField(null=True, blank=True)
+    redemption_notes = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='pending')
+    visibility = models.CharField(max_length=20, default='public', null=True, blank=True)
 
     class Meta:
         db_table = "award_history"
@@ -96,6 +137,12 @@ class RewardWalletLedger(BaseModel):
     source_id = models.UUIDField(null=True, blank=True)
     memo = models.TextField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
+    award_id = models.UUIDField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    points_change = models.IntegerField(null=True, blank=True)
+    reference_id = models.CharField(max_length=255, null=True, blank=True)
+    reference_type = models.CharField(max_length=50, null=True, blank=True)
+    transaction_type = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         db_table = "reward_wallet_ledger"
@@ -116,7 +163,16 @@ class RewardWalletLedger(BaseModel):
 class BudgetPool(BaseModel):
     """Migrated from drizzle: award-templates-schema.ts"""
 
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
+    organization_id = models.CharField(max_length=255)
+    allocated_budget = models.IntegerField(default=0)
+    description = models.TextField(null=True, blank=True)
+    fiscal_year = models.IntegerField()
+    manager_id = models.CharField(max_length=255, null=True, blank=True)
+    quarter = models.IntegerField(null=True, blank=True)
+    spent_budget = models.IntegerField(default=0)
+    status = models.CharField(max_length=20, default='active')
+    total_budget = models.IntegerField()
 
     class Meta:
         db_table = "budget_pool"
@@ -135,7 +191,10 @@ class BudgetReservations(BaseModel):
         related_name="budget_reservations_pool_set",
     )
     reserved_amount = models.IntegerField()
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=255, blank=True, default='pending')
+    expires_at = models.DateTimeField(null=True, blank=True)
+    reference_id = models.CharField(max_length=255)
+    reference_type = models.CharField(max_length=50)
 
     class Meta:
         db_table = "budget_reservations"
@@ -145,7 +204,37 @@ class BudgetReservations(BaseModel):
 class Calendars(BaseModel):
     """Migrated from drizzle: calendar-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    name = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    color = models.CharField(max_length=7, default='#3B82F6', null=True, blank=True)
+    icon = models.CharField(max_length=50, null=True, blank=True)
+    owner_id = models.TextField()
+    is_personal = models.BooleanField(default=True, null=True, blank=True)
+    is_shared = models.BooleanField(default=False, null=True, blank=True)
+    is_public = models.BooleanField(default=False, null=True, blank=True)
+    external_provider = models.CharField(max_length=50, null=True, blank=True)
+    external_calendar_id = models.TextField(null=True, blank=True)
+    sync_enabled = models.BooleanField(default=False, null=True, blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
+    sync_status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'synced', 'pending', 'failed', 'disconnected', 'idle', 'running', 'success', 'partial',
+            'cancelled', 'in_progress',
+        ]],
+        default='disconnected',
+        null=True,
+        blank=True,
+    )
+    sync_token = models.TextField(null=True, blank=True)
+    timezone = models.CharField(max_length=100, default='America/New_York', null=True, blank=True)
+    default_event_duration = models.IntegerField(default=60, null=True, blank=True)
+    reminder_default_minutes = models.IntegerField(default=15, null=True, blank=True)
+    allow_overlap = models.BooleanField(default=True, null=True, blank=True)
+    require_approval = models.BooleanField(default=False, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
 
     class Meta:
         db_table = "calendars"
@@ -160,6 +249,64 @@ class CalendarEvents(BaseModel):
         on_delete=models.CASCADE,
         related_name="calendar_events_calendar_set",
     )
+    organization_id = models.UUIDField()
+    title = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    location = models.TextField(null=True, blank=True)
+    location_url = models.TextField(null=True, blank=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    timezone = models.CharField(max_length=100, default='America/New_York', null=True, blank=True)
+    is_all_day = models.BooleanField(default=False, null=True, blank=True)
+    is_recurring = models.BooleanField(default=False, null=True, blank=True)
+    recurrence_rule = models.TextField(null=True, blank=True)
+    recurrence_exceptions = models.JSONField(null=True, blank=True)
+    parent_event_id = models.UUIDField(null=True, blank=True)
+    event_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'meeting', 'appointment', 'deadline', 'reminder', 'task', 'hearing', 'mediation',
+            'negotiation', 'training', 'other',
+        ]],
+        default='meeting',
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'scheduled', 'confirmed', 'cancelled', 'completed', 'no_show', 'rescheduled',
+        ]],
+        default='scheduled',
+        null=True,
+        blank=True,
+    )
+    priority = models.CharField(max_length=20, default='normal', null=True, blank=True)
+    claim_id = models.TextField(null=True, blank=True)
+    case_number = models.TextField(null=True, blank=True)
+    member_id = models.TextField(null=True, blank=True)
+    meeting_room_id = models.UUIDField(null=True, blank=True)
+    meeting_url = models.TextField(null=True, blank=True)
+    meeting_password = models.TextField(null=True, blank=True)
+    agenda = models.TextField(null=True, blank=True)
+    organizer_id = models.TextField()
+    reminders = models.JSONField(
+        default=column_defaults.calendar_events__reminders,
+        null=True,
+        blank=True,
+    )
+    external_event_id = models.TextField(null=True, blank=True)
+    external_provider = models.CharField(max_length=50, null=True, blank=True)
+    external_html_link = models.TextField(null=True, blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
+    is_private = models.BooleanField(default=False, null=True, blank=True)
+    visibility = models.CharField(max_length=20, default='default', null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
+    created_by = models.TextField()
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    cancelled_by = models.TextField(null=True, blank=True)
+    cancellation_reason = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "calendar_events"
@@ -174,6 +321,26 @@ class EventAttendees(BaseModel):
         on_delete=models.CASCADE,
         related_name="event_attendees_event_set",
     )
+    email = models.TextField()
+    external_attendee_id = models.TextField(null=True, blank=True)
+    is_optional = models.BooleanField(default=False, null=True, blank=True)
+    is_organizer = models.BooleanField(default=False, null=True, blank=True)
+    last_notification_at = models.DateTimeField(null=True, blank=True)
+    name = models.TextField(null=True, blank=True)
+    notification_sent = models.BooleanField(default=False, null=True, blank=True)
+    organization_id = models.UUIDField()
+    responded_at = models.DateTimeField(null=True, blank=True)
+    response_comment = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'invited', 'accepted', 'declined', 'tentative', 'no_response',
+        ]],
+        default='invited',
+        null=True,
+        blank=True,
+    )
+    user_id = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "event_attendees"
@@ -183,7 +350,38 @@ class EventAttendees(BaseModel):
 class MeetingRooms(BaseModel):
     """Migrated from drizzle: calendar-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    name = models.TextField()
+    display_name = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    building_name = models.CharField(max_length=200, null=True, blank=True)
+    floor = models.CharField(max_length=50, null=True, blank=True)
+    room_number = models.CharField(max_length=50, null=True, blank=True)
+    address = models.TextField(null=True, blank=True)
+    capacity = models.IntegerField(default=10, null=True, blank=True)
+    features = models.JSONField(null=True, blank=True)
+    equipment = models.JSONField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['available', 'booked', 'maintenance', 'unavailable']],
+        default='available',
+        null=True,
+        blank=True,
+    )
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    requires_approval = models.BooleanField(default=False, null=True, blank=True)
+    min_booking_duration = models.IntegerField(default=30, null=True, blank=True)
+    max_booking_duration = models.IntegerField(default=480, null=True, blank=True)
+    advance_booking_days = models.IntegerField(default=90, null=True, blank=True)
+    operating_hours = models.JSONField(null=True, blank=True)
+    allowed_user_roles = models.JSONField(null=True, blank=True)
+    blocked_dates = models.JSONField(null=True, blank=True)
+    contact_person_id = models.TextField(null=True, blank=True)
+    contact_email = models.TextField(null=True, blank=True)
+    contact_phone = models.CharField(max_length=20, null=True, blank=True)
+    image_url = models.TextField(null=True, blank=True)
+    floor_plan_url = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "meeting_rooms"
@@ -196,6 +394,40 @@ class RoomBookings(BaseModel):
     room = models.ForeignKey(
         "MeetingRooms", on_delete=models.CASCADE, related_name="room_bookings_room_set"
     )
+    event_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    booked_by = models.TextField()
+    booked_for = models.TextField(null=True, blank=True)
+    purpose = models.TextField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    setup_required = models.BooleanField(default=False, null=True, blank=True)
+    setup_time = models.IntegerField(default=0, null=True, blank=True)
+    catering_required = models.BooleanField(default=False, null=True, blank=True)
+    catering_notes = models.TextField(null=True, blank=True)
+    special_requests = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'scheduled', 'confirmed', 'cancelled', 'completed', 'no_show', 'rescheduled',
+        ]],
+        default='scheduled',
+        null=True,
+        blank=True,
+    )
+    requires_approval = models.BooleanField(default=False, null=True, blank=True)
+    approved_by = models.TextField(null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approval_notes = models.TextField(null=True, blank=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    checked_in_by = models.TextField(null=True, blank=True)
+    checked_out_at = models.DateTimeField(null=True, blank=True)
+    actual_end_time = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    cancelled_by = models.TextField(null=True, blank=True)
+    cancellation_reason = models.TextField(null=True, blank=True)
+    attendee_count = models.IntegerField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "room_bookings"
@@ -221,6 +453,33 @@ class ExternalCalendarConnections(BaseModel):
 
     user_id = models.TextField()
     organization_id = models.UUIDField(null=True, blank=True)
+    provider = models.CharField(max_length=50)
+    provider_account_id = models.TextField()
+    provider_email = models.TextField(null=True, blank=True)
+    access_token = models.TextField()
+    refresh_token = models.TextField(null=True, blank=True)
+    token_expires_at = models.DateTimeField(null=True, blank=True)
+    scope = models.TextField(null=True, blank=True)
+    sync_enabled = models.BooleanField(default=True, null=True, blank=True)
+    sync_direction = models.CharField(max_length=20, default='both', null=True, blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
+    next_sync_at = models.DateTimeField(null=True, blank=True)
+    sync_status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'synced', 'pending', 'failed', 'disconnected', 'idle', 'running', 'success', 'partial',
+            'cancelled', 'in_progress',
+        ]],
+        default='synced',
+        null=True,
+        blank=True,
+    )
+    sync_error = models.TextField(null=True, blank=True)
+    sync_past_days = models.IntegerField(default=30, null=True, blank=True)
+    sync_future_days = models.IntegerField(default=365, null=True, blank=True)
+    sync_only_free_time = models.BooleanField(default=False, null=True, blank=True)
+    calendar_mappings = models.JSONField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
 
     class Meta:
         db_table = "external_calendar_connections"
@@ -235,6 +494,15 @@ class EventReminders(BaseModel):
         on_delete=models.CASCADE,
         related_name="event_reminders_event_set",
     )
+    error = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    reminder_minutes = models.IntegerField()
+    reminder_type = models.CharField(max_length=20, default='notification', null=True, blank=True)
+    scheduled_for = models.DateTimeField()
+    sent_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='pending', null=True, blank=True)
+    user_id = models.TextField()
 
     class Meta:
         db_table = "event_reminders"
@@ -244,7 +512,16 @@ class EventReminders(BaseModel):
 class CongressMemberships(BaseModel):
     """Migrated from drizzle: congress-memberships-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    congress_id = models.UUIDField()
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['active', 'suspended', 'expired', 'pending']],
+        default='active',
+    )
+    joined_at = models.DateTimeField(default=timezone.now)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "congress_memberships"
@@ -261,6 +538,12 @@ class Holidays(BaseModel):
         null=True,
         blank=True,
     )
+    holiday_date = models.DateTimeField()
+    holiday_name = models.CharField(max_length=255)
+    holiday_type = models.CharField(max_length=100)
+    is_recurring = models.BooleanField(default=False)
+    applies_to = models.CharField(max_length=100, default='all')
+    is_observed = models.BooleanField(default=True)
 
     class Meta:
         db_table = "holidays"
@@ -271,6 +554,40 @@ class StewardAssignments(BaseModel):
     """Migrated from drizzle: organizer-workflows.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    steward_id = models.TextField()
+    steward_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'chief_steward', 'steward', 'alternate_steward', 'health_safety_rep',
+        ]],
+    )
+    status = models.CharField(max_length=50, default='active')
+    unit_id = models.UUIDField(null=True, blank=True)
+    worksite_id = models.UUIDField(null=True, blank=True)
+    department = models.CharField(max_length=255, null=True, blank=True)
+    shift = models.CharField(max_length=100, null=True, blank=True)
+    floor = models.CharField(max_length=100, null=True, blank=True)
+    area = models.CharField(max_length=255, null=True, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    is_interim = models.BooleanField(default=False, null=True, blank=True)
+    appointed_by = models.TextField(null=True, blank=True)
+    elected_date = models.DateField(null=True, blank=True)
+    certification_date = models.DateField(null=True, blank=True)
+    responsibility_areas = models.JSONField(null=True, blank=True)
+    members_covered = models.IntegerField(null=True, blank=True)
+    training_completed = models.BooleanField(default=False, null=True, blank=True)
+    training_completion_date = models.DateField(null=True, blank=True)
+    certification_expiry = models.DateField(null=True, blank=True)
+    work_phone = models.CharField(max_length=50, null=True, blank=True)
+    personal_phone = models.CharField(max_length=50, null=True, blank=True)
+    preferred_contact_method = models.CharField(max_length=50, null=True, blank=True)
+    availability_notes = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    grievance_id = models.UUIDField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "steward_assignments"
@@ -320,7 +637,36 @@ class FieldNotes(BaseModel):
 class OrganizerTasks(BaseModel):
     """Migrated from drizzle: organizer-workflows.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    assigned_to = models.CharField(max_length=255)
+    assigned_by = models.CharField(max_length=255, null=True, blank=True)
+    member_id = models.CharField(max_length=255, null=True, blank=True)
+    related_case_id = models.UUIDField(null=True, blank=True)
+    related_grievance_id = models.UUIDField(null=True, blank=True)
+    priority = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['low', 'medium', 'high', 'urgent']],
+        default='medium',
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'pending', 'in_progress', 'completed', 'cancelled', 'blocked',
+        ]],
+        default='pending',
+    )
+    due_date = models.DateField(null=True, blank=True)
+    estimated_minutes = models.IntegerField(null=True, blank=True)
+    actual_minutes = models.IntegerField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completion_notes = models.TextField(null=True, blank=True)
+    blocked_reason = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    tags = ArrayField(models.TextField(), null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "organizer_tasks"
@@ -351,6 +697,23 @@ class Surveys(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    survey_type = models.CharField(max_length=50, default='general')
+    status = models.CharField(max_length=50, default='draft')
+    published_at = models.DateTimeField(null=True, blank=True)
+    closes_at = models.DateTimeField(null=True, blank=True)
+    allow_anonymous = models.BooleanField(default=False)
+    allow_multiple_responses = models.BooleanField(default=False)
+    require_authentication = models.BooleanField(default=True)
+    shuffle_questions = models.BooleanField(default=False)
+    show_results = models.BooleanField(default=False)
+    welcome_message = models.TextField(null=True, blank=True)
+    thank_you_message = models.TextField(null=True, blank=True)
+    response_count = models.IntegerField(default=0)
+    view_count = models.IntegerField(default=0)
+    completion_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "surveys"
@@ -361,6 +724,25 @@ class SurveyQuestions(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    survey_id = models.UUIDField()
+    question_text = models.TextField()
+    question_type = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+    order_index = models.IntegerField(default=0)
+    section = models.CharField(max_length=255, null=True, blank=True)
+    required = models.BooleanField(default=False)
+    choices = models.JSONField(null=True, blank=True)
+    allow_other = models.BooleanField(default=False)
+    min_choices = models.IntegerField(null=True, blank=True)
+    max_choices = models.IntegerField(null=True, blank=True)
+    rating_min = models.IntegerField(default=1, null=True, blank=True)
+    rating_max = models.IntegerField(default=10, null=True, blank=True)
+    rating_min_label = models.CharField(max_length=100, null=True, blank=True)
+    rating_max_label = models.CharField(max_length=100, null=True, blank=True)
+    min_length = models.IntegerField(null=True, blank=True)
+    max_length = models.IntegerField(null=True, blank=True)
+    placeholder = models.TextField(null=True, blank=True)
+    show_if = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "survey_questions"
@@ -371,6 +753,16 @@ class SurveyResponses(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    survey_id = models.UUIDField()
+    user_id = models.TextField(null=True, blank=True)
+    respondent_email = models.CharField(max_length=255, null=True, blank=True)
+    respondent_name = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=50, default='in_progress')
+    started_at = models.DateTimeField(default=timezone.now)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    time_spent_seconds = models.IntegerField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "survey_responses"
@@ -381,6 +773,13 @@ class SurveyAnswers(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    response_id = models.UUIDField()
+    question_id = models.UUIDField()
+    answer_text = models.TextField(null=True, blank=True)
+    answer_number = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    answer_choices = models.JSONField(null=True, blank=True)
+    answer_other = models.TextField(null=True, blank=True)
+    answered_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "survey_answers"
@@ -391,6 +790,18 @@ class Polls(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    question = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    options = models.JSONField()
+    status = models.CharField(max_length=50, default='active')
+    allow_multiple_votes = models.BooleanField(default=False)
+    require_authentication = models.BooleanField(default=True)
+    show_results_before_vote = models.BooleanField(default=False)
+    published_at = models.DateTimeField(default=timezone.now)
+    closes_at = models.DateTimeField(null=True, blank=True)
+    total_votes = models.IntegerField(default=0)
+    unique_voters = models.IntegerField(default=0)
+    created_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "polls"
@@ -401,6 +812,13 @@ class PollVotes(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    poll_id = models.UUIDField()
+    user_id = models.TextField(null=True, blank=True)
+    voter_email = models.CharField(max_length=255, null=True, blank=True)
+    option_id = models.CharField(max_length=50)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    voted_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "poll_votes"
@@ -411,6 +829,24 @@ class MemberLocationConsent(BaseModel):
     """Migrated from drizzle: geofence.ts"""
 
     user_id = models.CharField(max_length=255, null=True, blank=True)
+    consent_status = models.CharField(max_length=20, default='never_asked')
+    opted_in_at = models.DateTimeField(null=True, blank=True)
+    opted_out_at = models.DateTimeField(null=True, blank=True)
+    consent_purpose = models.TextField()
+    purpose_description = models.TextField(null=True, blank=True)
+    foreground_only = models.BooleanField(default=True)
+    allowed_during_strike = models.BooleanField(default=False)
+    allowed_during_events = models.BooleanField(default=False)
+    can_revoke_anytime = models.BooleanField(default=True)
+    data_retention_hours = models.CharField(max_length=10, default='24')
+    auto_delete_enabled = models.BooleanField(default=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    renewal_required = models.BooleanField(default=True)
+    last_renewal_reminder = models.DateTimeField(null=True, blank=True)
+    consent_text = models.TextField()
+    consent_version = models.CharField(max_length=10)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "member_location_consent"
@@ -422,6 +858,39 @@ class Federations(BaseModel):
 
     organization_id = models.UUIDField()
     name = models.CharField(max_length=255, null=True, blank=True)
+    short_name = models.CharField(max_length=100, null=True, blank=True)
+    slug = models.CharField(max_length=255)
+    federation_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['provincial', 'regional', 'sectoral', 'international']],
+        default='provincial',
+    )
+    province = models.CharField(max_length=2, null=True, blank=True)
+    region = models.CharField(max_length=100, null=True, blank=True)
+    jurisdiction = models.CharField(max_length=100, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    website = models.TextField(null=True, blank=True)
+    address = models.JSONField(null=True, blank=True)
+    founded_date = models.DateField(null=True, blank=True)
+    affiliated_with_clc = models.BooleanField(default=True, null=True, blank=True)
+    clc_affiliate_code = models.CharField(max_length=50, null=True, blank=True)
+    total_member_unions = models.IntegerField(default=0, null=True, blank=True)
+    total_represented_workers = models.IntegerField(default=0, null=True, blank=True)
+    per_capita_rate = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    fiscal_year_end = models.CharField(max_length=5, null=True, blank=True)
+    status = models.CharField(max_length=20, default='active', null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    mission = models.TextField(null=True, blank=True)
+    constitution = models.TextField(null=True, blank=True)
+    bylaws = models.TextField(null=True, blank=True)
+    strategic_plan = models.TextField(null=True, blank=True)
+    settings = models.JSONField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "federations"
@@ -484,9 +953,55 @@ class FederationRemittances(BaseModel):
     due_date = models.DateField()
     total_members = models.IntegerField()
     remittable_members = models.IntegerField()
-    per_capita_rate = models.DecimalField(
-        max_digits=19, decimal_places=2, null=True, blank=True
+    per_capita_rate = models.DecimalField(max_digits=19, decimal_places=2)
+    adjustment_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
     )
+    adjustment_reason = models.TextField(null=True, blank=True)
+    amount_outstanding = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    amount_paid = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    approval_status = models.CharField(max_length=20, default='draft', null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    approved_date = models.DateTimeField(null=True, blank=True)
+    cheque_number = models.CharField(max_length=50, null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    fiscal_period = models.CharField(max_length=20, null=True, blank=True)
+    gl_account = models.CharField(max_length=50, null=True, blank=True)
+    invoice_url = models.TextField(null=True, blank=True)
+    late_fee_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    metadata = models.JSONField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    paid_date = models.DateTimeField(null=True, blank=True)
+    payment_method = models.CharField(max_length=50, null=True, blank=True)
+    payment_reference = models.CharField(max_length=100, null=True, blank=True)
+    payment_status = models.CharField(max_length=20, default='unpaid', null=True, blank=True)
+    receipt_url = models.TextField(null=True, blank=True)
+    rejected_by = models.CharField(max_length=255, null=True, blank=True)
+    rejected_date = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+    remittance_file_url = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='pending', null=True, blank=True)
+    submitted_by = models.CharField(max_length=255, null=True, blank=True)
+    submitted_date = models.DateTimeField(null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "federation_remittances"
@@ -538,7 +1053,22 @@ class FederationResources(BaseModel):
 class VotingSessions(BaseModel):
     """Migrated from drizzle: voting.ts"""
 
-    title = models.CharField(max_length=255, null=True, blank=True)
+    title = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField()
+    description = models.TextField(null=True, blank=True)
+    type = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, default='draft')
+    meeting_type = models.CharField(max_length=50)
+    created_by = models.CharField(max_length=255)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    scheduled_end_time = models.DateTimeField(null=True, blank=True)
+    allow_anonymous = models.BooleanField(default=True, null=True, blank=True)
+    requires_quorum = models.BooleanField(default=True, null=True, blank=True)
+    quorum_threshold = models.IntegerField(default=50, null=True, blank=True)
+    total_eligible_voters = models.IntegerField(default=0, null=True, blank=True)
+    settings = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "voting_sessions"
@@ -556,6 +1086,11 @@ class VotingOptions(BaseModel):
         on_delete=models.CASCADE,
         related_name="voting_options_session_set",
     )
+    text = models.CharField(max_length=500)
+    description = models.TextField(null=True, blank=True)
+    order_index = models.IntegerField(default=0)
+    is_default = models.BooleanField(default=False, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "voting_options"
@@ -570,6 +1105,21 @@ class VoterEligibility(BaseModel):
         on_delete=models.CASCADE,
         related_name="voter_eligibility_session_set",
     )
+    member_id = models.UUIDField()
+    is_eligible = models.BooleanField(default=True, null=True, blank=True)
+    eligibility_reason = models.TextField(null=True, blank=True)
+    voting_weight = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('1.0'),
+        null=True,
+        blank=True,
+    )
+    can_delegate = models.BooleanField(default=False, null=True, blank=True)
+    delegated_to = models.UUIDField(null=True, blank=True)
+    restrictions = ArrayField(models.TextField(), null=True, blank=True)
+    verification_status = models.CharField(max_length=20, default='pending', null=True, blank=True)
+    voter_metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "voter_eligibility"
@@ -582,6 +1132,17 @@ class Votes(BaseModel):
     session = models.ForeignKey(
         "VotingSessions", on_delete=models.CASCADE, related_name="votes_session_set"
     )
+    option_id = models.UUIDField()
+    voter_id = models.CharField(max_length=100)
+    voter_hash = models.CharField(max_length=100, null=True, blank=True)
+    signature = models.TextField(null=True, blank=True)
+    receipt_id = models.CharField(max_length=255, null=True, blank=True)
+    verification_code = models.CharField(max_length=100, null=True, blank=True)
+    audit_hash = models.CharField(max_length=255, null=True, blank=True)
+    cast_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    is_anonymous = models.BooleanField(default=True, null=True, blank=True)
+    voter_type = models.CharField(max_length=20, default='member', null=True, blank=True)
+    voter_metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "votes"
@@ -596,6 +1157,21 @@ class VotingNotifications(BaseModel):
         on_delete=models.CASCADE,
         related_name="voting_notifications_session_set",
     )
+    delivery_method = ArrayField(
+        models.TextField(),
+        default=column_defaults.voting_notifications__delivery_method,
+        null=True,
+        blank=True,
+    )
+    is_read = models.BooleanField(default=False, null=True, blank=True)
+    message = models.TextField()
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    priority = models.CharField(max_length=20, default='medium', null=True, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    recipient_id = models.UUIDField()
+    sent_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    title = models.CharField(max_length=200)
+    type = models.CharField(max_length=50)
 
     class Meta:
         db_table = "voting_notifications"
@@ -610,6 +1186,17 @@ class VotingAuditLog(BaseModel):
         on_delete=models.CASCADE,
         related_name="voting_audit_log_session_set",
     )
+    audit_hash = models.CharField(max_length=255)
+    audit_metadata = models.JSONField(default=dict, null=True, blank=True)
+    chain_valid = models.BooleanField(default=True, null=True, blank=True)
+    is_anonymous = models.BooleanField(default=True, null=True, blank=True)
+    previous_audit_hash = models.CharField(max_length=255, null=True, blank=True)
+    receipt_id = models.CharField(max_length=255)
+    signature = models.TextField()
+    tampered_indicators = ArrayField(models.TextField(), null=True, blank=True)
+    verification_code = models.CharField(max_length=100, null=True, blank=True)
+    vote_hash = models.CharField(max_length=255)
+    voted_at = models.DateTimeField()
 
     class Meta:
         db_table = "voting_audit_log"
@@ -624,6 +1211,47 @@ class OrganizingCampaigns(BaseModel):
         on_delete=models.CASCADE,
         related_name="organizing_campaigns_organization_set",
     )
+    campaign_name = models.CharField(max_length=255)
+    campaign_code = models.CharField(max_length=50)
+    target_employer = models.CharField(max_length=255)
+    workplace_location = models.TextField()
+    industry = models.CharField(max_length=100, null=True, blank=True)
+    campaign_type = models.CharField(max_length=50, default='voluntary_recognition')
+    status = models.CharField(max_length=50, default='planning')
+    priority = models.CharField(max_length=20, default='medium', null=True, blank=True)
+    estimated_unit_size = models.IntegerField()
+    target_card_count = models.IntegerField(null=True, blank=True)
+    cards_signed = models.IntegerField(default=0, null=True, blank=True)
+    card_signing_progress = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    lead_organizer_id = models.TextField(null=True, blank=True)
+    organizing_team = ArrayField(models.UUIDField(), null=True, blank=True)
+    campaign_start_date = models.DateField(null=True, blank=True)
+    target_card_deadline = models.DateField(null=True, blank=True)
+    filing_date = models.DateField(null=True, blank=True)
+    election_date = models.DateField(null=True, blank=True)
+    certification_date = models.DateField(null=True, blank=True)
+    campaign_end_date = models.DateField(null=True, blank=True)
+    organizing_strategy = models.TextField(null=True, blank=True)
+    key_issues = ArrayField(models.TextField(), null=True, blank=True)
+    employer_vulnerabilities = ArrayField(models.TextField(), null=True, blank=True)
+    union_advantages = ArrayField(models.TextField(), null=True, blank=True)
+    contacts_identified = models.IntegerField(default=0, null=True, blank=True)
+    contacts_committed = models.IntegerField(default=0, null=True, blank=True)
+    house_visits_completed = models.IntegerField(default=0, null=True, blank=True)
+    workplace_meetings_held = models.IntegerField(default=0, null=True, blank=True)
+    election_eligible_voters = models.IntegerField(null=True, blank=True)
+    votes_for_union = models.IntegerField(null=True, blank=True)
+    votes_against_union = models.IntegerField(null=True, blank=True)
+    challenged_ballots = models.IntegerField(null=True, blank=True)
+    election_result = models.CharField(max_length=50, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "organizing_campaigns"
@@ -731,7 +1359,15 @@ class OrganizingCampaignMilestones(BaseModel):
 class RecognitionPrograms(BaseModel):
     """Migrated from drizzle: rewards.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['draft', 'active', 'archived']],
+        default='draft',
+    )
+    currency = models.CharField(max_length=3, default='CAD')
 
     class Meta:
         db_table = "recognition_programs"
@@ -741,7 +1377,16 @@ class RecognitionPrograms(BaseModel):
 class RecognitionAwardTypes(BaseModel):
     """Migrated from drizzle: rewards.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    program_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    kind = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['milestone', 'peer', 'admin', 'automated']],
+    )
+    default_credit_amount = models.IntegerField()
+    requires_approval = models.BooleanField(default=False)
+    rules_json = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "recognition_award_types"
@@ -751,7 +1396,21 @@ class RecognitionAwardTypes(BaseModel):
 class RecognitionAwards(BaseModel):
     """Migrated from drizzle: rewards.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    program_id = models.UUIDField()
+    award_type_id = models.UUIDField()
+    recipient_user_id = models.CharField(max_length=255)
+    issuer_user_id = models.CharField(max_length=255, null=True, blank=True)
+    reason = models.TextField()
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['pending', 'approved', 'issued', 'rejected', 'revoked']],
+        default='pending',
+    )
+    approved_by_user_id = models.CharField(max_length=255, null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    issued_at = models.DateTimeField(null=True, blank=True)
+    metadata_json = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "recognition_awards"
@@ -761,7 +1420,22 @@ class RecognitionAwards(BaseModel):
 class RewardBudgetEnvelopes(BaseModel):
     """Migrated from drizzle: rewards.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    program_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    scope_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['org', 'local', 'department', 'manager']],
+    )
+    scope_ref_id = models.CharField(max_length=255, null=True, blank=True)
+    period = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['monthly', 'quarterly', 'annual']],
+    )
+    amount_limit = models.IntegerField()
+    amount_used = models.IntegerField(default=0)
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
 
     class Meta:
         db_table = "reward_budget_envelopes"
@@ -771,7 +1445,21 @@ class RewardBudgetEnvelopes(BaseModel):
 class RewardRedemptions(BaseModel):
     """Migrated from drizzle: rewards.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    user_id = models.CharField(max_length=255)
+    program_id = models.UUIDField()
+    credits_spent = models.IntegerField()
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'initiated', 'pending_payment', 'ordered', 'fulfilled', 'cancelled', 'refunded',
+        ]],
+        default='initiated',
+    )
+    provider = models.CharField(max_length=63, choices=[(value, value) for value in ['shopify']])
+    provider_order_id = models.CharField(max_length=255, null=True, blank=True)
+    provider_checkout_id = models.CharField(max_length=255, null=True, blank=True)
+    provider_payload_json = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "reward_redemptions"
@@ -782,6 +1470,15 @@ class MemberAddresses(BaseModel):
     """Migrated from drizzle: addresses.ts"""
 
     user_id = models.CharField(max_length=255, null=True, blank=True)
+    address_type = models.CharField(max_length=20, default='mailing')
+    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=2, default='CA')
+    effective_date = models.DateTimeField(null=True, blank=True)
+    is_primary = models.BooleanField(default=False, null=True, blank=True)
+    organization_id = models.UUIDField()
+    postal_code = models.CharField(max_length=10)
+    province = models.CharField(max_length=2)
+    street_address = models.TextField()
 
     class Meta:
         db_table = "member_addresses"
@@ -854,6 +1551,58 @@ class MemberEmployment(BaseModel):
     seniority_years = models.DecimalField(
         max_digits=19, decimal_places=2, null=True, blank=True
     )
+    adjusted_seniority_date = models.DateField(null=True, blank=True)
+    seniority_adjustment_reason = models.TextField(null=True, blank=True)
+    job_title = models.CharField(max_length=255)
+    job_code = models.CharField(max_length=100, null=True, blank=True)
+    job_classification = models.CharField(max_length=255, null=True, blank=True)
+    job_level = models.IntegerField(null=True, blank=True)
+    department = models.CharField(max_length=255, null=True, blank=True)
+    division = models.CharField(max_length=255, null=True, blank=True)
+    pay_frequency = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'hourly', 'weekly', 'bi_weekly', 'semi_monthly', 'monthly', 'annual', 'per_diem',
+        ]],
+        default='hourly',
+    )
+    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    base_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    gross_wages = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    regular_hours_per_week = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('40.00'),
+        null=True,
+        blank=True,
+    )
+    regular_hours_per_period = models.DecimalField(
+        max_digits=7,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    shift_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['day', 'evening', 'night', 'rotating', 'split', 'on_call']],
+        null=True,
+        blank=True,
+    )
+    shift_start_time = models.CharField(max_length=10, null=True, blank=True)
+    shift_end_time = models.CharField(max_length=10, null=True, blank=True)
+    operates_weekends = models.BooleanField(default=False, null=True, blank=True)
+    operates_24_hours = models.BooleanField(default=False, null=True, blank=True)
+    supervisor_name = models.CharField(max_length=255, null=True, blank=True)
+    supervisor_id = models.UUIDField(null=True, blank=True)
+    is_probationary = models.BooleanField(default=False, null=True, blank=True)
+    probation_end_date = models.DateField(null=True, blank=True)
+    checkoff_authorized = models.BooleanField(default=True, null=True, blank=True)
+    checkoff_date = models.DateField(null=True, blank=True)
+    rand_exempt = models.BooleanField(default=False, null=True, blank=True)
+    custom_fields = models.JSONField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "member_employment"
@@ -881,6 +1630,12 @@ class EmploymentHistory(BaseModel):
         blank=True,
     )
     change_type = models.CharField(max_length=255, null=True, blank=True)
+    effective_date = models.DateField()
+    previous_values = models.JSONField(null=True, blank=True)
+    new_values = models.JSONField(null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "employment_history"
@@ -929,6 +1684,15 @@ class MemberLeaves(BaseModel):
     actual_return_date = models.DateField(null=True, blank=True)
     is_approved = models.BooleanField(default=False)
     approved_by = models.CharField(max_length=255, null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    affects_seniority = models.BooleanField(default=False, null=True, blank=True)
+    seniority_adjustment_days = models.IntegerField(null=True, blank=True)
+    affects_dues = models.BooleanField(default=True, null=True, blank=True)
+    dues_waiver_approved = models.BooleanField(default=False, null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    documents = models.JSONField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "member_leaves"
@@ -951,6 +1715,18 @@ class JobClassifications(BaseModel):
         blank=True,
     )
     job_code = models.CharField(max_length=255, null=True, blank=True)
+    job_title = models.CharField(max_length=255)
+    job_family = models.CharField(max_length=255, null=True, blank=True)
+    job_level = models.IntegerField(null=True, blank=True)
+    minimum_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    maximum_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    standard_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    requirements = models.JSONField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    effective_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "job_classifications"
@@ -967,7 +1743,7 @@ class MemberSegments(BaseModel):
     created_by = models.TextField()
     last_executed_at = models.DateTimeField(null=True, blank=True)
     execution_count = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_public = models.BooleanField(default=False)
 
     class Meta:
@@ -987,6 +1763,11 @@ class SegmentExecutions(BaseModel):
         on_delete=models.CASCADE,
         related_name="segment_executions_segment_set",
     )
+    executed_at = models.DateTimeField(default=timezone.now)
+    executed_by = models.TextField()
+    execution_time_ms = models.IntegerField(null=True, blank=True)
+    filters_snapshot = models.JSONField(null=True, blank=True)
+    result_count = models.IntegerField()
 
     class Meta:
         db_table = "segment_executions"
@@ -1004,6 +1785,20 @@ class SegmentExports(BaseModel):
         null=True,
         blank=True,
     )
+    approved_by = models.TextField(null=True, blank=True)
+    data_retention_days = models.IntegerField(default=90, null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    export_hash = models.TextField(null=True, blank=True)
+    exported_at = models.DateTimeField(default=timezone.now)
+    exported_by = models.TextField()
+    file_size = models.IntegerField(null=True, blank=True)
+    file_url = models.TextField(null=True, blank=True)
+    filters_used = models.JSONField(null=True, blank=True)
+    format = models.TextField()
+    include_fields = models.JSONField(null=True, blank=True)
+    member_count = models.IntegerField()
+    purpose = models.TextField(null=True, blank=True)
+    watermark = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "segment_exports"
@@ -1014,7 +1809,53 @@ class TrainingCourses(BaseModel):
     """Migrated from drizzle: training.ts"""
 
     organization_id = models.UUIDField()
-    course_code = models.CharField(max_length=255, null=True, blank=True)
+    course_code = models.CharField(max_length=255, blank=True)
+    course_name = models.CharField(max_length=300)
+    course_description = models.TextField(null=True, blank=True)
+    course_category = models.CharField(max_length=50)
+    delivery_method = models.CharField(max_length=50)
+    course_difficulty = models.CharField(max_length=20, default='all_levels', null=True, blank=True)
+    duration_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    duration_days = models.IntegerField(null=True, blank=True)
+    has_prerequisites = models.BooleanField(default=False, null=True, blank=True)
+    prerequisite_courses = models.JSONField(null=True, blank=True)
+    prerequisite_certifications = models.JSONField(null=True, blank=True)
+    learning_objectives = models.TextField(null=True, blank=True)
+    course_outline = models.JSONField(null=True, blank=True)
+    course_materials_url = models.TextField(null=True, blank=True)
+    presentation_slides_url = models.TextField(null=True, blank=True)
+    workbook_url = models.TextField(null=True, blank=True)
+    additional_resources = models.JSONField(null=True, blank=True)
+    primary_instructor_name = models.CharField(max_length=200, null=True, blank=True)
+    instructor_ids = models.JSONField(null=True, blank=True)
+    min_enrollment = models.IntegerField(default=5, null=True, blank=True)
+    max_enrollment = models.IntegerField(default=30, null=True, blank=True)
+    provides_certification = models.BooleanField(default=False, null=True, blank=True)
+    certification_name = models.CharField(max_length=200, null=True, blank=True)
+    certification_valid_years = models.IntegerField(null=True, blank=True)
+    clc_approved = models.BooleanField(default=False, null=True, blank=True)
+    clc_approval_date = models.DateField(null=True, blank=True)
+    clc_course_code = models.CharField(max_length=50, null=True, blank=True)
+    course_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    materials_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    travel_subsidy_available = models.BooleanField(default=False, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    is_mandatory = models.BooleanField(default=False, null=True, blank=True)
+    mandatory_for_roles = models.JSONField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "training_courses"
@@ -1027,6 +1868,41 @@ class CourseSessions(BaseModel):
     organization_id = models.UUIDField()
     course_id = models.UUIDField()
     session_code = models.CharField(max_length=255, null=True, blank=True)
+    session_name = models.CharField(max_length=300, null=True, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    session_times = models.JSONField(null=True, blank=True)
+    delivery_method = models.CharField(max_length=50)
+    venue_name = models.CharField(max_length=200, null=True, blank=True)
+    venue_address = models.TextField(null=True, blank=True)
+    room_number = models.CharField(max_length=50, null=True, blank=True)
+    virtual_meeting_url = models.TextField(null=True, blank=True)
+    virtual_meeting_access_code = models.CharField(max_length=50, null=True, blank=True)
+    lead_instructor_id = models.CharField(max_length=255, null=True, blank=True)
+    lead_instructor_name = models.CharField(max_length=200, null=True, blank=True)
+    co_instructors = models.JSONField(null=True, blank=True)
+    registration_open_date = models.DateField(null=True, blank=True)
+    registration_close_date = models.DateField(null=True, blank=True)
+    registration_count = models.IntegerField(default=0, null=True, blank=True)
+    waitlist_count = models.IntegerField(default=0, null=True, blank=True)
+    max_enrollment = models.IntegerField(null=True, blank=True)
+    session_status = models.CharField(max_length=50, default='scheduled', null=True, blank=True)
+    attendees_count = models.IntegerField(default=0, null=True, blank=True)
+    completions_count = models.IntegerField(default=0, null=True, blank=True)
+    completion_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+    evaluation_responses_count = models.IntegerField(default=0, null=True, blank=True)
+    session_budget = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    actual_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    travel_subsidy_offered = models.BooleanField(default=False, null=True, blank=True)
+    accommodation_arranged = models.BooleanField(default=False, null=True, blank=True)
+    accommodation_hotel = models.CharField(max_length=200, null=True, blank=True)
+    materials_prepared = models.BooleanField(default=False, null=True, blank=True)
+    materials_distributed_count = models.IntegerField(default=0, null=True, blank=True)
+    cancellation_reason = models.TextField(null=True, blank=True)
+    cancelled_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "course_sessions"
@@ -1037,7 +1913,68 @@ class CourseRegistrations(BaseModel):
     """Migrated from drizzle: training.ts"""
 
     organization_id = models.UUIDField()
-    member_id = models.CharField(max_length=255, null=True, blank=True)
+    member_id = models.CharField(max_length=255, blank=True)
+    course_id = models.UUIDField()
+    session_id = models.UUIDField()
+    registration_date = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    registration_status = models.CharField(
+        max_length=50,
+        default='registered',
+        null=True,
+        blank=True,
+    )
+    requires_approval = models.BooleanField(default=False, null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    approved_date = models.DateField(null=True, blank=True)
+    approval_notes = models.TextField(null=True, blank=True)
+    attended = models.BooleanField(default=False, null=True, blank=True)
+    attendance_dates = models.JSONField(null=True, blank=True)
+    attendance_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    completed = models.BooleanField(default=False, null=True, blank=True)
+    completion_date = models.DateField(null=True, blank=True)
+    completion_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    pre_test_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    post_test_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    final_grade = models.CharField(max_length=10, null=True, blank=True)
+    passed = models.BooleanField(null=True, blank=True)
+    certificate_issued = models.BooleanField(default=False, null=True, blank=True)
+    certificate_number = models.CharField(max_length=100, null=True, blank=True)
+    certificate_issue_date = models.DateField(null=True, blank=True)
+    certificate_url = models.TextField(null=True, blank=True)
+    evaluation_completed = models.BooleanField(default=False, null=True, blank=True)
+    evaluation_rating = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+    evaluation_comments = models.TextField(null=True, blank=True)
+    evaluation_submitted_date = models.DateField(null=True, blank=True)
+    travel_required = models.BooleanField(default=False, null=True, blank=True)
+    travel_subsidy_requested = models.BooleanField(default=False, null=True, blank=True)
+    travel_subsidy_approved = models.BooleanField(default=False, null=True, blank=True)
+    travel_subsidy_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    accommodation_required = models.BooleanField(default=False, null=True, blank=True)
+    course_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    fee_paid = models.BooleanField(default=False, null=True, blank=True)
+    fee_payment_date = models.DateField(null=True, blank=True)
+    fee_waived = models.BooleanField(default=False, null=True, blank=True)
+    fee_waiver_reason = models.TextField(null=True, blank=True)
+    cancellation_date = models.DateField(null=True, blank=True)
+    cancellation_reason = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "course_registrations"
@@ -1049,6 +1986,32 @@ class MemberCertifications(BaseModel):
 
     organization_id = models.UUIDField()
     member_id = models.CharField(max_length=255, null=True, blank=True)
+    certification_name = models.CharField(max_length=200)
+    certification_type = models.CharField(max_length=100, null=True, blank=True)
+    issued_by_organization = models.CharField(max_length=200, null=True, blank=True)
+    certification_number = models.CharField(max_length=100, null=True, blank=True)
+    issue_date = models.DateField()
+    expiry_date = models.DateField(null=True, blank=True)
+    valid_years = models.IntegerField(null=True, blank=True)
+    certification_status = models.CharField(max_length=50, default='active', null=True, blank=True)
+    course_id = models.UUIDField(null=True, blank=True)
+    session_id = models.UUIDField(null=True, blank=True)
+    registration_id = models.UUIDField(null=True, blank=True)
+    renewal_required = models.BooleanField(default=False, null=True, blank=True)
+    renewal_date = models.DateField(null=True, blank=True)
+    renewal_course_id = models.UUIDField(null=True, blank=True)
+    verified = models.BooleanField(default=True, null=True, blank=True)
+    verification_date = models.DateField(null=True, blank=True)
+    verified_by = models.CharField(max_length=255, null=True, blank=True)
+    certificate_url = models.TextField(null=True, blank=True)
+    digital_badge_url = models.TextField(null=True, blank=True)
+    clc_registered = models.BooleanField(default=False, null=True, blank=True)
+    clc_registration_number = models.CharField(max_length=100, null=True, blank=True)
+    clc_registration_date = models.DateField(null=True, blank=True)
+    revoked = models.BooleanField(default=False, null=True, blank=True)
+    revocation_date = models.DateField(null=True, blank=True)
+    revocation_reason = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "member_certifications"
@@ -1059,7 +2022,20 @@ class TrainingPrograms(BaseModel):
     """Migrated from drizzle: training.ts"""
 
     organization_id = models.UUIDField()
-    program_name = models.CharField(max_length=255, null=True, blank=True)
+    program_name = models.CharField(max_length=255, blank=True)
+    program_description = models.TextField(null=True, blank=True)
+    program_duration = models.CharField(max_length=100, null=True, blank=True)
+    required_courses = models.JSONField(null=True, blank=True)
+    elective_courses = models.JSONField(null=True, blank=True)
+    minimum_required_courses = models.IntegerField(null=True, blank=True)
+    minimum_elective_courses = models.IntegerField(null=True, blank=True)
+    provides_certification = models.BooleanField(default=False, null=True, blank=True)
+    certification_name = models.CharField(max_length=200, null=True, blank=True)
+    clc_approved = models.BooleanField(default=False, null=True, blank=True)
+    clc_approval_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "training_programs"
@@ -1081,6 +2057,47 @@ class Employers(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     organization_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    legal_name = models.CharField(max_length=255, null=True, blank=True)
+    dba_name = models.CharField(max_length=255, null=True, blank=True)
+    employer_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'private', 'public', 'non_profit', 'crown_corporation', 'municipal', 'provincial',
+            'federal', 'educational', 'healthcare',
+        ]],
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'active', 'inactive', 'contract_expired', 'in_bargaining', 'dispute', 'archived',
+        ]],
+        default='active',
+    )
+    business_number = models.CharField(max_length=50, null=True, blank=True)
+    federal_corporation_number = models.CharField(max_length=50, null=True, blank=True)
+    provincial_corporation_number = models.CharField(max_length=50, null=True, blank=True)
+    industry_code = models.CharField(max_length=20, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    website = models.CharField(max_length=500, null=True, blank=True)
+    main_address = models.JSONField(null=True, blank=True)
+    total_employees = models.IntegerField(null=True, blank=True)
+    unionized_employees = models.IntegerField(null=True, blank=True)
+    established_date = models.DateField(null=True, blank=True)
+    primary_contact_name = models.CharField(max_length=255, null=True, blank=True)
+    primary_contact_title = models.CharField(max_length=255, null=True, blank=True)
+    primary_contact_email = models.CharField(max_length=255, null=True, blank=True)
+    primary_contact_phone = models.CharField(max_length=50, null=True, blank=True)
+    labour_relations_contact_name = models.CharField(max_length=255, null=True, blank=True)
+    labour_relations_contact_email = models.CharField(max_length=255, null=True, blank=True)
+    labour_relations_contact_phone = models.CharField(max_length=50, null=True, blank=True)
+    parent_company_id = models.UUIDField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    custom_fields = models.JSONField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "employers"
@@ -1091,6 +2108,30 @@ class Worksites(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     organization_id = models.UUIDField()
+    employer_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=50, null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'active', 'temporarily_closed', 'permanently_closed', 'seasonal', 'archived',
+        ]],
+        default='active',
+    )
+    address = models.JSONField(null=True, blank=True)
+    employee_count = models.IntegerField(null=True, blank=True)
+    shift_count = models.IntegerField(null=True, blank=True)
+    operates_weekends = models.BooleanField(default=False, null=True, blank=True)
+    operates_24_hours = models.BooleanField(default=False, null=True, blank=True)
+    site_manager_name = models.CharField(max_length=255, null=True, blank=True)
+    site_manager_email = models.CharField(max_length=255, null=True, blank=True)
+    site_manager_phone = models.CharField(max_length=50, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    custom_fields = models.JSONField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "worksites"
@@ -1101,6 +2142,40 @@ class BargainingUnits(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     organization_id = models.UUIDField()
+    employer_id = models.UUIDField()
+    worksite_id = models.UUIDField(null=True, blank=True)
+    name = models.CharField(max_length=255)
+    unit_number = models.CharField(max_length=50, null=True, blank=True)
+    unit_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'full_time', 'part_time', 'casual', 'mixed', 'craft', 'industrial', 'professional',
+        ]],
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'active', 'under_certification', 'decertified', 'merged', 'inactive', 'archived',
+        ]],
+        default='active',
+    )
+    certification_number = models.CharField(max_length=100, null=True, blank=True)
+    certification_date = models.DateField(null=True, blank=True)
+    certification_body = models.CharField(max_length=100, null=True, blank=True)
+    certification_expiry_date = models.DateField(null=True, blank=True)
+    current_collective_agreement_id = models.UUIDField(null=True, blank=True)
+    contract_expiry_date = models.DateField(null=True, blank=True)
+    next_bargaining_date = models.DateField(null=True, blank=True)
+    member_count = models.IntegerField(default=0, null=True, blank=True)
+    classifications = models.JSONField(null=True, blank=True)
+    chief_steward_id = models.TextField(null=True, blank=True)
+    bargaining_chair_id = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    custom_fields = models.JSONField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "bargaining_units"
@@ -1111,6 +2186,38 @@ class Committees(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     organization_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    committee_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'bargaining', 'grievance', 'health_safety', 'political_action', 'equity', 'education',
+            'organizing', 'steward', 'executive', 'finance', 'communications', 'social',
+            'pension_benefits', 'other',
+        ]],
+    )
+    status = models.CharField(max_length=50, default='active')
+    unit_id = models.UUIDField(null=True, blank=True)
+    worksite_id = models.UUIDField(null=True, blank=True)
+    is_organization_wide = models.BooleanField(default=False, null=True, blank=True)
+    mandate = models.TextField(null=True, blank=True)
+    meeting_frequency = models.CharField(max_length=100, null=True, blank=True)
+    meeting_day = models.CharField(max_length=50, null=True, blank=True)
+    meeting_time = models.CharField(max_length=50, null=True, blank=True)
+    meeting_location = models.TextField(null=True, blank=True)
+    max_members = models.IntegerField(null=True, blank=True)
+    current_member_count = models.IntegerField(default=0, null=True, blank=True)
+    requires_appointment = models.BooleanField(default=False, null=True, blank=True)
+    requires_election = models.BooleanField(default=False, null=True, blank=True)
+    term_length = models.IntegerField(null=True, blank=True)
+    chair_id = models.TextField(null=True, blank=True)
+    secretary_id = models.TextField(null=True, blank=True)
+    contact_email = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    custom_fields = models.JSONField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "committees"
@@ -1121,6 +2228,28 @@ class CommitteeMemberships(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     committee_id = models.UUIDField(null=True, blank=True)
+    member_id = models.TextField()
+    role = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'chair', 'vice_chair', 'secretary', 'treasurer', 'member', 'alternate', 'advisor',
+            'ex_officio',
+        ]],
+        default='member',
+    )
+    status = models.CharField(max_length=50, default='active')
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    term_number = models.IntegerField(default=1, null=True, blank=True)
+    appointment_method = models.CharField(max_length=50, null=True, blank=True)
+    appointed_by = models.TextField(null=True, blank=True)
+    election_date = models.DateField(null=True, blank=True)
+    votes_received = models.IntegerField(null=True, blank=True)
+    meetings_attended = models.IntegerField(default=0, null=True, blank=True)
+    meetings_total = models.IntegerField(default=0, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "committee_memberships"
@@ -1131,6 +2260,27 @@ class RoleTenureHistory(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    achievements = models.JSONField(null=True, blank=True)
+    appointment_method = models.CharField(max_length=50, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    election_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    end_reason = models.CharField(max_length=100, null=True, blank=True)
+    ended_by = models.TextField(null=True, blank=True)
+    is_current_role = models.BooleanField(default=True, null=True, blank=True)
+    member_id = models.TextField()
+    notes = models.TextField(null=True, blank=True)
+    related_entity_id = models.UUIDField(null=True, blank=True)
+    related_entity_type = models.CharField(max_length=50, null=True, blank=True)
+    role_level = models.CharField(max_length=50, null=True, blank=True)
+    role_title = models.CharField(max_length=255)
+    role_type = models.CharField(max_length=100)
+    start_date = models.DateField()
+    term_length = models.IntegerField(null=True, blank=True)
+    term_number = models.IntegerField(default=1, null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    vote_total = models.IntegerField(null=True, blank=True)
+    votes_received = models.IntegerField(null=True, blank=True)
 
     class Meta:
         db_table = "role_tenure_history"

@@ -135,6 +135,36 @@ jobs:
             --expected-skips tooling/scripts/lib/ue-native-expected-skips.json \
             --receipt artifacts/ue-native-pg/receipt.json
 
+      # The Django models are the ORM contract of every Django view, task and command, so they run against the schema the
+      # platform migrations built, not the one Django's migrations alone describe: constraints, defaults and types are real.
+      - name: Point Django at the converged database
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE' >> "$GITHUB_ENV"
+          const u = new URL(process.env.UE_NATIVE_TEMPLATE_URL)
+          const database = u.pathname.replace(/^\//, '')
+          console.log('PGHOST=' + u.hostname)
+          console.log('PGPORT=' + (u.port || '5432'))
+          console.log('PGUSER=' + decodeURIComponent(u.username))
+          console.log('PGPASSWORD=' + decodeURIComponent(u.password))
+          console.log('PGDATABASE=' + database)
+          // Django clones this database for its test database (backend/core/test_runner.py).
+          console.log('UE_DJANGO_TEST_TEMPLATE=' + database)
+          NODE
+
+      - name: Run the Django suite against a clone of the converged database
+        shell: bash
+        working-directory: apps/union-eyes/backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings
+          DJANGO_SECRET_KEY: ci-django-suite-only
+          DJANGO_DEBUG: 'True'
+          REDIS_URL: redis://127.0.0.1:6379/15
+        run: |
+          set -euo pipefail
+          python manage.py test --noinput --parallel 1
+          python -m pytest auth_core/tests/test_health_contract.py -q -p no:cacheprovider
+
       - name: Upload exact-SHA, version-scoped evidence
         if: always()
         uses: actions/upload-artifact@v4

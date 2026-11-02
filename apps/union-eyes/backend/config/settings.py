@@ -112,6 +112,12 @@ DATABASES = {
     }
 }
 
+# The Django suite runs against the schema production has, not the one Django's migrations alone describe:
+# see core/test_runner.py. UE_DJANGO_TEST_TEMPLATE clones a converged database instead of running migrations.
+TEST_RUNNER = "core.test_runner.ConvergedSchemaRunner"
+if os.environ.get("UE_DJANGO_TEST_TEMPLATE"):
+    DATABASES["default"]["TEST"] = {"TEMPLATE": os.environ["UE_DJANGO_TEST_TEMPLATE"], "MIGRATE": False}
+
 UE_CANONICAL_BOOTSTRAP_V2 = os.environ.get("UE_CANONICAL_BOOTSTRAP_V2") == "1"
 UE_V2_PROCESS_CONTEXT = os.environ.get("UE_V2_PROCESS_CONTEXT", "web")
 if UE_CANONICAL_BOOTSTRAP_V2:

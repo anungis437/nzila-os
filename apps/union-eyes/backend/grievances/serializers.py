@@ -9,166 +9,201 @@ from .models import (ClaimPrecedentAnalysis, Claims, ClaimUpdates, DeadlineRules
 class ClaimPrecedentAnalysisSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClaimPrecedentAnalysis
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'claim_id', 'precedent_matches', 'success_probability']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ClaimsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Claims
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'claim_id', 'claim_number', 'organization_id',
+            'member_id', 'is_anonymous', 'claim_type', 'status', 'priority', 'incident_date',
+            'location', 'description', 'desired_outcome', 'witnesses_present', 'witness_details',
+            'previously_reported', 'previous_report_details', 'assigned_to', 'assigned_at',
+            'ai_score', 'ai_analysis', 'merit_confidence', 'precedent_match', 'complexity_score',
+            'progress', 'claim_amount', 'settlement_amount', 'legal_costs', 'court_costs',
+            'resolution_outcome', 'filed_date', 'resolved_at', 'closed_at', 'attachments',
+            'voice_transcriptions', 'metadata', 'idempotency_hash',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ClaimUpdatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClaimUpdates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'update_id', 'claim']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DeadlineRulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeadlineRules
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'rule_name', 'rule_code',
+            'description', 'claim_type', 'priority_level', 'step_number', 'days_from_event',
+            'event_type', 'business_days_only', 'allows_extension', 'max_extension_days',
+            'requires_approval', 'escalate_to_role', 'escalation_delay_days', 'is_active',
+            'is_system_rule', 'created_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ClaimDeadlinesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClaimDeadlines
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'claim_id', 'organization_id', 'deadline_rule_id',
+            'deadline_name', 'deadline_type', 'event_date', 'original_deadline', 'due_date',
+            'completed_at', 'status', 'priority', 'extension_count', 'total_extension_days',
+            'last_extension_date', 'last_extension_reason', 'completed_by', 'completion_notes',
+            'is_overdue', 'days_until_due', 'days_overdue', 'escalated_at', 'escalated_to',
+            'alert_count', 'last_alert_sent',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DeadlineExtensionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeadlineExtensions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'deadline_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DeadlineAlertsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeadlineAlerts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'deadline_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DefensibilityPacksSerializer(serializers.ModelSerializer):
     class Meta:
         model = DefensibilityPacks
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'pack_id', 'case_id', 'case_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PackDownloadLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = PackDownloadLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'log_id', 'pack_id', 'case_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PackVerificationLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = PackVerificationLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'verification_id', 'pack_id', 'case_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievancesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grievances
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'grievance_number', 'type', 'status', 'priority',
+            'step', 'grievant_id', 'grievant_name', 'grievant_email', 'union_rep_id',
+            'employer_rep_id', 'employer_id', 'employer_name', 'workplace_id', 'workplace_name',
+            'cba_id', 'cba_article', 'cba_section', 'title', 'description', 'background',
+            'desired_outcome', 'incident_date', 'filed_date', 'response_deadline', 'meeting_date',
+            'escalated_at', 'resolved_at', 'closed_at', 'timeline', 'attachments',
+            'group_grievance_id', 'related_grievance_ids', 'is_group_grievance',
+            'is_arbitration_eligible', 'has_legal_implications', 'is_confidential',
+            'organization_id', 'created_by', 'last_updated_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceResponsesSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceResponses
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'response_number', 'responding_party', 'grievance']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ArbitrationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Arbitrations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'arbitration_number', 'grievance']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SettlementsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Settlements
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'settlement_type', 'status', 'grievance', 'arbitration']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceTimelineSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceTimeline
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'event_type', 'grievance']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceDeadlinesSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceDeadlines
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'deadline_type', 'due_date', 'status', 'grievance']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceWorkflowsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceWorkflows
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'name']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceStagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceStages
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'workflow']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceTransitionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceTransitions
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'trigger_type', 'reason', 'notes',
+            'transitioned_by', 'claim', 'from_stage', 'to_stage',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceAssignmentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceAssignments
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'assigned_to', 'claim']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceDocumentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceDocuments
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'document_name', 'claim']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceSettlementsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceSettlements
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'settlement_type', 'claim']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceCommunicationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceCommunications
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'communication_type', 'claim']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GrievanceApprovalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceApprovals
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'transition']
         read_only_fields = ['id', 'created_at', 'updated_at']

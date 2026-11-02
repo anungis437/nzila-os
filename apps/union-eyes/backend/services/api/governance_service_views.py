@@ -20,6 +20,7 @@ from compliance.models import (
     GovernanceEvents,
     CouncilElections,
 )
+from core.api_projection import api_columns
 
 
 class GovernanceServiceViewSet(viewsets.ViewSet):
@@ -186,13 +187,13 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             share = GoldenShares.objects.filter(status='active').first()
             
             # Get recent votes
-            recent_votes = list(ReservedMatterVotes.objects.order_by('-created_at')[:5].values())
+            recent_votes = list(ReservedMatterVotes.objects.order_by('-created_at')[:5].values(*api_columns(ReservedMatterVotes)))
             
             # Get recent audits
-            recent_audits = list(MissionAudits.objects.order_by('-audit_year')[:3].values())
+            recent_audits = list(MissionAudits.objects.order_by('-audit_year')[:3].values(*api_columns(MissionAudits)))
             
             # Get recent events
-            recent_events = list(GovernanceEvents.objects.order_by('-event_date')[:10].values())
+            recent_events = list(GovernanceEvents.objects.order_by('-event_date')[:10].values(*api_columns(GovernanceEvents)))
             
             return Response({
                 'goldenShare': {
@@ -486,7 +487,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
                 }, status=status.HTTP_200_OK)
             
             # Get recent audits
-            audits = list(MissionAudits.objects.order_by('-audit_year')[:10].values())
+            audits = list(MissionAudits.objects.order_by('-audit_year')[:10].values(*api_columns(MissionAudits)))
             
             return Response({
                 'consecutiveYears': share.consecutive_compliance_years,
