@@ -351,6 +351,13 @@
       "when": 1790460000000,
       "tag": "0052_declared_absent_relations_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1790470000000,
+      "tag": "0053_enhanced_rbac_rls_closure",
+      "breakpoints": true
     }
   ]
 }

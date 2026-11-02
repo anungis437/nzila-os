@@ -611,7 +611,10 @@ class CommunicationPreferencesPhase4ModelTest(TestCase):
         )
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.user_id, "user_500")
-        self.assertEqual(obj.timezone, "America/Toronto")
+        # The model assumes no time zone and no consent: a preference nobody stated stays unset.
+        self.assertIsNone(obj.timezone)
+        self.assertIsNone(obj.email_opt_in)
+        self.assertIsNone(obj.sms_opt_in)
 
     def test_str(self):
         obj = create_valid(CommunicationPreferencesPhase4,

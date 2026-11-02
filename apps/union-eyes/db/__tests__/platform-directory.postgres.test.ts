@@ -128,9 +128,9 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
     seeded.gone = await member(ORG_B, `gone-${tag}`, 'Gale Removed', `gale.removed.${tag}@example.org`, true)
     for (const [organizationId, status] of [[ORG_A, 'open'], [ORG_B, 'settled']]) {
       await admin.query(
-        `INSERT INTO grievances (id, organization_id, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status)
-         VALUES (gen_random_uuid(), $1, now(), now(), false, false, false, false, 'medium', $2)`,
-        [organizationId, status],
+        `INSERT INTO grievances (id, organization_id, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status, grievance_number, title, type, description)
+         VALUES (gen_random_uuid(), $1, now(), now(), false, false, false, false, 'medium', $2, $3, 'F03-A case', 'individual', 'Fixture case for the platform directory proof')`,
+        [organizationId, status, `F03A-${tag}-${status}`],
       )
     }
     await admin.query(

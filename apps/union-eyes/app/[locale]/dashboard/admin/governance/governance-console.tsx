@@ -206,6 +206,10 @@ toast.error("Unable to issue golden share");
       toast.error("Matter details JSON is invalid");
       return;
     }
+    if (!reservedMatterForm.votingDeadline) {
+      toast.error("A voting deadline is required");
+      return;
+    }
 
     try {
       const response = await fetch("/api/governance/reserved-matters", {

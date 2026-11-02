@@ -115,7 +115,7 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       await seedMembership(d, user, org, role)
       // Outside Canonical V2 a staff actor's live membership is read per request from the compatibility projection.
       await admin.query(
-        `INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id) VALUES (gen_random_uuid(), now(), now(), $1, $2, 'active', false, $3)`,
+        `INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id, name, email) VALUES (gen_random_uuid(), now(), now(), $1, $2, 'active', false, $3, $1, $1 || '@example.test')`,
         [user, role, org],
       )
     }
@@ -226,7 +226,7 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       const ghost = actor(U.ghost)
       expect(await as(ghost, (tx) => access!.listThreads(tx, ghost))).toEqual([])
       expect(await as(ghost, (tx) => access!.findReadableThread(tx, ghost, id))).toBeNull()
-      await admin.query(`INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id) VALUES (gen_random_uuid(), now(), now(), $1, 'steward', 'active', false, $2)`, [U.ghost, ORG_B])
+      await admin.query(`INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id, name, email) VALUES (gen_random_uuid(), now(), now(), $1, 'steward', 'active', false, $2, $1, $1 || '@example.test')`, [U.ghost, ORG_B])
       expect(await as(ghost, (tx) => access!.findReadableThread(tx, ghost, id))).toBeNull()
     })
 

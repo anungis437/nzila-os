@@ -278,7 +278,7 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
 
     beforeAll(async () => {
       const member = (id: string, org: string, user: string) =>
-        admin.query(`INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id) VALUES ($1, now(), now(), $2, 'member', 'active', false, $3)`, [id, user, org])
+        admin.query(`INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id, name, email) VALUES ($1, now(), now(), $2, 'member', 'active', false, $3, $2, $2 || '@example.test')`, [id, user, org])
       await member(MEMBER_A, ORG_A, `rep-user-a-${MEMBER_A.slice(0, 6)}`)
       await member(MEMBER_B, ORG_B, `rep-user-b-${MEMBER_B.slice(0, 6)}`)
       const claim = (id: string, org: string) =>
@@ -286,8 +286,9 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       await claim(CLAIM_A, ORG_A)
       await claim(CLAIM_B, ORG_B)
       await admin.query(
-        `INSERT INTO claim_deadlines (id, created_at, updated_at, claim_id, alert_count, days_overdue, extension_count, is_overdue, priority, status, total_extension_days, organization_id)
-         VALUES ($1, now(), now(), $2, 0, 0, 0, false, 'medium', 'open', 0, $3)`,
+        `INSERT INTO claim_deadlines (id, created_at, updated_at, claim_id, alert_count, days_overdue, extension_count, is_overdue, priority, status, total_extension_days, organization_id,
+                                      deadline_name, deadline_type, due_date, event_date, original_deadline)
+         VALUES ($1, now(), now(), $2, 0, 0, 0, false, 'medium', 'open', 0, $3, 'Fixture deadline', 'filing', now() + interval '30 days', now(), now() + interval '30 days')`,
         [DEADLINE_B, CLAIM_B, ORG_B],
       )
     })

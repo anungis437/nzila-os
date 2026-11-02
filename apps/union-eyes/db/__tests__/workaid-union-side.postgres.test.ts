@@ -46,18 +46,19 @@ describe.skipIf(!URL)('union-side WorkAid disclosure on the combined deployed sc
   const newCase = async (creator: string = U.member) => {
     const id = newUuid()
     await admin.query(
-      `INSERT INTO grievances (id, organization_id, created_by, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status)
-       VALUES ($1,$2,$3, now(), now(), false, false, false, false, 'medium', 'open')`,
-      [id, ORG, creator],
+      `INSERT INTO grievances (id, organization_id, created_by, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status, grievance_number, title, type, description)
+       VALUES ($1,$2,$3, now(), now(), false, false, false, false, 'medium', 'open', $4, 'WorkAid case', 'individual', 'Fixture case for the WorkAid proof')`,
+      [id, ORG, creator, `WA-${id}`],
     )
     return id
   }
   const addDoc = async (caseId: string, uploadedBy: string = U.member) => {
     const id = newUuid()
     await admin.query(
-      `INSERT INTO documents (id, created_at, updated_at, organization_id, uploaded_by, access_level, contains_legal_privilege, contains_medical_sensitive, contains_pii, is_confidential, privacy_label, status)
-       VALUES ($1, now(), now(), $2, $3, 'team', false, false, false, false, 'team_confidential', 'active')`,
-      [id, ORG, uploadedBy],
+      `INSERT INTO documents (id, created_at, updated_at, organization_id, uploaded_by, access_level, contains_legal_privilege, contains_medical_sensitive, contains_pii, is_confidential, privacy_label, status,
+                              name, file_url, file_type, uploaded_at)
+       VALUES ($1, now(), now(), $2, $3, 'team', false, false, false, false, 'team_confidential', 'active', $4, $5, 'application/pdf', now())`,
+      [id, ORG, uploadedBy, `Fixture ${id}`, `https://files.example.test/${id}.pdf`],
     )
     await admin.query(`INSERT INTO document_links (organization_id, document_id, linked_entity_type, linked_entity_id, linked_by) VALUES ($1,$2,'grievance',$3,$4)`, [ORG, id, caseId, uploadedBy])
     return id

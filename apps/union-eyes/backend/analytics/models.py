@@ -208,7 +208,7 @@ class PageAnalytics(BaseModel):
 
 class CommunicationAnalytics(BaseModel):
     """Migrated from drizzle: communication-analytics-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     bounces = models.IntegerField(default=0, null=True, blank=True)
     channel = models.CharField(
         max_length=63,
@@ -234,7 +234,7 @@ class CommunicationAnalytics(BaseModel):
 
 class UserEngagementScores(BaseModel):
     """Migrated from drizzle: communication-analytics-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     calculated_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
     email_score = models.IntegerField(default=0, null=True, blank=True)
     last_email_open = models.DateTimeField(null=True, blank=True)

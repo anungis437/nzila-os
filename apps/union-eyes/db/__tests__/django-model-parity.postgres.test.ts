@@ -6,7 +6,7 @@
  *   - the strict classes are empty: no model asks for a column or type the table lacks, none may send NULL into a NOT NULL column, no
  *     NOT NULL column without a default is unknown to its model (every ORM insert would fail), no model can write a value an enum
  *     or a CHECK rejects, no foreign key (of the two a column can carry) points where the model does not, and no model writes a
- *     default of its own over the column's (a Django write and a Drizzle write of one row agree);
+ *     default of its own over the column's, or where the column has none (a Django write and a Drizzle write of one row agree);
  *     (backend/core/management/commands/ue_physical_parity.py defines each class);
  *   - every column of every table is described by its model (COLUMN_UNKNOWN is zero): the models are complete, and what a response
  *     returns is named by the response (backend/core/api_projection.py, backend/core/api_surface.json), not by the model;
@@ -32,8 +32,8 @@ const ADVISORY_CEILING: Record<string, number> = {
   PK_ABSENT: 0,
   TYPE_LOOSE: 0,
   UNIQUE_ABSENT: 0,
-  // A model that requires a value where the table accepts NULL: the table is the looser side, and tightening it is a platform migration.
-  NOT_NULL_ABSENT: 10,
+  // A model that requires a value where the table accepts NULL: the table is the looser side. Closed by platform 0072, so a new open one is a model edit that outran the platform.
+  NOT_NULL_ABSENT: 0,
   // Columns that are `timestamp without time zone` under a DateTimeField: the platform declares them naive, and retyping them is a data decision.
   TIMESTAMP_NAIVE: 361,
 }

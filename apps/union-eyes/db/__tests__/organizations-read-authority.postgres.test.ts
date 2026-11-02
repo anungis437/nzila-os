@@ -113,7 +113,7 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
   }
   async function member(user: string, organizationId: string, role: string, status = 'active') {
     await admin.query(
-      `INSERT INTO organization_members (user_id, organization_id, role, status, is_primary, created_at, updated_at) VALUES ($1,$2,$3,$4,false,now(),now())`,
+      `INSERT INTO organization_members (user_id, organization_id, role, status, is_primary, created_at, updated_at, name, email) VALUES ($1,$2,$3,$4,false,now(),now(),$1,$1 || '@example.test')`,
       [user, organizationId, role, status],
     )
     if (status === 'active') state.roles[`${user}:${organizationId}`] = role

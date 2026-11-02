@@ -45,7 +45,7 @@ class ClaimPrecedentAnalysis(BaseModel):
     """Migrated from drizzle: cba-intelligence-schema.ts"""
 
     claim_id = models.UUIDField()
-    precedent_matches = models.JSONField(default=dict, null=True, blank=True)
+    precedent_matches = models.JSONField(null=True, blank=True)
     success_probability = models.DecimalField(
         max_digits=19, decimal_places=2, null=True, blank=True
     )
@@ -103,7 +103,7 @@ class Claims(BaseModel):
     claim_number = models.CharField(max_length=50, null=True, blank=True)
 
     # Ownership
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     member_id = models.TextField(null=True, blank=True)  # Auth provider user ID
     is_anonymous = models.BooleanField(default=True)
 
@@ -136,7 +136,7 @@ class Claims(BaseModel):
 
     # AI Analysis
     ai_score = models.IntegerField(null=True, blank=True)
-    ai_analysis = models.JSONField(default=dict, null=True, blank=True)
+    ai_analysis = models.JSONField(null=True, blank=True)
     merit_confidence = models.IntegerField(null=True, blank=True)
     precedent_match = models.IntegerField(null=True, blank=True)
     complexity_score = models.IntegerField(null=True, blank=True)
@@ -145,10 +145,10 @@ class Claims(BaseModel):
     progress = models.IntegerField(default=0)
 
     # Financials
-    claim_amount = models.CharField(max_length=20, null=True, blank=True, db_default='0')
-    settlement_amount = models.CharField(max_length=20, null=True, blank=True, db_default='0')
-    legal_costs = models.CharField(max_length=20, null=True, blank=True, db_default='0')
-    court_costs = models.CharField(max_length=20, null=True, blank=True, db_default='0')
+    claim_amount = models.CharField(max_length=20, blank=True, db_default='0', default='0')
+    settlement_amount = models.CharField(max_length=20, blank=True, db_default='0', default='0')
+    legal_costs = models.CharField(max_length=20, blank=True, db_default='0', default='0')
+    court_costs = models.CharField(max_length=20, blank=True, db_default='0', default='0')
 
     # Resolution
     resolution_outcome = models.CharField(max_length=100, null=True, blank=True)
@@ -200,7 +200,7 @@ class ClaimUpdates(BaseModel):
     message = models.TextField(null=True, blank=True)
     created_by = models.CharField(max_length=255, null=True, blank=True)
     is_internal = models.BooleanField(default=False, null=True, blank=True)
-    visibility_scope = models.TextField(default='member', null=True, blank=True)
+    visibility_scope = models.TextField(default='member', blank=True)
     metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
@@ -212,14 +212,14 @@ class DeadlineRules(BaseModel):
     """Canonical model for deadline_rules table.
     Defines grievance-processing deadline templates per org."""
 
-    organization_id = models.UUIDField(null=True, blank=True)
-    rule_name = models.CharField(max_length=255, null=True, blank=True)
-    rule_code = models.CharField(max_length=100, null=True, blank=True)
+    organization_id = models.UUIDField()
+    rule_name = models.CharField(max_length=255, blank=True)
+    rule_code = models.CharField(max_length=100, blank=True)
     description = models.TextField(null=True, blank=True)
     claim_type = models.CharField(max_length=100, null=True, blank=True)
     priority_level = models.CharField(max_length=50, null=True, blank=True)
     step_number = models.IntegerField(null=True, blank=True)
-    days_from_event = models.IntegerField(null=True, blank=True)
+    days_from_event = models.IntegerField()
     event_type = models.CharField(max_length=100, default='claim_filed', blank=True)
     business_days_only = models.BooleanField(default=True)
     allows_extension = models.BooleanField(default=True)
@@ -241,13 +241,13 @@ class ClaimDeadlines(BaseModel):
     Tracks individual deadline instances linked to claims."""
 
     claim_id = models.UUIDField()
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     deadline_rule_id = models.UUIDField(null=True, blank=True)
-    deadline_name = models.CharField(max_length=255, null=True, blank=True)
-    deadline_type = models.CharField(max_length=100, null=True, blank=True)
-    event_date = models.DateTimeField(null=True, blank=True)
-    original_deadline = models.DateTimeField(null=True, blank=True)
-    due_date = models.DateTimeField(null=True, blank=True)
+    deadline_name = models.CharField(max_length=255, blank=True)
+    deadline_type = models.CharField(max_length=100, blank=True)
+    event_date = models.DateTimeField()
+    original_deadline = models.DateTimeField()
+    due_date = models.DateTimeField()
     completed_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, default="pending")
     priority = models.CharField(max_length=20, default="medium")
@@ -301,7 +301,7 @@ class DefensibilityPacks(BaseModel):
 
     pack_id = models.UUIDField(default=uuid.uuid4, unique=True)
     case_id = models.UUIDField()
-    case_number = models.CharField(max_length=255, null=True, blank=True)
+    case_number = models.CharField(max_length=255, blank=True)
     organization_id = models.UUIDField()
     pack_version = models.CharField(max_length=10, default='1.0.0')
     generated_at = models.DateTimeField(default=timezone.now)
@@ -404,14 +404,10 @@ class Grievances(BaseModel):
     ]
 
     # Identity
-    grievance_number = models.CharField(
-        max_length=50, null=True, blank=True, unique=True
-    )
+    grievance_number = models.CharField(max_length=50, blank=True, unique=True)
 
     # Classification
-    type = models.CharField(
-        max_length=20, choices=GRIEVANCE_TYPE_CHOICES, null=True, blank=True
-    )
+    type = models.CharField(max_length=20, choices=GRIEVANCE_TYPE_CHOICES, blank=True)
     status = models.CharField(
         max_length=20, choices=GRIEVANCE_STATUS_CHOICES, default="draft"
     )
@@ -441,8 +437,8 @@ class Grievances(BaseModel):
     cba_section = models.CharField(max_length=100, null=True, blank=True)
 
     # Details
-    title = models.CharField(max_length=500, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    title = models.CharField(max_length=500, blank=True)
+    description = models.TextField(blank=True)
     background = models.TextField(null=True, blank=True)
     desired_outcome = models.TextField(null=True, blank=True)
 
@@ -456,12 +452,12 @@ class Grievances(BaseModel):
     closed_at = models.DateTimeField(null=True, blank=True)
 
     # Timeline & Attachments (JSON)
-    timeline = models.JSONField(default=list, null=True, blank=True)
-    attachments = models.JSONField(default=list, null=True, blank=True)
+    timeline = models.JSONField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
 
     # Related Records
     group_grievance_id = models.UUIDField(null=True, blank=True)
-    related_grievance_ids = models.JSONField(default=list, null=True, blank=True)
+    related_grievance_ids = models.JSONField(null=True, blank=True)
 
     # Flags
     is_group_grievance = models.BooleanField(default=False)
@@ -470,7 +466,7 @@ class Grievances(BaseModel):
     is_confidential = models.BooleanField(default=False)
 
     # Ownership
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     created_by = models.TextField(null=True, blank=True)
     last_updated_by = models.TextField(null=True, blank=True)
 
@@ -513,7 +509,7 @@ class Arbitrations(BaseModel):
         on_delete=models.CASCADE,
         related_name="arbitrations_grievance_set",
     )
-    arbitration_number = models.CharField(max_length=255, null=True, blank=True)
+    arbitration_number = models.CharField(max_length=255, blank=True)
     board_name = models.CharField(max_length=255)
     board_type = models.CharField(max_length=100)
     arbitrator_ids = ArrayField(models.UUIDField(), null=True, blank=True)
@@ -579,7 +575,7 @@ class Settlements(BaseModel):
         blank=True,
     )
     settlement_type = models.CharField(choices=SETTLEMENT_TYPE_CHOICES, max_length=24)
-    status = models.CharField(max_length=255, null=True, blank=True, db_default='proposed')
+    status = models.CharField(max_length=255, blank=True, db_default='proposed', default='proposed')
     monetary_amount = models.IntegerField(null=True, blank=True)
     monetary_details = models.TextField(null=True, blank=True)
     non_monetary_terms = models.JSONField(null=True, blank=True)
@@ -624,14 +620,14 @@ class GrievanceDeadlines(BaseModel):
         on_delete=models.CASCADE,
         related_name="grievance_deadlines_grievance_set",
     )
-    deadline_type = models.CharField(max_length=255, null=True, blank=True)
+    deadline_type = models.CharField(max_length=255, blank=True)
     # Phase 3A: the deadline engine (reminder worker, overdue cron, assignment convergence) reads these two columns, which the
     # Drizzle mirror declares and the canonical model lacked. `due_date` is the EFFECTIVE due date (deadline-confirmation-service
     # writes it together with override_due_date); `status` is pending|extended|completed|cancelled|... Invariants (kept by the writers in
     # lib/deadline-engine/deadline-semantics.ts and guarded by CHECK constraints in grievances.0007): an override in force equals
     # due_date; a superseded deadline is completed or cancelled. The remaining declared-but-missing columns stay REQUIRED_LATER
     # (db/schema-authority/runtime-drift-dispositions.json).
-    due_date = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField()
     status = models.CharField(max_length=50, default="pending", db_default="pending")
     description = models.CharField(max_length=500, null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
@@ -661,7 +657,7 @@ class GrievanceWorkflows(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
     organization_id = models.UUIDField()
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
     auto_assign = models.BooleanField(default=False, null=True, blank=True)
     contract_id = models.UUIDField(null=True, blank=True)
     created_by = models.CharField(max_length=255)
@@ -782,7 +778,7 @@ class GrievanceAssignments(BaseModel):
         on_delete=models.CASCADE,
         related_name="grievance_assignments_claim_set",
     )
-    assigned_to = models.CharField(max_length=255, null=True, blank=True)
+    assigned_to = models.CharField(max_length=255, blank=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
     actual_hours = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     assigned_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
@@ -825,7 +821,7 @@ class GrievanceDocuments(BaseModel):
         on_delete=models.CASCADE,
         related_name="grievance_documents_claim_set",
     )
-    document_name = models.CharField(max_length=255, null=True, blank=True)
+    document_name = models.CharField(max_length=255, blank=True)
     document_type = models.CharField(max_length=100)
     file_path = models.TextField()
     file_size = models.BigIntegerField(null=True, blank=True)
@@ -878,7 +874,7 @@ class GrievanceSettlements(BaseModel):
         on_delete=models.CASCADE,
         related_name="grievance_settlements_claim_set",
     )
-    settlement_type = models.CharField(max_length=255, null=True, blank=True)
+    settlement_type = models.CharField(max_length=255, blank=True)
     currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
     finalized_at = models.DateTimeField(null=True, blank=True)
     finalized_by = models.CharField(max_length=255, null=True, blank=True)
@@ -936,7 +932,7 @@ class GrievanceCommunications(BaseModel):
         on_delete=models.CASCADE,
         related_name="grievance_communications_claim_set",
     )
-    communication_type = models.CharField(max_length=255, null=True, blank=True)
+    communication_type = models.CharField(max_length=255, blank=True)
     attachment_ids = ArrayField(models.UUIDField(), null=True, blank=True)
     body = models.TextField(null=True, blank=True)
     calendar_event_id = models.UUIDField(null=True, blank=True)

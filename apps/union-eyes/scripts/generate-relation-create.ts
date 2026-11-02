@@ -180,6 +180,13 @@ END $ue_post$;`)
 function reverse(): string {
   const order = dropOrder()
   const enumNames = [...enumsUsed.keys()].sort()
+  // An empty ARRAY[] has no type and PostgreSQL refuses it at run time (42P18), so a set of relations that uses no enum type has no enum loop.
+  const dropEnums = enumNames.length === 0 ? '' : `
+  FOREACH t IN ARRAY ARRAY[${quoteList(enumNames)}] LOOP
+    IF to_regtype('public.' || t) IS NOT NULL AND obj_description(to_regtype('public.' || t), 'pg_type') IS NOT DISTINCT FROM '${marker}' THEN
+      EXECUTE format('DROP TYPE public.%I', t);
+    END IF;
+  END LOOP;`
   const out: string[] = [header('Platform migration rollback'), `
 DO $ue_rollback$
 DECLARE
@@ -198,12 +205,7 @@ BEGIN
   END LOOP;
   FOREACH t IN ARRAY ARRAY[${quoteList(order)}] LOOP
     EXECUTE format('DROP TABLE IF EXISTS %s', CASE WHEN position('.' IN t) > 0 THEN t ELSE 'public.' || t END);
-  END LOOP;
-  FOREACH t IN ARRAY ARRAY[${quoteList(enumNames)}] LOOP
-    IF to_regtype('public.' || t) IS NOT NULL AND obj_description(to_regtype('public.' || t), 'pg_type') IS NOT DISTINCT FROM '${marker}' THEN
-      EXECUTE format('DROP TYPE public.%I', t);
-    END IF;
-  END LOOP;
+  END LOOP;${dropEnums}
 END $ue_rollback$;`]
   return out.join('\n') + '\n'
 }

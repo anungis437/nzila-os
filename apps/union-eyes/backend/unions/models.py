@@ -452,7 +452,7 @@ class ExternalCalendarConnections(BaseModel):
     """Migrated from drizzle: calendar-schema.ts"""
 
     user_id = models.TextField()
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     provider = models.CharField(max_length=50)
     provider_account_id = models.TextField()
     provider_email = models.TextField(null=True, blank=True)
@@ -553,7 +553,7 @@ class Holidays(BaseModel):
 class StewardAssignments(BaseModel):
     """Migrated from drizzle: organizer-workflows.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     steward_id = models.TextField()
     steward_type = models.CharField(
         max_length=63,
@@ -696,7 +696,7 @@ class MemberRelationshipScores(BaseModel):
 class Surveys(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     survey_type = models.CharField(max_length=50, default='general')
@@ -723,7 +723,7 @@ class Surveys(BaseModel):
 class SurveyQuestions(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     survey_id = models.UUIDField()
     question_text = models.TextField()
     question_type = models.CharField(max_length=50)
@@ -752,7 +752,7 @@ class SurveyQuestions(BaseModel):
 class SurveyResponses(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     survey_id = models.UUIDField()
     user_id = models.TextField(null=True, blank=True)
     respondent_email = models.CharField(max_length=255, null=True, blank=True)
@@ -772,7 +772,7 @@ class SurveyResponses(BaseModel):
 class SurveyAnswers(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     response_id = models.UUIDField()
     question_id = models.UUIDField()
     answer_text = models.TextField(null=True, blank=True)
@@ -789,7 +789,7 @@ class SurveyAnswers(BaseModel):
 class Polls(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     question = models.TextField()
     description = models.TextField(null=True, blank=True)
     options = models.JSONField()
@@ -811,7 +811,7 @@ class Polls(BaseModel):
 class PollVotes(BaseModel):
     """Migrated from drizzle: surveys.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     poll_id = models.UUIDField()
     user_id = models.TextField(null=True, blank=True)
     voter_email = models.CharField(max_length=255, null=True, blank=True)
@@ -828,7 +828,7 @@ class PollVotes(BaseModel):
 class MemberLocationConsent(BaseModel):
     """Migrated from drizzle: geofence.ts"""
 
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     consent_status = models.CharField(max_length=20, default='never_asked')
     opted_in_at = models.DateTimeField(null=True, blank=True)
     opted_out_at = models.DateTimeField(null=True, blank=True)
@@ -857,7 +857,7 @@ class Federations(BaseModel):
     """Migrated from drizzle: federation-schema.ts"""
 
     organization_id = models.UUIDField()
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
     short_name = models.CharField(max_length=100, null=True, blank=True)
     slug = models.CharField(max_length=255)
     federation_type = models.CharField(
@@ -1469,7 +1469,7 @@ class RewardRedemptions(BaseModel):
 class MemberAddresses(BaseModel):
     """Migrated from drizzle: addresses.ts"""
 
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     address_type = models.CharField(max_length=20, default='mailing')
     city = models.CharField(max_length=100)
     country = models.CharField(max_length=2, default='CA')
@@ -1629,7 +1629,7 @@ class EmploymentHistory(BaseModel):
         null=True,
         blank=True,
     )
-    change_type = models.CharField(max_length=255, null=True, blank=True)
+    change_type = models.CharField(max_length=255, blank=True)
     effective_date = models.DateField()
     previous_values = models.JSONField(null=True, blank=True)
     new_values = models.JSONField(null=True, blank=True)
@@ -1714,7 +1714,7 @@ class JobClassifications(BaseModel):
         null=True,
         blank=True,
     )
-    job_code = models.CharField(max_length=255, null=True, blank=True)
+    job_code = models.CharField(max_length=255, blank=True)
     job_title = models.CharField(max_length=255)
     job_family = models.CharField(max_length=255, null=True, blank=True)
     job_level = models.IntegerField(null=True, blank=True)
@@ -1739,7 +1739,7 @@ class MemberSegments(BaseModel):
     organization_id = models.UUIDField()
     name = models.TextField()
     description = models.TextField(null=True, blank=True)
-    filters = models.JSONField(default=dict)
+    filters = models.JSONField()
     created_by = models.TextField()
     last_executed_at = models.DateTimeField(null=True, blank=True)
     execution_count = models.IntegerField(default=0)
@@ -1867,7 +1867,7 @@ class CourseSessions(BaseModel):
 
     organization_id = models.UUIDField()
     course_id = models.UUIDField()
-    session_code = models.CharField(max_length=255, null=True, blank=True)
+    session_code = models.CharField(max_length=255, blank=True)
     session_name = models.CharField(max_length=300, null=True, blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
@@ -1985,7 +1985,7 @@ class MemberCertifications(BaseModel):
     """Migrated from drizzle: training.ts"""
 
     organization_id = models.UUIDField()
-    member_id = models.CharField(max_length=255, null=True, blank=True)
+    member_id = models.CharField(max_length=255, blank=True)
     certification_name = models.CharField(max_length=200)
     certification_type = models.CharField(max_length=100, null=True, blank=True)
     issued_by_organization = models.CharField(max_length=200, null=True, blank=True)
@@ -2227,7 +2227,7 @@ class Committees(BaseModel):
 class CommitteeMemberships(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
-    committee_id = models.UUIDField(null=True, blank=True)
+    committee_id = models.UUIDField()
     member_id = models.TextField()
     role = models.CharField(
         max_length=63,
@@ -2259,7 +2259,7 @@ class CommitteeMemberships(BaseModel):
 class RoleTenureHistory(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     achievements = models.JSONField(null=True, blank=True)
     appointment_method = models.CharField(max_length=50, null=True, blank=True)
     created_by = models.TextField(null=True, blank=True)

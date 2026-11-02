@@ -318,6 +318,30 @@ class AuthOrganizationHandlerTest(TestCase):
         org = Organizations.objects.get(auth_provider_org_id="org_test_idem")
         self.assertEqual(org.name, "CUPE 2000 Updated")
 
+    def test_handle_organization_created_stores_an_empty_hierarchy_path(self):
+        """The column is NOT NULL with no default, so the handler states it: a new organization has no ancestors here."""
+        _handle_organization_created({"id": "org_test_path_new", "name": "Path New", "slug": "path-new"})
+
+        org = Organizations.objects.get(auth_provider_org_id="org_test_path_new")
+        self.assertEqual(org.hierarchy_path, [])
+
+    def test_handle_organization_created_keeps_the_hierarchy_path_of_an_existing_organization(self):
+        """A repeated event must not move an organization back to the root: it may sit under a parent this webhook knows nothing about."""
+        Organizations.objects.create(
+            auth_provider_org_id="org_test_path_kept",
+            name="Path Kept",
+            slug="path-kept",
+            organization_type="local",
+            hierarchy_path=["federation-1", "council-1"],
+            hierarchy_level=2,
+        )
+        _handle_organization_created({"id": "org_test_path_kept", "name": "Path Kept Renamed", "slug": "path-kept"})
+
+        org = Organizations.objects.get(auth_provider_org_id="org_test_path_kept")
+        self.assertEqual(org.name, "Path Kept Renamed")
+        self.assertEqual(org.hierarchy_path, ["federation-1", "council-1"])
+        self.assertEqual(org.hierarchy_level, 2)
+
     def test_handle_organization_created_no_slug(self):
         """Missing slug should derive from name."""
         data = {"id": "org_test_noslug", "name": "My Union"}
@@ -338,6 +362,7 @@ class AuthOrganizationHandlerTest(TestCase):
             name="Old Name",
             slug="old-name",
             organization_type="union",
+            hierarchy_path=[],
         )
         data = {
             "id": "org_test_update",
@@ -382,6 +407,7 @@ class AuthMembershipHandlerTest(TestCase):
             name="Test Org",
             slug="test-org-membership",
             organization_type="union",
+            hierarchy_path=[],
         )
 
     def _membership_data(self, user_id="user_mem_001", role="member"):
@@ -549,6 +575,7 @@ class AuthWebhookEndpointTest(TestCase):
             name="E2E Mem Org",
             slug="e2e-mem-org",
             organization_type="union",
+            hierarchy_path=[],
         )
         payload = {
             "type": "organizationMembership.created",
@@ -570,6 +597,7 @@ class AuthWebhookEndpointTest(TestCase):
             name="E2E Upd Org",
             slug="e2e-upd-org",
             organization_type="union",
+            hierarchy_path=[],
         )
         OrganizationMembers.objects.create(
             user_id="user_e2e_upd",

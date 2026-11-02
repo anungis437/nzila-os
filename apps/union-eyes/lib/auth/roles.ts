@@ -81,6 +81,27 @@ export enum UserRole {
   STAFF_REP = "staff_rep",                         // Deprecated: Use STEWARD
 }
 
+/**
+ * The roles an organization itself can hold, as an ordered list from the highest level down. Everything else in UserRole is not an organization role: the Nzila
+ * platform-operations roles and the CLC, federation and national roles work across organizations (PLATFORM_ELEVATED_ROLES in lib/api-auth-guard.ts), and the
+ * deprecated aliases and `guest` are not assigned any more. The database catalog of roles (role_definitions) is seeded from exactly this list, because a role
+ * row in an organization's own data must never carry a level that opens another organization or the platform; a test holds the list disjoint from
+ * PLATFORM_ELEVATED_ROLES and the seed equal to it. A new role has to be classified here or in that list: a test fails until it is.
+ */
+export const TENANT_LOCAL_ROLES: readonly UserRole[] = [
+  UserRole.ADMIN,
+  UserRole.PRESIDENT,
+  UserRole.VICE_PRESIDENT,
+  UserRole.SECRETARY_TREASURER,
+  UserRole.CHIEF_STEWARD,
+  UserRole.OFFICER,
+  UserRole.CLERK,
+  UserRole.STEWARD,
+  UserRole.BARGAINING_COMMITTEE,
+  UserRole.HEALTH_SAFETY_REP,
+  UserRole.MEMBER,
+];
+
 // Permissions that can be assigned to roles
 export enum Permission {
   // ===== APP OPERATIONS PERMISSIONS =====

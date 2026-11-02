@@ -42,7 +42,7 @@ class OrganizationModel(BaseModel):
 
 class ArbitrationPrecedents(BaseModel):
     """Migrated from drizzle: arbitration-precedents-schema.ts"""
-    source_organization_id = models.UUIDField(null=True, blank=True)
+    source_organization_id = models.UUIDField()
     source_decision_id = models.UUIDField(null=True, blank=True)
     case_number = models.CharField(max_length=100, null=True, blank=True)
     case_title = models.CharField(max_length=500)
@@ -406,7 +406,7 @@ class BenefitComparisons(BaseModel):
 
 class ArbitrationDecisions(BaseModel):
     """Migrated from drizzle: cba-intelligence-schema.ts"""
-    case_number = models.CharField(max_length=255, null=True, blank=True)
+    case_number = models.CharField(max_length=255, blank=True)
     source_organization_id = models.UUIDField(null=True, blank=True)
     is_public = models.BooleanField(default=False, null=True, blank=True)
     access_restrictions = models.TextField(null=True, blank=True)

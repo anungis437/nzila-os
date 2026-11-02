@@ -40,7 +40,7 @@ from pathlib import Path
 
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
-from django.db import connection
+from django.db import connection, models
 from django.db.models import NOT_PROVIDED
 
 from core import exposure
@@ -266,7 +266,7 @@ def python_default(expression, kind, table, column):
     if expression is None:
         return None
     e = expression.strip()
-    if e in ("now()", "CURRENT_TIMESTAMP") or e.startswith("timezone("):
+    if e in ("now()", "CURRENT_TIMESTAMP", "statement_timestamp()", "clock_timestamp()", "transaction_timestamp()") or e.startswith("timezone("):
         return Default("timezone.now", {"timezone"})
     if e == "gen_random_uuid()":
         return Default("uuid.uuid4", {"uuid"})
@@ -438,6 +438,20 @@ def tightened_statement(src, stmt, drop_blank, default):
     return f"{attr} = {func}(\n" + "".join(f"        {p},\n" for p in parts) + "    )"
 
 
+def undefaulted_statement(src, stmt):
+    """The field statement without ``default=``; None if it carries a comment."""
+    call = stmt.value
+    if "#" in src.segment(call):
+        return None
+    parts = [src.segment(a) for a in call.args] + [src.segment(kw) for kw in call.keywords if kw.arg != "default"]
+    attr = stmt.targets[0].id
+    func = src.segment(call.func)
+    one_line = f"{attr} = {func}({', '.join(parts)})"
+    if len("    " + one_line) <= LINE_LIMIT:
+        return one_line
+    return f"{attr} = {func}(\n" + "".join(f"        {p},\n" for p in parts) + "    )"
+
+
 def defaulted_statement(src, stmt, keyword, expression):
     """The field statement with ``keyword`` (default or db_default) set to ``expression``; None if it carries a comment."""
     call = stmt.value
@@ -517,11 +531,36 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--apply", action="store_true", help="Write the edited files.")
         parser.add_argument("--apps", default="", help="Comma-separated app labels to converge.")
+        parser.add_argument(
+            "--declared-not-null",
+            default="",
+            help="JSON register of NOT_NULL_ABSENT findings (scripts/runtime/orm-physical-parity.ts --kinds=NOT_NULL_ABSENT --write): "
+            "the models require those columns too, so the platform can make them NOT NULL.",
+        )
+        parser.add_argument("--keep-nullable", default="", help="Comma-separated table.column that stay nullable on purpose.")
+        parser.add_argument(
+            "--drop-defaults",
+            default="",
+            help="JSON list of table.column whose model default is removed: the platform declares none, so a Django INSERT must not write "
+            "a value no other writer writes.",
+        )
 
     def handle(self, *args, **options):
         labels = {a for a in options["apps"].split(",") if a}
         with connection.cursor() as cursor:
             catalog = Catalog(cursor)
+
+        drop_defaults = set()
+        if options["drop_defaults"]:
+            with open(options["drop_defaults"], encoding="utf-8") as handle:
+                drop_defaults = set(json.load(handle))
+        declared_required = set()
+        if options["declared_not_null"]:
+            kept = {k for k in options["keep_nullable"].split(",") if k}
+            with open(options["declared_not_null"], encoding="utf-8") as handle:
+                for finding in json.load(handle)["findings"]:
+                    if finding["kind"] == "NOT_NULL_ABSENT" and finding.get("column") and f"{finding['table']}.{finding['column']}" not in kept:
+                        declared_required.add((finding["table"].split(".")[-1], finding["column"]))
 
         live = exposure.live_serializers()
 
@@ -531,7 +570,7 @@ class Command(BaseCommand):
             return files.get(path) or files.setdefault(path, SourceFile(path))
 
         added = defaultdict(int)
-        tightened, unmapped, manual, defaulted = [], [], [], []
+        tightened, unmapped, manual, defaulted, dropped = [], [], [], [], []
         helpers = {}
         new_attrs = defaultdict(list)
 
@@ -583,7 +622,9 @@ class Command(BaseCommand):
 
             for fld in meta.local_concrete_fields:
                 column = physical.get(fld.column)
-                if column is None or not column["notnull"] or column["identity"] or column["generated"]:
+                if column is None or column["identity"] or column["generated"]:
+                    continue
+                if not (column["notnull"] or (split_table(meta.db_table)[1], fld.column) in declared_required):
                     continue
                 if not model_permits_null(fld):
                     continue
@@ -591,8 +632,8 @@ class Command(BaseCommand):
                 if stmt is None:
                     manual.append((meta.db_table, f"{fld.name}: the field is not a plain assignment in the class body"))
                     continue
-                if fld.remote_field is not None:
-                    manual.append((meta.db_table, f"{fld.name}: a nullable foreign key over a NOT NULL column"))
+                if fld.remote_field is not None and fld.remote_field.on_delete is models.SET_NULL:
+                    manual.append((meta.db_table, f"{fld.name}: SET_NULL on a foreign key over a NOT NULL column"))
                     continue
                 try:
                     kind = "array" if column["type"].endswith("[]") else field_call(column, catalog)[1]
@@ -650,6 +691,23 @@ class Command(BaseCommand):
                 src.replace_node(stmt, text)
                 defaulted.append((meta.db_table, fld.column, keyword))
 
+            for fld in meta.local_concrete_fields:
+                key = f"{meta.db_table}.{fld.column}"
+                if key not in drop_defaults or fld.default is NOT_PROVIDED:
+                    continue
+                if (meta.db_table, fld.column) in tightened or any(d[:2] == (meta.db_table, fld.column) for d in defaulted):
+                    manual.append((meta.db_table, f"{fld.name}: already edited in this run; drop its default in a separate run"))
+                    continue
+                stmt = src.field_statement(cls, fld.name)
+                if stmt is None:
+                    manual.append((meta.db_table, f"{fld.name}: the field is not a plain assignment in the class body"))
+                    continue
+                text = undefaulted_statement(src, stmt)
+                if text is None:
+                    manual.append((meta.db_table, f"{fld.name}: the statement carries a comment"))
+                    continue
+                src.replace_node(stmt, text)
+                dropped.append((meta.db_table, fld.column))
         frozen, serializer_notes, preexisting_sensitive = 0, [], []
         for serializer, model in live.items():
             if labels and model._meta.app_label not in labels:
@@ -690,6 +748,8 @@ class Command(BaseCommand):
             "columns_added_total": sum(added.values()),
             "fields_tightened": len(tightened),
             "fields_defaulted": defaulted,
+            "defaults_dropped": dropped,
+            "defaults_requested_but_absent": sorted(drop_defaults - {f"{t}.{c}" for t, c in dropped}),
             "serializers_frozen": frozen,
             "serializers_with_write_only_credentials": write_only_marked,
             "helper_defaults": sorted(helpers),

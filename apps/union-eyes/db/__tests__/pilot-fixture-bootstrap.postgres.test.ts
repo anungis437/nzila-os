@@ -185,8 +185,9 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
     )
   const realGrievance = (organizationId: string, number: string) =>
     admin.query(
-      `INSERT INTO grievances (id, organization_id, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status, grievance_number)
-       VALUES (gen_random_uuid(), $1, now(), now(), false, false, false, false, 'medium', 'filed', $2) RETURNING id`,
+      `INSERT INTO grievances (id, organization_id, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status, grievance_number, title, type, description)
+       VALUES (gen_random_uuid(), $1, now(), now(), false, false, false, false, 'medium', 'filed', $2, 'A real case', 'individual', 'A case someone really filed, which the pilot bootstrap must never claim')
+       RETURNING id`,
       [organizationId, number],
     )
   const deniedAs = async (role: Role, statement: string) => {

@@ -37,7 +37,8 @@ export const POST = withApi(
       title: z.string().min(1),
       description: z.string().min(1),
       proposedBy: z.string().optional(), // ignored: the proposer is always the session user
-      votingDeadline: z.string().optional(),
+      // The column is NOT NULL: a matter cannot be put to a vote without a deadline, and nothing here invents one.
+      votingDeadline: z.string().refine((value) => !Number.isNaN(Date.parse(value)), 'votingDeadline must be a date and time'),
       classATotalVotes: z.number().int().optional(),
       matterDetails: z.record(z.string(), z.unknown()).optional(),
     }),
@@ -48,11 +49,11 @@ export const POST = withApi(
       await db.execute(sql`
         INSERT INTO reserved_matter_votes (
           id, created_at, updated_at, matter_type, title, description,
-          proposed_by, voting_deadline, class_a_total_votes, matter_details, status
+          proposed_by, proposed_date, voting_deadline, class_a_total_votes, matter_details, status
         ) VALUES (
           ${id}::uuid, NOW(), NOW(), ${body.matterType}, ${body.title},
-          ${body.description}, ${userId!},
-          ${body.votingDeadline ? body.votingDeadline : null}::timestamptz,
+          ${body.description}, ${userId!}, NOW(),
+          ${body.votingDeadline}::timestamptz,
           ${body.classATotalVotes ?? 0},
           ${JSON.stringify(body.matterDetails ?? {})}::jsonb,
           'pending'

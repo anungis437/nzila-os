@@ -167,7 +167,7 @@ class CertificationComplianceReports(BaseModel):
 
 class CertificationAuditLog(BaseModel):
     """Migrated from drizzle: certification-management-schema.ts"""
-    action_type = models.CharField(max_length=255, null=True, blank=True)
+    action_type = models.CharField(max_length=255, blank=True)
     action_description = models.TextField()
     certification_id = models.UUIDField(null=True, blank=True)
     compliance_impact = models.CharField(max_length=20, null=True, blank=True)
@@ -183,7 +183,7 @@ class CertificationAuditLog(BaseModel):
 
 class DsrRequests(BaseModel):
     """Migrated from drizzle: data-governance-schema.ts"""
-    request_type = models.CharField(max_length=255, null=True, blank=True)
+    request_type = models.CharField(max_length=255, blank=True)
     actions_performed = models.JSONField(null=True, blank=True)
     assigned_at = models.DateTimeField(null=True, blank=True)
     assigned_to = models.CharField(max_length=255, null=True, blank=True)
@@ -457,7 +457,7 @@ class FirewallComplianceAudit(BaseModel):
     total_violations = models.TextField()
     critical_violations = models.TextField()
     compliance_rate = models.TextField()
-    top_violated_data_types = models.JSONField(default=dict, null=True, blank=True)
+    top_violated_data_types = models.JSONField(null=True, blank=True)
     recommended_actions = models.TextField(null=True, blank=True)
     audited_by = models.TextField()
     audit_report = models.TextField(null=True, blank=True)
@@ -612,8 +612,8 @@ class BreakGlassActivations(BaseModel):
     activation_initiated_at = models.DateTimeField()
     activation_approved_at = models.DateTimeField(null=True, blank=True)
     activation_reason = models.TextField()
-    key_holder_ids = models.JSONField(default=dict, null=True, blank=True)
-    secret_shares = models.JSONField(default=dict, null=True, blank=True)
+    key_holder_ids = models.JSONField(null=True, blank=True)
+    secret_shares = models.JSONField(null=True, blank=True)
     required_signatures = models.IntegerField(default=3)
     signatures_received = models.IntegerField(default=0)
     signature1_user_id = models.CharField(max_length=255, null=True, blank=True)
@@ -748,7 +748,7 @@ class DataRetentionPolicies(BaseModel):
 class DataAnonymizationLog(BaseModel):
     """Migrated from drizzle: gdpr.ts"""
     user_id = models.TextField()
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     operation_type = models.TextField()
     reason = models.TextField()
     request_id = models.UUIDField(null=True, blank=True)
@@ -766,7 +766,7 @@ class DataAnonymizationLog(BaseModel):
 
 class LocationTracking(BaseModel):
     """Migrated from drizzle: geofence.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=8)
     longitude = models.DecimalField(max_digits=11, decimal_places=8)
     accuracy = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -814,7 +814,7 @@ class Geofences(BaseModel):
 
 class GeofenceEvents(BaseModel):
     """Migrated from drizzle: geofence.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     geofence_id = models.UUIDField()
     event_type = models.CharField(max_length=20)
     event_time = models.DateTimeField(default=timezone.now)
@@ -829,7 +829,7 @@ class GeofenceEvents(BaseModel):
 
 class LocationTrackingAudit(BaseModel):
     """Migrated from drizzle: geofence.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     action_type = models.CharField(max_length=50)
     action_description = models.TextField(null=True, blank=True)
     performed_by = models.CharField(max_length=255, null=True, blank=True)
@@ -896,7 +896,7 @@ class ForeignWorkers(BaseModel):
     requires_lmbp = models.BooleanField(default=False)
     lmbp_letter_generated = models.BooleanField(default=False)
     lmbp_letter_date = models.DateTimeField(null=True, blank=True)
-    skills_transfer_plan = models.JSONField(default=dict, null=True, blank=True)
+    skills_transfer_plan = models.JSONField(null=True, blank=True)
     mentorship_start_date = models.DateTimeField(null=True, blank=True)
     mentorship_end_date = models.DateTimeField(null=True, blank=True)
     compliance_status = models.TextField(default="pending")
@@ -920,8 +920,8 @@ class LmbpLetters(BaseModel):
     generated_date = models.DateTimeField()
     valid_from = models.DateTimeField()
     valid_until = models.DateTimeField()
-    commitments = models.JSONField(default=dict)
-    foreign_worker_ids = models.JSONField(default=dict)
+    commitments = models.JSONField()
+    foreign_worker_ids = models.JSONField()
     compliance_report_due = models.DateTimeField(null=True, blank=True)
     last_compliance_report = models.DateTimeField(null=True, blank=True)
     compliance_status = models.TextField(null=True, blank=True, default="active")
@@ -943,13 +943,13 @@ class GssApplications(BaseModel):
     expected_decision_date = models.DateTimeField()
     actual_decision_date = models.DateTimeField(null=True, blank=True)
     processing_days = models.IntegerField(null=True, blank=True)
-    met2_week_target = models.BooleanField(default=False)
+    met2_week_target = models.BooleanField(null=True, blank=True)
     status = models.TextField(default="submitted")
-    decision_details = models.JSONField(default=dict, null=True, blank=True)
-    documents = models.JSONField(default=dict, null=True, blank=True)
+    decision_details = models.JSONField(null=True, blank=True)
+    documents = models.JSONField(null=True, blank=True)
     employer_id = models.UUIDField()
-    position_details = models.JSONField(default=dict, null=True, blank=True)
-    compliance_flags = models.JSONField(default=dict, null=True, blank=True)
+    position_details = models.JSONField(null=True, blank=True)
+    compliance_flags = models.JSONField(null=True, blank=True)
     created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
@@ -966,8 +966,8 @@ class Mentorships(BaseModel):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
     actual_end_date = models.DateTimeField(null=True, blank=True)
-    skills_to_transfer = models.JSONField(default=dict)
-    learning_objectives = models.JSONField(default=dict, null=True, blank=True)
+    skills_to_transfer = models.JSONField()
+    learning_objectives = models.JSONField(null=True, blank=True)
     meeting_frequency = models.TextField(null=True, blank=True)
     total_meetings = models.IntegerField(null=True, blank=True, default=0)
     last_meeting_date = models.DateTimeField(null=True, blank=True)
@@ -1021,7 +1021,7 @@ class LmbpComplianceReports(BaseModel):
     submitted_to_ircc = models.BooleanField(default=False)
     submission_date = models.DateTimeField(null=True, blank=True)
     ircc_confirmation_number = models.TextField(null=True, blank=True)
-    commitment_progress = models.JSONField(default=dict)
+    commitment_progress = models.JSONField()
     total_foreign_workers = models.IntegerField()
     total_mentorships = models.IntegerField()
     mentorships_completed = models.IntegerField()
@@ -1082,7 +1082,7 @@ class BandCouncilConsent(BaseModel):
 
 class IndigenousMemberData(BaseModel):
     """Migrated from drizzle: indigenous-data.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     allow_aggregation = models.BooleanField(default=False)
     allow_third_party_access = models.BooleanField(default=False)
     band_council_id = models.UUIDField(null=True, blank=True)
@@ -1261,7 +1261,7 @@ class ProvincialPrivacyConfig(BaseModel):
 
 class ProvincialConsent(BaseModel):
     """Migrated from drizzle: provincial-privacy.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     province = models.CharField(max_length=2)
     consent_type = models.CharField(max_length=50)
     consent_given = models.BooleanField()
@@ -1304,7 +1304,7 @@ class PrivacyBreaches(BaseModel):
 
 class ProvincialDataHandling(BaseModel):
     """Migrated from drizzle: provincial-privacy.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     province = models.CharField(max_length=2)
     action_type = models.CharField(max_length=50)
     data_category = models.CharField(max_length=50)
@@ -1321,7 +1321,7 @@ class ProvincialDataHandling(BaseModel):
 
 class DataSubjectAccessRequests(BaseModel):
     """Migrated from drizzle: provincial-privacy.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     request_type = models.CharField(max_length=50)
     province = models.CharField(max_length=2)
     request_description = models.TextField(null=True, blank=True)
@@ -1576,7 +1576,7 @@ class ConflictTraining(BaseModel):
 
 class ConflictAuditLog(BaseModel):
     """Migrated from drizzle: conflicts.ts"""
-    action_type = models.CharField(max_length=255, null=True, blank=True)
+    action_type = models.CharField(max_length=255, blank=True)
     action_description = models.TextField()
     compliance_impact = models.CharField(max_length=20, null=True, blank=True)
     ip_address = models.CharField(max_length=45, null=True, blank=True)
@@ -1597,7 +1597,7 @@ class GoldenShares(BaseModel):
     certificate_number = models.TextField(unique=True)
     issue_date = models.DateField()
     holder_type = models.TextField(default="council")
-    council_members = models.JSONField(default=dict)
+    council_members = models.JSONField()
     voting_power_reserved_matters = models.IntegerField(default=51)
     voting_power_ordinary_matters = models.IntegerField(default=1)
     redemption_value = models.IntegerField(default=1)
@@ -1620,7 +1620,7 @@ class ReservedMatterVotes(BaseModel):
     matter_type = models.TextField()
     title = models.TextField()
     description = models.TextField()
-    proposed_by = models.CharField(max_length=255, null=True, blank=True)
+    proposed_by = models.CharField(max_length=255, blank=True)
     proposed_date = models.DateTimeField()
     voting_deadline = models.DateTimeField()
     matter_details = models.JSONField()
@@ -1662,22 +1662,22 @@ class MissionAudits(BaseModel):
     union_revenue_threshold = models.IntegerField(default=90)
     member_satisfaction_threshold = models.IntegerField(default=80)
     data_violations_threshold = models.IntegerField(default=0)
-    union_revenue_pass = models.BooleanField(default=False)
-    member_satisfaction_pass = models.BooleanField(default=False)
-    data_violations_pass = models.BooleanField(default=False)
-    overall_pass = models.BooleanField(default=False)
+    union_revenue_pass = models.BooleanField()
+    member_satisfaction_pass = models.BooleanField()
+    data_violations_pass = models.BooleanField()
+    overall_pass = models.BooleanField()
     total_revenue = models.IntegerField(null=True, blank=True)
     union_revenue = models.IntegerField(null=True, blank=True)
     member_survey_sample_size = models.IntegerField(null=True, blank=True)
     member_survey_responses = models.IntegerField(null=True, blank=True)
-    data_violation_details = models.JSONField(default=dict, null=True, blank=True)
+    data_violation_details = models.JSONField(null=True, blank=True)
     auditor_opinion = models.TextField()
     auditor_notes = models.TextField(null=True, blank=True)
-    corrective_actions = models.JSONField(default=dict, null=True, blank=True)
+    corrective_actions = models.JSONField(null=True, blank=True)
     impacts_consecutive_compliance = models.BooleanField(default=False)
     consecutive_years_after_audit = models.IntegerField(null=True, blank=True)
     audit_report_pdf_url = models.TextField(null=True, blank=True)
-    supporting_documents_urls = models.JSONField(default=dict, null=True, blank=True)
+    supporting_documents_urls = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'mission_audits'
@@ -1695,7 +1695,7 @@ class GovernanceEvents(BaseModel):
     description = models.TextField()
     impact = models.TextField(null=True, blank=True)
     impact_description = models.TextField(null=True, blank=True)
-    stakeholders = models.JSONField(default=dict, null=True, blank=True)
+    stakeholders = models.JSONField(null=True, blank=True)
     notifications_sent = models.BooleanField(default=False)
     created_at = models.DateTimeField()
     created_by = models.CharField(max_length=255, null=True, blank=True)
@@ -1713,8 +1713,8 @@ class CouncilElections(BaseModel):
     election_year = models.IntegerField()
     election_date = models.DateField()
     positions_available = models.IntegerField()
-    candidates = models.JSONField(default=dict)
-    winners = models.JSONField(default=dict)
+    candidates = models.JSONField()
+    winners = models.JSONField()
     total_votes = models.IntegerField()
     participation_rate = models.IntegerField(null=True, blank=True)
     verified_by = models.TextField(null=True, blank=True)
@@ -1729,7 +1729,7 @@ class CouncilElections(BaseModel):
 class WorkplaceIncidents(BaseModel):
     """Migrated from drizzle: health-safety-schema.ts"""
     organization_id = models.UUIDField()
-    incident_number = models.CharField(max_length=255, null=True, blank=True)
+    incident_number = models.CharField(max_length=255, blank=True)
     claim_id = models.UUIDField(null=True, blank=True)
     incident_type = models.CharField(
         max_length=63,
@@ -1839,7 +1839,7 @@ class WorkplaceIncidents(BaseModel):
 class SafetyInspections(BaseModel):
     """Migrated from drizzle: health-safety-schema.ts"""
     organization_id = models.UUIDField()
-    inspection_number = models.CharField(max_length=255, null=True, blank=True)
+    inspection_number = models.CharField(max_length=255, blank=True)
     inspection_type = models.CharField(
         max_length=63,
         choices=[(value, value) for value in [
@@ -1908,7 +1908,7 @@ class SafetyInspections(BaseModel):
 class HazardReports(BaseModel):
     """Migrated from drizzle: health-safety-schema.ts"""
     organization_id = models.UUIDField()
-    report_number = models.CharField(max_length=255, null=True, blank=True)
+    report_number = models.CharField(max_length=255, blank=True)
     hazard_category = models.CharField(
         max_length=63,
         choices=[(value, value) for value in [
@@ -1981,7 +1981,7 @@ class SafetyCommitteeMeetings(BaseModel):
 class SafetyTrainingRecords(BaseModel):
     """Migrated from drizzle: health-safety-schema.ts"""
     organization_id = models.UUIDField()
-    record_number = models.CharField(max_length=255, null=True, blank=True)
+    record_number = models.CharField(max_length=255, blank=True)
     assessment_required = models.BooleanField(default=False, null=True, blank=True)
     assessment_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     certificate_issued = models.BooleanField(default=False, null=True, blank=True)
@@ -2038,7 +2038,7 @@ class SafetyTrainingRecords(BaseModel):
 class PpeEquipment(BaseModel):
     """Migrated from drizzle: health-safety-schema.ts"""
     organization_id = models.UUIDField()
-    item_number = models.CharField(max_length=255, null=True, blank=True)
+    item_number = models.CharField(max_length=255, blank=True)
     serial_number = models.CharField(max_length=100, null=True, blank=True)
     ppe_type = models.CharField(
         max_length=63,

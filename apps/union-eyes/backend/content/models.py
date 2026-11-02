@@ -358,15 +358,15 @@ class DocumentFolders(BaseModel):
 class Documents(BaseModel):
     """Migrated from drizzle: documents-schema.ts — full runtime field set (Phase F convergence)"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     folder_id = models.UUIDField(null=True, blank=True)
 
     # File information
     title = models.TextField(null=True, blank=True)
     filename = models.TextField(null=True, blank=True)
-    name = models.TextField(null=True, blank=True)
-    file_url = models.TextField(null=True, blank=True)
-    file_type = models.TextField(null=True, blank=True)
+    name = models.TextField(blank=True)
+    file_url = models.TextField(blank=True)
+    file_type = models.TextField(blank=True)
     content_type = models.TextField(null=True, blank=True)
     mime_type = models.TextField(null=True, blank=True)
     document_type = models.TextField(null=True, blank=True)
@@ -388,8 +388,8 @@ class Documents(BaseModel):
     metadata = models.JSONField(default=dict, null=True, blank=True)
 
     # Upload information
-    uploaded_by = models.TextField(null=True, blank=True)
-    uploaded_at = models.DateTimeField(null=True, blank=True)
+    uploaded_by = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(default=timezone.now)
 
     # Status and access
     status = models.CharField(max_length=20, default="active")
@@ -446,7 +446,7 @@ class MemberDocuments(BaseModel):
     file_url = models.TextField()
     file_size = models.IntegerField()
     file_type = models.TextField()
-    category = models.TextField(null=True, blank=True, default="General")
+    category = models.TextField(null=True, blank=True)
     uploaded_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     confidentiality_level = models.TextField(null=True, blank=True)
@@ -586,7 +586,7 @@ class DocumentSigners(BaseModel):
 class SignatureAuditTrail(BaseModel):
     """Migrated from drizzle: signatures.ts"""
 
-    document_id = models.UUIDField(null=True, blank=True)
+    document_id = models.UUIDField()
     signer_id = models.UUIDField(null=True, blank=True)
     event_type = models.TextField()
     event_description = models.TextField()
@@ -636,7 +636,7 @@ class SignatureWebhooksLog(BaseModel):
 class SignatureWorkflows(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     auto_reminders_enabled = models.BooleanField(default=True, null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     completed_signatures = models.IntegerField(default=0, null=True, blank=True)
@@ -710,7 +710,7 @@ class Signers(BaseModel):
 class SignatureAuditLog(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
-    workflow_id = models.UUIDField(null=True, blank=True)
+    workflow_id = models.UUIDField()
     certificate_info = models.JSONField(null=True, blank=True)
     event_description = models.TextField(null=True, blank=True)
     event_type = models.CharField(max_length=100)
@@ -1113,7 +1113,7 @@ class PilotApplications(BaseModel):
 class PilotMetrics(BaseModel):
     """Migrated from drizzle: marketing.ts"""
 
-    pilot_id = models.UUIDField(null=True, blank=True)
+    pilot_id = models.UUIDField()
     organization_id = models.UUIDField()
     enrollment_date = models.DateTimeField()
     days_active = models.IntegerField(default=0)

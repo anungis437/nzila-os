@@ -23,8 +23,9 @@ Strict kinds
                             Django write then violates that constraint, or names the wrong row); a column that carries
                             two keys is judged by both
     DEFAULT_DIVERGES        the model's constant default and the column's constant default differ, or the model has no
-                            default for a column that has one: a Django INSERT writes its own value (or NULL, or '') over
-                            what every other writer gets, so one logical row differs by writer
+                            default for a column that has one, or the model has a default for a column that has none: a
+                            Django INSERT writes its own value (or NULL, or '', or nothing the column would have stored)
+                            over what every other writer gets, so one logical row differs by writer
     CHECK_REFUSES_CHOICE    a value the field's choices allow is refused by a CHECK constraint that lists the column's values
 
 Advisory kinds
@@ -321,6 +322,21 @@ def model_default(field):
     return value
 
 
+def unbacked_default(field, column):
+    """The default the model writes for a column that has none (NOT_PROVIDED when there is no such default).
+
+    A Django INSERT that omits the field writes this value; a SQL script, a raw INSERT or any other writer leaves the column to NULL, or to an
+    error when it is NOT NULL, so one logical row differs by writer. ``auto_now`` and ``auto_now_add`` stamp in Python and are not defaults.
+    """
+    if field.primary_key or is_auto(field) or column["identity"] or column["generated"]:
+        return NOT_PROVIDED
+    if getattr(field, "auto_now", False) or getattr(field, "auto_now_add", False):
+        return NOT_PROVIDED
+    if column["default"] is not None:
+        return NOT_PROVIDED
+    return model_default(field)
+
+
 def defaults_agree(model_value, physical_value):
     """True when what the ORM writes for an omitted field is what the column's own default would have stored."""
     model_value = getattr(model_value, "value", model_value)
@@ -433,6 +449,9 @@ def measure(app_labels, include_contrib):
                             add("DEFAULT_DIVERGES", field.column, field=field.name, django=None, database=column["default"])
                     elif written is not COMPUTED and not defaults_agree(written, physical_value):
                         add("DEFAULT_DIVERGES", field.column, field=field.name, django=repr(written), database=column["default"])
+            unbacked = unbacked_default(field, column)
+            if unbacked is not NOT_PROVIDED:
+                add("DEFAULT_DIVERGES", field.column, field=field.name, django="computed" if unbacked is COMPUTED else repr(unbacked), database=None)
 
             if field.choices and not field.remote_field:
                 for constraint_name, refused in check_refused_choices(field, catalog.check_definitions.get(key, [])):

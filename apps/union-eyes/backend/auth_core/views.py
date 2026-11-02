@@ -853,15 +853,19 @@ def _handle_organization_created(data: Dict[str, Any]):
         logger.warning("organization.created event missing id")
         return
 
+    fields = {
+        "name": org_name,
+        "slug": slug,
+        "display_name": org_name,
+        "organization_type": metadata.get("organization_type", "union"),
+        "status": "active",
+    }
+    # A new organization has no parent here, so its path is empty. The column is NOT NULL with no default (every writer states it), and an existing
+    # organization keeps the path it has: it may sit under a parent this webhook knows nothing about.
     org, created = Organizations.objects.update_or_create(
         auth_provider_org_id=auth_org_id,
-        defaults={
-            "name": org_name,
-            "slug": slug,
-            "display_name": org_name,
-            "organization_type": metadata.get("organization_type", "union"),
-            "status": "active",
-        },
+        defaults=fields,
+        create_defaults={**fields, "hierarchy_path": []},
     )
     action = "Created" if created else "Updated"
     logger.info(

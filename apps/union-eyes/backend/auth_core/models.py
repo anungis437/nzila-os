@@ -128,7 +128,6 @@ class Organizations(BaseModel):
     )
     hierarchy_path = ArrayField(
         models.TextField(),
-        default=list,
         help_text="Array of ancestor organization IDs from root to this node",
     )
     hierarchy_level = models.IntegerField(
@@ -404,23 +403,23 @@ class CountryAddressFormats(BaseModel):
     administrative_area_label = models.TextField(null=True, blank=True, default="State")
     postal_code_label = models.TextField(null=True, blank=True, default="Postal Code")
     sub_administrative_area_label = models.TextField(null=True, blank=True)
-    required_fields = models.JSONField(default=dict, null=True, blank=True)
-    optional_fields = models.JSONField(default=dict, null=True, blank=True)
+    required_fields = models.JSONField(null=True, blank=True)
+    optional_fields = models.JSONField(null=True, blank=True)
     address_format = models.TextField()
-    display_order = models.JSONField(default=dict, null=True, blank=True)
+    display_order = models.JSONField(null=True, blank=True)
     postal_code_required = models.BooleanField(default=True)
     postal_code_pattern = models.TextField(null=True, blank=True)
     postal_code_example = models.TextField(null=True, blank=True)
     postal_code_length = models.IntegerField(null=True, blank=True)
-    administrative_areas = models.JSONField(default=dict, null=True, blank=True)
+    administrative_areas = models.JSONField(null=True, blank=True)
     has_subdivisions = models.BooleanField(default=False)
-    validation_rules = models.JSONField(default=dict, null=True, blank=True)
+    validation_rules = models.JSONField(null=True, blank=True)
     geocoding_supported = models.BooleanField(default=True)
     preferred_geocoder = models.TextField(null=True, blank=True)
     standardization_provider = models.TextField(null=True, blank=True)
     standardization_available = models.BooleanField(default=False)
-    example_addresses = models.JSONField(default=dict, null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    example_addresses = models.JSONField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "country_address_formats"
@@ -437,13 +436,13 @@ class AddressValidationCache(BaseModel):
     locality = models.TextField()
     administrative_area = models.TextField(null=True, blank=True)
     postal_code = models.TextField(null=True, blank=True)
-    is_valid = models.BooleanField(default=False)
+    is_valid = models.BooleanField()
     validated_by = models.TextField()
     confidence = models.TextField(null=True, blank=True)
-    corrected_address = models.JSONField(default=dict, null=True, blank=True)
+    corrected_address = models.JSONField(null=True, blank=True)
     latitude = models.TextField(null=True, blank=True)
     longitude = models.TextField(null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
     expires_at = models.DateTimeField()
     hit_count = models.IntegerField(default=1)
     last_hit_at = models.DateTimeField()
@@ -478,11 +477,11 @@ class FeatureFlags(BaseModel):
     type = models.TextField(default="boolean")
     enabled = models.BooleanField(default=False)
     percentage = models.IntegerField(null=True, blank=True)
-    allowed_organizations = models.JSONField(default=dict, null=True, blank=True)
-    allowed_users = models.JSONField(default=dict, null=True, blank=True)
+    allowed_organizations = models.JSONField(null=True, blank=True)
+    allowed_users = models.JSONField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     tags = models.JSONField(default=list, null=True, blank=True)
-    created_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
     created_by = models.TextField(null=True, blank=True)
     last_modified_by = models.TextField(null=True, blank=True)
 
@@ -498,7 +497,7 @@ class FeatureFlags(BaseModel):
 class OrganizationSharingSettings(BaseModel):
     """Migrated from drizzle: sharing.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     allow_congress_sharing = models.BooleanField(default=False, null=True, blank=True)
     allow_federation_sharing = models.BooleanField(default=False, null=True, blank=True)
     allow_province_sharing = models.BooleanField(default=False, null=True, blank=True)
@@ -526,7 +525,7 @@ class OrganizationSharingSettings(BaseModel):
 class CrossOrgAccessLog(BaseModel):
     """Migrated from drizzle: sharing.ts"""
 
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
     access_granted_via = models.CharField(max_length=50, null=True, blank=True)
     access_type = models.CharField(max_length=50)
     ip_address = models.CharField(max_length=45, null=True, blank=True)
@@ -640,7 +639,7 @@ class Profiles(BaseModel):
     used_credits = models.IntegerField(null=True, blank=True, default=0, db_default=0)
     status = models.TextField(null=True, blank=True, default="active", db_default="active")
     created_at = models.DateTimeField(db_default=Now())
-    updated_at = models.DateTimeField(null=True, blank=True, db_default=Now())
+    updated_at = models.DateTimeField(db_default=Now(), default=timezone.now)
 
     class Meta:
         db_table = "profiles"
@@ -718,8 +717,8 @@ class MemberContactPreferences(BaseModel):
     sms_opt_in = models.BooleanField(default=False)
     phone_opt_in = models.BooleanField(default=False)
     mail_opt_in = models.BooleanField(default=False)
-    notification_preferences = models.JSONField(default=dict, null=True, blank=True)
-    best_contact_times = models.JSONField(default=dict, null=True, blank=True)
+    notification_preferences = models.JSONField(null=True, blank=True)
+    best_contact_times = models.JSONField(null=True, blank=True)
     alternative_email = models.TextField(null=True, blank=True)
     alternative_phone = models.TextField(null=True, blank=True)
     emergency_contact_name = models.TextField(null=True, blank=True)
@@ -728,7 +727,7 @@ class MemberContactPreferences(BaseModel):
     accessibility_needs = models.TextField(null=True, blank=True)
     interpreter_required = models.BooleanField(default=False)
     interpreter_language = models.TextField(null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
     last_modified_by = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -756,7 +755,7 @@ class MemberEmploymentDetails(BaseModel):
     shift_type = models.TextField(null=True, blank=True)
     shift_start = models.TextField(null=True, blank=True)
     shift_end = models.TextField(null=True, blank=True)
-    work_days = models.JSONField(default=dict, null=True, blank=True)
+    work_days = models.JSONField(null=True, blank=True)
     hours_per_week = models.IntegerField(null=True, blank=True)
     supervisor_name = models.TextField(null=True, blank=True)
     supervisor_id = models.UUIDField(null=True, blank=True)
@@ -773,7 +772,7 @@ class MemberEmploymentDetails(BaseModel):
     steward = models.BooleanField(default=False)
     officer = models.BooleanField(default=False)
     committee_member = models.BooleanField(default=False)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
     last_modified_by = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -789,7 +788,7 @@ class MemberConsents(BaseModel):
     organization_id = models.UUIDField()
     consent_type = models.TextField()
     consent_category = models.TextField()
-    granted = models.BooleanField(default=False)
+    granted = models.BooleanField()
     granted_at = models.DateTimeField(null=True, blank=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
     consent_version = models.TextField(null=True, blank=True)
@@ -800,7 +799,7 @@ class MemberConsents(BaseModel):
     witnessed_by = models.TextField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     requires_renewal = models.BooleanField(default=False)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
     created_by = models.TextField(null=True, blank=True)
 
@@ -820,12 +819,12 @@ class MemberHistoryEvents(BaseModel):
     event_date = models.DateTimeField()
     event_title = models.TextField()
     event_description = models.TextField(null=True, blank=True)
-    event_data = models.JSONField(default=dict, null=True, blank=True)
+    event_data = models.JSONField(null=True, blank=True)
     actor_id = models.TextField(null=True, blank=True)
     actor_name = models.TextField(null=True, blank=True)
     is_public = models.BooleanField(default=False)
     visible_to_member = models.BooleanField(default=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
     created_by = models.TextField(null=True, blank=True)
 
@@ -867,8 +866,8 @@ class OrganizationMembers(BaseModel):
     exemption_approved_by = models.CharField(max_length=255, null=True, blank=True)
 
     # Phase F convergence — runtime-required member-directory + soft-delete fields
-    name = models.TextField(null=True, blank=True)
-    email = models.TextField(null=True, blank=True)
+    name = models.TextField(blank=True)
+    email = models.TextField(blank=True)
     phone = models.TextField(null=True, blank=True)
     department = models.TextField(null=True, blank=True)
     location = models.TextField(null=True, blank=True)

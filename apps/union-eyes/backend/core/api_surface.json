@@ -13,7 +13,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "accessibility_audits",
    "write_only": []
   },
@@ -29,7 +31,9 @@
     "id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "audit_id"
+   ],
    "table": "accessibility_issues",
    "write_only": []
   },
@@ -93,7 +97,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "ai_usage_metrics",
    "write_only": []
   },
@@ -141,7 +147,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "knowledge_base",
    "write_only": []
   },
@@ -309,7 +317,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "communication_analytics",
    "write_only": []
   },
@@ -520,7 +530,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "user_engagement_scores",
    "write_only": []
   },
@@ -596,6 +608,7 @@
    "required": [
     "consent_category",
     "consent_type",
+    "granted",
     "organization_id",
     "user_id"
    ],
@@ -837,7 +850,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "organization_sharing_settings",
    "write_only": []
   },
@@ -1007,7 +1022,9 @@
     "source_organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "source_organization_id"
+   ],
    "table": "arbitration_precedents",
    "write_only": []
   },
@@ -1181,7 +1198,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "bank_reconciliation",
    "write_only": []
   },
@@ -1335,8 +1354,7 @@
     "verified_by"
    ],
    "required": [
-    "direction",
-    "organization"
+    "direction"
    ],
    "table": "clc_sync_log",
    "write_only": []
@@ -1429,6 +1447,7 @@
     "updated_at"
    ],
    "required": [
+    "amount",
     "organization_id",
     "rate_name",
     "rate_type"
@@ -1486,7 +1505,8 @@
     "organization_id",
     "period_end",
     "period_start",
-    "remittance_date"
+    "remittance_date",
+    "total_amount"
    ],
    "table": "employer_remittances",
    "write_only": []
@@ -1535,7 +1555,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "financial_audit_log",
    "write_only": []
   },
@@ -1584,7 +1606,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "gl_account_mappings",
    "write_only": []
   },
@@ -1600,7 +1624,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "gl_transaction_log",
    "write_only": []
   },
@@ -1616,7 +1642,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "gl_trial_balance",
    "write_only": []
   },
@@ -1693,6 +1721,7 @@
     "user_id"
    ],
    "required": [
+    "amount",
     "effective_date",
     "organization_id",
     "transaction_date",
@@ -1714,7 +1743,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "organization_billing_config",
    "write_only": []
   },
@@ -1749,7 +1780,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "payment_cycles",
    "write_only": []
   },
@@ -1765,7 +1798,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "payment_disputes",
    "write_only": []
   },
@@ -1781,7 +1816,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "payment_methods",
    "write_only": []
   },
@@ -1803,6 +1840,7 @@
    "required": [
     "organization_id",
     "plan_name",
+    "total_owed",
     "user_id"
    ],
    "table": "payment_plans",
@@ -1834,6 +1872,7 @@
     "from_organization_id",
     "good_standing_members",
     "organization_id",
+    "per_capita_rate",
     "remittable_members",
     "remittance_month",
     "remittance_year",
@@ -1891,6 +1930,7 @@
     "user_id"
    ],
    "required": [
+    "amount",
     "organization_id",
     "remittance_id"
    ],
@@ -2002,10 +2042,12 @@
     "winners"
    ],
    "required": [
+    "candidates",
     "election_date",
     "election_year",
     "positions_available",
-    "total_votes"
+    "total_votes",
+    "winners"
    ],
    "table": "council_elections",
    "write_only": []
@@ -2024,6 +2066,7 @@
     "user_id"
    ],
    "required": [
+    "organization_id",
     "user_id"
    ],
    "table": "data_anonymization_log",
@@ -2174,6 +2217,7 @@
    ],
    "required": [
     "certificate_number",
+    "council_members",
     "issue_date"
    ],
    "table": "golden_shares",
@@ -2398,7 +2442,11 @@
     "auditor_firm",
     "auditor_name",
     "auditor_opinion",
+    "data_violations_pass",
+    "member_satisfaction_pass",
     "member_satisfaction_percent",
+    "overall_pass",
+    "union_revenue_pass",
     "union_revenue_percent"
    ],
    "table": "mission_audits",
@@ -2834,7 +2882,9 @@
     "uploaded_at",
     "uploaded_by"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "documents",
    "write_only": []
   },
@@ -3050,7 +3100,9 @@
     "pilot_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "pilot_id"
+   ],
    "table": "pilot_metrics",
    "write_only": []
   },
@@ -3433,7 +3485,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "external_accounts",
    "write_only": []
   },
@@ -3449,7 +3503,9 @@
     "org_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "org_id"
+   ],
    "table": "external_communication_files",
    "write_only": []
   },
@@ -3465,7 +3521,9 @@
     "org_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "org_id"
+   ],
    "table": "external_communication_messages",
    "write_only": []
   },
@@ -3481,7 +3539,9 @@
     "org_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "org_id"
+   ],
    "table": "external_document_files",
    "write_only": []
   },
@@ -3497,7 +3557,9 @@
     "org_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "org_id"
+   ],
    "table": "external_document_permissions",
    "write_only": []
   },
@@ -3698,7 +3760,11 @@
     "updated_at"
    ],
    "required": [
-    "claim_id"
+    "claim_id",
+    "due_date",
+    "event_date",
+    "organization_id",
+    "original_deadline"
    ],
    "table": "claim_deadlines",
    "write_only": []
@@ -3789,7 +3855,9 @@
     "witness_details",
     "witnesses_present"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "claims",
    "write_only": []
   },
@@ -3860,7 +3928,10 @@
     "step_number",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "days_from_event",
+    "organization_id"
+   ],
    "table": "deadline_rules",
    "write_only": []
   },
@@ -3962,6 +4033,7 @@
     "updated_at"
    ],
    "required": [
+    "due_date",
     "grievance"
    ],
    "table": "grievance_deadlines",
@@ -4165,7 +4237,9 @@
     "workplace_id",
     "workplace_name"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "grievances",
    "write_only": []
   },
@@ -4243,7 +4317,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "campaigns",
    "write_only": []
   },
@@ -4275,7 +4351,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "communication_preferences",
    "write_only": []
   },
@@ -4293,6 +4371,7 @@
     "user_id"
    ],
    "required": [
+    "organization_id",
     "user_id"
    ],
    "table": "in_app_notifications",
@@ -4310,7 +4389,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "message_log",
    "write_only": []
   },
@@ -4382,7 +4463,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "message_templates",
    "write_only": []
   },
@@ -4494,7 +4577,9 @@
     "id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "campaign_id"
+   ],
    "table": "newsletter_recipients",
    "write_only": []
   },
@@ -4542,7 +4627,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "notification_delivery_log",
    "write_only": []
   },
@@ -4595,7 +4682,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "notification_queue",
    "write_only": []
   },
@@ -4611,7 +4700,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "notification_templates",
    "write_only": []
   },
@@ -4666,7 +4757,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "notifications",
    "write_only": []
   },
@@ -4698,7 +4791,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "push_notifications",
    "write_only": []
   },
@@ -4714,7 +4809,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "sms_messages",
    "write_only": []
   },
@@ -4977,7 +5074,9 @@
     "id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "committee_id"
+   ],
    "table": "committee_memberships",
    "write_only": []
   },
@@ -5110,6 +5209,7 @@
     "user_id"
    ],
    "required": [
+    "organization_id",
     "user_id"
    ],
    "table": "external_calendar_connections",
@@ -5472,6 +5572,7 @@
    ],
    "required": [
     "created_by",
+    "filters",
     "name",
     "organization_id"
    ],
@@ -5610,7 +5711,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "poll_votes",
    "write_only": []
   },
@@ -5626,7 +5729,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "polls",
    "write_only": []
   },
@@ -5661,7 +5766,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "role_tenure_history",
    "write_only": []
   },
@@ -5714,7 +5821,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "steward_assignments",
    "write_only": []
   },
@@ -5730,7 +5839,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "survey_answers",
    "write_only": []
   },
@@ -5746,7 +5857,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "survey_questions",
    "write_only": []
   },
@@ -5762,7 +5875,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "survey_responses",
    "write_only": []
   },
@@ -5778,7 +5893,9 @@
     "organization_id",
     "updated_at"
    ],
-   "required": [],
+   "required": [
+    "organization_id"
+   ],
    "table": "surveys",
    "write_only": []
   },

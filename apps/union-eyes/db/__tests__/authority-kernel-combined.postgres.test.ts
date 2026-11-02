@@ -57,8 +57,8 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     for (const [u, r] of Object.entries(roles)) await seedMembership(d, u, ORG, r)
     await seedUser(d, 'user_other_org')
     await seedMembership(d, 'user_other_org', ORG_B, 'president')
-    await admin.query(`INSERT INTO grievances (id, organization_id, created_by, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status)
-      VALUES ($1,$2,$3, now(), now(), false, false, false, false, 'medium', 'open') ON CONFLICT (id) DO NOTHING`, [CASE, ORG, U.member])
+    await admin.query(`INSERT INTO grievances (id, organization_id, created_by, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status, grievance_number, title, type, description)
+      VALUES ($1,$2,$3, now(), now(), false, false, false, false, 'medium', 'open', 'AK-COMBINED-1', 'Authority kernel case', 'individual', 'Fixture case for the authority kernel proof') ON CONFLICT (id) DO NOTHING`, [CASE, ORG, U.member])
     await admin.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method) VALUES ($1,$2,now(),now(),'dues','cash') ON CONFLICT (id) DO NOTHING`, [PAYMENT, ORG])
     runtime = new pg.Client({ connectionString: URL })
     await runtime.connect()
@@ -148,8 +148,9 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
   it('classified documents on the real tables: own submission yes, union internal file no, privileged no', async () => {
     const [own, internal, publicInternal, privileged] = [newUuid(), newUuid(), newUuid(), newUuid()]
     const ins = (id: string, by: string, label: string, priv: boolean) => admin.query(
-      `INSERT INTO documents (id, created_at, updated_at, organization_id, uploaded_by, access_level, contains_legal_privilege, contains_medical_sensitive, contains_pii, is_confidential, privacy_label, status)
-       VALUES ($1, now(), now(), $2, $3, 'team', $4, false, false, false, $5, 'active')`, [id, ORG, by, priv, label])
+      `INSERT INTO documents (id, created_at, updated_at, organization_id, uploaded_by, access_level, contains_legal_privilege, contains_medical_sensitive, contains_pii, is_confidential, privacy_label, status,
+                              name, file_url, file_type, uploaded_at)
+       VALUES ($1, now(), now(), $2, $3, 'team', $4, false, false, false, $5, 'active', $6, $7, 'application/pdf', now())`, [id, ORG, by, priv, label, `Fixture ${id}`, `https://files.example.test/${id}.pdf`])
     await ins(own, U.member, 'team_confidential', false)
     await ins(internal, U.officer, 'team_confidential', false)
     await ins(publicInternal, U.officer, 'public_internal', false)

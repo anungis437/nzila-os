@@ -73,8 +73,8 @@ describe.skipIf(!URL)('conversation assignment on the combined deployed schema, 
     // Outside Canonical V2 a staff actor's live membership is read per request from the compatibility projection.
     for (const [user, org, role] of [[U.admin, ORG_A, 'admin'], [U.triager, ORG_A, 'steward'], [U.steward, ORG_A, 'steward'], [U.other, ORG_A, 'steward'], [U.member, ORG_A, 'member'], [U.foreign, ORG_B, 'steward']]) {
       await admin.query(
-        `INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id)
-         VALUES (gen_random_uuid(), now(), now(), $1, $2, 'active', false, $3)`,
+        `INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id, name, email)
+         VALUES (gen_random_uuid(), now(), now(), $1, $2, 'active', false, $3, $1, $1 || '@example.test')`,
         [user, role, org],
       )
     }

@@ -105,7 +105,7 @@ class AbTestEvents(BaseModel):
 
 class AccessibilityAudits(BaseModel):
     """Migrated from drizzle: accessibility-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     accessibility_score = models.IntegerField(null=True, blank=True)
     audit_name = models.TextField()
     audit_type = models.TextField()
@@ -144,7 +144,7 @@ class AccessibilityAudits(BaseModel):
 
 class AccessibilityIssues(BaseModel):
     """Migrated from drizzle: accessibility-schema.ts"""
-    audit_id = models.UUIDField(null=True, blank=True)
+    audit_id = models.UUIDField()
     affects_color_blindness = models.BooleanField(default=False)
     affects_keyboard_nav = models.BooleanField(default=False)
     affects_screen_readers = models.BooleanField(default=False)
@@ -201,9 +201,9 @@ class WcagSuccessCriteria(BaseModel):
     understanding_url = models.TextField(null=True, blank=True)
     how_to_meet_url = models.TextField(null=True, blank=True)
     testing_procedure = models.TextField(null=True, blank=True)
-    common_failures = models.JSONField(default=dict, null=True, blank=True)
-    sufficient_techniques = models.JSONField(default=dict, null=True, blank=True)
-    keywords = models.JSONField(default=dict, null=True, blank=True)
+    common_failures = models.JSONField(null=True, blank=True)
+    sufficient_techniques = models.JSONField(null=True, blank=True)
+    keywords = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'wcag_success_criteria'
@@ -228,7 +228,7 @@ class AccessibilityUserTesting(BaseModel):
 
 class ChatSessions(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
-    user_id = models.TextField(null=True, blank=True)
+    user_id = models.TextField(blank=True)
     organization_id = models.UUIDField()
     title = models.TextField()
     status = models.CharField(
@@ -279,7 +279,7 @@ class ChatMessages(BaseModel):
 
 class KnowledgeBase(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     allowed_organizations = models.JSONField(null=True, blank=True)
     citation_count = models.IntegerField(default=0)
     content = models.TextField()
@@ -339,8 +339,8 @@ class AiSafetyFilters(BaseModel):
     input = models.TextField()
     output = models.TextField(null=True, blank=True)
     flagged = models.BooleanField(default=False)
-    flagged_categories = models.JSONField(default=dict, null=True, blank=True)
-    confidence_scores = models.JSONField(default=dict, null=True, blank=True)
+    flagged_categories = models.JSONField(null=True, blank=True)
+    confidence_scores = models.JSONField(null=True, blank=True)
     action = models.TextField()
     reason = models.TextField(null=True, blank=True)
     session = models.ForeignKey('ChatSessions', on_delete=models.CASCADE, related_name='ai_safety_filters_session_set', null=True, blank=True)
@@ -354,7 +354,7 @@ class AiSafetyFilters(BaseModel):
 
 class AiUsageMetrics(BaseModel):
     """Migrated from drizzle: ai-chatbot-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     provider = models.TextField()
     model = models.TextField()
     operation = models.TextField()

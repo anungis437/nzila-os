@@ -148,7 +148,7 @@ export const missionAudits = pgTable("mission_audits", {
   correctiveActions: jsonb("corrective_actions"), // JSON: [{ action, deadline, status }]
   
   // Sunset clause impact
-  impactsConsecutiveCompliance: boolean("impacts_consecutive_compliance").notNull(),
+  impactsConsecutiveCompliance: boolean("impacts_consecutive_compliance").notNull().default(false),
   consecutiveYearsAfterAudit: integer("consecutive_years_after_audit"), // Running count after this audit
   
   // Document storage

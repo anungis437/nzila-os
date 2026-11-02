@@ -512,6 +512,41 @@
       "when": 1759280000000,
       "tag": "0071_conservative_consent_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1759290000000,
+      "tag": "0072_declared_not_null_2",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1759300000000,
+      "tag": "0073_declared_defaults",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1759310000000,
+      "tag": "0074_model_defaults_physical",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1759320000000,
+      "tag": "0075_enhanced_rbac_relations",
+      "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1759330000000,
+      "tag": "0076_enhanced_rbac_catalog",
+      "breakpoints": true
     }
   ]
 }

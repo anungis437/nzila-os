@@ -10,7 +10,7 @@
  *     keys, indexes, NOT NULL, time zone, checks) are held at zero;
  *   - the database is unambiguous on its own terms: no column carries two foreign keys, no index is defined twice, no constraint is left unvalidated
  *     (Django migrate and the platform bootstrap each name their own objects, so a column could carry both until platform 0070);
- *   - platform migrations 0062 to 0070 are reversible and re-appliable: rolling them back restores the findings they closed, applying them again
+ *   - platform migrations 0062 to 0073 are reversible and re-appliable: rolling them back restores the findings they closed, applying them again
  *     closes them, and nothing else changes.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database that has no other session
@@ -32,7 +32,7 @@ import {
   type Finding,
   type FindingKind,
 } from '../../scripts/runtime/schema-convergence'
-import { djangoLiveTables } from '../../scripts/runtime/django-writers'
+import { djangoLiveTables, djangoNullableColumns } from '../../scripts/runtime/django-writers'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const APP_ROOT = join(__dirname, '..', '..')
@@ -40,15 +40,14 @@ const APP_ROOT = join(__dirname, '..', '..')
 /**
  * Advisory classes that remain open. Each ceiling is the count measured on the converged database; a change that adds to one fails here, and
  * closing findings means lowering the ceiling in the same change. The integrity classes (foreign keys, indexes, time zone, checks, an unvalidated
- * constraint) are closed and held at zero. NOT NULL is closed wherever no live Django ViewSet can write the table (the database may not be stricter
- * than the loosest legitimate writer), and 1 column is open on purpose (NOT_NULL_DELIBERATELY_OPEN); the 128 on live Django tables and that one are all
- * that remain, and a test below holds the open set to exactly that rule.
+ * constraint) are closed and held at zero. NOT NULL is closed everywhere the Django model requires the column too (the database may not be stricter
+ * than the loosest legitimate writer), and 1 column is open on purpose (NOT_NULL_DELIBERATELY_OPEN); a test below holds the open set to exactly that rule.
  * What else remains is the 14 relations that several declarations name differently, and the pgvector column on a server that does not offer the extension.
  */
 const ADVISORY_CEILING: Partial<Record<FindingKind, number>> = {
   FK_ABSENT: 0,
   INDEX_ABSENT: 0,
-  NOT_NULL_ABSENT: 129,
+  NOT_NULL_ABSENT: 1,
   TZ_MISMATCH: 0,
   CHECK_ABSENT: 0,
   CONSTRAINT_NOT_VALIDATED: 0,
@@ -64,12 +63,14 @@ const INTEGRITY_MIGRATIONS = [
   '0068_declared_foreign_keys',
   '0069_declared_not_null',
   '0070_unambiguous_constraints',
+  '0072_declared_not_null_2',
 ]
 const SHAPE_MIGRATIONS = [
   '0062_declared_enum_convergence',
   '0063_declared_shape_convergence',
   '0064_declared_unique_keys',
   '0065_declared_absent_relations_2',
+  '0073_declared_defaults',
 ]
 const MIGRATIONS = [...SHAPE_MIGRATIONS, ...INTEGRITY_MIGRATIONS]
 
@@ -113,8 +114,9 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
 
   it('measures every declared relation', async () => {
     const measured = await measure(URL!)
-    // 623 distinct physical relations are declared across the barrel and the flat declaration files; fewer would mean a declaration went unmeasured.
-    expect(measured.declared.length).toBeGreaterThanOrEqual(623)
+    // 627 distinct physical relations are declared across the barrel and the flat declaration files (623, and the four of the enhanced RBAC: platform 0075); fewer would
+    // mean a declaration went unmeasured.
+    expect(measured.declared.length).toBeGreaterThanOrEqual(627)
     expect(measured.tables).toBe(measured.declared.length)
   }, 600_000)
 
@@ -135,16 +137,24 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     expect(Object.keys(counts).filter((kind) => !known.has(kind))).toEqual([])
   }, 600_000)
 
-  it('leaves a NOT NULL column open only where a live Django ViewSet can write the table, or on purpose', async () => {
+  it('leaves a NOT NULL column open only where a live Django ViewSet can store NULL in it, or on purpose', async () => {
     // The database may not be stricter than the loosest legitimate writer. A Django ViewSet that is not contained can store NULL in a column its
-    // model leaves null=True, so those columns wait for the Django model and API to require them; everywhere else the declared NOT NULL is applied,
+    // model leaves null=True, so such a column waits for the Django model and API to require it too; everywhere else the declared NOT NULL is applied,
     // except the columns the platform leaves nullable deliberately, each with the migration that says why.
     const measured = await measure(URL!)
     const live = djangoLiveTables(APP_ROOT)
+    const nullable = djangoNullableColumns(APP_ROOT)
     const open = measured.findings.filter((f) => f.kind === 'NOT_NULL_ABSENT')
     expect(live.size).toBeGreaterThan(100)
+    expect(nullable.size).toBeGreaterThan(300)
     expect(
-      open.filter((f) => !live.has(f.table.split('.').pop()!) && !NOT_NULL_DELIBERATELY_OPEN[`${f.table}.${f.column}`]).map((f) => `${f.table}.${f.column}`),
+      open
+        .filter((f) => !NOT_NULL_DELIBERATELY_OPEN[`${f.table}.${f.column}`])
+        .filter((f) => {
+          const bare = f.table.split('.').pop()!
+          return !(live.has(bare) && nullable.get(bare)?.has(f.column!))
+        })
+        .map((f) => `${f.table}.${f.column}`),
     ).toEqual([])
     // An exception that no longer applies (the column is now NOT NULL, or undeclared) must leave the list.
     for (const key of Object.keys(NOT_NULL_DELIBERATELY_OPEN)) expect(open.map((f) => `${f.table}.${f.column}`), `${key} is no longer open`).toContain(key)
@@ -237,7 +247,7 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     expect(integrityCounts.FK_ABSENT).toBe(293)
     expect(integrityCounts.INDEX_ABSENT).toBe(797)
     expect(integrityCounts.CHECK_ABSENT).toBe(36)
-    expect(integrityCounts.NOT_NULL_ABSENT).toBe(286)
+    expect(integrityCounts.NOT_NULL_ABSENT).toBe(294)
 
     await run([...SHAPE_MIGRATIONS].reverse().map((tag) => `${tag}.rollback.sql`))
     const rolledBack = await measure(cloneUrl.toString())

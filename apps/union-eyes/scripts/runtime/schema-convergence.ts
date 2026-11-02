@@ -12,7 +12,9 @@
  *   TYPE_MISMATCH                     the declaration and the column disagree on type family (uuid vs text, array vs jsonb, ...).
  *   NARROWER_PHYSICAL                 the column is narrower than declared (varchar(50) for a text, numeric(10,2) for numeric(15,2), integer for bigint).
  *   NO_DB_DEFAULT                     NOT NULL, no database default, and the ORM emits the DEFAULT keyword for an omitted value (R-16).
- *   DEFAULT_ABSENT                    nullable, no database default, but the declaration has one: an omitted value is stored as NULL, not the declared default.
+ *   DEFAULT_ABSENT                    the declaration states a SQL default the database does not have: a writer that omits the value (Django, a SQL script, an ORM that
+ *                                     does not fill it) stores NULL, or fails, instead of the declared default. An ORM that fills the value itself ($defaultFn) is not
+ *                                     exempt: the declaration still states the default, and every other writer needs it from the database.
  *   NULLABLE_DECLARED_BUT_REQUIRED    declared nullable with no default, but the column is NOT NULL with no default: an insert that leaves it out fails.
  *   UNDECLARED_REQUIRED               NOT NULL, no default, and no declaration names the column: every insert fails.
  *   UNIQUE_ABSENT                     a declared unique key or primary key has no unique constraint or index over exactly those columns, so ON CONFLICT cannot infer it.
@@ -579,7 +581,10 @@ function compareColumn(table: DeclaredTable, column: DeclaredColumn, p: Physical
     if (column.defaultSql === null && column.notNullIn > 0 && column.notNullIn < table.variantCount) add('VARIANT_REQUIRED', `NOT NULL, no default, declared NOT NULL by ${column.notNullIn} of ${table.variantCount} declarations`)
     else add(column.hasDefault ? 'NO_DB_DEFAULT' : 'NULLABLE_DECLARED_BUT_REQUIRED', column.hasDefault ? 'NOT NULL, no database default, ORM relies on the DEFAULT keyword' : 'declared nullable, but the column is NOT NULL with no default')
   }
-  if (p.nullable && !p.hasDefault && column.defaultSql !== null && !column.clientFilled && !column.generated) add('DEFAULT_ABSENT', `declared default ${column.defaultSql} is not applied by the database`)
+  // A default the ORM fills client side ($defaultFn) is still a default the declaration states: any other writer gets NULL, or an error, unless the database has it too.
+  if (!p.hasDefault && column.defaultSql !== null && !column.generated && (p.nullable || column.clientFilled)) {
+    add('DEFAULT_ABSENT', column.clientFilled ? `declared default ${column.defaultSql} is filled by the ORM; no other writer gets it from the database` : `declared default ${column.defaultSql} is not applied by the database`)
+  }
   if (column.notNull && p.nullable) add('NOT_NULL_ABSENT', 'declared NOT NULL, the column is nullable')
 }
 

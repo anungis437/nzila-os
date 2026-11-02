@@ -47,7 +47,7 @@ class NotificationLog(BaseModel):
     """Migrated from drizzle: clc-per-capita-schema.ts"""
     remittance_id = models.UUIDField(null=True, blank=True)
     organization_id = models.UUIDField()
-    type = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, blank=True)
     channel = models.CharField(max_length=255, null=True, blank=True)
     errors = models.TextField(null=True, blank=True)
     failure_count = models.IntegerField(default=0, null=True, blank=True)
@@ -63,7 +63,7 @@ class NotificationLog(BaseModel):
 
 class CommunicationPreferences(BaseModel):
     """Migrated from drizzle: communication-analytics-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     user_id = models.CharField(max_length=255)
     email_enabled = models.BooleanField(default=True, null=True, blank=True)
     sms_enabled = models.BooleanField(default=False, null=True, blank=True)
@@ -102,7 +102,7 @@ class CommunicationPreferences(BaseModel):
 
 class MessageTemplates(BaseModel):
     """Migrated from drizzle: campaigns.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     type = models.CharField(
@@ -129,7 +129,7 @@ class MessageTemplates(BaseModel):
 
 class Campaigns(BaseModel):
     """Migrated from drizzle: campaigns.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     type = models.CharField(
@@ -173,7 +173,7 @@ class Campaigns(BaseModel):
 
 class MessageLog(BaseModel):
     """Migrated from drizzle: campaigns.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     campaign_id = models.UUIDField(null=True, blank=True)
     recipient_id = models.CharField(max_length=255)
     recipient_email = models.CharField(max_length=255, null=True, blank=True)
@@ -361,7 +361,7 @@ class NewsletterCampaigns(BaseModel):
 
 class NewsletterRecipients(BaseModel):
     """Migrated from drizzle: newsletters.ts"""
-    campaign_id = models.UUIDField(null=True, blank=True)
+    campaign_id = models.UUIDField()
     profile_id = models.TextField(null=True, blank=True)
     email = models.CharField(max_length=255)
     status = models.CharField(max_length=50, default='pending', null=True, blank=True)
@@ -430,7 +430,7 @@ class NotificationTracking(BaseModel):
     body = models.TextField()
     html_body = models.TextField(null=True, blank=True)
     template_id = models.TextField(null=True, blank=True)
-    template_data = models.JSONField(default=dict, null=True, blank=True)
+    template_data = models.JSONField(null=True, blank=True)
     provider_id = models.TextField(null=True, blank=True)
     external_message_id = models.TextField(null=True, blank=True)
     action_url = models.TextField(null=True, blank=True)
@@ -440,7 +440,7 @@ class NotificationTracking(BaseModel):
     failure_reason = models.TextField(null=True, blank=True)
     failure_count = models.IntegerField(null=True, blank=True, default=0)
     last_failure_at = models.DateTimeField(null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'notification_tracking'
@@ -450,7 +450,7 @@ class NotificationTracking(BaseModel):
 class InAppNotifications(BaseModel):
     """Migrated from drizzle: notifications.ts"""
     user_id = models.TextField()
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     title = models.TextField()
     message = models.TextField()
     type = models.TextField(default='info')
@@ -476,7 +476,7 @@ class NotificationHistory(BaseModel):
 
 class Notifications(BaseModel):
     """Migrated from drizzle: notifications.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     user_id = models.TextField()
     type = models.TextField()
     title = models.TextField()
@@ -498,7 +498,7 @@ class Notifications(BaseModel):
 
 class NotificationTemplates(BaseModel):
     """Migrated from drizzle: notifications.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     template_key = models.TextField()
     name = models.TextField()
     description = models.TextField(null=True, blank=True)
@@ -540,7 +540,7 @@ class NotificationTemplates(BaseModel):
 
 class NotificationQueue(BaseModel):
     """Migrated from drizzle: notifications.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     status = models.CharField(
         max_length=63,
         choices=[(value, value) for value in ['pending', 'processing', 'completed', 'failed', 'retrying']],
@@ -566,7 +566,7 @@ class NotificationQueue(BaseModel):
 
 class NotificationDeliveryLog(BaseModel):
     """Migrated from drizzle: notifications.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     notification_id = models.UUIDField()
     event = models.TextField()
     event_timestamp = models.DateTimeField()
@@ -631,7 +631,7 @@ class PushNotificationTemplates(BaseModel):
 
 class PushNotifications(BaseModel):
     """Migrated from drizzle: push-notifications.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     name = models.TextField()
     template_id = models.UUIDField(null=True, blank=True)
     title = models.TextField()
@@ -748,7 +748,7 @@ class SmsCampaigns(BaseModel):
 
 class SmsMessages(BaseModel):
     """Migrated from drizzle: sms.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     user_id = models.TextField(null=True, blank=True)
     phone_number = models.TextField()
     message = models.TextField()
@@ -909,7 +909,7 @@ class MobileSyncQueue(BaseModel):
 
 class MobileAnalytics(BaseModel):
     """Migrated from drizzle: mobile-devices-schema.ts"""
-    session_id = models.CharField(max_length=255, null=True, blank=True)
+    session_id = models.CharField(max_length=255, blank=True)
     device_context = models.JSONField(null=True, blank=True)
     device_id = models.UUIDField(null=True, blank=True)
     event_name = models.CharField(max_length=100)
@@ -953,11 +953,11 @@ class CommunicationPreferencesPhase4(BaseModel):
     """Migrated from drizzle: phase-4-messaging-schema.ts"""
     user_id = models.TextField()
     organization_id = models.UUIDField()
-    email_opt_in = models.TextField(null=True, blank=True, default='true')
-    sms_opt_in = models.TextField(null=True, blank=True, default='true')
+    email_opt_in = models.TextField(null=True, blank=True)
+    sms_opt_in = models.TextField(null=True, blank=True)
     quiet_hours_start = models.TextField(null=True, blank=True)
     quiet_hours_end = models.TextField(null=True, blank=True)
-    timezone = models.TextField(null=True, blank=True, default='America/Toronto')
+    timezone = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'communication_preferences_phase4'

@@ -361,6 +361,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "row security for the relations platform 0061 creates: ten tenant tables, two system-only tables; CBA intelligence is tenant-less by manifest design"
+      },
+      {
+        "tag": "0053_enhanced_rbac_rls_closure",
+        "sha256": "6ff41601b5a9f54744f046b21711674aed831aa131477330b8c3355df7aff93c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Row security for member_roles, permission_exceptions and rbac_audit_log through ue_create_direct_org_rls_policy (FORCE RLS, one runtime policy per command, system-role policy); role_definitions is global reference data and takes none; grants nothing: the runtime role gets SELECT only from the manifest at grant activation."
       }
     ],
     "platform": [
@@ -762,6 +769,41 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Six column defaults move from true to false where the Django models already write false (member_contact_preferences email, phone and mail opt-in; location_tracking_config.location_tracking_enabled; separated_payment_transactions separation_enforced and correct_account_used), so a consent, an outcome or a tracking switch is never asserted by omission; existing rows are untouched; a default that is neither true nor absent is left alone; reversible."
+      },
+      {
+        "tag": "0072_declared_not_null_2",
+        "sha256": "1c8772f257e08c9de22fed6eb99da3953f01343729ea0b11e337bd7c63aca3f6",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Sets the 136 declared NOT NULL columns the database left nullable, now that the Django models require them too (128 model fields tightened, the 8 created_at and updated_at columns of employers, worksites, bargaining_units and committees now declared NOT NULL); payments.amount stays nullable on purpose; fail-closed on a NULL; the rollback relaxes exactly the listed columns."
+      },
+      {
+        "tag": "0073_declared_defaults",
+        "sha256": "8a614b5c204f95564835ad0661304a40b8d49745f57a4e125494c1a5da38991a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Gives the database the 35 defaults the Drizzle declarations state and the ORM fills client side (claims, claim_updates, grievances, organization_members, organizations: flags false, counters 0, status and priority starters, id and claim_id gen_random_uuid(), created_at and updated_at now()) plus mission_audits.impacts_consecutive_compliance false (the TS mission-audits route omits it and the column was NOT NULL with no default, so the route could not insert); no row is rewritten; a preflight and postflight prove no constraint, index, policy, grant or row-security setting changed; reversible."
+      },
+      {
+        "tag": "0074_model_defaults_physical",
+        "sha256": "1925f1ef4fa5ebc27a9abf72e344aec0b7721838b0df501c2f59687665f770ed",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Gives the database the 35 defaults the Django models apply on relations only Django declares (evidence_packs, integration_registry, compliance_snapshots, domain_events and nine more): every value is the one the model already writes (empty strings, zero counters, empty objects, draft or active starters, gen_random_uuid() and now()); a column that already has a default keeps it; no row is rewritten; reversible by tag."
+      },
+      {
+        "tag": "0075_enhanced_rbac_relations",
+        "sha256": "1d5478aa579afcb21add282e0ab44c84320831eb58e7637f698d65ff8d3316b5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Creates the four relations the enhanced RBAC query module was written against and nothing created (role_definitions, member_roles, permission_exceptions, rbac_audit_log), from their Drizzle declarations through drizzle-kit: tables, named checks, foreign keys, indexes, and the live-assignment partial unique index; privileges are revoked explicitly so grants and row security come only from the storage-authority manifest and cache 0053; refuses to run when a target exists; rollback refuses to drop a relation that holds rows."
+      },
+      {
+        "tag": "0076_enhanced_rbac_catalog",
+        "sha256": "841f0d011a5eed00dd802527802e465575e18e3e491e6f827ca8b87b4f5a4d21",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Integrity and catalog for the enhanced RBAC relations: rbac_audit_log is append-only (no delete, no truncate, only the review columns change, once); member_roles and permission_exceptions refuse a member who does not belong to the row's organization; member_roles refuses an inactive role; role_definitions is seeded with the 11 organization roles of TENANT_LOCAL_ROLES (levels from getRoleLevel, permissions from ROLE_PERMISSIONS), never the platform-operations or CLC, federation and national roles; generated from the code catalog; a custom role using a seeded code stops the migration; reversible, refusing while a member holds a seeded role."
       }
     ]
   }

@@ -20,6 +20,7 @@
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema'
+import { serializeRawDates } from './driver-dates'
 
 const systemDatabaseUrl = process.env.SYSTEM_DATABASE_URL
 
@@ -59,6 +60,8 @@ function getSystemClient() {
 function getSystemDb() {
   if (!_systemDb) {
     _systemDb = drizzle(getSystemClient(), { schema })
+    // after drizzle(): drizzle installs its serializers at construction
+    serializeRawDates(getSystemClient())
   }
   return _systemDb
 }

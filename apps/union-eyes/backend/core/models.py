@@ -247,8 +247,8 @@ class AuditLogs(BaseModel):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(null=True, blank=True)
     correlation_id = models.UUIDField(null=True, blank=True)
-    details = models.JSONField(default=dict, null=True, blank=True)
-    changes = models.JSONField(default=dict, null=True, blank=True)
+    details = models.JSONField(null=True, blank=True)
+    changes = models.JSONField(null=True, blank=True)
     # — Hash chain —
     content_hash = models.CharField(max_length=64, null=True, blank=True)
     previous_hash = models.CharField(max_length=64, null=True, blank=True)
@@ -275,8 +275,6 @@ class SecurityEvents(BaseModel):
         "auth_core.Organizations",
         on_delete=models.CASCADE,
         related_name="security_events_organization_set",
-        null=True,
-        blank=True,
     )
     user_id = models.CharField(max_length=255, null=True, blank=True)
     action_taken = models.TextField(null=True, blank=True)
@@ -447,7 +445,7 @@ class ExternalCustomers(BaseModel):
 class ExternalAccounts(BaseModel):
     """Migrated from drizzle: accounting.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     external_id = models.CharField(max_length=255)
     external_provider = models.CharField(max_length=50)
     account_name = models.CharField(max_length=500)
@@ -487,7 +485,7 @@ class ExternalCommunicationChannels(BaseModel):
 class ExternalCommunicationMessages(BaseModel):
     """Migrated from drizzle: communication.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
     external_provider = models.CharField(max_length=50)
     external_id = models.CharField(max_length=255)
     channel_id = models.UUIDField(null=True, blank=True)
@@ -535,7 +533,7 @@ class ExternalCommunicationUsers(BaseModel):
 class ExternalCommunicationFiles(BaseModel):
     """Migrated from drizzle: communication.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
     external_provider = models.CharField(max_length=50)
     external_id = models.CharField(max_length=255)
     channel_id = models.UUIDField(null=True, blank=True)
@@ -593,7 +591,7 @@ class ExternalDocumentLibraries(BaseModel):
 class ExternalDocumentFiles(BaseModel):
     """Migrated from drizzle: documents.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
     created_by = models.CharField(max_length=255, null=True, blank=True)
     created_by_email = models.CharField(max_length=255, null=True, blank=True)
     external_id = models.CharField(max_length=255)
@@ -618,7 +616,7 @@ class ExternalDocumentFiles(BaseModel):
 class ExternalDocumentPermissions(BaseModel):
     """Migrated from drizzle: documents.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
     external_id = models.CharField(max_length=255)
     external_provider = models.CharField(max_length=50)
     file_id = models.UUIDField(null=True, blank=True)

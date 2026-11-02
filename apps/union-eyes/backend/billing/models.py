@@ -183,6 +183,14 @@ class ClcBargainingTrends(BaseModel):
 
 class ClcSyncLog(OrganizationModel):
     """Tenant sync audit used by the current CLC collection routes."""
+    # The per-capita declaration (clc-per-capita-schema.ts) records a sync that names no organization, and the column is nullable: such a sync is recorded, not refused.
+    organization = models.ForeignKey(
+        "auth_core.Organizations",
+        on_delete=models.CASCADE,
+        related_name="%(class)ss",
+        null=True,
+        blank=True,
+    )
     sync_type = models.CharField(
         max_length=255,
         null=True,
@@ -263,7 +271,7 @@ class PerCapitaRemittances(BaseModel):
     total_members = models.IntegerField()
     good_standing_members = models.IntegerField()
     remittable_members = models.IntegerField()
-    per_capita_rate = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    per_capita_rate = models.DecimalField(max_digits=19, decimal_places=2)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
     clc_account_code = models.CharField(max_length=50, null=True, blank=True)
@@ -290,7 +298,7 @@ class PerCapitaRemittances(BaseModel):
 
 class ClcChartOfAccounts(BaseModel):
     """Migrated from drizzle: clc-per-capita-schema.ts"""
-    account_code = models.CharField(max_length=255, null=True, blank=True)
+    account_code = models.CharField(max_length=255, blank=True)
     account_name = models.CharField(max_length=255)
     account_type = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
@@ -374,7 +382,7 @@ class OrganizationContacts(BaseModel):
 class ClcOrganizationSyncLog(BaseModel):
     """Migrated from drizzle: clc-sync-audit-schema.ts"""
     organization_id = models.UUIDField(null=True, blank=True)
-    affiliate_code = models.CharField(max_length=255, null=True, blank=True)
+    affiliate_code = models.CharField(max_length=255, blank=True)
     action = models.CharField(max_length=20)
     changes = models.TextField(null=True, blank=True)
     conflicts = models.JSONField(null=True, blank=True)
@@ -666,7 +674,7 @@ class SeparatedPaymentTransactions(BaseModel):
     correct_account_used = models.BooleanField(default=False)
     payment_status = models.TextField(default="pending")
     failure_reason = models.TextField(null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
 
     class Meta:
@@ -731,7 +739,7 @@ class AccountBalanceReconciliation(BaseModel):
     account_type = models.TextField()
     stripe_reported_balance = models.TextField()
     system_calculated_balance = models.TextField()
-    balance_match = models.BooleanField(default=False)
+    balance_match = models.BooleanField()
     discrepancy_amount = models.TextField(null=True, blank=True)
     discrepancy_reason = models.TextField(null=True, blank=True)
     reconciliation_status = models.TextField(default="pending")
@@ -753,7 +761,7 @@ class WhiplashPreventionAudit(BaseModel):
     transaction = models.ForeignKey('SeparatedPaymentTransactions', on_delete=models.CASCADE, related_name='whiplash_prevention_audit_transaction_set', null=True, blank=True)
     performed_by = models.TextField()
     compliance_impact = models.TextField(null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'whiplash_prevention_audit'
@@ -789,7 +797,7 @@ class CostCenters(BaseModel):
 
 class GlAccountMappings(BaseModel):
     """Migrated from drizzle: accounting.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     account_type = models.CharField(
         max_length=63,
         choices=[(value, value) for value in [
@@ -826,7 +834,7 @@ class GlAccountMappings(BaseModel):
 
 class GlTransactionLog(BaseModel):
     """Migrated from drizzle: accounting.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     chart_of_accounts_id = models.UUIDField()
     transaction_date = models.DateTimeField()
     transaction_number = models.CharField(max_length=50)
@@ -865,7 +873,7 @@ class GlTransactionLog(BaseModel):
 
 class GlTrialBalance(BaseModel):
     """Migrated from drizzle: accounting.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     chart_of_accounts_id = models.UUIDField()
     period_end_date = models.DateTimeField()
     opening_balance = models.DecimalField(
@@ -909,7 +917,7 @@ class GlTrialBalance(BaseModel):
 
 class OrganizationBillingConfig(BaseModel):
     """Migrated from drizzle: billing-config.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     billing_day_of_month = models.IntegerField(null=True, blank=True)
     billing_frequency = models.CharField(max_length=20, default='monthly')
     enabled = models.BooleanField(default=True, null=True, blank=True)
@@ -1055,7 +1063,7 @@ class Payments(BaseModel):
 
 class PaymentCycles(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     closed_at = models.DateTimeField(null=True, blank=True)
     cycle_type = models.CharField(max_length=50, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -1072,7 +1080,7 @@ class PaymentCycles(BaseModel):
 
 class PaymentMethods(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     member_id = models.CharField(max_length=255)
     type = models.CharField(
         max_length=63,
@@ -1102,7 +1110,7 @@ class PaymentMethods(BaseModel):
 
 class BankReconciliation(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     bank_deposit_id = models.TextField()
     bank_statement_date = models.DateTimeField()
     deposit_amount = models.DecimalField(max_digits=19, decimal_places=2)
@@ -1131,7 +1139,7 @@ class BankReconciliation(BaseModel):
 
 class PaymentDisputes(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     description = models.TextField(null=True, blank=True)
     filed_by = models.CharField(max_length=255, null=True, blank=True)
     payment_id = models.UUIDField()
@@ -1610,7 +1618,7 @@ class SyncJobs(BaseModel):
 
 class FinancialAuditLog(BaseModel):
     """Migrated from drizzle: erp.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     action = models.CharField(
         max_length=63,
         choices=[(value, value) for value in [
@@ -1861,7 +1869,7 @@ class DuesRates(BaseModel):
     unit_id = models.UUIDField(null=True, blank=True)
     rate_name = models.TextField()
     rate_type = models.TextField()
-    amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=19, decimal_places=2)
     classification = models.TextField(null=True, blank=True)
     created_by = models.TextField(null=True, blank=True)
     effective_from = models.DateTimeField()
@@ -1884,7 +1892,7 @@ class MemberDuesLedger(BaseModel):
     transaction_type = models.TextField()
     transaction_date = models.DateTimeField()
     effective_date = models.DateTimeField()
-    amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=19, decimal_places=2)
     balance_before = models.DecimalField(max_digits=10, decimal_places=2)
     balance_after = models.DecimalField(max_digits=10, decimal_places=2)
     period_start = models.DateTimeField(null=True, blank=True)
@@ -1917,9 +1925,8 @@ class MemberArrears(BaseModel):
     total_owed = models.DecimalField(
         max_digits=19,
         decimal_places=2,
-        null=True,
-        blank=True,
         db_default=Decimal('0'),
+        default=Decimal('0'),
     )
     over_30_days = models.DecimalField(
         max_digits=10,
@@ -1968,7 +1975,7 @@ class EmployerRemittances(BaseModel):
     fiscal_month = models.IntegerField()
     remittance_date = models.DateTimeField()
     remittance_number = models.TextField(null=True, blank=True)
-    total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=19, decimal_places=2)
     member_count = models.IntegerField()
     file_name = models.TextField(null=True, blank=True)
     file_url = models.TextField(null=True, blank=True)
@@ -2004,7 +2011,7 @@ class RemittanceLineItems(BaseModel):
     user_id = models.TextField(null=True, blank=True)
     match_confidence = models.IntegerField(null=True, blank=True)
     match_method = models.TextField(null=True, blank=True)
-    amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=19, decimal_places=2)
     period_start = models.DateTimeField(null=True, blank=True)
     period_end = models.DateTimeField(null=True, blank=True)
     line_status = models.TextField(default='pending')
@@ -2050,7 +2057,7 @@ class PaymentPlans(BaseModel):
     user_id = models.TextField()
     organization_id = models.UUIDField()
     plan_name = models.TextField()
-    total_owed = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    total_owed = models.DecimalField(max_digits=19, decimal_places=2)
     installment_amount = models.DecimalField(max_digits=10, decimal_places=2)
     installment_count = models.IntegerField()
     frequency = models.TextField(default='monthly')

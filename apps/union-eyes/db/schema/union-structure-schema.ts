@@ -180,8 +180,8 @@ export const employers = pgTable(
     customFields: jsonb('custom_fields').$type<Record<string, unknown>>(),
 
     // Metadata
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdBy: text('created_by').references(() => profiles.userId),
     updatedBy: text('updated_by').references(() => profiles.userId),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
@@ -243,8 +243,8 @@ export const worksites = pgTable(
     customFields: jsonb('custom_fields').$type<Record<string, unknown>>(),
 
     // Metadata
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdBy: text('created_by').references(() => profiles.userId),
     updatedBy: text('updated_by').references(() => profiles.userId),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
@@ -310,8 +310,8 @@ export const bargainingUnits = pgTable(
     customFields: jsonb('custom_fields').$type<Record<string, unknown>>(),
 
     // Metadata
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdBy: text('created_by').references(() => profiles.userId),
     updatedBy: text('updated_by').references(() => profiles.userId),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
@@ -373,8 +373,8 @@ export const committees = pgTable(
     customFields: jsonb('custom_fields').$type<Record<string, unknown>>(),
 
     // Metadata
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdBy: text('created_by').references(() => profiles.userId),
     updatedBy: text('updated_by').references(() => profiles.userId),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
