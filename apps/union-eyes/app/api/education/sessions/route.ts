@@ -13,9 +13,11 @@ const { GET, POST } = crudRoutes({
   tags: ["Scheduling"],
   orgScoped: true,
   readRole: 'member',
-  // Members receive a public session projection; verified tenant staff can inspect access details and financials.
-  // An absent or failed role lookup redacts these fields, including POST responses.
-  staffOnlyResponseFields: ['virtualMeetingAccessCode', 'sessionBudget', 'actualCost'],
+  // Meeting access is visible to verified tenant staff, never members or unresolved identities.
+  staffOnlyResponseFields: ['virtualMeetingAccessCode'],
+  // Budget and actual cost remain confidential for every generic caller until a finance-specific read mandate is issued.
+  // Do not equate the steward floor with institutional financial authority.
+  omitFromResponse: ['sessionBudget', 'actualCost'],
   writeRole: 'steward',
   // Counters, rates, ratings, cost and lifecycle come from registrations, attendance, evaluations and finance, not from a steward's body.
   writableFields: [

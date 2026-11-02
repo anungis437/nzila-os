@@ -10859,7 +10859,22 @@
         "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
       ],
       "correction": "Introduces fail-closed tenant-role-dependent generic CRUD projection for course-session meeting access codes and financial amounts. Member and unresolved-role reads omit all three fields; tenant staff at steward-or-higher may inspect them. Applies to collection, item, create and mutation responses. Unit and source-contract adversarial tests authored.",
-      "remaining": "Exact-HEAD complete Vitest/contract, native PG15/16 and real HTTP/browser/staging tests with member/steward/officer identities; education authority and institutional approval; independent reviewer and owner persona ratification. No CLOSED credit."
+      "remaining": "Exact-HEAD complete Vitest/contract, native PG15/16 and real HTTP/browser/staging tests with member/steward/officer identities; education authority and institutional approval; independent reviewer and owner persona ratification. No CLOSED credit. Financial columns are conservatively redacted for all generic callers by the subsequent UE-EDUCATION-FINANCIAL-FIELDS-FAIL-CLOSED-20261102 correction; this historical source evidence is superseded for that scope."
+    },
+    {
+      "id": "UE-EDUCATION-FINANCIAL-FIELDS-FAIL-CLOSED-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-session-financial-fields-fail-closed-20261102.md",
+      "sourceBaseline": "8fe69cff1bdafc45d6e48d1abd613ddaf30918ba",
+      "sourceCommit": null,
+      "files": [
+        "apps/union-eyes/app/api/education/sessions/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+      ],
+      "correction": "Restricts new education-session staff projection to meeting access code only. Financial budget and actual-cost fields remain unconditionally redacted on all generic CRUD reads and writes because the steward role is not an issued financial disclosure mandate. Contract regression requires the split.",
+      "remaining": "Issue and implement an institutional financial read mandate with explicit permitted roles before exposing sessionBudget or actualCost; exact-HEAD full tests, native PG15/16, HTTP/browser and independent release qualification. No defect closure."
     }
   ]
 }
