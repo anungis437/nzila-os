@@ -332,7 +332,9 @@ jobs:
           # Reject silent omissions, extra targets or changed image/destination.
           node scripts/release/verify-deploy-selection.mjs \
             staging-artifacts/artifact-manifest.json \
-            staging-artifacts/artifact-manifest.filtered.json "$APPROVED"
+            staging-artifacts/artifact-manifest.filtered.json "$APPROVED" \
+            "ops/deploy-evidence/oci-provenance-${GITHUB_RUN_ID}.json" \
+            "$GITHUB_SHA" "${{ needs.verify-artifact.outputs.source_run_id }}"
 
           # BR-5 image immutability gate (fail-closed): every approved production
           # deploy target MUST reference an immutable @sha256 digest. A mutable
