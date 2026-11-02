@@ -1307,10 +1307,11 @@
         "apps/union-eyes/lib/dues/dues-payment-service.ts",
         "apps/union-eyes/app/api/portal/dues/pay/route.ts",
         "apps/union-eyes/lib/dues/__tests__/dues-payment-service.test.ts",
-        "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts"
+        "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts"
       ],
       "correction": "Refuses pending dues supersession and changed-balance second intents; preserves internal reference after ambiguous provider errors; reuses verified linked intents, bounds unlinked idempotent retries and refuses a failed link update.",
-      "remaining": "Earlier NATIVE_VERIFIED status is historical, not new-HEAD qualification. Exact-HEAD focused/full unit, real PG15/16, HTTP/browser/staging, provider refunds/disputes and reconciliation, independent reviewer and institutional mandates required. Zero new implementation or CLOSED credit."
+      "remaining": "Earlier NATIVE_VERIFIED status is historical, not new-HEAD qualification. Exact-HEAD focused/full unit, real PG15/16, HTTP/browser/staging, provider refunds/disputes and reconciliation, independent reviewer and institutional mandates required. Zero new implementation or CLOSED credit. Native PG15/16 baseline failed due to provider-retrieve fixture; corrected by 7e68b4a, exact-HEAD retest pending."
     }
   }
 }
