@@ -377,6 +377,6 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     expect(migration).toContain('CREATE TABLE IF NOT EXISTS public.tool_fabric_trust_entry (')
     expect(migration).toContain('REFERENCES public.tool_fabric_trust_stream(stream_id)')
     expect(migration).toContain('INSERT INTO public.tool_fabric_trust_stream (')
-    expect(migration).not.toMatch(/\\b(?:CREATE TABLE IF NOT EXISTS|REFERENCES|INSERT INTO)\\s+tool_fabric_trust_/)
+    expect(migration).not.toMatch(/\b(?:CREATE TABLE IF NOT EXISTS|REFERENCES|INSERT INTO)\s+tool_fabric_trust_/)
   })
 })

@@ -1,7 +1,7 @@
 -- P0 #1037: durable, append-only trust ledger. Run via approved DB migration
+-- authority only. The application must not auto-create/repair this schema.
 -- Every relation is schema-qualified to match the runtime adapter even when
 -- the DBA migration session has a non-public search_path.
--- authority only. The application must not auto-create/repair this schema.
 BEGIN;
 CREATE TABLE IF NOT EXISTS public.tool_fabric_trust_stream (
   stream_id TEXT PRIMARY KEY,
