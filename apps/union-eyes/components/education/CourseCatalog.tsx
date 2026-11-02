@@ -7,7 +7,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { buildEducationEnrollment, type EnrollmentSession } from '@/lib/education/enrollment-selection';
+import { buildEducationEnrollment, parseCourseFee, type EnrollmentSession } from '@/lib/education/enrollment-selection';
 import { readEducationCrudRows, assertEducationRegistrationCreated } from '@/lib/education/crud-response';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -111,12 +111,7 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
         provides_certification: c.providesCertification === true || c.provides_certification === true,
         certification_name: String(c.certificationName ?? c.certification_name ?? ''),
         clc_approved: c.clcApproved === true || c.clc_approved === true,
-        course_fee: (() => {
-          const raw = c.courseFee ?? c.course_fee;
-          if (raw == null || raw === '') return null;
-          const amount = Number(raw);
-          return Number.isFinite(amount) && amount >= 0 ? amount : null;
-        })(),
+        course_fee: parseCourseFee(c.courseFee ?? c.course_fee),
         min_enrollment: Number(c.minEnrollment ?? c.min_enrollment ?? 0),
         max_enrollment: Number(c.maxEnrollment ?? c.max_enrollment ?? 0),
       })));
