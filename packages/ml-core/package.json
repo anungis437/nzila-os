@@ -19,8 +19,7 @@
   "dependencies": {
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
-    "@nzila/os-core": "workspace:*",
-    "zod": "^3.24.0"
+    "@nzila/os-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25",

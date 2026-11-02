@@ -3809,8 +3809,8 @@ importers:
         specifier: workspace:*
         version: link:../agri-sync-contracts
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       typescript:
         specifier: ^6
@@ -3997,8 +3997,8 @@ importers:
   packages/cfo-core:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ^25
@@ -5281,8 +5281,8 @@ importers:
   packages/healthcare-surveys:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@nzila/config':
         specifier: workspace:*
@@ -5576,9 +5576,6 @@ importers:
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../os-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^25
