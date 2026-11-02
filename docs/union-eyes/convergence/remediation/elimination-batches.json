@@ -10891,6 +10891,21 @@
       ],
       "correction": "Closes member-level disclosure of course-session meeting URLs (possibly embedded bearer tokens), access codes, accommodation hotel locations and internal notes. These four fields now use fail-closed tenant-staff projection; session budgets and actual costs remain unconditionally hidden. Contract and projection regression tests cover member, unresolved-role and authorized staff response shapes.",
       "remaining": "Provide governed registration-scoped session access for enrolled members without broadly disclosing meeting secrets, accommodation or internal notes; run exact-HEAD unit/contract, native PG15/16 and HTTP/browser/staging tests; obtain independent reviewer, owner persona and institutional authorization. Zero defect or CLOSED credit."
+    },
+    {
+      "id": "UE-EDUCATION-REGISTRATION-SCOPED-JOIN-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-registration-scoped-join-20261102.md",
+      "sourceBaseline": "ab0042ef930f7a49ba3bef7b3bddb07071409a98",
+      "sourceCommit": null,
+      "files": [
+        "apps/union-eyes/app/api/education/registrations/join/route.ts",
+        "apps/union-eyes/app/api/education/registrations/join/__tests__/route.test.ts"
+      ],
+      "correction": "Registration-owner and tenant scoped education virtual join credentials with approval, session date, HTTPS and atomic access audit. Catalogue redactions preserved.",
+      "remaining": "Exact-HEAD full Vitest/contract, PG15/16, HTTP/browser and staging proof, plus independent reviewer, owner-persona and institutional authorization. Zero defect or CLOSED credit."
     }
   ]
 }
