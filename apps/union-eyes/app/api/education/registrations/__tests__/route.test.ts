@@ -147,6 +147,17 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1' }, { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 409 });
   });
 
+  it('permits registration through the scheduled session end date, inclusively', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    open({ endDate: today });
+    m.limit.mockResolvedValueOnce([]);
+    await expect(beforeCreate({
+      courseId: 'course-1', sessionId: 'session-1',
+    }, { organizationId: 'org-real', userId: 'member' })).resolves.toMatchObject({
+      registrationStatus: 'registered', memberId: 'member',
+    });
+  });
+
   it('refuses registration for a session that is full, and allows one with room', async () => {
     open({ maxEnrollment: 2 });
     m.where.mockReturnValueOnce({ limit: m.limit }).mockReturnValueOnce({ limit: m.limit }).mockResolvedValueOnce([{ registered: 2 }]);

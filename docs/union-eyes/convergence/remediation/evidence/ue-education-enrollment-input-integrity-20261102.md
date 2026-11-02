@@ -12,3 +12,9 @@ The registration route now permits only `courseId`, `sessionId`, `travelRequired
 
 ## Qualification boundary
 Source and tests are committed, but authored tests are **not** independent execution evidence. Exact-HEAD full Vitest/contract, security, PostgreSQL 15/16, disposable HTTP/browser and staging results must be read separately. Existing CI success on the prior HEAD does not qualify this correction. This is a source-level engineering entry, not a defect closure, financial mandate, institutional sign-off, or complete end-to-end member journey. The original 777-defect register and frozen Gate 0 artifacts remain untouched.
+
+## Follow-up — fail-closed session eligibility
+
+**Additional source commit:** `cc17b8c0f16d0c097d5adc318db6bef6e03de279`.
+
+The registration route formerly treated `sessionStatus = null` as eligible because it only rejected non-null statuses other than `scheduled`. It also did not check whether the session had already ended. The route now requires the exact `scheduled` status and a non-null end date on or after today's UTC calendar date. The session's date is selected from the same tenant/course-scoped row as its status. Regression cases cover null/unknown statuses, past or missing end dates, and ordinary scheduled sessions. These source changes have not been independently qualified at runtime.
