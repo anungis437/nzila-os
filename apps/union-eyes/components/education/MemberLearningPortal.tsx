@@ -24,9 +24,13 @@ import {
 } from 'lucide-react';
  
 import { format } from 'date-fns';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
+import { MemberSessionJoin } from './MemberSessionJoin';
 
 interface Registration {
   id: string;
+  session_id: string | null;
   course_name: string;
   course_code: string;
   course_category: string;
@@ -86,26 +90,89 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
   const [completions, setCompletions] = useState<Completion[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('my-courses');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const locale = useLocale();
 
   const fetchMemberData = useCallback(async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       
       // Fetch registrations
       const regResponse = await fetch(`/api/education/registrations?memberId=${memberId}`);
       if (regResponse.ok) {
         const regData = await regResponse.json();
-        setRegistrations(regData.data || []);
+        const raw = Array.isArray(regData.data) ? regData.data : [];
+        // CRUD returns camelCase source rows, not the historical snake_case view model.
+        // Read tenant-scoped catalogue metadata only; never read meeting credentials here.
+        const [courseResult, sessionResult] = await Promise.allSettled([
+          fetch('/api/education/courses', { cache: 'no-store' }),
+          fetch('/api/education/sessions', { cache: 'no-store' }),
+        ]);
+        const readRows = async (result: PromiseSettledResult<Response>) => {
+          if (result.status !== 'fulfilled' || !result.value.ok) return [] as Record<string, unknown>[];
+          const body: { data?: unknown } = await result.value.json();
+          return Array.isArray(body.data) ? body.data as Record<string, unknown>[] : [];
+        };
+        const [courses, sessions] = await Promise.all([readRows(courseResult), readRows(sessionResult)]);
+        const courseById = new Map(courses.map(c => [c.id, c]));
+        const sessionById = new Map(sessions.map(c => [c.id, c]));
+        const text = (v: unknown, fallback = '') => typeof v === 'string' ? v : fallback;
+        const date = (v: unknown) => {
+          const candidate = text(v);
+          return candidate && !Number.isNaN(Date.parse(candidate)) ? candidate : '';
+        };
+        setRegistrations(raw.map((r: Record<string, unknown>) => {
+          const course = courseById.get(r.courseId ?? r.course_id) ?? {};
+          const session = sessionById.get(r.sessionId ?? r.session_id) ?? {};
+          return {
+            id: text(r.id),
+            session_id: text(r.sessionId ?? r.session_id) || null,
+            course_name: text(course.courseName ?? r.course_name ?? r.courseName, 'Course details unavailable'),
+            course_code: text(course.courseCode ?? r.course_code ?? r.courseCode),
+            course_category: text(course.courseCategory ?? r.course_category ?? r.courseCategory, 'other'),
+            session_code: text(session.sessionCode ?? r.session_code ?? r.sessionCode),
+            start_date: date(session.startDate ?? r.start_date ?? r.startDate),
+            end_date: date(session.endDate ?? r.end_date ?? r.endDate),
+            registration_status: text(r.registrationStatus ?? r.registration_status, 'unknown'),
+            attended: r.attended === true,
+            completed: r.completed === true,
+            completion_percentage: Number(r.completionPercentage ?? r.completion_percentage ?? 0),
+            passed: typeof r.passed === 'boolean' ? r.passed : null,
+            venue_name: text(session.venueName ?? r.venue_name ?? r.venueName) || null,
+          };
+        }));
+      } else {
+        setLoadError('Your registrations could not be loaded. Please try again.');
       }
 
       // Fetch completions
       const compResponse = await fetch(`/api/education/completions?memberId=${memberId}`);
       if (compResponse.ok) {
         const compData = await compResponse.json();
-        setCompletions(compData.data || []);
+        const raw = Array.isArray(compData.data) ? compData.data : [];
+        setCompletions(raw.map((r: Record<string, unknown>) => ({
+          id: String(r.id ?? ''),
+          course_name: String(r.course_name ?? r.courseName ?? 'Course details unavailable'),
+          course_code: String(r.course_code ?? r.courseCode ?? ''),
+          course_category: String(r.course_category ?? r.courseCategory ?? 'other'),
+          completion_date: String(r.completion_date ?? r.completionDate ?? ''),
+          passed: r.passed === true,
+          certificate_issued: r.certificateIssued === true || r.certificate_issued === true,
+          certificate_number: typeof (r.certificateNumber ?? r.certificate_number) === 'string' ? String(r.certificateNumber ?? r.certificate_number) : null,
+          certificate_url: typeof (r.certificateUrl ?? r.certificate_url) === 'string' ? String(r.certificateUrl ?? r.certificate_url) : null,
+          certification_name: typeof (r.certificationName ?? r.certification_name) === 'string' ? String(r.certificationName ?? r.certification_name) : null,
+          expiry_date: typeof (r.expiryDate ?? r.expiry_date) === 'string' ? String(r.expiryDate ?? r.expiry_date) : null,
+          is_expired: r.isExpired === true || r.is_expired === true,
+          expiring_soon: r.expiringSoon === true || r.expiring_soon === true,
+          days_until_expiry: typeof (r.daysUntilExpiry ?? r.days_until_expiry) === 'number' ? Number(r.daysUntilExpiry ?? r.days_until_expiry) : null,
+        })));
+      } else {
+        setLoadError('Your course completions could not be loaded. Please try again.');
       }
     } catch (_error) {
-} finally {
+      setLoadError('Learning records could not be loaded. Please try again.');
+    } finally {
       setLoading(false);
     }
   }, [memberId]);
@@ -123,7 +190,10 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
   );
   
   const inProgressCourses = activeCourses.filter(r => 
-    new Date(r.start_date) <= new Date() && new Date(r.end_date) >= new Date()
+    r.start_date && r.end_date && new Date(r.start_date) <= new Date() && new Date(r.end_date) >= new Date()
+  );
+  const otherCourses = activeCourses.filter(r =>
+    !upcomingCourses.includes(r) && !inProgressCourses.includes(r)
   );
 
   const validCertificates = completions.filter(c => 
@@ -151,6 +221,8 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
         </div>
         <Button onClick={fetchMemberData}>Refresh</Button>
       </div>
+
+      {loadError && <p role="alert" className="text-sm text-destructive">{loadError}</p>}
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -259,9 +331,7 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
                         </div>
                       )}
 
-                      <Button variant="outline" size="sm" className="w-full">
-                        View Details
-                      </Button>
+                      <MemberSessionJoin sessionId={course.session_id} />
                     </CardContent>
                   </Card>
                 ))}
@@ -302,17 +372,25 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
                       )}
 
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
-                          View Details
-                        </Button>
-                        <Button variant="outline" size="sm" className="flex-1" disabled>
-                          Cancel
-                        </Button>
+                        <MemberSessionJoin sessionId={course.session_id} />
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+            </div>
+          )}
+
+          {otherCourses.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Other Enrollments</h3>
+              {otherCourses.map(course => (
+                <Card key={course.id}><CardContent className="space-y-2 pt-4">
+                  <p className="font-medium">{course.course_name}</p>
+                  <p className="text-sm text-muted-foreground">Status: {course.registration_status}. Session schedule is not available in this view.</p>
+                  <MemberSessionJoin sessionId={course.session_id} />
+                </CardContent></Card>
+              ))}
             </div>
           )}
 
@@ -349,7 +427,7 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
                           Expires in {cert.days_until_expiry} days ({format(new Date(cert.expiry_date!), 'MMM d, yyyy')})
                         </div>
                       </div>
-                      <Button size="sm" variant="outline">Renew</Button>
+                      <p className="text-xs text-muted-foreground">Contact your union for renewal options.</p>
                     </div>
                   ))}
                 </div>
@@ -391,10 +469,12 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
                     {cert.course_category.replace(/_/g, ' ')}
                   </Badge>
 
-                  <Button variant="outline" size="sm" className="w-full" disabled={!cert.certificate_url}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Certificate
-                  </Button>
+                  {cert.certificate_url && /^https:\/\//i.test(cert.certificate_url) ? (
+                    <a href={cert.certificate_url} target="_blank" rel="noopener noreferrer"
+                       referrerPolicy="no-referrer" className="inline-flex items-center text-sm underline">
+                      <Download className="h-4 w-4 mr-2" /> Open Certificate
+                    </a>
+                  ) : <p className="text-xs text-muted-foreground">Certificate download is not available. Contact your union.</p>}
                 </CardContent>
               </Card>
             ))}
@@ -418,7 +498,7 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
               <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-lg font-medium">Browse Course Catalog</p>
               <p className="text-sm text-muted-foreground mb-4">View this page in the full Course Catalog</p>
-              <Button>Go to Course Catalog</Button>
+              <Button asChild><Link href={`/${locale}/dashboard/education/courses`}>Go to Course Catalog</Link></Button>
             </CardContent>
           </Card>
         </TabsContent>
