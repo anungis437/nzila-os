@@ -11005,8 +11005,9 @@
         "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
         "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT"
       ],
-      "correction": "Reject client-supplied certification identity, verification, lifecycle and badge assertions; derive only a pending candidate from a completed, passed, uncancelled same-tenant registration and certifying course. Refuse completion of cancelled, waitlisted or inactive registrations despite stale attendance/pass flags; reassert status/cancellation in the locked update and preserve atomic audit.",
-      "remaining": "Exact-HEAD full Vitest/contract, native PG15/16, HTTP/browser/staging, course lifecycle evidence and institutional verification mandate. Independent reviewer, owner-persona ratification and institutional authority outstanding. No defect closure."
+      "correction": "Reject client-supplied certification identity, verification, lifecycle and badge assertions; derive only a pending candidate from a completed, passed, uncancelled same-tenant registration and certifying course. Refuse completion of cancelled, waitlisted or inactive registrations despite stale attendance/pass flags; reassert status/cancellation in the locked update and preserve atomic audit. Completion permits registered, confirmed and attended states; rejects cancelled, incomplete, waitlisted and unknown states.",
+      "remaining": "Exact-HEAD full Vitest/contract, native PG15/16, HTTP/browser/staging, course lifecycle evidence and institutional verification mandate. Independent reviewer, owner-persona ratification and institutional authority outstanding. No defect closure.",
+      "followUpSourceCommit": "b8f84272d67e8b2951d4839c59ad388510024d57"
     }
   ]
 }
