@@ -52,7 +52,7 @@ const { GET, POST } = crudRoutes({
     if (!course) throw ApiError.badRequest('Course is not available to this organization');
     // Fee is a server-owned enrollment snapshot. Never default an unknown paid
     // course to free or accept a client-supplied price/waiver/payment assertion.
-    if (typeof course.courseFee !== 'string' || !/^\\d{1,8}(?:\\.\\d{1,2})?$/.test(course.courseFee)) {
+    if (typeof course.courseFee !== 'string' || !/^\d{1,8}(?:\.\d{1,2})?$/.test(course.courseFee)) {
       throw ApiError.conflict('Course fee is unavailable');
     }
     const [session] = await db.select({
