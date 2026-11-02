@@ -11605,6 +11605,22 @@
       ],
       "correction": "A Date interpolated into a raw drizzle sql template reaches postgres.js unserialized (drizzle installs identity serializers for timestamptz, timestamp and date because it encodes through column mappers) and the driver throws ERR_INVALID_ARG_TYPE. Found by the enhanced RBAC native proof; measured by type with the TypeScript checker over every sql tagged template (3,915 files, 1,113 templates): 58 raw Date parameters in 13 production files (the rewards analytics page, deadline queries, rewards export, engagement scoring, scheduled reports, billing, per-capita calculator, board packet, the document-intake retry sweep, mobile engine, admin actions), invisible to mock-based unit tests. db/driver-dates.ts serializeRawDates keeps drizzle's own encoding and sends a Date as its ISO instant, and is applied after drizzle() by all four clients that build drizzle over postgres.js (tenant, system, multi-db, test). 9 unit tests (the helper, and that every production factory applies it and that no other module builds such a client) and 5 native tests on PostgreSQL 16 with the production options, including a canary that a bare drizzle client still refuses a Date.",
       "remaining": "Not proven per call site or over HTTP; a raw execute still returns timestamps and dates as the server's text (code that reads one as a Date is a different class, not measured). The command-line tools and services/financial-service build their own clients and are not covered. The type-aware scan is informational and not run in CI. Exact-SHA CI for the final head; independent reviewer. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-EXTERNAL-COUNSEL-NATIVE-SEED-TYPE-20261102",
+      "status": "SOURCE_CHANGED_PENDING_EXACT_HEAD_CI",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-external-counsel-native-seed-type-20261102.md",
+      "sourceBaseline": "d8b63813beafc763b64269a8e16a3be4389fddc6",
+      "sourceCommit": null,
+      "files": [
+        "apps/union-eyes/scripts/runtime/external-admin.ts",
+        "apps/union-eyes/scripts/runtime/__tests__/external-admin-seed-contract.test.ts",
+        "docs/union-eyes/convergence/remediation/evidence/ue-external-counsel-native-seed-type-20261102.md"
+      ],
+      "correction": "Correct the QA-only external-counsel grievance seed to include the required physical NOT NULL type, with a static regression contract. The HTTP acceptance workflow had failed before external counsel authorization tests could execute.",
+      "remaining": "Exact-HEAD Vitest, native PG15/16 and HTTP/browser qualification; no authority issuance path or independent ratification; no defect closure credit."
     }
   ]
 }

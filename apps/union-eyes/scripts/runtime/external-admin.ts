@@ -38,9 +38,9 @@ async function main(): Promise<void> {
       await client.query(`DELETE FROM representation_authorities WHERE id = $1`, [AUTHORITY_ID])
       await client.query(`DELETE FROM grievances WHERE id = $1`, [EXTERNAL_MATTER_ID])
       await client.query(
-        `INSERT INTO grievances (id, organization_id, grievance_number, title, description, status, priority, filed_date, created_at, updated_at,
+        `INSERT INTO grievances (id, organization_id, grievance_number, type, title, description, status, priority, filed_date, created_at, updated_at,
                                  has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance)
-         VALUES ($1, $2, 'QA-EXT-0001', 'Synthetic external-collaboration matter', 'PRIVATE internal description that must not reach counsel', 'filed', 'medium',
+         VALUES ($1, $2, 'QA-EXT-0001', 'individual', 'Synthetic external-collaboration matter', 'PRIVATE internal description that must not reach counsel', 'filed', 'medium',
                  now(), now(), now(), false, false, false, false)`,
         [EXTERNAL_MATTER_ID, org],
       )
