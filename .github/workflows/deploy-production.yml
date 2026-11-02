@@ -429,7 +429,7 @@ jobs:
           if [[ "$RELEASE_TRIGGER" == "push" ]]; then
             RELEASE_OUTPUT="ops/releases/release-${RELEASE_REF}.json"
           else
-            RELEASE_OUTPUT="ops/deploy-evidence/dispatch-${RELEASE_REF}.json"
+            RELEASE_OUTPUT="ops/deploy-evidence/${RELEASE_REF}.json"
           fi
           cat > "$RELEASE_OUTPUT" <<EOF
           {
