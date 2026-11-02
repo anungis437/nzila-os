@@ -105,7 +105,13 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     expect(statements.filter(sql => sql.includes('FROM public.tool_fabric_trust_stream'))).toHaveLength(2)
     expect(statements.filter(sql => sql.includes('FROM public.tool_fabric_trust_entry'))).toHaveLength(2)
     expect(statements.filter(sql => sql.includes('INSERT INTO public.tool_fabric_trust_entry'))).toHaveLength(1)
-    expect(statements.filter(sql => sql.includes('UPDATE public.tool_fabric_trust_stream'))).toHaveLength(1)
+    const casUpdates = statements.filter(sql => sql.includes('UPDATE public.tool_fabric_trust_stream'))
+    expect(casUpdates).toHaveLength(1)
+    // now() is the transaction-start timestamp in PostgreSQL. A CAS writer
+    // may have waited behind a newer committed transaction; do not regress
+    // the locked head's timestamp or trigger a false monotonicity violation.
+    expect(casUpdates[0]).toContain('updated_at = GREATEST(clock_timestamp(), updated_at)')
+    expect(casUpdates[0]).not.toContain('updated_at = now()')
     expect(statements.some(sql =>
       /\b(?:FROM|INTO|UPDATE)\s+(?:tool_fabric_trust_stream|tool_fabric_trust_entry)\b/i.test(sql),
     )).toBe(false)
