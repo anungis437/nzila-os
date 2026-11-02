@@ -126,6 +126,29 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms))
 }
 
+/** A health response must be from the resolved Azure ingress, not a redirect
+ * or an unbounded response from a compromised application. */
+export async function inspectHealthResponse(response: Response, expectedMarker?: string): Promise<boolean> {
+  if (!response.ok || response.redirected || response.status < 200 || response.status >= 300) return false
+  if (expectedMarker === undefined) return true
+  if (expectedMarker.length < 1 || expectedMarker.length > 256 || !response.body) return false
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      total += value.byteLength
+      if (total > 65_536) return false
+      chunks.push(value)
+    }
+    return Buffer.concat(chunks).toString('utf8').includes(expectedMarker)
+  } finally {
+    await reader.cancel().catch(() => undefined)
+  }
+}
+
 /**
  * Read the selected deployment manifest from one opened descriptor. Refuse
  * symlinks, special files, oversized input and mutation during the read.
@@ -209,12 +232,16 @@ export function parseManifestTargets(
       `P0 #1038: deploy target ${appName} must use a canonical nzilacanadaacr.azurecr.io/nzila/ image @sha256 digest.`,
     )
 
+    ensure(raw.expectedBodyContains === undefined ||
+      (typeof raw.expectedBodyContains === 'string' &&
+        raw.expectedBodyContains.length >= 1 && raw.expectedBodyContains.length <= 256),
+      'Health marker must be a bounded literal string')
     targets.push({
       containerAppName: appName,
       image,
       healthUrl: raw.healthUrl ? String(raw.healthUrl) : undefined,
       healthPath: raw.healthPath ? String(raw.healthPath) : undefined,
-      expectedBodyContains: raw.expectedBodyContains ? String(raw.expectedBodyContains) : undefined,
+      expectedBodyContains: raw.expectedBodyContains as string | undefined,
     })
   }
 
@@ -312,12 +339,12 @@ async function runHealthCheck(target: DeployTarget, args: ParsedArgs, resourceGr
     const timeout = setTimeout(() => controller.abort(), args.healthTimeoutMs)
 
     try {
-      const response = await fetch(url, { signal: controller.signal })
+      // A redirect must not certify a different, unrelated healthy service.
+      const response = await fetch(url, { signal: controller.signal, redirect: 'manual', cache: 'no-store' })
       statusCode = response.status
-      const body = await response.text()
-      const hasExpectedBody = !target.expectedBodyContains || body.includes(target.expectedBodyContains)
+      const hasExpectedBody = await inspectHealthResponse(response, target.expectedBodyContains)
 
-      if (response.ok && hasExpectedBody) {
+      if (hasExpectedBody) {
         return {
           appName: target.containerAppName,
           url,
