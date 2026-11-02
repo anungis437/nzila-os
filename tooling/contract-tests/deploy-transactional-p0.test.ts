@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { parseArgs, parseManifestTargets } from '../../scripts/deploy-transactional'
+import { parseArgs, parseManifestTargets, inspectHealthResponse } from '../../scripts/deploy-transactional'
 
 const dirs: string[] = []
 afterEach(() => { for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true }) })
@@ -19,6 +19,26 @@ function fixture(targets: unknown[]) {
 }
 
 describe('P0 #1038 transactional production promotion boundary', () => {
+  it('rejects redirected, missing-marker and oversized health responses', async () => {
+    expect(await inspectHealthResponse(new Response('ready', { status: 200 }), 'ready')).toBe(true)
+    expect(await inspectHealthResponse(new Response('ready', { status: 200 }))).toBe(true)
+    expect(await inspectHealthResponse(new Response('ready', { status: 302, headers: {
+      location: 'https://untrusted.example/ready',
+    } }), 'ready')).toBe(false)
+    expect(await inspectHealthResponse(new Response('ready', { status: 200 }), 'missing')).toBe(false)
+    expect(await inspectHealthResponse(new Response('ready', { status: 200 }), '')).toBe(false)
+    expect(await inspectHealthResponse(new Response('ready', { status: 200 }), 'x'.repeat(257))).toBe(false)
+    expect(await inspectHealthResponse(new Response('ready' + 'x'.repeat(65_537), { status: 200 }), 'ready')).toBe(false)
+  })
+
+  it('rejects non-string and oversized signed health markers', () => {
+    for (const marker of [{ value: 'ready' }, 'x'.repeat(257), '']) {
+      const f = fixture([{ containerAppName: 'alpha', image: image('alpha'), expectedBodyContains: marker }])
+      expect(() => parseManifestTargets(f.path, undefined, true, f.sha))
+        .toThrow(/Health marker must be a bounded literal string/)
+    }
+  })
+
   it('requires an exact verified selection SHA even with digest-pinned images', () => {
     expect(() => parseArgs(['--resource-group', 'nzila-canada-prod-rg']))
       .toThrow(/verified manifest SHA-256 handoff/)
