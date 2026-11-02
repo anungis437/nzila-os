@@ -17,8 +17,7 @@
   },
   "dependencies": {
     "@nzila/db": "workspace:*",
-    "@nzila/platform-pilot-metrics-types": "workspace:*",
-    "zod": "^3.24.0"
+    "@nzila/platform-pilot-metrics-types": "workspace:*"
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",

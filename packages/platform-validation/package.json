@@ -22,9 +22,7 @@
     "audit:all": "tsx src/run-all.ts",
     "test:coverage": "vitest run --coverage"
   },
-  "dependencies": {
-    "zod": "^3.25.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "tsx": "^4.19.3",
     "vitest": "^5.0.5"
