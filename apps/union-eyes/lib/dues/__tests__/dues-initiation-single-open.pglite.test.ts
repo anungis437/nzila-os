@@ -127,18 +127,19 @@ describe('initiateDuesPayment — one open payment per member', () => {
     expect(b.amount).toBe('40.00')
   })
 
-  it('cancels the open payment and its provider intent when the balance has changed, and opens a new one', async () => {
+  it('refuses changed balance without cancelling the chargeable intent', async () => {
     const g = gateway()
     const first = await initiate('member-a', g)
     await charge('member-a', 10)
-    const second = await initiate('member-a', g)
-
-    expect(second.paymentId).not.toBe(first.paymentId)
-    expect(second.amount).toBe('35.00')
-    const all = await rows(`WHERE member_id = 'member-a'`)
-    expect(all.find((r) => r.id === first.paymentId)?.status).toBe('cancelled')
-    expect(all.filter((r) => r.status === 'pending')).toHaveLength(1)
-    expect(g.cancel).toHaveBeenCalledWith(first.paymentIntentId)
+    await expect(initiate('member-a', g)).rejects.toMatchObject({
+      code: 'PENDING_PAYMENT_REQUIRES_RECONCILIATION',
+    })
+    const all = await rows("WHERE member_id = 'member-a'")
+    expect(all).toHaveLength(1)
+    expect(all[0].id).toBe(first.paymentId)
+    expect(all[0].status).toBe('pending')
+    expect(g.cancel).not.toHaveBeenCalled()
+    expect(g.create).toHaveBeenCalledTimes(1)
   })
 
   it('opens nothing for a member with nothing due', async () => {
@@ -158,20 +159,19 @@ describe('initiateDuesPayment — one open payment per member', () => {
     expect((await rows(`WHERE member_id = 'member-a'`))[0].processor_payment_id).toBe(result.paymentIntentId)
   })
 
-  it('records the cancellation when the provider creates nothing, and the member can try again', async () => {
+  it('preserves pending state on ambiguous provider failure and retries the same reference', async () => {
     const failing = { create: vi.fn(async () => { throw new Error('stripe_down') }), cancel: vi.fn() }
     await expect(
       initiateDuesPayment({ organizationId: ORG, userId: 'member-a', gateway: { paymentIntents: failing }, providerConfigured: true }),
     ).rejects.toThrow('stripe_down')
 
-    const [row] = await rows(`WHERE member_id = 'member-a'`)
-    expect(row.status).toBe('cancelled')
-    const cancelled = state.audit.filter((e) => e.action === 'dues.payment_cancelled')
-    expect(cancelled).toHaveLength(1)
-    expect(cancelled[0]).toMatchObject({ resourceId: row.id, details: { reason: 'provider_intent_not_created' } })
+    const [row] = await rows("WHERE member_id = 'member-a'")
+    expect(row.status).toBe('pending')
+    expect(state.audit.filter((e) => e.action === 'dues.payment_cancelled')).toHaveLength(0)
 
     const retry = await initiate('member-a', gateway())
-    expect(retry.paymentId).not.toBe(row.id)
+    expect(retry.paymentId).toBe(row.id)
+    expect(await rows("WHERE member_id = 'member-a'")).toHaveLength(1)
   })
 
   it('keeps the payment pending when the provider holds a payable intent that could not be linked, and a repeat reuses it', async () => {
@@ -207,16 +207,20 @@ describe('initiateDuesPayment — one open payment per member', () => {
     expect(keys).toEqual(new Set([`ue-dues-${pendingRow.id}`]))
   })
 
-  it('records the cancellation of a superseded payment', async () => {
+  it('refuses stale unlinked pending payment without creating a second intent', async () => {
     const g = gateway()
     const first = await initiate('member-a', g)
-    await charge('member-a', 10)
-    await initiate('member-a', g)
-
-    const superseded = state.audit.filter((e) => e.action === 'dues.payment_cancelled')
-    expect(superseded).toHaveLength(1)
-    expect(superseded[0]).toMatchObject({ resourceId: first.paymentId, details: { reason: 'superseded_by_new_balance' } })
+    await pg.query(
+      "UPDATE dues_transactions SET processor_payment_id = NULL, created_at = now() - interval '13 hours' WHERE id = $1::uuid",
+      [first.paymentId],
+    )
+    await expect(initiate('member-a', g)).rejects.toMatchObject({
+      code: 'PENDING_PAYMENT_REQUIRES_RECONCILIATION',
+    })
+    expect(g.create).toHaveBeenCalledTimes(1)
+    expect(await rows("WHERE member_id = 'member-a'")).toHaveLength(1)
   })
+
 })
 
 describe('settleDuesPaymentIntent — a payment beyond the balance is recorded, not hidden', () => {
