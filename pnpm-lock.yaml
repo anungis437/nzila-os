@@ -4914,8 +4914,8 @@ importers:
   packages/finance-core:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -5083,8 +5083,8 @@ importers:
   packages/governance:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8
@@ -5938,8 +5938,8 @@ importers:
         specifier: workspace:*
         version: link:../platform-observability
       zod:
-        specifier: ^3.23.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       typescript:
         specifier: ^6.0.2
