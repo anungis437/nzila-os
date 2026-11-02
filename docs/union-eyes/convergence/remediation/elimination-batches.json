@@ -10483,6 +10483,21 @@
       ],
       "correction": "Administrator billing-cycle execution and preview now share strict ISO period parsing, reject impossible/reversed/partial/ambiguous boundaries and malformed JSON before billing, and preserve valid leap dates. Adversarial route tests added.",
       "remaining": "Exact-HEAD route unit tests, complete contract/Vitest, native PG15/16, HTTP/browser/staging, finance exactly-once and atomic audit, independent reviewer and institutional mandates. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-BILLING-CALENDAR-ROLLOVER-AND-DIRECT-SERVICE-PERIOD-20261101",
+      "status": "SOURCE_CHANGED_TESTS_ADDED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-billing-calendar-rollover-and-direct-service-period-20261101.md",
+      "sourceBaseline": "53ee8018ccc86b921ae9d26529bfc255ad2b033a",
+      "files": [
+        "apps/union-eyes/lib/services/billing-cycle-service.ts",
+        "apps/union-eyes/lib/__tests__/billing-cycle-service.test.ts",
+        "apps/union-eyes/lib/services/__tests__/billing-cycle-service.test.ts"
+      ],
+      "correction": "Corrects monthly and quarterly default period rollover on month-end reference dates, clamps next monthly/quarterly/annual billing dates to target calendar month, rejects invalid reference dates and unsupported recurrence frequencies, and rejects invalid or reversed periods in direct service/scheduler calls before financial transaction access. Adds adversarial date and direct-service tests.",
+      "remaining": "Exact-HEAD Vitest/contract, native PostgreSQL 15/16, HTTP/browser and staging proof; original month-end schedule-anchor persistence, exactly-once billing, atomic audit, financial allocation mandates and institutional authority. No defect completion or CLOSED credit."
     }
   ]
 }
