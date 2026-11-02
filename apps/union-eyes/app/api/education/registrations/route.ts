@@ -46,10 +46,15 @@ const { GET, POST } = crudRoutes({
     if (typeof courseId !== 'string' || typeof sessionId !== 'string') {
       throw ApiError.badRequest('Course and session are required');
     }
-    const [course] = await db.select({ id: trainingCourses.id }).from(trainingCourses)
+    const [course] = await db.select({ id: trainingCourses.id, courseFee: trainingCourses.courseFee }).from(trainingCourses)
       .where(and(eq(trainingCourses.id, courseId), eq(trainingCourses.organizationId, ctx.organizationId),
         eq(trainingCourses.isActive, true))).limit(1);
     if (!course) throw ApiError.badRequest('Course is not available to this organization');
+    // Fee is a server-owned enrollment snapshot. Never default an unknown paid
+    // course to free or accept a client-supplied price/waiver/payment assertion.
+    if (typeof course.courseFee !== 'string' || !/^\\d{1,8}(?:\\.\\d{1,2})?$/.test(course.courseFee)) {
+      throw ApiError.conflict('Course fee is unavailable');
+    }
     const [session] = await db.select({
       id: courseSessions.id,
       sessionStatus: courseSessions.sessionStatus,
@@ -94,6 +99,7 @@ const { GET, POST } = crudRoutes({
       certificateIssued: false,
       feePaid: false,
       feeWaived: false,
+      courseFee: course.courseFee,
       travelRequired: values.travelRequired === true,
       travelSubsidyRequested: values.travelSubsidyRequested === true,
       accommodationRequired: values.accommodationRequired === true,
