@@ -123,8 +123,8 @@ export function MemberLearningPortal({ organizationId: _organizationId, memberId
           return candidate && !Number.isNaN(Date.parse(candidate)) ? candidate : '';
         };
         setRegistrations(raw.map((r: Record<string, unknown>) => {
-          const course = courseById.get(r.courseId ?? r.course_id) ?? {};
-          const session = sessionById.get(r.sessionId ?? r.session_id) ?? {};
+          const course: Record<string, unknown> = courseById.get(r.courseId ?? r.course_id) ?? {};
+          const session: Record<string, unknown> = sessionById.get(r.sessionId ?? r.session_id) ?? {};
           return {
             id: text(r.id),
             session_id: text(r.sessionId ?? r.session_id) || null,
