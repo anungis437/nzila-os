@@ -2,9 +2,10 @@
 -- monotonic CAS stream heads. Apply ONLY after 001 via approved DBA change.
 -- A database superuser can disable triggers: the independent rollback witness
 -- and external audit domain remain mandatory. Never auto-migrate on startup.
+-- Canonical schema bindings must not depend on the DBA session search_path.
 BEGIN;
 
-CREATE FUNCTION tool_fabric_reject_trust_mutation() RETURNS trigger
+CREATE FUNCTION public.tool_fabric_reject_trust_mutation() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
   RAISE EXCEPTION 'Tool Fabric trust receipts are append-only'
@@ -13,14 +14,14 @@ END;
 $$;
 
 CREATE TRIGGER tool_fabric_entry_immutable
-BEFORE UPDATE OR DELETE ON tool_fabric_trust_entry
-FOR EACH ROW EXECUTE FUNCTION tool_fabric_reject_trust_mutation();
+BEFORE UPDATE OR DELETE ON public.tool_fabric_trust_entry
+FOR EACH ROW EXECUTE FUNCTION public.tool_fabric_reject_trust_mutation();
 
 CREATE TRIGGER tool_fabric_entry_no_truncate
-BEFORE TRUNCATE ON tool_fabric_trust_entry
-FOR EACH STATEMENT EXECUTE FUNCTION tool_fabric_reject_trust_mutation();
+BEFORE TRUNCATE ON public.tool_fabric_trust_entry
+FOR EACH STATEMENT EXECUTE FUNCTION public.tool_fabric_reject_trust_mutation();
 
-CREATE FUNCTION tool_fabric_guard_trust_head_cas() RETURNS trigger
+CREATE FUNCTION public.tool_fabric_guard_trust_head_cas() RETURNS trigger
 LANGUAGE plpgsql AS $$
 DECLARE
   committed_hash CHAR(64);
@@ -34,7 +35,7 @@ BEGIN
       USING ERRCODE = '42501';
   END IF;
   SELECT entry_hash INTO committed_hash
-  FROM tool_fabric_trust_entry
+  FROM public.tool_fabric_trust_entry
   WHERE stream_id = OLD.stream_id AND seq = NEW.revision;
   IF committed_hash IS NULL OR NEW.head_hash IS DISTINCT FROM committed_hash THEN
     RAISE EXCEPTION 'Tool Fabric trust head has no matching durable receipt'
@@ -45,15 +46,15 @@ END;
 $$;
 
 CREATE TRIGGER tool_fabric_stream_monotonic_cas
-BEFORE UPDATE ON tool_fabric_trust_stream
-FOR EACH ROW EXECUTE FUNCTION tool_fabric_guard_trust_head_cas();
+BEFORE UPDATE ON public.tool_fabric_trust_stream
+FOR EACH ROW EXECUTE FUNCTION public.tool_fabric_guard_trust_head_cas();
 
 CREATE TRIGGER tool_fabric_stream_no_delete
-BEFORE DELETE ON tool_fabric_trust_stream
-FOR EACH ROW EXECUTE FUNCTION tool_fabric_reject_trust_mutation();
+BEFORE DELETE ON public.tool_fabric_trust_stream
+FOR EACH ROW EXECUTE FUNCTION public.tool_fabric_reject_trust_mutation();
 
 CREATE TRIGGER tool_fabric_stream_no_truncate
-BEFORE TRUNCATE ON tool_fabric_trust_stream
-FOR EACH STATEMENT EXECUTE FUNCTION tool_fabric_reject_trust_mutation();
+BEFORE TRUNCATE ON public.tool_fabric_trust_stream
+FOR EACH STATEMENT EXECUTE FUNCTION public.tool_fabric_reject_trust_mutation();
 
 COMMIT;
