@@ -108,6 +108,12 @@ export class BillingCycleService {
   ): Promise<BillingCycleResult> {
     const startTime = Date.now();
     const { organizationId, periodStart, periodEnd, frequency, dryRun = false, executedBy } = params;
+    // Direct service and scheduler callers must not bypass the HTTP period validator.
+    if (!(periodStart instanceof Date) || !(periodEnd instanceof Date) ||
+        !Number.isFinite(periodStart.getTime()) || !Number.isFinite(periodEnd.getTime()) ||
+        periodStart.getTime() > periodEnd.getTime()) {
+      throw new Error('Invalid billing cycle period');
+    }
 
     logger.info('Starting billing cycle generation', {
       organizationId,
@@ -483,6 +489,9 @@ export class BillingCycleService {
     periodStart: Date;
     periodEnd: Date;
   } {
+    if (!(referenceDate instanceof Date) || !Number.isFinite(referenceDate.getTime())) {
+      throw new Error('Invalid billing reference date');
+    }
     const start = new Date(referenceDate);
     const end = new Date(referenceDate);
 
@@ -490,6 +499,8 @@ export class BillingCycleService {
       case 'monthly':
         start.setDate(1);
         start.setHours(0, 0, 0, 0);
+        // Reset day first: Jan 31 + one month normalizes into March.
+        end.setDate(1);
         end.setMonth(end.getMonth() + 1);
         end.setDate(0); // Last day of current month
         end.setHours(23, 59, 59, 999);
@@ -517,9 +528,11 @@ export class BillingCycleService {
 
       case 'quarterly':
         const quarter = Math.floor(start.getMonth() / 3);
-        start.setMonth(quarter * 3);
+        // Set the day before changing months to avoid overflow (May 31 -> May 1).
         start.setDate(1);
+        start.setMonth(quarter * 3);
         start.setHours(0, 0, 0, 0);
+        end.setDate(1);
         end.setMonth((quarter + 1) * 3);
         end.setDate(0); // Last day of quarter
         end.setHours(23, 59, 59, 999);
@@ -542,29 +555,44 @@ export class BillingCycleService {
   }
 
   /**
+   * Advance by calendar months without silently skipping a billing month.
+   * Clamp month-end anchors (Jan 31 -> Feb 28/29); preserving an original
+   * month-end recurrence across multiple executions requires a separate
+   * persisted schedule anchor and remains a distinct obligation.
+   */
+  private static addMonthsClamped(date: Date, months: number): Date {
+    const next = new Date(date);
+    const day = next.getDate();
+    next.setDate(1);
+    next.setMonth(next.getMonth() + months);
+    const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+    next.setDate(Math.min(day, lastDay));
+    return next;
+  }
+
+  /**
    * Get next billing date based on frequency
    */
   static getNextBillingDate(frequency: BillingFrequency, lastBillingDate: Date): Date {
+    if (!(lastBillingDate instanceof Date) || !Number.isFinite(lastBillingDate.getTime())) {
+      throw new Error('Invalid last billing date');
+    }
     const nextDate = new Date(lastBillingDate);
-
     switch (frequency) {
       case 'monthly':
-        nextDate.setMonth(nextDate.getMonth() + 1);
-        break;
+        return this.addMonthsClamped(nextDate, 1);
       case 'bi_weekly':
         nextDate.setDate(nextDate.getDate() + 14);
-        break;
+        return nextDate;
       case 'weekly':
         nextDate.setDate(nextDate.getDate() + 7);
-        break;
+        return nextDate;
       case 'quarterly':
-        nextDate.setMonth(nextDate.getMonth() + 3);
-        break;
+        return this.addMonthsClamped(nextDate, 3);
       case 'annual':
-        nextDate.setFullYear(nextDate.getFullYear() + 1);
-        break;
+        return this.addMonthsClamped(nextDate, 12);
+      default:
+        throw new Error(`Unsupported billing frequency: ${frequency}`);
     }
-
-    return nextDate;
   }
 }
