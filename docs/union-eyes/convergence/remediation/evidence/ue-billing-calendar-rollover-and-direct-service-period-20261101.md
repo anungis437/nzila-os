@@ -6,16 +6,17 @@ Status: SOURCE_CHANGED; exact-HEAD executable, native PostgreSQL, HTTP/browser, 
 
 1. The default monthly billing interval computed its last day by incrementing the month while retaining the reference day. On January 31 this can normalize into March before `setDate(0)`, producing a February date for a January cycle.
 2. The quarterly interval set its quarter-start month before setting the day to 1. On May 31 this normalizes April 31 to May 1, omitting April from Q2.
-3. The next billing date advanced monthly, quarterly and annual anniversaries using unbounded `setMonth` / `setFullYear`, which skips the intended target month for month-end anchors and leap days.
-4. Direct service and scheduler callers of `generateBillingCycle` did not reject reversed or invalid Date instances before opening the transaction, even though the HTTP routes have a separate parser.
+3. Weekly and biweekly intervals calculated the end day using the computed Monday's day-of-month but applied it to the original reference month. When the week starts in the preceding month, this could extend the period by weeks and misstate the billing interval.
+4. The next billing date advanced monthly, quarterly and annual anniversaries using unbounded `setMonth` / `setFullYear`, which skips the intended target month for month-end anchors and leap days.
+5. Direct service and scheduler callers of `generateBillingCycle` did not reject reversed or invalid Date instances before opening the transaction, even though the HTTP routes have a separate parser.
 
 ## Source corrections
 
-The monthly and quarterly boundary calculations now set day 1 before advancing the calendar month. Monthly, quarterly and annual next-billing calculations clamp to the last valid day of the target month. Unsupported frequency and invalid reference/last-billing dates are explicitly refused. The billing service rejects invalid or reversed periods before logging or accessing the financial database transaction.
+The monthly and quarterly boundary calculations now set day 1 before advancing the calendar month. Weekly and biweekly end boundaries are now derived from the computed Monday, including when the week crosses a month boundary. Monthly, quarterly and annual next-billing calculations clamp to the last valid day of the target month. Unsupported frequency and invalid reference/last-billing dates are explicitly refused. The billing service rejects invalid or reversed periods before logging or accessing the financial database transaction.
 
 ## Regression coverage
 
-`apps/union-eyes/lib/__tests__/billing-cycle-service.test.ts` adds Jan 31 monthly interval, May 31 Q2, Dec 31 Q4, Jan 31 -> Feb 28/29, quarterly Jan 31 -> Apr 30, leap-day anniversary, and invalid-input cases.
+`apps/union-eyes/lib/__tests__/billing-cycle-service.test.ts` adds cross-month weekly and biweekly intervals, Jan 31 monthly interval, May 31 Q2, Dec 31 Q4, Jan 31 -> Feb 28/29, quarterly Jan 31 -> Apr 30, leap-day anniversary, and invalid-input cases.
 
 `apps/union-eyes/lib/services/__tests__/billing-cycle-service.test.ts` adds direct-service invalid/reversed-period refusal with no transaction or mandate call.
 
