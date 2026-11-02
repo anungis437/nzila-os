@@ -11168,6 +11168,28 @@
       ],
       "correction": "Eighteen generated Django service ViewSets under /api/services/ were IsAuthenticated only, with no role and mostly no tenant scope: any signed-in user could send push, SMS and email, change location-tracking and privacy configuration, approve access to indigenous traditional knowledge, change payment and currency policy, declare or lift force majeure, issue or convert a golden share, define and trigger workflows and list every model and field; 64 create paths (48 behind that permission) built the row from every key of the request body. The application calls exactly one of them (governance-service/check_status, through services/governance-service.ts, used by lib/middleware/admin-auth.ts and lib/trust/system-metrics.ts). Seventeen are contained with core.isolation.DenyAllPermission; governance-service is default-deny with check_status as its only live action. services/tests_service_write_path_containment.py (9 tests, DRF view layer): an authenticated caller reaches exactly that one action over every registered ViewSet and action, the other 150+ routes answer 403 and write nothing, an anonymous caller reaches none; reopening a ViewSet or adding a live action fails the tests.",
       "remaining": "No HTTP-level proof (the middleware needs Redis and request signing). The four serializer-based control-plane modules (services/integration_control_plane, events, evidence_pack, compliance_snapshot) are IsAuthenticated and were not reviewed. check_status returns the global golden share to any authenticated caller (a role gate is an institutional decision). UE_V2_APPLICATION_ACTOR_MAP.json pins file hashes of these modules, was last generated on 2026-10-26 and is not regenerated. Reopening a ViewSet needs a reviewed, tenant-scoped, role-gated design and a caller. Exact-SHA CI for the final head; independent reviewer. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-EDUCATION-SESSION-CREATE-INTEGRITY-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-session-create-integrity-20261102.md",
+      "sourceBaseline": "39403a3b1caf4484035ab71192c3cdf9a072206e",
+      "sourceCommits": [
+        "a4407cda5259d4831b48a60a344fe97ecc511886",
+        "c7642d4581d02553d72eb927dfabec2ccdc05e0f"
+      ],
+      "testCommits": [
+        "1bab9ddb851da8eab8f585e17244aa18c52e285c",
+        "0ee9c954975a4d6c974836c1233b2ebc05b133fa"
+      ],
+      "files": [
+        "apps/union-eyes/app/api/education/sessions/route.ts",
+        "apps/union-eyes/app/api/education/sessions/__tests__/session-create-integrity.test.ts"
+      ],
+      "correction": "Session POST validates strict dates and chronological registration windows, bounded capacity, HTTPS joining URL and required fields before tenant lookup and insert; existing course ownership guard retained.",
+      "remaining": "Exact-HEAD Vitest/contract, real PG15/16 route proof, HTTP/browser/staging and independent institutional review remain. No original 777-defect or CLOSED credit."
     }
   ]
 }
