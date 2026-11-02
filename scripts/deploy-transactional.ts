@@ -8,7 +8,8 @@
  *     --resource-group <rg>
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, openSync, closeSync, fstatSync, readSync, constants } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
@@ -46,12 +47,13 @@ type ParsedArgs = {
   evidenceOut: string
   fallbackTargetsJson?: string
   requireDigestPinned: boolean
+  expectedManifestSha256?: string
 }
 
 // BR-5 defense-in-depth: a production deploy target must reference an immutable
 // image digest, never a mutable tag. This mirrors the workflow-level gate so the
 // promotion script is fail-closed even if invoked directly.
-const DIGEST_PINNED_RE = /^[a-zA-Z0-9][a-zA-Z0-9._:/-]*@sha256:[0-9a-f]{64}$/i
+const PRODUCTION_IMAGE_RE = /^nzilacanadaacr\.azurecr\.io\/nzila\/[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?@sha256:[0-9a-f]{64}$/
 const CONTAINER_APP_NAME_RE = /^[a-z](?!.*--)[a-z0-9-]{0,30}[a-z0-9]$/
 
 export function parseArgs(argv: string[]): ParsedArgs {
@@ -85,6 +87,15 @@ export function parseArgs(argv: string[]): ParsedArgs {
     throw new Error('BR-5: production digest pinning cannot be disabled')
   }
   const requireDigestPinned = isProdGroup || requireFlag === 'true'
+  const expectedManifestSha256 = args['expected-manifest-sha256']
+  // An immutable digest alone is not enough: production must consume the
+  // EXACT filtered manifest that passed signed-target/OCI receipt verification.
+  if (requireDigestPinned && !/^[0-9a-f]{64}$/.test(expectedManifestSha256 ?? '')) {
+    throw new Error('P0 #1038: production requires a verified manifest SHA-256 handoff')
+  }
+  if (expectedManifestSha256 !== undefined && !/^[0-9a-f]{64}$/.test(expectedManifestSha256)) {
+    throw new Error('Invalid expected manifest SHA-256')
+  }
 
   return {
     manifest: resolve(args.manifest ?? 'staging-artifacts/artifact-manifest.json'),
@@ -95,6 +106,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     evidenceOut: resolve(args['evidence-out'] ?? `ops/deploy-evidence/production-${new Date().toISOString().replace(/[:.]/g, '-')}.json`),
     fallbackTargetsJson: args['fallback-targets-json'] ?? process.env.PRODUCTION_DEPLOY_TARGETS_JSON,
     requireDigestPinned,
+    expectedManifestSha256,
   }
 }
 
@@ -114,9 +126,54 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms))
 }
 
-export function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string, requireDigestPinned = false): DeployTarget[] {
-  const manifestRaw = readFileSync(manifestPath, 'utf8')
-  const manifest = JSON.parse(manifestRaw) as { deployTargets?: unknown[]; apps?: unknown[] }
+/**
+ * Read the selected deployment manifest from one opened descriptor. Refuse
+ * symlinks, special files, oversized input and mutation during the read.
+ * A prior verifier cannot protect a later pathname-based, unbounded re-read.
+ */
+function readBoundedDeployManifest(path: string): Buffer {
+  let fd: number | undefined
+  try {
+    fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK)
+    const before = fstatSync(fd, { bigint: true })
+    if (!before.isFile() || before.size < 2n || before.size > 2_097_152n) {
+      throw new Error('Invalid deployment manifest size or file type')
+    }
+    const expected = Number(before.size)
+    const bytes = Buffer.allocUnsafe(expected + 1)
+    let length = 0
+    while (length < bytes.length) {
+      const count = readSync(fd, bytes, length, bytes.length - length, null)
+      if (count === 0) break
+      length += count
+    }
+    const after = fstatSync(fd, { bigint: true })
+    if (length !== expected || after.size !== before.size ||
+        after.mtimeNs !== before.mtimeNs || after.ctimeNs !== before.ctimeNs ||
+        after.ino !== before.ino || after.dev !== before.dev) {
+      throw new Error('Deployment manifest changed during bounded read')
+    }
+    return bytes.subarray(0, length)
+  } catch {
+    throw new Error('P0 #1038: deployment manifest unavailable, unsafe or mutated')
+  } finally {
+    if (fd !== undefined) closeSync(fd)
+  }
+}
+
+export function parseManifestTargets(
+  manifestPath: string, fallbackTargetsJson?: string, requireDigestPinned = false,
+  expectedManifestSha256?: string,
+): DeployTarget[] {
+  const manifestRaw = readBoundedDeployManifest(manifestPath)
+  if (requireDigestPinned && !/^[0-9a-f]{64}$/.test(expectedManifestSha256 ?? '')) {
+    throw new Error('P0 #1038: production manifest verification receipt missing')
+  }
+  if (expectedManifestSha256 !== undefined &&
+      createHash('sha256').update(manifestRaw).digest('hex') !== expectedManifestSha256) {
+    throw new Error('P0 #1038: deployment manifest differs from verified selection')
+  }
+  const manifest = JSON.parse(manifestRaw.toString('utf8')) as { deployTargets?: unknown[]; apps?: unknown[] }
   const rawTargets = Array.isArray(manifest.deployTargets)
     ? manifest.deployTargets
     : Array.isArray(manifest.apps)
@@ -129,7 +186,8 @@ export function parseManifestTargets(manifestPath: string, fallbackTargetsJson?:
       ? JSON.parse(fallbackTargetsJson)
       : []
 
-  ensure(Array.isArray(sourceTargets) && sourceTargets.length > 0, 'No deploy targets found in artifact manifest and no fallback targets provided')
+  ensure(Array.isArray(sourceTargets) && sourceTargets.length > 0 && sourceTargets.length <= 32,
+    'Deployment manifest must contain 1–32 targets; no fallback is permitted for production')
 
   const targets: DeployTarget[] = []
   const seen = new Set<string>()
@@ -147,9 +205,8 @@ export function parseManifestTargets(manifestPath: string, fallbackTargetsJson?:
     ensure(!seen.has(appName), 'Duplicate Azure Container App destination')
     seen.add(appName)
     ensure(
-      !requireDigestPinned || DIGEST_PINNED_RE.test(image),
-      `BR-5: deploy target ${appName} image '${image}' is not pinned to an immutable @sha256 digest. ` +
-        `A mutable tag is not accepted for production promotion. Provide an @sha256-pinned image reference.`,
+      !requireDigestPinned || PRODUCTION_IMAGE_RE.test(image),
+      `P0 #1038: deploy target ${appName} must use a canonical nzilacanadaacr.azurecr.io/nzila/ image @sha256 digest.`,
     )
 
     targets.push({
@@ -303,7 +360,7 @@ function rollback(updatedStates: TargetState[], resourceGroup: string): void {
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
-  const targets = parseManifestTargets(args.manifest, args.fallbackTargetsJson, args.requireDigestPinned)
+  const targets = parseManifestTargets(args.manifest, args.fallbackTargetsJson, args.requireDigestPinned, args.expectedManifestSha256)
 
   const evidence: Record<string, unknown> = {
     mode: 'transactional-production-promotion',

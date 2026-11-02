@@ -124,7 +124,10 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
     const receipt = JSON.parse(receiptRaw.toString('utf8'))
     verifySelectionProvenance(signedRaw, signed, receipt, sourceSha, stagingRunId)
     const result = verifyDeploySelection(signed, selected, approvedCsv)
-    console.log('Exact signed-to-approved production selection verified for ' + result.approvedCount + ' target(s)')
+    // Only machine-readable verified bytes go to stdout. The deployment
+    // process must hash-check the SAME filtered bytes at its own read boundary.
+    console.error('Exact signed-to-approved production selection verified for ' + result.approvedCount + ' target(s)')
+    process.stdout.write(createHash('sha256').update(selectedRaw).digest('hex') + '\n')
   } catch (error) {
     console.error(error instanceof Error ? error.message : 'production selection verification failed')
     process.exitCode = 1
