@@ -3,6 +3,7 @@ import {
   generateTraceId,
   generateSpanId,
   getTraceContext,
+  traceContextSchema,
   withTraceContextAsync,
   parseTraceparent,
   buildTraceparent,
@@ -10,6 +11,36 @@ import {
 import type { TraceContext } from "./context.js";
 
 describe("TraceContext", () => {
+  it("preserves trace context parsing under patched Zod 4", () => {
+    const source = {
+      traceId: "0af7651916cd43dd8448eb211c80319c",
+      spanId: "b7ad6b7169203331",
+      tenantId: "org-a",
+      actorId: "actor-a",
+      requestId: "req-1",
+      parentSpanId: "1234567890abcdef",
+      ignoredField: "not part of the context",
+    };
+    const parsed = traceContextSchema.parse(source);
+    expect(parsed).toEqual({
+      traceId: source.traceId, spanId: source.spanId,
+      tenantId: source.tenantId, actorId: source.actorId,
+      requestId: source.requestId, parentSpanId: source.parentSpanId,
+    });
+  });
+
+  it("rejects malformed tenant and actor context after Zod 4 migration", () => {
+    const valid = {
+      traceId: "0af7651916cd43dd8448eb211c80319c",
+      spanId: "b7ad6b7169203331",
+      tenantId: "org-a", actorId: "actor-a", requestId: "req-1",
+    };
+    expect(traceContextSchema.safeParse({ ...valid, tenantId: "" }).success).toBe(false);
+    expect(traceContextSchema.safeParse({ ...valid, actorId: null }).success).toBe(false);
+    expect(traceContextSchema.safeParse({ ...valid, requestId: undefined }).success).toBe(false);
+    expect(traceContextSchema.safeParse({ ...valid, spanId: [] }).success).toBe(false);
+  });
+
   it("generates valid IDs", () => {
     const traceId = generateTraceId();
     const spanId = generateSpanId();
