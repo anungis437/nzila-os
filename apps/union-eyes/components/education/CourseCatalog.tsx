@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { buildEducationEnrollment, parseCourseFee, type EnrollmentSession } from '@/lib/education/enrollment-selection';
 import { readEducationCrudRows, assertEducationRegistrationCreated } from '@/lib/education/crud-response';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,6 +82,7 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [enrollmentMessage, setEnrollmentMessage] = useState<string | null>(null);
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
+  const catalogueRequest = useRef<AbortController | null>(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,13 +92,19 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
   const [clcApprovedOnly, setClcApprovedOnly] = useState(false);
 
   const fetchCourses = useCallback(async () => {
+    catalogueRequest.current?.abort();
+    const controller = new AbortController();
+    catalogueRequest.current = controller;
+    setCourses([]);
+    setSelectedCourse(null);
     try {
       setLoading(true);
-      const response = await fetch(`/api/education/courses?organizationId=${organizationId}`);
+      const response = await fetch('/api/education/courses', { signal: controller.signal, cache: 'no-store' });
       
       if (!response.ok) throw new Error('Failed to fetch courses');
       
       const data = await response.json();
+      if (controller.signal.aborted) return;
       setCourses(readEducationCrudRows(data).map((c: Record<string, unknown>) => ({
         id: String(c.id ?? ''),
         course_code: String(c.courseCode ?? c.course_code ?? ''),
@@ -116,10 +123,12 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
         max_enrollment: Number(c.maxEnrollment ?? c.max_enrollment ?? 0),
       })));
     } catch (_error) {
-      setEnrollmentError('Course catalogue could not be loaded. Please retry.');
-      setCourses([]);
+      if (!controller.signal.aborted) {
+        setEnrollmentError('Course catalogue could not be loaded. Please retry.');
+        setCourses([]);
+      }
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, [organizationId]);
 
@@ -159,6 +168,7 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
 
   useEffect(() => {
     fetchCourses();
+    return () => { catalogueRequest.current?.abort(); };
   }, [fetchCourses]);
 
   useEffect(() => {
