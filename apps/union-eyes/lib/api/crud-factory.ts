@@ -81,6 +81,8 @@ export interface CrudOptions {
   writableFields?: string[];
   /** Columns removed from every row the route returns (credentials, internal security flags). */
   omitFromResponse?: string[];
+  /** Response fields visible only to authenticated steward-or-higher members of this organization. Fail closed if the role lookup fails. */
+  staffOnlyResponseFields?: string[];
   /**
    * With an ownerColumn: a caller at or above the steward floor reads every row of the organization on GET, while a member
    * still reads only their own. Writes keep the owner scope, so staff reading a member's record never edits it as the member.
@@ -482,9 +484,12 @@ export function shapeCrudResponseRow<T extends Record<string, unknown> | undefin
   row: T,
   tableName: string,
   omitFromResponse: readonly string[] = [],
+  staffOnlyResponseFields: readonly string[] = [],
+  belowStaff = true,
 ): T {
   if (!row) return row;
   const omitted = new Set(omitFromResponse);
+  if (belowStaff) for (const field of staffOnlyResponseFields) omitted.add(field);
   if (tableName === 'analytics_metrics') omitted.add('metadata');
   if (omitted.size === 0) return row;
   return Object.fromEntries(Object.entries(row).filter(([key]) => !omitted.has(key))) as T;
@@ -550,9 +555,14 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     return !(await isBelowStaff(userId, organizationId));
   }
 
-  /** All generic aliases of the same table must apply the same confidentiality policy. */
-  function shape<T extends Record<string, unknown> | undefined>(row: T): T {
-    return shapeCrudResponseRow(row, drizzleTableName(table), opts.omitFromResponse);
+  /** Apply the same confidentiality projection to collection, item and write responses. An absent/failed tenant role lookup hides staff-only fields. */
+  async function shapeForCaller<T extends Record<string, unknown> | undefined>(
+    row: T,
+    userId: string | null | undefined,
+    organizationId: string | null | undefined,
+  ): Promise<T> {
+    const belowStaff = !opts.staffOnlyResponseFields?.length || await isBelowStaff(userId, organizationId);
+    return shapeCrudResponseRow(row, drizzleTableName(table), opts.omitFromResponse, opts.staffOnlyResponseFields, belowStaff);
   }
 
   /** Refuses any body field outside the route's allow-list. Factory-managed fields are already refused by assertGenericWritePayload. */
@@ -688,8 +698,10 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
         const total = totalResult[0]?.total ?? 0;
 
+        // Resolve the tenant role once per page, not once per row. A failed role lookup redacts rather than discloses.
+        const belowStaff = !opts.staffOnlyResponseFields?.length || await isBelowStaff(userId, organizationId);
         return {
-          data: rows.map((row) => shape(row as Record<string, unknown>)),
+          data: rows.map((row) => shapeCrudResponseRow(row as Record<string, unknown>, drizzleTableName(table), opts.omitFromResponse, opts.staffOnlyResponseFields, belowStaff)),
           pagination: {
             page,
             limit,
@@ -787,7 +799,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         } catch (error) {
           throw opts.mapCreateError?.(error) ?? error;
         }
-        return { data: shape(row) };
+        return { data: await shapeForCaller(row, userId, organizationId) };
       },
     );
 
@@ -831,7 +843,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
         const [row] = await db.select().from(table).where(and(...conditions));
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: shape(row) };
+        return { data: await shapeForCaller(row, userId, organizationId) };
       },
     );
 
@@ -943,7 +955,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           }));
 
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: shape(row) };
+          return { data: await shapeForCaller(row, userId, organizationId) };
         }
 
         // Auto-set updatedAt if column exists
@@ -959,7 +971,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           .returning())[0] as Record<string, unknown> | undefined);
 
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: shape(row) };
+        return { data: await shapeForCaller(row, userId, organizationId) };
       },
     );
 
@@ -1007,7 +1019,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
             .where(and(...conditions))
             .returning())[0] as Record<string, unknown> | undefined);
           if (!archived) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: shape(archived) };
+          return { data: await shapeForCaller(archived, userId, organizationId) };
         }
 
         // Never write an invented 'archived' value to a domain-specific enum. In particular,
@@ -1036,7 +1048,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
               : (await tx.delete(table).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
           }));
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: shape(row) };
+          return { data: await shapeForCaller(row, userId, organizationId) };
         }
 
         // Try soft delete first (status → archived), fall back to hard delete
@@ -1046,7 +1058,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
             .where(and(...conditions))
             .returning())[0] as Record<string, unknown> | undefined);
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: shape(row) };
+          return { data: await shapeForCaller(row, userId, organizationId) };
         }
 
         // Hard delete for tables without a status column
@@ -1056,7 +1068,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           .returning())[0] as Record<string, unknown> | undefined,
         removedColumns.length > 0 ? (row) => Object.fromEntries(removedColumns.map((name) => [name, row[name] ?? null])) : undefined);
         if (!deleted) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: shape(deleted) };
+        return { data: await shapeForCaller(deleted, userId, organizationId) };
       },
     );
 

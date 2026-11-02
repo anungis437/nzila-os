@@ -10843,6 +10843,23 @@
       ],
       "correction": "Strict trustee meeting calendar parser refuses impossible dates, numeric or boolean coercion, ambiguous timezone-free timestamps and invalid offsets; valid ISO dates and timezone-qualified instants preserve their intended UTC instant. Authenticated tenant transaction, role restriction and atomic audit retained. Adversarial regression tests authored.",
       "remaining": "Exact-new-HEAD full Vitest/contract, native PG15/16, disposable HTTP/browser and staging acceptance; trustee institutional mandates, independent reviewer and owner-persona ratification. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-EDUCATION-SESSION-STAFF-PROJECTION-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-session-staff-projection-20261102.md",
+      "sourceBaseline": "9f0118c06e289a0b6d5d368e5c451fb831357fd8",
+      "sourceCommit": null,
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/app/api/education/sessions/route.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-factory.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+      ],
+      "correction": "Introduces fail-closed tenant-role-dependent generic CRUD projection for course-session meeting access codes and financial amounts. Member and unresolved-role reads omit all three fields; tenant staff at steward-or-higher may inspect them. Applies to collection, item, create and mutation responses. Unit and source-contract adversarial tests authored.",
+      "remaining": "Exact-HEAD complete Vitest/contract, native PG15/16 and real HTTP/browser/staging tests with member/steward/officer identities; education authority and institutional approval; independent reviewer and owner persona ratification. No CLOSED credit."
     }
   ]
 }

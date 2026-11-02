@@ -13,8 +13,9 @@ const { GET, POST } = crudRoutes({
   tags: ["Scheduling"],
   orgScoped: true,
   readRole: 'member',
-  // The access code and the budget and actual cost are for staff; the factory has no per-role column view, so no one reads them here.
-  omitFromResponse: ['virtualMeetingAccessCode', 'sessionBudget', 'actualCost'],
+  // Members receive a public session projection; verified tenant staff can inspect access details and financials.
+  // An absent or failed role lookup redacts these fields, including POST responses.
+  staffOnlyResponseFields: ['virtualMeetingAccessCode', 'sessionBudget', 'actualCost'],
   writeRole: 'steward',
   // Counters, rates, ratings, cost and lifecycle come from registrations, attendance, evaluations and finance, not from a steward's body.
   writableFields: [
