@@ -26,6 +26,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
+import ts from 'typescript'
 import {
   ROOT,
   loadExceptions,
@@ -70,6 +71,38 @@ const ALLOWLISTED_PATHS = [
   'db/queries/',                      // DAL layer — auth enforced by calling server actions
 ]
 
+/**
+ * Recognize executable Next.js server-action directives, not arbitrary text.
+ * A string comparison, comment, documentation sample or generated source snippet
+ * containing the words "use server" must not classify its host as an action.
+ * Both module-level and function-body directive prologues are supported.
+ */
+function containsServerActionDirective(content: string, fileName: string): boolean {
+  const source = ts.createSourceFile(
+    fileName,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    fileName.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  )
+  let found = false
+  const visit = (node: ts.Node): void => {
+    if (found) return
+    if (ts.isSourceFile(node) || ts.isBlock(node)) {
+      for (const statement of node.statements) {
+        if (!ts.isExpressionStatement(statement) || !ts.isStringLiteral(statement.expression)) break
+        if (statement.expression.text === 'use server') {
+          found = true
+          return
+        }
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(source)
+  return found
+}
+
 function walkServerActionFiles(dir: string): string[] {
   const results: string[] = []
   if (!existsSync(dir)) return results
@@ -81,7 +114,7 @@ function walkServerActionFiles(dir: string): string[] {
       results.push(...walkServerActionFiles(fullPath))
     } else if (entry.isFile() && /\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith('.test.ts') && !entry.name.endsWith('.d.ts')) {
       const content = readFileSync(fullPath, 'utf-8')
-      if (content.includes("'use server'") || content.includes('"use server"')) {
+      if (containsServerActionDirective(content, fullPath)) {
         results.push(fullPath)
       }
     }
@@ -94,6 +127,22 @@ function hasAuthGuard(content: string): boolean {
 }
 
 // ── SERVER_ACTION_AUTH_REQUIRED_001 ─────────────────────────────────────────
+
+describe('server-action directive detection', () => {
+  it('ignores documentation, comments, comparisons and embedded strings', () => {
+    expect(containsServerActionDirective("// 'use server'\\nexport const x = 1", 'sample.ts')).toBe(false)
+    expect(containsServerActionDirective("const label = 'use server'\\nexport const x = label", 'sample.ts')).toBe(false)
+    expect(containsServerActionDirective("if (statement.expression.text === 'use server') { run() }", 'sample.ts')).toBe(false)
+    expect(containsServerActionDirective("const text = \"'use server'\";", 'sample.ts')).toBe(false)
+  })
+
+  it('recognizes real module and function-body server directives', () => {
+    expect(containsServerActionDirective("'use server'\\nexport async function save() {}", 'sample.ts')).toBe(true)
+    expect(containsServerActionDirective("export async function save() { 'use server'; return 1 }", 'sample.ts')).toBe(true)
+    expect(containsServerActionDirective("export async function save() { 'use strict'; 'use server'; return 1 }", 'sample.ts')).toBe(true)
+    expect(containsServerActionDirective("export async function save() { const x = 1; 'use server'; return x }", 'sample.ts')).toBe(false)
+  })
+})
 
 describe('SERVER_ACTION_AUTH_REQUIRED_001 — Every server action must gate on authentication', () => {
   it('every "use server" file across all apps calls an auth guard', () => {
