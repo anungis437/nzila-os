@@ -10947,6 +10947,24 @@
       ],
       "correction": "Protect paid education joining credentials until the stored registration has recorded payment or waiver, with unknown/malformed fee refusal. Preserve audited owner/tenant/approval gates. Reconcile new GET route into UE-CONV-K-008 manifest without changing historical defect provenance.",
       "remaining": "Exact-HEAD Vitest/contract, native PG15/16, disposable HTTP/browser, staging and upstream payment/waiver authority verification. Gate 0C.4 independent reviewer, owner-persona and institutional decisions outstanding. No defect closure."
+    },
+    {
+      "id": "UE-PUSH-DEVICE-PREFERENCE-PATCH-VALIDATION-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-push-device-preference-patch-integrity-20261102.md",
+      "sourceBaseline": "e580eb19b3a4cc522efea7b1ce95026c1f6ef490",
+      "sourceCommit": "322ec5012ca0330ceee0f0252195c8c5ba9faa26",
+      "testCommit": "03a44454da3bb7a35fb8c2cabe64acda4f79ed3a",
+      "files": [
+        "apps/union-eyes/app/api/mobile/devices/push-device-preferences.ts",
+        "apps/union-eyes/app/api/mobile/devices/route.ts",
+        "apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+        "apps/union-eyes/app/api/mobile/devices/__tests__/preference-patch.test.ts"
+      ],
+      "correction": "Validate owner-scoped push-device preference PATCH with the same strict time, timezone, boolean and metadata bounds used on create; reject malformed inputs before audited database mutation, retaining token redaction and tenant/owner restrictions.",
+      "remaining": "Exact-HEAD Vitest/contract, native PostgreSQL 15/16, security, HTTP/browser, staging and full device journeys; independent reviewer, owner-persona and institutional authority. No defect closure."
     }
   ]
 }
