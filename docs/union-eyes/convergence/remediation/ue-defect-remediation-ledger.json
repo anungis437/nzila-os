@@ -1299,6 +1299,18 @@
       ],
       "correction": "Transaction-owning billing service now requires a live finance:execute ledger-wide mandate for the target organization; a member processing failure aborts the real transaction rather than returning a successful partial charge. Both preview routes return 422 for incomplete calculations.",
       "remaining": "Exact-HEAD focused/full unit and contract, native PG15/16 with tenant-role/rollback/mandate proof, real HTTP/browser/staging; atomic audit and exactly-once cycle generation, institutional mandate issuance and independent reviewer/persona ratification. Zero additional implementation or CLOSED credit."
+    },
+    "DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT-AND-INTENT-ON-EVERY-CALL-AND-SETTLEMENT-DOES-NOT-RECHECK-THE-BALANCE": {
+      "status": "SUPPLEMENTAL_SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-dues-provider-ambiguous-retry-safety-20261101.md",
+      "files": [
+        "apps/union-eyes/lib/dues/dues-payment-service.ts",
+        "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+        "apps/union-eyes/lib/dues/__tests__/dues-payment-service.test.ts",
+        "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts"
+      ],
+      "correction": "Refuses pending dues supersession and changed-balance second intents; preserves internal reference after ambiguous provider errors; reuses verified linked intents, bounds unlinked idempotent retries and refuses a failed link update.",
+      "remaining": "Earlier NATIVE_VERIFIED status is historical, not new-HEAD qualification. Exact-HEAD focused/full unit, real PG15/16, HTTP/browser/staging, provider refunds/disputes and reconciliation, independent reviewer and institutional mandates required. Zero new implementation or CLOSED credit."
     }
   }
 }
