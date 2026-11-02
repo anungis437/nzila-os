@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { attendanceCsvCell, patchSessionAttendance } from "./attendance-client";
 import { Check, X, Users, Calendar, CheckCircle2, XCircle, Download } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,38 +22,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface Session {
   id: string;
   sessionCode: string;
   sessionName: string;
-  courseId: string;
-  courseName: string;
   startDate: string;
-  endDate: string;
-  enrolledCount: number;
-  attendedCount: number;
 }
 
 interface Registration {
   id: string;
   memberId: string;
-  memberNumber: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber?: string;
-  registrationStatus: string;
-  registrationDate: string;
+  registrationStatus: string | null;
   attended: boolean;
-  attendanceDates?: string[];
-  attendanceHours?: number;
+  attendanceHours: string | null;
   completed: boolean;
-  completionDate?: string;
-  completionPercentage?: number;
 }
 
 interface AttendanceStats {
@@ -74,159 +59,171 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedRegistrations, setSelectedRegistrations] = useState<Set<string>>(new Set());
-  const [attendanceDate, setAttendanceDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  const [saving, setSaving] = useState(false);
+  const orgGeneration = useRef(0);
+  const rosterGeneration = useRef(0);
 
-  const fetchSessions = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `/api/education/sessions?organizationId=${organizationId}&sessionStatus=registration_open,in_progress,completed`
-      );
-      const data = await response.json();
-      setSessions(data.sessions || []);
-    } catch (_error) {
-toast.error("Failed to load sessions");
-    }
+  // Organization switches invalidate all previously loaded tenant data and
+  // all in-flight responses, including requests that cannot be aborted.
+  useEffect(() => {
+    const generation = ++orgGeneration.current;
+    ++rosterGeneration.current;
+    setSessions([]);
+    setSelectedSessionId("");
+    setSelectedSession(null);
+    setRegistrations([]);
+    setStats(null);
+    setSelectedRegistrations(new Set());
+    if (!organizationId) return;
+    void (async () => {
+      try {
+        const response = await fetch('/api/education/sessions?limit=100', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Session catalogue unavailable');
+        const payload = await response.json();
+        const rows: unknown = payload?.data;
+        if (!Array.isArray(rows)) throw new Error('Session catalogue response invalid');
+        const valid = rows.filter((row): row is Session =>
+          row && typeof row.id === 'string' && typeof row.sessionName === 'string' &&
+          typeof row.sessionCode === 'string' && typeof row.startDate === 'string');
+        if (generation === orgGeneration.current) setSessions(valid);
+      } catch {
+        if (generation === orgGeneration.current) toast.error('Failed to load sessions');
+      }
+    })();
   }, [organizationId]);
 
-  // Fetch sessions on mount
-  useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
-
-  // Fetch attendance when session changes
-  useEffect(() => {
-    if (selectedSessionId) {
-      fetchAttendance(selectedSessionId);
-    }
-  }, [selectedSessionId]);
-
-  const fetchAttendance = async (sessionId: string) => {
+  const fetchAttendance = useCallback(async (sessionId: string) => {
+    const generation = ++rosterGeneration.current;
+    const orgAtRequest = orgGeneration.current;
+    setSelectedRegistrations(new Set());
+    setRegistrations([]);
+    setStats(null);
+    setSelectedSession(sessions.find(session => session.id === sessionId) ?? null);
+    if (!sessionId) return;
     try {
       setLoading(true);
-      const response = await fetch(`/api/education/sessions/${sessionId}/attendance`);
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch attendance");
+      const response = await fetch(`/api/education/sessions/${encodeURIComponent(sessionId)}/attendance`, {
+        cache: 'no-store',
+      });
+      if (!response.ok) throw new Error('Attendance roster unavailable');
+      const payload = await response.json();
+      if (payload?.sessionId !== sessionId || !Array.isArray(payload?.registrations)) {
+        throw new Error('Attendance roster response invalid');
       }
-
-      const data = await response.json();
-      setSelectedSession(data.session);
-      setRegistrations(data.registrations || []);
-      setStats(data.stats);
-    } catch (_error) {
-toast.error("Failed to load attendance records");
+      const records: Registration[] = payload.registrations;
+      if (!records.every(row => row && typeof row.id === 'string' &&
+        typeof row.memberId === 'string' && typeof row.attended === 'boolean' &&
+        typeof row.completed === 'boolean')) {
+        throw new Error('Attendance roster is incomplete');
+      }
+      if (generation !== rosterGeneration.current || orgAtRequest !== orgGeneration.current) return;
+      setRegistrations(records);
+      setStats({
+        total: records.length,
+        attended: records.filter(row => row.attended).length,
+        notAttended: records.filter(row => !row.attended).length,
+        completed: records.filter(row => row.completed).length,
+      });
+    } catch {
+      if (generation === rosterGeneration.current && orgAtRequest === orgGeneration.current) {
+        toast.error('Failed to load attendance records');
+      }
     } finally {
-      setLoading(false);
+      if (generation === rosterGeneration.current && orgAtRequest === orgGeneration.current) {
+        setLoading(false);
+      }
     }
-  };
+  }, [sessions]);
+
+  useEffect(() => {
+    void fetchAttendance(selectedSessionId);
+    return () => { ++rosterGeneration.current; };
+  }, [selectedSessionId, fetchAttendance]);
 
   const handleToggleRegistration = (registrationId: string) => {
-    const newSelected = new Set(selectedRegistrations);
-    if (newSelected.has(registrationId)) {
-      newSelected.delete(registrationId);
-    } else {
-      newSelected.add(registrationId);
-    }
-    setSelectedRegistrations(newSelected);
+    setSelectedRegistrations(current => {
+      const next = new Set(current);
+      if (next.has(registrationId)) next.delete(registrationId);
+      else next.add(registrationId);
+      return next;
+    });
   };
 
   const handleSelectAll = () => {
-    if (selectedRegistrations.size === registrations.length) {
-      setSelectedRegistrations(new Set());
-    } else {
-      setSelectedRegistrations(new Set(registrations.map((r) => r.id)));
-    }
+    setSelectedRegistrations(current =>
+      current.size === registrations.length
+        ? new Set()
+        : new Set(registrations.map(row => row.id)));
   };
 
   const handleMarkAttendance = async (attended: boolean) => {
-    if (selectedRegistrations.size === 0) {
-      toast.error("Please select at least one member");
-      return;
-    }
-
+    if (!selectedSessionId || saving || selectedRegistrations.size === 0) return;
+    const sessionId = selectedSessionId;
+    const orgAtStart = orgGeneration.current;
+    const ids = [...selectedRegistrations];
+    let updated = 0;
+    setSaving(true);
     try {
-      const response = await fetch(
-        `/api/education/sessions/${selectedSessionId}/attendance`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            registrationIds: Array.from(selectedRegistrations),
-            attended,
-            attendanceDate,
-          }),
+      // The server intentionally exposes a per-registration audited PATCH,
+      // not a bulk POST. Never represent partial success as all-success.
+      for (const registrationId of ids) {
+        if (orgAtStart !== orgGeneration.current) break;
+        try {
+          await patchSessionAttendance(sessionId, registrationId, attended);
+          updated++;
+        } catch {
+          // Continue independent records and report the exact partial count.
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to mark attendance");
       }
-
-      const data = await response.json();
-      toast.success(data.message || "Attendance marked successfully");
-      setSelectedRegistrations(new Set());
-      fetchAttendance(selectedSessionId);
-    } catch (_error) {
-toast.error("Failed to mark attendance");
+      if (orgAtStart === orgGeneration.current) {
+        if (updated === ids.length) toast.success(`Attendance updated for ${updated} registrations`);
+        else toast.error(`Only ${updated} of ${ids.length} attendance updates succeeded`);
+        await fetchAttendance(sessionId);
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleMarkSingleAttendance = async (registrationId: string, memberId: string, attended: boolean) => {
+  const handleMarkSingleAttendance = async (registrationId: string, _memberId: string, attended: boolean) => {
+    if (!selectedSessionId || saving) return;
+    const sessionId = selectedSessionId;
+    const orgAtStart = orgGeneration.current;
+    setSaving(true);
     try {
-      const response = await fetch(
-        `/api/education/sessions/${selectedSessionId}/attendance`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            memberId,
-            attended,
-            attendanceDate,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to mark attendance");
+      await patchSessionAttendance(sessionId, registrationId, attended);
+      if (orgAtStart === orgGeneration.current) {
+        toast.success('Attendance updated');
+        await fetchAttendance(sessionId);
       }
-
-      toast.success("Attendance marked successfully");
-      fetchAttendance(selectedSessionId);
-    } catch (_error) {
-toast.error("Failed to mark attendance");
+    } catch {
+      if (orgAtStart === orgGeneration.current) toast.error('Attendance update was not confirmed');
+    } finally {
+      setSaving(false);
     }
   };
 
   const exportToCSV = () => {
     if (!selectedSession || registrations.length === 0) return;
-
-    const headers = ["Member Number", "Name", "Email", "Status", "Attended", "Completion %"];
-    const rows = registrations.map((reg) => [
-      reg.memberNumber,
-      `${reg.firstName} ${reg.lastName}`,
-      reg.email,
-      reg.registrationStatus,
-      reg.attended ? "Yes" : "No",
-      reg.completionPercentage || "0",
+    const headers = ['Member ID', 'Status', 'Attended', 'Completed', 'Attendance Hours'];
+    const rows = registrations.map(row => [
+      row.memberId,
+      row.registrationStatus ?? 'Unknown',
+      row.attended ? 'Yes' : 'No',
+      row.completed ? 'Yes' : 'No',
+      row.attendanceHours ?? '',
     ]);
-
-    const csv = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv" });
+    const csv = [headers, ...rows].map(row => row.map(attendanceCsvCell).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `attendance-${selectedSession.sessionCode}-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `attendance-${selectedSession.id}-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
     window.URL.revokeObjectURL(url);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
     const statusColors: Record<string, string> = {
       registered: "bg-blue-100 text-blue-800",
       confirmed: "bg-green-100 text-green-800",
@@ -237,8 +234,8 @@ toast.error("Failed to mark attendance");
     };
 
     return (
-      <Badge className={statusColors[status] || "bg-gray-100 text-gray-800"}>
-        {status.replace(/_/g, " ").toUpperCase()}
+      <Badge className={statusColors[status ?? ""] || "bg-gray-100 text-gray-800"}>
+        {(status ?? "unknown").replace(/_/g, " ").toUpperCase()}
       </Badge>
     );
   };
@@ -337,18 +334,9 @@ toast.error("Failed to mark attendance");
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4 items-end">
-              <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="attendanceDate">Attendance Date</Label>
-                <Input
-                  id="attendanceDate"
-                  type="date"
-                  value={attendanceDate}
-                  onChange={(e) => setAttendanceDate(e.target.value)}
-                />
-              </div>
               <Button
                 onClick={() => handleMarkAttendance(true)}
-                disabled={selectedRegistrations.size === 0}
+                disabled={saving || selectedRegistrations.size === 0}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Check className="mr-2 h-4 w-4" />
@@ -356,7 +344,7 @@ toast.error("Failed to mark attendance");
               </Button>
               <Button
                 onClick={() => handleMarkAttendance(false)}
-                disabled={selectedRegistrations.size === 0}
+                disabled={saving || selectedRegistrations.size === 0}
                 variant="outline"
               >
                 <X className="mr-2 h-4 w-4" />
@@ -377,7 +365,7 @@ toast.error("Failed to mark attendance");
           <CardHeader>
             <CardTitle>Session Roster</CardTitle>
             <CardDescription>
-              {selectedSession.sessionName} - {selectedSession.courseName}
+              {selectedSession.sessionName}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -397,12 +385,10 @@ toast.error("Failed to mark attendance");
                         onCheckedChange={handleSelectAll}
                       />
                     </TableHead>
-                    <TableHead>Member #</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead>Member ID</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-center">Attended</TableHead>
-                    <TableHead className="text-center">Completion</TableHead>
+                    <TableHead className="text-center">Completed</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -415,11 +401,7 @@ toast.error("Failed to mark attendance");
                           onCheckedChange={() => handleToggleRegistration(registration.id)}
                         />
                       </TableCell>
-                      <TableCell className="font-medium">{registration.memberNumber}</TableCell>
-                      <TableCell>
-                        {registration.firstName} {registration.lastName}
-                      </TableCell>
-                      <TableCell>{registration.email}</TableCell>
+                      <TableCell className="font-mono text-xs">{registration.memberId}</TableCell>
                       <TableCell>{getStatusBadge(registration.registrationStatus)}</TableCell>
                       <TableCell className="text-center">
                         {registration.attended ? (
@@ -429,7 +411,7 @@ toast.error("Failed to mark attendance");
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        {registration.completionPercentage || 0}%
+                        {registration.completed ? "Yes" : "No"}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
@@ -437,6 +419,7 @@ toast.error("Failed to mark attendance");
                             <Button
                               size="sm"
                               variant="ghost"
+                              disabled={saving}
                               onClick={() =>
                                 handleMarkSingleAttendance(
                                   registration.id,
