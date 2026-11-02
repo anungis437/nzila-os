@@ -22,7 +22,7 @@ vi.mock('@/db/schema', () => ({
     id: 'cr.id', organizationId: 'cr.organizationId', memberId: 'cr.memberId',
     courseId: 'cr.courseId', sessionId: 'cr.sessionId',
   },
-  trainingCourses: { id: 'tc.id', organizationId: 'tc.organizationId', isActive: 'tc.isActive' },
+  trainingCourses: { id: 'tc.id', organizationId: 'tc.organizationId', isActive: 'tc.isActive', courseFee: 'tc.courseFee' },
   courseSessions: { id: 'cs.id', courseId: 'cs.courseId', organizationId: 'cs.organizationId' },
 }));
 vi.mock('drizzle-orm', () => ({ eq: m.eq, and: m.and, count: vi.fn(() => 'count') }));
@@ -56,7 +56,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
   });
 
   it('forces the member identity and ignores all client-controlled achievement/payment fields', async () => {
-    m.limit.mockResolvedValueOnce([{ id: 'course-1' }])
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
       .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
     const result = await beforeCreate({
       courseId: 'course-1', sessionId: 'session-1', memberId: 'victim',
@@ -80,7 +80,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
   });
 
   it('rejects a session outside the caller course or organization', async () => {
-    m.limit.mockResolvedValueOnce([{ id: 'course-1' }]).mockResolvedValueOnce([]);
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }]).mockResolvedValueOnce([]);
     await expect(beforeCreate({
       courseId: 'course-1', sessionId: 'foreign-session',
     }, { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 400 });
@@ -88,7 +88,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
   });
 
   it('rejects a duplicate self-registration for the same session', async () => {
-    m.limit.mockResolvedValueOnce([{ id: 'course-1' }])
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
       .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([{ id: 'existing' }]);
     await expect(beforeCreate({
       courseId: 'course-1', sessionId: 'session-1',
@@ -96,7 +96,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
   });
 
   const open = (extra: Record<string, unknown>) => {
-    m.limit.mockResolvedValueOnce([{ id: 'course-1' }]).mockResolvedValueOnce([{ id: 'session-1', ...extra }]);
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }]).mockResolvedValueOnce([{ id: 'session-1', ...extra }]);
   };
 
   it.each([
@@ -119,8 +119,27 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1' }, { organizationId: 'org-real', userId: 'member' })).resolves.toMatchObject({ registrationStatus: 'registered' });
   });
 
+  it('records the authoritative paid course fee and ignores client price, payment and waiver fields', async () => {
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '49.95' }])
+      .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
+    const result = await beforeCreate({
+      courseId: 'course-1', sessionId: 'session-1',
+      courseFee: '0.00', feePaid: true, feeWaived: true,
+    }, { organizationId: 'org-real', userId: 'member' });
+    expect(result).toMatchObject({ courseFee: '49.95', feePaid: false, feeWaived: false });
+  });
+
+  it.each([null, undefined, 'invalid', '-1', '1e2', '10.999'])(
+    'refuses unavailable or malformed server course fee %s without registering', async fee => {
+      m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: fee }]);
+      await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1' },
+        { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 409 });
+      expect(m.select).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('allows enrollment when both foreign keys belong to the caller organization', async () => {
-    m.limit.mockResolvedValueOnce([{ id: 'course-1' }])
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
       .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
     const result = await beforeCreate({
       courseId: 'course-1', sessionId: 'session-1',
