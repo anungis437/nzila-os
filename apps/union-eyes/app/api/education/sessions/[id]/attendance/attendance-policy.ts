@@ -16,9 +16,10 @@ export function isAttendanceEditable(registration: AttendanceEligibility): boole
     (registration.registrationStatus === 'registered' ||
       registration.registrationStatus === 'confirmed' ||
       registration.registrationStatus === 'attended') &&
-    registration.completed !== true &&
+    registration.completed === false &&
     registration.cancellationDate == null &&
-    (registration.requiresApproval !== true || Boolean(registration.approvedBy))
+    (registration.requiresApproval === false ||
+      (registration.requiresApproval === true && Boolean(registration.approvedBy)))
   );
 }
 
