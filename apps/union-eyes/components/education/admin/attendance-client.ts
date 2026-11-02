@@ -20,7 +20,9 @@ export async function patchSessionAttendance(
   if (!payload || typeof payload !== 'object' || !('data' in payload)) {
     throw new Error('Attendance confirmation missing');
   }
-  const record = (payload as { data: unknown }).data;
+  const inner = (payload as { data: unknown }).data;
+  const record = inner && typeof inner === 'object' && 'data' in inner
+    ? (inner as { data: unknown }).data : null;
   if (!record || typeof record !== 'object' ||
     (record as { id?: unknown }).id !== registrationId ||
     (record as { attended?: unknown }).attended !== attended) {
