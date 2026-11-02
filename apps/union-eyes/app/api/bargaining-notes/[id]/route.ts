@@ -3,7 +3,6 @@
  * collection service; direct UUID lookup must never bypass it.
  */
 import { withApi, ApiError, z, zUUID } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { bargainingNotes } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -30,13 +29,15 @@ export const GET = withApi({
   if (!organizationId || !userId) throw ApiError.forbidden('Organization identity required');
   const parsed = zUUID.safeParse(params.id);
   if (!parsed.success) throw ApiError.badRequest('Invalid bargaining note id');
-  const [note] = await db.select().from(bargainingNotes).where(and(
-    eq(bargainingNotes.id, parsed.data),
-    eq(bargainingNotes.organizationId, organizationId),
-    publicOrAuthor(userId),
-  )).limit(1);
-  if (!note) throw ApiError.notFound('Bargaining note not found');
-  return { data: note };
+  return withRLSContext({ organizationId, userId }, async (tx) => {
+    const [note] = await tx.select().from(bargainingNotes).where(and(
+      eq(bargainingNotes.id, parsed.data),
+      eq(bargainingNotes.organizationId, organizationId),
+      publicOrAuthor(userId),
+    )).limit(1);
+    if (!note) throw ApiError.notFound('Bargaining note not found');
+    return { data: note };
+  });
 });
 
 const patchSchema = z.object({

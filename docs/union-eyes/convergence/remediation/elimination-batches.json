@@ -10543,6 +10543,22 @@
       ],
       "correction": "UTC calendar-day inclusive proration fixes final-day joins and DST/period-end denominator drift; integer-cent allocation with residual regular dues prevents rounded fund components from diverging from the charge; invalid allocation inputs fail closed. Existing allocation percentages are not an issued mandate.",
       "remaining": "Exact-HEAD Vitest/contract/security, native PostgreSQL 15/16 persisted reconciliation, HTTP/browser/staging, atomic audit, exactly-once cycle generation, institutionally approved fund allocation and independent reviewer/persona/authority ratifications. No defect or CLOSED credit."
+    },
+    {
+      "id": "UE-BARGAINING-NOTES-TENANT-TRANSACTION-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-bargaining-notes-rls-transaction-boundary-20261102.md",
+      "sourceBaseline": "4528779c36aaff9a2c0cd84dac5d1ed6a15f5a18",
+      "files": [
+        "apps/union-eyes/app/api/bargaining-notes/[id]/route.ts",
+        "apps/union-eyes/app/api/bargaining-notes/route.ts",
+        "apps/union-eyes/app/api/__tests__/cbas-bargaining-notes.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/bargaining-note-item-rls.route.test.ts"
+      ],
+      "correction": "Bargaining-note item GET now reads through its tenant-scoped RLS transaction; collection timeline, statistics, session-type and service-backed listing all execute inside the authenticated tenant transaction. Existing org/author/confidentiality predicates preserved.",
+      "remaining": "Exact-new-HEAD unit/contract, PG15/16, HTTP/browser/staging qualification; independent institutional confidentiality policy and Gate 0C.4 ratifications. No defect or CLOSED credit."
     }
   ]
 }

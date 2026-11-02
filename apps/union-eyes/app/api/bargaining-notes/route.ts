@@ -14,7 +14,7 @@ import {
 } from "@/lib/services/bargaining-notes-audited-service";
 import { getCbaForOrganization } from "@/lib/services/cba-audited-service";
 import { z } from "zod";
-import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { bargainingNotes } from '@/db/schema';
 import { and, or, eq, inArray, asc, desc, count } from 'drizzle-orm';
 import { withRoleAuth } from '@/lib/api-auth-guard';
@@ -59,6 +59,9 @@ export const GET = withRoleAuth('member', async (request, context) => {
 
       // Special views must use the SAME confidentiality policy as ordinary
       // listing. The legacy summary helpers read restricted note titles.
+      // All modes, including summaries and service-backed listing, must run on
+      // the authenticated tenant transaction rather than a pooled connection.
+      return withRLSContext({ organizationId, userId }, async (tx) => {
       const visible = and(
         eq(bargainingNotes.organizationId, organizationId),
         or(
@@ -67,7 +70,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
         ),
       );
       if (timeline && cbaId) {
-        const timelineData = await db.select({
+        const timelineData = await tx.select({
           id: bargainingNotes.id,
           sessionDate: bargainingNotes.sessionDate,
           sessionType: bargainingNotes.sessionType,
@@ -78,12 +81,12 @@ export const GET = withRoleAuth('member', async (request, context) => {
         return NextResponse.json({ timeline: timelineData });
       }
       if (statistics) {
-        const bySessionType = await db.select({
+        const bySessionType = await tx.select({
           sessionType: bargainingNotes.sessionType,
           count: count(),
         }).from(bargainingNotes).where(visible).groupBy(bargainingNotes.sessionType);
-        const [total] = await db.select({ value: count() }).from(bargainingNotes).where(visible);
-        const recentActivity = await db.select({
+        const [total] = await tx.select({ value: count() }).from(bargainingNotes).where(visible);
+        const recentActivity = await tx.select({
           sessionDate: bargainingNotes.sessionDate,
           sessionType: bargainingNotes.sessionType,
           title: bargainingNotes.title,
@@ -91,7 +94,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
         return NextResponse.json({ total: total?.value ?? 0, bySessionType, recentActivity });
       }
       if (sessionTypes) {
-        const rows = await db.selectDistinct({ sessionType: bargainingNotes.sessionType })
+        const rows = await tx.selectDistinct({ sessionType: bargainingNotes.sessionType })
           .from(bargainingNotes).where(visible);
         return NextResponse.json({ sessionTypes: rows.map(row => row.sessionType).filter(Boolean) });
       }
@@ -155,6 +158,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
       const result = await listBargainingNotes(filters, { page, limit, sortBy, sortOrder });
 
       return NextResponse.json(result);
+      });
     } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,

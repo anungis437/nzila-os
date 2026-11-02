@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   getNotes: vi.fn(),
   createNote: vi.fn(),
   listNotes: vi.fn(),
+  rlsScopes: [] as unknown[],
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -37,7 +38,7 @@ vi.mock('@/lib/services/bargaining-notes-audited-service', () => ({
   ForeignAgreementError: class ForeignAgreementError extends Error {},
 }));
 vi.mock('@/lib/services/cba-service', () => ({ listCBAs: vi.fn() }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_s: unknown, fn: () => unknown) => fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (scope: unknown, fn: () => unknown) => { m.rlsScopes.push(scope); return fn(); } }));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { FORBIDDEN: 'FORBIDDEN', VALIDATION_ERROR: 'VALIDATION_ERROR', RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND', CONFLICT: 'CONFLICT', INTERNAL_ERROR: 'INTERNAL_ERROR', ALREADY_EXISTS: 'ALREADY_EXISTS' },
   standardErrorResponse: (code: string, message: string) =>
@@ -132,7 +133,7 @@ describe('cbas route', () => {
 });
 
 describe('bargaining-notes route', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); m.rlsScopes.length = 0; });
 
   const note = { sessionDate: '2025-01-01', sessionType: 'negotiation', title: 'T', content: 'C' };
 
@@ -170,8 +171,21 @@ describe('bargaining-notes route', () => {
       expect.objectContaining({ organizationId: 'org-1', visibleToUserId: 'u1' }),
       expect.anything(),
     );
+    expect(m.rlsScopes).toContainEqual({ organizationId: 'org-1', userId: 'u1' });
     const foreign = await GET(json('http://x/api/bargaining-notes?organizationId=org-2', 'GET'));
     expect(foreign.status).toBe(403);
+  });
+
+  it('GET tag-filtered listing remains inside the authenticated tenant transaction', async () => {
+    const { GET } = await import('../bargaining-notes/route');
+    m.listNotes.mockResolvedValue({ notes: [], total: 0, page: 1, limit: 20 });
+    const response = await GET(json('http://x/api/bargaining-notes?tags=seniority', 'GET'));
+    expect(response.status).toBe(200);
+    expect(m.rlsScopes).toContainEqual({ organizationId: 'org-1', userId: 'u1' });
+    expect(m.listNotes).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org-1', visibleToUserId: 'u1', tags: ['seniority'] }),
+      expect.anything(),
+    );
   });
 
   it('GET for an agreement outside the organization is 404', async () => {
