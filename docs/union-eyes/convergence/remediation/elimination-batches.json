@@ -10529,6 +10529,20 @@
       ],
       "correction": "Corrected native PostgreSQL dues-drift fixture to populate required balance_before, balance_after and description, and replaced stale cancellation/supersession source ratchet with fail-closed reconciliation, provider verification and atomic audit assertions. Baseline native PG15/16 failed 1 test per version (458 passed, 1 skipped); whole-app regression failed 1 obsolete ratchet. Production controls unchanged.",
       "remaining": "Inspect exact-new-HEAD full application/contract, native PG15/16, security, HTTP/browser and staging results. Prove provider reconciliation and institutionally issued mandates separately; independent reviewer/persona/institutional ratifications outstanding. Zero defect and CLOSED credit."
+    },
+    {
+      "id": "UE-BILLING-PRORATION-AND-ALLOCATION-CENT-INTEGRITY-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-billing-proration-and-allocation-cent-integrity-20261102.md",
+      "sourceBaseline": "5dfbd44677d7880453534182f73b1eb3043e79e1",
+      "files": [
+        "apps/union-eyes/lib/services/billing-cycle-service.ts",
+        "apps/union-eyes/lib/__tests__/billing-cycle-service.test.ts"
+      ],
+      "correction": "UTC calendar-day inclusive proration fixes final-day joins and DST/period-end denominator drift; integer-cent allocation with residual regular dues prevents rounded fund components from diverging from the charge; invalid allocation inputs fail closed. Existing allocation percentages are not an issued mandate.",
+      "remaining": "Exact-HEAD Vitest/contract/security, native PostgreSQL 15/16 persisted reconciliation, HTTP/browser/staging, atomic audit, exactly-once cycle generation, institutionally approved fund allocation and independent reviewer/persona/authority ratifications. No defect or CLOSED credit."
     }
   ]
 }
