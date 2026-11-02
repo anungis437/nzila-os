@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { z } from 'zod';
 
 const m = vi.hoisted(() => ({
   rows: [] as Array<Record<string, unknown>>,
@@ -9,7 +8,9 @@ const m = vi.hoisted(() => ({
   bareDb: vi.fn(() => { throw new Error('unscoped database access'); }),
 }));
 
-vi.mock('@/lib/api/framework', () => ({
+vi.mock('@/lib/api/framework', async () => {
+  const { z } = await import('zod');
+  return {
   withApi: (options: Record<string, unknown>, handler: unknown) => {
     m.options.push(options);
     return handler;
@@ -22,7 +23,8 @@ vi.mock('@/lib/api/framework', () => ({
   },
   z,
   zUUID: z.string().uuid(),
-}));
+  };
+});
 vi.mock('@/db/db', () => ({ db: { select: (...args: unknown[]) => m.bareDb(...args) } }));
 vi.mock('@/db/schema', () => ({
   bargainingNotes: {
