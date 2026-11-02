@@ -90,6 +90,7 @@ const { GET, POST } = crudRoutes({
     const [session] = await db.select({
       id: courseSessions.id,
       sessionStatus: courseSessions.sessionStatus,
+      endDate: courseSessions.endDate,
       maxEnrollment: courseSessions.maxEnrollment,
       registrationOpenDate: courseSessions.registrationOpenDate,
       registrationCloseDate: courseSessions.registrationCloseDate,
@@ -101,7 +102,12 @@ const { GET, POST } = crudRoutes({
 
     // Registration is open only for a scheduled session inside its registration window, and only while there is room.
     const today = new Date().toISOString().slice(0, 10);
-    if (session.sessionStatus != null && session.sessionStatus !== 'scheduled') throw ApiError.conflict('This session is not open for registration');
+    // A null/unknown status must not be treated as scheduled. Likewise,
+    // an already-ended session cannot accept a new registration even if
+    // its status or optional registration-window fields were left stale.
+    if (session.sessionStatus !== 'scheduled' || !session.endDate || session.endDate < today) {
+      throw ApiError.conflict('This session is not open for registration');
+    }
     if ((session.registrationOpenDate && session.registrationOpenDate > today) || (session.registrationCloseDate && session.registrationCloseDate < today)) {
       throw ApiError.conflict('Registration for this session is not open');
     }

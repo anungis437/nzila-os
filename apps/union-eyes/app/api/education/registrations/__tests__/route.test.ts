@@ -96,7 +96,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
 
   it('preserves exactly 2000 characters of legitimate notes without truncation', async () => {
     m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
-      .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([{ id: 'session-1', sessionStatus: 'scheduled', endDate: '2999-12-31' }]).mockResolvedValueOnce([]);
     const notes = 'n'.repeat(2000);
     const result = await beforeCreate({
       courseId: 'course-1', sessionId: 'session-1', notes,
@@ -124,18 +124,22 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
 
   it('rejects a duplicate self-registration for the same session', async () => {
     m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
-      .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([{ id: 'existing' }]);
+      .mockResolvedValueOnce([{ id: 'session-1', sessionStatus: 'scheduled', endDate: '2999-12-31' }]).mockResolvedValueOnce([{ id: 'existing' }]);
     await expect(beforeCreate({
       courseId: 'course-1', sessionId: 'session-1',
     }, { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 409 });
   });
 
   const open = (extra: Record<string, unknown>) => {
-    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }]).mockResolvedValueOnce([{ id: 'session-1', ...extra }]);
+    m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }]).mockResolvedValueOnce([{ id: 'session-1', sessionStatus: 'scheduled', endDate: '2999-12-31', ...extra }]);
   };
 
   it.each([
     ['a cancelled session', { sessionStatus: 'cancelled' }],
+    ['a session with missing status', { sessionStatus: null }],
+    ['a session with unknown status', { sessionStatus: 'unknown' }],
+    ['an already ended session', { endDate: '2000-01-01' }],
+    ['a session with missing end date', { endDate: null }],
     ['a session whose registration has not opened', { registrationOpenDate: '2999-01-01' }],
     ['a session whose registration has closed', { registrationCloseDate: '2000-01-01' }],
   ])('refuses registration for %s (DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK)', async (_name, extra) => {
@@ -156,7 +160,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
 
   it('records authoritative paid fees with no client-supplied payment or waiver authority', async () => {
     m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '49.95' }])
-      .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([{ id: 'session-1', sessionStatus: 'scheduled', endDate: '2999-12-31' }]).mockResolvedValueOnce([]);
     const result = await beforeCreate({
       courseId: 'course-1', sessionId: 'session-1',
       travelRequired: true, travelSubsidyRequested: false,
@@ -181,7 +185,7 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
 
   it('allows enrollment when both foreign keys belong to the caller organization', async () => {
     m.limit.mockResolvedValueOnce([{ id: 'course-1', courseFee: '0.00' }])
-      .mockResolvedValueOnce([{ id: 'session-1' }]).mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([{ id: 'session-1', sessionStatus: 'scheduled', endDate: '2999-12-31' }]).mockResolvedValueOnce([]);
     const result = await beforeCreate({
       courseId: 'course-1', sessionId: 'session-1',
     }, { organizationId: 'org-real', userId: 'member' });
