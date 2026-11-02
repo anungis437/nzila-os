@@ -10875,6 +10875,22 @@
       ],
       "correction": "Restricts new education-session staff projection to meeting access code only. Financial budget and actual-cost fields remain unconditionally redacted on all generic CRUD reads and writes because the steward role is not an issued financial disclosure mandate. Contract regression requires the split.",
       "remaining": "Issue and implement an institutional financial read mandate with explicit permitted roles before exposing sessionBudget or actualCost; exact-HEAD full tests, native PG15/16, HTTP/browser and independent release qualification. No defect closure."
+    },
+    {
+      "id": "UE-EDUCATION-SESSION-MEETING-URL-ACCESS-BOUNDARY-20261102",
+      "status": "SOURCE_CHANGED_TESTS_AUTHORED_NOT_QUALIFIED",
+      "defectCredit": 0,
+      "closureCredit": 0,
+      "evidenceFile": "docs/union-eyes/convergence/remediation/evidence/ue-education-session-meeting-url-access-boundary-20261102.md",
+      "sourceBaseline": "45a8233dd322d925e3966aca8713aacc02e55d5a",
+      "sourceCommit": null,
+      "files": [
+        "apps/union-eyes/app/api/education/sessions/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-factory.test.ts"
+      ],
+      "correction": "Closes member-level disclosure of course-session meeting URLs that may embed bearer tokens or join secrets. Both URL and access code now use the existing fail-closed tenant-staff projection; session budgets and actual costs remain unconditionally hidden. Contract and projection regression tests cover member, unresolved-role and authorized staff response shapes.",
+      "remaining": "Provide governed registration-scoped meeting join for enrolled members without revealing access credentials to all members; run exact-HEAD unit/contract, native PG15/16 and HTTP/browser/staging tests; obtain independent reviewer, owner persona and institutional authorization. Zero defect or CLOSED credit."
     }
   ]
 }

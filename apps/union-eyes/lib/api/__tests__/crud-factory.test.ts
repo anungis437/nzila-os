@@ -326,23 +326,26 @@ describe('nested collection POST parent binding (DEF-0B5-SURVEY-RESPONSES-ROUTE-
 describe('education session role-sensitive CRUD response projection', () => {
   const session = {
     id: 'session-1', organizationId: 'org-1', sessionName: 'Member training',
+    virtualMeetingUrl: 'https://meet.example.test/join?token=PRIVATE-TOKEN',
     virtualMeetingAccessCode: 'PRIVATE-CODE', sessionBudget: '1250.00', actualCost: '900.00',
   };
-  const sensitive = ['virtualMeetingAccessCode', 'sessionBudget', 'actualCost'];
+  const sensitive = ['virtualMeetingUrl', 'virtualMeetingAccessCode'];
+  const unconditional = ['sessionBudget', 'actualCost'];
 
-  it('redacts all three staff-only fields from member and unresolved-role responses without mutating the row', () => {
-    const member = shapeCrudResponseRow(session, 'course_sessions', [], sensitive, true);
-    const unresolved = shapeCrudResponseRow(session, 'course_sessions', [], sensitive);
+  it('redacts join URLs, embedded tokens, access codes and financial fields from member and unresolved-role responses without mutating the row', () => {
+    const member = shapeCrudResponseRow(session, 'course_sessions', unconditional, sensitive, true);
+    const unresolved = shapeCrudResponseRow(session, 'course_sessions', unconditional, sensitive);
     expect(member).toEqual({ id: 'session-1', organizationId: 'org-1', sessionName: 'Member training' });
     expect(unresolved).toEqual(member);
-    for (const value of ['PRIVATE-CODE', '1250.00', '900.00']) expect(JSON.stringify(member)).not.toContain(value);
+    for (const value of ['PRIVATE-TOKEN', 'PRIVATE-CODE', '1250.00', '900.00']) expect(JSON.stringify(member)).not.toContain(value);
     expect(session.virtualMeetingAccessCode).toBe('PRIVATE-CODE');
   });
 
   it('allows tenant staff to inspect authorized fields while honoring unconditional redactions', () => {
-    expect(shapeCrudResponseRow(session, 'course_sessions', [], sensitive, false)).toEqual(session);
-    expect(shapeCrudResponseRow(session, 'course_sessions', ['actualCost'], sensitive, false))
-      .toEqual({ id: 'session-1', organizationId: 'org-1', sessionName: 'Member training', virtualMeetingAccessCode: 'PRIVATE-CODE', sessionBudget: '1250.00' });
+    expect(shapeCrudResponseRow(session, 'course_sessions', unconditional, sensitive, false))
+      .toEqual({ id: 'session-1', organizationId: 'org-1', sessionName: 'Member training', virtualMeetingUrl: session.virtualMeetingUrl, virtualMeetingAccessCode: 'PRIVATE-CODE' });
+    expect(shapeCrudResponseRow(session, 'course_sessions', unconditional, sensitive, true))
+      .toEqual({ id: 'session-1', organizationId: 'org-1', sessionName: 'Member training' });
     expect(shapeCrudResponseRow({ metadata: { claimIds: ['private'] }, ...session }, 'analytics_metrics', [], sensitive, false))
       .not.toHaveProperty('metadata');
   });

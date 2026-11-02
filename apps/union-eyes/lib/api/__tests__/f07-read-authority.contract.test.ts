@@ -31,9 +31,9 @@ describe('F07 read authority beyond a role floor', () => {
   // DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS
   it('a member cannot read session access codes or costs, while tenant staff have a governed projection', () => {
     const text = read('education/sessions');
-    expect(text).toContain("staffOnlyResponseFields: ['virtualMeetingAccessCode']");
+    expect(text).toContain("staffOnlyResponseFields: ['virtualMeetingUrl', 'virtualMeetingAccessCode']");
     expect(text).toContain("omitFromResponse: ['sessionBudget', 'actualCost']");
-    for (const column of ['virtualMeetingAccessCode', 'sessionBudget', 'actualCost']) expect(text).toContain(`'${column}'`);
+    for (const column of ['virtualMeetingUrl', 'virtualMeetingAccessCode', 'sessionBudget', 'actualCost']) expect(text).toContain(`'${column}'`);
   });
 
   // DEF-0B6-EDU-OWNER-SCOPED-READS-HIDE-MEMBER-RECORDS-FROM-STAFF
