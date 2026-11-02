@@ -4034,9 +4034,6 @@ importers:
       '@nzila/integrations-core':
         specifier: workspace:*
         version: link:../integrations-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2
@@ -4059,9 +4056,6 @@ importers:
       '@nzila/integrations-core':
         specifier: workspace:*
         version: link:../integrations-core
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2
@@ -4463,9 +4457,6 @@ importers:
       firebase-admin:
         specifier: ^13.7.0
         version: 13.7.0
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2
@@ -4491,9 +4482,6 @@ importers:
       twilio:
         specifier: ^6.2.0
         version: 6.2.0
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.71.2
