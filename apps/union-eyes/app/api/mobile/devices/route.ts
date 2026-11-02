@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/api/errors';
 import { pushDevices, profiles } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { eq } from 'drizzle-orm';
+import { validatePushDevicePreferences } from './push-device-preferences';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,35 +28,7 @@ export function buildPushDeviceCreateValues(
   if (!PUSH_PLATFORMS.includes(values.platform as (typeof PUSH_PLATFORMS)[number])) {
     throw ApiError.badRequest(`platform must be one of ${PUSH_PLATFORMS.join(', ')}`);
   }
-  // PostgreSQL TIME and the platform enum must never receive unvalidated client strings.
-  // Otherwise an ordinary malformed device preference produces a database 500.
-  for (const key of ['quietHoursStart', 'quietHoursEnd'] as const) {
-    const value = values[key];
-    if (value !== undefined && value !== null &&
-      (typeof value !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value))) {
-      throw ApiError.badRequest(`${key} must be HH:mm in 24-hour time`);
-    }
-  }
-  if (values.enabled !== undefined && typeof values.enabled !== 'boolean') {
-    throw ApiError.badRequest('enabled must be a boolean');
-  }
-  for (const key of ['deviceName', 'deviceModel', 'osVersion', 'appVersion'] as const) {
-    const value = values[key];
-    if (value !== undefined && value !== null &&
-      (typeof value !== 'string' || value.length > 255)) {
-      throw ApiError.badRequest(`${key} must be a string of at most 255 characters`);
-    }
-  }
-  if (values.timezone !== undefined && values.timezone !== null) {
-    if (typeof values.timezone !== 'string' || values.timezone.length > 64) {
-      throw ApiError.badRequest('timezone must be a valid IANA time zone');
-    }
-    try {
-      new Intl.DateTimeFormat('en', { timeZone: values.timezone });
-    } catch {
-      throw ApiError.badRequest('timezone must be a valid IANA time zone');
-    }
-  }
+  validatePushDevicePreferences(values);
   return { ...values, profileId: userId };
 }
 
