@@ -2,7 +2,7 @@
  * Certifications must be derived from a completed, passed and owned
  * registration. A generic free-form insert could forge verification.
  */
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { ApiError } from '@/lib/api/errors';
 import { db } from '@/db/db';
@@ -19,10 +19,25 @@ const { GET, POST } = crudRoutes({
   staffReadsAll: true,
   readRole: 'member',
   writeRole: 'steward',
-  beforeCreate: async (values, { organizationId }) => {
-    if (!organizationId) throw ApiError.forbidden('Organization context required');
+  // The client nominates only an existing registration. Identity, verification,
+  // badge, issuer and lifecycle fields are never client-issued attestations.
+  writableFields: ['registrationId'],
+  beforeCreate: async (values, { organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Authenticated organization context required');
+    // The factory refuses unknown client fields; retain the invariant for
+    // direct hook callers and future CRUD refactors, before any database read.
+    const allowed = new Set(['registrationId', 'organizationId', 'createdBy']);
+    for (const field of Object.keys(values)) {
+      if (!allowed.has(field)) throw ApiError.badRequest(`Certification field ${field} is not allowed`);
+    }
+    if (values.organizationId !== undefined && values.organizationId !== organizationId) {
+      throw ApiError.forbidden('Organization mismatch');
+    }
+    if (values.createdBy !== undefined && values.createdBy !== userId) {
+      throw ApiError.forbidden('Creator mismatch');
+    }
     const registrationId = values.registrationId;
-    if (typeof registrationId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f-]{27,28}$/i.test(registrationId)) {
+    if (typeof registrationId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(registrationId)) {
       throw ApiError.badRequest('A completed training registration is required');
     }
     const [registration] = await db.select().from(courseRegistrations).where(and(
@@ -30,6 +45,8 @@ const { GET, POST } = crudRoutes({
       eq(courseRegistrations.organizationId, organizationId),
       eq(courseRegistrations.completed, true),
       eq(courseRegistrations.passed, true),
+      eq(courseRegistrations.registrationStatus, 'completed'),
+      isNull(courseRegistrations.cancellationDate),
     )).limit(1);
     if (!registration) throw ApiError.badRequest('No verified completed training registration');
     const [course] = await db.select().from(trainingCourses).where(and(
