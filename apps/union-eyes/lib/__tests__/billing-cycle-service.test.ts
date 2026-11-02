@@ -111,6 +111,28 @@ describe('BillingCycleService.calculatePeriodDates', () => {
     });
   });
 
+  it('keeps month-end January 31 inside January rather than rolling into March', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('monthly', new Date(2025, 0, 31));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2025, 0, 1]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2025, 0, 31]);
+  });
+
+  it('keeps May 31 inside Q2 with an April 1 start', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('quarterly', new Date(2026, 4, 31));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 3, 1]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 5, 30]);
+  });
+
+  it('keeps December 31 inside Q4 rather than rolling into the following year', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('quarterly', new Date(2026, 11, 31));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 9, 1]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 11, 31]);
+  });
+
+  it('rejects invalid reference dates before deriving financial boundaries', () => {
+    expect(() => BillingCycleService.calculatePeriodDates('monthly', new Date(NaN))).toThrow('Invalid billing reference date');
+  });
+
   it('throws for unsupported frequency', () => {
     expect(() =>
       BillingCycleService.calculatePeriodDates('daily' as BillingFrequency),
@@ -254,6 +276,31 @@ describe('BillingCycleService.getNextBillingDate', () => {
     const last = new Date(2025, 0, 1); // Jan 1
     const next = BillingCycleService.getNextBillingDate('quarterly', last);
     expect(next.getMonth()).toBe(3); // April
+  });
+
+  it('monthly: clamps Jan 31 to Feb 28 rather than skipping February', () => {
+    const next = BillingCycleService.getNextBillingDate('monthly', new Date(2025, 0, 31));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2025, 1, 28]);
+  });
+
+  it('monthly: preserves Feb 29 in a leap year', () => {
+    const next = BillingCycleService.getNextBillingDate('monthly', new Date(2024, 0, 31));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2024, 1, 29]);
+  });
+
+  it('quarterly: clamps Jan 31 to Apr 30', () => {
+    const next = BillingCycleService.getNextBillingDate('quarterly', new Date(2025, 0, 31));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2025, 3, 30]);
+  });
+
+  it('annual: clamps a leap-day anniversary rather than rolling into March', () => {
+    const next = BillingCycleService.getNextBillingDate('annual', new Date(2024, 1, 29));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2025, 1, 28]);
+  });
+
+  it('rejects an invalid recurrence date or unsupported frequency', () => {
+    expect(() => BillingCycleService.getNextBillingDate('monthly', new Date(NaN))).toThrow('Invalid last billing date');
+    expect(() => BillingCycleService.getNextBillingDate('daily' as BillingFrequency, new Date(2025, 0, 1))).toThrow('Unsupported billing frequency');
   });
 
   it('annual: advances by 1 year', () => {
