@@ -49,9 +49,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 12,
    "CRUD_TENANT_TX": 86,
-   "NONE": 339,
+   "NONE": 338,
    "SYSTEM_CONTEXT": 61,
-   "TENANT_TX": 184
+   "TENANT_TX": 185
   }
  },
  "routes": [
@@ -2454,7 +2454,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
