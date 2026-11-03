@@ -47,6 +47,21 @@ test('registry response is strictly typed and bound to installed packages', () =
   )
 })
 
+test('noncanonical advisory IDs cannot alias valid advisory identities', () => {
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  for (const id of ['001244017', ' 1244017', '1e3', '+1244017', '0', 0, -1, 1.5, null]) {
+    assert.throws(
+      () => normalizeAdvisoryResponse({ 'node-forge': [{ id, severity: 'high', title: 'Forged ID' }] }, packages),
+      /Invalid advisory record/,
+      String(id),
+    )
+  }
+  assert.deepEqual(
+    normalizeAdvisoryResponse({ 'node-forge': [{ id: '1244017', severity: 'high', title: 'Valid ID' }] }, packages),
+    { '1244017': { id: '1244017', severity: 'high', title: 'Valid ID', package: 'node-forge' } },
+  )
+})
+
 test('duplicate advisory IDs cannot overwrite or downgrade earlier findings', () => {
   const packages = new Map([
     ['node-forge', new Set(['1.4.0'])],
