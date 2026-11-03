@@ -377,21 +377,30 @@ export interface VulnPolicyResult {
  */
 export function checkVulnerabilityPolicy(
   auditReportPath: string,
+  now: Date = new Date(),
 ): VulnPolicyResult {
-  const now = new Date()
   const errors: string[] = []
 
-  // Check for expired waivers
-  const expiredWaivers = ACTIVE_WAIVERS
-    .filter((w) => new Date(w.expiresAt) < now)
-    .map((w) => w.id)
-
-  // Active (non-expired) waivers
-  const activeWaiverIds = new Set(
-    ACTIVE_WAIVERS
-      .filter((w) => new Date(w.expiresAt) >= now)
-      .map((w) => w.id),
-  )
+  // Waivers expire at the END of their recorded UTC calendar day. No invalid
+  // date, duplicate record, expired exception, or ambiguous approval is valid.
+  const activeWaivers = new Map<string, VulnerabilityWaiver>()
+  const expiredWaivers: string[] = []
+  const seenIds = new Set<string>()
+  for (const waiver of ACTIVE_WAIVERS) {
+    const endOfDay = /^\d{4}-\d{2}-\d{2}$/.test(waiver.expiresAt)
+      ? new Date(`${waiver.expiresAt}T23:59:59.999Z`) : new Date(Number.NaN)
+    if (!Number.isFinite(endOfDay.valueOf())) {
+      errors.push(`Malformed expiry on waiver ${waiver.id}`)
+      continue
+    }
+    if (!waiver.id || !waiver.package || !waiver.approvedBy || !waiver.reason || seenIds.has(waiver.id)) {
+      errors.push(`Invalid or duplicate waiver record: ${waiver.id || 'missing-id'}`)
+      continue
+    }
+    seenIds.add(waiver.id)
+    if (endOfDay < now) expiredWaivers.push(waiver.id)
+    else activeWaivers.set(waiver.id, waiver)
+  }
 
   let totalVulns = 0
   let highOrCritical = 0
@@ -400,31 +409,80 @@ export function checkVulnerabilityPolicy(
 
   try {
     const resolvedAuditReportPath = safeResolveUnderRoot(auditReportPath)
-    const report = JSON.parse(readUtf8(resolvedAuditReportPath))
-    const advisories: Record<string, { severity?: string; cves?: string[]; ghpiit_id?: string }> =
-      report.advisories ?? report.vulnerabilities ?? {}
+    const report: unknown = JSON.parse(readUtf8(resolvedAuditReportPath))
+    if (!report || typeof report !== 'object' || Array.isArray(report)) {
+      throw new Error('Audit report must be an object')
+    }
+    const root = report as Record<string, unknown>
+    const metadata = root.metadata
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+      throw new Error('Audit report missing completion metadata')
+    }
+    const details = metadata as Record<string, unknown>
+    const summary = details.vulnerabilities
+    if (!summary || typeof summary !== 'object' || Array.isArray(summary)) {
+      throw new Error('Audit report missing vulnerability summary')
+    }
+    if (details.status !== undefined && details.status !== 'complete') {
+      throw new Error('Incomplete dependency audit report')
+    }
+    if (details.totalDependencies !== undefined &&
+        (!Number.isSafeInteger(details.totalDependencies) || (details.totalDependencies as number) <= 0)) {
+      throw new Error('Audit report has no verified dependency inventory')
+    }
+    const value = root.advisories ?? root.vulnerabilities
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      throw new Error('Audit report has no valid advisories/vulnerabilities collection')
+    }
 
-    for (const [key, advisory] of Object.entries(advisories)) {
+    for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        throw new Error(`Malformed advisory record: ${key}`)
+      }
+      const advisory = raw as Record<string, unknown>
+      const severity = advisory.severity
+      if (!['info', 'low', 'moderate', 'high', 'critical'].includes(String(severity))) {
+        throw new Error(`Unknown severity for advisory: ${key}`)
+      }
       totalVulns++
-      const severity = advisory.severity ?? 'unknown'
-      if (severity === 'high' || severity === 'critical') {
-        highOrCritical++
-        // Check if waived by CVE or GHSA ID
-        const ids = [key, ...(advisory.cves ?? [])]
-        const isWaived = ids.some((id) => activeWaiverIds.has(id))
-        if (isWaived) {
-          waived++
-        } else {
-          unwaived++
-          errors.push(`Unwaived ${severity} vulnerability: ${key}`)
-        }
+      if (severity !== 'high' && severity !== 'critical') continue
+      highOrCritical++
+      const packageName = advisory.package ?? advisory.module_name ?? advisory.name
+      const packageString = typeof packageName === 'string' ? packageName.trim() : ''
+      const additionalIds = Array.isArray(advisory.cves)
+        ? advisory.cves.filter((id): id is string => typeof id === 'string') : []
+      const ids = [key, ...additionalIds]
+      if (typeof advisory.ghsa_id === 'string') ids.push(advisory.ghsa_id)
+      const isWaived = !!packageString && ids.some((id) => {
+        const waiver = activeWaivers.get(id)
+        return waiver !== undefined && waiver.package === packageString
+      })
+      if (isWaived) waived++
+      else {
+        unwaived++
+        errors.push(`Unwaived ${severity} vulnerability: ${key} (${packageString || 'unknown-package'})`)
+      }
+    }
+
+    const summaryDetails = summary as Record<string, unknown>
+    for (const severity of ['high', 'critical']) {
+      const supplied = summaryDetails[severity]
+      if (supplied !== undefined && (!Number.isSafeInteger(supplied) || (supplied as number) < 0)) {
+        throw new Error(`Malformed vulnerability summary: ${severity}`)
+      }
+    }
+    // The npm bulk collector reports one advisory per ID. Its own metadata
+    // must agree with the evaluated count, or the scan is not trustworthy.
+    if (details.source === 'npm-bulk-advisories') {
+      if (highOrCritical !== Number(summaryDetails.high ?? 0) + Number(summaryDetails.critical ?? 0)) {
+        throw new Error('Audit advisory count disagrees with collector metadata')
       }
     }
   } catch (err) {
-    errors.push(`Failed to parse audit report: ${(err as Error).message}`)
+    errors.push(`Invalid or unreadable audit report: ${(err as Error).message}`)
   }
 
-  if (expiredWaivers.length > 0) {
+  if (expiredWaivers.length) {
     errors.push(`Expired waivers requiring review: ${expiredWaivers.join(', ')}`)
   }
 
