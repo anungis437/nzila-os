@@ -253,7 +253,9 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   }
 
   // Get active subscription
-  const [subscription] = await db
+  // Fail closed on ambiguous pricing authority: choosing the first active
+  // subscription would issue an invoice against an arbitrary plan.
+  const activeSubscriptions = await db
     .select()
     .from(orgSubscriptions)
     .where(
@@ -262,8 +264,12 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
         eq(orgSubscriptions.status, 'active'),
       ),
     )
-    .limit(1);
+    .limit(2);
 
+  if (activeSubscriptions.length > 1) {
+    throw new Error('Cannot generate invoice: multiple active subscriptions require reconciliation');
+  }
+  const subscription = activeSubscriptions[0];
   if (!subscription) throw new Error(`No active subscription for org ${input.organizationId}`);
 
   // Get plan details
