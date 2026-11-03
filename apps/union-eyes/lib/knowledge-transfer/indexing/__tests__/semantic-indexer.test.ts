@@ -8,6 +8,8 @@ const h = vi.hoisted(() => ({
   error: vi.fn(),
   audit: vi.fn(),
   operation: vi.fn(),
+  ready: vi.fn(),
+  writeEmbedding: vi.fn(),
 }));
 
 function chain(): Record<string, unknown> {
@@ -40,6 +42,16 @@ vi.mock('@/lib/services/ai/embedding-cache', () => ({
   embeddingCache: { getCachedEmbedding: h.getCached, setCachedEmbedding: h.setCached },
 }));
 vi.mock('@/lib/logger', () => ({ logger: { error: h.error } }));
+vi.mock('@/lib/ai/vector-readiness', () => ({
+  KNOWLEDGE_BASE_EMBEDDING: { table: 'knowledge_base', column: 'embedding' },
+  VectorSearchUnavailableError: class extends Error {
+    constructor(target: { table: string; column: string }) {
+      super(`Semantic search is not available: ${target.table}.${target.column} is not a pgvector column on this database.`);
+    }
+  },
+  vectorColumnReady: h.ready,
+}));
+vi.mock('@/lib/ai/knowledge-base-embeddings', () => ({ writeKnowledgeBaseEmbedding: h.writeEmbedding }));
 
 import { buildIndexableContent, indexExitInterview } from '../semantic-indexer';
 
@@ -61,6 +73,8 @@ beforeEach(() => {
   h.error.mockReset();
   h.audit.mockReset().mockResolvedValue(undefined);
   h.operation.mockReset().mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
+  h.ready.mockReset().mockResolvedValue(true);
+  h.writeEmbedding.mockReset().mockResolvedValue(undefined);
 });
 
 describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
@@ -85,6 +99,8 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result).toEqual({ indexed: true, knowledgeBaseId: 'kb1' });
     expect(h.embed).not.toHaveBeenCalled();
+    // The vector is written to the row inside the same transaction, after the row exists.
+    expect(h.writeEmbedding).toHaveBeenCalledWith(tx, { id: 'kb1', organizationId: 'org-1', embedding: [0.1, 0.2] });
     expect(h.operation).toHaveBeenCalledWith(
       expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'exit_interview.index.embed' }),
       expect.any(Function),
@@ -105,6 +121,38 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     expect(result).toEqual({ indexed: true, knowledgeBaseId: 'kb-existing' });
     expect(h.embed).toHaveBeenCalled();
     expect(h.setCached).toHaveBeenCalled();
+    expect(h.writeEmbedding).toHaveBeenCalledWith(tx, { id: 'kb-existing', organizationId: 'org-1', embedding: [0.5, 0.6] });
+  });
+
+  it('is unavailable, neither indexed nor failed, where the database has no vector column, and sends nothing to the AI provider', async () => {
+    h.queue.push([interview()]);
+    h.ready.mockResolvedValue(false);
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result).toEqual({ indexed: false, reason: expect.stringContaining('not available'), unavailable: true });
+    expect(h.operation).not.toHaveBeenCalled();
+    expect(h.embed).not.toHaveBeenCalled();
+    expect(h.writeEmbedding).not.toHaveBeenCalled();
+    // The interview keeps its pending status: nothing was skipped, indexed or failed, so nothing is audited.
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('still skips a blocked or unconsented interview where the vector column is missing', async () => {
+    h.queue.push([interview({ consentGranted: false })], undefined);
+    h.ready.mockResolvedValue(false);
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result).toEqual({ indexed: false, reason: 'Retiree consent not granted' });
+    expect(h.ready).not.toHaveBeenCalled();
+  });
+
+  it('records a failure, and no success, when the vector cannot be written', async () => {
+    h.queue.push([interview()], [{ id: 'kb1' }], undefined);
+    h.getCached.mockResolvedValue([0.1, 0.2]);
+    h.writeEmbedding.mockRejectedValueOnce(new Error('different vector dimensions 1536 and 2'));
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result).toEqual({ indexed: false, reason: 'Indexing failed', failed: true });
+    expect(JSON.stringify(result)).not.toContain('dimensions');
+    expect(h.audit).not.toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index' }), 'success');
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.failed' }), 'failure');
   });
 
   it('returns not-found without writing or auditing when the interview is missing in the organization', async () => {

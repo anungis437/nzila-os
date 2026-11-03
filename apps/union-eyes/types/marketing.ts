@@ -333,8 +333,6 @@ export interface GovernanceMetric extends TrustMetricDetail {
 export interface AuditLogMetric extends TrustMetricDetail {
   eventsLogged: number;
   retentionPolicy: string; // "7 years"
-  lastArchive: Date;
-  archivedEvents: number;
 }
 
 export interface TrustMetrics {

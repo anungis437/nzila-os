@@ -25,6 +25,9 @@ const mocks = vi.hoisted(() => ({
   mockFetch: vi.fn(),
   audit: vi.fn(),
   operation: vi.fn(),
+  requireVector: vi.fn(),
+  searchKb: vi.fn(),
+  sourceCondition: vi.fn(),
 }));
 
 vi.mock("@/db", () => ({
@@ -130,8 +133,18 @@ vi.mock("@/lib/rate-limiter", () => ({
   checkRateLimit: vi.fn(async () => ({ allowed: true, remaining: 29, limit: 30, resetIn: 60 })),
 }));
 
+vi.mock("@/lib/ai/vector-readiness", () => ({
+  KNOWLEDGE_BASE_EMBEDDING: { table: "knowledge_base", column: "embedding" },
+  VectorSearchUnavailableError: class VectorSearchUnavailableError extends Error {},
+  requireVectorColumn: mocks.requireVector,
+}));
+vi.mock("@/lib/ai/knowledge-base-embeddings", () => ({ searchKnowledgeBaseByEmbedding: mocks.searchKb }));
+vi.mock("@/lib/knowledge-transfer/governance/interview-access", () => ({ knowledgeBaseSourceCondition: mocks.sourceCondition }));
+
 /* ── imports ────────────────────────────────────────────────────────── */
 
+import { VectorSearchUnavailableError } from "@/lib/ai/vector-readiness";
+import { logger } from "@/lib/logger";
 import { ChatSessionManager, RAGService, ChatbotService, ChatbotUnavailableError } from "../chatbot-service";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
@@ -157,6 +170,9 @@ const session = {
 beforeEach(() => {
   mocks.audit.mockReset().mockResolvedValue(undefined);
   mocks.operation.mockReset().mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
+  mocks.requireVector.mockReset().mockResolvedValue(undefined);
+  mocks.searchKb.mockReset().mockResolvedValue([]);
+  mocks.sourceCondition.mockReset().mockReturnValue({ _tag: "source-condition" });
 });
 
 afterEach(() => {
@@ -234,63 +250,70 @@ describe("RAGService", () => {
     mocks.mockUpdateWhere.mockResolvedValue(undefined);
   });
 
-  it("addDocument generates embedding and inserts", async () => {
-    await rag.addDocument({
-      organizationId: "org-1",
-      title: "Test Doc",
-      documentType: "policy",
-      content: "Document content about grievance procedures",
-      sourceType: "manual",
-      createdBy: "user-1",
-    });
-    expect(mocks.mockAiEmbed).toHaveBeenCalled();
-  });
-
   it("searchDocuments fails closed before embedding or SQL when organization is absent", async () => {
     await expect(rag.searchDocuments("grievance", { organizationId: "" })).rejects.toThrow(
       "Organization context required for knowledge search",
     );
+    expect(mocks.requireVector).not.toHaveBeenCalled();
     expect(mocks.mockAiEmbed).not.toHaveBeenCalled();
-    expect(mocks.mockSelectFrom).not.toHaveBeenCalled();
+    expect(mocks.searchKb).not.toHaveBeenCalled();
   });
 
-  it("searchDocuments returns scored results", async () => {
-    mocks.mockSelectLimit.mockResolvedValueOnce([
-      {
-        id: "doc-1",
-        title: "Policy",
-        content: "Grievance filing procedures for union members...",
-        embedding: JSON.stringify(Array(384).fill(0.1)),
-      },
+  it("searchDocuments is unavailable, before the question is embedded, where the database has no vector column", async () => {
+    mocks.requireVector.mockRejectedValueOnce(new VectorSearchUnavailableError("no vector column"));
+    await expect(rag.searchDocuments("grievance", { organizationId: "org-1" })).rejects.toBeInstanceOf(VectorSearchUnavailableError);
+    expect(mocks.mockAiEmbed).not.toHaveBeenCalled();
+    expect(mocks.searchKb).not.toHaveBeenCalled();
+  });
+
+  it("searchDocuments has the database score and order the matches, and returns an excerpt of each", async () => {
+    mocks.searchKb.mockResolvedValueOnce([
+      { id: "doc-1", title: "Policy", content: "Grievance filing procedures for union members. ".repeat(10), similarity: 0.93 },
+      { id: "doc-2", title: "Guide", content: "Short", similarity: 0.81 },
     ]);
     const results = await rag.searchDocuments("grievance", { organizationId: "org-1", limit: 5 });
-    expect(Array.isArray(results)).toBe(true);
+
+    expect(results.map((r) => [r.documentId, r.relevanceScore])).toEqual([["doc-1", 0.93], ["doc-2", 0.81]]);
+    expect(results[0].excerpt).toHaveLength(203);
+    expect(results[0].excerpt.endsWith("...")).toBe(true);
+    expect(results[1].excerpt).toBe("Short...");
   });
 
-  // DEF-0B4-CHATBOT-RAG-LIMITS-BEFORE-SCORING
-  it("searchDocuments scores the candidate set before applying the limit, and skips unreadable embeddings", async () => {
-    const aligned = (n: number) => JSON.stringify(Array(384).fill(n));
-    mocks.mockSelectLimit.mockResolvedValueOnce([
-      { id: "weak", title: "Weak", content: "x", embedding: JSON.stringify(Array.from({ length: 384 }, (_, i) => (i === 0 ? 1 : 0))) },
-      { id: "broken", title: "Broken", content: "x", embedding: "not json" },
-      { id: "missing", title: "Missing", content: "x", embedding: null },
-      { id: "best", title: "Best", content: "x", embedding: aligned(0.1) },
-    ]);
-    const results = await rag.searchDocuments("grievance", { organizationId: "org-1", limit: 1, similarityThreshold: 0 });
-    expect(results.map((r) => r.documentId)).toEqual(["best"]);
-    // The query reads a bounded candidate set, not the requested limit.
-    expect(mocks.mockSelectLimit).toHaveBeenCalledWith(500);
+  it("searchDocuments asks the database for the best matches above the threshold, scoped to the organization and the reader's levels", async () => {
+    await rag.searchDocuments("grievance", {
+      organizationId: "org-1",
+      limit: 3,
+      similarityThreshold: 0.6,
+      documentTypes: ["policy"],
+      readableLevels: ["public_internal", "restricted"],
+    });
+
+    expect(mocks.sourceCondition).toHaveBeenCalledWith(
+      expect.objectContaining({ levels: new Set(["public_internal", "restricted"]) }),
+      "org-1",
+    );
+    expect(mocks.searchKb).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        organizationId: "org-1",
+        embedding: Array(384).fill(0.1),
+        minSimilarity: 0.6,
+        limit: 3,
+        documentTypes: ["policy"],
+        sourceCondition: { _tag: "source-condition" },
+      }),
+    );
   });
 
-  it("searchDocuments filters by threshold", async () => {
-    mocks.mockSelectLimit.mockResolvedValueOnce([
-      {
-        id: "doc-1",
-        title: "Irrelevant",
-        content: "Totally unrelated content",
-        embedding: JSON.stringify(Array(384).fill(0)),
-      },
-    ]);
+  it("searchDocuments defaults to a threshold of 0.7 and five matches, and reads no interview-derived knowledge without reader levels", async () => {
+    await rag.searchDocuments("grievance", { organizationId: "org-1" });
+
+    expect(mocks.sourceCondition).toHaveBeenCalledWith(expect.objectContaining({ levels: new Set() }), "org-1");
+    expect(mocks.searchKb).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ minSimilarity: 0.7, limit: 5 }));
+  });
+
+  it("searchDocuments returns nothing when no row reaches the threshold", async () => {
+    mocks.searchKb.mockResolvedValueOnce([]);
     const results = await rag.searchDocuments("grievance", { organizationId: "org-1", similarityThreshold: 0.99 });
     expect(results).toHaveLength(0);
   });
@@ -395,6 +418,39 @@ describe("ChatbotService", () => {
     });
     expect(msg.role).toBe("assistant");
     expect(msg.content).toContain("union rights");
+  });
+
+  it("sendMessage retrieves knowledge for the sender's readable levels and gives the model the matched excerpts as context", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    mocks.searchKb.mockResolvedValueOnce([{ id: "doc-1", title: "Policy", content: "Grievances are filed within 30 days.", similarity: 0.9 }]);
+    await bot.sendMessage({
+      sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "How long do I have to file?", readableLevels: ["public_internal"],
+    });
+
+    expect(mocks.sourceCondition).toHaveBeenCalledWith(expect.objectContaining({ levels: new Set(["public_internal"]) }), "org-1");
+    const request = mocks.mockAiGenerate.mock.calls[0][0];
+    expect(request.input[0]).toMatchObject({ role: "system", content: expect.stringContaining("[Policy]: Grievances are filed within 30 days.") });
+  });
+
+  it("sendMessage answers without context, and without a warning, where semantic retrieval is not available", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    mocks.requireVector.mockRejectedValueOnce(new VectorSearchUnavailableError("no vector column"));
+    const msg = await bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "What are my rights?" });
+
+    expect(msg.role).toBe("assistant");
+    expect(mocks.mockAiEmbed).not.toHaveBeenCalled();
+    const request = mocks.mockAiGenerate.mock.calls[0][0];
+    expect(request.input.every((m: { role: string }) => m.role !== "system")).toBe(true);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("sendMessage warns, and still answers without context, when retrieval fails for another reason", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    mocks.searchKb.mockRejectedValueOnce(new Error("database down"));
+    const msg = await bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "What are my rights?" });
+
+    expect(msg.role).toBe("assistant");
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("RAG search failed"), expect.objectContaining({ error: "database down" }));
   });
 
   it("sendMessage stores the exchange with its audit record on the same transaction", async () => {

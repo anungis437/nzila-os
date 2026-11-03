@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { withApi } from '@/lib/api/with-api';
 import { ChatbotService, ChatbotUnavailableError } from '@/lib/ai/chatbot-service';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { hasMinRole } from '@/lib/api-auth-guard';
+import { readableSensitivityLevels } from '@/lib/knowledge-transfer/governance/consent-controls';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
@@ -61,6 +63,8 @@ export const POST = withApi(
         organizationId: organizationId!,
         content: body.content,
         useRAG: body.useRAG,
+        // Knowledge made from an exit interview carries that interview's sensitivity: retrieval returns it only to a sender whose role may read it.
+        readableLevels: body.useRAG ? await readableSensitivityLevels(hasMinRole) : [],
       });
     } catch (error) {
       if (error instanceof ChatbotUnavailableError) throw ApiError.externalService('ai-assistant', 'The assistant is temporarily unavailable. Please try again shortly.');

@@ -8569,7 +8569,6 @@
     "reservedMatters": "Questions réservées",
     "auditTrail": "Piste d'audit",
     "eventsLogged": "Événements enregistrés (30 jours)",
-    "archivedEvents": "Événements archivés",
     "retentionPolicy": "Politique de rétention",
     "auditLogDescription": "Toutes les actions du système sont enregistrées de manière immuable. Les journaux d'audit ne peuvent pas être modifiés ou supprimés, seulement archivés après la période de rétention.",
     "technicalImplementation": "Mise en œuvre technique",

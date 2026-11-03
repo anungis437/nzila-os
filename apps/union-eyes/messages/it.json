@@ -8552,7 +8552,6 @@
     "reservedMatters": "Questioni Riservate",
     "auditTrail": "Traccia di Audit",
     "eventsLogged": "Eventi Registrati (30 giorni)",
-    "archivedEvents": "Eventi Archiviati",
     "retentionPolicy": "Politica di Conservazione",
     "auditLogDescription": "Tutte le azioni del sistema sono registrate in modo immutabile. I registri di audit non possono essere modificati o eliminati, solo archiviati dopo il periodo di conservazione.",
     "technicalImplementation": "Implementazione Tecnica",

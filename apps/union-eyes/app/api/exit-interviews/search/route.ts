@@ -29,6 +29,12 @@ function allowedSensitivityLevels(role: string | null): ExitInterviewSensitivity
   return ['public_internal'];
 }
 
+/** Whether the role is the steward floor or above: such a caller reads a published interview whose retiree has not consented (canReadInterview). */
+function isStewardPlus(role: string | null): boolean {
+  const normalized = normalizeRole((role ?? 'member') as never);
+  return (ROLE_HIERARCHY[normalized] ?? 0) >= ROLE_HIERARCHY.steward;
+}
+
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -45,6 +51,7 @@ export const POST = withApi(
       query: body.q,
       orgId: organizationId!,
       allowedSensitivityLevels: allowedSensitivityLevels(user?.role ?? null),
+      stewardPlus: isStewardPlus(user?.role ?? null),
       limit: body.limit,
       semanticWeight: body.semanticWeight ?? 0.6,
     });

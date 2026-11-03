@@ -804,6 +804,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Integrity and catalog for the enhanced RBAC relations: rbac_audit_log is append-only (no delete, no truncate, only the review columns change, once); member_roles and permission_exceptions refuse a member who does not belong to the row's organization; member_roles refuses an inactive role; role_definitions is seeded with the 11 organization roles of TENANT_LOCAL_ROLES (levels from getRoleLevel, permissions from ROLE_PERMISSIONS), never the platform-operations or CLC, federation and national roles; generated from the code catalog; a custom role using a seeded code stops the migration; reversible, refusing while a member holds a seeded role."
+      },
+      {
+        "tag": "0077_ingestion_traceability",
+        "sha256": "77a1f13ba0658f8480a3d73c0721fd53586933e1ed76f2ae50e4bef6c0ef612c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "UE-CONV-H-014: the nine import traceability columns on grievances and documents, a partial unique key per (organization, source system, external id), one CHECK that an external id names its source"
       }
     ]
   }

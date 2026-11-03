@@ -20,6 +20,8 @@ import {
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
+import { KNOWLEDGE_BASE_EMBEDDING, vectorColumnReady } from '@/lib/ai/vector-readiness';
+import { interviewListCondition, type InterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 import type { ExitInterviewSensitivityLevel } from '@/db/schema';
 
 export interface KnowledgeSearchResult {
@@ -47,6 +49,11 @@ export interface HybridSearchOptions {
   orgId: string;
   /** Allowed sensitivity levels based on caller's role */
   allowedSensitivityLevels: ExitInterviewSensitivityLevel[];
+  /**
+   * Whether the caller holds the steward role or above. A published interview is shared with the organization only with the retiring
+   * employee's consent; a steward or above reads it without. Omitted means below steward: consent is required.
+   */
+  stewardPlus?: boolean;
   limit?: number;
   /** Weight for semantic score vs keyword score. Default: 0.6 */
   semanticWeight?: number;
@@ -78,17 +85,17 @@ async function generateQueryEmbedding(
 
 /**
  * Keyword-based search across published exit interviews.
- * Always org-scoped and sensitivity-filtered.
+ * Always org-scoped, sensitivity-filtered and consent-filtered.
  */
 async function keywordSearch(
   query: string,
   orgId: string,
-  allowedSensitivityLevels: ExitInterviewSensitivityLevel[],
+  reader: InterviewReader,
   limit: number,
 ): Promise<KnowledgeSearchResult[]> {
   // LIKE wildcards typed in the query are literal characters, not a pattern the caller controls.
   const pattern = `%${query.replace(/[\\%_]/g, (ch) => `\\${ch}`)}%`;
-  if (allowedSensitivityLevels.length === 0) return [];
+  if (reader.levels.size === 0) return [];
   const rows = await db
     .select({
       id: exitInterviews.id,
@@ -106,8 +113,8 @@ async function keywordSearch(
       and(
         eq(exitInterviews.organizationId, orgId),
         eq(exitInterviews.status, 'published'),
-        // The sensitivity floor is part of the query, so the limit counts only interviews the caller may read.
-        inArray(exitInterviews.sensitivityLevel, allowedSensitivityLevels),
+        // The sensitivity floor and the retiree's consent are part of the query, so the limit counts only interviews the caller may read.
+        interviewListCondition(reader),
         or(
           ilike(exitInterviews.title, pattern),
           ilike(exitInterviews.keyLessons, pattern),
@@ -122,7 +129,7 @@ async function keywordSearch(
     .limit(limit);
 
   return rows
-    .filter((r) => allowedSensitivityLevels.includes(r.sensitivityLevel as ExitInterviewSensitivityLevel))
+    .filter((r) => reader.levels.has(r.sensitivityLevel))
     .map((r) => ({
       id: r.id,
       title: r.title,
@@ -142,7 +149,7 @@ async function keywordSearch(
 
 /**
  * Semantic vector search against the knowledge_base table.
- * Only retrieves exit_interview source records.
+ * Only retrieves exit_interview source records, and only while the retiree's consent stands (the knowledge copy follows the interview).
  */
 async function semanticSearch(
   embedding: number[],
@@ -150,20 +157,21 @@ async function semanticSearch(
   allowedSensitivityLevels: ExitInterviewSensitivityLevel[],
   limit: number,
 ): Promise<Map<string, number>> {
-  // pgvector cosine distance; lower is more similar
-  const embeddingLiteral = `'[${embedding.join(',')}]'::vector`;
+  // pgvector cosine distance; lower is more similar. The vector is a bound parameter: what the embedding service returned is never part of the statement text.
+  const vector = `[${embedding.map((value) => Number(value)).join(',')}]`;
   const rows = await db.execute(
     sql`
-      SELECT kb.source_id, 1 - (kb.embedding <=> ${sql.raw(embeddingLiteral)}) AS similarity
+      SELECT kb.source_id, 1 - (kb.embedding <=> ${vector}::vector) AS similarity
       FROM knowledge_base kb
       INNER JOIN exit_interviews ei ON ei.id::text = kb.source_id
       WHERE kb.organization_id = ${orgId}
         AND kb.source_type = 'exit_interview'
         AND kb.is_active = true
         AND ei.status = 'published'
+        AND ei.consent_granted = true
         AND ${sqlIn(sql`ei.sensitivity_level`, allowedSensitivityLevels)}
         AND kb.embedding IS NOT NULL
-      ORDER BY kb.embedding <=> ${sql.raw(embeddingLiteral)}
+      ORDER BY kb.embedding <=> ${vector}::vector
       LIMIT ${limit}
     `,
   );
@@ -182,10 +190,15 @@ export async function hybridKnowledgeSearch(
   options: HybridSearchOptions,
 ): Promise<KnowledgeSearchResult[]> {
   const { query, orgId, allowedSensitivityLevels, limit = 10, semanticWeight = 0.6 } = options;
+  // Search results are the shared knowledge, not the caller's own interviews: no author branch, only the levels and the consent rule.
+  const reader: InterviewReader = { userId: null, stewardPlus: options.stewardPlus ?? false, levels: new Set(allowedSensitivityLevels) };
+
+  // pgvector is optional. Without it there is nothing to rank by similarity: the query is not sent to the embedding service and the search is the keyword search.
+  const semanticAvailable = await vectorColumnReady(KNOWLEDGE_BASE_EMBEDDING);
 
   const [keywordResults, queryEmbedding] = await Promise.all([
-    keywordSearch(query, orgId, allowedSensitivityLevels, limit * 2),
-    generateQueryEmbedding(query, orgId),
+    keywordSearch(query, orgId, reader, limit * 2),
+    semanticAvailable ? generateQueryEmbedding(query, orgId) : Promise.resolve(null),
   ]);
 
   let semanticScores = new Map<string, number>();
@@ -223,12 +236,13 @@ export async function hybridKnowledgeSearch(
           and(
             eq(exitInterviews.organizationId, orgId),
             eq(exitInterviews.status, 'published'),
+            interviewListCondition(reader),
             inArray(exitInterviews.id, semanticOnlyIds),
           ),
         );
 
       for (const r of semanticRows) {
-        if (!allowedSensitivityLevels.includes(r.sensitivityLevel as ExitInterviewSensitivityLevel)) continue;
+        if (!reader.levels.has(r.sensitivityLevel)) continue;
         const semScore = semanticScores.get(r.id) ?? 0;
         resultMap.set(r.id, {
           id: r.id,

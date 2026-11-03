@@ -5,7 +5,8 @@
  * Handles grievances, arbitrations, settlements, and related workflows.
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const grievanceTypeEnum = pgEnum("grievance_type", [
   "individual",
@@ -156,6 +157,14 @@ export const grievances = pgTable("grievances", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
   createdBy: text("created_by"),
   lastUpdatedBy: text("last_updated_by"),
+
+  // Import traceability (platform 0077): where an imported case came from, so a re-import finds it and changes it instead of adding a second copy.
+  // An external case id always names its source system (a CHECK), and is unique per organization and source system.
+  externalCaseId: varchar("external_case_id", { length: 255 }),
+  importFingerprint: varchar("import_fingerprint", { length: 64 }),
+  sourceSystem: varchar("source_system", { length: 100 }),
+  importedAt: timestamp("imported_at", { withTimezone: true }),
+  importBatchId: uuid("import_batch_id"),
 }, (table) => [
   index("idx_grievances_number").on(table.grievanceNumber),
   index("idx_grievances_status").on(table.status),
@@ -168,6 +177,8 @@ export const grievances = pgTable("grievances", {
   index("idx_grievances_cba").on(table.cbaId),
   index("idx_grievances_org").on(table.organizationId),
   index("idx_grievances_deadline").on(table.responseDeadline),
+  uniqueIndex("ux_grievances_org_source_external_case").on(table.organizationId, table.sourceSystem, table.externalCaseId).where(sql`external_case_id IS NOT NULL`),
+  index("idx_grievances_import_batch_id").on(table.importBatchId).where(sql`import_batch_id IS NOT NULL`),
 ]);
 
 // Arbitrations

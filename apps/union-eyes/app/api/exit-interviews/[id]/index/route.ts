@@ -53,6 +53,9 @@ export const POST = withApi(
       eventNotes: 'Manual semantic re-index triggered',
     });
 
+    // pgvector is optional: where it is not installed the request cannot be carried out, which is not a failure of this interview.
+    if (!result.indexed && 'unavailable' in result && result.unavailable) throw ApiError.capabilityUnavailable(result.reason);
+
     // A failed indexing is a failure of the request, not a 200 carrying the error text.
     if (!result.indexed && 'failed' in result && result.failed) throw ApiError.internal('Indexing failed');
 

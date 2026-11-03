@@ -91,6 +91,20 @@ describe('ai/semantic-search route', () => {
     expect(payload.feature).toBe('ai_semantic_search');
   });
 
+  it('answers 501, not 500, when the database cannot search by similarity', async () => {
+    const { POST } = await loadRoute();
+    const { VectorSearchUnavailableError, CLAUSE_EMBEDDING } = await import('@/lib/ai/vector-readiness');
+    m.semanticClauseSearch.mockRejectedValueOnce(new VectorSearchUnavailableError(CLAUSE_EMBEDDING));
+
+    const response = await POST(new Request('http://localhost/api/ai/semantic-search', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: 'vacation clause', searchType: 'clauses' }),
+    }));
+
+    expect(response.status).toBe(501);
+    expect(JSON.stringify(await response.json())).toContain('cba_clauses.embedding');
+  });
+
   it('returns blocked response when AI feature guard denies', async () => {
     const { POST } = await loadRoute();
     m.guardAiFeature.mockResolvedValueOnce(new Response(JSON.stringify({ error: 'blocked' }), { status: 403 }));

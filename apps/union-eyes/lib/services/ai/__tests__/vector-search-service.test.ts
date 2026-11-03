@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   mockDbQuery: vi.fn(),
   mockGetCachedEmbedding: vi.fn(),
   mockSetCachedEmbedding: vi.fn(),
+  mockRequireVector: vi.fn(async () => undefined),
 }));
 
 vi.mock('@/lib/ai/ai-client', () => ({
@@ -40,7 +41,7 @@ vi.mock('@/db/schema', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
-  sql: vi.fn((...args: any[]) => args),
+  sql: Object.assign(vi.fn((...args: any[]) => args), { join: (parts: unknown[], separator: unknown) => [...parts, separator] }),
   and: vi.fn((...args: any[]) => args),
   or: vi.fn((...args: any[]) => args),
   SQL: vi.fn(),
@@ -53,11 +54,18 @@ vi.mock('../embedding-cache', () => ({
   },
 }));
 
+// These tests are about the query and the ranking; whether pgvector is installed is tested in lib/ai/__tests__/vector-readiness.test.ts.
+vi.mock('@/lib/ai/vector-readiness', () => ({
+  CLAUSE_EMBEDDING: { table: 'cba_clauses', column: 'embedding' },
+  PRECEDENT_EMBEDDING: { table: 'arbitration_decisions', column: 'embedding' },
+  requireVectorColumn: mocks.mockRequireVector,
+}));
+
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-import { generateEmbedding, semanticClauseSearch, findSimilarClauses } from '../vector-search-service';
+import { generateEmbedding, semanticClauseSearch, findSimilarClauses, semanticPrecedentSearch } from '../vector-search-service';
 
 const ORG = { filters: { organizationId: 'org-1' } };
 const ORG_ONLY = { organizationId: 'org-1' };
@@ -225,5 +233,60 @@ describe('findSimilarClauses', () => {
     ]);
     const results = await findSimilarClauses('clause-1', { ...ORG_ONLY, threshold: 0.75 });
     expect(results).toHaveLength(0);
+  });
+});
+
+describe('when the database cannot search by similarity', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.mockRequireVector.mockRejectedValue(new Error('VECTOR_SEARCH_UNAVAILABLE'));
+  });
+
+  it('refuses a clause search before the query is sent to the embedding service, and does not wrap the reason', async () => {
+    await expect(semanticClauseSearch('wages', ORG)).rejects.toThrow('VECTOR_SEARCH_UNAVAILABLE');
+    expect(mocks.mockGetAiClient).not.toHaveBeenCalled();
+    expect(mocks.mockEmbed).not.toHaveBeenCalled();
+    expect(mocks.mockDbExecute).not.toHaveBeenCalled();
+  });
+
+  it('refuses a similar-clauses search before it reads the source clause or embeds it', async () => {
+    await expect(findSimilarClauses('clause-1', ORG_ONLY)).rejects.toThrow('VECTOR_SEARCH_UNAVAILABLE');
+    expect(mocks.mockDbQuery).not.toHaveBeenCalled();
+    expect(mocks.mockEmbed).not.toHaveBeenCalled();
+  });
+
+  it('refuses a precedent search before the query is embedded', async () => {
+    await expect(semanticPrecedentSearch('wrongful dismissal')).rejects.toThrow('VECTOR_SEARCH_UNAVAILABLE');
+    expect(mocks.mockEmbed).not.toHaveBeenCalled();
+    expect(mocks.mockDbExecute).not.toHaveBeenCalled();
+  });
+});
+
+describe('the queries name columns the tables have', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.mockRequireVector.mockResolvedValue(undefined);
+    mocks.mockEmbed.mockResolvedValue({ embeddings: [[0.1, 0.2, 0.3]] });
+    mocks.mockGetAiClient.mockReturnValue({ embed: mocks.mockEmbed });
+    mocks.mockGetCachedEmbedding.mockResolvedValue(null);
+    mocks.mockSetCachedEmbedding.mockResolvedValue(undefined);
+    mocks.mockDbExecute.mockResolvedValue([]);
+  });
+
+  const statement = (call: number) => JSON.stringify(mocks.mockDbExecute.mock.calls[call][0]);
+
+  it('reads a clause\'s key terms as its tags (cba_clauses has no tags column)', async () => {
+    await semanticClauseSearch('wages', ORG);
+    expect(statement(0)).toContain('key_terms AS tags');
+    expect(statement(0)).not.toMatch(/\\n\s*tags,/);
+  });
+
+  it('filters a precedent by the issues it turned on (issue_types, a jsonb array) and by its jurisdiction column', async () => {
+    await semanticPrecedentSearch('dismissal', { issueType: 'termination', jurisdiction: 'ON' });
+    expect(statement(0)).toContain('issue_types');
+    expect(statement(0)).toContain('issue_types @> to_jsonb(');
+    expect(statement(0)).toContain('jurisdiction = ');
+    expect(statement(0)).not.toContain('tribunal_type');
+    expect(statement(0)).not.toMatch(/issue_type[^s]/);
   });
 });

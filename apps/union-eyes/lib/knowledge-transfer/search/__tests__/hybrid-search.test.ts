@@ -6,6 +6,8 @@ const h = vi.hoisted(() => ({
   embed: vi.fn(),
   getCached: vi.fn(),
   setCached: vi.fn(),
+  vectorReady: vi.fn(),
+  listCondition: vi.fn(),
 }));
 
 function chain(): Record<string, unknown> {
@@ -20,12 +22,19 @@ function chain(): Record<string, unknown> {
 vi.mock('@/db/db', () => ({
   db: { select: () => chain(), execute: h.execute },
 }));
+// These tests are about ranking and merging; whether pgvector is installed is tested in lib/ai/__tests__/vector-readiness.test.ts.
+vi.mock('@/lib/ai/vector-readiness', () => ({
+  KNOWLEDGE_BASE_EMBEDDING: { table: 'knowledge_base', column: 'embedding' },
+  vectorColumnReady: h.vectorReady,
+}));
+// The consent and level predicate is interview-access.ts's own (tested there, and on real PostgreSQL in db/__tests__/semantic-search.postgres.test.ts).
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ interviewListCondition: h.listCondition }));
 vi.mock('@/db/schema', () => ({
   exitInterviews: new Proxy({}, { get: (_t, p) => String(p) }),
 }));
 vi.mock('drizzle-orm', () => ({
   and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, ilike: (...a: unknown[]) => a, inArray: (...a: unknown[]) => a, or: (...a: unknown[]) => a,
-  sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }),
+  sql: Object.assign((strings: TemplateStringsArray, ...values: unknown[]) => ({ strings: [...strings], values }), { raw: (s: string) => s }),
 }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ embed: h.embed }),
@@ -53,6 +62,22 @@ describe('lib/knowledge-transfer/search/hybrid-search', () => {
     h.getCached.mockReset();
     h.setCached.mockReset();
     h.setCached.mockResolvedValue(undefined);
+    h.vectorReady.mockReset();
+    h.vectorReady.mockResolvedValue(true);
+    h.listCondition.mockReset();
+    h.listCondition.mockReturnValue('list-condition');
+  });
+
+  it('is the keyword search, with no embedding requested and no vector query, when pgvector is not installed', async () => {
+    h.vectorReady.mockResolvedValue(false);
+    h.selectQueue.push([row('a')]);
+
+    const results = await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: ['low'] });
+    expect(results.map((r) => r.id)).toEqual(['a']);
+    expect(results[0]).toMatchObject({ keywordScore: 1, semanticScore: null });
+    expect(h.getCached).not.toHaveBeenCalled();
+    expect(h.embed).not.toHaveBeenCalled();
+    expect(h.execute).not.toHaveBeenCalled();
   });
 
   it('combines keyword and semantic results with cached embedding', async () => {
@@ -98,5 +123,41 @@ describe('lib/knowledge-transfer/search/hybrid-search', () => {
   it('puts the sensitivity floor in the query and reads nothing when no level is allowed', async () => {
     const results = await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: [] });
     expect(results).toEqual([]);
+  });
+
+  it('reads interviews through the consent and level predicate for a reader below steward, unless the caller is a steward or above', async () => {
+    h.selectQueue.push([row('a')]);
+    h.vectorReady.mockResolvedValue(false);
+    await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: ['low'] });
+    // No author branch (search results are the shared knowledge) and consent required: stewardPlus is false unless the caller says so.
+    expect(h.listCondition).toHaveBeenLastCalledWith({ userId: null, stewardPlus: false, levels: new Set(['low']) });
+
+    h.selectQueue.push([row('a')]);
+    await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: ['low', 'medium'], stewardPlus: true });
+    expect(h.listCondition).toHaveBeenLastCalledWith({ userId: null, stewardPlus: true, levels: new Set(['low', 'medium']) });
+  });
+
+  it('applies the same predicate to an interview found only by meaning', async () => {
+    h.getCached.mockResolvedValue([0.1, 0.2, 0.3]);
+    h.selectQueue.push([]); // no keyword rows
+    h.selectQueue.push([row('c')]);
+    h.execute.mockResolvedValue([{ source_id: 'c', similarity: 0.8 }]);
+
+    const results = await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: ['low'] });
+    expect(results.map((r) => r.id)).toEqual(['c']);
+    // The keyword read and the read of the semantic-only interviews each go through the predicate.
+    expect(h.listCondition).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the knowledge copy of an interview out of the semantic match once the retiree\'s consent is withdrawn, and binds the vector instead of writing it into the statement', async () => {
+    h.getCached.mockResolvedValue([0.1, 0.2, 0.3]);
+    h.selectQueue.push([]);
+    h.execute.mockResolvedValue([]);
+
+    await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: ['low'] });
+    const statement = h.execute.mock.calls[0][0] as { strings: string[]; values: unknown[] };
+    expect(statement.strings.join('?')).toContain('ei.consent_granted = true');
+    expect(statement.strings.join('?')).not.toContain('0.1,0.2');
+    expect(statement.values).toContain('[0.1,0.2,0.3]');
   });
 });

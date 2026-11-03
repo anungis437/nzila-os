@@ -16,7 +16,6 @@ import {
   pgEnum,
   index,
   integer,
-  vector,
   decimal,
   date,
 } from "drizzle-orm/pg-core";
@@ -199,8 +198,9 @@ export const knowledgeBase = pgTable(
     sourceId: text("source_id"), // Reference to original document
     sourceUrl: text("source_url"),
     
-    // Embeddings for semantic search
-    embedding: vector("embedding", { dimensions: 1536 }), // OpenAI ada-002
+    // Embeddings for semantic search. The vector itself (knowledge_base.embedding, vector(1536)) is NOT declared here: pgvector is optional, platform 0063 creates the
+    // column only on a server that offers the extension, and a declared column is part of every `select()` and `returning()`, so every read of this table would
+    // fail wherever the extension is absent. The vector is written and read through lib/ai/knowledge-base-embeddings.ts, which asks first.
     embeddingModel: text("embedding_model").default("text-embedding-ada-002"),
     // Version of the embedding model used to produce the vector above.
     // When the embedding model changes, this field drives selective re-indexing.
@@ -245,10 +245,6 @@ export const knowledgeBase = pgTable(
     ),
     documentTypeIdx: index("knowledge_base_document_type_idx").on(
       table.documentType
-    ),
-    embeddingIdx: index("knowledge_base_embedding_idx").using(
-      "hnsw",
-      table.embedding.op("vector_cosine_ops")
     ),
     isActiveIdx: index("knowledge_base_is_active_idx").on(table.isActive),
   })

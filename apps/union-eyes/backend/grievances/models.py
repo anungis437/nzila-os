@@ -470,6 +470,13 @@ class Grievances(BaseModel):
     created_by = models.TextField(null=True, blank=True)
     last_updated_by = models.TextField(null=True, blank=True)
 
+    # Import traceability (platform 0077): where an imported case came from, so a re-import changes it instead of adding a second copy.
+    external_case_id = models.CharField(max_length=255, null=True, blank=True)
+    import_fingerprint = models.CharField(max_length=64, null=True, blank=True)
+    source_system = models.CharField(max_length=100, null=True, blank=True)
+    imported_at = models.DateTimeField(null=True, blank=True)
+    import_batch_id = models.UUIDField(null=True, blank=True)
+
     class Meta:
         db_table = "grievances"
         verbose_name = "Grievances"

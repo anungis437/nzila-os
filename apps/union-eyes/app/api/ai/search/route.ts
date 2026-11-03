@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withRoleAuth, hasMinRole, BaseAuthContext } from '@/lib/api-auth-guard';
-import { readableSensitivityLevels } from '@/lib/knowledge-transfer/governance/consent-controls';
+import { knowledgeBaseSourceCondition, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
@@ -17,6 +17,8 @@ import { buildCanonicalAiOutput } from '@nzila/ai-sdk';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { generateEmbedding } from '@/lib/services/ai/vector-search-service';
+import { searchKnowledgeBaseByEmbedding } from '@/lib/ai/knowledge-base-embeddings';
+import { KNOWLEDGE_BASE_EMBEDDING, VectorSearchUnavailableError, vectorColumnReady } from '@/lib/ai/vector-readiness';
 import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -79,75 +81,47 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     const { query, max_results, threshold, document_type, generate_answer } = validation.data;
     const orgId = context.organizationId as string;
 
+    // pgvector is optional: without it the query would be sent to the embedding service and then fail. Ask first, and answer that it is not available (501).
+    if (!(await vectorColumnReady(KNOWLEDGE_BASE_EMBEDDING))) {
+      return standardErrorResponse(ErrorCode.NOT_IMPLEMENTED, new VectorSearchUnavailableError(KNOWLEDGE_BASE_EMBEDDING).message);
+    }
+
     // Generate query embedding
     const queryEmbedding = await generateEmbedding(query);
-    const embeddingStr = `[${queryEmbedding.join(',')}]`;
 
-    // Build optional type filter
-    const typeFilter = document_type
-      ? sql`AND document_type = ${document_type}`
-      : sql``;
+    // A knowledge asset made from an exit interview keeps that interview's sensitivity and consent: it is returned only to a caller who holds the
+    // role that sensitivity requires, and only while the retiree's consent stands (the rule the knowledge list applies).
+    const reader = await resolveInterviewReader(context.userId ?? null, false, hasMinRole);
 
-    // A knowledge asset made from an exit interview keeps that interview's sensitivity: it is only returned to a caller
-    // who holds the role that sensitivity requires.
-    const readableLevels = JSON.stringify(await readableSensitivityLevels(hasMinRole));
+    // The database scores the matches and applies the organization, expiry, visibility, type and threshold, then orders and limits them.
+    const matches = await withRLSContext(async (tx) =>
+      searchKnowledgeBaseByEmbedding(tx, {
+        organizationId: orgId,
+        embedding: queryEmbedding,
+        minSimilarity: threshold,
+        limit: max_results,
+        documentTypes: document_type ? [document_type] : undefined,
+        sourceCondition: knowledgeBaseSourceCondition(reader, orgId),
+      }),
+    );
 
-    // Semantic search with org-scoping + visibility rules
-    const results = await withRLSContext(async () => db.execute(sql`
-      SELECT
-        id,
-        title,
-        document_type,
-        content,
-        summary,
-        tags,
-        keywords,
-        language,
-        source_type,
-        source_url,
-        view_count,
-        citation_count,
-        effective_date,
-        expiry_date,
-        1 - (embedding <=> ${embeddingStr}::vector) AS similarity
-      FROM knowledge_base
-      WHERE is_active = true
-        AND organization_id = ${orgId}
-        AND (expiry_date IS NULL OR expiry_date > now())
-        AND embedding IS NOT NULL
-        AND (
-          source_type IS DISTINCT FROM 'exit_interview'
-          OR EXISTS (
-            SELECT 1 FROM exit_interviews ei
-            WHERE ei.id::text = knowledge_base.source_id::text
-              AND ei.organization_id = knowledge_base.organization_id
-              AND ei.sensitivity_level IN (SELECT jsonb_array_elements_text(${readableLevels}::jsonb))
-          )
-        )
-        ${typeFilter}
-      ORDER BY similarity DESC
-      LIMIT ${max_results}
-    `));
-
-    const hits = (results as any as Array<Record<string, unknown>>)
-      .filter((r) => (r.similarity as number) >= threshold)
-      .map((r) => ({
-        id: r.id,
-        title: r.title,
-        document_type: r.document_type,
-        summary: r.summary,
-        content_preview: (r.content as string).slice(0, 300),
-        tags: r.tags,
-        keywords: r.keywords,
-        language: r.language,
-        source_type: r.source_type,
-        source_url: r.source_url,
-        similarity: Number((r.similarity as number).toFixed(4)),
-        view_count: r.view_count,
-        citation_count: r.citation_count,
-        effective_date: r.effective_date,
-        expiry_date: r.expiry_date,
-      }));
+    const hits = matches.map((r) => ({
+      id: r.id,
+      title: r.title,
+      document_type: r.documentType,
+      summary: r.summary,
+      content_preview: r.content.slice(0, 300),
+      tags: r.tags,
+      keywords: r.keywords,
+      language: r.language,
+      source_type: r.sourceType,
+      source_url: r.sourceUrl,
+      similarity: Number(r.similarity.toFixed(4)),
+      view_count: r.viewCount,
+      citation_count: r.citationCount,
+      effective_date: r.effectiveDate,
+      expiry_date: r.expiryDate,
+    }));
 
     // Optionally generate an AI answer grounded on the retrieved docs
     let answer: string | undefined;
@@ -225,10 +199,21 @@ export const GET = withRoleAuth('member', async (_request: NextRequest, _context
   if (getBlocked) return getBlocked;
 
   try {
-    const rows = await withRLSContext(async () => db.execute(sql`
+    // Without pgvector there is no embedding column to count: the index is unavailable, not empty.
+    const vectorReady = await vectorColumnReady(KNOWLEDGE_BASE_EMBEDDING);
+    const rows = await withRLSContext(async () => db.execute(vectorReady ? sql`
       SELECT
         count(*)::int AS total,
         count(*) FILTER (WHERE embedding IS NOT NULL)::int AS with_embeddings,
+        count(DISTINCT organization_id)::int AS organizations,
+        count(DISTINCT document_type)::int AS document_types
+      FROM knowledge_base
+      WHERE is_active = true
+        AND organization_id = ${statsOrgId}
+    ` : sql`
+      SELECT
+        count(*)::int AS total,
+        0::int AS with_embeddings,
         count(DISTINCT organization_id)::int AS organizations,
         count(DISTINCT document_type)::int AS document_types
       FROM knowledge_base
@@ -241,7 +226,8 @@ export const GET = withRoleAuth('member', async (_request: NextRequest, _context
     const withEmbeddings = (stats.with_embeddings as number) || 0;
 
     return NextResponse.json({
-      status: withEmbeddings > 0 ? 'ready' : 'pending',
+      status: !vectorReady ? 'unavailable' : withEmbeddings > 0 ? 'ready' : 'pending',
+      ...(vectorReady ? {} : { reason: new VectorSearchUnavailableError(KNOWLEDGE_BASE_EMBEDDING).message }),
       knowledge_base: {
         total,
         with_embeddings: withEmbeddings,

@@ -2,7 +2,8 @@
  * Documents Schema
  * Database schema for general document management with folder support
  */
-import { pgTable, text, integer, timestamp, uuid, boolean, jsonb, index, uniqueIndex, pgEnum, bigint, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, timestamp, uuid, boolean, jsonb, index, uniqueIndex, pgEnum, bigint, numeric, varchar } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { organizations } from '../schema-organizations';
 import { claims } from './claims-schema';
 
@@ -108,6 +109,13 @@ export const documents = pgTable('documents', {
   
   // Additional metadata
   metadata: jsonb('metadata').default({}),
+
+  // Import traceability (platform 0077): the source system and the document's id in it, when it was imported and the batch that imported it. A re-import finds the same
+  // document again: one per organization, source system and external id. The case a document belongs to is its document_links row, not a column here.
+  sourceSystem: varchar('source_system', { length: 100 }),
+  externalDocumentId: varchar('external_document_id', { length: 255 }),
+  importedAt: timestamp('imported_at', { withTimezone: true }),
+  importBatchId: uuid('import_batch_id'),
 }, (table) => [
   index('idx_documents_org').on(table.organizationId),
   index('idx_documents_folder').on(table.folderId),
@@ -118,6 +126,8 @@ export const documents = pgTable('documents', {
   index('idx_documents_document_type').on(table.documentType),
   index('idx_documents_created').on(table.createdAt),
   index('idx_documents_deleted_at').on(table.deletedAt),
+  uniqueIndex('ux_documents_org_source_external_document').on(table.organizationId, table.sourceSystem, table.externalDocumentId).where(sql`external_document_id IS NOT NULL`),
+  index('idx_documents_import_batch_id').on(table.importBatchId).where(sql`import_batch_id IS NOT NULL`),
 ]);
 
 export const documentVersions = pgTable('document_versions', {

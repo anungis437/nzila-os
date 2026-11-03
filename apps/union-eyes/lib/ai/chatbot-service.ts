@@ -24,6 +24,9 @@ import { eq, and, desc, sql } from "drizzle-orm";
 import { embeddingCache } from "@/lib/services/ai/embedding-cache";
 import { logger } from "@/lib/logger";
 import { buildOrgAiTrace, getAiClient, toGatewayDataClass, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { searchKnowledgeBaseByEmbedding } from '@/lib/ai/knowledge-base-embeddings';
+import { KNOWLEDGE_BASE_EMBEDDING, VectorSearchUnavailableError, requireVectorColumn } from '@/lib/ai/vector-readiness';
+import { knowledgeBaseSourceCondition } from '@/lib/knowledge-transfer/governance/interview-access';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -128,12 +131,6 @@ async function aiEmbed(text: string, organizationId?: string): Promise<number[]>
   return embedding;
 }
 
-/**
- * Chat Session Manager
- */
-/** Upper bound on the knowledge rows scored for one question. */
-const RAG_CANDIDATE_CAP = 500;
-
 export class ChatbotUnavailableError extends Error {
   constructor() {
     super('The assistant is temporarily unavailable');
@@ -141,6 +138,9 @@ export class ChatbotUnavailableError extends Error {
   }
 }
 
+/**
+ * Chat Session Manager
+ */
 export class ChatSessionManager {
   /**
    * Create a new chat session
@@ -264,37 +264,10 @@ export class ChatSessionManager {
  */
 export class RAGService {
   /**
-   * Add document to knowledge base
-   */
-  async addDocument(data: {
-    organizationId: string;
-    title: string;
-    documentType: string;
-    content: string;
-    summary?: string;
-    sourceType: string;
-    sourceId?: string;
-    sourceUrl?: string;
-    tags?: string[];
-    keywords?: string[];
-    language?: string;
-    isPublic?: boolean;
-    createdBy: string;
-  }): Promise<void> {
-    // Generate embedding for the document
-    const embedding = await aiEmbed(data.content, data.organizationId);
-    
-    await db.insert(knowledgeBase).values({
-      ...data,
-      organizationId: data.organizationId,
-      documentType: data.documentType as (typeof knowledgeBase.documentType)['_']['data'],
-      embedding: JSON.stringify(embedding) as unknown as (typeof knowledgeBase.$inferInsert)['embedding'],
-      embeddingModel: "text-embedding-ada-002",
-    });
-  }
-  
-  /**
-   * Search knowledge base using semantic search
+   * Search the organization's knowledge base by embedding similarity.
+   *
+   * Semantic search needs pgvector (capability UE-AI-SEMANTIC-SEARCH): without the vector column this throws
+   * VectorSearchUnavailableError before the question is sent to the embedding service.
    */
   async searchDocuments(
     query: string,
@@ -303,6 +276,8 @@ export class RAGService {
       documentTypes?: string[];
       limit?: number;
       similarityThreshold?: number;
+      /** Exit-interview sensitivity levels the asker may read. Knowledge made from an interview is returned only for these; none when omitted. */
+      readableLevels?: readonly string[];
     }
   ): Promise<
     Array<{
@@ -317,49 +292,31 @@ export class RAGService {
     if (!options.organizationId?.trim()) {
       throw new Error('Organization context required for knowledge search');
     }
+    await requireVectorColumn(KNOWLEDGE_BASE_EMBEDDING);
     const queryEmbedding = await aiEmbed(query, options.organizationId);
 
     // Both the SQL predicate and the transaction RLS context bind the read.
     // Do not let an omitted organization broaden the query to every tenant.
-    const results = await withRLSContext({ organizationId: options.organizationId }, async (tx) =>
-      tx.select({
-        id: knowledgeBase.id,
-        title: knowledgeBase.title,
-        content: knowledgeBase.content,
-        embedding: knowledgeBase.embedding,
-      })
-        .from(knowledgeBase)
-        .where(and(
-          eq(knowledgeBase.isActive, true),
-          eq(knowledgeBase.organizationId, options.organizationId),
-        ))
-        // The limit applies to the best matches, not to the rows read: a bounded candidate set is scored first, so a relevant
-        // document is not lost because it was not among the first few rows the database returned.
-        .limit(RAG_CANDIDATE_CAP),
+    const matches = await withRLSContext({ organizationId: options.organizationId }, async (tx) =>
+      searchKnowledgeBaseByEmbedding(tx, {
+        organizationId: options.organizationId,
+        embedding: queryEmbedding,
+        minSimilarity: options.similarityThreshold ?? 0.7,
+        limit: options.limit || 5,
+        documentTypes: options.documentTypes,
+        sourceCondition: knowledgeBaseSourceCondition(
+          { userId: null, stewardPlus: false, levels: new Set(options.readableLevels ?? []) },
+          options.organizationId,
+        ),
+      }),
     );
 
-    // Calculate cosine similarity; a row whose embedding is missing or unreadable cannot be scored and is skipped.
-    const scored = results.flatMap((doc) => {
-      let docEmbedding: number[];
-      try {
-        docEmbedding = typeof doc.embedding === 'string' ? JSON.parse(doc.embedding) : (doc.embedding as unknown as number[]);
-      } catch {
-        return [];
-      }
-      if (!Array.isArray(docEmbedding) || docEmbedding.length !== queryEmbedding.length) return [];
-      return [{
-        documentId: doc.id,
-        title: doc.title,
-        relevanceScore: cosineSimilarity(queryEmbedding, docEmbedding),
-        excerpt: doc.content.substring(0, 200) + "...",
-      }];
-    });
-
-    // Filter by threshold, order by relevance, then keep the requested number.
-    return scored
-      .filter((r) => r.relevanceScore >= (options.similarityThreshold ?? 0.7))
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, options.limit || 5);
+    return matches.map((match) => ({
+      documentId: match.id,
+      title: match.title,
+      relevanceScore: match.similarity,
+      excerpt: match.content.substring(0, 200) + "...",
+    }));
   }
   
   /**
@@ -399,6 +356,8 @@ export class ChatbotService {
     organizationId: string;
     content: string;
     useRAG?: boolean;
+    /** Exit-interview sensitivity levels the sender may read; retrieval returns knowledge made from an interview only for these. */
+    readableLevels?: readonly string[];
   }): Promise<ChatMessage> {
     const startTime = Date.now();
 
@@ -468,12 +427,20 @@ export class ChatbotService {
             docs = await this.ragService.searchDocuments(data.content, {
               organizationId: session.organizationId,
               limit: 3,
+              readableLevels: data.readableLevels,
             });
           } catch (ragError) {
-            logger?.warn('[ChatbotService] RAG search failed — proceeding without context', {
-              error: ragError instanceof Error ? ragError.message : String(ragError),
-              sessionId: data.sessionId,
-            });
+            if (ragError instanceof VectorSearchUnavailableError) {
+              // Not a fault: without pgvector there is no knowledge to retrieve, and the answer is given without context.
+              logger?.debug('[ChatbotService] Semantic retrieval is not available on this database — proceeding without context', {
+                sessionId: data.sessionId,
+              });
+            } else {
+              logger?.warn('[ChatbotService] RAG search failed — proceeding without context', {
+                error: ragError instanceof Error ? ragError.message : String(ragError),
+                sessionId: data.sessionId,
+              });
+            }
           }
 
           // Add context to conversation
@@ -650,16 +617,5 @@ export class ChatbotService {
 return { flagged: true, reason: 'Safety system unavailable' }; // Fail closed
     }
   }
-}
-
-/**
- * Helper: Cosine similarity
- */
-function cosineSimilarity(a: number[], b: number[]): number {
-  const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
-  const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
-  const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
-  
-  return dotProduct / (magnitudeA * magnitudeB);
 }
 

@@ -3,7 +3,7 @@
  *
  * After a batch import, verify data integrity:
  * - No NULL critical fields on imported grievances
- * - No orphan documents (linked_case_id set but grievance missing)
+ * - No orphan documents (linked to no grievance, or to one that does not exist)
  * - No broken case → org references
  * - Timeline events ordered correctly
  * - All ingestion_records resolved (no stuck 'processing')
@@ -72,22 +72,23 @@ export async function verifyImportBatch(batchId: string): Promise<VerificationRe
     });
   }
 
-  // §12.3: Orphan documents (linked_case_id but grievance doesn't exist)
+  // §12.3: Orphan documents: an imported document linked to no grievance, or to one that does not exist (the link is the canonical document_links row)
   const orphans = await db.execute(sql`
-    SELECT d.id, d.name, d.linked_case_id
+    SELECT d.id, d.name, dl.linked_entity_id AS linked_case_id
     FROM documents d
+    LEFT JOIN document_links dl ON dl.document_id = d.id AND dl.linked_entity_type = 'grievance'
     WHERE d.import_batch_id = ${batchId}::uuid
-      AND d.linked_case_id IS NOT NULL
-      AND NOT EXISTS (
-        SELECT 1 FROM grievances g WHERE g.id = d.linked_case_id
+      AND (
+        dl.id IS NULL
+        OR NOT EXISTS (SELECT 1 FROM grievances g WHERE g.id = dl.linked_entity_id)
       )
-  `) as Array<{ id: string; name: string; linked_case_id: string }>;
+  `) as Array<{ id: string; name: string; linked_case_id: string | null }>;
 
   if (orphans.length > 0) {
     checks.push({
       check: 'orphan_documents',
       severity: 'warning',
-      message: `${orphans.length} document(s) linked to non-existent grievances`,
+      message: `${orphans.length} document(s) not linked to an existing grievance`,
       count: orphans.length,
       details: orphans.slice(0, 10),
     });

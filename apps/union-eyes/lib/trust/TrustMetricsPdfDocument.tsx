@@ -192,7 +192,6 @@ export function TrustMetricsPdfDocument({ metrics }: { metrics: TrustMetrics }) 
             <Text style={styles.bodyText}>{metrics.auditLog.description}</Text>
             <Text style={styles.listLine}>{verificationText(metrics.auditLog.verification)}</Text>
             <Text style={styles.listLine}>Events logged (30 days): {metrics.auditLog.eventsLogged.toLocaleString()}</Text>
-            <Text style={styles.listLine}>Archived events: {metrics.auditLog.archivedEvents.toLocaleString()}</Text>
             <Text style={styles.listLine}>Retention policy: {metrics.auditLog.retentionPolicy}</Text>
           </View>
         </View>

@@ -35,7 +35,10 @@ describe('UE AI knowledge tenant isolation', () => {
   it('semantic search binds knowledge rows to authenticated organization', () => {
     const file = source('app/api/ai/search/route.ts');
     expect(file).toContain('const orgId = context.organizationId as string');
-    expect(file).toContain('AND organization_id = ${orgId}');
+    // The route hands only the authenticated organization to the one query, which binds it in its predicate (and row-level security binds it again).
+    expect(file).toContain('organizationId: orgId,');
+    expect(file).toContain('knowledgeBaseSourceCondition(reader, orgId)');
+    expect(source('lib/ai/knowledge-base-embeddings.ts')).toContain('eq(knowledgeBase.organizationId, query.organizationId)');
   });
 
   it('chatbot RAG rejects missing tenant before embedding and uses RLS and an SQL predicate', () => {
@@ -46,6 +49,9 @@ describe('UE AI knowledge tenant isolation', () => {
     expect(guard).toBeGreaterThan(-1);
     expect(embed).toBeGreaterThan(guard);
     expect(rag).toContain('withRLSContext({ organizationId: options.organizationId }');
-    expect(rag).toContain('eq(knowledgeBase.organizationId, options.organizationId)');
+    // The organization predicate is the shared query's; the retrieval passes the session's organization and the reader's levels into it.
+    expect(rag).toContain('organizationId: options.organizationId,');
+    expect(rag).toContain('knowledgeBaseSourceCondition(');
+    expect(source('lib/ai/knowledge-base-embeddings.ts')).toContain('eq(knowledgeBase.organizationId, query.organizationId)');
   });
 });

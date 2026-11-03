@@ -50,8 +50,6 @@ const metrics: TrustMetrics = {
     description: 'Audit trail is healthy.',
     eventsLogged: 1200,
     retentionPolicy: '7 years',
-    lastArchive: new Date('2026-05-01T00:00:00.000Z'),
-    archivedEvents: 42000,
   },
   lastUpdated: new Date('2026-05-24T00:00:00.000Z'),
 };

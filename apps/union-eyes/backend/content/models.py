@@ -408,6 +408,12 @@ class Documents(BaseModel):
     checksum = models.TextField(null=True, blank=True)
     org_id = models.UUIDField(null=True, blank=True)
 
+    # Import traceability (platform 0077). The case a document belongs to is its document_links row, not a column here.
+    source_system = models.CharField(max_length=100, null=True, blank=True)
+    external_document_id = models.CharField(max_length=255, null=True, blank=True)
+    imported_at = models.DateTimeField(null=True, blank=True)
+    import_batch_id = models.UUIDField(null=True, blank=True)
+
     class Meta:
         db_table = "documents"
         verbose_name = "Documents"

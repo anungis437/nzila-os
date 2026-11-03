@@ -42,7 +42,8 @@ const APP_ROOT = join(__dirname, '..', '..')
  * closing findings means lowering the ceiling in the same change. The integrity classes (foreign keys, indexes, time zone, checks, an unvalidated
  * constraint) are closed and held at zero. NOT NULL is closed everywhere the Django model requires the column too (the database may not be stricter
  * than the loosest legitimate writer), and 1 column is open on purpose (NOT_NULL_DELIBERATELY_OPEN); a test below holds the open set to exactly that rule.
- * What else remains is the 14 relations that several declarations name differently, and the pgvector column on a server that does not offer the extension.
+ * What else remains is the 14 relations that several declarations name differently. The pgvector column is not declared (knowledge_base.embedding is read and written
+ * only through lib/ai/knowledge-base-embeddings.ts, after asking whether it exists), so a server that does not offer the extension is no longer a finding.
  */
 const ADVISORY_CEILING: Partial<Record<FindingKind, number>> = {
   FK_ABSENT: 0,
@@ -53,7 +54,7 @@ const ADVISORY_CEILING: Partial<Record<FindingKind, number>> = {
   CONSTRAINT_NOT_VALIDATED: 0,
   SHAPE_DRIFT: 13,
   VARIANT_REQUIRED: 19,
-  EXTENSION_ABSENT: 1,
+  EXTENSION_ABSENT: 0,
 }
 
 /** The migrations that closed the integrity classes, in order, then the ones that converged shape. */

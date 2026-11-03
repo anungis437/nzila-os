@@ -302,7 +302,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
     });
 
     const [duplicate] = await db.execute(sql`
-      SELECT ir.resolved_id
+      SELECT ir.entity_id AS resolved_id
       FROM ingestion_records ir
       INNER JOIN ingestion_batches ib ON ib.id = ir.batch_id
       WHERE ib.organization_id = ${organizationId}::uuid

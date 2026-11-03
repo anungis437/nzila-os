@@ -1149,6 +1149,34 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'real pages over organization, member, grievance, agreement, ticket and NPS data, so they are not listed in ownedBy: an ownedBy page of a NOT_IMPLEMENTED entry is ' +
       'treated as an unconditional 404 by getRegistryTracked404DashboardRoutes.',
   },
+  {
+    id: 'UE-AI-SEMANTIC-SEARCH',
+    title: 'Semantic search over the knowledge base: search, chatbot retrieval and exit-interview indexing (needs pgvector)',
+    state: 'LIMITED',
+    ownedBy: [
+      'lib/ai/vector-readiness.ts',
+      'lib/ai/knowledge-base-embeddings.ts',
+      'lib/ai/chatbot-service.ts',
+      'lib/services/ai/vector-search-service.ts',
+      'lib/knowledge-transfer/indexing/semantic-indexer.ts',
+      'lib/knowledge-transfer/search/hybrid-search.ts',
+      'app/api/ai/search/route.ts',
+      'app/api/ai/semantic-search/route.ts',
+      'app/api/exit-interviews/[id]/index/route.ts',
+    ],
+    evidence: [
+      'db/__tests__/semantic-search.postgres.test.ts — native, as union_eyes_runtime under FORCE row-level security: with no vector column the table still reads and writes through its declaration and search, write, chatbot retrieval and indexing all answer unavailable before anything is sent to the embedding service; with the column (PostgreSQL 16, pgvector 0.8.7) the database scores and orders the matches, an expired, inactive or unembedded row is never returned, knowledge made from an exit interview is returned only for a level the reader may read and only with consent, one organization never sees another\'s rows, a vector of the wrong size is refused, and the indexer writes the row, its vector, the interview status and the audit record in one transaction',
+      'lib/ai/vector-readiness.ts asks whether the vector extension and the column exist (cached for a minute); /api/ai/search and /api/ai/semantic-search answer 501 and the exit-interview index route answers 501 where they do not, and the chatbot answers without retrieved context',
+      'knowledge_base.embedding is not declared in either Drizzle declaration of the table (a declared column is part of every select(), so it made every read of the table fail where pgvector is absent); it is read and written only through lib/ai/knowledge-base-embeddings.ts',
+    ],
+    targetWave: 5,
+    notes:
+      'Works only where the deployment offers the pgvector extension, which is an operator decision: platform 0063 creates knowledge_base.embedding (vector(1536)) only on a server that offers it. ' +
+      'The exit-interview indexer is the only writer of embeddings, so semantic search finds exit-interview knowledge only; the other knowledge rows (bylaws, policies, summaries) are never embedded. ' +
+      'cba_clauses.embedding and arbitration_decisions.embedding are text columns that nothing writes or converts, so clause and precedent semantic search answer unavailable on every database. ' +
+      'The embedding model must produce 1536 numbers; any other size is refused. The match is an exact per-organization scan (no approximate index), which is correct at the current size of an organization\'s knowledge base. ' +
+      'Not yet run natively on PostgreSQL 15.',
+  },
 ] as const;
 
 /**

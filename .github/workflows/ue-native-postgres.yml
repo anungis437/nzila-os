@@ -108,6 +108,18 @@ jobs:
         shell: bash
         run: docker exec ue-runtime-pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ue_rls_scratch'
 
+      # pgvector is an optional extension: the stock image does not carry it, so the database above was built without it and platform 0063 left
+      # knowledge_base.embedding out. semantic-search.postgres.test.ts proves that state first, then enables the extension in its own clone and proves
+      # semantic search where it exists. Installing the package makes the extension available to the server; nothing is created in the converged database.
+      - name: Offer the pgvector extension on the disposable server
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec ue-runtime-pg bash -c 'apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "postgresql-${PG_MAJOR}-pgvector"'
+          version="$(docker exec ue-runtime-pg psql -U postgres -d postgres -Atc "SELECT default_version FROM pg_available_extensions WHERE name = 'vector'")"
+          test -n "$version"
+          echo "pgvector $version is available to the disposable server"
+
       - name: Run every native PostgreSQL test, each file in its own clone of the converged database
         shell: bash
         env:
@@ -116,6 +128,7 @@ jobs:
           UE_OWNERSHIP_NATIVE_PROOF: '1'
           UE_ELECTION_SUCCESSION_NATIVE_PROOF: '1'
           UE_AUTHORITY_IDENTITY_NATIVE: '1'
+          UE_NATIVE_REQUIRE_PGVECTOR: '1'
           UE_AUTHORITY_NATIVE_IMAGE: postgres:${{ matrix.pg }}-alpine
         run: |
           set -euo pipefail

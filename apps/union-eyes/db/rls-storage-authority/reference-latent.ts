@@ -839,7 +839,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     table: "knowledge_base",
     classification: "TENANT_RLS_REQUIRED",
     reason: "CLOSED round 56 (DIRECT_TENANT_RESOURCE archetype): organization_id NOT NULL. Reachable via app/api/{ai/summarize,exit-interviews/[id]/publish,governance/bylaws}/route.ts, all withApi()/withRoleAuth()-backed with server-derived organizationId (never a client body/query value). created_by is an audit-actor FK to profiles.",
-    supportingCapability: ["app/api/ai/summarize/route.ts","app/api/exit-interviews/[id]/publish/route.ts","app/api/governance/bylaws/route.ts","app/api/knowledge-base/[id]/route.ts","app/api/knowledge-base/route.ts","lib/ai/chatbot-service.ts","lib/ai/template-engine.ts","lib/knowledge-transfer/indexing/semantic-indexer.ts"],
+    supportingCapability: ["app/api/ai/summarize/route.ts","app/api/exit-interviews/[id]/publish/route.ts","app/api/governance/bylaws/route.ts","app/api/knowledge-base/[id]/route.ts","app/api/knowledge-base/route.ts","lib/ai/chatbot-service.ts","lib/ai/knowledge-base-embeddings.ts","lib/knowledge-transfer/indexing/semantic-indexer.ts"],
     requiredRuntimePrivileges: ["SELECT", "INSERT", "UPDATE"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",

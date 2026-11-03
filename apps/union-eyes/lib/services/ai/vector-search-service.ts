@@ -22,6 +22,7 @@ import { cbaClause } from '@/db/schema';
 import { eq, sql, and, or, SQL } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { embeddingCache } from './embedding-cache';
+import { CLAUSE_EMBEDDING, PRECEDENT_EMBEDDING, requireVectorColumn } from '@/lib/ai/vector-readiness';
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
 const _EMBEDDING_DIMENSIONS = 1536;
@@ -120,6 +121,9 @@ export async function semanticClauseSearch(
     throw new Error('organizationId is required to search clauses');
   }
 
+  // Asked before the query is sent to the embedding service: a database that cannot search by similarity cannot use the answer.
+  await requireVectorColumn(CLAUSE_EMBEDDING);
+
   try {
     // Generate embedding for search query
     const queryEmbedding = await generateEmbedding(query, organizationId);
@@ -135,7 +139,7 @@ export async function semanticClauseSearch(
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-    // Perform vector similarity search using pgvector
+    // Perform vector similarity search using pgvector. A clause's tags are its key terms (cba_clauses has no tags column).
     const results = await db.execute(sql`
       SELECT 
         id,
@@ -144,7 +148,7 @@ export async function semanticClauseSearch(
         content,
         clause_type,
         article_number,
-        tags,
+        key_terms AS tags,
         1 - (embedding <=> ${embeddingString}::vector) as similarity,
         ${hybridSearch.enabled ? sql`
           (1 - (embedding <=> ${embeddingString}::vector)) * ${1 - (hybridSearch.keywordWeight || 0.3)} +
@@ -189,6 +193,8 @@ export async function findSimilarClauses(
 ): Promise<SearchResult[]> {
   const { organizationId, limit = 5, threshold = 0.75, sameTypeOnly = false } = options;
 
+  await requireVectorColumn(CLAUSE_EMBEDDING);
+
   try {
     // Get the source clause; one in another organization is simply not found
     const sourceClause = await db.query.cbaClause.findFirst({
@@ -216,7 +222,7 @@ export async function findSimilarClauses(
         content,
         clause_type,
         cba_id,
-        tags,
+        key_terms AS tags,
         1 - (embedding <=> ${embeddingString}::vector) as similarity
       FROM cba_clauses
       WHERE id != ${clauseId}
@@ -260,16 +266,19 @@ export async function semanticPrecedentSearch(
 ): Promise<SearchResult[]> {
   const { limit = 10, threshold = 0.7, issueType, jurisdiction } = options;
 
+  await requireVectorColumn(PRECEDENT_EMBEDDING);
+
   try {
     const queryEmbedding = await generateEmbedding(query);
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
+    // issue_types is a jsonb array of the issues a decision turned on; jurisdiction is its own column
     const whereFilters: SQL[] = [];
     if (issueType) {
-      whereFilters.push(sql`issue_type = ${issueType}`);
+      whereFilters.push(sql`issue_types @> to_jsonb(${issueType}::text)`);
     }
     if (jurisdiction) {
-      whereFilters.push(sql`tribunal_type = ${jurisdiction}`);
+      whereFilters.push(sql`jurisdiction = ${jurisdiction}`);
     }
 
     const whereClause = whereFilters.length > 0 
@@ -283,7 +292,7 @@ export async function semanticPrecedentSearch(
         case_number,
         precedent_summary,
         reasoning,
-        issue_type,
+        issue_types,
         outcome,
         precedent_value,
         citation_count,
@@ -303,7 +312,7 @@ export async function semanticPrecedentSearch(
           caseTitle: row.case_title,
           caseNumber: row.case_number,
           reasoning: row.reasoning,
-          issueType: row.issue_type,
+          issueTypes: row.issue_types,
           outcome: row.outcome,
           precedentValue: row.precedent_value,
           citationCount: row.citation_count,
@@ -317,144 +326,6 @@ export async function semanticPrecedentSearch(
       options,
     });
     throw new Error('Semantic precedent search failed');
-  }
-}
-
-/**
- * Batch generate and update embeddings for all clauses
- */
-export async function generateClauseEmbeddings(
-  options: {
-    batchSize?: number;
-    organizationId?: string;
-    onProgress?: (completed: number, total: number) => void;
-  } = {}
-): Promise<{ success: number; failed: number }> {
-  const { batchSize = 100, organizationId, onProgress } = options;
-  let success = 0;
-  let failed = 0;
-
-  try {
-    // Get clauses without embeddings
-    const whereClause = organizationId 
-      ? and(
-          eq(cbaClause.organizationId, organizationId),
-          sql`embedding IS NULL`
-        )
-      : sql`embedding IS NULL`;
-
-    const clauses = await db.query.cbaClause.findMany({
-      where: whereClause,
-      limit: 1000, // Process in chunks
-    });
-
-    const total = clauses.length;
-    logger.info('Generating clause embeddings', { total });
-
-    // Process in batches
-    for (let i = 0; i < clauses.length; i += batchSize) {
-      const batch = clauses.slice(i, i + batchSize);
-      
-      const embeddingPromises = batch.map(async clause => {
-        try {
-          const embedding = await generateEmbedding(
-            `${clause.title} ${clause.content}`,
-            clause.organizationId,
-          );
-          
-          await db.execute(sql`
-            UPDATE cba_clauses
-            SET embedding = ${`[${embedding.join(',')}]`}::vector
-            WHERE id = ${clause.id}
-          `);
-          
-          success++;
-          return true;
-        } catch (error) {
-          logger.error('Failed to generate embedding for clause', {
-            error,
-            clauseId: clause.id,
-          });
-          failed++;
-          return false;
-        }
-      });
-
-      await Promise.all(embeddingPromises);
-      
-      if (onProgress) {
-        onProgress(i + batch.length, total);
-      }
-    }
-
-    logger.info('Clause embedding generation complete', { success, failed });
-    return { success, failed };
-  } catch (error) {
-    logger.error('Error generating clause embeddings', { error });
-    return { success, failed };
-  }
-}
-
-/**
- * Batch generate embeddings for precedents
- */
-export async function generatePrecedentEmbeddings(
-  options: {
-    batchSize?: number;
-    onProgress?: (completed: number, total: number) => void;
-  } = {}
-): Promise<{ success: number; failed: number }> {
-  const { batchSize = 100, onProgress } = options;
-  let success = 0;
-  let failed = 0;
-
-  try {
-    const precedents = await db.query.arbitrationDecisions.findMany({
-      where: sql`embedding IS NULL`,
-      limit: 1000,
-    });
-
-    const total = precedents.length;
-    logger.info('Generating precedent embeddings', { total });
-
-    for (let i = 0; i < precedents.length; i += batchSize) {
-      const batch = precedents.slice(i, i + batchSize);
-      
-      const embeddingPromises = batch.map(async precedent => {
-        try {
-          const textToEmbed = `${precedent.caseTitle} ${precedent.precedentSummary} ${precedent.reasoning}`;
-          const embedding = await generateEmbedding(textToEmbed);
-          
-          await db.execute(sql`
-            UPDATE arbitration_decisions
-            SET embedding = ${`[${embedding.join(',')}]`}::vector
-            WHERE id = ${precedent.id}
-          `);
-          
-          success++;
-          return true;
-        } catch (error) {
-          logger.error('Failed to generate embedding for precedent', {
-            error,
-            precedentId: precedent.id,
-          });
-          failed++;
-          return false;
-        }
-      });
-
-      await Promise.all(embeddingPromises);
-      
-      if (onProgress) {
-        onProgress(i + batch.length, total);
-      }
-    }
-
-    logger.info('Precedent embedding generation complete', { success, failed });
-    return { success, failed };
-  } catch (error) {
-    logger.error('Error generating precedent embeddings', { error });
-    return { success, failed };
   }
 }
 

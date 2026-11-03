@@ -547,6 +547,13 @@
       "when": 1759330000000,
       "tag": "0076_enhanced_rbac_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1759340000000,
+      "tag": "0077_ingestion_traceability",
+      "breakpoints": true
     }
   ]
 }

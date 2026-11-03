@@ -8143,7 +8143,6 @@
     "reservedMatters": "Reserved Matters",
     "auditTrail": "Audit Trail",
     "eventsLogged": "Events Logged (30 days)",
-    "archivedEvents": "Archived Events",
     "retentionPolicy": "Retention Policy",
     "auditLogDescription": "All system actions are logged immutably. Audit logs cannot be modified or deleted, only archived after the retention period.",
     "technicalImplementation": "Technical Implementation",

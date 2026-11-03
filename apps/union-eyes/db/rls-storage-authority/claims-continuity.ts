@@ -338,9 +338,9 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     {
     table: "grievance_timeline_events",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "CORRECTED round 57 (round-56's empty tsProductionReferences list was misleading — the real caller is a raw-SQL helper, not a Drizzle-symbol import): lib/ingestion/batch-ingest.ts's ingestGrievanceBatch() is called from app/api/admin/ingest/route.ts (admin-only). organization_id NOT NULL; the raw SQL insert explicitly parameterizes `${opts.organizationId}` (the trusted request context) and separately verifies each record's own organization_id matches before insert — not client-suppliable.",
-    supportingCapability: ["app/api/admin/ingest/route.ts","lib/ingestion/batch-ingest.ts"],
-    requiredRuntimePrivileges: ["INSERT"],
+    reason: "CORRECTED round 57 (round-56's empty tsProductionReferences list was misleading — the real caller is a raw-SQL helper, not a Drizzle-symbol import): lib/ingestion/batch-ingest.ts's ingestGrievanceBatch() is called from app/api/admin/ingest/route.ts (admin-only). organization_id NOT NULL; the raw SQL insert explicitly parameterizes `${opts.organizationId}` (the trusted request context) and separately verifies each record's own organization_id matches before insert — not client-suppliable. UE-CONV-H-014: SELECT is required too, and the INSERT-only grant failed every import natively (permission denied) — an INSERT ... ON CONFLICT (grievance_id, event_date, event_type, content_hash) reads the columns of its conflict target, and lib/ingestion/post-import-verification.ts counts a batch's events.",
+    supportingCapability: ["app/api/admin/ingest/route.ts","lib/ingestion/batch-ingest.ts","lib/ingestion/post-import-verification.ts"],
+    requiredRuntimePrivileges: ["INSERT", "SELECT"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",

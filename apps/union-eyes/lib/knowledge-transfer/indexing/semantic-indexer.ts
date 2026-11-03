@@ -24,6 +24,8 @@ import {
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
+import { writeKnowledgeBaseEmbedding } from '@/lib/ai/knowledge-base-embeddings';
+import { KNOWLEDGE_BASE_EMBEDDING, VectorSearchUnavailableError, vectorColumnReady } from '@/lib/ai/vector-readiness';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { logger } from '@/lib/logger';
 import type { ExitInterview } from '@/db/schema';
@@ -72,11 +74,14 @@ export function buildIndexableContent(interview: ExitInterview): string {
 
 export type IndexResult =
   | { indexed: true; knowledgeBaseId: string }
-  | { indexed: false; reason: string; failed?: true };
+  | { indexed: false; reason: string; failed?: true; unavailable?: true };
 
 /**
  * Index a single exit interview into the vector knowledge base.
  * Idempotent — will upsert if knowledgeBaseId already set.
+ *
+ * pgvector is optional (capability UE-AI-SEMANTIC-SEARCH). Where the database has no vector column the interview is neither
+ * indexed nor failed: it stays pending, the result says `unavailable`, and its content is not sent to the AI provider.
  *
  * The embedding call sends interview content to the AI provider, which cannot share a database transaction, so its
  * intent is recorded first and the call is skipped if that record cannot be written. Every state change (skipped,
@@ -131,6 +136,10 @@ export async function indexExitInterview(
       return markSkipped('Retiree consent not granted');
     }
 
+    if (!(await vectorColumnReady(KNOWLEDGE_BASE_EMBEDDING))) {
+      return { indexed: false, reason: new VectorSearchUnavailableError(KNOWLEDGE_BASE_EMBEDDING).message, unavailable: true };
+    }
+
     const content = buildIndexableContent(interview);
     const embedding = await performAuditedOperation(
       {
@@ -154,7 +163,6 @@ export async function indexExitInterview(
           .update(knowledgeBase)
           .set({
             content,
-            embedding: embedding as never,
             embeddingModel: 'text-embedding-3-small',
             embeddingModelVersion: 'text-embedding-3-small@v1',
             tags: interview.topics ?? [],
@@ -177,7 +185,6 @@ export async function indexExitInterview(
             summary: interview.summary ?? undefined,
             sourceType: 'exit_interview',
             sourceId: interview.id,
-            embedding: embedding as never,
             embeddingModel: 'text-embedding-3-small',
             embeddingModelVersion: 'text-embedding-3-small@v1',
             tags: interview.topics ?? [],
@@ -191,6 +198,8 @@ export async function indexExitInterview(
           .returning();
         knowledgeBaseId = kbRecord.id;
       }
+
+      await writeKnowledgeBaseEmbedding(tx, { id: knowledgeBaseId, organizationId: orgId, embedding });
 
       const [marked] = await tx
         .update(exitInterviews)

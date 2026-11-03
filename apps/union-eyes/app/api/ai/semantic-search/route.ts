@@ -20,6 +20,7 @@ import { db } from '@/db/db';
 import { eq } from 'drizzle-orm';
 import { cbaClause } from '@/db/schema/cba-clauses-schema';
 import { arbitrationPrecedents } from '@/db/schema/arbitration-precedents-schema';
+import { VectorSearchUnavailableError } from '@/lib/ai/vector-readiness';
 
 import {
   ErrorCode,
@@ -184,7 +185,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       'Invalid searchType. Use: clauses, precedents, unified, or similar'
     );
       }
-    } catch {
+    } catch (error) {
+      // pgvector is optional: a database without the extension, or with text embedding columns, answers that semantic search is not available (501), not a 500.
+      if (error instanceof VectorSearchUnavailableError) {
+        return standardErrorResponse(ErrorCode.NOT_IMPLEMENTED, error.message);
+      }
       return NextResponse.json(
         {
           error: 'Semantic search failed',
