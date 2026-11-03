@@ -295,11 +295,17 @@ describe('platform-economics/billing-service', () => {
       expect(h.appendLedgerEntry).toHaveBeenCalledTimes(1);
     });
 
-    it('returns the existing payment on idempotency key match', async () => {
+    it('fails closed on an unverified idempotency replay', async () => {
       pushSel([account]); // getBillingAccount
       pushSel([{ id: 'pay-existing' }]); // existing by idempotency
-      const result = await recordPayment({ organizationId: 'o1', invoiceId: 'inv-1', amount: '10.00', method: 'card', idempotencyKey: 'idem-1' });
-      expect(result.id).toBe('pay-existing');
+      await expect(recordPayment({ organizationId: 'o1', invoiceId: 'inv-1', amount: '10.00', method: 'card', idempotencyKey: 'idem-1' })).rejects.toThrow('requires verified invoice allocation');
+    });
+
+    it('fails closed on a new keyed payment until database uniqueness is enforced', async () => {
+      pushSel([account]);
+      pushSel([]);
+      await expect(recordPayment({ organizationId: 'o1', invoiceId: 'inv-1', amount: '10.00', method: 'card', idempotencyKey: 'new-key' })).rejects.toThrow('Keyed payment recording unavailable');
+      expect(h.appendLedgerEntry).not.toHaveBeenCalled();
     });
 
     it('throws when there is no billing account', async () => {
@@ -363,17 +369,16 @@ describe('platform-economics/billing-service', () => {
       expect(result.id).toBe('pay-2');
     });
 
-    it('returns the existing payment when already reconciled', async () => {
+    it('fails closed when external payment allocation is unverified', async () => {
       pushSel([invoice]);
       pushSel([{ id: 'pay-existing' }]); // existing payment
-      const result = await reconcileExternalInvoicePayment({
+      await expect(reconcileExternalInvoicePayment({
         organizationId: 'o1',
         invoiceId: 'inv-1',
         amount: '100.00',
         method: 'eft',
         externalReference: 'ext-1',
-      });
-      expect(result.id).toBe('pay-existing');
+      })).rejects.toThrow('requires verified invoice allocation');
     });
 
     it('throws when the invoice is missing', async () => {
