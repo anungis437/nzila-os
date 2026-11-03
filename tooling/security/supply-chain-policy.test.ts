@@ -43,6 +43,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('disagrees'))).toBe(true)
   })
 
+  it('rejects a missing low-severity summary count', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-missing-low-count.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('Malformed or missing vulnerability summary: low'))).toBe(true)
+  })
+
   it('rejects an expired waiver without extending its validity', () => {
     const afterExpiry = new Date('2026-11-05T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
