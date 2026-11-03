@@ -69,10 +69,11 @@ export function parseLockfilePackages(lockfilePath) {
 
   // A lockfile inventory must be derived from one top-level resolved section,
   // never from arbitrary indented text or sections appended after snapshots.
-  if (!/^lockfileVersion:\s*['\"]?9(?:\.0)?['\"]?\s*$/m.test(content)) {
-    throw new Error('Unsupported pnpm lockfile version; expected v9')
-  }
   const lines = content.split(/\r?\n/)
+  const versions = lines.filter((line) => /^lockfileVersion\s*:/.test(line))
+  if (versions.length !== 1 || !/^lockfileVersion: ['\"]?9(?:\.0)?['\"]?\s*$/.test(versions[0])) {
+    throw new Error('Unsupported or ambiguous pnpm lockfile version; expected exactly one v9 declaration')
+  }
   const start = lines.findIndex((line) => line === 'snapshots:')
   if (lines.filter((line) => line === 'snapshots:').length !== 1) {
     throw new Error('Ambiguous pnpm lockfile: expected exactly one snapshots section')
