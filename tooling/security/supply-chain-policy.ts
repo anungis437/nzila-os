@@ -469,18 +469,25 @@ export function checkVulnerabilityPolicy(
     }
 
     const summaryDetails = summary as Record<string, unknown>
-    for (const severity of ['high', 'critical']) {
+    const severities = ['info', 'low', 'moderate', 'high', 'critical'] as const
+    for (const severity of [...severities, 'total']) {
       const supplied = summaryDetails[severity]
-      if (supplied !== undefined && (!Number.isSafeInteger(supplied) || (supplied as number) < 0)) {
-        throw new Error(`Malformed vulnerability summary: ${severity}`)
+      if (!Number.isSafeInteger(supplied) || (supplied as number) < 0) {
+        throw new Error(`Malformed or missing vulnerability summary: ${severity}`)
       }
     }
-    // The npm bulk collector reports one advisory per ID. Its own metadata
-    // must agree with the evaluated count, or the scan is not trustworthy.
-    if (details.source === 'npm-bulk-advisories') {
-      if (highOrCritical !== Number(summaryDetails.high ?? 0) + Number(summaryDetails.critical ?? 0)) {
-        throw new Error('Audit advisory count disagrees with collector metadata')
+    const counted = Object.fromEntries(severities.map((severity) => [severity, 0])) as Record<string, number>
+    for (const raw of Object.values(value as Record<string, unknown>)) {
+      const severity = (raw as Record<string, unknown>).severity as string
+      counted[severity]++
+    }
+    for (const severity of severities) {
+      if (counted[severity] !== summaryDetails[severity]) {
+        throw new Error(`Audit advisory count disagrees with collector metadata: ${severity}`)
       }
+    }
+    if (totalVulns !== summaryDetails.total) {
+      throw new Error('Audit advisory total disagrees with collector metadata')
     }
   } catch (err) {
     errors.push(`Invalid or unreadable audit report: ${(err as Error).message}`)
