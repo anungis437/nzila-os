@@ -92,3 +92,14 @@ test('unsupported ignore-registry-errors escape hatch is rejected before any sca
   assert.equal(result.status, 2)
   assert.match(result.stderr, /Registry or audit failures cannot be ignored/)
 })
+
+test('inventory rejects fabricated keys, unsupported lockfiles, and out-of-section records', () => {
+  withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\npackages:\\n  forged@1.0.0:\\n', (file) => {
+    const inventory = parseLockfilePackages(file)
+    assert.deepEqual([...inventory.keys()], ['undici'])
+  })
+  withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@not-a-version:\\n', (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Malformed resolved snapshot key/))
+  withLockfile('lockfileVersion: 6.0\\nsnapshots:\\n  undici@7.29.1:\\n', (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Unsupported pnpm lockfile version/))
+})
