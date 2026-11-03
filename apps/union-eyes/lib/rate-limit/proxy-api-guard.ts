@@ -17,6 +17,7 @@
 import { checkRateLimit as checkMemory } from '@nzila/os-core/rateLimit'
 import { classifyRoute, type RouteGroup } from '@nzila/os-core/orgRateLimit'
 import { checkRateLimit as checkShared } from '@/lib/rate-limiter'
+import { CRON_API_ROUTES, SIGNED_CALLBACK_ROUTES } from '@/lib/public-routes'
 
 export type LimitScope = 'session' | 'ip'
 
@@ -135,8 +136,9 @@ export function isGuardExempt(pathname: string, method: string): boolean {
   return (
     pathname === '/api/health' ||
     pathname.startsWith('/api/health/') ||
-    pathname.startsWith('/api/webhooks/') ||
+    SIGNED_CALLBACK_ROUTES.has(pathname) ||
     pathname.startsWith('/api/cron/') ||
+    CRON_API_ROUTES.has(pathname) ||
     pathname === '/api/auth' ||
     pathname.startsWith('/api/auth/')
   )

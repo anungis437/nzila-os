@@ -107,8 +107,19 @@ describe('API rate-limit guard', () => {
   })
 
   it('leaves probes, signed callbacks, cron, auth and preflight to their own controls, and nothing else', () => {
-    for (const path of ['/api/health', '/api/webhooks/stripe', '/api/cron/daily', '/api/auth/login', '/api/auth']) expect(isGuardExempt(path, 'POST'), path).toBe(true)
+    for (const path of [
+      '/api/health',
+      '/api/payments/webhooks/stripe',
+      '/api/payments/webhooks/paypal',
+      '/api/communications/webhooks/resend',
+      '/api/integrations/shopify/webhooks',
+      '/api/cron/daily',
+      '/api/rewards/cron',
+      '/api/auth/login',
+      '/api/auth',
+    ]) expect(isGuardExempt(path, 'POST'), path).toBe(true)
     expect(isGuardExempt('/api/cases', 'OPTIONS')).toBe(true)
-    for (const path of ['/api/cases/intake', '/api/public/intake', '/api/export/all', '/api/authority/anything']) expect(isGuardExempt(path, 'POST'), path).toBe(false)
+    // A path that merely looks like a callback, with no route behind it, is not exempt.
+    for (const path of ['/api/cases/intake', '/api/public/intake', '/api/export/all', '/api/authority/anything', '/api/webhooks/stripe']) expect(isGuardExempt(path, 'POST'), path).toBe(false)
   })
 })

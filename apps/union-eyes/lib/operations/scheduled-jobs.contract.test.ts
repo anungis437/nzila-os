@@ -57,9 +57,33 @@ describe('scheduled jobs manifest', () => {
       const source = readFileSync(file, 'utf8')
       const cron = /auth:\s*\{[^}]*\bcron:\s*true/.test(source) || /cronSecretMatches\(/.test(source)
       const rel = path.relative(API, path.dirname(file)).replace(/\\/g, '/')
-      return cron && !declared.has(path.normalize(file)) && !(rel in NOT_JOBS)
+      return cron && !declared.has(path.normalize(file)) && !(rel in NOT_JOBS) && !(rel in RETIRED_CRON)
     })
     expect(undeclared.map((f) => path.relative(API, f))).toEqual([])
+  })
+
+  // A schedule for a route that answers 501 can only record a failed run every period, so the route is not scheduled while it is retired. Its intended cadence is in
+  // its capability entry (UE-CRON-*, lib/reality/capability-registry.ts); the entry returns to the manifest when the route does real work.
+  const RETIRED_CRON: Record<string, string> = {
+    'cron/process-notifications': 'UE-CRON-PROCESS-NOTIFICATIONS',
+    'cron/process-messages': 'UE-CRON-PROCESS-MESSAGES',
+    'cron/overdue-notifications': 'UE-CRON-OVERDUE-NOTIFICATIONS',
+    'cron/scheduled-reports': 'UE-CRON-SCHEDULED-REPORTS',
+    'cron/monthly-dues': 'UE-CRON-MONTHLY-DUES',
+    'cron/analytics/daily-metrics': 'UE-CRON-DAILY-METRICS',
+    'cron/billing-lifecycle': 'UE-CRON-BILLING-LIFECYCLE',
+  }
+
+  it('schedules no route that answers 501, and keeps a route off the schedule only while it does', () => {
+    const manifest = JSON.parse(readFileSync(path.resolve(APP, '../../docs/union-eyes/convergence/register/ue-route-coverage-manifest.json'), 'utf8')) as {
+      routes: Array<{ route: string; guard: string }>
+    }
+    const guardOf = (urlPath: string) => manifest.routes.find((r) => r.route === `${urlPath.split('?')[0].replace(/^\/api\//, '')}/route.ts`)?.guard
+    for (const job of jobs) expect(guardOf(job.path), `${job.path} is scheduled but answers 501`).not.toBe('RETIRED')
+    for (const rel of Object.keys(RETIRED_CRON)) {
+      expect(guardOf(`/api/${rel}`), `${rel} is off the schedule but no longer retired: schedule it`).toBe('RETIRED')
+      expect(jobs.some((j) => j.path.split('?')[0] === `/api/${rel}`), `${rel} is retired and must not be scheduled`).toBe(false)
+    }
   })
 
   it('makes the edge check cover exactly the scheduled paths', () => {

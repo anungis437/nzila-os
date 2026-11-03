@@ -33,7 +33,7 @@ import { ApiError } from './errors';
 import { db } from '@/db/db';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { eq, and, or, ilike, desc, count, sql, inArray, getTableName as drizzleTableName, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, asc, desc, count, sql, inArray, getTableName as drizzleTableName, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
@@ -121,6 +121,8 @@ export interface CrudOptions {
   createPathBinding?: { paramName: string; field: string };
   /** Column to order by (default: 'createdAt') */
   orderBy?: string;
+  /** Direction of the ordering (default: 'desc', newest first). */
+  orderDirection?: 'asc' | 'desc';
   /** Minimum role for read operations (default: 'member') */
   readRole?: MinRole;
   /** Minimum role for write operations (default: 'steward') */
@@ -688,7 +690,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           : [baseQuery, countQuery] as const;
 
         const ordered = orderCol
-          ? withWhere[0].orderBy(desc(orderCol))
+          ? withWhere[0].orderBy(opts.orderDirection === 'asc' ? asc(orderCol) : desc(orderCol))
           : withWhere[0];
 
         const [rows, totalResult] = await Promise.all([

@@ -13,6 +13,19 @@
 import scheduledJobs from './operations/scheduled-jobs.json';
 
 /**
+ * Provider callbacks: routes that carry no session because an external system pushes to them, and that verify the provider's own signature (or HMAC) in the
+ * handler. Each is a route whose guard class is WEBHOOK_SIGNATURE in the route-coverage manifest; lib/__tests__/edge-route-config.test.ts holds the two lists
+ * equal, so a callback added without being listed here, or listed without a route, fails a test. They are public at the edge (CORS, no session required) and are
+ * left out of the API rate limit (lib/rate-limit/proxy-api-guard.ts): a provider's retry burst must reach the handler that verifies it.
+ */
+export const SIGNED_CALLBACK_ROUTES: ReadonlySet<string> = new Set([
+  '/api/payments/webhooks/stripe',      // Stripe payment events (verified via webhook signature)
+  '/api/payments/webhooks/paypal',      // PayPal capture events (verified through PayPal's signature-verification call)
+  '/api/communications/webhooks/resend', // Resend delivery events (verified via the Svix signature)
+  '/api/integrations/shopify/webhooks', // Shopify order events (verified via HMAC)
+]);
+
+/**
  * Public API routes that don&apos;t require authentication
  * 
  * SECURITY DOCUMENTATION:
@@ -35,15 +48,7 @@ export const PUBLIC_API_ROUTES = new Set([
   // WEBHOOKS
   // Justification: External systems push events, authenticated via signatures
   // ========================================================================
-  '/api/webhooks/stripe',      // Stripe payment events (verified via webhook signature)
-  '/api/webhooks/clc',         // CLC per-capita updates (verified via API key)
-  '/api/webhooks/signatures',  // DocuSign signature events (verified via webhook signature)
-  '/api/webhooks/whop',        // Whop membership events (verified via webhook signature)
-  '/api/signatures/webhooks/docusign', // Legacy DocuSign webhook endpoint
-  '/api/integrations/shopify/webhooks', // Shopify order events (verified via HMAC)
-  '/api/payments/webhooks/stripe', // Stripe webhook endpoint (consolidated)
-  '/api/whop/webhooks',        // Alternative Whop webhook endpoint
-  
+  ...SIGNED_CALLBACK_ROUTES,
   // ========================================================================
   // PUBLIC CHECKOUT/PAYMENT FLOWS
   // Justification: Guest checkout required for payment processor integrations

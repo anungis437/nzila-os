@@ -20,8 +20,6 @@ import { eq, sql } from "drizzle-orm";
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-// Credits system disabled — platform does not require credits
-// import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   // Fetch user profile once at the layout level

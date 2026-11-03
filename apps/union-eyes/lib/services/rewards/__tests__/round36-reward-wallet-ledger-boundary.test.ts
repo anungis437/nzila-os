@@ -102,7 +102,6 @@ describe('round 36: full reachability census for reward_budget_envelopes / rewar
       'db/schema/domains/infrastructure/rewards.ts',
       'db/schema/recognition-rewards-schema.ts',
       'lib/services/rewards/budget-service.ts',
-      'lib/services/rewards/export-service.ts',
     ]);
     for (const file of importers) {
       expect(allowed.has(file), `unexpected new rewardBudgetEnvelopes importer: ${file}`).toBe(true);
@@ -123,7 +122,6 @@ describe('round 36: full reachability census for reward_budget_envelopes / rewar
       'db/schema/recognition-rewards-schema.ts',
       'db/schema/award-templates-schema.ts',
       'lib/services/rewards/wallet-service.ts',
-      'lib/services/rewards/export-service.ts',
       // PRE-EXISTING, already tracked by
       // scripts/__tests__/schema-duplicate-table-ratchet.test.ts:
       // these two import a DIFFERENT (incompatible) rewardWalletLedger

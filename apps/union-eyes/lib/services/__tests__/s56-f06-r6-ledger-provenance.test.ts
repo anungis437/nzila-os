@@ -18,6 +18,13 @@ const built = read('docs/union-eyes/convergence/remediation/ue-gate0-defect-elim
 
 const f06 = source.batches.filter((batch) => /^B1(0[5-9]|[1-9]\d)-/.test(batch.id))
 
+// Files a batch named as evidence that were deleted afterwards, each with the reason.
+const REMOVED_LATER: Record<string, string> = {
+  'apps/union-eyes/lib/email/report-email-templates.ts':
+    'dead code (nothing that runs reaches it) deleted with the scheduled-report executor it served, in the mismatch census (UE-CONV-H-017); the batch commit holds the file',
+  'apps/union-eyes/lib/email/__tests__/report-email-templates.test.ts': 'the test of the deleted module above',
+}
+
 describe('F06 ledger provenance', () => {
   it('records the defects touched by every F06 batch from B105, including in-place upgrades', () => {
     expect(f06.length).toBeGreaterThanOrEqual(13)
@@ -41,9 +48,17 @@ describe('F06 ledger provenance', () => {
   it('names only source files that exist, so the evidence is recoverable', () => {
     for (const batch of f06) {
       for (const touch of batch.touches ?? []) {
-        for (const file of touch.files) expect(fs.existsSync(path.join(root, file)), `${batch.id}: ${file}`).toBe(true)
+        for (const file of touch.files) {
+          // A file the census later proves nothing reaches is deleted; the evidence then lives in the batch's commit.
+          if (file in REMOVED_LATER) continue
+          expect(fs.existsSync(path.join(root, file)), `${batch.id}: ${file}`).toBe(true)
+        }
       }
     }
+  })
+
+  it('names each file removed since its batch with the reason, and only while the file is gone', () => {
+    for (const file of Object.keys(REMOVED_LATER)) expect(fs.existsSync(path.join(root, file)), `${file} exists again: remove it from REMOVED_LATER`).toBe(false)
   })
 
   it('does not change the credit: every touched defect is counted once', () => {

@@ -23,16 +23,14 @@ import {
 - `SafetyMetricsCard` - Reusable KPI display card
 - `IncidentTrendChart` - Data visualization for trends
 
-#### 2. **Incident Management** (5 components)
+#### 2. **Incident Management** (4 components)
 - `IncidentListTable` - Paginated incident listing
 - `IncidentReportForm` - Comprehensive incident reporting
-- `IncidentDetailView` - Full incident details
 - `IncidentStatusBadge` - Status indicator
 - `IncidentTimelineViewer` - Activity timeline
 
-#### 3. **Inspection Management** (4 components)
+#### 3. **Inspection Management** (3 components)
 - `InspectionScheduleCalendar` - Calendar view for inspections
-- `InspectionChecklist` - Interactive checklist
 - `InspectionReportViewer` - Report display
 - `InspectionFindingsCard` - Summary card
 
@@ -41,10 +39,7 @@ import {
 - `HazardsList` - Grid view of hazards
 - `HazardPriorityBadge` - Priority indicator
 
-#### 5. **Additional Features** (4 components)
-- `PPEDistributionTracker` - PPE inventory management
-- `SafetyCommitteeMeetingScheduler` - Meeting scheduler
-- `SafetyTrainingRecordsViewer` - Training tracking
+#### 5. **Additional Features** (1 component)
 - `CorrectiveActionTracker` - Action item management
 
 ## 🚀 Quick Start
@@ -160,29 +155,6 @@ interface IncidentReportFormProps {
 
 ---
 
-### InspectionChecklist
-
-**Purpose**: Interactive checklist for inspections
-
-**Props**:
-```typescript
-interface InspectionChecklistProps {
-  inspectionId: string;
-  items: ChecklistItem[];
-  onComplete: (results: ChecklistResults) => void | Promise<void>;
-  onSaveDraft?: (results: Partial<ChecklistResults>) => void;
-}
-```
-
-**Features**:
-- Pass/Fail/N/A selection
-- Photo attachments per item
-- Progress tracking
-- Auto-save
-- Category grouping
-
----
-
 ### HazardsList
 
 **Purpose**: Grid view of reported hazards
@@ -200,48 +172,6 @@ interface HazardsListProps {
 - Status and priority filtering
 - Responsive grid layout
 - Priority badges
-
----
-
-### PPEDistributionTracker
-
-**Purpose**: Track PPE inventory and distribution
-
-**Props**:
-```typescript
-interface PPEDistributionTrackerProps {
-  organizationId: string;
-  onDistribute?: (itemId: string) => void;
-  onReorder?: (itemId: string) => void;
-}
-```
-
-**Features**:
-- Stock level monitoring
-- Low/critical stock alerts
-- Distribution history
-- Reorder recommendations
-
----
-
-### SafetyTrainingRecordsViewer
-
-**Purpose**: Display employee training records
-
-**Props**:
-```typescript
-interface SafetyTrainingRecordsViewerProps {
-  organizationId: string;
-  employeeId?: string;
-  onViewCertificate?: (recordId: string) => void;
-}
-```
-
-**Features**:
-- Compliance rate tracking
-- Expiry alerts
-- Certificate downloads
-- Training history
 
 ---
 

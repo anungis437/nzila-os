@@ -72,7 +72,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     table: "grievance_deadlines",
     classification: "PARENT_OWNED_RLS_REQUIRED",
     reason: "0108-baseline table, but PARENT-OWNED via grievances.id (grievance_deadlines.grievance_id), not direct-org — it has no organization_id column of its own (confirmed live via information_schema, P4 failed-rollout census 2026-09-13; this table's presumed direct-org call was the source of a second latent 0108 defect once organization_members' isText fix is applied, and was corrected to a bespoke two-hop-style EXISTS(...grievances...) policy in 0108 PART 6b). Distinct from 'claim_deadlines' (a separate, round-5-added table backing the 'deadlines' Drizzle export). MIXED: reachable via ordinary tenant deadline-management code (SELECT/INSERT/UPDATE/DELETE, TENANT_RUNTIME) AND via app/api/cron/deadline-overdue/route.ts (auth: { cron: true }, SYSTEM_SCHEDULE), whose raw SQL SELECT against grievance_deadlines (joined to deadline_reminders) runs inside withSystemContext to detect overdue deadlines — verified by reading that route's SQL directly (see the deadline_reminders/claim_deadlines entries' round-5 correction for the same route).",
-    supportingCapability: ["app/api/cron/deadline-overdue/route.ts","lib/deadline-tracking-system.ts","lib/deadline-service.ts"],
+    supportingCapability: ["app/api/cron/deadline-overdue/route.ts","lib/deadline-tracking-system.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
     requiredSystemPrivileges: ["SELECT"],
     invocationAuthority: "MIXED",

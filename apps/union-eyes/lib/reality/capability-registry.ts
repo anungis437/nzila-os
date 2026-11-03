@@ -222,7 +222,8 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       '2026-08-31): a SEPARATE, more mature implementation already exists and is scheduled in the ' +
       'financial-service microservice — see UE-FIN-DUES-CALCULATION-WORKFLOW below. That implementation is ' +
       'real and running but has its own defect (hardcoded single test tenant). This entry describes only the ' +
-      'main-app stub route, which genuinely returns 501 and is not itself wired to the financial-service job.',
+      'main-app stub route, which genuinely returns 501 and is not itself wired to the financial-service job. ' +
+      'Intended cadence, removed from lib/operations/scheduled-jobs.json (a schedule for a 501 route only records a failed run every period): "0 6 1 * *" UTC, 300 s timeout.',
   },
   {
     id: 'UE-CRON-OVERDUE-NOTIFICATIONS',
@@ -235,7 +236,8 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'NOTE (Phase 3A capability audit, 2026-08-31): real dues-reminder-sending code already exists at ' +
       'lib/jobs/dues-reminder-scheduler.ts (DuesReminderScheduler.runReminderJob — 7-day/1-day/overdue ' +
       'notices via lib/services/notification-service.ts) but no cron, queue, or route invokes it anywhere ' +
-      'in the codebase. See UE-FIN-DUES-REMINDER-SCHEDULER below.',
+      'in the codebase. See UE-FIN-DUES-REMINDER-SCHEDULER below. ' +
+      'Intended cadence, removed from lib/operations/scheduled-jobs.json (a schedule for a 501 route only records a failed run every period): "0 8 * * *" UTC, 100 s timeout.',
   },
   {
     id: 'UE-CRON-PROCESS-MESSAGES',
@@ -244,6 +246,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: ['app/api/cron/process-messages/route.ts'],
     evidence: ['app/api/cron/process-messages/route.ts — throws ApiError.notImplemented → HTTP 501'],
     targetWave: 4,
+    notes: 'Intended cadence, removed from lib/operations/scheduled-jobs.json (a schedule for a 501 route only records a failed run every period): "*/5 * * * *" UTC, 100 s timeout.',
   },
   {
     id: 'UE-CRON-PROCESS-NOTIFICATIONS',
@@ -252,7 +255,8 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: ['app/api/cron/process-notifications/route.ts'],
     evidence: ['app/api/cron/process-notifications/route.ts — throws ApiError.notImplemented → HTTP 501'],
     targetWave: 4,
-    notes: 'Depends on Wave 5 (real notification dispatcher).',
+    notes:
+      'Depends on Wave 5 (real notification dispatcher). Intended cadence, removed from lib/operations/scheduled-jobs.json (a schedule for a 501 route only records a failed run every period): "*/5 * * * *" UTC, 100 s timeout.',
   },
   {
     id: 'UE-CRON-SCHEDULED-REPORTS',
@@ -261,6 +265,25 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: ['app/api/cron/scheduled-reports/route.ts'],
     evidence: ['app/api/cron/scheduled-reports/route.ts — throws ApiError.notImplemented → HTTP 501'],
     targetWave: 8,
+    notes: 'Intended cadence, removed from lib/operations/scheduled-jobs.json (a schedule for a 501 route only records a failed run every period): "0 * * * *" UTC, 300 s timeout.',
+  },
+  {
+    id: 'UE-CRON-DAILY-METRICS',
+    title: 'Daily analytics metrics cron',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/cron/analytics/daily-metrics/route.ts'],
+    evidence: ['app/api/cron/analytics/daily-metrics/route.ts — throws ApiError.notImplemented → HTTP 501 (the earlier version returned a literal healthy status and did no work)'],
+    targetWave: 8,
+    notes: 'Intended cadence, removed from lib/operations/scheduled-jobs.json (a schedule for a 501 route only records a failed run every period): "30 2 * * *" UTC, 300 s timeout. No analytics collector has been designed or persisted.',
+  },
+  {
+    id: 'UE-CRON-BILLING-LIFECYCLE',
+    title: 'Billing lifecycle cron (period, invoices, finalization, overdue state)',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/cron/billing-lifecycle/route.ts'],
+    evidence: ['app/api/cron/billing-lifecycle/route.ts — throws ApiError.notImplemented → HTTP 501: the lifecycle writes across organizations and the cron caller has no authorized SYSTEM cross-organization write authority (the final closure sprint authorizes cross-organization SELECT only)'],
+    targetWave: 7,
+    notes: 'Intended cadence, removed from lib/operations/scheduled-jobs.json (a schedule for a 501 route only records a failed run every period): "0 3 * * *" UTC, 300 s timeout. It returns when that write authority is designed, granted and proven.',
   },
 
   // ------------------------------------------------------------------------
@@ -1165,7 +1188,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'app/api/exit-interviews/[id]/index/route.ts',
     ],
     evidence: [
-      'db/__tests__/semantic-search.postgres.test.ts — native, as union_eyes_runtime under FORCE row-level security: with no vector column the table still reads and writes through its declaration and search, write, chatbot retrieval and indexing all answer unavailable before anything is sent to the embedding service; with the column (PostgreSQL 16, pgvector 0.8.7) the database scores and orders the matches, an expired, inactive or unembedded row is never returned, knowledge made from an exit interview is returned only for a level the reader may read and only with consent, one organization never sees another\'s rows, a vector of the wrong size is refused, and the indexer writes the row, its vector, the interview status and the audit record in one transaction',
+      'db/__tests__/semantic-search.postgres.test.ts — native, as union_eyes_runtime under FORCE row-level security: with no vector column the table still reads and writes through its declaration and search, write, chatbot retrieval and indexing all answer unavailable before anything is sent to the embedding service; with the column (PostgreSQL 15 and 16, pgvector installed on the disposable server by .github/workflows/ue-native-postgres.yml) the database scores and orders the matches, an expired, inactive or unembedded row is never returned, knowledge made from an exit interview is returned only for a level the reader may read and only with consent, one organization never sees another\'s rows, a vector of the wrong size is refused, and the indexer writes the row, its vector, the interview status and the audit record in one transaction',
       'lib/ai/vector-readiness.ts asks whether the vector extension and the column exist (cached for a minute); /api/ai/search and /api/ai/semantic-search answer 501 and the exit-interview index route answers 501 where they do not, and the chatbot answers without retrieved context',
       'knowledge_base.embedding is not declared in either Drizzle declaration of the table (a declared column is part of every select(), so it made every read of the table fail where pgvector is absent); it is read and written only through lib/ai/knowledge-base-embeddings.ts',
     ],
@@ -1175,7 +1198,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'The exit-interview indexer is the only writer of embeddings, so semantic search finds exit-interview knowledge only; the other knowledge rows (bylaws, policies, summaries) are never embedded. ' +
       'cba_clauses.embedding and arbitration_decisions.embedding are text columns that nothing writes or converts, so clause and precedent semantic search answer unavailable on every database. ' +
       'The embedding model must produce 1536 numbers; any other size is refused. The match is an exact per-organization scan (no approximate index), which is correct at the current size of an organization\'s knowledge base. ' +
-      'Not yet run natively on PostgreSQL 15.',
+      'The native test runs in CI on PostgreSQL 15 and 16; where the extension is missing it fails (UE_NATIVE_REQUIRE_PGVECTOR) instead of skipping.',
   },
   {
     id: 'UE-GOVERNANCE-POLICY-LIFECYCLE',

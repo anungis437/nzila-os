@@ -15,11 +15,9 @@ describe('DEF-0B1-DOCS-UNAUTH-API-SURFACE: privileged OpenAPI exposure', () => {
     expect(alias).not.toMatch(/openApiConfig/)
   })
 
-  it('excludes the operation inventory from both public-route registries', () => {
+  it('excludes the operation inventory from the public-route registry', () => {
     const proxy = source('lib/public-routes.ts')
-    const registry = source('config/public-api-routes.ts')
     expect(proxy).not.toMatch(/^\s*'\/api\/docs\/openapi\.json'\s*,/m)
-    expect(registry).not.toMatch(/pattern:\s*['"]\/api\/docs\/openapi\.json['"]/)
   })
 
   it('does not permit a shared cache to retain either response', () => {

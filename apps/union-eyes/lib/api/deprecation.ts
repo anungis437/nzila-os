@@ -43,9 +43,8 @@ export const DEPRECATED_ROUTE_MAP: DeprecatedRouteMapping[] = [
   { deprecated: '/api/cba/clauses/compare', canonical: '/api/clause-library/compare', reason: 'Moved to clause-library domain', phase: 1 },
   { deprecated: '/api/cba/footnotes/[clauseId]', canonical: '/api/cbas/[id]', reason: 'Merged into CBA detail', phase: 1 },
   { deprecated: '/api/cba/precedents', canonical: '/api/precedents', reason: 'Moved to standalone domain', phase: 1 },
-  { deprecated: '/api/organization/switch', canonical: '/api/org/switch', reason: 'Dead stub — no logic', phase: 1 },
-  { deprecated: '/api/organization/current', canonical: '/api/org', reason: 'Merged into org endpoint', phase: 1 },
-  { deprecated: '/api/payments/webhooks/stripe', canonical: '/api/payments/webhooks', reason: 'Consolidated webhook handler', phase: 1 },
+  { deprecated: '/api/organization/switch', canonical: 'REMOVED', reason: 'Dead stub — no logic; the route that took its name (/api/org/switch) is retired (501) in this release', phase: 1 },
+  { deprecated: '/api/organization/current', canonical: '/api/org/current', reason: 'Merged into the org endpoint', phase: 1 },
   { deprecated: '/api/user/status', canonical: '/api/auth/me', reason: 'Replaced by the current-user endpoint', phase: 1 },
   { deprecated: '/api/messaging/preferences', canonical: '/api/notifications/preferences', reason: 'Merged into notifications', phase: 1 },
   { deprecated: '/api/auth/debug-role', canonical: 'REMOVED', reason: 'Security fix — debug endpoint removed', phase: 0 },
@@ -61,10 +60,10 @@ export const DEPRECATED_ROUTE_MAP: DeprecatedRouteMapping[] = [
   { deprecated: '/api/v2/payments/*', canonical: '/api/payments/*', reason: 'v2 mirror removed — use root payments', phase: 2 },
 
   // ── Phase 4: API Duplicate Consolidation ──────────────────────────────────
-  { deprecated: '/api/messaging/campaigns', canonical: '/api/messages', reason: 'Duplicate of messages — same table', phase: 4 },
+  { deprecated: '/api/messaging/campaigns', canonical: '/api/messages/threads', reason: 'Duplicate of messages — same table', phase: 4 },
   { deprecated: '/api/messaging/campaigns/[id]', canonical: '/api/messages/threads/[threadId]', reason: 'Duplicate of messages — same table', phase: 4 },
-  { deprecated: '/api/messaging/campaigns/[id]/send', canonical: '/api/messages', reason: 'Merged into messages workflow', phase: 4 },
-  { deprecated: '/api/strike-fund/applications', canonical: '/api/strike/funds', reason: 'Merged into strike fund domain', phase: 4 },
+  { deprecated: '/api/messaging/campaigns/[id]/send', canonical: '/api/messages/threads/[threadId]/messages', reason: 'Merged into messages workflow', phase: 4 },
+  { deprecated: '/api/strike-fund/applications', canonical: 'REMOVED', reason: 'Merged into the strike fund domain, whose routes (/api/strike/funds) are retired (501) in this release', phase: 4 },
 
   // ── Phase 9: v2 Mirror Wholesale Deprecation ──────────────────────────────
   { deprecated: '/api/v2/*', canonical: '/api/*', reason: 'v2 mirror — identical copy of root API', phase: 9 },
@@ -120,7 +119,7 @@ export async function logDeprecatedAccess(
 export function deprecatedResponse(
   deprecatedPath: string,
   canonicalPath: string,
-  body?: any,
+  body?: unknown,
 ): NextResponse {
   const res = NextResponse.json(
     {
@@ -129,7 +128,7 @@ export function deprecatedResponse(
       _sunset: SUNSET_DATE.toISOString(),
       _sunsetPassed: SUNSET_DATE.getTime() <= Date.now(),
       _canonical: canonicalPath,
-      ...(body && typeof body === 'object' ? body : {}),
+      ...(body && typeof body === 'object' ? (body as Record<string, unknown>) : {}),
     },
     { status: 200 },
   );

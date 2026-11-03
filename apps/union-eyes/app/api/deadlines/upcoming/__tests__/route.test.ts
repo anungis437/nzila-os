@@ -79,8 +79,16 @@ describe('GET /api/deadlines/upcoming', () => {
     expect(body).not.toEqual({ data: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } });
   });
 
-  it('exports POST as the underlying crud handler unchanged', async () => {
+  it('exports only GET: creating a deadline is POST /api/deadlines, not a write to a list of what is coming', async () => {
     const route = await import('../route');
-    expect(route.POST).toBe(mockPost);
+    expect(route.GET).toBe(mockGet);
+    expect((route as Record<string, unknown>).POST).toBeUndefined();
+  });
+
+  it('lists only pending deadlines due within the next 30 days, soonest first', async () => {
+    vi.resetModules();
+    const { crudRoutes } = await import('@/lib/api/crud-factory');
+    await import('../route');
+    expect(vi.mocked(crudRoutes)).toHaveBeenCalledWith(expect.objectContaining({ orderBy: 'dueDate', orderDirection: 'asc', readCondition: expect.anything() }));
   });
 });

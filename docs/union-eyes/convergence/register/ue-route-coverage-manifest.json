@@ -5019,8 +5019,7 @@
   {
    "route": "deadlines/overdue/route.ts",
    "methods": [
-    "GET",
-    "POST"
+    "GET"
    ],
    "mutating": false,
    "guard": "CRUD_FACTORY",
@@ -5045,8 +5044,7 @@
   {
    "route": "deadlines/upcoming/route.ts",
    "methods": [
-    "GET",
-    "POST"
+    "GET"
    ],
    "mutating": false,
    "guard": "CRUD_FACTORY",
