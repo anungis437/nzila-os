@@ -425,11 +425,24 @@ describe('reconcileExternalInvoicePayment', () => {
     await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(/not found/);
   });
 
-  it('returns the existing payment when the external ref was already recorded', async () => {
+  it('refuses an existing external reference until its invoice allocation is verified', async () => {
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1' }];
-    state.selects.platformPayments = [{ id: 'pay-existing' }];
-    const r = await reconcileExternalInvoicePayment(base);
-    expect(r.id).toBe('pay-existing');
+    state.selects.platformPayments = [{ id: 'pay-existing', organizationId: 'org-1', amount: '100.00' }];
+    await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(
+      'External payment replay requires verified invoice allocation',
+    );
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it('refuses a conflicting external payment amount without ledger or audit side effects', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1' }];
+    state.selects.platformPayments = [{ id: 'pay-existing', organizationId: 'org-1', amount: '99.00' }];
+    await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(
+      'External payment reference conflicts with the requested organization or amount',
+    );
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
   });
 
   it('records a completed external payment and allocates it', async () => {
