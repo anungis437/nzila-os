@@ -125,3 +125,10 @@ test('duplicate or conflicting lockfile version declarations fail closed', () =>
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
 })
+
+test('duplicate resolved snapshot keys fail closed instead of silently collapsing the graph', () => {
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n    dependencies: {}\n  undici@7.29.1:\n    dependencies:\n      injected: 1.0.0\n', (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Duplicate resolved snapshot key/))
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n  undici@7.29.2:\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).get('undici')], ['7.29.1', '7.29.2']))
+})
