@@ -1,0 +1,26 @@
+name: Security Bulk Audit Contract
+
+on:
+  pull_request:
+    paths:
+      - 'tooling/security/npm-bulk-audit.mjs'
+      - 'tooling/security/npm-bulk-audit.test.mjs'
+      - '.github/workflows/security-bulk-audit-contract.yml'
+  push:
+    paths:
+      - 'tooling/security/npm-bulk-audit.mjs'
+      - 'tooling/security/npm-bulk-audit.test.mjs'
+      - '.github/workflows/security-bulk-audit-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit-input-integrity:
+    name: Audit input integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the source audit's fail-closed contract tests
+        run: node --test tooling/security/npm-bulk-audit.test.mjs
