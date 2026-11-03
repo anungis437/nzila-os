@@ -449,6 +449,11 @@ export function checkVulnerabilityPolicy(
         throw new Error(`Malformed advisory record: ${key}`)
       }
       const advisory = raw as Record<string, unknown>
+      // Bind the advisory map key to its declared identity. A mismatched ID
+      // must never inherit a waiver belonging to a different finding.
+      if (advisory.id !== undefined && String(advisory.id) !== key) {
+        throw new Error(`Advisory identity mismatch: ${key}`)
+      }
       const severity = advisory.severity
       if (!['info', 'low', 'moderate', 'high', 'critical'].includes(String(severity))) {
         throw new Error(`Unknown severity for advisory: ${key}`)
