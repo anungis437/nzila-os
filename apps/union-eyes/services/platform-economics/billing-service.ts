@@ -513,10 +513,18 @@ export async function recordPayment(input: RecordPaymentInput) {
     const [existing] = await db
       .select()
       .from(platformPayments)
-      .where(eq(platformPayments.externalReference, input.idempotencyKey))
+      .where(and(eq(platformPayments.organizationId, input.organizationId), eq(platformPayments.externalReference, input.idempotencyKey)))
       .limit(1);
 
-    if (existing) return existing;
+    if (existing) {
+      if (existing.organizationId !== input.organizationId || existing.amount !== input.amount) {
+        throw new Error('Payment idempotency reference conflicts with the requested organization or amount');
+      }
+      // A reference cannot safely identify a payment without proving its invoice allocation.
+      throw new Error('Payment idempotency replay requires verified invoice allocation');
+    }
+    // No database-enforced uniqueness currently protects concurrent keyed payments.
+    throw new Error('Keyed payment recording unavailable until transactional idempotency is enforced');
   }
 
   // Get invoice
@@ -639,10 +647,15 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
   const [existingPayment] = await db
     .select()
     .from(platformPayments)
-    .where(eq(platformPayments.externalReference, input.externalReference))
+    .where(and(eq(platformPayments.organizationId, input.organizationId), eq(platformPayments.externalReference, input.externalReference)))
     .limit(1);
 
-  if (existingPayment) return existingPayment;
+  if (existingPayment) {
+    if (existingPayment.organizationId !== input.organizationId || existingPayment.amount !== input.amount) {
+      throw new Error('External payment reference conflicts with the requested organization or amount');
+    }
+    throw new Error('External payment replay requires verified invoice allocation');
+  }
 
   const account = await getBillingAccount(input.organizationId);
   if (!account) throw new Error(`No billing account for org ${input.organizationId}`);
