@@ -258,6 +258,18 @@ describe('platform-economics/billing-service', () => {
       await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' })).rejects.toThrow('No active subscription');
     });
 
+    it('refuses multiple active subscriptions before reading a plan or issuing an invoice', async () => {
+      pushSel([account]);
+      pushSel([period]);
+      pushSel([]); // no existing invoice
+      h.getActiveContract.mockResolvedValueOnce({ id: 'ctr-1' });
+      pushSel([subscription, { ...subscription, planId: 'plan-2' }]);
+      await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' }))
+        .rejects.toThrow('multiple active subscriptions');
+      expect(h.appendLedgerEntry).not.toHaveBeenCalled();
+      expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
     it('throws when the plan is missing', async () => {
       pushSel([account]);
       pushSel([period]);
