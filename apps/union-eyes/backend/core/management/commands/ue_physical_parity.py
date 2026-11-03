@@ -36,7 +36,7 @@ Advisory kinds
     FK_ABSENT               a model foreign key (db_constraint) is not enforced by the table
     CHECK_ABSENT            a model check constraint is not enforced by the table
     PK_ABSENT               a model primary key is not the table's primary key
-    COLUMN_UNKNOWN          a nullable or defaulted column the model does not know
+    COLUMN_UNKNOWN          a nullable or defaulted column the model does not know (except a column of OPTIONAL_EXTENSION_COLUMNS)
     FK_DELETE_RULE_MISMATCH the model's on_delete (applied by Django, in Python) is not the database's delete rule on the key, so a DELETE
                             that does not go through the ORM behaves differently: `risk` says whether the database destroys what the
                             ORM protects (PROTECT/RESTRICT/DO_NOTHING over CASCADE, SET NULL or SET DEFAULT) or blocks what the ORM cascades
@@ -79,6 +79,14 @@ ADVISORY_KINDS = (
     "COLUMN_UNKNOWN",
     "FK_DELETE_RULE_MISMATCH",
 )
+
+# A column that exists only where an optional PostgreSQL extension is offered. Platform 0063 creates knowledge_base.embedding inside a block that is skipped on
+# a server without pgvector, so no model can declare it (a field would ask every server for a column most do not have), and a server that has it must not read
+# as an incomplete model. It is read and written only through lib/ai/knowledge-base-embeddings.ts, after lib/ai/vector-readiness.ts has found the column. The match is
+# exact (schema, table, column and type): a column that changes shape is an unknown column again.
+OPTIONAL_EXTENSION_COLUMNS = {
+    ("public", "knowledge_base", "embedding"): "vector(1536)",
+}
 
 # The database delete rule (pg_constraint.confdeltype) that enforces what each Django on_delete does in Python.
 DELETE_RULES_FOR_ON_DELETE = {
@@ -482,7 +490,7 @@ def measure(app_labels, include_contrib):
                 add("NOT_NULL_ABSENT", field.column, field=field.name)
 
         for name, column in physical.items():
-            if name in known:
+            if name in known or OPTIONAL_EXTENSION_COLUMNS.get((*key, name)) == column["type"]:
                 continue
             if column["notnull"] and column["default"] is None and not column["identity"] and not column["generated"]:
                 add("REQUIRED_COLUMN_UNKNOWN", name, physical=column["type"])

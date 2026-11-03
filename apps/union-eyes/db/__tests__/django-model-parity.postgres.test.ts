@@ -14,10 +14,11 @@
  *   - Django's migration state equals the models (`makemigrations --check`), so the migration history records what the tables are.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at a disposable, fully bootstrapped database AND UE_AUTHORITY_DJANGO=1 (python with
- * the backend requirements is on PATH). It only reads.
+ * the backend requirements is on PATH). It only reads, except the last test, which changes one column of its own clone and puts it back.
  */
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
+import pg from 'pg'
 import { describe, expect, it } from 'vitest'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
@@ -79,14 +80,13 @@ describe.skipIf(!ENABLED)('Django models equal the physical schema', () => {
     })
 
   let report: Report
-  const measure = () => {
-    if (report) return report
+  const measureFresh = (): Report => {
     const run = manage(['ue_physical_parity', '--json'])
     const line = `${run.stdout}`.split('\n').find((l) => l.startsWith('PARITY_JSON='))
     if (!line) throw new Error(`ue_physical_parity produced no report (exit ${run.status}): ${run.stderr.slice(-800)}`)
-    report = JSON.parse(line.slice('PARITY_JSON='.length)) as Report
-    return report
+    return JSON.parse(line.slice('PARITY_JSON='.length)) as Report
   }
+  const measure = () => (report ??= measureFresh())
   const render = (findings: readonly Finding[]) => findings.slice(0, 12).map((f) => `${f.kind} ${f.table}.${f.column ?? ''}`).join('\n')
 
   it('measures every Django model of the project', () => {
@@ -131,4 +131,31 @@ describe.skipIf(!ENABLED)('Django models equal the physical schema', () => {
     const run = manage(['makemigrations', '--check', '--dry-run'])
     expect({ status: run.status, out: `${run.stdout}`.slice(-600) }).toEqual({ status: 0, out: expect.stringContaining('No changes detected') })
   })
+
+  // Last, because it changes one column of this file's own clone and puts it back.
+  it('knows an optional-extension column only in the shape platform 0063 creates it, with or without pgvector on the server', async () => {
+    const embedding = (r: Report) => r.findings.filter((f) => f.table === 'knowledge_base' && f.column === 'embedding')
+    expect(embedding(measure())).toEqual([])
+
+    const admin = new pg.Client({ connectionString: URL })
+    await admin.connect()
+    try {
+      const original = (
+        await admin.query(
+          `SELECT format_type(a.atttypid, a.atttypmod) AS type FROM pg_attribute a WHERE a.attrelid = 'public.knowledge_base'::regclass AND a.attname = 'embedding' AND NOT a.attisdropped`,
+        )
+      ).rows[0]?.type as string | undefined
+      await admin.query('ALTER TABLE public.knowledge_base DROP COLUMN IF EXISTS embedding')
+
+      // Without the column the table is complete; with the column under any other shape it is an unknown column.
+      expect(embedding(measureFresh())).toEqual([])
+      await admin.query('ALTER TABLE public.knowledge_base ADD COLUMN embedding text')
+      expect(embedding(measureFresh()).map((f) => ({ kind: f.kind, physical: f.detail.physical }))).toEqual([{ kind: 'COLUMN_UNKNOWN', physical: 'text' }])
+
+      await admin.query('ALTER TABLE public.knowledge_base DROP COLUMN embedding')
+      if (original) await admin.query(`ALTER TABLE public.knowledge_base ADD COLUMN embedding ${original}`)
+    } finally {
+      await admin.end()
+    }
+  }, 180_000)
 })

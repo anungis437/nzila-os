@@ -13,11 +13,11 @@
    "NONE": 48,
    "ORG_AUTH": 12,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 223,
+   "RETIRED": 236,
    "ROLE_AUTH": 173,
    "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 292,
+   "WITH_API": 279,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -29,14 +29,14 @@
    "NONE": 9,
    "ORG_AUTH": 8,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 216,
+   "RETIRED": 222,
    "ROLE_AUTH": 98,
    "SESSION_AUTH": 31,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 185
+   "WITH_API": 179
   },
   "mutatingByAudit": {
-   "ATOMIC": 164,
+   "ATOMIC": 158,
    "ATOMIC_SERVICE": 117,
    "COMPUTE_ONLY": 31,
    "CRUD_ATOMIC": 86,
@@ -44,13 +44,13 @@
    "EXEMPT_UNATTRIBUTABLE": 28,
    "INTENT_OUTCOME": 31,
    "NO_WRITES_FOUND": 10,
-   "NONE": 213
+   "NONE": 219
   },
   "mutatingByData": {
    "AMBIENT_DB": 12,
    "CRUD_TENANT_TX": 86,
-   "NONE": 338,
-   "SYSTEM_CONTEXT": 61,
+   "NONE": 344,
+   "SYSTEM_CONTEXT": 55,
    "TENANT_TX": 185
   }
  },
@@ -7747,11 +7747,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "governance/lifecycle/conflicts/route.ts",
@@ -7759,10 +7759,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7771,10 +7771,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7784,11 +7784,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "governance/lifecycle/policies/[id]/conflicts/route.ts",
@@ -7796,10 +7796,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7808,10 +7808,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7821,11 +7821,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "governance/lifecycle/policies/[id]/route.ts",
@@ -7834,11 +7834,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "governance/lifecycle/policies/[id]/versions/route.ts",
@@ -7846,10 +7846,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7859,11 +7859,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "governance/lifecycle/policy-events/route.ts",
@@ -7871,10 +7871,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7883,10 +7883,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7896,11 +7896,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "governance/mission-audits/route.ts",

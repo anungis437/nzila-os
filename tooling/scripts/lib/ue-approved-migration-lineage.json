@@ -368,6 +368,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Row security for member_roles, permission_exceptions and rbac_audit_log through ue_create_direct_org_rls_policy (FORCE RLS, one runtime policy per command, system-role policy); role_definitions is global reference data and takes none; grants nothing: the runtime role gets SELECT only from the manifest at grant activation."
+      },
+      {
+        "tag": "0054_staging_proof_ledger_rls_closure",
+        "sha256": "fb2876d88719f07839795c98d0b19663ca662090cbadd6362f0bc64ecd05b5b8",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Forced row-level security with a single system-role policy and no runtime policy on the three staging proof ledger relations platform 0078 creates (SYSTEM_ONLY)."
       }
     ],
     "platform": [
@@ -811,6 +818,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "UE-CONV-H-014: the nine import traceability columns on grievances and documents, a partial unique key per (organization, source system, external id), one CHECK that an external id names its source"
+      },
+      {
+        "tag": "0078_staging_proof_ledger",
+        "sha256": "9024af278e396c10fa11d9d40e216ddcda9368150118b9e486bc75cba371f584",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Creates staging_proof_nonce_uses, staging_proof_runs and staging_proof_run_events, the ledger of the HMAC-gated staging proof harness, which existed only in the PGlite DDL of the route's test (UE-CONV-H-016). Generated from the Drizzle declarations; SYSTEM_ONLY; rollback refuses while rows exist."
       }
     ]
   }

@@ -59,6 +59,7 @@ import {
 } from '@/lib/deadline-engine';
 import { completeDeadline } from '@/lib/deadline-tracking-system';
 import { logger } from '@/lib/logger';
+import { createProofRun, finalizeProofRun } from '@/lib/staging-proof/ledger';
 import {
   isAuthorizedStagingProofEnvironment,
   STAGING_PROOF_SCENARIOS,
@@ -181,73 +182,6 @@ async function cleanup(organizationId: string, deadlineId: string | null, grieva
     });
     throw new Error('deadline-proof: cleanup failed');
   }
-}
-
-async function createProofRun(input: {
-  proofRunId: string;
-  nonce: string;
-  scenario: z.infer<typeof ScenarioName>;
-  correlationId: string;
-}): Promise<boolean> {
-  return db.transaction(async (tx) => {
-    const nonceRows = (await tx.execute(sql`
-      insert into staging_proof_nonce_uses (nonce, proof_run_id, expires_at)
-      values (${input.nonce}, ${input.proofRunId}::uuid, now() + interval '10 minutes')
-      on conflict do nothing
-      returning nonce
-    `)) as unknown as Array<{ nonce: string }>;
-    if (nonceRows.length !== 1) return false;
-
-    await tx.execute(sql`
-      insert into staging_proof_runs (id, nonce, scenario, correlation_id, status)
-      values (${input.proofRunId}::uuid, ${input.nonce}, ${input.scenario}, ${input.correlationId}, 'started')
-    `);
-    await tx.execute(sql`
-      insert into staging_proof_run_events (
-        proof_run_id, scenario, event_type, correlation_id, expected_outcome
-      ) values (
-        ${input.proofRunId}::uuid, ${input.scenario}, 'started', ${input.correlationId},
-        ${JSON.stringify({ service_boundary: true, cleanup: true })}::jsonb
-      )
-    `);
-    return true;
-  });
-}
-
-async function finalizeProofRun(input: {
-  proofRunId: string;
-  scenario: z.infer<typeof ScenarioName>;
-  eventType: 'completed' | 'failed' | 'cleanup_failed';
-  correlationId: string;
-  createdIdentifiers?: Record<string, string>;
-  actualOutcome: Record<string, boolean>;
-  cleanupPassed: boolean;
-}): Promise<void> {
-  await db.transaction(async (tx) => {
-    const finalized = (await tx.execute(sql`
-      update staging_proof_runs
-         set status = ${input.eventType},
-             cleanup_passed = ${input.cleanupPassed},
-             finalized_at = now()
-       where id = ${input.proofRunId}::uuid
-         and status = 'started'
-       returning id
-    `)) as unknown as Array<{ id: string }>;
-    if (finalized.length !== 1) {
-      throw new Error('deadline-proof: proof run is missing or already finalized');
-    }
-    await tx.execute(sql`
-      insert into staging_proof_run_events (
-        proof_run_id, scenario, event_type, correlation_id, created_identifiers,
-        expected_outcome, actual_outcome, cleanup_passed
-      ) values (
-        ${input.proofRunId}::uuid, ${input.scenario}, ${input.eventType}, ${input.correlationId},
-        ${JSON.stringify(input.createdIdentifiers ?? {})}::jsonb,
-        ${JSON.stringify({ service_boundary: true, cleanup: true })}::jsonb,
-        ${JSON.stringify(input.actualOutcome)}::jsonb, ${input.cleanupPassed}
-      )
-    `);
-  });
 }
 
 async function insertSyntheticOrganization(proofRunId: string): Promise<string> {
@@ -549,7 +483,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!(await createProofRun({ proofRunId, nonce: authorization.nonce, scenario: parsed.data.scenario, correlationId }))) {
       return new NextResponse(null, { status: 404 });
     }
-  } catch {
+  } catch (ledgerError) {
+    // The caller learns nothing (a replayed nonce and an unavailable ledger both look like no route); the operator is told.
+    logger.error('deadline-proof: the ledger refused to open a run', {
+      proofRunId,
+      correlationId,
+      error: ledgerError instanceof Error ? ledgerError.message : String(ledgerError),
+    });
     return new NextResponse(null, { status: 404 });
   }
 
@@ -571,9 +511,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       : parsed.data.scenario === 'reschedule'
         ? await runReschedule(input, correlationId)
         : await runCancel(input, correlationId);
-      const completedOrganizationId = organizationId;
-      await retireSyntheticOrganization(completedOrganizationId, proofRunId);
-      await finalizeProofRun({
+    const completedOrganizationId = organizationId;
+    await retireSyntheticOrganization(completedOrganizationId, proofRunId);
+    await finalizeProofRun({
       proofRunId,
       scenario: parsed.data.scenario,
       eventType: 'completed',
@@ -608,8 +548,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       createdIdentifiers: organizationId ? { organizationId } : {},
       actualOutcome: { passed: false },
       cleanupPassed,
-    }).catch(() => undefined);
-    logger.error('deadline-proof: scenario failed', { proofRunId, correlationId, scenario: parsed.data.scenario });
+    }).catch((ledgerError: unknown) => {
+      logger.error('deadline-proof: the failed run could not be settled in the ledger', {
+        proofRunId,
+        correlationId,
+        error: ledgerError instanceof Error ? ledgerError.message : String(ledgerError),
+      });
+    });
+    logger.error('deadline-proof: scenario failed', {
+      proofRunId,
+      correlationId,
+      scenario: parsed.data.scenario,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return NextResponse.json({ proofRunId, correlationId, passed: false, startedAt, finishedAt: new Date().toISOString() }, { status: 500 });
   }
 }

@@ -104,6 +104,9 @@ export * from "./deadline-engine-schema";
 // Dues & Finance (member dues ledger, arrears, employer remittances)
 export * from "./dues-finance-schema";
 
+// Staging proof harness ledger (nonces, runs and events; SYSTEM_ONLY, no tenant data)
+export * from "./staging-proof-schema";
+
 // ============================================================================
 // EXTERNAL EXPORTS (Outside Domain Structure)
 // ============================================================================

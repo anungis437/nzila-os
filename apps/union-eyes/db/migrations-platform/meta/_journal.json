@@ -554,6 +554,13 @@
       "when": 1759340000000,
       "tag": "0077_ingestion_traceability",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1759350000000,
+      "tag": "0078_staging_proof_ledger",
+      "breakpoints": true
     }
   ]
 }

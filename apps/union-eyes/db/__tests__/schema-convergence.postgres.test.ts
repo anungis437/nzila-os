@@ -115,9 +115,9 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
 
   it('measures every declared relation', async () => {
     const measured = await measure(URL!)
-    // 627 distinct physical relations are declared across the barrel and the flat declaration files (623, and the four of the enhanced RBAC: platform 0075); fewer would
-    // mean a declaration went unmeasured.
-    expect(measured.declared.length).toBeGreaterThanOrEqual(627)
+    // 630 distinct physical relations are declared across the barrel and the flat declaration files (623, the four of the enhanced RBAC: platform 0075, and the three of
+    // the staging proof ledger: platform 0078); fewer would mean a declaration went unmeasured.
+    expect(measured.declared.length).toBeGreaterThanOrEqual(630)
     expect(measured.tables).toBe(measured.declared.length)
   }, 600_000)
 

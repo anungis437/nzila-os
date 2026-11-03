@@ -23,6 +23,11 @@ vi.mock('@/db', async () => {
   const { lateBoundDb } = await import('./support/pglite-tables');
   return { db: lateBoundDb(state) };
 });
+// The ledger relations are SYSTEM_ONLY: the route writes them through the system context, which here is a transaction on the same PGlite database.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (operation: (tx: unknown) => Promise<unknown>) =>
+    (state.db as { transaction: (callback: (tx: unknown) => Promise<unknown>) => Promise<unknown> }).transaction((tx) => operation(tx)),
+}));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() } }));
 vi.mock('@/lib/deadline-tracking-system', () => ({ completeDeadline: vi.fn() }));
 vi.mock('@/lib/deadline-engine', () => ({

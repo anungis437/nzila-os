@@ -1177,6 +1177,39 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'The embedding model must produce 1536 numbers; any other size is refused. The match is an exact per-organization scan (no approximate index), which is correct at the current size of an organization\'s knowledge base. ' +
       'Not yet run natively on PostgreSQL 15.',
   },
+  {
+    id: 'UE-GOVERNANCE-POLICY-LIFECYCLE',
+    title: 'Policy lifecycle governance: governed policies, approval chains, conflicts, replay, events and snapshots',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'lib/governance/policy-lifecycle-unavailable.ts',
+      'lib/governance/policy-approval-authority.ts',
+      'app/api/governance/lifecycle/policies/route.ts',
+      'app/api/governance/lifecycle/conflicts/route.ts',
+      'app/api/governance/lifecycle/deprecation-watch/route.ts',
+      'app/api/governance/lifecycle/policy-events/route.ts',
+      'app/api/governance/lifecycle/snapshots/route.ts',
+      'app/api/governance/lifecycle/policies/[id]/route.ts',
+      'app/api/governance/lifecycle/policies/[id]/approvals/route.ts',
+      'app/api/governance/lifecycle/policies/[id]/conflicts/route.ts',
+      'app/api/governance/lifecycle/policies/[id]/lineage/route.ts',
+      'app/api/governance/lifecycle/policies/[id]/replay/route.ts',
+      'app/api/governance/lifecycle/policies/[id]/versions/route.ts',
+      'app/api/governance/lifecycle/conflicts/[conflictId]/route.ts',
+      'app/api/governance/lifecycle/snapshots/[at]/route.ts',
+    ],
+    evidence: [
+      'The mismatch census (scripts/runtime/mismatch-census.ts, UE-CONV-H-013) found governed_policies, policy_approval_chains, policy_approval_actions, policy_conflicts, policy_replay_sessions, policy_governance_events and policy_governance_snapshots read and written through Union Eyes\' own database handle: they exist in no Union Eyes migration, Django model or Drizzle declaration (they are the platform\'s, @nzila/db/schema), so every call failed',
+      'app/api/__tests__/governance-lifecycle-unavailable.contract.test.ts — all thirteen routes answer 501 for every method behind the administrator and entitlement gate, and import no database, audit or system-context code',
+      'The pages (app/[locale]/dashboard/governance/lifecycle) and components (components/policy-governance) that called the routes were removed; nothing linked to them',
+    ],
+    targetWave: 6,
+    notes:
+      'What is missing is a decision, not a column: whose policies these are (the platform\'s or each organization\'s), who may approve them and where the record is kept. ' +
+      'The handlers ran as the system role, so had the relations existed here an administrator of any one organization would have been writing policy for the whole platform, and the audit record would have sat in a different database from the change. ' +
+      'lib/governance/policy-approval-authority.ts is the decision logic written for the approval path (identity and role from the session only; a body asserts neither) and stays, tested, until a store exists. ' +
+      'apps/platform-admin reads policies and snapshots from these routes and shows the answer. Part of Governance Officer 2.1 G06 (policy creation, versioning, review and supersession), whose implementation is not certified.',
+  },
 ] as const;
 
 /**

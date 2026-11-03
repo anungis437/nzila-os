@@ -75,8 +75,8 @@ export const EXECUTIVE_DOMAINS: readonly ExecutiveDomain[] = [
   {
     id: 'O05', name: 'Motions, resolutions, decisions and authorized execution',
     destination: 'governance-organization', disposition: 'BLOCKED',
-    sources: ['lib/executive/decision-lifecycle.ts (pure kernel, not persisted)', 'app/api/governance/lifecycle/policies/[id]/approvals/route.ts (platform policy chains, caller-asserted actorRole)'],
-    gap: 'No motion/decision store, no quorum or decision-rule source, no organization-scoped adoption record. The kernel is test-proven only; nothing is persisted or exposed.',
+    sources: ['lib/executive/decision-lifecycle.ts (pure kernel, not persisted)', 'lib/governance/policy-approval-authority.ts (approver authority from the session; no store to run against)'],
+    gap: 'No motion/decision store, no quorum or decision-rule source, no organization-scoped adoption record. The kernel is test-proven only; nothing is persisted or exposed. The policy approval routes under app/api/governance/lifecycle answer 501 (UE-GOVERNANCE-POLICY-LIFECYCLE).',
   },
   {
     id: 'O06', name: 'Meetings, agendas, quorum, minutes and obligations',
@@ -165,8 +165,8 @@ export const EXECUTIVE_DOMAINS: readonly ExecutiveDomain[] = [
   {
     id: 'O20', name: 'Conflicts, recusals, ethics and independent complaints',
     destination: 'governance-organization', disposition: 'LIMITED',
-    sources: ['db/schema/domains/governance/conflicts.ts', 'app/api/governance/lifecycle/conflicts'],
-    gap: 'Conflict/recusal tables exist in the platform governance lifecycle; recusal is not enforced on executive actions and there is no independent complaint channel.',
+    sources: ['db/schema/domains/governance/conflicts.ts', 'services/founder-conflict-service.ts'],
+    gap: 'Conflict-of-interest, disclosure and recusal tables are declared and one service reads them, but nothing records or enforces a recusal on an executive action and there is no independent complaint channel. The policy-conflict routes under app/api/governance/lifecycle are about conflicts between policies, not conflicts of interest, and answer 501 (UE-GOVERNANCE-POLICY-LIFECYCLE).',
   },
   {
     id: 'O21', name: 'Risk, compliance, privacy and institutional accountability',

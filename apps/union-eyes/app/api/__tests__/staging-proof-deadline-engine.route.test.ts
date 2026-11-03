@@ -15,6 +15,10 @@ vi.mock('@/db', () => ({
     transaction: mocks.transaction,
   },
 }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  // The ledger's every statement runs in one system-role transaction; `transaction` stands for it and `execute` for a statement inside it.
+  withSystemContext: (callback: (tx: unknown) => Promise<unknown>) => mocks.transaction(callback),
+}));
 vi.mock('@/lib/deadline-engine', () => ({
   scheduleGrievanceDeadlineReminders: vi.fn(),
   cancelGrievanceDeadlineReminders: vi.fn(),
