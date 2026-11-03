@@ -43,7 +43,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('production'),
 
   // Worker
-  WORKER_CONCURRENCY: z.coerce.number().int().positive().default(2),
+  WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(64).default(2),
   POLL_INTERVAL_MS: z.coerce.number().int().positive().default(1000),
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
 })
