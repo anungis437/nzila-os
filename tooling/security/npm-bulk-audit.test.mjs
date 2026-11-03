@@ -120,7 +120,7 @@ test('duplicate or conflicting lockfile version declarations fail closed', () =>
     'lockfileVersion: 9.0\nlockfileVersion: 9.0\n',
   ]) {
     withLockfile(prefix + 'snapshots:\n  undici@7.29.1:\n', (file) =>
-      assert.throws(() => parseLockfilePackages(file), /Unsupported or ambiguous pnpm lockfile version/))
+      assert.throws(() => parseLockfilePackages(file), /Unsupported pnpm lockfile version or ambiguous declarations/))
   }
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
