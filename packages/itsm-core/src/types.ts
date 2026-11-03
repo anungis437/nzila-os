@@ -88,7 +88,7 @@ export const createTicketInputSchema = z.object({
   contractId: z.string().uuid().optional(),
   assetId: z.string().uuid().optional(),
   tags: z.array(z.string()).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 })
 export type CreateTicketInput = z.infer<typeof createTicketInputSchema>
 
@@ -121,7 +121,7 @@ export const createTicketEventInputSchema = z.object({
   toValue: z.string().optional(),
   body: z.string().optional(),
   internal: z.boolean().default(false),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
 })
 export type CreateTicketEventInput = z.infer<typeof createTicketEventInputSchema>
 
@@ -154,7 +154,7 @@ export const createAssetInputSchema = z.object({
   purchaseCost: z.string().optional(),
   location: z.string().optional(),
   tags: z.array(z.string()).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 })
 export type CreateAssetInput = z.infer<typeof createAssetInputSchema>
 
