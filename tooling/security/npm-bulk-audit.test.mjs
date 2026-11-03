@@ -103,3 +103,11 @@ test('inventory rejects fabricated keys, unsupported lockfiles, and out-of-secti
   withLockfile('lockfileVersion: 6.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
     assert.throws(() => parseLockfilePackages(file), /Unsupported pnpm lockfile version/))
 })
+
+
+test('duplicate snapshots sections cannot hide dependencies from the audit inventory', () => {
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\npackages:\n  undici@7.29.1:\nsnapshots:\n  node-forge@1.4.0:\n', (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Ambiguous pnpm lockfile/))
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
+})
