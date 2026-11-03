@@ -13,6 +13,10 @@ describe('Zod 4 media worker environment boundary', () => {
       expect(() => validateEnv()).toThrow('Invalid environment configuration:')
       process.env = { ...process.env, S3_ENDPOINT: 'https://s3.example.com', WORKER_CONCURRENCY: '-1' }
       expect(() => validateEnv()).toThrow('Invalid environment configuration:')
+      process.env = { ...process.env, WORKER_CONCURRENCY: '65' }
+      expect(() => validateEnv()).toThrow('Invalid environment configuration:')
+      process.env = { ...process.env, WORKER_CONCURRENCY: '64' }
+      expect(validateEnv().WORKER_CONCURRENCY).toBe(64)
     } finally {
       process.env = original
     }
