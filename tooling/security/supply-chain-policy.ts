@@ -439,7 +439,12 @@ export function checkVulnerabilityPolicy(
         (details.totalDependencies as number) <= 0) {
       throw new Error('Audit report has no verified dependency inventory')
     }
-    const value = root.advisories ?? root.vulnerabilities
+    // The collector emits one canonical advisory map. Conflicting alternative
+    // maps must not be used to conceal findings by precedence/fallback.
+    if (Object.prototype.hasOwnProperty.call(root, 'vulnerabilities')) {
+      throw new Error('Unexpected alternate vulnerabilities collection in bulk audit report')
+    }
+    const value = root.advisories
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
       throw new Error('Audit report has no valid advisories/vulnerabilities collection')
     }
