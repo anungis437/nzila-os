@@ -66,6 +66,7 @@ if (minSeverityIdx === -1) {
 export function parseLockfilePackages(lockfilePath) {
   const content = readFileSync(lockfilePath, 'utf-8')
   const pkgMap = new Map()
+  const seenSnapshots = new Set()
 
   // A lockfile inventory must be derived from one top-level resolved section,
   // never from arbitrary indented text or sections appended after snapshots.
@@ -90,6 +91,13 @@ export function parseLockfilePackages(lockfilePath) {
       throw new Error('Malformed resolved snapshot key in pnpm-lock.yaml')
     }
     const [, name, version] = match
+    // YAML duplicate mapping keys can silently replace an earlier resolution.
+    // Reject them rather than certifying an incomplete or ambiguous inventory.
+    const snapshotKey = line.slice(2, line.lastIndexOf(':')).trim()
+    if (seenSnapshots.has(snapshotKey)) {
+      throw new Error(`Duplicate resolved snapshot key in pnpm-lock.yaml: ${snapshotKey}`)
+    }
+    seenSnapshots.add(snapshotKey)
     if (!pkgMap.has(name)) pkgMap.set(name, new Set())
     pkgMap.get(name).add(version)
   }
