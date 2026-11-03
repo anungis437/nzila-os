@@ -113,7 +113,9 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
     }
     for (const adv of advisoryList) {
       if (!adv || typeof adv !== 'object' || Array.isArray(adv) ||
-          !(Number.isSafeInteger(adv.id) && adv.id > 0 ||\n            typeof adv.id === 'string' && /^[1-9][0-9]*$/.test(adv.id) &&\n            Number.isSafeInteger(Number(adv.id))) ||
+          !(Number.isSafeInteger(adv.id) && adv.id > 0 ||
+            typeof adv.id === 'string' && /^[1-9][0-9]*$/.test(adv.id) &&
+            Number.isSafeInteger(Number(adv.id))) ||
           !SEVERITY_ORDER.includes(adv.severity) ||
           typeof adv.title !== 'string' || !adv.title.trim()) {
         throw new Error(`Invalid advisory record for ${pkgName}`)
