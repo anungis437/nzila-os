@@ -74,6 +74,9 @@ export function parseLockfilePackages(lockfilePath) {
   }
   const lines = content.split(/\r?\n/)
   const start = lines.findIndex((line) => line === 'snapshots:')
+  if (lines.filter((line) => line === 'snapshots:').length !== 1) {
+    throw new Error('Ambiguous pnpm lockfile: expected exactly one snapshots section')
+  }
   if (start === -1) {
     throw new Error('Missing snapshots/packages section in pnpm-lock.yaml; cannot establish dependency inventory')
   }
