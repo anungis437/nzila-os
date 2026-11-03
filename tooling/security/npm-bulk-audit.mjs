@@ -81,7 +81,7 @@ export function parseLockfilePackages(lockfilePath) {
     const line = lines[i]
     if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
-    const match = /^ {2}((?:@[^\s@/:]+\.)?[^\s@/:]+)@([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)(?:\.[^\n]*\.)?:\s*$/.exec(line)
+    const match = /^ {2}((?:@[^\s@/:]+\/)?[^\s@/:]+)@([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)(?:\([^\n]*\))?:\s*$/.exec(line)
     if (!match) {
       throw new Error('Malformed resolved snapshot key in pnpm-lock.yaml')
     }
