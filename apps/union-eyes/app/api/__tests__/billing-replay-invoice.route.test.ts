@@ -22,6 +22,9 @@ async function loadRoute() {
 
 describe('billing/replay-invoice route', () => {
   beforeEach(() => {
+    // Re-evaluate the route module so withApi registration is observable in every test.
+    // clearAllMocks alone preserves Vitest's ESM module cache across test cases.
+    vi.resetModules();
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
     m.replayInvoiceDeterministically.mockResolvedValue({ recomputed: { isMatch: true }, pricingRuleVersion: 'v1' });
