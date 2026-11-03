@@ -56,6 +56,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.unwaived).toBe(1)
   })
 
+  it('rejects an advisory whose declared ID differs from its map key', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-identity-mismatch.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('Advisory identity mismatch'))).toBe(true)
+  })
+
   it('rejects an expired waiver without extending its validity', () => {
     const afterExpiry = new Date('2026-11-05T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
