@@ -76,11 +76,11 @@ export function parseLockfilePackages(lockfilePath) {
     throw new Error('Unsupported pnpm lockfile version or ambiguous declarations; expected exactly one v9 declaration')
   }
   const start = lines.findIndex((line) => line === 'snapshots:')
-  if (lines.filter((line) => line === 'snapshots:').length !== 1) {
-    throw new Error('Ambiguous pnpm lockfile: expected exactly one snapshots section')
-  }
   if (start === -1) {
     throw new Error('Missing snapshots/packages section in pnpm-lock.yaml; cannot establish dependency inventory')
+  }
+  if (lines.filter((line) => line === 'snapshots:').length !== 1) {
+    throw new Error('Ambiguous pnpm lockfile: expected exactly one snapshots section')
   }
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i]
