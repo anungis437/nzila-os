@@ -72,7 +72,7 @@ export function parseLockfilePackages(lockfilePath) {
   const lines = content.split(/\r?\n/)
   const versions = lines.filter((line) => /^lockfileVersion\s*:/.test(line))
   if (versions.length !== 1 || !/^lockfileVersion: ['\"]?9(?:\.0)?['\"]?\s*$/.test(versions[0])) {
-    throw new Error('Unsupported or ambiguous pnpm lockfile version; expected exactly one v9 declaration')
+    throw new Error('Unsupported pnpm lockfile version or ambiguous declarations; expected exactly one v9 declaration')
   }
   const start = lines.findIndex((line) => line === 'snapshots:')
   if (lines.filter((line) => line === 'snapshots:').length !== 1) {
