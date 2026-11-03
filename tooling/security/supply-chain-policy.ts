@@ -393,7 +393,7 @@ export function checkVulnerabilityPolicy(
       errors.push(`Malformed expiry on waiver ${waiver.id}`)
       continue
     }
-    if (!waiver.id || !waiver.package || !waiver.approvedBy || !waiver.reason || seenIds.has(waiver.id)) {
+    if (!waiver.id || !waiver.package || !waiver.approvedBy?.trim() || !waiver.reason?.trim() || seenIds.has(waiver.id) ||\n        !['high', 'critical'].includes(waiver.severity) ||\n        !/^\d{4}-\d{2}-\d{2}$/.test(waiver.approvedAt) ||\n        !Number.isFinite(new Date(`${waiver.approvedAt}T00:00:00.000Z`).valueOf()) ||\n        new Date(`${waiver.approvedAt}T00:00:00.000Z`) > now ||\n        new Date(`${waiver.approvedAt}T00:00:00.000Z`) > endOfDay) {
       errors.push(`Invalid or duplicate waiver record: ${waiver.id || 'missing-id'}`)
       continue
     }
@@ -459,7 +459,7 @@ export function checkVulnerabilityPolicy(
       if (typeof advisory.ghsa_id === 'string') ids.push(advisory.ghsa_id)
       const isWaived = !!packageString && ids.some((id) => {
         const waiver = activeWaivers.get(id)
-        return waiver !== undefined && waiver.package === packageString
+        return waiver !== undefined && waiver.package === packageString && waiver.severity === severity
       })
       if (isWaived) waived++
       else {
