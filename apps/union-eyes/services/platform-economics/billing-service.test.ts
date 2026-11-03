@@ -358,11 +358,13 @@ describe('recordPayment', () => {
     await expect(recordPayment(base)).rejects.toThrow(/No billing account/);
   });
 
-  it('returns the existing payment for a duplicate idempotency key', async () => {
+  it('refuses an existing keyed payment until its invoice allocation can be verified', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
-    state.selects.platformPayments = [{ id: 'pay-existing' }];
-    const r = await recordPayment({ ...base, idempotencyKey: 'idem-1' });
-    expect(r.id).toBe('pay-existing');
+    state.selects.platformPayments = [{ id: 'pay-existing', organizationId: 'org-1', amount: '100.00' }];
+    await expect(recordPayment({ ...base, idempotencyKey: 'idem-1' }))
+      .rejects.toThrow(/requires verified invoice allocation/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
   });
 
   it('throws when the invoice is not found', async () => {
