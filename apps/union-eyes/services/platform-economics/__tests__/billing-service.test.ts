@@ -297,7 +297,7 @@ describe('platform-economics/billing-service', () => {
 
     it('fails closed on an unverified idempotency replay', async () => {
       pushSel([account]); // getBillingAccount
-      pushSel([{ id: 'pay-existing' }]); // existing by idempotency
+      pushSel([{ id: 'pay-existing', organizationId: 'o1', amount: '10.00' }]); // existing by idempotency
       await expect(recordPayment({ organizationId: 'o1', invoiceId: 'inv-1', amount: '10.00', method: 'card', idempotencyKey: 'idem-1' })).rejects.toThrow('requires verified invoice allocation');
     });
 
@@ -371,7 +371,7 @@ describe('platform-economics/billing-service', () => {
 
     it('fails closed when external payment allocation is unverified', async () => {
       pushSel([invoice]);
-      pushSel([{ id: 'pay-existing' }]); // existing payment
+      pushSel([{ id: 'pay-existing', organizationId: 'o1', amount: '100.00' }]); // existing payment
       await expect(reconcileExternalInvoicePayment({
         organizationId: 'o1',
         invoiceId: 'inv-1',
