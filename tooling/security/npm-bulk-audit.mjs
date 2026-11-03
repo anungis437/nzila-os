@@ -17,7 +17,7 @@
  *   --audit-level=<low|moderate|high|critical>  Minimum severity to report (default: critical)
  *   --json                                       Write JSON report to stdout
  *   --output=<path>                              Write JSON report to file (and print summary to stdout)
- *   --ignore-registry-errors                     Exit 0 even if the registry is unreachable
+ *   Audit/network/lockfile/response failures are always blocking (fail closed).
  *
  * Exit codes:
  *   0 — no vulnerabilities at or above --audit-level
@@ -26,6 +26,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const BULK_ENDPOINT = 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk'
 const SEVERITY_ORDER = ['info', 'low', 'moderate', 'high', 'critical']
@@ -36,7 +37,13 @@ const args = process.argv.slice(2)
 const auditLevel = args.find((a) => a.startsWith('--audit-level='))?.split('=')[1] ?? 'critical'
 const jsonMode = args.includes('--json')
 const outFile = args.find((a) => a.startsWith('--output='))?.split('=')[1]
-const ignoreRegistryErrors = args.includes('--ignore-registry-errors')
+const invalidOptions = args.filter((a) =>
+  a !== '--json' && !/^--audit-level=(info|low|moderate|high|critical)$/.test(a) && !a.startsWith('--output='),
+)
+if (invalidOptions.length) {
+  console.error(`Unsupported audit option(s): ${invalidOptions.join(', ')}. Registry or audit failures cannot be ignored.`)
+  process.exit(2)
+}
 
 const minSeverityIdx = SEVERITY_ORDER.indexOf(auditLevel)
 if (minSeverityIdx === -1) {
@@ -56,15 +63,14 @@ if (minSeverityIdx === -1) {
  *   "  @scope/pkg@1.0.0:"
  *   "  webpack@5.0.0(esbuild@0.19.0):"  ← peer suffix is stripped
  */
-function parseLockfilePackages(lockfilePath) {
+export function parseLockfilePackages(lockfilePath) {
   const content = readFileSync(lockfilePath, 'utf-8')
   const pkgMap = new Map()
 
   // Find the snapshots section (may also be called 'packages' in v6)
   const snapshotsMatch = content.match(/\n(snapshots|packages):\n([\s\S]*)$/)
   if (!snapshotsMatch) {
-    console.warn('Warning: no snapshots/packages section found in pnpm-lock.yaml')
-    return pkgMap
+    throw new Error('Missing snapshots/packages section in pnpm-lock.yaml; cannot establish dependency inventory')
   }
 
   const snapshotsBlock = snapshotsMatch[2]
@@ -81,6 +87,9 @@ function parseLockfilePackages(lockfilePath) {
     pkgMap.get(name).add(version)
   }
 
+  if (pkgMap.size === 0) {
+    throw new Error('No resolved packages found in pnpm-lock.yaml; cannot certify an empty graph')
+  }
   return pkgMap
 }
 
@@ -93,49 +102,55 @@ function parseLockfilePackages(lockfilePath) {
  * New endpoint response shape:
  *   { "package-name": [ { id, title, severity, vulnerable_versions, ... } ] }
  */
-async function fetchAdvisories(pkgMap) {
-  const requestBody = {}
-  for (const [name, versions] of pkgMap) {
-    requestBody[name] = [...versions]
+export function normalizeAdvisoryResponse(raw, pkgMap) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error('Invalid npm bulk audit payload: expected package-to-advisory object')
   }
-
-  let response
-  try {
-    response = await fetch(BULK_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    })
-  } catch (err) {
-    if (ignoreRegistryErrors) {
-      console.warn(`Registry unreachable (ignored): ${err.message}`)
-      return {}
-    }
-    throw new Error(`Failed to reach audit endpoint: ${err.message}`)
-  }
-
-  if (!response.ok) {
-    const body = await response.text()
-    if (ignoreRegistryErrors) {
-      console.warn(`Registry returned ${response.status} (ignored): ${body}`)
-      return {}
-    }
-    throw new Error(`Audit endpoint returned ${response.status}: ${body}`)
-  }
-
-  // Response: { "pkg-name": [ { id, title, severity, ... } ] }
-  // Flatten to { advisoryId: { ...advisory, package: pkgName } } for compat
-  const raw = await response.json()
   const flat = {}
   for (const [pkgName, advisoryList] of Object.entries(raw)) {
+    if (!pkgMap.has(pkgName) || !Array.isArray(advisoryList)) {
+      throw new Error(`Invalid audit package entry: ${pkgName}`)
+    }
     for (const adv of advisoryList) {
-      const key = String(adv.id)
-      if (!flat[key]) {
-        flat[key] = { ...adv, package: pkgName }
+      if (!adv || typeof adv !== 'object' || Array.isArray(adv) ||
+          !Number.isSafeInteger(Number(adv.id)) || Number(adv.id) <= 0 ||
+          !SEVERITY_ORDER.includes(adv.severity) ||
+          typeof adv.title !== 'string' || !adv.title.trim()) {
+        throw new Error(`Invalid advisory record for ${pkgName}`)
       }
+      const key = String(adv.id)
+      if (flat[key] && flat[key].package !== pkgName) {
+        throw new Error(`Advisory ID collision across packages: ${key}`)
+      }
+      flat[key] = { ...adv, package: pkgName }
     }
   }
   return flat
+}
+
+async function fetchAdvisories(pkgMap) {
+  const requestBody = {}
+  for (const [name, versions] of pkgMap) requestBody[name] = [...versions]
+
+  const response = await fetch(BULK_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody),
+    signal: AbortSignal.timeout(30000),
+  }).catch((err) => {
+    throw new Error(`Audit registry unreachable: ${err.message}`)
+  })
+
+  if (!response.ok) {
+    throw new Error(`Audit registry returned HTTP ${response.status}; a failed request is never an empty audit`)
+  }
+  let raw
+  try {
+    raw = await response.json()
+  } catch (err) {
+    throw new Error(`Audit registry returned malformed JSON: ${err.message}`)
+  }
+  return normalizeAdvisoryResponse(raw, pkgMap)
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────
@@ -148,12 +163,7 @@ async function main() {
     pkgMap = parseLockfilePackages(lockfilePath)
   } catch (err) {
     console.error(`Failed to read pnpm-lock.yaml: ${err.message}`)
-    process.exit(ignoreRegistryErrors ? 0 : 1)
-  }
-
-  if (pkgMap.size === 0) {
-    console.warn('No packages found in pnpm-lock.yaml — skipping audit.')
-    process.exit(0)
+    process.exit(1)
   }
 
   let advisories
@@ -179,6 +189,9 @@ async function main() {
     metadata: {
       vulnerabilities: vulnCounts,
       totalDependencies: pkgMap.size,
+      source: 'npm-bulk-advisories',
+      status: 'complete',
+      lockfile: 'pnpm-lock.yaml',
     },
   }
 
@@ -218,7 +231,9 @@ async function main() {
   process.exit(0)
 }
 
-main().catch((err) => {
-  console.error('Fatal audit error:', err.message)
-  process.exit(ignoreRegistryErrors ? 0 : 1)
-})
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch((err) => {
+    console.error('Fatal audit error:', err.message)
+    process.exit(1)
+  })
+}
