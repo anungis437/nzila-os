@@ -47,6 +47,27 @@ test('registry response is strictly typed and bound to installed packages', () =
   )
 })
 
+test('duplicate advisory IDs cannot overwrite or downgrade earlier findings', () => {
+  const packages = new Map([
+    ['node-forge', new Set(['1.4.0'])],
+    ['follow-redirects', new Set(['1.16.1'])],
+  ])
+  const high = { id: 1244017, severity: 'high', title: 'PEM DoS' }
+  const low = { id: 1244017, severity: 'low', title: 'Forged downgrade' }
+  assert.throws(
+    () => normalizeAdvisoryResponse({ 'node-forge': [high, low] }, packages),
+    /Duplicate advisory ID/,
+  )
+  assert.throws(
+    () => normalizeAdvisoryResponse({ 'node-forge': [high], 'follow-redirects': [low] }, packages),
+    /Duplicate advisory ID/,
+  )
+  assert.deepEqual(
+    normalizeAdvisoryResponse({ 'node-forge': [high] }, packages),
+    { '1244017': { ...high, package: 'node-forge' } },
+  )
+})
+
 test('unsupported ignore-registry-errors escape hatch is rejected before any scan', () => {
   const file = fileURLToPath(new URL('./npm-bulk-audit.mjs', import.meta.url))
   const result = spawnSync(process.execPath, [resolve(file), '--ignore-registry-errors'], {
