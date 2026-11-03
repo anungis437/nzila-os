@@ -119,8 +119,11 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
         throw new Error(`Invalid advisory record for ${pkgName}`)
       }
       const key = String(adv.id)
-      if (flat[key] && flat[key].package !== pkgName) {
-        throw new Error(`Advisory ID collision across packages: ${key}`)
+      // Never let a repeated advisory ID overwrite an earlier finding. The
+      // registry may return several affected versions for one package; a
+      // collision must be investigated, not silently downgraded or hidden.
+      if (Object.prototype.hasOwnProperty.call(flat, key)) {
+        throw new Error(`Duplicate advisory ID in registry response: ${key}`)
       }
       flat[key] = { ...adv, package: pkgName }
     }
