@@ -11,6 +11,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Invalid or unreadable audit report'))).toBe(true)
   })
 
+  it('rejects a forged zero-vulnerability report without collector provenance', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-forged-empty.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('collector provenance'))).toBe(true)
+  })
+
   it('accepts a valid, completed, zero-vulnerability inventory', () => {
     const result = checkVulnerabilityPolicy(fixture('audit-clean.json'), atApproval)
     expect(result.highOrCritical).toBe(0)
