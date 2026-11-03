@@ -423,11 +423,15 @@ export function checkVulnerabilityPolicy(
     if (!summary || typeof summary !== 'object' || Array.isArray(summary)) {
       throw new Error('Audit report missing vulnerability summary')
     }
-    if (details.status !== undefined && details.status !== 'complete') {
-      throw new Error('Incomplete dependency audit report')
+    // A forged empty report must not pass by omitting the collector's
+    // completion evidence. Only the audited bulk-collector schema is accepted.
+    if (details.source !== 'npm-bulk-advisories' ||
+        details.status !== 'complete' ||
+        details.lockfile !== 'pnpm-lock.yaml') {
+      throw new Error('Audit report lacks supported collector provenance or completion')
     }
-    if (details.totalDependencies !== undefined &&
-        (!Number.isSafeInteger(details.totalDependencies) || (details.totalDependencies as number) <= 0)) {
+    if (!Number.isSafeInteger(details.totalDependencies) ||
+        (details.totalDependencies as number) <= 0) {
       throw new Error('Audit report has no verified dependency inventory')
     }
     const value = root.advisories ?? root.vulnerabilities
