@@ -49,6 +49,13 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Malformed or missing vulnerability summary: low'))).toBe(true)
   })
 
+  it('does not let a HIGH waiver authorize a CRITICAL advisory of the same ID and package', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-waiver-severity-mismatch.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.waived).toBe(0)
+    expect(result.unwaived).toBe(1)
+  })
+
   it('rejects an expired waiver without extending its validity', () => {
     const afterExpiry = new Date('2026-11-05T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
