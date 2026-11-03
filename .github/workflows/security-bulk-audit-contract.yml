@@ -7,6 +7,7 @@ on:
       - 'tooling/security/npm-bulk-audit.test.mjs'
       - 'tooling/security/supply-chain-policy.ts'
       - 'tooling/security/supply-chain-policy.test.ts'
+      - 'tooling/security/vitest.audit.config.ts'
       - 'tooling/security/fixtures/audit-*.json'
       - '.github/workflows/security-bulk-audit-contract.yml'
   push:
@@ -15,6 +16,7 @@ on:
       - 'tooling/security/npm-bulk-audit.test.mjs'
       - 'tooling/security/supply-chain-policy.ts'
       - 'tooling/security/supply-chain-policy.test.ts'
+      - 'tooling/security/vitest.audit.config.ts'
       - 'tooling/security/fixtures/audit-*.json'
       - '.github/workflows/security-bulk-audit-contract.yml'
 
@@ -38,4 +40,4 @@ jobs:
       - name: Install locked workspace dependencies
         run: pnpm install --frozen-lockfile
       - name: Run waiver and report-integrity tests
-        run: pnpm exec vitest run tooling/security/supply-chain-policy.test.ts
+        run: pnpm exec vitest run --config tooling/security/vitest.audit.config.ts
