@@ -260,41 +260,13 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
   //   - 1117941–1117943 (otel) — auto-instrumentations-node>=0.75.0 / sdk-node@0.217+; absent from audit
   // Fresh high finding 1239030 (adm-zip) remediated by override adm-zip>=0.6.1 (also clears 1193734).
 
-  // npm advisory feed rollover (2026-08-01): new IDs for previously triaged dependency families.
-  // Approved as a temporary bridge while dependency upgrades are prepared.
-  ...[
-    { id: '1123898', pkg: 'brace-expansion' },
-    { id: '1130591', pkg: 'brace-expansion' },
-    { id: '1123911', pkg: 'js-yaml' },
-    { id: '1123912', pkg: 'js-yaml' },
-    { id: '1123940', pkg: 'tar', severity: 'critical' as const },
-    { id: '1123941', pkg: 'tar' },
-    { id: '1123943', pkg: 'socket.io' },
-    { id: '1123944', pkg: 'shell-quote' },
-    { id: '1123967', pkg: 'axios' },
-    { id: '1124007', pkg: 'immutable' },
-    { id: '1124017', pkg: 'immutable' },
-    { id: '1124064', pkg: 'fast-uri' },
-    { id: '1130178', pkg: 'fast-uri' },
-    { id: '1124066', pkg: 'sharp' },
-    { id: '1124170', pkg: 'next' },
-    { id: '1124171', pkg: 'next' },
-    { id: '1124184', pkg: 'next' },
-    { id: '1124192', pkg: 'next' },
-    { id: '1124242', pkg: 'next-auth', severity: 'critical' as const },
-    { id: '1124244', pkg: 'next-auth' },
-    { id: '1124246', pkg: 'next-auth', severity: 'critical' as const },
-    { id: '1124273', pkg: 'find-my-way' },
-    { id: '1124288', pkg: 'postcss' },
-  ].map(({ id, pkg, severity }) => ({
-    id,
-    package: pkg,
-    reason: 'Temporary advisory-ID rollover waiver (2026-08-01). Risk previously triaged for this dependency family; tracked for remediation in the next dependency upgrade sweep.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-01',
-    expiresAt: '2026-10-31',
-    severity: severity ?? ('high' as const),
-  })),
+  // 2026-11-03: retired 23 expired 2026-08-01 advisory-ID rollover waivers.
+  // They expired on 2026-10-31 and are NOT present among the 14 high advisories
+  // in the exact-SHA 2026-11-03 npm audit (job 125758768608). No waiver was
+  // extended or re-approved. If any historical ID appears again, the existing
+  // fail-closed vulnerability policy treats it as UNWAIVED.
+  // See docs/security/2026-11-03-expired-waiver-retirement.md.
+
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────
