@@ -111,3 +111,17 @@ test('duplicate snapshots sections cannot hide dependencies from the audit inven
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
 })
+
+
+test('duplicate or conflicting lockfile version declarations fail closed', () => {
+  for (const prefix of [
+    'lockfileVersion: 9.0\nlockfileVersion: 6.0\n',
+    'lockfileVersion: 6.0\nlockfileVersion: 9.0\n',
+    'lockfileVersion: 9.0\nlockfileVersion: 9.0\n',
+  ]) {
+    withLockfile(prefix + 'snapshots:\n  undici@7.29.1:\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Unsupported or ambiguous pnpm lockfile version/))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
+})
