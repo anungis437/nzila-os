@@ -49,6 +49,9 @@ async function loadRoute() { return import('../billing/send-batch/route'); }
 
 describe('billing/send-batch financial mandate and tenant isolation', () => {
   beforeEach(() => {
+    // Re-evaluate the route module so withApi registration is observable in every test.
+    // clearAllMocks alone preserves Vitest's ESM module cache across test cases.
+    vi.resetModules();
     vi.clearAllMocks();
     m.tx.select.mockReset();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
