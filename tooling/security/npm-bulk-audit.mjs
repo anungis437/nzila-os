@@ -69,19 +69,19 @@ export function parseLockfilePackages(lockfilePath) {
 
   // A lockfile inventory must be derived from one top-level resolved section,
   // never from arbitrary indented text or sections appended after snapshots.
-  if (!/^lockfileVersion:\\s*['\"]?9(?:\\.0)?['\"]?\\s*$/m.test(content)) {
+  if (!/^lockfileVersion:\s*['\"]?9(?:\.0)?['\"]?\s*$/m.test(content)) {
     throw new Error('Unsupported pnpm lockfile version; expected v9')
   }
-  const lines = content.split(/\\r?\\n/)
+  const lines = content.split(/\r?\n/)
   const start = lines.findIndex((line) => line === 'snapshots:')
   if (start === -1) {
     throw new Error('Missing snapshots/packages section in pnpm-lock.yaml; cannot establish dependency inventory')
   }
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i]
-    if (/^[^\\s#][^:]*:/.test(line)) break // next top-level YAML section
+    if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
-    const match = /^ {2}((?:@[^\\s@/:]+\\/)?[^\\s@/:]+)@([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)(?:\\([^\\n]*\\))?:\\s*$/.exec(line)
+    const match = /^ {2}((?:@[^\s@/:]+\.)?[^\s@/:]+)@([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)(?:\.[^\n]*\.)?:\s*$/.exec(line)
     if (!match) {
       throw new Error('Malformed resolved snapshot key in pnpm-lock.yaml')
     }
