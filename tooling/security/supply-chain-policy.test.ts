@@ -62,6 +62,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Advisory identity mismatch'))).toBe(true)
   })
 
+  it('rejects a forged alternate vulnerabilities collection even when advisories is empty', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-dual-collections.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('alternate vulnerabilities collection'))).toBe(true)
+  })
+
   it('rejects an expired waiver without extending its validity', () => {
     const afterExpiry = new Date('2026-11-05T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
