@@ -110,6 +110,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Conflicting or malformed package identities'))).toBe(true)
   })
 
+  it('rejects whitespace-spoofed package aliases before waiver matching', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-noncanonical-package-alias.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('Conflicting or malformed package identities'))).toBe(true)
+  })
+
   it('rejects an expired waiver without extending its validity', () => {
     const afterExpiry = new Date('2026-11-05T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
