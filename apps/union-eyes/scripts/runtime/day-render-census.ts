@@ -42,7 +42,7 @@ export const ACCEPTED: ReadonlyArray<{ file: string; text: string; reason: strin
   {
     file: 'components/leadership/employer-hotspots-table.tsx',
     text: 'new Date(emp.lastCommunicationDate).toLocaleDateString()',
-    reason: 'lastCommunicationDate is the latest communication timestamp of the employer (dashboard-kpi-service sends toISOString() of the newest sent_at), an instant',
+    reason: 'lastCommunicationDate is the latest of the employer\'s grievance timestamps (updatedAt, meetingDate, resolvedDate, filedDate: dashboard-kpi-service takes their maximum and sends toISOString()), an instant',
   },
   {
     file: 'components/workbench/workbench-console.tsx',

@@ -23,7 +23,7 @@ import { getTrustMetrics } from '@/lib/trust/system-metrics';
 import { formatTableList } from '@/lib/trust/format';
 import { formatDay } from '@/lib/client/day';
 import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { SystemStatusGrid } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout, CalloutPresets } from '@/components/marketing/human-centered-callout';
 import { Shield, Lock, GitBranch, Scale, FileText } from 'lucide-react';
@@ -39,6 +39,8 @@ export default async function TrustPage() {
   const { organizationId } = await requireOrganizationScope();
   const metrics = await getTrustMetrics(organizationId);
   const t = await getTranslations('trust');
+  // Dates and numbers are read in the reader's language: the server's own default locale is not it.
+  const locale = await getLocale();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -56,7 +58,7 @@ export default async function TrustPage() {
           <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
             <span>{t("lastUpdated")}:</span>
             <span className="font-medium text-slate-700">
-              {metrics.lastUpdated.toLocaleString('en-US', {
+              {metrics.lastUpdated.toLocaleString(locale, {
                 dateStyle: 'medium',
                 timeStyle: 'short',
               })}
@@ -98,7 +100,7 @@ export default async function TrustPage() {
           <StatCard
             icon={<FileText className="h-5 w-5" />}
             label={t("statAuditEvents")}
-            value={metrics.auditLog.eventsLogged.toLocaleString()}
+            value={metrics.auditLog.eventsLogged.toLocaleString(locale)}
             status={metrics.auditLog.status}
           />
         </div>
@@ -131,7 +133,7 @@ export default async function TrustPage() {
                   },
                   {
                     label: t("lastAudit"),
-                    value: metrics.immutability.lastAudit.toLocaleDateString(),
+                    value: metrics.immutability.lastAudit.toLocaleDateString(locale),
                   },
                 ],
                 auditUrl: '#immutability',
@@ -156,7 +158,7 @@ export default async function TrustPage() {
                   },
                   {
                     label: t("lastCheck"),
-                    value: metrics.rlsEnforcement.lastPolicyCheck.toLocaleDateString(),
+                    value: metrics.rlsEnforcement.lastPolicyCheck.toLocaleDateString(locale),
                   },
                 ],
                 auditUrl: '#rls',
@@ -177,7 +179,7 @@ export default async function TrustPage() {
                   },
                   {
                     label: t("lastValidation"),
-                    value: metrics.fsmValidation.lastValidation.toLocaleDateString(),
+                    value: metrics.fsmValidation.lastValidation.toLocaleDateString(locale),
                   },
                 ],
                 auditUrl: '#fsm',
@@ -215,7 +217,7 @@ export default async function TrustPage() {
               <div>
                 <p className="text-sm text-slate-600 mb-2">{t("eventsLogged")}</p>
                 <p className="text-3xl font-bold text-slate-900">
-                  {metrics.auditLog.eventsLogged.toLocaleString()}
+                  {metrics.auditLog.eventsLogged.toLocaleString(locale)}
                 </p>
               </div>
               <div>
@@ -247,7 +249,7 @@ export default async function TrustPage() {
                   <li>{t("updateTriggers")}</li>
                   <li>{t("deleteTriggers")}</li>
                   <li>{t("appliedTo")}: {formatTableList(metrics.immutability.tablesProtected)}</li>
-                  <li>{t("verified")}: {metrics.immutability.lastAudit.toLocaleDateString()}</li>
+                  <li>{t("verified")}: {metrics.immutability.lastAudit.toLocaleDateString(locale)}</li>
                 </ul>
               </Section>
 
@@ -290,7 +292,7 @@ export default async function TrustPage() {
                   </li>
                   {metrics.governance.lastElectionDate && (
                     <li>
-                      {t("lastElection")}: {formatDay(metrics.governance.lastElectionDate, undefined, 'numeric')}
+                      {t("lastElection")}: {formatDay(metrics.governance.lastElectionDate, locale, 'numeric')}
                     </li>
                   )}
                   <li>{t("classVotingRights")}</li>

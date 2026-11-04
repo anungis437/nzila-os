@@ -21,7 +21,8 @@ const STYLE_OPTIONS: Record<Exclude<DayStyle, 'numeric'>, Intl.DateTimeFormatOpt
 
 function isoOf(value: DayValue): string {
   if (typeof value === 'string') return value;
-  return Number.isNaN(value.getTime()) ? '' : value.toISOString();
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? '' : value.toISOString();
+  return '';
 }
 
 function dayParts(value: DayValue): [number, number, number] | null {
@@ -29,15 +30,19 @@ function dayParts(value: DayValue): [number, number, number] | null {
   return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
 }
 
-/** The Date to format, compare or take fields from: the recorded day at noon in the reader's zone, or the instant itself when a time of day was recorded. A day that does not exist (30 February) is no date. */
+/**
+ * The Date to format, compare or take fields from: the recorded day at noon in the reader's zone, or the instant itself when a time of day was recorded. A day that does not exist
+ * (30 February) is no date, and neither is a value that is not a day at all: a nullable column a screen typed as present arrives as null, and `new Date(null)` is 1 January 1970.
+ */
 export function recordedDay(value: DayValue): Date {
+  if (typeof value !== 'string' && !(value instanceof Date)) return new Date(Number.NaN);
   const parts = dayParts(value);
   if (!parts) return new Date(value);
   const date = new Date(parts[0], parts[1] - 1, parts[2], 12);
   return date.getMonth() === parts[1] - 1 && date.getDate() === parts[2] ? date : new Date(Number.NaN);
 }
 
-/** The day as text in the reader's locale (the browser's when none is given). A value that is no date is shown as it was received. */
+/** The day as text in the reader's locale (the browser's when none is given). A value that is no date is shown as it was received; nothing received shows as nothing. */
 export function formatDay(value: DayValue, locale?: string, style: DayStyle = 'medium'): string {
   const date = recordedDay(value);
   if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : '';
@@ -53,10 +58,11 @@ export function daysUntilDay(value: DayValue, now: Date = new Date()): number {
   return Math.round(localDayNumber(recordedDay(value)) - localDayNumber(now));
 }
 
-/** True once the recorded day is over: a deadline on 4 March is not overdue until 5 March, whatever the hour or the time zone. An instant is past when it has been reached. */
+/** True once the recorded day is over: a deadline on 4 March is not overdue until 5 March, whatever the hour or the time zone. An instant is past when it has been reached. A value that is no date is not past. */
 export function isDayPast(value: DayValue, now: Date = new Date()): boolean {
-  if (dayParts(value)) return daysUntilDay(value, now) < 0;
-  return new Date(value).getTime() < now.getTime();
+  const date = recordedDay(value);
+  if (Number.isNaN(date.getTime())) return false;
+  return dayParts(value) ? daysUntilDay(value, now) < 0 : date.getTime() < now.getTime();
 }
 
 /**

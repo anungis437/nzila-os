@@ -102,6 +102,25 @@ describe('an instant stays an instant', () => {
   });
 });
 
+describe('a value that is no day at all', () => {
+  // A nullable column a screen typed as present arrives as null: `new Date(null)` is 1 January 1970, which is a date that was never recorded.
+  it('is no date, instead of 1 January 1970 or a thrown error', () => {
+    for (const value of [null, undefined, 0, {}] as unknown as Array<string>) {
+      expect(Number.isNaN(recordedDay(value).getTime()), String(value)).toBe(true);
+      expect(formatDay(value, 'en-CA')).toBe('');
+      expect(isDayPast(value)).toBe(false);
+      expect(Number.isNaN(daysUntilDay(value))).toBe(true);
+    }
+  });
+
+  it('keeps a text that is not a date as it was received, and does not call it past', () => {
+    expect(formatDay('', 'en-CA')).toBe('');
+    expect(formatDay('n/a', 'en-CA')).toBe('n/a');
+    expect(isDayPast('n/a')).toBe(false);
+    expect(isDayPast(new Date('nope'))).toBe(false);
+  });
+});
+
 describe('formatting styles', () => {
   it('matches toLocaleDateString for the numeric style, so a screen keeps the format it had', () => {
     inZone('America/Toronto', () => {
