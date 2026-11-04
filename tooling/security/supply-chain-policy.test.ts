@@ -139,6 +139,11 @@ describe('security audit policy: fail closed', () => {
 
 
 describe('security license policy: exact allowlist', () => {
+  it('rejects conflicting SPDX license identifiers before accepting an allowed id', () => {
+    expect(() => validateSbomLicenses(fixture('sbom-conflicting-license-identities.json')))
+      .toThrow('Conflicting or malformed license identity')
+  })
+
   it('rejects empty license arrays without rejecting an explicitly approved license', () => {
     const violations = validateSbomLicenses(fixture('sbom-empty-licenses.json'))
     expect(violations.map((violation) => violation.package)).toEqual(['unlicensed-empty', 'unlicensed-missing'])
