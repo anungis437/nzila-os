@@ -1,8 +1,29 @@
+import * as fs from 'node:fs'
+import * as os from 'node:os'
+import * as path from 'node:path'
 import { describe, it, expect } from 'vitest'
 import { checkVulnerabilityPolicy, validateSbomLicenses } from './supply-chain-policy'
 
 const atApproval = new Date('2026-10-10T12:00:00Z')
 const fixture = (name: string) => `tooling/security/fixtures/${name}`
+
+describe('security gate input containment', () => {
+  it('rejects symlink-escaped audit and SBOM inputs', () => {
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'nzila-security-input-'))
+    const link = path.join(__dirname, 'fixtures', 'security-escaped-input-test.json')
+    try {
+      fs.writeFileSync(path.join(outside, 'report.json'), '{}')
+      fs.symlinkSync(path.join(outside, 'report.json'), link)
+      const relative = 'tooling/security/fixtures/security-escaped-input-test.json'
+      expect(checkVulnerabilityPolicy(relative, atApproval).errors.some((message) =>
+        message.includes('Security input resolves outside repository root'))).toBe(true)
+      expect(() => validateSbomLicenses(relative)).toThrow('Security input resolves outside repository root')
+    } finally {
+      fs.rmSync(link, { force: true })
+      fs.rmSync(outside, { recursive: true, force: true })
+    }
+  })
+})
 
 describe('security audit policy: fail closed', () => {
   it('refuses an arbitrary JSON file in place of a valid audit', () => {
