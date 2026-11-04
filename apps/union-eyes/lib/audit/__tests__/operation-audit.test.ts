@@ -4,6 +4,7 @@ const m = vi.hoisted(() => ({
   audit: vi.fn(),
   tx: {},
   orgs: [] as unknown[],
+  systemRuns: 0,
   logger: { error: vi.fn() },
 }));
 
@@ -12,11 +13,15 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     m.orgs.push(ctx);
     return fn(m.tx);
   },
+  withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => {
+    m.systemRuns += 1;
+    return fn(m.tx);
+  },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
-import { performAuditedOperation, performAtomicAuditedOperation, OperationAuditError, operationAuditResponse } from '../operation-audit';
+import { performAuditedOperation, performAtomicAuditedOperation, performAtomicSystemAuditedOperation, OperationAuditError, operationAuditResponse } from '../operation-audit';
 
 const op = { organizationId: 'org_1', userId: 'admin', action: 'platform.thing', resourceType: 'thing', resourceId: 't1' };
 
@@ -160,5 +165,52 @@ describe('performAtomicAuditedOperation', () => {
     m.audit.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('audit down'));
     await expect(performAtomicAuditedOperation({ ...op, afterCommitReport }, async () => 5, async () => { throw new Error('x'); })).resolves.toBe(5);
     expect(afterCommitReport.ok).toBe(false);
+  });
+
+  it('runs as the acting organization on the runtime role and never opens a system transaction', async () => {
+    m.systemRuns = 0;
+    await performAtomicAuditedOperation(op, async () => 1, async () => { throw new Error('cache refresh failed'); });
+    expect(m.orgs).toEqual([{ organizationId: 'org_1' }, { organizationId: 'org_1' }]);
+    expect(m.systemRuns).toBe(0);
+  });
+});
+
+describe('performAtomicSystemAuditedOperation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.orgs = [];
+    m.systemRuns = 0;
+    m.audit.mockResolvedValue(undefined);
+  });
+
+  it('writes the work and its single audit record on the one system transaction handle, in that order', async () => {
+    const order: string[] = [];
+    m.audit.mockImplementation(async (tx: unknown, entry: { action: string }) => { order.push(`audit:${entry.action}:${tx === m.tx}`); });
+    const result = await performAtomicSystemAuditedOperation(op, async (tx) => { order.push(`work:${tx === m.tx}`); return 9; });
+    expect(result).toBe(9);
+    expect(order).toEqual(['work:true', 'audit:platform.thing:true']);
+    expect(m.systemRuns).toBe(1);
+    expect(m.orgs).toHaveLength(0);
+  });
+
+  it('turns a failed audit write into OperationAuditError so the system transaction is abandoned, and does not run afterCommit', async () => {
+    m.audit.mockRejectedValue(new Error('audit down'));
+    const after = vi.fn();
+    await expect(performAtomicSystemAuditedOperation(op, async () => 1, after)).rejects.toBeInstanceOf(OperationAuditError);
+    expect(after).not.toHaveBeenCalled();
+  });
+
+  it('refuses an unattributed operation without opening a transaction', async () => {
+    await expect(performAtomicSystemAuditedOperation({ ...op, organizationId: null }, async () => 1)).rejects.toBeInstanceOf(OperationAuditError);
+    expect(m.systemRuns).toBe(0);
+  });
+
+  it('records a failed afterCommit under the system role as its own failure entry and still returns the committed result', async () => {
+    const afterCommitReport = { ok: true };
+    await expect(performAtomicSystemAuditedOperation({ ...op, afterCommitReport }, async () => 5, async () => { throw new Error('x'); })).resolves.toBe(5);
+    expect(afterCommitReport.ok).toBe(false);
+    expect(m.audit.mock.calls.map((call) => [call[1].action, call[2]])).toEqual([['platform.thing', undefined], ['platform.thing.after_commit_failed', 'failure']]);
+    expect(m.systemRuns).toBe(2);
+    expect(m.orgs).toHaveLength(0);
   });
 });

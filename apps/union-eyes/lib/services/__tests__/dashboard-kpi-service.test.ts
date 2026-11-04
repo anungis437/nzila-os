@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildExecutiveMetrics,
   buildLeadershipDashboard,
@@ -14,6 +14,21 @@ type ExecutiveMetricsRemittances = Parameters<typeof buildExecutiveMetrics>[3];
 function iso(date: string): Date {
   return new Date(date);
 }
+
+/** The organization contexts the service opened, and a context module that hands the test's database double to the work done in one. */
+const contexts: Array<{ organizationId: string }> = [];
+function inContext(dbMock: unknown) {
+  return {
+    withRLSContext: async (context: { organizationId: string }, work: (tx: unknown) => Promise<unknown>) => {
+      contexts.push(context);
+      return work(dbMock);
+    },
+  };
+}
+
+beforeEach(() => {
+  contexts.length = 0;
+});
 
 describe("dashboard-kpi-service", () => {
   it("computes leadership KPI durations from grievance data", () => {
@@ -361,13 +376,14 @@ describe("dashboard-kpi-service", () => {
       cacheGet: cacheGetMock,
       cacheSet: cacheSetMock,
     }));
-    vi.doMock("@/db/db", () => ({ db: dbMock }));
+    vi.doMock("@/lib/db/with-rls-context", () => inContext(dbMock));
 
     const mod = await import("@/lib/services/dashboard-kpi-service");
     const result = await mod.getLeadershipDashboardMetrics({ organizationId: "org-1", timeframe: "monthly" });
 
     expect(result.provenance.cache.hit).toBe(true);
     expect(dbMock.select).not.toHaveBeenCalled();
+    expect(contexts).toEqual([]);
     expect(cacheSetMock).not.toHaveBeenCalled();
   });
 
@@ -446,7 +462,7 @@ describe("dashboard-kpi-service", () => {
       cacheGet: cacheGetMock,
       cacheSet: cacheSetMock,
     }));
-    vi.doMock("@/db/db", () => ({ db: dbMock }));
+    vi.doMock("@/lib/db/with-rls-context", () => inContext(dbMock));
 
     const mod = await import("@/lib/services/dashboard-kpi-service");
     const result = await mod.getLeadershipDashboardMetrics({
@@ -458,6 +474,8 @@ describe("dashboard-kpi-service", () => {
     expect(result.kpi.activeGrievances).toBe(1);
     expect(result.compliance.alerts[0]?.title).toBe("Reporting Overdue alert");
     expect(result.provenance.cache.hit).toBe(false);
+    // The figures are read in the organization's own context: outside one the handle has no organization and every table reads as empty.
+    expect(contexts).toEqual([{ organizationId: "org-1" }]);
     expect(cacheSetMock).toHaveBeenCalledTimes(1);
   });
 
@@ -532,7 +550,7 @@ describe("dashboard-kpi-service", () => {
       cacheGet: cacheGetMock,
       cacheSet: cacheSetMock,
     }));
-    vi.doMock("@/db/db", () => ({ db: dbMock }));
+    vi.doMock("@/lib/db/with-rls-context", () => inContext(dbMock));
 
     const mod = await import("@/lib/services/dashboard-kpi-service");
     const result = await mod.getExecutiveMetrics({ organizationId: "org-1", timeframe: "monthly", now: iso("2026-05-10T00:00:00.000Z") });
@@ -540,6 +558,7 @@ describe("dashboard-kpi-service", () => {
     expect(result.atRiskStrategicGoals).toBe(1);
     expect(result.duesRemittances.expectedAmount).toBe(20);
     expect(result.provenance.cache.hit).toBe(false);
+    expect(contexts).toEqual([{ organizationId: "org-1" }]);
     expect(cacheSetMock).toHaveBeenCalledTimes(1);
   });
 
@@ -582,13 +601,14 @@ describe("dashboard-kpi-service", () => {
       cacheGet: cacheGetMock,
       cacheSet: cacheSetMock,
     }));
-    vi.doMock("@/db/db", () => ({ db: dbMock }));
+    vi.doMock("@/lib/db/with-rls-context", () => inContext(dbMock));
 
     const mod = await import("@/lib/services/dashboard-kpi-service");
     const result = await mod.getExecutiveMetrics({ organizationId: "org-1", timeframe: "monthly" });
 
     expect(result.provenance.cache.hit).toBe(true);
     expect(dbMock.select).not.toHaveBeenCalled();
+    expect(contexts).toEqual([]);
     expect(cacheSetMock).not.toHaveBeenCalled();
   });
 

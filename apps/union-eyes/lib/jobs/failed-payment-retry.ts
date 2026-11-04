@@ -12,7 +12,7 @@
  * @module lib/jobs/failed-payment-retry
  */
 
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -52,6 +52,11 @@ interface RetryTransactionRow {
 // FAILED PAYMENT RETRY SERVICE
 // =============================================================================
 
+/**
+ * Platform job: it reads the failed dues of every organization, so it runs as the system role, which only the platform-gated route that
+ * triggers it may reach. The scan is one system transaction; the update of a transaction and each notification are system transactions
+ * of their own, so a statement that fails for one transaction never aborts the transactions after it.
+ */
 export class FailedPaymentRetryService {
   /**
    * Run failed payment retry job
@@ -121,11 +126,13 @@ export class FailedPaymentRetryService {
           const nextRetryDate = calculateRetryDate(failureCount + 1);
 
           // Send retry notification to member
-          await sendPaymentFailure(
-            txn.id,
-            'Payment will be retried automatically',
-            true,
-            nextRetryDate
+          await withSystemContext(() =>
+            sendPaymentFailure(
+              txn.id,
+              'Payment will be retried automatically',
+              true,
+              nextRetryDate
+            ),
           );
 
           result.retriesSucceeded++;
@@ -169,26 +176,28 @@ export class FailedPaymentRetryService {
    */
   private static async getTransactionsNeedingRetry(): Promise<RetryTransactionRow[]> {
     try {
-      // Get pending transactions with failures
-      const transactions = await db
-        .select({
-          id: duesTransactions.id,
-          memberId: duesTransactions.memberId,
-          organizationId: duesTransactions.organizationId,
-          totalAmount: duesTransactions.totalAmount,
-          dueDate: duesTransactions.dueDate,
-          status: duesTransactions.status,
-          metadata: duesTransactions.metadata,
-          createdAt: duesTransactions.createdAt,
-        })
-        .from(duesTransactions)
-        .where(
-          and(
-            eq(duesTransactions.status, 'pending'),
-            // Only transactions with payment attempts
-            sql`${duesTransactions.metadata}->>'failureCount' IS NOT NULL`
-          )
-        );
+      // Get pending transactions with failures (cross-organization read, system role)
+      const transactions = await withSystemContext((tx) =>
+        tx
+          .select({
+            id: duesTransactions.id,
+            memberId: duesTransactions.memberId,
+            organizationId: duesTransactions.organizationId,
+            totalAmount: duesTransactions.totalAmount,
+            dueDate: duesTransactions.dueDate,
+            status: duesTransactions.status,
+            metadata: duesTransactions.metadata,
+            createdAt: duesTransactions.createdAt,
+          })
+          .from(duesTransactions)
+          .where(
+            and(
+              eq(duesTransactions.status, 'pending'),
+              // Only transactions with payment attempts
+              sql`${duesTransactions.metadata}->>'failureCount' IS NOT NULL`
+            )
+          ),
+      );
 
       // Filter for transactions that need retry based on time elapsed
       const now = new Date();
@@ -272,22 +281,25 @@ export class FailedPaymentRetryService {
         failureCount,
       });
 
-      await db
-        .update(duesTransactions)
-        .set({
-          status: 'overdue',
-          metadata: sql`jsonb_set(
-            COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
-            '{requiresAdminIntervention}',
-            'true'::jsonb
-          )`,
-          notes: sql`COALESCE(${duesTransactions.notes}, '') || E'\n' || ${`[${new Date().toISOString()}] Max payment retry attempts (${failureCount}) reached. Requires admin intervention.`}`,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(duesTransactions.id, transactionId), eq(duesTransactions.organizationId, organizationId)));
+      // The flag commits first; the notification is best effort (it never throws) and must not roll the flag back
+      await withSystemContext((tx) =>
+        tx
+          .update(duesTransactions)
+          .set({
+            status: 'overdue',
+            metadata: sql`jsonb_set(
+              COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
+              '{requiresAdminIntervention}',
+              'true'::jsonb
+            )`,
+            notes: sql`COALESCE(${duesTransactions.notes}, '') || E'\n' || ${`[${new Date().toISOString()}] Max payment retry attempts (${failureCount}) reached. Requires admin intervention.`}`,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(duesTransactions.id, transactionId), eq(duesTransactions.organizationId, organizationId))),
+      );
 
       // Send admin intervention notification
-      await sendAdminIntervention(transactionId);
+      await withSystemContext(() => sendAdminIntervention(transactionId));
 
       logger.info('Transaction marked for admin intervention', {
         transactionId,

@@ -12,6 +12,12 @@ vi.mock('@/db', async () => {
   const { lateBoundDb } = await import('@/app/api/__tests__/support/pglite-tables');
   return { db: lateBoundDb(state) };
 });
+// The scan and each warning marker run in short system transactions in production (the cron has no tenant session); here they run on the same PostgreSQL.
+vi.mock('@/lib/db/with-rls-context', async () => {
+  const { lateBoundDb } = await import('@/app/api/__tests__/support/pglite-tables');
+  const database = lateBoundDb(state);
+  return { withSystemContext: async (operation: (tx: unknown) => Promise<unknown>) => operation(database) };
+});
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 vi.mock('../email-service', () => ({
   sendAwardReceivedEmail: vi.fn(),
@@ -55,10 +61,8 @@ async function spend(org: string, user: string, amount: number, balanceAfter: nu
 beforeAll(async () => {
   const created = await createTableDatabase([rewardWalletLedger, inAppNotifications], [
     `CREATE UNIQUE INDEX uq_in_app_notifications_dedupe ON in_app_notifications (organization_id, user_id, ((data->>'dedupeKey'))) WHERE data ? 'dedupeKey'`,
-    `CREATE SCHEMA IF NOT EXISTS user_management`,
-    `CREATE TABLE user_management.users (user_id text primary key, email text, display_name text)`,
     `CREATE TABLE organizations (id uuid primary key, name text)`,
-    `CREATE TABLE organization_members (id uuid primary key default gen_random_uuid(), organization_id uuid not null, user_id text not null, name text)`,
+    `CREATE TABLE organization_members (id uuid primary key default gen_random_uuid(), organization_id uuid not null, user_id text not null, name text, email text not null)`,
   ]);
   pg = created.pg;
   state.db = created.db;
@@ -67,11 +71,13 @@ afterAll(async () => { await pg.close(); });
 beforeEach(async () => {
   state.sent.length = 0;
   state.failFor = null;
-  await pg.exec('TRUNCATE in_app_notifications, reward_wallet_ledger, user_management.users, organizations, organization_members');
+  await pg.exec('TRUNCATE in_app_notifications, reward_wallet_ledger, organizations, organization_members');
   await pg.query(`INSERT INTO organizations (id, name) VALUES ($1::uuid, 'Local 7'), ($2::uuid, 'Local 9')`, [ORG_A, ORG_B]);
-  for (const user of ['u7', 'u6', 'u14', 'u30', 'u20', 'u-spent', 'u-partial', 'u-b']) {
-    await pg.query(`INSERT INTO user_management.users (user_id, email) VALUES ($1, $1 || '@x.ca')`, [user]);
+  // The warning goes to the address of the member's record in the organization the credits belong to (the scan runs as the system role, which cannot read the identity store).
+  for (const user of ['u7', 'u6', 'u14', 'u30', 'u20', 'u-spent', 'u-partial']) {
+    await pg.query(`INSERT INTO organization_members (organization_id, user_id, email) VALUES ($1::uuid, $2, $2 || '@x.ca')`, [ORG_A, user]);
   }
+  await pg.query(`INSERT INTO organization_members (organization_id, user_id, email) VALUES ($1::uuid, 'u-b', 'u-b@x.ca')`, [ORG_B]);
 });
 
 describe('credit expiration warnings', () => {

@@ -222,10 +222,11 @@ describe('cases/[caseId]/transition route', () => {
     expect(await response.json()).toMatchObject({ error: 'TRANSITION_DENIED' });
   });
 
-  it('notifies the owning member in-app when their case moves', async () => {
+  it('notifies the owning member in-app when their case moves, with a link to their own case', async () => {
     const { PATCH } = await loadRoute();
+    const claimId = '8d3f6a52-1b0c-4a47-9f0e-0c5a3b7d1e01';
     m.state.claimRows = [{
-      claimId: 'case_1',
+      claimId,
       memberId: 'member_9',
       status: 'submitted',
       priority: 'medium',
@@ -239,7 +240,7 @@ describe('cases/[caseId]/transition route', () => {
     expect(m.state.inserted).toContainEqual(expect.objectContaining({
       userId: 'member_9',
       organizationId: 'org_1',
-      actionUrl: '/dashboard/claims/case_1',
+      actionUrl: `/dashboard/claims/${claimId}`,
     }));
   });
 

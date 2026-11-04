@@ -39,6 +39,8 @@ const m = vi.hoisted(() => ({
   auth: vi.fn(),
   withAuthContext: vi.fn(),
   audit: vi.fn(),
+  tenantContexts: [] as Array<{ organizationId: string }>,
+  tenantBindingRefused: { on: false },
 }));
 
 vi.mock('@nzila/platform-auth/password', () => ({
@@ -103,6 +105,12 @@ vi.mock('@/db/schema', () => ({
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: async (operation: (tx: unknown) => Promise<unknown>) => operation((await import('@/db/db')).db),
+  // The case-relationship count reads the authority kernel in the organization's own tenant transaction.
+  withRLSContext: async (context: { organizationId: string }, operation: (tx: unknown) => Promise<unknown>) => {
+    m.tenantContexts.push(context);
+    if (m.tenantBindingRefused.on) throw Object.assign(new Error('MEMBERSHIP_REQUIRED'), { code: 'MEMBERSHIP_REQUIRED' });
+    return operation((await import('@/db/db')).db);
+  },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 
@@ -125,6 +133,8 @@ const baseInput = {
 describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.tenantContexts.length = 0;
+    m.tenantBindingRefused.on = false;
     m.auth.mockResolvedValue({ userId: 'admin-1' });
     m.audit.mockResolvedValue(undefined);
     m.withAuthContext.mockImplementation(async (_context, callback) => callback());
@@ -237,8 +247,29 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
 
     expect(result.success).toBe(true);
     expect(result.caseAccessRevokedCount).toBe(2);
+    // The count is read in the organization's own tenant transaction: the system role holds no grant on the authority kernel.
+    expect(m.tenantContexts).toEqual([{ organizationId: baseInput.organizationId }]);
     // Kernel relationships are not rewritten: the membership disable ends them. Only the local status update runs.
     expect(m.membersUpdateWhere).toHaveBeenCalledTimes(1);
+  });
+
+  it('says the relationships were not counted, never zero, when the administrator cannot bind the organization, and still revokes', async () => {
+    m.tenantBindingRefused.on = true;
+    const { revokeMemberAccess } = await loadService();
+
+    const result = await revokeMemberAccess(baseInput);
+
+    expect(result.caseAccessRevokedCount).toBeNull();
+    expect(result.success).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(result.sessionsRevoked).toBe(true);
+    expect(result.authMembershipDisabled).toBe(true);
+    expect(result.localStatusUpdated).toBe(true);
+    expect(m.audit).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'member.access.deactivate', details: expect.objectContaining({ liveCaseRelationships: null }) }),
+      'success',
+    );
   });
 });
 

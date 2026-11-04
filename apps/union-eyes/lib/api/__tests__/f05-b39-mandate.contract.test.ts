@@ -17,8 +17,9 @@ describe('F05 financial intelligence needs a live mandate', () => {
     expect(mandate).toBeLessThan(source.indexOf('checkRateLimit('))
     expect(mandate).toBeLessThan(source.indexOf('guardAiFeature('))
     const resource = route.includes('/members/') ? 'memberId' : 'planId'
-    expect(source).toContain(`financeViewMandateDenial(context.organizationId!, context.userId!, ${resource})`)
-    expect(source.indexOf(`const ${resource} = request.nextUrl.pathname`)).toBeLessThan(mandate)
+    // The wrapper hands the handler the authenticated organization and user; the mandate is asked for that pair and for the validated path identifier.
+    expect(source).toContain(`financeViewMandateDenial(organizationId!, userId!, ${resource}.data)`)
+    expect(source.indexOf(`const ${resource} = z.guid().safeParse(params.id)`)).toBeLessThan(mandate)
   })
 
   it('the finance analysis checks the mandate before the feature gate and the report', () => {

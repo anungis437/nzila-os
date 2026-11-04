@@ -35,20 +35,20 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: vi.fn((handler: (...args: any[]) => unknown) => handler),
-}));
+vi.mock('@/lib/api/framework', async () => (await import('@/app/api/__tests__/support/with-api-stub')).frameworkModule);
 
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({
-  requireEntitlement: vi.fn(async () => undefined),
+// The route opens its own organization transaction: here that is the scripted handle every statement of the issuance goes through.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) => operation(mocks.db),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
   hasMinRole: mocks.hasMinRole,
 }));
 
+// The ambient handle must never be reached by this route.
 vi.mock('@/db/db', () => ({
-  db: mocks.db,
+  db: new Proxy({}, { get() { throw new Error('the ambient database handle was used'); } }),
 }));
 
 vi.mock('@/lib/services/case-access-service', () => ({
@@ -68,13 +68,23 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.persistAt
 
 const DOCUMENT_ID = '11111111-1111-4111-8111-111111111111';
 
-const { GET } = await import('@/app/api/documents/[id]/download/route');
+const { GET: route } = await import('@/app/api/documents/[id]/download/route');
+const { caller, declared, resetCaller } = await import('@/app/api/__tests__/support/with-api-stub');
+
+// The wrapper resolves the caller and the route params; the calls below name them as they always did.
+const GET = (request: Request, context: { organizationId: string; userId: string }, params: { id: string }) => {
+  caller.organizationId = context.organizationId;
+  caller.userId = context.userId;
+  return route(request, { params });
+};
 
 describe('GET /api/documents/[id]/download', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'member';
     mocks.db._selectQueue.length = 0;
-    mocks.hasMinRole.mockResolvedValueOnce(true).mockResolvedValue(false);
+    mocks.hasMinRole.mockResolvedValue(false);
     mocks.getEffectiveCaseAccess.mockResolvedValue({
       isPrimaryOwner: false,
       canViewCase: true,
@@ -82,6 +92,15 @@ describe('GET /api/documents/[id]/download', () => {
     });
     mocks.generateSasUrl.mockResolvedValue('https://storage/documents/org-1/file.pdf?sig=1');
     mocks.persistAtomicAudit.mockResolvedValue(undefined);
+  });
+
+  it('declares a member floor and the case-suite entitlement; a caller below the floor reaches no statement', async () => {
+    expect(declared.at(-1)).toMatchObject({ auth: { required: true, minRole: 'member' }, entitlement: 'grievance_case_suite' });
+    caller.role = 'guest';
+    const res = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), { organizationId: 'org-1', userId: 'user-1' }, { id: DOCUMENT_ID });
+
+    expect(res.status).toBe(403);
+    expect(mocks.db.select).not.toHaveBeenCalled();
   });
 
   it('denies download when governance policy denies access', async () => {

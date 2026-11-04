@@ -8,6 +8,11 @@ vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropa
 vi.mock('@/db/db', () => ({
   db: { select: () => ({ from: () => ({ where: orderByMock }) }) },
 }));
+// The eligible-interview count is read through the organization's tenant transaction; the transaction here is the mocked handle.
+vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
+  isUuid: () => true,
+  inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
+}));
 vi.mock('@/db/schema', () => ({
   exitInterviews: { id: 'id' },
 }));

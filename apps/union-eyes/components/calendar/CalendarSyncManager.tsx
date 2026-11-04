@@ -1,57 +1,106 @@
 /**
- * Calendar Sync Manager Component
- * 
- * Interface for connecting and managing external calendar sync
- * with Google Calendar and Microsoft Outlook.
- * 
+ * Calendar Sync Manager
+ *
+ * Lists the external (Google, Outlook) calendar connections the signed-in user already has, and lets them disconnect one.
+ *
+ * Synchronizing is not available in this release (UE-ACTION-CALENDAR-SYNC): the OAuth callbacks create a connection with no calendar mapping, no
+ * route lists a provider's calendars or stores a mapping, and the scheduled job answers "No calendar mappings configured" for every connection, so
+ * "Sync now" had nothing to send. The dialog therefore offers no way to connect another account, to sync, or to set sync options, and says so; it
+ * keeps disconnecting, which deletes the access stored here and asks the provider to revoke it.
+ *
  * @module components/calendar/CalendarSyncManager
  */
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
+import { Cloud, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Cloud,
-  CloudOff,
-  RefreshCw,
-  Trash2,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-} from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
+import { logger } from '@/lib/logger';
+import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
+import { asRecord, optionalString, requiredString } from '@/lib/client/row-fields';
 
-interface ExternalConnection {
+const COPY = {
+  en: {
+    title: 'Calendar Sync',
+    description: 'External calendars you connected earlier.',
+    reason:
+      'Connecting a Google or Outlook calendar is turned off in this release: no calendar can be chosen to synchronize, so nothing would be synchronized. You can still disconnect a calendar you connected earlier, which removes the access stored here.',
+    loading: 'Loading connected calendars…',
+    loadFailed: 'Connected calendars could not be loaded.',
+    retry: 'Try again',
+    none: 'No external calendars are connected.',
+    connectedOn: 'Connected on {date}',
+    disconnect: 'Disconnect',
+    disconnectConfirm: 'Disconnect {account}? The access stored here is removed.',
+    cancel: 'Cancel',
+    disconnectFailed: 'The calendar could not be disconnected.',
+    calendarOf: { google: 'Google Calendar', microsoft: 'Outlook Calendar' },
+    providerName: { google: 'Google', microsoft: 'Microsoft' },
+    revoked: 'Disconnected. Access was revoked at {provider}.',
+    notSupported: 'Disconnected here. {provider} cannot be asked to revoke access from this app; remove this app in your {provider} account settings to finish.',
+    unconfirmed: 'Disconnected here, but {provider} did not confirm that access was revoked. Check the permissions in your {provider} account.',
+  },
+  fr: {
+    title: 'Synchronisation du calendrier',
+    description: 'Calendriers externes que vous avez connectés auparavant.',
+    reason:
+      'La connexion d’un calendrier Google ou Outlook est désactivée dans cette version : aucun calendrier ne peut être choisi pour la synchronisation, donc rien ne serait synchronisé. Vous pouvez toujours déconnecter un calendrier connecté auparavant, ce qui supprime l’accès enregistré ici.',
+    loading: 'Chargement des calendriers connectés…',
+    loadFailed: 'Les calendriers connectés n’ont pas pu être chargés.',
+    retry: 'Réessayer',
+    none: 'Aucun calendrier externe n’est connecté.',
+    connectedOn: 'Connecté le {date}',
+    disconnect: 'Déconnecter',
+    disconnectConfirm: 'Déconnecter {account} ? L’accès enregistré ici est supprimé.',
+    cancel: 'Annuler',
+    disconnectFailed: 'Le calendrier n’a pas pu être déconnecté.',
+    calendarOf: { google: 'Calendrier Google', microsoft: 'Calendrier Outlook' },
+    providerName: { google: 'Google', microsoft: 'Microsoft' },
+    revoked: 'Déconnecté. L’accès a été révoqué chez {provider}.',
+    notSupported: 'Déconnecté ici. {provider} ne peut pas être invité à révoquer l’accès depuis cette application ; retirez cette application dans les paramètres de votre compte {provider} pour terminer.',
+    unconfirmed: 'Déconnecté ici, mais {provider} n’a pas confirmé la révocation de l’accès. Vérifiez les autorisations dans votre compte {provider}.',
+  },
+} as const;
+
+const fill = (template: string, values: Record<string, string>) => template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole);
+
+/** A connection of GET /api/calendar-sync/connections: the stored account, never a credential. */
+interface Connection {
   id: string;
-  provider: 'google' | 'microsoft';
-  providerAccountId: string;
-  syncEnabled: boolean;
-  syncDirection: 'import' | 'export' | 'both';
-  syncStatus: 'synced' | 'syncing' | 'failed' | 'pending';
-  lastSyncAt: string | null;
-  lastSyncError: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  calendarMappings: Record<string, any>;
-  createdAt: string;
+  provider: string;
+  account: string;
+  connectedAt: string;
 }
+
+type Loaded = { status: 'loading' } | { status: 'ready'; connections: Connection[] } | { status: 'error'; message: string | null };
+type Outcome = { tone: 'ok' | 'warn' | 'error'; text: string };
+
+function connectionFrom(value: unknown): Connection {
+  const row = asRecord(value, 'connection');
+  const connectedAt = requiredString(row, 'createdAt');
+  if (Number.isNaN(new Date(connectedAt).getTime())) throw new ApiShapeError('createdAt is not a date');
+  return {
+    id: requiredString(row, 'id'),
+    provider: requiredString(row, 'provider'),
+    account: optionalString(row, 'providerEmail') ?? requiredString(row, 'providerAccountId'),
+    connectedAt,
+  };
+}
+
+async function readConnections(): Promise<Connection[]> {
+  const response = await fetch('/api/calendar-sync/connections');
+  if (!response.ok) throw new Error(await readApiError(response, ''));
+  const connections = envelopeData(await response.json()).connections;
+  if (!Array.isArray(connections)) throw new ApiShapeError('no connections');
+  return connections.map(connectionFrom);
+}
+
+/** The server's own message when it gave one, else null (the caller words the failure in the reader's language). */
+const serverMessage = (err: unknown) => (err instanceof Error && !(err instanceof ApiShapeError) && err.message ? err.message : null);
 
 interface CalendarSyncManagerProps {
   open: boolean;
@@ -59,347 +108,165 @@ interface CalendarSyncManagerProps {
 }
 
 export function CalendarSyncManager({ open, onOpenChange }: CalendarSyncManagerProps) {
-  const [connections, setConnections] = useState<ExternalConnection[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState<string | null>(null);
+  const locale = useLocale();
+  const copy = locale.toLowerCase().startsWith('fr') ? COPY.fr : COPY.en;
+  const [state, setState] = useState<Loaded>({ status: 'loading' });
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
 
   useEffect(() => {
-    if (open) {
-      fetchConnections();
-    }
+    if (!open) return;
+    let current = true;
+    readConnections().then(
+      (connections) => {
+        if (current) setState({ status: 'ready', connections });
+      },
+      (err: unknown) => {
+        logger.error('Failed to read the calendar connections', err);
+        if (current) setState({ status: 'error', message: serverMessage(err) });
+      },
+    );
+    return () => {
+      current = false;
+    };
   }, [open]);
 
-  const fetchConnections = async () => {
+  const reload = useCallback(async () => {
     try {
-      const response = await fetch('/api/calendar-sync/connections');
-      const data = await response.json();
-      setConnections(data.connections || []);
-    } catch (_error) {
-} finally {
-      setLoading(false);
+      setState({ status: 'ready', connections: await readConnections() });
+    } catch (err) {
+      logger.error('Failed to read the calendar connections', err);
+      setState({ status: 'error', message: serverMessage(err) });
     }
+  }, []);
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setState({ status: 'loading' });
+      setConfirming(null);
+      setOutcome(null);
+    }
+    onOpenChange(next);
   };
 
-  const handleConnect = async (provider: 'google' | 'microsoft') => {
-    try {
-      // Redirect to OAuth flow
-      window.location.href = `/api/calendar-sync/${provider}/auth`;
-    } catch (_error) {
-alert(`Failed to connect ${provider}`);
-    }
+  const revocationOutcome = (connection: Connection, revocation: unknown): Outcome => {
+    const provider = connection.provider === 'google' || connection.provider === 'microsoft' ? copy.providerName[connection.provider] : connection.provider;
+    if (revocation === 'revoked') return { tone: 'ok', text: fill(copy.revoked, { provider }) };
+    if (revocation === 'not_supported') return { tone: 'warn', text: fill(copy.notSupported, { provider }) };
+    return { tone: 'warn', text: fill(copy.unconfirmed, { provider }) };
   };
 
-  const handleDisconnect = async (connectionId: string) => {
-    if (!confirm('Are you sure you want to disconnect this calendar?')) {
-      return;
-    }
-
+  const disconnect = async (connection: Connection) => {
+    setBusy(true);
+    setOutcome(null);
     try {
-      await fetch(`/api/calendar-sync/connections/${connectionId}`, {
-        method: 'DELETE',
-      });
-      
-      setConnections(prev => prev.filter(c => c.id !== connectionId));
-    } catch (_error) {
-alert('Failed to disconnect calendar');
-    }
-  };
-
-  const handleSync = async (connectionId: string) => {
-    setSyncing(connectionId);
-
-    try {
-      // Get connection details to find calendar mappings
-      const connection = connections.find(c => c.id === connectionId);
-      if (!connection) return;
-
-      // Trigger sync for each mapped calendar
-      const mappings = connection.calendarMappings || {};
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const promises = Object.entries(mappings).map(([externalCalendarId, mapping]: [string, any]) => {
-        return fetch(`/api/calendar-sync/connections/${connectionId}/sync`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            localCalendarId: mapping.localCalendarId,
-            externalCalendarId,
-          }),
-        });
-      });
-
-      await Promise.all(promises);
-      
-      // Refresh connections to get updated sync status
-      await fetchConnections();
-    } catch (_error) {
-alert('Failed to sync calendar');
+      const response = await fetch(`/api/calendar-sync/connections/${connection.id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error(await readApiError(response, ''));
+      // The connection is gone once the route says so; an answer that cannot be read only leaves the provider's revocation unconfirmed.
+      let revocation: unknown = null;
+      try {
+        revocation = envelopeData(await response.json()).providerRevocation;
+      } catch (err) {
+        logger.error('The disconnect answer could not be read', err);
+      }
+      setConfirming(null);
+      setOutcome(revocationOutcome(connection, revocation));
+      await reload();
+    } catch (err) {
+      setOutcome({ tone: 'error', text: serverMessage(err) ?? copy.disconnectFailed });
     } finally {
-      setSyncing(null);
+      setBusy(false);
     }
   };
 
-  const handleToggleSync = async (connectionId: string, enabled: boolean) => {
-    try {
-      await fetch(`/api/calendar-sync/connections/${connectionId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ syncEnabled: enabled }),
-      });
-
-      setConnections(prev =>
-        prev.map(c => (c.id === connectionId ? { ...c, syncEnabled: enabled } : c))
-      );
-    } catch (_error) {
-alert('Failed to update sync settings');
-    }
-  };
-
-  const handleChangeSyncDirection = async (
-    connectionId: string,
-    direction: 'import' | 'export' | 'both'
-  ) => {
-    try {
-      await fetch(`/api/calendar-sync/connections/${connectionId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ syncDirection: direction }),
-      });
-
-      setConnections(prev =>
-        prev.map(c => (c.id === connectionId ? { ...c, syncDirection: direction } : c))
-      );
-    } catch (_error) {
-alert('Failed to update sync direction');
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'synced':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'syncing':
-        return <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />;
-      case 'failed':
-        return <XCircle className="h-4 w-4 text-destructive" />;
-      case 'pending':
-        return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      default:
-        return <CloudOff className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  const getProviderLogo = (provider: string) => {
-    const logos: Record<string, string> = {
-      google: 'https://www.google.com/favicon.ico',
-      microsoft: 'https://www.microsoft.com/favicon.ico',
-    };
-    return logos[provider] || '';
-  };
+  const calendarName = (provider: string) => (provider === 'google' || provider === 'microsoft' ? copy.calendarOf[provider] : provider);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Calendar Sync</DialogTitle>
-          <DialogDescription>
-            Connect your Google Calendar or Microsoft Outlook to sync events automatically
-          </DialogDescription>
+          <DialogTitle>{copy.title}</DialogTitle>
+          <DialogDescription>{copy.description}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Connect New Calendar */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Connect Calendar</h3>
-            <div className="flex space-x-3">
+        <div className="space-y-4">
+          <CapabilityUnavailable locale={locale} capability="UE-ACTION-CALENDAR-SYNC" />
+          <p className="text-sm text-muted-foreground">{copy.reason}</p>
+
+          {outcome && (
+            <p
+              role={outcome.tone === 'error' ? 'alert' : 'status'}
+              className={`rounded-md border p-3 text-sm ${outcome.tone === 'error' ? 'border-destructive/40 text-destructive' : ''}`}
+            >
+              {outcome.text}
+            </p>
+          )}
+
+          {state.status === 'loading' && <p role="status" className="py-6 text-center text-muted-foreground">{copy.loading}</p>}
+
+          {state.status === 'error' && (
+            <div role="alert" className="rounded-md border border-destructive/40 p-3 text-sm">
+              <p>{state.message ?? copy.loadFailed}</p>
               <Button
                 variant="outline"
-                onClick={() => handleConnect('google')}
-                className="flex-1"
+                size="sm"
+                className="mt-3"
+                onClick={() => {
+                  setState({ status: 'loading' });
+                  void reload();
+                }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={getProviderLogo('google')}
-                  alt="Google"
-                  className="h-4 w-4 mr-2"
-                />
-                Connect Google Calendar
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleConnect('microsoft')}
-                className="flex-1"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={getProviderLogo('microsoft')}
-                  alt="Microsoft"
-                  className="h-4 w-4 mr-2"
-                />
-                Connect Outlook Calendar
+                {copy.retry}
               </Button>
             </div>
-          </div>
+          )}
 
-          {/* Connected Calendars */}
-          {connections.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold">Connected Calendars</h3>
-              
-              {loading ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  Loading connections...
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {connections.map(connection => (
-                    <div
-                      key={connection.id}
-                      className="p-4 border rounded-lg space-y-4"
-                    >
-                      {/* Header */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={getProviderLogo(connection.provider)}
-                            alt={connection.provider}
-                            className="h-6 w-6"
-                          />
-                          <div>
-                            <div className="font-semibold capitalize">
-                              {connection.provider} Calendar
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {connection.providerAccountId}
-                            </div>
-                          </div>
-                        </div>
+          {state.status === 'ready' && state.connections.length === 0 && (
+            <div className="py-8 text-center text-muted-foreground">
+              <Cloud className="mx-auto mb-3 h-10 w-10 opacity-50" aria-hidden />
+              <p>{copy.none}</p>
+            </div>
+          )}
 
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(connection.syncStatus)}
-                          <Badge
-                            variant={
-                              connection.syncStatus === 'synced'
-                                ? 'default'
-                                : connection.syncStatus === 'failed'
-                                ? 'destructive'
-                                : 'secondary'
-                            }
-                          >
-                            {connection.syncStatus}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Sync Controls */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor={`sync-${connection.id}`}>Auto-sync</Label>
-                          <Switch
-                            id={`sync-${connection.id}`}
-                            checked={connection.syncEnabled}
-                            onCheckedChange={(checked) =>
-                              handleToggleSync(connection.id, checked)
-                            }
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Sync Direction</Label>
-                          <Select
-                            value={connection.syncDirection}
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            onValueChange={(value: any) =>
-                              handleChangeSyncDirection(connection.id, value)
-                            }
-                            disabled={!connection.syncEnabled}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="import">
-                                Import only (from {connection.provider})
-                              </SelectItem>
-                              <SelectItem value="export">
-                                Export only (to {connection.provider})
-                              </SelectItem>
-                              <SelectItem value="both">
-                                Two-way sync
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      {/* Last Sync Info */}
-                      {connection.lastSyncAt && (
-                        <div className="text-xs text-muted-foreground">
-                          Last synced:{' '}
-                          {new Date(connection.lastSyncAt).toLocaleString()}
-                        </div>
-                      )}
-
-                      {connection.lastSyncError && (
-                        <div className="text-xs text-destructive">
-                          Error: {connection.lastSyncError}
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSync(connection.id)}
-                          disabled={syncing === connection.id}
-                        >
-                          {syncing === connection.id ? (
-                            <>
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                              Syncing...
-                            </>
-                          ) : (
-                            <>
-                              <RefreshCw className="h-4 w-4 mr-2" />
-                              Sync Now
-                            </>
-                          )}
+          {state.status === 'ready' && state.connections.length > 0 && (
+            <ul className="space-y-3">
+              {state.connections.map((connection) => (
+                <li key={connection.id} className="space-y-3 rounded-lg border p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">{calendarName(connection.provider)}</p>
+                      <p className="truncate text-xs text-muted-foreground">{connection.account}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {fill(copy.connectedOn, { date: new Date(connection.connectedAt).toLocaleDateString(locale, { dateStyle: 'medium' }) })}
+                      </p>
+                    </div>
+                    {confirming !== connection.id && (
+                      <Button variant="outline" size="sm" disabled={busy} onClick={() => setConfirming(connection.id)}>
+                        <Trash2 className="mr-2 h-4 w-4" aria-hidden />
+                        {copy.disconnect}
+                      </Button>
+                    )}
+                  </div>
+                  {confirming === connection.id && (
+                    <div role="group" aria-label={copy.disconnect} className="space-y-2 rounded-md border border-destructive/40 p-3 text-sm">
+                      <p>{fill(copy.disconnectConfirm, { account: connection.account })}</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="destructive" disabled={busy} onClick={() => void disconnect(connection)}>
+                          {copy.disconnect}
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDisconnect(connection.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Disconnect
+                        <Button size="sm" variant="outline" disabled={busy} onClick={() => setConfirming(null)}>
+                          {copy.cancel}
                         </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {!loading && connections.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Cloud className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No calendars connected yet</p>
-              <p className="text-sm mt-2">
-                Connect your Google or Outlook calendar to get started
-              </p>
-            </div>
+                  )}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-

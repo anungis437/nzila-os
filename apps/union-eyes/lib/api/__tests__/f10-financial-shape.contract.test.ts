@@ -44,9 +44,16 @@ describe('F09/F10 rate limits, cancellation contract and financial record shape'
 
   // DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT
   it('publishing to the connected social accounts is an officer act and is audited around the publish', () => {
-    const source = read('app/api/social-media/posts/route.ts')
-    expect(source).toMatch(/export const POST = withRoleAuth\('officer'/)
-    expect(source).toContain('performAuditedOperation(')
+    // Saving a post sends nothing: it records a draft for the accounts it names, at the officer floor, for a second officer to approve.
+    const drafts = read('app/api/social-media/posts/route.ts')
+    expect(drafts).toMatch(/export const POST = withApi\(\s*\{\s*auth: \{ minRole: 'officer' \}/)
+    expect(drafts).toContain('account_ids: z.array(z.guid("Invalid account id")).min(1, "Name at least one account")')
+    expect(drafts).not.toContain('.publishPost(')
+    // The publish is the approval: an officer act whose intent is made durable before the platform is called and whose outcome is recorded after.
+    const review = read('app/api/social-media/posts/review/route.ts')
+    expect(review).toMatch(/export const POST = withApi\(\s*\{\s*auth: \{ minRole: 'officer' \}/)
+    expect(review).toContain('performAuditedOperation(')
+    expect(review.indexOf('performAuditedOperation(')).toBeLessThan(review.indexOf('.publishPost('))
   })
 
   // DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK

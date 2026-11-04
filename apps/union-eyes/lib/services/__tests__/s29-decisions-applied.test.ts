@@ -4,21 +4,7 @@ import { join } from 'node:path'
 
 const src = (path: string) => readFileSync(join(process.cwd(), path), 'utf8').replace(/\r\n/g, '\n')
 
-describe('Gate 0 batch B85: decisions applied (organization types, calendar revocation, social approval, bot challenge)', () => {
-  it('offers only the canonical organization types and tells the user when a create or update is refused', () => {
-    const ui = src('components/admin/OrganizationHierarchyAdmin.tsx')
-    expect(ui).toContain("const ORGANIZATION_TYPES = ['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'] as const")
-    expect(ui).not.toContain('local_union')
-    // The hierarchy read answers success; create and update decide from the HTTP status.
-    expect(ui.match(/data\.success/g)).toHaveLength(1)
-    expect(ui).toContain('if (!response.ok)')
-    for (const locale of ['en', 'fr']) {
-      const messages = JSON.parse(src(`messages/${locale}.json`))
-      expect(Object.keys(messages.organizationHierarchyAdmin.types)).toEqual(['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'])
-      expect(messages.organizationHierarchyAdmin.createFailed).toBeTruthy()
-    }
-  })
-
+describe('Gate 0 batch B85: decisions applied (calendar revocation, social approval, bot challenge)', () => {
   it('asks Google to revoke the grant on disconnect, and says plainly when a provider cannot', () => {
     const revocation = src('lib/external-calendar-sync/provider-revocation.ts')
     expect(revocation).toContain('https://oauth2.googleapis.com/revoke')

@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get election results' },

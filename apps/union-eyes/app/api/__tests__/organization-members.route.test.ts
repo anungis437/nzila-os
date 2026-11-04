@@ -141,8 +141,10 @@ describe('organization/members route', () => {
     expect(result.members[0]).toMatchObject({
       id: 'om_1',
       phone: '',
-      department: 'Administration',
-      position: 'Union Member',
+      // Unknown is null: the directory does not invent a department, a position or years of seniority.
+      department: null,
+      position: null,
+      seniority: null,
       membershipNumber: '',
     });
     expect(result.members[1]).toMatchObject({

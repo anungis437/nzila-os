@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { declaredOptions } from './with-api-double';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
   generateAnnualComplianceReport: vi.fn(),
@@ -10,7 +10,7 @@ const m = vi.hoisted(() => ({
   standardErrorResponse: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
+vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble);
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   createRateLimitHeaders: m.createRateLimitHeaders,
@@ -28,10 +28,9 @@ async function loadRoute() {
 }
 
 describe('admin/clc/analytics/annual-report route', () => {
+  const authorized = { userId: 'u1', organizationId: 'org-a' };
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRoleAuth.mockImplementation((_role: string, handler: any) =>
-      (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org-a' }) => handler(request, context));
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '49' });
     m.generateAnnualComplianceReport.mockResolvedValue({ year: 2026, findings: [] });
@@ -39,11 +38,20 @@ describe('admin/clc/analytics/annual-report route', () => {
       new Response(JSON.stringify({ code, message }), { status: code === 'VALIDATION_ERROR' ? 400 : code === 'FORBIDDEN' ? 403 : code === 'AUTH_REQUIRED' ? 401 : 500 }));
   });
 
+  it('asks the wrapper for an administrator, an audit record, and the organization\'s own tenant transaction', async () => {
+    const { GET } = await loadRoute();
+    expect(declaredOptions(GET)).toMatchObject({
+      auth: { minRole: 'admin' },
+      rlsOrgContext: true,
+      registry: { audience: 'admin', evidenceRequired: true },
+    });
+  });
+
   it('returns 429 when rate limit is exceeded', async () => {
     const { GET } = await loadRoute();
     m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 120 });
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026'));
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026'), authorized);
 
     expect(response.status).toBe(429);
   });
@@ -51,7 +59,7 @@ describe('admin/clc/analytics/annual-report route', () => {
   it('returns 400 for invalid year parameter', async () => {
     const { GET } = await loadRoute();
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=1900'));
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=1900'), authorized);
 
     expect(response.status).toBe(400);
   });
@@ -59,7 +67,7 @@ describe('admin/clc/analytics/annual-report route', () => {
   it('returns annual report on success', async () => {
     const { GET } = await loadRoute();
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026'));
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026'), authorized);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -76,7 +84,7 @@ describe('admin/clc/analytics/annual-report route', () => {
 
   it('rejects a year with trailing characters instead of parsing its numeric prefix', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026garbage'));
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026garbage'), authorized);
     expect(response.status).toBe(400);
     expect(m.generateAnnualComplianceReport).not.toHaveBeenCalled();
   });
@@ -85,7 +93,7 @@ describe('admin/clc/analytics/annual-report route', () => {
     const { GET } = await loadRoute();
     m.generateAnnualComplianceReport.mockRejectedValueOnce(new Error('db down'));
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026'));
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026'), authorized);
 
     expect(response.status).toBe(500);
   });

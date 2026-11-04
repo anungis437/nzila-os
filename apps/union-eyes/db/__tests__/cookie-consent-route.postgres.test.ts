@@ -9,7 +9,9 @@
  *   - a signed-in visitor's record holds the profile uuid, not the identity string, and updating it again keeps it;
  *   - a signed-in visitor with no profile row is recorded like an anonymous one, not refused;
  *   - a record a signed-in member holds cannot be changed by another member or by an anonymous visitor, and a record never moves organization;
- *   - a body that is not valid is a client error, and writes nothing.
+ *   - a body that is not valid is a client error, and writes nothing;
+ *   - GET reads the visitor's record on the system connection (a handle with no organization sees none), exposes only the public receipt, and answers
+ *     null / 400 for an unknown / malformed consent id.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
@@ -28,7 +30,7 @@ vi.mock('@/lib/audit/atomic-audit', async () => ({ persistAtomicAudit: (await im
 vi.mock('@/lib/api-auth-guard', () => ({ getCurrentUser: async () => session.user }))
 vi.mock('@/lib/public-intake/guard', () => ({ guardPublicIntake: async (request: Request) => ({ ok: true, json: await request.json().catch(() => ({})) }) }))
 
-const { harness } = await import('./native-route-harness')
+const { harness, RUNTIME_ROLE } = await import('./native-route-harness')
 const route = URL ? await import('@/app/api/gdpr/cookie-consent/route') : null
 
 type Row = Record<string, unknown>
@@ -114,5 +116,34 @@ describe.skipIf(!URL)('the cookie consent route on the combined schema, as the r
     expect((await post({ consentId: randomUUID(), organizationId: 'nope' })).status).toBe(400)
     expect((await post({ consentId: randomUUID(), organizationId: randomUUID() })).status).toBe(400)
     expect(Number((await admin.query(`SELECT count(*) FROM public.cookie_consents`)).rows[0].count)).toBe(before)
+  })
+
+  describe('GET', () => {
+    const get = (query: string) =>
+      (route!.GET as unknown as (request: Request) => Promise<Response>)(new Request(`http://localhost/api/gdpr/cookie-consent${query}`, { method: 'GET' }))
+
+    it('reads a visitor\'s record on the system connection, which a handle with no organization cannot see, and exposes only the public receipt', async () => {
+      const { CookieConsentManager } = await import('@/lib/gdpr/consent-manager')
+      const consentId = randomUUID()
+      expect((await post({ consentId, organizationId: ORG, functional: true, analytics: true })).status).toBe(200)
+
+      // Why the route opens the system connection: the pooled runtime role with no organization set sees no cookie_consents row at all.
+      const ambient = await harness.tenant(RUNTIME_ROLE, null, null, (tx) => CookieConsentManager.getCookieConsent(consentId, tx))
+      expect(ambient).toBeNull()
+
+      const response = await get(`?consentId=${consentId}`)
+      expect(response.status).toBe(200)
+      const body = (await response.json()) as Row
+      expect(body).toMatchObject({ consentId, essential: true, functional: true, analytics: true })
+      for (const key of ['id', 'userId', 'organizationId', 'ipAddress', 'userAgent']) expect(body).not.toHaveProperty(key)
+    })
+
+    it('answers null for a consent id nobody holds, an empty banner check for no id, and 400 for an id that is not a uuid', async () => {
+      const unknown = await get(`?consentId=${randomUUID()}`)
+      expect(unknown.status).toBe(200)
+      expect(await unknown.json()).toEqual({ consent: null })
+      expect(await (await get('')).json()).toEqual({ consent: null })
+      expect((await get('?consentId=not-a-uuid')).status).toBe(400)
+    })
   })
 })

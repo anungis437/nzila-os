@@ -15,19 +15,9 @@ import { createPrecedentAudited } from "@/lib/services/precedent-audited-service
 import { tribunalTypeEnum, decisionTypeEnum, outcomeEnum, precedentValueEnum } from "@/db/schema";
 import { z } from "zod";
 import { toPublicPrecedentSummary } from "@/lib/precedents/public-decision-view";
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
+import { logger } from '@/lib/logger';
 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 import {
   ErrorCode,
   standardErrorResponse,
@@ -42,7 +32,20 @@ function boundedPositiveInt(raw: string | null, fallback: number, max: number): 
   return Number.isSafeInteger(parsed) && parsed <= max ? parsed : null;
 }
 
-export const GET = withRoleAuth('member', async (request, _context) => {
+// A list filter must name declared values of its column: the database refuses anything else, and that must not come back as a server fault.
+function declaredValues(raw: string, allowed: readonly string[]): string[] | null {
+  const values = raw.split(",");
+  return values.every((value) => allowed.includes(value)) ? values : null;
+}
+
+// The precedent reads run in the caller organization's tenant transaction (`rlsOrgContext`): the decisions table is tenant-scoped.
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Precedents'], summary: 'List, filter and rank arbitration precedents' },
+  },
+  async ({ request }) => {
   try {
       const { searchParams } = new URL(request.url);
       
@@ -83,22 +86,30 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       
       const tribunal = searchParams.get("tribunal");
       if (tribunal) {
-        filters.tribunal = tribunal.split(",");
+        const values = declaredValues(tribunal, tribunalTypeEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid tribunal filter" }, { status: 400 });
+        filters.tribunal = values;
       }
 
       const decisionType = searchParams.get("decisionType");
       if (decisionType) {
-        filters.decisionType = decisionType.split(",");
+        const values = declaredValues(decisionType, decisionTypeEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid decisionType filter" }, { status: 400 });
+        filters.decisionType = values;
       }
 
       const outcome = searchParams.get("outcome");
       if (outcome) {
-        filters.outcome = outcome.split(",");
+        const values = declaredValues(outcome, outcomeEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid outcome filter" }, { status: 400 });
+        filters.outcome = values;
       }
 
       const precedentValue = searchParams.get("precedentValue");
       if (precedentValue) {
-        filters.precedentValue = precedentValue.split(",");
+        const values = declaredValues(precedentValue, precedentValueEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid precedentValue filter" }, { status: 400 });
+        filters.precedentValue = values;
       }
 
       const arbitrator = searchParams.get("arbitrator");
@@ -141,6 +152,9 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       if (dateTo) {
         filters.dateTo = new Date(dateTo);
       }
+      if ([filters.dateFrom, filters.dateTo].some((date) => date instanceof Date && Number.isNaN(date.getTime()))) {
+        return NextResponse.json({ error: "Invalid date filter" }, { status: 400 });
+      }
 
       // Pagination
       // Reuse validated, bounded collection page and limit.
@@ -154,13 +168,15 @@ export const GET = withRoleAuth('member', async (request, _context) => {
 
       return NextResponse.json({ ...result, precedents: result.precedents.map(toPublicPrecedentSummary) });
     } catch (error) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Internal server error',
-      error
-    );
+      logger.error('Failed to list the precedents', { error });
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Internal server error',
+        error
+      );
     }
-});
+  },
+);
 
 
 // The precedent library is shared across tenants, so only a platform-elevated role may add to it.
@@ -192,13 +208,20 @@ const precedentsSchema = z.object({
   language: z.string().max(10).optional(),
 });
 
-export const POST = withRoleAuth('content_manager', async (request, context) => {
-  const { userId, organizationId } = context;
-  if (!userId || !organizationId) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
-  }
+// Adding a precedent opens its own tenant transaction and writes its audit record in it (createPrecedentAudited), so the wrapper opens none.
+export const POST = withApi(
+  {
+    auth: { minRole: 'content_manager' },
+    openapi: { tags: ['Precedents'], summary: 'Create a precedent draft awaiting review' },
+  },
+  async ({ request, userId, organizationId }) => {
   try {
-      const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+    }
     const validation = precedentsSchema.safeParse(body);
     if (!validation.success) {
       return standardErrorResponse(
@@ -209,7 +232,7 @@ export const POST = withRoleAuth('content_manager', async (request, context) => 
     }
 
       // Create a non-public draft. Publication requires an independent reviewed workflow. 
-      const precedent = await createPrecedentAudited({ organizationId, userId }, validation.data);
+      const precedent = await createPrecedentAudited({ organizationId: organizationId!, userId: userId! }, validation.data);
 
       return standardSuccessResponse(
       { precedent, publicationStatus: 'pending_review', publiclyDiscoverable: false }
@@ -224,10 +247,12 @@ export const POST = withRoleAuth('content_manager', async (request, context) => 
     );
       }
 
+      logger.error('Failed to create the precedent', { error });
       return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',
       error
     );
     }
-});
+  },
+);

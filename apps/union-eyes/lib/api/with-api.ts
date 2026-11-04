@@ -49,6 +49,7 @@ import {
   standardErrorResponse,
 } from './standardized-responses';
 import { ApiError } from './errors';
+import { readBoundedJson, RequestBodyTooLargeError } from './bounded-json';
 import { secretsEqual } from './secret-compare';
 import { expectedCronSecret, presentedCronSecret } from './cron-secret';
 import {
@@ -141,8 +142,18 @@ export interface WithApiOptions<
 
   // ── Validation ────────────────────────────────────────────────────────────
 
-  /** Zod schema for request body (automatically parsed from `request.json()`) */
+  /**
+   * Zod schema for request body. The framework reads the JSON through the bounded reader (see `bodyLimitBytes`): a malformed body is
+   * 400, a body larger than the limit is 413, and neither reaches the handler.
+   */
   body?: TBody;
+
+  /**
+   * The most bytes of JSON body the framework reads for this route, counted from the stream whatever Content-Length claims
+   * (default `DEFAULT_JSON_BODY_LIMIT_BYTES`). A larger body is refused with 413 before the handler runs. A route that takes a
+   * bulk payload raises it explicitly; a route that wants a smaller ceiling lowers it.
+   */
+  bodyLimitBytes?: number;
 
   /** Zod schema for URL search params (automatically parsed) */
   query?: TQuery;
@@ -257,12 +268,13 @@ export interface ApiContext<
 
 /**
  * The return value of the handler. Can be:
- * - A plain object → wrapped in `standardSuccessResponse()`
+ * - A plain object (an interface-typed one too) → wrapped in `standardSuccessResponse()`
  * - An array → wrapped in `standardSuccessResponse()` as `data`
  * - A `NextResponse` → passed through unmodified (escape hatch)
  * - `void` / `undefined` → 204 No Content
+ * `Record<string, unknown>` would refuse a value typed by an interface, which has no index signature, so the payloads the engines and services type that way would need a cast.
  */
-type HandlerReturn = Record<string, unknown> | any[] | NextResponse | void | null;
+type HandlerReturn = object | void | null;
 
 type HandlerFn<TBody, TQuery, TMachine = unknown> = (ctx: ApiContext<TBody, TQuery, TMachine>) => Promise<HandlerReturn> | HandlerReturn;
 
@@ -277,11 +289,31 @@ function generateTraceId(): string {
 // ─── Implementation ──────────────────────────────────────────────────────────
 
 /**
- * The framework parses the body from a clone so the original stream stays readable for
- * handlers and legacy wrappers that delegate here and still call `request.json()`.
+ * The most JSON the framework reads for a route that does not set `bodyLimitBytes`. Generous enough for the largest declared bulk
+ * route; the point is that the read is bounded, not that ordinary bodies come close.
  */
-function bodyReader(request: NextRequest): { json(): Promise<unknown> } {
-  return typeof request.clone === 'function' ? request.clone() : request;
+export const DEFAULT_JSON_BODY_LIMIT_BYTES = 2 * 1024 * 1024;
+
+const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+/**
+ * The framework reads the body from a clone so the original stream stays readable for handlers and legacy wrappers that delegate here
+ * and still call `request.json()`. The read is bounded: more than `limit` bytes is a RequestBodyTooLargeError, whatever the declared
+ * Content-Length says.
+ */
+function readJsonBody(request: NextRequest, limit: number): Promise<unknown> {
+  return readBoundedJson(typeof request.clone === 'function' ? request.clone() : request, limit);
+}
+
+/**
+ * A route without a body schema still gets `ctx.body` when the caller sent JSON (or declared no type), but never a read of an upload
+ * or a binary payload: those are the handler's to stream, and a multi-megabyte file is not a JSON document the framework should buffer.
+ */
+function mayBeJsonBody(request: NextRequest): boolean {
+  const contentType = request.headers?.get?.('content-type');
+  if (!contentType) return true;
+  const type = contentType.split(';')[0]!.trim().toLowerCase();
+  return type === 'application/json' || type.endsWith('+json') || type.startsWith('text/');
 }
 
 /**
@@ -325,6 +357,10 @@ export function withApi<
   }
   // Pre-compute auth requirements
   const requireAuth = options.auth?.required !== false && !options.auth?.cron && !machineAuthenticator;
+  const bodyLimitBytes = options.bodyLimitBytes ?? DEFAULT_JSON_BODY_LIMIT_BYTES;
+  if (!Number.isSafeInteger(bodyLimitBytes) || bodyLimitBytes < 1) {
+    throw new Error('withApi: bodyLimitBytes must be a positive integer number of bytes');
+  }
   const requireCron = options.auth?.cron === true;
   const requireOrg = options.requireOrg ?? requireAuth; // default: enforce org for auth'd routes
   const minRoleLevel = options.auth?.minRole
@@ -584,14 +620,24 @@ export function withApi<
       }
 
       // ── 6. Parse & validate body ───────────────────────────────────────
+      // Every read goes through the bounded reader: a body larger than `bodyLimitBytes` is a 413 before the handler runs.
+      const bodyTooLarge = () => {
+        // The reader has stopped reading the clone; stop the original too, so the rest of an oversized upload is not pulled in.
+        void request.body?.cancel().catch(() => undefined);
+        return standardErrorResponse(
+          ErrorCode.PAYLOAD_TOO_LARGE,
+          'Request body exceeds the allowed size',
+          { limitBytes: bodyLimitBytes },
+          traceId,
+        );
+      };
       let body: z.infer<TBody> = undefined as z.infer<TBody>;
       if (options.body) {
-        let rawBody: any;
+        let rawBody: unknown;
         try {
-          // Parse a clone: handlers (and legacy wrappers delegating here) may still read the body.
-          // Parse a clone: handlers may still read the body.
-          rawBody = await bodyReader(request).json();
-        } catch {
+          rawBody = await readJsonBody(request, bodyLimitBytes);
+        } catch (error) {
+          if (error instanceof RequestBodyTooLargeError) return bodyTooLarge();
           return standardErrorResponse(
             ErrorCode.INVALID_FORMAT,
             'Request body must be valid JSON',
@@ -614,12 +660,13 @@ export function withApi<
           );
         }
         body = result.data as z.infer<TBody>;
-      } else if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
-        // No Zod schema provided — still parse JSON body so handlers can
-        // access it via ctx.body without calling request.json() themselves.
+      } else if (BODY_METHODS.has(request.method) && mayBeJsonBody(request)) {
+        // No Zod schema provided: handlers that read ctx.body (the CRUD factory, older routes) still get the JSON the caller sent, read
+        // through the same bounded reader. Prefer declaring a `body` schema.
         try {
-          body = (await bodyReader(request).json()) as z.infer<TBody>;
-        } catch {
+          body = (await readJsonBody(request, bodyLimitBytes)) as z.infer<TBody>;
+        } catch (error) {
+          if (error instanceof RequestBodyTooLargeError) return bodyTooLarge();
           // Body may be empty or non-JSON — leave as undefined
         }
       }

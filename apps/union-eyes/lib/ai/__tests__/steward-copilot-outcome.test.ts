@@ -25,7 +25,10 @@ function chain(): Record<string, unknown> {
 
 const tx = chain();
 vi.mock('@/db/db', () => ({ db: {} }));
-vi.mock('drizzle-orm', () => ({ eq: (...a: unknown[]) => ['eq', ...a], and: (...a: unknown[]) => ['and', ...a], desc: (x: unknown) => x }));
+vi.mock('drizzle-orm', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('drizzle-orm')>()),
+  eq: (...a: unknown[]) => ['eq', ...a], and: (...a: unknown[]) => ['and', ...a], desc: (x: unknown) => x,
+}));
 vi.mock('@/db/schema/domains/ml/ai-copilot-sessions', () => ({
   aiCopilotSessions: new Proxy({}, { get: (_t, p) => String(p) }),
 }));

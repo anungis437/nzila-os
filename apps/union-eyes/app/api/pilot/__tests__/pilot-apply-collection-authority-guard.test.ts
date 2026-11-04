@@ -88,6 +88,8 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
         returning: vi.fn(async () => [{ id: 'pilot-1' }]),
       })),
     });
+    // The intake row is written on the system connection the route opens, through the transaction it hands the callback.
+    m.withSystemContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn({ insert: m.dbInsert }));
   });
 
   it('returns 429 when the per-IP rate limit is exceeded, without touching the database', async () => {
@@ -100,10 +102,11 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
     }));
 
     expect(response.status).toBe(429);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
     expect(m.dbInsert).not.toHaveBeenCalled();
   });
 
-  it('returns 400 with validation details for a malformed body', async () => {
+  it('returns 400 with validation details for a malformed body, without opening the system connection', async () => {
     const { POST } = await loadRoute();
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply', {
@@ -112,10 +115,11 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
     }));
 
     expect(response.status).toBe(400);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
     expect(m.dbInsert).not.toHaveBeenCalled();
   });
 
-  it('accepts a well-formed body and creates the pilot application', async () => {
+  it('accepts a well-formed body and creates the pilot application on the system connection', async () => {
     const { POST } = await loadRoute();
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply', {
@@ -129,6 +133,7 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
     }));
 
     expect(response.status).toBe(201);
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
     expect(m.dbInsert).toHaveBeenCalled();
   });
 

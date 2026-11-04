@@ -1,10 +1,13 @@
-import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
-import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { authDb, withAuthContext } from '@nzila/platform-auth/auth-execution';
+
+/** The canonical organization binding refuses a caller who is not a live member of the organization it is asked to bind. */
+const isMembershipRequired = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'MEMBERSHIP_REQUIRED';
 
 /** Callers retain their administrator guard; bind every auth write to the real actor. */
 async function withMemberAuthMutation<T>(
@@ -41,7 +44,8 @@ export interface RevokeMemberAccessResult {
   success: boolean;
   sessionsRevoked: boolean;
   authMembershipDisabled: boolean;
-  caseAccessRevokedCount: number;
+  /** How many kernel case relationships were live when the membership was disabled; `null` when they could not be counted (see the step in revokeMemberAccess). */
+  caseAccessRevokedCount: number | null;
   localStatusUpdated: boolean;
   /** False when the attempt could not be recorded before the revocation ran (the revocation still ran: denial is the safe direction). */
   intentRecorded: boolean;
@@ -94,7 +98,7 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   const errors: string[] = [];
   let sessionsRevoked = false;
   let authMembershipDisabled = false;
-  let caseAccessRevokedCount = 0;
+  let caseAccessRevokedCount: number | null = null;
   let localStatusUpdated = false;
 
   // Revocation spans three stores (sessions, platform-auth membership, the local row) that cannot share one transaction, so the
@@ -157,25 +161,36 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
 
   // 3. Case access. Kernel case relationships are only ever effective for an ACTIVE membership: the kernel checks the
   // membership on every decision, so disabling it above ends every relationship at once, without rewriting any
-  // governed record. This step only counts the relationships that were live, for the revocation report.
+  // governed record. This step only counts the relationships that were live, for the revocation report. The count reads the
+  // authority kernel's store, which only the organization's own tenant transaction may read (the system role holds no grant on it),
+  // so it runs there. A platform administrator acting on an organization they are not a member of cannot open that transaction
+  // (the canonical binding requires live membership): the report then says the count was not measured, as null, never as zero.
   try {
-    await withSystemContext(async (_tx) => {
-      const rows = await db.execute(sql`
+    caseAccessRevokedCount = await withRLSContext({ organizationId: input.organizationId }, async (tx) => {
+      const rows = await tx.execute(sql`
         SELECT count(*)::int AS n FROM ue_authority_resource_relationships
          WHERE organization_id = ${input.organizationId}::uuid AND principal_user_id = ${input.authUserId}
            AND resource_type = 'case' AND status = 'active' AND revoked_at IS NULL
            AND (expires_at IS NULL OR expires_at > now())`);
       const list = (Array.isArray(rows) ? rows : (rows as { rows?: { n: number }[] }).rows ?? []) as { n: number }[];
-      caseAccessRevokedCount = Number(list[0]?.n ?? 0);
+      return Number(list[0]?.n ?? 0);
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    errors.push(`case_access_revocation_failed: ${message}`);
-    logger.error('case_access_revocation_failed', {
-      authUserId: input.authUserId,
-      organizationId: input.organizationId,
-      error: err,
-    });
+    if (isMembershipRequired(err)) {
+      logger.warn('case_relationship_count_not_measured', {
+        authUserId: input.authUserId,
+        organizationId: input.organizationId,
+        reason: 'The administrator is not a member of the organization, so its tenant transaction cannot be opened.',
+      });
+    } else {
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push(`case_access_revocation_failed: ${message}`);
+      logger.error('case_access_revocation_failed', {
+        authUserId: input.authUserId,
+        organizationId: input.organizationId,
+        error: err,
+      });
+    }
   }
 
   // 4. Persist local membership state — done under SYSTEM_RUNTIME since a

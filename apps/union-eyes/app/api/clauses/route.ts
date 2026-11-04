@@ -9,7 +9,7 @@
 import { and, eq } from 'drizzle-orm';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { ApiError } from '@/lib/api/errors';
-import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { cbaClause, collectiveAgreements } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
@@ -24,23 +24,27 @@ export async function verifyClauseReferences(
   const cbaId = values.cbaId;
   if (typeof cbaId !== 'string' || !UUID.test(cbaId)) throw ApiError.badRequest('A valid agreement id is required');
 
-  const [agreement] = await db
-    .select({ id: collectiveAgreements.id })
-    .from(collectiveAgreements)
-    .where(and(eq(collectiveAgreements.id, cbaId), eq(collectiveAgreements.organizationId, organizationId)))
-    .limit(1);
-  if (!agreement) throw ApiError.notFound('Agreement');
-
-  const parentId = values.parentClauseId;
-  if (parentId !== undefined && parentId !== null) {
-    if (typeof parentId !== 'string' || !UUID.test(parentId)) throw ApiError.badRequest('Invalid parent clause id');
-    const [parent] = await db
-      .select({ id: cbaClause.id })
-      .from(cbaClause)
-      .where(and(eq(cbaClause.id, parentId), eq(cbaClause.cbaId, cbaId), eq(cbaClause.organizationId, organizationId)))
+  // Both lookups run as the runtime role in the caller organization's own tenant transaction (a savepoint of the route's when the
+  // factory has one open), by row-level security as well as by the explicit organization predicate.
+  await withRLSContext({ organizationId }, async (tx) => {
+    const [agreement] = await tx
+      .select({ id: collectiveAgreements.id })
+      .from(collectiveAgreements)
+      .where(and(eq(collectiveAgreements.id, cbaId), eq(collectiveAgreements.organizationId, organizationId)))
       .limit(1);
-    if (!parent) throw ApiError.badRequest('The parent clause is not a clause of this agreement');
-  }
+    if (!agreement) throw ApiError.notFound('Agreement');
+
+    const parentId = values.parentClauseId;
+    if (parentId !== undefined && parentId !== null) {
+      if (typeof parentId !== 'string' || !UUID.test(parentId)) throw ApiError.badRequest('Invalid parent clause id');
+      const [parent] = await tx
+        .select({ id: cbaClause.id })
+        .from(cbaClause)
+        .where(and(eq(cbaClause.id, parentId), eq(cbaClause.cbaId, cbaId), eq(cbaClause.organizationId, organizationId)))
+        .limit(1);
+      if (!parent) throw ApiError.badRequest('The parent clause is not a clause of this agreement');
+    }
+  });
   return values;
 }
 

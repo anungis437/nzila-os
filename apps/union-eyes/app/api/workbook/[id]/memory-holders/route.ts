@@ -15,8 +15,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
 import { workbooks, workbookMemoryHolders } from '@/db/schema/workbook-schema';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { extractWorkbookCapability } from '@/lib/workbook/workbook-capability';
@@ -53,8 +53,8 @@ const createSchema = z.object({
   notice: holderNoticeSchema.optional(),
 });
 
-async function loadCartography(workbookId: string, viewer: NoticeViewer) {
-  const rows = await db
+async function loadCartography(tx: RLSTx, workbookId: string, viewer: NoticeViewer) {
+  const rows = await tx
     .select({
       id: workbookMemoryHolders.id,
       role: workbookMemoryHolders.role,
@@ -101,6 +101,8 @@ export async function GET(
   // The identifier of an unclaimed workbook is its only credential, so reads are slowed like every other bearer route.
   const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false });
   if (!intake.ok) return intake.response;
+  // A malformed identifier names no workbook: it is answered as an absent one, not sent to SQL to fail there.
+  if (!z.guid().safeParse(workbookId).success) return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
   try {
     // Authorization is resolved first; the protected cartography read then runs
     // inside the DB execution context that matches the resolved authority.
@@ -115,7 +117,7 @@ export async function GET(
           resourceId: workbookId,
           details: { authority: authority.kind },
         });
-        return loadCartography(workbookId, authority.kind);
+        return loadCartography(authority.tx, workbookId, authority.kind);
       },
     );
     if (!access.ok) {
@@ -141,6 +143,7 @@ export async function POST(
   // the request body read.
   const intake = await guardPublicIntake(request, { bucket: 'capability' });
   if (!intake.ok) return intake.response;
+  if (!z.guid().safeParse(workbookId).success) return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
   const body: unknown = intake.json;
 
   const parse = createSchema.safeParse(body);
@@ -180,7 +183,7 @@ export async function POST(
         // writers serialize on this row, so a count check cannot race another
         // POST and exceed the ceiling. Recheck ownership after acquiring the
         // lock: a claim/transfer may have occurred after authorization.
-        const [lockedWorkbook] = await db
+        const [lockedWorkbook] = await authority.tx
           .select({
             id: workbooks.id,
             claimedByUserId: workbooks.claimedByUserId,
@@ -195,7 +198,7 @@ export async function POST(
           (lockedWorkbook.claimedOrgId != null && lockedWorkbook.claimedOrgId !== authority.claimedOrgId)
         ) throw new Error('Workbook authority changed before memory-holder write');
 
-        const existingHolders = await db
+        const existingHolders = await authority.tx
           .select({ id: workbookMemoryHolders.id })
           .from(workbookMemoryHolders)
           .where(eq(workbookMemoryHolders.workbookId, workbookId))
@@ -204,7 +207,7 @@ export async function POST(
           throw new WorkbookMemoryHolderLimitError();
         }
 
-        const [inserted] = await db
+        const [inserted] = await authority.tx
           .insert(workbookMemoryHolders)
           .values({
             workbookId,
@@ -226,7 +229,7 @@ export async function POST(
           details: { role: parse.data.role },
         });
 
-        const cartography = await loadCartography(workbookId, authority.kind);
+        const cartography = await loadCartography(authority.tx, workbookId, authority.kind);
         return { id: inserted?.id, ...cartography };
       },
     );

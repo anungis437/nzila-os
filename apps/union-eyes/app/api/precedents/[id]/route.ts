@@ -10,9 +10,9 @@
  * - PATCH and DELETE are owner-only, run under the caller's tenant RLS context, name the owner in their own WHERE
  *   clause, and are audited in the same transaction. Sharing changes are checked against the owner's standing.
  */
-import { and, count, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { withApi, ApiError, z } from '@/lib/api/framework';
-import { arbitrationPrecedents, precedentCitations, precedentTags } from '@/db/schema/arbitration-precedents-schema';
+import { arbitrationPrecedents } from '@/db/schema/arbitration-precedents-schema';
 import { withRLSContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
@@ -141,15 +141,19 @@ export const DELETE = withApi(
       }
       // The tags and the citation history cascade with the row. A precedent that has been cited is part of other records' reasoning, so
       // it is retained: withdraw it from sharing (sharingLevel) instead. One that was never cited is removed with an audit that keeps
-      // what identified it.
-      const [{ n: citations }] = await tx.select({ n: count() }).from(precedentCitations).where(eq(precedentCitations.precedentId, ctx.id));
-      if (Number(citations) > 0) {
+      // what identified it. "Has been cited" is the precedent's own citation count: the citation and tag tables are not readable by the
+      // application's roles (nothing writes them: their only writer is a denied Django viewset), and the count is checked again in the
+      // DELETE's own predicate, so a citation recorded between the read and the delete is not removed with the row.
+      if ((existing.citationCount ?? 0) > 0) {
         throw ApiError.conflict('This precedent has citation history and is retained. Withdraw it from sharing instead of deleting it.');
       }
-      const [{ n: tags }] = await tx.select({ n: count() }).from(precedentTags).where(eq(precedentTags.precedentId, ctx.id));
       const [deleted] = await tx
         .delete(arbitrationPrecedents)
-        .where(and(eq(arbitrationPrecedents.id, ctx.id), eq(arbitrationPrecedents.sourceOrganizationId, ctx.organizationId)))
+        .where(and(
+          eq(arbitrationPrecedents.id, ctx.id),
+          eq(arbitrationPrecedents.sourceOrganizationId, ctx.organizationId),
+          sql`coalesce(${arbitrationPrecedents.citationCount}, 0) = 0`,
+        ))
         .returning({ id: arbitrationPrecedents.id });
       if (!deleted) throw ApiError.notFound('precedent', ctx.id);
 
@@ -164,7 +168,6 @@ export const DELETE = withApi(
           caseTitle: existing.caseTitle,
           jurisdiction: existing.jurisdiction,
           sharingLevel: existing.sharingLevel,
-          removedTagCount: Number(tags),
         },
       });
       return { success: true };

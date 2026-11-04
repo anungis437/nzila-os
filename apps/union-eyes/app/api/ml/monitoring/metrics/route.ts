@@ -1,15 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { db } from '@/db';
+import { logger } from '@/lib/logger';
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
-  import { AI_FEATURES } from '@/lib/services/feature-flags';
-  import { enforceAISafety } from '@nzila/policies';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 /**
  * GET /api/ml/monitoring/metrics
  * 
@@ -37,8 +38,16 @@ import {
  *   timestamp: string
  * }
  */
-export const GET = withRoleAuth('member', async (request: NextRequest, context) => {
-  const { userId, organizationId } = context;
+// The statement reads the organization's own model metadata and predictions: it runs in the caller organization's tenant transaction
+// (`rlsOrgContext`). No call leaves the database, so nothing waits on a network call inside it.
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['ML'], summary: 'Real-time model performance metrics of the organization' },
+  },
+  async ({ user, userId, organizationId }) => {
+  const orgId = organizationId!;
 
   // Rate limit monitoring reads
   const rateLimitResult = await checkRateLimit(
@@ -56,16 +65,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     );
   }
 
-    // OWASP AI: Org presence check + feature flag + AI safety gate
-    if (!organizationId) {
-      return NextResponse.json({ error: 'No active organization' }, { status: 400 });
-    }
-    const blocked = await guardAiFeature(AI_FEATURES.ML_MONITORING, { userId, organizationId });
+    // OWASP AI: feature flag + AI safety gate (the wrapper has already required an organization)
+    const blocked = await guardAiFeature(AI_FEATURES.ML_MONITORING, { userId: userId!, organizationId: orgId });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'ml-monitoring-metrics', action: 'GET', organizationId, userId, userRole: 'member', dataClass: 'internal' });
+    enforceAISafety({ origin: 'ml-monitoring-metrics', action: 'GET', organizationId: orgId, userId: userId!, userRole: user?.role ?? 'member', dataClass: 'internal' });
 
   try {
-      const organizationScopeId = organizationId;
+      const organizationScopeId = orgId;
 
     // Model metadata and predictions are organization-scoped. The schema stores
     // forecast values and model accuracy, not evaluated precision/recall/F1 or
@@ -107,11 +113,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     });
 
   } catch (error) {
-return standardErrorResponse(
+    logger.error('Failed to fetch model metrics', { error });
+    return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to fetch model metrics',
       error
     );
   }
-});
+  },
+);
 

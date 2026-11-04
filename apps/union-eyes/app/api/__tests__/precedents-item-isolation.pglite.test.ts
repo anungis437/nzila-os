@@ -176,21 +176,26 @@ describe('DELETE /api/precedents/[id]', () => {
   });
 
   it('keeps what identified the removed precedent in the audit record', async () => {
-    await pg.query(`INSERT INTO precedent_tags (precedent_id, tag_name) VALUES ($1, 'a'), ($1, 'b')`, [P_A_PRIVATE]);
     const { DELETE } = await import('../precedents/[id]/route');
     await (DELETE as any)(ctx(ORG_A, P_A_PRIVATE));
+    // Exactly what identified the precedent: the tag table is not readable by the application's roles, so no tag count is recorded
     expect(audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
-      details: expect.objectContaining({ caseTitle: 'title', jurisdiction: 'ON', sharingLevel: 'private', removedTagCount: 2 }),
+      action: 'precedent.delete',
+      resourceId: P_A_PRIVATE,
+      details: { caseNumber: `C-${P_A_PRIVATE}`, caseTitle: 'title', jurisdiction: 'ON', sharingLevel: 'private' },
     }));
   });
 
   it('retains a precedent that has citation history instead of cascading it away', async () => {
+    // "Has been cited" is the precedent's own citation count: the citation table is not readable by the application's roles
     await pg.query(`INSERT INTO precedent_citations (precedent_id, citing_organization_id, cited_by) VALUES ($1, $2, 'user-2')`, [P_A_PRIVATE, ORG_B]);
+    await pg.query(`UPDATE arbitration_precedents SET citation_count = 1 WHERE id = $1`, [P_A_PRIVATE]);
     await pg.query(`INSERT INTO precedent_tags (precedent_id, tag_name) VALUES ($1, 'a')`, [P_A_PRIVATE]);
     const { DELETE } = await import('../precedents/[id]/route');
     await expect((DELETE as any)(ctx(ORG_A, P_A_PRIVATE))).rejects.toMatchObject({ status: 409 });
     expect(await row(P_A_PRIVATE)).toBeDefined();
     expect((await pg.query('SELECT count(*)::int AS n FROM precedent_tags')).rows[0]).toMatchObject({ n: 1 });
+    expect((await pg.query('SELECT count(*)::int AS n FROM precedent_citations')).rows[0]).toMatchObject({ n: 1 });
     expect(audit).not.toHaveBeenCalled();
   });
 

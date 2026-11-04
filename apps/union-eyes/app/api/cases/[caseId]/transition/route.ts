@@ -26,6 +26,7 @@ import { logger } from '@/lib/logger';
 import { getCaseActor, findReadableCase, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
 import { inAppNoticeAllowed } from '@/lib/notifications/in-app-preferences';
+import { memberCaseUrl } from '@/lib/notifications/links';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
@@ -175,7 +176,7 @@ export async function PATCH(
           message: `Your case is now ${toDbStatus.replace(/_/g, ' ')}.`,
           type: 'info',
           actionLabel: 'View case',
-          actionUrl: `/dashboard/claims/${claim.claimId}`,
+          actionUrl: memberCaseUrl(claim.claimId),
           data: { event: 'case_status_changed', claimId: claim.claimId, toStatus: toDbStatus },
         });
       }

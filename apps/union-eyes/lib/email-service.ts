@@ -11,6 +11,7 @@
 import { Resend, type CreateEmailOptions } from 'resend';
 import { logger } from '@/lib/logger';
 import { extractAddress, suppressedAddressHashes, isAddressSuppressed } from '@/lib/communications/address-suppression';
+import { supportEmail } from '@/lib/support-contact';
 
 // Lazy initialize Resend client to avoid errors during build
 let resend: Resend | null = null;
@@ -36,7 +37,7 @@ export function getFromEmail(label?: string): string {
 }
 
 // Email configuration
-const REPLY_TO_EMAIL = process.env.EMAIL_REPLY_TO || 'support@unioneyes.app';
+const REPLY_TO_EMAIL = supportEmail();
 
 export interface EmailRecipient {
   email: string;

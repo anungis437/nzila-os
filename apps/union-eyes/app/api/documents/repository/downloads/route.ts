@@ -1,13 +1,14 @@
 import { z } from 'zod';
-import { withOrganizationAuth } from '@/lib/organization-middleware';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { withApi, ApiError } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { issueDocumentDownload, type DownloadOutcome } from '@/lib/documents/download-issuance';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/documents/repository/downloads
@@ -57,53 +58,63 @@ function describeOutcome(documentId: string, outcome: DownloadOutcome): ItemResu
   }
 }
 
-export const POST = withOrganizationAuth(async (request, context) => {
-  const { organizationId, userId } = context;
-  await requireEntitlement(organizationId, 'grievance_case_suite');
-
-  if (!(await hasMinRole('member'))) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized');
-  }
-
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid request body');
-  }
-  const parsed = bulkSchema.safeParse(body);
-  if (!parsed.success) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid bulk download request', parsed.error.flatten());
-  }
-
-  const documentIds = [...new Set(parsed.data.documentIds)];
-  const isStaff = await hasMinRole('steward');
-
-  // One at a time: each issued link takes its own chained audit record, which serializes per organization.
-  const items: ItemResult[] = [];
-  for (const documentId of documentIds) {
-    let outcome: DownloadOutcome;
-    try {
-      outcome = await issueDocumentDownload({
-        organizationId,
-        userId,
-        documentId,
-        isStaff,
-        route: '/api/documents/repository/downloads',
-      });
-    } catch {
-      outcome = { kind: 'storage_unavailable' };
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    entitlement: 'grievance_case_suite',
+    // Each document is its own organization transaction (below): the batch is not one.
+    openapi: { tags: ['Documents'], summary: 'Issue audited download links for a batch of documents (independent, not atomic)' },
+  },
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) {
+      throw ApiError.forbidden('Organization context required — select an organization before accessing this resource');
     }
-    items.push(describeOutcome(documentId, outcome));
-  }
 
-  const issued = items.filter((item) => item.outcome === 'issued').length;
-  return standardSuccessResponse({
-    atomic: false,
-    status: issued === items.length ? 'complete' : issued === 0 ? 'none' : 'partial',
-    requested: items.length,
-    issued,
-    failed: items.length - issued,
-    items,
-  });
-});
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid request body');
+    }
+    const parsed = bulkSchema.safeParse(body);
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid bulk download request', parsed.error.flatten());
+    }
+
+    const documentIds = [...new Set(parsed.data.documentIds)];
+    const isStaff = await hasMinRole('steward');
+
+    // One at a time: each issued link takes its own chained audit record, which serializes per organization. Each document
+    // runs in its own transaction, so a failure on one (an aborted statement, a refused audit) cannot undo or poison the
+    // access records of the links already issued for the others.
+    const items: ItemResult[] = [];
+    for (const documentId of documentIds) {
+      let outcome: DownloadOutcome;
+      try {
+        outcome = await withRLSContext({ organizationId }, (tx) =>
+          issueDocumentDownload(tx, {
+            organizationId,
+            userId,
+            documentId,
+            isStaff,
+            route: '/api/documents/repository/downloads',
+          }),
+        );
+      } catch (error) {
+        logger.error('Bulk document download item failed', { documentId, error: error instanceof Error ? error.message : String(error) });
+        outcome = { kind: 'storage_unavailable' };
+      }
+      items.push(describeOutcome(documentId, outcome));
+    }
+
+    const issued = items.filter((item) => item.outcome === 'issued').length;
+    return standardSuccessResponse({
+      atomic: false,
+      status: issued === items.length ? 'complete' : issued === 0 ? 'none' : 'partial',
+      requested: items.length,
+      issued,
+      failed: items.length - issued,
+      items,
+    });
+  },
+);

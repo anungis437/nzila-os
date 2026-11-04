@@ -1,20 +1,21 @@
 'use client';
 
+import { useFormatter, useTranslations } from 'next-intl';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useTranslations } from 'next-intl';
-import type { RewardBudgetEnvelope } from '@/db/schema/recognition-rewards-schema';
+import type { BudgetEnvelopeRow } from '@/lib/rewards/admin-reads';
 
 interface BudgetsListProps {
-  budgets: RewardBudgetEnvelope[];
+  budgets: BudgetEnvelopeRow[];
 }
 
 export function BudgetsList({ budgets }: BudgetsListProps) {
   const t = useTranslations('rewards.admin.budgets');
+  const format = useFormatter();
 
   if (budgets.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>{t('list.empty', { defaultValue: 'No budget envelopes created yet' })}</p>
+        <p>{t('list.empty')}</p>
       </div>
     );
   }
@@ -24,32 +25,29 @@ export function BudgetsList({ budgets }: BudgetsListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('list.columns.name', { defaultValue: 'Name' })}</TableHead>
-            <TableHead>{t('list.columns.allocated', { defaultValue: 'Allocated' })}</TableHead>
-            <TableHead>{t('list.columns.used', { defaultValue: 'Used' })}</TableHead>
-            <TableHead>{t('list.columns.remaining', { defaultValue: 'Remaining' })}</TableHead>
-            <TableHead>{t('list.columns.period', { defaultValue: 'Period' })}</TableHead>
+            <TableHead>{t('list.columns.name')}</TableHead>
+            <TableHead>{t('list.columns.program')}</TableHead>
+            <TableHead>{t('list.columns.allocated')}</TableHead>
+            <TableHead>{t('list.columns.used')}</TableHead>
+            <TableHead>{t('list.columns.remaining')}</TableHead>
+            <TableHead>{t('list.columns.period')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {budgets.map((budget) => {
-            const remaining = budget.amountLimit - budget.amountUsed;
-            const _usagePercent = (budget.amountUsed / budget.amountLimit) * 100;
-            
+            const remaining = budget.limit - budget.used;
             return (
               <TableRow key={budget.id}>
                 <TableCell className="font-medium">{budget.name}</TableCell>
-                <TableCell>{budget.amountLimit.toLocaleString()}</TableCell>
-                <TableCell>{budget.amountUsed.toLocaleString()}</TableCell>
+                <TableCell>{budget.programName ?? '—'}</TableCell>
+                <TableCell>{format.number(budget.limit)}</TableCell>
+                <TableCell>{format.number(budget.used)}</TableCell>
                 <TableCell>
-                  <span className={remaining < budget.amountLimit * 0.1 ? 'text-destructive font-semibold' : ''}>
-                    {remaining.toLocaleString()}
-                  </span>
+                  <span className={remaining < budget.limit * 0.1 ? 'text-destructive font-semibold' : ''}>{format.number(remaining)}</span>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {budget.startsAt && budget.endsAt
-                    ? `${new Date(budget.startsAt).toLocaleDateString()} - ${new Date(budget.endsAt).toLocaleDateString()}`
-                    : t('list.ongoing', { defaultValue: 'Ongoing' })}
+                  {format.dateTime(new Date(budget.startsAt), { dateStyle: 'medium', timeZone: 'UTC' })} –{' '}
+                  {format.dateTime(new Date(budget.endsAt), { dateStyle: 'medium', timeZone: 'UTC' })}
                 </TableCell>
               </TableRow>
             );
@@ -59,4 +57,3 @@ export function BudgetsList({ budgets }: BudgetsListProps) {
     </div>
   );
 }
-

@@ -10,6 +10,8 @@ import enCA from '../../messages/en-CA.json'
 import frCA from '../../messages/fr-CA.json'
 import { StaffMessages } from './staff-messages'
 
+vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }))
+
 type Handler = (init?: RequestInit) => { status?: number; body?: unknown }
 type Routes = Record<string, Handler>
 const json = (status: number, body: unknown) => Promise.resolve({ ok: status >= 200 && status < 300, status, json: async () => body })

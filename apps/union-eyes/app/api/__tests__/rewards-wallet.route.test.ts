@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
+import { declaredOptions } from './with-api-double'
 
 const m = vi.hoisted(() => ({ getWalletSnapshot: vi.fn() }))
 
 vi.mock('@/lib/services/rewards/wallet-service', () => ({ getWalletSnapshot: m.getWalletSnapshot }))
-vi.mock('@/lib/api-auth-guard', () => ({
-  withRoleAuth: (_role: string, handler: (request: NextRequest, context: unknown) => unknown) => handler,
-}))
+vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble)
+vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }))
 
 // DEF-0B11-PRP-WALLET-GET-READS-BALANCE-AND-LEDGER-SEPARATELY-WITH-UNVALIDATED-PAGING
 describe('rewards/wallet GET paging', () => {
@@ -23,6 +23,12 @@ describe('rewards/wallet GET paging', () => {
     )
   }
 
+  it('asks the wrapper for a member and for the tenant transaction its ledger statements read in', async () => {
+    const { GET } = await import('../rewards/wallet/route')
+    const options = declaredOptions(GET)
+    expect(options.auth).toEqual({ minRole: 'member' })
+    expect(options.rlsOrgContext).toBe(true)
+  })
   it('turns a non-numeric or negative request into bounded defaults', async () => {
     await get('?limit=abc&offset=-5')
     expect(m.getWalletSnapshot).toHaveBeenCalledWith('org_1', 'u1', 20, 0)

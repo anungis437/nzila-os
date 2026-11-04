@@ -36,6 +36,7 @@ const replaySchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_execution_replay",
     body: replaySchema,

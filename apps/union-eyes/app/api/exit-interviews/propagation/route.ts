@@ -25,6 +25,7 @@ const querySchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     entitlement: 'union_knowledge_suite',
   },
@@ -39,10 +40,7 @@ export const GET = withApi(
 
     if (!propagationMap.nodes.length) {
       if (nodeId) throw ApiError.notFound('node', nodeId);
-      return {
-        data: propagationMap,
-        meta: { message: 'No published interviews found to analyze' },
-      };
+      return { ...propagationMap, message: 'No published interviews found to analyze' };
     }
 
     // Filter to specific node if requested
@@ -58,24 +56,20 @@ export const GET = withApi(
 
       // The node view honours analysisType too: each type returns only its own section next to the node.
       return {
-        data: {
-          node,
-          downstreamImpact: analysisType === 'upstream' || analysisType === 'coupling' ? undefined : downstreamImpact,
-          upstreamDependencies: analysisType === 'downstream' || analysisType === 'coupling' ? undefined : upstreamDeps,
-          couplingAnalysis: analysisType === 'downstream' || analysisType === 'upstream' ? undefined : coupling,
-        },
+        node,
+        downstreamImpact: analysisType === 'upstream' || analysisType === 'coupling' ? undefined : downstreamImpact,
+        upstreamDependencies: analysisType === 'downstream' || analysisType === 'coupling' ? undefined : upstreamDeps,
+        couplingAnalysis: analysisType === 'downstream' || analysisType === 'upstream' ? undefined : coupling,
       };
     }
 
     // Return full map, potentially filtered by analysis type
     // Each analysis type returns its own section: coupling no longer returns the downstream and upstream lists as well.
-    const filtered = {
+    return {
       ...propagationMap,
       downstreamImpacts: analysisType === 'upstream' || analysisType === 'coupling' ? [] : propagationMap.downstreamImpacts,
       upstreamDependencies: analysisType === 'downstream' || analysisType === 'coupling' ? [] : propagationMap.upstreamDependencies,
       couplingAnalysis: analysisType === 'downstream' || analysisType === 'upstream' ? [] : propagationMap.couplingAnalysis,
     };
-
-    return { data: filtered };
   },
 );

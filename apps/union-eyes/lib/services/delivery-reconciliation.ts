@@ -162,8 +162,8 @@ export function ledgerEventsFromRows(rows: unknown): DeliveryFact[] {
   });
 }
 
-export async function loadDeliveryFacts(organizationId: string, idempotencyKey: string): Promise<DeliveryFact[]> {
-  const rows = await db
+export async function loadDeliveryFacts(organizationId: string, idempotencyKey: string, database: RLSTx = db): Promise<DeliveryFact[]> {
+  const rows = await database
     .select({
       event: notificationDeliveryLog.event,
       externalEventId: notificationDeliveryLog.externalEventId,

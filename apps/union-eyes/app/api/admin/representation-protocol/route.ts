@@ -8,7 +8,7 @@
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { withAdminAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
+import { withApi } from "@/lib/api/framework";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import {
   resolveRepresentationProtocol,
@@ -23,6 +23,10 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// The protocol is the caller organization's own configuration row: the handlers run in that organization's tenant transaction, so the read the
+// service makes through the ambient handle carries the organization row-level security applies to. The writes open their own transaction with
+// their audit record inside it (a savepoint of this one).
 
 // ─── Validation ───────────────────────────────────────────────
 
@@ -51,9 +55,14 @@ const putBodySchema = z.object({
 
 // ─── GET — Read current protocol ──────────────────────────────
 
-export const GET = withAdminAuth(async (request, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-
+export const GET = withApi(
+  {
+    auth: { minRole: "admin" },
+    rlsOrgContext: true,
+    registry: { audience: "admin", productionStatus: "active", evidenceRequired: true, orgScoping: "caller-org" },
+    openapi: { tags: ["Admin", "Representation"], summary: "Read the representation protocol of the current organization" },
+  },
+  async ({ userId, organizationId }) => {
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization context required");
   }
@@ -81,15 +90,21 @@ export const GET = withAdminAuth(async (request, context: BaseAuthContext) => {
       approval: protocol.approval ?? null,
     },
   });
-});
+  },
+);
 
 // ─── PUT — Save protocol ─────────────────────────────────────
 
-export const PUT = withAdminAuth(async (request, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-
-  if (!organizationId) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization context required");
+export const PUT = withApi(
+  {
+    auth: { minRole: "admin" },
+    rlsOrgContext: true,
+    registry: { audience: "admin", productionStatus: "active", evidenceRequired: true, orgScoping: "caller-org" },
+    openapi: { tags: ["Admin", "Representation"], summary: "Save the representation protocol of the current organization as pending approval" },
+  },
+  async ({ request, userId, organizationId }) => {
+  if (!organizationId || !userId) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization and user context required");
   }
 
   let rawBody: any;
@@ -108,11 +123,11 @@ export const PUT = withAdminAuth(async (request, context: BaseAuthContext) => {
     );
   }
 
-  await saveRepresentationProtocol(organizationId, parsed.data.protocol, userId ?? "system");
+  await saveRepresentationProtocol(organizationId, parsed.data.protocol, userId);
 
   logApiAuditEvent({
     timestamp: new Date().toISOString(),
-    userId: userId ?? "unknown",
+    userId,
     endpoint: "/api/admin/representation-protocol",
     method: "PUT",
     eventType: "success",
@@ -127,19 +142,39 @@ export const PUT = withAdminAuth(async (request, context: BaseAuthContext) => {
     protocol: parsed.data.protocol,
     execution: { status: "pending_approval", executable: false },
   });
-});
+  },
+);
 
 // ─── POST — Independently approve the pending protocol ────────
 
-export const POST = withAdminAuth(async (request, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-
+export const POST = withApi(
+  {
+    auth: { minRole: "admin" },
+    rlsOrgContext: true,
+    registry: { audience: "admin", productionStatus: "active", evidenceRequired: true, orgScoping: "caller-org" },
+    openapi: { tags: ["Admin", "Representation"], summary: "Approve the pending representation protocol, or submit the legacy one for approval" },
+  },
+  async ({ request, userId, organizationId }) => {
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization and user context required");
   }
 
-  const body = await request.json().catch(() => ({}));
-  if (body?.action === "submit_legacy") {
+  // No body approves the pending protocol, and a body names its action. A body that is not JSON, or names an action this route does not
+  // have, is a client error: it is never read as an approval.
+  const text = await request.text();
+  let body: { action?: unknown } = {};
+  if (text.trim() !== "") {
+    try {
+      const parsed = JSON.parse(text);
+      body = typeof parsed === "object" && parsed !== null && !Array.isArray(parsed) ? parsed : { action: "invalid" };
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid JSON in request body");
+    }
+  }
+  if (body.action !== undefined && body.action !== "approve" && body.action !== "submit_legacy") {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Unknown action: use submit_legacy, or send no action to approve");
+  }
+  if (body.action === "submit_legacy") {
     const submitted = await submitLegacyRepresentationProtocolForApproval(organizationId, userId);
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
@@ -173,4 +208,5 @@ export const POST = withAdminAuth(async (request, context: BaseAuthContext) => {
     return NextResponse.json({ error: result.code, message: result.message }, { status });
   }
   return NextResponse.json({ ok: true, approvedAt: result.approvedAt, execution: { status: "approved", executable: true } });
-});
+  },
+);

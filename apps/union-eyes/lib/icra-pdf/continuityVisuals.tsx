@@ -433,29 +433,6 @@ export function StewardshipSignalList({ signals }: StewardshipSignalListProps) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PageDivider — thin horizontal rule for section separation
-// ─────────────────────────────────────────────────────────────────────────────
-
-const dividerStyles = StyleSheet.create({
-  line: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    marginTop: SPACE.lg,
-    marginBottom: SPACE.lg,
-  },
-  thinLine: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: COLORS.borderLight,
-    marginTop: SPACE.sm,
-    marginBottom: SPACE.sm,
-  },
-});
-
-export function PageDivider({ thin = false }: { thin?: boolean }) {
-  return <View style={thin ? dividerStyles.thinLine : dividerStyles.line} />;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // OCI Motif block — the closing institutional motif
 // ─────────────────────────────────────────────────────────────────────────────
 

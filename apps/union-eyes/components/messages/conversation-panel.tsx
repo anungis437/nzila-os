@@ -5,34 +5,18 @@ import { useLocale, useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { assignmentProblem, MAX_BODY, pick, type AssignmentProblem } from '@/components/messages/messages-api';
+import { logger } from '@/lib/logger';
+import {
+  assignmentProblem,
+  MAX_BODY,
+  messagesFrom,
+  threadDetailFrom,
+  type AssignmentProblem,
+  type MessageRecord,
+  type ThreadDetail,
+} from '@/components/messages/messages-api';
 
 export type MessagesNamespace = 'memberMessages' | 'staffMessages';
-
-type Retention =
-  | { audience: 'member'; state: 'not_closed' | 'policy_not_adopted' | 'retained' }
-  | { audience: 'staff'; state: 'legal_hold' | 'not_closed' | 'policy_not_adopted' | 'closure_unrecorded' | 'retained' | 'retention_elapsed'; retainedUntil?: string };
-
-type Detail = {
-  subject: string;
-  status: string;
-  isArchived: boolean;
-  representativeAssigned: boolean;
-  viewerRole: 'member' | 'assignee';
-  canReply: boolean;
-  canClose: boolean;
-  canArchive: boolean;
-  retention?: Retention;
-};
-
-type Message = {
-  id: string;
-  fromMe: boolean;
-  senderKind: 'member' | 'union' | 'system';
-  content: string | null;
-  createdAt: string;
-  readByCounterpart?: boolean;
-};
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 type Confirm = 'close' | 'release' | null;
@@ -57,8 +41,8 @@ export function ConversationPanel({
 }) {
   const t = useTranslations(ns as 'memberMessages') as unknown as Translate;
   const locale = useLocale();
-  const [thread, setThread] = useState<Detail | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [thread, setThread] = useState<ThreadDetail | null>(null);
+  const [messages, setMessages] = useState<MessageRecord[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
@@ -78,16 +62,24 @@ export function ConversationPanel({
       const [threadResponse, messageResponse] = await Promise.all([fetch(base), fetch(`${base}/messages`)]);
       if (threadResponse.status === 404 || messageResponse.status === 404) return setState('missing');
       if (!threadResponse.ok || !messageResponse.ok) throw new Error('load');
-      const loaded = pick<Message[]>(await messageResponse.json(), 'messages') ?? [];
-      setThread(pick<Detail>(await threadResponse.json(), 'thread') ?? null);
+      // An answer that is not the shape the routes promise is a failed load, never a conversation with no messages.
+      const loaded = messagesFrom(await messageResponse.json());
+      setThread(threadDetailFrom(await threadResponse.json()));
       setMessages(loaded);
       setState('ready');
-      // Opening the conversation tells the other side it was read; failing to say so must not hide the conversation.
+      // Opening the conversation tells the other side it was read; failing to say so must not hide the conversation,
+      // and is tried again the next time the conversation is loaded.
       if (!marked.current && loaded.some((m) => !m.fromMe)) {
         marked.current = true;
-        void fetch(`${base}/read`, { method: 'POST' }).catch(() => undefined);
+        const unmark = () => {
+          marked.current = false;
+        };
+        void fetch(`${base}/read`, { method: 'POST' }).then((response) => {
+          if (!response.ok) unmark();
+        }, unmark);
       }
-    } catch {
+    } catch (err) {
+      logger.error('Failed to load the conversation', err);
       setState('error');
     }
   }, [base]);
@@ -207,7 +199,7 @@ export function ConversationPanel({
         ? t('retention.retainedUntil', { date: dateFormat.format(new Date(retention.retainedUntil)) })
         : t(`retention.${retention.state}`)
     : null;
-  const senderLabel = (m: Message) => (m.fromMe ? t('you') : m.senderKind === 'system' ? t('system') : m.senderKind === 'member' ? t('member') : t('union'));
+  const senderLabel = (m: MessageRecord) => (m.fromMe ? t('you') : m.senderKind === 'system' ? t('system') : m.senderKind === 'member' ? t('member') : t('union'));
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border p-4" data-testid="thread-view">

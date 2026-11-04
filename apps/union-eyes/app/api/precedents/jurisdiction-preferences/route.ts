@@ -21,6 +21,7 @@ const VALID_LEVELS = ['federal', 'provincial', 'municipal'];
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Precedents'],

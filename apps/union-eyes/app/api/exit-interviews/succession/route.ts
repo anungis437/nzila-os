@@ -19,6 +19,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -31,6 +32,6 @@ export const GET = withApi(
   async ({ organizationId, userId }) => {
     await limitModelRun(organizationId!);
     const report = await analyzeSuccessionFragility(organizationId!, userId ?? undefined);
-    return { data: report };
+    return report;
   },
 );

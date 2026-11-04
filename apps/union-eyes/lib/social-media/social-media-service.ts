@@ -8,11 +8,11 @@
  * and rate limit management across all platforms.
  */
 
-import { openToken, openOptionalToken, sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
+import { openToken, openOptionalToken, sealToken } from '@/lib/social-media/token-vault';
 import { MetaAPIClient, createMetaClient } from './meta-api-client';
 import { TwitterAPIClient, createTwitterClient } from './twitter-api-client';
 import { LinkedInAPIClient, createLinkedInClient } from './linkedin-api-client';
-import { db } from '@/db';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { ApiError } from '@/lib/api/errors';
 import { logger } from '@/lib/logger';
 import { socialAccounts, socialPosts, socialAnalytics } from '@/db/schema/social-media-schema';
@@ -21,6 +21,14 @@ import type {
   SocialPlatform,
   SocialPostType,
 } from '@/db/schema/social-media-schema';
+
+/**
+ * One database step in the organization's own tenant transaction. The service calls the platforms between its steps, so it never holds a
+ * transaction open across one of those calls, and a step that runs alone is still bound to the organization row-level security applies.
+ */
+function inOrganization<T>(organizationId: string, work: (tx: RLSTx) => Promise<T>): Promise<T> {
+  return withRLSContext({ organizationId }, work);
+}
 
 /**
  * Unified social media post content
@@ -145,11 +153,13 @@ export class SocialMediaService {
     accountId: string,
     organizationId: string
   ): Promise<MetaAPIClient | TwitterAPIClient | LinkedInAPIClient> {
-    const [typedAccount] = await db
-      .select()
-      .from(socialAccounts)
-      .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
-      .limit(1);
+    const [typedAccount] = await inOrganization(organizationId, (tx) =>
+      tx
+        .select()
+        .from(socialAccounts)
+        .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
+        .limit(1),
+    );
 
     if (!typedAccount) {
       throw new Error(`Account not found: ${accountId}`);
@@ -185,21 +195,23 @@ export class SocialMediaService {
    * in the query itself rather than rely on a caller-side check.
    */
   async refreshAccessToken(accountId: string, organizationId: string): Promise<void> {
-    const [typedAccount] = await db
-      .select()
-      .from(socialAccounts)
-      .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
-      .limit(1);
+    const [typedAccount] = await inOrganization(organizationId, (tx) =>
+      tx
+        .select()
+        .from(socialAccounts)
+        .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
+        .limit(1),
+    );
 
     if (!typedAccount) {
       throw new Error(`Account not found: ${accountId}`);
     }
 
-    try {
-      let newAccessToken: string;
-      let newRefreshToken: string | null = null;
-      let expiresIn: number;
+    let newAccessToken: string;
+    let newRefreshToken: string | null = null;
+    let expiresIn: number;
 
+    try {
       switch (typedAccount.platform) {
         case 'facebook':
         case 'instagram': {
@@ -230,7 +242,7 @@ export class SocialMediaService {
             throw new Error('No refresh token available for LinkedIn account');
           }
           const linkedInClient = createLinkedInClient((await openToken(typedAccount.accessToken)));
-          const tokenData = await linkedInClient.refreshAccessToken(typedAccount.refreshToken);
+          const tokenData = await linkedInClient.refreshAccessToken(await openToken(typedAccount.refreshToken));
           newAccessToken = tokenData.access_token;
           newRefreshToken = tokenData.refresh_token || null;
           expiresIn = tokenData.expires_in;
@@ -240,24 +252,30 @@ export class SocialMediaService {
         default:
           throw new Error(`Token refresh not supported for platform: ${typedAccount.platform}`);
       }
-
-      // Update account with new tokens
-      const expiresAt = new Date(Date.now() + expiresIn * 1000);
-      await db.update(socialAccounts).set({
-        accessToken: await sealToken(newAccessToken),
-        tokenExpiresAt: expiresAt,
-        updatedAt: new Date(),
-        ...(newRefreshToken ? { refreshToken: await sealToken(newRefreshToken) } : {}),
-      }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)));
     } catch (error) {
-      // Update account status to error
-      await db.update(socialAccounts).set({
-        status: 'expired',
-        updatedAt: new Date(),
-      }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)));
+      // Only the platform refusing the refresh marks the account expired; a failure to store the new token below does not.
+      await inOrganization(organizationId, (tx) =>
+        tx.update(socialAccounts).set({
+          status: 'expired',
+          updatedAt: new Date(),
+        }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId))),
+      );
 
       throw error;
     }
+
+    // Update account with new tokens, sealed with the Key Vault before the database step so that no transaction waits on that call
+    const expiresAt = new Date(Date.now() + expiresIn * 1000);
+    const sealedAccessToken = await sealToken(newAccessToken);
+    const sealedRefreshToken = newRefreshToken ? await sealToken(newRefreshToken) : null;
+    await inOrganization(organizationId, (tx) =>
+      tx.update(socialAccounts).set({
+        accessToken: sealedAccessToken,
+        tokenExpiresAt: expiresAt,
+        updatedAt: new Date(),
+        ...(sealedRefreshToken ? { refreshToken: sealedRefreshToken } : {}),
+      }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId))),
+    );
   }
 
   /**
@@ -272,18 +290,20 @@ export class SocialMediaService {
     const results: PlatformPostResult[] = [];
 
     // Get accounts for specified platforms
-    const typedAccounts = await db
-      .select()
-      .from(socialAccounts)
-      .where(
-        and(
-          eq(socialAccounts.organizationId, organizationId),
-          inArray(socialAccounts.platform, content.platforms),
-          eq(socialAccounts.status, 'active'),
-          // Publishing reaches only the accounts the post names: never every connected page of a platform.
-          ...(options.accountIds ? [inArray(socialAccounts.id, options.accountIds)] : []),
-        )
-      );
+    const typedAccounts = await inOrganization(organizationId, (tx) =>
+      tx
+        .select()
+        .from(socialAccounts)
+        .where(
+          and(
+            eq(socialAccounts.organizationId, organizationId),
+            inArray(socialAccounts.platform, content.platforms),
+            eq(socialAccounts.status, 'active'),
+            // Publishing reaches only the accounts the post names: never every connected page of a platform.
+            ...(options.accountIds ? [inArray(socialAccounts.id, options.accountIds)] : []),
+          )
+        ),
+    );
 
     if (typedAccounts.length === 0) {
       throw new Error('No active accounts found for specified platforms');
@@ -411,19 +431,21 @@ export class SocialMediaService {
         try {
           if (options.existingPostId) {
             // An approved draft is completed in place: it is the record of what was approved.
-            const completed = await db
-              .update(socialPosts)
-              .set({
-                platformPostId: postId,
-                status: content.scheduled_for ? 'scheduled' : 'published',
-                publishedAt: content.scheduled_for ? null : new Date(),
-                platformUrl: permalink ?? null,
-                updatedAt: new Date(),
-              })
-              .where(and(eq(socialPosts.id, options.existingPostId), eq(socialPosts.organizationId, organizationId), eq(socialPosts.accountId, account.id)))
-              .returning({ id: socialPosts.id });
+            const completed = await inOrganization(organizationId, (tx) =>
+              tx
+                .update(socialPosts)
+                .set({
+                  platformPostId: postId,
+                  status: content.scheduled_for ? 'scheduled' : 'published',
+                  publishedAt: content.scheduled_for ? null : new Date(),
+                  platformUrl: permalink ?? null,
+                  updatedAt: new Date(),
+                })
+                .where(and(eq(socialPosts.id, options.existingPostId!), eq(socialPosts.organizationId, organizationId), eq(socialPosts.accountId, account.id)))
+                .returning({ id: socialPosts.id }),
+            );
             if (completed.length === 0) throw new Error('The approved draft no longer exists');
-          } else await db.insert(socialPosts).values({
+          } else await inOrganization(organizationId, (tx) => tx.insert(socialPosts).values({
             organizationId,
             accountId: account.id,
             platformPostId: postId,
@@ -438,7 +460,7 @@ export class SocialMediaService {
             publishedAt: content.scheduled_for ? null : new Date(),
             platformUrl: permalink ?? null,
             createdBy: createdById,
-          });
+          }));
         } catch (recordError) {
           recorded = false;
           logger.error('Post accepted by the platform but not recorded', {
@@ -485,18 +507,20 @@ export class SocialMediaService {
    * that the post is already gone counts as removed.
    */
   async removeFromPlatform(postId: string, organizationId: string): Promise<{ alreadyRemoved: boolean }> {
-    const [result] = await db
-      .select({
-        id: socialPosts.id,
-        accountId: socialPosts.accountId,
-        platformPostId: socialPosts.platformPostId,
-        platform: socialAccounts.platform,
-        accessToken: socialAccounts.accessToken,
-      })
-      .from(socialPosts)
-      .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
-      .where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)))
-      .limit(1);
+    const [result] = await inOrganization(organizationId, (tx) =>
+      tx
+        .select({
+          id: socialPosts.id,
+          accountId: socialPosts.accountId,
+          platformPostId: socialPosts.platformPostId,
+          platform: socialAccounts.platform,
+          accessToken: socialAccounts.accessToken,
+        })
+        .from(socialPosts)
+        .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
+        .where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)))
+        .limit(1),
+    );
 
     if (!result?.id) {
       throw new Error(`Post not found: ${postId}`);
@@ -539,11 +563,13 @@ export class SocialMediaService {
 
   async deletePost(postId: string, organizationId: string): Promise<void> {
     await this.removeFromPlatform(postId, organizationId);
-    await db.update(socialPosts).set({
-      status: 'deleted',
-      deletedAt: new Date(),
-      updatedAt: new Date(),
-    }).where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)));
+    await inOrganization(organizationId, (tx) =>
+      tx.update(socialPosts).set({
+        status: 'deleted',
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+      }).where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId))),
+    );
   }
 
   /**
@@ -559,11 +585,13 @@ export class SocialMediaService {
     startDate: Date,
     endDate: Date
   ): Promise<UnifiedAnalytics[]> {
-    const [typedAccount] = await db
-      .select()
-      .from(socialAccounts)
-      .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
-      .limit(1);
+    const [typedAccount] = await inOrganization(organizationId, (tx) =>
+      tx
+        .select()
+        .from(socialAccounts)
+        .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
+        .limit(1),
+    );
 
     if (!typedAccount) {
       throw new Error(`Account not found: ${accountId}`);
@@ -636,24 +664,14 @@ export class SocialMediaService {
         );
       }
 
-      // Save analytics to database
-      for (const data of analytics) {
-        const dateStr = data.date.toISOString().split('T')[0];
-        await db.insert(socialAnalytics).values({
-          organizationId: typedAccount.organizationId,
-          accountId,
-          analyticsDate: dateStr,
-          totalImpressions: data.impressions,
-          totalReach: data.reach,
-          totalEngagements: data.engagement,
-          totalLikes: data.likes,
-          totalComments: data.comments,
-          totalShares: data.shares,
-          linkClicks: data.clicks,
-          followerCount: data.follower_count,
-        }).onConflictDoUpdate({
-          target: [socialAnalytics.accountId, socialAnalytics.analyticsDate],
-          set: {
+      // Save analytics to database: one tenant transaction for the whole batch, the platform calls above are done
+      await inOrganization(typedAccount.organizationId, async (tx) => {
+        for (const data of analytics) {
+          const dateStr = data.date.toISOString().split('T')[0];
+          await tx.insert(socialAnalytics).values({
+            organizationId: typedAccount.organizationId,
+            accountId,
+            analyticsDate: dateStr,
             totalImpressions: data.impressions,
             totalReach: data.reach,
             totalEngagements: data.engagement,
@@ -662,10 +680,22 @@ export class SocialMediaService {
             totalShares: data.shares,
             linkClicks: data.clicks,
             followerCount: data.follower_count,
-            updatedAt: new Date(),
-          },
-        });
-      }
+          }).onConflictDoUpdate({
+            target: [socialAnalytics.accountId, socialAnalytics.analyticsDate],
+            set: {
+              totalImpressions: data.impressions,
+              totalReach: data.reach,
+              totalEngagements: data.engagement,
+              totalLikes: data.likes,
+              totalComments: data.comments,
+              totalShares: data.shares,
+              linkClicks: data.clicks,
+              followerCount: data.follower_count,
+              updatedAt: new Date(),
+            },
+          });
+        }
+      });
     } catch (error) {
 throw error;
     }
@@ -677,15 +707,17 @@ throw error;
    * Get rate limit status for all connected accounts
    */
   async getRateLimitStatus(organizationId: string): Promise<RateLimitStatus[]> {
-    const typedAccounts = await db
-      .select()
-      .from(socialAccounts)
-      .where(
-        and(
-          eq(socialAccounts.organizationId, organizationId),
-          eq(socialAccounts.status, 'active'),
-        )
-      );
+    const typedAccounts = await inOrganization(organizationId, (tx) =>
+      tx
+        .select()
+        .from(socialAccounts)
+        .where(
+          and(
+            eq(socialAccounts.organizationId, organizationId),
+            eq(socialAccounts.status, 'active'),
+          )
+        ),
+    );
 
     if (!typedAccounts.length) {
       return [];
@@ -743,8 +775,14 @@ throw error;
           reset_at: resetAt,
           is_limited: remaining < limit * 0.1,
         });
-      } catch (_error) {
-}
+      } catch (error) {
+        // An account whose limits cannot be read is left out of the answer, never reported as healthy; the failure is logged
+        logger.warn('The rate limit of a social media account could not be read', {
+          organizationId,
+          platform: account.platform,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
 
     return statuses;

@@ -240,17 +240,25 @@ describe('round 48 cross-tenant IDOR ratchet: ml_predictions churn-risk route', 
 });
 
 describe('round 48 cross-tenant IDOR ratchet: ai_usage_metrics feedback route', () => {
-  it('GET scopes its select query by the caller\'s own organizationId', () => {
+  it('GET scopes its select query by the caller\'s own organizationId and userId', () => {
     const src = source('app/api/ai/feedback/route.ts');
-    const getMatch = src.match(/export const GET = withRoleAuth\('member',[\s\S]*$/);
+    const getMatch = src.match(/export const GET = withApi\([\s\S]*$/);
     expect(getMatch, 'GET handler not found').toBeTruthy();
-    expect(getMatch![0]).toContain('eq(aiUsageMetrics.organizationId, context.organizationId)');
+    expect(getMatch![0]).toContain('eq(aiUsageMetrics.organizationId, organizationId)');
+    expect(getMatch![0]).toContain('eq(aiUsageMetrics.userId, userId)');
   });
 
   it('GET rejects requests with no organization context', () => {
     const src = source('app/api/ai/feedback/route.ts');
-    const getMatch = src.match(/export const GET = withRoleAuth\('member',[\s\S]*$/);
+    const getMatch = src.match(/export const GET = withApi\([\s\S]*$/);
+    expect(getMatch, 'GET handler not found').toBeTruthy();
     expect(getMatch![0]).toContain('No active organization');
+  });
+
+  it('is an append-only ledger for the route: it inserts and selects, and never updates or deletes a row', () => {
+    const src = source('app/api/ai/feedback/route.ts');
+    expect(src).not.toMatch(/\.update\(aiUsageMetrics\)/);
+    expect(src).not.toMatch(/\.delete\(aiUsageMetrics\)/);
   });
 });
 

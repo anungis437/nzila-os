@@ -29,24 +29,11 @@ import {
   BarChart3,
   Database,
 } from 'lucide-react';
-import { logger } from '@/lib/logger';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { isUuid } from '@/lib/page-data/uuid';
+import { loadIntegrationSettings, type IntegrationConfig, type DomainStats } from '@/lib/dashboard-reads/integrations';
 import { getTranslations } from 'next-intl/server';
 
 // ── Types ──────────────────────────────────────────────────────────────────
-
-interface IntegrationConfig {
-  id: string;
-  type: string;
-  provider: string;
-  status: string;
-  metadata: Record<string, unknown>;
-  createdBy: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface DataDomain {
   key: string;
@@ -64,73 +51,8 @@ interface ProviderInfo {
   configId?: string;
 }
 
-interface DomainStats {
-  domain: string;
-  tableCount: number;
-  totalRows: number;
-}
-
 // ── Data loaders ───────────────────────────────────────────────────────────
-
-async function loadIntegrationConfigs(orgId: string): Promise<IntegrationConfig[]> {
-  // An integration records its provider, its settings and whether it is enabled; the page's "metadata" is its settings, and its status is derived from `enabled`.
-  const result = await db.execute(sql`
-    SELECT id, type, provider,
-           CASE WHEN enabled THEN 'active' ELSE 'inactive' END AS status,
-           settings AS metadata,
-           created_at, updated_at
-    FROM integration_configs
-    WHERE organization_id = ${orgId}::uuid
-    ORDER BY type, provider
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    type: r.type as string,
-    provider: r.provider as string,
-    status: r.status as string,
-    metadata: (r.metadata as Record<string, unknown>) ?? {},
-    createdBy: null,
-    createdAt: r.created_at as string,
-    updatedAt: r.updated_at as string,
-  }));
-}
-
-async function loadDomainTableStats(_orgId: string): Promise<DomainStats[]> {
-  try {
-    const result = await db.execute(sql`
-      SELECT
-        CASE
-          WHEN table_name LIKE 'external_pension%' THEN 'pension'
-          WHEN table_name LIKE 'external_calendar%' THEN 'calendar'
-          WHEN table_name LIKE 'external_hris%' THEN 'hris'
-          WHEN table_name LIKE 'external_insurance%' THEN 'insurance'
-          WHEN table_name LIKE 'external_accounting%' THEN 'accounting'
-          WHEN table_name LIKE 'external_communication%' THEN 'communication'
-          WHEN table_name LIKE 'external_crm%' THEN 'crm'
-          WHEN table_name LIKE 'external_commerce%' THEN 'commerce'
-          WHEN table_name LIKE 'external_lrb%' OR table_name LIKE 'external_labour%' THEN 'labour'
-          WHEN table_name LIKE 'external_health%' THEN 'health'
-          WHEN table_name LIKE 'external_clc%' OR table_name LIKE 'external_collective%' THEN 'collective'
-          ELSE 'other'
-        END AS domain,
-        count(*)::int AS table_count
-      FROM information_schema.tables
-      WHERE table_schema = 'public'
-        AND table_name LIKE 'external_%'
-      GROUP BY 1
-      ORDER BY 1
-    `);
-
-    return Array.from(result).map((r: Record<string, unknown>) => ({
-      domain: r.domain as string,
-      tableCount: r.table_count as number,
-      totalRows: 0,
-    }));
-  } catch {
-    return [];
-  }
-}
+// The reads live in lib/dashboard-reads/integrations.ts, which runs them in the organization's own context.
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -337,22 +259,13 @@ export default async function IntegrationSettingsPage({
   }
 
   const organizationId = user.organizationId;
-
-  let configs: IntegrationConfig[] = [];
-  let domainStats: DomainStats[] = [];
-
-  if (organizationId) {
-    try {
-      [configs, domainStats] = await withSystemContext(() =>
-        Promise.all([
-          loadIntegrationConfigs(organizationId),
-          loadDomainTableStats(organizationId),
-        ]),
-      );
-    } catch (error) {
-      logger.error('Error loading integration settings:', error);
-    }
+  // A person who belongs to no organization has no integration settings to read: they go back to the dashboard rather than to an empty page.
+  if (!isUuid(organizationId)) {
+    redirect(`/${locale}/dashboard`);
   }
+
+  // A failed read is an error, not "no integrations configured": nothing here catches it.
+  const { configs, domainStats } = await loadIntegrationSettings(organizationId);
 
   const domains = buildDomainCatalogue(configs, domainStats, t);
   const filteredDomains = filterDomain

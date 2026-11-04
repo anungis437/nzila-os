@@ -6,6 +6,7 @@
  */
 import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
+import type { RLSTx } from '@/lib/db/with-rls-context'
 import { inAppNotifications } from '@/db/schema/domains/communications/notifications'
 
 export interface ExpiryWarning {
@@ -20,9 +21,9 @@ export function expiryWarningKey(warning: Pick<ExpiryWarning, 'expirationDate'>,
   return `rewards-expiry:${tierDays}:${warning.expirationDate.toISOString().slice(0, 10)}`
 }
 
-/** True when this run owns the warning; false when it was already recorded. */
-export async function claimExpiryWarning(warning: ExpiryWarning, tierDays: number): Promise<boolean> {
-  const rows = await db
+/** True when this run owns the warning; false when it was already recorded. The caller supplies the transaction it commits on (the cron's is a system one). */
+export async function claimExpiryWarning(warning: ExpiryWarning, tierDays: number, executor: RLSTx = db): Promise<boolean> {
+  const rows = await executor
     .insert(inAppNotifications)
     .values({
       organizationId: warning.organizationId,
@@ -37,8 +38,8 @@ export async function claimExpiryWarning(warning: ExpiryWarning, tierDays: numbe
   return rows.length > 0
 }
 
-export async function releaseExpiryWarning(warning: ExpiryWarning, tierDays: number): Promise<void> {
-  await db
+export async function releaseExpiryWarning(warning: ExpiryWarning, tierDays: number, executor: RLSTx = db): Promise<void> {
+  await executor
     .delete(inAppNotifications)
     .where(
       and(

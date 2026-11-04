@@ -24,8 +24,13 @@ describe('F06 batch 2 (A2): mutation and audit in one database transaction', () 
 
   it('audits every ICRA review decision, claimed or not, in the decision\'s transaction', () => {
     const route = src('app/api/icra/report/[assessmentId]/review/route.ts')
-    expect(route).toContain('assessment.claimedOrgId ?? (await getOrganizationIdForUser(userId)')
+    // The acting organization is resolved from the identity scope before the decision's transaction opens; it keys the audit of an unclaimed assessment.
+    expect(route).toContain('const actingOrganizationId = await getOrganizationIdForUser(userId).catch(() => null)')
+    expect(route.indexOf('const actingOrganizationId = await getOrganizationIdForUser(userId)')).toBeLessThan(route.indexOf('withSystemContext(async (tx)'))
+    expect(route).toContain('const auditOrganizationId = assessment.claimedOrgId ?? actingOrganizationId')
     expect(route).not.toMatch(/if \(assessment\.claimedOrgId\) \{\s*await persistAtomicAudit/)
+    // A decision with no organization to be recorded against is refused before it is made, and the audit follows the update in the same transaction.
+    expect(route.indexOf('status: 409')).toBeLessThan(route.indexOf('.update(icraAssessments)'))
     expect(route.indexOf('.update(icraAssessments)')).toBeLessThan(route.indexOf('await persistAtomicAudit(tx'))
   })
 

@@ -10,8 +10,9 @@
  */
 
 import { z } from 'zod';
-import { NextRequest, NextResponse } from 'next/server';
-import { hasMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { NextResponse } from 'next/server';
+import { hasMinRole } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { ReportExecutor, type ReportConfig } from '@/lib/report-executor';
 import { OFFICER_REPORT_ROW_CAP, suppressSmallGroups, validateReportConfig, withGroupSizeField } from '@/lib/reports/report-config-validation';
@@ -43,17 +44,20 @@ const REPORT_SHAPE_BUDGET = { limit: 12, window: 3600, identifier: 'report-shape
 // officers of one organization. Neither budget eliminates differencing; they bound how much of it one hour allows, and every refusal is recorded.
 const REPORT_SOURCE_BUDGET = { limit: 60, window: 3600, identifier: 'report-source' };
 
-export const POST = withRoleAuth('officer', async (request: NextRequest, context) => {
-  const { userId, organizationId } = context as { userId: string; organizationId: string };
+// The report is a read of the caller organization's own data: it runs in that organization's tenant transaction (`rlsOrgContext`), so the
+// generated statement executes as the runtime role bound to the organization. Nothing leaves the database inside it.
+export const POST = withApi(
+  {
+    auth: { minRole: 'officer' },
+    rlsOrgContext: true,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Reports'], summary: 'Execute an ad hoc report configuration' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
 
   try {
-    if (!userId || !organizationId) {
-      return standardErrorResponse(
-      ErrorCode.AUTH_REQUIRED,
-      'Unauthorized'
-    );
-    }
-
     // Rate limit report execution
     const rateLimitResult = await checkRateLimit(
       `report-execute-adhoc:${userId}`,
@@ -81,7 +85,12 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     );
     }
 
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+    }
     // Validate request body
     const validation = reportsExecuteSchema.safeParse(body);
     if (!validation.success) {
@@ -273,4 +282,5 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       error
     );
   }
-});
+  },
+);

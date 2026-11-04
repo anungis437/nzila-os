@@ -17,6 +17,7 @@ function hasStewardPrivileges(role: string | null): boolean {
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     entitlement: 'union_knowledge_suite',
     openapi: {

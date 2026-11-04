@@ -1,8 +1,9 @@
 /**
  * Board Packet Schema
  * 
- * Automated board packet generation for governance meetings
- * Includes financials, cases, motions, audit exceptions, and compliance status
+ * Board packets for governance meetings: an officer prepares the content sections (financials, membership, cases, motions, audit exceptions, compliance
+ * and action items), finalizes the packet (certified with a content hash, lib/governance/board-packet-lifecycle.ts) and distributes it to members.
+ * The sections are written by the officer, not derived from other tables.
  */
 
 import { pgTable, uuid, varchar, text, timestamp, jsonb, integer, boolean, date } from "drizzle-orm/pg-core";

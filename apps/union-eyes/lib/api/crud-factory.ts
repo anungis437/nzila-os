@@ -30,6 +30,7 @@
  */
 import { withApi } from './with-api';
 import { ApiError } from './errors';
+import { parseCrudPagination } from './pagination';
 import { db } from '@/db/db';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -366,19 +367,7 @@ const FACTORY_MANAGED_FIELDS = new Set([
 ]);
 
 /** Strict, bounded pagination for every collection backed by the CRUD factory. */
-export function parseCrudPagination(params: URLSearchParams, defaultLimit = 50): { page: number; limit: number; offset: number } {
-  const rawPage = params.get('page') ?? '1';
-  const rawLimit = params.get('limit') ?? String(defaultLimit);
-  if (!/^[1-9]\d*$/.test(rawPage) || !/^[1-9]\d*$/.test(rawLimit)) {
-    throw ApiError.badRequest('Invalid pagination parameters');
-  }
-  const page = Number(rawPage);
-  const limit = Number(rawLimit);
-  if (!Number.isSafeInteger(page) || page > 10000 || !Number.isSafeInteger(limit) || limit > 100) {
-    throw ApiError.badRequest('Pagination out of bounds');
-  }
-  return { page, limit, offset: (page - 1) * limit };
-}
+export { parseCrudPagination };
 
 export function assertGenericWritePayload(
   body: unknown,
@@ -578,7 +567,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
   function parentCondition(organizationId: string | null | undefined): SQL | undefined {
     if (!parentColumn || !parentKeyColumn || !parentOrgColumn) return undefined;
     if (!organizationId) throw ApiError.forbidden();
-    return inArray(parentColumn, db.select({ key: parentKeyColumn }).from(opts.parentScope!.parent).where(eq(parentOrgColumn, organizationId)));
+    // The subquery is part of the caller's own statement and runs on its handle, so it is written as SQL rather than built on a handle of its own.
+    return inArray(parentColumn, sql`(select ${parentKeyColumn} from ${opts.parentScope!.parent} where ${eq(parentOrgColumn, organizationId)})`);
   }
   if (opts.ownerColumn && !ownerCol) throw new Error(`crud-factory: "${resourceName}" declares ownerColumn "${opts.ownerColumn}" which the table does not have`);
   const orderCol = getColumn(table, orderBy);
@@ -636,6 +626,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     return resolveLowRoleScope(lowRoleMode, userId, organizationId);
   }
 
+  // Every generic route is authenticated and bound to the caller's organization, so every handler runs in the caller's tenant transaction
+  // (`rlsOrgContext: true`), including a route over a table with no organization column of its own (`orgScoped: false`): the factory's reads go
+  // through the ambient handle, which is only that transaction inside it, and a shared reference table's policy admits any organization.
   if (itemRoute) {
     return buildItemHandlers();
   }
@@ -646,7 +639,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: readRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `List ${resourceName}`,
@@ -718,7 +711,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: writeRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Create ${resourceName}`,
@@ -817,7 +810,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: readRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Get ${resourceName} by ID`,
@@ -853,7 +846,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: writeRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Update ${resourceName}`,
@@ -989,7 +982,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: deleteRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Delete ${resourceName}`,

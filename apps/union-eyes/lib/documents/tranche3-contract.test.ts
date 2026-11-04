@@ -36,7 +36,6 @@ describe('tranche 3 document contract record', () => {
       'document-categories',
       'portal-cms-routes-are-not-the-document-repository',
       'signature-provider-activation',
-      'sharepoint-credentials',
       'staff-console-bulk-download',
       'external-download-sas-activation',
     ]);
@@ -51,7 +50,8 @@ describe('tranche 3 document contract record', () => {
     expect(status.get('apps/union-eyes/app/[locale]/dashboard/documents/page.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
     expect(status.get('apps/union-eyes/components/documents/document-browser.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
     expect(status.get('apps/union-eyes/app/api/signatures/documents/route.ts')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
-    expect(status.get('apps/union-eyes/components/documents/document-preview-modal.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    // The preview modal was retired (no caller): it is recorded in retiredPaths, not as a consumer that is implemented.
+    expect(status.has('apps/union-eyes/components/documents/document-preview-modal.tsx')).toBe(false);
     expect(status.get('apps/union-eyes/app/api/documents/route.ts')).toBe('RETAINED_REQUIRED_CONSUMER');
     expect(status.get('apps/union-eyes/lib/documents/batch-operations-service.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
     expect(status.get('apps/union-eyes/app/api/external/documents/[id]/download/route.ts')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');

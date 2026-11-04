@@ -16166,10 +16166,6 @@
       "domain": "PENSION_PLAN_AND_ENROLMENT_RECORDS",
       "callers": [
         {
-          "ref": "apps/union-eyes/components/pension/TrusteePortal.tsx",
-          "quote": "const planRes = await fetch(`/api/pension/plans?trustBoardId=${trustBoardId}&limit=1`);"
-        },
-        {
           "ref": "apps/union-eyes/components/pension/pension-admin-console.tsx",
           "quote": "const plansRes = await fetch(`/api/pension/plans?organizationId=${encodeURIComponent(organizationId)}`);"
         },
@@ -16178,7 +16174,7 @@
           "quote": "const plansRes = await fetch(`/api/pension/plans?organizationId=${encodeURIComponent(organizationId)}&limit=12`);"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
     },
     {
       "id": "pension/plans/route.ts|POST",
@@ -16363,10 +16359,6 @@
       "domain": "PENSION_PLAN_AND_ENROLMENT_RECORDS",
       "callers": [
         {
-          "ref": "apps/union-eyes/components/pension/TrusteePortal.tsx",
-          "quote": "const planRes = await fetch(`/api/pension/plans?trustBoardId=${trustBoardId}&limit=1`);"
-        },
-        {
           "ref": "apps/union-eyes/components/pension/pension-admin-console.tsx",
           "quote": "const plansRes = await fetch(`/api/pension/plans?organizationId=${encodeURIComponent(organizationId)}`);"
         },
@@ -16375,7 +16367,7 @@
           "quote": "const plansRes = await fetch(`/api/pension/plans?organizationId=${encodeURIComponent(organizationId)}&limit=12`);"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
     },
     {
       "id": "pension/retirement-eligibility/route.ts|GET",
@@ -17423,13 +17415,8 @@
       "manifestCorrections": [],
       "riskScreen": {},
       "domain": "PENSION_TRUSTEE_MEETING_RECORDS",
-      "callers": [
-        {
-          "ref": "apps/union-eyes/components/pension/TrusteePortal.tsx",
-          "quote": "const meetingsRes = await fetch(`/api/pension/trustee-meetings?trustBoardId=${trustBoardId}&limit=10`);"
-        }
-      ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callers": [],
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
     },
     {
       "id": "pension/trustee-meetings/route.ts|POST",
@@ -17597,13 +17584,8 @@
       "manifestCorrections": [],
       "riskScreen": {},
       "domain": "PENSION_TRUSTEE_MEETING_RECORDS",
-      "callers": [
-        {
-          "ref": "apps/union-eyes/components/pension/TrusteePortal.tsx",
-          "quote": "const meetingsRes = await fetch(`/api/pension/trustee-meetings?trustBoardId=${trustBoardId}&limit=10`);"
-        }
-      ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callers": [],
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
     },
     {
       "id": "pilot/apply/[id]/approve-commercial-terms/route.ts|POST",

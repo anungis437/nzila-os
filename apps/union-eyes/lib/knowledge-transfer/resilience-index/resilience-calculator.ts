@@ -8,7 +8,7 @@ import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interv
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { PropagationMap } from '../propagation/propagation-models';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
-import { db } from '@/db/db';
+import { inOrganization } from '../org-scope';
 import { ApiError } from '@/lib/api/errors';
 import { exitInterviews } from '@/db/schema';
 
@@ -40,11 +40,14 @@ export interface OrganizationalResilienceIndex {
 }
 
 async function loadPublishedInterviews(orgId: string) {
-  return db
-    .select()
-    .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId))
-    .limit(INTERVIEW_READ_LIMIT);
+  // Read as the runtime role in the organization's own tenant transaction.
+  return inOrganization(orgId, (tx) =>
+    tx
+      .select()
+      .from(exitInterviews)
+      .where(derivedAnalyticsCondition(orgId))
+      .limit(INTERVIEW_READ_LIMIT),
+  );
 }
 
 export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {

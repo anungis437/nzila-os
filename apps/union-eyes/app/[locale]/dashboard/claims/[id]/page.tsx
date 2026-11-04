@@ -12,6 +12,7 @@ import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
 import { ClaimDeadlineUnavailable } from '@/components/claims/claim-deadline-unavailable';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
+import { envelopeRow, envelopeRows, readApiError } from '@/lib/client/api-envelope';
 import Link from 'next/link';
 
 interface ClaimAttachment {
@@ -98,6 +99,7 @@ export default function ClaimDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [activity, setActivity] = useState<CaseActivity[]>([]);
+  const [activityFailed, setActivityFailed] = useState(false);
 
   useEffect(() => {
     const fetchClaim = async () => {
@@ -112,26 +114,23 @@ export default function ClaimDetailPage() {
         }
         
         if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          throw new Error(body?.message || `HTTP ${response.status} ${response.statusText}`);
+          throw new Error(await readApiError(response, `HTTP ${response.status} ${response.statusText}`));
         }
         
-        const data = await response.json();
-        // withApi wraps in { success, data: { data: row }, timestamp }
-        const claimData = data?.data?.data ?? data?.data ?? data?.claim ?? data;
+        // The route answers { success, data: { data: <the case> } }: the framework's envelope around the route's own { data }.
+        const claimData = envelopeRow(await response.json()) as unknown as Claim;
         setClaim(claimData);
-        trackCaseViewed(claimData?.claimId ?? claimId);
+        trackCaseViewed(claimData.claimId ?? claimId);
         
         // Member-visible case activity from the canonical timeline (visibility-scoped server side)
         try {
-          const timelineResponse = await fetch(`/api/cases/${claimData?.claimId ?? claimId}/timeline`);
-          if (timelineResponse.ok) {
-            const timelineBody = await timelineResponse.json();
-            const items = timelineBody?.data?.data ?? timelineBody?.data ?? [];
-            setActivity(Array.isArray(items) ? items : []);
-          }
-        } catch (_timelineErr) {
-}
+          const timelineResponse = await fetch(`/api/cases/${claimData.claimId ?? claimId}/timeline`);
+          if (!timelineResponse.ok) throw new Error(`HTTP ${timelineResponse.status}`);
+          setActivity(envelopeRows(await timelineResponse.json()) as CaseActivity[]);
+        } catch {
+          // The case itself loaded; only its activity did not, and the card says so rather than reading as "no activity".
+          setActivityFailed(true);
+        }
       } catch (err) {
 setError(err instanceof Error ? err.message : 'Failed to load claim');
       } finally {
@@ -303,7 +302,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
             </motion.div>
 
             {/* Case activity */}
-            {activity.length > 0 && (
+            {(activity.length > 0 || activityFailed) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -314,6 +313,9 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <CardTitle className="text-lg">{t('claims.statusHistory')}</CardTitle>
                   </CardHeader>
                   <CardContent>
+                    {activityFailed ? (
+                      <p role="alert" className="text-sm text-red-600" data-testid="case-activity-error">{t('claims.activityLoadFailed')}</p>
+                    ) : (
                     <div className="space-y-4" data-testid="case-activity">
                       {activity.map((item, index: number) => (
                         <div key={item.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
@@ -328,6 +330,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                         </div>
                       ))}
                     </div>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>

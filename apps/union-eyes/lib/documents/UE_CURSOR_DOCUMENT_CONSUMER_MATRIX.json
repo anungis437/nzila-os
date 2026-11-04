@@ -5,6 +5,62 @@
   "cursorBranch": "agents/ue-cursor-documents-convergence",
   "integrationBranch": "agents/ue-final-convergence",
   "journey": "dashboard document list -> authorized download -> repository upload -> persisted canonical row -> download audit -> UI refresh",
+  "retiredPaths": [
+    {
+      "path": "apps/union-eyes/components/documents/document-preview-modal.tsx",
+      "retiredBy": "UE-CONV-H-017 (frontend census, dead-code purge)",
+      "reason": "Deleted: no page and no component rendered it (declaration-level reachability from every page, route, layout and action), so it consumed nothing. Its only request, GET /api/documents/{id}/versions, is served by the repository versions route that the documents console already reads.",
+      "replacement": "Repository and audited download routes"
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-adapter.ts",
+      "retiredBy": "UE-CONV-H-023 (tenant-context and privilege census, integration framework)",
+      "reason": "Deleted with its client, index and tests: SharePoint is not in the integration catalog and the control-plane policy never approved it, its storage tables (external_document_sites, _libraries, _files, _permissions) hold no database authority so every statement of the adapter would be refused to the runtime role, and its Graph sync was never activated. IntegrationFactory could construct it, which was the only way it was reachable; the factory now refuses the provider.",
+      "replacement": "None: no approved SharePoint provider exists; the factory answers NOT_IMPLEMENTED for sharepoint."
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts",
+      "retiredBy": "UE-CONV-H-023 (tenant-context and privilege census, integration framework)",
+      "reason": "Deleted with the SharePoint adapter it served: nothing else imported the Microsoft Graph client, and the provider is neither registered nor approved.",
+      "replacement": "None: no approved SharePoint provider exists."
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/index.ts",
+      "retiredBy": "UE-CONV-H-023 (tenant-context and privilege census, integration framework)",
+      "reason": "Deleted: it only re-exported the SharePoint client and adapter, which no longer exist.",
+      "replacement": "None."
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-adapter.test.ts",
+      "retiredBy": "UE-CONV-H-023 (tenant-context and privilege census, integration framework)",
+      "reason": "Deleted with the adapter it tested; the factory refusal of sharepoint is tested in lib/integrations/__tests__/factory.test.ts.",
+      "replacement": "lib/integrations/__tests__/factory.test.ts"
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts",
+      "retiredBy": "UE-CONV-H-023 (tenant-context and privilege census, integration framework)",
+      "reason": "Deleted with the Microsoft Graph client it tested; the provider is neither registered nor approved and nothing else imports the client.",
+      "replacement": "None."
+    },
+    {
+      "path": "apps/union-eyes/components/documents/advanced-search.tsx",
+      "retiredBy": "UE-CONV-H-027 (orphan census, unmounted UI purge)",
+      "reason": "Deleted: no page and no component rendered it (declaration-level reachability from every page, route, layout and action), so it consumed nothing. Its two requests, /api/documents/filters and /api/documents/saved-searches, are made by the documents console's search tab through document-search-advanced.tsx.",
+      "replacement": "apps/union-eyes/components/documents/document-search-advanced.tsx"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-sharing-controls.tsx",
+      "retiredBy": "UE-CONV-H-027 (orphan census, unmounted UI purge)",
+      "reason": "Deleted: no page and no component rendered it, so it consumed nothing. It offered sharing controls for which no canonical share, disclosure or WorkAid counsel route exists; the gap stays recorded under canonicalContractGaps (document-share-disclosure) and every surface fails closed.",
+      "replacement": "None; sharing and disclosure stay unimplemented (canonicalContractGaps: document-share-disclosure)."
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-approval-workflow.tsx",
+      "retiredBy": "Documents honesty pass (simulated approval workflow removed; capability UE-DOCUMENT-APPROVAL-WORKFLOW)",
+      "reason": "Deleted with the Approvals tab of the documents console. The tab kept the workflow configuration and every reviewer decision in React state only: nothing was sent to a route and no table holds document approvals, so a reviewer could mark a document approved and the decision vanished on reload. Reviewers were also the uploaders' ids shown as names. A document approval workflow does not exist; it is recorded as NOT_IMPLEMENTED capability UE-DOCUMENT-APPROVAL-WORKFLOW.",
+      "replacement": "None; document approval is not implemented (capability registry: UE-DOCUMENT-APPROVAL-WORKFLOW)."
+    }
+  ],
   "canonicalContractGaps": [
     {
       "id": "document-share-disclosure",
@@ -373,7 +429,7 @@
       ],
       "operation": "Signature document detail and void.",
       "consumers": [
-        "components/signatures callers of the collection route",
+        "No page or component calls this route (the signature components were removed as unmounted UI, UE-CONV-H-027)",
         "app/api/signatures/audit/[documentId]/route.ts comment"
       ],
       "authorization": "verifyDocumentAccess before read or mutation.",
@@ -395,8 +451,7 @@
       ],
       "operation": "Signature request list and create.",
       "consumers": [
-        "components/signatures/documents-list.tsx",
-        "components/signatures/signature-request-form.tsx"
+        "No page or component calls this route (the signature components were removed as unmounted UI, UE-CONV-H-027)"
       ],
       "authorization": "withApiAuth. organizationId comes from the authenticated user. SignatureService.verifyDocumentAccess on read paths.",
       "canonicalReplacement": "lib/signature/signature-service.ts",
@@ -570,43 +625,6 @@
       "disposition": "MIGRATE"
     },
     {
-      "path": "apps/union-eyes/components/documents/advanced-search.tsx",
-      "methods": [],
-      "operation": "Document UI surface.",
-      "consumers": [
-        "/api/documents/filters",
-        "/api/documents/saved-searches"
-      ],
-      "authorization": "Legacy flag or role check. Not the canonical document policy.",
-      "canonicalReplacement": "Repository and audited download routes",
-      "kernelAction": "Consume repository authorization; do not decide locally",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
-      "regressionTests": [],
-      "retirementDisposition": "Migrate callers before removing the component.",
-      "disposition": "MIGRATE"
-    },
-    {
-      "path": "apps/union-eyes/components/documents/document-approval-workflow.tsx",
-      "methods": [],
-      "operation": "Document UI surface.",
-      "consumers": [
-        "local approval state in DocumentsConsole"
-      ],
-      "authorization": "Legacy flag or role check. Not the canonical document policy.",
-      "canonicalReplacement": "Repository and audited download routes",
-      "kernelAction": "Consume repository authorization; do not decide locally",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
-      "regressionTests": [],
-      "retirementDisposition": "Migrate callers before removing the component.",
-      "disposition": "MIGRATE"
-    },
-    {
       "path": "apps/union-eyes/components/documents/document-browser.tsx",
       "methods": [],
       "operation": "Canonical repository browser. Bulk download authorizes every selected id and reports permitted, denied, and failed counts. A partial batch is not a complete success.",
@@ -666,24 +684,6 @@
       "disposition": "MIGRATE"
     },
     {
-      "path": "apps/union-eyes/components/documents/document-preview-modal.tsx",
-      "methods": [],
-      "operation": "Document UI surface.",
-      "consumers": [
-        "/api/documents/${id}/versions"
-      ],
-      "authorization": "Legacy flag or role check. Not the canonical document policy.",
-      "canonicalReplacement": "Repository and audited download routes",
-      "kernelAction": "Consume repository authorization; do not decide locally",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
-      "regressionTests": [],
-      "retirementDisposition": "Migrate callers before removing the component.",
-      "disposition": "MIGRATE"
-    },
-    {
       "path": "apps/union-eyes/components/documents/document-retention-policy.tsx",
       "methods": [],
       "operation": "Document UI surface.",
@@ -718,24 +718,6 @@
       "regressionTests": [],
       "retirementDisposition": "Migrate callers before removing the component.",
       "disposition": "MIGRATE"
-    },
-    {
-      "path": "apps/union-eyes/components/documents/document-sharing-controls.tsx",
-      "methods": [],
-      "operation": "Document UI surface.",
-      "consumers": [
-        "sharing controls without a canonical share route"
-      ],
-      "authorization": "Legacy flag or role check. Not the canonical document policy.",
-      "canonicalReplacement": "No canonical share, disclosure, or WorkAid counsel route.",
-      "kernelAction": "Missing share/disclosure/export contract",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
-      "regressionTests": [],
-      "retirementDisposition": "Migrate callers before removing the component.",
-      "disposition": "BLOCKED_CANONICAL_CONTRACT"
     },
     {
       "path": "apps/union-eyes/components/documents/document-template-manager.tsx",
@@ -833,100 +815,6 @@
       "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
       "regressionTests": [],
       "retirementDisposition": "No tranche-1 caller. Do not delete until a repo-wide import check is repeated in a later tranche.",
-      "disposition": "RETIRE_UNUSED"
-    },
-    {
-      "path": "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-adapter.test.ts",
-      "methods": [],
-      "operation": "SharePoint adapter unit test.",
-      "consumers": [
-        "vitest"
-      ],
-      "authorization": "n/a",
-      "canonicalReplacement": "n/a",
-      "kernelAction": "n/a",
-      "classificationRules": "n/a",
-      "storage": "n/a",
-      "audit": "n/a",
-      "migrationStatus": "IMPLEMENTED_TESTED",
-      "regressionTests": [
-        "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-adapter.test.ts"
-      ],
-      "retirementDisposition": "Keep while the adapter file remains.",
-      "disposition": "RETIRE_UNUSED"
-    },
-    {
-      "path": "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts",
-      "methods": [],
-      "operation": "SharePoint client unit test.",
-      "consumers": [
-        "vitest"
-      ],
-      "authorization": "n/a",
-      "canonicalReplacement": "n/a",
-      "kernelAction": "n/a",
-      "classificationRules": "n/a",
-      "storage": "n/a",
-      "audit": "n/a",
-      "migrationStatus": "IMPLEMENTED_TESTED",
-      "regressionTests": [
-        "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts"
-      ],
-      "retirementDisposition": "Keep while the adapter file remains.",
-      "disposition": "RETIRE_UNUSED"
-    },
-    {
-      "path": "apps/union-eyes/lib/integrations/adapters/documents/index.ts",
-      "methods": [],
-      "operation": "SharePoint adapter. Factory can construct it; the provider is not approved.",
-      "consumers": [
-        "lib/integrations/factory.ts"
-      ],
-      "authorization": "assertKnownProvider rejects sharepoint before adapter code runs.",
-      "canonicalReplacement": "No approved SharePoint canonical provider.",
-      "kernelAction": "PROVIDER_NOT_APPROVED",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "BLOCKED_EXTERNAL_ACTIVATION",
-      "regressionTests": [],
-      "retirementDisposition": "Do not delete. factory.ts is outside this lane and still imports the adapter.",
-      "disposition": "RETIRE_UNUSED"
-    },
-    {
-      "path": "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-adapter.ts",
-      "methods": [],
-      "operation": "SharePoint adapter. Factory can construct it; the provider is not approved.",
-      "consumers": [
-        "lib/integrations/factory.ts"
-      ],
-      "authorization": "assertKnownProvider rejects sharepoint before adapter code runs.",
-      "canonicalReplacement": "No approved SharePoint canonical provider.",
-      "kernelAction": "PROVIDER_NOT_APPROVED",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "BLOCKED_EXTERNAL_ACTIVATION",
-      "regressionTests": [],
-      "retirementDisposition": "Do not delete. factory.ts is outside this lane and still imports the adapter.",
-      "disposition": "RETIRE_UNUSED"
-    },
-    {
-      "path": "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts",
-      "methods": [],
-      "operation": "SharePoint adapter. Factory can construct it; the provider is not approved.",
-      "consumers": [
-        "lib/integrations/factory.ts"
-      ],
-      "authorization": "assertKnownProvider rejects sharepoint before adapter code runs.",
-      "canonicalReplacement": "No approved SharePoint canonical provider.",
-      "kernelAction": "PROVIDER_NOT_APPROVED",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "BLOCKED_EXTERNAL_ACTIVATION",
-      "regressionTests": [],
-      "retirementDisposition": "Do not delete. factory.ts is outside this lane and still imports the adapter.",
       "disposition": "RETIRE_UNUSED"
     },
     {
@@ -1176,17 +1064,6 @@
       ],
       "status": "OPEN_EXTERNAL_ACTIVATION",
       "integratorNote": "No provider credentials were used. Prerequisite: sandbox provider accounts, signed webhook secrets and an approved test envelope set. Status handling is implemented and proven without a provider (lib/signature/signature-sync.pglite.test.ts)."
-    },
-    {
-      "id": "sharepoint-credentials",
-      "owner": "operations",
-      "behavior": "SharePoint healthCheck returns an error before any network call when client id, secret, or tenant id is missing. Live Graph sync is not activated.",
-      "security": "Do not report a successful sync without credentials and a recorded provider response.",
-      "files": [
-        "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts"
-      ],
-      "status": "OPEN_EXTERNAL_ACTIVATION",
-      "integratorNote": "Needs tenant, client id and secret for a non-production SharePoint site."
     },
     {
       "id": "staff-console-bulk-download",

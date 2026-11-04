@@ -23,6 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
+import { readApiError } from "@/lib/client/api-envelope";
 import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
 import Link from "next/link";
 import { VoiceDisclosurePrompt, useVoiceDisclosure } from "@/components/voice-disclosure-consent";
@@ -176,7 +177,9 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
       .then((payload: { user?: { email?: string } } | null) => {
         if (!cancelled && payload?.user?.email) setSessionEmail(payload.user.email);
       })
-      .catch(() => {});
+      .catch(() => {
+        // The prefilled contact e-mail is a convenience: when the session cannot be read the field is simply left for the member to fill in.
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -260,12 +263,11 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to create claim");
+        throw new Error(await readApiError(response, "Failed to create claim"));
       }
 
       const result = await response.json();
-      const claimId = result.claimId || result.data?.claimId;
+      const claimId = result.claimId;
 
       if (!claimId) {
         throw new Error("Case was created but no case ID was returned");

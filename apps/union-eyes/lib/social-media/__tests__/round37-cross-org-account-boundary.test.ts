@@ -55,8 +55,11 @@ const ORG_A = 'org-A';
 const ORG_B = 'org-B';
 
 let accounts: FakeAccount[];
+// The organizations whose tenant transaction each database step ran in.
+let rlsScopes: Array<{ organizationId: string }> = [];
 
-vi.mock('drizzle-orm', () => ({
+vi.mock('drizzle-orm', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('drizzle-orm')>()),
   eq: (field: { __col: string }, value: unknown) => ({ __type: 'eq', field: field.__col, value }),
   and: (...predicates: Predicate[]) => ({ __type: 'and', predicates }),
   inArray: (field: { __col: string }, values: unknown[]) => ({ __type: 'eq', field: field.__col, value: values }),
@@ -80,7 +83,8 @@ vi.mock('@/db/schema/social-media-schema', () => {
   };
 });
 
-vi.mock('@/db', () => {
+// Every step of the service runs in the tenant transaction of the organization it names: the fake database below is that transaction.
+vi.mock('@/lib/db/with-rls-context', () => {
   const db = {
     select: () => ({
       from: () => ({
@@ -100,7 +104,12 @@ vi.mock('@/db', () => {
     }),
     insert: () => ({ values: () => ({ onConflictDoUpdate: () => ({ returning: async () => [] }) }) }),
   };
-  return { db };
+  return {
+    withRLSContext: async (scope: { organizationId: string }, run: (tx: unknown) => Promise<unknown>) => {
+      rlsScopes.push(scope);
+      return run(db);
+    },
+  };
 });
 
 vi.mock('../meta-api-client', () => ({
@@ -147,6 +156,7 @@ function seedAccounts() {
 describe('round 37: cross-org OAuth account boundary (negative tests 1, 2, 4)', () => {
   beforeEach(() => {
     seedAccounts();
+    rlsScopes = [];
   });
 
   it('negative test 1/4: refreshAccessToken cannot read/rotate another org\'s account token', async () => {
@@ -170,6 +180,9 @@ describe('round 37: cross-org OAuth account boundary (negative tests 1, 2, 4)', 
     expect(legit.accessToken).toBe('enc:v1:sealed(rotated-meta-token)');
     // Rogue (org A) stays untouched even though it exists in the same fake db.
     expect(rogue.accessToken).toBe('rogue-access-token');
+    // The lookup and the token write each ran in the caller's own organization.
+    expect(rlsScopes.length).toBeGreaterThanOrEqual(2);
+    expect(rlsScopes.every((scope) => scope.organizationId === ORG_B)).toBe(true);
   });
 
   it('negative test 2: fetchAnalytics cannot read another org\'s account token', async () => {

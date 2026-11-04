@@ -1,4 +1,5 @@
 import { caseActionAllowed, casePolicyRole } from '@/lib/cases/case-permissions'
+import { logger } from '@/lib/logger'
 
 export type MemberDirectoryScope = 'none' | 'case-context' | 'organization'
 
@@ -46,7 +47,13 @@ export function projectDirectoryMember(m: DirectoryMemberFields, access: MemberD
   let metadata: Record<string, unknown> = {}
   if (access.includeSensitive && m.metadata) {
     if (typeof m.metadata === 'string') {
-      try { metadata = JSON.parse(m.metadata) } catch { /* ignore malformed legacy metadata */ }
+      try {
+        metadata = JSON.parse(m.metadata)
+      } catch {
+        // Malformed legacy metadata is left out of the directory. It is not silently dropped: it is logged, by member only (the parse error quotes the
+        // content, which can be personal), so that it can be repaired.
+        logger.warn('Member metadata is not valid JSON and was left out of the directory', { memberId: m.id })
+      }
     } else if (typeof m.metadata === 'object') {
       metadata = m.metadata as Record<string, unknown>
     }
@@ -59,10 +66,11 @@ export function projectDirectoryMember(m: DirectoryMemberFields, access: MemberD
     phone: m.phone || '',
     role: m.role,
     status: m.status,
-    department: m.department || 'Administration',
-    position: m.position || 'Union Member',
+    // An unknown department, position or seniority is null: the directory does not invent "Administration", "Union Member" or 0 years.
+    department: m.department || null,
+    position: m.position || null,
     hireDate: access.includeSensitive ? m.hireDate?.toISOString() ?? null : null,
-    seniority: access.includeSensitive ? m.seniority ?? 0 : null,
+    seniority: access.includeSensitive ? m.seniority : null,
     membershipNumber: m.membershipNumber || '',
     unionJoinDate: access.includeSensitive ? m.unionJoinDate?.toISOString() ?? null : null,
     createdAt: m.createdAt?.toISOString() ?? null,

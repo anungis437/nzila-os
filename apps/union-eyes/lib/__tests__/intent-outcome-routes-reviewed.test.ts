@@ -35,9 +35,6 @@ const REVIEWED: Record<string, Reason> = {
   'admin/jobs/[action]/route.ts': 'external_job_queue',
   'admin/jobs/retry/route.ts': 'external_job_queue',
   'admin/payments/retry-failed/route.ts': 'external_provider',
-  'admin/pki/signatures/[id]/sign/route.ts': 'in_process_store',
-  'admin/pki/signatures/[id]/verify/route.ts': 'in_process_store',
-  'admin/pki/workflows/[id]/route.ts': 'in_process_store',
   'ai/cache-stats/route.ts': 'external_cache',
   'ai/classify/route.ts': 'external_provider',
   'ai/copilot/query/route.ts': 'external_provider',
@@ -83,7 +80,7 @@ describe('routes recorded as two-phase (intent, effect, outcome) are each review
   })
 
   it('names a reason, none of them "database only", for every route that stays two-phase', () => {
-    expect(Object.keys(REVIEWED).length).toBe(31)
+    expect(Object.keys(REVIEWED).length).toBe(28)
     for (const [route, reason] of Object.entries(REVIEWED)) expect(reason, route).toBeTruthy()
     expect(Object.keys(REVIEWED)).not.toEqual(expect.arrayContaining(NOW_ATOMIC))
   })

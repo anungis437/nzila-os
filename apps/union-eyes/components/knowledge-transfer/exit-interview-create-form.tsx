@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
+import { readApiError } from '@/lib/client/api-envelope';
 
 type FormState = {
   retiringEmployeeName: string;
@@ -63,8 +64,7 @@ export function ExitInterviewCreateForm() {
       });
 
       if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-        throw new Error(payload?.error?.message ?? 'Failed to create interview draft');
+        throw new Error(await readApiError(response, 'Failed to create interview draft'));
       }
 
       setMessage('Draft created successfully. You can now review and submit it.');

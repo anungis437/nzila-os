@@ -14,7 +14,6 @@
  */
 
 import { randomUUID } from 'crypto';
-import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
@@ -70,10 +69,12 @@ export async function suggestClausesForGrievance(
   const access = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
   if (!access.canViewCase) throw new Error('Case access denied');
 
-  // 1. Fetch grievance
-  const grievance = await db.query.grievances.findFirst({
-    where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
-  });
+  // 1. Fetch grievance, in the organization's own context and before the provider is called
+  const grievance = await withRLSContext({ organizationId }, (tx) =>
+    tx.query.grievances.findFirst({
+      where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
+    }),
+  );
 
   if (!grievance) {
     throw new Error(`Grievance ${grievanceId} not found in org ${organizationId}`);
@@ -176,9 +177,11 @@ export async function explainClauseRelevance(
 ): Promise<AiResponseEnvelope<{ reasoning: string; strength: string }>> {
   const access = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
   if (!access.canViewCase) throw new Error('Case access denied');
-  const grievance = await db.query.grievances.findFirst({
-    where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
-  });
+  const grievance = await withRLSContext({ organizationId }, (tx) =>
+    tx.query.grievances.findFirst({
+      where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
+    }),
+  );
   if (!grievance) throw new Error(`Grievance ${grievanceId} not found`);
 
   const ai = getAiClient();
@@ -320,13 +323,15 @@ export async function getClauseReasoningHistory(
   grievanceId: string,
   organizationId: string,
 ) {
-  return db.query.aiClauseReasonings.findMany({
-    where: and(
-      eq(aiClauseReasonings.grievanceId, grievanceId),
-      eq(aiClauseReasonings.organizationId, organizationId),
-    ),
-    orderBy: [desc(aiClauseReasonings.relevanceScore)],
-  });
+  return withRLSContext({ organizationId }, (tx) =>
+    tx.query.aiClauseReasonings.findMany({
+      where: and(
+        eq(aiClauseReasonings.grievanceId, grievanceId),
+        eq(aiClauseReasonings.organizationId, organizationId),
+      ),
+      orderBy: [desc(aiClauseReasonings.relevanceScore)],
+    }),
+  );
 }
 
 // ============================================================================

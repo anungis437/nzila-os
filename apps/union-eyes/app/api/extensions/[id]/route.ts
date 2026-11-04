@@ -44,6 +44,7 @@ function publicIntegration<T extends Record<string, unknown>>(row: T) {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     // The connection's endpoint, mapping and sync state are an administrator's, not every member's.
     auth: { required: true, minRole: 'admin' },
     openapi: {

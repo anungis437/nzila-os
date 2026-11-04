@@ -1,16 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { declaredOptions } from './with-api-double';
 
 const m = vi.hoisted(() => ({
-  withApiAuth: vi.fn(),
-  getCurrentUser: vi.fn(),
-  hasMinRole: vi.fn(),
   requireBillingCycleAuthority: vi.fn(),
   BillingCycleService: { calculatePeriodDates: vi.fn(), generateBillingCycle: vi.fn() },
-  logger: { info: vi.fn(), error: vi.fn() },
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser, hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble);
 vi.mock('@/lib/finance/billing-cycle-authority', () => ({ requireBillingCycleAuthority: m.requireBillingCycleAuthority }));
 vi.mock('@/lib/services/billing-cycle-service', () => ({ BillingCycleService: m.BillingCycleService }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
@@ -27,36 +25,29 @@ async function loadRoute() {
 describe('admin/billing-cycles/preview route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
-    m.getCurrentUser.mockResolvedValue({ id: 'u1' });
-    m.hasMinRole.mockResolvedValue(true);
     m.requireBillingCycleAuthority.mockResolvedValue(undefined);
     m.BillingCycleService.calculatePeriodDates.mockReturnValue({ periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') });
     m.BillingCycleService.generateBillingCycle.mockResolvedValue({ success: true, cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
   });
 
-  it('returns 401 when unauthenticated', async () => {
+  it('asks the wrapper for a platform lead who need not belong to an organization, and for no tenant transaction (the target organization is opened by the service)', async () => {
     const { POST } = await loadRoute();
-    m.getCurrentUser.mockResolvedValueOnce(null);
-
-    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
-    }));
-
-    expect(response.status).toBe(401);
+    const options = declaredOptions(POST);
+    expect(options.auth).toEqual({ minRole: 'platform_lead' });
+    expect(options.requireOrg).toBe(false);
+    expect(options.rlsOrgContext).toBeUndefined();
   });
 
-  it('returns 403 when lacking platform lead role', async () => {
+  it('returns 401 when the wrapper hands over no user', async () => {
     const { POST } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
 
     const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles/preview', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ organizationId: '11111111-1111-4111-8111-111111111111', frequency: 'monthly' }),
-    }));
+    }), { userId: null, organizationId: null });
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
   });
 
   it('refuses a target organization without a live financial mandate before touching member billing', async () => {

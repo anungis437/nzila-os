@@ -23,6 +23,8 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(state.db),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+// The child holds the knowledge suite, so what its parent shares is readable to it: the test is about WHICH shared rows, not the entitlement
+vi.mock('@/services/platform-economics/entitlement-guard', () => ({ checkModuleEntitlement: vi.fn(async () => ({ allowed: true })) }));
 vi.mock('@/lib/api/framework', async () => {
   const { z } = await import('zod');
   const make = (status: number) => (message: string) => Object.assign(new Error(message), { status });
@@ -64,7 +66,7 @@ beforeAll(async () => {
     `CREATE TABLE knowledge_base (id uuid primary key default gen_random_uuid(), organization_id uuid not null, title text not null,
        document_type text not null default 'guide', content text not null, summary text, source_type text not null, source_id text,
        source_url text, tags jsonb, language text not null default 'en', effective_date timestamp, version int not null default 1,
-       is_public boolean not null default false, view_count int not null default 0, is_active boolean not null default true,
+       is_public boolean not null default false, allowed_organizations jsonb, view_count int not null default 0, is_active boolean not null default true,
        created_at timestamp default now(), updated_at timestamp default now())`,
     `CREATE TABLE organizations (id uuid primary key, parent_id uuid)`,
   ]);
@@ -163,23 +165,29 @@ describe('exit interview item and attachments', () => {
 });
 
 describe('knowledge base copy of an interview', () => {
-  const kb = (title: string, sourceType: string, sourceId: string | null, org = ORG) =>
-    pg.query(`INSERT INTO knowledge_base (organization_id, title, content, source_type, source_id) VALUES ($1::uuid, $2, 'body', $3, $4)`, [org, title, sourceType, sourceId]);
+  const kb = (title: string, sourceType: string, sourceId: string | null, org = ORG, isPublic = false) =>
+    pg.query(`INSERT INTO knowledge_base (organization_id, title, content, source_type, source_id, is_public) VALUES ($1::uuid, $2, 'body', $3, $4, $5)`, [org, title, sourceType, sourceId, isPublic]);
 
+  // The route runs on the context the wrapper resolves: the caller's organization and user.
   const titles = async (role: typeof state.role, org = ORG) => {
     state.role = role;
     const { GET } = await import('../knowledge-base/route');
-    const response = await (GET as unknown as (r: NextRequest, c: unknown) => Promise<Response>)(new NextRequest('http://localhost/api/knowledge-base'), {});
+    const response = await (GET as unknown as (c: unknown) => Promise<Response>)({
+      request: new NextRequest('http://localhost/api/knowledge-base'),
+      user: { id: state.userId, role },
+      organizationId: org,
+    });
     return ((await response.json()).data as Array<{ title: string }>).map((r) => r.title).sort();
   };
 
   beforeEach(async () => {
-    await kb('Public interview copy', 'exit_interview', id(1));
-    await kb('Restricted interview copy', 'exit_interview', id(2));
-    await kb('Privileged interview copy', 'exit_interview', id(3));
+    // The parent shares its copies publicly: only the interview rule keeps an interview's copy from the child
+    await kb('Public interview copy', 'exit_interview', id(1), ORG, true);
+    await kb('Restricted interview copy', 'exit_interview', id(2), ORG, true);
+    await kb('Privileged interview copy', 'exit_interview', id(3), ORG, true);
     await kb('No-consent interview copy', 'exit_interview', id(6));
     await kb('Orphan interview copy', 'exit_interview', id(99));
-    await kb('Policy', 'policy', null);
+    await kb('Policy', 'policy', null, ORG, true);
     await kb('Parent organization interview', 'exit_interview', id(1), CHILD);
   });
 
@@ -193,8 +201,10 @@ describe('knowledge base copy of an interview', () => {
     expect(await titles('officer')).not.toContain('No-consent interview copy');
   });
 
-  it('an interview copy never reaches an organization through the parent link', async () => {
-    state.role = 'admin';
+  it('an interview copy never reaches an organization through the parent link, in either direction', async () => {
+    // The child holds the knowledge suite and the parent shares everything above publicly, so the child reads what the parent shared: its public policy, and no interview copy
+    expect(await titles('admin', CHILD)).toEqual(['Policy']);
+    // The child's own copy does not reach its parent either
     expect(await titles('admin')).not.toContain('Parent organization interview');
   });
 });

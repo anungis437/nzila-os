@@ -489,10 +489,14 @@ export class WageEnrichmentService {
 
   /**
    * Sync contribution rates (EI, CPP)
+   *
+   * contribution_rates and the sync log are system-written reference data and the run has no tenant session, so every database step runs as
+   * the system role. The provider is called between two short system transactions, never inside one; each source's writes are one savepoint,
+   * so a failure on one does not undo the other.
    */
   async syncContributionRates(year?: number): Promise<SyncResult> {
     const startTime = Date.now();
-    const syncId = await this.createSyncLog('statcan', 'api', 'running', { type: 'contributions', year });
+    const syncId = await withSystemContext(() => this.createSyncLog('statcan', 'api', 'running', { type: 'contributions', year }));
 
     let recordsProcessed = 0;
     let recordsInserted = 0;
@@ -502,118 +506,144 @@ export class WageEnrichmentService {
     const currentYear = year || new Date().getFullYear();
 
     try {
+      let eiRates: Awaited<ReturnType<typeof this.statCanClient.getEIContributionRates>> | null = null;
       try {
-        const eiRates = await this.statCanClient.getEIContributionRates({ year: currentYear });
+        eiRates = await this.statCanClient.getEIContributionRates({ year: currentYear });
         recordsProcessed++;
-
-        const existing = await db.select()
-          .from(contributionRates)
-          .where(
-            and(
-              eq(contributionRates.rateType, 'ei_employee'),
-              eq(contributionRates.year, currentYear),
-            )
-          )
-          .limit(1);
-
-        const eiRateStr = String(eiRates.employeeRate);
-        const eiMaxStr = String(eiRates.maxInsurableEarnings);
-
-        if (existing.length > 0) {
-          await db.update(contributionRates)
-            .set({
-              rate: eiRateStr,
-              maxInsurableEarnings: eiMaxStr,
-              updatedAt: new Date(),
-              syncId,
-            })
-            .where(eq(contributionRates.id, existing[0].id));
-          recordsUpdated++;
-        } else {
-          await db.insert(contributionRates).values({
-            rateType: 'ei_employee',
-            rateTypeName: 'Employment Insurance - Employee Rate',
-            rate: eiRateStr,
-            maxInsurableEarnings: eiMaxStr,
-            year: currentYear,
-            source: 'Canada Revenue Agency',
-            syncId,
-          });
-          await db.insert(contributionRates).values({
-            rateType: 'ei_employer',
-            rateTypeName: 'Employment Insurance - Employer Rate',
-            rate: String(eiRates.employerRate),
-            maxInsurableEarnings: eiMaxStr,
-            year: currentYear,
-            source: 'Canada Revenue Agency',
-            syncId,
-          });
-          recordsInserted += 2;
-        }
       } catch (error) {
         recordsFailed++;
         errors.push(`Failed to sync EI rates: ${error}`);
       }
 
+      let cppRates: Awaited<ReturnType<typeof this.statCanClient.getCPPContributionRates>> | null = null;
       try {
-        const cppRates = await this.statCanClient.getCPPContributionRates({ year: currentYear });
+        cppRates = await this.statCanClient.getCPPContributionRates({ year: currentYear });
         recordsProcessed++;
-
-        const existing = await db.select()
-          .from(contributionRates)
-          .where(
-            and(
-              eq(contributionRates.rateType, 'cpp_employee'),
-              eq(contributionRates.year, currentYear),
-            )
-          )
-          .limit(1);
-
-        if (existing.length > 0) {
-          await db.update(contributionRates)
-            .set({
-              rate: String(cppRates.employeeRate),
-              exemptionLimit: String(cppRates.exemptionLimit),
-              maximumContribution: String(cppRates.maximumContribution),
-              updatedAt: new Date(),
-              syncId,
-            })
-            .where(eq(contributionRates.id, existing[0].id));
-          recordsUpdated++;
-        } else {
-          await db.insert(contributionRates).values({
-            rateType: 'cpp_employee',
-            rateTypeName: 'Canada Pension Plan - Employee Rate',
-            rate: String(cppRates.employeeRate),
-            exemptionLimit: String(cppRates.exemptionLimit),
-            maximumContribution: String(cppRates.maximumContribution),
-            year: currentYear,
-            source: 'Canada Revenue Agency',
-            syncId,
-          });
-          await db.insert(contributionRates).values({
-            rateType: 'cpp_employer',
-            rateTypeName: 'Canada Pension Plan - Employer Rate',
-            rate: String(cppRates.employerRate),
-            exemptionLimit: String(cppRates.exemptionLimit),
-            maximumContribution: String(cppRates.maximumContribution),
-            year: currentYear,
-            source: 'Canada Revenue Agency',
-            syncId,
-          });
-          recordsInserted += 2;
-        }
       } catch (error) {
         recordsFailed++;
         errors.push(`Failed to sync CPP rates: ${error}`);
       }
 
-      await this.updateSyncLog(syncId, {
-        ...syncLogOutcome(recordsFailed, errors),
-        recordsProcessed,
-        recordsInserted,
-        recordsUpdated,
-        recordsFailed,
+      await withSystemContext(async (tx) => {
+        if (eiRates) {
+          const ei = eiRates;
+          try {
+            const written = await tx.transaction(async (savepoint) => {
+              const existing = await savepoint.select()
+                .from(contributionRates)
+                .where(
+                  and(
+                    eq(contributionRates.rateType, 'ei_employee'),
+                    eq(contributionRates.year, currentYear),
+                  )
+                )
+                .limit(1);
+
+              const eiRateStr = String(ei.employeeRate);
+              const eiMaxStr = String(ei.maxInsurableEarnings);
+
+              if (existing.length > 0) {
+                await savepoint.update(contributionRates)
+                  .set({
+                    rate: eiRateStr,
+                    maxInsurableEarnings: eiMaxStr,
+                    updatedAt: new Date(),
+                    syncId,
+                  })
+                  .where(eq(contributionRates.id, existing[0].id));
+                return { inserted: 0, updated: 1 };
+              }
+              await savepoint.insert(contributionRates).values({
+                rateType: 'ei_employee',
+                rateTypeName: 'Employment Insurance - Employee Rate',
+                rate: eiRateStr,
+                maxInsurableEarnings: eiMaxStr,
+                year: currentYear,
+                source: 'Canada Revenue Agency',
+                syncId,
+              });
+              await savepoint.insert(contributionRates).values({
+                rateType: 'ei_employer',
+                rateTypeName: 'Employment Insurance - Employer Rate',
+                rate: String(ei.employerRate),
+                maxInsurableEarnings: eiMaxStr,
+                year: currentYear,
+                source: 'Canada Revenue Agency',
+                syncId,
+              });
+              return { inserted: 2, updated: 0 };
+            });
+            recordsInserted += written.inserted;
+            recordsUpdated += written.updated;
+          } catch (error) {
+            recordsFailed++;
+            errors.push(`Failed to sync EI rates: ${error}`);
+          }
+        }
+
+        if (cppRates) {
+          const cpp = cppRates;
+          try {
+            const written = await tx.transaction(async (savepoint) => {
+              const existing = await savepoint.select()
+                .from(contributionRates)
+                .where(
+                  and(
+                    eq(contributionRates.rateType, 'cpp_employee'),
+                    eq(contributionRates.year, currentYear),
+                  )
+                )
+                .limit(1);
+
+              if (existing.length > 0) {
+                await savepoint.update(contributionRates)
+                  .set({
+                    rate: String(cpp.employeeRate),
+                    exemptionLimit: String(cpp.exemptionLimit),
+                    maximumContribution: String(cpp.maximumContribution),
+                    updatedAt: new Date(),
+                    syncId,
+                  })
+                  .where(eq(contributionRates.id, existing[0].id));
+                return { inserted: 0, updated: 1 };
+              }
+              await savepoint.insert(contributionRates).values({
+                rateType: 'cpp_employee',
+                rateTypeName: 'Canada Pension Plan - Employee Rate',
+                rate: String(cpp.employeeRate),
+                exemptionLimit: String(cpp.exemptionLimit),
+                maximumContribution: String(cpp.maximumContribution),
+                year: currentYear,
+                source: 'Canada Revenue Agency',
+                syncId,
+              });
+              await savepoint.insert(contributionRates).values({
+                rateType: 'cpp_employer',
+                rateTypeName: 'Canada Pension Plan - Employer Rate',
+                rate: String(cpp.employerRate),
+                exemptionLimit: String(cpp.exemptionLimit),
+                maximumContribution: String(cpp.maximumContribution),
+                year: currentYear,
+                source: 'Canada Revenue Agency',
+                syncId,
+              });
+              return { inserted: 2, updated: 0 };
+            });
+            recordsInserted += written.inserted;
+            recordsUpdated += written.updated;
+          } catch (error) {
+            recordsFailed++;
+            errors.push(`Failed to sync CPP rates: ${error}`);
+          }
+        }
+
+        await this.updateSyncLog(syncId, {
+          ...syncLogOutcome(recordsFailed, errors),
+          recordsProcessed,
+          recordsInserted,
+          recordsUpdated,
+          recordsFailed,
+        });
       });
 
       return {
@@ -627,14 +657,14 @@ export class WageEnrichmentService {
         duration: Date.now() - startTime,
       };
     } catch (error) {
-      await this.updateSyncLog(syncId, {
+      await withSystemContext(() => this.updateSyncLog(syncId, {
         status: 'failed',
         recordsProcessed,
         recordsInserted,
         recordsUpdated,
         recordsFailed,
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
-      });
+      }));
 
       throw error;
     }

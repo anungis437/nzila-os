@@ -7,7 +7,7 @@ vi.mock('@/lib/api-auth-guard', () => ({
   withSystemAdminAuth: (handler: (r: NextRequest, c: unknown) => Promise<Response>) => (r: NextRequest, c: unknown = { userId: 'admin_1', organizationId: 'org_1' }) => handler(r, c),
 }))
 vi.mock('@/lib/audit/operation-audit', () => ({
-  performAtomicAuditedOperation: m.atomic,
+  performAtomicSystemAuditedOperation: m.atomic,
   operationAuditResponse: (e: unknown) => (e instanceof Error && e.message === 'audit refused' ? { status: 409, body: { error: 'audit' } } : null),
 }))
 vi.mock('@/lib/communications/address-suppression', async (importOriginal) => ({ ...(await importOriginal<typeof import('@/lib/communications/address-suppression')>()), liftAddressSuppression: m.lift }))
@@ -32,7 +32,7 @@ describe('admin/email-suppressions route', () => {
     expect(response.status).toBe(200)
     expect(m.lift).toHaveBeenCalledWith(m.tx, { address: 'Person@Example.com', liftedBy: 'admin_1', reason: 'The member confirmed this address by phone.' })
     const op = m.atomic.mock.calls[0][0]
-    expect(op).toMatchObject({ action: 'communications.address_suppression.lift', scope: 'system', userId: 'admin_1' })
+    expect(op).toMatchObject({ action: 'communications.address_suppression.lift', userId: 'admin_1' })
     expect(JSON.stringify(op)).not.toContain('Person@Example.com')
     expect(op.details.addressSha256Prefix).toMatch(/^[0-9a-f]{12}$/)
   })

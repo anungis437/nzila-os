@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { apiErrorMessage } from '@/lib/client/api-envelope';
 
 export default function InviteAcceptPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function InviteAcceptPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || 'Could not accept invite');
+        setError(apiErrorMessage(data, 'Could not accept invite'));
         return;
       }
       router.replace('/en-CA/dashboard');

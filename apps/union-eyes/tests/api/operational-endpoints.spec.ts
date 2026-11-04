@@ -173,8 +173,9 @@ describe('UE Ops - /api/health source implementation contract', () => {
     expect(healthSrc).toContain('payload.ok ? 200 : 503')
   })
 
-  it('probes Redis if configured (HEALTH-REDIS-PROBE)', () => {
-    expect(healthSrc).toContain('UPSTASH_REDIS_REST_URL')
+  it('probes the cache through the shared probe, which reads the Upstash REST configuration (HEALTH-REDIS-PROBE)', () => {
+    expect(healthSrc).toContain('probeCache')
+    expect(readRoute('lib/operations/service-probes.ts')).toContain('UPSTASH_REDIS_REST_URL')
   })
 
   it('probes auth configuration (HEALTH-AUTH-PROBE)', () => {

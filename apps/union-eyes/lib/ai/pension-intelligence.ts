@@ -15,8 +15,8 @@
  * @module lib/ai/pension-intelligence
  */
 
-import { db } from '@/db/db';
 import { eq, and, sum, count } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import {
   pensionPlans,
@@ -117,10 +117,12 @@ export async function analyzePensionFunding(
 ): Promise<AiResponseEnvelope<PensionFundingResult>> {
   const { planId, organizationId, userId } = input;
 
-  // 1. Fetch plan record
-  const plan = await db.query.pensionPlans.findFirst({
-    where: and(eq(pensionPlans.id, planId), eq(pensionPlans.organizationId, organizationId)),
-  });
+  // 1. Fetch plan record, in the organization's own context and before the provider is called
+  const plan = await withRLSContext({ organizationId }, (tx) =>
+    tx.query.pensionPlans.findFirst({
+      where: and(eq(pensionPlans.id, planId), eq(pensionPlans.organizationId, organizationId)),
+    }),
+  );
   if (!plan) throw new Error(`Pension plan ${planId} not found in org ${organizationId}`);
 
   const fundingRatio = parseFloat(plan.fundingStatus ?? '100');
@@ -181,26 +183,29 @@ export async function projectMemberBenefit(
 ): Promise<AiResponseEnvelope<BenefitProjectionResult>> {
   const { memberId, organizationId, userId, targetRetirementAge } = input;
 
-  // 1. Fetch member
-  const member = await db.query.pensionMembers.findFirst({
-    where: and(
-      eq(pensionMembers.id, memberId),
-      eq(pensionMembers.organizationId, organizationId),
-    ),
-  });
-  if (!member) throw new Error(`Pension member ${memberId} not found in org ${organizationId}`);
-
-  // 2. Fetch contribution total
-  const contribRows = await db
-    .select({ total: sum(pensionContributions.amount) })
-    .from(pensionContributions)
-    .where(
-      and(
-        eq(pensionContributions.memberId, memberId),
-        eq(pensionContributions.organizationId, organizationId),
+  // 1. Fetch the member and the contribution total, in the organization's own context and before the provider is called
+  const read = await withRLSContext({ organizationId }, async (tx) => {
+    const found = await tx.query.pensionMembers.findFirst({
+      where: and(
+        eq(pensionMembers.id, memberId),
+        eq(pensionMembers.organizationId, organizationId),
       ),
-    );
-  const totalContributions = parseFloat(contribRows[0]?.total ?? '0');
+    });
+    if (!found) return null;
+    const contribRows = await tx
+      .select({ total: sum(pensionContributions.amount) })
+      .from(pensionContributions)
+      .where(
+        and(
+          eq(pensionContributions.memberId, memberId),
+          eq(pensionContributions.organizationId, organizationId),
+        ),
+      );
+    return { member: found, total: contribRows[0]?.total ?? null };
+  });
+  if (!read) throw new Error(`Pension member ${memberId} not found in org ${organizationId}`);
+  const { member } = read;
+  const totalContributions = parseFloat(read.total ?? '0');
 
   const yearsOfService = parseFloat(member.yearsOfService ?? '0');
 
@@ -268,21 +273,25 @@ export async function summarizeTrusteeReport(
 ): Promise<AiResponseEnvelope<TrusteeReportResult>> {
   const { planId, organizationId, userId, valuationDocumentText } = input;
 
-  // 1. Fetch plan + member counts
-  const plan = await db.query.pensionPlans.findFirst({
-    where: and(eq(pensionPlans.id, planId), eq(pensionPlans.organizationId, organizationId)),
+  // 1. Fetch plan + member counts, in the organization's own context and before the provider is called
+  const read = await withRLSContext({ organizationId }, async (tx) => {
+    const found = await tx.query.pensionPlans.findFirst({
+      where: and(eq(pensionPlans.id, planId), eq(pensionPlans.organizationId, organizationId)),
+    });
+    if (!found) return null;
+    const [stats] = await tx
+      .select({ total: count() })
+      .from(pensionMembers)
+      .where(
+        and(
+          eq(pensionMembers.planId, planId),
+          eq(pensionMembers.organizationId, organizationId),
+        ),
+      );
+    return { plan: found, memberStats: stats };
   });
-  if (!plan) throw new Error(`Pension plan ${planId} not found in org ${organizationId}`);
-
-  const [memberStats] = await db
-    .select({ total: count() })
-    .from(pensionMembers)
-    .where(
-      and(
-        eq(pensionMembers.planId, planId),
-        eq(pensionMembers.organizationId, organizationId),
-      ),
-    );
+  if (!read) throw new Error(`Pension plan ${planId} not found in org ${organizationId}`);
+  const { plan, memberStats } = read;
 
   // 2. Build prompt
   const prompt = buildTrusteePrompt({

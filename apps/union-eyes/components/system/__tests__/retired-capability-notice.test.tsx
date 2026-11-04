@@ -20,7 +20,7 @@ describe('retiredCapabilityPath', () => {
     expect(retiredCapabilityPath('/api/v2/analytics/overview', 200)).toBeNull();
     expect(retiredCapabilityPath('/api/v2/analytics/overview', 404)).toBeNull();
     expect(retiredCapabilityPath('/api/claims', 410)).toBeNull();
-    expect(retiredCapabilityPath('https://api.whop.com/api/v2/checkout_sessions', 410)).toBe('/api/v2/checkout_sessions');
+    expect(retiredCapabilityPath('https://payments.example/api/v2/checkout_sessions', 410)).toBe('/api/v2/checkout_sessions');
   });
 });
 
@@ -78,9 +78,20 @@ describe('CapabilityUnavailable', () => {
   afterEach(cleanup);
   it('is an alert in English by default and in French on request', () => {
     const { rerender } = render(<CapabilityUnavailable capability="federation/remittances" />);
-    expect(screen.getByRole('alert')).toHaveTextContent('This information is not available');
+    expect(screen.getByRole('alert')).toHaveTextContent('Not available in this release');
     expect(screen.getByRole('alert')).toHaveTextContent('federation/remittances');
     rerender(<CapabilityUnavailable locale="fr-CA" />);
-    expect(screen.getByRole('alert')).toHaveTextContent('Cette information n’est pas disponible');
+    expect(screen.getByRole('alert')).toHaveTextContent('Non disponible dans cette version');
+  });
+
+  it.each([
+    ['en-CA', 'Nothing was read, saved or changed through it', 'is not real and must not be relied on'],
+    ['fr-CA', 'Rien n’a été lu, enregistré ou modifié par son intermédiaire', 'n’est pas réel et ne doit pas être utilisé'],
+  ])('uses wording that fits a page, a form or an action with no figures (%s)', (locale, statement, warning) => {
+    render(<CapabilityUnavailable locale={locale} />);
+    const text = screen.getByRole('alert').textContent ?? '';
+    expect(text).toContain(statement);
+    expect(text).toContain(warning);
+    expect(text).not.toMatch(/figures below|below|chiffres ci-dessous|ci-dessous/i);
   });
 });

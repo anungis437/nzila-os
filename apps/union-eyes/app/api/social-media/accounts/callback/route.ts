@@ -8,14 +8,14 @@
  * the account under the caller's own authenticated organization.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { socialAccounts } from '@/db/schema/social-media-schema';
 import { createMetaClient } from '@/lib/social-media/meta-api-client';
 import { createTwitterClient } from '@/lib/social-media/twitter-api-client';
 import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { validateOAuthCallbackContext } from '@/lib/social-media/oauth-callback-state';
@@ -40,9 +40,18 @@ function clearOAuthCookies(cookieStore: CookieStore) {
   cookieStore.set('twitter_code_verifier', '', expired);
 }
 
-export const GET = withRoleAuth('admin', async (request: NextRequest, context: BaseAuthContext) => {
+// The provider calls (token exchange, Page lookup) leave the database, so the route does not hold a tenant transaction: the account is written, with its
+// audit record, in one `withRLSContext` after they return. A caller with no organization keeps the answer it had (403, below): `requireOrg: false`.
+export const GET = withApi(
+  {
+    auth: { minRole: 'admin' },
+    requireOrg: false,
+    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Social Media'], summary: 'Complete the OAuth connection of a social account' },
+  },
+  async ({ request, userId: authenticatedUserId, organizationId }) => {
   const cookieStore = await cookies();
-  const { userId, organizationId } = context;
+  const userId = authenticatedUserId as string;
 
   try {
     if (!organizationId) {
@@ -195,7 +204,7 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
     }
 
     // organizationId/userId come only from the trusted, authenticated server
-    // context (withRoleAuth) — never from query params, provider payload, or state.
+    // context (withApi) — never from query params, provider payload, or state.
     // Provider tokens are stored sealed, never as plaintext.
     const sealedAccessToken = await sealToken(accessToken);
     const sealedRefreshToken = await sealOptionalToken(refreshToken);
@@ -249,5 +258,6 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to complete OAuth connection');
   }
-});
+  },
+);
 

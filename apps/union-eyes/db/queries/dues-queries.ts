@@ -1,5 +1,3 @@
-"use server";
-
 import { eq, and, desc, sql } from "drizzle-orm";
 import { duesTransactions, type DuesTransaction, type NewDuesTransaction } from "../schema/dues-transactions-schema";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";

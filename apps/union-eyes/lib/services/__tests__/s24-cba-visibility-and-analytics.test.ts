@@ -64,7 +64,10 @@ describe('Gate 0 batch B80: CBA review visibility, analytics honesty and organiz
 
   it('refuses a metrics action whose organization differs from the one the route authorized', () => {
     const actions = src('actions/analytics-actions.ts')
-    expect(actions).toContain("throw new Error('Organization context changed during the request')")
+    // A user-facing error, so the refusal reaches the caller as its own message instead of the generic action failure.
+    expect(actions).toContain("if (expected && expected !== resolved) throw new UserFacingError('Organization context changed during the request')")
+    expect(actions).toContain('getActor(params.expectedOrganizationId)')
+    expect(actions).toContain('getCurrentUserOrgId(params.expectedOrganizationId)')
     const route = src('app/api/analytics/metrics/route.ts')
     expect(route.match(/expectedOrganizationId: context\.organizationId/g)).toHaveLength(2)
   })

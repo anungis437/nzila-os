@@ -68,7 +68,7 @@ beforeEach(async () => {
 describe('derived analytics eligibility', () => {
   it('the expertise map aggregates only published, consented interviews of the organization at the allowed levels', async () => {
     const { GET } = await import('../exit-interviews/expertise-map/route');
-    const result = (await (GET as any)({ organizationId: ORG })) as { data: unknown };
+    const result = (await (GET as any)({ organizationId: ORG })) as { domains: unknown[] };
     const text = JSON.stringify(result);
     expect(text).toContain('tag-open');
     expect(text).toContain('tag-restricted');

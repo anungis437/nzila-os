@@ -3,6 +3,7 @@ import { inAppNotifications } from '@/db/schema'
 import { messageThreads, messageThreadAssignments } from '@/db/schema/messages-schema'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import type { RLSTx } from '@/lib/db/with-rls-context'
+import { messageThreadUrl } from '@/lib/notifications/links'
 import { hasLiveDesignation, liveDesignees } from '@/lib/triage/designations'
 import { staffMembershipLive } from '@/lib/messaging/staff-liveness'
 
@@ -174,7 +175,7 @@ export async function assignThread(tx: RLSTx, actor: MessageActor, input: Assign
       message: 'A member conversation has been assigned to you.',
       type: 'info',
       actionLabel: 'Open conversation',
-      actionUrl: `/dashboard/messages/staff?thread=${thread.id}`,
+      actionUrl: messageThreadUrl(thread.id, 'staff'),
       data: { event: 'thread_assigned', threadId: thread.id },
     })
   }

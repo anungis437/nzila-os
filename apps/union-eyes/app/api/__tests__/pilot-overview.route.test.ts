@@ -4,7 +4,7 @@ const m = vi.hoisted(() => ({
   requireUser: vi.fn(),
   hasMinRole: vi.fn(),
   isPlatformAdminUser: vi.fn(),
-  performAtomicAuditedOperation: vi.fn(),
+  performAtomicSystemAuditedOperation: vi.fn(),
   operationAuditResponse: vi.fn(),
   logger: { error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -44,7 +44,7 @@ vi.mock('@/lib/api-auth-guard', () => ({
 }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/audit/operation-audit', () => ({
-  performAtomicAuditedOperation: m.performAtomicAuditedOperation,
+  performAtomicSystemAuditedOperation: m.performAtomicSystemAuditedOperation,
   operationAuditResponse: m.operationAuditResponse,
 }));
 vi.mock('@/lib/organization-utils', () => ({ DEFAULT_ORGANIZATION_ID: 'platform_org' }));
@@ -85,7 +85,7 @@ describe('pilot/overview route', () => {
     m.hasMinRole.mockResolvedValue(true);
     m.isPlatformAdminUser.mockResolvedValue(true);
     m.operationAuditResponse.mockReturnValue(null);
-    m.performAtomicAuditedOperation.mockImplementation(async (_op: unknown, work: (tx: unknown) => Promise<unknown>) => work(mockDb));
+    m.performAtomicSystemAuditedOperation.mockImplementation(async (_op: unknown, work: (tx: unknown) => Promise<unknown>) => work(mockDb));
   });
 
   it('GET returns 403 when role check fails', async () => {
@@ -93,7 +93,7 @@ describe('pilot/overview route', () => {
     const { GET } = await loadRoute();
 
     expect((await GET()).status).toBe(403);
-    expect(m.performAtomicAuditedOperation).not.toHaveBeenCalled();
+    expect(m.performAtomicSystemAuditedOperation).not.toHaveBeenCalled();
   });
 
   it('F06 A4: an officer of the platform organization without platform-administrator authority is denied, and nothing is read', async () => {
@@ -104,7 +104,7 @@ describe('pilot/overview route', () => {
 
     expect(response.status).toBe(403);
     expect(m.isPlatformAdminUser).toHaveBeenCalledWith('u1');
-    expect(m.performAtomicAuditedOperation).not.toHaveBeenCalled();
+    expect(m.performAtomicSystemAuditedOperation).not.toHaveBeenCalled();
     expect(mockDb.select).not.toHaveBeenCalled();
   });
 
@@ -169,9 +169,8 @@ describe('pilot/overview route', () => {
 
     expect(json.pagination).toMatchObject({ limit: 100, offset: 0, total: 500, returned: 0 });
     expect(m.chainCalls).toContainEqual(['limit', [100]]);
-    expect(m.performAtomicAuditedOperation).toHaveBeenCalledWith(
+    expect(m.performAtomicSystemAuditedOperation).toHaveBeenCalledWith(
       expect.objectContaining({
-        scope: 'system',
         organizationId: 'platform_org',
         userId: 'u1',
         action: 'pilot.overview.read',
@@ -184,7 +183,7 @@ describe('pilot/overview route', () => {
 
   it('F06 A4: returns nothing when the read cannot be audited', async () => {
     const refusal = { status: 409, body: { error: 'audit' } };
-    m.performAtomicAuditedOperation.mockRejectedValueOnce(new Error('audit down'));
+    m.performAtomicSystemAuditedOperation.mockRejectedValueOnce(new Error('audit down'));
     m.operationAuditResponse.mockReturnValueOnce(refusal);
     const { GET } = await loadRoute();
 
@@ -194,7 +193,7 @@ describe('pilot/overview route', () => {
   });
 
   it('GET returns 500 when the query throws', async () => {
-    m.performAtomicAuditedOperation.mockRejectedValueOnce(new Error('db down'));
+    m.performAtomicSystemAuditedOperation.mockRejectedValueOnce(new Error('db down'));
     const { GET } = await loadRoute();
 
     expect((await GET()).status).toBe(500);

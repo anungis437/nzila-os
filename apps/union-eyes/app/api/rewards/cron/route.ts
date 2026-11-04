@@ -9,11 +9,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cronSecretMatches } from '@/lib/api/cron-secret';
 import { jobResponse, type JobFailure } from '@/lib/operations/job-result';
-import { db } from '@/db';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { processAnniversaryAwards, processScheduledAwards } from '@/lib/services/rewards/automation-service';
 import { sendBatchExpirationWarnings } from '@/lib/services/rewards/notification-service';
+import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
@@ -27,24 +27,27 @@ import {
  * Query Parameters:
  * - task: 'anniversaries' | 'expirations' | 'scheduled' | 'all'
  * 
- * Security: the cron secret (CRON_SECRET_KEY or CRON_SECRET), presented as x-cron-secret or a bearer token
+ * Security: the cron secret (CRON_SECRET_KEY or CRON_SECRET), presented as x-cron-secret or a bearer token, is checked before any statement.
+ * The job has no tenant session, so every database step runs as the system role: the organization list and each organization's task in
+ * a system transaction of their own (with the task's audit entry on the same transaction), the expiry scan and each warning marker in short
+ * ones. No transaction is open while a warning e-mail is sent.
  */
 const TASKS = ['anniversaries', 'expirations', 'scheduled', 'all'] as const;
 
 const CRON_ACTOR = 'system:rewards';
 
 /**
- * Runs one organization's task inside that organization's own context, so the services' shared db handle is subject to its
- * row-level security instead of resting on the predicates in each query alone, and records the run in that organization's audit trail.
+ * Runs one organization's task in a system transaction scoped to that organization's own work, and records the run in that organization's
+ * audit trail on the same transaction, so the task and its audit entry commit or fail together.
  */
 async function runForOrganization<T extends { success?: boolean }>(
   organizationId: string,
   action: string,
-  task: () => Promise<T>,
+  task: (tx: RLSTx) => Promise<T>,
   summarize: (result: T) => Record<string, unknown>,
 ): Promise<T> {
-  return withRLSContext({ organizationId, userId: CRON_ACTOR }, async (tx) => {
-    const result = await task();
+  return withSystemContext(async (tx) => {
+    const result = await task(tx);
     await persistAtomicAudit(tx, {
       organizationId,
       userId: CRON_ACTOR,
@@ -89,8 +92,8 @@ export async function POST(request: NextRequest) {
 
     // 3. Get all organizations
     // Listing every organization is a cross-organization read, which only system authority may perform.
-    const organizations = await withSystemContext(async () =>
-      db.query.organizations.findMany({
+    const organizations = await withSystemContext((tx) =>
+      tx.query.organizations.findMany({
         where: (orgs, { eq }) => eq(orgs.status, 'active'),
       }),
     );
@@ -99,7 +102,7 @@ export async function POST(request: NextRequest) {
     if (task === 'anniversaries' || task === 'all') {
 const anniversaryResults = await Promise.allSettled(
         organizations.map((org) =>
-          runForOrganization(org.id, 'rewards.cron.anniversaries', () => processAnniversaryAwards(org.id), (r) => ({
+          runForOrganization(org.id, 'rewards.cron.anniversaries', (tx) => processAnniversaryAwards(org.id, tx), (r) => ({
             processed: (r as { processed?: number }).processed ?? 0,
             failed: (r as { failed?: number }).failed ?? 0,
           })),
@@ -132,7 +135,7 @@ const expirationResult = await sendBatchExpirationWarnings();
       const mailed = (expirationResult as { byOrganization?: Record<string, { sent: number; failed: number }> } | undefined)?.byOrganization ?? {};
       for (const [organizationId, tally] of Object.entries(mailed)) {
         try {
-          await withRLSContext({ organizationId, userId: CRON_ACTOR }, (tx) =>
+          await withSystemContext((tx) =>
             persistAtomicAudit(tx, {
               organizationId,
               userId: CRON_ACTOR,
@@ -141,7 +144,8 @@ const expirationResult = await sendBatchExpirationWarnings();
               details: { sent: tally.sent, failed: tally.failed },
             }),
           );
-        } catch {
+        } catch (auditError) {
+          logger.error('[rewards-cron] expiration run audit not recorded', { organizationId, error: auditError instanceof Error ? auditError.message : String(auditError) });
           failures.push({ scope: `expirations:${organizationId}`, reason: 'expiration run audit not recorded' });
         }
       }
@@ -154,7 +158,7 @@ const expirationResult = await sendBatchExpirationWarnings();
     if (task === 'scheduled' || task === 'all') {
 const scheduledResults = await Promise.allSettled(
         organizations.map((org) =>
-          runForOrganization(org.id, 'rewards.cron.scheduled', () => processScheduledAwards(org.id), (r) => ({
+          runForOrganization(org.id, 'rewards.cron.scheduled', (tx) => processScheduledAwards(org.id, tx), (r) => ({
             processed: (r as { processed?: number }).processed ?? 0,
             skipped: (r as { skipped?: number }).skipped ?? 0,
           })),
@@ -185,7 +189,8 @@ const scheduledResults = await Promise.allSettled(
       failures,
       details: { data: results },
     });
-  } catch (_error: any) {
+  } catch (error: unknown) {
+    logger.error('[rewards-cron] failed to execute scheduled tasks', { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json(
       { error: 'Failed to execute scheduled tasks' },
       { status: 500 }

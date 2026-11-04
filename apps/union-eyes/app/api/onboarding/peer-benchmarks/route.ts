@@ -11,19 +11,26 @@
  */
 
 import { NextResponse } from 'next/server';
-import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
+import { withApi } from '@/lib/api/framework';
 import { getPeerBenchmarks } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
 import { recordOnboardingRead } from '@/lib/utils/onboarding-read-audit';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
- 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('member' as MemberRole, async (request, context) => {
-  const { userId, organizationId } = context;
+// The comparison reads the peers' organization rows as the system role inside getPeerBenchmarks (only aggregates leave it) and calls the
+// national-average service, and the read is audited in a transaction of its own (recordOnboardingRead): no transaction spans the handler.
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    openapi: { tags: ['Onboarding'], summary: 'Compare the organization with its peers and national averages' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
 
   try {
     const rateLimit = await checkRateLimit(userId, RATE_LIMITS.ONBOARDING);
@@ -42,9 +49,6 @@ export const GET = withRoleAuth('member' as MemberRole, async (request, context)
     // The comparison is of the caller's own organization against its peers. A target taken from the request would let any member
     // read another organization's standing (member count and rates), so a named target must be the caller's own and otherwise reads
     // as not found.
-    if (!organizationId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
-    }
     const requested = searchParams.get('organizationId');
     if (requested && requested !== organizationId) {
       return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Organization not found');
@@ -79,5 +83,6 @@ export const GET = withRoleAuth('member' as MemberRole, async (request, context)
       { status: 500 }
     );
   }
-});
+  },
+);
 

@@ -8,7 +8,7 @@ const route = readFileSync(join(process.cwd(), 'app/api/documents/repository/rou
 describe('Gate 0B.6 repository list cannot fan out over the entire tenant', () => {
   it('limits the number of case-access decisions before mapping candidates', () => {
     expect(route).toContain('listPage(request, 100, 50)')
-    const query = route.slice(route.indexOf('const rows = await db'), route.indexOf('// Representative-level role'))
+    const query = route.slice(route.indexOf('const rows = await withRLSContext'), route.indexOf('// Representative-level role'))
     expect(query).toContain('.limit(limit)')
     expect(query).toContain('.offset(offset)')
     expect(query).toContain('desc(documents.updatedAt), desc(documents.id)')

@@ -23,7 +23,8 @@
  * ```
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -31,7 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/components/ui/use-toast';
+import { ApiShapeError, isRecord, readApiError } from '@/lib/client/api-envelope';
 import {
   Table,
   TableBody,
@@ -63,7 +64,6 @@ import {
   CheckCircle,
   DollarSign,
   Calendar,
-  Download,
   RefreshCw,
   PieChart as _PieChartIcon,
   Activity,
@@ -184,112 +184,131 @@ interface ForecastMetrics {
 }
 
 // ============================================================================
+// RESPONSE CHECKS
+// ============================================================================
+
+const hasNumbers = (value: unknown, keys: readonly string[]): boolean =>
+  isRecord(value) && keys.every((key) => typeof value[key] === 'number' && Number.isFinite(value[key]));
+
+/**
+ * GET /api/admin/clc/analytics/annual-report answers with the report itself. A body that lacks a part the screen reads is an error to
+ * show, not a report to render half of.
+ */
+function toAnnualReport(body: unknown): AnnualComplianceReport {
+  if (
+    !isRecord(body) ||
+    !hasNumbers(body.summary, ['totalOrganizations', 'totalRemittances', 'totalAmount', 'paidAmount', 'outstandingAmount', 'overdueAmount', 'complianceRate']) ||
+    !hasNumbers(body.complianceMetrics, ['onTimeSubmissionRate', 'onTimePaymentRate', 'averageSubmissionDelay', 'averagePaymentDelay', 'perfectComplianceOrgs', 'criticalNonComplianceOrgs']) ||
+    !hasNumbers(body.paymentPatterns, ['onTimePaymentRate', 'latePaymentRate', 'nonPaymentRate', 'averageProcessingTime']) ||
+    !isRecord(body.paymentPatterns) ||
+    !Array.isArray(body.paymentPatterns.monthlyDistribution) ||
+    !Array.isArray(body.paymentPatterns.seasonalTrends) ||
+    !Array.isArray(body.organizationPerformance) ||
+    !Array.isArray(body.anomalies) ||
+    !Array.isArray(body.recommendations)
+  ) {
+    throw new ApiShapeError('not an annual compliance report');
+  }
+  return body as unknown as AnnualComplianceReport;
+}
+
+/** GET /api/admin/clc/analytics/multi-year-trends answers with the analysis itself. */
+function toMultiYearTrends(body: unknown): MultiYearTrendAnalysis {
+  if (
+    !isRecord(body) ||
+    !Array.isArray(body.totalRemittancesTrend) ||
+    !Array.isArray(body.totalAmountTrend) ||
+    !Array.isArray(body.complianceRateTrend) ||
+    !Array.isArray(body.keyInsights) ||
+    !hasNumbers(body.forecastNextYear, ['year', 'forecastRemittances', 'forecastAmount', 'forecastComplianceRate', 'confidenceLevel'])
+  ) {
+    throw new ApiShapeError('not a multi-year trend analysis');
+  }
+  return body as unknown as MultiYearTrendAnalysis;
+}
+
+const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+function LoadFailure({ title, detail, onRetry }: { title: string; detail: string; onRetry: () => void }) {
+  const t = useTranslations('clcAnalyticsDashboard');
+  return (
+    <Alert variant="destructive" role="alert">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription className="space-y-2">
+        <p>{detail}</p>
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          {t('retry')}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 export default function CLCAnalyticsDashboard() {
-  const { toast } = useToast();
-
+  const t = useTranslations('clcAnalyticsDashboard');
   // State management
-  const [loading, setLoading] = useState(false);
+  const [loadingReport, setLoadingReport] = useState(true);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [reportReload, setReportReload] = useState(0);
+  const [trendsError, setTrendsError] = useState<string | null>(null);
+  const [trendsReload, setTrendsReload] = useState(0);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [trendYears, setTrendYears] = useState<3 | 5 | 10>(5);
   const [annualReport, setAnnualReport] = useState<AnnualComplianceReport | null>(null);
   const [multiYearTrends, setMultiYearTrends] = useState<MultiYearTrendAnalysis | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Fetch annual compliance report
-  const fetchAnnualReport = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/admin/clc/analytics/annual-report?year=${selectedYear}`);
-      if (!response.ok) throw new Error('Failed to fetch annual report');
-      
-      const data = await response.json();
-      setAnnualReport(data);
-    } catch (_error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load annual compliance report',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedYear, toast]);
-
-  // Fetch multi-year trends
-  const fetchMultiYearTrends = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/admin/clc/analytics/multi-year-trends?years=${trendYears}`);
-      if (!response.ok) throw new Error('Failed to fetch multi-year trends');
-      
-      const data = await response.json();
-      setMultiYearTrends(data);
-    } catch (_error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load multi-year trends',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [trendYears, toast]);
-
-  // Initial data load
+  // Annual compliance report. What was loaded for another year is dropped first, so the year on screen is the year of its figures.
   useEffect(() => {
-    fetchAnnualReport();
-    fetchMultiYearTrends();
-  }, [fetchAnnualReport, fetchMultiYearTrends]);
+    const controller = new AbortController();
+    const load = async () => {
+      setLoadingReport(true);
+      setReportError(null);
+      setAnnualReport(null);
+      try {
+        const response = await fetch(`/api/admin/clc/analytics/annual-report?year=${selectedYear}`, { signal: controller.signal });
+        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        setAnnualReport(toAnnualReport(await response.json()));
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setReportError(errorText(error));
+      } finally {
+        if (!controller.signal.aborted) setLoadingReport(false);
+      }
+    };
+    load();
+    return () => controller.abort();
+  }, [selectedYear, reportReload]);
 
-  // Export report
-  const handleExportReport = async (format: 'pdf' | 'excel' | 'csv') => {
-    try {
-      const response = await fetch(
-        `/api/admin/clc/analytics/export?year=${selectedYear}&format=${format}`,
-        { method: 'GET' }
-      );
-      
-      if (!response.ok) throw new Error('Export failed');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `clc-analytics-${selectedYear}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: 'Success',
-        description: `Report exported as ${format.toUpperCase()}`
-      });
-    } catch (_error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to export report',
-        variant: 'destructive'
-      });
-    }
-  };
+  // Multi-year trends
+  useEffect(() => {
+    const controller = new AbortController();
+    const load = async () => {
+      setTrendsError(null);
+      setMultiYearTrends(null);
+      try {
+        const response = await fetch(`/api/admin/clc/analytics/multi-year-trends?years=${trendYears}`, { signal: controller.signal });
+        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        setMultiYearTrends(toMultiYearTrends(await response.json()));
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setTrendsError(errorText(error));
+      }
+    };
+    load();
+    return () => controller.abort();
+  }, [trendYears, trendsReload]);
 
   // Refresh data
   const handleRefresh = () => {
-    fetchAnnualReport();
-    fetchMultiYearTrends();
-    toast({
-      title: 'Refreshed',
-      description: 'Analytics data updated'
-    });
+    setReportReload((count) => count + 1);
+    setTrendsReload((count) => count + 1);
   };
-
-  if (loading && !annualReport) {
-    return <DashboardSkeleton />;
-  }
 
   return (
     <div className="space-y-6">
@@ -316,17 +335,29 @@ export default function CLCAnalyticsDashboard() {
             </SelectContent>
           </Select>
           
-          <Button variant="outline" size="icon" onClick={handleRefresh}>
+          <Button variant="outline" size="icon" onClick={handleRefresh} aria-label={t('refresh')}>
             <RefreshCw className="h-4 w-4" />
-          </Button>
-          
-          <Button variant="outline" onClick={() => handleExportReport('pdf')}>
-            <Download className="h-4 w-4 mr-2" />
-            Export PDF
           </Button>
         </div>
       </div>
 
+      {reportError && (
+        <LoadFailure
+          title={t('reportFailedTitle', { year: selectedYear })}
+          detail={reportError}
+          onRetry={() => setReportReload((count) => count + 1)}
+        />
+      )}
+      {trendsError && (
+        <LoadFailure
+          title={t('trendsFailedTitle')}
+          detail={trendsError}
+          onRetry={() => setTrendsReload((count) => count + 1)}
+        />
+      )}
+
+      {loadingReport && !annualReport ? <DashboardSkeleton /> : (
+      <>
       {/* Critical Anomalies Alert */}
       {annualReport && annualReport.anomalies.filter(a => a.severity === 'critical').length > 0 && (
         <Alert variant="destructive">
@@ -764,11 +795,16 @@ export default function CLCAnalyticsDashboard() {
                       <AlertDescription>
                         <p className="font-medium">{anomaly.description}</p>
                         <p className="text-sm mt-2">
-                          <strong>Type:</strong> {anomaly.type.replace('_', ' ')} | 
-                          <strong> Period:</strong> {anomaly.period || 'N/A'}
+                          <strong>{t('anomalyType')}</strong> {anomaly.type.replace(/_/g, ' ')}
+                          {anomaly.period && (
+                            <>
+                              {' | '}
+                              <strong>{t('anomalyPeriod')}</strong> {anomaly.period}
+                            </>
+                          )}
                         </p>
                         <p className="text-sm mt-2 text-blue-600">
-                          <strong>Suggested Action:</strong> {anomaly.suggestedAction}
+                          <strong>{t('suggestedAction')}</strong> {anomaly.suggestedAction}
                         </p>
                       </AlertDescription>
                     </Alert>
@@ -855,6 +891,8 @@ export default function CLCAnalyticsDashboard() {
           )}
         </TabsContent>
       </Tabs>
+      </>
+      )}
     </div>
   );
 }
@@ -920,7 +958,6 @@ function MetricCard({
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <Skeleton className="h-12 w-full" />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-32 w-full" />

@@ -90,12 +90,14 @@ describe('lib/dashboard/role-experience', () => {
       }
     });
 
-    it('hides the admin Exports entry in pilot mode (it targets a pilot-excluded /dashboard/movement-insights prefix)', () => {
+    it('does not advertise the legislative brief export, in or out of pilot mode: it is retired and its page says so', () => {
       const fullNav = getVisibleNavigationForExperience('admin', false, 'admin');
       const pilotNav = getVisibleNavigationForExperience('admin', true);
-      expect(fullNav.some((i) => i.href === '/dashboard/movement-insights/export')).toBe(true);
-      expect(pilotNav.some((i) => i.href === '/dashboard/movement-insights/export')).toBe(false);
-      expect(pilotNav.length).toBe(fullNav.length - 1);
+      for (const nav of [fullNav, pilotNav]) {
+        expect(nav.some((i) => i.href.startsWith('/dashboard/movement-insights'))).toBe(false);
+        expect(nav.some((i) => i.label === 'Exports')).toBe(false);
+      }
+      expect(pilotNav.length).toBe(fullNav.length);
     });
 
     it('does not advertise platform operations to an ordinary organization admin', () => {

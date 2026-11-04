@@ -5,30 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { REVIEW_INTAKE_TYPES, type ReviewIntakeType } from '@/lib/authority/review-intake-types'
-
-type OwnReview = {
-  id: string
-  reviewType: string
-  status: 'open' | 'closed'
-  openedAt: string
-  participation: 'opened' | 'complainant'
-}
-
-type OversightReview = {
-  id: string
-  reviewType: string
-  status: 'open' | 'closed'
-  openedAt: string
-  classification: 'standard' | 'privileged'
-  complainantUserId: string | null
-}
-
-type IntakeList = {
-  own: OwnReview[]
-  oversight: OversightReview[]
-  notificationDelivered: false
-  notificationPolicy: 'not_adopted'
-}
+import { readIntakeList, type IntakeList } from './review-readers'
 
 type LoadState = 'loading' | 'ready' | 'error' | 'denied'
 
@@ -44,7 +21,7 @@ export function ReviewIntake({ audience }: { audience: 'member' | 'oversight' })
   const [reviewType, setReviewType] = useState<ReviewIntakeType>('complaint')
   const [adverseText, setAdverseText] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [formMessage, setFormMessage] = useState<'opened' | 'validation' | 'denied' | 'failed' | null>(null)
+  const [formMessage, setFormMessage] = useState<'opened' | 'alreadyOpen' | 'validation' | 'denied' | 'limited' | 'failed' | null>(null)
   const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' })
 
   const load = useCallback(async () => {
@@ -57,15 +34,10 @@ export function ReviewIntake({ audience }: { audience: 'member' | 'oversight' })
         return
       }
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const body = (await response.json()) as IntakeList
-      setList({
-        own: body.own ?? [],
-        oversight: body.oversight ?? [],
-        notificationDelivered: false,
-        notificationPolicy: 'not_adopted',
-      })
+      setList(readIntakeList(await response.json()))
       setState('ready')
     } catch {
+      setList(null)
       setState('error')
     }
   }, [])
@@ -98,6 +70,10 @@ export function ReviewIntake({ audience }: { audience: 'member' | 'oversight' })
         setFormMessage('denied')
         return
       }
+      if (response.status === 429) {
+        setFormMessage('limited')
+        return
+      }
       if (!response.ok) {
         setFormMessage('failed')
         return
@@ -108,7 +84,8 @@ export function ReviewIntake({ audience }: { audience: 'member' | 'oversight' })
         return
       }
       setAdverseText('')
-      setFormMessage('opened')
+      // A repeat of a review that is already open answers 200 with that review: nothing new was recorded.
+      setFormMessage(body.alreadyOpen === true ? 'alreadyOpen' : 'opened')
       await load()
     } catch {
       setFormMessage('failed')
@@ -155,8 +132,10 @@ export function ReviewIntake({ audience }: { audience: 'member' | 'oversight' })
           {submitting ? t('submitting') : t('submit')}
         </Button>
         {formMessage === 'opened' && <p role="status" data-testid="review-opened">{t('opened')}<span className="block">{t('noNotice')}</span></p>}
+        {formMessage === 'alreadyOpen' && <p role="status" data-testid="review-already-open">{t('alreadyOpen')}<span className="block">{t('noNotice')}</span></p>}
         {formMessage === 'validation' && <p role="alert">{t('validation')}</p>}
         {formMessage === 'denied' && <p role="alert">{t('denied')}</p>}
+        {formMessage === 'limited' && <p role="alert">{t('limited')}</p>}
         {formMessage === 'failed' && <p role="alert">{t('submitError')}</p>}
       </form>
 
@@ -180,7 +159,7 @@ export function ReviewIntake({ audience }: { audience: 'member' | 'oversight' })
                   <li key={review.id} className="rounded-md border p-3 text-sm">
                     <p className="font-medium">{reviewLabel(t, review.reviewType)}</p>
                     <p>{t(`status.${review.status}`)}</p>
-                    <p>{dateFormat.format(new Date(review.openedAt))}</p>
+                    <p>{dateFormat.format(review.openedAt)}</p>
                     <p className="break-all text-muted-foreground">{review.id}</p>
                   </li>
                 ))}

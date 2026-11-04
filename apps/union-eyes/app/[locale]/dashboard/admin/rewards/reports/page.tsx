@@ -3,14 +3,11 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getFormatter, getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import { db } from '@/db/db';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { getOrganizationId } from '@/lib/organization-middleware';
-import { sql } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
+import { isUuid } from '@/lib/page-data/uuid';
+import { loadRewardsReport } from '@/lib/rewards/admin-reads';
 import { BarChart3, TrendingUp, Award, Gift, Users } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -18,95 +15,57 @@ export const metadata: Metadata = {
   description: 'Rewards analytics and insights dashboard',
 };
 
+interface RecentAward {
+  id: string;
+  status: string;
+  points_value: unknown;
+  recipient_name: string | null;
+  nominator_name: string | null;
+  award_type_name: string | null;
+}
+
+interface TopRecipient {
+  user_id: string;
+  name: string;
+  email: string;
+  award_count: unknown;
+  total_points: unknown;
+}
+
 export default async function AdminRewardsReportsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  await requireUser();
+  const user = await requireUser();
   const hasAccess = await hasMinRole("admin");
   if (!hasAccess) {
     redirect('/dashboard');
   }
 
   const t = await getTranslations('rewards.admin.reports');
-  const orgId = await getOrganizationId();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let stats: Record<string, any> = {};
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let recentAwards: any[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let topRecipients: any[] = [];
-
-  try {
-    const result = await withSystemContext(async () => {
-      // Overall stats. The recognition tables key an organization as org_id and a person as a user id; the credits an award carries are the credits its ledger entries moved.
-      const overallResult = await db.execute(sql`
-        SELECT
-          (SELECT COUNT(*) FROM recognition_programs WHERE org_id = ${orgId}::uuid AND status <> 'archived') AS total_programs,
-          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid) AS total_awards,
-          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'issued') AS issued_awards,
-          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'pending') AS pending_awards,
-          (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND created_at > NOW() - INTERVAL '30 days') AS awards_this_month,
-          (SELECT COALESCE(SUM(amount_credits), 0) FROM reward_wallet_ledger WHERE org_id = ${orgId}::uuid AND award_id IS NOT NULL AND amount_credits > 0) AS total_points_issued,
-          (SELECT COUNT(DISTINCT recipient_user_id) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'issued') AS unique_recipients,
-          (SELECT COUNT(DISTINCT issuer_user_id) FROM recognition_awards WHERE org_id = ${orgId}::uuid AND status = 'issued') AS unique_nominators
-      `);
-
-      // Recent awards
-      const recentResult = await db.execute(sql`
-        SELECT
-          ra.id,
-          ra.status,
-          COALESCE((SELECT SUM(wl.amount_credits) FROM reward_wallet_ledger wl WHERE wl.award_id = ra.id AND wl.amount_credits > 0), 0) AS points_value,
-          ra.created_at,
-          ra.reason AS message,
-          om_r.name AS recipient_name,
-          om_n.name AS nominator_name,
-          rat.name AS award_type_name
-        FROM recognition_awards ra
-        LEFT JOIN organization_members om_r ON om_r.user_id = ra.recipient_user_id AND om_r.organization_id = ra.org_id
-        LEFT JOIN organization_members om_n ON om_n.user_id = ra.issuer_user_id AND om_n.organization_id = ra.org_id
-        LEFT JOIN recognition_award_types rat ON rat.id = ra.award_type_id
-        WHERE ra.org_id = ${orgId}::uuid
-        ORDER BY ra.created_at DESC
-        LIMIT 10
-      `);
-
-      // Top recipients by credits
-      const topResult = await db.execute(sql`
-        SELECT
-          om.name,
-          om.email,
-          COUNT(ra.id) AS award_count,
-          COALESCE(SUM(credits.amount), 0) AS total_points
-        FROM recognition_awards ra
-        JOIN organization_members om ON om.user_id = ra.recipient_user_id AND om.organization_id = ra.org_id
-        LEFT JOIN LATERAL (
-          SELECT SUM(wl.amount_credits) AS amount FROM reward_wallet_ledger wl WHERE wl.award_id = ra.id AND wl.amount_credits > 0
-        ) credits ON TRUE
-        WHERE ra.org_id = ${orgId}::uuid
-          AND ra.status = 'issued'
-        GROUP BY om.id, om.name, om.email
-        ORDER BY total_points DESC
-        LIMIT 10
-      `);
-
-      return {
-        stats: Array.from(overallResult)[0] || {},
-        recent: Array.from(recentResult),
-        top: Array.from(topResult),
-      };
-    });
-
-    stats = result.stats;
-    recentAwards = result.recent;
-    topRecipients = result.top;
-  } catch (e) {
-    logger.error('[REWARDS] reports query failed', e instanceof Error ? e : new Error(String(e)));
+  const format = await getFormatter();
+  // The organization is the administrator's own, from their verified membership: never the cookie the browser sends.
+  const orgId = user.organizationId;
+  if (!isUuid(orgId)) {
+    redirect('/dashboard');
   }
+
+  // A failed read is an error, not an empty report: nothing here catches it.
+  const report = await loadRewardsReport(orgId);
+  const { stats } = report;
+  const recentAwards = report.recent as unknown as RecentAward[];
+  const topRecipients = report.top as unknown as TopRecipient[];
+
+  const number = (value: unknown) => format.number(Number(value ?? 0));
+  const statusLabels: Record<string, string> = {
+    pending: t('status.pending'),
+    approved: t('status.approved'),
+    issued: t('status.issued'),
+    rejected: t('status.rejected'),
+    revoked: t('status.revoked'),
+  };
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -115,14 +74,10 @@ export default async function AdminRewardsReportsPage({
           href={`/${locale}/dashboard/admin/rewards`}
           className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block"
         >
-          &larr; {t('backToAdmin', { defaultValue: 'Back to Admin' })}
+          &larr; {t('backToAdmin')}
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight">
-          {t('title', { defaultValue: 'Rewards Reports' })}
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          {t('description', { defaultValue: 'Analytics and insights for your recognition programs' })}
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-2">{t('description')}</p>
       </div>
 
       {/* KPI Cards */}
@@ -130,37 +85,37 @@ export default async function AdminRewardsReportsPage({
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-primary" />
-              <CardDescription>{t('kpi.totalAwards', { defaultValue: 'Total Awards' })}</CardDescription>
+              <Award className="h-4 w-4 text-primary" aria-hidden="true" />
+              <CardDescription>{t('kpi.totalAwards')}</CardDescription>
             </div>
-            <CardTitle className="text-2xl">{Number(stats.total_awards ?? 0).toLocaleString()}</CardTitle>
+            <CardTitle className="text-2xl">{number(stats.total_awards)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              <CardDescription>{t('kpi.thisMonth', { defaultValue: 'This Month' })}</CardDescription>
+              <TrendingUp className="h-4 w-4 text-green-600" aria-hidden="true" />
+              <CardDescription>{t('kpi.last30Days')}</CardDescription>
             </div>
-            <CardTitle className="text-2xl">{Number(stats.awards_this_month ?? 0)}</CardTitle>
+            <CardTitle className="text-2xl">{number(stats.awards_last_30_days)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Gift className="h-4 w-4 text-amber-500" />
-              <CardDescription>{t('kpi.pointsIssued', { defaultValue: 'Points Issued' })}</CardDescription>
+              <Gift className="h-4 w-4 text-amber-500" aria-hidden="true" />
+              <CardDescription>{t('kpi.creditsIssued')}</CardDescription>
             </div>
-            <CardTitle className="text-2xl">{Number(stats.total_points_issued ?? 0).toLocaleString()}</CardTitle>
+            <CardTitle className="text-2xl">{number(stats.credits_issued)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-blue-500" />
-              <CardDescription>{t('kpi.recipients', { defaultValue: 'Unique Recipients' })}</CardDescription>
+              <Users className="h-4 w-4 text-blue-500" aria-hidden="true" />
+              <CardDescription>{t('kpi.recipients')}</CardDescription>
             </div>
-            <CardTitle className="text-2xl">{Number(stats.unique_recipients ?? 0)}</CardTitle>
+            <CardTitle className="text-2xl">{number(stats.unique_recipients)}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -169,20 +124,20 @@ export default async function AdminRewardsReportsPage({
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>{t('engagement.programs', { defaultValue: 'Active Programs' })}</CardDescription>
-            <CardTitle>{Number(stats.total_programs ?? 0)}</CardTitle>
+            <CardDescription>{t('engagement.programs')}</CardDescription>
+            <CardTitle>{number(stats.active_programs)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>{t('engagement.pending', { defaultValue: 'Pending Approval' })}</CardDescription>
-            <CardTitle>{Number(stats.pending_awards ?? 0)}</CardTitle>
+            <CardDescription>{t('engagement.pending')}</CardDescription>
+            <CardTitle>{number(stats.pending_awards)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>{t('engagement.nominators', { defaultValue: 'Unique Nominators' })}</CardDescription>
-            <CardTitle>{Number(stats.unique_nominators ?? 0)}</CardTitle>
+            <CardDescription>{t('engagement.givers')}</CardDescription>
+            <CardTitle>{number(stats.unique_givers)}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -194,36 +149,39 @@ export default async function AdminRewardsReportsPage({
           <CardHeader>
             <CardTitle className="text-base">
               <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                {t('recent.title', { defaultValue: 'Recent Awards' })}
+                <BarChart3 className="h-4 w-4" aria-hidden="true" />
+                {t('recent.title')}
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {recentAwards.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {t('recent.empty', { defaultValue: 'No awards yet' })}
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t('recent.empty')}</p>
             ) : (
               <div className="space-y-3">
                 {recentAwards.map((award) => (
                   <div key={award.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
                     <div>
-                      <p className="font-medium">
-                        {award.recipient_name}
-                      </p>
+                      <p className="font-medium">{award.recipient_name ?? t('recent.formerMember')}</p>
                       <p className="text-xs text-muted-foreground">
-                        {award.award_type_name ?? 'Award'} &middot; by {award.nominator_name ?? 'System'}
+                        {t('recent.by', {
+                          type: award.award_type_name ?? t('recent.fallbackType'),
+                          name: award.nominator_name ?? t('recent.system'),
+                        })}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono">{Number(award.points_value ?? 0).toLocaleString()} pts</p>
-                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ${
-                        award.status === 'issued' ? 'bg-green-100 text-green-700' :
-                        award.status === 'approved' ? 'bg-blue-100 text-blue-700' :
-                        'bg-amber-100 text-amber-700'
-                      }`}>
-                        {award.status}
+                      <p className="font-mono">{t('creditsCount', { count: Number(award.points_value ?? 0) })}</p>
+                      <span
+                        className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ${
+                          award.status === 'issued'
+                            ? 'bg-green-100 text-green-700'
+                            : award.status === 'approved'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
+                        {statusLabels[award.status] ?? award.status}
                       </span>
                     </div>
                   </div>
@@ -238,20 +196,18 @@ export default async function AdminRewardsReportsPage({
           <CardHeader>
             <CardTitle className="text-base">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                {t('topRecipients.title', { defaultValue: 'Top Recipients' })}
+                <TrendingUp className="h-4 w-4" aria-hidden="true" />
+                {t('topRecipients.title')}
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {topRecipients.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {t('topRecipients.empty', { defaultValue: 'No data yet' })}
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t('topRecipients.empty')}</p>
             ) : (
               <div className="space-y-3">
                 {topRecipients.map((r, idx) => (
-                  <div key={r.email} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
+                  <div key={r.user_id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-muted-foreground w-5">#{idx + 1}</span>
                       <div>
@@ -260,8 +216,8 @@ export default async function AdminRewardsReportsPage({
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono">{Number(r.total_points).toLocaleString()} pts</p>
-                      <p className="text-xs text-muted-foreground">{r.award_count} awards</p>
+                      <p className="font-mono">{t('creditsCount', { count: Number(r.total_points ?? 0) })}</p>
+                      <p className="text-xs text-muted-foreground">{t('awardsCount', { count: Number(r.award_count ?? 0) })}</p>
                     </div>
                   </div>
                 ))}

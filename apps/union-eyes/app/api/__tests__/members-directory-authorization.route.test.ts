@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { memberDirectoryAccess, projectDirectoryMember } from '@/lib/members/directory-access';
+import { logger } from '@/lib/logger';
 
 describe('member directory access policy', () => {
   it.each([
@@ -41,16 +42,78 @@ describe('member directory access policy', () => {
     expect(full.metadata).toEqual({ compensation: 1, medical: 'x' });
     expect(full.seniority).toBe(9);
   });
+
+  it('does not invent a department, a position or years of seniority that the record does not have', () => {
+    const row = {
+      id: '1', userId: 'u1', name: 'Pat', email: 'p@example.test', phone: null, role: 'member', status: 'active',
+      department: null, position: null, hireDate: null, seniority: null, membershipNumber: null,
+      unionJoinDate: null, createdAt: null, metadata: null,
+    };
+    for (const access of [{ scope: 'organization', includeSensitive: true }, { scope: 'case-context', includeSensitive: false }] as const) {
+      const projected = projectDirectoryMember(row, access);
+      expect(projected.department).toBeNull();
+      expect(projected.position).toBeNull();
+      expect(projected.seniority).toBeNull();
+    }
+    // A seniority of 0 that the record really holds is still 0 for an officer.
+    expect(projectDirectoryMember({ ...row, seniority: 0 }, { scope: 'organization', includeSensitive: true }).seniority).toBe(0);
+    expect(projectDirectoryMember({ ...row, department: 'Operations', position: 'Welder' }, { scope: 'organization', includeSensitive: true })).toMatchObject({ department: 'Operations', position: 'Welder' });
+  });
+
+  it('logs malformed legacy metadata instead of dropping it silently, without logging what it says', () => {
+    const warn = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const row = {
+      id: 'om-7', userId: 'u7', name: 'Pat', email: 'p@example.test', phone: null, role: 'member', status: 'active',
+      department: null, position: null, hireDate: null, seniority: null, membershipNumber: null,
+      unionJoinDate: null, createdAt: null, metadata: '{"compensation": secret-salary',
+    };
+    const projected = projectDirectoryMember(row, { scope: 'organization', includeSensitive: true });
+    expect(projected.metadata).toEqual({});
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(warn.mock.calls)).toContain('om-7');
+    expect(JSON.stringify(warn.mock.calls)).not.toContain('secret-salary');
+    warn.mockRestore();
+
+    // Valid JSON in the legacy string form is still read, and a non-sensitive projection reads none of it.
+    expect(projectDirectoryMember({ ...row, metadata: '{"local":12}' }, { scope: 'organization', includeSensitive: true }).metadata).toEqual({ local: 12 });
+    expect(projectDirectoryMember({ ...row, metadata: '{"local":12}' }, { scope: 'case-context', includeSensitive: false }).metadata).toEqual({});
+  });
 });
 
-const m = vi.hoisted(() => ({ rows: [] as unknown[], where: vi.fn(), auditDataAccess: vi.fn() }));
+const m = vi.hoisted(() => ({
+  rows: [] as unknown[],
+  total: 0,
+  where: vi.fn(),
+  orderBy: vi.fn(),
+  limit: vi.fn(),
+  offset: vi.fn(),
+  auditDataAccess: vi.fn(),
+}));
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: (_cfg: unknown, handler: (ctx: unknown) => unknown) => (ctx: unknown) => handler(ctx),
 }));
+// The page query goes on to order, limit and offset; the count query (select({ total })) is awaited at its where.
 vi.mock('@/db/db', () => ({
   db: {
-    select: () => ({ from: () => ({ where: (cond: unknown) => { m.where(cond); return { limit: () => ({ offset: async () => m.rows }) }; } }) }),
+    select: (shape?: unknown) => ({
+      from: () => ({
+        where: (cond: unknown) => {
+          m.where(cond);
+          return Object.assign(Promise.resolve(shape ? [{ total: m.total }] : []), {
+            orderBy: (...keys: unknown[]) => {
+              m.orderBy(...keys);
+              return {
+                limit: (n: number) => {
+                  m.limit(n);
+                  return { offset: async (n2: number) => { m.offset(n2); return m.rows; } };
+                },
+              };
+            },
+          });
+        },
+      }),
+    }),
   },
 }));
 vi.mock('@/db/schema-organizations', () => ({
@@ -65,6 +128,8 @@ vi.mock('drizzle-orm', () => {
     or: (...c: unknown[]) => ({ or: c }),
     isNull: (a: unknown) => ({ isNull: a }),
     ilike: (a: unknown, b: unknown) => ({ ilike: [a, b] }),
+    asc: (a: unknown) => ({ asc: a }),
+    count: () => ({ count: true }),
   };
 });
 vi.mock('@/lib/audit-logger', () => ({ auditDataAccess: m.auditDataAccess }));
@@ -79,7 +144,7 @@ const call = async (ctx: Record<string, unknown>, query = '') => {
 };
 
 describe('GET /api/members', () => {
-  beforeEach(() => { vi.clearAllMocks(); m.rows = []; });
+  beforeEach(() => { vi.clearAllMocks(); m.rows = []; m.total = 0; });
 
   it('denies an ordinary member the directory', async () => {
     const res = await call({ organizationId: 'org-1', userId: 'u1', user: { role: 'member' } });
@@ -119,5 +184,47 @@ describe('GET /api/members', () => {
   it('gives an admin the organization directory without the case-context restriction', async () => {
     await call({ organizationId: 'org-1', userId: 'a1', user: { role: 'admin' } });
     expect(JSON.stringify(m.where.mock.calls[0][0])).not.toContain('claims c');
+  });
+
+  const dbRow = (id: string, name: string) => ({
+    id, userId: `u-${id}`, name, email: `${id}@union.example`, phone: null, role: 'member', status: 'active', department: null, position: null,
+    hireDate: null, seniority: null, membershipNumber: null, unionJoinDate: null, createdAt: null, metadata: {},
+  });
+
+  it('reports how many members match, not how many are on the page, and counts them over the very same conditions', async () => {
+    m.rows = [dbRow('m1', 'Ada'), dbRow('m2', 'Grace')];
+    m.total = 137;
+    const result = await call({ organizationId: 'org-1', userId: 'a1', user: { role: 'admin' } }, '?limit=2&offset=2&search=a&status=active');
+
+    expect(result.members).toHaveLength(2);
+    expect(result.total).toBe(137);
+    expect(m.limit).toHaveBeenCalledWith(2);
+    expect(m.offset).toHaveBeenCalledWith(2);
+    // The page and the count are asked of the same condition: this organization, the search and the status.
+    expect(m.where).toHaveBeenCalledTimes(2);
+    expect(m.where.mock.calls[1][0]).toBe(m.where.mock.calls[0][0]);
+    const condition = JSON.stringify(m.where.mock.calls[0][0]);
+    expect(condition).toContain('org-1');
+    expect(condition).toContain('active');
+    expect(condition).toContain('%a%');
+  });
+
+  it('counts a steward\'s case-context members only, so the count carries the same restriction as the page', async () => {
+    m.total = 3;
+    const result = await call({ organizationId: 'org-1', userId: 'steward-1', user: { role: 'steward' } });
+    expect(result.total).toBe(3);
+    expect(JSON.stringify(m.where.mock.calls[1][0])).toContain('claims c');
+    expect(JSON.stringify(m.where.mock.calls[1][0])).toContain('steward-1');
+  });
+
+  it('reports a total of zero for a directory with no matching member', async () => {
+    const result = await call({ organizationId: 'org-1', userId: 'a1', user: { role: 'admin' } }, '?search=nobody');
+    expect(result).toMatchObject({ members: [], total: 0 });
+  });
+
+  it('orders the page by name and then id, so that a page boundary neither repeats nor skips a member', async () => {
+    await call({ organizationId: 'org-1', userId: 'a1', user: { role: 'admin' } });
+    expect(m.orderBy).toHaveBeenCalledTimes(1);
+    expect(m.orderBy).toHaveBeenCalledWith({ asc: { column: 'name' } }, { asc: { column: 'id' } });
   });
 });

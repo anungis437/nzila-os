@@ -1,7 +1,7 @@
 /**
  * Dispatch Queue API
  *
- * GET /api/dispatch/queue — List open dispatch requests for the org
+ * GET /api/dispatch/queue — List the dispatch requests of the org that still need workers (open and partially filled)
  */
 
 import { withOrganizationAuth } from "@/lib/organization-middleware";

@@ -199,7 +199,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
     { label: 'Policies', href: '/dashboard/governance' },
     { label: 'Audit', href: '/dashboard/audits' },
     { label: 'Security', href: '/dashboard/security' },
-    { label: 'Exports', href: '/dashboard/movement-insights/export' },
     { label: 'Integrations', href: '/dashboard/integrations' },
     { label: 'System Status', href: '/dashboard/operations' },
   ];
@@ -259,7 +258,6 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/governance',
     '/dashboard/audits',
     '/dashboard/security',
-    '/dashboard/movement-insights/export',
     '/dashboard/integrations',
     '/dashboard/operations',
     '/dashboard/settings',

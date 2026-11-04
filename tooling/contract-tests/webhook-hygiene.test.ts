@@ -1,7 +1,8 @@
 /**
  * Contract test: Webhook handler hygiene.
  *
- * WHK-001: No app should inline Svix HMAC verification — must use @nzila/platform-auth
+ * WHK-001: Every Clerk-named webhook route must verify the Svix signature. The shared verifier that used to live in @nzila/platform-auth was
+ *          retired with the identity provider (UE-CONV-A-006), so a route that still exists carries its own HMAC check
  * WHK-002: All Clerk webhook handlers must validate timestamps
  * WHK-003: API guard duplication detection — apps should import from @nzila/platform-auth
  */
@@ -19,32 +20,20 @@ const WEBHOOK_ROUTES = [
   'apps/zonga/app/api/webhooks/stripe/route.ts',
 ].filter((p) => existsSync(join(ROOT, p)))
 
-describe('WHK-001: No inline Svix HMAC verification', () => {
+describe('WHK-001: Webhook handlers verify the signature', () => {
   const clerkWebhookRoutes = WEBHOOK_ROUTES.filter((p) => p.includes('clerk'))
 
   it.each(clerkWebhookRoutes)(
-    '%s should use @nzila/platform-auth for Svix verification',
+    '%s must verify the Svix signature',
     (relativePath) => {
       const src = readFileSync(join(ROOT, relativePath), 'utf-8')
 
-      // Flag: inline createHmac usage for webhook verification
-      const hasInlineHmac =
+      const verifiesSignature =
         src.includes("createHmac('sha256'") || src.includes('createHmac("sha256"')
-      const usesSharedPackage =
-        src.includes('@nzila/platform-auth') || src.includes('verifySvixSignature') || src.includes('verifyClerkWebhook')
 
-      // Warn if inline HMAC exists without shared package import
-      // This is a migration flag — will become a hard fail once all apps migrate
-      if (hasInlineHmac && !usesSharedPackage) {
-        console.warn(
-          `⚠️ ${relativePath} uses inline HMAC — migrate to @nzila/platform-auth/clerk-webhook`,
-        )
-      }
-
-      // For now, just ensure the file at least handles signature verification
       expect(
-        hasInlineHmac || usesSharedPackage,
-        `${relativePath} must verify webhook signatures (inline or via shared package)`,
+        verifiesSignature,
+        `${relativePath} must verify webhook signatures`,
       ).toBe(true)
     },
   )

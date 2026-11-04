@@ -98,4 +98,45 @@ describe('ReviewIntake', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     await waitFor(() => expect(screen.getByTestId('own-reviews-empty')).toBeInTheDocument())
   })
+
+  it('reports a successful response that is not the review list instead of showing an empty list', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ success: true })))
+    renderIntake('member')
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be loaded')
+    expect(screen.queryByTestId('own-reviews-empty')).not.toBeInTheDocument()
+    cleanup()
+
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ...empty, own: [{ id: '11111111-1111-4111-8111-111111111111', reviewType: 'appeal', status: 'pending', openedAt: '2026-10-26T15:00:00.000Z', participation: 'opened' }] })))
+    renderIntake('member')
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be loaded')
+    expect(screen.queryByTestId('own-reviews')).not.toBeInTheDocument()
+  })
+
+  it('says a repeat of an already open review recorded nothing new, as the route answers it (200, alreadyOpen)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (_url: string, init?: RequestInit) => {
+      if ((init?.method ?? 'GET') === 'POST') {
+        return Response.json({ success: true, id: '11111111-1111-4111-8111-111111111111', reviewType: 'complaint', status: 'open', notificationDelivered: false, notificationPolicy: 'not_adopted', alreadyOpen: true }, { status: 200 })
+      }
+      return Response.json(empty)
+    }))
+    renderIntake('member')
+    expect(await screen.findByTestId('own-reviews-empty')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Open this review' }))
+    expect(await screen.findByTestId('review-already-open')).toHaveTextContent('You already have this review open. No new review was recorded.')
+    expect(screen.queryByTestId('review-opened')).not.toBeInTheDocument()
+  })
+
+  it('tells the member when the daily limit of opened reviews is reached (429), not that the review failed', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (_url: string, init?: RequestInit) => {
+      if ((init?.method ?? 'GET') === 'POST') {
+        return Response.json({ success: false, error: 'RATE_LIMITED', code: 'REVIEW_INTAKE_LIMIT' }, { status: 429, headers: { 'Retry-After': '3600' } })
+      }
+      return Response.json(empty)
+    }))
+    renderIntake('member')
+    expect(await screen.findByTestId('own-reviews-empty')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Open this review' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('You have reached the limit for opening reviews. Try again later.')
+    expect(screen.queryByTestId('review-opened')).not.toBeInTheDocument()
+  })
 })

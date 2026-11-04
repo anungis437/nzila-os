@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Notifications'], summary: 'List in-app notifications (mobile)', description: 'The in-app inbox of the authenticated user.' },
   },

@@ -11,14 +11,17 @@ const m = vi.hoisted(() => ({
   insertResult: [{ id: 'holder_1' }] as unknown[],
 }));
 
-const mockDb = {
+const WORKBOOK = '11111111-1111-4111-8111-111111111111';
+
+// The transaction the access boundary hands to the callback (authority.tx): every statement the route makes goes through it.
+const boundaryTx = {
   select: vi.fn(() => {
     const chain = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
       // Row lock on the parent workbook and the bounded holder-count read used by the serialized POST.
-      for: vi.fn(async () => [{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]),
+      for: vi.fn(async () => [{ id: WORKBOOK, claimedByUserId: null, claimedOrgId: null }]),
       // The cartography read is ordered then bounded; the POST holder-count read is bounded only. Both consume the queue.
       limit: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
     };
@@ -31,7 +34,10 @@ const mockDb = {
   })),
 };
 
-vi.mock('@/db', () => ({ db: mockDb }));
+// The ambient handle must never be reached by this route: a statement on it would run outside the authority's context.
+const ambient = new Proxy({}, { get: () => { throw new Error('the ambient database handle was used'); } });
+vi.mock('@/db', () => ({ db: ambient }));
+vi.mock('@/db/db', () => ({ db: ambient }));
 vi.mock('@/lib/workbook/access-control', () => ({
   withClaimedWorkbookAccess: m.withClaimedWorkbookAccess,
 }));
@@ -64,6 +70,7 @@ function allowAccess() {
         claimedOrgId: null,
         actorUserId: null,
         operation: args.operation,
+        tx: boundaryTx,
       };
       const value = await cb(authority);
       return { ok: true as const, value, authority };
@@ -88,14 +95,14 @@ describe('workbook/[id]/memory-holders route', () => {
   it('POST records the audit for the new holder inside the access boundary and fails if it cannot', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push([]);
-    const call = () => POST(new NextRequest('http://localhost/api/workbook/w1/memory-holders', {
+    const call = () => POST(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders`, {
       method: 'POST',
       body: JSON.stringify({ role: 'Treasurer', responsibility: 'Payroll' }),
-    }), { params: Promise.resolve({ id: 'w1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK }) });
 
     expect((await call()).status).toBe(201);
     expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ workbookId: 'w1' }),
+      expect.objectContaining({ workbookId: WORKBOOK, tx: boundaryTx }),
       expect.objectContaining({ action: 'workbook.memory_holder.create', resourceId: 'holder_1', details: { role: 'Treasurer' } }),
     );
 
@@ -107,8 +114,8 @@ describe('workbook/[id]/memory-holders route', () => {
     const { GET } = await loadRoute();
     m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
 
-    const response = await GET(new NextRequest('http://localhost/api/workbook/w1/memory-holders'), {
-      params: Promise.resolve({ id: 'w1' }),
+    const response = await GET(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders`), {
+      params: Promise.resolve({ id: WORKBOOK }),
     });
 
     expect(response.status).toBe(403);
@@ -118,53 +125,70 @@ describe('workbook/[id]/memory-holders route', () => {
     const { GET } = await loadRoute();
     m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 404, error: 'Workbook not found' });
 
-    const response = await GET(new NextRequest('http://localhost/api/workbook/w1/memory-holders'), {
-      params: Promise.resolve({ id: 'w1' }),
+    const response = await GET(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders`), {
+      params: Promise.resolve({ id: WORKBOOK }),
     });
 
     expect(response.status).toBe(404);
   });
 
-  it('GET returns cartography payload when access is allowed', async () => {
+  it('GET returns cartography payload when access is allowed, reading on the boundary transaction', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([]);
 
-    const response = await GET(new NextRequest('http://localhost/api/workbook/w1/memory-holders'), {
-      params: Promise.resolve({ id: 'w1' }),
+    const response = await GET(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders`), {
+      params: Promise.resolve({ id: WORKBOOK }),
     });
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'read', capability: null },
+      { workbookId: WORKBOOK, operation: 'read', capability: null },
       expect.any(Function),
     );
+    expect(boundaryTx.select).toHaveBeenCalled();
+    expect(m.auditWorkbookRead).toHaveBeenCalledWith(expect.objectContaining({ tx: boundaryTx }), expect.anything());
   });
 
   it('POST returns the access-control error status when access is denied', async () => {
     const { POST } = await loadRoute();
     m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
 
-    const response = await POST(new NextRequest('http://localhost/api/workbook/w1/memory-holders', {
+    const response = await POST(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders`, {
       method: 'POST',
       body: JSON.stringify({ role: 'x', responsibility: 'y' }),
-    }), { params: Promise.resolve({ id: 'w1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK }) });
 
     expect(response.status).toBe(403);
   });
 
-  it('POST creates a memory holder when access is allowed', async () => {
+  it('POST creates a memory holder when access is allowed, locking, counting and inserting on the boundary transaction', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push([]);
 
-    const response = await POST(new NextRequest('http://localhost/api/workbook/w1/memory-holders', {
+    const response = await POST(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders`, {
       method: 'POST',
       body: JSON.stringify({ role: 'Treasurer', responsibility: 'Payroll' }),
-    }), { params: Promise.resolve({ id: 'w1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK }) });
 
     expect(response.status).toBe(201);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write', capability: null },
+      { workbookId: WORKBOOK, operation: 'write', capability: null },
       expect.any(Function),
     );
+    expect(boundaryTx.insert).toHaveBeenCalledTimes(1);
+  });
+
+  it('answers a malformed workbook identifier as an absent workbook, without resolving authority or reaching SQL', async () => {
+    const { GET, POST } = await loadRoute();
+
+    const read = await GET(new NextRequest('http://localhost/api/workbook/not-a-uuid/memory-holders'), { params: Promise.resolve({ id: 'not-a-uuid' }) });
+    const write = await POST(new NextRequest('http://localhost/api/workbook/not-a-uuid/memory-holders', {
+      method: 'POST',
+      body: JSON.stringify({ role: 'x', responsibility: 'y' }),
+    }), { params: Promise.resolve({ id: 'not-a-uuid' }) });
+
+    expect(read.status).toBe(404);
+    expect(write.status).toBe(404);
+    expect(m.withClaimedWorkbookAccess).not.toHaveBeenCalled();
   });
 });

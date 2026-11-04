@@ -14,13 +14,11 @@ import {
   documentVersions,
   documentLinks,
 } from "@/db/schema/documents-schema";
-import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
-import { recordUsage } from '@/services/platform-economics';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
   ErrorCode,
@@ -28,10 +26,13 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+
+// The address is shown as a link to everyone with access to the case, so only a web address is accepted: a javascript: or data: address
+// would run in the page that follows it.
+const webUrl = z.string().url().refine((value) => /^https?:\/\//i.test(value), { message: 'Must be an http or https address' });
 
 const docSchema = z.object({
-  fileUrl: z.string().url(),
+  fileUrl: webUrl,
   title: z.string().min(1).max(300),
   filename: z.string().min(1).max(500),
   mimeType: z.string().min(1).max(150),
@@ -58,19 +59,24 @@ const docSchema = z.object({
   contentHash: z.string().min(8).optional(),
 });
 
-export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {
-  const { organizationId, userId } = context;
-  await requireEntitlement(organizationId, 'grievance_case_suite');
-
-  try {
-    if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-    const canAccess = await hasMinRole("member");
-    if (!canAccess) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "Unauthorized");
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    entitlement: 'grievance_case_suite',
+    // The grievance is read through the ambient handle, so the handler runs in the caller's organization transaction.
+    rlsOrgContext: true,
+    openapi: { tags: ['Grievances'], summary: 'Attach a document to a grievance' },
+  },
+  async ({ request, params, organizationId, userId }) => {
+    if (!organizationId || !userId) {
+      throw ApiError.forbidden('Organization context required — select an organization before accessing this resource');
+    }
+    const grievanceId = params.id;
+    if (!grievanceId || !zUUID.safeParse(grievanceId).success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid grievance ID");
     }
 
-    const body = await request.json();
-    const parsed = docSchema.safeParse(body);
+    const parsed = docSchema.safeParse(await request.json());
     if (!parsed.success) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid input", parsed.error.flatten());
     }
@@ -81,7 +87,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       .from(grievances)
       .where(
         and(
-          eq(grievances.id, params.id),
+          eq(grievances.id, grievanceId),
           eq(grievances.organizationId, organizationId),
         ),
       );
@@ -92,7 +98,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
-      grievanceId: params.id,
+      grievanceId,
       userId,
     });
 
@@ -105,7 +111,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have permission to upload documents to this case');
     }
 
-    const result = await withRLSContext(async (tx) => {
+    const result = await withRLSContext({ organizationId }, async (tx) => {
       const [governedDoc] = await tx
         .insert(documents)
         .values({
@@ -142,13 +148,13 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         organizationId,
         documentId: governedDoc.id,
         linkedEntityType: 'grievance',
-        linkedEntityId: params.id,
+        linkedEntityId: grievanceId,
         linkedBy: userId,
       });
 
       // Emit event
       await tx.insert(grievanceEvents).values({
-        grievanceId: params.id,
+        grievanceId,
         eventType: "document_uploaded",
         actorUserId: userId,
         notes: `Document uploaded: ${parsed.data.documentType}`,
@@ -162,7 +168,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         resourceType: 'grievance_documents',
         resourceId: governedDoc.id,
         details: {
-          grievanceId: params.id,
+          grievanceId,
           privacyLabel: governedDoc.privacyLabel,
           documentType: governedDoc.documentType,
         },
@@ -175,16 +181,16 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       actionType: 'GRIEVANCE_DOCUMENT_UPLOADED',
       orgId: organizationId,
       actorId: userId,
-      artifacts: [{ type: 'grievance_document', data: { grievanceId: params.id, documentId: result.governedDoc.id, documentType: parsed.data.documentType, privacyLabel: parsed.data.privacyLabel } }],
+      artifacts: [{ type: 'grievance_document', data: { grievanceId, documentId: result.governedDoc.id, documentType: parsed.data.documentType, privacyLabel: parsed.data.privacyLabel } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_DOCUMENT_UPLOADED' }));
 
     await trackPilotEvent({
       userId,
       organizationId,
-      sessionId: `server:${params.id}`,
+      sessionId: `server:${grievanceId}`,
       eventType: 'document_uploaded',
       metadata: {
-        grievanceId: params.id,
+        grievanceId,
         documentId: result.governedDoc.id,
         documentType: parsed.data.documentType,
       },
@@ -193,32 +199,17 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     await trackPilotEvent({
       userId,
       organizationId,
-      sessionId: `server:${params.id}`,
+      sessionId: `server:${grievanceId}`,
       eventType: 'document_attached',
       metadata: {
-        grievanceId: params.id,
+        grievanceId,
         documentId: result.governedDoc.id,
         privacyLabel: parsed.data.privacyLabel,
       },
     });
 
-    await recordUsage({
-      meterCode: 'document_uploaded',
-      organizationId,
-      userId,
-      quantity: 1,
-      idempotencyKey: `usage:document_uploaded:${result.governedDoc.id}`,
-      metadata: {
-        grievanceId: params.id,
-        documentId: result.governedDoc.id,
-        documentType: parsed.data.documentType,
-      },
-    }).catch((err) => logger.warn('Usage meter write skipped', { error: String(err), meterCode: 'document_uploaded' }));
-
     return standardSuccessResponse({
       ...result.governedDoc,
     });
-  } catch (_error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to upload document");
-  }
-});
+  },
+);

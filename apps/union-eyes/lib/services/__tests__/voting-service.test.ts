@@ -591,9 +591,9 @@ describe('VotingService', () => {
       expect(await hasVoted('session-1', 'member-1')).toBe(false);
     });
 
-    it('returns false on error', async () => {
+    it('rethrows when the vote lookup fails: "has not voted" is an answer, not a failure', async () => {
       mocks.mockVotesFindFirst.mockRejectedValue(new Error('fail'));
-      expect(await hasVoted('s', 'm')).toBe(false);
+      await expect(hasVoted('s', 'm')).rejects.toThrow('Failed to check whether the member has voted');
     });
   });
 

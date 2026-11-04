@@ -28,6 +28,7 @@ function hasStewardPrivileges(role: string | null): boolean {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     query: listQuerySchema,
     entitlement: 'union_knowledge_suite',

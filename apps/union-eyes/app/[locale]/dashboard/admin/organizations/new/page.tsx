@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useOrganization } from "@/lib/hooks/use-organization";
+import { readApiError } from "@/lib/client/api-envelope";
 import {
   ArrowLeft,
   Save,
@@ -79,6 +80,9 @@ const orgTypes: OrganizationType[] = [
   "district",
 ];
 
+// Radix Select refuses an item whose value is the empty string, so "no parent" has a value of its own (an organization id is a UUID and cannot be it).
+const NO_PARENT = "none";
+
 export default function NewOrganizationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -108,13 +112,15 @@ export default function NewOrganizationPage() {
     const loadOrganizations = async () => {
       try {
         const response = await fetch("/api/organizations?status=active&purpose=parent");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         setAvailableOrganizations(data.data || []);
-      } catch (_error) {
-}
+      } catch {
+        setError(t("failedToLoadParentOrganizations"));
+      }
     };
     loadOrganizations();
-  }, []);
+  }, [t]);
 
   // Auto-generate slug from name
   const handleNameChange = (name: string) => {
@@ -143,19 +149,18 @@ export default function NewOrganizationPage() {
           type: formData.type,
           parent_id: formData.parentId || null,
           description: formData.description || null,
+          charter_number: formData.charterNumber || null,
+          affiliation_date: formData.affiliationDate || null,
           status: "active",
           settings: {
             sector: formData.sector,
-            jurisdiction: formData.jurisdiction,
-            charter_number: formData.charterNumber || null,
-            affiliation_date: formData.affiliationDate || null
+            jurisdiction: formData.jurisdiction
           }
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || t("failedToCreateOrganization"));
+        throw new Error(await readApiError(response, t("failedToCreateOrganization")));
       }
 
       const result = await response.json();
@@ -277,17 +282,17 @@ export default function NewOrganizationPage() {
             <div className="space-y-2">
               <Label htmlFor="parent">{t("parentOrganizationLabel")}</Label>
               <Select
-                value={formData.parentId}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value }))}
+                value={formData.parentId || NO_PARENT}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value === NO_PARENT ? "" : value }))}
               >
                 <SelectTrigger id="parent">
                   <SelectValue placeholder={t("noParentOption")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("noParentOption")}</SelectItem>
+                  <SelectItem value={NO_PARENT}>{t("noParentOption")}</SelectItem>
                   {availableOrganizations.map(org => (
                     <SelectItem key={org.id} value={org.id}>
-                      {org.name} ({org.type})
+                      {org.name} ({t(`orgType.${org.organization_type}`)})
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -11,8 +11,13 @@ describe('Gate 0 batch B91: provider token sealing and the resolving outbound gu
     expect(callback).toContain('accessToken: sealedAccessToken')
     for (const file of ['lib/social-media/social-media-service.ts', 'app/api/social-media/accounts/route.ts']) {
       const source = src(file)
-      expect(source).toContain('accessToken: await sealToken(newAccessToken)')
-      expect(source).toContain('refreshToken: await sealToken(newRefreshToken)')
+      // The tokens are sealed with the Key Vault before the database step opens (no transaction waits on that call), and only the sealed values are stored.
+      expect(source).toContain('const sealedAccessToken = await sealToken(newAccessToken)')
+      expect(source).toContain('const sealedRefreshToken = newRefreshToken ? await sealToken(newRefreshToken) : null')
+      expect(source).toContain('accessToken: sealedAccessToken')
+      expect(source).toContain('...(sealedRefreshToken ? { refreshToken: sealedRefreshToken } : {})')
+      expect(source).not.toContain('accessToken: newAccessToken')
+      expect(source).not.toContain('refreshToken: newRefreshToken')
     }
   })
 

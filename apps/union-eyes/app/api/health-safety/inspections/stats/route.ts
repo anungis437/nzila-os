@@ -1,7 +1,7 @@
 /**
  * GET /api/health-safety/inspections/stats
  * Summary statistics for safety inspections.
- * Returns { total, scheduled, completed, overdue, complianceRate, avgScore }.
+ * Returns { total, scheduled, completed, overdue, complianceRate, avgScore }; complianceRate and avgScore are null when nothing was scored.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
@@ -46,12 +46,13 @@ export const GET = withApi(
       scheduled: Number(row.scheduled ?? 0),
       completed: Number(row.completed ?? 0),
       overdue: Number(row.overdue ?? 0),
+      // Unknown is not zero: with no inspection scored there is no rate and no average to give.
       complianceRate: row.compliance_rate != null
         ? Math.round(Number(row.compliance_rate) * 10) / 10
-        : 0,
+        : null,
       avgScore: row.avg_score != null
         ? Math.round(Number(row.avg_score) * 10) / 10
-        : 0,
+        : null,
     };
   },
 );

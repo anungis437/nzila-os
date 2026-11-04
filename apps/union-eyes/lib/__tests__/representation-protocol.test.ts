@@ -5,7 +5,7 @@
  * 1. Protocol type presets & helpers
  * 2. Protocol service barrel export
  * 3. Assignment engine integration
- * 4. UI component protocol-awareness
+ * 4. Protocol completeness
  */
 import { describe, it, expect, vi } from "vitest";
 
@@ -210,63 +210,7 @@ describe("Barrel export (lib/representation/index.ts)", () => {
 });
 
 // ============================================================================
-// 4. UI Component Protocol-Awareness (export verification)
-// ============================================================================
-
-import { NextActionsPanel } from "@/components/grievances/next-actions-panel";
-import { StewardLoadCard, StewardWorkloadList } from "@/components/grievances/steward-load-card";
-
-describe("NextActionsPanel", () => {
-  it("exports a component function", () => {
-    expect(typeof NextActionsPanel).toBe("function");
-  });
-
-  it("accepts protocol in props shape", () => {
-    const props = {
-      grievanceStatus: "filed",
-      hasSteward: false,
-      hasEmployerResponse: false,
-      isOverdue: false,
-      onAction: () => {},
-      protocol: PROTOCOL_LRO_LED,
-    };
-    // Type-level verification — no runtime rendering in unit tests
-    expect(props.protocol.primaryRepresentative).toBe("lro");
-  });
-});
-
-describe("StewardLoadCard", () => {
-  it("exports a component function", () => {
-    expect(typeof StewardLoadCard).toBe("function");
-  });
-
-  it("accepts protocol in props shape", () => {
-    const props = {
-      stewardName: "Test",
-      workload: { activeCases: 5, overdueCases: 1, avgDaysInState: 3, casesThisWeek: 2 },
-      protocol: PROTOCOL_NATIONAL_REP_LED,
-    };
-    expect(props.protocol.representativeLabel).toBe("National Representative");
-  });
-});
-
-describe("StewardWorkloadList", () => {
-  it("exports a component function", () => {
-    expect(typeof StewardWorkloadList).toBe("function");
-  });
-
-  it("accepts protocol in props shape", () => {
-    const props = {
-      stewards: [],
-      organizationId: "org_123",
-      protocol: PROTOCOL_OFFICER_LED,
-    };
-    expect(props.protocol.representativeLabel).toBe("Union Officer");
-  });
-});
-
-// ============================================================================
-// 5. Protocol Completeness Guard
+// 4. Protocol Completeness Guard
 // ============================================================================
 
 describe("Protocol completeness", () => {

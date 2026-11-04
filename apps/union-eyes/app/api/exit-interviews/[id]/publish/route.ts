@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'admin' },
     entitlement: 'union_knowledge_suite',
     openapi: {

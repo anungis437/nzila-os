@@ -6,25 +6,16 @@ import { MessageSquare, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationPanel } from '@/components/messages/conversation-panel';
-import { MAX_BODY, MAX_SUBJECT, pick } from '@/components/messages/messages-api';
-
-export { pick };
-
-type Thread = {
-  id: string;
-  subject: string;
-  status: string;
-  isArchived?: boolean;
-  lastMessageAt: string | null;
-  createdAt: string;
-  representativeAssigned: boolean;
-};
+import { logger } from '@/lib/logger';
+import { createdThreadId, MAX_BODY, MAX_SUBJECT, threadsFrom, type ThreadSummary } from '@/components/messages/messages-api';
 
 export function MemberMessages({ initialThreadId, compose }: { initialThreadId?: string; compose?: 'privacy' }) {
   const t = useTranslations('memberMessages');
   const locale = useLocale();
-  const [threads, setThreads] = useState<Thread[]>([]);
+  const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [listState, setListState] = useState<'loading' | 'ready' | 'error'>('loading');
+  // The list on screen is the last one that was read; this says that a later read failed, so it may be out of date.
+  const [refreshFailed, setRefreshFailed] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
   const [composing, setComposing] = useState(Boolean(compose) && !initialThreadId);
   const [showArchived, setShowArchived] = useState(false);
@@ -37,10 +28,13 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
     try {
       const response = await fetch('/api/messages/threads');
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      setThreads(pick<Thread[]>(await response.json(), 'threads') ?? []);
+      setThreads(threadsFrom(await response.json()));
       setListState('ready');
-    } catch {
-      if (!quiet) setListState('error');
+      setRefreshFailed(false);
+    } catch (err) {
+      logger.error('Failed to read the conversations', err);
+      if (quiet) setRefreshFailed(true);
+      else setListState('error');
     }
   }, []);
 
@@ -82,6 +76,9 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
               <p>{t('loadError')}</p>
               <Button variant="outline" size="sm" className="mt-3" onClick={() => void loadThreads()}>{t('retry')}</Button>
             </div>
+          )}
+          {listState === 'ready' && refreshFailed && (
+            <p role="status" className="mb-2 rounded-md border border-destructive/40 p-3 text-sm" data-testid="refresh-failed">{t('refreshError')}</p>
           )}
           {listState === 'ready' && threads.length === 0 && (
             <div className="rounded-lg border border-dashed p-6 text-center" data-testid="messages-empty">
@@ -168,10 +165,9 @@ function NewConversation({ initialSubject, onCancel, onCreated }: { initialSubje
         body: JSON.stringify({ subject: subject.trim(), body: body.trim(), clientRequestId: requestId.current }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const id = pick<string>(await response.json(), 'id');
-      if (!id) throw new Error('missing id');
-      onCreated(id);
-    } catch {
+      onCreated(createdThreadId(await response.json()));
+    } catch (err) {
+      logger.error('Failed to start the conversation', err);
       setError(true);
     } finally {
       setSending(false);

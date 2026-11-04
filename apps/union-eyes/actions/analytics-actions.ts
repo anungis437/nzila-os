@@ -28,6 +28,8 @@ import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
+import { UserFacingError } from '@/lib/errors/user-facing-error';
+import { safeActionMessage } from '@/lib/actions/safe-action-error';
 
 /**
  * Get current user's organization ID
@@ -48,13 +50,13 @@ import { logger } from '@/lib/logger';
  * the two resolutions) refuses the call instead of writing to a different organization than the one the caller was authorized in.
  */
 function assertSameOrganization(resolved: string, expected: string | undefined): string {
-  if (expected && expected !== resolved) throw new Error('Organization context changed during the request');
+  if (expected && expected !== resolved) throw new UserFacingError('Organization context changed during the request');
   return resolved;
 }
 
 async function getCurrentUserOrgId(expectedOrganizationId?: string): Promise<string> {
   const { userId } = await auth();
-  if (!userId) throw new Error('Unauthorized');
+  if (!userId) throw new UserFacingError('Unauthorized');
 
   return assertSameOrganization(await getOrganizationIdForUser(userId), expectedOrganizationId);
 }
@@ -62,7 +64,7 @@ async function getCurrentUserOrgId(expectedOrganizationId?: string): Promise<str
 /** The acting user and the organization verified for them; every write is audited to this pair. */
 async function getActor(expectedOrganizationId?: string): Promise<{ userId: string; orgId: string }> {
   const { userId } = await auth();
-  if (!userId) throw new Error('Unauthorized');
+  if (!userId) throw new UserFacingError('Unauthorized');
 
   return { userId, orgId: assertSameOrganization(await getOrganizationIdForUser(userId), expectedOrganizationId) };
 }
@@ -144,7 +146,7 @@ export async function calculateMetrics(params: {
         break;
         
       default:
-        throw new Error(`Unsupported metric type: ${params.metricType}`);
+        throw new UserFacingError(`Unsupported metric type: ${params.metricType}`);
     }
     
     // Get comparison value from previous period
@@ -205,7 +207,7 @@ export async function calculateMetrics(params: {
     return { success: true, metric };
   } catch (error) {
     logger.error('Error calculating metrics', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'calculateMetrics' }) };
   }
 }
 
@@ -295,7 +297,7 @@ export async function generatePredictions(params: {
     return { success: true, predictions: storedPredictions };
   } catch (error) {
     logger.error('Error generating predictions', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'generatePredictions' }) };
   }
 }
 
@@ -374,7 +376,7 @@ export async function detectMetricTrends(params: {
     return { success: true, trend: storedTrend };
   } catch (error) {
     logger.error('Error detecting trends', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'detectMetricTrends' }) };
   }
 }
 
@@ -396,7 +398,7 @@ export async function createKPI(params: {
 }) {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error('Unauthorized');
+    if (!userId) throw new UserFacingError('Unauthorized');
     
     const orgId = await getCurrentUserOrgId();
     
@@ -432,7 +434,7 @@ export async function createKPI(params: {
     return { success: true, kpi };
   } catch (error) {
     logger.error('Error creating KPI', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'createKPI' }) };
   }
 }
 
@@ -498,7 +500,7 @@ export async function getAnalyticsMetrics(params: {
     return { success: true, metrics: publicMetrics };
   } catch (error) {
     logger.error('Error fetching analytics metrics', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'getAnalyticsMetrics' }) };
   }
 }
 

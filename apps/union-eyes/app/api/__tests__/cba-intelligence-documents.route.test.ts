@@ -34,7 +34,7 @@ describe('cba-intelligence/documents route', () => {
     const result = await GET({ query: {} });
 
     expect(m.listDocuments).toHaveBeenCalledWith({}, { page: undefined, limit: undefined });
-    expect(result).toMatchObject({ data: { items: [{ id: 'doc_1' }] } });
+    expect(result).toMatchObject({ items: [{ id: 'doc_1' }] });
   });
 
   it('passes filters and pagination from query', async () => {

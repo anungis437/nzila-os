@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PgDialect, pgTable, text, uuid } from 'drizzle-orm/pg-core';
-import { sql, type SQL } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 
 // R-44 class: a minimum role is eligibility, never authority over a specific row. These tests drive the real factory over
 // tables that carry no organization column, which the factory used to serve to every tenant without saying so.
@@ -23,9 +23,7 @@ vi.mock('@/lib/organization-utils', () => ({ getUserRoleInOrganization: vi.fn().
 
 vi.mock('@/db/db', () => ({
   db: {
-    select: (fields?: Record<string, unknown>) => {
-      // The parent-ownership subquery: rendered as real SQL so the test can read it back.
-      if (fields && 'key' in fields) return { from: (parent: unknown) => ({ where: (clause: unknown) => sql`(select ${fields.key} from ${parent} where ${clause})` }) };
+    select: () => {
       const chain: Record<string, unknown> = {};
       chain.from = () => chain;
       chain.where = (clause: unknown) => { captured.wheres.push(clause); return chain; };

@@ -73,6 +73,14 @@ describe('claims route', () => {
     await expect(POST({ body: { description: 'A valid description', claimType: 'other' }, userId: 'u1' })).rejects.toMatchObject({ status: 400 });
   });
 
+  it('POST returns 400 when no JSON object body arrives, instead of creating an empty claim from `{}`', async () => {
+    const { POST } = await loadRoute();
+    for (const body of [undefined, null, 'text', 7, []]) {
+      await expect(POST({ body, organizationId: 'org_1', userId: 'u1' }), String(body)).rejects.toMatchObject({ status: 400 });
+    }
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
   it('POST creates a claim and auto-generates claim number', async () => {
     const { POST } = await loadRoute();
     const result = await POST({

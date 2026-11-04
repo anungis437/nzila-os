@@ -67,11 +67,15 @@ vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
 }));
 vi.mock('drizzle-orm', async (importOriginal) => ({ ...(await importOriginal<typeof import('drizzle-orm')>()), eq: vi.fn(), and: vi.fn() }));
 // Pass-through RLS context helpers so the real authority boundary runs; the
-// ownership lookup is fed the mock db as its system-context `tx`.
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: (cb: any) => cb(mockDb),
-  withExplicitUserContext: (_userId: string, cb: any) => cb(),
-}));
+// ownership lookup is fed the mock db as its system-context `tx`, and a claimant's callback runs with the mock db as the active tenant transaction,
+// which is where the boundary reads it from.
+vi.mock('@/lib/db/with-rls-context', async () => {
+  const { tenantContextStorage } = await import('@/db/tenant-context-storage');
+  return {
+    withSystemContext: (cb: any) => cb(mockDb),
+    withExplicitUserContext: (_userId: string, cb: any) => tenantContextStorage.run(mockDb as never, cb),
+  };
+});
 
 // Disclosed adaptation (F06 R7): an unclaimed workbook is no longer reached by its identifier alone, so the predicate that decides whether a
 // presented capability is the workbook's own is a seam here, and the requests below present 'cap-ok'. The real predicate (hash, expiry,
@@ -82,8 +86,18 @@ vi.mock('@/lib/workbook/workbook-capability', async (importOriginal) => ({
   workbookCapabilityHolds: (presented: string | null) => presented === 'cap-ok',
 }));
 
+// The routes answer an identifier that is not a GUID as an absent workbook or holder, before any lookup: the ids these tests present are GUIDs.
+const W1 = '11111111-1111-4111-8111-111111111111';
+const WA = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const WB = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const H1 = '22222222-2222-4222-8222-222222222222';
+const HOLDER_X = '33333333-3333-4333-8333-333333333333';
+const HOLDER_FROM_WB = '44444444-4444-4444-8444-444444444444';
+const listUrl = (workbookId: string) => `http://localhost/api/workbook/${workbookId}/memory-holders`;
+const itemUrlOf = (workbookId: string, holderId: string) => `${listUrl(workbookId)}/${holderId}`;
+
 function req(body?: unknown, capability: string | null = 'cap-ok') {
-  return new NextRequest('http://localhost/api/workbook/w1/memory-holders', {
+  return new NextRequest(listUrl(W1), {
     method: body === undefined ? 'GET' : 'POST',
     ...(capability ? { headers: { authorization: `Bearer ${capability}` } } : {}),
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -112,8 +126,8 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
   });
 
   describe('unclaimed workbook without its capability (F06 R7)', () => {
-    const row = [{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]
-    const params = { params: Promise.resolve({ id: 'w1' }) }
+    const row = [{ id: W1, claimedByUserId: null, claimedOrgId: null }]
+    const params = { params: Promise.resolve({ id: W1 }) }
 
     it('answers a read as a workbook that is not there, reads nothing and records nothing', async () => {
       const { GET } = await loadListRoute()
@@ -141,8 +155,8 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('refuses a change and a removal the same way', async () => {
       const { PATCH, DELETE } = await loadItemRoute()
-      const itemParams = { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) }
-      const itemUrl = 'http://localhost/api/workbook/w1/memory-holders/h1'
+      const itemParams = { params: Promise.resolve({ id: W1, holderId: H1 }) }
+      const itemUrl = itemUrlOf(W1, H1)
 
       m.selectQueue.push(row)
       expect((await PATCH(new NextRequest(itemUrl, { method: 'PATCH', body: JSON.stringify({ role: 'x' }) }), itemParams)).status).toBe(404)
@@ -153,28 +167,51 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     })
   })
 
+  describe('an identifier that is not a GUID', () => {
+    it('names no workbook and no holder: every method answers 404 before any authority lookup or query', async () => {
+      const { GET, POST } = await loadListRoute()
+      const { PATCH, DELETE } = await loadItemRoute()
+      const notGuid = 'w1'
+      const list = { params: Promise.resolve({ id: notGuid }) }
+      const item = (workbookId: string, holderId: string) => ({ params: Promise.resolve({ id: workbookId, holderId }) })
+
+      expect((await GET(req(), list)).status).toBe(404)
+      expect((await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }), list)).status).toBe(404)
+      expect((await PATCH(new NextRequest(itemUrlOf(notGuid, H1), { method: 'PATCH', body: JSON.stringify({ role: 'x' }) }), item(notGuid, H1))).status).toBe(404)
+      expect((await PATCH(new NextRequest(itemUrlOf(W1, 'h1'), { method: 'PATCH', body: JSON.stringify({ role: 'x' }) }), item(W1, 'h1'))).status).toBe(404)
+      expect((await DELETE(new NextRequest(itemUrlOf(W1, 'h1'), { method: 'DELETE' }), item(W1, 'h1'))).status).toBe(404)
+
+      expect(mockDb.select).not.toHaveBeenCalled()
+      expect(mockDb.insert).not.toHaveBeenCalled()
+      expect(mockDb.update).not.toHaveBeenCalled()
+      expect(mockDb.delete).not.toHaveBeenCalled()
+      expect(m.appendIntake).not.toHaveBeenCalled()
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled()
+    })
+  })
+
   describe('GET', () => {
     it('refuses to return a misleading partial cartography for an oversized legacy workbook', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
       m.selectQueue.push(Array.from({ length: 201 }, (_, i) => ({ id: `holder_${i}` })));
-      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await GET(req(), { params: Promise.resolve({ id: W1 }) });
       expect(response.status).toBe(409);
       expect(m.runStewardshipCartography).not.toHaveBeenCalled();
     });
     it('serves an unclaimed workbook via the bearer id (preclaim)', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
       m.selectQueue.push([]); // holders
 
-      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await GET(req(), { params: Promise.resolve({ id: W1 }) });
 
       expect(response.status).toBe(200);
       expect(m.auth).not.toHaveBeenCalled();
       // F06 R3: the read of the people an unclaimed workbook names is recorded under the pseudonymous authority, before it is served,
       // with no organization, no actor and no consent invented, and never the workbook id as a value to record.
       expect(m.appendIntake).toHaveBeenCalledTimes(1);
-      expect(m.appendIntake.mock.calls[0][1]).toMatchObject({ action: 'workbook.memory_holder.read', operation: 'read', subjectKind: 'unclaimed_workbook', subjectId: 'w1', resourceRef: null });
+      expect(m.appendIntake.mock.calls[0][1]).toMatchObject({ action: 'workbook.memory_holder.read', operation: 'read', subjectKind: 'unclaimed_workbook', subjectId: W1, resourceRef: null });
       expect(JSON.stringify(m.appendIntake.mock.calls[0][1])).not.toMatch(/organizationId|userId/);
       expect(m.persistAtomicAudit).not.toHaveBeenCalled();
       expect(m.appendIntake.mock.invocationCallOrder[0]).toBeLessThan(m.runStewardshipCartography.mock.invocationCallOrder[0]);
@@ -182,11 +219,11 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('does not read the people an unclaimed workbook names when the read cannot be recorded', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
       m.selectQueue.push([{ id: 'holder_1' }]);
       m.appendIntake.mockRejectedValueOnce(new Error('audit store down'));
 
-      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await GET(req(), { params: Promise.resolve({ id: W1 }) });
 
       expect(response.status).toBe(503);
       expect(m.runStewardshipCartography).not.toHaveBeenCalled();
@@ -195,11 +232,11 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('records a claimed workbook read under the claiming organization and the acting person', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.selectQueue.push([]);
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
-      expect((await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).status).toBe(200);
+      expect((await GET(req(), { params: Promise.resolve({ id: W1 }) })).status).toBe(200);
 
       expect(m.persistAtomicAudit).toHaveBeenCalledWith(
         expect.anything(),
@@ -210,22 +247,22 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('serves the claimant', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.selectQueue.push([]);
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
-      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await GET(req(), { params: Promise.resolve({ id: W1 }) });
 
       expect(response.status).toBe(200);
     });
 
     it('rejects a cross-tenant caller with 403 and does not read child data', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
       m.auth.mockResolvedValueOnce({ userId: 'attacker_1' });
       m.getOrganizationIdForUser.mockResolvedValueOnce('org_attacker');
 
-      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await GET(req(), { params: Promise.resolve({ id: W1 }) });
 
       expect(response.status).toBe(403);
       // The cartography read (second select) never happened.
@@ -234,10 +271,10 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('returns 401 for a claimed workbook when unauthenticated', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
       m.auth.mockResolvedValueOnce({ userId: null });
 
-      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await GET(req(), { params: Promise.resolve({ id: W1 }) });
 
       expect(response.status).toBe(401);
     });
@@ -246,11 +283,11 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
   describe('POST', () => {
     it('refuses a 201st holder under the workbook lock before any insert', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.selectQueue.push(Array.from({ length: 200 }, (_, i) => ({ id: `holder_${i}` })));
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
       const response = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }), {
-        params: Promise.resolve({ id: 'w1' }),
+        params: Promise.resolve({ id: W1 }),
       });
       expect(response.status).toBe(409);
       expect(mockDb.insert).not.toHaveBeenCalled();
@@ -259,11 +296,11 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('rejects a workbook whose ownership changed while waiting for the row lock', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
-      m.lockOverride = { id: 'w1', claimedByUserId: 'another_user', claimedOrgId: 'org_1' };
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.lockOverride = { id: W1, claimedByUserId: 'another_user', claimedOrgId: 'org_1' };
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
       const response = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }), {
-        params: Promise.resolve({ id: 'w1' }),
+        params: Promise.resolve({ id: W1 }),
       });
       expect(response.status).toBe(503);
       expect(mockDb.insert).not.toHaveBeenCalled();
@@ -271,25 +308,25 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('permits a holder when the workbook has fewer than 200 records', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.selectQueue.push(Array.from({ length: 199 }, (_, i) => ({ id: `holder_${i}` })));
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
       const response = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }), {
-        params: Promise.resolve({ id: 'w1' }),
+        params: Promise.resolve({ id: W1 }),
       });
       expect(response.status).toBe(201);
       expect(mockDb.insert).toHaveBeenCalledTimes(1);
     });
     it('creates a memory holder for the claimant', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.selectQueue.push([]); // holders (loadCartography after insert)
       m.insertQueue.push([{ id: 'holder_new' }]);
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
       const response = await POST(
         req({ role: 'Treasurer', responsibility: 'Signs cheques' }),
-        { params: Promise.resolve({ id: 'w1' }) },
+        { params: Promise.resolve({ id: W1 }) },
       );
 
       expect(response.status).toBe(201);
@@ -308,14 +345,14 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('rolls back the insert path when the claimed-workbook audit fails', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.insertQueue.push([{ id: 'holder_new' }]);
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
       m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
 
       const response = await POST(
         req({ role: 'Treasurer', responsibility: 'Signs cheques' }),
-        { params: Promise.resolve({ id: 'w1' }) },
+        { params: Promise.resolve({ id: W1 }) },
       );
 
       expect(response.status).toBe(503);
@@ -323,13 +360,13 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('refuses an identity-linked write that has no organization to attribute', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: null }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: null }]);
       m.insertQueue.push([{ id: 'holder_new' }]);
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
       const response = await POST(
         req({ role: 'Treasurer', responsibility: 'Signs cheques' }),
-        { params: Promise.resolve({ id: 'w1' }) },
+        { params: Promise.resolve({ id: W1 }) },
       );
 
       expect(response.status).toBe(503);
@@ -339,7 +376,7 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     it('rejects invalid bodies with 422 before touching authorization', async () => {
       const { POST } = await loadListRoute();
 
-      const response = await POST(req({ role: '' }), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await POST(req({ role: '' }), { params: Promise.resolve({ id: W1 }) });
 
       expect(response.status).toBe(422);
       expect(mockDb.insert).not.toHaveBeenCalled();
@@ -347,13 +384,13 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('rejects a cross-tenant caller with 403 and does not insert', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
       m.auth.mockResolvedValueOnce({ userId: 'attacker_1' });
       m.getOrganizationIdForUser.mockResolvedValueOnce('org_attacker');
 
       const response = await POST(
         req({ role: 'Treasurer', responsibility: 'Signs cheques' }),
-        { params: Promise.resolve({ id: 'w1' }) },
+        { params: Promise.resolve({ id: W1 }) },
       );
 
       expect(response.status).toBe(403);
@@ -364,13 +401,13 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
   describe('PATCH / DELETE', () => {
     it('updates a holder for a same-organization peer', async () => {
       const { PATCH } = await loadItemRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_shared' }]);
-      m.updateQueue.push([{ id: 'holder_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'owner_1', claimedOrgId: 'org_shared' }]);
+      m.updateQueue.push([{ id: H1 }]);
       m.auth.mockResolvedValueOnce({ userId: 'peer_1' });
       m.getOrganizationIdForUser.mockResolvedValueOnce('org_shared');
 
       const response = await PATCH(req({ role: 'Chair' }), {
-        params: Promise.resolve({ id: 'w1', holderId: 'holder_1' }),
+        params: Promise.resolve({ id: W1, holderId: H1 }),
       });
 
       expect(response.status).toBe(200);
@@ -378,15 +415,15 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('returns 404 when the holder to delete does not exist', async () => {
       const { DELETE } = await loadItemRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.deleteQueue.push([]); // no rows deleted
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
       const response = await DELETE(
-        new NextRequest('http://localhost/api/workbook/w1/memory-holders/holder_x', {
+        new NextRequest(itemUrlOf(W1, HOLDER_X), {
           method: 'DELETE',
         }),
-        { params: Promise.resolve({ id: 'w1', holderId: 'holder_x' }) },
+        { params: Promise.resolve({ id: W1, holderId: HOLDER_X }) },
       );
 
       expect(response.status).toBe(404);
@@ -394,15 +431,15 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('rejects a cross-tenant DELETE with 403 and does not delete', async () => {
       const { DELETE } = await loadItemRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
       m.auth.mockResolvedValueOnce({ userId: 'attacker_1' });
       m.getOrganizationIdForUser.mockResolvedValueOnce('org_attacker');
 
       const response = await DELETE(
-        new NextRequest('http://localhost/api/workbook/w1/memory-holders/holder_1', {
+        new NextRequest(itemUrlOf(W1, H1), {
           method: 'DELETE',
         }),
-        { params: Promise.resolve({ id: 'w1', holderId: 'holder_1' }) },
+        { params: Promise.resolve({ id: W1, holderId: H1 }) },
       );
 
       expect(response.status).toBe(403);
@@ -415,15 +452,15 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
       // workbook_id = A, so B's holder never matches → 0 rows → 404. Authority
       // over A does NOT confer authority over B's children.
       const { DELETE } = await loadItemRoute();
-      m.selectQueue.push([{ id: 'wA', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: WA, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.deleteQueue.push([]); // holder belongs to wB → no row matches WHERE workbook_id = wA
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
       const response = await DELETE(
-        new NextRequest('http://localhost/api/workbook/wA/memory-holders/holder_from_wB', {
+        new NextRequest(itemUrlOf(WA, HOLDER_FROM_WB), {
           method: 'DELETE',
         }),
-        { params: Promise.resolve({ id: 'wA', holderId: 'holder_from_wB' }) },
+        { params: Promise.resolve({ id: WA, holderId: HOLDER_FROM_WB }) },
       );
 
       expect(response.status).toBe(404);
@@ -433,8 +470,8 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
   });
 
   describe('notice to the named people (F06 R5)', () => {
-    const itemParams = { params: Promise.resolve({ id: 'w1', holderId: 'holder_1' }) };
-    const patch = (body: unknown) => new NextRequest('http://localhost/api/workbook/w1/memory-holders/holder_1', { method: 'PATCH', headers: { authorization: 'Bearer cap-ok' }, body: JSON.stringify(body) });
+    const itemParams = { params: Promise.resolve({ id: W1, holderId: H1 }) };
+    const patch = (body: unknown) => new NextRequest(itemUrlOf(W1, H1), { method: 'PATCH', headers: { authorization: 'Bearer cap-ok' }, body: JSON.stringify(body) });
     const setCalls = () => mockDb.update.mock.results.flatMap((r) => (r.value as { set: ReturnType<typeof vi.fn> }).set.mock.calls.map((c) => c[0] as Record<string, unknown>));
 
     it('records a notice for a claimed workbook attributed to the acting person, with the time and channel', async () => {
@@ -533,10 +570,10 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('refuses to add a name or note to a new holder, and still adds one that names no one', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
       m.auth.mockResolvedValueOnce({ userId: 'user_1' });
 
-      const refused = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques', displayName: 'A Person' }), { params: Promise.resolve({ id: 'w1' }) });
+      const refused = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques', displayName: 'A Person' }), { params: Promise.resolve({ id: W1 }) });
 
       expect(refused.status).toBe(409);
       expect((await refused.json()).error.code).toBe('NOTICE_REQUIRED_FOR_IDENTIFYING_DETAIL');
@@ -546,7 +583,7 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('records an unclaimed workbook\'s refused name write under the pseudonymous authority, by field name only', async () => {
       const { PATCH } = await loadItemRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }], [{ noticeState: 'not_recorded', noticeEvidence: 'none' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }], [{ noticeState: 'not_recorded', noticeEvidence: 'none' }]);
 
       const response = await PATCH(patch({ displayName: 'A Person' }), itemParams);
 
@@ -558,14 +595,14 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     });
     it('shows the reader what each named person\'s notice rests on, and withholds the names whose notice is only a statement from a bearer of the capability', async () => {
       const { GET } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
       m.selectQueue.push([
         { id: 'h1', role: 'A', displayName: 'N1', notes: null, noticeState: 'notified', noticeEvidence: 'self_reported' },
         { id: 'h2', role: 'B', displayName: 'N2', notes: null, noticeState: 'not_recorded', noticeEvidence: 'none' },
         { id: 'h3', role: 'C', displayName: 'N3', notes: 'private', noticeState: 'notified', noticeEvidence: 'delivery_verified' },
       ]);
 
-      const body = await (await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).json();
+      const body = await (await GET(req(), { params: Promise.resolve({ id: W1 }) })).json();
 
       expect(body.notice).toEqual({ holders: 3, deliveryVerified: 1, selfReported: 1, noNotice: 1 });
       expect(body.holders.map((h: { identifyingDetailWithheld: boolean }) => h.identifyingDetailWithheld)).toEqual([true, true, false]);
@@ -579,14 +616,14 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
       const rows = [{ id: 'h1', role: 'A', displayName: 'N1', notes: 'private', noticeState: 'notified', noticeEvidence: 'self_reported' }];
 
       m.auth.mockResolvedValue({ userId: 'owner_1' });
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_1' }], rows);
-      const owner = await (await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).json();
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'owner_1', claimedOrgId: 'org_1' }], rows);
+      const owner = await (await GET(req(), { params: Promise.resolve({ id: W1 }) })).json();
       expect(owner.holders[0]).toMatchObject({ displayName: 'N1', notes: 'private', identifyingDetailWithheld: false, identifyingDetailWritable: false });
 
       m.auth.mockResolvedValue({ userId: 'peer_1' });
       m.getOrganizationIdForUser.mockResolvedValue('org_1');
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_1' }], rows);
-      const peer = await (await GET(req(), { params: Promise.resolve({ id: 'w1' }) })).json();
+      m.selectQueue.push([{ id: W1, claimedByUserId: 'owner_1', claimedOrgId: 'org_1' }], rows);
+      const peer = await (await GET(req(), { params: Promise.resolve({ id: W1 }) })).json();
       expect(peer.holders[0]).toMatchObject({ displayName: null, notes: null, identifyingDetailWithheld: true });
       expect(JSON.stringify(peer)).not.toContain('N1');
       expect(JSON.stringify(peer)).not.toContain('private');
@@ -596,13 +633,13 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
   describe('preclaim capability', () => {
     it('creates a memory holder under the pre-claim bearer (unclaimed workbook)', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
       m.selectQueue.push([]); // holders (loadCartography after insert)
       m.insertQueue.push([{ id: 'holder_new' }]);
 
       const response = await POST(
         req({ role: 'Founder', responsibility: 'Holds the origin story' }),
-        { params: Promise.resolve({ id: 'w1' }) },
+        { params: Promise.resolve({ id: W1 }) },
       );
 
       expect(response.status).toBe(201);
@@ -620,12 +657,12 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('does not keep an unclaimed workbook write that cannot be recorded', async () => {
       const { POST } = await loadListRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
       m.selectQueue.push([]);
       m.insertQueue.push([{ id: 'holder_new' }]);
       m.appendIntake.mockRejectedValueOnce(new Error('audit store down'));
 
-      const response = await POST(req({ role: 'Founder', responsibility: 'Holds the origin story' }), { params: Promise.resolve({ id: 'w1' }) });
+      const response = await POST(req({ role: 'Founder', responsibility: 'Holds the origin story' }), { params: Promise.resolve({ id: W1 }) });
 
       expect(response.status).toBe(503);
       expect(m.runStewardshipCartography).not.toHaveBeenCalled();
@@ -633,23 +670,24 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
 
     it('records an unclaimed update and delete by reference, with the fields changed and nothing typed', async () => {
       const { PATCH, DELETE } = await loadItemRoute();
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
-      m.updateQueue.push([{ id: 'h1' }]);
+      // A name or a note is identifying detail, which an unclaimed workbook cannot hold (no notice can be recorded there): the changed fields are the role and the responsibility
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
+      m.updateQueue.push([{ id: H1 }]);
       await PATCH(
-        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'PATCH', headers: { authorization: 'Bearer cap-ok' }, body: JSON.stringify({ displayName: 'A Real Name', notes: 'private note' }) }),
-        { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) },
+        new NextRequest(itemUrlOf(W1, H1), { method: 'PATCH', headers: { authorization: 'Bearer cap-ok' }, body: JSON.stringify({ role: 'Typed Role', responsibility: 'Typed responsibility' }) }),
+        { params: Promise.resolve({ id: W1, holderId: H1 }) },
       );
-      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
-      m.deleteQueue.push([{ id: 'h1' }]);
+      m.selectQueue.push([{ id: W1, claimedByUserId: null, claimedOrgId: null }]);
+      m.deleteQueue.push([{ id: H1 }]);
       await DELETE(
-        new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE', headers: { authorization: 'Bearer cap-ok' } }),
-        { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) },
+        new NextRequest(itemUrlOf(W1, H1), { method: 'DELETE', headers: { authorization: 'Bearer cap-ok' } }),
+        { params: Promise.resolve({ id: W1, holderId: H1 }) },
       );
 
       const entries = m.appendIntake.mock.calls.map((call) => call[1]);
-      expect(entries.map((e) => [e.operation, e.resourceRef])).toEqual([['update', 'h1'], ['delete', 'h1']]);
-      expect(entries[0].details).toEqual({ fields: ['displayName', 'notes'] });
-      expect(JSON.stringify(entries)).not.toMatch(/A Real Name|private note/);
+      expect(entries.map((e) => [e.operation, e.resourceRef])).toEqual([['update', H1], ['delete', H1]]);
+      expect(entries[0].details).toEqual({ fields: ['role', 'responsibility'] });
+      expect(JSON.stringify(entries)).not.toMatch(/Typed Role|Typed responsibility/);
     });
   });
 });

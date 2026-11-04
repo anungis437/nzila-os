@@ -103,37 +103,6 @@ export function HumanCenteredCallout({
 }
 
 /**
- * Compact variant for inline use
- */
-export function HumanCenteredCalloutCompact({
-  icon,
-  title,
-  variant = 'human',
-  className,
-}: Pick<HumanCenteredCalloutProps, 'icon' | 'title' | 'variant' | 'className'>) {
-  const styles = variantStyles[variant];
-  const displayIcon = icon || defaultIcons[variant];
-
-  return (
-    <div
-      className={cn(
-        'inline-flex items-center gap-2 px-4 py-2 rounded-full border',
-        styles.bg,
-        styles.border.split(' ')[0], // Just the border color, not border-l
-        className
-      )}
-    >
-      <span className={cn('shrink-0', styles.icon)}>
-        {displayIcon}
-      </span>
-      <span className="text-sm font-medium text-slate-900">
-        {title}
-      </span>
-    </div>
-  );
-}
-
-/**
  * Preset callouts for common messaging
  */
 export const CalloutPresets = {

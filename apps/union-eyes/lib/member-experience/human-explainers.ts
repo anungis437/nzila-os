@@ -55,11 +55,6 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
       'We take your concerns seriously and will keep you informed every step of the way.',
     resourcesAvailable: [
       {
-        title: 'What to expect',
-        description: 'Learn about the grievance process and your rights',
-        url: '/resources/grievance-process',
-      },
-      {
         title: 'Contact your union representative',
         description: 'You can reach out anytime if you have questions',
       },
@@ -78,13 +73,6 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
     expectedTimeline: 'Review process takes 3-7 business days',
     empathyMessage:
       'We understand this is a difficult time. Your union representative is your advocate throughout this process.',
-    resourcesAvailable: [
-      {
-        title: 'Your rights during review',
-        description: 'What employers can and cannot do while your case is under review',
-        url: '/resources/your-rights',
-      },
-    ],
   },
 
   assigned: {
@@ -129,13 +117,6 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
     expectedTimeline: 'Provide documentation within 7 days if possible',
     empathyMessage:
       'We know gathering paperwork can be frustrating. Your union representative is here to help guide you through this.',
-    resourcesAvailable: [
-      {
-        title: 'Document checklist',
-        description: 'Common documents needed for grievance cases',
-        url: '/resources/document-checklist',
-      },
-    ],
   },
 
   resolved: {
@@ -150,17 +131,6 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
     expectedTimeline: 'Resolution implementation varies by case',
     empathyMessage:
       'Thank you for trusting us with your case. Your participation in the process makes our union stronger.',
-    resourcesAvailable: [
-      {
-        title: 'Understanding your resolution',
-        description: 'What happens after a case is resolved',
-        url: '/resources/post-resolution',
-      },
-      {
-        title: 'Share feedback',
-        description: 'Help us improve by sharing your experience',
-      },
-    ],
   },
 
   rejected: {
@@ -175,13 +145,6 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
     expectedTimeline: 'Contact your union representative within 48 hours to discuss',
     empathyMessage:
       'We understand this isn\'t the outcome you hoped for. Your union representative can help you understand the decision and explore other options.',
-    resourcesAvailable: [
-      {
-        title: 'Alternative resources',
-        description: 'Other ways to address workplace concerns',
-        url: '/resources/alternatives',
-      },
-    ],
   },
 
   closed: {

@@ -18,6 +18,7 @@ import { classifyAcceptanceStanding } from '@/lib/pilot/counterpart-acceptance';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     // Contract value, term and renewal conditions are the organization's commercial position: an officer reads them.
     auth: { minRole: 'officer' },
     entitlement: 'commercial_reporting',
@@ -47,6 +48,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'admin' },
     entitlement: 'commercial_reporting',
     body: createContractSchema,

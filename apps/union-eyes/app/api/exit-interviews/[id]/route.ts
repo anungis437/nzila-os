@@ -36,6 +36,7 @@ function hasStewardPrivileges(role: string | null): boolean {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -85,6 +86,7 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     body: patchSchema,
     entitlement: 'union_knowledge_suite',

@@ -103,7 +103,6 @@ export default function GovernanceConsole() {
     voteId: "",
     vote: "approve",
     voteRationale: "",
-    councilMembersVotingJson: "[]",
   });
   const [auditForm, setAuditForm] = useState({
     auditYear: "",
@@ -264,13 +263,8 @@ toast.error("Unable to record Class A vote");
     }
   };
 
+  // The server records the signed-in user as the voting principal; a council roster typed here would be ignored, so the form does not take one.
   const submitClassBVote = async () => {
-    const parsedCouncilVotes = jsonSafeParse(classBVoteForm.councilMembersVotingJson);
-    if (!parsedCouncilVotes.ok) {
-      toast.error("Council votes JSON is invalid");
-      return;
-    }
-
     try {
       const response = await fetch(
         `/api/governance/reserved-matters/${classBVoteForm.voteId}/class-b-vote`,
@@ -280,7 +274,6 @@ toast.error("Unable to record Class A vote");
           body: JSON.stringify({
             vote: classBVoteForm.vote,
             voteRationale: classBVoteForm.voteRationale,
-            councilMembersVoting: parsedCouncilVotes.data,
           }),
         }
       );
@@ -291,7 +284,6 @@ toast.error("Unable to record Class A vote");
         voteId: "",
         vote: "approve",
         voteRationale: "",
-        councilMembersVotingJson: "[]",
       });
       fetchDashboard();
     } catch (_error) {
@@ -690,14 +682,6 @@ toast.error("Unable to record council election");
                   setClassBVoteForm((prev) => ({ ...prev, voteRationale: event.target.value }))
                 }
                 rows={2}
-              />
-              <Textarea
-                placeholder='Council members voting JSON (e.g. [{"member":"A","vote":"approve","rationale":""}])'
-                value={classBVoteForm.councilMembersVotingJson}
-                onChange={(event) =>
-                  setClassBVoteForm((prev) => ({ ...prev, councilMembersVotingJson: event.target.value }))
-                }
-                rows={3}
               />
               <Button onClick={submitClassBVote} className="bg-amber-600 text-white">
                 Record Council vote

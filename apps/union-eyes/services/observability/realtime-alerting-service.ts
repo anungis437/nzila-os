@@ -132,8 +132,7 @@ async function emitSignal(signal: AlertSignal, tx: RLSTx, at: Date): Promise<Sig
         title: 'Realtime Alert',
         message: signal.message,
         type: signal.severity === 'critical' ? 'error' : 'warning',
-        actionLabel: 'View alerts',
-        actionUrl: '/dashboard/alerts',
+        // No page lists these alerts (GET /api/alerts/realtime has no screen), so the notice carries no link: the alert is its message.
         data: { origin: 'system:observability-alerts', signal: signal.kind, executionId, dedupeKey: key, count: signal.count },
       })))
       .onConflictDoNothing()

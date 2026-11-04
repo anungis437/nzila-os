@@ -18,6 +18,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     // The list is the subscribers' e-mail addresses, so it is read by the staff who send to them, and bounded.
     auth: { required: true, minRole: 'steward' },
     openapi: {

@@ -11,7 +11,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
-import { ErrorCode, standardErrorResponse, standardSuccessResponse } from '@/lib/api/standardized-responses';
+import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { isMalwareScanError } from '@/lib/security/clamav';
@@ -20,6 +20,7 @@ import { openIntake } from '@/lib/documents/intake-lifecycle';
 import { blobIntakeStorage } from '@/lib/documents/intake-storage';
 import { loadDocumentAuthorityContext } from '@/lib/documents/ocr-authority';
 import { decideTranscriptAccess } from '@/lib/documents/transcripts';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
   // An intake that will become a new version of a document is only opened by someone who could modify that document.
   if (fields.data.targetDocumentId) {
-    const target = await loadDocumentAuthorityContext({ organizationId, userId, documentId: fields.data.targetDocumentId });
+    const targetDocumentId = fields.data.targetDocumentId;
+    const target = await withRLSContext({ organizationId }, (tx) =>
+      loadDocumentAuthorityContext(tx, { organizationId, userId, documentId: targetDocumentId }),
+    );
     if (!target || !decideTranscriptAccess(target, userId).canWrite) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 

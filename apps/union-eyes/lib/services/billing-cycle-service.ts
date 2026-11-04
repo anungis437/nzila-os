@@ -7,9 +7,9 @@
  * in an organization based on billing frequency (monthly, bi-weekly, weekly).
  * 
  * Features:
- * - Bulk transaction generation
+ * - Bulk transaction generation (one charge per member and period)
  * - Pro-rated dues for mid-cycle joins
- * - Override amount support
+ * - The amount is the member's dues assignment (dues_assignments)
  * - COPE/PAC/Strike Fund allocation
  * - Audit trail with execution metadata
  * 
@@ -17,13 +17,12 @@
  */
 
 import { organizationMembers } from '@/db/schema-organizations';
-import { memberEmployment } from '@/db/schema/domains/member/member-employment';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { moneyToNumber, toCents } from '@/lib/decimal-safe';
+import { toCents } from '@/lib/decimal-safe';
 import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { type RLSTx } from '@/lib/db/with-rls-context';
 
@@ -99,9 +98,10 @@ export class BillingCycleService {
    * Generate billing cycle for an organization
    * 
    * Creates dues transactions for all active members based on:
-   * - Their dues assignment rules
-   * - Employment data (wages, hours, etc.)
+   * - Their dues assignment (the amount and frequency the organization recorded for the member)
    * - Pro-rated amounts for mid-cycle joins
+   *
+   * A member who already has a charge for the same period is skipped, so running a cycle twice never bills it twice.
    */
   static async generateBillingCycle(
     params: BillingCycleParams
@@ -135,8 +135,9 @@ export class BillingCycleService {
           requiresLedger: true,
         });
 
-        // Step 1: Get all active members
+        // Step 1: Get all active members, and the members already charged for this period
         const activeMembers = await this.getActiveMembersForBilling(tx, organizationId, periodStart);
+        const alreadyBilled = await this.getMembersBilledForPeriod(tx, organizationId, periodStart, periodEnd);
 
         logger.info(`Found ${activeMembers.length} active members for billing`, {
           organizationId,
@@ -153,7 +154,9 @@ export class BillingCycleService {
               member,
               periodStart,
               periodEnd,
+              frequency,
               dryRun,
+              alreadyBilled: alreadyBilled.has(member.id),
             });
 
             results.push(result);
@@ -272,22 +275,8 @@ export class BillingCycleService {
         membershipNumber: organizationMembers.membershipNumber,
         status: organizationMembers.status,
         joinedAt: organizationMembers.joinedAt,
-        // Employment data (left join - may be null)
-        employmentId: memberEmployment.id,
-        employmentStatus: memberEmployment.employmentStatus,
-        hourlyRate: memberEmployment.hourlyRate,
-        baseSalary: memberEmployment.baseSalary,
-        grossWages: memberEmployment.grossWages,
-        regularHoursPerWeek: memberEmployment.regularHoursPerWeek,
       })
       .from(organizationMembers)
-      .leftJoin(
-        memberEmployment,
-        and(
-          eq(memberEmployment.memberId, organizationMembers.id),
-          eq(memberEmployment.employmentStatus, 'active')
-        )
-      )
       .where(
         and(
           eq(organizationMembers.organizationId, organizationId),
@@ -296,6 +285,29 @@ export class BillingCycleService {
       );
 
     return members;
+  }
+
+  /**
+   * The members who already have a charge for exactly this period (ids as dues transactions keep them: text).
+   */
+  private static async getMembersBilledForPeriod(
+    tx: RLSTx,
+    organizationId: string,
+    periodStart: Date,
+    periodEnd: Date,
+  ): Promise<Set<string>> {
+    const rows = await tx
+      .select({ memberId: duesTransactions.memberId })
+      .from(duesTransactions)
+      .where(
+        and(
+          eq(duesTransactions.organizationId, organizationId),
+          eq(duesTransactions.transactionType, 'charge'),
+          eq(duesTransactions.periodStart, periodStart.toISOString().split('T')[0]),
+          eq(duesTransactions.periodEnd, periodEnd.toISOString().split('T')[0]),
+        )
+      );
+    return new Set(rows.map((row) => row.memberId));
   }
 
   /**
@@ -310,10 +322,12 @@ export class BillingCycleService {
       member: any;
       periodStart: Date;
       periodEnd: Date;
+      frequency: BillingFrequency;
       dryRun: boolean;
+      alreadyBilled: boolean;
     }
   ): Promise<MemberBillingResult> {
-    const { organizationId, member, periodStart, periodEnd, dryRun } = params;
+    const { organizationId, member, periodStart, periodEnd, frequency, dryRun, alreadyBilled } = params;
 
     // Skip members with certain statuses
     if (!member.status || member.status !== 'active') {
@@ -326,19 +340,21 @@ export class BillingCycleService {
       };
     }
 
-    // Calculate dues using DuesCalculationEngine
-    const calculation = await DuesCalculationEngine.calculateMemberDues({
-      organizationId,
-      memberId: member.id,
-      periodStart,
-      periodEnd,
-      memberData: {
-        grossWages: member.grossWages ? moneyToNumber(member.grossWages) : undefined,
-        baseSalary: member.baseSalary ? moneyToNumber(member.baseSalary) : undefined,
-        hourlyRate: member.hourlyRate ? moneyToNumber(member.hourlyRate) : undefined,
-        hoursWorked: member.regularHoursPerWeek ? moneyToNumber(member.regularHoursPerWeek) * this.getWeeksInPeriod(periodStart, periodEnd) : undefined,
-      },
-    });
+    if (alreadyBilled) {
+      return {
+        memberId: member.id,
+        memberName: member.membershipNumber || member.userId,
+        success: true,
+        skipped: true,
+        skipReason: 'Already billed for this period',
+      };
+    }
+
+    // Calculate dues from the member's assignment, in this cycle's transaction
+    const calculation = await DuesCalculationEngine.calculateMemberDues(
+      { organizationId, memberId: member.id, periodStart, periodEnd, frequency },
+      tx,
+    );
 
     // No active dues assignment
     if (!calculation) {
@@ -379,6 +395,7 @@ export class BillingCycleService {
       .values({
         organizationId,
         memberId: member.id,
+        assignmentId: calculation.assignmentId,
         transactionType: 'charge',
         amount: proRatedAmount.toString(),
         periodStart: periodStart.toISOString().split('T')[0],
@@ -392,8 +409,8 @@ export class BillingCycleService {
         totalAmount: proRatedAmount.toString(),
         metadata: {
           calculationType: calculation.calculationType,
-          ruleId: calculation.ruleId,
-          ruleName: calculation.ruleName,
+          assignmentId: calculation.assignmentId,
+          assignmentFrequency: calculation.frequency,
           isProRated,
           proRatedReason: isProRated ? `Joined ${member.joinedAt}` : undefined,
         },
@@ -487,14 +504,6 @@ export class BillingCycleService {
       pacAmount: pacCents / 100,
       strikeFundAmount: strikeCents / 100,
     };
-  }
-
-  /**
-   * Get number of weeks in a billing period
-   */
-  private static getWeeksInPeriod(periodStart: Date, periodEnd: Date): number {
-    const days = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.ceil(days / 7);
   }
 
   /**

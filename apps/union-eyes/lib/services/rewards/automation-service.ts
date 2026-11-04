@@ -4,6 +4,7 @@
  */
 
 import { db } from '@/db';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { automationRules } from '@/db/schema/recognition-rewards-schema';
 import { organizations } from '@/db/schema';
 import { createAwardRequest, issueAward } from './award-service';
@@ -68,9 +69,10 @@ export interface AutomationRule {
 
 /**
  * Check and trigger anniversary awards
- * Should be run daily as a scheduled job
+ * Should be run daily as a scheduled job. The caller supplies the transaction the organization's awards run on (the cron's is a system
+ * transaction: it has no tenant session); every statement below, and the savepoints under it, use that one transaction.
  */
-export async function processAnniversaryAwards(orgId: string) {
+export async function processAnniversaryAwards(orgId: string, executor: RLSTx = db) {
   try {
     const today = new Date();
     const currentMonth = today.getMonth() + 1;
@@ -82,7 +84,7 @@ export async function processAnniversaryAwards(orgId: string) {
     // organization's "Work Anniversary" award type (cross-tenant data
     // confusion in a system-invoked job) and issue awards using its
     // programId/credit rules/approval settings.
-    const anniversaryAwardType = await db.query.recognitionAwardTypes.findFirst({
+    const anniversaryAwardType = await executor.query.recognitionAwardTypes.findFirst({
       where: (types, { eq, and }) =>
         and(
           eq(types.orgId, orgId),
@@ -99,7 +101,7 @@ export async function processAnniversaryAwards(orgId: string) {
     // Two overlapping runs (retries, a slow run still going when the next fires) must not both read "not yet awarded" and
     // both issue. A transaction-scoped advisory lock keyed on organization and award type makes the second run wait until
     // the first has committed its awards, and then it sees them. The lock is released when this transaction ends.
-    return await db.transaction(async (lockTx) => {
+    return await executor.transaction(async (lockTx) => {
     await lockTx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`anniversary-awards:${orgId}:${anniversaryAwardType.id}`}, 0))`);
 
     // Find active members with anniversaries today who have not already been given today's award. The job is triggered by a
@@ -327,12 +329,12 @@ export async function processMetricAwards(
  * Process scheduled awards (e.g., monthly top performer)
  * Should be triggered by cron job
  */
-export async function processScheduledAwards(orgId: string) {
+export async function processScheduledAwards(orgId: string, executor: RLSTx = db) {
   try {
     // A scheduled rule names an award type and a cron expression but nothing that says who earns the award (a top performer by
     // which measure, over what period), so no award can be derived from it. The rules are reported as skipped, never as processed,
     // so a response cannot claim work that was not done.
-    const rules = await db
+    const rules = await executor
       .select({ id: automationRules.id })
       .from(automationRules)
       .where(

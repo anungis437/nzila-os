@@ -44,10 +44,7 @@ state.storage = {
   },
 };
 
-vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: (handler: (...args: unknown[]) => unknown) => handler,
-}));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: vi.fn(async () => undefined) }));
+vi.mock('@/lib/api/framework', async () => (await import('@/app/api/__tests__/support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: async (role: string) => role === 'member' }));
 vi.mock('@/db/db', () => ({
   db: new Proxy({}, {
@@ -84,6 +81,7 @@ const lifecycle = await import('@/lib/documents/intake-lifecycle');
 const { POST: createDocument } = await import('@/app/api/documents/repository/route');
 const { POST: appendVersion } = await import('@/app/api/documents/repository/[id]/versions/route');
 const { createDocumentDatabase, resetDocumentDatabase } = await import('@/lib/documents/test-support/pglite-document-database');
+const stub = await import('@/app/api/__tests__/support/with-api-stub');
 
 const { openIntake, checkIntakeForAcceptance, bindIntakeInTx, cancelIntake, expireDueIntakes, finalizeIntakeObjects, runIntakeReaper, countAbandonedIntakeObjects, IntakeConflictError, INTAKE_MAX_DELETION_ATTEMPTS } = lifecycle;
 
@@ -132,10 +130,21 @@ const acceptInTx = (intakeId: string, docId: string, versionNo = 1, org = ORG_A,
     return versionId;
   });
 
-const post = (body: Record<string, unknown>, user = USER) =>
-  createDocument(new Request('https://t.test/api/documents/repository', { method: 'POST', body: JSON.stringify(body) }), { organizationId: ORG_A, userId: user });
-const append = (docId: string, body: Record<string, unknown>, user = USER) =>
-  appendVersion(new Request(`https://t.test/api/documents/repository/${docId}/versions`, { method: 'POST', body: JSON.stringify(body) }), { organizationId: ORG_A, userId: user }, { id: docId });
+// The wrapper resolves the caller (a member of organization A) and the route params.
+const asMember = (user: string) => {
+  stub.resetCaller();
+  stub.caller.organizationId = ORG_A;
+  stub.caller.userId = user;
+  stub.caller.role = 'member';
+};
+const post = (body: Record<string, unknown>, user = USER) => {
+  asMember(user);
+  return createDocument(new Request('https://t.test/api/documents/repository', { method: 'POST', body: JSON.stringify(body) }));
+};
+const append = (docId: string, body: Record<string, unknown>, user = USER) => {
+  asMember(user);
+  return appendVersion(new Request(`https://t.test/api/documents/repository/${docId}/versions`, { method: 'POST', body: JSON.stringify(body) }), { params: { id: docId } });
+};
 const createBody = (intakeId: string, extra: Record<string, unknown> = {}) => ({
   title: 'Filed', filename: 'a.pdf', intakeId, documentType: 'ocr_upload', privacyLabel: 'team_confidential', ...extra,
 });
@@ -478,7 +487,8 @@ describe('repository create from an intake (mandatory audit in the same transact
   it('commits no document when the mandatory create audit fails, and leaves the intake open', async () => {
     const { view } = await openOk('contents');
     await failAudit('document.upload');
-    await expect(post(createBody(view.intakeId))).rejects.toThrow();
+    // The write and its refused audit are one transaction: the caller is told so (an unexpected fault is a 500), and nothing commits.
+    expect((await post(createBody(view.intakeId))).status).toBe(500);
     expect((await q(`SELECT 1 FROM documents`)).rows).toHaveLength(0);
     expect((await q(`SELECT 1 FROM document_versions`)).rows).toHaveLength(0);
     expect(await intakeRow(view.intakeId)).toMatchObject({ status: 'open', object_state: 'present' });
@@ -490,9 +500,8 @@ describe('repository create from an intake (mandatory audit in the same transact
     const stored = state.blobs;
     stored.set(`documents/${ORG_A}/legacy-file`, Buffer.from('legacy'));
     await failAudit('document.upload');
-    await expect(
-      post({ title: 'Legacy', filename: 'l.pdf', blobPath: `documents/${ORG_A}/legacy-file`, documentType: 'x', mimeType: 'application/pdf', privacyLabel: 'team_confidential' }),
-    ).rejects.toThrow();
+    const refused = await post({ title: 'Legacy', filename: 'l.pdf', blobPath: `documents/${ORG_A}/legacy-file`, documentType: 'x', mimeType: 'application/pdf', privacyLabel: 'team_confidential' });
+    expect(refused.status).toBe(500);
     expect((await q(`SELECT 1 FROM documents`)).rows).toHaveLength(0);
   });
 
@@ -565,7 +574,7 @@ describe('version append from an intake', () => {
     await acceptInTx(v1.view.intakeId, id(1));
     const next = await openOk('two', { operation: 'append_version', targetDocumentId: id(1) });
     await failAudit('document.version_append');
-    await expect(append(id(1), { intakeId: next.view.intakeId })).rejects.toThrow();
+    expect((await append(id(1), { intakeId: next.view.intakeId })).status).toBe(500);
     expect((await q(`SELECT 1 FROM document_versions WHERE document_id = $1`, [id(1)])).rows).toHaveLength(1);
     expect(await intakeRow(next.view.intakeId)).toMatchObject({ status: 'open' });
     await q(`DELETE FROM audit_fault_actions`);

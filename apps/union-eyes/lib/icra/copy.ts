@@ -222,7 +222,7 @@ export const COPY = {
     diagnosticCtaLabel: 'Open an Full Diagnostic & Action Plan conversation',
     diagnosticCtaHref: '/contact?topic=institutional-continuity-diagnostic',
     gateNote:
-      'The Leadership Briefing Report is available at $1,200 CAD and is designed for board presentation and executive decision-making.',
+      `The Leadership Briefing Report is available at ${ICRA_PAID_REPORT_PRICES.executive_continuity_brief.label} and is designed for board presentation and executive decision-making.`,
   },
   governance: {
     auditableNote:

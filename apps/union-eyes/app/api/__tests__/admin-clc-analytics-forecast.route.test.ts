@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { declaredOptions } from './with-api-double';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
   forecastRemittances: vi.fn(),
@@ -10,7 +10,7 @@ const m = vi.hoisted(() => ({
   standardErrorResponse: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
+vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble);
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   createRateLimitHeaders: m.createRateLimitHeaders,
@@ -39,8 +39,6 @@ const authorized = { userId: 'user-1', organizationId: 'org-1' };
 describe('admin/clc/analytics/forecast route: tenant and financial controls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRoleAuth.mockImplementation((_role: string, handler: any) =>
-      (req: NextRequest, context: any = authorized) => handler(req, context));
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '0' });
     m.forecastRemittances.mockResolvedValue({ monthsAhead: 12, points: [] });
@@ -49,6 +47,15 @@ describe('admin/clc/analytics/forecast route: tenant and financial controls', ()
         AUTH_REQUIRED: 401, FORBIDDEN: 403, VALIDATION_ERROR: 400, INTERNAL_ERROR: 500,
       };
       return new Response(JSON.stringify({ code, message }), { status: status[code] ?? 500 });
+    });
+  });
+
+  it('asks the wrapper for an administrator, an audit record, and the organization\'s own tenant transaction', async () => {
+    const { GET } = await loadRoute();
+    expect(declaredOptions(GET)).toMatchObject({
+      auth: { minRole: 'admin' },
+      rlsOrgContext: true,
+      registry: { audience: 'admin', evidenceRequired: true },
     });
   });
 

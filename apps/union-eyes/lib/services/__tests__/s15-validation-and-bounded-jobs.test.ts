@@ -32,10 +32,22 @@ describe('Gate 0 batch B71: validated input and bounded jobs', () => {
     expect(service).toContain('return { trackingRecordsDeleted, eventRecordsDeleted, truncated }')
   })
 
-  it('keeps the frozen finance exception: contribution rates are still written through the handle the finance freeze pins', () => {
+  // contribution_rates is global reference data that only the system role writes (db/rls-storage-authority: SYSTEM_RUNTIME). The finance freeze that had kept
+  // this method on the plain handle was lifted in round 57; the behaviour is covered in external-data/__tests__/wage-enrichment-service.test.ts.
+  it('writes contribution rates as the system role, with the provider called before the write transaction opens', () => {
     const service = src('lib/services/external-data/wage-enrichment-service.ts')
     const start = service.indexOf('async syncContributionRates')
-    expect(service.slice(start, start + 1500)).not.toContain('withSystemContext')
+    expect(start).toBeGreaterThan(0)
+    const method = service.slice(start, service.indexOf('async getBenchmarksForCBA', start))
+    // The sync log is opened, the rates and their outcome are written, and a failure is recorded, each in a system transaction.
+    expect(method).toContain("await withSystemContext(() => this.createSyncLog('statcan', 'api', 'running', { type: 'contributions', year }))")
+    expect(method).toContain('await withSystemContext(async (tx) => {')
+    expect(method).toContain('await withSystemContext(() => this.updateSyncLog(syncId, {')
+    const write = method.indexOf('await withSystemContext(async (tx) => {')
+    expect(method.indexOf('getEIContributionRates(')).toBeLessThan(write)
+    expect(method.indexOf('getCPPContributionRates(')).toBeLessThan(write)
+    // No statement of the method is on the plain handle.
+    expect(method).not.toMatch(/\bdb\.(select|insert|update|delete|transaction)\(/)
   })
 
   it('verified: a realtime alert is addressed to the organization\'s active administrators and records no recipient when there is none', () => {

@@ -18,6 +18,7 @@ const bodySchema = z
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: "admin" },
     entitlement: "commercial_reporting",
     body: bodySchema,

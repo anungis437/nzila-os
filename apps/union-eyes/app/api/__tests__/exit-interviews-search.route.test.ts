@@ -24,12 +24,11 @@ describe('exit-interviews/search route', () => {
     ]);
   });
 
-  it('returns search results with total count', async () => {
+  it('returns the results as a list; the framework wraps it as the data of the answer', async () => {
     const { POST } = await loadRoute();
     const result = await POST({ organizationId: 'org_1', user: { role: 'officer' }, body: { q: 'retention', limit: 10, semanticWeight: 0.5 } });
 
-    expect(result.total).toBe(2);
-    expect(result.data).toHaveLength(2);
+    expect(result).toHaveLength(2);
     expect(m.hybridKnowledgeSearch).toHaveBeenCalledWith(expect.objectContaining({ query: 'retention', orgId: 'org_1', limit: 10, semanticWeight: 0.5, stewardPlus: true }));
   });
 

@@ -17,6 +17,7 @@ export const dynamic = 'force-dynamic';
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -30,23 +31,22 @@ import {
   Calendar,
   AlertCircle,
   RefreshCw,
-  Download,
   PlayCircle,
-  FileText,
   Users,
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
+// What GET /api/admin/dues/overview answers inside { success, data, timestamp }. A payment whose member has no roster entry has no name.
 interface OverviewData {
   financialKpis: {
     totalCollected: number;
     totalOutstanding: number;
     totalOverdue: number;
-    currentBalance: number;
   };
   paymentStats: {
     pending: number;
@@ -56,11 +56,11 @@ interface OverviewData {
   };
   recentPayments: Array<{
     id: string;
-    memberName: string;
+    memberName: string | null;
     amount: number;
     status: string;
     paidDate: string | null;
-    dueDate: string;
+    dueDate: string | null;
   }>;
   periodStats: {
     thisMonth: {
@@ -96,18 +96,19 @@ function formatDate(date: string, locale: string): string {
 }
 
 function getStatusBadge(status: string, t: (key: string) => string) {
+  // The ledger's own statuses: a posted payment is a paid one (the paid count above is the posted count); anything else is shown as the ledger names it.
   const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
-    paid: { variant: 'default', label: t('status.paid') },
+    posted: { variant: 'default', label: t('status.paid') },
     pending: { variant: 'secondary', label: t('status.pending') },
-    overdue: { variant: 'destructive', label: t('status.overdue') },
   };
 
   const config = variants[status] || { variant: 'outline' as const, label: status };
   return <Badge variant={config.variant}>{config.label}</Badge>;
 }
 
-function calculatePercentageChange(current: number, previous: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0;
+// A change against a period with nothing in it has no percentage; it is not +100% and it is not 0%.
+function calculatePercentageChange(current: number, previous: number): number | undefined {
+  if (previous === 0) return undefined;
   return ((current - previous) / previous) * 100;
 }
 
@@ -168,16 +169,22 @@ export default function AdminDuesDashboard() {
   const fetchOverview = useCallback(async () => {
     try {
       setRefreshing(true);
+      setError(null);
       const response = await fetch('/api/admin/dues/overview');
 
       if (!response.ok) {
-        throw new Error(t('failedToFetchOverview'));
+        throw new Error(await readApiError(response, t('failedToFetchOverview')));
       }
 
-      const result = await response.json();
-      setData(result);
+      // The route answers its overview inside { success, data, timestamp }.
+      const overview = envelopeData(await response.json());
+      if (!isRecord(overview.financialKpis) || !isRecord(overview.paymentStats) || !Array.isArray(overview.recentPayments) || !isRecord(overview.periodStats)) {
+        throw new ApiShapeError('no dues overview');
+      }
+      setData(overview as unknown as OverviewData);
     } catch (err) {
       logger.error(t('errorFetchingOverviewLog'), { error: err });
+      setData(null);
       setError(err instanceof Error ? err.message : t('failedToLoadOverview'));
     } finally {
       setLoading(false);
@@ -260,10 +267,6 @@ export default function AdminDuesDashboard() {
     data.periodStats.thisMonth.collected,
     data.periodStats.lastMonth.collected
   );
-  const _outstandingChange = calculatePercentageChange(
-    data.periodStats.thisMonth.outstanding,
-    data.periodStats.lastMonth.outstanding
-  );
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
@@ -285,15 +288,11 @@ export default function AdminDuesDashboard() {
             <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             {t('refreshButton')}
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            {t('exportButton')}
-          </Button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <KpiCard
           title={t('kpi.totalCollectedTitle')}
           value={data.financialKpis.totalCollected}
@@ -312,12 +311,6 @@ export default function AdminDuesDashboard() {
           value={data.financialKpis.totalOverdue}
           icon={<AlertCircle className="h-4 w-4" />}
           description={t('kpi.overdueDescription')}
-        />
-        <KpiCard
-          title={t('kpi.currentBalanceTitle')}
-          value={data.financialKpis.currentBalance}
-          icon={<TrendingUp className="h-4 w-4" />}
-          description={t('kpi.currentBalanceDescription')}
         />
       </div>
 
@@ -413,22 +406,18 @@ export default function AdminDuesDashboard() {
           <CardDescription>{t('quickActionsDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Button className="w-full" variant="outline">
-              <PlayCircle className="mr-2 h-4 w-4" />
-              {t('actions.generateBillingCycle')}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Button className="w-full" variant="outline" asChild>
+              <Link href={`/${locale}/dashboard/admin/dues/billing-cycles`}>
+                <PlayCircle className="mr-2 h-4 w-4" />
+                {t('actions.generateBillingCycle')}
+              </Link>
             </Button>
-            <Button className="w-full" variant="outline">
-              <AlertCircle className="mr-2 h-4 w-4" />
-              {t('actions.processLateFees')}
-            </Button>
-            <Button className="w-full" variant="outline">
-              <FileText className="mr-2 h-4 w-4" />
-              {t('actions.viewReports')}
-            </Button>
-            <Button className="w-full" variant="outline">
-              <Users className="mr-2 h-4 w-4" />
-              {t('actions.manageMembers')}
+            <Button className="w-full" variant="outline" asChild>
+              <Link href={`/${locale}/dashboard/members`}>
+                <Users className="mr-2 h-4 w-4" />
+                {t('actions.manageMembers')}
+              </Link>
             </Button>
           </div>
         </CardContent>
@@ -457,21 +446,20 @@ export default function AdminDuesDashboard() {
                     <TableHead>{t('tableAmount')}</TableHead>
                     <TableHead className="hidden md:table-cell">{t('tableStatus')}</TableHead>
                     <TableHead className="hidden lg:table-cell">{t('tablePaidDate')}</TableHead>
-                    <TableHead className="text-right">{t('tableActions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {data.recentPayments.map((payment) => (
                     <TableRow key={payment.id}>
-                      <TableCell className="font-medium">{payment.memberName}</TableCell>
+                      <TableCell className="font-medium">{payment.memberName ?? t('naLabel')}</TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        {formatDate(payment.dueDate, locale)}
+                        {payment.dueDate ? formatDate(payment.dueDate, locale) : t('naLabel')}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium">{formatCurrency(payment.amount, locale)}</span>
                           <span className="text-xs text-muted-foreground sm:hidden">
-                            {formatDate(payment.dueDate, locale)}
+                            {payment.dueDate ? formatDate(payment.dueDate, locale) : t('naLabel')}
                           </span>
                         </div>
                       </TableCell>
@@ -480,11 +468,6 @@ export default function AdminDuesDashboard() {
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
                         {payment.paidDate ? formatDate(payment.paidDate, locale) : t('naLabel')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          {t('viewButton')}
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

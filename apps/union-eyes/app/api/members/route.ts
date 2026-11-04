@@ -7,7 +7,7 @@ import { withApi } from '@/lib/api/framework';
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
-import { eq, and, isNull, ilike, or, sql } from 'drizzle-orm';
+import { eq, and, isNull, ilike, or, sql, asc, count } from 'drizzle-orm';
 import { auditDataAccess } from '@/lib/audit-logger';
 import { normalizeRole } from '@/lib/api-auth-guard';
 import { memberDirectoryAccess, projectDirectoryMember } from '@/lib/members/directory-access';
@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     openapi: {
       tags: ['Members'],
@@ -89,12 +90,20 @@ export const GET = withApi(
       );
     }
 
-    const rows = await db
-      .select()
-      .from(organizationMembers)
-      .where(and(...conditions))
-      .limit(limit)
-      .offset(offset);
+    const where = and(...conditions);
+
+    const [rows, [totalRow]] = await Promise.all([
+      db
+        .select()
+        .from(organizationMembers)
+        .where(where)
+        // A stable order, so that a page boundary neither repeats nor skips a member.
+        .orderBy(asc(organizationMembers.name), asc(organizationMembers.id))
+        .limit(limit)
+        .offset(offset),
+      // How many members match the search and the status, not how many are on this page.
+      db.select({ total: count() }).from(organizationMembers).where(where),
+    ]);
 
     const members = rows.map(m => projectDirectoryMember(m, access));
 
@@ -111,6 +120,6 @@ export const GET = withApi(
       },
     });
 
-    return { members, total: members.length };
+    return { members, total: totalRow?.total ?? 0 };
   },
 );

@@ -22,7 +22,7 @@ import {
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { KNOWLEDGE_BASE_EMBEDDING, vectorColumnReady } from '@/lib/ai/vector-readiness';
 import { interviewListCondition, type InterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
-import type { ExitInterviewSensitivityLevel } from '@/db/schema';
+import type { ExitInterviewIndexingStatus, ExitInterviewSensitivityLevel } from '@/db/schema';
 
 export interface KnowledgeSearchResult {
   id: string;
@@ -30,10 +30,14 @@ export interface KnowledgeSearchResult {
   roleInUnion: string;
   yearsOfService: number;
   summary: string | null;
+  /** The operational summary written for the interview (the summarize route); null until one is. Read with the interview, so it is the caller's to read exactly when the interview is. */
+  aiSummary: string | null;
   sensitivityLevel: ExitInterviewSensitivityLevel;
   expertiseTags: string[] | null;
   topics: string[] | null;
   publishedAt: string | null;
+  /** Whether the interview has been indexed for semantic search. */
+  indexingStatus: ExitInterviewIndexingStatus;
   /** Keyword match score (1 = matched, 0 = not) */
   keywordScore: number;
   /** Cosine similarity from vector search (null if no embedding available) */
@@ -103,10 +107,12 @@ async function keywordSearch(
       roleInUnion: exitInterviews.roleInUnion,
       yearsOfService: exitInterviews.yearsOfService,
       summary: exitInterviews.summary,
+      aiSummary: exitInterviews.aiSummary,
       sensitivityLevel: exitInterviews.sensitivityLevel,
       expertiseTags: exitInterviews.expertiseTags,
       topics: exitInterviews.topics,
       publishedAt: exitInterviews.publishedAt,
+      indexingStatus: exitInterviews.indexingStatus,
     })
     .from(exitInterviews)
     .where(
@@ -136,10 +142,12 @@ async function keywordSearch(
       roleInUnion: r.roleInUnion,
       yearsOfService: r.yearsOfService,
       summary: r.summary,
+      aiSummary: r.aiSummary,
       sensitivityLevel: r.sensitivityLevel as ExitInterviewSensitivityLevel,
       expertiseTags: r.expertiseTags as string[] | null,
       topics: r.topics as string[] | null,
       publishedAt: r.publishedAt?.toISOString() ?? null,
+      indexingStatus: r.indexingStatus,
       keywordScore: 1,
       semanticScore: null,
       relevanceScore: 1,
@@ -226,10 +234,12 @@ export async function hybridKnowledgeSearch(
           roleInUnion: exitInterviews.roleInUnion,
           yearsOfService: exitInterviews.yearsOfService,
           summary: exitInterviews.summary,
+          aiSummary: exitInterviews.aiSummary,
           sensitivityLevel: exitInterviews.sensitivityLevel,
           expertiseTags: exitInterviews.expertiseTags,
           topics: exitInterviews.topics,
           publishedAt: exitInterviews.publishedAt,
+          indexingStatus: exitInterviews.indexingStatus,
         })
         .from(exitInterviews)
         .where(
@@ -250,10 +260,12 @@ export async function hybridKnowledgeSearch(
           roleInUnion: r.roleInUnion,
           yearsOfService: r.yearsOfService,
           summary: r.summary,
+          aiSummary: r.aiSummary,
           sensitivityLevel: r.sensitivityLevel as ExitInterviewSensitivityLevel,
           expertiseTags: r.expertiseTags as string[] | null,
           topics: r.topics as string[] | null,
           publishedAt: r.publishedAt?.toISOString() ?? null,
+          indexingStatus: r.indexingStatus,
           keywordScore: 0,
           semanticScore: semScore,
           relevanceScore: keywordWeight(0, semScore, semanticWeight),

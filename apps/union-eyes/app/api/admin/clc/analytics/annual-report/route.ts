@@ -7,15 +7,23 @@
 import { NextResponse } from 'next/server';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { generateAnnualComplianceReport } from '@/services/clc/compliance-reports';
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
-export const GET = withRoleAuth('admin', async (request, context) => {
-  const { userId, organizationId } = context;
+// The report reads the caller organization's remittances and the organizations beneath it: it runs in that organization's tenant transaction,
+// so the ambient handle the compliance service reads through carries the organization row-level security applies to.
+export const GET = withApi(
+  {
+    auth: { minRole: 'admin' },
+    rlsOrgContext: true,
+    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Admin', 'CLC'], summary: 'CLC annual compliance report' },
+  },
+  async ({ request, userId, organizationId }) => {
   if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
   try {
@@ -87,4 +95,5 @@ export const GET = withRoleAuth('admin', async (request, context) => {
       error
     );
   }
-});
+  },
+);

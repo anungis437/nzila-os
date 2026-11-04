@@ -19,7 +19,6 @@
  */
 
 import { randomUUID } from 'crypto';
-import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
@@ -270,14 +269,16 @@ export async function getCopilotHistory(
   organizationId: string,
   limit = 20,
 ) {
-  return db.query.aiCopilotSessions.findMany({
-    where: and(
-      eq(aiCopilotSessions.userId, userId),
-      eq(aiCopilotSessions.organizationId, organizationId),
-    ),
-    orderBy: [desc(aiCopilotSessions.createdAt)],
-    limit,
-  });
+  return withRLSContext({ organizationId }, (tx) =>
+    tx.query.aiCopilotSessions.findMany({
+      where: and(
+        eq(aiCopilotSessions.userId, userId),
+        eq(aiCopilotSessions.organizationId, organizationId),
+      ),
+      orderBy: [desc(aiCopilotSessions.createdAt)],
+      limit,
+    }),
+  );
 }
 
 // ============================================================================
@@ -291,14 +292,17 @@ async function buildCopilotPrompt(input: CopilotInput): Promise<string> {
     `Action: ${input.actionType}`,
   ];
 
-  // If related to a grievance, fetch context
+  // If related to a grievance, fetch context (in the organization's own context, before the provider is called)
   if (input.relatedEntityType === 'grievance' && input.relatedEntityId) {
-    const grievance = await db.query.grievances.findFirst({
-      where: and(
-        eq(grievances.id, input.relatedEntityId),
-        eq(grievances.organizationId, input.organizationId),
-      ),
-    });
+    const relatedEntityId = input.relatedEntityId;
+    const grievance = await withRLSContext({ organizationId: input.organizationId }, (tx) =>
+      tx.query.grievances.findFirst({
+        where: and(
+          eq(grievances.id, relatedEntityId),
+          eq(grievances.organizationId, input.organizationId),
+        ),
+      }),
+    );
 
     if (grievance) {
       parts.push('');

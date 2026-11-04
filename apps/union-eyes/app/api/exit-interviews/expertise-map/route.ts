@@ -43,6 +43,7 @@ function riskLevel(coverageCount: number, isSingleSource: boolean): 'low' | 'med
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -129,15 +130,13 @@ export const GET = withApi(
     }
 
     return {
-      data: {
-        organizationId: organizationId!,
-        generatedAt: new Date().toISOString(),
-        totalPublishedInterviews: published.length,
-        domains,
-        singleSourceDomains: domains.filter((d) => d.isSingleSource).map((d) => d.domain),
-        wellCoveredDomains: domains.filter((d) => d.coverageCount >= 3).map((d) => d.domain),
-        categoryBreakdown,
-      },
+      organizationId: organizationId!,
+      generatedAt: new Date().toISOString(),
+      totalPublishedInterviews: published.length,
+      domains,
+      singleSourceDomains: domains.filter((d) => d.isSingleSource).map((d) => d.domain),
+      wellCoveredDomains: domains.filter((d) => d.coverageCount >= 3).map((d) => d.domain),
+      categoryBreakdown,
     };
   },
 );

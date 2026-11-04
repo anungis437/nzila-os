@@ -20,6 +20,7 @@ function mapOrg(row: typeof organizations.$inferSelect) {
     slug: row.slug,
     display_name: row.displayName,
     short_name: row.shortName,
+    description: row.description,
     organization_type: row.organizationType,
     parent_id: row.parentId,
     hierarchy_path: row.hierarchyPath,
@@ -148,6 +149,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (body.name !== undefined) updates.name = body.name
   if (body.slug !== undefined) updates.slug = body.slug
   if (body.display_name !== undefined) updates.displayName = body.display_name
+  if (body.description !== undefined) updates.description = body.description
+  if (body.charter_number !== undefined) updates.charterNumber = body.charter_number
+  if (body.affiliation_date !== undefined) updates.affiliationDate = body.affiliation_date
   if (body.status !== undefined) updates.status = body.status
   if (body.email !== undefined) updates.email = body.email
   if (body.phone !== undefined) updates.phone = body.phone

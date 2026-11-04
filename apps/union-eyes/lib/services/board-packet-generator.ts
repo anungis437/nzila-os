@@ -1,389 +1,114 @@
 /**
- * Board Packet Generator Service
- * 
- * Automated generation of board packets with financial, operational, and compliance data
+ * Board Packet Distribution Service
+ *
+ * Distributes a finalized board packet: the recipients, the move to 'distributed' and the audit record commit together, and the PDF is rendered from the
+ * packet's own certified content. A packet's content is supplied and finalized through /api/governance/board-packets (lib/governance/board-packet-lifecycle.ts).
+ * The generator this module once held derived a packet's sections from other tables, read a relation the database never had and filled the financial
+ * summary with placeholder zeros and the compliance section with an unconditional "all requirements met"; nothing called it and it was removed in the
+ * mismatch census (UE-CONV-H-017). The class keeps its name because the route manifest and the caller inventory refer to this path and export.
  */
 
-import { db } from '@/db';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { Document, Page, StyleSheet, Text, renderToBuffer } from '@react-pdf/renderer';
+import React from 'react';
 import {
   boardPackets,
   boardPacketDistributions,
 } from '@/db/schema/board-packet-schema';
-import { organizationMembers } from '@/db/schema/organization-members-schema';
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
-import crypto from 'crypto';
-import { Document, Page, StyleSheet, Text, renderToBuffer } from '@react-pdf/renderer';
-import React from 'react';
+import { organizationMembers } from '@/db/schema-organizations';
 import { getEmailService } from '@/lib/services/messaging/email-service';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { ApiError } from '@/lib/api/errors';
 import { logger } from '@/lib/logger';
-import { moneyToNumber } from '@/lib/decimal-safe';
+import { boardPacketCertificationIntact } from '@/lib/governance/board-packet-lifecycle';
 
-interface BoardPacketData {
-  title: string;
-  organizationId: string;
-  periodStart: Date;
-  periodEnd: Date;
-  generatedBy: string;
-  packetType?: 'monthly' | 'quarterly' | 'annual' | 'special';
+type BoardPacketRow = typeof boardPackets.$inferSelect;
+
+const HTML_ENTITIES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+/** Text placed in an HTML email: the packet title and the recipient's name are data, not markup. */
+const escapeHtml = (text: string): string => text.replace(/[&<>"']/g, (character) => HTML_ENTITIES[character]);
+
+const asText = (value: unknown): string => (typeof value === 'string' ? value : JSON.stringify(value));
+
+/** A section's summary, then each further detail it carries, so nothing an officer wrote is dropped from the document. */
+function sectionLines(label: string, section: unknown): string[] {
+  if (section === null || section === undefined) return [];
+  const { summary, ...detail } = (typeof section === 'object' ? section : {}) as Record<string, unknown>;
+  return [
+    `${label}: ${typeof summary === 'string' && summary.trim() ? summary : 'N/A'}`,
+    ...Object.entries(detail).map(([key, value]) => `    ${key}: ${asText(value)}`),
+  ];
+}
+
+function actionItemLines(items: unknown): string[] {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  return [
+    'Action items:',
+    ...items.map((entry) => {
+      const { item, owner, deadline, status } = (entry ?? {}) as Record<string, unknown>;
+      const facts = [owner && `owner ${asText(owner)}`, deadline && `due ${asText(deadline)}`, status && asText(status)].filter(Boolean);
+      return `    - ${asText(item)}${facts.length ? ` (${facts.join(', ')})` : ''}`;
+    }),
+  ];
 }
 
 export class BoardPacketGenerator {
   /**
-   * Generate a complete board packet
-   */
-  async generatePacket(data: BoardPacketData) {
-    const packetType = data.packetType || 'monthly';
-    const fiscalYear = data.periodEnd.getFullYear();
-    const fiscalQuarter = Math.ceil((data.periodEnd.getMonth() + 1) / 3);
-    
-    try {
-      // Generate all sections
-      const [
-        financialSummary,
-        membershipStats,
-        caseSummary,
-        motionsAndVotes,
-        auditExceptions,
-        complianceStatus,
-      ] = await Promise.all([
-        this.generateFinancialSummary(data.organizationId, data.periodStart, data.periodEnd),
-        this.generateMembershipStats(data.organizationId, data.periodStart, data.periodEnd),
-        this.generateCaseSummary(data.organizationId, data.periodStart, data.periodEnd),
-        this.generateMotionsAndVotes(data.organizationId, data.periodStart, data.periodEnd),
-        this.generateAuditExceptions(data.organizationId, data.periodStart, data.periodEnd),
-        this.generateComplianceStatus(data.organizationId, data.periodEnd),
-      ]);
-      
-      // Calculate content hash for integrity
-      const contentString = JSON.stringify({
-        financialSummary,
-        membershipStats,
-        caseSummary,
-        motionsAndVotes,
-        auditExceptions,
-        complianceStatus,
-      });
-      
-      const contentHash = crypto
-        .createHash('sha256')
-        .update(contentString)
-        .digest('hex');
-      
-      // Create board packet
-      const [packet] = await db
-        .insert(boardPackets)
-        .values({
-          title: data.title,
-          packetType,
-          organizationId: data.organizationId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          periodStart: data.periodStart.toISOString().split('T')[0] as any,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          periodEnd: data.periodEnd.toISOString().split('T')[0] as any,
-          fiscalYear,
-          fiscalQuarter: packetType === 'quarterly' || packetType === 'annual' ? fiscalQuarter : null,
-          generatedBy: data.generatedBy,
-          financialSummary,
-          membershipStats,
-          caseSummary,
-          motionsAndVotes,
-          auditExceptions,
-          complianceStatus,
-          status: 'draft',
-          recipientRoles: ['board_member', 'executive'],
-          contentHash,
-        })
-        .returning();
-      
-      return packet;
-    } catch (error) {
-      logger.error('Error generating board packet', error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Generate financial summary section
-   */
-  private async generateFinancialSummary(
-    organizationId: string,
-    periodStart: Date,
-    periodEnd: Date
-  ) {
-    // Only strike-activity totals are real. Dues revenue, operational expenses,
-    // and reserves are NOT wired to the finance module yet — they are returned
-    // as zero. A board reading this packet will see a balance sheet that
-    // understates revenue and reserves. Surface loudly until finance module is
-    // integrated.
-    logger.warn('board-packet financial summary: revenue, operational expenses, and reserves are placeholder zeros (finance module not integrated). Only strike-activity totals are real.', { organizationId, periodStart, periodEnd });
-    // Query strike activity data (simplified - uses raw SQL since strike_actions may not have a schema table)
-    const strikeActivityResult = await db
-      .execute(
-        sql`SELECT COALESCE(SUM(amount)::numeric, 0) as "totalAmount", COUNT(*)::int as "count" FROM strike_actions WHERE organization_id = ${organizationId} AND action_date >= ${periodStart} AND action_date <= ${periodEnd}`
-      );
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const strikeActivity = (strikeActivityResult as any)[0] || { totalAmount: 0, count: 0 };
-    
-    return {
-      period: {
-        start: periodStart.toISOString().split('T')[0],
-        end: periodEnd.toISOString().split('T')[0],
-      },
-      revenue: {
-        duesCollected: 0, // Would integrate with dues module
-        otherIncome: 0,
-        total: 0,
-      },
-      expenses: {
-        strikePayments: moneyToNumber(strikeActivity.totalAmount) || 0,
-        operational: 0,
-        total: moneyToNumber(strikeActivity.totalAmount) || 0,
-      },
-      netPosition: 0 - (moneyToNumber(strikeActivity.totalAmount) || 0),
-      reserves: {
-        strikeReserve: 0,
-        operatingReserve: 0,
-        total: 0,
-      },
-      arrears: {
-        totalOwed: 0,
-        membersInArrears: 0,
-        over90Days: 0,
-      },
-      summary: `${strikeActivity.count} strike actions totaling $${moneyToNumber(strikeActivity.totalAmount || 0).toFixed(2)}`,
-    };
-  }
-  
-  /**
-   * Generate membership statistics section
-   */
-  private async generateMembershipStats(
-    organizationId: string,
-    periodStart: Date,
-    periodEnd: Date
-  ) {
-    // Would integrate with membership module
-    return {
-      period: {
-        start: periodStart.toISOString().split('T')[0],
-        end: periodEnd.toISOString().split('T')[0],
-      },
-      total: 0,
-      active: 0,
-      inactive: 0,
-      newMembers: 0,
-      departedMembers: 0,
-      growthRate: '0%',
-      demographics: {
-        byLocal: [],
-        byWorksite: [],
-        bySeniority: [],
-      },
-      summary: 'Membership statistics pending integration with membership module',
-    };
-  }
-  
-  /**
-   * Generate case summary section
-   */
-  private async generateCaseSummary(
-    organizationId: string,
-    periodStart: Date,
-    periodEnd: Date
-  ) {
-    // Would integrate with case management module
-    return {
-      period: {
-        start: periodStart.toISOString().split('T')[0],
-        end: periodEnd.toISOString().split('T')[0],
-      },
-      openCases: 0,
-      newCases: 0,
-      closedCases: 0,
-      slaRisks: {
-        critical: 0,
-        high: 0,
-        medium: 0,
-        list: [],
-      },
-      byType: {
-        grievance: 0,
-        discipline: 0,
-        termination: 0,
-        other: 0,
-      },
-      averageResolutionTime: '0 days',
-      summary: 'Case statistics pending integration with case management module',
-    };
-  }
-  
-  /**
-   * Generate motions and votes section
-   */
-  private async generateMotionsAndVotes(
-    organizationId: string,
-    periodStart: Date,
-    periodEnd: Date
-  ) {
-    // Would integrate with governance module
-    return {
-      period: {
-        start: periodStart.toISOString().split('T')[0],
-        end: periodEnd.toISOString().split('T')[0],
-      },
-      motionsPending: [],
-      motionsApproved: [],
-      motionsRejected: [],
-      reservedMatters: [],
-      summary: 'No motions or votes in period',
-    };
-  }
-  
-  /**
-   * Generate audit exceptions section
-   */
-  private async generateAuditExceptions(
-    organizationId: string,
-    periodStart: Date,
-    periodEnd: Date
-  ) {
-    // Would integrate with audit log
-    return {
-      period: {
-        start: periodStart.toISOString().split('T')[0],
-        end: periodEnd.toISOString().split('T')[0],
-      },
-      totalExceptions: 0,
-      critical: [],
-      high: [],
-      medium: [],
-      resolved: 0,
-      summary: 'No audit exceptions detected',
-    };
-  }
-  
-  /**
-   * Generate compliance status section
-   */
-  private async generateComplianceStatus(
-    organizationId: string,
-    asOfDate: Date
-  ) {
-    // Would integrate with compliance modules
-    return {
-      asOf: asOfDate.toISOString().split('T')[0],
-      regulatory: {
-        laborStandards: 'compliant',
-        privacyLaws: 'compliant',
-        financialReporting: 'compliant',
-      },
-      internal: {
-        bylaws: 'compliant',
-        policies: 'compliant',
-        procedures: 'compliant',
-      },
-      certifications: {
-        upToDate: true,
-        expiringWithin90Days: [],
-      },
-      training: {
-        boardMembersCompliant: true,
-        staffCompliant: true,
-      },
-      summary: 'All compliance requirements met',
-    };
-  }
-  
-  /**
-   * Finalize board packet (lock it and generate PDF)
-   */
-  async finalizePacket(packetId: string, organizationId: string, signedBy: string) {
-    try {
-      const [packet] = await db
-        .update(boardPackets)
-        .set({
-          status: 'finalized',
-          finalizedAt: new Date(),
-          signedBy,
-          signedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)))
-        .returning();
-      
-      const pdfResult = await this.generatePDF(packet);
-      await db
-        .update(boardPackets)
-        .set({
-          pdfUrl: pdfResult.pdfUrl,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)));
-      
-      return packet;
-    } catch (error) {
-      logger.error('Error finalizing board packet', error);
-      throw error;
-    }
-  }
-  
-  /**
    * Distribute a finalized board packet to recipients.
    *
-   * The distribution records, the move to 'distributed' and the audit record commit together, and only members of
-   * the packet's own organization can receive it (their address is taken from their membership record, never from the
+   * The distribution records, the move to 'distributed' and the audit record commit together, and only active members of
+   * the packet's own organization can receive it (their name and address are taken from their membership record, never from the
    * request). Email delivery happens after that commit; a failed delivery is reported and recorded, and does not
    * undo the recorded distribution.
    */
   async distributePacket(
     packetId: string,
-    recipients: Array<{
-      recipientId: string;
-      recipientName: string;
-      recipientEmail: string;
-      recipientRole: string;
-    }>,
+    recipients: Array<{ recipientId: string; recipientRole: string }>,
     context: { organizationId: string; userId: string }
   ) {
     const { organizationId, userId } = context;
     try {
-      const [packet] = await db
-        .select()
-        .from(boardPackets)
-        .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)))
-        .limit(1);
+      const packet = await withRLSContext({ organizationId }, async (tx) => {
+        const [row] = await tx
+          .select()
+          .from(boardPackets)
+          .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)))
+          .limit(1);
+        return row;
+      });
 
       if (!packet) {
-        throw new Error('Board packet not found');
+        throw ApiError.notFound('Board packet');
       }
       if (packet.status !== 'finalized' && packet.status !== 'distributed') {
         throw ApiError.conflict('Only a finalized board packet can be distributed');
+      }
+      if (!boardPacketCertificationIntact(packet)) {
+        throw ApiError.conflict("The board packet's content does not match its certification: reopen it as a draft and finalize it again");
       }
 
       const pdfResult = await this.generatePDF(packet);
 
       const distributions = await withRLSContext({ organizationId }, async (tx) => {
         const members = await tx
-          .select({ userId: organizationMembers.userId, email: organizationMembers.email })
+          .select({ userId: organizationMembers.userId, name: organizationMembers.name, email: organizationMembers.email })
           .from(organizationMembers)
           .where(
             and(
               eq(organizationMembers.organizationId, organizationId),
               inArray(organizationMembers.userId, recipients.map((recipient) => recipient.recipientId)),
+              eq(organizationMembers.status, 'active'),
               isNull(organizationMembers.deletedAt)
             )
           );
-        const emailByMember = new Map(members.map((member) => [member.userId, member.email]));
+        const memberById = new Map(members.map((member) => [member.userId, member]));
         const verified = recipients.map((recipient) => {
-          const email = emailByMember.get(recipient.recipientId);
-          if (!email) {
-            throw ApiError.badRequest('Every recipient must be a member of the organization');
+          const member = memberById.get(recipient.recipientId);
+          if (!member) {
+            throw ApiError.badRequest('Every recipient must be an active member of the organization');
           }
-          return { ...recipient, recipientEmail: email };
+          return { ...recipient, recipientName: member.name, recipientEmail: member.email };
         });
 
         const rows = await tx
@@ -398,7 +123,7 @@ export class BoardPacketGenerator {
           )
           .returning();
 
-        // The status predicate keeps a concurrent archive or edit from being overwritten.
+        // The predicate keeps a concurrent archive, or a reopen and a new certification, from being overwritten by what was rendered above.
         const [updated] = await tx
           .update(boardPackets)
           .set({
@@ -412,7 +137,8 @@ export class BoardPacketGenerator {
             and(
               eq(boardPackets.id, packetId),
               eq(boardPackets.organizationId, organizationId),
-              inArray(boardPackets.status, ['finalized', 'distributed'])
+              inArray(boardPackets.status, ['finalized', 'distributed']),
+              eq(boardPackets.contentHash, packet.contentHash!)
             )
           )
           .returning({ id: boardPackets.id });
@@ -424,12 +150,17 @@ export class BoardPacketGenerator {
           action: 'board_packet.distribute',
           resourceType: 'board_packets',
           resourceId: packetId,
-          details: { recipientIds: verified.map((recipient) => recipient.recipientId), deliveryMethod: 'email' },
+          details: {
+            recipientIds: verified.map((recipient) => recipient.recipientId),
+            deliveryMethod: 'email',
+            contentHash: packet.contentHash,
+          },
         });
         return rows;
       });
 
       const emailService = getEmailService();
+      const attachmentName = `${packet.title.replace(/[^\p{L}\p{N}._-]+/gu, '_')}.pdf`;
       const outcomes = await Promise.allSettled(
         distributions.map((recipient) =>
           emailService.send({
@@ -437,14 +168,14 @@ export class BoardPacketGenerator {
             subject: `Board Packet: ${packet.title}`,
             body: `Board Packet: ${packet.title} - Period: ${packet.periodStart} to ${packet.periodEnd}`,
             html: `
-            <h2>${packet.title}</h2>
-            <p>Hello ${recipient.recipientName},</p>
+            <h2>${escapeHtml(packet.title)}</h2>
+            <p>Hello ${escapeHtml(recipient.recipientName)},</p>
             <p>The latest board packet has been distributed.</p>
-            <p>Period: ${packet.periodStart} to ${packet.periodEnd}</p>
+            <p>Period: ${escapeHtml(String(packet.periodStart))} to ${escapeHtml(String(packet.periodEnd))}</p>
           `,
             attachments: [
               {
-                filename: `${packet.title.replace(/\s+/g, '_')}.pdf`,
+                filename: attachmentName,
                 content: pdfResult.pdfBuffer,
                 contentType: 'application/pdf',
               },
@@ -481,13 +212,25 @@ export class BoardPacketGenerator {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async generatePDF(packet: any): Promise<{ pdfBuffer: Buffer; pdfUrl: string }> {
+  private async generatePDF(packet: BoardPacketRow): Promise<{ pdfBuffer: Buffer; pdfUrl: string }> {
     const styles = StyleSheet.create({
       page: { padding: 32, fontSize: 12 },
       title: { fontSize: 18, marginBottom: 12 },
       section: { marginBottom: 8 },
     });
+
+    const lines = [
+      `Period: ${packet.periodStart} to ${packet.periodEnd}`,
+      `Status: ${packet.status}`,
+      `Certified: ${packet.finalizedAt?.toISOString() ?? 'N/A'} by ${packet.signedBy ?? 'N/A'} (SHA-256 ${packet.contentHash ?? 'N/A'})`,
+      ...sectionLines('Financial Summary', packet.financialSummary),
+      ...sectionLines('Membership Summary', packet.membershipStats),
+      ...sectionLines('Case Summary', packet.caseSummary),
+      ...sectionLines('Motions and Votes', packet.motionsAndVotes),
+      ...sectionLines('Audit Exceptions', packet.auditExceptions),
+      ...sectionLines('Compliance Summary', packet.complianceStatus),
+      ...actionItemLines(packet.actionItems),
+    ];
 
     const doc = React.createElement(
       Document,
@@ -496,11 +239,7 @@ export class BoardPacketGenerator {
         Page,
         { size: 'A4', style: styles.page },
         React.createElement(Text, { style: styles.title }, packet.title),
-        React.createElement(Text, { style: styles.section }, `Period: ${packet.periodStart} to ${packet.periodEnd}`),
-        React.createElement(Text, { style: styles.section }, `Status: ${packet.status}`),
-        React.createElement(Text, { style: styles.section }, `Financial Summary: ${packet.financialSummary?.summary || 'N/A'}`),
-        React.createElement(Text, { style: styles.section }, `Membership Summary: ${packet.membershipStats?.summary || 'N/A'}`),
-        React.createElement(Text, { style: styles.section }, `Compliance Summary: ${packet.complianceStatus?.summary || 'N/A'}`)
+        ...lines.map((line, index) => React.createElement(Text, { key: index, style: styles.section }, line))
       )
     );
 

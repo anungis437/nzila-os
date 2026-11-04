@@ -5,22 +5,46 @@ import { requireApiAuth } from '@/lib/api-auth-guard';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
+import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
+const MAX_BODY_BYTES = 16 * 1024;
+
+const provinceSchema = z.enum(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'], {
+  error: 'Invalid province code'
+});
+
 const consentSchema = z.object({
-  province: z.enum(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'], {
-    error: 'Invalid province code'
-  }),
+  province: provinceSchema,
   consentType: z.string().min(1, 'Consent type is required'),
   consentGiven: z.boolean(),
   consentText: z.string().min(10, 'Consent text must be at least 10 characters'),
   consentLanguage: z.enum(['en', 'fr', 'it', 'pt']).default('en'),
   consentMethod: z.enum(['explicit_checkbox', 'opt_in', 'opt_out', 'implicit']).default('explicit_checkbox'),
 });
+
+const revokeSchema = z.object({
+  province: provinceSchema,
+  consentType: z.string().min(1, 'Consent type is required'),
+});
+
+/** A body that is not JSON, or is over the limit, is the caller's error, not a server failure. */
+async function readBody(request: NextRequest): Promise<{ body: unknown } | { response: Response }> {
+  try {
+    return { body: await readBoundedJson(request, MAX_BODY_BYTES) };
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return { response: NextResponse.json({ error: 'Request body too large' }, { status: 413 }) };
+    }
+    return { response: standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON body') };
+  }
+}
+
 /**
  * POST /api/privacy/consent
  * Record user consent for provincial privacy compliance
@@ -35,7 +59,9 @@ export async function POST(request: NextRequest) {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
     }
 
-    const body = await request.json();
+    const parsed = await readBody(request);
+    if ('response' in parsed) return parsed.response;
+    const body = parsed.body;
     
     // Validate request body
     const validation = consentSchema.safeParse(body);
@@ -92,8 +118,9 @@ export async function POST(request: NextRequest) {
       consent,
       message: "Consent recorded successfully" 
     });
-  } catch (_error: any) {
-return NextResponse.json(
+  } catch (error: unknown) {
+    logger.error('[privacy-consent] POST failed', { error });
+    return NextResponse.json(
       { error: "Failed to record consent" },
       { status: 500 }
     );
@@ -115,25 +142,30 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const province = searchParams.get("province") as Province;
+    const rawProvince = searchParams.get("province");
     const consentType = searchParams.get("consentType");
 
-    if (!province || !consentType) {
+    if (!rawProvince || !consentType) {
       return standardErrorResponse(
       ErrorCode.VALIDATION_ERROR,
       'Missing province or consentType'
     );
     }
+    const province = provinceSchema.safeParse(rawProvince);
+    if (!province.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid province code');
+    }
 
-    const hasConsent = await ProvincialPrivacyService.hasValidConsent(
-      userId,
-      province,
-      consentType
+    // The consent rows are the caller's own (row-level security keys them on the user), so the read runs in the caller's tenant transaction.
+    const organizationId = await getOrganizationIdForUser(userId);
+    const hasConsent = await withRLSContext({ organizationId }, (tx) =>
+      ProvincialPrivacyService.hasValidConsent(userId, province.data, consentType, tx),
     );
 
     return NextResponse.json({ hasConsent });
-  } catch (_error: any) {
-return NextResponse.json(
+  } catch (error: unknown) {
+    logger.error('[privacy-consent] GET failed', { error });
+    return NextResponse.json(
       { error: "Failed to check consent" },
       { status: 500 }
     );
@@ -154,15 +186,17 @@ export async function DELETE(request: NextRequest) {
     );
     }
 
-    const body = await request.json();
-    const { province, consentType } = body;
-
-    if (!province || !consentType) {
+    const parsed = await readBody(request);
+    if ('response' in parsed) return parsed.response;
+    const validation = revokeSchema.safeParse(parsed.body);
+    if (!validation.success) {
       return standardErrorResponse(
       ErrorCode.VALIDATION_ERROR,
-      'Missing required fields'
+      'Missing required fields',
+      validation.error.issues
     );
     }
+    const { province, consentType } = validation.data;
 
     const organizationId = await getOrganizationIdForUser(userId);
     const revoked = await withRLSContext({ organizationId }, async (tx) => {
@@ -186,8 +220,9 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: "Consent revoked successfully" 
     });
-  } catch (_error: any) {
-return NextResponse.json(
+  } catch (error: unknown) {
+    logger.error('[privacy-consent] DELETE failed', { error });
+    return NextResponse.json(
       { error: "Failed to revoke consent" },
       { status: 500 }
     );

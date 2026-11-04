@@ -185,15 +185,18 @@ export class ChatSessionManager {
   }
   
   /**
-   * Get session by ID
+   * Get session by ID, within its organization: read as the runtime role in that organization's tenant transaction, so a session of
+   * another organization is not visible, and the organization is also part of the predicate.
    */
-  async getSession(sessionId: string): Promise<ChatSession | null> {
-    const sessions = await db
-      .select()
-      .from(chatSessions)
-      .where(eq(chatSessions.id, sessionId))
-      .limit(1);
-    
+  async getSession(sessionId: string, organizationId: string): Promise<ChatSession | null> {
+    const sessions = await withRLSContext({ organizationId }, (tx) =>
+      tx
+        .select()
+        .from(chatSessions)
+        .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.organizationId, organizationId)))
+        .limit(1),
+    );
+
     return sessions[0] || null;
   }
   
@@ -226,36 +229,6 @@ export class ChatSessionManager {
       .offset(options.offset || 0);
 
     return results;
-  }
-  
-  /**
-   * Update session title (auto-generated from first message)
-   */
-  async updateSessionTitle(sessionId: string, organizationId: string, title: string): Promise<void> {
-    await db
-      .update(chatSessions)
-      .set({ title, updatedAt: new Date() })
-      .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.organizationId, organizationId)));
-  }
-  
-  /**
-   * Archive session
-   */
-  async archiveSession(sessionId: string, organizationId: string): Promise<void> {
-    await db
-      .update(chatSessions)
-      .set({ status: "archived", updatedAt: new Date() })
-      .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.organizationId, organizationId)));
-  }
-  
-  /**
-   * Delete session
-   */
-  async deleteSession(sessionId: string, organizationId: string): Promise<void> {
-    await db
-      .update(chatSessions)
-      .set({ status: "deleted", updatedAt: new Date() })
-      .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.organizationId, organizationId)));
   }
 }
 
@@ -370,7 +343,7 @@ export class ChatbotService {
     }
     
     // Get session
-    const session = await this.sessionManager.getSession(data.sessionId);
+    const session = await this.sessionManager.getSession(data.sessionId, data.organizationId);
     if (!session) {
       throw new Error("Session not found");
     }
@@ -406,13 +379,16 @@ export class ChatbotService {
           throw new Error('Message flagged by content safety filter');
         }
 
-        // Conversation history: what was said before, then this message (stored with the reply below)
-        const history = await db
-          .select()
-          .from(chatMessages)
-          .where(eq(chatMessages.sessionId, data.sessionId))
-          .orderBy(desc(chatMessages.createdAt))
-          .limit(9);
+        // Conversation history: what was said before, then this message (stored with the reply below). A short tenant transaction of its own:
+        // the moderation, retrieval and model calls around it never hold one.
+        const history = await withRLSContext({ organizationId: data.organizationId }, (tx) =>
+          tx
+            .select()
+            .from(chatMessages)
+            .where(eq(chatMessages.sessionId, data.sessionId))
+            .orderBy(desc(chatMessages.createdAt))
+            .limit(9),
+        );
 
         const conversationMessages = history.reverse().map((m) => ({
           role: m.role,
@@ -551,18 +527,20 @@ export class ChatbotService {
   ): Promise<ChatMessage[]> {
     // A chat session belongs to exactly one user within one organization —
     // never trust a client-supplied sessionId without verifying both.
-    const session = await this.sessionManager.getSession(sessionId);
+    const session = await this.sessionManager.getSession(sessionId, owner.organizationId);
     if (!session || session.status !== 'active' || session.userId !== owner.userId || session.organizationId !== owner.organizationId) {
       throw new Error("Session not found");
     }
 
-    const messages = await db
-      .select()
-      .from(chatMessages)
-      .where(eq(chatMessages.sessionId, sessionId))
-      .orderBy(desc(chatMessages.createdAt))
-      .limit(options.limit || 100)
-      .offset(options.offset || 0);
+    const messages = await withRLSContext({ organizationId: owner.organizationId }, (tx) =>
+      tx
+        .select()
+        .from(chatMessages)
+        .where(eq(chatMessages.sessionId, sessionId))
+        .orderBy(desc(chatMessages.createdAt))
+        .limit(options.limit || 100)
+        .offset(options.offset || 0),
+    );
 
     return messages.reverse(); // Return in chronological order
   }

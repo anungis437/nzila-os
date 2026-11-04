@@ -31,7 +31,7 @@ async function loadRoute() {
   return import('../staging-proof/deadline-engine/scenario/route');
 }
 
-const secret = 'deadline-proof-test-secret';
+const secret = '7c41e0a95d2b83f6190ae4c7b58d3f2a6e1d09b47c5a8f23';
 const nonce = 'proof_nonce_01234567890123456789';
 
 function request(body: unknown, overrides: Record<string, string> = {}) {

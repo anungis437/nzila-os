@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true },
     entitlement: 'financial_intelligence_suite',
     openapi: {

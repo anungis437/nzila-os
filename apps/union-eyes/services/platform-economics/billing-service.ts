@@ -18,13 +18,10 @@ import {
   platformPayments,
   paymentAllocations,
   subscriptionPlans,
-  usageAggregates,
-  usageEvents,
-  usageMeters,
   organizations,
   type NewBillingAccount,
 } from '@/db/schema';
-import { eq, and, desc, inArray, sql, or, lt } from 'drizzle-orm';
+import { eq, and, desc, inArray, or, lt } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import type { RLSTx } from '@/lib/db/with-rls-context';
@@ -338,60 +335,10 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     });
   }
 
-  // Usage-driven line items with explicit event lineage.
-  if (period) {
-    const aggregates = await db
-      .select({
-        id: usageAggregates.id,
-        meterId: usageAggregates.meterId,
-        billableQuantity: usageAggregates.billableQuantity,
-        unitPrice: usageAggregates.unitPrice,
-        totalAmount: usageAggregates.totalAmount,
-        status: usageAggregates.status,
-        meterCode: usageMeters.code,
-        meterUnit: usageMeters.unit,
-      })
-      .from(usageAggregates)
-      .innerJoin(usageMeters, eq(usageMeters.id, usageAggregates.meterId))
-      .where(
-        and(
-          eq(usageAggregates.organizationId, input.organizationId),
-          eq(usageAggregates.billingPeriodId, input.billingPeriodId),
-        ),
-      );
-
-    for (const agg of aggregates) {
-      const amountCents = centsSafe(agg.totalAmount);
-      if (amountCents <= 0) continue;
-
-      const usageEventRows = await db
-        .select({ id: usageEvents.id })
-        .from(usageEvents)
-        .where(
-          and(
-            eq(usageEvents.organizationId, input.organizationId),
-            eq(usageEvents.meterId, agg.meterId),
-            sql`${usageEvents.eventTime} >= ${period.periodStart}`,
-            sql`${usageEvents.eventTime} <= ${period.periodEnd}`,
-          ),
-        );
-
-      lineItems.push({
-        description: `Usage ${agg.meterCode} (${agg.billableQuantity} ${agg.meterUnit})`,
-        costType: 'usage_fee',
-        quantity: String(agg.billableQuantity),
-        unitPrice: String(agg.unitPrice),
-        amount: String(agg.totalAmount),
-        metadata: {
-          usageAggregateId: agg.id,
-          meterId: agg.meterId,
-          meterCode: agg.meterCode,
-          usageAggregateStatus: agg.status,
-          usageEventIds: usageEventRows.map((r) => r.id),
-        },
-      });
-    }
-  }
+  // Usage-driven line items are not billed: metering is not implemented. The only writer of usage_events / usage_aggregates
+  // (usage-metering-service.ts) has no caller, so there is no usage to invoice, and the application's roles hold no grant on the
+  // metering tables (they are LATENT_UNREACHABLE in the storage-authority manifest). An invoice carries the subscription fees; when
+  // metering exists, its line items come back with the metering tables' authority declared.
 
   // Apply discount — cents-safe arithmetic
   let subtotalCents = lineItems.reduce((s, li) => s + centsSafe(li.amount), 0);
@@ -859,13 +806,14 @@ export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 
 // Queries
 // ============================================================================
 
-export async function getInvoices(organizationId: string, limit = 50) {
+export async function getInvoices(organizationId: string, limit = 50, offset = 0) {
   return db
     .select()
     .from(platformInvoices)
     .where(eq(platformInvoices.organizationId, organizationId))
-    .orderBy(desc(platformInvoices.issueDate))
-    .limit(limit);
+    .orderBy(desc(platformInvoices.issueDate), desc(platformInvoices.id))
+    .limit(limit)
+    .offset(offset);
 }
 
 /** eader is the caller's tenant transaction when the read and its audit record must commit together; it defaults to the shared handle. */

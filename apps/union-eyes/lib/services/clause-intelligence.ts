@@ -11,6 +11,7 @@
 
 import { db } from "@/db/db";
 import type { RLSTx } from "@/lib/db/with-rls-context";
+import { ApiError } from "@/lib/api/errors";
 import {
   cbaClause,
 } from "@/db/schema/domains/agreements/clauses";
@@ -216,7 +217,7 @@ export async function linkClauseToGrievance(
     .from(cbaClause)
     .where(and(eq(cbaClause.id, clauseId), eq(cbaClause.organizationId, organizationId)));
 
-  if (!clause) throw new Error("Clause not found.");
+  if (!clause) throw ApiError.notFound("Clause");
 
   // Import grievances table to update
   const { grievances } = await import(

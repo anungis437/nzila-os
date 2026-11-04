@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiErrorMessage } from '@/lib/client/api-envelope';
 
 interface AuthPolicy {
   organizationId?: string | null;
@@ -30,8 +31,8 @@ export function AuthPolicyForm() {
     try {
       const res = await fetch('/api/auth/policy', { cache: 'no-store' });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Could not load auth policy');
+        const data = await res.json().catch(() => null);
+        setError(apiErrorMessage(data, 'Could not load auth policy'));
         return;
       }
       const data = (await res.json()) as AuthPolicy;
@@ -77,9 +78,9 @@ export function AuthPolicyForm() {
           mfaRequiredForRoles: policy.mfaRequiredForRoles ?? [],
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error || 'Could not save policy');
+        setError(apiErrorMessage(data, 'Could not save policy'));
         return;
       }
       setPolicy({

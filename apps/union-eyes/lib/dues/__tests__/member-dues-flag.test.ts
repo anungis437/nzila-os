@@ -6,13 +6,13 @@ const m = vi.hoisted(() => ({
   createCheckoutSession: vi.fn(),
 }))
 
-// withApi is exercised elsewhere; here it is a pass-through so the handler's own gate is what runs.
+// withApi is exercised elsewhere; here it is a pass-through so the handler's own gate is what runs. The options a route declared stay on the handler.
 vi.mock('@/lib/api/framework', async () => {
   const { ApiError } = await import('@/lib/api/errors')
   return {
     ApiError,
     RATE_LIMITS: { FINANCIAL_WRITE: {} },
-    withApi: (_options: unknown, handler: (ctx: unknown) => unknown) => handler,
+    withApi: (options: unknown, handler: (ctx: unknown) => unknown) => Object.assign((ctx: unknown) => handler(ctx), { options }),
   }
 })
 vi.mock('@/lib/stripe', () => ({ stripe: {} }))
@@ -100,24 +100,21 @@ describe('member dues payment is a dormant optional capability', () => {
   })
 
   describe('POST /api/payments/checkout/create (legacy)', () => {
-    const request = () =>
-      ({
-        json: async () => ({
-          transactionId: '3f1c2a4e-5b6d-4e7f-8a9b-0c1d2e3f4a5b',
-          returnUrl: 'https://example.invalid/ok',
-          cancelUrl: 'https://example.invalid/no',
-        }),
-      }) as never
+    const body = {
+      transactionId: '3f1c2a4e-5b6d-4e7f-8a9b-0c1d2e3f4a5b',
+      returnUrl: 'https://example.invalid/ok',
+      cancelUrl: 'https://example.invalid/no',
+      processorType: 'stripe',
+    }
 
-    it('requires authentication before anything else', async () => {
-      m.auth.mockResolvedValue({ userId: null })
+    it('requires authentication before anything else: the framework refuses an unauthenticated call before the handler runs', async () => {
       const { POST } = await import('../../../app/api/payments/checkout/create/route')
-      expect((await POST(request())).status).toBe(401)
+      expect((POST as unknown as { options: { auth: { required: boolean } } }).options.auth).toEqual({ required: true })
     })
 
     it('answers 501 without touching the payment service when the capability is off', async () => {
       const { POST } = await import('../../../app/api/payments/checkout/create/route')
-      const response = await POST(request())
+      const response = await (POST as unknown as (c: unknown) => Promise<Response>)({ ...context, body })
       expect(response.status).toBe(501)
       expect(await response.json()).toMatchObject({ code: 'NOT_IMPLEMENTED' })
       expect(m.createCheckoutSession).not.toHaveBeenCalled()

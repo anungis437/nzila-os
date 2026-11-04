@@ -21,6 +21,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Dues dashboard aggregate stats' },

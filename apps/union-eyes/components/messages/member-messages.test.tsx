@@ -9,6 +9,8 @@ import enCA from '../../messages/en-CA.json'
 import frCA from '../../messages/fr-CA.json'
 import { MemberMessages } from './member-messages'
 
+vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }))
+
 type Handler = (init?: RequestInit) => { status?: number; body?: unknown }
 type Routes = Record<string, Handler>
 

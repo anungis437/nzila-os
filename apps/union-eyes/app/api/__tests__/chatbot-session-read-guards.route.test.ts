@@ -24,7 +24,8 @@ vi.mock('@/lib/api/errors', () => ({
   },
 }));
 
-const ctx = { params: { sessionId: 'session-1' }, userId: 'user-1', organizationId: 'org-1' };
+const SESSION_ID = '5e5a1c3e-0000-4000-8000-000000000001';
+const ctx = { params: { sessionId: SESSION_ID }, userId: 'user-1', organizationId: 'org-1' };
 
 describe('DEF-0B4 chatbot session transcript visibility', () => {
   beforeEach(() => {
@@ -39,13 +40,21 @@ describe('DEF-0B4 chatbot session transcript visibility', () => {
     const { GET } = await import('../chatbot/sessions/[sessionId]/messages/route');
     const result = await (GET as any)(ctx);
     expect(m.withApi).toHaveBeenCalledWith(expect.objectContaining({
-      entitlement: 'ai_chatbot',
+      entitlement: 'ai_advanced_insights',
       rateLimit: expect.objectContaining({ limit: 30 }),
     }), expect.any(Function));
     expect(result).toEqual({ data: [{ id: 'message-1' }] });
     expect(m.guardAiFeature).toHaveBeenCalledWith('ai_chatbot', { userId: 'user-1', organizationId: 'org-1' });
     expect(m.enforceAISafety).toHaveBeenCalledWith(expect.objectContaining({ action: 'GET', organizationId: 'org-1' }));
-    expect(m.getMessages).toHaveBeenCalledWith('session-1', { userId: 'user-1', organizationId: 'org-1' });
+    expect(m.getMessages).toHaveBeenCalledWith(SESSION_ID, { userId: 'user-1', organizationId: 'org-1' });
+  });
+
+  it('answers 404 for a session id that is not a uuid, without any feature check or database read', async () => {
+    const { GET } = await import('../chatbot/sessions/[sessionId]/messages/route');
+    await expect((GET as any)({ ...ctx, params: { sessionId: 'session-1' } })).rejects.toMatchObject({ status: 404 });
+    await expect((GET as any)({ ...ctx, params: {} })).rejects.toMatchObject({ status: 404 });
+    expect(m.guardAiFeature).not.toHaveBeenCalled();
+    expect(m.getMessages).not.toHaveBeenCalled();
   });
 
   it('does not disclose a transcript when the feature is disabled', async () => {

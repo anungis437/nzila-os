@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withSystemContext: vi.fn(),
+  withRLSContext: vi.fn(),
   auditLog: vi.fn(),
   persistAtomicAudit: vi.fn(),
   selectQueue: [] as unknown[][],
@@ -48,7 +49,7 @@ vi.mock('@/lib/api/framework', () => {
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
-  withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb),
+  withRLSContext: m.withRLSContext,
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
@@ -76,7 +77,7 @@ describe('admin/duplicates route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withApi.mockImplementation(
       (_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
@@ -103,7 +104,7 @@ describe('admin/duplicates route', () => {
     m.selectQueue.push(
       [{ count: 1 }],
       [{ id: 'g1', autoScore: 0.8, createdAt: new Date('2026-01-01'), reviewedAt: null }],
-      [{ id: 'm1', similarityScore: 0.95, createdAt: new Date('2026-01-01') }],
+      [{ id: 'm1', groupId: 'g1', similarityScore: 0.95, createdAt: new Date('2026-01-01') }],
     );
 
     const response = await GET(new NextRequest('http://localhost/api/admin/duplicates'), {
@@ -115,6 +116,39 @@ describe('admin/duplicates route', () => {
     expect(json.total).toBe(1);
     expect(json.groups).toHaveLength(1);
     expect(json.groups[0].members).toHaveLength(1);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('GET reads the members of every listed group in ONE query and does not mix groups up', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(
+      [{ count: 2 }],
+      [
+        { id: 'g1', autoScore: 0.8, createdAt: new Date('2026-01-01'), reviewedAt: null },
+        { id: 'g2', autoScore: 0.7, createdAt: new Date('2026-01-02'), reviewedAt: null },
+      ],
+      [
+        { id: 'm1', groupId: 'g1', similarityScore: 0.95, createdAt: new Date('2026-01-01') },
+        { id: 'm2', groupId: 'g2', similarityScore: 0.9, createdAt: new Date('2026-01-01') },
+        { id: 'm3', groupId: 'g2', similarityScore: 0.85, createdAt: new Date('2026-01-01') },
+      ],
+    );
+
+    const response = await GET(new NextRequest('http://localhost/api/admin/duplicates'), {
+      organizationId: 'org_1',
+      query: { limit: 20, offset: 0 },
+    });
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(mockDb.select).toHaveBeenCalledTimes(3);
+    expect(json.groups.map((group: { id: string; members: unknown[] }) => [group.id, group.members.length])).toEqual([['g1', 1], ['g2', 2]]);
+  });
+
+  it('GET declares the caller tenant transaction (rlsOrgContext) and never uses the system context', async () => {
+    vi.resetModules();
+    await loadRoute();
+    expect(m.withApi).toHaveBeenCalledWith(expect.objectContaining({ rlsOrgContext: true, auth: { minRole: 'admin' } }), expect.any(Function));
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 
   it('POST returns 400 when org context missing', async () => {
@@ -146,6 +180,11 @@ describe('admin/duplicates route', () => {
     const json = await response.json();
     expect(json.status).toBe('merged');
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'duplicate.merge', organizationId: 'org_1', userId: 'u1', resourceId: 'g1' }));
+    // The lookup, the resolution and the audit record are one tenant transaction of the caller's organization.
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: 'org_1' });
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.anything());
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 
   it('POST fails and reports no resolution when the in-transaction audit cannot be written', async () => {

@@ -8,8 +8,6 @@
  */
 
 import { withApi, z, ApiError } from '@/lib/api/framework';
-import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
-import { db } from '@/db/db';
 import { eq, and, inArray, sql } from 'drizzle-orm';
 import {
   ingestionBatches,
@@ -39,51 +37,40 @@ export const POST = withApi(
       throw ApiError.badRequest('Organization context required');
     }
 
-    // Verify batch exists and belongs to this org
-    const [batch] = await withSystemContext(async () =>
-      db
-        .select()
+    // The batch lookup, the failed-record read, the reset and the audit record are one tenant transaction (runtime role, the caller's
+    // organization): every failed record is re-queued with its audit record, or none is.
+    const failedCount = await withRLSContext({ organizationId }, async (tx) => {
+      const [batch] = await tx
+        .select({ id: ingestionBatches.id })
         .from(ingestionBatches)
         .where(
           and(
             eq(ingestionBatches.id, body.batch_id),
             eq(ingestionBatches.organizationId, organizationId),
           ),
-        ),
-    );
+        );
 
-    if (!batch) {
-      throw ApiError.notFound('Batch not found');
-    }
+      if (!batch) {
+        throw ApiError.notFound('Batch not found');
+      }
 
-    // Get failed records
-    const conditions = [
-      eq(ingestionRecords.batchId, body.batch_id),
-      eq(ingestionRecords.status, 'failed'),
-    ];
-    if (body.record_ids) {
-      conditions.push(inArray(ingestionRecords.id, body.record_ids));
-    }
+      const conditions = [
+        eq(ingestionRecords.batchId, body.batch_id),
+        eq(ingestionRecords.status, 'failed'),
+      ];
+      if (body.record_ids) {
+        conditions.push(inArray(ingestionRecords.id, body.record_ids));
+      }
 
-    const failedRecords = await withSystemContext(async () =>
-      db
-        .select()
+      const failedRecords = await tx
+        .select({ id: ingestionRecords.id })
         .from(ingestionRecords)
-        .where(and(...conditions)),
-    );
+        .where(and(...conditions));
 
-    if (failedRecords.length === 0) {
-      return {
-        retried: 0,
-        queued: 0,
-        succeeded: 0,
-        failed: 0,
-        message: 'No failed records found to queue for retry',
-      };
-    }
+      if (failedRecords.length === 0) {
+        return 0;
+      }
 
-    // Every reset and the audit record commit together: all failed records are re-queued or none are.
-    await withRLSContext({ organizationId }, async (tx) => {
       await tx
         .update(ingestionRecords)
         .set({ status: 'pending', errorMessage: null, errorDetails: null, processedAt: null })
@@ -102,15 +89,27 @@ export const POST = withApi(
         action: 'ingest.retry',
         details: { recordCount: failedRecords.length, recordIds: body.record_ids ?? 'all_failed' },
       });
+      return failedRecords.length;
     });
+
+    if (failedCount === 0) {
+      return {
+        retried: 0,
+        queued: 0,
+        succeeded: 0,
+        failed: 0,
+        message: 'No failed records found to queue for retry',
+      };
+    }
+
     // Re-queuing is NOT processing: report pending work, never a successful replay.
     // The legacy 'retried' count is retained as an alias for callers already using it.
     return {
-      retried: failedRecords.length,
-      queued: failedRecords.length,
+      retried: failedCount,
+      queued: failedCount,
       succeeded: 0,
       failed: 0,
-      message: `${failedRecords.length} records queued for retry; processing has not completed`,
+      message: `${failedCount} records queued for retry; processing has not completed`,
     };
   },
 );

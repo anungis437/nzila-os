@@ -1,7 +1,7 @@
 /**
  * AI Chatbot Service — Unit Tests
  *
- * Covers ChatSessionManager (6 methods), RAGService (3 methods),
+ * Covers ChatSessionManager (3 methods), RAGService (3 methods),
  * ChatbotService (sendMessage, getMessages).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({
   mockFetch: vi.fn(),
   audit: vi.fn(),
   operation: vi.fn(),
+  rls: vi.fn(),
   requireVector: vi.fn(),
   searchKb: vi.fn(),
   sourceCondition: vi.fn(),
@@ -124,7 +125,7 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 vi.mock("@/lib/db/with-rls-context", () => ({
-  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import("@/db")).db),
+  withRLSContext: mocks.rls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import("@/db")).db)),
 }));
 vi.mock("@/lib/audit/atomic-audit", () => ({ persistAtomicAudit: mocks.audit }));
 vi.mock("@/lib/audit/operation-audit", () => ({ performAuditedOperation: mocks.operation }));
@@ -189,7 +190,6 @@ describe("ChatSessionManager", () => {
     mocks.mockInsertReturning.mockResolvedValue([session]);
     mocks.mockSelectLimit.mockReturnValue(limitResult([session]));
     mocks.mockSelectOffset.mockResolvedValue([session]);
-    mocks.mockUpdateWhere.mockResolvedValue(undefined);
   });
 
   it("createSession returns new session", async () => {
@@ -198,15 +198,15 @@ describe("ChatSessionManager", () => {
     expect(s.title).toBe("Test chat");
   });
 
-  it("getSession returns session by id", async () => {
+  it('getSession returns session by id', async () => {
     mocks.mockSelectLimit.mockResolvedValueOnce([session]);
-    const s = await mgr.getSession("sess-1");
+    const s = await mgr.getSession("sess-1", "org-1");
     expect(s?.id).toBe("sess-1");
   });
 
   it("getSession returns null when not found", async () => {
     mocks.mockSelectLimit.mockResolvedValueOnce([]);
-    const s = await mgr.getSession("missing");
+    const s = await mgr.getSession("missing", "org-1");
     expect(s).toBeNull();
   });
 
@@ -220,21 +220,6 @@ describe("ChatSessionManager", () => {
     mocks.mockSelectOffset.mockResolvedValueOnce([]);
     const list = await mgr.getUserSessions("user-1", { status: "active" });
     expect(list).toEqual([]);
-  });
-
-  it("updateSessionTitle updates", async () => {
-    await mgr.updateSessionTitle("sess-1", "org-1", "Updated title");
-    expect(mocks.mockUpdateWhere).toHaveBeenCalled();
-  });
-
-  it("archiveSession sets archived status", async () => {
-    await mgr.archiveSession("sess-1", "org-1");
-    expect(mocks.mockUpdateWhere).toHaveBeenCalled();
-  });
-
-  it("deleteSession sets deleted status", async () => {
-    await mgr.deleteSession("sess-1", "org-1");
-    expect(mocks.mockUpdateWhere).toHaveBeenCalled();
   });
 });
 
@@ -451,6 +436,22 @@ describe("ChatbotService", () => {
 
     expect(msg.role).toBe("assistant");
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("RAG search failed"), expect.objectContaining({ error: "database down" }));
+  });
+
+  it("sendMessage and getMessages read and write only in the tenant transaction of the session's organization, never on the ambient handle", async () => {
+    mocks.rls.mockClear();
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    await bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "What are my rights?" });
+    // the session lookup, the history read and the exchange commit are three short transactions; none stays open around the model call
+    const sendScopes = mocks.rls.mock.calls.map((call) => call[0]);
+    expect(sendScopes.length).toBeGreaterThanOrEqual(3);
+    expect(sendScopes.every((scope) => scope.organizationId === "org-1")).toBe(true);
+
+    mocks.rls.mockClear();
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    mocks.mockSelectOffset.mockResolvedValueOnce([]);
+    await bot.getMessages("sess-1", { userId: "user-1", organizationId: "org-1" });
+    expect(mocks.rls.mock.calls.map((call) => call[0])).toEqual([{ organizationId: "org-1" }, { organizationId: "org-1" }]);
   });
 
   it("sendMessage stores the exchange with its audit record on the same transaction", async () => {

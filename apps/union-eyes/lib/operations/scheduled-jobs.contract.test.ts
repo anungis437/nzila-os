@@ -72,6 +72,7 @@ describe('scheduled jobs manifest', () => {
     'cron/monthly-dues': 'UE-CRON-MONTHLY-DUES',
     'cron/analytics/daily-metrics': 'UE-CRON-DAILY-METRICS',
     'cron/billing-lifecycle': 'UE-CRON-BILLING-LIFECYCLE',
+    'cron/calendar-sync': 'UE-ACTION-CALENDAR-SYNC',
   }
 
   it('schedules no route that answers 501, and keeps a route off the schedule only while it does', () => {

@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   listVotingSessions: vi.fn(),
-  rows: { options: [] as unknown[], counts: [] as unknown[] },
+  rows: { options: [] as unknown[], counts: [] as unknown[], failOptions: false },
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, z: require('zod').z }));
@@ -19,7 +19,15 @@ vi.mock('@/db/db', () => ({
   db: {
     select: (shape?: unknown) => ({
       from: () => ({
-        where: () => (shape ? { groupBy: async () => m.rows.counts } : { orderBy: async () => m.rows.options }),
+        where: () =>
+          shape
+            ? { groupBy: async () => m.rows.counts }
+            : {
+                orderBy: async () => {
+                  if (m.rows.failOptions) throw new Error('options query failed');
+                  return m.rows.options;
+                },
+              },
       }),
     }),
   },
@@ -35,6 +43,7 @@ describe('voting/sessions list withholds tallies (UE-CONV-K-009, G12)', () => {
       { id: 'o2', sessionId: 's1', text: 'No', description: null, orderIndex: 1 },
     ];
     m.rows.counts = [{ optionId: 'o1', count: 7 }, { optionId: 'o2', count: 3 }];
+    m.rows.failOptions = false;
     m.listVotingSessions.mockResolvedValue({ sessions: [{ id: 's1', status: 'active' }], total: 1, page: 1, limit: 20 });
   });
 
@@ -50,5 +59,27 @@ describe('voting/sessions list withholds tallies (UE-CONV-K-009, G12)', () => {
       expect(option).not.toHaveProperty('percentage');
     }
     expect(JSON.stringify(body)).not.toMatch(/"(votes|percentage)"/);
+  });
+
+  it('answers a listing failure as a failure: an empty list would read as "no ballots"', async () => {
+    m.listVotingSessions.mockRejectedValue(new Error('Failed to list voting sessions'));
+    const { GET } = await import('../voting/sessions/route');
+    await expect((GET as never as (r: NextRequest) => Promise<Response>)(new NextRequest('http://localhost/api/voting/sessions')))
+      .rejects.toThrow('Failed to list voting sessions');
+  });
+
+  it('answers an options failure as a failure: sessions without options cannot be voted in', async () => {
+    m.rows.failOptions = true;
+    const { GET } = await import('../voting/sessions/route');
+    await expect((GET as never as (r: NextRequest) => Promise<Response>)(new NextRequest('http://localhost/api/voting/sessions')))
+      .rejects.toThrow('options query failed');
+  });
+
+  it('lists an empty organisation as an empty page, with the paging it was asked for', async () => {
+    m.listVotingSessions.mockResolvedValue({ sessions: [], total: 0, page: 2, limit: 50 });
+    const { GET } = await import('../voting/sessions/route');
+    const body = await (await (GET as never as (r: NextRequest) => Promise<Response>)(new NextRequest('http://localhost/api/voting/sessions?page=2&limit=50'))).json();
+    expect(body).toEqual({ sessions: [], total: 0, page: 2, limit: 50 });
+    expect(m.listVotingSessions).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1' }), { page: 2, limit: 50 });
   });
 });

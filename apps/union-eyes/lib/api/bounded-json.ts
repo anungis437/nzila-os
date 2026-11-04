@@ -13,8 +13,10 @@ export class RequestBodyTooLargeError extends Error {
 export async function readBoundedJson(request: Request, maxBytes: number): Promise<unknown> {
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new RangeError('Invalid request body byte limit')
 
-  const declared = request.headers.get('content-length')
+  // A request double without headers or a stream (unit tests of handlers) has nothing to bound: it can only be read whole.
+  const declared = request.headers?.get?.('content-length') ?? null
   if (declared !== null && /^\d+$/.test(declared) && Number(declared) > maxBytes) {
+    abandon(request.body)
     throw new RequestBodyTooLargeError()
   }
 
@@ -30,7 +32,7 @@ export async function readBoundedJson(request: Request, maxBytes: number): Promi
       if (done) break
       bytes += value.byteLength
       if (bytes > maxBytes) {
-        await reader.cancel().catch(() => undefined)
+        abandon(reader)
         throw new RequestBodyTooLargeError()
       }
       text += decoder.decode(value, { stream: true })
@@ -40,4 +42,12 @@ export async function readBoundedJson(request: Request, maxBytes: number): Promi
   } finally {
     reader.releaseLock()
   }
+}
+
+/**
+ * Stops reading what the caller is still sending. Never awaited: a cancel on one branch of a tee'd stream (a cloned request, which is how
+ * `withApi` reads a body) settles only once the other branch is cancelled too, so waiting for it would hang the request it is refusing.
+ */
+function abandon(stream: { cancel(): Promise<void> } | null | undefined): void {
+  void stream?.cancel().catch(() => undefined)
 }

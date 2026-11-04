@@ -26,7 +26,6 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import type { SelectProfile } from "@/db/schema/domains/member";
 import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
 import { Badge } from "@/components/ui/badge";
@@ -50,10 +49,7 @@ import { navigationDestination, selectedNavigationDestination } from '@/lib/dash
 import { navigationCopyKey } from '@/lib/dashboard/navigation-copy';
 
 interface SidebarProps {
-  profile: SelectProfile | null;
   userEmail?: string;
-  whopMonthlyPlanId: string;
-  whopYearlyPlanId: string;
   userRole?: string;
   platformOrgId?: string;
 }
@@ -90,7 +86,6 @@ function IconForItem({ item }: { item: NavigationItem }) {
 }
 
 export default function Sidebar({
-  profile,
   userEmail,
   userRole,
   platformOrgId,
@@ -186,7 +181,7 @@ export default function Sidebar({
     return result;
   }, [items]);
 
-  const identityLabel = userEmail || profile?.email || "User";
+  const identityLabel = userEmail || "User";
 
   const withLocale = (href: string) => `/${locale}${href}`;
 
@@ -198,7 +193,7 @@ export default function Sidebar({
     try {
       window.localStorage.setItem(LS_COLLAPSED, next ? "1" : "0");
     } catch {
-      /* ignore */
+      /* Storage is unavailable (private mode): the collapsed state lasts for this visit only. */
     }
   };
 
@@ -210,7 +205,7 @@ export default function Sidebar({
       try {
         window.localStorage.setItem(LS_GROUPS, JSON.stringify([...next]));
       } catch {
-        /* ignore */
+        /* Storage is unavailable (private mode): the group state lasts for this visit only. */
       }
       return next;
     });

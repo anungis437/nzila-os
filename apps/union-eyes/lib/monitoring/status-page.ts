@@ -1,17 +1,18 @@
-﻿/**
+/**
  * System Status Page
- * 
- * Monitors critical service health and provides public status page
- * Compatible with Pingdom, UptimeRobot, and custom monitoring
- * 
+ *
+ * The status of the services a deployment depends on, for the public status page (/api/status) and the GraphQL `systemStatus` query. Every service listed is
+ * measured: the database with a query, and the cache, document storage and job backend with the probes /api/health and /api/ready use
+ * (lib/operations/service-probes.ts). A service that is not configured is reported as degraded with the reason, never as operational.
+ *
  * Usage:
  * ```typescript
  * // Get current status
  * const status = await getSystemStatus();
- * 
+ *
  * // Check specific service
  * const dbHealth = await checkDatabaseHealth();
- * 
+ *
  * // API endpoint: /api/status
  * ```
  */
@@ -20,17 +21,28 @@ import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { cache } from 'react';
+import { getBuildMetadata } from '@nzila/os-core/health';
+import { probeCache, probeQueue, probeStorage, type ProbeResult } from '@/lib/operations/service-probes';
 import type { ServiceHealth, ServiceStatus, SystemStatus } from './status-utils';
 
 // Re-export types so existing server-side imports still work
 export type { ServiceStatus, ServiceHealth, SystemStatus };
 
+/** What the running build calls itself: an operator's label, else the release or commit it was built from, else "unknown". Never an invented number. */
+function runningVersion(): string {
+  const label = process.env.APP_VERSION?.trim();
+  if (label) return label;
+  const build = getBuildMetadata('union-eyes');
+  for (const candidate of [build.releaseId, build.gitSha]) {
+    if (candidate && candidate !== 'unknown' && candidate !== 'local') return candidate;
+  }
+  return 'unknown';
+}
+
 /**
  * Get overall system status
  */
 export const getSystemStatus = cache(async (): Promise<SystemStatus> => {
-  const _startTime = Date.now();
-
   try {
     // Check all services in parallel
     const [database, redis, storage, queue] = await Promise.allSettled([
@@ -54,17 +66,17 @@ export const getSystemStatus = cache(async (): Promise<SystemStatus> => {
       status: overallStatus,
       services,
       uptime: process.uptime(),
-      version: process.env.APP_VERSION || '1.0.0',
+      version: runningVersion(),
       timestamp: new Date(),
     };
   } catch (error) {
     logger.error('Failed to get system status', { error });
-    
+
     return {
       status: 'down',
       services: [],
       uptime: process.uptime(),
-      version: process.env.APP_VERSION || '1.0.0',
+      version: runningVersion(),
       timestamp: new Date(),
     };
   }
@@ -79,7 +91,7 @@ export async function checkDatabaseHealth(): Promise<ServiceHealth> {
   try {
     // Simple query to verify connection
     await db.execute(sql`SELECT 1 as health`);
-    
+
     const responseTime = Date.now() - startTime;
 
     return {
@@ -91,137 +103,47 @@ export async function checkDatabaseHealth(): Promise<ServiceHealth> {
     };
   } catch (error) {
     logger.error('Database health check failed', { error });
-    
+
     return {
       name: 'Database',
       status: 'down',
       responseTime: Date.now() - startTime,
-      message: error instanceof Error ? error.message : 'Connection failed',
+      message: 'Connection failed',
       lastChecked: new Date(),
     };
   }
 }
 
+function fromProbe(name: string, probe: ProbeResult): ServiceHealth {
+  const status: ServiceStatus = probe.state === 'ok' ? 'healthy' : probe.state === 'fail' ? 'down' : 'degraded';
+  return {
+    name,
+    status,
+    ...(probe.ms === undefined ? {} : { responseTime: probe.ms }),
+    message: probe.state === 'ok' ? 'Operational' : (probe.note ?? 'Not operational'),
+    lastChecked: new Date(),
+  };
+}
+
 /**
- * Check Redis health (cache/session store)
+ * Check the shared store of the rate limiter (Upstash or Redis). Without it rate limiting is degraded, so the answer is degraded, not healthy.
  */
 export async function checkRedisHealth(): Promise<ServiceHealth> {
-  const startTime = Date.now();
-
-  try {
-    // Check if Redis is configured
-    if (!process.env.REDIS_URL && !process.env.KV_REST_API_URL) {
-      return {
-        name: 'Redis',
-        status: 'healthy',
-        message: 'Not configured (optional)',
-        lastChecked: new Date(),
-      };
-    }
-
-    // Attempt to ping Redis
-    // Note: Actual implementation would use your Redis client
-    // For now, we&apos;ll simulate a check
-    const responseTime = Date.now() - startTime;
-
-    return {
-      name: 'Redis',
-      status: 'healthy',
-      responseTime,
-      message: 'Operational',
-      lastChecked: new Date(),
-    };
-  } catch (error) {
-    logger.error('Redis health check failed', { error });
-    
-    return {
-      name: 'Redis',
-      status: 'down',
-      responseTime: Date.now() - startTime,
-      message: error instanceof Error ? error.message : 'Connection failed',
-      lastChecked: new Date(),
-    };
-  }
+  return fromProbe('Redis', await probeCache());
 }
 
 /**
- * Check storage health (S3/blob storage)
+ * Check document storage (the Azure Blob container member documents are written to)
  */
 export async function checkStorageHealth(): Promise<ServiceHealth> {
-  const startTime = Date.now();
-
-  try {
-    // Check if storage is configured
-    if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.AWS_S3_BUCKET) {
-      return {
-        name: 'Storage',
-        status: 'healthy',
-        message: 'Azure Blob Storage (managed)',
-        lastChecked: new Date(),
-      };
-    }
-
-    // Simulate storage check
-    const responseTime = Date.now() - startTime;
-
-    return {
-      name: 'Storage',
-      status: 'healthy',
-      responseTime,
-      message: 'Operational',
-      lastChecked: new Date(),
-    };
-  } catch (error) {
-    logger.error('Storage health check failed', { error });
-    
-    return {
-      name: 'Storage',
-      status: 'degraded',
-      responseTime: Date.now() - startTime,
-      message: error instanceof Error ? error.message : 'Connection failed',
-      lastChecked: new Date(),
-    };
-  }
+  return fromProbe('Storage', await probeStorage());
 }
 
 /**
- * Check queue health (job processing)
+ * Check queue health: background jobs run in the Django backend, so this is the backend's own readiness
  */
 export async function checkQueueHealth(): Promise<ServiceHealth> {
-  const startTime = Date.now();
-
-  try {
-    // Check if queue is configured
-    if (!process.env.QUEUE_URL) {
-      return {
-        name: 'Queue',
-        status: 'healthy',
-        message: 'Operational',
-        lastChecked: new Date(),
-      };
-    }
-
-    // Simulate queue check
-    const responseTime = Date.now() - startTime;
-
-    return {
-      name: 'Queue',
-      status: 'healthy',
-      responseTime,
-      message: 'Operational',
-      lastChecked: new Date(),
-    };
-  } catch (error) {
-    logger.error('Queue health check failed', { error });
-    
-    return {
-      name: 'Queue',
-      status: 'degraded',
-      responseTime: Date.now() - startTime,
-      message: error instanceof Error ? error.message : 'Connection failed',
-      lastChecked: new Date(),
-    };
-  }
+  return fromProbe('Queue', await probeQueue());
 }
 
 /**
@@ -244,13 +166,14 @@ function determineOverallStatus(services: ServiceHealth[]): ServiceStatus {
 }
 
 /**
- * Create failed service health object
+ * Create failed service health object. The status is public: what went wrong is logged, never published (an error message can carry hosts and addresses).
  */
-function getFailedService(name: string, error: any): ServiceHealth {
+function getFailedService(name: string, error: unknown): ServiceHealth {
+  logger.error('Service health check failed', { service: name, error });
   return {
     name,
     status: 'down',
-    message: error instanceof Error ? error.message : 'Health check failed',
+    message: 'Health check failed',
     lastChecked: new Date(),
   };
 }

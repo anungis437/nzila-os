@@ -6,6 +6,8 @@ const { loadCognitionMemory } = vi.hoisted(() => ({ loadCognitionMemory: vi.fn()
 vi.mock('@/lib/knowledge-transfer/cognition-memory/memory-store', () => ({ loadCognitionMemory }))
 vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'condition' }))
 vi.mock('@/db/db', () => ({ db: {} }))
+// topic-graph-builder reads through the organization's tenant transaction helper; the helper is not exercised by these cases.
+vi.mock('@/lib/knowledge-transfer/org-scope', () => ({ isUuid: () => true, inOrganization: async (_org: string, work: (tx: unknown) => Promise<unknown>) => work({}) }))
 vi.mock('@/db/schema', () => ({ exitInterviews: {} }))
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }))
 

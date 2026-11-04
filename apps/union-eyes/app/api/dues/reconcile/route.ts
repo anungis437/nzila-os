@@ -20,6 +20,7 @@ export const POST = withApi(
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     body: reconcileSchema,
+    rlsOrgContext: true,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {
       tags: ['Dues'],

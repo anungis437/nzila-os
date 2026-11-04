@@ -9,7 +9,6 @@ import { stripMarkup } from './strip-markup';
 const TRUSTED_REDIRECT_DOMAINS = [
   'checkout.stripe.com',
   'billing.stripe.com',
-  'whop.com',
   'checkout.shopify.com',
   'appcenter.intuit.com',     // QBO OAuth
   'accounts.intuit.com',      // QBO OAuth

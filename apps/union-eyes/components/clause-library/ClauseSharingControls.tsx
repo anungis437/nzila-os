@@ -110,6 +110,7 @@ export function ClauseSharingControls({
     currentSettings.anonymizedEmployerName || "Anonymous Employer"
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Reset form when dialog opens or settings change
   useEffect(() => {
@@ -119,10 +120,12 @@ export function ClauseSharingControls({
     setAnonymizedEmployerName(
       currentSettings.anonymizedEmployerName || "Anonymous Employer"
     );
+    setSaveError(null);
   }, [open, currentSettings]);
 
   const handleSave = async () => {
     setIsSaving(true);
+    setSaveError(null);
     try {
       await onSave({
         sharingLevel,
@@ -131,8 +134,9 @@ export function ClauseSharingControls({
         anonymizedEmployerName: isAnonymized ? anonymizedEmployerName : undefined,
       });
       onOpenChange(false);
-    } catch (_error) {
-} finally {
+    } catch (error) {
+      setSaveError(error instanceof Error && error.message ? error.message : "The sharing settings could not be saved.");
+    } finally {
       setIsSaving(false);
     }
   };
@@ -278,6 +282,12 @@ export function ClauseSharingControls({
             </Alert>
           )}
         </div>
+
+        {saveError && (
+          <Alert variant="destructive" data-testid="sharing-save-error">
+            <AlertDescription>{saveError}</AlertDescription>
+          </Alert>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>

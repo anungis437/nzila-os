@@ -71,7 +71,7 @@ const claimCreateSchema = z
 
 export const dynamic = 'force-dynamic'
 
-const handlers = crudRoutes({
+const { GET } = crudRoutes({
   table: claims,
   pk: 'claimId',
   tags: ['Claims'],
@@ -81,7 +81,7 @@ const handlers = crudRoutes({
   writeRole: 'steward',
 })
 
-export const GET = handlers.GET
+export { GET }
 
 /**
  * Custom POST: auto-generates claimNumber (CLM-YYYYMMDD-XXXX)
@@ -97,7 +97,11 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    const parsed = claimCreateSchema.safeParse(body ?? {})
+    // Every field of a claim is optional, so a missing or malformed body would otherwise validate as `{}` and create an empty claim.
+    if (body === undefined || body === null || typeof body !== 'object' || Array.isArray(body)) {
+      throw ApiError.badRequest('A JSON object body is required')
+    }
+    const parsed = claimCreateSchema.safeParse(body)
     if (!parsed.success) {
       throw ApiError.badRequest(parsed.error.issues.map((e) => e.message).join('; '))
     }

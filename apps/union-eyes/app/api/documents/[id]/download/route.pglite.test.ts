@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
+import { caller, resetCaller } from '@/app/api/__tests__/support/with-api-stub';
 
 const state = vi.hoisted(() => ({
   db: null as unknown,
@@ -14,12 +15,11 @@ const state = vi.hoisted(() => ({
   sas: vi.fn(async () => 'https://storage.example/signed.pdf'),
 }));
 
-vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: (handler: (...args: unknown[]) => unknown) => handler,
-}));
+vi.mock('@/lib/api/framework', async () => (await import('@/app/api/__tests__/support/with-api-stub')).frameworkModule);
 
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({
-  requireEntitlement: vi.fn(async () => undefined),
+// The route opens its own organization transaction: here that is the PostgreSQL handle, on the tenant role the test selected.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) => operation(state.db),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -28,10 +28,8 @@ vi.mock('@/lib/api-auth-guard', () => ({
 
 vi.mock('@/db/db', () => ({
   db: new Proxy({}, {
-    get(_target, property) {
-      const database = state.db as Record<PropertyKey, unknown> | null;
-      const value = database ? database[property] : undefined;
-      return typeof value === 'function' ? value.bind(database) : value;
+    get() {
+      throw new Error('the ambient database handle was used');
     },
   }),
 }));
@@ -85,10 +83,12 @@ async function insertDocument(id: string, organizationId: string, privacyLabel: 
 
 async function callDownload(organizationId: string, documentId: string, userId = USER) {
   await asTenant(organizationId);
+  caller.organizationId = organizationId;
+  caller.userId = userId;
+  caller.role = state.member ? 'member' : 'guest';
   return GET(
     new Request(`https://example.test/api/documents/${documentId}/download`),
-    { organizationId, userId },
-    { id: documentId },
+    { params: { id: documentId } },
   );
 }
 
@@ -369,10 +369,13 @@ describe('GET /api/documents/[id]/download against PostgreSQL', () => {
   });
 
   it('rejects malformed ids, missing storage, and a failed audit write without returning a url', async () => {
+    resetCaller();
+    caller.organizationId = ORG_A;
+    caller.userId = USER;
+    caller.role = 'member';
     const malformed = await GET(
       new Request('https://example.test/api/documents/not-a-uuid/download'),
-      { organizationId: ORG_A, userId: USER },
-      { id: 'not-a-uuid' },
+      { params: { id: 'not-a-uuid' } },
     );
     expect(malformed.status).toBe(400);
 

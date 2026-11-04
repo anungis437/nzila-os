@@ -95,7 +95,7 @@ describe('S6 verified and small fixes', () => {
     const route = read('app/api/health-safety/stats/route.ts')
     expect(route).toContain('trainingDue: recordsHeld > 0 ? Number(row.training_due ?? 0) : null')
     expect(route).toContain('trainingRecordsHeld: recordsHeld')
-    expect(read('app/[locale]/dashboard/health-safety/training/page.tsx')).toContain('totalRecords: json.trainingRecordsHeld ?? 0')
+    expect(read('app/[locale]/dashboard/health-safety/training/page.tsx')).toContain('recordsHeld: requiredCount(data, "trainingRecordsHeld")')
   })
 
   it('enrols a pension member only in a plan of the organization, under the plan\'s own name, with a bounded years-of-service figure', () => {

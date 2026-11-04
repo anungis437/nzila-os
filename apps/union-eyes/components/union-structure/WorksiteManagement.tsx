@@ -1,19 +1,20 @@
 /**
  * Worksite Management Component
- * 
- * CRUD interface for managing worksite orgs (physical work locations).
+ *
+ * The worksites of the organization (physical work locations), over /api/worksites: list, create, edit and archive.
+ * Writing needs the steward role and archiving the administrator role. The route decides, and its refusal is shown as the route states it.
+ * The route leaves the site manager, the notes and the custom fields out of what it sends, so this screen neither shows nor rewrites them.
  */
 "use client";
 
-import { useState, useEffect } from "react";
-import { logger } from "@/lib/logger";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { MapPin, Plus, Edit, Trash2, Search, MoreVertical, Building2, RefreshCw } from "lucide-react";
+import { Archive, Building2, Edit, MapPin, MoreVertical, Plus, RefreshCw, Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import{ Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,47 +22,83 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { createWorksiteSchema } from "@/lib/validation/union-structure-schemas";
+import { logger } from "@/lib/logger";
+import { readApiError } from "@/lib/client/api-envelope";
+import { humanize } from "@/lib/client/row-fields";
+import {
+  addressFieldsOf,
+  EMPTY_ADDRESS_FIELDS,
+  failureText,
+  formatLocation,
+  integerOrNull,
+  loadEmployers,
+  loadWorksites,
+  provinceChoices,
+  textOrNull,
+  toAddressPayload,
+  type Address,
+  type EmployerRow,
+  type WorksiteRow,
+} from "./structure-data";
 
-// NOTE: Known TypeScript limitation with react-hook-form + Zod schemas using .default()
-// The base schema's address fields use .default(), creating optional types that conflict with
-// react-hook-form's strict type inference. Runtime behavior is correct - suppressing type errors below.
-const formSchema = createWorksiteSchema.omit({
-  organizationId: true,
-}).extend({
-  status: z.enum(['active', 'temporarily_closed', 'permanently_closed', 'seasonal', 'archived']),
-  operatesWeekends: z.boolean(),
-  operates24Hours: z.boolean(),
+const WORKSITE_STATUSES: Record<string, string> = {
+  active: "Active",
+  temporarily_closed: "Temporarily Closed",
+  permanently_closed: "Permanently Closed",
+  seasonal: "Seasonal",
+  archived: "Archived",
+};
+
+const WORKSITE_STATUS_CODES = Object.keys(WORKSITE_STATUSES);
+
+// Only what the form edits and /api/worksites takes from a steward. The count is text here so that a blank field is blank, not zero.
+const formSchema = z.object({
+  employerId: z.string().min(1, "Employer is required"),
+  name: z.string().trim().min(1, "Name is required").max(255),
+  code: z.string().max(50),
+  status: z.string().refine((code) => WORKSITE_STATUS_CODES.includes(code), "Select a status"),
+  employeeCount: z.string().regex(/^\d{0,9}$/, "Enter a whole number"),
+  street: z.string().max(255),
+  city: z.string().max(255),
+  province: z.string().max(50),
+  postalCode: z.string().max(20),
 });
 
-type WorksiteFormData = z.infer<typeof formSchema>;
+type WorksiteFormValues = z.infer<typeof formSchema>;
 
-interface Worksite {
-  id: string;
-  organizationId: string;
-  employerId: string;
-  name: string;
-  code?: string;
-  worksiteType?: string;
-  address?: string;
-  city?: string;
-  province?: string;
-  postalCode?: string;
-  country?: string;
-  status: string;
-  totalEmployees?: number;
-  createdAt: string;
-  employer?: {
-    name: string;
-  };
-  _count?: {
-    bargainingUnits: number;
+const EMPTY_FORM: WorksiteFormValues = {
+  employerId: "",
+  name: "",
+  code: "",
+  status: "active",
+  employeeCount: "",
+  ...EMPTY_ADDRESS_FIELDS,
+};
+
+function formValuesOf(worksite: WorksiteRow): WorksiteFormValues {
+  return {
+    employerId: worksite.employerId,
+    name: worksite.name,
+    code: worksite.code ?? "",
+    status: worksite.status,
+    employeeCount: worksite.employeeCount === null ? "" : String(worksite.employeeCount),
+    ...addressFieldsOf(worksite.address),
   };
 }
 
-interface Employer {
-  id: string;
-  name: string;
+/** The body POST /api/worksites and PATCH /api/worksites/{id} take: a blank optional field is sent as null, which clears it. */
+export function toWorksitePayload(values: WorksiteFormValues, existingAddress: Address | null) {
+  return {
+    employerId: values.employerId,
+    name: values.name,
+    code: textOrNull(values.code),
+    status: values.status,
+    employeeCount: integerOrNull(values.employeeCount),
+    address: toAddressPayload(
+      { street: values.street, city: values.city, province: values.province, postalCode: values.postalCode },
+      existingAddress,
+    ),
+  };
 }
 
 interface WorksiteManagementProps {
@@ -70,160 +107,93 @@ interface WorksiteManagementProps {
 }
 
 export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagementProps) {
-  const [worksites, setWorksites] = useState<Worksite[]>([]);
-  const [employers, setEmployers] = useState<Employer[]>([]);
+  const [worksites, setWorksites] = useState<WorksiteRow[]>([]);
+  const [employers, setEmployers] = useState<EmployerRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingWorksite, setEditingWorksite] = useState<Worksite | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingWorksite, setEditingWorksite] = useState<WorksiteRow | null>(null);
   const { toast } = useToast();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form = useForm<WorksiteFormData, any, WorksiteFormData>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(formSchema) as any,
-    defaultValues: {
-      employerId: "",
-      name: "",
-      code: "",
-      status: "active",
-      address: {
-        street: "",
-        city: "",
-        province: "",
-        postal_code: "",
-        country: "Canada",
-      },
-      employeeCount: 0,
-      shiftCount: 0,
-      operatesWeekends: false,
-      operates24Hours: false,
-      siteManagerName: "",
-      siteManagerEmail: "",
-      siteManagerPhone: "",
-      description: "",
-      notes: "",
-    },
+  const form = useForm<WorksiteFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: EMPTY_FORM,
   });
 
   useEffect(() => {
-    fetchWorksites();
-    fetchEmployers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organizationId]);
+    let current = true;
+    Promise.all([loadWorksites(), loadEmployers()]).then(
+      ([worksiteRows, employerRows]) => {
+        if (!current) return;
+        setWorksites(worksiteRows);
+        setEmployers(employerRows);
+        setLoadError(null);
+        setIsLoading(false);
+      },
+      (error: unknown) => {
+        logger.error("Failed to load worksites", error);
+        if (!current) return;
+        // The employer names and choices come from the second list, so either one failing leaves the screen incomplete: an error, never a partial table.
+        setWorksites([]);
+        setEmployers([]);
+        setLoadError(failureText(error, "Unknown error"));
+        setIsLoading(false);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [organizationId, reloadKey]);
 
-  const fetchWorksites = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/worksites?organizationId=${organizationId}`);
-      if (!response.ok) throw new Error("Failed to fetch worksites");
-      const data = await response.json();
-      setWorksites(data.data || []);
-    } catch (_error) {
-      toast({
-        title: "Error",
-        description: "Failed to load worksites",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchEmployers = async () => {
-    try {
-      const response = await fetch(`/api/employers?organizationId=${organizationId}`);
-      if (!response.ok) throw new Error("Failed to fetch employers");
-      const data = await response.json();
-      setEmployers(data.data || []);
-    } catch (error) {
-      logger.error("Failed to load employers", error);
-    }
+  const reload = () => {
+    setIsLoading(true);
+    setReloadKey((key) => key + 1);
   };
 
   const handleCreate = () => {
     setEditingWorksite(null);
-    form.reset();
+    form.reset(EMPTY_FORM);
     setIsDialogOpen(true);
   };
 
-  const handleEdit = (worksite: Worksite) => {
+  const handleEdit = (worksite: WorksiteRow) => {
     setEditingWorksite(worksite);
-    // @ts-expect-error - Type mismatch between DB model and form schema (known limitation)
-    form.reset({
-      employerId: worksite.employerId,
-      name: worksite.name,
-      code: worksite.code || "",
-      status: worksite.status,
-      address: {
-        street: worksite.address || "",
-        city: worksite.city || "",
-        province: worksite.province || "",
-        postal_code: worksite.postalCode || "",
-        country: worksite.country || "Canada",
-      },
-      employeeCount: worksite.totalEmployees || 0,
-      shiftCount: 0,
-      operatesWeekends: false,
-      operates24Hours: false,
-      siteManagerName: "",
-      siteManagerEmail: "",
-      siteManagerPhone: "",
-      description: "",
-      notes: "",
-    });
+    form.reset(formValuesOf(worksite));
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string, worksiteName: string) => {
-    if (!confirm(`Archive worksite '${worksiteName}'?`)) return;
+  const handleArchive = async (worksite: WorksiteRow) => {
+    if (!confirm(`Archive worksite '${worksite.name}'? The record is kept, with its status set to archived.`)) return;
 
     try {
-      const response = await fetch(`/api/worksites/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Failed to delete worksite");
+      const response = await fetch(`/api/worksites/${encodeURIComponent(worksite.id)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(await readApiError(response, "Failed to archive worksite"));
 
-      toast({
-        title: "Success",
-        description: "Worksite deleted successfully",
-      });
-
-      fetchWorksites();
+      toast({ title: "Success", description: "Worksite archived" });
+      reload();
       onUpdate?.();
-    } catch (_error) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete worksite",
+        description: failureText(error, "Failed to archive worksite"),
         variant: "destructive",
       });
     }
   };
 
-  const onSubmit = async (data: WorksiteFormData) => {
+  const onSubmit = async (values: WorksiteFormValues) => {
     try {
-      setIsSubmitting(true);
-
-      const payload = {
-        ...data,
-        organizationId,
-      };
-
-      const url = editingWorksite
-        ? `/api/worksites/${editingWorksite.id}`
-        : `/api/worksites`;
-
-      const method = editingWorksite ? "PATCH" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to save worksite");
-      }
+      const response = await fetch(
+        editingWorksite ? `/api/worksites/${encodeURIComponent(editingWorksite.id)}` : "/api/worksites",
+        {
+          method: editingWorksite ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(toWorksitePayload(values, editingWorksite?.address ?? null)),
+        },
+      );
+      if (!response.ok) throw new Error(await readApiError(response, "Failed to save worksite"));
 
       toast({
         title: "Success",
@@ -231,23 +201,27 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
       });
 
       setIsDialogOpen(false);
-      fetchWorksites();
+      reload();
       onUpdate?.();
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to save worksite",
+        description: failureText(error, "Failed to save worksite"),
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const filteredWorksites = worksites.filter((worksite) =>
-    worksite.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    worksite.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    worksite.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  const employerNameOf = (worksite: WorksiteRow) =>
+    employers.find((employer) => employer.id === worksite.employerId)?.name;
+
+  const query = searchQuery.toLowerCase();
+  const filteredWorksites = worksites.filter(
+    (worksite) =>
+      worksite.status !== "archived" &&
+      (worksite.name.toLowerCase().includes(query) ||
+        worksite.code?.toLowerCase().includes(query) ||
+        worksite.address?.city?.toLowerCase().includes(query)),
   );
 
   return (
@@ -262,7 +236,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={fetchWorksites}>
+              <Button variant="outline" onClick={reload}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
@@ -287,91 +261,100 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
             </div>
           </div>
 
-          <div className="border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Employer</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Employees</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
+          {isLoading ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">Loading...</div>
+          ) : loadError !== null ? (
+            <div className="flex flex-col items-center gap-3 py-8">
+              <p role="alert" className="text-sm text-destructive">
+                Failed to load worksites: {loadError}
+              </p>
+              <Button variant="outline" onClick={reload}>
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
-                      Loading...
-                    </TableCell>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Employer</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Employees</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ) : filteredWorksites.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No worksites found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredWorksites.map((worksite) => (
-                    <TableRow key={worksite.id}>
-                      <TableCell className="font-medium">{worksite.name}</TableCell>
-                      <TableCell>{worksite.code || "—"}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <Building2 className="h-3 w-3" />
-                          {worksite.employer?.name || "—"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {worksite.city && worksite.province ? (
-                          <div className="flex items-center gap-1 text-sm">
-                            <MapPin className="h-3 w-3" />
-                            {worksite.city}, {worksite.province}
-                          </div>
-                        ) : (
-                          "—"
-                        )}
-                      </TableCell>
-                      <TableCell>{worksite.worksiteType || "—"}</TableCell>
-                      <TableCell>{worksite.totalEmployees?.toLocaleString() || "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {worksite.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleEdit(worksite)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(worksite.id, worksite.name)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                </TableHeader>
+                <TableBody>
+                  {filteredWorksites.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        {searchQuery ? "No worksites found" : "No worksites yet"}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  ) : (
+                    filteredWorksites.map((worksite) => (
+                      <TableRow key={worksite.id}>
+                        <TableCell className="font-medium">{worksite.name}</TableCell>
+                        <TableCell>{worksite.code || "—"}</TableCell>
+                        <TableCell>
+                          {employerNameOf(worksite) ? (
+                            <div className="flex items-center gap-1 text-sm">
+                              <Building2 className="h-3 w-3" />
+                              {employerNameOf(worksite)}
+                            </div>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {worksite.address?.city || worksite.address?.province ? (
+                            <div className="flex items-center gap-1 text-sm">
+                              <MapPin className="h-3 w-3" />
+                              {formatLocation(worksite.address)}
+                            </div>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+                        <TableCell>{worksite.employeeCount === null ? "—" : worksite.employeeCount.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {WORKSITE_STATUSES[worksite.status] ?? humanize(worksite.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" aria-label={`Actions for ${worksite.name}`}>
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => handleEdit(worksite)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleArchive(worksite)}
+                                className="text-red-600"
+                              >
+                                <Archive className="h-4 w-4 mr-2" />
+                                Archive
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -404,11 +387,13 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {employers.map((employer) => (
-                          <SelectItem key={employer.id} value={employer.id}>
-                            {employer.name}
-                          </SelectItem>
-                        ))}
+                        {employers
+                          .filter((employer) => employer.status !== "archived" || employer.id === field.value)
+                          .map((employer) => (
+                            <SelectItem key={employer.id} value={employer.id}>
+                              {employer.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -460,11 +445,11 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="temporarily_closed">Temporarily Closed</SelectItem>
-                          <SelectItem value="permanently_closed">Permanently Closed</SelectItem>
-                          <SelectItem value="seasonal">Seasonal</SelectItem>
-                          <SelectItem value="archived">Archived</SelectItem>
+                          {Object.entries(WORKSITE_STATUSES).map(([code, label]) => (
+                            <SelectItem key={code} value={code}>
+                              {label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -479,12 +464,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                     <FormItem>
                       <FormLabel>Employee Count</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
+                        <Input type="number" min="0" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -494,7 +474,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
 
               <FormField
                 control={form.control}
-                name="address.street"
+                name="street"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Street Address</FormLabel>
@@ -509,7 +489,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
               <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
-                  name="address.city"
+                  name="city"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>City</FormLabel>
@@ -523,7 +503,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
 
                 <FormField
                   control={form.control}
-                  name="address.province"
+                  name="province"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Province</FormLabel>
@@ -534,16 +514,11 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="ON">Ontario</SelectItem>
-                          <SelectItem value="QC">Quebec</SelectItem>
-                          <SelectItem value="BC">British Columbia</SelectItem>
-                          <SelectItem value="AB">Alberta</SelectItem>
-                          <SelectItem value="MB">Manitoba</SelectItem>
-                          <SelectItem value="SK">Saskatchewan</SelectItem>
-                          <SelectItem value="NS">Nova Scotia</SelectItem>
-                          <SelectItem value="NB">New Brunswick</SelectItem>
-                          <SelectItem value="PE">Prince Edward Island</SelectItem>
-                          <SelectItem value="NL">Newfoundland and Labrador</SelectItem>
+                          {provinceChoices(field.value).map((province) => (
+                            <SelectItem key={province.code} value={province.code}>
+                              {province.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -553,7 +528,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
 
                 <FormField
                   control={form.control}
-                  name="address.postal_code"
+                  name="postalCode"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Postal Code</FormLabel>
@@ -566,41 +541,17 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="closed">Closed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
-                  disabled={isSubmitting}
+                  disabled={form.formState.isSubmitting}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : editingWorksite ? "Update" : "Create"}
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? "Saving..." : editingWorksite ? "Update" : "Create"}
                 </Button>
               </DialogFooter>
             </form>

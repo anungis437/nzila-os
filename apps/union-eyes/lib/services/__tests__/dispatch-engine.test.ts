@@ -195,11 +195,16 @@ describe("dispatch-engine", () => {
 
   // ── listDispatchQueue ────────────────────────────────────────────────────
   describe("listDispatchQueue", () => {
-    it("returns open requests for an org sorted by requestedDate", async () => {
-      const rows = [{ id: "r1", orgId: "org-1", status: "open" }];
+    it("returns the requests that still need workers, open and partially filled, sorted by requestedDate", async () => {
+      const rows = [
+        { id: "r1", orgId: "org-1", status: "open" },
+        { id: "r2", orgId: "org-1", status: "partially_filled" },
+      ];
       mocks.mockOrderBy.mockResolvedValueOnce(rows);
       const result = await listDispatchQueue("org-1");
       expect(result).toEqual(rows);
+      const condition = mocks.mockWhere.mock.calls.at(-1)?.[0] as { a: unknown[] };
+      expect(condition.a).toContainEqual({ _type: "inArray", c: "status", v: ["open", "partially_filled"] });
     });
   });
 

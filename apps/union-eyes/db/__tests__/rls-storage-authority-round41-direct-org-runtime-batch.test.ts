@@ -50,7 +50,8 @@ const CLOSED_COHORT: ClosedRow[] = [
   { table: 'ingestion_batches', runtime: ['SELECT', 'INSERT', 'UPDATE'] },
   { table: 'break_policies', runtime: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] },
   { table: 'duplicate_groups', runtime: ['SELECT', 'INSERT', 'UPDATE'] },
-  { table: 'employer_contacts', runtime: ['SELECT', 'INSERT'] },
+  // CTX-3 census: the contacts route updates a contact (PUT), so the runtime role also holds UPDATE (the old shape pinned SELECT and INSERT only).
+  { table: 'employer_contacts', runtime: ['SELECT', 'INSERT', 'UPDATE'] },
   { table: 'exit_interviews', runtime: ['SELECT', 'INSERT', 'UPDATE'] },
   { table: 'organizer_tasks', runtime: ['SELECT', 'INSERT'] },
   { table: 'pay_equity_exercises', runtime: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] },

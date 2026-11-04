@@ -29,7 +29,6 @@ import {
   DimensionGrid,
   DimensionSpectrumRow,
   OciMotif,
-  PageDivider,
   RecommendationBlock,
   StewardshipSignalList,
 } from '../continuityVisuals';
@@ -123,11 +122,6 @@ describe('continuityVisuals', () => {
     );
     expect(filled.container.textContent).toContain('Signal one');
     expect(filled.container.textContent).toContain('Signal three');
-  });
-
-  it('PageDivider renders thin and standard variants', () => {
-    expect(() => render(React.createElement(PageDivider, { thin: true }))).not.toThrow();
-    expect(() => render(React.createElement(PageDivider, {}))).not.toThrow();
   });
 
   it('OciMotif renders with and without attribution', () => {

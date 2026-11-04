@@ -17,7 +17,9 @@ import { ClauseSharingControls } from "@/components/clause-library/ClauseSharing
 import { ClauseTagManager } from "@/components/clause-library/ClauseTagManager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/lib/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+import { envelopeData, readApiError } from "@/lib/client/api-envelope";
+import { ClauseEditorDialog } from "@/components/clause-library/ClauseEditorDialog";
 
 interface SearchFilters {
   query: string;
@@ -80,6 +82,9 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
   const [selectedClauseIds, setSelectedClauseIds] = useState<string[]>([]);
   const [comparisonNotes, setComparisonNotes] = useState("");
   const [sharingDialogOpen, setSharingDialogOpen] = useState(false);
+  // The clause editor: closed, adding a clause (no clause), or changing the selected one.
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorClause, setEditorClause] = useState<SelectedClause | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [clausesData, setClausesData] = useState<ClausesData | null>(null);
   const [isLoadingClauses, setIsLoadingClauses] = useState(false);
@@ -160,9 +165,8 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
         });
         
         if (response.ok) {
-          const data = await response.json();
-          // withApi wraps in { success, data: { clauses, ... }, timestamp }
-          setClausesData(data.data ?? data);
+          // The route's { clauses, total, page, limit } is what the framework wraps as { success, data, timestamp }.
+          setClausesData(envelopeData(await response.json()) as unknown as ClausesData);
         } else if (response.status === 401) {
           setClausesData({ clauses: [], total: 0, page: currentPage, limit: pageSize });
         } else {
@@ -195,25 +199,20 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
     setCurrentPage(1);
   }, []);
 
+  // The clause as the route sends it: the framework wraps what it returns as { success, data, timestamp }.
+  const loadClause = async (clauseId: string): Promise<SelectedClause> => {
+    const response = await fetch(`/api/clause-library/${clauseId}`);
+    if (!response.ok) throw new Error(await readApiError(response, "The clause could not be loaded"));
+    return envelopeData(await response.json()) as unknown as SelectedClause;
+  };
+
   const handleViewClause = async (clauseId: string) => {
     setSelectedClauseId(clauseId);
     setActiveTab("view");
     setIsLoadingClause(true);
     
     try {
-      const response = await fetch(`/api/clause-library/${clauseId}`);
-      if (response.ok) {
-        const data = await response.json();
-        // withApi wraps in { success, data: {...}, timestamp }
-        setSelectedClause(data.data ?? data);
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to load clause details",
-          variant: "destructive",
-        });
-        setSelectedClause(null);
-      }
+      setSelectedClause(await loadClause(clauseId));
     } catch (_error) {
       toast({
         title: "Error",
@@ -224,6 +223,10 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
     } finally {
       setIsLoadingClause(false);
     }
+  };
+
+  const reloadClause = async (clauseId: string) => {
+    setSelectedClause(await loadClause(clauseId));
   };
 
   const handleToggleCompare = (clauseId: string) => {
@@ -255,9 +258,8 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
       });
       
       if (response.ok) {
-        const data = await response.json();
-        // withApi wraps in { success, data: {...}, timestamp }
-        setComparisonData(data.data ?? data);
+        // The route's { clauses, analysis } is what the framework wraps as { success, data, timestamp }.
+        setComparisonData(envelopeData(await response.json()) as unknown as ComparisonData);
       } else {
         toast({
           title: "Error",
@@ -337,7 +339,12 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
             Search and compare collective agreement clauses across unions
           </p>
         </div>
-        <Button>
+        <Button
+          onClick={() => {
+            setEditorClause(null);
+            setEditorOpen(true);
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Clause
         </Button>
@@ -465,11 +472,8 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                 clause={selectedClause}
                 isOwner={selectedClause.isOwner}
                 onEdit={() => {
-                  toast({
-                    title: "Edit Clause",
-                    description: "Opening clause editor...",
-                  });
-                  window.location.href = `/dashboard/clause-library/${selectedClause.id}/edit`;
+                  setEditorClause(selectedClause);
+                  setEditorOpen(true);
                 }}
                 onDelete={async () => {
                   try {
@@ -518,11 +522,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                       });
                       
                       if (response.ok) {
-                        const updatedResponse = await fetch(`/api/clause-library/${selectedClause.id}`);
-                        if (updatedResponse.ok) {
-                          const updated = await updatedResponse.json();
-                          setSelectedClause(updated);
-                        }
+                        await reloadClause(selectedClause.id);
                         toast({
                           title: "Tag added",
                           description: `Tag "${tagName}" has been added to the clause`,
@@ -547,11 +547,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                       });
                       
                       if (response.ok) {
-                        const updatedResponse = await fetch(`/api/clause-library/${selectedClause.id}`);
-                        if (updatedResponse.ok) {
-                          const updated = await updatedResponse.json();
-                          setSelectedClause(updated);
-                        }
+                        await reloadClause(selectedClause.id);
                         toast({
                           title: "Tag removed",
                           description: `Tag "${tagName}" has been removed`,
@@ -582,34 +578,27 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                   anonymizedEmployerName: selectedClause.anonymizedEmployerName,
                 }}
                 onSave={async (settings) => {
+                  // A refusal is thrown to the dialog, which shows it and stays open; the dialog closes only for a change the server accepted.
+                  const response = await fetch(`/api/clause-library/${selectedClause.id}/share`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(settings),
+                  });
+                  if (!response.ok) throw new Error(await readApiError(response, "The sharing settings could not be updated."));
                   try {
-                    const response = await fetch(`/api/clause-library/${selectedClause.id}/share`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(settings),
-                    });
-                    
-                    if (response.ok) {
-                      const updatedResponse = await fetch(`/api/clause-library/${selectedClause.id}`);
-                      if (updatedResponse.ok) {
-                        const updated = await updatedResponse.json();
-                        setSelectedClause(updated);
-                      }
-                      toast({
-                        title: "Sharing updated",
-                        description: "Clause sharing settings have been updated",
-                      });
-                      setSharingDialogOpen(false);
-                    } else {
-                      throw new Error("Failed to update sharing");
-                    }
-                  } catch (_error) {
+                    await reloadClause(selectedClause.id);
+                  } catch {
                     toast({
-                      title: "Error",
-                      description: "Failed to update sharing settings",
+                      title: "Sharing updated",
+                      description: "The change was saved, but the clause could not be reloaded. Open it again to see it.",
                       variant: "destructive",
                     });
+                    return;
                   }
+                  toast({
+                    title: "Sharing updated",
+                    description: "Clause sharing settings have been updated",
+                  });
                 }}
               />
             </>
@@ -645,7 +634,10 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                 report += `Total Clauses: ${comparisonData.analysis?.statistics.totalClauses || 0}\n`;
                 report += `Average Length: ${comparisonData.analysis?.statistics.averageTextLength || 0} characters\n`;
                 report += `Unique Types: ${comparisonData.analysis?.statistics.uniqueTypes || 0}\n`;
-                report += `Unique Sectors: ${comparisonData.analysis?.statistics.uniqueSectors || 0}\n\n`;
+                report += `Unique Sectors: ${comparisonData.analysis?.statistics.uniqueSectors || 0}\n`;
+                report += `Unique Provinces: ${comparisonData.analysis?.statistics.uniqueProvinces || 0}\n`;
+                if (comparisonData.analysis?.differences.dateRanges) report += `Date Range: ${comparisonData.analysis.differences.dateRanges}\n`;
+                report += "\n";
                 
                 if ((comparisonData.analysis?.commonKeywords?.length ?? 0) > 0) {
                   report += "Common Keywords: " + (comparisonData.analysis?.commonKeywords?.join(", ") ?? "") + "\n\n";
@@ -657,7 +649,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                 comparisonData.clauses.forEach((clause, index: number) => {
                   report += `${index + 1}. ${clause.clauseTitle}\n`;
                   report += "-".repeat(80) + "\n";
-                  report += `Organization: ${clause.sourceOrganization?.organizationName || "Unknown"}\n`;
+                  report += `Organization: ${clause.sourceOrganization?.organizationName || "Anonymized"}\n`;
                   report += `Type: ${clause.clauseType}\n`;
                   report += `Sharing Level: ${clause.sharingLevel}\n`;
                   if (clause.sector) report += `Sector: ${clause.sector}\n`;
@@ -695,6 +687,24 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
           )}
         </TabsContent>
       </Tabs>
+
+      <ClauseEditorDialog
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        clause={editorClause}
+        onSaved={async (clauseId) => {
+          // The list is read again so a new or changed clause shows; the open clause is reloaded so its wording is the saved one.
+          setSearchFilters((filters) => ({ ...filters }));
+          if (clauseId && selectedClauseId === clauseId) {
+            try {
+              await reloadClause(clauseId);
+            } catch {
+              toast({ title: "Clause saved", description: "The clause could not be reloaded. Open it again to see the change.", variant: "destructive" });
+            }
+          }
+          toast({ title: editorClause ? "Clause updated" : "Clause added", description: "The clause library has been updated" });
+        }}
+      />
     </div>
   );
 }

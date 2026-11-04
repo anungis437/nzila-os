@@ -62,6 +62,7 @@ describe('BillingCycleService transaction-owning financial controls', () => {
     vi.spyOn(BillingCycleService as any, 'getActiveMembersForBilling').mockResolvedValue([
       { id: 'member-1' }, { id: 'member-2' },
     ]);
+    vi.spyOn(BillingCycleService as any, 'getMembersBilledForPeriod').mockResolvedValue(new Set());
     const process = vi.spyOn(BillingCycleService as any, 'processMemberBilling')
       .mockResolvedValueOnce({ memberId: 'member-1', success: true, amount: 100, breakdown: { duesAmount: 85, copeAmount: 10, pacAmount: 3, strikeFundAmount: 2 } })
       .mockResolvedValueOnce({ memberId: 'member-2', success: false, error: 'missing dues assignment' });
@@ -83,6 +84,7 @@ describe('BillingCycleService transaction-owning financial controls', () => {
 
   it('preserves preview diagnostics without claiming all members were successfully calculated', async () => {
     vi.spyOn(BillingCycleService as any, 'getActiveMembersForBilling').mockResolvedValue([{ id: 'member-1' }]);
+    vi.spyOn(BillingCycleService as any, 'getMembersBilledForPeriod').mockResolvedValue(new Set());
     vi.spyOn(BillingCycleService as any, 'processMemberBilling')
       .mockResolvedValue({ memberId: 'member-1', success: false, error: 'missing wage data' });
 

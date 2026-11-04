@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { readApiError } from '@/lib/client/api-envelope';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -294,8 +295,7 @@ export default function AdminPilotApplicationsPage() {
         body: JSON.stringify(body),
       });
       if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.error || `Failed to update status (${response.status})`);
+        throw new Error(await readApiError(response, `Failed to update status (${response.status})`));
       }
 
       setApplications((prev) => prev.map((app) => (app.id === id ? { ...app, ...body } : app)));
@@ -384,8 +384,7 @@ export default function AdminPilotApplicationsPage() {
       });
 
       if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.error || `Unable to update commercial state (${response.status})`);
+        throw new Error(await readApiError(response, `Unable to update commercial state (${response.status})`));
       }
 
       await loadApplications();

@@ -49,6 +49,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_payroll_preview",
     body: createSchema,

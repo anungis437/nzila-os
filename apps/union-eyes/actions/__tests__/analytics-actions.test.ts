@@ -110,7 +110,9 @@ describe('analytics-actions', () => {
       mocks.audit.mockRejectedValueOnce(new Error('audit down'));
       const failed = await calculateMetrics(params);
       expect(failed.success).toBe(false);
-      expect(failed.error).toBe('audit down');
+      expect(failed.error).toMatch(/^Something went wrong\. Please try again\. \(reference [0-9a-f]{8}\)$/);
+      expect(failed.error).not.toContain('audit down');
+      expect(mocks.loggerError).toHaveBeenCalled();
     });
 
     it('createKPI audits the stored configuration on the same transaction', async () => {

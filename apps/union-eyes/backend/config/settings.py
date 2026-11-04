@@ -3,10 +3,13 @@ Django settings for UnionEyes
 """
 
 import os
+import sys
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 
 from dotenv import load_dotenv
+
+from config.hardening import check_debug, is_serving_process, resolve_secrets
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,15 +19,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env.local")
 load_dotenv(BASE_DIR / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY", "django-insecure-CHANGE-ME-IN-PRODUCTION"
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+# Debug mode is refused while ALLOWED_HOSTS names a non-local host, and a serving process (gunicorn, celery) that is not a developer's machine refuses to
+# start without real secrets: see config/hardening.py.
+check_debug(DEBUG, ALLOWED_HOSTS)
+SERVING_PROCESS = is_serving_process(sys.argv)
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY, REQUEST_SIGNING_SECRET, WEBHOOK_DEFAULT_SECRET = resolve_secrets(
+    os.environ.get("DJANGO_SECRET_KEY"),
+    os.environ.get("REQUEST_SIGNING_SECRET"),
+    os.environ.get("WEBHOOK_DEFAULT_SECRET"),
+    SERVING_PROCESS,
+    DEBUG,
+)
 
 # Application definition
 INSTALLED_APPS = [
@@ -185,24 +197,6 @@ AUTH_PROVIDER_NAMESPACE = os.environ.get("AUTH_PROVIDER_NAMESPACE", "entra")
 AUTH_SECRET = os.environ.get("AUTH_SECRET")
 AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET")
 
-# Detection only — legacy CLERK_* names are NOT read. If one is still present
-# without its AUTH_* replacement, say so loudly at startup rather than silently
-# running with authentication unconfigured.
-for _legacy, _current in (
-    ("CLERK_JWKS_URL", "AUTH_JWKS_URL"),
-    ("CLERK_SECRET_KEY", "AUTH_SECRET"),
-    ("CLERK_WEBHOOK_SECRET", "AUTH_WEBHOOK_SECRET"),
-):
-    if os.environ.get(_legacy) and not os.environ.get(_current):
-        import logging as _logging
-
-        _logging.getLogger(__name__).warning(
-            "Legacy environment variable %s is set but %s is not; the legacy "
-            "name is ignored. Set %s.",
-            _legacy,
-            _current,
-            _current,
-        )
 REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 
 # Upstash REST credentials (optional, parallel path to native RESP). When
@@ -478,6 +472,4 @@ LOGGING = {
     },
 }
 
-# Webhook / signing configuration
-WEBHOOK_DEFAULT_SECRET = os.environ.get("WEBHOOK_DEFAULT_SECRET", SECRET_KEY)
-REQUEST_SIGNING_SECRET = os.environ.get("REQUEST_SIGNING_SECRET", SECRET_KEY)
+# Webhook / signing configuration: WEBHOOK_DEFAULT_SECRET and REQUEST_SIGNING_SECRET are resolved with the secret key (config/hardening.py).

@@ -86,8 +86,8 @@ export const GROUPS = {
     actor: 'Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list',
     routes: ['reports/scheduled/route.ts', 'reports/scheduled/[id]/route.ts'],
     evidence: [
-      ev(`${APP}components/admin/ScheduledReportForm.tsx`, 'deliveryMethod: formData.deliveryMethod,'),
-      ev(`${APP}components/admin/ScheduledReportForm.tsx`, 'recipients,'),
+      ev(`${API}reports/scheduled/route.ts`, ' * GET POST /api/reports/scheduled'),
+      ev(`${API}reports/scheduled/route.ts`, "throw ApiError.notImplemented('/api/reports/scheduled is not implemented: it performed no operation of its own.');"),
       ev(`${APP}lib/reality/capability-registry.ts`, "id: 'UE-CRON-SCHEDULED-REPORTS',"),
     ],
   },

@@ -31,14 +31,6 @@ export interface ServiceOverview {
 
 const RECORDED_STATUSES = new Set(['healthy', 'degraded', 'down']);
 
-const PLATFORM_SERVICES_QUERY = sql`
-  SELECT service_name, status, updated_at
-  FROM platform_services
-  ORDER BY
-    CASE status WHEN 'down' THEN 0 WHEN 'degraded' THEN 1 ELSE 2 END,
-    service_name
-`;
-
 export function summarizePlatformServices(rows: Array<Record<string, unknown>>): ServiceOverview {
   const services = rows.map((row) => ({
     serviceName: String(row.service_name),
@@ -57,11 +49,17 @@ export function summarizePlatformServices(rows: Array<Record<string, unknown>>):
 
 /** Throws on any database failure. A failed read must never look like an empty service list. */
 export async function loadPlatformServices(): Promise<ServiceOverview> {
-  const result = currentStateContextEnabled()
-    ? await db.transaction(async (tx) => {
-        await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`);
-        return tx.execute(PLATFORM_SERVICES_QUERY);
-      })
-    : await db.execute(PLATFORM_SERVICES_QUERY);
+  // One statement on one transaction of the application connection (the runtime identity). The statement is written here, where the table it
+  // reads can be seen, rather than held in a constant.
+  const result = await db.transaction(async (tx) => {
+    if (currentStateContextEnabled()) await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`);
+    return tx.execute(sql`
+      SELECT service_name, status, updated_at
+      FROM platform_services
+      ORDER BY
+        CASE status WHEN 'down' THEN 0 WHEN 'degraded' THEN 1 ELSE 2 END,
+        service_name
+    `);
+  });
   return summarizePlatformServices(Array.from(result) as Array<Record<string, unknown>>);
 }

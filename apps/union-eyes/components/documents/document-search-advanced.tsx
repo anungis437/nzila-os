@@ -76,6 +76,9 @@ export interface SavedSearch {
   usageCount: number;
 }
 
+// Radix Select refuses an item whose value is the empty string, so "any owner" has a value of its own (an owner id is never this).
+const ANY_OWNER = "__any_owner__";
+
 export function DocumentSearchAdvanced({
   onSearch,
   suggestions = [],
@@ -228,7 +231,7 @@ export function DocumentSearchAdvanced({
                       onValueChange={(value) =>
                         setFilters({
                           ...filters,
-                          owners: value ? [value] : undefined,
+                          owners: value && value !== ANY_OWNER ? [value] : undefined,
                         })
                       }
                     >
@@ -236,7 +239,7 @@ export function DocumentSearchAdvanced({
                         <SelectValue placeholder="Any owner..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any Owner</SelectItem>
+                        <SelectItem value={ANY_OWNER}>Any Owner</SelectItem>
                         {owners.map((owner) => (
                           <SelectItem key={owner.id} value={owner.id}>
                             {owner.name}

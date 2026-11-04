@@ -1,36 +1,38 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-const h = vi.hoisted(() => ({ error: vi.fn() }));
+const h = vi.hoisted(() => ({ error: vi.fn(), warn: vi.fn() }));
 
 vi.mock('@/lib/client-logger', () => ({
   createClientLogger: () => ({
     error: h.error,
-    warn: vi.fn(),
+    warn: h.warn,
     info: vi.fn(),
     debug: vi.fn(),
   }),
 }));
 
-import {
-  membersAPI,
-  memberSegmentsAPI,
-  duesAPI,
-  casesAPI,
-  strikeFundAPI,
-  electionsAPI,
-  dashboardAPI,
-  adminAPI,
-  api,
-} from '../index';
+import { api, electionsAPI, ApiRequestError } from '../index';
 
-type FakeResponse = {
-  ok: boolean;
-  status: number;
-  statusText: string;
-  json: () => Promise<unknown>;
+const record = {
+  id: '3f1c9a0e-5b7d-4c1a-9d52-0a6f4f7a1b01',
+  electionYear: 2026,
+  electionDate: '2026-10-01',
+  positionsAvailable: 2,
+  candidates: [{ name: 'A. Candidate', union: 'Local 1', platform: 'Fair pay' }],
+  winners: [],
+  totalVotes: 0,
+  participationRate: null,
+  verifiedBy: null,
+  verificationDate: null,
+  contestedResults: false,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-function res(body: unknown, status = 200, statusText = 'OK'): FakeResponse {
+/** What withApi sends for a handler that returns { data }: the framework envelope around the handler's own { data }. */
+const wrapped = (data: unknown) => ({ success: true, data: { data }, timestamp: '2026-01-01T00:00:00.000Z' });
+
+function res(body: unknown, status = 200, statusText = 'OK') {
   return {
     ok: status >= 200 && status < 300,
     status,
@@ -43,7 +45,8 @@ let fetchMock: ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   h.error.mockReset();
-  fetchMock = vi.fn(async () => res({ ok: true }));
+  h.warn.mockReset();
+  fetchMock = vi.fn(async () => res(wrapped([record])));
   vi.stubGlobal('fetch', fetchMock);
 });
 
@@ -52,42 +55,112 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe('fetchAPI behavior (via membersAPI)', () => {
-  it('issues a GET without an Idempotency-Key header', async () => {
-    await membersAPI.get('m1');
+describe('electionsAPI.list', () => {
+  it('reads the records out of the framework envelope, with a GET and no Idempotency-Key', async () => {
+    const elections = await electionsAPI.list();
+    expect(elections).toHaveLength(1);
+    expect(elections[0]).toMatchObject({ id: record.id, electionYear: 2026, positionsAvailable: 2 });
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('/api/members/m1');
+    expect(url).toBe('/api/elections');
+    expect(init.method).toBeUndefined();
     expect(init.headers['Content-Type']).toBe('application/json');
     expect(init.headers['Idempotency-Key']).toBeUndefined();
   });
 
-  it('adds an Idempotency-Key header for mutations', async () => {
-    await membersAPI.create({ name: 'x' });
+  it('returns an empty list only when the server really returned one', async () => {
+    fetchMock.mockResolvedValueOnce(res(wrapped([])));
+    await expect(electionsAPI.list()).resolves.toEqual([]);
+  });
+
+  it('rejects a body that is not a list of records instead of answering with an empty list', async () => {
+    fetchMock.mockResolvedValueOnce(res(wrapped({ not: 'a list' })));
+    await expect(electionsAPI.list()).rejects.toThrow('Unexpected response from /api/elections');
+    expect(h.error).toHaveBeenCalled();
+  });
+
+  it('rejects a record that is missing a field the screens rely on', async () => {
+    const { id: _id, ...withoutId } = record;
+    fetchMock.mockResolvedValueOnce(res(wrapped([withoutId])));
+    await expect(electionsAPI.list()).rejects.toThrow('Unexpected response');
+  });
+
+  it('accepts null for the columns the table allows to be null', async () => {
+    fetchMock.mockResolvedValueOnce(
+      res(wrapped([{ ...record, participationRate: null, verifiedBy: null, verificationDate: null, contestedResults: null }])),
+    );
+    await expect(electionsAPI.list()).resolves.toHaveLength(1);
+  });
+});
+
+describe('electionsAPI.get', () => {
+  it('requests the record by its encoded id and reads it out of the envelope', async () => {
+    fetchMock.mockResolvedValueOnce(res(wrapped(record)));
+    await expect(electionsAPI.get(record.id)).resolves.toMatchObject({ id: record.id });
+    expect(fetchMock.mock.calls[0][0]).toBe(`/api/elections/${record.id}`);
+  });
+
+  it('encodes an id so it cannot change the path', async () => {
+    fetchMock.mockResolvedValueOnce(res(wrapped(record)));
+    await electionsAPI.get('a/../b');
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/elections/a%2F..%2Fb');
+  });
+
+  it('surfaces a 404 as an ApiRequestError that carries the status', async () => {
+    fetchMock.mockResolvedValueOnce(res({ code: 'NOT_FOUND', message: 'Election not found' }, 404, 'Not Found'));
+    const failure = await electionsAPI.get('missing').catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(ApiRequestError);
+    expect(failure).toMatchObject({ status: 404, message: 'Election not found' });
+  });
+});
+
+describe('electionsAPI.create', () => {
+  const input = {
+    electionYear: 2026,
+    electionDate: '2026-10-01',
+    positionsAvailable: 2,
+    candidates: [{ name: 'A. Candidate', union: 'Local 1', platform: 'Fair pay' }],
+  };
+
+  it('POSTs exactly the input with an Idempotency-Key and reads the unwrapped 201 body', async () => {
+    fetchMock.mockResolvedValueOnce(res({ data: record }, 201, 'Created'));
+    await expect(electionsAPI.create(input)).resolves.toMatchObject({ id: record.id });
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('/api/members');
+    expect(url).toBe('/api/elections');
     expect(init.method).toBe('POST');
     expect(typeof init.headers['Idempotency-Key']).toBe('string');
+    expect(JSON.parse(init.body)).toEqual(input);
   });
 
-  it('builds query strings and filters out undefined/null params', async () => {
-    await membersAPI.list({ search: 'a', status: 'active', local: undefined, limit: 10 });
-    const [url] = fetchMock.mock.calls[0];
-    expect(url).toContain('/api/members?');
-    expect(url).toContain('search=a');
-    expect(url).toContain('status=active');
-    expect(url).toContain('limit=10');
-    expect(url).not.toContain('local');
+  it('does not send results: winners, vote totals and the contested flag are left to the route defaults', async () => {
+    fetchMock.mockResolvedValueOnce(res({ data: record }, 201, 'Created'));
+    await electionsAPI.create(input);
+    const sent = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(sent).not.toHaveProperty('winners');
+    expect(sent).not.toHaveProperty('totalVotes');
+    expect(sent).not.toHaveProperty('contestedResults');
   });
 
-  it('omits the query string when no params are provided', async () => {
-    await membersAPI.list();
-    expect(fetchMock.mock.calls[0][0]).toBe('/api/members');
+  it('rejects with the status when the server refuses', async () => {
+    fetchMock.mockResolvedValueOnce(res({ code: 'FORBIDDEN', message: 'Forbidden: Requires clc_staff' }, 403, 'Forbidden'));
+    await expect(electionsAPI.create(input)).rejects.toMatchObject({ status: 403, message: 'Forbidden: Requires clc_staff' });
   });
+});
 
-  it('throws the server-provided error message on non-ok responses', async () => {
+describe('request failures', () => {
+  it('uses the server message and throws an ApiRequestError; an expected refusal is logged as a warning, not an error', async () => {
     fetchMock.mockResolvedValueOnce(res({ message: 'bad request' }, 400, 'Bad Request'));
-    await expect(membersAPI.get('m1')).rejects.toThrow('bad request');
+    const failure = await electionsAPI.list().catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(ApiRequestError);
+    expect(failure).toMatchObject({ status: 400, message: 'bad request', name: 'ApiRequestError' });
+    expect(h.warn).toHaveBeenCalledWith('API request refused [/api/elections]', { status: 400, message: 'bad request' });
+    expect(h.error).not.toHaveBeenCalled();
+  });
+
+  it('logs a server fault as an error', async () => {
+    fetchMock.mockResolvedValueOnce(res({ message: 'boom' }, 500, 'Internal Server Error'));
+    await expect(electionsAPI.list()).rejects.toMatchObject({ status: 500, message: 'boom' });
     expect(h.error).toHaveBeenCalled();
+    expect(h.warn).not.toHaveBeenCalled();
   });
 
   it('falls back to statusText when the error body cannot be parsed', async () => {
@@ -99,133 +172,27 @@ describe('fetchAPI behavior (via membersAPI)', () => {
         throw new Error('not json');
       },
     });
-    await expect(membersAPI.get('m1')).rejects.toThrow('Server Error');
+    await expect(electionsAPI.list()).rejects.toMatchObject({ status: 500, message: 'Server Error' });
   });
 
-  it('returns an empty object for 204 No Content', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      status: 204,
-      statusText: 'No Content',
-      json: async () => {
-        throw new Error('should not parse');
-      },
-    });
-    await expect(membersAPI.delete('m1')).resolves.toEqual({});
+  it('falls back to the status code when there is neither a message nor a status text', async () => {
+    fetchMock.mockResolvedValueOnce(res({}, 502, ''));
+    await expect(electionsAPI.list()).rejects.toMatchObject({ status: 502, message: 'HTTP 502' });
   });
 
   it('logs and rethrows when fetch itself rejects', async () => {
     fetchMock.mockRejectedValueOnce(new Error('network down'));
-    await expect(membersAPI.get('m1')).rejects.toThrow('network down');
+    await expect(electionsAPI.list()).rejects.toThrow('network down');
     expect(h.error).toHaveBeenCalled();
   });
 });
 
-describe('members and segments APIs', () => {
-  it('covers every members method', async () => {
-    await membersAPI.list();
-    await membersAPI.get('m1');
-    await membersAPI.create({});
-    await membersAPI.update('m1', {});
-    await membersAPI.delete('m1');
-    await membersAPI.search('q');
-    await membersAPI.import({ name: 'f.csv' } as unknown as File);
-    expect(fetchMock).toHaveBeenCalled();
-  });
-
-  it('throws when member import fails', async () => {
-    fetchMock.mockResolvedValueOnce(res({}, 500, 'fail'));
-    await expect(membersAPI.import({ name: 'f.csv' } as unknown as File)).rejects.toThrow('Import failed');
-  });
-
-  it('covers every member-segments method', async () => {
-    await memberSegmentsAPI.list();
-    await memberSegmentsAPI.create({});
-    await memberSegmentsAPI.preview([{}]);
-    await memberSegmentsAPI.delete('s1');
-    expect(fetchMock).toHaveBeenCalledTimes(4);
-  });
-});
-
-describe('dues API', () => {
-  it('covers dashboard, remittances, reconciliation, arrears and payment plans', async () => {
-    await duesAPI.dashboard();
-    await duesAPI.remittances.list({ employer: 'e', status: 's', limit: 5 });
-    await duesAPI.remittances.upload({ name: 'r.csv' } as unknown as File, { period: '2024' });
-    await duesAPI.reconciliation.queue();
-    await duesAPI.reconciliation.autoMatch();
-    await duesAPI.reconciliation.match('r1', 'm1');
-    await duesAPI.reconciliation.reject('r1', 'bad');
-    await duesAPI.arrears.list();
-    await duesAPI.arrears.recordPayment('m1', 100, 'note');
-    await duesAPI.arrears.sendReminder('m1');
-    await duesAPI.paymentPlans.list();
-    await duesAPI.paymentPlans.get('p1');
-    await duesAPI.paymentPlans.create({});
-    await duesAPI.paymentPlans.update('p1', {});
-    await duesAPI.paymentPlans.delete('p1');
-    expect(fetchMock).toHaveBeenCalled();
-  });
-
-  it('throws when remittance upload fails', async () => {
-    fetchMock.mockResolvedValueOnce(res({}, 500, 'fail'));
-    await expect(
-      duesAPI.remittances.upload({ name: 'r.csv' } as unknown as File, {})
-    ).rejects.toThrow('Upload failed');
-  });
-});
-
-describe('cases API', () => {
-  it('covers every cases method', async () => {
-    await casesAPI.list({ status: 'open', type: 't', priority: 'high' });
-    await casesAPI.get('c1');
-    await casesAPI.create({});
-    await casesAPI.update('c1', {});
-    await casesAPI.delete('c1');
-    await casesAPI.timeline('c1');
-    await casesAPI.evidence.list('c1');
-    await casesAPI.evidence.upload('c1', { name: 'e.pdf' } as unknown as File);
-    await casesAPI.evidence.delete('c1', 'e1');
-    await casesAPI.notes.list('c1');
-    await casesAPI.notes.create('c1', 'hello');
-    expect(fetchMock).toHaveBeenCalled();
-  });
-
-  it('throws when evidence upload fails', async () => {
-    fetchMock.mockResolvedValueOnce(res({}, 500, 'fail'));
-    await expect(
-      casesAPI.evidence.upload('c1', { name: 'e.pdf' } as unknown as File)
-    ).rejects.toThrow('Upload failed');
-  });
-});
-
-describe('remaining APIs', () => {
-  it('covers strike fund, elections, dashboard and admin', async () => {
-    await strikeFundAPI.dashboard();
-
-    await electionsAPI.list({ status: 'open' });
-    await electionsAPI.get('e1');
-    await electionsAPI.create({});
-    await electionsAPI.update('e1', {});
-    await electionsAPI.vote('e1', { pos: ['cand'] });
-    await electionsAPI.results('e1');
-
-    await dashboardAPI.stats();
-    await dashboardAPI.activities(20);
-
-    await adminAPI.integrations.list();
-    await adminAPI.integrations.test('i1');
-    await adminAPI.integrations.sync('i1');
-    await adminAPI.governance.policies();
-    await adminAPI.governance.createPolicy({});
-    await adminAPI.audit.logs({ limit: 10, entity: 'member' });
-
-    expect(fetchMock).toHaveBeenCalled();
-  });
-
-  it('exposes the aggregated api object', () => {
-    expect(api.members).toBe(membersAPI);
-    expect(api.dues).toBe(duesAPI);
-    expect(api.admin).toBe(adminAPI);
+describe('the exported surface', () => {
+  it('offers only what a live screen uses, and no vote or results call', () => {
+    expect(Object.keys(api)).toEqual(['elections']);
+    expect(api.elections).toBe(electionsAPI);
+    expect(Object.keys(electionsAPI).sort()).toEqual(['create', 'get', 'list']);
+    expect(electionsAPI).not.toHaveProperty('vote');
+    expect(electionsAPI).not.toHaveProperty('results');
   });
 });

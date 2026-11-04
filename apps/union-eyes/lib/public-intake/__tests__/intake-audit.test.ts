@@ -9,15 +9,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const m = vi.hoisted(() => ({ append: vi.fn(), persist: vi.fn() }))
 vi.mock('@/db', () => ({ db: {} }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persist }))
-vi.mock('@/lib/public-intake/intake-audit', async (importOriginal) => ({ ...(await importOriginal<typeof import('@/lib/public-intake/intake-audit')>()), appendPublicIntakeAudit: m.append }))
 
 import { PublicIntakeAuditUnavailableError, pseudonymousSubjectRef } from '../intake-audit'
 import { auditClaimedWorkbookWrite, auditWorkbookRead } from '@/lib/workbook/claimed-write-audit'
 
 const KEY = 'x'.repeat(40)
 const WORKBOOK = '5b7a3a47-0a6f-4a5b-9f3c-2d3a8f0e7c11'
-const preclaim = { kind: 'preclaim' as const, workbookId: WORKBOOK, claimedByUserId: null, claimedOrgId: null, actorUserId: null }
-const claimed = { kind: 'claimant' as const, workbookId: WORKBOOK, claimedByUserId: 'user_1', claimedOrgId: 'org_1', actorUserId: 'user_1' }
+// The transaction the access boundary opened: the claimed helper writes on it (authority.tx), never on the ambient handle. An unclaimed workbook's boundary is the system
+// role's, and it hands the helper the pseudonymous writer already bound to that transaction (lib/workbook/__tests__/access-control.test.ts proves the binding).
+const boundaryTx = { boundary: true } as never
+const preclaim = { kind: 'preclaim' as const, workbookId: WORKBOOK, claimedByUserId: null, claimedOrgId: null, actorUserId: null, tx: boundaryTx, appendPublicIntakeAudit: m.append }
+const claimed = { kind: 'claimant' as const, workbookId: WORKBOOK, claimedByUserId: 'user_1', claimedOrgId: 'org_1', actorUserId: 'user_1', tx: boundaryTx }
 
 describe('pseudonymous subject reference', () => {
   const original = process.env.PUBLIC_INTAKE_AUDIT_KEY
@@ -51,7 +53,7 @@ describe('workbook audit helpers', () => {
     await auditClaimedWorkbookWrite(preclaim, { action: 'workbook.memory_holder.create', resourceType: 'workbook_memory_holders', resourceId: 'holder-1', details: { role: 'Treasurer', responsibility: 'Payroll', fields: ['role'] } })
 
     expect(m.persist).not.toHaveBeenCalled()
-    const entry = m.append.mock.calls[0][1]
+    const entry = m.append.mock.calls[0][0]
     expect(entry).toEqual({
       surface: 'workbook.memory_holder',
       action: 'workbook.memory_holder.create',
@@ -63,7 +65,7 @@ describe('workbook audit helpers', () => {
     })
 
     await auditClaimedWorkbookWrite(preclaim, { action: 'workbook.export', resourceType: 'workbooks', resourceId: WORKBOOK, details: { format: 'pdf', secret: 'x' } })
-    expect(m.append.mock.calls[1][1]).toMatchObject({ operation: 'read', resourceRef: null, details: { format: 'pdf' } })
+    expect(m.append.mock.calls[1][0]).toMatchObject({ operation: 'read', resourceRef: null, details: { format: 'pdf' } })
   })
 
   it.each([
@@ -73,7 +75,7 @@ describe('workbook audit helpers', () => {
     ['workbook.memory_holder.delete_not_found', 'delete'],
   ])('classifies %s as %s', async (action, operation) => {
     await auditClaimedWorkbookWrite(preclaim, { action, resourceType: 'workbook_memory_holders', resourceId: 'h', details: {} })
-    expect(m.append.mock.calls[0][1].operation).toBe(operation)
+    expect(m.append.mock.calls[0][0].operation).toBe(operation)
   })
 
   it('records a claimed access under the claiming organization and the acting person, and nothing pseudonymous', async () => {
@@ -81,6 +83,7 @@ describe('workbook audit helpers', () => {
     await auditWorkbookRead(claimed, { action: 'workbook.memory_holder.read', resourceType: 'workbook_memory_holders', resourceId: WORKBOOK, details: {} })
 
     expect(m.append).not.toHaveBeenCalled()
+    expect(m.persist.mock.calls.map((c) => c[0])).toEqual([boundaryTx, boundaryTx])
     expect(m.persist.mock.calls.map((c) => c[1])).toEqual([
       expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', action: 'workbook.memory_holder.update' }),
       expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', action: 'workbook.memory_holder.read' }),
@@ -94,5 +97,12 @@ describe('workbook audit helpers', () => {
   it('lets a failed record propagate so the protected operation does not proceed', async () => {
     m.append.mockRejectedValueOnce(new PublicIntakeAuditUnavailableError())
     await expect(auditWorkbookRead(preclaim, { action: 'workbook.memory_holder.read', resourceType: 'x', resourceId: WORKBOOK, details: {} })).rejects.toBeInstanceOf(PublicIntakeAuditUnavailableError)
+  })
+
+  it('refuses an unclaimed access whose authority carries no pseudonymous writer, rather than recording it anywhere else', async () => {
+    const { appendPublicIntakeAudit: _writer, ...withoutWriter } = preclaim
+    await expect(auditWorkbookRead(withoutWriter, { action: 'workbook.memory_holder.read', resourceType: 'x', resourceId: WORKBOOK, details: {} })).rejects.toBeInstanceOf(PublicIntakeAuditUnavailableError)
+    await expect(auditClaimedWorkbookWrite(withoutWriter, { action: 'workbook.memory_holder.create', resourceType: 'x', resourceId: 'h', details: {} })).rejects.toBeInstanceOf(PublicIntakeAuditUnavailableError)
+    expect(m.persist).not.toHaveBeenCalled()
   })
 })

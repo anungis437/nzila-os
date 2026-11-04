@@ -43,7 +43,11 @@ function chain(resolveValue: any): any {
 }
 
 
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: any) => fn(), withRLSContext: mocks.mockWithRLSContext }));
+// The system-context wrapper hands its callback the (mocked) database, as the real one hands it the system transaction.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (fn: any) => fn({ select: mocks.mockSelect, query: { organizationMembers: { findFirst: mocks.mockOrgMembersFindFirst } } }),
+  withRLSContext: mocks.mockWithRLSContext,
+}));
 vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: mocks.mockAuth,
   currentUser: mocks.mockCurrentUser,

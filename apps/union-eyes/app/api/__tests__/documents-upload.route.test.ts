@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
   logApiAuditEvent: vi.fn(),
@@ -13,30 +12,27 @@ const m = vi.hoisted(() => ({
   requireCaseFilingCapacity: vi.fn(),
   hasCaseFilingCapacity: vi.fn(),
   openIntake: vi.fn(),
+  withRLSContext: vi.fn(),
 }));
 
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/cases/case-authorization', () => ({ requireCaseFilingCapacity: m.requireCaseFilingCapacity, hasCaseFilingCapacity: m.hasCaseFilingCapacity }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   createRateLimitHeaders: m.createRateLimitHeaders,
   RATE_LIMITS: { DOCUMENT_UPLOAD: { windowMs: 60000, maxRequests: 100 } },
 }));
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
-vi.mock('@/db/db', () => ({
-  db: {
-    transaction: async (fn: (tx: unknown) => unknown) =>
-      fn({ insert: () => ({ values: (v: unknown) => ({ returning: () => m.insertDocument(v) }) }) }),
-  },
-}));
 vi.mock('@/db/schema', () => ({ documents: {} }));
-vi.mock('@/lib/db/org-owned-context', () => ({ withOrgOwnedContext: (operation: () => unknown) => operation() }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.appendMandatoryAudit }));
 vi.mock('@/lib/blob-client', () => ({ putBlob: m.putBlob, deleteBlob: m.deleteBlob }));
 vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: m.isMalwareScanError }));
 vi.mock('@/lib/documents/intake-lifecycle', () => ({ openIntake: m.openIntake }));
 vi.mock('@/lib/documents/intake-storage', () => ({ blobIntakeStorage: {} }));
+
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   return import('../documents/upload/route');
@@ -45,12 +41,12 @@ async function loadRoute() {
 describe('documents/upload route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'member';
 
-    m.withRoleAuth.mockImplementation((_role: string, handler: any) => {
-      return (request: Request, context: any = { userId: 'u1', organizationId: 'org_1' }) =>
-        handler(request, context);
-    });
-
+    // The tenant transaction the document row and its audit record are written in.
+    m.withRLSContext.mockImplementation(async (_scope: unknown, run: (tx: unknown) => unknown) =>
+      run({ insert: () => ({ values: (v: unknown) => ({ returning: () => m.insertDocument(v) }) }) }));
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '0' });
     m.putBlob.mockResolvedValue({ url: 'https://blob.test/doc', pathname: 'documents/path', malwareScan: { status: 'clean' } });
@@ -62,13 +58,24 @@ describe('documents/upload route', () => {
     m.hasCaseFilingCapacity.mockResolvedValue(true);
   });
 
-  it('returns error when file is missing', async () => {
+  it('declares what it asks of the wrapper: a member in an organization, and no transaction spanning the blob upload and the malware scan', async () => {
+    await loadRoute();
+    const config = declared.find((entry) => entry.openapi?.summary === 'Upload a document file');
+
+    expect(config?.auth).toEqual({ minRole: 'member' });
+    expect(config?.requireOrg).toBeUndefined();
+    expect(config?.rlsOrgContext).toBeUndefined();
+  });
+
+  it('returns 400 when the file is missing, and stores nothing', async () => {
     const { POST } = await loadRoute();
     const form = new FormData();
     form.set('organizationId', 'org_1');
 
     const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
-    expect([200, 400, 403, 429, 500]).toContain(response.status);
+    expect(response.status).toBe(400);
+    expect(m.putBlob).not.toHaveBeenCalled();
+    expect(m.insertDocument).not.toHaveBeenCalled();
   });
 
   it('returns forbidden on organization mismatch', async () => {
@@ -78,25 +85,24 @@ describe('documents/upload route', () => {
     form.set('file', file);
     form.set('organizationId', 'org_other');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-      userId: 'u1',
-      organizationId: 'org_1',
-    });
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     expect(response.status).toBe(403);
+    expect(m.putBlob).not.toHaveBeenCalled();
     expect(m.insertDocument).not.toHaveBeenCalled();
   });
 
   it('rejects a write when server organization context is missing', async () => {
+    caller.organizationId = null;
     const { POST } = await loadRoute();
     const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
     const form = new FormData();
     form.set('file', file);
     form.set('organizationId', 'org_other');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-      userId: 'u1',
-    });
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     expect(response.status).toBe(403);
+    expect(m.hasCaseFilingCapacity).not.toHaveBeenCalled();
+    expect(m.putBlob).not.toHaveBeenCalled();
     expect(m.insertDocument).not.toHaveBeenCalled();
   });
 
@@ -108,11 +114,9 @@ describe('documents/upload route', () => {
     form.set('organizationId', 'org_1');
     form.set('name', 'My File');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-      userId: 'u1',
-      organizationId: 'org_1',
-    });
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     expect(response.status).toBe(201);
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
     expect(m.insertDocument).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1' }));
     expect(m.appendMandatoryAudit).toHaveBeenCalledWith(
       expect.anything(),
@@ -128,10 +132,7 @@ describe('documents/upload route', () => {
     form.set('file', file);
     form.set('organizationId', 'org_1');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-      userId: 'u1',
-      organizationId: 'org_1',
-    });
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     expect(response.status).toBeGreaterThanOrEqual(500);
     expect(m.deleteBlob).toHaveBeenCalledWith('https://blob.test/doc');
   });
@@ -144,10 +145,7 @@ describe('documents/upload route', () => {
     form.set('file', file);
     form.set('organizationId', 'org_1');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-      userId: 'u1',
-      organizationId: 'org_1',
-    });
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     expect(response.status).toBe(403);
     expect((await response.json()).error).toBe('FORBIDDEN');
     expect(m.hasCaseFilingCapacity).toHaveBeenCalledWith({ userId: 'u1', organizationId: 'org_1' }, 'member');
@@ -166,12 +164,9 @@ describe('documents/upload route', () => {
     form.set('file', file);
     form.set('organizationId', 'org_1');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-      userId: 'u1',
-      organizationId: 'org_1',
-    });
-    expect(response.status).toBeGreaterThanOrEqual(400);
-    expect(response.status).not.toBe(201);
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
+    // The wrapper answers the refusal with its own status; it is not a server fault.
+    expect(response.status).toBe(403);
     expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'u1', organizationId: 'org_1' }, 'member');
     expect(m.insertDocument).not.toHaveBeenCalled();
     expect(m.appendMandatoryAudit).not.toHaveBeenCalled();
@@ -189,9 +184,11 @@ describe('documents/upload route', () => {
 
     expect(response.status).toBe(429);
     expect(m.logApiAuditEvent).toHaveBeenCalled();
+    expect(m.checkRateLimit).toHaveBeenCalledWith('doc-upload:u1', expect.anything());
+    expect(m.putBlob).not.toHaveBeenCalled();
   });
 
-  it('returns validation error when organizationId is missing', async () => {
+  it('returns 400 when organizationId is missing from the form, and stores nothing', async () => {
     const { POST } = await loadRoute();
     const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
     const form = new FormData();
@@ -199,7 +196,9 @@ describe('documents/upload route', () => {
 
     const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
 
-    expect([400, 403, 500]).toContain(response.status);
+    expect(response.status).toBe(400);
+    expect(m.putBlob).not.toHaveBeenCalled();
+    expect(m.insertDocument).not.toHaveBeenCalled();
   });
 
   it('rejects file exceeding size limit', async () => {
@@ -231,10 +230,7 @@ describe('documents/upload route', () => {
     form.set('organizationId', 'org_1');
     form.set('canonicalIntake', '1');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-      userId: 'u1',
-      organizationId: 'org_1',
-    });
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     const body = await response.json();
     expect(response.status).toBe(201);
     expect(body).toEqual({ success: true, data: expect.objectContaining({ intakeId: '11111111-1111-4111-8111-111111111111', size: 3, checksum: 'a'.repeat(64) }) });
@@ -255,7 +251,7 @@ describe('documents/upload route', () => {
       form.set('file', new File([new Uint8Array([1])], 'note.pdf', { type: 'application/pdf' }));
       form.set('organizationId', 'org_1');
       form.set('canonicalIntake', '1');
-      return POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), { userId: 'u1', organizationId: 'org_1' });
+      return POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     };
     m.openIntake.mockResolvedValueOnce({ ok: false, kind: 'invalid' });
     expect((await send()).status).toBe(400);
@@ -280,10 +276,7 @@ describe('documents/upload route', () => {
       const form = new FormData();
       form.set('organizationId', 'org_1');
       form.set('discardBlobPath', blobPath);
-      const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-        userId: 'u1',
-        organizationId: 'org_1',
-      });
+      const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
       expect(response.status).toBe(403);
       expect(JSON.stringify(await response.json())).not.toContain(blobPath);
     }
@@ -291,21 +284,17 @@ describe('documents/upload route', () => {
     const replay = new FormData();
     replay.set('organizationId', 'org_1');
     replay.set('discardBlobPath', 'documents/org_1/note.pdf');
-    const again = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: replay }), {
-      userId: 'other-user',
-      organizationId: 'org_1',
-    });
+    caller.userId = 'other-user';
+    const again = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: replay }));
     expect(again.status).toBe(403);
+    caller.userId = 'u1';
 
     const raced = await Promise.all([0, 1].map(() => {
       const form = new FormData();
       form.set('organizationId', 'org_1');
       form.set('file', new File([new Uint8Array([1])], 'note.pdf', { type: 'application/pdf' }));
       form.set('discardBlobPath', 'documents/org_1/note.pdf');
-      return POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
-        userId: 'u1',
-        organizationId: 'org_1',
-      });
+      return POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     }));
     expect(raced.map((response) => response.status)).toEqual([403, 403]);
     expect(m.deleteBlob).not.toHaveBeenCalled();

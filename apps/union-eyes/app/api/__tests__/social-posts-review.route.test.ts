@@ -9,8 +9,10 @@ const m = vi.hoisted(() => ({
   claim: [] as Array<{ id: string }>,
   updates: [] as Array<Record<string, unknown>>,
   order: [] as string[],
+  scopes: [] as unknown[],
 }));
 
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: vi.fn(async () => ({ allowed: true, remaining: 9, resetIn: 0 })),
   RATE_LIMITS: { SOCIAL_MEDIA_POST: {} },
@@ -23,36 +25,36 @@ vi.mock('@/lib/social-media/social-media-service', () => ({
     }
   },
 }));
-vi.mock('@/db', () => ({
-  db: {
-    select: () => ({ from: () => ({ innerJoin: () => ({ where: () => ({ limit: async () => m.draft }) }) }) }),
-    update: () => ({ set: (row: Record<string, unknown>) => { m.updates.push(row); return { where: async () => undefined }; } }),
-  },
-}));
 vi.mock('@/db/schema/social-media-schema', () => ({
   socialPosts: { id: 'id', organizationId: 'organizationId', status: 'status', postMetadata: 'postMetadata', accountId: 'accountId' },
   socialAccounts: { id: 'id', platform: 'platform' },
 }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(), and: vi.fn(), sql: Object.assign(vi.fn(() => 'sql'), { raw: vi.fn() }) }));
+vi.mock('drizzle-orm', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('drizzle-orm')>()),
+  eq: vi.fn(), and: vi.fn(), sql: Object.assign(vi.fn(() => 'sql'), { raw: vi.fn() }),
+}));
+// Every database step of the route runs in a tenant transaction of the caller's organization: the read of the draft, the claim, the rejection and the outcome.
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) =>
-    fn({ update: () => ({ set: (row: Record<string, unknown>) => { m.updates.push(row); return { where: () => ({ returning: async () => m.claim }) }; } }) }),
+  withRLSContext: async (scope: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+    m.scopes.push(scope);
+    return fn({
+      select: () => ({ from: () => ({ innerJoin: () => ({ where: () => ({ limit: async () => m.draft }) }) }) }),
+      update: () => ({ set: (row: Record<string, unknown>) => { m.updates.push(row); return { where: () => ({ returning: async () => m.claim }) }; } }),
+    });
+  },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAuditedOperation: async (_op: unknown, fn: () => Promise<unknown>) => fn(),
   operationAuditResponse: () => null,
 }));
-vi.mock('@/lib/api-auth-guard', () => ({
-  withRoleAuth: (_role: string, handler: (req: NextRequest, ctx: unknown) => Promise<Response>) =>
-    (req: NextRequest, ctx: unknown) => handler(req, ctx),
-}));
+
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 const POST_ID = '22222222-2222-4222-8222-222222222222';
-const reviewer = { userId: 'officer_b', organizationId: 'org_1' };
-const call = (body: unknown, ctx: unknown = reviewer) =>
+const call = (body: unknown) =>
   import('../social-media/posts/review/route').then(({ POST }) =>
-    POST(new NextRequest('http://localhost/api/social-media/posts/review', { method: 'POST', body: JSON.stringify(body) }), ctx as never));
+    POST(new NextRequest('http://localhost/api/social-media/posts/review', { method: 'POST', body: JSON.stringify(body) })));
 
 const pendingDraft = (over: Record<string, unknown> = {}) => ({
   id: POST_ID, accountId: 'acct_1', campaignId: null, content: 'Ratify', mediaUrls: [], linkUrl: null, hashtags: [], scheduledFor: null,
@@ -62,16 +64,39 @@ const pendingDraft = (over: Record<string, unknown> = {}) => ({
 describe('social-media/posts/review — a second officer decides', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.userId = 'officer_b';
+    caller.organizationId = 'org_1';
+    caller.role = 'officer';
     m.updates.length = 0;
     m.order.length = 0;
+    m.scopes.length = 0;
     m.draft = [pendingDraft()];
     m.claim = [{ id: POST_ID }];
     m.persistAtomicAudit.mockImplementation(async (_tx: unknown, entry: { action: string }) => { m.order.push(entry.action); });
     m.publishPost.mockImplementation(async () => { m.order.push('publish'); return [{ success: true, platform: 'twitter', post_id: 'p1' }]; });
   });
 
+  it('declares what it asks of the wrapper: an officer, with no transaction spanning the platform call (every database step opens its own)', async () => {
+    await import('../social-media/posts/review/route');
+    const config = declared.find((entry) => entry.openapi?.summary === 'Approve or reject a drafted social media post');
+
+    expect(config?.auth).toEqual({ minRole: 'officer' });
+    expect(config?.rlsOrgContext).toBeUndefined();
+    expect(config?.registry).toMatchObject({ audience: 'officer', evidenceRequired: true, orgScoping: 'caller-org' });
+  });
+
+  it('refuses a steward, whom the officer floor does not admit, before any read, claim or publish', async () => {
+    caller.role = 'steward';
+    const response = await call({ post_id: POST_ID, decision: 'approve' });
+    expect(response.status).toBe(403);
+    expect(m.scopes).toEqual([]);
+    expect(m.publishPost).not.toHaveBeenCalled();
+  });
+
   it('refuses to let the author approve their own post, and publishes nothing', async () => {
-    const response = await call({ post_id: POST_ID, decision: 'approve' }, { userId: 'officer_a', organizationId: 'org_1' });
+    caller.userId = 'officer_a';
+    const response = await call({ post_id: POST_ID, decision: 'approve' });
     expect(response.status).toBe(403);
     expect(m.publishPost).not.toHaveBeenCalled();
   });
@@ -81,6 +106,9 @@ describe('social-media/posts/review — a second officer decides', () => {
     expect(response.status).toBe(200);
     expect(m.order).toEqual(['social.post.approve', 'publish']);
     expect(m.publishPost).toHaveBeenCalledWith('org_1', expect.objectContaining({ text: 'Ratify', platforms: ['twitter'] }), 'officer_b', { accountIds: ['acct_1'], existingPostId: POST_ID });
+    // Every database step ran in a tenant transaction of the caller's organization.
+    expect(m.scopes.length).toBeGreaterThanOrEqual(3);
+    expect(m.scopes.every((scope) => JSON.stringify(scope) === JSON.stringify({ organizationId: 'org_1' }))).toBe(true);
   });
 
   it('does not publish when the draft was already claimed by another reviewer (409)', async () => {

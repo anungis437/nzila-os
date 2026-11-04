@@ -1,7 +1,10 @@
 /**
  * Receipt Viewer Page
- * View and download receipt for a paid dues transaction
- * 
+ * Shows the dues ledger entry behind a payment to the member it belongs to.
+ *
+ * GET /api/dues/receipt/:id answers the member's own member_dues_ledger entry as JSON. The entry states no union or member name, no breakdown of
+ * the amount and no rendered PDF, so this page states none of those either.
+ *
  * @module app/dashboard/dues/receipts/[transactionId]/page
  */
 
@@ -9,61 +12,52 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import {
-  Download,
-  Printer,
-  CheckCircle2,
-  ArrowLeft,
-  FileText,
-  CreditCard,
-  Building2,
-  User,
-  Loader2,
-} from 'lucide-react';
+import { Printer, ArrowLeft, FileText, CreditCard, Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
+import { ApiShapeError, envelopeRow, readApiError } from '@/lib/client/api-envelope';
+import { optionalString, requiredString } from '@/lib/client/row-fields';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-interface ReceiptData {
-  receiptNumber: string;
-  paymentDate: string;
-  generatedAt?: string;
-  unionName: string;
-  unionAddress?: string;
-  unionPhone?: string;
-  unionEmail?: string;
-  memberName: string;
-  memberNumber: string;
-  memberEmail?: string;
-  duesAmount: string;
-  copeAmount?: string;
-  pacAmount?: string;
-  strikeFundAmount?: string;
-  lateFee?: string;
-  adjustmentAmount?: string;
-  totalAmount: string;
-  paymentMethod: string;
-  paymentReference?: string;
-  billingPeriod?: string;
-  transaction?: {
-    id: string;
-    periodStart: string;
-    periodEnd: string;
-    amount: number;
-    lateFee: number;
-    total: number;
-    paymentMethod: string | null;
-    paymentReference: string | null;
+// The columns of the member_dues_ledger entry this page reads. `amount` is decimal text; the receipt number, method, reference and period are null
+// when the entry does not state them.
+interface LedgerReceipt {
+  id: string;
+  transactionDate: string;
+  amount: number;
+  status: string;
+  description: string;
+  receiptNumber: string | null;
+  paymentMethod: string | null;
+  paymentReference: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+}
+
+function readLedgerReceipt(row: Record<string, unknown>): LedgerReceipt {
+  const amount = Number(requiredString(row, 'amount'));
+  if (!Number.isFinite(amount)) throw new ApiShapeError('amount is not a number');
+  return {
+    id: requiredString(row, 'id'),
+    transactionDate: requiredString(row, 'transactionDate'),
+    amount,
+    status: requiredString(row, 'status'),
+    description: requiredString(row, 'description'),
+    receiptNumber: optionalString(row, 'receiptNumber'),
+    paymentMethod: optionalString(row, 'paymentMethod'),
+    paymentReference: optionalString(row, 'paymentReference'),
+    periodStart: optionalString(row, 'periodStart'),
+    periodEnd: optionalString(row, 'periodEnd'),
   };
 }
 
@@ -72,64 +66,40 @@ interface ReceiptData {
 // =============================================================================
 
 function formatDate(date: string, locale: string): string {
-  try {
-    return new Intl.DateTimeFormat(locale, {
-      month: 'long',
-      day: '2-digit',
-      year: 'numeric',
-    }).format(new Date(date));
-  } catch {
-    return date;
-  }
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat(locale, {
+    month: 'long',
+    day: '2-digit',
+    year: 'numeric',
+  }).format(parsed);
 }
 
 // =============================================================================
-// RECEIPT HEADER COMPONENT
+// RECEIPT COMPONENTS
 // =============================================================================
 
-function ReceiptHeader({ receipt }: { receipt: ReceiptData }) {
+function ReceiptHeader({ receipt }: { receipt: LedgerReceipt }) {
   const t = useTranslations('duesReceiptPage');
   const locale = useLocale();
 
   return (
-    <div className="space-y-4 pb-6">
-      {/* Union/Organization Info */}
-      <div className="text-center border-b pb-4">
-        <div className="flex items-center justify-center mb-2">
-          <Building2 className="h-8 w-8 text-primary mr-2" />
-          <h1 className="text-2xl font-bold">{receipt.unionName}</h1>
-        </div>
-        {receipt.unionAddress && (
-          <p className="text-sm text-muted-foreground">{receipt.unionAddress}</p>
-        )}
-        <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
-          {receipt.unionPhone && <span>{receipt.unionPhone}</span>}
-          {receipt.unionEmail && <span>{receipt.unionEmail}</span>}
-        </div>
-      </div>
-
-      {/* Receipt Title & Number */}
-      <div className="text-center py-4">
-        <div className="flex items-center justify-center mb-2">
-          <CheckCircle2 className="h-6 w-6 text-green-600 mr-2" />
-          <h2 className="text-xl font-semibold">{t('paymentReceiptTitle')}</h2>
-        </div>
+    <div className="space-y-2 pb-6 text-center">
+      <h2 className="text-xl font-semibold">{t('paymentReceiptTitle')}</h2>
+      {receipt.receiptNumber !== null && (
         <Badge variant="outline" className="text-base px-4 py-1">
           {receipt.receiptNumber}
         </Badge>
-        <p className="text-sm text-muted-foreground mt-2">
-          {t('issuedPrefix')}: {formatDate(receipt.paymentDate, locale)}
-        </p>
-      </div>
+      )}
+      <p className="text-sm text-muted-foreground">{receipt.description}</p>
+      <p className="text-sm text-muted-foreground">
+        {t('issuedPrefix')}: {formatDate(receipt.transactionDate, locale)}
+      </p>
     </div>
   );
 }
 
-// =============================================================================
-// RECEIPT DETAILS COMPONENT
-// =============================================================================
-
-function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
+function ReceiptDetails({ receipt }: { receipt: LedgerReceipt }) {
   const t = useTranslations('duesReceiptPage');
   const locale = useLocale();
   const paymentMethod = receipt.paymentMethod
@@ -137,128 +107,55 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
         ? t(`paymentMethod.${receipt.paymentMethod}`)
         : receipt.paymentMethod)
     : t('naLabel');
+  const status = t.has(`status.${receipt.status}`) ? t(`status.${receipt.status}`) : receipt.status;
 
   return (
     <div className="space-y-6">
-      {/* Member Information */}
-      <div>
-        <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center">
-          <User className="h-4 w-4 mr-2" />
-          {t('memberInformationTitle')}
-        </h3>
-        <div className="space-y-2 pl-6">
-          <div className="flex justify-between">
-            <span className="text-sm text-muted-foreground">{t('nameLabel')}</span>
-            <span className="text-sm font-medium">{receipt.memberName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-muted-foreground">{t('memberIdLabel')}</span>
-            <span className="text-sm font-medium">{receipt.memberNumber}</span>
-          </div>
-          {receipt.memberEmail && (
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">{t('emailLabel')}</span>
-              <span className="text-sm font-medium">{receipt.memberEmail}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Payment Information */}
       <div>
         <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center">
           <CreditCard className="h-4 w-4 mr-2" />
           {t('paymentInformationTitle')}
         </h3>
         <div className="space-y-2 pl-6">
-          {receipt.billingPeriod && (
+          {receipt.periodStart !== null && receipt.periodEnd !== null && (
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">{t('billingPeriodLabel')}</span>
-              <span className="text-sm font-medium">{receipt.billingPeriod}</span>
+              <span className="text-sm font-medium">
+                {formatDate(receipt.periodStart, locale)} – {formatDate(receipt.periodEnd, locale)}
+              </span>
             </div>
           )}
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">{t('paymentDateLabel')}</span>
-            <span className="text-sm font-medium">{formatDate(receipt.paymentDate, locale)}</span>
+            <span className="text-sm font-medium">{formatDate(receipt.transactionDate, locale)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">{t('paymentMethodLabel')}</span>
             <span className="text-sm font-medium capitalize">{paymentMethod}</span>
           </div>
-          {receipt.paymentReference && (
+          {receipt.paymentReference !== null && (
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">{t('referenceLabel')}</span>
-              <span className="text-xs font-medium font-mono">
-                {receipt.paymentReference}
-              </span>
+              <span className="text-xs font-medium font-mono">{receipt.paymentReference}</span>
             </div>
           )}
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">{t('statusLabel')}</span>
+            <span className="text-sm font-medium capitalize">{status}</span>
+          </div>
         </div>
       </div>
 
       <Separator />
 
-      {/* Amount Breakdown */}
       <div>
         <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center">
           <FileText className="h-4 w-4 mr-2" />
           {t('amountBreakdownTitle')}
         </h3>
-        <div className="space-y-2 pl-6">
-          <div className="flex justify-between">
-            <span className="text-sm">{t('duesAmountLabel')}</span>
-            <span className="text-sm font-medium">{formatCurrency(Number(receipt.duesAmount))}</span>
-          </div>
-
-          {receipt.copeAmount && parseFloat(receipt.copeAmount) > 0 && (
-            <div className="flex justify-between">
-              <span className="text-sm">{t('copeContributionLabel')}</span>
-              <span className="text-sm font-medium">{formatCurrency(Number(receipt.copeAmount))}</span>
-            </div>
-          )}
-
-          {receipt.pacAmount && parseFloat(receipt.pacAmount) > 0 && (
-            <div className="flex justify-between">
-              <span className="text-sm">{t('pacContributionLabel')}</span>
-              <span className="text-sm font-medium">{formatCurrency(Number(receipt.pacAmount))}</span>
-            </div>
-          )}
-
-          {receipt.strikeFundAmount && parseFloat(receipt.strikeFundAmount) > 0 && (
-            <div className="flex justify-between">
-              <span className="text-sm">{t('strikeFundLabel')}</span>
-              <span className="text-sm font-medium">
-                {formatCurrency(Number(receipt.strikeFundAmount))}
-              </span>
-            </div>
-          )}
-
-          {receipt.lateFee && parseFloat(receipt.lateFee) > 0 && (
-            <div className="flex justify-between text-orange-600">
-              <span className="text-sm">{t('lateFeeLabel')}</span>
-              <span className="text-sm font-medium">{formatCurrency(Number(receipt.lateFee))}</span>
-            </div>
-          )}
-
-          {receipt.adjustmentAmount && parseFloat(receipt.adjustmentAmount) !== 0 && (
-            <div className="flex justify-between">
-              <span className="text-sm">{t('adjustmentLabel')}</span>
-              <span className="text-sm font-medium">
-                {formatCurrency(Number(receipt.adjustmentAmount))}
-              </span>
-            </div>
-          )}
-
-          <Separator className="my-3" />
-
-          <div className="flex justify-between items-center pt-2">
-            <span className="text-base font-semibold">{t('totalAmountLabel')}</span>
-            <span className="text-2xl font-bold text-green-600">
-              {formatCurrency(Number(receipt.totalAmount))}
-            </span>
-          </div>
+        <div className="flex justify-between items-center pl-6 pt-2">
+          <span className="text-base font-semibold">{t('totalAmountLabel')}</span>
+          <span className="text-2xl font-bold">{formatCurrency(receipt.amount)}</span>
         </div>
       </div>
     </div>
@@ -276,68 +173,36 @@ export default function ReceiptViewerPage() {
   const t = useTranslations('duesReceiptPage');
   const transactionId = params.transactionId as string;
 
-  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [receipt, setReceipt] = useState<LedgerReceipt | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState(false);
 
-  // Fetch receipt data
-  useEffect(() => {
-    async function fetchReceipt() {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/dues/receipt/${transactionId}?format=json`);
+  const fetchReceipt = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`/api/dues/receipt/${encodeURIComponent(transactionId)}`);
 
-        if (!response.ok) {
-          throw new Error(t('failedToFetchReceipt'));
-        }
-
-        const data = await response.json();
-        setReceipt(data);
-      } catch (err) {
-        logger.error(t('errorFetchingReceiptLog'), { error: err, transactionId });
-        setError(err instanceof Error ? err.message : t('failedToLoadReceipt'));
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error(await readApiError(response, t('failedToFetchReceipt')));
       }
-    }
 
-    if (transactionId) {
-      fetchReceipt();
+      // The route answers { success, data: { data: <ledger entry> } }.
+      setReceipt(readLedgerReceipt(envelopeRow(await response.json())));
+    } catch (err) {
+      logger.error(t('errorFetchingReceiptLog'), { error: err, transactionId });
+      setReceipt(null);
+      setError(err instanceof Error ? err.message : t('failedToLoadReceipt'));
+    } finally {
+      setLoading(false);
     }
   }, [transactionId, t]);
 
-  // Handle PDF download
-  const handleDownload = async () => {
-    try {
-      setDownloading(true);
-      const response = await fetch(`/api/dues/receipt/${transactionId}?format=pdf`);
-
-      if (!response.ok) {
-        throw new Error(t('failedToGeneratePdf'));
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `receipt-${receipt?.receiptNumber || transactionId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      logger.error(t('errorDownloadingReceiptLog'), { error: err, transactionId });
-      alert(t('failedToDownloadReceiptAlert'));
-    } finally {
-      setDownloading(false);
+  useEffect(() => {
+    if (transactionId) {
+      void fetchReceipt();
     }
-  };
-
-  // Handle print
-  const handlePrint = () => {
-    window.print();
-  };
+  }, [transactionId, fetchReceipt]);
 
   // Loading state
   if (loading) {
@@ -354,7 +219,7 @@ export default function ReceiptViewerPage() {
   }
 
   // Error state
-  if (error || !receipt) {
+  if (error !== null || !receipt) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <Button
@@ -369,15 +234,17 @@ export default function ReceiptViewerPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-destructive">{t('receiptNotFoundTitle')}</CardTitle>
-            <CardDescription>{error || t('failedToLoadReceipt')}</CardDescription>
+            <CardDescription role="alert">{error ?? t('failedToLoadReceipt')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              {t('receiptNotFoundDescription')}
-            </p>
-            <Button onClick={() => router.push(`/${locale}/dashboard/dues`)}>
-              {t('returnToDuesDashboardButton')}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => void fetchReceipt()}>
+                {t('retryButton')}
+              </Button>
+              <Button onClick={() => router.push(`/${locale}/dashboard/dues`)}>
+                {t('returnToDuesDashboardButton')}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -395,20 +262,10 @@ export default function ReceiptViewerPage() {
             {t('backToDuesButton')}
           </Button>
 
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="mr-2 h-4 w-4" />
-              {t('printButton')}
-            </Button>
-            <Button size="sm" onClick={handleDownload} disabled={downloading}>
-              {downloading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="mr-2 h-4 w-4" />
-              )}
-              {t('downloadPdfButton')}
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="mr-2 h-4 w-4" />
+            {t('printButton')}
+          </Button>
         </div>
       </div>
 
@@ -417,21 +274,6 @@ export default function ReceiptViewerPage() {
         <CardContent className="p-8">
           <ReceiptHeader receipt={receipt} />
           <ReceiptDetails receipt={receipt} />
-
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t text-center">
-            <p className="text-xs text-muted-foreground">
-              {t('officialReceiptNote')}
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              {t('thankYouMessage')}
-            </p>
-            {receipt.generatedAt && (
-              <p className="text-xs text-muted-foreground mt-4">
-                {t('generatedPrefix')}: {receipt.generatedAt}
-              </p>
-            )}
-          </div>
         </CardContent>
       </Card>
 

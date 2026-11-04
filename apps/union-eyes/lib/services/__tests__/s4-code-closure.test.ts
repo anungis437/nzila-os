@@ -74,8 +74,18 @@ describe('S4 code closure of partial fixes', () => {
     expect(schema).toContain('.strict()')
   })
 
-  it('reads the wallet balance and the ledger page from one repeatable-read snapshot', () => {
-    expect(read('lib/services/rewards/wallet-service.ts')).toContain("isolationLevel: 'repeatable read'")
-    expect(read('app/api/rewards/wallet/route.ts')).toContain('getWalletSnapshot(organizationId, userId, limit, offset)')
+  it('reads the wallet balance, the total and the ledger page from one statement, so they come from one snapshot', () => {
+    const wallet = read('lib/services/rewards/wallet-service.ts')
+    const snapshot = wallet.slice(wallet.indexOf('export async function getWalletSnapshot'), wallet.indexOf('export async function applyLedgerEntry'))
+    // The page, the total and the newest balance come out of one statement (window functions over the same rows): one snapshot at any isolation level.
+    // A transaction opened here could not raise the isolation of the member's tenant transaction it would be nested in. Behaviour: wallet-snapshot.pglite.test.ts.
+    expect(snapshot).toContain('snapshotTotal: sql<number>`(count(*) over ())::int`')
+    expect(snapshot).toContain('snapshotBalance: sql<number>`first_value(${rewardWalletLedger.balanceAfter}) over (order by ${rewardWalletLedger.createdAt} desc)`')
+    expect(snapshot).toContain('.limit(limit)')
+    expect(snapshot).toContain('.offset(offset)')
+    expect(snapshot).not.toContain('.transaction(')
+    const route = read('app/api/rewards/wallet/route.ts')
+    expect(route).toContain('rlsOrgContext: true')
+    expect(route).toContain('getWalletSnapshot(organizationId!, userId!, limit, offset)')
   })
 })

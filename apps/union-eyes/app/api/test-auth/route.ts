@@ -14,7 +14,7 @@ import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
-const DJANGO = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const djangoBase = () => (process.env.DJANGO_API_URL ?? process.env.NEXT_PUBLIC_DJANGO_API_URL ?? '').replace(/\/$/, '');
 
 export async function GET(_req: NextRequest) {
   // ── Step 1: Auth session ──────────────────────────────────────────────────────────
@@ -31,6 +31,12 @@ export async function GET(_req: NextRequest) {
   // backend's response bodies are not returned to a signed-in user of any organization.
   if (!(await isPlatformAdminUser(userId))) {
     return NextResponse.json({ passed: false, message: 'Platform administrator required' }, { status: 403 });
+  }
+
+  // The same backend address every other route resolves; there is no localhost fallback to send a session token to.
+  const DJANGO = djangoBase();
+  if (!DJANGO) {
+    return NextResponse.json({ passed: false, message: 'The Django backend is not configured (DJANGO_API_URL)' }, { status: 503 });
   }
 
   const token = await getToken();

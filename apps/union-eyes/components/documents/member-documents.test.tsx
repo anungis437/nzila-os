@@ -71,12 +71,22 @@ describe('MemberDocuments', () => {
 })
 
 describe('parseDocumentList', () => {
-  it('accepts flat, enveloped and nested shapes and drops rows without an id', () => {
+  it('reads the list the route answers under data, and drops rows without an id', () => {
     const row = { id: 'x', title: 'T', createdAt: '2026-01-01' }
-    expect(parseDocumentList([row])).toHaveLength(1)
-    expect(parseDocumentList({ data: [row] })).toHaveLength(1)
-    expect(parseDocumentList({ data: { data: [row, { title: 'no id' }] } })).toHaveLength(1)
-    expect(parseDocumentList(null)).toEqual([])
-    expect(parseDocumentList({ data: 'nope' })).toEqual([])
+    expect(parseDocumentList({ success: true, data: [row, { title: 'no id' }] })).toEqual([expect.objectContaining({ id: 'x', title: 'T' })])
+    expect(parseDocumentList({ success: true, data: [] })).toEqual([])
+  })
+
+  it('refuses any other answer, rather than showing it as an empty list', () => {
+    expect(() => parseDocumentList([{ id: 'x' }])).toThrow('Unexpected API response')
+    expect(() => parseDocumentList({ data: { data: [{ id: 'x' }] } })).toThrow('Unexpected API response')
+    expect(() => parseDocumentList(null)).toThrow('Unexpected API response')
+    expect(() => parseDocumentList({ data: 'nope' })).toThrow('Unexpected API response')
+  })
+
+  it('shows the retryable error state for an answer that is not the list', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => ok({ success: true, data: { data: documents } })))
+    renderDocs()
+    expect(await screen.findByRole('alert')).toHaveTextContent("couldn't load your documents")
   })
 })

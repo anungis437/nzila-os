@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // F06 R4 (replaces the two-phase mock): ANALYZE changes planner statistics, which are rows of our own database, so the run and its audit
-// record are one transaction (performAtomicAuditedOperation, system scope), and the answer says how many tables the role could analyze.
+// record are one transaction (performAtomicSystemAuditedOperation), and the answer says how many tables the role could analyze.
 const TX = vi.hoisted(() => ({ execute: vi.fn() }));
 const audit = vi.hoisted(() => ({
   run: vi.fn(async (_op: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(TX)),
 }));
 vi.mock('@/lib/audit/operation-audit', () => ({
-  performAtomicAuditedOperation: audit.run,
+  performAtomicSystemAuditedOperation: audit.run,
   operationAuditResponse: () => null,
 }));
 
@@ -62,7 +62,7 @@ describe('admin/database/optimize route', () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ success: true, tablesAnalyzed: 12, tablesSkipped: 0, message: expect.stringContaining('all 12 tables') });
     expect(audit.run).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'platform.database.analyze', organizationId: 'org_1', userId: 'admin_1', scope: 'system' }),
+      expect.objectContaining({ action: 'platform.database.analyze', organizationId: 'org_1', userId: 'admin_1' }),
       expect.any(Function),
     );
     expect(TX.execute).toHaveBeenCalledTimes(2);

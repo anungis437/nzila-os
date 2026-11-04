@@ -19,6 +19,7 @@ const createSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     // The events describe payroll and remittance runs, which the financial roles hold; a member reads none of them.
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_execution_compliance",

@@ -7,6 +7,7 @@
 
 "use client";
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { useState, useEffect, useId } from "react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Cookie, Shield, Settings } from "lucide-react";
 
 import { CONSENT_DECISION_EVENT, hasStoredConsentDecision } from '@/lib/privacy/consent-decision';
+import { defaultLocale, locales } from '@/lib/locales';
+
+/** The locale the page is served under: the first segment of its path when it names one the application serves. The banner sits above the locale layouts. */
+function useServedLocale(): string {
+  const first = usePathname()?.split('/')[1] ?? '';
+  return (locales as readonly string[]).includes(first) ? first : defaultLocale;
+}
 
 interface CookiePreferences {
   essential: boolean;
@@ -32,14 +40,17 @@ interface CookiePreferences {
   marketing: boolean;
 }
 
+// Set while the last decision's record has not reached the server.
+const UNRECORDED_KEY = "cookie_consent_unrecorded";
+
 interface CookieConsentBannerProps {
   organizationId: string;
-  userId?: string;
   messages?: Record<string, string>;
 }
 
-export function CookieConsentBanner({ organizationId, userId, messages }: CookieConsentBannerProps) {
+export function CookieConsentBanner({ organizationId, messages }: CookieConsentBannerProps) {
   const fieldId = useId();
+  const locale = useServedLocale();
   const text = (key: string, fallback: string) => messages?.[key] ?? fallback;
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -104,6 +115,29 @@ export function CookieConsentBanner({ organizationId, userId, messages }: Cookie
     }
   };
 
+  // The decision is kept on the device and applied at once; the server's copy is the record of it.
+  const recordConsent = async (consentId: string, prefs: CookiePreferences): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/gdpr/cookie-consent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": consentId,
+        },
+        // Who the visitor is and where they connect from are read by the server (the session and the request headers), never taken from the page.
+        body: JSON.stringify({
+          consentId,
+          organizationId,
+          ...prefs,
+          userAgent: navigator.userAgent,
+        }),
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  };
+
   useEffect(() => {
     // Check if user has already consented
     const consentId = localStorage.getItem("cookie_consent_id");
@@ -118,8 +152,16 @@ export function CookieConsentBanner({ organizationId, userId, messages }: Cookie
         const saved = JSON.parse(consentData);
         setPreferences(saved.preferences);
         applyConsent(saved.preferences);
-      } catch (_e) {
-}
+        // A decision whose record never reached the server is sent again (the request carries an idempotency key, so a repeat is harmless).
+        if (localStorage.getItem(UNRECORDED_KEY)) {
+          recordConsent(consentId, saved.preferences).then((recorded) => {
+            if (recorded) localStorage.removeItem(UNRECORDED_KEY);
+          });
+        }
+      } catch {
+        // A stored decision that cannot be read is not a decision: the banner asks again.
+        setShowBanner(true);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -139,25 +181,9 @@ export function CookieConsentBanner({ organizationId, userId, messages }: Cookie
     localStorage.setItem("cookie_consent_id", consentId);
     localStorage.setItem("cookie_consent", JSON.stringify(consentData));
 
-    // Save to backend
-    try {
-      await fetch("/api/gdpr/cookie-consent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": consentId,
-        },
-        body: JSON.stringify({
-          consentId,
-          userId,
-          organizationId,
-          ...prefs,
-          ipAddress: undefined, // Server will capture this
-          userAgent: navigator.userAgent,
-        }),
-      });
-    } catch (_error) {
-}
+    // Save to backend; a record that did not reach it is remembered and sent again at the next page load
+    if (await recordConsent(consentId, prefs)) localStorage.removeItem(UNRECORDED_KEY);
+    else localStorage.setItem(UNRECORDED_KEY, consentId);
 
     applyConsent(prefs);
     window.dispatchEvent(new Event(CONSENT_DECISION_EVENT));
@@ -341,16 +367,12 @@ export function CookieConsentBanner({ organizationId, userId, messages }: Cookie
                 </div>
 
                 <div className="pt-4 border-t">
+                  {/* There is a privacy page and no cookie policy page; the cookies are described above. */}
                   <p className="text-xs text-muted-foreground">{text("text17", "For more information, please read our")}{" "}
-                    <Link href="/privacy-policy"
+                    <Link href={`/${locale}/legal/privacy`}
                       className="text-primary underline"
                       target="_blank"
-                    >{text("text18", "Privacy Policy")}</Link>{" "}
-                    and{" "}
-                    <Link href="/cookie-policy"
-                      className="text-primary underline"
-                      target="_blank"
-                    >{text("text20", "Cookie Policy")}</Link>
+                    >{text("text18", "Privacy Policy")}</Link>
                     .
                   </p>
                 </div>
@@ -366,46 +388,5 @@ export function CookieConsentBanner({ organizationId, userId, messages }: Cookie
       </Dialog>
     </>
   );
-}
-
-/**
- * Hook to access cookie consent preferences
- */
-export function useCookieConsent() {
-  const [preferences, setPreferences] = useState<CookiePreferences>({
-    essential: true,
-    functional: false,
-    analytics: false,
-    marketing: false,
-  });
-
-  useEffect(() => {
-    const consentData = localStorage.getItem("cookie_consent");
-    if (consentData) {
-      try {
-        const { preferences: saved } = JSON.parse(consentData);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPreferences(saved);
-      } catch (_e) {
-}
-    }
-  }, []);
-
-  const updatePreferences = (newPrefs: Partial<CookiePreferences>) => {
-    const updated = { ...preferences, ...newPrefs };
-    setPreferences(updated);
-    
-    const consentData = localStorage.getItem("cookie_consent");
-    if (consentData) {
-      try {
-        const data = JSON.parse(consentData);
-        data.preferences = updated;
-        localStorage.setItem("cookie_consent", JSON.stringify(data));
-      } catch (_e) {
-}
-    }
-  };
-
-  return { preferences, updatePreferences };
 }
 

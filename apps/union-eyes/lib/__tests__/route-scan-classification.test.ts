@@ -56,6 +56,15 @@ beforeAll(() => {
   put('app/api/crud-subject-owned/route.ts', `import { crudRoutes } from '@/lib/api/crud-factory'\nimport { userConsents } from '@/db/schema'\nconst { GET, POST } = crudRoutes({ table: userConsents, pk: 'id', ownerColumn: 'userId' })\nexport { GET, POST }\n`)
   put('app/api/admin-inside/route.ts', `import { auth } from '@nzila/platform-auth/entra/server'\nimport { requireSystemAdmin } from '@/lib/api-auth-guard'\nexport async function POST() { await auth(); await requireSystemAdmin() }\n`)
   put('app/api/role-inside/route.ts', `import { auth } from '@nzila/platform-auth/entra/server'\nimport { hasMinRole } from '@/lib/api-auth-guard'\nexport async function POST() { await auth(); if (!(await hasMinRole('officer'))) return null }\n`)
+  // Retired handlers: every method answers 501, directly, through a helper, through an alias or a named export.
+  put('app/api/retired-whole/route.ts', `import { retiredHandler } from '@/lib/api/retired-route'\nexport const GET = retiredHandler('x')\nexport const POST = retiredHandler('x')\n`)
+  put('app/api/retired-alias/route.ts', `import { notImplemented } from '@/lib/api/errors'\nconst handler = () => notImplemented('x')\nexport const GET = handler\nexport const POST = handler\n`)
+  put('app/api/retired-named/route.ts', `import { notImplemented } from '@/lib/api/errors'\nasync function post() { return notImplemented('x') }\nasync function get() { return notImplemented('x') }\nexport { get as GET, post as POST }\n`)
+  put('app/api/live-and-retired/route.ts', `import { withApi, ApiError } from '@/lib/api/framework'\nimport { recordsASendOnly } from '@/lib/api/records-a-send-only'\nexport const GET = withApi({ auth: { required: true } }, async ({ tx }) => tx.select().from(things))\nexport const POST = recordsASendOnly('x', 'y')\nexport const PATCH = withApi({ auth: { required: true } }, async ({ tx }) => { await tx.update(things); await persistAtomicAudit(tx, {}) })\n`)
+  put('app/api/live-with-501-branch/route.ts', `import { withApi, ApiError } from '@/lib/api/framework'\nexport const GET = withApi({ auth: { required: true } }, async ({ tx, request }) => {\n  if (new URL(request.url).searchParams.get('format') === 'pdf') throw ApiError.notImplemented('pdf')\n  return tx.select().from(things)\n})\n`)
+  put('app/api/live-with-write-and-501/route.ts', `import { withApi, ApiError } from '@/lib/api/framework'\nexport const POST = withApi({ auth: { required: true } }, async ({ tx }) => { await tx.insert(things); if (false) throw ApiError.notImplemented('x') })\n`)
+  put('app/api/crud-with-retired-post/route.ts', `import { crudRoutes } from '@/lib/api/crud-factory'\nimport { recordsASendOnly } from '@/lib/api/records-a-send-only'\nimport { employers } from '@/db/schema'\nconst { GET } = crudRoutes({ table: employers, pk: 'id' })\nexport const POST = recordsASendOnly('x', 'y')\nexport { GET }\n`)
+  put('app/api/delegating/route.ts', `export { GET, POST } from '../live-and-retired/route'\n`)
 })
 afterAll(() => rmSync(root, { recursive: true, force: true }))
 
@@ -104,5 +113,34 @@ describe('route coverage scanner', () => {
   it('sees the administrator and role gates a handler applies itself', () => {
     expect(by().get('admin-inside')?.guard).toBe('ADMIN_AUTH')
     expect(by().get('role-inside')?.guard).toBe('ROLE_AUTH')
+  })
+
+  describe('a retired method is judged by its own handler, not by the file it sits in', () => {
+    it('calls a route retired when every method it exports answers 501, however the handler is spelled', () => {
+      const routes = by()
+      for (const name of ['retired-whole', 'retired-alias', 'retired-named']) {
+        expect(routes.get(name), name).toMatchObject({ guard: 'RETIRED' })
+        expect(routes.get(name)?.retiredMethods, name).toBeUndefined()
+      }
+    })
+
+    it('does not call a route retired because one of its methods is: the live methods keep their own guard, audit and mutating verdict', () => {
+      expect(by().get('live-and-retired')).toMatchObject({ guard: 'WITH_API', retiredMethods: ['POST'], mutating: true, audit: 'ATOMIC' })
+    })
+
+    it('does not count a retired method as one that changes state', () => {
+      expect(by().get('crud-with-retired-post')).toMatchObject({ guard: 'CRUD_FACTORY', retiredMethods: ['POST'], mutating: false, audit: 'READ_ONLY' })
+    })
+
+    it('does not call a handler retired for holding a 501 branch when it also reads or writes', () => {
+      for (const name of ['live-with-501-branch', 'live-with-write-and-501']) {
+        expect(by().get(name)?.guard, name).toBe('WITH_API')
+        expect(by().get(name)?.retiredMethods, name).toBeUndefined()
+      }
+    })
+
+    it('gives a file that re-exports another the target\'s retired methods', () => {
+      expect(by().get('delegating')).toMatchObject({ guard: 'DELEGATED', retiredMethods: ['POST'] })
+    })
   })
 })

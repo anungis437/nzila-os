@@ -6,6 +6,7 @@
  */
 
 import { db } from '@/db';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { auditLogs } from '@/db/schema/audit-security-schema';
 import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
@@ -37,13 +38,13 @@ export interface AuditLogQuery {
 }
 
 /**
- * Create an audit log entry
+ * Create an audit log entry. Pass the caller's transaction as `database` to write on it; the default is the active context's handle.
  */
-export async function createAuditLog(entry: AuditLogEntry): Promise<string> {
+export async function createAuditLog(entry: AuditLogEntry, database: RLSTx = db): Promise<string> {
   const id = uuidv4();
   
   try {
-    await db.insert(auditLogs).values({
+    await database.insert(auditLogs).values({
       auditId: id,
       organizationId: entry.organizationId,
       userId: entry.userId,

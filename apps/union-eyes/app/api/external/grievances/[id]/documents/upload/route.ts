@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { db } from '@/db/db';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
 import { externalDocumentAccessGrants, externalMatterAccessGrants } from '@/db/schema/representation-authority-schema';
-import { withExplicitUserContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
@@ -31,6 +30,11 @@ export const POST = withExternalMatterResourceAuth(
   {
     requiredPermission: 'upload_documents',
     resolve: resolveExternalGrievanceResource,
+    // The upload writes its own record (document.external_upload); it is not a read.
+    readRecord: 'handler',
+    // The stored object is checked against storage before anything is written: only the authorization decision holds a transaction,
+    // and the write below opens its own.
+    transaction: 'authorization',
   },
   async (request, context) => {
     if (context.matterType !== 'grievance' || !context.actor.representativeOrganizationId) {
@@ -50,8 +54,8 @@ export const POST = withExternalMatterResourceAuth(
       fileUrl: parsed.data.fileUrl,
     });
 
-    const created = await withExplicitUserContext(context.actor.userId, async () => {
-      const [matterGrant] = await db
+    const created = await withRLSContext({ organizationId: context.organizationId }, async (tx) => {
+      const [matterGrant] = await tx
         .select()
         .from(externalMatterAccessGrants)
         .where(and(
@@ -78,21 +82,21 @@ export const POST = withExternalMatterResourceAuth(
 
       // The representative names a stored object; nothing shows it is theirs. An object another record already holds (a document
       // or a version of one) is some other matter's file, so it is never attached here through an upload.
-      const [heldByDocument] = await db
+      const [heldByDocument] = await tx
         .select({ id: documents.id })
         .from(documents)
         .where(and(eq(documents.organizationId, context.organizationId), eq(documents.blobPath, resolvedBlob.blobPath)))
         .limit(1);
       const [heldByVersion] = heldByDocument
         ? []
-        : await db
+        : await tx
             .select({ id: documentVersions.id })
             .from(documentVersions)
             .where(and(eq(documentVersions.organizationId, context.organizationId), eq(documentVersions.storageKey, resolvedBlob.blobPath)))
             .limit(1);
       if (heldByDocument || heldByVersion) return { conflict: true as const };
 
-      const [insertedDocument] = await db
+      const [insertedDocument] = await tx
         .insert(documents)
         .values({
           organizationId: context.organizationId,
@@ -120,7 +124,7 @@ export const POST = withExternalMatterResourceAuth(
           name: documents.name,
         });
 
-      await db.insert(documentVersions).values({
+      await tx.insert(documentVersions).values({
         organizationId: context.organizationId,
         documentId: insertedDocument.id,
         versionNo: 1,
@@ -129,7 +133,7 @@ export const POST = withExternalMatterResourceAuth(
         uploadedBy: context.actor.userId,
       });
 
-      await db.insert(documentLinks).values({
+      await tx.insert(documentLinks).values({
         organizationId: context.organizationId,
         documentId: insertedDocument.id,
         linkedEntityType: 'grievance',
@@ -137,7 +141,7 @@ export const POST = withExternalMatterResourceAuth(
         linkedBy: context.actor.userId,
       });
 
-      await db.insert(externalDocumentAccessGrants).values({
+      await tx.insert(externalDocumentAccessGrants).values({
         authorityId: context.authorityId,
         matterGrantId: context.matterGrantId,
         organizationId: context.organizationId,
@@ -157,7 +161,7 @@ export const POST = withExternalMatterResourceAuth(
 
       // The document, its version, its link, the copied matter grant and this record commit together.
       // Upload permission does not let the representative issue a download or a privilege label.
-      await persistAtomicAudit(db as unknown as RLSTx, {
+      await persistAtomicAudit(tx, {
         organizationId: context.organizationId,
         userId: context.actor.userId,
         action: 'document.external_upload',
@@ -167,7 +171,7 @@ export const POST = withExternalMatterResourceAuth(
       });
 
       return { forbidden: false as const, conflict: false as const, document: insertedDocument };
-    }, context.organizationId);
+    });
 
     if ('conflict' in created && created.conflict) {
       return NextResponse.json({ error: 'The file is already attached to another record' }, { status: 409 });

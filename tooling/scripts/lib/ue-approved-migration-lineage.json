@@ -375,6 +375,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Forced row-level security with a single system-role policy and no runtime policy on the three staging proof ledger relations platform 0078 creates (SYSTEM_ONLY)."
+      },
+      {
+        "tag": "0055_census_ctx3_promoted_relations_rls_closure",
+        "sha256": "d3007657c93d7222c1ccfa88ccf70f037aec8e2deb35185377d34f3365a6aabe",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Row security for job_classifications, committee_memberships, integration_sync_logs and shopify_config, the relations tenant-context census CTX-3 reclassified after finding live code for them"
       }
     ],
     "platform": [
@@ -825,6 +832,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Creates staging_proof_nonce_uses, staging_proof_runs and staging_proof_run_events, the ledger of the HMAC-gated staging proof harness, which existed only in the PGlite DDL of the route's test (UE-CONV-H-016). Generated from the Drizzle declarations; SYSTEM_ONLY; rollback refuses while rows exist."
+      },
+      {
+        "tag": "0079_deadline_reminders_pending_partial",
+        "sha256": "ba58bb35c16198413a28004e1aee473718ba5fac7a9ffe04062b2ce8791c1ee4",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "The deadline reminders pending-uniqueness index is unique over pending reminders only, as the scheduler's ON CONFLICT clause and its design require; the canonical lineage created it over every status, so a reschedule inserted no reminder"
       }
     ]
   }

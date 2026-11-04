@@ -16,8 +16,8 @@
  */
 
 import { NextResponse } from 'next/server';
-import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { z } from 'zod';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -34,89 +34,95 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
-  const { organizationId, userId } = context;
-  if (!organizationId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-  try {
-    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
-
-  const url = new URL(request.url);
-  const type = url.searchParams.get('type');
-  const periodId = url.searchParams.get('periodId');
-  const format = url.searchParams.get('format') ?? 'json';
-
-  if (!type) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Export type required');
-  }
-
-  try {
-    switch (type) {
-      case 'master_invoice': {
-        const invoiceId = url.searchParams.get('invoiceId');
-        if (!invoiceId) {
-          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'invoiceId required');
-        }
-        const data = await exportMasterInvoice(organizationId, invoiceId);
-        return standardSuccessResponse(data);
-      }
-
-      case 'allocation_statement': {
-        const allocationRunId = url.searchParams.get('allocationRunId');
-        if (!allocationRunId) {
-          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'allocationRunId required');
-        }
-        const data = await exportAllocationStatement(organizationId, allocationRunId);
-        return standardSuccessResponse(data);
-      }
-
-      case 'chargeback_report': {
-        const localId = url.searchParams.get('localId');
-        if (!localId) {
-          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'localId required');
-        }
-        const data = await exportChargebackReport(organizationId, localId, periodId ?? undefined);
-        return standardSuccessResponse(data);
-      }
-
-      case 'gl_journal': {
-        if (!periodId) {
-          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'periodId required');
-        }
-        const journal = await exportGlJournal(organizationId, periodId);
-
-        if (format === 'csv') {
-          const csv = glJournalToCsv(journal);
-          return new NextResponse(csv, {
-            status: 200,
-            headers: {
-              'Content-Type': 'text/csv; charset=utf-8',
-              'Content-Disposition': `attachment; filename="gl-journal-${periodId}.csv"`,
-            },
-          });
-        }
-        return standardSuccessResponse(journal);
-      }
-
-      case 'evidence_pack': {
-        if (!periodId) {
-          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'periodId required');
-        }
-        const data = await generateEvidencePack(organizationId, periodId);
-        return standardSuccessResponse(data);
-      }
-
-      default:
-        return standardErrorResponse(
-          ErrorCode.VALIDATION_ERROR,
-          `Unknown export type: ${type}. Valid: master_invoice, allocation_statement, chargeback_report, gl_journal, evidence_pack`,
-        );
-    }
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Export failed', error);
-  }
+// An id that is not a uuid is a client error here, never a database fault handed back as a 500.
+const querySchema = z.object({
+  type: z.string().optional(),
+  periodId: z.guid().optional(),
+  invoiceId: z.guid().optional(),
+  allocationRunId: z.guid().optional(),
+  localId: z.guid().optional(),
+  format: z.string().optional(),
 });
+
+// The exports read the caller organization's own billing records: they run in that organization's tenant transaction.
+export const GET = withApi(
+  {
+    auth: { minRole: 'secretary_treasurer' },
+    entitlement: 'financial_intelligence_suite',
+    rlsOrgContext: true,
+    query: querySchema,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'Generate Nzila platform-billing exports' },
+  },
+  async ({ organizationId, query }) => {
+    const orgId = organizationId!;
+    const { type, periodId, format = 'json' } = query;
+
+    if (!type) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Export type required');
+    }
+
+    try {
+      switch (type) {
+        case 'master_invoice': {
+          if (!query.invoiceId) {
+            return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'invoiceId required');
+          }
+          const data = await exportMasterInvoice(orgId, query.invoiceId);
+          return standardSuccessResponse(data);
+        }
+
+        case 'allocation_statement': {
+          if (!query.allocationRunId) {
+            return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'allocationRunId required');
+          }
+          const data = await exportAllocationStatement(orgId, query.allocationRunId);
+          return standardSuccessResponse(data);
+        }
+
+        case 'chargeback_report': {
+          if (!query.localId) {
+            return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'localId required');
+          }
+          const data = await exportChargebackReport(orgId, query.localId, periodId);
+          return standardSuccessResponse(data);
+        }
+
+        case 'gl_journal': {
+          if (!periodId) {
+            return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'periodId required');
+          }
+          const journal = await exportGlJournal(orgId, periodId);
+
+          if (format === 'csv') {
+            const csv = glJournalToCsv(journal);
+            return new NextResponse(csv, {
+              status: 200,
+              headers: {
+                'Content-Type': 'text/csv; charset=utf-8',
+                'Content-Disposition': `attachment; filename="gl-journal-${periodId}.csv"`,
+              },
+            });
+          }
+          return standardSuccessResponse(journal);
+        }
+
+        case 'evidence_pack': {
+          if (!periodId) {
+            return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'periodId required');
+          }
+          const data = await generateEvidencePack(orgId, periodId);
+          return standardSuccessResponse(data);
+        }
+
+        default:
+          return standardErrorResponse(
+            ErrorCode.VALIDATION_ERROR,
+            `Unknown export type: ${type}. Valid: master_invoice, allocation_statement, chargeback_report, gl_journal, evidence_pack`,
+          );
+      }
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Export failed', error);
+    }
+  },
+);

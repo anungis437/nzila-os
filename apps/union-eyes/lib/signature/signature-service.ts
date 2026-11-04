@@ -839,7 +839,7 @@ export class SignatureService {
         type: 'email',
         priority: 'normal',
         subject: 'Reminder: Document Awaiting Your Signature',
-        body: `This is a reminder that you have a document awaiting your signature.\n\nDocument ID: ${signer.documentId}\nSigner: ${signer.name}\n\nPlease sign the document at your earliest convenience.`,
+        body: `This is a reminder that you have a document awaiting your signature.\n\nDocument ID: ${signer.documentId}\nSigner: ${signer.name}\n\nPlease complete it with the signing request the signing service e-mailed to you.`,
         htmlBody: `
           <h2>Reminder: Document Awaiting Your Signature</h2>
           <p>This is a friendly reminder that you have a document awaiting your signature.</p>
@@ -847,10 +847,8 @@ export class SignatureService {
             <li><strong>Document ID:</strong> ${signer.documentId}</li>
             <li><strong>Signer:</strong> ${signer.name}</li>
           </ul>
-          <p>Please sign the document at your earliest convenience.</p>
+          <p>Please complete it with the signing request the signing service e-mailed to you.</p>
         `,
-        actionUrl: `/documents/${signer.documentId}/sign`,
-        actionLabel: 'Sign Now',
         metadata: {
           documentId: signer.documentId,
           signerId,

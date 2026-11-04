@@ -7,7 +7,7 @@ const m = vi.hoisted(() => ({
   sendBatchExpirationWarnings: vi.fn(),
   db: { query: { organizations: { findMany: vi.fn() } } },
   persistAtomicAudit: vi.fn(),
-  rlsContexts: [] as unknown[],
+  systemContexts: [] as Array<{ marker: string }>,
 }));
 
 vi.mock('@/lib/services/rewards/automation-service', () => ({
@@ -17,10 +17,13 @@ vi.mock('@/lib/services/rewards/automation-service', () => ({
 vi.mock('@/lib/services/rewards/notification-service', () => ({
   sendBatchExpirationWarnings: m.sendBatchExpirationWarnings,
 }));
-vi.mock('@/db', () => ({ db: m.db }));
+// The job has no tenant session: every step runs in a system transaction of its own (the ordinary tenant context is not offered at all).
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn({}),
-  withRLSContext: async (ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => { m.rlsContexts.push(ctx); return fn({ tx: true }); },
+  withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => {
+    const tx = { query: m.db.query, marker: `system-${m.systemContexts.length + 1}` };
+    m.systemContexts.push(tx);
+    return fn(tx);
+  },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('crypto', () => ({ timingSafeEqual: (a: Buffer, b: Buffer) => a.length === b.length && a.compare(b) === 0 }));
@@ -32,7 +35,7 @@ async function loadRoute() {
 describe('rewards/cron route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.rlsContexts = [];
+    m.systemContexts = [];
     m.persistAtomicAudit.mockResolvedValue(undefined);
     process.env.CRON_SECRET = 'test-secret';
     m.db.query.organizations.findMany.mockResolvedValue([
@@ -145,17 +148,24 @@ describe('rewards/cron route', () => {
     return POST(new NextRequest(`http://localhost/api/rewards/cron${query}`, { method: 'POST', headers: { 'x-cron-secret': 'test-secret' } }));
   };
 
-  it('runs each organization\'s task inside that organization\'s own context and audits the run under it', async () => {
+  it('runs each organization\'s task and its audit entry on one system transaction of its own, with no tenant context at all', async () => {
     const response = await post('?task=anniversaries');
     expect(response.status).toBe(200);
-    expect(m.rlsContexts).toEqual([
-      { organizationId: 'org_1', userId: 'system:rewards' },
-      { organizationId: 'org_2', userId: 'system:rewards' },
+    // One system transaction lists the organizations; each organization then gets its own.
+    expect(m.systemContexts.map((tx) => tx.marker)).toEqual(['system-1', 'system-2', 'system-3']);
+    const [, org1Tx, org2Tx] = m.systemContexts;
+    expect(m.processAnniversaryAwards.mock.calls.map((call) => [call[0], call[1]])).toEqual([['org_1', org1Tx], ['org_2', org2Tx]]);
+    expect(m.persistAtomicAudit.mock.calls.map((call) => [call[0], call[1].organizationId, call[1].userId, call[1].action, call[1].details.processed])).toEqual([
+      [org1Tx, 'org_1', 'system:rewards', 'rewards.cron.anniversaries', 5],
+      [org2Tx, 'org_2', 'system:rewards', 'rewards.cron.anniversaries', 5],
     ]);
-    expect(m.persistAtomicAudit.mock.calls.map((call) => [call[1].organizationId, call[1].action, call[1].details.processed])).toEqual([
-      ['org_1', 'rewards.cron.anniversaries', 5],
-      ['org_2', 'rewards.cron.anniversaries', 5],
-    ]);
+  });
+
+  it('checks the cron secret before it opens any transaction', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=all', { method: 'POST' }));
+    expect(response.status).toBe(401);
+    expect(m.systemContexts).toEqual([]);
   });
 
   it('answers 500 naming the organization when members could not be awarded, even though the task returned', async () => {

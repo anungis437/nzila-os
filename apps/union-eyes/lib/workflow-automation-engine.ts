@@ -37,6 +37,7 @@ import { grievances } from "@/db/schema/domains/claims/grievances";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
 import { getNotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
+import { sameSiteActionPath } from "@/lib/notifications/links";
 import { generatePDF } from "@/lib/utils/pdf-generator";
 import { generateExcel } from "@/lib/utils/excel-generator";
 import DocumentStorageService from "@/lib/services/document-storage-service";
@@ -1015,8 +1016,6 @@ async function sendStageNotification(
         priority: 'normal',
         title: `Grievance Stage ${action}`,
         body: `Claim ${claim.claimNumber} has ${action} stage: ${stage.name}`,
-        actionUrl: `/grievances/${claimId}`,
-        actionLabel: 'View Claim',
         metadata: {
           type: 'grievance_stage_notification',
           claimId,
@@ -1056,8 +1055,8 @@ async function sendActionNotification(
       priority: config.priority || 'normal',
       title: config.title || 'Grievance Action Notification',
       body: config.message || 'An action has been triggered on a grievance',
-      actionUrl: config.actionUrl || `/grievances/${claimId}`,
-      actionLabel: config.actionLabel || 'View Details',
+      actionUrl: sameSiteActionPath(config.actionUrl),
+      actionLabel: config.actionLabel,
       metadata: {
         type: 'grievance_action_notification',
         claimId,
@@ -1156,7 +1155,7 @@ async function sendActionEmail(
       title: config.title || 'Grievance Update',
       body: config.body || config.message || 'You have a new grievance update',
       htmlBody: config.htmlBody,
-      actionUrl: config.actionUrl,
+      actionUrl: sameSiteActionPath(config.actionUrl),
       actionLabel: config.actionLabel,
       metadata: {
         type: 'grievance_action_email',
@@ -1252,8 +1251,6 @@ async function sendTransitionRejectedNotification(
       priority: 'high',
       title: 'Stage Transition Rejected',
       body: `Your request to transition claim ${claimId} was rejected. Reason: ${reason}`,
-      actionUrl: `/grievances/${claimId}`,
-      actionLabel: 'View Claim',
       metadata: {
         type: 'grievance_transition_rejected',
         claimId,
@@ -1346,8 +1343,6 @@ export async function sendDeadlineReminders(): Promise<void> {
               priority: daysUntilDeadline <= 1 ? 'urgent' : 'high',
               title: `Deadline Reminder: ${daysUntilDeadline} Day(s) Remaining`,
               body: `Reminder: Deadline "${deadline.deadlineType}" for grievance ${grievance.grievanceNumber} is due in ${daysUntilDeadline} day(s).`,
-              actionUrl: `/grievances/${grievance.id}`,
-              actionLabel: 'View Grievance',
               metadata: {
                 type: 'grievance_deadline_reminder',
                 deadlineId: deadline.id,

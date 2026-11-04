@@ -53,6 +53,7 @@ export interface GovernanceDriftReport {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -182,17 +183,16 @@ export const GET = withApi(
         ? Math.round(allRiskScores.reduce((a, b) => a + b, 0) / allRiskScores.length)
         : null;
 
+    // The framework wraps what a handler returns as `data`: the report is returned as it is.
     return {
-      data: {
-        organizationId: orgId,
-        generatedAt: new Date().toISOString(),
-        timeline,
-        currentExposureScore,
-        trendDirection,
-        totalInterviewsCaptured: interviews.length,
-        totalPublished: interviews.filter((i) => i.status === 'published').length,
-        governanceActivityLast30Days: last30Days,
-      } satisfies GovernanceDriftReport,
-    };
+      organizationId: orgId,
+      generatedAt: new Date().toISOString(),
+      timeline,
+      currentExposureScore,
+      trendDirection,
+      totalInterviewsCaptured: interviews.length,
+      totalPublished: interviews.filter((i) => i.status === 'published').length,
+      governanceActivityLast30Days: last30Days,
+    } satisfies GovernanceDriftReport;
   },
 );

@@ -7,11 +7,14 @@
  */
 
 import { db } from "@/db";
+import { getActiveSystemDb } from "@/db/system-context-storage";
+import { getActiveTenantDb } from "@/db/tenant-context-storage";
 import { v4 as uuid } from "uuid";
 import { logger } from "@/lib/logger";
 import { stripMarkup } from "@/lib/utils/strip-markup";
 import { getFromEmail, sendResendEmail } from "@/lib/email-service";
 import { createAuditLog } from "./audit-service";
+import { withSystemContext, type RLSTx } from "@/lib/db/with-rls-context";
 import {
   notificationQueue,
   notificationDeliveryLog,
@@ -113,6 +116,23 @@ export interface NotificationProvider {
   trackDelivery?(messageId: string): Promise<NotificationStatus>;
 }
 
+export interface SendOptions {
+  /** For a caller with no tenant session (a webhook, a job): each database step of the delivery runs as the system role in its own short transaction. */
+  systemSteps?: boolean;
+}
+
+/**
+ * The transaction a caller holds when it sends without `systemSteps`: the system transaction of a job, or the tenant transaction of a route. A delivery step
+ * never falls back to the pooled connection, which has no organization: the recipient check would see nobody and the ledger writes would be refused.
+ */
+function callerTransaction(): RLSTx {
+  const transaction = getActiveSystemDb() ?? getActiveTenantDb();
+  if (!transaction) {
+    throw new Error("NotificationService.send needs a tenant or system transaction to be open, or systemSteps for a caller with no session");
+  }
+  return transaction as unknown as RLSTx;
+}
+
 type DeliveryLedgerEvent =
   | "queued"
   | "attempted"
@@ -141,8 +161,8 @@ async function recordDeliveryEvent(input: {
   statusCode?: string;
   errorMessage?: string;
   details?: Record<string, unknown>;
-}): Promise<void> {
-  await db.insert(notificationDeliveryLog).values({
+}, database: RLSTx = db): Promise<void> {
+  await database.insert(notificationDeliveryLog).values({
     id: uuid(),
     organizationId: input.organizationId,
     notificationId: input.notificationId,
@@ -156,9 +176,9 @@ async function recordDeliveryEvent(input: {
   });
 }
 
-async function channelSuppression(payload: NotificationPayload): Promise<string | null> {
+async function channelSuppression(payload: NotificationPayload, database: RLSTx = db): Promise<string | null> {
   if (!payload.recipientId) return null;
-  const rows = await db
+  const rows = await database
     .select({
       emailEnabled: userNotificationPreferences.emailEnabled,
       smsEnabled: userNotificationPreferences.smsEnabled,
@@ -613,14 +633,20 @@ export class NotificationService {
   }
 
   /**
-   * Send notification immediately
+   * Send notification immediately.
+   *
+   * A caller that runs inside a tenant transaction (a route with `rlsOrgContext`) or a system transaction (a job) sends on that transaction. A caller with
+   * no session at all (a webhook) passes `systemSteps`: every database step of the delivery then runs as the system role in its own short
+   * transaction, so the claim and the attempt are committed before the provider is called and no transaction is open while it is.
    */
-  async send(payload: NotificationPayload): Promise<NotificationResponse> {
+  async send(payload: NotificationPayload, options: SendOptions = {}): Promise<NotificationResponse> {
+    const step = <T>(work: (database: RLSTx) => Promise<T>): Promise<T> =>
+      options.systemSteps ? withSystemContext((tx) => work(tx)) : work(callerTransaction());
     try {
       const idempotencyKey = payload.idempotencyKey;
       let retryingConfirmedFailure = false;
       if (idempotencyKey) {
-        const prior = await loadDeliveryFacts(payload.organizationId, idempotencyKey);
+        const prior = await step((database) => loadDeliveryFacts(payload.organizationId, idempotencyKey, database));
         const decision = decideDeliveryRetry(prior);
         if (decision.action === "skip") {
           return {
@@ -633,7 +659,7 @@ export class NotificationService {
         retryingConfirmedFailure = decision.retry;
         if (prior.length === 0) {
           try {
-            await db.insert(notificationQueue).values({
+            await step((database) => database.insert(notificationQueue).values({
               id: idempotencyKey,
               organizationId: payload.organizationId,
               status: "processing",
@@ -644,10 +670,10 @@ export class NotificationService {
               nextRetryAt: new Date(),
               createdAt: new Date(),
               updatedAt: new Date(),
-            });
+            }));
           } catch (error) {
             if (!isDeliveryClaimConflict(error)) throw error;
-            const claimed = await db
+            const claimed = await step((database) => database
               .update(notificationQueue)
               .set({ status: "processing", updatedAt: new Date() })
               .where(and(
@@ -659,7 +685,7 @@ export class NotificationService {
                   eq(notificationQueue.status, "retrying"),
                 ),
               ))
-              .returning({ id: notificationQueue.id });
+              .returning({ id: notificationQueue.id }));
             if (Array.isArray(claimed) && claimed.length === 0) {
               return {
                 id: idempotencyKey,
@@ -669,7 +695,7 @@ export class NotificationService {
             }
           }
         } else {
-          const claimed = await db
+          const claimed = await step((database) => database
             .update(notificationQueue)
             .set({ status: "processing", updatedAt: new Date() })
             .where(and(
@@ -681,7 +707,7 @@ export class NotificationService {
                 eq(notificationQueue.status, "retrying"),
               ),
             ))
-            .returning({ id: notificationQueue.id });
+            .returning({ id: notificationQueue.id }));
           if (Array.isArray(claimed) && claimed.length === 0) {
             return {
               id: idempotencyKey,
@@ -692,16 +718,16 @@ export class NotificationService {
         }
       }
 
-      const recipientActive = await isNotificationRecipientActive(payload);
+      const recipientActive = await step((database) => isNotificationRecipientActive(payload, database));
       if (!recipientActive) {
         const id = idempotencyKey ?? uuid();
-        await recordDeliveryEvent({
+        await step((database) => recordDeliveryEvent({
           organizationId: payload.organizationId,
           notificationId: id,
           event: "suppressed",
           errorMessage: "Recipient is not active in organization",
           details: { type: payload.type, channel: payload.type, idempotencyKey: id },
-        });
+        }, database));
         return {
           id,
           status: "failed",
@@ -709,16 +735,16 @@ export class NotificationService {
         };
       }
 
-      const suppression = await channelSuppression(payload);
+      const suppression = await step((database) => channelSuppression(payload, database));
       if (suppression) {
         const id = idempotencyKey ?? uuid();
-        await recordDeliveryEvent({
+        await step((database) => recordDeliveryEvent({
           organizationId: payload.organizationId,
           notificationId: id,
           event: "suppressed",
           errorMessage: suppression,
           details: { type: payload.type, channel: payload.type, idempotencyKey: id },
-        });
+        }, database));
         return {
           id,
           status: "failed",
@@ -734,27 +760,27 @@ export class NotificationService {
 
       const attemptId = idempotencyKey ?? uuid();
       if (retryingConfirmedFailure) {
-        await recordDeliveryEvent({
+        await step((database) => recordDeliveryEvent({
           organizationId: payload.organizationId,
           notificationId: attemptId,
           event: "retried",
           providerId: provider.name,
           details: { type: payload.type, channel: payload.type, idempotencyKey: attemptId },
-        });
+        }, database));
       }
-      await recordDeliveryEvent({
+      await step((database) => recordDeliveryEvent({
         organizationId: payload.organizationId,
         notificationId: attemptId,
         event: "attempted",
         providerId: provider.name,
         details: { type: payload.type, channel: payload.type, idempotencyKey: attemptId },
-      });
+      }, database));
 
       const response = await provider.send(payload);
       const ledgerEvent = providerSubmissionEvent(response.status);
       const providerAccepted = response.status === "sent" || response.status === "delivered";
       try {
-        await recordDeliveryEvent({
+        await step((database) => recordDeliveryEvent({
           organizationId: payload.organizationId,
           notificationId: attemptId,
           event: ledgerEvent,
@@ -769,11 +795,11 @@ export class NotificationService {
             idempotencyKey: attemptId,
             providerMessageId: response.id,
           },
-        });
+        }, database));
       } catch (error) {
         if (!providerAccepted) throw error;
         try {
-          await recordDeliveryEvent({
+          await step((database) => recordDeliveryEvent({
             organizationId: payload.organizationId,
             notificationId: attemptId,
             event: "uncertain",
@@ -786,7 +812,7 @@ export class NotificationService {
               idempotencyKey: attemptId,
               providerMessageId: response.id,
             },
-          });
+          }, database));
         } catch (uncertainError) {
           logger.error("Provider accepted a message and neither acceptance nor the uncertain marker was recorded", {
             uncertainError,
@@ -804,7 +830,7 @@ export class NotificationService {
 
       if (!idempotencyKey) {
         try {
-          await db.insert(notificationQueue).values({
+          await step((database) => database.insert(notificationQueue).values({
             id: response.id,
             organizationId: payload.organizationId,
             status: ledgerEvent === "failed" || ledgerEvent === "bounced" ? "failed" : "completed",
@@ -818,7 +844,7 @@ export class NotificationService {
             completedAt: response.sentAt,
             resultNotificationId: response.id,
             errorMessage: response.failureReason,
-          });
+          }));
         } catch (dbError) {
           logger.warn("Queue mirror failed after the delivery ledger was written", { dbError, responseId: response.id });
         }
@@ -826,7 +852,7 @@ export class NotificationService {
 
       // Create audit log
       if (payload.userId && (response.status === "sent" || response.status === "delivered")) {
-        await createAuditLog({
+        await step((database) => createAuditLog({
           organizationId: payload.organizationId,
           userId: payload.userId,
           action: "NOTIFICATION_SENT",
@@ -837,7 +863,7 @@ export class NotificationService {
             type: payload.type,
             status: response.status,
           },
-        }).catch((err: unknown) => logger.warn("Failed to create audit log for notification", {
+        }, database)).catch((err: unknown) => logger.warn("Failed to create audit log for notification", {
           error: err instanceof Error ? err.message : String(err)
         }));
       }
@@ -1156,12 +1182,12 @@ export class NotificationService {
   }
 }
 
-async function isNotificationRecipientActive(payload: NotificationPayload): Promise<boolean> {
+async function isNotificationRecipientActive(payload: NotificationPayload, database: RLSTx = db): Promise<boolean> {
   if (!payload.recipientId) {
     return true;
   }
 
-  const [membership] = await db
+  const [membership] = await database
     .select({ id: organizationMembers.id })
     .from(organizationMembers)
     .where(

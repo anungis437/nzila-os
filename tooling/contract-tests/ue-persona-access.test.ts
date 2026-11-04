@@ -192,7 +192,6 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'admin/rewards/members/page.tsx',              minRole: 'admin',                description: 'Member wallet balances' },
   { path: 'admin/rewards/programs/page.tsx',             minRole: 'admin',                description: 'Recognition program management' },
   { path: 'admin/rewards/reports/page.tsx',              minRole: 'admin',                description: 'Rewards reports & insights' },
-  { path: 'admin/rewards/settings/page.tsx',             minRole: 'admin',                description: 'Program settings configuration' },
   { path: 'admin/rewards/shopify/page.tsx',              minRole: 'admin',                description: 'Shopify integration config' },
 
   // ── Member-facing pages (any authenticated member) ─────────────────────
@@ -233,7 +232,6 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'notifications/page.tsx',                      minRole: 'member',               description: 'Notifications console' },
   { path: 'organizing/page.tsx',                         minRole: 'member',               description: 'Organizing dashboard' },
   { path: 'organizing/[campaignId]/page.tsx',            minRole: 'member',               description: 'Campaign detail' },
-  { path: 'pay/page.tsx',                                minRole: 'member',               description: 'Payment flow (client-side)' },
   { path: 'pension/page.tsx',                            minRole: 'member',               description: 'Pension member console' },
   { path: 'pension/trustee/page.tsx',                    minRole: 'member',               description: 'Pension trustee portal' },
   { path: 'profile/page.tsx',                            minRole: 'member',               description: 'User profile settings' },
@@ -379,7 +377,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'messaging/preferences',expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'settings/communications' },
   { apiPath: 'organizing/notes',     expectedAuthPattern: 'withApi',              expectedMinRole: 'officer',              backingPage: 'organizing/notes', unavailableUntilImplemented: true },
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
-  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withApiAuth',          expectedMinRole: 'member',               backingPage: 'admin/dues (own record; any other member needs the named financial role)' },
+  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin/dues (own record; any other member needs the named financial role)' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
 ]
 

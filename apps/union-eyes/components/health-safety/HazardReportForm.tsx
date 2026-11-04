@@ -32,7 +32,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertTriangle, Send, Camera } from "lucide-react";
+import { AlertTriangle, Send } from "lucide-react";
 
 const hazardSchema = z.object({
   hazardType: z.string().min(1, "Hazard type is required"),
@@ -59,19 +59,17 @@ const hazardSchema = z.object({
 type HazardFormData = z.infer<typeof hazardSchema>;
 
 export interface HazardReportFormProps {
-  organizationId: string;
-  onSubmit?: (data: HazardFormData) => Promise<void>;
+  /** Saves the report. It throws when the report is refused, so the form stays open with what was typed and shows the reason. */
+  onSubmit: (data: HazardFormData) => Promise<void>;
   onCancel?: () => void;
 }
 
 export function HazardReportForm({
-  organizationId,
   onSubmit,
   onCancel
 }: HazardReportFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [photos, setPhotos] = React.useState<File[]>([]);
 
   const form = useForm<HazardFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,50 +89,11 @@ export function HazardReportForm({
   async function handleSubmit(data: HazardFormData) {
     setIsSubmitting(true);
     try {
-      if (onSubmit) {
-        await onSubmit(data);
-      } else {
-        // Default API call
-        const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value.toString());
-          }
-        });
-
-        photos.forEach((photo) => {
-          formData.append('photos', photo);
-        });
-
-        formData.append('organizationId', organizationId);
-
-        const response = await fetch('/api/health-safety/hazards', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to submit hazard report");
-        }
-
-        const result = await response.json();
-
-        toast({
-          title: "Success",
-          description: "Hazard report submitted successfully"
-        });
-
-        // Redirect to hazard list or detail
-        if (result.hazardId) {
-          window.location.href = `/health-safety/hazards/${result.hazardId}`;
-        } else {
-          window.location.href = `/health-safety/hazards`;
-        }
-      }
-    } catch (_error) {
+      await onSubmit(data);
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to submit hazard report",
+        description: error instanceof Error && error.message !== "" ? error.message : "Failed to submit hazard report",
         variant: "destructive"
       });
     } finally {
@@ -142,29 +101,8 @@ export function HazardReportForm({
     }
   }
 
-  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
-      setPhotos(Array.from(e.target.files));
-    }
-  }
-
   const isAnonymous = form.watch("isAnonymous");
   const priority = form.watch("priority");
-
-  const _getPriorityColor = (p: string) => {
-    switch (p) {
-      case "critical":
-        return "text-red-600";
-      case "high":
-        return "text-orange-600";
-      case "medium":
-        return "text-yellow-600";
-      case "low":
-        return "text-green-600";
-      default:
-        return "text-gray-600";
-    }
-  };
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -310,27 +248,6 @@ export function HazardReportForm({
               rows={3}
               {...form.register("recommendedAction")}
             />
-          </div>
-
-          {/* Photo Upload */}
-          <div className="space-y-2">
-            <Label htmlFor="photos">Photos</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="photos"
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handlePhotoChange}
-                className="cursor-pointer"
-              />
-              <Camera className="h-4 w-4 text-muted-foreground" />
-            </div>
-            {photos.length > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {photos.length} photo{photos.length !== 1 ? 's' : ''} selected
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>

@@ -121,9 +121,12 @@ export type OcrInterpretation =
   | { kind: 'failed' };
 
 /**
- * OCR text is a review draft. A persisted or authoritative flag from the response
- * is not accepted as a legal record.
+ * OCR text is a review draft. An answer that claims to be a persisted or authoritative record, or that carries a stored location or the extracted text as the document's own
+ * content, is refused: it is the denial list below that is checked for, not a field the screen depends on.
  */
+const REFUSED_FLAGS = ['persisted', 'authoritative'] as const;
+const REFUSED_MEMBERS = ['blobPath', 'fileUrl', 'contentText'] as const;
+
 export function interpretOcr(status: number, body: unknown): OcrInterpretation {
   if (status === 501) return { kind: 'unavailable' };
   if (status === 401 || status === 403 || status === 404) return { kind: 'denied' };
@@ -131,9 +134,9 @@ export function interpretOcr(status: number, body: unknown): OcrInterpretation {
   const data = (body as { data?: unknown }).data;
   if (!data || typeof data !== 'object') return { kind: 'failed' };
   const record = data as Record<string, unknown>;
-  if (record.persisted === true || record.authoritative === true) return { kind: 'failed' };
+  if (REFUSED_FLAGS.some((flag) => record[flag] === true)) return { kind: 'failed' };
   if (typeof record.text !== 'string') return { kind: 'failed' };
-  if ('blobPath' in record || 'fileUrl' in record || 'contentText' in record) return { kind: 'failed' };
+  if (REFUSED_MEMBERS.some((member) => member in record)) return { kind: 'failed' };
   const revisionNo = typeof record.revisionNo === 'number' && Number.isInteger(record.revisionNo) ? record.revisionNo : null;
   return { kind: 'review', text: record.text, revisionNo };
 }

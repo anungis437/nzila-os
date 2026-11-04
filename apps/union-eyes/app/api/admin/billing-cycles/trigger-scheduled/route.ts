@@ -21,9 +21,10 @@
  * @module app/api/admin/billing-cycles/trigger-scheduled
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { BillingScheduler } from '@/lib/jobs/billing-scheduler';
-import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -40,25 +41,21 @@ const triggerSchema = z.object({
   frequency: z.enum(['monthly', 'bi_weekly', 'weekly', 'quarterly', 'annual']),
 });
 
-export const POST = withApiAuth(async (request: NextRequest) => {
+// Billing every organization is a platform operation, gated by platform authority, so it runs as the system role. That is not a tenant
+// transaction, and the intent record the audit boundary writes first must commit on its own, so the wrapper opens none.
+export const POST = withApi(
+  {
+    auth: { minRole: 'platform_lead' },
+    openapi: { tags: ['Admin', 'Billing'], summary: 'Manually trigger scheduled billing for every organization' },
+  },
+  async ({ request, userId, organizationId }) => {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return standardErrorResponse(
-        ErrorCode.AUTH_REQUIRED,
-        'Authentication required'
-      );
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
     }
-
-    const canAccess = await hasMinRole('platform_lead');
-    if (!canAccess) {
-      return standardErrorResponse(
-        ErrorCode.FORBIDDEN,
-        'Platform lead role required'
-      );
-    }
-
-    const body = await request.json();
     const validation = triggerSchema.safeParse(body);
 
     if (!validation.success) {
@@ -73,21 +70,21 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     logger.info('Manually triggering scheduled billing', {
       frequency,
-      userId: user.id,
+      userId,
     });
 
     // Execute scheduled billing
     // Billing every organization is a platform operation: the intent is recorded before it starts.
     const result = await performAuditedOperation(
       {
-        organizationId: user.organizationId,
-        userId: user.id,
+        organizationId,
+        userId,
         scope: 'system',
         action: 'platform.billing_cycle.trigger_scheduled',
         resourceType: 'billing_scheduler',
         details: { frequency },
       },
-      () => BillingScheduler.manualTrigger(frequency),
+      () => withSystemContext(() => BillingScheduler.manualTrigger(frequency)),
     );
 
     logger.info('Scheduled billing completed', {
@@ -95,7 +92,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       totalOrganizations: result.totalOrganizations,
       successful: result.successful,
       failed: result.failed,
-      userId: user.id,
+      userId,
     });
 
     return standardSuccessResponse({
@@ -112,4 +109,5 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       'Failed to trigger scheduled billing'
     );
   }
-});
+  },
+);

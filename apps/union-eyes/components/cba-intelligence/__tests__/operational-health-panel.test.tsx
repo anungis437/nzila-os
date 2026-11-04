@@ -32,6 +32,8 @@ describe("OperationalHealthPanel", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
         json: () =>
           Promise.resolve({
             success: true,
@@ -68,13 +70,28 @@ describe("OperationalHealthPanel", () => {
     });
   });
 
-  it("renders an error state when health loading fails", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
+  it("renders an error state when health loading fails, without the browser's own text", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
 
     renderWithQueryClient(<OperationalHealthPanel />);
 
     await waitFor(() => {
       expect(screen.getByText("Failed to load health snapshot.")).toBeDefined();
+    });
+  });
+
+  it("states the refusal of the route, and does not read its body as a snapshot", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ code: "FORBIDDEN", message: "Your plan does not include commercial reporting" }), { status: 403, headers: { "Content-Type": "application/json" } }),
+      ),
+    );
+
+    renderWithQueryClient(<OperationalHealthPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Your plan does not include commercial reporting")).toBeDefined();
     });
   });
 });

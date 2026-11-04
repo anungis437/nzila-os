@@ -3,26 +3,20 @@
  * Handles payment lifecycle for member dues
  * 
  * Features:
- * - Create checkout sessions (Stripe/PayPal)
- * - Process payments
- * - Handle payment success/failure
- * - Generate receipts
+ * - Create checkout sessions (Stripe/PayPal), reading the dues in the caller's organization
+ * - Handle payment success/failure (system role: the processor's webhook has no organization session)
  * - Update transaction status
  * 
  * @module lib/services/payment-service
  */
 
-import { db } from '@/db';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
-import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
-import { organizationMembers, organizations } from '@/db/schema-organizations';
-import { eq, and, inArray } from 'drizzle-orm';
+import { organizationMembers } from '@/db/schema-organizations';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
-import { Document, Page, StyleSheet, Text, pdf } from '@react-pdf/renderer';
-import { Readable } from 'node:stream';
-import React from 'react';
 // Platform Stripe integration via @nzila/payments-stripe
 import { getStripeClient } from '@nzila/payments-stripe';
 import { sendPaymentConfirmation, sendPaymentFailure } from '@/lib/services/dues-notifications';
@@ -37,8 +31,11 @@ export interface CreateCheckoutSessionParams {
   returnUrl: string;
   cancelUrl: string;
   processorType?: 'stripe' | 'paypal';
-  /** The authenticated caller. A checkout is created only for the member the dues belong to. */
-  actor: { userId: string };
+  /**
+   * The authenticated caller and the organization they act in. A checkout is created only for the member the dues
+   * belong to, and only for a transaction of that organization.
+   */
+  actor: { userId: string; organizationId: string };
 }
 
 /** A refusal the route reports as 403 (not the payer) or 409 (not payable). */
@@ -82,31 +79,6 @@ export interface PaymentFailureParams {
   errorCode?: string;
 }
 
-export interface ReceiptData {
-  transactionId: string;
-  receiptUrl: string;
-  receiptNumber: string;
-  paidDate: Date;
-  amount: string;
-  memberName: string;
-  memberEmail: string;
-  organizationName: string;
-}
-
-function isReadable(value: any): value is Readable {
-  return value instanceof Readable;
-}
-
-async function streamToBuffer(stream: Readable): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-
-  return Buffer.concat(chunks);
-}
-
 // =============================================================================
 // PAYMENT SERVICE
 // =============================================================================
@@ -123,52 +95,39 @@ export class PaymentService {
     try {
       logger.info('Creating checkout session', { transactionId, processorType });
 
-      // Get transaction details
-      const transaction = await db
-        .select()
-        .from(duesTransactions)
-        .where(eq(duesTransactions.id, transactionId))
-        .limit(1);
+      // The reads run in the caller's organization (row-level security shows nothing of another organization's
+      // dues) and end before the processor is called: no transaction is held across the network call.
+      const found = await withRLSContext({ organizationId: actor.organizationId }, async (tx) => {
+        const [txn] = await tx
+          .select()
+          .from(duesTransactions)
+          .where(and(eq(duesTransactions.id, transactionId), eq(duesTransactions.organizationId, actor.organizationId)))
+          .limit(1);
+        if (!txn) return null;
 
-      if (!transaction || transaction.length === 0) {
-        throw new PaymentAuthorityError('NOT_FOUND', 'Transaction not found');
-      }
+        // A checkout session lets the holder pay (and receive the receipt for) this transaction, and it names the
+        // member and the amount. Only the member the dues belong to may start one; anyone else cannot tell that the
+        // transaction exists. `member_id` is text, so the comparison is made on the text of the member's id.
+        const [payer] = await tx
+          .select({ id: organizationMembers.id, name: organizationMembers.name, email: organizationMembers.email })
+          .from(organizationMembers)
+          .where(
+            and(
+              eq(sql`${organizationMembers.id}::text`, txn.memberId),
+              eq(organizationMembers.userId, actor.userId),
+              eq(organizationMembers.organizationId, txn.organizationId),
+            ),
+          )
+          .limit(1);
+        return payer ? { txn, payer } : null;
+      });
 
-      const txn = transaction[0];
-
-      // A checkout session lets the holder pay (and receive the receipt for) this transaction, and it names the
-      // member and the amount. Only the member the dues belong to may start one; anyone else cannot tell that the
-      // transaction exists.
-      const [payer] = await db
-        .select({ id: organizationMembers.id })
-        .from(organizationMembers)
-        .where(
-          and(
-            eq(organizationMembers.id, txn.memberId),
-            eq(organizationMembers.userId, actor.userId),
-            eq(organizationMembers.organizationId, txn.organizationId),
-          ),
-        )
-        .limit(1);
-      if (!payer) throw new PaymentAuthorityError('NOT_FOUND', 'Transaction not found');
+      if (!found) throw new PaymentAuthorityError('NOT_FOUND', 'Transaction not found');
+      const { txn, payer: member } = found;
 
       // Validate transaction status
       if (txn.status !== 'pending' && txn.status !== 'overdue') {
         throw new PaymentAuthorityError('CONFLICT', `Transaction status is ${txn.status}, cannot create checkout session`);
-      }
-
-      // Get member details
-      const member = await db
-        .select({
-          name: organizationMembers.name,
-          email: organizationMembers.email,
-        })
-        .from(organizationMembers)
-        .where(eq(organizationMembers.id, txn.memberId))
-        .limit(1);
-
-      if (!member || member.length === 0) {
-        throw new Error(`Member not found: ${txn.memberId}`);
       }
 
       if (processorType === 'stripe') {
@@ -187,8 +146,8 @@ export class PaymentService {
               transactionId,
               amount: txn.totalAmount,
               currency: 'cad',
-              memberEmail: member[0].email,
-              memberName: member[0].name,
+              memberEmail: member.email,
+              memberName: member.name,
               returnUrl,
               cancelUrl,
               duesBreakdown: {
@@ -281,55 +240,6 @@ export class PaymentService {
   /**
    * Handle successful payment
    */
-
-  private static async generateReceiptPdfUrl(params: {
-    receiptNumber: string;
-    memberName: string;
-    memberEmail: string;
-    organizationName: string;
-    amount: string;
-    currency: string;
-    paidDate: Date;
-  }): Promise<string> {
-    const styles = StyleSheet.create({
-      page: { padding: 32, fontSize: 12 },
-      title: { fontSize: 18, marginBottom: 12 },
-      section: { marginBottom: 8 },
-      label: { fontSize: 10, color: '#555' },
-      value: { fontSize: 12 },
-    });
-
-    const doc = React.createElement(
-      Document,
-      null,
-      React.createElement(
-        Page,
-        { size: 'A4', style: styles.page },
-        React.createElement(Text, { style: styles.title }, 'Payment Receipt'),
-        React.createElement(Text, { style: styles.section }, `Organization: ${params.organizationName}`),
-        React.createElement(Text, { style: styles.section }, `Receipt Number: ${params.receiptNumber}`),
-        React.createElement(Text, { style: styles.section }, `Paid Date: ${params.paidDate.toLocaleDateString()}`),
-        React.createElement(Text, { style: styles.label }, 'Member'),
-        React.createElement(Text, { style: styles.value }, params.memberName),
-        React.createElement(Text, { style: styles.value }, params.memberEmail),
-        React.createElement(Text, { style: styles.label }, 'Amount'),
-        React.createElement(Text, { style: styles.value }, `${params.currency} ${params.amount}`)
-      )
-    );
-
-    const rendered = await pdf(doc).toBuffer();
-    const pdfBuffer = Buffer.isBuffer(rendered)
-      ? rendered
-      : rendered instanceof Uint8Array
-      ? Buffer.from(rendered)
-      : isReadable(rendered)
-      ? await streamToBuffer(rendered)
-      : Buffer.from(String(rendered));
-
-    const base64 = pdfBuffer.toString('base64');
-    return `data:application/pdf;base64,${base64}`;
-  }
-
   static async handlePaymentSuccess(
     params: PaymentSuccessParams
   ): Promise<void> {
@@ -478,147 +388,6 @@ export class PaymentService {
       logger.error('Error handling payment failure', {
         error,
         transactionId,
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * Generate receipt for paid transaction
-   */
-  static async generateReceipt(transactionId: string): Promise<ReceiptData> {
-    try {
-      logger.info('Generating receipt', { transactionId });
-
-      // Get transaction with member details
-      const result = await db
-        .select({
-          transaction: duesTransactions,
-          memberName: organizationMembers.name,
-          memberEmail: organizationMembers.email,
-          organizationName: organizations.name,
-        })
-        .from(duesTransactions)
-        .innerJoin(
-          organizationMembers,
-          eq(duesTransactions.memberId, organizationMembers.id)
-        )
-        .innerJoin(
-          organizations,
-          eq(duesTransactions.organizationId, organizations.id)
-        )
-        .where(eq(duesTransactions.id, transactionId))
-        .limit(1);
-
-      if (!result || result.length === 0) {
-        throw new Error(`Transaction not found: ${transactionId}`);
-      }
-
-      const { transaction, memberName, memberEmail, organizationName } = result[0];
-
-      if (transaction.status !== 'paid') {
-        throw new Error(`Transaction not paid: ${transactionId}`);
-      }
-
-      // Generate receipt number (format: DUES-YYYYMMDD-XXXXX)
-      const date = new Date();
-      const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
-      const random = crypto.randomUUID().slice(0, 5).toUpperCase();
-      const receiptNumber = `DUES-${dateStr}-${random}`;
-
-      const receiptUrl = transaction.receiptUrl || await PaymentService.generateReceiptPdfUrl({
-        receiptNumber,
-        memberName,
-        memberEmail,
-        organizationName,
-        amount: transaction.totalAmount,
-        currency: 'USD',
-        paidDate: transaction.paidDate || new Date(),
-      });
-
-      // Update receipt URL if not set
-      if (!transaction.receiptUrl) {
-        await db
-          .update(duesTransactions)
-          .set({
-            receiptUrl,
-            updatedAt: new Date(),
-          })
-          .where(and(eq(duesTransactions.id, transactionId), eq(duesTransactions.organizationId, transaction.organizationId)));
-      }
-
-      return {
-        transactionId,
-        receiptUrl,
-        receiptNumber,
-        paidDate: transaction.paidDate || new Date(),
-        amount: transaction.totalAmount,
-        memberName,
-        memberEmail,
-        organizationName: organizationName || 'UnionEyes',
-      };
-    } catch (error) {
-      logger.error('Error generating receipt', { error, transactionId });
-      throw error;
-    }
-  }
-
-  /**
-   * Get transaction by processor payment ID
-   */
-  static async getTransactionByProcessorPaymentId(
-    processorPaymentId: string,
-    processorType: 'stripe' | 'paypal'
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      const transaction = await db
-        .select()
-        .from(duesTransactions)
-        .where(
-          and(
-            eq(duesTransactions.processorPaymentId, processorPaymentId),
-            eq(duesTransactions.processorType, processorType)
-          )
-        )
-        .limit(1);
-
-      return transaction && transaction.length > 0 ? transaction[0] : null;
-    } catch (error) {
-      logger.error('Error getting transaction by processor payment ID', {
-        error,
-        processorPaymentId,
-        processorType,
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * Get transaction by checkout session ID (Stripe)
-   */
-  static async getTransactionBySessionId(
-    sessionId: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
-    try {
-      // Query by metadata (session ID stored in metadata)
-      const transactions = await db
-        .select()
-        .from(duesTransactions)
-        .where(eq(duesTransactions.processorType, 'stripe'));
-
-      // Filter by session ID in metadata (client reference ID)
-      const transaction = transactions.find((txn) => {
-        const metadata = txn.metadata as Record<string, unknown>;
-        return metadata?.stripeSessionId === sessionId;
-      });
-
-      return transaction || null;
-    } catch (error) {
-      logger.error('Error getting transaction by session ID', {
-        error,
-        sessionId,
       });
       throw error;
     }

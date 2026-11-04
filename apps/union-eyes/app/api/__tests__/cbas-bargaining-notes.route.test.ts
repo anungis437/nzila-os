@@ -13,12 +13,14 @@ const m = vi.hoisted(() => ({
   rlsScopes: [] as unknown[],
 }));
 
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
+// `cbas/route` and `bargaining-notes/route` are still wrapped by withRoleAuth; `cbas/[id]/route` is wrapped by withApi (the stub above).
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: (_role: string, handler: (req: NextRequest, ctx: unknown) => Promise<Response>) =>
     (req: NextRequest, ctx: Record<string, unknown> = {}) =>
       handler(req, { userId: 'u1', organizationId: 'org-1', params: { id: 'c1' }, ...ctx }),
 }));
-vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
+vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));
 vi.mock('@/lib/services/cba-audited-service', () => ({
   getCbaForOrganization: m.getCba,
   updateCbaAudited: m.updateCba,
@@ -39,67 +41,110 @@ vi.mock('@/lib/services/bargaining-notes-audited-service', () => ({
 }));
 vi.mock('@/lib/services/cba-service', () => ({ listCBAs: vi.fn() }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (scope: unknown, fn: () => unknown) => { m.rlsScopes.push(scope); return fn(); } }));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { FORBIDDEN: 'FORBIDDEN', VALIDATION_ERROR: 'VALIDATION_ERROR', RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND', CONFLICT: 'CONFLICT', INTERNAL_ERROR: 'INTERNAL_ERROR', ALREADY_EXISTS: 'ALREADY_EXISTS' },
-  standardErrorResponse: (code: string, message: string) =>
-    new Response(JSON.stringify({ code, message }), {
-      status: ({ RESOURCE_NOT_FOUND: 404, FORBIDDEN: 403, VALIDATION_ERROR: 400, CONFLICT: 409, ALREADY_EXISTS: 409 } as Record<string, number>)[code] ?? 500,
-    }),
-  standardSuccessResponse: (data: unknown) => new Response(JSON.stringify(data), { status: 200 }),
-}));
+
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
+
+const CBA_ID = '11111111-1111-4111-8111-111111111111';
 
 const json = (url: string, method: string, body?: unknown) =>
   new NextRequest(url, { method, body: body ? JSON.stringify(body) : undefined, headers: { 'content-type': 'application/json' } });
 
 describe('cbas/[id] route', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetCaller();
+    caller.userId = 'u1';
+    caller.organizationId = 'org-1';
+    caller.role = 'steward';
+    caller.params = { id: CBA_ID };
+  });
+
+  it('declares what it asks of the wrapper: a member to read it (in the organization\'s tenant transaction) and a steward to change or archive it', async () => {
+    await import('../cbas/[id]/route');
+    const read = declared.find((entry) => entry.openapi?.summary === 'Read a collective agreement with its clauses and bargaining notes');
+    const update = declared.find((entry) => entry.openapi?.summary === 'Update a collective agreement');
+    const archive = declared.find((entry) => entry.openapi?.summary === 'Archive a collective agreement (never a hard delete)');
+
+    expect(read?.auth).toEqual({ minRole: 'member' });
+    expect(read?.rlsOrgContext).toBe(true);
+    // The audited services open their own tenant transaction, so the wrapper opens none for the writes.
+    expect(update?.auth).toEqual({ minRole: 'steward' });
+    expect(update?.rlsOrgContext).toBeUndefined();
+    expect(archive?.auth).toEqual({ minRole: 'steward' });
+    expect(archive?.rlsOrgContext).toBeUndefined();
+  });
+
+  it('refuses a member the change and the archive before any service is reached, and lets a member read', async () => {
+    caller.role = 'member';
+    const { PATCH, DELETE, GET } = await import('../cbas/[id]/route');
+
+    expect((await PATCH(json(`http://x/api/cbas/${CBA_ID}`, 'PATCH', { title: 'T' }))).status).toBe(403);
+    expect((await DELETE(json(`http://x/api/cbas/${CBA_ID}`, 'DELETE'))).status).toBe(403);
+    expect(m.updateCba).not.toHaveBeenCalled();
+    expect(m.archiveCba).not.toHaveBeenCalled();
+
+    m.getCba.mockResolvedValue({ id: CBA_ID });
+    expect((await GET(json(`http://x/api/cbas/${CBA_ID}`, 'GET'))).status).toBe(200);
+  });
+
+  it('answers 400, and reaches no service, for an id that is not a valid id', async () => {
+    caller.params = { id: 'c1' };
+    const { PATCH, DELETE, GET } = await import('../cbas/[id]/route');
+
+    expect((await GET(json('http://x/api/cbas/c1', 'GET'))).status).toBe(400);
+    expect((await PATCH(json('http://x/api/cbas/c1', 'PATCH', { title: 'T' }))).status).toBe(400);
+    expect((await DELETE(json('http://x/api/cbas/c1', 'DELETE'))).status).toBe(400);
+    expect(m.getCba).not.toHaveBeenCalled();
+    expect(m.updateCba).not.toHaveBeenCalled();
+    expect(m.archiveCba).not.toHaveBeenCalled();
+  });
 
   it('PATCH updates within the caller\'s organization and reports another organization\'s CBA as 404', async () => {
     const { PATCH } = await import('../cbas/[id]/route');
-    m.updateCba.mockResolvedValueOnce({ kind: 'updated', cba: { id: 'c1' } });
-    expect((await PATCH(json('http://x/api/cbas/c1', 'PATCH', { title: 'T' }))).status).toBe(200);
-    expect(m.updateCba).toHaveBeenCalledWith({ organizationId: 'org-1', userId: 'u1' }, 'c1', { title: 'T' });
+    m.updateCba.mockResolvedValueOnce({ kind: 'updated', cba: { id: CBA_ID } });
+    expect((await PATCH(json(`http://x/api/cbas/${CBA_ID}`, 'PATCH', { title: 'T' }))).status).toBe(200);
+    expect(m.updateCba).toHaveBeenCalledWith({ organizationId: 'org-1', userId: 'u1' }, CBA_ID, { title: 'T' });
 
     m.updateCba.mockResolvedValueOnce({ kind: 'not_found' });
-    expect((await PATCH(json('http://x/api/cbas/c1', 'PATCH', { title: 'T' }))).status).toBe(404);
+    expect((await PATCH(json(`http://x/api/cbas/${CBA_ID}`, 'PATCH', { title: 'T' }))).status).toBe(404);
   });
 
   it('PATCH reports a concurrent status change as a conflict', async () => {
     const { PATCH } = await import('../cbas/[id]/route');
     m.updateCba.mockResolvedValue({ kind: 'conflict' });
-    expect((await PATCH(json('http://x/api/cbas/c1', 'PATCH', { status: 'expired' }))).status).toBe(409);
+    expect((await PATCH(json(`http://x/api/cbas/${CBA_ID}`, 'PATCH', { status: 'expired' }))).status).toBe(409);
   });
 
   it('PATCH refuses to change visibility', async () => {
     const { PATCH } = await import('../cbas/[id]/route');
-    expect((await PATCH(json('http://x/api/cbas/c1', 'PATCH', { isPublic: true }))).status).toBe(403);
+    expect((await PATCH(json(`http://x/api/cbas/${CBA_ID}`, 'PATCH', { isPublic: true }))).status).toBe(403);
     expect(m.updateCba).not.toHaveBeenCalled();
   });
 
   it('DELETE only archives, in the caller\'s organization, and a "hard" request is not honoured', async () => {
     const { DELETE } = await import('../cbas/[id]/route');
     m.archiveCba.mockResolvedValue('archived');
-    expect((await DELETE(json('http://x/api/cbas/c1?hard=true', 'DELETE'))).status).toBe(200);
-    expect(m.archiveCba).toHaveBeenCalledWith({ organizationId: 'org-1', userId: 'u1' }, 'c1');
+    expect((await DELETE(json(`http://x/api/cbas/${CBA_ID}?hard=true`, 'DELETE'))).status).toBe(200);
+    expect(m.archiveCba).toHaveBeenCalledWith({ organizationId: 'org-1', userId: 'u1' }, CBA_ID);
 
     m.archiveCba.mockResolvedValueOnce('not_found');
-    expect((await DELETE(json('http://x/api/cbas/c1', 'DELETE'))).status).toBe(404);
+    expect((await DELETE(json(`http://x/api/cbas/${CBA_ID}`, 'DELETE'))).status).toBe(404);
     m.archiveCba.mockResolvedValueOnce('already_archived');
-    expect((await DELETE(json('http://x/api/cbas/c1', 'DELETE'))).status).toBe(409);
+    expect((await DELETE(json(`http://x/api/cbas/${CBA_ID}`, 'DELETE'))).status).toBe(409);
   });
 
   it('GET reads within the organization and keeps privileged notes from other members', async () => {
     const { GET } = await import('../cbas/[id]/route');
-    m.getCba.mockResolvedValue({ id: 'c1' });
+    m.getCba.mockResolvedValue({ id: CBA_ID });
     m.getNotes.mockResolvedValue([
       { id: 'n1', confidentialityLevel: 'internal', createdBy: 'other' },
       { id: 'n2', confidentialityLevel: 'confidential', createdBy: 'other' },
       { id: 'n3', confidentialityLevel: 'restricted', createdBy: 'u1' },
     ]);
-    const response = await GET(json('http://x/api/cbas/c1?includeNotes=true', 'GET'));
+    const response = await GET(json(`http://x/api/cbas/${CBA_ID}?includeNotes=true`, 'GET'));
     const body = await response.json();
-    expect(m.getCba).toHaveBeenCalledWith('org-1', 'c1', { countView: false });
-    expect(m.getNotes).toHaveBeenCalledWith('c1', 'org-1');
+    expect(m.getCba).toHaveBeenCalledWith('org-1', CBA_ID, { countView: false });
+    expect(m.getNotes).toHaveBeenCalledWith(CBA_ID, 'org-1');
     expect(body.bargainingNotes.map((n: { id: string }) => n.id)).toEqual(['n1', 'n3']);
   });
 });

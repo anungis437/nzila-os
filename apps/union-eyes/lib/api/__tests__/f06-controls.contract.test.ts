@@ -57,6 +57,13 @@ describe('F06 audit, retention and read-floor controls', () => {
   // DEF-0B8-JUR-KNOWLEDGE-BASE-ITEM-GET-INCREMENTS-VIEW-COUNT-IN-SYSTEM-CONTEXT-WITHOUT-ORG-PREDICATE
   it('the knowledge-base view counter is bounded to the organization of the row that was read', () => {
     const text = route('knowledge-base/[id]');
-    expect(text).toContain('AND organization_id = ${row.organizationId}::uuid');
+    // The counter names the row that was read and that row's organization, counts only the caller's own row, and runs on the request's tenant
+    // transaction: the one system-role statement in the route is the gated read of a parent's shared row.
+    expect(text).toMatch(
+      /if \(row\.organizationId === orgId\) \{\s*await db\s*\.update\(knowledgeBase\)\s*\.set\(\{ viewCount: sql`\$\{knowledgeBase\.viewCount\} \+ 1` \}\)\s*\.where\(and\(eq\(knowledgeBase\.id, id\), eq\(knowledgeBase\.organizationId, row\.organizationId\)\)\);\s*\}/,
+    );
+    expect(text.split('.update(knowledgeBase)')).toHaveLength(2);
+    expect(text.match(/withSystemContext\(/g)).toHaveLength(1);
+    expect(text).toMatch(/withSystemContext\(\(tx\) =>\s*tx\s*\.select\(columns\)/);
   });
 });

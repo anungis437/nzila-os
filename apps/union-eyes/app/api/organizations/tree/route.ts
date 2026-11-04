@@ -57,6 +57,8 @@ export async function GET(_req: NextRequest) {
       jurisdiction: o.provinceTerritory ?? null,
       description: o.description ?? null,
       hierarchyLevel: o.hierarchyLevel ?? 0,
+      // memberCount keeps the 0 older callers read; member_count is null where the count was never computed, which is not zero.
+      member_count: o.memberCount,
       memberCount: o.memberCount ?? 0,
       status: o.status ?? 'active',
       createdAt: o.createdAt?.toISOString() ?? new Date().toISOString(),

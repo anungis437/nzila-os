@@ -2,10 +2,8 @@
  * Comprehensive role access flow tests
  *
  * Validates that EVERY client-facing role has correct:
- *  1. Route access (canAccessRoute for all defined routes)
- *  2. Navigation visibility (getAccessibleNavItems)
- *  3. Permission grants (critical permissions they MUST have)
- *  4. Permission denials (critical permissions they MUST NOT have)
+ *  1. Permission grants (critical permissions they MUST have)
+ *  2. Permission denials (critical permissions they MUST NOT have)
  *
  * This prevents regressions when roles or permissions are modified.
  */
@@ -14,14 +12,9 @@ import {
   UserRole,
   Permission,
   ROLE_PERMISSIONS,
-  ROUTE_PERMISSIONS,
-  NAV_ITEMS,
-  ADMIN_NAV_ITEMS,
   hasPermission,
   hasAnyPermission,
   hasAllPermissions,
-  canAccessRoute,
-  getAccessibleNavItems,
   getRoleLevel,
   hasHigherOrEqualRole,
 } from '../roles';
@@ -85,139 +78,6 @@ const LEGACY_ROLE_MAP: [UserRole, UserRole][] = [
 
 /** Every role in the enum — for exhaustive checks */
 const ALL_ENUM_ROLES = Object.values(UserRole) as UserRole[];
-
-const ALL_ROUTES = Object.keys(ROUTE_PERMISSIONS);
-
-// ════════════════════════════════════════════════════════════════════════════
-// 1. ROUTE ACCESS MATRIX — every role × every route
-// ════════════════════════════════════════════════════════════════════════════
-
-describe('Route access matrix — union roles', () => {
-  for (const role of CLIENT_FACING_ROLES) {
-    describe(`${role}`, () => {
-      for (const route of ALL_ROUTES) {
-        const requiredPerms = ROUTE_PERMISSIONS[route];
-        const shouldAccess =
-          requiredPerms.length === 0 ||
-          requiredPerms.every((p) => hasPermission(role, p));
-
-        it(`${shouldAccess ? '✓' : '✗'} ${route}`, () => {
-          expect(canAccessRoute(role, route)).toBe(shouldAccess);
-        });
-      }
-    });
-  }
-});
-
-describe('Route access matrix — platform ops roles', () => {
-  for (const role of PLATFORM_OPS_ROLES) {
-    describe(`${role}`, () => {
-      for (const route of ALL_ROUTES) {
-        const requiredPerms = ROUTE_PERMISSIONS[route];
-        const shouldAccess =
-          requiredPerms.length === 0 ||
-          requiredPerms.every((p) => hasPermission(role, p));
-
-        it(`${shouldAccess ? '✓' : '✗'} ${route}`, () => {
-          expect(canAccessRoute(role, route)).toBe(shouldAccess);
-        });
-      }
-    });
-  }
-});
-
-describe('Route access matrix — GUEST', () => {
-  for (const route of ALL_ROUTES) {
-    const requiredPerms = ROUTE_PERMISSIONS[route];
-    const shouldAccess =
-      requiredPerms.length === 0 ||
-      requiredPerms.every((p) => hasPermission(UserRole.GUEST, p));
-
-    it(`${shouldAccess ? '✓' : '✗'} ${route}`, () => {
-      expect(canAccessRoute(UserRole.GUEST, route)).toBe(shouldAccess);
-    });
-  }
-});
-
-describe('Route access matrix — legacy roles', () => {
-  for (const [legacy] of LEGACY_ROLE_MAP) {
-    describe(`${legacy}`, () => {
-      for (const route of ALL_ROUTES) {
-        const requiredPerms = ROUTE_PERMISSIONS[route];
-        const shouldAccess =
-          requiredPerms.length === 0 ||
-          requiredPerms.every((p) => hasPermission(legacy, p));
-
-        it(`${shouldAccess ? '✓' : '✗'} ${route}`, () => {
-          expect(canAccessRoute(legacy, route)).toBe(shouldAccess);
-        });
-      }
-    });
-  }
-});
-
-// ════════════════════════════════════════════════════════════════════════════
-// 2. NAVIGATION ITEM VISIBILITY — per role
-// ════════════════════════════════════════════════════════════════════════════
-
-describe('Navigation visibility — union roles', () => {
-  it('MEMBER sees dashboard, claims, CBA, voting, settings but NOT members or analytics', () => {
-    const items = getAccessibleNavItems(UserRole.MEMBER);
-    const hrefs = items.map((i) => i.href);
-    expect(hrefs).toContain('/dashboard');
-    expect(hrefs).toContain('/dashboard/claims');
-    expect(hrefs).toContain('/dashboard/collective-agreements');
-    expect(hrefs).toContain('/dashboard/voting');
-    expect(hrefs).toContain('/dashboard/settings');
-    expect(hrefs).not.toContain('/dashboard/members');
-    expect(hrefs).not.toContain('/dashboard/analytics');
-  });
-
-  it('STEWARD sees members and analytics', () => {
-    const items = getAccessibleNavItems(UserRole.STEWARD);
-    const hrefs = items.map((i) => i.href);
-    expect(hrefs).toContain('/dashboard/members');
-    expect(hrefs).toContain('/dashboard/analytics');
-  });
-
-  it('ADMIN sees all dashboard nav items', () => {
-    const items = getAccessibleNavItems(UserRole.ADMIN);
-    const hrefs = items.map((i) => i.href);
-    expect(hrefs).toContain('/dashboard');
-    expect(hrefs).toContain('/dashboard/claims');
-    expect(hrefs).toContain('/dashboard/members');
-    expect(hrefs).toContain('/dashboard/analytics');
-  });
-
-  it('ADMIN gets admin nav items in admin mode', () => {
-    const items = getAccessibleNavItems(UserRole.ADMIN, true);
-    expect(items.length).toBeGreaterThan(0);
-    expect(items.every((i) => i.adminOnly)).toBe(true);
-  });
-
-  it('MEMBER gets zero admin nav items', () => {
-    const items = getAccessibleNavItems(UserRole.MEMBER, true);
-    expect(items).toHaveLength(0);
-  });
-
-  it('PRESIDENT gets admin panel nav in admin mode', () => {
-    const items = getAccessibleNavItems(UserRole.PRESIDENT, true);
-    const hrefs = items.map((i) => i.href);
-    expect(hrefs).toContain('/admin');
-  });
-
-  it('SYSTEM_ADMIN gets full admin nav', () => {
-    const items = getAccessibleNavItems(UserRole.SYSTEM_ADMIN, true);
-    expect(items.length).toBeGreaterThanOrEqual(5);
-  });
-
-  for (const role of CLIENT_FACING_ROLES) {
-    it(`${role} always sees /dashboard`, () => {
-      const hrefs = getAccessibleNavItems(role).map((i) => i.href);
-      expect(hrefs).toContain('/dashboard');
-    });
-  }
-});
 
 // ════════════════════════════════════════════════════════════════════════════
 // 3. PERMISSION GRANTS — critical permissions each role MUST have
@@ -929,20 +789,6 @@ describe('Feature flow — Cross-org analytics (CLC / Federation)', () => {
       expect(hasPermission(role, Permission.VIEW_CONGRESS_ANALYTICS)).toBe(false);
     }
   });
-
-  it('CLC/federation can access federation route', () => {
-    expect(canAccessRoute(UserRole.FED_EXECUTIVE, '/dashboard/federation')).toBe(true);
-    expect(canAccessRoute(UserRole.FED_STAFF, '/dashboard/federation')).toBe(true);
-    // CLC_EXECUTIVE also has VIEW_FEDERATION_ANALYTICS (cross-org visibility)
-    expect(canAccessRoute(UserRole.CLC_EXECUTIVE, '/dashboard/federation')).toBe(true);
-  });
-
-  it('congress route available to CLC only', () => {
-    expect(canAccessRoute(UserRole.CLC_EXECUTIVE, '/dashboard/congress')).toBe(true);
-    expect(canAccessRoute(UserRole.CLC_STAFF, '/dashboard/congress')).toBe(true);
-    expect(canAccessRoute(UserRole.FED_EXECUTIVE, '/dashboard/congress')).toBe(false);
-    expect(canAccessRoute(UserRole.MEMBER, '/dashboard/congress')).toBe(false);
-  });
 });
 
 describe('Feature flow — Claim lifecycle', () => {
@@ -999,21 +845,6 @@ describe('Feature flow — Admin panel access', () => {
     expect(adminRoles).toContain(UserRole.APP_OWNER);
     // Nobody else
     expect(adminRoles).toHaveLength(4);
-  });
-
-  it('admin route blocked for all non-admin roles', () => {
-    for (const role of [
-      UserRole.MEMBER,
-      UserRole.STEWARD,
-      UserRole.OFFICER,
-      UserRole.CHIEF_STEWARD,
-      UserRole.SECRETARY_TREASURER,
-      UserRole.VICE_PRESIDENT,
-      UserRole.BARGAINING_COMMITTEE,
-      UserRole.HEALTH_SAFETY_REP,
-    ]) {
-      expect(canAccessRoute(role, '/admin')).toBe(false);
-    }
   });
 });
 
@@ -1083,15 +914,6 @@ describe('Completeness checks', () => {
       for (const p of reserved) {
         expect(hasPermission(role, p))
           .toBe(false);
-      }
-    }
-  });
-
-  it('every route in ROUTE_PERMISSIONS uses valid Permission values', () => {
-    const validPerms = new Set(Object.values(Permission));
-    for (const [route, perms] of Object.entries(ROUTE_PERMISSIONS)) {
-      for (const p of perms) {
-        expect(validPerms.has(p), `Invalid perm ${p} in route ${route}`).toBe(true);
       }
     }
   });
@@ -1167,31 +989,6 @@ describe('Legacy role parity', () => {
       expect(hasHigherOrEqualRole(replacement, legacy)).toBe(true);
     }
   });
-
-  it('non-overpowered legacy roles access the same routes as their replacements', () => {
-    // UNION_REP is excluded — see "UNION_REP has extra permissions" test above.
-    const subset = LEGACY_ROLE_MAP.filter(([l]) => l !== UserRole.UNION_REP);
-    for (const [legacy, replacement] of subset) {
-      for (const route of ALL_ROUTES) {
-        const legacyAccess = canAccessRoute(legacy, route);
-        const replacementAccess = canAccessRoute(replacement, route);
-        if (legacyAccess) {
-          expect(replacementAccess, `${legacy} can access ${route} but ${replacement} cannot`)
-            .toBe(true);
-        }
-      }
-    }
-  });
-
-  it('UNION_REP can access routes that STEWARD cannot (overpowered legacy)', () => {
-    const extraRoutes = ALL_ROUTES.filter(
-      (route) =>
-        canAccessRoute(UserRole.UNION_REP, route) &&
-        !canAccessRoute(UserRole.STEWARD, route)
-    );
-    // Lock in that this gap exists — any reduction is intentional cleanup
-    expect(extraRoutes.length).toBeGreaterThanOrEqual(0);
-  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1231,17 +1028,6 @@ describe('hasAllPermissions', () => {
 
   it('returns true for empty permission array', () => {
     expect(hasAllPermissions(UserRole.GUEST, [])).toBe(true);
-  });
-});
-
-describe('canAccessRoute edge cases', () => {
-  it('allows access to undefined (unlisted) routes', () => {
-    expect(canAccessRoute(UserRole.GUEST, '/some/unknown/route')).toBe(true);
-  });
-
-  it('allows access to routes with empty permission arrays', () => {
-    expect(canAccessRoute(UserRole.GUEST, '/dashboard')).toBe(true);
-    expect(canAccessRoute(UserRole.GUEST, '/dashboard/settings')).toBe(true);
   });
 });
 
@@ -1326,89 +1112,6 @@ describe('Cross-domain isolation', () => {
       for (const p of UNION_SPECIFIC_PERMS) {
         expect(hasPermission(role, p), `${role} should not have ${p}`)
           .toBe(false);
-      }
-    }
-  });
-});
-
-// ════════════════════════════════════════════════════════════════════════════
-// 10. NAVIGATION VISIBILITY — platform ops & edge cases
-// ════════════════════════════════════════════════════════════════════════════
-
-describe('Navigation visibility — platform ops roles', () => {
-  it('platform ops roles see dashboard and settings (open routes) but not claims/voting/CBA', () => {
-    for (const role of PLATFORM_OPS_ROLES) {
-      const items = getAccessibleNavItems(role);
-      const hrefs = items.map((i) => i.href);
-      expect(hrefs).toContain('/dashboard');
-      expect(hrefs).toContain('/dashboard/settings');
-      expect(hrefs).not.toContain('/dashboard/claims');
-      expect(hrefs).not.toContain('/dashboard/voting');
-      expect(hrefs).not.toContain('/dashboard/collective-agreements');
-    }
-  });
-
-  it('platform ops roles get zero admin nav items', () => {
-    for (const role of PLATFORM_OPS_ROLES) {
-      const items = getAccessibleNavItems(role, true);
-      expect(items).toHaveLength(0);
-    }
-  });
-});
-
-describe('Navigation visibility — GUEST', () => {
-  it('GUEST sees only dashboard and settings', () => {
-    const items = getAccessibleNavItems(UserRole.GUEST);
-    const hrefs = items.map((i) => i.href);
-    expect(hrefs).toContain('/dashboard');
-    expect(hrefs).toContain('/dashboard/settings');
-    expect(hrefs).toHaveLength(2);
-  });
-
-  it('GUEST gets zero admin nav items', () => {
-    expect(getAccessibleNavItems(UserRole.GUEST, true)).toHaveLength(0);
-  });
-});
-
-describe('Admin nav granularity', () => {
-  it('PRESIDENT can see admin overview but not admin/members (requires MANAGE_USERS)', () => {
-    const items = getAccessibleNavItems(UserRole.PRESIDENT, true);
-    const hrefs = items.map((i) => i.href);
-    expect(hrefs).toContain('/admin');
-    expect(hrefs).not.toContain('/admin/members');
-  });
-
-  it('ADMIN can see admin/members and admin/settings', () => {
-    const items = getAccessibleNavItems(UserRole.ADMIN, true);
-    const hrefs = items.map((i) => i.href);
-    expect(hrefs).toContain('/admin/members');
-    expect(hrefs).toContain('/admin/settings');
-  });
-
-  it('/admin/organizations route exists but is not in ADMIN_NAV_ITEMS', () => {
-    // ROUTE_PERMISSIONS defines /admin/organizations but ADMIN_NAV_ITEMS does not
-    // include it. The route is accessible via direct URL, but does not appear
-    // in the navigation sidebar. This may be intentional (accessed via org switcher)
-    // or an oversight to address in a future PR.
-    expect(ROUTE_PERMISSIONS['/admin/organizations']).toBeDefined();
-    const adminNavHrefs = ADMIN_NAV_ITEMS.map((i) => i.href);
-    expect(adminNavHrefs).not.toContain('/admin/organizations');
-  });
-
-  it('SYSTEM_ADMIN can access /admin/organizations route directly', () => {
-    expect(canAccessRoute(UserRole.SYSTEM_ADMIN, '/admin/organizations')).toBe(true);
-  });
-
-  it('ADMIN cannot access /admin/organizations route (no MANAGE_ORGANIZATIONS)', () => {
-    expect(canAccessRoute(UserRole.ADMIN, '/admin/organizations')).toBe(false);
-  });
-
-  it('every NAV_ITEM href appears in ROUTE_PERMISSIONS or is open', () => {
-    for (const item of [...NAV_ITEMS, ...ADMIN_NAV_ITEMS]) {
-      // The nav item's required perms should match the route perms
-      const routePerms = ROUTE_PERMISSIONS[item.href];
-      if (routePerms) {
-        expect(item.requiredPermissions).toEqual(routePerms);
       }
     }
   });

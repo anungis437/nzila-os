@@ -24,6 +24,11 @@ vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
 }));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
+// The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
+vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
+  isUuid: () => true,
+  inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
+}));
 vi.mock('@/db/schema', () => ({ exitInterviews: { organizationId: 'organizationId', status: 'status' } }));
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
 

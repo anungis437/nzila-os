@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'steward' },
     entitlement: 'grievance_case_suite',
     openapi: { tags: ['Grievances'], summary: 'Steward workload stats' },

@@ -15,12 +15,12 @@ import { useState } from 'react';
 export interface GovernanceNode {
   id: string;
   name: string;
-  type: 'compliance' | 'regulatory' | 'procedural' | 'decision_authority';
+  /** The category the dependency map gives the node's knowledge. */
+  type: 'compliance' | 'governance';
   isSingleSource: boolean;
   dependsOn: string[];
   downstreamProcesses: string[];
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  continuityImplication: string;
 }
 
 export interface GovernanceImpactData {
@@ -32,7 +32,7 @@ export interface GovernanceImpactData {
     triggerNode: string;
     cascadedProcesses: string[];
     severity: string;
-    description: string;
+    cascadeDepth: number;
   }>;
 }
 
@@ -45,9 +45,7 @@ const RISK_COLORS: Record<string, string> = {
 
 const TYPE_LABELS: Record<string, string> = {
   compliance: 'Compliance',
-  regulatory: 'Regulatory',
-  procedural: 'Procedural',
-  decision_authority: 'Decision Authority',
+  governance: 'Governance',
 };
 
 interface Props {
@@ -104,7 +102,7 @@ export function GovernanceImpactExplorer({ data }: Props) {
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <span className="text-xs text-slate-500">Filter:</span>
-        {['compliance', 'regulatory', 'procedural', 'decision_authority'].map((t) => (
+        {['compliance', 'governance'].map((t) => (
           <button
             key={t}
             onClick={() => setFilterType(filterType === t ? null : t)}
@@ -174,7 +172,6 @@ export function GovernanceImpactExplorer({ data }: Props) {
             <h4 className="font-medium text-slate-800">{selectedNode.name}</h4>
             <span className="text-xs text-slate-500 ml-auto">{TYPE_LABELS[selectedNode.type]}</span>
           </div>
-          <p className="text-sm text-slate-600">{selectedNode.continuityImplication}</p>
           {selectedNode.downstreamProcesses.length > 0 && (
             <div>
               <div className="text-xs font-medium text-slate-700 mb-1">Downstream processes affected if this fails</div>
@@ -214,7 +211,10 @@ export function GovernanceImpactExplorer({ data }: Props) {
                     'bg-amber-50 text-amber-600'
                   }`}>{risk.severity}</span>
                 </div>
-                <p className="text-xs text-slate-500">{risk.description}</p>
+                <p className="text-xs text-slate-500">
+                  Cascade depth {risk.cascadeDepth}
+                  {risk.cascadedProcesses.length > 0 ? ` · affects ${risk.cascadedProcesses.join(', ')}` : ''}
+                </p>
               </div>
             ))}
           </div>

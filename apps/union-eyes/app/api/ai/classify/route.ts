@@ -5,7 +5,7 @@
  * Classify clauses and generate metadata using AI
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   classifyClause,
   generateClauseTags,
@@ -15,7 +15,7 @@ import {
   batchClassifyClauses,
 } from '@/lib/services/ai/auto-classification-service';
 import { z } from "zod";
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
@@ -32,16 +32,33 @@ const aiClassifySchema = z.object({
   action: z.enum(['classify-clause', 'generate-tags', 'detect-refs', 'classify-precedent', 'enrich', 'batch-classify']).default('classify-clause'),
   content: z.string().max(50000, 'Content too long').optional(),
   context: z.record(z.string(), z.unknown()).prefault({}),
-  clauses: z.array(z.any()).default([]),
-  caseTitle: z.string().optional(),
-  facts: z.string().optional(),
-  reasoning: z.string().optional(),
-  decision: z.string().optional(),
+  // One provider call is made per clause: the batch is bounded, and each clause is the shape the classifier reads.
+  clauses: z.array(z.object({
+    id: z.string().min(1).max(200),
+    content: z.string().min(1).max(20_000),
+    title: z.string().max(500).optional(),
+    clauseNumber: z.string().max(100).optional(),
+  })).max(100).default([]),
+  caseTitle: z.string().max(500).optional(),
+  facts: z.string().max(50_000).optional(),
+  reasoning: z.string().max(50_000).optional(),
+  decision: z.string().max(50_000).optional(),
 });
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+
+// The classifiers read nothing from the database: the route has no tenant statement and sets no `rlsOrgContext`. The entitlement is checked here, not by the
+// wrapper, to keep its answer (with the upgrade address) as it was; `requireOrg: false` keeps the answer for a caller with no organization (403, below).
+export const POST = withApi(
+  {
+    auth: { minRole: 'member' },
+    requireOrg: false,
+    body: aiClassifySchema,
+    registry: { audience: 'member', productionStatus: 'active', evidenceRequired: false, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Classify clauses and precedents with AI' },
+  },
+  async ({ user, userId, organizationId, body }) => {
     // CRITICAL: Rate limit AI calls (expensive OpenAI API)
     const rateLimitResult = await checkRateLimit(
-      `ai-completion:${context.userId}`,
+      `ai-completion:${userId}`,
       RATE_LIMITS.AI_COMPLETION
     );
 
@@ -56,8 +73,8 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     }
 
     // CRITICAL: Check subscription entitlement for AI classify
-    if (!context.organizationId) return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
-    const entitlement = await checkEntitlement(context.organizationId, 'ai_classify');
+    if (!organizationId) return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
+    const entitlement = await checkEntitlement(organizationId, 'ai_classify');
     if (!entitlement.allowed) {
       return NextResponse.json(
         { 
@@ -69,23 +86,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       );
     }
 
-    const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: context.userId, organizationId: context.organizationId });
+    const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: userId!, organizationId });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
+    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId, userId, userRole: user?.role ?? 'member', dataClass: 'internal' });
 
     try {
-      const body = await request.json();
-      
-      // Validate request body
-      const validation = aiClassifySchema.safeParse(body);
-      if (!validation.success) {
-        return standardErrorResponse(
-          ErrorCode.VALIDATION_ERROR,
-          'Invalid classification request',
-          validation.error.issues
-        );
-      }
-
       const {
         action,
         content,
@@ -95,11 +100,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         facts,
         reasoning,
         decision,
-      } = validation.data;
+      } = body;
 
       return await performAuditedOperation({
-        organizationId: context.organizationId,
-        userId: context.userId,
+        organizationId,
+        userId: userId!,
         action: 'ai.classification.' + action,
         resourceType: 'ai_invocations',
       }, async () => {
@@ -107,9 +112,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         case 'classify-clause':
           if (!content) {
             return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'Content is required'
-    );
+              ErrorCode.MISSING_REQUIRED_FIELD,
+              'Content is required'
+            );
           }
           const classification = await classifyClause(content, classificationContext);
           return NextResponse.json({
@@ -120,15 +125,15 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         case 'generate-tags':
           if (!content) {
             return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'Content is required'
-    );
+              ErrorCode.MISSING_REQUIRED_FIELD,
+              'Content is required'
+            );
           }
           if (!classificationContext.clauseType) {
             return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'clauseType is required in context'
-    );
+              ErrorCode.MISSING_REQUIRED_FIELD,
+              'clauseType is required in context'
+            );
           }
           const tags = await generateClauseTags(content, classificationContext.clauseType as Parameters<typeof generateClauseTags>[1]);
           return NextResponse.json({
@@ -139,9 +144,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         case 'detect-refs':
           if (!content) {
             return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'Content is required'
-    );
+              ErrorCode.MISSING_REQUIRED_FIELD,
+              'Content is required'
+            );
           }
           const crossReferences = await detectCrossReferences(content);
           return NextResponse.json({
@@ -152,9 +157,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         case 'classify-precedent':
           if (!caseTitle || !facts || !reasoning || !decision) {
             return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'caseTitle, facts, reasoning, and decision are required'
-    );
+              ErrorCode.MISSING_REQUIRED_FIELD,
+              'caseTitle, facts, reasoning, and decision are required'
+            );
           }
           const precedentClass = await classifyPrecedent(caseTitle, facts, reasoning, decision);
           return NextResponse.json({
@@ -165,9 +170,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         case 'enrich':
           if (!content) {
             return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'Content is required'
-    );
+              ErrorCode.MISSING_REQUIRED_FIELD,
+              'Content is required'
+            );
           }
           const enriched = await enrichClauseMetadata(content, classificationContext);
           return NextResponse.json({
@@ -178,9 +183,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         case 'batch-classify':
           if (!clauses || clauses.length === 0) {
             return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'Clauses array is required and must not be empty'
-    );
+              ErrorCode.MISSING_REQUIRED_FIELD,
+              'Clauses array is required and must not be empty'
+            );
           }
           
           let completed = 0;
@@ -217,12 +222,12 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     } catch (error) {
       const refused = operationAuditResponse(error);
       if (refused) return NextResponse.json(refused.body, { status: refused.status });
-return NextResponse.json(
+      return NextResponse.json(
         {
           error: 'Classification failed',
         },
         { status: 500 }
       );
     }
-});
-
+  },
+);

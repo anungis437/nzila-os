@@ -117,9 +117,15 @@ const baseRun = {
 
 const preparedSnapshot = { creatorUserId: 'preparer_1' };
 
+// A run is addressed by a uuid. The fixtures name their runs by label, and the route receives the label's uuid.
+const idOf = (label: string) => {
+  const n = [...label].reduce((sum, ch) => (sum * 31 + ch.charCodeAt(0)) % 1_000_000_000_000, 7);
+  return `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+};
+
 const patch = (userId: string, runId: string, action: 'approve' | 'seal') => ({
   organizationId: 'org_1',
-  params: { id: runId },
+  params: { id: idOf(runId) },
   userId,
   body: { action, acknowledgedEventIds: [] },
 }) as any;
@@ -192,7 +198,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
       }],
     );
 
-    const result = await GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: 'run_1' } } as any);
+    const result = await GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: idOf('run_1') } } as any);
 
     expect(result.data.run.id).toBe('run_1');
     expect(result.data.items.length).toBe(1);
@@ -205,7 +211,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     const denied = Object.assign(new Error('financial mandate'), { status: 403 });
     m.requireLiveFinancialMandate.mockRejectedValue(denied);
     m.queueSelect([[{ id: 'run_1', runType: 'official' }]]);
-    await expect(GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: 'run_1' } } as any)).rejects.toMatchObject({ status: 403 });
+    await expect(GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: idOf('run_1') } } as any)).rejects.toMatchObject({ status: 403 });
     await expect(PATCH(patch('approver_1', 'run_1', 'approve'))).rejects.toMatchObject({ status: 403 });
     expect(m.state.selectQueue).toHaveLength(1);
   });
@@ -214,6 +220,26 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     await loadRoute();
     const { FINANCIAL_MEMBER_DATA_ROLES } = await import('@/lib/finance/financial-authority');
     expect(m.configs['Transition official payroll run lifecycle'].auth).toEqual({ roles: FINANCIAL_MEMBER_DATA_ROLES });
+  });
+
+  it('answers a run id that is not a uuid, and a list of events that is not bounded, as a client error before anything is read', async () => {
+    const { GET, PATCH } = await loadRoute();
+
+    for (const id of ['run_1', '', '1; DROP TABLE employer_payroll_runs', undefined]) {
+      await expect(GET({ organizationId: 'org_1', userId: 'reader_1', params: { id } } as any)).rejects.toMatchObject({ status: 400 });
+      await expect(PATCH({ organizationId: 'org_1', params: { id }, userId: 'approver_1', body: { action: 'approve', acknowledgedEventIds: [] } } as any))
+        .rejects.toMatchObject({ status: 400 });
+    }
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
+
+    // the transition body is parsed by the wrapper from the route's schema: acknowledging more than 500 events at once is refused there
+    const { z } = await import('zod');
+    const schema = m.configs['Transition official payroll run lifecycle'].body as import('zod').ZodType;
+    expect(schema.safeParse({ action: 'approve', acknowledgedEventIds: Array.from({ length: 501 }, () => '00000000-0000-4000-8000-000000000001') }).success).toBe(false);
+    expect(schema.safeParse({ action: 'approve', acknowledgedEventIds: ['not-a-uuid'] }).success).toBe(false);
+    expect(z.guid().safeParse('00000000-0000-4000-8000-000000000001').success).toBe(true);
   });
 
   it('PATCH returns 404 when the run does not exist', async () => {

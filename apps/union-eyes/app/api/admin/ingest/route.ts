@@ -15,7 +15,7 @@
  */
 
 import { withApi, z, ApiError } from '@/lib/api/framework';
-import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   ingestGrievanceBatch,
   type IngestionGrievanceRecord,
@@ -69,6 +69,8 @@ export const POST = withApi(
   {
     auth: { minRole: 'admin' },
     body: ingestBodySchema,
+    // Up to 5000 records with their timelines and document lists: the framework's default ceiling is for ordinary bodies.
+    bodyLimitBytes: 16 * 1024 * 1024,
     openapi: {
       tags: ['Admin', 'Ingestion'],
       summary: 'Batch ingest grievance cases',
@@ -93,8 +95,10 @@ export const POST = withApi(
       );
     }
 
+    // The import writes the organization's own rows as the runtime role: it runs in the organization's tenant transaction, and each
+    // record is contained in its own savepoint inside it. The audit intent and outcome below are separate transactions.
     const ingest = () =>
-      withSystemContext(async () =>
+      withRLSContext({ organizationId }, async () =>
         ingestGrievanceBatch(body.records as IngestionGrievanceRecord[], {
           organizationId,
           sourceSystem: body.source_system,
@@ -127,9 +131,7 @@ export const POST = withApi(
     // Post-import verification for non-dry-run completed batches
     let verification: VerificationResult | null = null;
     if (!body.dry_run && result.batchId && result.batchId !== 'dry-run') {
-      verification = await withSystemContext(async () =>
-        verifyImportBatch(result.batchId),
-      );
+      verification = await withRLSContext({ organizationId }, async () => verifyImportBatch(result.batchId));
     }
 
     return {

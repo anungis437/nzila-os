@@ -87,10 +87,8 @@ vi.mock("@/lib/audit-logger", () => ({
   auditDataMutation: vi.fn(),
 }));
 
-vi.mock("@/lib/db/with-rls-context", () => ({
-  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
-    fn({ insert: () => ({ values: async () => undefined }) }),
-}));
+const { withRls } = vi.hoisted(() => ({ withRls: vi.fn() }));
+vi.mock("@/lib/db/with-rls-context", () => ({ withRLSContext: withRls }));
 vi.mock("@/lib/audit/atomic-audit", () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock("@/lib/audit/operation-audit", () => ({
   performAuditedOperation: async (_op: unknown, fn: () => Promise<unknown>) => fn(),
@@ -112,8 +110,11 @@ import {
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("Steward Copilot AI", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // The tenant transaction hands the service the same connection stub the rest of this file mocks
+    const { db } = await import("@/db/db");
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(db));
   });
 
   describe("exports", () => {
@@ -167,6 +168,7 @@ describe("Steward Copilot AI", () => {
       expect(mockGenerate).toHaveBeenCalledTimes(1);
       const callArgs = mockGenerate.mock.calls[0][0];
       expect(callArgs.profileKey).toBe("ue-steward-copilot");
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 
@@ -174,6 +176,7 @@ describe("Steward Copilot AI", () => {
     it("returns an array", async () => {
       const result = await getCopilotHistory("user-1", "org-1");
       expect(Array.isArray(result)).toBe(true);
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 });

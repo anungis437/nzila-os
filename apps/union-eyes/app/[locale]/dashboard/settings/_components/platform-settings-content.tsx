@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useLocale } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/logger";
+import { isRecord, readApiError } from "@/lib/client/api-envelope";
 import {
   Settings,
   Shield,
@@ -39,7 +42,7 @@ const SECTION_META: Record<PlatformSection, { label: string; icon: typeof Shield
 /* ── Exported types for server → client props ─────────────────────────────── */
 export interface PlatformSettingsValues {
   sessionTimeout: number;
-  mfaEnforcement: string;
+  mfaEnforcement: boolean;
   passwordMinLength: number;
   requireMixedCase: boolean;
   requireSymbol: boolean;
@@ -47,7 +50,7 @@ export interface PlatformSettingsValues {
   emailDigest: boolean;
   digestFrequency: string;
   pushNotifications: boolean;
-  smsAlerts: string;
+  smsAlerts: boolean;
   webhookNotifications: boolean;
   webhookUrl: string;
   voiceGrievance: boolean;
@@ -136,27 +139,52 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
   /* ── API keys (reveal / copy state) ───────────────────────────────────── */
   const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [copyFailed, setCopyFailed] = useState(false);
+
+  const isFrench = useLocale().startsWith("fr");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveNote, setSaveNote] = useState<string | null>(null);
+  // What the server holds, as far as this screen knows: the settings as loaded, then as last saved.
+  const [baseline, setBaseline] = useState<PlatformSettingsValues>(init);
 
   const markChanged = () => setHasChanges(true);
 
   const handleSave = async () => {
+    const current: PlatformSettingsValues = {
+      sessionTimeout, mfaEnforcement, passwordMinLength, requireMixedCase, requireSymbol, rateLimitPerMin,
+      emailDigest, digestFrequency, pushNotifications, smsAlerts, webhookNotifications, webhookUrl,
+      voiceGrievance, aiClauseAnalysis, mobileAccess, crossUnionAnalytics,
+      defaultLanguage, dateFormat, currency,
+    };
+    // Only what was changed is sent: the route merges it into the stored settings, and a value the screen shows by default is not written as a choice.
+    const changed = Object.fromEntries(Object.entries(current).filter(([key, value]) => value !== baseline[key as keyof PlatformSettingsValues]));
+    if (Object.keys(changed).length === 0) {
+      setHasChanges(false);
+      return;
+    }
     setSaving(true);
-    // Platform settings are env/config-driven — this persists the
-    // user-configurable subset to the platform org's settings jsonb.
+    setSaveError(null);
+    setSaveNote(null);
     try {
-      await fetch('/api/settings/organization', {
+      const res = await fetch('/api/settings/organization', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          settings: {
-            sessionTimeout, mfaEnforcement, passwordMinLength, requireMixedCase, requireSymbol, rateLimitPerMin,
-            emailDigest, digestFrequency, pushNotifications, smsAlerts, webhookNotifications, webhookUrl,
-            voiceGrievance, aiClauseAnalysis, mobileAccess, crossUnionAnalytics,
-            defaultLanguage, dateFormat, currency,
-          },
-        }),
+        body: JSON.stringify({ settings: changed }),
       });
+      if (!res.ok) throw new Error(await readApiError(res, `Request failed with status ${res.status}`));
+      const json: unknown = await res.json();
+      const data = isRecord(json) && isRecord(json.data) ? json.data : null;
+      if (data === null || data.updated !== true) {
+        throw new Error('The server did not confirm that the settings were saved.');
+      }
+      setBaseline(current);
       setHasChanges(false);
+      // The route says when a saved setting is stored but not enforced by the platform.
+      setSaveNote(typeof data.message === 'string' ? data.message : null);
+    } catch (failure) {
+      logger.error('Failed to save the platform settings', failure);
+      // The changes stay on the screen and the bar stays up: nothing was saved.
+      setSaveError(failure instanceof Error && failure.message ? failure.message : 'The settings were not saved.');
     } finally {
       setSaving(false);
     }
@@ -166,10 +194,17 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
     window.location.reload();
   };
 
-  const handleCopyKey = (id: string, value: string) => {
-    navigator.clipboard.writeText(value);
-    setCopiedKey(id);
-    setTimeout(() => setCopiedKey(null), 2000);
+  const handleCopyKey = async (id: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopyFailed(false);
+      setCopiedKey(id);
+      setTimeout(() => setCopiedKey(null), 2000);
+    } catch (failure) {
+      logger.error('Failed to copy the key prefix', failure);
+      setCopiedKey(null);
+      setCopyFailed(true);
+    }
   };
 
   const meta = SECTION_META[activeSection];
@@ -229,6 +264,24 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                 <p className="text-gray-600">{meta.description}</p>
               </div>
 
+              {saveError !== null && (
+                <div role="alert" className="rounded-lg border border-destructive p-4 text-sm text-destructive">
+                  <p>{isFrench ? 'Les paramètres n’ont pas été enregistrés. Vos modifications sont conservées; veuillez réessayer.' : 'Settings were not saved. Your changes are kept; please try again.'}</p>
+                  <p className="mt-1">{saveError}</p>
+                </div>
+              )}
+              {saveNote !== null && (
+                <div role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">{saveNote}</div>
+              )}
+              {activeSection === "security" && (
+                <div role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                  <p className="font-semibold">{isFrench ? 'Préférences enregistrées, non appliquées' : 'Stored preferences, not enforced controls'}</p>
+                  <p className="mt-1">{isFrench
+                    ? 'Les options de sécurité ci-dessous sont enregistrées avec l’organisation, mais les mécanismes de connexion, de session, de mot de passe et de limitation de débit ne les lisent pas. Ne les considérez pas comme des protections actives.'
+                    : 'The security options below are saved with the organization, but sign-in, session, password and rate-limit mechanisms do not read them. Do not rely on them as active protections.'}</p>
+                </div>
+              )}
+
               {/* ═══════════ SECURITY ═══════════ */}
               {activeSection === "security" && (
                 <div className="space-y-4">
@@ -243,14 +296,12 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">MFA enforcement</label>
-                    <select value={mfaEnforcement} onChange={(e) => { setMfaEnforcement(e.target.value); markChanged(); }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option value="disabled">Disabled</option>
-                      <option value="admins_only">Required for admins</option>
-                      <option value="all_users">Required for all users</option>
-                    </select>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">Require multi-factor authentication</p>
+                      <p className="text-sm text-gray-600">A stored preference: sign-in does not read it</p>
+                    </div>
+                    <Toggle checked={mfaEnforcement} onChange={(v) => { setMfaEnforcement(v); markChanged(); }} label="Require multi-factor authentication" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -317,14 +368,12 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                     <Toggle checked={pushNotifications} onChange={(v) => { setPushNotifications(v); markChanged(); }} label="Push notifications" />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">SMS alerts</label>
-                    <select value={smsAlerts} onChange={(e) => { setSmsAlerts(e.target.value); markChanged(); }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option value="disabled">Disabled</option>
-                      <option value="critical">Critical only</option>
-                      <option value="all">All alerts</option>
-                    </select>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">SMS alerts</p>
+                      <p className="text-sm text-gray-600">Send alerts to members by text message</p>
+                    </div>
+                    <Toggle checked={smsAlerts} onChange={(v) => { setSmsAlerts(v); markChanged(); }} label="SMS alerts" />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -334,6 +383,9 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                     </div>
                     <Toggle checked={webhookNotifications} onChange={(v) => { setWebhookNotifications(v); markChanged(); }} label="Webhook notifications" />
                   </div>
+                  {webhookNotifications && (
+                    <p className="text-xs text-amber-800">Saved only: no webhook is sent from this setting yet.</p>
+                  )}
 
                   {webhookNotifications && (
                     <div>
@@ -477,13 +529,14 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                           {revealedKeys[k.id] ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                         <button
-                          onClick={() => handleCopyKey(k.id, k.keyPrefix)}
+                          onClick={() => void handleCopyKey(k.id, k.keyPrefix)}
                           className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                           aria-label="Copy key prefix"
                         >
                           {copiedKey === k.id ? <Check size={18} className="text-green-600" /> : <Copy size={18} />}
                         </button>
                       </div>
+                      {copyFailed && <p role="alert" className="text-xs text-destructive mb-2">The key prefix could not be copied.</p>}
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <span>Scopes: {k.scopes.join(', ')}</span>
                         <span>•</span>

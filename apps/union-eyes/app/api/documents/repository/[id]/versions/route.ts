@@ -1,13 +1,11 @@
 import { z } from 'zod';
 import { and, desc, eq, sql } from 'drizzle-orm';
-import { withOrganizationAuth } from '@/lib/organization-middleware';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { withApi, ApiError } from '@/lib/api/framework';
 import {
   standardErrorResponse,
   standardSuccessResponse,
   ErrorCode,
 } from '@/lib/api/standardized-responses';
-import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
@@ -16,6 +14,7 @@ import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-bl
 import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@/lib/documents/intake-lifecycle';
 import { blobIntakeStorage } from '@/lib/documents/intake-storage';
 import { intakeRefusal } from '@/lib/documents/intake-acceptance';
+import { isDocumentId } from '@/lib/documents/canonical-journey';
 import { generateSasUrl } from '@/lib/blob-client';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
@@ -33,13 +32,27 @@ const appendVersionSchema = z.object({
   path: ['intakeId'],
 });
 
-export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {
-  const { organizationId, userId } = context;
-  await requireEntitlement(organizationId, 'grievance_case_suite');
+export const POST = withApi(
+  {
+    auth: { required: true },
+    entitlement: 'grievance_case_suite',
+    // Authority is decided per document (its uploader or the case kernel), not by a role floor. The intake and storage
+    // checks reach out to blob storage, so no database transaction is held across them: the reads before the write and
+    // the write itself are each their own organization transaction.
+    openapi: { tags: ['Documents'], summary: 'Append a version to a document' },
+  },
+  async ({ request, params, organizationId, userId }) => {
+  if (!organizationId || !userId) {
+    throw ApiError.forbidden('Organization context required — select an organization before accessing this resource');
+  }
 
-  if (!params?.id) {
+  if (!params.id) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing document ID');
   }
+  if (!isDocumentId(params.id)) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document ID');
+  }
+  const documentId = params.id;
 
   const body = await request.json();
   const parsed = appendVersionSchema.safeParse(body);
@@ -52,16 +65,19 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
   try {
     if (parsed.data.intakeId) {
       const check = await checkIntakeForAcceptance(
-        { organizationId, userId, intakeId: parsed.data.intakeId, operation: 'append_version', targetDocumentId: params.id },
+        { organizationId, userId, intakeId: parsed.data.intakeId, operation: 'append_version', targetDocumentId: documentId },
         blobIntakeStorage,
       );
       if (!check.ok) return intakeRefusal(check);
       if (check.replay) {
-        const [existing] = await db
-          .select()
-          .from(documentVersions)
-          .where(and(eq(documentVersions.id, check.intake.acceptedVersionId ?? ''), eq(documentVersions.organizationId, organizationId)))
-          .limit(1);
+        const acceptedVersionId = check.intake.acceptedVersionId ?? '';
+        const [existing] = await withRLSContext({ organizationId }, (tx) =>
+          tx
+            .select()
+            .from(documentVersions)
+            .where(and(eq(documentVersions.id, acceptedVersionId), eq(documentVersions.organizationId, organizationId)))
+            .limit(1),
+        );
         return existing ? standardSuccessResponse({ ...existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
       }
       intakeId = check.intake.id;
@@ -87,18 +103,20 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
   }
 
   const doc = (
-    await db
-      .select({
-        id: documents.id,
-        metadata: documents.metadata,
-        uploadedBy: documents.uploadedBy,
-        linkedEntityType: documentLinks.linkedEntityType,
-        linkedEntityId: documentLinks.linkedEntityId,
-      })
-      .from(documents)
-      .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
-      .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`))
-      .limit(1)
+    await withRLSContext({ organizationId }, (tx) =>
+      tx
+        .select({
+          id: documents.id,
+          metadata: documents.metadata,
+          uploadedBy: documents.uploadedBy,
+          linkedEntityType: documentLinks.linkedEntityType,
+          linkedEntityId: documentLinks.linkedEntityId,
+        })
+        .from(documents)
+        .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
+        .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`))
+        .limit(1),
+    )
   )[0];
 
   if (!doc) {
@@ -206,4 +224,5 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     case 'blob_in_use':
       return standardErrorResponse(ErrorCode.CONFLICT, 'That stored file is already attached to a document version');
   }
-});
+  },
+);

@@ -87,6 +87,10 @@ export async function POST(request: Request, { params }: RouteContext) {
   const summary = parsed.summary.trim();
   const action = parsed.action;
 
+  // The organization the reviewer is acting in comes from the identity scope, not from the platform authority's database transaction: it is resolved
+  // before that transaction opens, and only used (to key the audit record) for an assessment nobody has claimed.
+  const actingOrganizationId = await getOrganizationIdForUser(userId).catch(() => null);
+
   try {
     return await withSystemContext(async (tx) => {
     const [assessment] = await tx
@@ -134,7 +138,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     // Every review decision is audited. The audit chain is organization-keyed: a claimed assessment is audited against the organization
     // that claimed it, and an unclaimed prospect assessment against the organization the reviewing platform administrator is acting in
     // (as for any platform operation). A reviewer acting in no organization cannot record a decision, so none is made unrecorded.
-    const auditOrganizationId = assessment.claimedOrgId ?? (await getOrganizationIdForUser(userId).catch(() => null));
+    const auditOrganizationId = assessment.claimedOrgId ?? actingOrganizationId;
     if (!auditOrganizationId) {
       return NextResponse.json(
         { error: 'A review decision needs an acting organization to be recorded against. Select an organization and retry.' },

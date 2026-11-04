@@ -44,9 +44,9 @@ vi.mock("@/db/db", () => ({ db: { select: mocks.mockSelect, insert: mocks.mockIn
 vi.mock("@/db/schema", () => ({
   cbaIntelReviewDecisions: { targetType: "target_type", targetId: "target_id", createdAt: "created_at" },
   cbaIntelFindings: { id: "id", reviewStatus: "review_status", confidence: "confidence", createdAt: "created_at", clauseFamily: "clause_family" },
-  cbaIntelAgreements: { id: "id", reviewStatus: "review_status", overallConfidence: "overall_confidence", createdAt: "created_at" },
-  cbaIntelWageAdjustments: { id: "id", reviewStatus: "review_status" },
-  cbaIntelClauses: { id: "id", reviewStatus: "review_status" },
+  cbaIntelAgreements: { id: "id", reviewStatus: "review_status", overallConfidence: "overall_confidence", createdAt: "created_at", jurisdiction: "jurisdiction" },
+  cbaIntelWageAdjustments: { id: "id", reviewStatus: "review_status", confidence: "confidence", createdAt: "created_at" },
+  cbaIntelClauses: { id: "id", reviewStatus: "review_status", confidence: "confidence", createdAt: "created_at", clauseFamily: "clause_family" },
 }));
 
 vi.mock("@/lib/observability/metrics", () => ({ updateReviewQueueDepthMetrics: mocks.mockMetricsUpdate }));
@@ -71,18 +71,62 @@ describe("review-service", () => {
     mocks.mockUpdate.mockImplementation(() => makeUpdateChain(mocks.updateQueue.shift() ?? []));
   });
 
-  it("gets review queue and pending agreement queue", async () => {
-    mocks.selectQueue.push([{ count: 1 }], [{ id: "f1" }], [{ count: 1 }], [{ id: "a1" }]);
+  it("lists the findings that await review as queue items, and the pending agreements", async () => {
+    mocks.selectQueue.push(
+      [{ count: 1 }],
+      [{ id: "f1", label: "Wage increase", clauseFamily: "wages", confidence: "0.750", citationText: "2.5% in 2026", isInferred: true, reviewStatus: "needs_followup", createdAt: new Date("2026-10-01T00:00:00Z") }],
+      [{ count: 1 }],
+      [{ id: "a1" }],
+    );
     const { getReviewQueue, getPendingAgreementReviews } = await import("../review-service");
     await expect(
       getReviewQueue({ minConfidence: 0.5, maxConfidence: 0.9, clauseFamily: "wages" }, { limit: 200 }),
-    ).resolves.toEqual({ items: [{ id: "f1" }], total: 1, page: 1, limit: 100 });
+    ).resolves.toEqual({
+      items: [{ id: "f1", targetType: "finding", title: "Wage increase", employer: null, jurisdiction: null, clauseFamily: "wages", confidence: 0.75, citationText: "2.5% in 2026", isInferred: true, reviewStatus: "needs_followup", createdAt: "2026-10-01T00:00:00.000Z" }],
+      total: 1,
+      page: 1,
+      limit: 100,
+    });
     await expect(getPendingAgreementReviews({ limit: 200 })).resolves.toEqual({
       items: [{ id: "a1" }],
       total: 1,
       page: 1,
       limit: 100,
     });
+  });
+
+  const createdAt = new Date("2026-10-01T00:00:00Z");
+  it.each([
+    [
+      "agreement",
+      "cbaIntelAgreements",
+      { id: "a1", title: "Unit agreement", employerNormalized: "Employer", jurisdiction: "ON", overallConfidence: "0.900", reviewStatus: "pending_review", createdAt },
+      { title: "Unit agreement", employer: "Employer", jurisdiction: "ON", clauseFamily: null, confidence: 0.9, citationText: null, isInferred: false, reviewStatus: "pending_review" },
+    ],
+    [
+      "wage_adjustment",
+      "cbaIntelWageAdjustments",
+      { id: "w1", adjustmentType: "general_increase", adjustmentPercent: "2.500", adjustmentFlat: null, year: 2026, classification: "Clerks", confidence: "0.600", citationText: "2.5% in 2026", isInferred: false, reviewStatus: "needs_followup", createdAt },
+      { title: "general increase · 2.5% · 2026 · Clerks", employer: null, jurisdiction: null, clauseFamily: null, confidence: 0.6, citationText: "2.5% in 2026", isInferred: false, reviewStatus: "needs_followup" },
+    ],
+    [
+      "clause",
+      "cbaIntelClauses",
+      { id: "c1", title: null, clauseNumber: "12.01", clauseFamily: "overtime", summary: "Overtime is paid at 1.5x.", confidence: "0.400", isInferred: true, reviewStatus: null, createdAt },
+      { title: "§12.01", employer: null, jurisdiction: null, clauseFamily: "overtime", confidence: 0.4, citationText: "Overtime is paid at 1.5x.", isInferred: true, reviewStatus: "pending_review" },
+    ],
+  ])("lists the %s rows that await review from their own table, not the findings", async (targetType, table, row, expected) => {
+    mocks.selectQueue.push([{ count: 1 }], [row]);
+    const { getReviewQueue } = await import("../review-service");
+    const schema = await import("@/db/schema");
+
+    const queue = await getReviewQueue({ targetType: targetType as never });
+
+    expect(queue).toEqual({ items: [{ id: row.id, targetType, createdAt: "2026-10-01T00:00:00.000Z", ...expected }], total: 1, page: 1, limit: 25 });
+    // The count and the page are both read from the table of the kind asked for.
+    for (const result of mocks.mockSelect.mock.results) {
+      expect((result.value as { from: ReturnType<typeof vi.fn> }).from).toHaveBeenCalledWith((schema as unknown as Record<string, unknown>)[table]);
+    }
   });
 
   it("submits review and writes audit decision", async () => {

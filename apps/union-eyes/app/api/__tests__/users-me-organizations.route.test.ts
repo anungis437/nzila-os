@@ -36,7 +36,11 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: m.auth,
   currentUser: m.currentUser,
 }));
-vi.mock('@/db/db', () => ({ db: mockDb }));
+// A person's memberships span organizations, so they are read as the system role inside an explicit context; the ambient handle must never be used.
+vi.mock('@/db/db', () => ({ db: new Proxy({}, { get() { throw new Error('ambient db used outside a context'); } }) }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn(async (operation: (tx: typeof mockDb) => Promise<unknown>) => operation(mockDb)),
+}));
 vi.mock('@nzila/os-core', () => ({
   createLogger: vi.fn(() => m.logger),
 }));
@@ -125,5 +129,36 @@ describe('users/me/organizations route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.organizations).toHaveLength(2);
+  });
+
+  it('offers a member only the active organizations they belong to, with the memberships of those organizations', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(
+      [
+        { id: 'm1', organizationId: 'org_1', userId: 'user_1', role: 'member', isPrimary: true, joinedAt: new Date(), createdAt: new Date() },
+        { id: 'm2', organizationId: 'org_archived', userId: 'user_1', role: 'admin', isPrimary: false, joinedAt: new Date(), createdAt: new Date() },
+      ],
+      [
+        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', sectors: [], provinceTerritory: 'ON', status: 'active', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'org_archived', name: 'Old', slug: 'old', organizationType: 'union', sectors: [], provinceTerritory: 'ON', status: 'archived', createdAt: new Date(), updatedAt: new Date() },
+      ],
+    );
+
+    const response = await GET(new NextRequest('http://localhost/api/users/me/organizations'));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.organizations.map((o: { id: string }) => o.id)).toEqual(['org_1']);
+    expect(payload.memberships.map((x: { organizationId: string }) => x.organizationId)).toEqual(['org_1']);
+  });
+
+  it('answers 500, not an empty 200, when the database read fails', async () => {
+    const { GET } = await loadRoute();
+    mockDb.select.mockImplementationOnce(() => { throw new Error('connection reset'); });
+
+    const response = await GET(new NextRequest('http://localhost/api/users/me/organizations'));
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: 'Failed to load organizations' });
   });
 });

@@ -43,7 +43,6 @@ export interface AtomicAuditedOperation<T = unknown> {
   details?: Record<string, unknown>
   /** Facts about what the work did (counts, identifiers), recorded in the same audit row once the work has produced them. */
   resultDetails?: (value: T) => Record<string, unknown>
-  scope?: 'organization' | 'system'
   /**
    * Set to { ok: false } when the `afterCommit` step failed. The change and its audit record have committed; what did not happen is the
    * follow-up (a cache refresh, for example), so the caller must not report the whole operation as having taken effect everywhere. The
@@ -106,9 +105,11 @@ export async function performAuditedOperation<T>(op: AuditedOperation<T>, operat
 }
 
 /**
- * Runs `work` and writes its audit record in ONE transaction. If the audit record cannot be written the work rolls back and the caller
- * gets an OperationAuditError (HTTP 409 through operationAuditResponse); if the work throws, nothing is recorded as done.
- * `afterCommit` runs only once the transaction has committed (cache invalidation, for example) and cannot undo it.
+ * Runs `work` and writes its audit record in ONE transaction, the acting organization's (the runtime role bound to it). If the audit record
+ * cannot be written the work rolls back and the caller gets an OperationAuditError (HTTP 409 through operationAuditResponse); if the work
+ * throws, nothing is recorded as done. `afterCommit` runs only once the transaction has committed (cache invalidation, for example) and
+ * cannot undo it. A platform operation that has to run as the system role is `performAtomicSystemAuditedOperation`: the two are separate
+ * functions so that the role a callback runs as is a fact of the call, not of a value this function reads.
  */
 export async function performAtomicAuditedOperation<T>(
   op: AtomicAuditedOperation<T>,
@@ -119,47 +120,79 @@ export async function performAtomicAuditedOperation<T>(
   if (!organizationId || !userId) {
     throw new OperationAuditError('A platform operation needs an authenticated administrator acting in an organization.')
   }
-  const result = await inScope(op.scope, organizationId, async (tx) => {
-    const value = await work(tx)
-    try {
-      await persistAtomicAudit(tx, {
+  const result = await withRLSContext({ organizationId }, (tx) => workAndAudit(tx, op, organizationId, userId, work))
+  await runAfterCommit(op, 'organization', organizationId, userId, afterCommit)
+  return result
+}
+
+/** The same operation as the system role: needed when a platform administrator acts on an organization they are not a member of. */
+export async function performAtomicSystemAuditedOperation<T>(
+  op: AtomicAuditedOperation<T>,
+  work: (tx: RLSTx) => Promise<T>,
+  afterCommit?: () => Promise<void> | void,
+): Promise<T> {
+  const { organizationId, userId } = op
+  if (!organizationId || !userId) {
+    throw new OperationAuditError('A platform operation needs an authenticated administrator acting in an organization.')
+  }
+  const result = await withSystemContext((tx) => workAndAudit(tx as unknown as RLSTx, op, organizationId, userId, work))
+  await runAfterCommit(op, 'system', organizationId, userId, afterCommit)
+  return result
+}
+
+async function workAndAudit<T>(
+  tx: RLSTx,
+  op: AtomicAuditedOperation<T>,
+  organizationId: string,
+  userId: string,
+  work: (tx: RLSTx) => Promise<T>,
+): Promise<T> {
+  const value = await work(tx)
+  try {
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: op.action,
+      resourceType: op.resourceType,
+      resourceId: op.resourceId,
+      details: { ...(op.details ?? {}), ...(op.resultDetails ? op.resultDetails(value) : {}) },
+    })
+  } catch (error) {
+    logger.error('platform_operation_atomic_audit_not_recorded', { action: op.action, error })
+    throw new OperationAuditError('The operation was not performed because its audit record could not be written.')
+  }
+  return value
+}
+
+async function runAfterCommit<T>(
+  op: AtomicAuditedOperation<T>,
+  scope: 'organization' | 'system',
+  organizationId: string,
+  userId: string,
+  afterCommit: (() => Promise<void> | void) | undefined,
+): Promise<void> {
+  if (!afterCommit) return
+  try {
+    await afterCommit()
+    if (op.afterCommitReport) op.afterCommitReport.ok = true
+  } catch (error) {
+    logger.error('platform_operation_after_commit_failed', { action: op.action, error })
+    if (op.afterCommitReport) op.afterCommitReport.ok = false
+    // The change committed; the follow-up did not. That is itself recorded, so a later reader can tell why the effect lagged.
+    await recordOutcome(
+      scope,
+      organizationId,
+      {
         organizationId,
         userId,
-        action: op.action,
+        action: `${op.action}.after_commit_failed`,
         resourceType: op.resourceType,
         resourceId: op.resourceId,
-        details: { ...(op.details ?? {}), ...(op.resultDetails ? op.resultDetails(value) : {}) },
-      })
-    } catch (error) {
-      logger.error('platform_operation_atomic_audit_not_recorded', { action: op.action, error })
-      throw new OperationAuditError('The operation was not performed because its audit record could not be written.')
-    }
-    return value
-  })
-  if (afterCommit) {
-    try {
-      await afterCommit()
-      if (op.afterCommitReport) op.afterCommitReport.ok = true
-    } catch (error) {
-      logger.error('platform_operation_after_commit_failed', { action: op.action, error })
-      if (op.afterCommitReport) op.afterCommitReport.ok = false
-      // The change committed; the follow-up did not. That is itself recorded, so a later reader can tell why the effect lagged.
-      await recordOutcome(
-        op.scope,
-        organizationId,
-        {
-          organizationId,
-          userId,
-          action: `${op.action}.after_commit_failed`,
-          resourceType: op.resourceType,
-          resourceId: op.resourceId,
-          details: { ...op.details, error: error instanceof Error ? error.message : 'unknown' },
-        },
-        'failure',
-      )
-    }
+        details: { ...op.details, error: error instanceof Error ? error.message : 'unknown' },
+      },
+      'failure',
+    )
   }
-  return result
 }
 const inScope = <T>(scope: 'organization' | 'system' | undefined, organizationId: string, work: (tx: RLSTx) => Promise<T>) =>
   scope === 'system' ? withSystemContext((tx) => work(tx as unknown as RLSTx)) : withRLSContext({ organizationId }, work)

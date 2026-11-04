@@ -8,10 +8,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CUPEVocabulary, CaseType, Priority, Severity, Role, Status } from '@nzila/cupe-vocabulary';
+import type { PublicVocabulary } from '@/lib/vocabulary/public-vocabulary';
 
+type CaseType = PublicVocabulary['caseTypes'][number];
+type Priority = PublicVocabulary['priorities'][number];
+type Severity = PublicVocabulary['severities'][number];
+type Role = PublicVocabulary['roles'][number];
+type Status = PublicVocabulary['statuses'][number];
+
+/** The vocabulary as the API serves it: identifiers, labels and descriptions, without service-level hours, role flags or status transitions (lib/vocabulary/public-vocabulary.ts). */
 interface UseCUPEVocabularyResult {
-  vocabulary: CUPEVocabulary | null;
+  vocabulary: PublicVocabulary | null;
   isLoading: boolean;
   error: Error | null;
   getCaseType: (id: string) => CaseType | undefined;
@@ -33,7 +40,7 @@ interface UseCUPEVocabularyResult {
  * ```
  */
 export function useCUPEVocabulary(): UseCUPEVocabularyResult {
-  const [vocabulary, setVocabulary] = useState<CUPEVocabulary | null>(null);
+  const [vocabulary, setVocabulary] = useState<PublicVocabulary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -48,7 +55,7 @@ export function useCUPEVocabulary(): UseCUPEVocabularyResult {
           throw new Error(`HTTP ${response.status}: Failed to fetch vocabulary`);
         }
 
-        const data: CUPEVocabulary = await response.json();
+        const data: PublicVocabulary = await response.json();
         setVocabulary(data);
         setError(null);
       } catch (err) {

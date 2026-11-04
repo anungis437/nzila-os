@@ -5,12 +5,13 @@ import { join } from 'node:path'
 const src = (path: string) => readFileSync(join(process.cwd(), path), 'utf8').replace(/\r\n/g, '\n')
 
 describe('F06 batch 4 (A3): durable operation lifecycles, each state change recorded for what it is', () => {
-  it('CBA registry seed and benchmark snapshot are atomic in the system scope; ingestion and extraction record the durable rows they wrote', () => {
+  it('CBA registry seed and benchmark snapshot are atomic in the acting organization transaction (the runtime role holds the grants on the global dataset, the system role none); ingestion and extraction record the durable rows they wrote', () => {
     for (const file of ['app/api/cba-intelligence/ingestion/seed/route.ts', 'app/api/cba-intelligence/benchmark/[id]/route.ts']) {
       const route = src(file)
       expect(route).toContain('performAtomicAuditedOperation(')
       expect(route).not.toContain('performAuditedOperation(')
-      expect(route).toContain('scope: "system"')
+      expect(route).not.toMatch(/scope:\s*["']system["']/)
+      expect(route).not.toContain('performAtomicSystemAuditedOperation')
     }
     expect(src('lib/services/cba-intelligence/seed-sources.ts')).toContain('if (options.failFast) throw error;')
     expect(src('app/api/cba-intelligence/ingestion/run/route.ts')).toContain('jobIds:')

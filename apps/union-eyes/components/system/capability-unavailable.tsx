@@ -1,17 +1,20 @@
 import { AlertTriangle } from 'lucide-react';
 
+// One statement for every caller: a whole page, a form or action, or a banner above data that depends on the service.
+// It says what is true in each case (the service is absent; nothing was read, saved or changed through it) and never
+// assumes there are figures, a list or a form beneath it.
 const COPY = {
   en: {
-    title: 'This information is not available',
-    body: 'The service that produces it is not available in this release, so the figures below are not real and must not be relied on. Nothing was changed.',
+    title: 'Not available in this release',
+    body: 'The service behind this is not available in this release. Nothing was read, saved or changed through it, and any number or status on this page that depends on it is not real and must not be relied on.',
   },
   fr: {
-    title: 'Cette information n’est pas disponible',
-    body: 'Le service qui la produit n’est pas disponible dans cette version; les chiffres ci-dessous ne sont donc pas réels et ne doivent pas être utilisés. Rien n’a été modifié.',
+    title: 'Non disponible dans cette version',
+    body: 'Le service qui sous-tend cette fonction n’est pas disponible dans cette version. Rien n’a été lu, enregistré ou modifié par son intermédiaire, et tout chiffre ou statut de cette page qui en dépend n’est pas réel et ne doit pas être utilisé.',
   },
 } as const;
 
-/** A visible, assistive-technology-announced statement that a page's data could not be produced. */
+/** A visible, assistive-technology-announced statement that the feature or data it stands in for is not available. */
 export function CapabilityUnavailable({ locale, capability }: { locale?: string; capability?: string }) {
   const copy = locale?.toLowerCase().startsWith('fr') ? COPY.fr : COPY.en;
   return (

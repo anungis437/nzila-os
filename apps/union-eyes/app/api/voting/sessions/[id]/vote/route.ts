@@ -21,8 +21,18 @@ async function requireOpenOwnedSession(sessionId: string, organizationId: string
   }
 }
 
+// castVote reports its refusals as plain Errors, which withApi would answer as a 500 "An internal error occurred".
+function castRefusal(error: unknown): ApiError | null {
+  const message = error instanceof Error ? error.message : '';
+  if (message === 'Vote already cast') return ApiError.conflict(message);
+  if (message === 'Voter is not eligible') return ApiError.forbidden(message);
+  if (message === 'Option does not belong to this voting session') return ApiError.badRequest(message);
+  return null;
+}
+
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     body: z.object({
       optionId: z.guid(),
@@ -40,7 +50,12 @@ export const POST = withApi(
       throw ApiError.badRequest('Open-roll voting is not available: ballots are secret.');
     }
     await requireOpenOwnedSession(sessionId, organizationId, true);
-    const vote = await castVote(sessionId, body.optionId, userId!, body.isAnonymous);
+    let vote: Awaited<ReturnType<typeof castVote>>;
+    try {
+      vote = await castVote(sessionId, body.optionId, userId!, body.isAnonymous);
+    } catch (error) {
+      throw castRefusal(error) ?? error;
+    }
     await withRLSContext({ organizationId: organizationId! }, (tx) =>
       recordBallotAcceptance(tx, { organizationId: organizationId!, sessionId, receiptId: vote.id }),
     );
@@ -52,6 +67,7 @@ export const POST = withApi(
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Governance'],

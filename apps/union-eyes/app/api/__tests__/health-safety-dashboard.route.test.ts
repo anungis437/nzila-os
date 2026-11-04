@@ -81,6 +81,37 @@ describe('health-safety/dashboard route (PR #752 round 17)', () => {
     expect(result.metrics.daysWithoutIncident).toBeNull();
   });
 
+  describe('incident change against the previous period', () => {
+    // The first two queries count the incidents of this period and of the one before it.
+    async function changeFor(current: number, previous: number) {
+      m.db.execute
+        .mockImplementationOnce(async () => [{ cnt: current, training_due: 0, last_dt: null }])
+        .mockImplementationOnce(async () => [{ cnt: previous, training_due: 0, last_dt: null }]);
+      const { GET } = await loadRoute();
+      const result = (await GET({ request: { url: 'http://localhost/api/health-safety/dashboard' }, organizationId: 'org-1' })) as { metrics: Record<string, unknown> };
+      return result.metrics;
+    }
+
+    it('gives no percentage, not 0%, when the previous period had no incident, and still says the count went up', async () => {
+      const metrics = await changeFor(5, 0);
+      expect(metrics.totalIncidents).toBe(5);
+      expect(metrics.incidentChange).toBeNull();
+      expect(metrics.incidentTrend).toBe('up');
+    });
+
+    it('is stable, with nothing to compare, when neither period had an incident', async () => {
+      const metrics = await changeFor(0, 0);
+      expect(metrics.incidentChange).toBeNull();
+      expect(metrics.incidentTrend).toBe('stable');
+    });
+
+    it('gives the percentage against the previous period, with its direction', async () => {
+      expect(await changeFor(6, 4)).toMatchObject({ incidentChange: 50, incidentTrend: 'up' });
+      expect(await changeFor(3, 4)).toMatchObject({ incidentChange: -25, incidentTrend: 'down' });
+      expect(await changeFor(4, 4)).toMatchObject({ incidentChange: 0, incidentTrend: 'stable' });
+    });
+  });
+
   it('fails when a query fails, rather than answering success with zeros', async () => {
     m.db.execute.mockRejectedValue(new Error('db down'));
     const { GET } = await loadRoute();

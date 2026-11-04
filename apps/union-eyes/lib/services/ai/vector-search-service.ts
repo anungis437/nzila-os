@@ -17,9 +17,9 @@ import {
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { db } from '@/db';
 import { cbaClause } from '@/db/schema';
 import { eq, sql, and, or, SQL } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import { embeddingCache } from './embedding-cache';
 import { CLAUSE_EMBEDDING, PRECEDENT_EMBEDDING, requireVectorColumn } from '@/lib/ai/vector-readiness';
@@ -139,8 +139,9 @@ export async function semanticClauseSearch(
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-    // Perform vector similarity search using pgvector. A clause's tags are its key terms (cba_clauses has no tags column).
-    const results = await db.execute(sql`
+    // Perform vector similarity search using pgvector, in the organization's own context after the embedding call has returned.
+    // A clause's tags are its key terms (cba_clauses has no tags column).
+    const results = await withRLSContext({ organizationId }, (tx) => tx.execute(sql`
       SELECT 
         id,
         clause_number,
@@ -159,7 +160,7 @@ export async function semanticClauseSearch(
       ${whereClause ? sql`AND ${whereClause}` : sql``}
       ORDER BY ${hybridSearch.enabled ? sql`hybrid_score` : sql`similarity`} DESC
       LIMIT ${limit}
-    `);
+    `));
 
     return (results as unknown as SqlRow[]).map((row: SqlRow) => ({
       id: row.id as string,
@@ -196,10 +197,12 @@ export async function findSimilarClauses(
   await requireVectorColumn(CLAUSE_EMBEDDING);
 
   try {
-    // Get the source clause; one in another organization is simply not found
-    const sourceClause = await db.query.cbaClause.findFirst({
-      where: and(eq(cbaClause.id, clauseId), eq(cbaClause.organizationId, organizationId)),
-    });
+    // Get the source clause, in the organization's own context; one in another organization is simply not found
+    const sourceClause = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.cbaClause.findFirst({
+        where: and(eq(cbaClause.id, clauseId), eq(cbaClause.organizationId, organizationId)),
+      }),
+    );
 
     if (!sourceClause) {
       throw new Error('Source clause not found');
@@ -214,7 +217,7 @@ export async function findSimilarClauses(
       ? sql`AND clause_type = ${sourceClause.clauseType}`
       : sql``;
 
-    const results = await db.execute(sql`
+    const results = await withRLSContext({ organizationId }, (tx) => tx.execute(sql`
       SELECT 
         id,
         clause_number,
@@ -230,7 +233,7 @@ export async function findSimilarClauses(
       ${typeFilter}
       ORDER BY similarity DESC
       LIMIT ${limit}
-    `);
+    `));
 
     return (results as unknown as SqlRow[])
       .map((row: SqlRow) => ({
@@ -253,18 +256,23 @@ export async function findSimilarClauses(
 }
 
 /**
- * Semantic search for arbitration precedents
+ * Semantic search for arbitration precedents. The decisions a caller may see (public ones and its own) are decided by row-level security in the
+ * organization's own context, so the search says whose context to run in.
  */
 export async function semanticPrecedentSearch(
   query: string,
   options: {
+    organizationId: string;
     limit?: number;
     threshold?: number;
     issueType?: string;
     jurisdiction?: string;
-  } = {}
+  }
 ): Promise<SearchResult[]> {
-  const { limit = 10, threshold = 0.7, issueType, jurisdiction } = options;
+  const { organizationId, limit = 10, threshold = 0.7, issueType, jurisdiction } = options;
+  if (!organizationId) {
+    throw new Error('organizationId is required to search precedents');
+  }
 
   await requireVectorColumn(PRECEDENT_EMBEDDING);
 
@@ -285,7 +293,7 @@ export async function semanticPrecedentSearch(
       ? sql`WHERE ${sql.join(whereFilters, sql` AND `)}`
       : sql``;
 
-    const results = await db.execute(sql`
+    const results = await withRLSContext({ organizationId }, (tx) => tx.execute(sql`
       SELECT 
         id,
         case_title,
@@ -301,7 +309,7 @@ export async function semanticPrecedentSearch(
       ${whereClause}
       ORDER BY similarity DESC
       LIMIT ${limit}
-    `);
+    `));
 
     return (results as unknown as SqlRow[])
       .map((row: SqlRow) => ({
@@ -354,10 +362,9 @@ export async function unifiedSemanticSearch(
     threshold = 0.7,
   } = options;
 
-  const [clauses, precedents] = await Promise.all([
-    includeClauses ? semanticClauseSearch(query, { limit, threshold, filters: { organizationId } }) : [],
-    includePrecedents ? semanticPrecedentSearch(query, { limit, threshold }) : [],
-  ]);
+  // One after the other: each search opens its own organization context, and two contexts must not interleave on one connection when this runs inside a transaction.
+  const clauses = includeClauses ? await semanticClauseSearch(query, { limit, threshold, filters: { organizationId } }) : [];
+  const precedents = includePrecedents ? await semanticPrecedentSearch(query, { organizationId, limit, threshold }) : [];
 
   // Combine and sort by similarity
   const combined = [...clauses, ...precedents]

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { caller, declared, resetCaller } from './support/with-api-stub';
 
 const TEST_ORG_ID = '00000000-0000-0000-0000-000000000001';
 const TEST_USER_ID = 'user_test_001';
@@ -10,7 +11,9 @@ const m = vi.hoisted(() => {
     blobInUse: false,
   };
 
-  const nextSelect = () => Promise.resolve((state.selectQueue.shift() ?? []) as unknown[]);
+  // A queued result is consumed by the next statement; with none queued, a statement finds nothing, except that the stored file is
+  // reported as held by another version while a test says it is.
+  const nextSelect = () => Promise.resolve((state.selectQueue.length ? state.selectQueue.shift()! : state.blobInUse ? [{ id: 'v-other' }] : []) as unknown[]);
 
   const createSelectChain = () => {
     const chain = {
@@ -27,7 +30,6 @@ const m = vi.hoisted(() => {
 
   return {
     state,
-    requireEntitlement: vi.fn(),
     hasMinRole: vi.fn(),
     getEffectiveCaseAccess: vi.fn(),
     isDocumentVisibleByPolicy: vi.fn(),
@@ -35,6 +37,7 @@ const m = vi.hoisted(() => {
     toGovernanceLabel: vi.fn(),
     resolveStoredBlob: vi.fn(),
     persistAtomicAudit: vi.fn(),
+    loadUploaderNames: vi.fn(),
     withRLSContext: vi.fn(),
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     resetQueues: () => {
@@ -44,21 +47,12 @@ const m = vi.hoisted(() => {
   };
 });
 
-const mockDb = {
-  select: vi.fn(() => m.createSelectChain()),
-};
-
-vi.mock('@/db/db', () => ({ db: mockDb }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({
-  requireEntitlement: m.requireEntitlement,
-}));
+// The ambient handle must never be reached by this route: a statement on it would run outside the organization's transaction.
+const ambient = new Proxy({}, { get: () => { throw new Error('the ambient database handle was used'); } });
+vi.mock('@/db/db', () => ({ db: ambient }));
+vi.mock('@/db', () => ({ db: ambient }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
-vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: vi.fn(
-    (handler: (req: NextRequest, ctx: { organizationId: string; userId: string }) => Promise<Response>) =>
-      (req: NextRequest) => handler(req, { organizationId: TEST_ORG_ID, userId: TEST_USER_ID })
-  ),
-}));
 vi.mock('@/lib/services/case-access-service', () => ({
   getEffectiveCaseAccess: m.getEffectiveCaseAccess,
 }));
@@ -75,6 +69,7 @@ vi.mock('@/lib/services/document-blob-integrity-service', () => ({
   }),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/documents/uploader-names', () => ({ loadUploaderNames: m.loadUploaderNames }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
 }));
@@ -86,9 +81,12 @@ async function loadRoute() {
 describe('documents/repository route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.userId = TEST_USER_ID;
+    caller.organizationId = TEST_ORG_ID;
+    caller.role = 'member';
     m.resetQueues();
     m.state.blobInUse = false;
-    m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({
       isPrimaryOwner: true,
@@ -105,11 +103,12 @@ describe('documents/repository route', () => {
       contentHash: 'sha256:test',
     });
     m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.loadUploaderNames.mockResolvedValue({});
 
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
       let insertCall = 0;
       const tx = {
-        select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => m.state.blobInUse ? [{ id: 'v-other' }] : []) })) })) })),
+        select: vi.fn(() => m.createSelectChain()),
         insert: vi.fn(() => ({
           values: vi.fn(() => {
             insertCall += 1;
@@ -129,19 +128,25 @@ describe('documents/repository route', () => {
     });
   });
 
+  it('declares a member floor and the case-suite entitlement, and holds no transaction of its own across storage checks', async () => {
+    await loadRoute();
+    expect(declared.map((options) => options.auth?.minRole)).toEqual(['member', 'member']);
+    expect(declared.map((options) => options.entitlement)).toEqual(['grievance_case_suite', 'grievance_case_suite']);
+    expect(declared.map((options) => Boolean(options.rlsOrgContext))).toEqual([false, false]);
+  });
+
   it('returns forbidden on GET when caller lacks member role', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    caller.role = 'guest';
 
     const response = await GET(new NextRequest('http://localhost/api/documents/repository'));
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.withRLSContext).not.toHaveBeenCalled();
   }, 60000);
 
   it('returns only visible documents after policy checks', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(true);
     m.queueSelect([
       {
         id: 'doc-1',
@@ -185,9 +190,69 @@ describe('documents/repository route', () => {
     }
   });
 
+  it('names the uploader of each document for a representative, and gives no name for someone who is no longer a member', async () => {
+    const { GET } = await loadRoute();
+    const row = (id: string, uploadedBy: string) => ({
+      id, title: id, name: id, filename: `${id}.pdf`, documentType: 'policy', privacyLabel: 'team_confidential', uploadedBy,
+      createdAt: new Date('2026-06-01T00:00:00.000Z'), updatedAt: new Date('2026-06-01T00:00:00.000Z'),
+      linkedEntityType: null, linkedEntityId: null,
+    });
+    m.queueSelect([row('doc-1', 'u-known'), row('doc-2', 'u-gone')]);
+    m.loadUploaderNames.mockResolvedValue({ 'u-known': 'Alice Steward' });
+
+    const payload = await (await GET(new NextRequest('http://localhost/api/documents/repository'))).json();
+
+    expect(m.loadUploaderNames).toHaveBeenCalledWith(TEST_ORG_ID, ['u-known', 'u-gone']);
+    expect(payload.data).toMatchObject([
+      { id: 'doc-1', uploadedBy: 'u-known', uploadedByName: 'Alice Steward' },
+      { id: 'doc-2', uploadedBy: 'u-gone', uploadedByName: null },
+    ]);
+  });
+
+  it('shows a member neither the uploader id nor a name, and does not look the names up', async () => {
+    const { GET } = await loadRoute();
+    m.hasMinRole.mockResolvedValue(false);
+    m.queueSelect([{
+      id: 'doc-1', title: 'Doc One', name: 'Doc One', filename: 'doc1.pdf', documentType: 'policy', privacyLabel: 'team_confidential', uploadedBy: 'u-other',
+      createdAt: new Date('2026-06-01T00:00:00.000Z'), updatedAt: new Date('2026-06-01T00:00:00.000Z'),
+      linkedEntityType: null, linkedEntityId: null,
+    }]);
+
+    const payload = await (await GET(new NextRequest('http://localhost/api/documents/repository'))).json();
+
+    expect(m.loadUploaderNames).not.toHaveBeenCalled();
+    expect(payload.data[0]).not.toHaveProperty('uploadedBy');
+    expect(payload.data[0]).not.toHaveProperty('uploadedByName');
+  });
+
+  it('answers an unknown label filter as a bad request, not as a database error', async () => {
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/documents/repository?label=not_a_label'));
+
+    expect(response.status).toBe(400);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
+  it('makes the case decision once per case for documents of a page that share it', async () => {
+    const { GET } = await loadRoute();
+    const row = (id: string) => ({
+      id, title: id, name: id, filename: `${id}.pdf`, documentType: 'policy', privacyLabel: 'team_confidential', uploadedBy: TEST_USER_ID,
+      createdAt: new Date('2026-06-01T00:00:00.000Z'), updatedAt: new Date('2026-06-01T00:00:00.000Z'),
+      linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa',
+    });
+    m.queueSelect([row('doc-1'), row('doc-2'), row('doc-3')]);
+
+    const response = await GET(new NextRequest('http://localhost/api/documents/repository'));
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).data).toHaveLength(3);
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledTimes(1);
+  });
+
   it('returns forbidden on POST when caller lacks upload role', async () => {
     const { POST } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    caller.role = 'guest';
 
     const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
       method: 'POST',
@@ -196,7 +261,7 @@ describe('documents/repository route', () => {
     }));
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
   });
 
   it('returns validation error when POST payload is invalid', async () => {

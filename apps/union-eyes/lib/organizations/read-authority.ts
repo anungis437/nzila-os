@@ -85,3 +85,15 @@ export function readableOrganizationIds(access: OrganizationAccess): string[] | 
 }
 
 export const UUID_PATTERN = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+/**
+ * The organization this one sits directly below, read as the system role from the organization's own row. The hierarchy is the platform's record, not a
+ * caller's claim: it is what lets a child receive what its parent shares with it (the parent's shared knowledge-base rows), and a caller cannot name
+ * another parent. A top-level organization has none.
+ */
+export async function verifiedParentOf(organizationId: string): Promise<string | undefined> {
+  const [row] = await withSystemContext((tx) =>
+    tx.select({ parentId: organizations.parentId }).from(organizations).where(eq(organizations.id, organizationId)).limit(1),
+  );
+  return row?.parentId ?? undefined;
+}

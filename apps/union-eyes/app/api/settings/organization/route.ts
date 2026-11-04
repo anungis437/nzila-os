@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 /* ── GET ──────────────────────────────────────────────────────────────────── */
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' } },
+  { rlsOrgContext: true, auth: { required: true, minRole: 'admin' } },
   async (ctx) => {
     const orgId = ctx.organizationId;
     if (!orgId) {

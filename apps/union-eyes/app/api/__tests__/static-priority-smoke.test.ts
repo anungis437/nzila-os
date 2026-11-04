@@ -34,7 +34,6 @@ const PRIORITY_SLUGS = [
   'documents',
   'cron/external-data-sync',
   'bargaining-notes',
-  'cron/calendar-sync',
   'integrations/shopify/webhooks',
   'icra/submit',
   'social-media/posts',

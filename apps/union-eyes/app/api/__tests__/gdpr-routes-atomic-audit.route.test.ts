@@ -43,13 +43,7 @@ vi.mock('@/lib/gdpr/consent-manager', () => {
 vi.mock('@/lib/job-queue', () => ({ getReportQueue: m.getReportQueue }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 vi.mock('@/db/schema', () => ({ organizations: { id: 'id' } }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq') }));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR', MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD', RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND' },
-  standardErrorResponse: (code: string, message: string) =>
-    new Response(JSON.stringify({ code, message }), { status: code === 'AUTH_REQUIRED' ? 401 : code === 'INTERNAL_ERROR' ? 500 : 400 }),
-  standardSuccessResponse: (data: unknown) => new Response(JSON.stringify(data), { status: 200 }),
-}));
+vi.mock('drizzle-orm', async (importOriginal) => ({ ...(await importOriginal<typeof import('drizzle-orm')>()), eq: vi.fn(() => 'eq') }));
 
 const ORG = '11111111-1111-4111-8111-111111111111';
 const OTHER_ORG = '22222222-2222-4222-8222-222222222222';
@@ -77,7 +71,7 @@ describe('gdpr/data-export POST', () => {
 
   it('files the request for the caller\u2019s own data: request, status and audit on one transaction, then the notification and the queue', async () => {
     const { POST } = await import('../gdpr/data-export/route');
-    const response = await POST(post('data-export', { organizationId: ORG }), { organizationId: ORG });
+    const response = await POST(post('data-export', { organizationId: ORG }));
 
     expect(response.status).toBe(200);
     expect(m.createDataAccessRequest).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u1', organizationId: ORG }), m.tx);
@@ -91,25 +85,49 @@ describe('gdpr/data-export POST', () => {
 
   it('refuses a request for an organization other than the caller\u2019s active one', async () => {
     const { POST } = await import('../gdpr/data-export/route');
-    const response = await POST(post('data-export', { organizationId: OTHER_ORG }), { organizationId: ORG });
+    const response = await POST(post('data-export', { organizationId: OTHER_ORG }));
 
     expect(response.status).toBe(403);
     expect(m.createDataAccessRequest).not.toHaveBeenCalled();
+    expect(m.queueAdd).not.toHaveBeenCalled();
   });
 
-  it('resolves the active organization itself when the context carries none, rather than trusting the body', async () => {
+  it('resolves the active organization from the caller\u2019s own membership, rather than trusting the body', async () => {
     const { POST } = await import('../gdpr/data-export/route');
-    const response = await POST(post('data-export', { organizationId: OTHER_ORG }), {});
+    const response = await POST(post('data-export', { organizationId: OTHER_ORG }));
 
     expect(response.status).toBe(403);
     expect(m.getOrganizationIdForUser).toHaveBeenCalledWith('u1');
+    expect(m.createDataAccessRequest).not.toHaveBeenCalled();
+  });
+
+  it('files nothing for a caller with no active organization, whatever the body names', async () => {
+    const { POST } = await import('../gdpr/data-export/route');
+    m.getOrganizationIdForUser.mockResolvedValue(null);
+
+    const response = await POST(post('data-export', { organizationId: ORG }));
+
+    expect(response.status).toBe(403);
+    expect(m.createDataAccessRequest).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('files nothing for a caller who is not signed in', async () => {
+    const { POST } = await import('../gdpr/data-export/route');
+    m.getCurrentUser.mockResolvedValue(null);
+
+    const response = await POST(post('data-export', { organizationId: ORG }));
+
+    expect(response.status).toBe(401);
+    expect(m.createDataAccessRequest).not.toHaveBeenCalled();
+    expect(m.queueAdd).not.toHaveBeenCalled();
   });
 
   it('files nothing and queues nothing when the audit cannot be written', async () => {
     const { POST } = await import('../gdpr/data-export/route');
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
 
-    const response = await POST(post('data-export', { organizationId: ORG }), { organizationId: ORG });
+    const response = await POST(post('data-export', { organizationId: ORG }));
 
     expect(response.status).toBe(500);
     expect(m.queueAdd).not.toHaveBeenCalled();
@@ -120,7 +138,7 @@ describe('gdpr/data-export POST', () => {
     const { POST } = await import('../gdpr/data-export/route');
     m.getReportQueue.mockReturnValue(null);
 
-    const response = await POST(post('data-export', { organizationId: ORG }), { organizationId: ORG });
+    const response = await POST(post('data-export', { organizationId: ORG }));
 
     expect(response.status).toBe(500);
     expect(m.updateRequestStatus).toHaveBeenCalledWith('req1', ORG, 'rejected', expect.anything(), m.tx);
@@ -131,7 +149,7 @@ describe('gdpr/data-export POST', () => {
     const { POST } = await import('../gdpr/data-export/route');
     m.queueAdd.mockRejectedValueOnce(new Error('redis down'));
 
-    const response = await POST(post('data-export', { organizationId: ORG }), { organizationId: ORG });
+    const response = await POST(post('data-export', { organizationId: ORG }));
 
     expect(response.status).toBe(500);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'gdpr.data_export.reject' }));

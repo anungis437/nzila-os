@@ -168,7 +168,6 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/docs',                // OpenAPI documentation
     '/api/status',              // Status page (public)
     '/api/gdpr/cookie-consent', // Cookie consent must be public
-    '/api/whop/unauthenticated-checkout', // Whop public checkout flow
     '/api/payments/webhooks/paypal',       // PayPal webhook (has its own signature verification)
     '/api/quote/[token]',                  // Token-gated public quote response
     '/api/zoho/webhook',                   // Zoho webhook (token-verified)

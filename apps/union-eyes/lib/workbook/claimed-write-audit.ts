@@ -1,7 +1,5 @@
-import { db } from '@/db';
-import type { RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { appendPublicIntakeAudit, type PublicIntakeOperation } from '@/lib/public-intake/intake-audit';
+import { PublicIntakeAuditUnavailableError, type PublicIntakeOperation } from '@/lib/public-intake/intake-audit';
 import type { ClaimedWorkbookAuthority } from '@/lib/workbook/access-control';
 
 interface WorkbookAuditEntry {
@@ -27,7 +25,9 @@ function operationOf(action: string): PublicIntakeOperation {
 async function recordPreclaim(authority: ClaimedWorkbookAuthority, entry: WorkbookAuditEntry, operation: PublicIntakeOperation): Promise<void> {
   const details: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(entry.details)) if (PSEUDONYMOUS_DETAIL_KEYS.has(key)) details[key] = value;
-  await appendPublicIntakeAudit(db as unknown as RLSTx, {
+  // The writer is bound to the system transaction the boundary opened for an unclaimed workbook; an authority that carries none is refused, never recorded elsewhere.
+  if (!authority.appendPublicIntakeAudit) throw new PublicIntakeAuditUnavailableError();
+  await authority.appendPublicIntakeAudit({
     surface: entry.action.split('.').slice(0, 2).join('.'),
     action: entry.action,
     operation,
@@ -43,7 +43,7 @@ async function recordClaimed(authority: ClaimedWorkbookAuthority, entry: Workboo
   if (!authority.actorUserId || !authority.claimedOrgId) {
     throw new Error('A claimed workbook access has no organization to record its audit under.');
   }
-  await persistAtomicAudit(db as unknown as RLSTx, {
+  await persistAtomicAudit(authority.tx, {
     organizationId: authority.claimedOrgId,
     userId: authority.actorUserId,
     action: entry.action,
@@ -54,8 +54,8 @@ async function recordClaimed(authority: ClaimedWorkbookAuthority, entry: Workboo
 }
 
 /**
- * Records a write to a workbook's identity-linked data on the executor the access boundary established, so the write and its audit row
- * commit or roll back together. Call it inside the `withClaimedWorkbookAccess` callback.
+ * Records a write to a workbook's identity-linked data on the transaction the access boundary opened (`authority.tx`), so the write and its
+ * audit row commit or roll back together. Call it inside the `withClaimedWorkbookAccess` callback.
  *
  * A claimed workbook is recorded under the claiming organization and the acting person; one with no organization to attribute to fails
  * closed. An unclaimed workbook has neither, and none is invented: it is recorded in the platform's append-only public-intake audit under

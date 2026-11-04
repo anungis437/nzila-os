@@ -12,6 +12,7 @@ const LIST_LIMIT = 200;
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List trustees', description: 'List all pension trustees for the organization' },
   },

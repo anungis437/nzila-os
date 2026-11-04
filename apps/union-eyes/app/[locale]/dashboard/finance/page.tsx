@@ -35,7 +35,10 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
 
+// What GET /api/finance/dashboard answers inside { success, data, timestamp }. The ledger summary is null unless the request names a billing
+// period, and this page does not, so it is unknown here and never shown as zero.
 interface DashboardData {
   billingAccount: {
     id: string;
@@ -87,10 +90,13 @@ export default function FinanceDashboardPage() {
     setError(null);
     try {
       const res = await fetch('/api/finance/dashboard');
-      if (!res.ok) throw new Error('Failed to load dashboard');
-      const json = await res.json();
-      setData(json.data);
+      if (!res.ok) throw new Error(await readApiError(res, 'Failed to load dashboard'));
+      const payload = envelopeData(await res.json());
+      if (!Array.isArray(payload.recentInvoices) || !Array.isArray(payload.recentChargebacks)) throw new ApiShapeError('no invoice or chargeback list');
+      if (!isRecord(payload.duesAlignment) || !Array.isArray(payload.duesAlignment.anomalies)) throw new ApiShapeError('no dues alignment');
+      setData(payload as unknown as DashboardData);
     } catch (err) {
+      setData(null);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
@@ -156,7 +162,7 @@ export default function FinanceDashboardPage() {
           <Button variant="outline" size="sm" onClick={() => router.push(`/${locale}/dashboard/finance/remittances`)}>
             {t('unionRemittances')}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push('/finance/exports')}>
+          <Button variant="outline" size="sm" onClick={() => router.push(`/${locale}/dashboard/finance/exports`)}>
             <Download className="h-4 w-4 mr-1" /> {t('exports')}
           </Button>
           <Button variant="outline" size="sm" onClick={fetchDashboard}>
@@ -190,10 +196,10 @@ export default function FinanceDashboardPage() {
             {t('ledgerEntriesLabel')}
           </div>
           <div className="text-xl font-semibold">
-            {data.ledgerSummary?.entryCount ?? 0}
+            {data.ledgerSummary ? data.ledgerSummary.entryCount : '—'}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {t('totalPrefix')} {formatCurrency(Number(data.ledgerSummary?.totalAmountCad ?? 0))}
+            {t('totalPrefix')} {data.ledgerSummary ? formatCurrency(Number(data.ledgerSummary.totalAmountCad)) : '—'}
           </p>
         </Card>
 
@@ -233,7 +239,7 @@ export default function FinanceDashboardPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/finance/invoices')}
+            onClick={() => router.push(`/${locale}/dashboard/finance/invoices`)}
           >
             {t('viewAll')} <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
@@ -256,7 +262,7 @@ export default function FinanceDashboardPage() {
                 <TableRow
                   key={inv.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/finance/invoices/${inv.id}`)}
+                  onClick={() => router.push(`/${locale}/dashboard/finance/invoices/${inv.id}`)}
                 >
                   <TableCell className="font-medium">{inv.invoiceNumber}</TableCell>
                   <TableCell>{formatCurrency(Number(inv.totalAmount))}</TableCell>

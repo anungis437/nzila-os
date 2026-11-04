@@ -7,12 +7,15 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
+// council_elections is a global platform table read and written in the system context, so it is open to the platform's governance roles only, as the rest of the
+// governance console is: a tenant admin's role is not authority over it.
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
+  { auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     const rows = await db.execute(sql`
@@ -28,7 +31,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     entitlement: 'governance_suite',
     body: z.object({
       electionYear: z.number().int(),

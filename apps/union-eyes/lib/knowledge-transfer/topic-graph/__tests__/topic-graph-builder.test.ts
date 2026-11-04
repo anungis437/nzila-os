@@ -6,6 +6,11 @@ const { whereMock } = vi.hoisted(() => ({ whereMock: vi.fn() }));
 vi.mock('@/db/db', () => ({
   db: { select: () => ({ from: () => ({ where: (...args: unknown[]) => ({ limit: () => whereMock(...args) }) }) }) },
 }));
+// The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
+vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
+  isUuid: () => true,
+  inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
+}));
 vi.mock('@/db/schema', () => ({
   exitInterviews: { id: 'id', roleInUnion: 'roleInUnion', topics: 'topics', expertiseTags: 'expertiseTags', organizationId: 'organizationId', status: 'status' },
 }));

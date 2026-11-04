@@ -848,7 +848,7 @@ async function sendSignatureRequestNotification(
       type: 'email',
       priority: 'normal',
       subject: 'Document Ready for Signature',
-      body: `You have a document that requires your signature.\n\nDocument ID: ${request.documentId}\nRequested by: ${request.requestedBy}\n\nPlease sign the document at your earliest convenience.`,
+      body: `You have a document that requires your signature.\n\nDocument ID: ${request.documentId}\nRequested by: ${request.requestedBy}\n\nPlease complete it with the signing request the signing service e-mailed to you.`,
       htmlBody: `
         <h2>Document Ready for Signature</h2>
         <p>You have a document that requires your signature.</p>
@@ -857,10 +857,8 @@ async function sendSignatureRequestNotification(
           <li><strong>Requested by:</strong> ${request.requestedBy}</li>
           <li><strong>Due Date:</strong> ${request.dueDate ? new Date(request.dueDate).toLocaleDateString() : 'No due date'}</li>
         </ul>
-        <p>Please sign the document at your earliest convenience.</p>
+        <p>Please complete it with the signing request the signing service e-mailed to you.</p>
       `,
-      actionUrl: `/documents/${request.documentId}/sign`,
-      actionLabel: 'Sign Document',
       metadata: {
         documentId: request.documentId,
         requestId: request.id,

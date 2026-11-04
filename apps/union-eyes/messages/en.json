@@ -109,6 +109,9 @@
   },
   "common": {
     "appName": "UnionEyes",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
@@ -336,7 +339,7 @@
       },
       "history": {
         "title": "Payment History",
-        "description": "View your past dues payments and download receipts",
+        "description": "View your past dues payments and open their receipts",
         "loading": "Loading payment history...",
         "empty": "No payment history available",
         "columns": {
@@ -1069,7 +1072,6 @@
     "partiesInvolved": "Parties Involved",
     "partyLabels": {
       "grievant": "Grievant",
-      "steward": "Union Representative",
       "management": "Management"
     },
     "contractViolation": "Contract Violation",
@@ -1257,7 +1259,18 @@
     "hoursAgo": "{hours}h ago",
     "daysAgo": "{days}d ago",
     "daysLeft": "{days} days left",
+    "loadFailed": "Notifications could not be loaded",
+    "markReadFailed": "The notification could not be marked as read",
+    "markAllReadFailed": "The notifications could not be marked as read",
+    "deleteFailed": "The notification could not be deleted",
+    "matching": "matching the filters",
+    "showingNewest": "Showing the newest {shown} of {total} notifications",
+    "preferencesLink": "Notification preferences",
     "types": {
+      "info": "Info",
+      "success": "Success",
+      "warning": "Warning",
+      "error": "Error",
       "caseUpdate": "Case Update",
       "deadline": "Deadline",
       "grievance": "Grievance",
@@ -1505,6 +1518,14 @@
     }
   },
   "duesReceiptPage": {
+    "statusLabel": "Status",
+    "retryButton": "Try again",
+    "status": {
+      "posted": "Posted",
+      "pending": "Pending",
+      "reversed": "Reversed",
+      "voided": "Voided"
+    },
     "paymentReceiptTitle": "Payment Receipt",
     "issuedPrefix": "Issued",
     "memberInformationTitle": "Member Information",
@@ -1940,13 +1961,14 @@
     "channels": {
       "email": "Email",
       "sms": "SMS",
-      "push": "Push"
+      "push": "Push",
+      "multi_channel": "Multi-Channel"
     },
     "types": {
       "broadcast": "Broadcast",
-      "campaign": "Campaign",
-      "newsletter": "Newsletter",
-      "alert": "Alert"
+      "sequence": "Sequence",
+      "triggered": "Triggered",
+      "transactional": "Transactional"
     },
     "stats": {
       "audience": {
@@ -2738,45 +2760,21 @@
     "metaDescription": "Access UnionEyes for casework, intelligence, and member services.",
     "appName": "UnionEyes",
     "tagline": "A Decision System for Labour Leadership",
-    "subtitle": "From intake to outcome - casework, intelligence, and member services in one system.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Locals",
-      "membersValue": "50K+",
-      "membersLabel": "Members",
-      "uptimeValue": "99.9%",
-      "uptimeLabel": "Uptime"
-    }
+    "subtitle": "From intake to outcome - casework, intelligence, and member services in one system."
   },
   "signInPage": {
     "metaTitle": "Sign In | UnionEyes",
     "metaDescription": "Sign in to UnionEyes - the intelligent labour relations platform for unions, locals, and federations.",
     "appName": "UnionEyes",
     "tagline": "Labour Intelligence Made Simple",
-    "subtitle": "Grievance tracking, arbitration management, collective bargaining analytics, and member services - purpose-built for unions.",
-    "stats": {
-      "rolesValue": "35+",
-      "rolesLabel": "Union roles",
-      "languagesValue": "6",
-      "languagesLabel": "Languages",
-      "uptimeValue": "99.9%",
-      "uptimeLabel": "Uptime"
-    }
+    "subtitle": "Grievance tracking, arbitration management, collective bargaining analytics, and member services - purpose-built for unions."
   },
   "signUpPage": {
     "metaTitle": "Sign Up | UnionEyes",
     "metaDescription": "Create your UnionEyes account to access casework, intelligence, and member services.",
     "appName": "UnionEyes",
     "tagline": "A Decision System for Labour Leadership",
-    "subtitle": "From intake to outcome - casework, intelligence, and member services in one system.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Locals",
-      "membersValue": "50K+",
-      "membersLabel": "Members",
-      "uptimeValue": "99.9%",
-      "uptimeLabel": "Uptime"
-    }
+    "subtitle": "From intake to outcome - casework, intelligence, and member services in one system."
   },
   "adminMembersPage": {
     "metaTitle": "Admin Members | UnionEyes",
@@ -3052,7 +3050,6 @@
   "adminOrganizationsPage": {
     "title": "Organizations",
     "subtitle": "Manage your organizational hierarchy",
-    "bulkImportButton": "Bulk Import",
     "addOrganizationButton": "Add Organization",
     "totalOrganizations": "Total Organizations",
     "activeOrganizations": "Active",
@@ -3329,15 +3326,7 @@
     "metaDescription": "Create your UnionEyes account - join the intelligent labour relations platform.",
     "appName": "UnionEyes",
     "tagline": "Labour Intelligence Made Simple",
-    "subtitle": "Grievance tracking, arbitration management, collective bargaining analytics, and member services - purpose-built for unions.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Locals",
-      "membersValue": "50K+",
-      "membersLabel": "Members",
-      "uptimeValue": "99.9%",
-      "uptimeLabel": "Uptime"
-    }
+    "subtitle": "Grievance tracking, arbitration management, collective bargaining analytics, and member services - purpose-built for unions."
   },
   "employerRemittanceRunDetailPage": {
     "metaTitle": "Remittance Run Details | UnionEyes",
@@ -3460,6 +3449,7 @@
     }
   },
   "financeInvoicesPage": {
+    "loadMore": "Load more invoices",
     "title": "Invoices",
     "empty": "No invoices generated yet",
     "errors": {
@@ -3776,54 +3766,11 @@
   "movementInsightsExportPage": {
     "metadata": {
       "title": "Legislative Brief Export",
-      "description": "Generate legislative brief exports from anonymized movement insights."
+      "description": "This export is not available in this release."
     },
     "header": {
       "title": "Legislative Brief",
-      "description": "Export anonymized insights for advocacy and policy work",
       "backToInsights": "Back to Insights"
-    },
-    "preview": {
-      "exportPdf": "Export PDF",
-      "keyFindings": "Key Findings",
-      "recommendations": "Recommendations",
-      "dataSourceLabel": "Data Source:"
-    },
-    "customize": {
-      "title": "Customize Brief",
-      "description": "Filter insights by focus area, jurisdiction, or timeframe",
-      "focusAreaLabel": "Focus Area",
-      "focusAreaOptions": {
-        "workplaceDisputes": "Workplace Disputes",
-        "healthcare": "Healthcare",
-        "education": "Education",
-        "publicSector": "Public Sector"
-      },
-      "jurisdictionLabel": "Jurisdiction",
-      "jurisdictionOptions": {
-        "allCanada": "All Canada",
-        "ontario": "Ontario",
-        "quebec": "Quebec"
-      }
-    },
-    "usage": {
-      "title": "How to Use This Brief",
-      "unionLeadership": {
-        "label": "For Union Leadership:",
-        "text": "Use these insights in strategic planning, contract negotiations, and member communications."
-      },
-      "clcAdvocacy": {
-        "label": "For CLC Advocacy:",
-        "text": "Reference anonymized data in legislative submissions, policy papers, and public reports."
-      },
-      "mediaRelations": {
-        "label": "For Media Relations:",
-        "text": "Cite cross-union trends to demonstrate systemic workplace issues requiring policy solutions."
-      },
-      "note": {
-        "label": "Note:",
-        "text": "All data is anonymized. No individual organization or member can be identified. Minimum 5 unions and 10 cases required for all metrics."
-      }
     }
   },
   "movementInsightsPage": {
@@ -3924,50 +3871,6 @@
       "afterLink": "Only you and your assigned steward can see these details."
     }
   },
-  "payPage": {
-    "header": {
-      "title": "Get Started with Pro",
-      "subtitle": "Purchase now and create your account later"
-    },
-    "billing": {
-      "monthly": "Monthly",
-      "yearly": "Yearly"
-    },
-    "pricing": {
-      "save": "Save {percentage}% ({amount})",
-      "planTitle": "Pro Plan",
-      "planDescription": "Everything your union needs to manage grievances, members & advocacy.",
-      "month": "month",
-      "year": "year",
-      "billedAnnually": "Billed annually"
-    },
-    "form": {
-      "emailLabel": "Email address",
-      "emailPlaceholder": "your@email.com"
-    },
-    "actions": {
-      "processing": "Processing...",
-      "upgrade": "Upgrade to Pro"
-    },
-    "benefits": {
-      "title": "Benefits",
-      "aiCredits": "1,000 AI credits per billing cycle",
-      "aiTriage": "Reviewer-assisted case triage & drafting under entitlement governance",
-      "precedentResearch": "Precedent research & CBA extraction",
-      "claimsToolkit": "Full claims & arbitration toolkit",
-      "teamCollaboration": "Multi-role team collaboration",
-      "prioritySupport": "Priority support from labour specialists"
-    },
-    "errors": {
-      "invalidEmail": "Please enter a valid email address",
-      "checkoutFailed": "Failed to create checkout. Please try again.",
-      "untrustedCheckoutUrl": "Untrusted checkout URL",
-      "unexpected": "An unexpected error occurred. Please try again."
-    },
-    "footer": {
-      "disclaimer": "By proceeding, you'll be able to create your account after checkout. Your purchase will be linked to your email address."
-    }
-  },
   "compliancePage": {
     "header": {
       "title": "Employer Compliance Dashboard",
@@ -4014,6 +3917,7 @@
     }
   },
   "distributionListsPage": {
+    "onThisPage": "on this page",
     "errors": {
       "fetchFailed": "Failed to fetch distribution lists"
     },
@@ -4500,7 +4404,9 @@
     "languages": {
       "en": "English",
       "fr": "Français",
-      "es": "Español"
+      "es": "Español",
+      "it": "Italian",
+      "pt": "Portuguese"
     },
     "months": {
       "january": "January",
@@ -4692,6 +4598,11 @@
     "noActiveVotesMessage": "Check back later for upcoming votes and ballots.",
     "noUpcomingVotes": "No Upcoming Votes",
     "noUpcomingVotesMessage": "Stay tuned for scheduled votes.",
+    "paused": "Paused",
+    "cancelled": "Cancelled",
+    "castYourVote": "Cast Your Vote",
+    "resultsWithheld": "Results are released by the election officer after the vote closes.",
+    "voteStatusUnknown": "We could not confirm whether you have already voted in this ballot, so voting is not offered until that can be checked.",
     "ballotBuilder": {
       "title": "Ballot Configuration",
       "ballotTitle": "Ballot Title",
@@ -5529,7 +5440,7 @@
     "noOrgMessage": "Please select an organization to view incident data.",
     "noOrgSelected": "No Organization Selected",
     "pageSubtitle": "Track and manage workplace safety incidents",
-    "pageTitle": "Incident Continuity Restoration",
+    "pageTitle": "Workplace Incidents",
     "reportIncidentButton": "Report Incident",
     "reported": "Reported",
     "resolved": "Resolved",
@@ -5538,6 +5449,7 @@
     "severityPlaceholder": "Severity",
     "statusPlaceholder": "Status",
     "thisPeriod": "This period",
+    "totalIncidents": "Total Incidents",
     "trendsTab": "Trends",
     "underInvestigation": "Under Investigation"
   },
@@ -5769,6 +5681,10 @@
     "createdDateLabel": "Created {date}",
     "priorityLabel": "{priority} priority",
     "unknownBadge": "Unknown",
+    "loadFailedTitle": "Member details could not be loaded",
+    "retryButton": "Retry",
+    "claimsLoadFailed": "Claims could not be loaded",
+    "noClaimNumber": "No claim number",
     "role": {
       "member": "Member",
       "steward": "Steward",
@@ -5809,6 +5725,7 @@
     "keyIssuesLabel": "Key Issues"
   },
   "communicationsCampaignsPage": {
+    "onThisPage": "on this page",
     "title": "Campaigns",
     "subtitle": "Manage and track your communication campaigns",
     "failedToFetchCampaigns": "Failed to fetch campaigns",
@@ -5860,9 +5777,9 @@
       "multi_channel": "Multi-Channel"
     },
     "type": {
-      "campaign": "Campaign",
-      "announcement": "Announcement",
-      "alert": "Alert",
+      "broadcast": "Broadcast",
+      "sequence": "Sequence",
+      "triggered": "Triggered",
       "transactional": "Transactional"
     }
   },
@@ -5874,31 +5791,26 @@
     "descriptionLabel": "Description",
     "campaignDescriptionPlaceholder": "Brief description of this campaign",
     "campaignTypeLabel": "Campaign Type",
-    "typeOptionCampaign": "Campaign - Regular marketing or organizing campaign",
-    "typeOptionAnnouncement": "Announcement - Important news or updates",
-    "typeOptionAlert": "Alert - Urgent or time-sensitive information",
-    "typeOptionTransactional": "Transactional - Response to user action",
+    "typeOptionBroadcast": "Broadcast - A message sent once to an audience",
+    "typeOptionTransactional": "Transactional - A system notice, such as a dues reminder",
     "channelLabel": "Channel",
     "channelOptionEmail": "Email",
     "channelOptionSms": "SMS",
     "channelOptionPush": "Push Notification",
     "channelOptionMulti": "Multi-Channel (Email + SMS + Push)",
     "selectAudienceTitle": "Select Audience",
-    "selectAudienceDescription": "Choose who will receive this campaign",
-    "segmentIntegrationNote": "Segment selection will be integrated with the member database. For now, the campaign will target all eligible members.",
+    "selectAudienceDescription": "Choose the saved member segment this campaign is meant for",
     "segmentLabel": "Segment (Optional)",
     "selectSegmentPlaceholder": "Select a segment",
-    "segmentOptionAll": "All Members",
-    "segmentOptionActive": "Active Members",
-    "segmentOptionInactive": "Inactive Members",
-    "segmentOptionNew": "New Members (Last 30 Days)",
-    "estimatedAudienceLabel": "Estimated Audience",
-    "testModeLabel": "Test mode (send to admins only)",
+    "segmentOptionNone": "No segment (audience not set)",
+    "segmentsLoadError": "The saved member segments could not be loaded",
+    "segmentsNone": "This organization has no saved member segments yet, so the draft is saved without an audience.",
     "campaignContentTitle": "Campaign Content",
     "campaignContentDescription": "Choose a template or write custom content",
     "templateLabel": "Template (Optional)",
     "selectTemplatePlaceholder": "Select a template",
     "customContentOption": "Custom Content",
+    "templatesNone": "No templates exist for this channel yet.",
     "subjectLineLabel": "Subject Line",
     "subjectLinePlaceholder": "Enter email subject",
     "messageLabel": "Message",
@@ -5907,25 +5819,20 @@
     "charactersLabel": "characters",
     "trackOpensLabel": "Track email opens",
     "trackClicksLabel": "Track link clicks",
-    "scheduleCampaignTitle": "Schedule Campaign",
-    "scheduleCampaignDescription": "Choose when to send your campaign",
-    "sendNowOption": "Send immediately after creation",
-    "scheduleForLaterOption": "Schedule for later",
-    "scheduleDateTimeLabel": "Schedule Date & Time",
     "reviewCampaignTitle": "Review Campaign",
-    "reviewCampaignDescription": "Review your campaign details before sending",
+    "reviewCampaignDescription": "Review your campaign details before saving the draft",
     "campaignInformationLabel": "Campaign Information",
     "nameLabel": "Name",
     "typeLabel": "Type",
     "contentLabel": "Content",
     "subjectLabel": "Subject",
-    "scheduleLabel": "Schedule",
-    "sendImmediatelyLabel": "Send immediately",
-    "scheduledForLabel": "Scheduled for",
-    "testModeDescription": "This campaign will only be sent to administrators.",
+    "audienceLabel": "Audience",
+    "audienceNotSet": "Not set",
+    "sendingLabel": "Sending",
     "backToCampaignsButton": "Back to Campaigns",
     "createCampaignTitle": "Create New Campaign",
-    "createCampaignDescription": "Follow the steps to create and launch your campaign",
+    "createCampaignDescription": "Follow the steps to save a campaign draft",
+    "draftNotice": "Campaigns are saved as drafts. Nothing is sent in this release.",
     "fetchTemplatesError": "Failed to fetch templates",
     "previousButton": "Previous",
     "nextButton": "Next",
@@ -5933,12 +5840,12 @@
     "stepBasicInfo": "Basic Info",
     "stepContent": "Content",
     "stepReview": "Review",
-    "stepSchedule": "Schedule",
-    "creatingStatus": "Creating...",
-    "createCampaignButton": "Create Campaign",
+    "creatingStatus": "Saving...",
+    "createCampaignButton": "Save Draft",
     "createCampaignError": "Failed to create campaign"
   },
   "communicationsTemplatesPage": {
+    "onThisPage": "on this page",
     "title": "Message Templates",
     "subtitle": "Create and manage reusable templates for your campaigns",
     "failedToFetchTemplates": "Failed to fetch templates",
@@ -7513,10 +7420,6 @@
     "pricing": {
       "heroHeading": "Organizational Modernization Programs",
       "heroDescription": "UnionEyes is packaged as a consultative modernization program aligned to governance complexity, organizational scope, and continuity outcomes.",
-      "monthly": "Monthly",
-      "yearly": "Yearly",
-      "perMonth": "/ month",
-      "perYear": "/ year",
       "getStarted": "Start a review",
       "pageTitle": "Organizational Modernization Programs | UnionEyes",
       "pageDescription": "Program-based commercial packaging for governance modernization, continuity resilience, and operational trust infrastructure."
@@ -8895,8 +8798,10 @@
       "filterPending": "Pending",
       "noResultsSearch": "No members match your search",
       "noResultsEmpty": "No members found",
-      "offlineBanner": "Offline mode - viewing cached data",
-      "unsyncedCount": "{count}"
+      "offlineBanner": "You are offline. The member list cannot be refreshed.",
+      "loadFailed": "Members could not be loaded.",
+      "showing": "Showing {shown} of {total} members",
+      "loadMore": "Load more"
     },
     "claims": {
       "title": "Claims",
@@ -9045,51 +8950,6 @@
       "assignButton": "Assign"
     }
   },
-  "billing": {
-    "upgradePlan": {
-      "title": "Upgrade to Pro",
-      "subtitle": "You've used all your credits ({used}/{total}). Get more with Pro.",
-      "monthly": "Monthly",
-      "yearly": "Yearly",
-      "save33": "Save 33%",
-      "monthlyPrice": "$30",
-      "yearlyPrice": "$249",
-      "yearlyPriceMonthly": "$20",
-      "perMonth": "/month",
-      "billedAnnually": "Billed annually at {price}",
-      "billedMonthly": "Billed monthly, cancel anytime",
-      "benefit1": "1,000 AI credits per billing cycle",
-      "benefit2": "Reviewer-assisted grievance triage & drafting",
-      "benefit3": "Precedent research & CBA extraction",
-      "benefit4": "Priority support from labour specialists",
-      "configError": "Configuration issue detected. Please visit the pricing page to complete your purchase.",
-      "checkoutFailed": "Failed to create checkout. Please try again later.",
-      "checkoutFailedRetry": "Failed to create checkout. Please try again.",
-      "untrustedUrl": "Untrusted checkout URL",
-      "unexpectedError": "An unexpected error occurred. Please try again later.",
-      "getProYearly": "Get Pro Yearly",
-      "getProMonthly": "Get Pro Monthly",
-      "processing": "Processing...",
-      "nextFreeRenewal": "Next free renewal",
-      "close": "Close"
-    },
-    "paymentSuccess": {
-      "title": "Payment Successful!",
-      "subtitleYearly": "Thank you for upgrading to Pro Yearly",
-      "subtitleMonthly": "Thank you for upgrading to Pro Monthly",
-      "planActive": "Your Pro Plan is Active!",
-      "refresh": "Refresh",
-      "credits": "Credits",
-      "creditsRenewOn": "Credits renew on",
-      "notAvailable": "N/A",
-      "planIncludes": "Your Pro Plan Includes:",
-      "benefit1": "{count} credits every billing cycle",
-      "benefit2": "Access to all premium features",
-      "benefit3": "Priority support",
-      "benefit4": "Advanced analytics and exports",
-      "closeLabel": "Get Started with Pro"
-    }
-  },
   "unionStructure": {
     "bargainingUnits": {
       "title": "Bargaining Units",
@@ -9186,29 +9046,6 @@
       "tabCommittees": "Committees",
       "orgStructureTitle": "Organizational Structure",
       "orgStructureDescription": "Visual representation of your union's organizational hierarchy"
-    }
-  },
-  "onboarding": {
-    "welcome": {
-      "title": "Welcome!",
-      "subtitle": "Thanks for joining! We're excited to have you here.",
-      "freePlanActive": "Your Free Plan is Active!",
-      "proPlanActive": "Your Pro Plan is Active!",
-      "credits": "Credits",
-      "nextRenewal": "Next renewal",
-      "freePlanIncludes": "Your Free Plan Includes:",
-      "proPlanIncludes": "Your Pro Plan Includes:",
-      "freeBenefit1": "{count} free credits every {period}",
-      "freeBenefit2": "Access to basic features",
-      "freeBenefit3": "Automatic credit renewals",
-      "freeBenefit4": "Upgrade to Pro anytime for more credits",
-      "proBenefit1": "{count} credits every billing cycle",
-      "proBenefit2": "Access to all premium features",
-      "proBenefit3": "Priority support",
-      "proBenefit4": "Advanced analytics",
-      "getStarted": "Let's Get Started",
-      "viewProPlans": "View Pro Plans",
-      "closeLabel": "Close welcome message"
     }
   },
   "platform": {
@@ -9586,6 +9423,13 @@
     "runBenchmark": "Run Benchmark",
     "computing": "Computing benchmark...",
     "errorLoad": "Failed to compute benchmark",
+    "errorSave": "Failed to save the snapshot",
+    "errorHistory": "Failed to load the snapshot history",
+    "comparability": {
+      "exact": "Exact",
+      "approximate": "Approximate",
+      "insufficient_confidence": "Low confidence"
+    },
     "summary": {
       "comparables": "Comparables",
       "wageP25": "Wage P25",
@@ -9629,11 +9473,11 @@
       "allReviews": "All reviews"
     },
     "reviewStatuses": {
-      "pending": "Pending",
+      "pending_review": "Pending review",
       "approved": "Approved",
       "rejected": "Rejected",
-      "needs_revision": "Needs revision",
-      "auto_approved": "Auto approved"
+      "needs_followup": "Needs follow-up",
+      "superseded": "Superseded"
     },
     "table": {
       "agreement": "Agreement",
@@ -9682,8 +9526,9 @@
         "confidence": "Confidence",
         "review": "Review"
       }
-    },
-    "vendorList": {
+    }
+  },
+  "vendorList": {
       "title": "Vendors",
       "description": "Manage vendor/supplier directory",
       "addVendor": "Add Vendor",
@@ -9944,6 +9789,9 @@
       "loading": "Loading notes...",
       "empty": "No session notes yet",
       "emptyHint": "Add notes from bargaining sessions to track discussions",
+      "loadFailed": "Session notes could not be loaded.",
+      "noAgreement": "This negotiation has no linked agreement, so there are no session notes to show.",
+      "showing": "Showing the {shown} most recent of {total} notes",
       "attendees": "{count} attendees",
       "view": "View",
       "sessionTypes": {
@@ -10117,6 +9965,7 @@
       },
       "fallbackName": "Staff",
       "defaultOrgName": "Canadian Labour Congress",
+    "loadFailed": "The affiliated organizations could not be loaded.",
       "subtitle": "National Operations",
       "kpis": {
         "affiliates": {
@@ -10205,6 +10054,7 @@
       },
       "fallbackName": "Staff",
       "defaultProvince": "Provincial Federation",
+    "loadFailed": "The affiliated locals could not be loaded.",
       "subtitle": "Federation Operations",
       "kpis": {
         "locals": {
@@ -10345,8 +10195,7 @@
         "title": "Precedent Matches by Jurisdiction",
         "description": "Distribution of precedent matches across labor jurisdictions"
       }
-    }
-  },
+    },
   "analyticsDashboard": {
     "title": "Analytics Dashboard",
     "subtitle": "Monitor key metrics and insights for your organization",
@@ -10390,6 +10239,7 @@
     },
     "confidence": "confidence",
     "anomaliesDetected": "{count} anomalies detected",
+    "noTrends": "No trend analyses have been computed for your organization yet.",
     "viewDetails": "View Details",
     "noFlagsFound": "No flags found"
   },
@@ -11502,7 +11352,6 @@
     "text17": "For more information, please read our",
     "text18": "Privacy Policy",
     "text19": "and",
-    "text20": "Cookie Policy",
     "text21": "Save Preferences",
     "text22": "session_id - Maintains your login session",
     "text23": "csrf_token - Protects against security attacks",
@@ -11530,7 +11379,9 @@
     "casesLoadError": "Your cases could not be loaded.",
     "noActiveCases": "You have no active cases.",
     "openCase": "Open a representation case",
-    "openMessages": "Go to Messages"
+    "openMessages": "Go to Messages",
+    "markAllReadError": "Your notifications could not be marked as read.",
+    "notificationsShowing": "Showing {shown} of {total} unread notifications."
   },
   "memberMessages": {
     "title": "Messages",
@@ -11569,6 +11420,7 @@
     "replyPlaceholder": "Write a reply",
     "closedNotice": "This conversation is closed. Start a new conversation to contact your union.",
     "privacySubject": "Privacy request",
+    "refreshError": "Your conversations could not be refreshed. What you see may be out of date.",
     "loading": "Loading…",
     "messagesLabel": "Messages in this conversation",
     "actionsLabel": "Conversation actions",
@@ -11597,6 +11449,7 @@
     "queueTitle": "Waiting for assignment",
     "queueDenied": "The assignment queue is available only while an administrator has granted you a triage designation. You do not currently hold one.",
     "queueLoadError": "The queue could not be loaded.",
+    "refreshError": "The queue or your conversations could not be refreshed. What you see may be out of date.",
     "queueEmptyTitle": "Nothing is waiting",
     "queueEmptyBody": "New member conversations appear here until someone is assigned.",
     "queueMetadataNote": "You see the subject, category and priority only. The messages and the member stay private until the conversation is assigned.",

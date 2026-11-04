@@ -27,7 +27,6 @@ import { requireEntitlement } from '@/services/platform-economics/entitlement-gu
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
-import { recordUsage } from '@/services/platform-economics';
 import { randomBytes } from 'crypto';
 
 // ── Validation ──────────────────────────────────────────────────────────────
@@ -244,15 +243,6 @@ export const POST = withOrganizationAuth(async (request, context) => {
           source: 'grievances_api',
         },
       });
-
-      await recordUsage({
-        meterCode: 'case_created',
-        organizationId,
-        userId,
-        quantity: 1,
-        idempotencyKey: `usage:case_created:${grievance.id}`,
-        metadata: { grievanceId: grievance.id, source: 'grievances_api' },
-      }).catch((err) => logger.warn('Usage meter write skipped', { error: String(err), meterCode: 'case_created' }));
     }
 
     return standardSuccessResponse(grievance);

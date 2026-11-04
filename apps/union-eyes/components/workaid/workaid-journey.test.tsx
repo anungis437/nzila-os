@@ -74,7 +74,7 @@ describe('WorkAidJourney', () => {
   it('refuses a staff referral that the server denies and does not show a recorded referral', async () => {
     vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
       if ((init?.method ?? 'GET') === 'GET') {
-        return Response.json({ success: true, referable: [{ matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary'], purpose: 'wage review', expiresAt: '2027-01-01T00:00:00.000Z' }] })
+        return Response.json({ success: true, referable: [{ matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary'], purpose: 'wage review', expiresAt: '2027-01-01T00:00:00.000Z' }], recorded: [] })
       }
       return Response.json({ success: false, error: 'DENIED', code: 'RECUSAL_REQUIRED' }, { status: 403 })
     }))
@@ -90,7 +90,7 @@ describe('WorkAidJourney', () => {
   it('records a referral only when the server says nothing was delivered to counsel', async () => {
     const row = { matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary'], purpose: 'wage review', expiresAt: '2027-01-01T00:00:00.000Z' }
     vi.stubGlobal('fetch', vi.fn(async (_url: string, init?: RequestInit) => {
-      if ((init?.method ?? 'GET') === 'GET') return Response.json({ success: true, referable: [row] })
+      if ((init?.method ?? 'GET') === 'GET') return Response.json({ success: true, referable: [row], recorded: [] })
       return Response.json({ success: true, delivered: false, counselAcknowledged: false }, { status: 201 })
     }))
     renderJourney('staff')

@@ -175,8 +175,9 @@ export async function register() {
         logger.warn(pilotDemoRuntime.startupMessage, { runtimeMode: pilotDemoRuntime.runtimeMode });
       }
 
-      // Run database startup checks (optional, can be disabled with env var)
-      if (process.env.SKIP_DB_STARTUP_CHECK !== 'true') {
+      // Run the database startup checks. Only a developer's machine or a test run may skip them (SKIP_DB_STARTUP_CHECK); a deployment always checks.
+      const { skipsDatabaseStartupCheck } = await import('./lib/runtime/startup-checks');
+      if (!skipsDatabaseStartupCheck()) {
         const { runDatabaseStartupChecks } = await import('./lib/db-validator');
         const dbValidation = await runDatabaseStartupChecks();
         

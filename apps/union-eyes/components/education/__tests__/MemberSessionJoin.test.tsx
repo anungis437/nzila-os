@@ -66,3 +66,39 @@ describe('member registration-scoped virtual joining', () => {
     expect(screen.queryByRole('link')).toBeNull();
   });
 });
+
+describe('what the member is told when joining details are not shown', () => {
+  const UNAVAILABLE = /unavailable\. Confirm your registration or contact your union/;
+  const FAILED = /could not be loaded\. Try again in a moment/;
+  const refused = (status: number) => ({ ok: false, status, json: async () => ({ code: 'NOT_FOUND', message: 'Session joining instructions unavailable' }) });
+
+  async function ask(reply: unknown) {
+    cleanup();
+    if (reply instanceof Error) vi.mocked(fetch).mockRejectedValueOnce(reply);
+    else vi.mocked(fetch).mockResolvedValueOnce(reply as Response);
+    render(<MemberSessionJoin sessionId={sessionId} />);
+    fireEvent.click(screen.getByRole('button', { name: /get virtual joining details/i }));
+    return waitFor(() => screen.getByRole('alert'));
+  }
+
+  it('blames the registration only when the route says joining is unavailable (404) or not allowed (403)', async () => {
+    expect((await ask(refused(404))).textContent).toMatch(UNAVAILABLE);
+    expect((await ask(refused(403))).textContent).toMatch(UNAVAILABLE);
+  });
+
+  it('says the request failed, not that the registration is wrong, for a server fault, a network failure or an answer that is not the envelope', async () => {
+    expect((await ask(refused(500))).textContent).toMatch(FAILED);
+    expect((await ask(refused(503))).textContent).toMatch(FAILED);
+    expect((await ask(new TypeError('Failed to fetch'))).textContent).toMatch(FAILED);
+    expect((await ask({ ok: true, json: async () => { throw new SyntaxError('Unexpected token <'); } })).textContent).toMatch(FAILED);
+    expect((await ask({ ok: true, json: async () => ({ data: valid }) })).textContent).toMatch(FAILED);
+  });
+
+  it('says joining is unavailable for details of another session or an address that is not plain https, and shows neither', async () => {
+    for (const reply of [response({ ...valid, sessionId: 'foreign' }), response({ ...valid, joinUrl: 'http://meeting.example.test/' })]) {
+      expect((await ask(reply)).textContent).toMatch(UNAVAILABLE);
+      expect(screen.queryByRole('link')).toBeNull();
+      expect(screen.queryByText('SECRET')).toBeNull();
+    }
+  });
+});

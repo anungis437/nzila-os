@@ -93,33 +93,35 @@ export default function JobClassificationManagement({
   organizationId, 
   bargainingUnitId 
 }: JobClassificationManagementProps) {
-  const { toast } = useToast();
   const [classifications, setClassifications] = useState<JobClassification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClassification, setEditingClassification] = useState<JobClassification | null>(null);
   const [activeOnly, setActiveOnly] = useState(true);
 
   const loadClassifications = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const result = await getJobClassificationsByOrganizationAction(organizationId, activeOnly);
-      if (result.isSuccess && Array.isArray(result.data)) {
-        const filtered = bargainingUnitId 
-          ? result.data.filter((c: JobClassification) => c.bargainingUnitId === bargainingUnitId)
-          : result.data;
-        setClassifications(filtered);
+      if (!result.isSuccess || !Array.isArray(result.data)) {
+        // A failed read is not "no classifications": show the failure, and nothing of the previous list.
+        setClassifications([]);
+        setLoadError(result.message || "Failed to load classifications");
+        return;
       }
+      const filtered = bargainingUnitId
+        ? result.data.filter((c: JobClassification) => c.bargainingUnitId === bargainingUnitId)
+        : result.data;
+      setClassifications(filtered);
     } catch {
-      toast({
-        title: "Error",
-        description: "Failed to load classifications",
-        variant: "destructive",
-      });
+      setClassifications([]);
+      setLoadError("Failed to load classifications");
     } finally {
       setLoading(false);
     }
-  }, [organizationId, activeOnly, bargainingUnitId, toast]);
+  }, [organizationId, activeOnly, bargainingUnitId]);
 
   useEffect(() => {
     loadClassifications();
@@ -181,12 +183,19 @@ export default function JobClassificationManagement({
       <Card>
         <CardHeader>
           <CardTitle>Classifications</CardTitle>
-          <CardDescription>{classifications.length} total records</CardDescription>
+          <CardDescription>{loadError ? "Classifications could not be loaded" : `${classifications.length} total records`}</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : loadError ? (
+            <div role="alert" className="text-center py-8 space-y-3">
+              <p className="text-destructive">{loadError}</p>
+              <Button variant="outline" onClick={() => loadClassifications()}>
+                Try again
+              </Button>
             </div>
           ) : classifications.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">

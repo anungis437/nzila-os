@@ -29,7 +29,9 @@ async function authorize(context: { organizationId: string; userId: string }, id
   await requireEntitlement(context.organizationId, 'grievance_case_suite');
   if (!(await hasMinRole('member'))) return { error: standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized'), ctx: undefined, access: undefined } as const;
   if (!id || !isDocumentId(id)) return { error: standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document ID'), ctx: undefined, access: undefined } as const;
-  const ctx = await loadDocumentAuthorityContext({ organizationId: context.organizationId, userId: context.userId, documentId: id });
+  const ctx = await withRLSContext({ organizationId: context.organizationId }, (tx) =>
+    loadDocumentAuthorityContext(tx, { organizationId: context.organizationId, userId: context.userId, documentId: id }),
+  );
   // A document the principal cannot read is indistinguishable from one that does not exist.
   if (!ctx) return { error: standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found'), ctx: undefined, access: undefined } as const;
   const access = decideTranscriptAccess(ctx, context.userId);

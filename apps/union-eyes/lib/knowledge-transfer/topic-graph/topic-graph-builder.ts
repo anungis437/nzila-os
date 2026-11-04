@@ -14,7 +14,7 @@
 
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
-import { db } from '@/db/db';
+import { inOrganization } from '../org-scope';
 import { exitInterviews } from '@/db/schema';
 
 export interface TopicNode {
@@ -71,16 +71,19 @@ export function categorize(tag: string): string {
 }
 
 export async function buildTopicGraph(orgId: string): Promise<TopicGraph> {
-  const interviews = await db
-    .select({
-      id: exitInterviews.id,
-      roleInUnion: exitInterviews.roleInUnion,
-      topics: exitInterviews.topics,
-      expertiseTags: exitInterviews.expertiseTags,
-    })
-    .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId))
-    .limit(INTERVIEW_READ_LIMIT);
+  // Read as the runtime role in the organization's own tenant transaction.
+  const interviews = await inOrganization(orgId, (tx) =>
+    tx
+      .select({
+        id: exitInterviews.id,
+        roleInUnion: exitInterviews.roleInUnion,
+        topics: exitInterviews.topics,
+        expertiseTags: exitInterviews.expertiseTags,
+      })
+      .from(exitInterviews)
+      .where(derivedAnalyticsCondition(orgId))
+      .limit(INTERVIEW_READ_LIMIT),
+  );
 
   // Build frequency map
   const nodeMap = new Map<

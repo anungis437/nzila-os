@@ -51,10 +51,11 @@ export const GET = withApi(
         await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived' AND incident_date >= ${prevStart}::timestamptz AND incident_date < ${startDate}::timestamptz`)
       );
       const prevIncidents = Number((prevRows[0] as Record<string, unknown>)?.cnt ?? 0);
+      // With no incident in the previous window there is no percentage to give: the change is unknown (null), not 0%. The direction is still known.
       const incidentChange = prevIncidents > 0
         ? Math.round(((totalIncidents - prevIncidents) / prevIncidents) * 100)
-        : 0;
-      const incidentTrend = incidentChange > 0 ? 'up' : incidentChange < 0 ? 'down' : 'stable';
+        : null;
+      const incidentTrend = totalIncidents > prevIncidents ? 'up' : totalIncidents < prevIncidents ? 'down' : 'stable';
 
       const hazardRows = Array.from(
         await tx.execute(sql`SELECT count(*)::int AS cnt FROM hazard_reports WHERE ${orgFilter} AND (status IS NULL OR status NOT IN ('resolved','closed','archived'))`)

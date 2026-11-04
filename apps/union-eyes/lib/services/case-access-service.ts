@@ -13,7 +13,8 @@ import { and, eq } from 'drizzle-orm'
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
 import { grievances } from '@/db/schema/domains/claims/grievances'
 import type { CaseAccessRole } from '@/db/schema/domains/claims/grievance-lifecycle'
-import { AuthorityStoreError } from '@/lib/authority/store/executor'
+import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding'
+import { AuthorityStoreError, isUuid } from '@/lib/authority/store/executor'
 import { assignCase, reassignCase, revokeCaseAssignment } from '@/lib/authority/store/lifecycle'
 import { decideCase, drizzleExecutor, kernelDeps } from '@/lib/authority/store/route-adapter'
 import type { Action } from '@/lib/authority/ontology'
@@ -200,15 +201,32 @@ export async function kernelCaseAccess(
   }
 }
 
+/**
+ * Refusals that say the principal has no standing with the case or its organization: the absence of access, not a fault. Anything else
+ * (the database, the connection, a missing session) is a fault and must reach the caller as one, never as "you have no access".
+ */
+const AUTHORITY_REFUSALS: ReadonlySet<AuthorityStoreError['code']> = new Set(['NOT_FOUND', 'DENIED'])
+const BINDING_REFUSALS: ReadonlySet<AuthOrgBindingError['code']> = new Set(['MEMBERSHIP_REQUIRED', 'ROLE_REQUIRED', 'INVALID_ORGANIZATION', 'ACTOR_MISMATCH'])
+
+function isNoRelationship(error: unknown): boolean {
+  return (
+    (error instanceof AuthorityStoreError && AUTHORITY_REFUSALS.has(error.code)) ||
+    (error instanceof AuthOrgBindingError && BINDING_REFUSALS.has(error.code))
+  )
+}
+
 export async function getEffectiveCaseAccess(params: {
   organizationId: string
   grievanceId: string
   userId: string
 }): Promise<EffectiveCaseAccess> {
+  // A case is named by a uuid. Anything else names no case, so nobody has access to it and there is nothing to look up.
+  if (!isUuid(params.grievanceId) || !isUuid(params.organizationId)) return NO_ACCESS
   try {
     return await withRLSContext({ organizationId: params.organizationId }, (tx) => kernelCaseAccess(tx, params))
-  } catch {
-    return NO_ACCESS
+  } catch (error) {
+    if (isNoRelationship(error)) return NO_ACCESS
+    throw error
   }
 }
 

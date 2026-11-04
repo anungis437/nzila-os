@@ -82,7 +82,6 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/api/rights/terms/')  // Public rights/terms routes (terms, agreement)
     || normalized.includes('/cron/')  // cron routes use CRON_SECRET bearer auth
     || normalized.includes('/webhook')  // webhook routes use signature verification (Stripe, PayPal, Shopify, Zoho, etc.)
-    || normalized.includes('/api/whop/')  // Whop payment routes (intentionally unauthenticated checkout)
     || normalized.includes('/api/quote/')  // Quote response via share token (no auth, token-validated)
     || normalized.includes('/api/healthcare/surveys/responses')  // Anonymous survey response via share token (no user auth, token-validated)
     || normalized.includes('/api/contact/')  // Public contact/demo-request form (marketing)

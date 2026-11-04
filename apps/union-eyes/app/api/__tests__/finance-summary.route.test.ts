@@ -129,7 +129,7 @@ describe('finance/summary route', () => {
     expect(payload.totalCharged).toBe(0);
     expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
     const uiSource = readFileSync(resolve(__dirname, '../../../components/financial/FinancialOverview.tsx'), 'utf8');
-    expect(uiSource).toContain("value={executive?.collectionRate == null ? 'N/A'");
+    expect(uiSource).toContain("value={executive?.collectionRate == null ? '—'");
     expect(uiSource).toContain("No dues charges recorded");
   });
 

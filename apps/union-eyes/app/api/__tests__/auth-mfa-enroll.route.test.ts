@@ -15,12 +15,18 @@ const m = vi.hoisted(() => {
     state,
     auth: vi.fn(),
     enrollMfa: vi.fn(),
-    db: { select: vi.fn(() => createSelectChain()) },
+    authDb: { select: vi.fn(() => createSelectChain()) },
+    withAuthenticatedAuthContext: vi.fn(async (_userId: string, callback: () => Promise<unknown>) => callback()),
   };
 });
 
 vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth }));
-vi.mock('@/db/db', () => ({ db: m.db }));
+// The ambient handle must never be used: the identity row is read through the auth execution boundary.
+vi.mock('@/db/db', () => ({ db: new Proxy({}, { get() { throw new Error('ambient db used outside a context'); } }) }));
+vi.mock('@nzila/platform-auth/auth-execution', () => ({
+  authDb: m.authDb,
+  withAuthenticatedAuthContext: m.withAuthenticatedAuthContext,
+}));
 vi.mock('@nzila/platform-auth/mfa', () => ({ enrollMfa: m.enrollMfa }));
 vi.mock('@nzila/db/schema', () => ({ authUsers: { email: 'email', userId: 'userId' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -52,6 +58,7 @@ describe('auth/mfa/enroll route', () => {
     const response = await POST(new NextRequest('http://localhost/api/auth/mfa/enroll', { method: 'POST' }));
 
     expect(response.status).toBe(401);
+    expect(m.withAuthenticatedAuthContext).not.toHaveBeenCalled();
   });
 
   it('returns 404 when user record is missing', async () => {
@@ -61,6 +68,7 @@ describe('auth/mfa/enroll route', () => {
     const response = await POST(new NextRequest('http://localhost/api/auth/mfa/enroll', { method: 'POST' }));
 
     expect(response.status).toBe(404);
+    expect(m.enrollMfa).not.toHaveBeenCalled();
   });
 
   it('returns 409 when MFA enrollment fails', async () => {
@@ -82,5 +90,18 @@ describe('auth/mfa/enroll route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ otpAuthUri: 'otpauth://totp/demo', secret: 'secret_1', recoveryCodes: ['a', 'b'] });
+  });
+
+  it('reads the identity row inside the authenticated auth context of the session user, never through the ambient handle', async () => {
+    const { POST } = await loadRoute();
+    m.state.selectRows.push([{ email: 'u@example.com' }]);
+
+    const response = await POST(new NextRequest('http://localhost/api/auth/mfa/enroll', { method: 'POST' }));
+
+    expect(response.status).toBe(200);
+    expect(m.withAuthenticatedAuthContext).toHaveBeenCalledTimes(1);
+    expect(m.withAuthenticatedAuthContext).toHaveBeenCalledWith('user_1', expect.any(Function));
+    expect(m.authDb.select).toHaveBeenCalledTimes(1);
+    expect(m.enrollMfa).toHaveBeenCalledWith({ userId: 'user_1', userEmail: 'u@example.com', issuer: 'UnionEyes' });
   });
 });

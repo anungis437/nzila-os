@@ -48,4 +48,27 @@ describe('MemberProfile', () => {
     fireEvent.click(screen.getAllByRole('button')[0])
     expect(onSignOut).toHaveBeenCalledTimes(1)
   })
+
+  it('lists the pages that really manage something, as links, and nothing when none is given', () => {
+    render(
+      <NextIntlClientProvider locale="en-CA" messages={enCA}>
+        <MemberProfile
+          name="Staff"
+          email="staff@nzila.test"
+          phone=""
+          organization="UE QA Primary Local"
+          role="Steward"
+          onSignOut={vi.fn()}
+          manage={[
+            { href: '/en-CA/settings/mfa', title: 'Two-factor authentication', description: 'Protect your sign-in.' },
+          ]}
+        />
+      </NextIntlClientProvider>,
+    )
+    expect(screen.getByRole('link', { name: /Two-factor authentication/ })).toHaveAttribute('href', '/en-CA/settings/mfa')
+    expect(screen.queryAllByRole('textbox')).toHaveLength(0)
+    cleanup()
+    renderProfile('en-CA')
+    expect(screen.queryAllByRole('link')).toHaveLength(0)
+  })
 })

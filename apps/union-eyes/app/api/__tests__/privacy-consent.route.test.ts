@@ -8,11 +8,13 @@ const m = vi.hoisted(() => ({
   hasValidConsent: vi.fn(),
   revokeConsent: vi.fn(),
   persistAtomicAudit: vi.fn(),
+  logError: vi.fn(),
   tx: { marker: 'tx' },
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: m.requireApiAuth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/logger', () => ({ logger: { error: m.logError, warn: vi.fn(), info: vi.fn() } }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx)),
 }));
@@ -101,14 +103,56 @@ describe('privacy/consent route', () => {
     const { GET } = await loadRoute();
     const response = await GET(new NextRequest('http://localhost/api/privacy/consent'));
     expect(response.status).toBe(400);
+    expect(m.hasValidConsent).not.toHaveBeenCalled();
   });
 
-  it('GET returns consent lookup result', async () => {
+  it('GET returns 400, before any read, for a province that is not a province', async () => {
     const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/privacy/consent?province=ZZZ&consentType=marketing'));
+    expect(response.status).toBe(400);
+    expect(m.hasValidConsent).not.toHaveBeenCalled();
+  });
+
+  it('GET returns consent lookup result, read in the caller\'s tenant transaction', async () => {
+    const { GET } = await loadRoute();
+    const { withRLSContext } = await import('@/lib/db/with-rls-context');
     const response = await GET(new NextRequest('http://localhost/api/privacy/consent?province=QC&consentType=marketing'));
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.hasConsent).toBe(true);
+    expect(withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-1' }, expect.any(Function));
+    expect(m.hasValidConsent).toHaveBeenCalledWith('u1', 'QC', 'marketing', m.tx);
+  });
+
+  it('GET answers 500, not a negative consent, when the read fails', async () => {
+    const { GET } = await loadRoute();
+    m.hasValidConsent.mockRejectedValueOnce(new Error('connection reset'));
+    const response = await GET(new NextRequest('http://localhost/api/privacy/consent?province=QC&consentType=marketing'));
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: 'Failed to check consent' });
+    expect(m.logError).toHaveBeenCalled();
+  });
+
+  it('POST and DELETE answer 400 for a body that is not JSON, and 413 for one over the limit', async () => {
+    const { POST, DELETE } = await loadRoute();
+    const request = (method: string, body: string) =>
+      new NextRequest('http://localhost/api/privacy/consent', { method, headers: { 'content-type': 'application/json' }, body });
+    expect((await POST(request('POST', 'not-json'))).status).toBe(400);
+    expect((await DELETE(request('DELETE', 'not-json'))).status).toBe(400);
+    expect((await POST(request('POST', JSON.stringify({ padding: 'x'.repeat(20_000) })))).status).toBe(413);
+    expect(m.recordConsent).not.toHaveBeenCalled();
+    expect(m.revokeConsent).not.toHaveBeenCalled();
+  });
+
+  it('DELETE answers 400 for a province that is not a province or a missing consent type, and revokes nothing', async () => {
+    const { DELETE } = await loadRoute();
+    for (const body of [{ province: 'ZZZ', consentType: 'marketing' }, { province: 'QC' }, { consentType: 'marketing' }, {}]) {
+      const response = await DELETE(new NextRequest('http://localhost/api/privacy/consent', {
+        method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+      }));
+      expect(response.status).toBe(400);
+    }
+    expect(m.revokeConsent).not.toHaveBeenCalled();
   });
 
   it('DELETE revokes consent', async () => {

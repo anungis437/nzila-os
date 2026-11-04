@@ -8,6 +8,7 @@
 import { sql } from 'drizzle-orm'
 import { slaClockStart } from './sla-clock'
 import { inAppNotifications } from '@/db/schema'
+import { workbenchUrl } from '@/lib/notifications/links'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-lifecycle'
 import { toLifecycleState } from '@/lib/workflow/state-bridge'
@@ -113,8 +114,8 @@ export async function writeSlaAlerts(tx: RLSTx, organizationId: string, alerts: 
       ? `Case ${label(alert)} passed its service-level deadline ${Math.max(0.1, Math.abs(alert.hoursRemaining)).toFixed(1)} hours ago.`
       : `Case ${label(alert)} reaches its service-level deadline in ${alert.hoursRemaining.toFixed(1)} hours.`,
     type: alert.kind === 'breached' ? 'error' : 'warning',
-    actionLabel: 'Open case',
-    actionUrl: `/dashboard/cases/${encodeURIComponent(alert.claimId)}`,
+    actionLabel: 'Open workbench',
+    actionUrl: workbenchUrl(),
     data: { origin: 'system:sla-watchdog', dedupeKey: alertKey(alert), claimId: alert.claimId, deadline: alert.deadline.toISOString() },
   }))
   const inserted = await tx.insert(inAppNotifications).values(rows).onConflictDoNothing().returning({ id: inAppNotifications.id })

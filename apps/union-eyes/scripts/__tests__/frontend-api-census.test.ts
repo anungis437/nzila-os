@@ -55,6 +55,7 @@ describe('matching a URL to the route files', () => {
     { route: 'members/route.ts', methods: ['GET', 'POST'], guard: 'WITH_API' },
     { route: 'members/[id]/route.ts', methods: ['GET', 'PATCH', 'DELETE'], guard: 'CRUD_FACTORY' },
     { route: 'members/export/route.ts', methods: ['GET'], guard: 'RETIRED' },
+    { route: 'pension/trustees/route.ts', methods: ['GET', 'POST'], guard: 'WITH_API', retiredMethods: ['POST'] },
     { route: 'docs/[...path]/route.ts', methods: ['GET'], guard: 'WITH_API' },
     { route: 'route.ts', methods: ['GET'], guard: 'WITH_API' },
   ]
@@ -88,16 +89,23 @@ describe('matching a URL to the route files', () => {
     // The same segment, computed, could be a member id: a live route may serve it, so it is not called retired.
     expect(judge(`/api/members/${DYNAMIC}`, 'GET')).toBeNull()
   })
+
+  it('judges a file that serves live methods beside retired ones by the method asked', () => {
+    expect(judge('/api/pension/trustees', 'GET')).toBeNull()
+    expect(judge('/api/pension/trustees', 'POST')).toBe('CALLS_RETIRED')
+    // Without a method, one of them is live.
+    expect(judge('/api/pension/trustees', null)).toBeNull()
+  })
 })
 
-// What the frontend asks for that nothing serves. Each ceiling can only fall; the end is zero.
-const CEILING = { ROUTE_MISSING: 150, METHOD_MISSING: 20, CALLS_RETIRED: 75 } as const
+// What the frontend asks for that nothing serves. The ceilings are the end: zero.
+const CEILING = { ROUTE_MISSING: 0, METHOD_MISSING: 0, CALLS_RETIRED: 0 } as const
 
 describe('the frontend against the routes that exist', () => {
   it('holds every finding class at or below its ceiling', () => {
     const report = runCensus(APP_ROOT, loadRoutes(), false)
     expect(report.files).toBeGreaterThan(1000)
-    expect(report.calls).toBeGreaterThan(500)
+    expect(report.calls).toBeGreaterThan(400)
     const over = (Object.keys(CEILING) as Array<keyof typeof CEILING>)
       .filter((kind) => report.byKind[kind] > CEILING[kind])
       .map((kind) => `${kind}: ${report.byKind[kind]} > ${CEILING[kind]}\n${report.findings.filter((f) => f.kind === kind).map((f) => `  ${f.method ?? '*'} ${f.pattern.replace(/\u0001/g, '{}')}  ${f.sites[0].file}:${f.sites[0].line}`).join('\n')}`)

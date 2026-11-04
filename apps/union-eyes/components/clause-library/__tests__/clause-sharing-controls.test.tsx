@@ -71,4 +71,13 @@ describe('ClauseSharingControls: sharing levels', () => {
     expect(screen.queryByText(/all CLC member organizations/)).toBeNull();
     expect(screen.queryByText(/Privacy Notice/)).toBeNull();
   });
+
+  it('shows the refusal of a save and stays open, instead of closing as if it had been saved', async () => {
+    const onSave = vi.fn().mockRejectedValue(new Error('Sharing a clause with every organization requires an officer role'));
+    const onOpenChange = vi.fn();
+    render(<ClauseSharingControls open onOpenChange={onOpenChange} clauseId="clause-1" currentSettings={{ sharingLevel: 'private', isAnonymized: false }} onSave={onSave} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Save Settings' }));
+    expect(await screen.findByTestId('sharing-save-error')).toHaveTextContent('requires an officer role');
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  });
 });

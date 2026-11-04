@@ -1,35 +1,95 @@
 /**
  * Data Sharing Settings Page
- * 
- * Allows organizations to opt in/out of movement insights aggregation.
- * 
- * CONSENT MANAGEMENT:
- * - Explicit opt-in required
- * - Granular control over 5 data types
- * - Clear purpose statements
- * - Revocable anytime
- * - Full audit trail visible
+ *
+ * Read-only status of this organization's movement-insights consent. It reads data_aggregation_consent, the table the
+ * Movement Trends page reads.
+ *
+ * Consent cannot be granted or revoked from here. The application's runtime role may only SELECT that table and no
+ * route writes it. POST /api/consent writes consent_records, a different table the feature never reads, so a form
+ * posting there would report a consent that nothing acts on. The page says the action is unavailable and never claims
+ * a consent it did not read or a right the user cannot exercise.
  */
-
 
 export const dynamic = 'force-dynamic';
 
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { db } from '@/db';
-import { dataAggregationConsent } from '@/db/schema/domains/marketing';
-import { organizations } from '@/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle2, Info, XCircle } from 'lucide-react';
+import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Info, CheckCircle2, XCircle, History } from 'lucide-react';
-import { requireUser, getUserRole } from '@/lib/api-auth-guard';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getUserRole, requireUser } from '@/lib/api-auth-guard';
 import { canManageOrganizationSettings } from '@/lib/auth/org-settings-access';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import ConsentForm from '@/components/marketing/consent-form';
- 
-import RevokeConsentButton from '@/components/marketing/revoke-consent-button';
+import { movementTrendCategoryLabel } from '@/lib/movement-insights/category-labels';
+import { readOrganizationConsent } from '@/lib/movement-insights/consent-read';
+
+const GRANT_CAPABILITY = 'UE-MOVEMENT-INSIGHTS-CONSENT-GRANT';
+const REVOKE_CAPABILITY = 'UE-MOVEMENT-INSIGHTS-CONSENT-REVOCATION';
+
+const COPY = {
+  en: {
+    subtitle: 'Whether your organization has consented to contribute to movement-wide insights',
+    onRecordTitle: 'Consent on record',
+    onRecordDescription: 'Your organization has consented to contribute to movement insights.',
+    noneTitle: 'No consent on record',
+    noneDescription: 'Your organization has not consented to contribute to movement insights.',
+    consentDate: 'Date of consent',
+    expires: 'Expires on',
+    expired: 'Expired on',
+    categories: 'Categories covered',
+    noCategories: 'No categories are recorded with this consent.',
+    grantUnavailable:
+      'Recording your organization’s consent is not available in this release, so it cannot be given from this page. The status above is read directly from your organization’s record and has not been changed.',
+    revokeUnavailable:
+      'Withdrawing your organization’s consent is not available in this release, so it cannot be done from this page. The status above is read directly from your organization’s record and has not been changed.',
+    storedTitle: 'What movement insights are made of',
+    storedAggregates:
+      'Movement trends are stored as aggregates: a category, a dimension, a timeframe, a count, the number of contributing organizations and a summary text. A stored trend has no column for organization names or identifiers.',
+    storedScope: 'This page shows what is stored. It does not calculate the trends and does not check how they were produced.',
+    legalTitle: 'Legal notice',
+    legalLead: 'For how data is handled, see the',
+    legalAnd: 'and the',
+    privacy: 'Privacy Policy',
+    terms: 'Terms of Service',
+  },
+  fr: {
+    subtitle: 'Indique si votre organisation a consenti à contribuer aux analyses à l’échelle du mouvement',
+    onRecordTitle: 'Consentement enregistré',
+    onRecordDescription: 'Votre organisation a consenti à contribuer aux analyses du mouvement.',
+    noneTitle: 'Aucun consentement enregistré',
+    noneDescription: 'Votre organisation n’a pas consenti à contribuer aux analyses du mouvement.',
+    consentDate: 'Date du consentement',
+    expires: 'Expire le',
+    expired: 'Expiré le',
+    categories: 'Catégories visées',
+    noCategories: 'Aucune catégorie n’est enregistrée avec ce consentement.',
+    grantUnavailable:
+      'L’enregistrement du consentement de votre organisation n’est pas disponible dans cette version; il ne peut donc pas être donné depuis cette page. Le statut ci-dessus est lu directement dans le dossier de votre organisation et n’a pas été modifié.',
+    revokeUnavailable:
+      'Le retrait du consentement de votre organisation n’est pas disponible dans cette version; il ne peut donc pas être effectué depuis cette page. Le statut ci-dessus est lu directement dans le dossier de votre organisation et n’a pas été modifié.',
+    storedTitle: 'Ce qui compose les analyses du mouvement',
+    storedAggregates:
+      'Les tendances du mouvement sont conservées sous forme d’agrégats : une catégorie, une dimension, une période, un compte, le nombre d’organisations contributrices et un texte de synthèse. Une tendance conservée n’a aucune colonne pour le nom ou l’identifiant des organisations.',
+    storedScope: 'Cette page montre ce qui est conservé. Elle ne calcule pas les tendances et ne vérifie pas comment elles ont été produites.',
+    legalTitle: 'Avis juridique',
+    legalLead: 'Pour savoir comment les données sont traitées, consultez la',
+    legalAnd: 'et les',
+    privacy: 'Politique de confidentialité',
+    terms: 'Conditions d’utilisation',
+  },
+} as const;
+
+type Language = keyof typeof COPY;
+
+function formatDate(value: Date, language: Language): string {
+  return new Intl.DateTimeFormat(language === 'fr' ? 'fr-CA' : 'en-CA', { dateStyle: 'long', timeZone: 'UTC' }).format(value);
+}
+
+function hasPassed(value: Date): boolean {
+  return value.getTime() < Date.now();
+}
 
 interface DataSharingPageProps {
   params: Promise<{
@@ -38,12 +98,16 @@ interface DataSharingPageProps {
 }
 
 export default async function DataSharingPage({ params }: DataSharingPageProps) {
-  const t = await getTranslations('dataSharingPage');
   const { locale } = await params;
+  const t = await getTranslations('dataSharingPage');
+  const language: Language = locale.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+  const copy = COPY[language];
 
-  // Get user's organization
   const user = await requireUser();
-  const organizationId = user.organizationId ?? '';
+  const organizationId = user.organizationId;
+  if (!organizationId) {
+    redirect(`/${locale}/dashboard/profile`);
+  }
 
   // Organization data-sharing consent is an administrator decision.
   const role = await getUserRole(user.userId, organizationId);
@@ -51,317 +115,100 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
     redirect(`/${locale}/dashboard/profile`);
   }
 
-  const [_organization] = await db
-    .select()
-    .from(organizations)
-    .where(eq(organizations.id, organizationId))
-    .limit(1);
+  const consent = await readOrganizationConsent(organizationId);
 
-  // Get current consent status
-  const [consent] = await db
-    .select()
-    .from(dataAggregationConsent)
-    .where(
-      and(
-        eq(dataAggregationConsent.organizationId, organizationId),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        eq((dataAggregationConsent as any).status, 'active')
-      )
-    )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .limit(1) as any[];
-
-  // Get consent history
-  const consentHistory = await db
-    .select()
-    .from(dataAggregationConsent)
-    .where(eq(dataAggregationConsent.organizationId, organizationId))
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .orderBy(desc((dataAggregationConsent as any).createdAt))
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .limit(10) as any[];
-
-  const hasActiveConsent = consent !== undefined;
+  // A stored row whose consent_given is false records no consent, so it is shown the same way as no row.
+  const onRecord = consent?.consentGiven ? consent : null;
 
   return (
     <div className="container mx-auto py-8 max-w-4xl space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-4xl font-bold">{t('pageTitle')}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t('pageSubtitle')}
-        </p>
+        <p className="text-muted-foreground mt-2">{copy.subtitle}</p>
       </div>
 
-      {/* Current Status */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {hasActiveConsent ? (
+            {onRecord ? (
               <>
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
-                {t('sharingEnabledTitle')}
+                <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-green-600" />
+                {copy.onRecordTitle}
               </>
             ) : (
               <>
-                <XCircle className="h-5 w-5 text-gray-400" />
-                {t('sharingDisabledTitle')}
+                <XCircle aria-hidden="true" className="h-5 w-5 text-gray-400" />
+                {copy.noneTitle}
               </>
             )}
           </CardTitle>
-          <CardDescription>
-            {hasActiveConsent
-              ? t('sharingEnabledDescription')
-              : t('sharingDisabledDescription')}
-          </CardDescription>
+          <CardDescription>{onRecord ? copy.onRecordDescription : copy.noneDescription}</CardDescription>
         </CardHeader>
-        {consent && (
+        {onRecord && (
           <CardContent>
-            <div className="space-y-4">
-              {/* Current Preferences */}
+            <dl className="grid gap-4 text-sm sm:grid-cols-2">
               <div>
-                <h3 className="font-semibold mb-3">{t('sharingPreferencesTitle')}</h3>
-                <div className="grid gap-2">
-                  <PreferenceItem
-                    label={t('impactMetricsLabel')}
-                    description={t('impactMetricsDescription')}
-                    enabled={consent.preferences.shareImpactMetrics}
-                  />
-                  <PreferenceItem
-                    label={t('caseResolutionLabel')}
-                    description={t('caseResolutionDescription')}
-                    enabled={consent.preferences.shareCaseResolutionTimes}
-                  />
-                  <PreferenceItem
-                    label={t('demographicDataLabel')}
-                    description={t('demographicDataDescription')}
-                    enabled={consent.preferences.shareDemographicData}
-                  />
-                  <PreferenceItem
-                    label={t('industryInsightsLabel')}
-                    description={t('industryInsightsDescription')}
-                    enabled={consent.preferences.shareIndustryInsights}
-                  />
-                  <PreferenceItem
-                    label={t('legislativeDataLabel')}
-                    description={t('legislativeDataDescription')}
-                    enabled={consent.preferences.shareLegislativeData}
-                  />
-                </div>
+                <dt className="font-medium">{copy.consentDate}</dt>
+                <dd className="text-muted-foreground">{formatDate(onRecord.consentDate, language)}</dd>
               </div>
-
-              {/* Consent Details */}
-              <div className="text-sm text-muted-foreground space-y-1 pt-4 border-t">
+              {onRecord.expiresAt && (
                 <div>
-                  <strong>{t('grantedByLabel')}:</strong> {consent.consentGivenBy}
+                  <dt className="font-medium">{hasPassed(onRecord.expiresAt) ? copy.expired : copy.expires}</dt>
+                  <dd className="text-muted-foreground">{formatDate(onRecord.expiresAt, language)}</dd>
                 </div>
-                <div>
-                  <strong>{t('dateLabel')}:</strong>{' '}
-                  {new Date(consent.grantedAt).toLocaleDateString()}
-                </div>
-                {consent.expiresAt && (
-                  <div>
-                    <strong>{t('expiresLabel')}:</strong>{' '}
-                    {new Date(consent.expiresAt).toLocaleDateString()}
-                  </div>
-                )}
+              )}
+              <div className="sm:col-span-2">
+                <dt className="font-medium">{copy.categories}</dt>
+                <dd className="mt-1 flex flex-wrap gap-2">
+                  {onRecord.categories.length > 0 ? (
+                    onRecord.categories.map((category) => (
+                      <Badge key={category} variant="secondary">
+                        {movementTrendCategoryLabel(category, language)}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground">{copy.noCategories}</span>
+                  )}
+                </dd>
               </div>
-
-              {/* Revoke Button */}
-              <div className="pt-4">
-                <RevokeConsentButton consentId={consent.id} />
-              </div>
-            </div>
+            </dl>
           </CardContent>
         )}
       </Card>
 
-      {/* How It Works */}
+      <div className="space-y-3">
+        <CapabilityUnavailable locale={locale} capability={onRecord ? REVOKE_CAPABILITY : GRANT_CAPABILITY} />
+        <p className="text-sm text-muted-foreground">{onRecord ? copy.revokeUnavailable : copy.grantUnavailable}</p>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Info className="h-5 w-5" />
-            {t('howItWorksTitle')}
+            <Info aria-hidden="true" className="h-5 w-5" />
+            {copy.storedTitle}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="font-semibold mb-2">{t('privacyGuaranteesTitle')}</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <Shield className="h-4 w-4 mt-0.5 text-green-600" />
-                <span>
-                  <strong>{t('minimum5UnionsLabel')}:</strong> {t('minimum5UnionsDescription')}
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Shield className="h-4 w-4 mt-0.5 text-green-600" />
-                <span>
-                  <strong>{t('minimum10CasesLabel')}:</strong> {t('minimum10CasesDescription')}
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Shield className="h-4 w-4 mt-0.5 text-green-600" />
-                <span>
-                  <strong>{t('statisticalNoiseLabel')}:</strong> {t('statisticalNoiseDescription')}
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Shield className="h-4 w-4 mt-0.5 text-green-600" />
-                <span>
-                  <strong>{t('noOrgNamesLabel')}:</strong> {t('noOrgNamesDescription')}
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Shield className="h-4 w-4 mt-0.5 text-green-600" />
-                <span>
-                  <strong>{t('revocableAnyTimeLabel')}:</strong> {t('revocableAnyTimeDescription')}
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-2">{t('whyParticipateTitle')}</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                • <strong>{t('learnFromMovementLabel')}:</strong> {t('learnFromMovementDescription')}
-              </li>
-              <li>
-                • <strong>{t('supportAdvocacyLabel')}:</strong> {t('supportAdvocacyDescription')}
-              </li>
-              <li>
-                • <strong>{t('benchmarkAnonymouslyLabel')}:</strong> {t('benchmarkAnonymouslyDescription')}
-              </li>
-              <li>
-                • <strong>{t('strengthenSolidarityLabel')}:</strong> {t('strengthenSolidarityDescription')}
-              </li>
-            </ul>
-          </div>
+        <CardContent className="space-y-2 text-sm">
+          <p>{copy.storedAggregates}</p>
+          <p className="text-muted-foreground">{copy.storedScope}</p>
         </CardContent>
       </Card>
 
-      {/* Opt-In Form */}
-      {!hasActiveConsent && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('enableDataSharingTitle')}</CardTitle>
-            <CardDescription>
-              {t('enableDataSharingDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ConsentForm organizationId={organizationId} />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Consent History */}
-      {consentHistory.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              {t('consentHistoryTitle')}
-            </CardTitle>
-            <CardDescription>
-              {t('consentHistoryDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {consentHistory.map((record) => (
-                <div
-                  key={record.id}
-                  className="flex items-start justify-between py-3 border-b last:border-0"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={
-                          record.status === 'active'
-                            ? 'default'
-                            : record.status === 'revoked'
-                            ? 'destructive'
-                            : 'secondary'
-                        }
-                      >
-                        {record.status}
-                      </Badge>
-                      <span className="text-sm font-medium">
-                        {record.status === 'revoked'
-                          ? t('consentRevokedStatus')
-                          : record.status === 'expired'
-                          ? t('consentExpiredStatus')
-                          : t('consentGrantedStatus')}
-                      </span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(record.createdAt).toLocaleString()}
-                      {record.revokedAt && (
-                        <span>
-                          {' '} {t('revokedAtPrefix')} {new Date(record.revokedAt).toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-                    {record.revocationReason && (
-                      <div className="text-sm text-muted-foreground">
-                        {t('revocationReasonLabel')}: {record.revocationReason}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Legal Notice */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertTitle>{t('legalNoticeTitle')}</AlertTitle>
+      <Alert role="note">
+        <Info aria-hidden="true" className="h-4 w-4" />
+        <AlertTitle>{copy.legalTitle}</AlertTitle>
         <AlertDescription className="text-xs">
-          {t('legalNoticeText')}{' '}
-          <Link href="/privacy" className="underline">
-            {t('privacyPolicyLink')}
+          {copy.legalLead}{' '}
+          <Link href={`/${locale}/legal/privacy`} className="underline">
+            {copy.privacy}
           </Link>{' '}
-          {t('and')} {' '}
-          <Link href="/terms" className="underline">
-            {t('termsLink')}
-          </Link>{' '}
-          {t('forDetails')}.
+          {copy.legalAnd}{' '}
+          <Link href={`/${locale}/legal/terms`} className="underline">
+            {copy.terms}
+          </Link>
+          .
         </AlertDescription>
       </Alert>
-    </div>
-  );
-}
-
-/**
- * Preference item display component
- */
-function PreferenceItem({
-  label,
-  description,
-  enabled,
-}: {
-  label: string;
-  description: string;
-  enabled: boolean;
-}) {
-  return (
-    <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
-      <div className="mt-0.5">
-        {enabled ? (
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
-        ) : (
-          <XCircle className="h-5 w-5 text-gray-300" />
-        )}
-      </div>
-      <div>
-        <div className="font-medium text-sm">{label}</div>
-        <div className="text-xs text-muted-foreground">{description}</div>
-      </div>
     </div>
   );
 }

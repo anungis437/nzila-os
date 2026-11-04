@@ -116371,11 +116371,12 @@
       "authority": {
         "table": "data_aggregation_consent",
         "classification": "TENANT_RLS_REQUIRED",
-        "reason": "CLOSED (2026-09-04, round 40 SIMPLE_TENANT:org:NORMAL cohort): direct NOT NULL organization_id table. Live paths are server pages app/[locale]/dashboard/settings/data-sharing/page.tsx and app/[locale]/dashboard/movement-insights/page.tsx, both after requireUser(), using the authenticated user's organizationId and filtering dataAggregationConsent by organizationId. The apparent mutation helpers in lib/movement-insights/consent-manager.ts are library-only today: ConsentForm/RevokeConsentButton post to /api/consent, whose route operates on consentRecords, not dataAggregationConsent. DataAggregationConsentViewSet is separately router-registered but now unconditionally denied via Round40DenyAllPermission because it has no legitimate Django consumer. Minimum live runtime DML is SELECT only, no withSystemContext.",
+        "reason": "CLOSED (2026-09-04, round 40 SIMPLE_TENANT:org:NORMAL cohort; the reads were later moved into the caller's tenant context): direct NOT NULL organization_id table. Live paths are server pages app/[locale]/dashboard/settings/data-sharing/page.tsx and app/[locale]/dashboard/movement-insights/page.tsx, both after requireUser(), which read the authenticated user's organizationId row through lib/movement-insights/consent-read.ts inside withRLSContext({ organizationId }) (through the module-level handle, which sets no organization, the runtime role sees no row). Nothing writes the table: the data-sharing page is a read-only status page that shows a CapabilityUnavailable notice for granting or withdrawing a consent (UE-MOVEMENT-INSIGHTS-CONSENT-GRANT, UE-MOVEMENT-INSIGHTS-CONSENT-REVOCATION), the former consent form and revoke button were removed, and POST /api/consent operates on consentRecords, not dataAggregationConsent. The mutation helpers in lib/movement-insights/consent-manager.ts are library-only. DataAggregationConsentViewSet is separately router-registered but now unconditionally denied via Round40DenyAllPermission because it has no legitimate Django consumer. Minimum live runtime DML is SELECT only, no withSystemContext.",
         "supportingCapability": [
           "app/[locale]/dashboard/movement-insights/page.tsx",
           "app/[locale]/dashboard/settings/data-sharing/page.tsx",
-          "lib/movement-insights/consent-manager.ts"
+          "lib/movement-insights/consent-manager.ts",
+          "lib/movement-insights/consent-read.ts"
         ],
         "requiredRuntimePrivileges": ["SELECT"],
         "requiredSystemPrivileges": [],

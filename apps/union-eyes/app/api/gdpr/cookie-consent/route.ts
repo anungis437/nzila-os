@@ -104,8 +104,16 @@ export const GET = async (request: NextRequest) => {
       // No consent ID — return empty (cookie banner initial check)
       return NextResponse.json({ consent: null });
     }
+    // The consent id is the visitor's only credential, and the read is made on the system connection: it is bounded per client like the write.
+    const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false });
+    if (!intake.ok) return intake.response;
+    if (!z.guid().safeParse(consentId).success) {
+      return NextResponse.json({ error: 'Invalid consentId' }, { status: 400 });
+    }
 
-    const consent = await CookieConsentManager.getCookieConsent(consentId);
+    // A visitor has no tenant session, so the record is read on the system connection by its browser-side consent id (a v4 uuid the
+    // visitor holds), exactly as the POST above writes it.
+    const consent = await withSystemContext((tx) => CookieConsentManager.getCookieConsent(consentId, tx));
 
     if (!consent) {
       return NextResponse.json({ consent: null });
@@ -113,9 +121,9 @@ export const GET = async (request: NextRequest) => {
 
     return NextResponse.json(publicCookieConsent(consent));
   } catch (error) {
-    // Gracefully handle missing table / DB errors — don't block the page
+    // A database failure is a failure: an empty "no consent recorded" answer would make the banner ask again and hide the outage.
     logger.error('[cookie-consent] GET error', { error });
-    return NextResponse.json({ consent: null });
+    return NextResponse.json({ error: 'Failed to load cookie consent' }, { status: 500 });
   }
 };
 

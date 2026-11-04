@@ -138,7 +138,8 @@ const EXECUTIVE_LABELS = [
 export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   // The treasurer role is in the executive experience; the finance duties come from the mandate, not from this navigation.
   finance: EXECUTIVE_LABELS,
-  platform: ['Organization', 'Pilot Configuration', 'Policies', 'Audit', 'Exports'],
+  // 'Exports' is not here: the export page behind it is a not-available notice (UE-MOVEMENT-INSIGHTS-LEGISLATIVE-BRIEF), so no navigation advertises it.
+  platform: ['Organization', 'Pilot Configuration', 'Policies', 'Audit'],
   federation: ['Governance Continuity Overview', 'Governance Trust & Explainability', 'Governance Continuity Review', 'OCRA Continuity Signals', 'Institutional Intelligence Reports', 'Profile & Settings'],
   member: [
     'Home',
@@ -193,7 +194,6 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
     'Pilot Configuration',
     'Policies',
     'Audit',
-    'Exports',
   ],
 };
 

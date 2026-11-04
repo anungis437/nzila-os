@@ -17,6 +17,13 @@ const updatePlanSchema = z.object({
 
 export const dynamic = 'force-dynamic';
 
+// A malformed id is a client error, never a uuid the database refuses.
+function planIdOf(params: Record<string, string>): string {
+  const id = z.guid().safeParse(params.id);
+  if (!id.success) throw ApiError.badRequest('id must be a valid identifier');
+  return id.data;
+}
+
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -24,7 +31,7 @@ export const GET = withApi(
   },
   async ({ params, organizationId, userId, user }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    const id = params.id;
+    const id = planIdOf(params);
     return withRLSContext({ organizationId, userId }, async (tx) => {
       const [row] = await tx
         .select({ plan: pensionPlans, activeMembers: activeEnrolmentCount(pensionPlans.id) })
@@ -45,8 +52,10 @@ export const PATCH = withApi(
   },
   async ({ params, body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    const id = params.id;
-    const changes = updatePlanSchema.parse(body);
+    const id = planIdOf(params);
+    const parsedChanges = updatePlanSchema.safeParse(body);
+    if (!parsedChanges.success) throw ApiError.badRequest(parsedChanges.error.issues[0]?.message ?? 'Invalid pension plan update');
+    const changes = parsedChanges.data;
     return withRLSContext({ organizationId }, async (tx) => {
       const [plan] = await tx
         .update(pensionPlans)
@@ -80,7 +89,7 @@ export const DELETE = withApi(
   },
   async ({ params, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    const id = params.id;
+    const id = planIdOf(params);
     return withRLSContext({ organizationId }, async (tx) => {
       const [plan] = await tx
         .update(pensionPlans)

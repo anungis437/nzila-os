@@ -22,6 +22,7 @@ function hasOfficerPrivileges(role: string | null): boolean {
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'union_knowledge_suite',
     body: reviewSchema,

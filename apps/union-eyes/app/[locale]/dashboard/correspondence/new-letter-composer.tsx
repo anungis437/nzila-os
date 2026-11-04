@@ -36,6 +36,8 @@ import {
   Plus,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { readApiError } from "@/lib/client/api-envelope";
 
 // ── Template Definitions ───────────────────────────────────────────────────
 
@@ -288,11 +290,16 @@ const BLANK_TEMPLATE: LetterTemplate = {
 interface NewLetterComposerProps {
   onCreated: () => void;
   onCancel: () => void;
+  /** The person writing the letter; with `canSign` it lets them name themselves as the signer. */
+  userId?: string;
+  /** At least an officer: the level that may sign a letter. */
+  canSign?: boolean;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
 
-export function NewLetterComposer({ onCreated, onCancel }: NewLetterComposerProps) {
+export function NewLetterComposer({ onCreated, onCancel, userId, canSign = false }: NewLetterComposerProps) {
+  const t = useTranslations("correspondencePage");
   const [step, setStep] = useState<"pick" | "compose">("pick");
   const [selectedTemplate, setSelectedTemplate] = useState<LetterTemplate | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -302,6 +309,10 @@ export function NewLetterComposer({ onCreated, onCancel }: NewLetterComposerProp
   const [body, setBody] = useState("");
   const [type, setType] = useState("letter");
   const [priority, setPriority] = useState("normal");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientOrganization, setRecipientOrganization] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [signMyself, setSignMyself] = useState(false);
 
   // ── Template Selection ───────────────────────────────────────────────────
 
@@ -321,6 +332,10 @@ export function NewLetterComposer({ onCreated, onCancel }: NewLetterComposerProp
     setBody("");
     setType("letter");
     setPriority("normal");
+    setRecipientName("");
+    setRecipientOrganization("");
+    setRecipientEmail("");
+    setSignMyself(false);
   };
 
   // ── AI Draft Assist ──────────────────────────────────────────────────────
@@ -343,8 +358,7 @@ export function NewLetterComposer({ onCreated, onCancel }: NewLetterComposerProp
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.error?.message ?? "AI service unavailable");
+        throw new Error(await readApiError(res, "AI service unavailable"));
       }
 
       const json = await res.json();
@@ -368,15 +382,29 @@ export function NewLetterComposer({ onCreated, onCancel }: NewLetterComposerProp
     if (!subject.trim() || !body.trim()) return;
     setSubmitting(true);
     try {
+      const recipients = recipientName.trim()
+        ? [
+            {
+              name: recipientName.trim(),
+              ...(recipientOrganization.trim() ? { organization: recipientOrganization.trim() } : {}),
+              ...(recipientEmail.trim() ? { email: recipientEmail.trim() } : {}),
+              recipientType: "to" as const,
+            },
+          ]
+        : undefined;
       const res = await fetch("/api/correspondence", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, body, type, priority }),
+        body: JSON.stringify({
+          subject: subject.trim(),
+          body,
+          type,
+          priority,
+          ...(recipients ? { recipients } : {}),
+          ...(signMyself && canSign && userId ? { assignedSignerId: userId } : {}),
+        }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.error?.message ?? "Failed to create letter");
-      }
+      if (!res.ok) throw new Error(await readApiError(res, "Failed to create letter"));
       toast.success("Letter created as draft.");
       onCreated();
     } catch (e) {
@@ -523,6 +551,30 @@ export function NewLetterComposer({ onCreated, onCancel }: NewLetterComposerProp
         </div>
       </div>
 
+      {/* Recipient */}
+      <div className="space-y-1.5">
+        <Label htmlFor="nl-recipient-name">{t("composer.recipientName")}</Label>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Input id="nl-recipient-name" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} maxLength={255} />
+          <Input
+            aria-label={t("composer.recipientOrganization")}
+            placeholder={t("composer.recipientOrganization")}
+            value={recipientOrganization}
+            onChange={(e) => setRecipientOrganization(e.target.value)}
+            maxLength={255}
+          />
+          <Input
+            type="email"
+            aria-label={t("composer.recipientEmail")}
+            placeholder={t("composer.recipientEmail")}
+            value={recipientEmail}
+            onChange={(e) => setRecipientEmail(e.target.value)}
+            maxLength={320}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">{t("composer.recipientHint")}</p>
+      </div>
+
       {/* Body with AI assist */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
@@ -554,6 +606,17 @@ export function NewLetterComposer({ onCreated, onCancel }: NewLetterComposerProp
           Replace bracketed placeholders (e.g. [Recipient Name]) with actual values before submitting.
         </p>
       </div>
+
+      {/* Signer */}
+      {canSign && userId && (
+        <div className="flex items-start gap-2">
+          <input id="nl-sign-myself" type="checkbox" className="mt-1 h-4 w-4" checked={signMyself} onChange={(e) => setSignMyself(e.target.checked)} />
+          <div>
+            <Label htmlFor="nl-sign-myself">{t("composer.signMyself")}</Label>
+            <p className="text-xs text-muted-foreground">{t("composer.signMyselfHint")}</p>
+          </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-2">

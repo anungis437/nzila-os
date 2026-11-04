@@ -55,6 +55,7 @@ vi.mock('@/db/schema/domains/documents/correspondence', () => {
   };
 });
 
+import { db } from '@/db';
 import {
   createCorrespondence,
   getCorrespondenceById,
@@ -111,9 +112,14 @@ describe('correspondence-service', () => {
     expect(await getCorrespondenceById('c1')).toEqual({ id: 'c1' });
 
     h.queue = [[{ id: 'c1' }], [{ id: 'r1' }], [{ id: 'a1' }]];
+    vi.mocked(db.select).mockClear();
     const details = await getCorrespondenceWithDetails('c1');
     expect(details?.recipients).toEqual([{ id: 'r1' }]);
     expect(details?.auditTrail).toEqual([{ id: 'a1' }]);
+
+    // The history of a letter names the event, the actor and the time; it never carries the network address, user agent, hash or metadata.
+    const [, , historySelect] = vi.mocked(db.select).mock.calls as unknown as Array<[Record<string, string> | undefined]>;
+    expect(Object.keys(historySelect[0] ?? {}).sort()).toEqual(['actorName', 'actorRole', 'eventDescription', 'eventType', 'id', 'timestamp']);
 
     h.queue = [[]];
     expect(await getCorrespondenceWithDetails('missing')).toBeNull();

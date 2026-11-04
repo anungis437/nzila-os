@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     body: z.object({
       receiptId: z.string().min(1),

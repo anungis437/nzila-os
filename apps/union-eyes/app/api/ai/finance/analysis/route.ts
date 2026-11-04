@@ -31,6 +31,7 @@ const querySchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'officer' },
     entitlement: 'ai_advanced_insights',
     rateLimit: RATE_LIMITS.AI_COMPLETION,

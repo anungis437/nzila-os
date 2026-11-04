@@ -17,6 +17,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'member' },
     openapi: { tags: ['Members'], summary: 'Get a member segment' },
   },

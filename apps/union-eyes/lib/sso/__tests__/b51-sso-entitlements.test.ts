@@ -42,7 +42,8 @@ describe('B51 SSO provider input (DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONF
 describe('B51 entitlement list (DEF-0B7-PLT-ENT-LISTS-EXPIRED-AND-UNBACKED-ENTITLEMENTS-AS-ACTIVE)', () => {
   it('lists only what the server-side check allows', () => {
     const route = read('app/api/entitlements/route.ts')
-    expect(route).toContain('checkModuleEntitlement(orgId, r.featureKey)).allowed')
+    expect(route).toContain('((await checkModuleEntitlement(organizationId, r.featureKey)).allowed ? r.featureKey : null)')
+    expect(route).toContain('checks.filter((key): key is string => key !== null)')
     expect(route).toContain('.limit(200)')
   })
 })

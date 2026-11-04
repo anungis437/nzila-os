@@ -4,6 +4,9 @@
  * Platform-level view of all internal and external data sources.
  * Shows record counts, field metadata, sync history and health.
  *
+ * Record counts are over every organization, so the page needs platform authority (isSystemAdmin) on top of the integration_manager role:
+ * the role alone is an ordinary per-organization one.
+ *
  * @role integration_manager and above (Nzila platform roles)
  * @dashboard_path /dashboard/data-source
  */
@@ -12,13 +15,11 @@ export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole, isSystemAdmin } from '@/lib/api-auth-guard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { loadDataSourceOverview, type SyncLogEntry } from '@/lib/dashboard-reads/data-source';
 import { getAllDataSources } from '@/lib/report-executor';
 import {
   Database, Table2, RefreshCw, Clock, CheckCircle2, XCircle,
@@ -27,22 +28,6 @@ import {
 } from 'lucide-react';
 
 /* ─── types ─── */
-
-interface SyncLogEntry {
-  id: string;
-  source: string;
-  source_type: string;
-  sync_id: string;
-  started_at: string;
-  completed_at: string | null;
-  status: string;
-  records_processed: number;
-  records_inserted: number;
-  records_updated: number;
-  records_failed: number;
-  error_message: string | null;
-  sync_type: string;
-}
 
 interface ExternalSourceInfo {
   id: string;
@@ -117,90 +102,16 @@ export default async function DataSourcePage() {
   const locale = await getLocale();
   const canAccess = await hasMinRole('integration_manager');
   if (!canAccess) redirect('/dashboard');
+  // The counts below are over every organization: that needs platform authority, not just a per-organization role.
+  if (!(await isSystemAdmin())) redirect('/dashboard');
 
-  // ── Data fetching (all under system context) ──────────────────────────────
+  // ── Data fetching (system role, platform authority checked above); a failed read is an error, not zero records ──
   const {
     internalCounts,
     externalCounts,
     syncLogs,
     totalExternalRecords,
-  } = await withSystemContext(async () => {
-    // Safe row count: returns 0 if table doesn't exist
-    const KNOWN_TABLES: Record<string, ReturnType<typeof sql>> = {
-      claims: sql`SELECT COUNT(*)::int AS c FROM claims`,
-      organization_members: sql`SELECT COUNT(*)::int AS c FROM organization_members`,
-      claim_deadlines: sql`SELECT COUNT(*)::int AS c FROM claim_deadlines`,
-      dues_assignments: sql`SELECT COUNT(*)::int AS c FROM dues_assignments`,
-      wage_benchmarks: sql`SELECT COUNT(*)::int AS c FROM wage_benchmarks`,
-      union_density: sql`SELECT COUNT(*)::int AS c FROM union_density`,
-      cost_of_living_data: sql`SELECT COUNT(*)::int AS c FROM cost_of_living_data`,
-      contribution_rates: sql`SELECT COUNT(*)::int AS c FROM contribution_rates`,
-    };
-
-    async function safeCount(table: string): Promise<number> {
-      try {
-        const exists = await db.execute(sql`
-          SELECT 1 FROM pg_tables
-          WHERE schemaname = 'public' AND tablename = ${table}
-        `);
-        if (Array.from(exists).length === 0) return 0;
-        const query = KNOWN_TABLES[table];
-        if (!query) return 0;
-        const rows = await db.execute(query);
-        return Number((Array.from(rows)[0] as Record<string, unknown>)?.c ?? 0);
-      } catch {
-        return 0;
-      }
-    }
-
-    // Internal data source row counts
-    const internalTables = ['claims', 'organization_members', 'claim_deadlines', 'dues_assignments'];
-    const internalMap: Record<string, number> = {};
-    for (const t of internalTables) {
-      internalMap[t] = await safeCount(t);
-    }
-
-    // External data source row counts
-    const externalTables = ['wage_benchmarks', 'union_density', 'cost_of_living_data', 'contribution_rates'];
-    const externalMap: Record<string, number> = {};
-    let extTotal = 0;
-    for (const t of externalTables) {
-      const count = await safeCount(t);
-      externalMap[t] = count;
-      extTotal += count;
-    }
-
-    // Recent sync logs (last 20) — table may not exist yet
-    let logs: SyncLogEntry[] = [];
-    try {
-      const syncTableExists = await db.execute(sql`
-        SELECT 1 FROM pg_tables
-        WHERE schemaname = 'public' AND tablename = 'external_data_sync_log'
-      `);
-      if (Array.from(syncTableExists).length > 0) {
-        const rawLogs = await db.execute(sql`
-          SELECT id, source, source_type, sync_id,
-                 started_at, completed_at, status,
-                 records_processed, records_inserted,
-                 records_updated, records_failed,
-                 error_message, sync_type
-          FROM external_data_sync_log
-          ORDER BY started_at DESC
-          LIMIT 20
-        `) as any as SyncLogEntry[];
-        logs = Array.from(rawLogs);
-      }
-    } catch {
-      // Table doesn't exist yet — no sync history
-    }
-
-    return {
-      internalCounts: internalMap,
-      externalCounts: externalMap,
-      syncLogs: logs,
-      totalExternalRecords: extTotal,
-    };
-  });
+  } = await loadDataSourceOverview();
 
   const internalSources = getAllDataSources();
   const totalInternalRecords = Object.values(internalCounts).reduce((a, b) => a + b, 0);

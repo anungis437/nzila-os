@@ -16,8 +16,6 @@
     "./source-disclosure": "./src/source-disclosure.ts",
     "./guards": "./src/guards.ts",
     "./middleware": "./src/middleware.ts",
-    "./adapter": "./src/clerk-adapter.ts",
-    "./clerk-adapter": "./src/clerk-adapter.ts",
     "./entra": "./src/entra/index.ts",
     "./entra/config": "./src/entra/config.ts",
     "./entra/adapter": "./src/entra/adapter.ts",

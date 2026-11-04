@@ -1,11 +1,25 @@
 "use client";
 
+/**
+ * The grievances workbench: list, filter, file, advance, assign.
+ *
+ * Reads GET /api/grievances, which answers { success, data: rows } with the stored grievance rows (and, for an unassigned intake the
+ * caller may only triage, a handful of columns without the narrative). Nothing is filled in for a column a row does not carry: a missing
+ * value is shown as missing, and a response that is not that shape is an error with a retry, not an empty list.
+ *
+ * Documents are not added from this list: POST /api/grievances/:id/documents takes the metadata of an uploaded file, which only the case
+ * page collects, so the action here opens the case.
+ */
+
 import React from 'react';
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent } from "@/components/ui/card";
-import { useOrganization } from "@/lib/hooks/use-organization";
+import { StewardRecommendations } from "@/components/steward-recommendations";
+import { ApiShapeError, isRecord, readApiError } from "@/lib/client/api-envelope";
+import type { grievanceTypeEnum } from "@/db/schema/domains/claims/grievances";
 import {
   Scale,
   FileText,
@@ -15,102 +29,167 @@ import {
   Calendar,
   User,
   Gavel,
-  TrendingUp,
   Filter,
   Search,
   Plus,
   ChevronDown,
   ChevronUp,
   Flag,
-  FileCheck,
   XCircle,
   AlertTriangle,
   Loader2,
   ArrowUpDown,
 } from "lucide-react";
 
-type GrievanceStatus = "filed" | "step-1" | "step-2" | "step-3" | "arbitration" | "resolved" | "withdrawn";
+type GrievanceStatus = "intake" | "filed" | "step-1" | "step-2" | "step-3" | "arbitration" | "resolved" | "withdrawn" | "other";
 type GrievancePriority = "low" | "medium" | "high" | "urgent";
+type GrievanceType = (typeof grievanceTypeEnum.enumValues)[number];
 
 interface Grievance {
   id: string;
   number: string;
-  title: string;
-  description: string;
+  /** Null on an intake the caller may only triage: it carries no narrative. */
+  title: string | null;
+  description: string | null;
   status: GrievanceStatus;
-  priority: GrievancePriority;
+  /** The status as stored; the label of a status this screen has no group for. */
+  rawStatus: string;
+  priority: GrievancePriority | null;
   category: string;
-  filedDate: string;
-  deadline: string;
-  currentStep: string;
-  daysUntilDeadline: number;
-  grievant: string;
-  steward: string;
-  management: string;
-  violatedArticle: string;
-  remedy: string;
+  /** Null until the grievance is filed. */
+  filedDate: string | null;
+  createdDate: string | null;
+  resolvedDate: string | null;
+  deadline: string | null;
+  daysUntilDeadline: number | null;
+  currentStep: string | null;
+  grievant: string | null;
+  management: string | null;
+  violatedArticle: string | null;
+  remedy: string | null;
   timeline: TimelineEvent[];
 }
 
 interface TimelineEvent {
   date: string;
   event: string;
-  description: string;
-  type: "filed" | "meeting" | "response" | "escalation" | "resolved";
+  description: string | null;
 }
 
-// Map DB status values to UI status values
-const mapDbStatusToUi = (dbStatus: string | undefined | null): GrievanceStatus => {
-  const statusMap: Record<string, GrievanceStatus> = {
-    "draft": "filed",
-    "new": "filed",
-    "filed": "filed",
-    "acknowledged": "step-1",
-    "investigating": "step-1",
-    "response_due": "step-2",
-    "response_received": "step-2",
-    "escalated": "step-3",
-    "mediation": "step-3",
-    "arbitration": "arbitration",
-    "settled": "resolved",
-    "closed": "resolved",
-    "closed_no_case": "resolved",
-    "converted": "resolved",
-    "denied": "withdrawn",
-    "withdrawn": "withdrawn",
-    // Pass through UI values as-is
-    "step-1": "step-1",
-    "step-2": "step-2",
-    "step-3": "step-3",
-    "resolved": "resolved",
-  };
-  return statusMap[dbStatus ?? ""] || "filed";
+// Group the stored statuses into the ones this screen filters by. A draft is a member's intake that nobody has converted: it is not filed.
+const STATUS_GROUP: Record<string, GrievanceStatus> = {
+  "draft": "intake",
+  "new": "filed",
+  "filed": "filed",
+  "acknowledged": "step-1",
+  "investigating": "step-1",
+  "response_due": "step-2",
+  "response_received": "step-2",
+  "escalated": "step-3",
+  "mediation": "step-3",
+  "arbitration": "arbitration",
+  "settled": "resolved",
+  "closed": "resolved",
+  "closed_no_case": "resolved",
+  "converted": "resolved",
+  "denied": "withdrawn",
+  "withdrawn": "withdrawn",
 };
 
-// Map raw API/DB row to component Grievance shape
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapDbGrievanceToUi = (raw: any): Grievance => ({
-  id: raw.id ?? raw.grievanceNumber ?? "",
-  number: raw.grievanceNumber ?? raw.number ?? "",
-  title: raw.title ?? "Untitled Grievance",
-  description: raw.description ?? "",
-  status: mapDbStatusToUi(raw.status),
-  priority: ["low", "medium", "high", "urgent"].includes(raw.priority) ? raw.priority : "medium",
-  category: raw.type ?? raw.category ?? "General",
-  filedDate: raw.filedDate ?? raw.createdAt ?? "",
-  deadline: raw.deadline ?? "",
-  currentStep: raw.step ?? raw.currentStep ?? "",
-  daysUntilDeadline: raw.daysUntilDeadline ?? 0,
-  grievant: raw.grievantName ?? raw.grievant ?? "Unknown",
-  steward: raw.steward ?? "",
-  management: raw.employerName ?? raw.management ?? "",
-  violatedArticle: raw.cbaArticle ?? raw.violatedArticle ?? "",
-  remedy: raw.remedy ?? "",
-  timeline: Array.isArray(raw.timeline) ? raw.timeline : [],
-});
+const PRIORITIES: readonly GrievancePriority[] = ["low", "medium", "high", "urgent"];
+
+const COPY = {
+  en: {
+    intake: "Intake (not filed)",
+    restricted: "Intake awaiting triage (details are not shown to you)",
+    none: "—",
+    noTimeline: "No timeline entries are recorded for this grievance.",
+    retry: "Retry",
+    dismiss: "Dismiss",
+    statusFailed: "The status could not be changed",
+    fileFailed: "The grievance could not be filed",
+  },
+  fr: {
+    intake: "Demande (non déposée)",
+    restricted: "Demande en attente de triage (les détails ne vous sont pas affichés)",
+    none: "—",
+    noTimeline: "Aucune entrée de chronologie n’est enregistrée pour ce grief.",
+    retry: "Réessayer",
+    dismiss: "Fermer",
+    statusFailed: "Le statut n’a pas pu être modifié",
+    fileFailed: "Le grief n’a pas pu être déposé",
+  },
+} as const;
+
+// Keyed by the database enum, so a type added there cannot be left without a label.
+const TYPE_LABELS: Record<GrievanceType, { en: string; fr: string }> = {
+  individual: { en: "Individual grievance", fr: "Grief individuel" },
+  group: { en: "Group grievance", fr: "Grief collectif" },
+  policy: { en: "Policy grievance", fr: "Grief de principe" },
+  contract: { en: "Collective agreement", fr: "Convention collective" },
+  harassment: { en: "Harassment", fr: "Harcèlement" },
+  discrimination: { en: "Discrimination", fr: "Discrimination" },
+  safety: { en: "Health and safety", fr: "Santé et sécurité" },
+  seniority: { en: "Seniority", fr: "Ancienneté" },
+  discipline: { en: "Discipline", fr: "Mesure disciplinaire" },
+  termination: { en: "Termination", fr: "Congédiement" },
+  other: { en: "Other", fr: "Autre" },
+};
+
+/** The types POST /api/grievances accepts, which are the grievance_type enum. */
+export const GRIEVANCE_TYPE_ORDER: readonly GrievanceType[] = [
+  "individual", "group", "policy", "contract", "harassment", "discrimination", "safety", "seniority", "discipline", "termination", "other",
+];
+
+const text = (value: unknown): string | null => (typeof value === "string" && value !== "" ? value : null);
+const DAY_MS = 86_400_000;
+
+function toTimeline(value: unknown): TimelineEvent[] {
+  if (!Array.isArray(value)) return [];
+  // The column is free-form JSON: an entry that is not { date, action } cannot be shown as an event, and is left out of the list.
+  return value.flatMap((entry): TimelineEvent[] =>
+    isRecord(entry) && typeof entry.date === "string" && typeof entry.action === "string"
+      ? [{ date: entry.date, event: entry.action, description: text(entry.notes) }]
+      : [],
+  );
+}
+
+/** One row of GET /api/grievances. Columns the row does not carry stay null. */
+function toGrievance(raw: unknown): Grievance {
+  if (!isRecord(raw)) throw new ApiShapeError("a grievance that is not a record");
+  const id = text(raw.id);
+  const number = text(raw.grievanceNumber);
+  if (!id || !number) throw new ApiShapeError("a grievance without an id or number");
+  const rawStatus = text(raw.status) ?? "";
+  const deadline = text(raw.responseDeadline);
+  const priority = PRIORITIES.find((candidate) => candidate === raw.priority) ?? null;
+  return {
+    id,
+    number,
+    title: text(raw.title),
+    description: text(raw.description),
+    status: STATUS_GROUP[rawStatus] ?? "other",
+    rawStatus,
+    priority,
+    category: text(raw.type) ?? "",
+    filedDate: text(raw.filedDate),
+    createdDate: text(raw.createdAt),
+    resolvedDate: text(raw.resolvedAt),
+    deadline,
+    daysUntilDeadline: deadline ? Math.ceil((Date.parse(deadline) - Date.now()) / DAY_MS) : null,
+    currentStep: text(raw.step),
+    grievant: text(raw.grievantName),
+    management: text(raw.employerName),
+    violatedArticle: text(raw.cbaArticle),
+    remedy: text(raw.desiredOutcome),
+    timeline: toTimeline(raw.timeline),
+  };
+}
 
 type SortField = "filedDate" | "priority" | "status" | "title";
 type SortOrder = "asc" | "desc";
+
+const STATUS_FILTERS = ["all", "intake", "filed", "step-1", "step-2", "step-3", "arbitration", "resolved", "withdrawn"] as const;
 
 export function GrievancesConsole() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,8 +199,11 @@ export function GrievancesConsole() {
   const [sortField, setSortField] = useState<SortField>("filedDate");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  // The grievance whose steward recommendations are open; the assignment itself is made from that list.
+  const [assigningGrievanceId, setAssigningGrievanceId] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
-  const { organizationId } = useOrganization();
 
   // Grievances data from API
   const [grievances, setGrievances] = useState<Grievance[]>([]);
@@ -129,35 +211,42 @@ export function GrievancesConsole() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const t = useTranslations();
+  const locale = useLocale();
+  const language = locale.toLowerCase().startsWith("fr") ? "fr" : "en";
+  const copy = COPY[language];
+
+  const formatDate = (value: string | null): string => {
+    if (!value) return copy.none;
+    const time = Date.parse(value);
+    return Number.isNaN(time) ? copy.none : new Date(time).toLocaleDateString(locale);
+  };
+  const categoryLabel = (category: string): string => {
+    const labels: Partial<Record<string, { en: string; fr: string }>> = TYPE_LABELS;
+    return labels[category]?.[language] ?? category;
+  };
 
   const fetchGrievances = useCallback(async () => {
       try {
         setLoading(true);
         setFetchError(null);
-        const url = organizationId
-          ? `/api/grievances?organizationId=${organizationId}`
-          : '/api/grievances';
-        const res = await fetch(url);
-        if (res.ok) {
-          const json = await res.json();
-          const items = Array.isArray(json) ? json : json?.grievances ?? json?.data ?? [];
-          setGrievances(items.map(mapDbGrievanceToUi));
-        } else {
-          const body = await res.json().catch(() => ({}));
-          setFetchError(body?.error || `Failed to load grievances (${res.status})`);
-        }
-      } catch {
-        setFetchError(t('grievances.errors.fileGrievance'));
+        const res = await fetch('/api/grievances');
+        if (!res.ok) throw new Error(await readApiError(res, `HTTP ${res.status}`));
+        const body: unknown = await res.json();
+        if (!isRecord(body) || !Array.isArray(body.data)) throw new ApiShapeError("no grievances");
+        setGrievances(body.data.map(toGrievance));
+      } catch (error) {
+        setFetchError(error instanceof Error ? error.message : String(error));
       } finally {
         setLoading(false);
       }
-  }, [organizationId, t]);
+  }, []);
 
   useEffect(() => {
     fetchGrievances();
   }, [fetchGrievances]);
 
   const statusConfig: Record<GrievanceStatus, { label: string; color: string; icon: React.ReactElement }> = {
+    "intake": { label: copy.intake, color: "text-gray-700 bg-gray-100 border-gray-200", icon: <FileText className="w-3 h-3" /> },
     "filed": { label: t('grievances.statusFiled'), color: "text-blue-700 bg-blue-100 border-blue-200", icon: <FileText className="w-3 h-3" /> },
     "step-1": { label: t('grievances.statusStep1'), color: "text-purple-700 bg-purple-100 border-purple-200", icon: <Flag className="w-3 h-3" /> },
     "step-2": { label: t('grievances.statusStep2'), color: "text-orange-700 bg-orange-100 border-orange-200", icon: <Flag className="w-3 h-3" /> },
@@ -165,7 +254,10 @@ export function GrievancesConsole() {
     "arbitration": { label: t('grievances.statusArbitration'), color: "text-pink-700 bg-pink-100 border-pink-200", icon: <Gavel className="w-3 h-3" /> },
     "resolved": { label: t('grievances.statusResolved'), color: "text-green-700 bg-green-100 border-green-200", icon: <CheckCircle className="w-3 h-3" /> },
     "withdrawn": { label: t('grievances.statusWithdrawn'), color: "text-gray-700 bg-gray-100 border-gray-200", icon: <XCircle className="w-3 h-3" /> },
+    "other": { label: "", color: "text-gray-700 bg-gray-100 border-gray-200", icon: <Flag className="w-3 h-3" /> },
   };
+  const statusLabel = (grievance: Grievance): string =>
+    grievance.status === "other" ? grievance.rawStatus : statusConfig[grievance.status].label;
 
   const priorityConfig: Record<GrievancePriority, { label: string; color: string; icon: React.ReactElement }> = {
     urgent: { label: t('grievances.priorityUrgent'), color: "text-red-700 bg-red-100 border-red-200", icon: <AlertTriangle className="w-4 h-4" /> },
@@ -174,23 +266,15 @@ export function GrievancesConsole() {
     low: { label: t('grievances.priorityLow'), color: "text-gray-700 bg-gray-100 border-gray-200", icon: <Flag className="w-4 h-4" /> },
   };
 
-  const timelineTypeConfig: Record<TimelineEvent["type"], { color: string; icon: React.ReactElement }> = {
-    filed: { color: "bg-blue-500", icon: <FileText className="w-4 h-4 text-white" /> },
-    meeting: { color: "bg-purple-500", icon: <Calendar className="w-4 h-4 text-white" /> },
-    response: { color: "bg-orange-500", icon: <FileCheck className="w-4 h-4 text-white" /> },
-    escalation: { color: "bg-red-500", icon: <TrendingUp className="w-4 h-4 text-white" /> },
-    resolved: { color: "bg-green-500", icon: <CheckCircle className="w-4 h-4 text-white" /> },
-  };
-
   // Filter and sort grievances
   const filteredGrievances = grievances
     .filter(grievance => {
       const q = searchQuery.toLowerCase();
       const matchesSearch = 
-        (grievance.number ?? "").toLowerCase().includes(q) ||
+        grievance.number.toLowerCase().includes(q) ||
         (grievance.title ?? "").toLowerCase().includes(q) ||
         (grievance.grievant ?? "").toLowerCase().includes(q) ||
-        (grievance.category ?? "").toLowerCase().includes(q);
+        categoryLabel(grievance.category).toLowerCase().includes(q);
       const matchesStatus = selectedStatus === "all" || grievance.status === selectedStatus;
       const matchesPriority = selectedPriority === "all" || grievance.priority === selectedPriority;
       return matchesSearch && matchesStatus && matchesPriority;
@@ -198,18 +282,22 @@ export function GrievancesConsole() {
     .sort((a, b) => {
       const dir = sortOrder === "asc" ? 1 : -1;
       if (sortField === "filedDate") {
-        return dir * (new Date(a.filedDate).getTime() - new Date(b.filedDate).getTime());
+        const time = (g: Grievance) => Date.parse(g.filedDate ?? g.createdDate ?? "") || 0;
+        return dir * (time(a) - time(b));
       }
       if (sortField === "priority") {
-        const order = { urgent: 0, high: 1, medium: 2, low: 3 };
-        return dir * ((order[a.priority] ?? 2) - (order[b.priority] ?? 2));
+        // A grievance with no priority sorts after every one that has one.
+        const rank = (g: Grievance) => (g.priority === null ? PRIORITIES.length : PRIORITIES.length - 1 - PRIORITIES.indexOf(g.priority));
+        return dir * (rank(a) - rank(b));
       }
-      return dir * (a[sortField] ?? "").localeCompare(b[sortField] ?? "");
+      if (sortField === "status") return dir * a.rawStatus.localeCompare(b.rawStatus);
+      return dir * (a.title ?? "").localeCompare(b.title ?? "");
     });
 
   // Action handlers
   const handleStatusTransition = async (grievance: Grievance, newStatus: string) => {
     setActionLoading(`status-${grievance.id}`);
+    setActionError(null);
     try {
       const res = await fetch(`/api/grievances/${grievance.id}/status`, {
         method: "PATCH",
@@ -217,57 +305,47 @@ export function GrievancesConsole() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        alert(body?.error || `Failed to update status (${res.status})`);
+        setActionError(await readApiError(res, `${copy.statusFailed} (HTTP ${res.status})`));
         return;
       }
       await fetchGrievances();
     } catch {
-      alert(t('grievances.errors.updateStatus'));
+      setActionError(t('grievances.errors.updateStatus'));
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleAssignSteward = async (grievance: Grievance) => {
-    setActionLoading(`assign-${grievance.id}`);
+  const handleFileGrievance = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const cbaArticle = String(formData.get("cbaArticle") ?? "").trim();
+    setActionLoading("new-grievance");
+    setFormError(null);
     try {
-      const res = await fetch(`/api/grievances/${grievance.id}/assign`, {
+      // Everyone who can open this list is staff, so this opens an official case; the organization is the caller's, never sent.
+      const res = await fetch("/api/grievances", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+          type: formData.get("type"),
+          title: formData.get("title"),
+          description: formData.get("description"),
+          priority: formData.get("priority"),
+          ...(cbaArticle && { cbaArticle }),
+          createOfficialCase: true,
+        }),
       });
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        alert(body?.error || `Failed to assign representative (${res.status})`);
+        setFormError(await readApiError(res, `${copy.fileFailed} (HTTP ${res.status})`));
         return;
       }
+      setShowNewForm(false);
+      form.reset();
       await fetchGrievances();
     } catch {
-      alert(t('grievances.errors.assignSteward'));
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleAddDocument = async (grievance: Grievance) => {
-    const description = prompt(t('grievances.documentDescriptionPrompt'));
-    if (!description) return;
-    setActionLoading(`doc-${grievance.id}`);
-    try {
-      const res = await fetch(`/api/grievances/${grievance.id}/documents`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: description, type: "note", content: description }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        alert(body?.error || `Failed to add document (${res.status})`);
-        return;
-      }
-      await fetchGrievances();
-    } catch {
-      alert(t('grievances.errors.addDocument'));
+      setFormError(t('grievances.errors.fileGrievance'));
     } finally {
       setActionLoading(null);
     }
@@ -286,19 +364,19 @@ export function GrievancesConsole() {
   const totalGrievances = grievances.length;
   const activeGrievances = grievances.filter(g => g.status !== "resolved" && g.status !== "withdrawn").length;
   const arbitrationCases = grievances.filter(g => g.status === "arbitration").length;
+  // From the day a grievance was filed to the day it was resolved, over the resolved ones that record both. None: no figure.
   const avgResolutionDays = (() => {
-    const resolved = grievances.filter(g => g.status === "resolved" && g.filedDate);
-    if (resolved.length === 0) return 0;
-    const totalDays = resolved.reduce((sum, g) => {
-      const filed = new Date(g.filedDate).getTime();
-      const now = Date.now();
-      return sum + Math.round((now - filed) / (1000 * 60 * 60 * 24));
-    }, 0);
-    return Math.round(totalDays / resolved.length);
+    const durations = grievances
+      .filter(g => g.status === "resolved" && g.filedDate && g.resolvedDate)
+      .map(g => Date.parse(g.resolvedDate as string) - Date.parse(g.filedDate as string))
+      .filter(duration => Number.isFinite(duration) && duration >= 0);
+    if (durations.length === 0) return null;
+    return Math.round(durations.reduce((sum, duration) => sum + duration, 0) / durations.length / DAY_MS);
   })();
 
-  const statusCounts = {
+  const statusCounts: Record<GrievanceStatus | "all", number> = {
     all: grievances.length,
+    intake: grievances.filter(g => g.status === "intake").length,
     filed: grievances.filter(g => g.status === "filed").length,
     "step-1": grievances.filter(g => g.status === "step-1").length,
     "step-2": grievances.filter(g => g.status === "step-2").length,
@@ -306,6 +384,7 @@ export function GrievancesConsole() {
     arbitration: grievances.filter(g => g.status === "arbitration").length,
     resolved: grievances.filter(g => g.status === "resolved").length,
     withdrawn: grievances.filter(g => g.status === "withdrawn").length,
+    other: grievances.filter(g => g.status === "other").length,
   };
 
   return (
@@ -317,10 +396,16 @@ export function GrievancesConsole() {
           </div>
         )}
         {fetchError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 mb-6 text-center">
+          <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-6 mb-6 text-center">
             <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />
             <h3 className="text-lg font-semibold text-red-900 mb-1">{t('grievances.errorLoadingGrievances')}</h3>
             <p className="text-red-800 text-sm">{fetchError}</p>
+            <button
+              onClick={() => void fetchGrievances()}
+              className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              {copy.retry}
+            </button>
           </div>
         )}
         {!loading && !fetchError && (
@@ -340,6 +425,15 @@ export function GrievancesConsole() {
           <p className="text-gray-600">{t('grievances.description')}</p>
         </motion.div>
 
+        {actionError && (
+          <div role="alert" className="mb-6 flex items-start justify-between gap-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} className="font-medium underline">
+              {copy.dismiss}
+            </button>
+          </div>
+        )}
+
         {/* File New Grievance Form */}
         <AnimatePresence>
           {showNewForm && (
@@ -352,63 +446,29 @@ export function GrievancesConsole() {
               <Card className="bg-white border-red-200 shadow-lg">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('grievances.fileNewGrievance')}</h3>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const form = e.currentTarget;
-                      const formData = new FormData(form);
-                      setActionLoading("new-grievance");
-                      try {
-                        const res = await fetch("/api/grievances", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            title: formData.get("title"),
-                            description: formData.get("description"),
-                            type: formData.get("type"),
-                            priority: formData.get("priority"),
-                            cbaArticle: formData.get("cbaArticle"),
-                            organizationId,
-                          }),
-                        });
-                        if (!res.ok) {
-                          const body = await res.json().catch(() => ({}));
-                          alert(body?.error || `Failed to file grievance (${res.status})`);
-                          return;
-                        }
-                        setShowNewForm(false);
-                        form.reset();
-                        await fetchGrievances();
-                      } catch {
-                        alert(t('grievances.errors.fileGrievance'));
-                      } finally {
-                        setActionLoading(null);
-                      }
-                    }}
-                    className="space-y-4"
-                  >
+                  <form onSubmit={handleFileGrievance} className="space-y-4">
+                    {formError && (
+                      <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                        {formError}
+                      </p>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.title')}</label>
-                        <input name="title" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" />
+                        <input name="title" required minLength={5} maxLength={500} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.type')}</label>
-                        <select name="type" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
-                          <option value="contract_violation">{t('grievances.form.types.contract_violation')}</option>
-                          <option value="discipline">{t('grievances.form.types.discipline')}</option>
-                          <option value="discrimination">{t('grievances.form.types.discrimination')}</option>
-                          <option value="safety">{t('grievances.form.types.safety')}</option>
-                          <option value="wages">{t('grievances.form.types.wages')}</option>
-                          <option value="benefits">{t('grievances.form.types.benefits')}</option>
-                          <option value="working_conditions">{t('grievances.form.types.working_conditions')}</option>
-                          <option value="other">{t('grievances.form.types.other')}</option>
+                        <select name="type" required defaultValue="individual" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                          {GRIEVANCE_TYPE_ORDER.map((type) => (
+                            <option key={type} value={type}>{TYPE_LABELS[type][language]}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.description')}</label>
-                      <textarea name="description" required rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" />
+                      <textarea name="description" required minLength={10} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -422,7 +482,7 @@ export function GrievancesConsole() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.cbaArticleOptional')}</label>
-                        <input name="cbaArticle" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" placeholder={t('grievances.form.cbaArticlePlaceholder')} />
+                        <input name="cbaArticle" maxLength={100} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" placeholder={t('grievances.form.cbaArticlePlaceholder')} />
                       </div>
                     </div>
                     <div className="flex gap-3 pt-2">
@@ -436,7 +496,10 @@ export function GrievancesConsole() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShowNewForm(false)}
+                        onClick={() => {
+                          setShowNewForm(false);
+                          setFormError(null);
+                        }}
                         className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                       >
                         {t('grievances.form.cancel')}
@@ -521,7 +584,7 @@ export function GrievancesConsole() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">{t('grievances.avgResolution')}</p>
-                    <p className="text-3xl font-bold text-gray-900">{avgResolutionDays}d</p>
+                    <p className="text-3xl font-bold text-gray-900">{avgResolutionDays === null ? copy.none : `${avgResolutionDays}d`}</p>
                   </div>
                   <div className="p-3 bg-green-100 rounded-lg">
                     <Clock className="w-6 h-6 text-green-600" />
@@ -569,7 +632,7 @@ export function GrievancesConsole() {
                   <Filter className="w-4 h-4" />
                   {t('grievances.filterStatus')}:
                 </span>
-                {(["all", "filed", "step-1", "step-2", "step-3", "arbitration", "resolved"] as const).map((status) => (
+                {STATUS_FILTERS.map((status) => (
                   <button
                     key={status}
                     onClick={() => setSelectedStatus(status)}
@@ -579,9 +642,8 @@ export function GrievancesConsole() {
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
-                    {status === "all" ? t('common.all') : statusConfig[status as GrievanceStatus].label}
-                    {status === "all" && ` (${statusCounts.all})`}
-                    {status !== "all" && ` (${statusCounts[status as GrievanceStatus]})`}
+                    {status === "all" ? t('common.all') : statusConfig[status].label}
+                    {` (${statusCounts[status]})`}
                   </button>
                 ))}
               </div>
@@ -602,7 +664,7 @@ export function GrievancesConsole() {
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
-                    {priority === "all" ? t('grievances.allPriorities') : priorityConfig[priority as GrievancePriority].label}
+                    {priority === "all" ? t('grievances.allPriorities') : priorityConfig[priority].label}
                   </button>
                 ))}
               </div>
@@ -666,7 +728,11 @@ export function GrievancesConsole() {
                 </Card>
               </motion.div>
             ) : (
-              filteredGrievances.map((grievance, index) => (
+              filteredGrievances.map((grievance, index) => {
+                const status = statusConfig[grievance.status];
+                const priority = grievance.priority ? priorityConfig[grievance.priority] : null;
+                const open = grievance.status !== "resolved" && grievance.status !== "withdrawn";
+                return (
                 <motion.div
                   key={grievance.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -682,28 +748,30 @@ export function GrievancesConsole() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">{grievance.number}</h3>
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${(statusConfig[grievance.status] ?? statusConfig.filed).color}`}>
-                              {(statusConfig[grievance.status] ?? statusConfig.filed).icon}
-                              {(statusConfig[grievance.status] ?? statusConfig.filed).label}
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${status.color}`}>
+                              {status.icon}
+                              {statusLabel(grievance)}
                             </span>
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${(priorityConfig[grievance.priority] ?? priorityConfig.medium).color}`}>
-                              {(priorityConfig[grievance.priority] ?? priorityConfig.medium).icon}
-                              {(priorityConfig[grievance.priority] ?? priorityConfig.medium).label}
-                            </span>
-                            {grievance.daysUntilDeadline <= 7 && grievance.daysUntilDeadline > 0 && (
+                            {priority && (
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${priority.color}`}>
+                                {priority.icon}
+                                {priority.label}
+                              </span>
+                            )}
+                            {open && grievance.daysUntilDeadline !== null && grievance.daysUntilDeadline <= 7 && grievance.daysUntilDeadline >= 0 && (
                               <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full border border-yellow-200">
                                 {t('grievances.deadlineCountdown', { days: grievance.daysUntilDeadline })}
                               </span>
                             )}
-                            {grievance.daysUntilDeadline < 0 && (
+                            {open && grievance.daysUntilDeadline !== null && grievance.daysUntilDeadline < 0 && (
                               <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full border border-red-200 flex items-center gap-1">
                                 <AlertTriangle className="w-3 h-3" />
                                 {t('grievances.overdue')}
                               </span>
                             )}
                           </div>
-                          <p className="text-base font-medium text-gray-900 mb-1">{grievance.title}</p>
-                          <p className="text-sm text-gray-600">{grievance.description}</p>
+                          <p className="text-base font-medium text-gray-900 mb-1">{grievance.title ?? copy.restricted}</p>
+                          {grievance.description && <p className="text-sm text-gray-600">{grievance.description}</p>}
                         </div>
                         <button
                           onClick={() => setExpandedGrievance(expandedGrievance === grievance.id ? null : grievance.id)}
@@ -721,19 +789,19 @@ export function GrievancesConsole() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                         <div>
                           <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.category')}</p>
-                          <p className="text-sm font-medium text-gray-900">{grievance.category}</p>
+                          <p className="text-sm font-medium text-gray-900">{categoryLabel(grievance.category)}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.currentStep')}</p>
-                          <p className="text-sm font-medium text-gray-900">{grievance.currentStep}</p>
+                          <p className="text-sm font-medium text-gray-900">{grievance.currentStep ? grievance.currentStep.replace(/_/g, " ") : copy.none}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.filedDate')}</p>
-                          <p className="text-sm font-medium text-gray-900">{new Date(grievance.filedDate).toLocaleDateString()}</p>
+                          <p className="text-sm font-medium text-gray-900">{formatDate(grievance.filedDate)}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.deadline')}</p>
-                          <p className="text-sm font-medium text-gray-900">{new Date(grievance.deadline).toLocaleDateString()}</p>
+                          <p className="text-sm font-medium text-gray-900">{formatDate(grievance.deadline)}</p>
                         </div>
                       </div>
 
@@ -752,18 +820,14 @@ export function GrievancesConsole() {
                                 <User className="w-4 h-4 text-blue-600" />
                                 {t('grievances.partiesInvolved')}
                               </h4>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                   <p className="text-xs text-gray-600 mb-1">{t('grievances.partyLabels.grievant')}</p>
-                                  <p className="text-sm font-medium text-gray-900">{grievance.grievant}</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-gray-600 mb-1">{t('grievances.partyLabels.steward')}</p>
-                                  <p className="text-sm font-medium text-gray-900">{grievance.steward}</p>
+                                  <p className="text-sm font-medium text-gray-900">{grievance.grievant ?? copy.none}</p>
                                 </div>
                                 <div>
                                   <p className="text-xs text-gray-600 mb-1">{t('grievances.partyLabels.management')}</p>
-                                  <p className="text-sm font-medium text-gray-900">{grievance.management}</p>
+                                  <p className="text-sm font-medium text-gray-900">{grievance.management ?? copy.none}</p>
                                 </div>
                               </div>
                             </div>
@@ -774,7 +838,7 @@ export function GrievancesConsole() {
                                 <FileText className="w-4 h-4 text-purple-600" />
                                 {t('grievances.contractViolation')}
                               </h4>
-                              <p className="text-sm text-gray-900 font-medium">{grievance.violatedArticle}</p>
+                              <p className="text-sm text-gray-900 font-medium">{grievance.violatedArticle ?? copy.none}</p>
                             </div>
 
                             {/* Remedy Sought */}
@@ -783,7 +847,7 @@ export function GrievancesConsole() {
                                 <CheckCircle className="w-4 h-4 text-green-600" />
                                 {t('grievances.remedySought')}
                               </h4>
-                              <p className="text-sm text-gray-700">{grievance.remedy}</p>
+                              <p className="text-sm text-gray-700">{grievance.remedy ?? copy.none}</p>
                             </div>
 
                             {/* Timeline */}
@@ -792,25 +856,29 @@ export function GrievancesConsole() {
                                 <Calendar className="w-4 h-4 text-gray-600" />
                                 {t('grievances.timelineTitle')}
                               </h4>
-                              <div className="space-y-4">
-                                {grievance.timeline.map((event, idx) => (
-                                  <div key={idx} className="flex gap-4">
-                                    <div className="flex flex-col items-center">
-                                      <div className={`w-8 h-8 rounded-full ${(timelineTypeConfig[event.type] ?? timelineTypeConfig.filed).color} flex items-center justify-center`}>
-                                        {(timelineTypeConfig[event.type] ?? timelineTypeConfig.filed).icon}
+                              {grievance.timeline.length === 0 ? (
+                                <p className="text-sm text-gray-500">{copy.noTimeline}</p>
+                              ) : (
+                                <div className="space-y-4">
+                                  {grievance.timeline.map((event, idx) => (
+                                    <div key={idx} className="flex gap-4">
+                                      <div className="flex flex-col items-center">
+                                        <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
+                                          <Calendar className="w-4 h-4 text-white" />
+                                        </div>
+                                        {idx < grievance.timeline.length - 1 && (
+                                          <div className="w-0.5 h-full bg-gray-300 mt-2"></div>
+                                        )}
                                       </div>
-                                      {idx < grievance.timeline.length - 1 && (
-                                        <div className="w-0.5 h-full bg-gray-300 mt-2"></div>
-                                      )}
+                                      <div className="flex-1 pb-6">
+                                        <p className="text-sm font-semibold text-gray-900">{event.event}</p>
+                                        <p className="text-xs text-gray-600 mb-1">{formatDate(event.date)}</p>
+                                        {event.description && <p className="text-sm text-gray-700">{event.description}</p>}
+                                      </div>
                                     </div>
-                                    <div className="flex-1 pb-6">
-                                      <p className="text-sm font-semibold text-gray-900">{event.event}</p>
-                                      <p className="text-xs text-gray-600 mb-1">{new Date(event.date).toLocaleDateString()}</p>
-                                      <p className="text-sm text-gray-700">{event.description}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
 
                             {/* Action Buttons */}
@@ -846,37 +914,44 @@ export function GrievancesConsole() {
                                 )}
                               </div>
                               <button
-                                onClick={() => handleAssignSteward(grievance)}
-                                disabled={actionLoading === `assign-${grievance.id}`}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                onClick={() =>
+                                  setAssigningGrievanceId((current) => (current === grievance.id ? null : grievance.id))
+                                }
+                                aria-expanded={assigningGrievanceId === grievance.id}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                               >
-                                {actionLoading === `assign-${grievance.id}` ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <User className="w-4 h-4" />
-                                )}
+                                <User className="w-4 h-4" />
                                 <span className="text-sm font-medium">{t('grievances.assignSteward')}</span>
                               </button>
-                              <button
-                                onClick={() => handleAddDocument(grievance)}
-                                disabled={actionLoading === `doc-${grievance.id}`}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                              <Link
+                                href={`/${locale}/dashboard/grievances/${grievance.id}`}
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                               >
-                                {actionLoading === `doc-${grievance.id}` ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <FileText className="w-4 h-4" />
-                                )}
+                                <FileText className="w-4 h-4" />
                                 <span className="text-sm font-medium">{t('grievances.addDocumentation')}</span>
-                              </button>
+                              </Link>
                             </div>
+
+                            {/* The recommendations are ranked by the server; the assignment is its own request (PATCH /api/grievances/:id/assign). */}
+                            {assigningGrievanceId === grievance.id && (
+                              <div className="mt-4">
+                                <StewardRecommendations
+                                  grievanceId={grievance.id}
+                                  onAssign={() => {
+                                    setAssigningGrievanceId(null);
+                                    void fetchGrievances();
+                                  }}
+                                />
+                              </div>
+                            )}
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </CardContent>
                   </Card>
                 </motion.div>
-              ))
+                );
+              })
             )}
           </AnimatePresence>
         </div>
@@ -896,16 +971,13 @@ export function GrievancesConsole() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('grievances.guidelines.title')}</h3>
-                  <ul className="text-sm text-gray-700 space-y-1 mb-4">
+                  <ul className="text-sm text-gray-700 space-y-1">
                     <li>• {t('grievances.guidelines.step1')}</li>
                     <li>• {t('grievances.guidelines.step2')}</li>
                     <li>• {t('grievances.guidelines.step3')}</li>
                     <li>• {t('grievances.guidelines.arbitration')}</li>
                     <li>• {t('grievances.guidelines.deadlines')}</li>
                   </ul>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-                    View Full Grievance Procedure
-                  </button>
                 </div>
               </div>
             </CardContent>

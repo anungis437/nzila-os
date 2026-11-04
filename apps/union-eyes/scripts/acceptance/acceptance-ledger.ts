@@ -362,6 +362,7 @@ export function buildAcceptanceControls() {
   return {
     summary: {
       rootCallers: graph.summary.rootCallers,
+      retiredRootCallers: graph.summary.retiredRootCallers,
       mutatingCallers: mutating.length,
       mutatingBound: mutating.filter((caller) => caller.boundControl).length,
       mutatingUnmapped: mutating.filter((caller) => !caller.boundControl).length,

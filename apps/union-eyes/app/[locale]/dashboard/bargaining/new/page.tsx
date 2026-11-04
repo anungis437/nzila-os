@@ -10,16 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { ArrowLeft, Save } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { readApiError } from '@/lib/client/api-envelope';
 
+/**
+ * Only what the negotiations route takes (lib/bargaining/negotiation-route-rules): the status, the mandate, the costing and the confidentiality label come from
+ * their own records, so a new negotiation starts as Scheduled and Restricted and none of them is typed here.
+ */
 interface NegotiationFormData {
   title: string;
   description: string;
@@ -27,12 +25,9 @@ interface NegotiationFormData {
   unionLocal: string;
   employerName: string;
   bargainingUnitSize: string;
-  status: string;
   noticeGivenDate: string;
   firstSessionDate: string;
   targetCompletionDate: string;
-  estimatedCost: string;
-  confidentialityLevel: string;
 }
 
 export default function NewNegotiationPage() {
@@ -40,6 +35,7 @@ export default function NewNegotiationPage() {
   const locale = useLocale();
   const t = useTranslations('bargaining');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<NegotiationFormData>({
     title: '',
     description: '',
@@ -47,12 +43,9 @@ export default function NewNegotiationPage() {
     unionLocal: '',
     employerName: '',
     bargainingUnitSize: '',
-    status: 'scheduled',
     noticeGivenDate: '',
     firstSessionDate: '',
     targetCompletionDate: '',
-    estimatedCost: '',
-    confidentialityLevel: 'restricted',
   });
 
   const updateField = (field: keyof NegotiationFormData, value: string) => {
@@ -62,6 +55,7 @@ export default function NewNegotiationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
 
     try {
       const payload: Record<string, unknown> = {
@@ -71,12 +65,9 @@ export default function NewNegotiationPage() {
         unionLocal: formData.unionLocal || null,
         employerName: formData.employerName,
         bargainingUnitSize: formData.bargainingUnitSize ? parseInt(formData.bargainingUnitSize, 10) : null,
-        status: formData.status,
         noticeGivenDate: formData.noticeGivenDate ? new Date(formData.noticeGivenDate).toISOString() : null,
         firstSessionDate: formData.firstSessionDate ? new Date(formData.firstSessionDate).toISOString() : null,
         targetCompletionDate: formData.targetCompletionDate ? new Date(formData.targetCompletionDate).toISOString() : null,
-        estimatedCost: formData.estimatedCost || null,
-        confidentialityLevel: formData.confidentialityLevel,
       };
 
       const response = await fetch('/api/bargaining/negotiations', {
@@ -87,15 +78,17 @@ export default function NewNegotiationPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to create negotiation (${response.status})`);
+        throw new Error(await readApiError(response, `Failed to create negotiation (${response.status})`));
       }
 
-      const data = await response.json();
-      router.push(`/${locale}/dashboard/bargaining/negotiations/${data.id || data.data?.id || ''}`);
+      // The route answers { success, data: { data: <the new negotiation> } }: the framework's envelope around the generic writer's own { data }.
+      const created = (await response.json()) as { data?: { data?: { id?: string } } };
+      const id = created.data?.data?.id;
+      if (!id) throw new Error('The negotiation was created, but the server did not say which one. Open it from the bargaining dashboard.');
+      router.push(`/${locale}/dashboard/bargaining/negotiations/${id}`);
     } catch (error) {
       logger.error('Error creating negotiation', error);
-      alert(error instanceof Error ? error.message : 'Error creating negotiation. Please try again.');
+      setError(error instanceof Error ? error.message : 'Error creating negotiation. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -192,40 +185,9 @@ export default function NewNegotiationPage() {
             </div>
           </div>
 
-          {/* Status & Confidentiality */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Configuration</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="status">{t('negotiations.status')}</Label>
-                <Select value={formData.status} onValueChange={(v) => updateField('status', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="scheduled">Scheduled</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="impasse">Impasse</SelectItem>
-                    <SelectItem value="conciliation">Conciliation</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confidentialityLevel">Confidentiality Level</Label>
-                <Select value={formData.confidentialityLevel} onValueChange={(v) => updateField('confidentialityLevel', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="restricted">Restricted</SelectItem>
-                    <SelectItem value="confidential">Confidential</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+          <p className="border-t pt-6 text-sm text-muted-foreground">
+            A new negotiation starts as Scheduled and Restricted. Its status, strike vote, mandate and costing cannot be typed in here.
+          </p>
 
           {/* Key Dates */}
           <div className="border-t pt-6">
@@ -263,23 +225,12 @@ export default function NewNegotiationPage() {
             </div>
           </div>
 
-          {/* Cost */}
-          <div className="border-t pt-6">
-            <div className="space-y-2 max-w-xs">
-              <Label htmlFor="estimatedCost">Estimated Cost ($)</Label>
-              <Input
-                id="estimatedCost"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.estimatedCost}
-                onChange={(e) => updateField('estimatedCost', e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
           {/* Submit */}
+          {error && (
+            <p role="alert" className="border-t pt-6 text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <div className="border-t pt-6 flex justify-end gap-3">
             <Button
               type="button"

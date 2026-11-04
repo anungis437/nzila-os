@@ -5,16 +5,16 @@
  * officer decides here. Approval is claimed atomically (so two approvers cannot both publish the same draft), the external publish
  * is audited before and after, and the decision, the decider and the time are kept on the post and in the audit trail.
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { and, eq, sql } from 'drizzle-orm';
-import { db } from '@/db';
 import { socialPosts, socialAccounts } from '@/db/schema/social-media-schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
+import { logger } from '@/lib/logger';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 import { AllPlatformsFailedError, createSocialMediaService } from '@/lib/social-media/social-media-service';
 
@@ -36,9 +36,17 @@ const stillPending = (postId: string, organizationId: string) =>
     sql`${socialPosts.postMetadata}->'approval'->>'state' = 'pending'`,
   );
 
-export const POST = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-  if (!userId || !organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+// Approving publishes to the platform (a network call): no transaction spans the handler. Every database step (the read, the claim, the
+// rejection, the outcome after the publish) runs in the organization's own tenant transaction, and the publish is a durable audited operation.
+export const POST = withApi(
+  {
+    auth: { minRole: 'officer' },
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Social media'], summary: 'Approve or reject a drafted social media post' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
 
   const limit = await checkRateLimit(`social-posts-review:${userId}`, RATE_LIMITS.SOCIAL_MEDIA_POST);
   if (!limit.allowed) return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded', { resetIn: limit.resetIn });
@@ -53,25 +61,27 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
   const review = parsed.data;
 
   try {
-    const [draft] = await db
-      .select({
-        id: socialPosts.id,
-        accountId: socialPosts.accountId,
-        campaignId: socialPosts.campaignId,
-        content: socialPosts.content,
-        mediaUrls: socialPosts.mediaUrls,
-        linkUrl: socialPosts.linkUrl,
-        hashtags: socialPosts.hashtags,
-        scheduledFor: socialPosts.scheduledFor,
-        status: socialPosts.status,
-        createdBy: socialPosts.createdBy,
-        postMetadata: socialPosts.postMetadata,
-        platform: socialAccounts.platform,
-      })
-      .from(socialPosts)
-      .innerJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
-      .where(and(eq(socialPosts.id, review.post_id), eq(socialPosts.organizationId, organizationId)))
-      .limit(1);
+    const [draft] = await withRLSContext({ organizationId }, (tx) =>
+      tx
+        .select({
+          id: socialPosts.id,
+          accountId: socialPosts.accountId,
+          campaignId: socialPosts.campaignId,
+          content: socialPosts.content,
+          mediaUrls: socialPosts.mediaUrls,
+          linkUrl: socialPosts.linkUrl,
+          hashtags: socialPosts.hashtags,
+          scheduledFor: socialPosts.scheduledFor,
+          status: socialPosts.status,
+          createdBy: socialPosts.createdBy,
+          postMetadata: socialPosts.postMetadata,
+          platform: socialAccounts.platform,
+        })
+        .from(socialPosts)
+        .innerJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
+        .where(and(eq(socialPosts.id, review.post_id), eq(socialPosts.organizationId, organizationId)))
+        .limit(1),
+    );
     if (!draft) return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Post not found');
 
     const approval = (draft.postMetadata as { approval?: { state?: string } } | null)?.approval;
@@ -165,15 +175,17 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       );
     } catch (error) {
       if (error instanceof AllPlatformsFailedError) {
-        await db
-          .update(socialPosts)
-          .set({
-            status: 'failed',
-            errorMessage: error.results[0]?.error ?? 'The platform did not accept the post.',
-            updatedAt: new Date(),
-            postMetadata: approvalPatch({ state: 'approved_publish_failed' }),
-          })
-          .where(and(eq(socialPosts.id, draft.id), eq(socialPosts.organizationId, organizationId)));
+        await withRLSContext({ organizationId }, (tx) =>
+          tx
+            .update(socialPosts)
+            .set({
+              status: 'failed',
+              errorMessage: error.results[0]?.error ?? 'The platform did not accept the post.',
+              updatedAt: new Date(),
+              postMetadata: approvalPatch({ state: 'approved_publish_failed' }),
+            })
+            .where(and(eq(socialPosts.id, draft.id), eq(socialPosts.organizationId, organizationId))),
+        );
         return NextResponse.json({ error: 'The platform did not accept the post', results: error.results }, { status: 502 });
       }
       const refused = operationAuditResponse(error);
@@ -192,13 +204,17 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
     }
 
-    await db
-      .update(socialPosts)
-      .set({ postMetadata: approvalPatch({ state: 'approved' }) })
-      .where(and(eq(socialPosts.id, draft.id), eq(socialPosts.organizationId, organizationId)));
+    await withRLSContext({ organizationId }, (tx) =>
+      tx
+        .update(socialPosts)
+        .set({ postMetadata: approvalPatch({ state: 'approved' }) })
+        .where(and(eq(socialPosts.id, draft.id), eq(socialPosts.organizationId, organizationId))),
+    );
 
     return NextResponse.json({ status: draft.scheduledFor ? 'scheduled' : 'published', post_id: draft.id, result: results[0] });
   } catch (error) {
+    logger.error('Failed to review the social media post', { error });
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Internal server error', error);
   }
-});
+  },
+);

@@ -64,10 +64,9 @@ vi.mock('@/db', () => {
 
   const mockGroupBy = vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) });
   const mockWhere = vi.fn().mockReturnValue({ groupBy: mockGroupBy });
-  const mockLeftJoin4 = vi.fn().mockReturnValue({ where: mockWhere });
-  const mockLeftJoin3 = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin4 });
-  const mockLeftJoin2 = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin3 });
-  const mockSelectFrom = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin2 });
+  const mockLeftJoin2 = vi.fn().mockReturnValue({ where: mockWhere });
+  const mockLeftJoin1 = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin2 });
+  const mockSelectFrom = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin1 });
   const mockSelect = vi.fn().mockReturnValue({ from: mockSelectFrom });
 
   return {
@@ -116,6 +115,12 @@ vi.mock('../email-service', () => ({
 }));
 
 vi.mock('@/lib/logger', () => ({ logger: mocks.mockLogger }));
+
+// The expiry scan and the warning markers run in short system transactions (the cron has no tenant session); here they run on the mocked handle.
+vi.mock('@/lib/db/with-rls-context', async () => {
+  const { db } = await import('@/db');
+  return { withSystemContext: async (operation: (tx: unknown) => Promise<unknown>) => operation(db) };
+});
 
 // The sent marker has its own PostgreSQL test (expiration-warnings.pglite.test.ts); here every warning is a first warning.
 vi.mock('../expiry-warning-marker', () => ({
@@ -508,10 +513,9 @@ describe('notification-service (extended paths)', () => {
       const emptyLimit = vi.fn().mockResolvedValue([]);
       const groupByFn = vi.fn().mockReturnValue({ limit: emptyLimit });
       const whereFn = vi.fn().mockReturnValue({ groupBy: groupByFn });
-      const lj4 = vi.fn().mockReturnValue({ where: whereFn });
-      const lj3 = vi.fn().mockReturnValue({ leftJoin: lj4 });
-      const lj2 = vi.fn().mockReturnValue({ leftJoin: lj3 });
-      const fromFn = vi.fn().mockReturnValue({ leftJoin: lj2 });
+      const lj2 = vi.fn().mockReturnValue({ where: whereFn });
+      const lj1 = vi.fn().mockReturnValue({ leftJoin: lj2 });
+      const fromFn = vi.fn().mockReturnValue({ leftJoin: lj1 });
       (db.select as ReturnType<typeof vi.fn>).mockReturnValue({ from: fromFn });
 
       const result = await sendBatchExpirationWarnings();

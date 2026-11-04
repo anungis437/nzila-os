@@ -29,6 +29,7 @@ const governanceSchema = z.object({
 
 export const PATCH = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'admin' },
     entitlement: 'union_knowledge_suite',
     body: governanceSchema,

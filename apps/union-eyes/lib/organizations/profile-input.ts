@@ -8,6 +8,13 @@ import { z } from 'zod'
 const SETTINGS_MAX_BYTES = 16 * 1024
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
+/** A real calendar date written YYYY-MM-DD: `new Date` alone normalizes impossible days (2020-02-31 becomes March), so the date is round-tripped. */
+export function isCalendarDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const instant = new Date(`${value}T00:00:00.000Z`)
+  return Number.isFinite(instant.getTime()) && instant.toISOString().slice(0, 10) === value
+}
+
 const settingsSchema = z
   .record(z.string().max(100), z.unknown())
   .refine((value) => Object.keys(value).length <= 200, 'settings has too many keys')
@@ -18,6 +25,9 @@ export const organizationPatchSchema = z
     name: z.string().trim().min(1).max(255),
     slug: z.string().trim().toLowerCase().min(2).max(100).regex(SLUG, 'slug must be lowercase letters, digits and single hyphens'),
     display_name: z.string().trim().max(255).nullable(),
+    description: z.string().trim().max(2000).nullable(),
+    charter_number: z.string().trim().max(100).nullable(),
+    affiliation_date: z.string().trim().refine(isCalendarDate, 'affiliation_date must be a calendar date (YYYY-MM-DD)').nullable(),
     status: z.string().trim().min(1).max(50),
     email: z.string().trim().max(254).email().nullable(),
     phone: z.string().trim().max(40).nullable(),

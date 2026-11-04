@@ -32,6 +32,7 @@ import {
 } from './session'
 import { issueMfaChallenge } from '../mfa/service'
 import { assessRisk } from '../risk/assess'
+import { isLocalQaRuntime } from '../runtime-identity'
 import { authDb, withAuthContext, withAuthSavepoint, checkAuthRequestRateLimit, insertAuthRow } from '../auth-db'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -99,9 +100,13 @@ const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000 // 1 hour
 const MAX_RESET_REQUESTS = 3 // Max resets per window per IP
 
-function isPlaywrightE2EAuthRequest(input: { userAgent?: string | null }): boolean {
+/**
+ * The Playwright login shortcut skips the risk assessment and the MFA step. The request names itself with a User-Agent anyone can send, so the shortcut exists
+ * only on the QA harness of a developer or acceptance machine: the test flag alone is never enough, and a deployed environment ignores it.
+ */
+export function isPlaywrightE2EAuthRequest(input: { userAgent?: string | null }): boolean {
   const testAuthEnabled = (process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true'
-  if (!testAuthEnabled) {
+  if (!testAuthEnabled || !isLocalQaRuntime()) {
     return false
   }
 

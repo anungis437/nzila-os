@@ -64,25 +64,16 @@
     "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts",
     "apps/union-eyes/app/api/__tests__/documents.route.test.ts",
     "apps/union-eyes/app/api/__tests__/signatures-documents.route.test.ts",
-    "apps/union-eyes/components/documents/advanced-search.tsx",
-    "apps/union-eyes/components/documents/document-approval-workflow.tsx",
     "apps/union-eyes/components/documents/document-browser.tsx",
     "apps/union-eyes/components/documents/document-bulk-operations.tsx",
     "apps/union-eyes/components/documents/document-library-browser.tsx",
-    "apps/union-eyes/components/documents/document-preview-modal.tsx",
     "apps/union-eyes/components/documents/document-retention-policy.tsx",
     "apps/union-eyes/components/documents/document-search-advanced.tsx",
-    "apps/union-eyes/components/documents/document-sharing-controls.tsx",
     "apps/union-eyes/components/documents/document-template-manager.tsx",
     "apps/union-eyes/components/documents/document-version-control.tsx",
     "apps/union-eyes/components/documents/documents-console.tsx",
     "apps/union-eyes/components/documents/ocr-upload.tsx",
     "apps/union-eyes/lib/documents/batch-operations-service.ts",
-    "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-adapter.test.ts",
-    "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts",
-    "apps/union-eyes/lib/integrations/adapters/documents/index.ts",
-    "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-adapter.ts",
-    "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts",
     "apps/union-eyes/lib/services/cba-intelligence/document-service.ts",
     "apps/union-eyes/lib/services/cba-intelligence/__tests__/document-service.test.ts",
     "apps/union-eyes/lib/services/document-service.ts",
@@ -190,7 +181,6 @@
     "apps/union-eyes/app/api/grievances/[id]/documents/route.ts",
     "apps/union-eyes/app/api/members/[id]/documents/route.ts",
     "apps/union-eyes/app/api/__tests__/grievances-documents.route.test.ts",
-    "apps/union-eyes/app/api/__tests__/grievances-id-documents.route.test.ts",
     "apps/union-eyes/app/api/__tests__/grievances-related-documents.route.test.ts"
   ],
   "cursorForbiddenPathPrefixes": [
@@ -357,8 +347,7 @@
     "apps/union-eyes/components/documents/ocr-upload.tsx",
     "apps/union-eyes/components/documents/ocr-upload.journey.test.tsx",
     "apps/union-eyes/lib/documents/canonical-journey.test.ts",
-    "apps/union-eyes/components/pension/pension-member-console.tsx",
-    "apps/union-eyes/lib/mobile/background-sync.ts"
+    "apps/union-eyes/components/pension/pension-member-console.tsx"
   ],
   "trancheOneQualification": {
     "status": "QUALIFIED_LOCAL",

@@ -20,6 +20,11 @@ vi.mock('@/lib/services/payment-service', () => ({
     handlePaymentSuccess: m.handlePaymentSuccess,
     handlePaymentFailure: m.handlePaymentFailure,
   },
+  PaymentAuthorityError: class PaymentAuthorityError extends Error {
+    constructor(readonly code: string, message: string) {
+      super(message);
+    }
+  },
 }));
 vi.mock('@/lib/services/rewards/webhook-service', () => ({
   isWebhookProcessed: m.isWebhookProcessed,
@@ -156,7 +161,7 @@ describe('payments/webhooks/paypal route', () => {
     }));
   });
 
-  it('returns non-retrying success envelope on unexpected verification errors', async () => {
+  it('answers 400 for a request without PayPal signature headers, and reads nothing from the database', async () => {
     const { POST } = await loadRoute();
     const headers = {
       'content-type': 'application/json',
@@ -165,10 +170,91 @@ describe('payments/webhooks/paypal route', () => {
 
     const response = await POST(makeRequest({ id: 'evt-err-1', event_type: 'PAYMENT.CAPTURE.COMPLETED', resource: {} }, headers));
 
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({
-      received: true,
-      error: 'Internal processing error',
-    });
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ error: 'Missing PayPal signature headers' });
+    expect(m.isWebhookProcessed).not.toHaveBeenCalled();
+    expect(m.handlePaymentSuccess).not.toHaveBeenCalled();
+  });
+
+  it('answers 400 for a body that is not a JSON object, and 413 for one over the limit, before calling PayPal', async () => {
+    const { POST } = await loadRoute();
+    const raw = (body: string) => new NextRequest('http://localhost/api/payments/webhooks/paypal', { method: 'POST', headers: paypalHeaders(), body });
+
+    expect((await POST(raw('not-json'))).status).toBe(400);
+    expect((await POST(raw('[1,2]'))).status).toBe(400);
+    expect((await POST(raw(JSON.stringify({ id: 'evt', padding: 'x'.repeat(300 * 1024) })))).status).toBe(413);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(m.isWebhookProcessed).not.toHaveBeenCalled();
+  });
+
+  it('checks the signature before it reads or writes anything: an event PayPal does not vouch for touches no state', async () => {
+    const { POST } = await loadRoute();
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      if (url.includes('/v1/oauth2/token')) return new Response(JSON.stringify({ access_token: 'token-123' }), { status: 200 });
+      return new Response(JSON.stringify({ verification_status: 'FAILURE' }), { status: 200 });
+    }));
+
+    const response = await POST(makeRequest({ id: 'evt-forged', event_type: 'PAYMENT.CAPTURE.COMPLETED', resource: { id: 'pay-1', amount: { value: '1.00' }, custom_id: 'txn-1' } }));
+
+    expect(response.status).toBe(400);
+    expect(m.isWebhookProcessed).not.toHaveBeenCalled();
+    expect(m.handlePaymentSuccess).not.toHaveBeenCalled();
+    expect(m.recordWebhookProcessed).not.toHaveBeenCalled();
+  });
+
+  it('answers 500, so PayPal delivers the event again, when PayPal\u2019s verification service fails', async () => {
+    const { POST } = await loadRoute();
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('unavailable', { status: 503 })));
+
+    const response = await POST(makeRequest({ id: 'evt-retry-1', event_type: 'PAYMENT.CAPTURE.COMPLETED', resource: {} }));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({ received: false, error: 'Internal processing error' });
+    expect(m.handlePaymentSuccess).not.toHaveBeenCalled();
+  });
+
+  it('answers 500 and does not record the event as processed when the payment cannot be recorded', async () => {
+    const { POST } = await loadRoute();
+    m.handlePaymentSuccess.mockRejectedValueOnce(new Error('connection reset'));
+
+    const response = await POST(makeRequest({
+      id: 'evt-db-down',
+      event_type: 'PAYMENT.CAPTURE.COMPLETED',
+      resource: { id: 'pay-1', amount: { value: '42.50' }, custom_id: 'txn-123' },
+    }));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({ received: false });
+    expect(m.recordWebhookProcessed).not.toHaveBeenCalled();
+  });
+
+  it('answers 500 when the failure of a payment cannot be recorded', async () => {
+    const { POST } = await loadRoute();
+    m.handlePaymentFailure.mockRejectedValueOnce(new Error('connection reset'));
+
+    const response = await POST(makeRequest({
+      id: 'evt-fail-db-down',
+      event_type: 'PAYMENT.CAPTURE.DENIED',
+      resource: { id: 'pay-2', status: 'DENIED', custom_id: 'txn-9' },
+    }));
+
+    expect(response.status).toBe(500);
+    expect(m.recordWebhookProcessed).not.toHaveBeenCalled();
+  });
+
+  it('answers 422, not success and not a retry-into-nothing 5xx, for an event the application refuses', async () => {
+    const { POST } = await loadRoute();
+    const { PaymentAuthorityError } = await import('@/lib/services/payment-service');
+    m.handlePaymentSuccess.mockRejectedValueOnce(new PaymentAuthorityError('CONFLICT', 'The paid amount differs from the amount on record'));
+
+    const response = await POST(makeRequest({
+      id: 'evt-conflict',
+      event_type: 'PAYMENT.CAPTURE.COMPLETED',
+      resource: { id: 'pay-3', amount: { value: '1.00' }, custom_id: 'txn-5' },
+    }));
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toEqual({ received: false, error: 'payment_rejected', code: 'CONFLICT' });
+    expect(m.recordWebhookProcessed).not.toHaveBeenCalled();
   });
 });

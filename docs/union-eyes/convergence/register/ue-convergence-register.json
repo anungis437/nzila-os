@@ -244,12 +244,10 @@
           "classification": "ACTIVE_COMPATIBILITY"
         }
       ],
-      "defect": "Provider code, packages, credentials and seed were removed; remaining references are the documented webhook alias, Whop legacy metadata, legacy-env detection, historical migrations, the unrelated Admin Clerk office role, and the physical column name clerk_user_id.",
-      "consumers": [
-        "apps/union-eyes/app/api/whop/create-checkout/route.ts"
-      ],
+      "defect": "Provider code, packages, credentials and seed were removed; remaining references are the documented webhook alias, legacy-env detection, historical migrations, the unrelated Admin Clerk office role, and the physical column name clerk_user_id.",
+      "consumers": [],
       "securityImplications": "Legacy webhook header and env names are detection-only; the physical column name is cosmetic but misleading.",
-      "requiredImplementation": "Forward migration renaming clerk_user_id to auth_user_id across user_uuid_mapping consumers; retire the webhook alias and Whop key once their external consumers are confirmed. CONTINUATION 7: Every remaining Clerk reference is classified by exact file (lib/auth/identity-provider-residuals.ts) and a test fails on any new unclassified one; nothing inside Union Eyes was provably dead, shared platform-auth aliases are removable on that owner's approval.",
+      "requiredImplementation": "Forward migration renaming clerk_user_id to auth_user_id across user_uuid_mapping consumers; retire the webhook alias once its external consumer is confirmed. CONTINUATION 7: Every remaining Clerk reference is classified by exact file (lib/auth/identity-provider-residuals.ts) and a test fails on any new unclassified one; nothing inside Union Eyes was provably dead, shared platform-auth aliases are removable on that owner's approval.",
       "evidence": [
         {
           "type": "commit",
@@ -273,7 +271,7 @@
     {
       "id": "UE-CONV-A-007",
       "domain": "identity",
-      "capability": "Webhook, Whop and test-credential external actions",
+      "capability": "Webhook and test-credential external actions",
       "workstream": "J",
       "canonicalOwner": "identity operations / integration owners",
       "sources": [
@@ -283,15 +281,15 @@
           "classification": "ACTIVE_COMPATIBILITY"
         }
       ],
-      "defect": "The auth webhook secret is provisioned but no sender exists in the repository; Whop consumer unknown; roughly 45 staging accounts used a repo-known test password.",
+      "defect": "The auth webhook secret is provisioned but no sender exists in the repository; roughly 45 staging accounts used a repo-known test password.",
       "consumers": [],
       "securityImplications": "A known password may still be accepted by staging accounts.",
       "requiredImplementation": "External actions only.",
       "evidence": [],
       "status": "EXTERNAL_GATE",
       "externalGate": {
-        "owner": "identity operations; integration owners; billing integration",
-        "missingProof": "Dated evidence that the old password is rejected or the accounts disabled; identity of the webhook sender and a delivery log; confirmation that the Whop consumer reads userId only."
+        "owner": "identity operations; integration owners",
+        "missingProof": "Dated evidence that the old password is rejected or the accounts disabled; identity of the webhook sender and a delivery log."
       },
       "retirement": {
         "disposition": "NONE"
@@ -1457,7 +1455,7 @@
           "classification": "CANONICAL"
         }
       ],
-      "defect": "No artifact recorded, for each of the 968 app/api routes, how it authenticates, what bounds its data, whether its writes are audited atomically or whether the authority kernel decides it. The manifest now does (textual classification, with one import hop followed for audit evidence), and three ratchets hold it: a mutating route with no authentication mechanism must be in a documented public allowlist (8 today; each now carries a control the ratchet asserts: the staging-proof route answers only an image built for staging, by build-time NEXT_PUBLIC_APP_ENV, so a production build can never answer a proof request whatever its runtime variables say; workbook, contact, whop and assessment routes use the shared public-intake guard (per-client limit that refuses when the limiter is unavailable outside development, a 16 KB body cap, strict JSON); the auth request routes are limited per IP by the proxy; capability-token routes are limited before any lookup); the route-level audit gap may not grow (baseline shrinks as routes convert); and the kernel-adoption backlog for case, claim, document and message mutations may not grow. The scan found the emergency routes returning 200 with an invented declaration, an activated break-glass state, audit and notification claims and fabricated preparedness and compliance figures, persisting nothing, with recovery callable by any authenticated user; activate, recovery and dashboard now return 501 (capability UE-EMERGENCY-DECLARATION). REMAINING: the audit-gap and kernel-adoption baselines are the open work list; the legacy documents API (flag-gated, role-based, used by several components) needs a retire-or-migrate decision; the manifest is a textual classification, not proof of authorization; the public-intake limiter is as strong as its Redis backend and its client-address header, and the per-client limit is not an idempotency control.",
+      "defect": "No artifact recorded, for each of the 968 app/api routes, how it authenticates, what bounds its data, whether its writes are audited atomically or whether the authority kernel decides it. The manifest now does (textual classification, with one import hop followed for audit evidence), and three ratchets hold it: a mutating route with no authentication mechanism must be in a documented public allowlist (8 today; each now carries a control the ratchet asserts: the staging-proof route answers only an image built for staging, by build-time NEXT_PUBLIC_APP_ENV, so a production build can never answer a proof request whatever its runtime variables say; workbook, contact and assessment routes use the shared public-intake guard (per-client limit that refuses when the limiter is unavailable outside development, a 16 KB body cap, strict JSON); the auth request routes are limited per IP by the proxy; capability-token routes are limited before any lookup); the route-level audit gap may not grow (baseline shrinks as routes convert); and the kernel-adoption backlog for case, claim, document and message mutations may not grow. The scan found the emergency routes returning 200 with an invented declaration, an activated break-glass state, audit and notification claims and fabricated preparedness and compliance figures, persisting nothing, with recovery callable by any authenticated user; activate, recovery and dashboard now return 501 (capability UE-EMERGENCY-DECLARATION). REMAINING: the audit-gap and kernel-adoption baselines are the open work list; the legacy documents API (flag-gated, role-based, used by several components) needs a retire-or-migrate decision; the manifest is a textual classification, not proof of authorization; the public-intake limiter is as strong as its Redis backend and its client-address header, and the per-client limit is not an idempotency control.",
       "consumers": [],
       "securityImplications": "Routes with no recorded authority basis, and routes that assert operational facts that are not true.",
       "requiredImplementation": "Shrink apps/union-eyes baselines in docs/union-eyes/convergence/register/ue-route-coverage-baselines.json to zero by converting each listed route; regenerate the manifest with scripts/generate-route-manifest.ts.",

@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'Get trustee', description: 'Get a single trustee by ID' },
   },

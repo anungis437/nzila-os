@@ -50,6 +50,13 @@ export const approveAwardSchema = z.object({
   awardId: z.guid(),
 });
 
+/** A member's nomination of a colleague for a peer award: what the nomination form sends, and all it may send. The program is the award type's own. */
+export const nominatePeerSchema = z.object({
+  awardTypeId: z.guid(),
+  recipientUserId: z.string().min(1).max(255),
+  reason: z.string().trim().min(1).max(500),
+});
+
 export const issueAwardSchema = z.object({
   awardId: z.guid(),
 });
@@ -145,6 +152,7 @@ export type UpdateProgramInput = z.infer<typeof updateProgramSchema>;
 export type CreateAwardTypeInput = z.infer<typeof createAwardTypeSchema>;
 export type UpdateAwardTypeInput = z.infer<typeof updateAwardTypeSchema>;
 export type CreateAwardInput = z.infer<typeof createAwardSchema>;
+export type NominatePeerInput = z.infer<typeof nominatePeerSchema>;
 export type ApproveAwardInput = z.infer<typeof approveAwardSchema>;
 export type IssueAwardInput = z.infer<typeof issueAwardSchema>;
 export type RevokeAwardInput = z.infer<typeof revokeAwardSchema>;

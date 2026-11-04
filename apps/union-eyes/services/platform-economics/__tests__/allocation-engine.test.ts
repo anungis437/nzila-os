@@ -61,7 +61,6 @@ import {
   createAllocationRule,
   getActiveRuleVersion,
   getAllocationRules,
-  getAllocationRun,
   getChargebacks,
   runAllocation,
 } from '../allocation-engine';
@@ -138,7 +137,8 @@ describe('platform-economics/allocation-engine', () => {
     });
 
     it('runs a simulation with the weighted_hybrid method', async () => {
-      pushSel([{ id: 'rule-1' }]); // rule ownership check (simulation skips the billing-period read)
+      pushSel([{ id: 'bp1', isClosed: false, label: 'P1' }]); // the organization's own period
+      pushSel([{ id: 'rule-1' }]); // rule ownership check
       pushSel([{ id: 'ver-1', method: 'weighted_hybrid', weights: { per_member_count: 1, per_active_user: 1 } }]);
       pushSel([{ total: '50.00' }]);
       const result = await runAllocation({
@@ -196,22 +196,44 @@ describe('platform-economics/allocation-engine', () => {
         runAllocation({ organizationId: 'o1', billingPeriodId: 'bp1', ruleId: 'r1', localBasis }),
       ).rejects.toThrow('No unallocated costs');
     });
-  });
 
-  describe('getAllocationRun', () => {
-    it('returns the run with lines and snapshots', async () => {
-      pushSel([{ id: 'run-1' }]); // run
-      pushSel([{ id: 'line-1' }]); // lines
-      pushSel([{ id: 'snap-1' }]); // snapshots
-      const result = await getAllocationRun('run-1');
-      expect(result?.id).toBe('run-1');
-      expect(result?.lines).toHaveLength(1);
-      expect(result?.snapshots).toHaveLength(1);
+    it('reports the reasons a run cannot proceed as AllocationRunError of the kind the caller can act on', async () => {
+      pushSel([]); // the period is not the organization's
+      await expect(
+        runAllocation({ organizationId: 'o1', billingPeriodId: 'bp1', ruleId: 'r1', localBasis }),
+      ).rejects.toMatchObject({ name: 'AllocationRunError', kind: 'not_found' });
+
+      pushSel([{ id: 'bp1', isClosed: true, label: 'P1' }]);
+      await expect(
+        runAllocation({ organizationId: 'o1', billingPeriodId: 'bp1', ruleId: 'r1', localBasis }),
+      ).rejects.toMatchObject({ kind: 'conflict' });
+
+      pushSel([{ id: 'bp1', isClosed: false, label: 'P1' }], []); // rule is another organization's
+      await expect(
+        runAllocation({ organizationId: 'o1', billingPeriodId: 'bp1', ruleId: 'r1', localBasis }),
+      ).rejects.toMatchObject({ kind: 'not_found' });
     });
 
-    it('returns null when the run is missing', async () => {
-      pushSel([]);
-      expect(await getAllocationRun('run-x')).toBeNull();
+    it('requires the period to be the organization\'s own for a simulation too, since the run stores a reference to it', async () => {
+      pushSel([]); // no such period for this organization
+      await expect(
+        runAllocation({ organizationId: 'o1', billingPeriodId: 'bp-of-another-org', ruleId: 'r1', isSimulation: true, localBasis }),
+      ).rejects.toThrow('not found');
+    });
+
+    it('lets a simulation read a closed period (it posts nothing)', async () => {
+      pushSel([{ id: 'bp1', isClosed: true, label: 'P1' }]); // closed period
+      pushSel([{ id: 'rule-1' }]); // rule ownership
+      pushSel([{ id: 'ver-1', method: 'per_member_count', weights: null }]);
+      pushSel([{ total: '10.00' }]);
+      const result = await runAllocation({
+        organizationId: 'o1',
+        billingPeriodId: 'bp1',
+        ruleId: 'rule-1',
+        isSimulation: true,
+        localBasis: localBasis.slice(0, 2),
+      });
+      expect(result.isSimulation).toBe(true);
     });
   });
 

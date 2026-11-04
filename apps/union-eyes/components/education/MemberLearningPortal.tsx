@@ -1,72 +1,54 @@
 /**
  * Member Learning Portal Component
- * Personal learning dashboard with courses, certificates, and progress tracking
- * Phase 3: Education & Training UI
+ * The signed-in member's registrations and certifications, as the education routes hold them.
  */
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import {
-  BookOpen,
-  Award,
-  GraduationCap,
-  Calendar,
-  CheckCircle2,
-  AlertCircle,
-  Download,
-  TrendingUp,
-} from 'lucide-react';
- 
-import { format } from 'date-fns';
-import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { BookOpen, Award, GraduationCap, Calendar, CheckCircle2, AlertCircle, Download, TrendingUp } from 'lucide-react';
+import { fetchAllRows } from '@/lib/client/crud-lists';
 import { MemberSessionJoin } from './MemberSessionJoin';
-import { readEducationCrudRows } from '@/lib/education/crud-response';
-
-interface Registration {
-  id: string;
-  session_id: string | null;
-  course_name: string;
-  course_code: string;
-  course_category: string;
-  session_code: string;
-  start_date: string;
-  end_date: string;
-  registration_status: string;
-  attended: boolean;
-  completed: boolean;
-  completion_percentage: number;
-  passed: boolean | null;
-  venue_name: string | null;
-}
-
-interface Completion {
-  id: string;
-  course_name: string;
-  course_code: string;
-  course_category: string;
-  completion_date: string;
-  passed: boolean;
-  certificate_issued: boolean;
-  certificate_number: string | null;
-  certificate_url: string | null;
-  certification_name: string | null;
-  expiry_date: string | null;
-  is_expired: boolean;
-  expiring_soon: boolean;
-  days_until_expiry: number | null;
-}
+import {
+  certificationState,
+  daysBetween,
+  formatDay,
+  humanizeCode,
+  readCertification,
+  readCourse,
+  readRegistration,
+  readSession,
+  safeHttpsUrl,
+  todayDay,
+  type Certification,
+  type Course,
+  type CourseSession,
+  type Registration,
+} from './education-data';
 
 interface MemberLearningPortalProps {
   organizationId: string;
   memberId: string;
 }
+
+/** A registration with the course and session it points at. Either is null when the catalogue no longer lists it. */
+interface RegistrationView {
+  registration: Registration;
+  course: Course | null;
+  session: CourseSession | null;
+}
+
+type ScheduledView = RegistrationView & { session: CourseSession };
+
+const hasSession = (view: RegistrationView): view is ScheduledView => view.session !== null;
+
+type Load<T> = { state: 'loading' } | { state: 'error'; reason: string } | { state: 'ready'; value: T };
 
 const statusColors: Record<string, string> = {
   registered: 'bg-blue-500',
@@ -86,155 +68,136 @@ const categoryColors: Record<string, string> = {
   labor_law: 'bg-indigo-600',
 };
 
-export function MemberLearningPortal({ organizationId, memberId }: MemberLearningPortalProps) {
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [completions, setCompletions] = useState<Completion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('my-courses');
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const locale = useLocale();
-  const activeRequest = useRef<AbortController | null>(null);
+// Registrations that still call for the member's attention (a finished or cancelled one does not).
+const ACTIVE_STATUSES = ['registered', 'confirmed', 'attended'];
 
-  const fetchMemberData = useCallback(async () => {
-    // A tenant change or refresh invalidates all previous in-flight responses.
-    // Never retain a former organization's member records in the new view.
-    activeRequest.current?.abort();
-    const controller = new AbortController();
-    activeRequest.current = controller;
-    setRegistrations([]);
-    setCompletions([]);
-    try {
-      setLoading(true);
-      setLoadError(null);
-      
-      // Fetch registrations
-      const regResponse = await fetch('/api/education/registrations', { signal: controller.signal, cache: 'no-store' });
-      if (regResponse.ok) {
-        const regData = await regResponse.json();
-        const raw = readEducationCrudRows(regData);
-        // CRUD returns camelCase source rows, not the historical snake_case view model.
-        // Read tenant-scoped catalogue metadata only; never read meeting credentials here.
-        const [courseResult, sessionResult] = await Promise.allSettled([
-          fetch('/api/education/courses', { cache: 'no-store', signal: controller.signal }),
-          fetch('/api/education/sessions', { cache: 'no-store', signal: controller.signal }),
-        ]);
-        const readRows = async (result: PromiseSettledResult<Response>) => {
-          if (result.status !== 'fulfilled' || !result.value.ok) return [] as Record<string, unknown>[];
-          return readEducationCrudRows(await result.value.json());
-        };
-        const [courses, sessions] = await Promise.all([readRows(courseResult), readRows(sessionResult)]);
-        const courseById = new Map<string, Record<string, unknown>>(courses.filter(c => typeof c.id === 'string').map(c => [c.id as string, c]));
-        const sessionById = new Map<string, Record<string, unknown>>(sessions.filter(c => typeof c.id === 'string').map(c => [c.id as string, c]));
-        const text = (v: unknown, fallback = '') => typeof v === 'string' ? v : fallback;
-        const date = (v: unknown) => {
-          const candidate = text(v);
-          return candidate && !Number.isNaN(Date.parse(candidate)) ? candidate : '';
-        };
-        if (controller.signal.aborted) return;
-        setRegistrations(raw.map((r: Record<string, unknown>) => {
-          const course: Record<string, unknown> = courseById.get(text(r.courseId ?? r.course_id)) ?? {};
-          const session: Record<string, unknown> = sessionById.get(text(r.sessionId ?? r.session_id)) ?? {};
-          return {
-            id: text(r.id),
-            session_id: text(r.sessionId ?? r.session_id) || null,
-            course_name: text(course.courseName ?? r.course_name ?? r.courseName, 'Course details unavailable'),
-            course_code: text(course.courseCode ?? r.course_code ?? r.courseCode),
-            course_category: text(course.courseCategory ?? r.course_category ?? r.courseCategory, 'other'),
-            session_code: text(session.sessionCode ?? r.session_code ?? r.sessionCode),
-            start_date: date(session.startDate ?? r.start_date ?? r.startDate),
-            end_date: date(session.endDate ?? r.end_date ?? r.endDate),
-            registration_status: text(r.registrationStatus ?? r.registration_status, 'unknown'),
-            attended: r.attended === true,
-            completed: r.completed === true,
-            completion_percentage: Number(r.completionPercentage ?? r.completion_percentage ?? 0),
-            passed: typeof r.passed === 'boolean' ? r.passed : null,
-            venue_name: text(session.venueName ?? r.venue_name ?? r.venueName) || null,
-          };
-        }));
-      } else {
-        setLoadError('Your registrations could not be loaded. Please try again.');
-      }
+const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
-      // Members cannot call the officer/steward-only completion attestation route.
-      // Read their own certifications through the member-scoped catalogue instead.
-      const compResponse = await fetch('/api/education/certifications', { cache: 'no-store', signal: controller.signal });
-      if (compResponse.ok) {
-        const compData = await compResponse.json();
-        const raw = readEducationCrudRows(compData);
-        if (controller.signal.aborted) return;
-        setCompletions(raw.map((r: Record<string, unknown>) => ({
-          id: String(r.id ?? ''),
-          course_name: String(r.course_name ?? r.courseName ?? 'Course details unavailable'),
-          course_code: String(r.course_code ?? r.courseCode ?? ''),
-          course_category: String(r.course_category ?? r.courseCategory ?? 'other'),
-          completion_date: String(r.issueDate ?? r.issue_date ?? ''),
-          passed: r.verified === true && r.revoked !== true,
-          certificate_issued: r.verified === true && r.revoked !== true && r.certificationStatus === 'active',
-          certificate_number: typeof (r.certificationNumber ?? r.certification_number) === 'string' ? String(r.certificationNumber ?? r.certification_number) : null,
-          certificate_url: typeof (r.certificateUrl ?? r.certificate_url) === 'string' ? String(r.certificateUrl ?? r.certificate_url) : null,
-          certification_name: typeof (r.certificationName ?? r.certification_name) === 'string' ? String(r.certificationName ?? r.certification_name) : null,
-          expiry_date: typeof (r.expiryDate ?? r.expiry_date) === 'string' ? String(r.expiryDate ?? r.expiry_date) : null,
-          is_expired: r.revoked === true || r.certificationStatus === 'expired' || (typeof r.expiryDate === 'string' && r.expiryDate < new Date().toISOString().slice(0, 10)),
-          expiring_soon: typeof r.expiryDate === 'string' && r.expiryDate >= new Date().toISOString().slice(0, 10) && r.expiryDate <= new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10),
-          days_until_expiry: typeof r.expiryDate === 'string' ? Math.ceil((Date.parse(r.expiryDate) - Date.now()) / 86400000) : null,
-        })));
-      } else {
-        setLoadError('Your certifications could not be loaded. Please try again.');
-      }
-    } catch (_error) {
-      if (!controller.signal.aborted) setLoadError('Learning records could not be loaded. Please try again.');
-    } finally {
-      if (!controller.signal.aborted) setLoading(false);
-    }
-  }, [memberId, organizationId]);
+/**
+ * Every registration of the member with the course and session it names. The course and session lists are catalogue reads: when one of them
+ * cannot be read the registrations are not shown with made-up names, the whole read is an error.
+ */
+async function loadRegistrations(): Promise<RegistrationView[]> {
+  const [registrationRows, courseRows, sessionRows] = await Promise.all([
+    fetchAllRows<unknown>('/api/education/registrations'),
+    fetchAllRows<unknown>('/api/education/courses'),
+    fetchAllRows<unknown>('/api/education/sessions'),
+  ]);
+  const registrations = registrationRows.map(readRegistration);
+  const courseIds = new Set(registrations.map((registration) => registration.courseId));
+  const sessionIds = new Set(registrations.map((registration) => registration.sessionId));
+  // Only the courses and sessions a registration points at are read, so an unrelated malformed row cannot hide the member's own.
+  const courses = new Map(courseRows.flatMap((row) => {
+    const course = readCourseIf(row, courseIds);
+    return course === null ? [] : [[course.id, course] as const];
+  }));
+  const sessions = new Map(sessionRows.flatMap((row) => {
+    const session = readSessionIf(row, sessionIds);
+    return session === null ? [] : [[session.id, session] as const];
+  }));
+  return registrations.map((registration) => ({
+    registration,
+    course: courses.get(registration.courseId) ?? null,
+    session: sessions.get(registration.sessionId) ?? null,
+  }));
+}
 
-  useEffect(() => {
-    fetchMemberData();
-    return () => { activeRequest.current?.abort(); };
-  }, [fetchMemberData]);
+function idOf(row: unknown): string | null {
+  return typeof row === 'object' && row !== null && 'id' in row && typeof row.id === 'string' ? row.id : null;
+}
 
-  const activeCourses = registrations.filter(r => 
-    !r.completed && ['registered', 'confirmed', 'attended'].includes(r.registration_status)
-  );
-  
-  const upcomingCourses = activeCourses.filter(r => 
-    new Date(r.start_date) > new Date()
-  );
-  
-  const inProgressCourses = activeCourses.filter(r => 
-    r.start_date && r.end_date && new Date(r.start_date) <= new Date() && new Date(r.end_date) >= new Date()
-  );
-  const otherCourses = activeCourses.filter(r =>
-    !upcomingCourses.includes(r) && !inProgressCourses.includes(r)
-  );
+function readCourseIf(row: unknown, ids: Set<string>): Course | null {
+  const id = idOf(row);
+  return id !== null && ids.has(id) ? readCourse(row) : null;
+}
 
-  const validCertificates = completions.filter(c => 
-    c.certificate_issued && !c.is_expired
-  );
+function readSessionIf(row: unknown, ids: Set<string>): CourseSession | null {
+  const id = idOf(row);
+  return id !== null && ids.has(id) ? readSession(row) : null;
+}
 
-  const expiringCertificates = completions.filter(c => 
-    c.certificate_issued && c.expiring_soon && !c.is_expired
-  );
+async function loadCertifications(): Promise<Certification[]> {
+  const rows = await fetchAllRows<unknown>('/api/education/certifications');
+  return rows.map(readCertification);
+}
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+function useLoad<T>(fetcher: () => Promise<T>, resetKey: string): [Load<T>, () => void] {
+  const [result, setResult] = useState<Load<T>>({ state: 'loading' });
+  const request = useRef(0);
+  // The latest request wins: a slow answer to an earlier request (or to another organization) is never shown.
+  const load = useCallback(() => {
+    const id = ++request.current;
+    fetcher().then(
+      (value) => {
+        if (id === request.current) setResult({ state: 'ready', value });
+      },
+      (error: unknown) => {
+        if (id === request.current) setResult({ state: 'error', reason: reasonOf(error) });
+      },
     );
-  }
+  }, [fetcher]);
+  useEffect(() => {
+    load();
+    return () => {
+      request.current += 1;
+    };
+  }, [load, resetKey]);
+  const retry = useCallback(() => {
+    setResult({ state: 'loading' });
+    load();
+  }, [load]);
+  return [result, retry];
+}
+
+function Failure({ title, reason, onRetry }: { title: string; reason: string; onRetry: () => void }) {
+  return (
+    <div role="alert" className="space-y-2 rounded-lg border border-destructive/40 p-4 text-sm">
+      <p className="font-medium text-destructive">{title}</p>
+      <p className="text-muted-foreground">{reason}</p>
+      <Button size="sm" variant="outline" onClick={onRetry}>Try again</Button>
+    </div>
+  );
+}
+
+export function MemberLearningPortal({ organizationId }: MemberLearningPortalProps) {
+  const locale = useLocale();
+  const [activeTab, setActiveTab] = useState('my-courses');
+  const [registrations, retryRegistrations] = useLoad(loadRegistrations, organizationId);
+  const [certifications, retryCertifications] = useLoad(loadCertifications, organizationId);
+
+  const today = todayDay();
+  const views = registrations.state === 'ready' ? registrations.value : [];
+  const isActive = (view: RegistrationView) => !view.registration.completed && ACTIVE_STATUSES.includes(view.registration.status ?? '');
+  const scheduled = views.filter(hasSession);
+  const inProgress = scheduled.filter((view) => isActive(view) && view.session.startDate <= today && view.session.endDate >= today);
+  const upcoming = scheduled.filter((view) => isActive(view) && view.session.startDate > today);
+  const shown = new Set([...inProgress, ...upcoming].map((view) => view.registration.id));
+  // Everything else the member is registered for: no schedule on file, a session that has ended without a completion, a waitlist, a cancellation.
+  const others = views.filter((view) => !view.registration.completed && !shown.has(view.registration.id));
+  const activeCount = views.filter(isActive).length;
+  const completedCount = views.filter((view) => view.registration.completed).length;
+
+  const certs = certifications.state === 'ready' ? certifications.value.map((cert) => ({ cert, state: certificationState(cert, today) })) : [];
+  const valid = certs.filter((item) => item.state === 'active' || item.state === 'expiring');
+  const expiring = certs.filter((item) => item.state === 'expiring');
+  const pending = certs.filter((item) => item.state === 'pending');
+
+  const nameOf = (view: RegistrationView) => view.course?.name ?? 'Course no longer in the catalogue';
+  const dash = '—';
+  const figure = (load: Load<unknown>, value: number) => (load.state === 'ready' ? String(value) : dash);
+
+  const canJoin = (view: ScheduledView) =>
+    view.registration.status === 'registered' && view.session.deliveryMethod !== 'in_person' && view.session.startDate <= today && view.session.endDate >= today;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">My Learning Portal</h2>
-          <p className="text-muted-foreground">Track your training progress and certificates</p>
+          <p className="text-muted-foreground">Your registrations and certifications</p>
         </div>
-        <Button onClick={fetchMemberData}>Refresh</Button>
+        <Button onClick={() => { retryRegistrations(); retryCertifications(); }}>Refresh</Button>
       </div>
-
-      {loadError && <p role="alert" className="text-sm text-destructive">{loadError}</p>}
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -246,9 +209,9 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeCourses.length}</div>
+            <div className="text-2xl font-bold" data-testid="stat-active-courses">{figure(registrations, activeCount)}</div>
             <p className="text-xs text-muted-foreground">
-              {inProgressCourses.length} in progress, {upcomingCourses.length} upcoming
+              {registrations.state === 'ready' ? `${inProgress.length} in progress, ${upcoming.length} upcoming` : 'Not loaded'}
             </p>
           </CardContent>
         </Card>
@@ -261,7 +224,7 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{registrations.filter(r => r.completed).length}</div>
+            <div className="text-2xl font-bold" data-testid="stat-completed">{figure(registrations, completedCount)}</div>
             <p className="text-xs text-muted-foreground">Completed registrations</p>
           </CardContent>
         </Card>
@@ -274,7 +237,7 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{validCertificates.length}</div>
+            <div className="text-2xl font-bold" data-testid="stat-certificates">{figure(certifications, valid.length)}</div>
             <p className="text-xs text-muted-foreground">Valid certifications</p>
           </CardContent>
         </Card>
@@ -287,7 +250,7 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{expiringCertificates.length}</div>
+            <div className="text-2xl font-bold text-yellow-600" data-testid="stat-expiring">{figure(certifications, expiring.length)}</div>
             <p className="text-xs text-muted-foreground">Within 90 days</p>
           </CardContent>
         </Card>
@@ -303,45 +266,41 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
 
         {/* My Courses Tab */}
         <TabsContent value="my-courses" className="space-y-4">
-          {/* In Progress */}
-          {inProgressCourses.length > 0 && (
+          {registrations.state === 'loading' && <p role="status" className="text-sm text-muted-foreground">Loading your courses…</p>}
+          {registrations.state === 'error' && (
+            <Failure title="Your courses could not be loaded." reason={registrations.reason} onRetry={retryRegistrations} />
+          )}
+
+          {inProgress.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-3">In Progress</h3>
               <div className="grid gap-4 md:grid-cols-2">
-                {inProgressCourses.map((course) => (
-                  <Card key={course.id}>
+                {inProgress.map((view) => (
+                  <Card key={view.registration.id} data-testid="in-progress-course">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{course.course_name}</CardTitle>
-                          <CardDescription>{course.course_code}</CardDescription>
+                          <CardTitle className="text-lg">{nameOf(view)}</CardTitle>
+                          {view.course && <CardDescription>{view.course.code}</CardDescription>}
                         </div>
-                        <Badge className={categoryColors[course.course_category] || 'bg-gray-600'}>
-                          {course.course_category.replace(/_/g, ' ')}
-                        </Badge>
+                        {view.course && (
+                          <Badge className={categoryColors[view.course.category] || 'bg-gray-600'}>
+                            {humanizeCode(view.course.category)}
+                          </Badge>
+                        )}
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Progress</span>
-                          <span className="font-medium">{course.completion_percentage}%</span>
-                        </div>
-                        <Progress value={course.completion_percentage} className="h-2" />
-                      </div>
-
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4 mr-2" />
-                        {format(new Date(course.start_date), 'MMM d')} - {format(new Date(course.end_date), 'MMM d, yyyy')}
+                        {formatDay(view.session.startDate, locale)} – {formatDay(view.session.endDate, locale)}
                       </div>
 
-                      {course.venue_name && (
-                        <div className="text-sm text-muted-foreground">
-                          ðŸ“ {course.venue_name}
-                        </div>
+                      {view.session.venueName && (
+                        <div className="text-sm text-muted-foreground">Venue: {view.session.venueName}</div>
                       )}
 
-                      <MemberSessionJoin sessionId={course.session_id} />
+                      {canJoin(view) && <MemberSessionJoin sessionId={view.registration.sessionId} />}
                     </CardContent>
                   </Card>
                 ))}
@@ -349,41 +308,32 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             </div>
           )}
 
-          {/* Upcoming */}
-          {upcomingCourses.length > 0 && (
+          {upcoming.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-3">Upcoming</h3>
               <div className="grid gap-4 md:grid-cols-2">
-                {upcomingCourses.map((course) => (
-                  <Card key={course.id}>
+                {upcoming.map((view) => (
+                  <Card key={view.registration.id} data-testid="upcoming-course">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{course.course_name}</CardTitle>
-                          <CardDescription>{course.session_code}</CardDescription>
+                          <CardTitle className="text-lg">{nameOf(view)}</CardTitle>
+                          <CardDescription>{view.session.name ?? view.session.code}</CardDescription>
                         </div>
-                        <Badge className={statusColors[course.registration_status] || 'bg-gray-500'}>
-                          {course.registration_status}
+                        <Badge className={statusColors[view.registration.status ?? ''] || 'bg-gray-500'}>
+                          {humanizeCode(view.registration.status ?? 'unknown')}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center text-sm">
                         <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="font-medium">
-                          {format(new Date(course.start_date), 'MMMM d, yyyy')}
-                        </span>
+                        <span className="font-medium">{formatDay(view.session.startDate, locale, 'long')}</span>
                       </div>
 
-                      {course.venue_name && (
-                        <div className="text-sm text-muted-foreground">
-                          ðŸ“ {course.venue_name}
-                        </div>
+                      {view.session.venueName && (
+                        <div className="text-sm text-muted-foreground">Venue: {view.session.venueName}</div>
                       )}
-
-                      <div className="flex gap-2">
-                        <MemberSessionJoin sessionId={course.session_id} />
-                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -391,35 +341,49 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             </div>
           )}
 
-          {otherCourses.length > 0 && (
+          {others.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">Other Enrollments</h3>
-              {otherCourses.map(course => (
-                <Card key={course.id}><CardContent className="space-y-2 pt-4">
-                  <p className="font-medium">{course.course_name}</p>
-                  <p className="text-sm text-muted-foreground">Status: {course.registration_status}. Session schedule is not available in this view.</p>
-                  <MemberSessionJoin sessionId={course.session_id} />
-                </CardContent></Card>
+              {others.map((view) => (
+                <Card key={view.registration.id} data-testid="other-course">
+                  <CardContent className="space-y-2 pt-4">
+                    <p className="font-medium">{nameOf(view)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Status: {humanizeCode(view.registration.status ?? 'unknown')}.{' '}
+                      {view.session === null
+                        ? 'Session schedule is not available in this view.'
+                        : `Session: ${formatDay(view.session.startDate, locale)} – ${formatDay(view.session.endDate, locale)}.`}
+                    </p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
 
-          {activeCourses.length === 0 && (
+          {registrations.state === 'ready' && views.length === 0 && (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-lg font-medium">No active courses</p>
+                <p className="text-lg font-medium">No registrations yet</p>
                 <p className="text-sm text-muted-foreground mb-4">Browse available courses to get started</p>
                 <Button onClick={() => setActiveTab('available')}>Browse Courses</Button>
               </CardContent>
             </Card>
           )}
+
+          {registrations.state === 'ready' && views.length > 0 && inProgress.length + upcoming.length + others.length === 0 && (
+            <p className="text-sm text-muted-foreground" data-testid="no-open-courses">You have no course in progress or coming up.</p>
+          )}
         </TabsContent>
 
         {/* Certificates Tab */}
         <TabsContent value="certificates" className="space-y-4">
-          {/* Expiring Soon Warning */}
-          {expiringCertificates.length > 0 && (
+          {certifications.state === 'loading' && <p role="status" className="text-sm text-muted-foreground">Loading your certifications…</p>}
+          {certifications.state === 'error' && (
+            <Failure title="Your certifications could not be loaded." reason={certifications.reason} onRetry={retryCertifications} />
+          )}
+
+          {expiring.length > 0 && (
             <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center text-yellow-900 dark:text-yellow-100">
@@ -429,12 +393,12 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {expiringCertificates.map((cert) => (
+                  {expiring.map(({ cert }) => (
                     <div key={cert.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-900 rounded">
                       <div>
-                        <div className="font-medium text-sm">{cert.certification_name || cert.course_name}</div>
+                        <div className="font-medium text-sm">{cert.name}</div>
                         <div className="text-xs text-muted-foreground">
-                          Expires in {cert.days_until_expiry} days ({cert.expiry_date && !Number.isNaN(Date.parse(cert.expiry_date)) ? format(new Date(cert.expiry_date), 'MMM d, yyyy') : 'date unavailable'})
+                          {cert.expiryDate !== null && `Expires in ${daysBetween(today, cert.expiryDate)} days (${formatDay(cert.expiryDate, locale)})`}
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">Contact your union for renewal options.</p>
@@ -445,60 +409,69 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             </Card>
           )}
 
-          {/* Valid Certificates */}
+          {pending.length > 0 && (
+            <p className="text-sm text-muted-foreground" data-testid="pending-certifications">
+              {pending.length === 1 ? '1 certification is' : `${pending.length} certifications are`} waiting for verification by your union and not counted above.
+            </p>
+          )}
+
           <div className="grid gap-4 md:grid-cols-2">
-            {validCertificates.map((cert) => (
-              <Card key={cert.id} className="border-green-200 dark:border-green-900">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Award className="h-5 w-5 text-green-600" />
-                        {cert.certification_name || cert.course_name}
-                      </CardTitle>
-                      <CardDescription>{cert.certificate_number}</CardDescription>
-                    </div>
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Issued</span>
-                      <span className="font-medium">{cert.completion_date && !Number.isNaN(Date.parse(cert.completion_date)) ? format(new Date(cert.completion_date), 'MMM d, yyyy') : 'Date unavailable'}</span>
-                    </div>
-                    {cert.expiry_date && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Expires</span>
-                        <span className="font-medium">{!Number.isNaN(Date.parse(cert.expiry_date)) ? format(new Date(cert.expiry_date), 'MMM d, yyyy') : 'Date unavailable'}</span>
+            {valid.map(({ cert }) => {
+              const certificateUrl = safeHttpsUrl(cert.certificateUrl);
+              return (
+                <Card key={cert.id} className="border-green-200 dark:border-green-900" data-testid="valid-certificate">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Award className="h-5 w-5 text-green-600" />
+                          {cert.name}
+                        </CardTitle>
+                        {cert.number !== null && <CardDescription>{cert.number}</CardDescription>}
                       </div>
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Issued</span>
+                        <span className="font-medium">{formatDay(cert.issueDate, locale)}</span>
+                      </div>
+                      {cert.expiryDate !== null && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Expires</span>
+                          <span className="font-medium">{formatDay(cert.expiryDate, locale)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {cert.type !== null && <Badge className="bg-gray-600">{humanizeCode(cert.type)}</Badge>}
+
+                    {certificateUrl !== null && (
+                      <a href={certificateUrl} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" className="inline-flex items-center text-sm underline">
+                        <Download className="h-4 w-4 mr-2" /> Open certificate
+                      </a>
                     )}
-                  </div>
-
-                  <Badge className={categoryColors[cert.course_category] || 'bg-gray-600'}>
-                    {cert.course_category.replace(/_/g, ' ')}
-                  </Badge>
-
-                  {cert.certificate_url && /^https:\/\//i.test(cert.certificate_url) ? (
-                    <a href={cert.certificate_url} target="_blank" rel="noopener noreferrer"
-                       referrerPolicy="no-referrer" className="inline-flex items-center text-sm underline">
-                      <Download className="h-4 w-4 mr-2" /> Open Certificate
-                    </a>
-                  ) : <p className="text-xs text-muted-foreground">Certificate download is not available. Contact your union.</p>}
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
-          {validCertificates.length === 0 && (
+          {certifications.state === 'ready' && valid.length === 0 && (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Award className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-lg font-medium">No certificates yet</p>
-                <p className="text-sm text-muted-foreground">Complete courses to earn certificates</p>
+                <p className="text-lg font-medium">No valid certificates</p>
+                <p className="text-sm text-muted-foreground">Certifications appear here once your union has verified them.</p>
               </CardContent>
             </Card>
           )}
+
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/${locale}/dashboard/education/certificates`}>See every certification, including expired ones</Link>
+          </Button>
         </TabsContent>
 
         {/* Available Courses Tab */}
@@ -507,7 +480,7 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
             <CardContent className="flex flex-col items-center justify-center py-12">
               <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-lg font-medium">Browse Course Catalog</p>
-              <p className="text-sm text-muted-foreground mb-4">View this page in the full Course Catalog</p>
+              <p className="text-sm text-muted-foreground mb-4">View the courses your union offers and enroll in a session</p>
               <Button asChild><Link href={`/${locale}/dashboard/education/courses`}>Go to Course Catalog</Link></Button>
             </CardContent>
           </Card>
@@ -518,4 +491,3 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
 }
 
 export default MemberLearningPortal;
-

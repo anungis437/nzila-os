@@ -9,7 +9,12 @@ const m = vi.hoisted(() => ({
   deleteResult: [{ id: 'holder_1' }] as unknown[],
 }));
 
-const mockDb = {
+const WORKBOOK = '11111111-1111-4111-8111-111111111111';
+const HOLDER = '22222222-2222-4222-8222-222222222222';
+const MISSING_HOLDER = '33333333-3333-4333-8333-333333333333';
+
+// The transaction the access boundary hands to the callback (authority.tx): every statement the route makes goes through it.
+const boundaryTx = {
   update: vi.fn(() => ({
     set: vi.fn(() => ({
       where: vi.fn(() => ({
@@ -24,7 +29,10 @@ const mockDb = {
   })),
 };
 
-vi.mock('@/db', () => ({ db: mockDb }));
+// The ambient handle must never be reached by this route: a statement on it would run outside the authority's context.
+const ambient = new Proxy({}, { get: () => { throw new Error('the ambient database handle was used'); } });
+vi.mock('@/db', () => ({ db: ambient }));
+vi.mock('@/db/db', () => ({ db: ambient }));
 vi.mock('@/lib/workbook/access-control', () => ({
   withClaimedWorkbookAccess: m.withClaimedWorkbookAccess,
 }));
@@ -51,6 +59,7 @@ function allowAccess() {
         claimedOrgId: null,
         actorUserId: null,
         operation: args.operation,
+        tx: boundaryTx,
       };
       const value = await cb(authority);
       return { ok: true as const, value, authority };
@@ -73,18 +82,19 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
   it('PATCH records an audit inside the access boundary and names only the changed fields', async () => {
     const { PATCH } = await loadRoute();
 
-    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+    const response = await PATCH(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, {
       method: 'PATCH',
       // Clearing a note is a change that removes identifying detail, so it needs no notice; writing one now does (see holder-notice.ts).
       body: JSON.stringify({ role: 'x', notes: null }),
-    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: HOLDER }) });
 
     expect(response.status).toBe(200);
+    expect(boundaryTx.update).toHaveBeenCalledTimes(1);
     expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ workbookId: 'w1' }),
+      expect.objectContaining({ workbookId: WORKBOOK, tx: boundaryTx }),
       expect.objectContaining({
         action: 'workbook.memory_holder.update',
-        resourceId: 'h1',
+        resourceId: HOLDER,
         details: { fields: ['role', 'notes'] },
       }),
     );
@@ -96,16 +106,16 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     const { PATCH } = await loadRoute();
     m.updateResult = [];
 
-    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h9', {
+    const response = await PATCH(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${MISSING_HOLDER}`, {
       method: 'PATCH',
       body: JSON.stringify({ role: 'x' }),
-    }), { params: Promise.resolve({ id: 'w1', holderId: 'h9' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: MISSING_HOLDER }) });
 
     expect(response.status).toBe(404);
     expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledTimes(1);
     expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: 'workbook.memory_holder.update_not_found', resourceId: 'h9' }),
+      expect.objectContaining({ action: 'workbook.memory_holder.update_not_found', resourceId: MISSING_HOLDER }),
     );
   });
 
@@ -113,33 +123,34 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     const { PATCH } = await loadRoute();
     m.auditClaimedWorkbookWrite.mockRejectedValueOnce(new Error('audit down'));
 
-    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+    const response = await PATCH(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, {
       method: 'PATCH',
       body: JSON.stringify({ role: 'x' }),
-    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: HOLDER }) });
 
     expect(response.status).toBe(503);
   });
 
   it('DELETE records an audit, and a missing holder is 404 recorded as a missed attempt', async () => {
     const { DELETE } = await loadRoute();
-    const ctx = { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) };
+    const ctx = { params: Promise.resolve({ id: WORKBOOK, holderId: HOLDER }) };
 
-    const ok = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE' }), ctx);
+    const ok = await DELETE(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, { method: 'DELETE' }), ctx);
     expect(ok.status).toBe(200);
+    expect(boundaryTx.delete).toHaveBeenCalledTimes(1);
     expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: 'workbook.memory_holder.delete', resourceId: 'h1' }),
+      expect.objectContaining({ action: 'workbook.memory_holder.delete', resourceId: HOLDER }),
     );
 
     m.auditClaimedWorkbookWrite.mockClear();
     m.deleteResult = [];
-    const missing = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE' }), ctx);
+    const missing = await DELETE(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, { method: 'DELETE' }), ctx);
     expect(missing.status).toBe(404);
     expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledTimes(1);
     expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: 'workbook.memory_holder.delete_not_found', resourceId: 'h1' }),
+      expect.objectContaining({ action: 'workbook.memory_holder.delete_not_found', resourceId: HOLDER }),
     );
   });
 
@@ -147,26 +158,26 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     const { PATCH } = await loadRoute();
     m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
 
-    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+    const response = await PATCH(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, {
       method: 'PATCH',
       body: JSON.stringify({ role: 'x' }),
-    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: HOLDER }) });
 
     expect(response.status).toBe(403);
-    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(boundaryTx.update).not.toHaveBeenCalled();
   });
 
   it('PATCH updates the holder when access is allowed', async () => {
     const { PATCH } = await loadRoute();
 
-    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+    const response = await PATCH(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, {
       method: 'PATCH',
       body: JSON.stringify({ role: 'x' }),
-    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: HOLDER }) });
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write', capability: null },
+      { workbookId: WORKBOOK, operation: 'write', capability: null },
       expect.any(Function),
     );
   });
@@ -175,26 +186,42 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     const { DELETE } = await loadRoute();
     m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 401, error: 'Authentication required' });
 
-    const response = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+    const response = await DELETE(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, {
       method: 'DELETE',
-    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: HOLDER }) });
 
     expect(response.status).toBe(401);
-    expect(mockDb.delete).not.toHaveBeenCalled();
+    expect(boundaryTx.delete).not.toHaveBeenCalled();
   });
 
   it('DELETE removes the holder when access is allowed', async () => {
     const { DELETE } = await loadRoute();
 
-    const response = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+    const response = await DELETE(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/${HOLDER}`, {
       method: 'DELETE',
-      headers: { cookie: 'wbk_cap_w1=tok-1' },
-    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+      headers: { cookie: `wbk_cap_${WORKBOOK}=tok-1` },
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: HOLDER }) });
 
     expect(response.status).toBe(200);
     expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
-      { workbookId: 'w1', operation: 'write', capability: 'tok-1' },
+      { workbookId: WORKBOOK, operation: 'write', capability: 'tok-1' },
       expect.any(Function),
     );
+  });
+
+  it('answers a malformed workbook or holder identifier as absent, without resolving authority or reaching SQL', async () => {
+    const { PATCH, DELETE } = await loadRoute();
+
+    const badHolderPatch = await PATCH(new NextRequest(`http://localhost/api/workbook/${WORKBOOK}/memory-holders/h1`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role: 'x' }),
+    }), { params: Promise.resolve({ id: WORKBOOK, holderId: 'h1' }) });
+    const badWorkbookDelete = await DELETE(new NextRequest(`http://localhost/api/workbook/w1/memory-holders/${HOLDER}`, { method: 'DELETE' }), {
+      params: Promise.resolve({ id: 'w1', holderId: HOLDER }),
+    });
+
+    expect(badHolderPatch.status).toBe(404);
+    expect(badWorkbookDelete.status).toBe(404);
+    expect(m.withClaimedWorkbookAccess).not.toHaveBeenCalled();
   });
 });

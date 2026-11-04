@@ -63,11 +63,8 @@ it a precise interface (recipe step 5). The boundary cast `as unknown as T` remo
 | File | any removed |
 | --- | --- |
 | `lib/services/notification-service.ts` | 162 |
-| `db/queries/analytics-queries.ts` | 82 |
 | `db/queries/deadline-queries.ts` | 56 |
 | `db/queries/enhanced-rbac-queries.ts` | 42 |
-| `lib/deadline-service.ts` | 6 |
-| `lib/scheduled-report-executor.ts` | 21 |
 | `lib/api-auth-guard.ts` | 18 |
 | `actions/rewards-actions.ts` | 15 |
 | `lib/api/signature-service-api.ts` | 14 |
@@ -84,18 +81,6 @@ it a precise interface (recipe step 5). The boundary cast `as unknown as T` remo
 | `lib/console-wrapper.ts` | 10 |
 | `lib/services/ocr-service.ts` | 10 |
 | `lib/movement-insights/consent-manager.ts` | 14 |
-| `components/analytics/charts/types.ts` | 9 |
-| `components/analytics/charts/ScatterChart.tsx` | 4 |
-| `components/analytics/charts/BubbleChart.tsx` | 3 |
-| `components/analytics/charts/TreemapChart.tsx` | 5 |
-| `components/analytics/charts/FunnelChart.tsx` | 1 |
-| `components/analytics/charts/SunburstChart.tsx` | 6 |
-| `components/analytics/charts/BoxPlotChart.tsx` | 2 |
-| `components/analytics/charts/WaterfallChart.tsx` | 3 |
-| `components/analytics/charts/DataTable.tsx` | 4 |
-| `components/analytics/charts/SankeyChart.tsx` | 5 |
-| `components/analytics/charts/CandlestickChart.tsx` | 2 |
-| `lib/services/pci-compliance-service.ts` | 9 |
 | `lib/calendar-reminder-scheduler.ts` | 9 |
 | `lib/api/crud-factory.ts` | 9 |
 | `lib/api/standardized-responses.ts` | 8 |
@@ -104,7 +89,6 @@ it a precise interface (recipe step 5). The boundary cast `as unknown as T` remo
 | `lib/mobile/service-worker-registration.ts` | 8 |
 | `actions/admin-actions.ts` | 10 |
 | `components/voting/vote-casting-interface.tsx` | 9 |
-| `components/admin/MemberEmploymentManagement.tsx` | 9 |
 | `components/clause-library/clause-library-console.tsx` | 8 |
 | `lib/services/member-service.ts` | 7 |
 | `lib/services/clause-service.ts` | 7 |
@@ -116,30 +100,21 @@ it a precise interface (recipe step 5). The boundary cast `as unknown as T` remo
 | `lib/mobile/mobile-engine.ts` | 8 |
 | `components/precedents/precedents-console.tsx` | 7 |
 | `components/members/members-console.tsx` | 7 |
-| `lib/services/rewards/export-service.ts` | 6 |
 | `lib/services/policy-engine.ts` | 6 |
-| `lib/services/messaging/campaign-service.ts` | 6 |
 | `lib/report-executor.ts` | 6 |
 | `lib/organizational-narratives/index.ts` | 6 |
 | `lib/csrf-client.ts` | 6 |
 | `lib/ai/chatbot-service.ts` | 6 |
 | `components/members/member-onboarding-wizard.tsx` | 6 |
-| `components/analytics/custom-report-builder.tsx` | 6 |
 | `app/api/icra/report/[assessmentId]/review/route.ts` | 6 |
 | `lib/services/external-data/statcan-client.ts` | 5 |
 | `lib/services/ai/precedent-matching-service.ts` | 5 |
 | `lib/middleware/api-security.ts` | 5 |
-| `lib/email/report-email-templates.ts` | 5 |
 | `lib/email-service.ts` | 5 |
 | `lib/clc/nil-prompts.ts` | 5 |
-| `lib/azure-keyvault.ts` | 5 |
 | `lib/ai/pipeline.ts` | 5 |
 | `components/ui/chart.tsx` | 9 |
-| `components/rewards/recognition-feed.tsx` | 5 |
 | `components/education/quiz-builder.tsx` | 5 |
-| `components/communication/notification-preferences.tsx` | 5 |
-| `components/automation/automation-workflow-builder.tsx` | 5 |
-| `components/accessibility/accessibility-dashboard.tsx` | 5 |
 | `app/api/icra/submit/route.ts` | 5 |
 
 ## Remaining hot spots (top of ~835 files)
@@ -153,7 +128,6 @@ The API client and React components cascade widely and need real domain types.
 | `lib/graphql/resolvers.ts` | 25 | medium |
 | `lib/workers/report-worker.ts` | 20 | medium (tsconfig-excluded; structurally messy) |
 | `lib/gdpr/consent-manager.ts` | 16 | medium (tsconfig-excluded) |
-| `lib/workers/notification-worker.ts` | 14 | medium (tsconfig-excluded) |
 | `services/financial-service/src/services/payment-processing.ts` | 15 | medium (tsconfig-excluded) |
 | `lib/documents/batch-operations-service.ts` | 7 | HIGH — DEFERRED: uses `getDatabase()` (multi-db client) whose schema differs from `@/db`; casting to the real `AppDb` surfaces ~10 genuine column mismatches (e.g. `auditLogs` has `auditId`/`organizationId`/`resourceId`, code inserts `id`/`tenantId`/`resourceIds`). Needs the multi-db schema types before de-anying. |
 

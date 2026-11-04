@@ -9,12 +9,9 @@ const m = vi.hoisted(() => ({
   audit: vi.fn(),
 }));
 
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/api-auth-guard', () => ({
   hasMinRole: (...args: unknown[]) => m.hasMinRole(...args),
-  withRoleAuth: vi.fn(
-    (_role: string, handler: (req: NextRequest, ctx: any) => Promise<Response>) =>
-      (req: NextRequest, ctx: any = {}) => handler(req, ctx),
-  ),
 }));
 
 // The execution is recorded durably (B95); the writer has its own coverage.
@@ -42,9 +39,13 @@ async function loadRoute() {
   return import('../reports/execute/route');
 }
 
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
+
 describe('reports/execute route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'officer';
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     // Existing cases exercise execution mechanics as an administrator; the officer cases below set it false.
     m.hasMinRole.mockResolvedValue(true);
@@ -52,14 +53,54 @@ describe('reports/execute route', () => {
     m.execute.mockResolvedValue({ success: true, data: [{ id: 1 }], rowCount: 1, executionTimeMs: 12 });
   });
 
-  it('returns auth required when context is missing', async () => {
+  it('declares what it asks of the wrapper: an officer, reading the organization\'s own data in its tenant transaction, with the access recorded', async () => {
+    await loadRoute();
+    const config = declared.find((entry) => entry.openapi?.summary === 'Execute an ad hoc report configuration');
+
+    expect(config?.auth).toEqual({ minRole: 'officer' });
+    expect(config?.rlsOrgContext).toBe(true);
+    expect(config?.requireOrg).toBeUndefined();
+    expect(config?.registry).toMatchObject({ audience: 'officer', evidenceRequired: true, orgScoping: 'caller-org' });
+  });
+
+  it('refuses a member, whom the officer floor does not admit, before any limit, execution or audit', async () => {
+    caller.role = 'member';
     const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/reports/execute', { method: 'POST', body: '{}' }), {
-      userId: '',
-      organizationId: '',
-    });
+    const response = await POST(new NextRequest('http://localhost/api/reports/execute', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'id' }] } }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.execute).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('refuses a caller with no active organization before any limit, execution or audit', async () => {
+    caller.organizationId = null;
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/reports/execute', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'id' }] } }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.execute).not.toHaveBeenCalled();
+  });
+
+  it('returns auth required when the caller is not authenticated', async () => {
+    caller.userId = null;
+    caller.organizationId = null;
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/reports/execute', { method: 'POST', body: '{}' }));
 
     expect(response.status).toBe(401);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.execute).not.toHaveBeenCalled();
   });
 
   it('returns 429 when rate limit is exceeded', async () => {
@@ -72,7 +113,6 @@ describe('reports/execute route', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ config: {} }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
     );
 
     expect(response.status).toBe(429);
@@ -87,7 +127,6 @@ describe('reports/execute route', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [] } }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
     );
 
     expect(response.status).toBe(400);
@@ -107,7 +146,6 @@ describe('reports/execute route', () => {
           },
         }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
     );
 
     expect(response.status).toBe(400);
@@ -128,7 +166,6 @@ describe('reports/execute route', () => {
           },
         }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
     );
     const payload = await response.json();
 
@@ -152,7 +189,6 @@ describe('reports/execute route', () => {
           },
         }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
     );
 
     expect(response.status).toBe(500);
@@ -168,7 +204,6 @@ describe('reports/execute route', () => {
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'status' }] } }),
         }),
-        { userId: 'u1', organizationId: 'org_1' },
       );
     };
     const events = () => m.logApiAuditEvent.mock.calls.map(([event]) => event.eventType);
@@ -199,7 +234,6 @@ describe('reports/execute field authority (F06 A5)', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ config }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
     );
   };
   const claimRows = { dataSourceId: 'claims', fields: [{ fieldId: 'claim_number', fieldName: 'Claim Number' }] };
@@ -208,6 +242,8 @@ describe('reports/execute field authority (F06 A5)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'officer';
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.execute.mockResolvedValue({ success: true, data: [{ n: 3 }], rowCount: 1, executionTimeMs: 4 });
     m.audit.mockReset().mockResolvedValue(undefined);
@@ -368,7 +404,6 @@ describe('reports/execute small-group suppression (F06 A5)', () => {
     const { POST } = await import('../reports/execute/route');
     return POST(
       new NextRequest('http://localhost/api/reports/execute', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ config }) }),
-      { userId: 'u1', organizationId: 'org_1' },
     );
   };
   const rows = [
@@ -380,6 +415,8 @@ describe('reports/execute small-group suppression (F06 A5)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'officer';
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.audit.mockReset().mockResolvedValue(undefined);
     m.execute.mockResolvedValue({ success: true, data: rows.map((r) => ({ ...r })), rowCount: 4, executionTimeMs: 3 });

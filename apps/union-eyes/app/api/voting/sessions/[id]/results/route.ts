@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     // Tallies are an officer-level, post-close view. Members receive the
     // participation endpoint only; no live count is observable.
     auth: { required: true, minRole: 'officer' },

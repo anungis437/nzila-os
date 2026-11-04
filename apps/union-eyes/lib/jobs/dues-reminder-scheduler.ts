@@ -12,10 +12,10 @@
  * @module lib/jobs/dues-reminder-scheduler
  */
 
-import { db } from '@/db';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, type SQL } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { getNotificationService } from '@/lib/services/notification-service';
 import { DuesNotificationTemplates, DuesNotificationData } from '@/lib/notification-templates/dues-notifications';
@@ -62,6 +62,14 @@ interface DuesTransactionRow {
 // DUES REMINDER SCHEDULER
 // =============================================================================
 
+/** Ids of organization members are uuids; a dues transaction keeps the member id as text. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Platform job: it reads the dues of every organization, so it runs as the system role, which only the platform-gated routes that trigger it
+ * may reach. The scans are one system transaction; each reminder (member lookup, notification, mark) is a system transaction of its own,
+ * so a statement that fails for one transaction rolls back only that reminder and the reminders after it still run and commit.
+ */
 export class DuesReminderScheduler {
   /**
    * Run dues reminder job
@@ -182,18 +190,11 @@ export class DuesReminderScheduler {
   }
 
   /**
-   * Get transactions needing 7-day reminder
+   * Pending dues of every organization that match a due-date window (cross-organization read, system role)
    */
-  private static async getTransactionsForSevenDayReminder(): Promise<DuesTransactionRow[]> {
-    try {
-      const today = new Date();
-      const sevenDaysFromNow = new Date(today);
-      sevenDaysFromNow.setDate(today.getDate() + 7);
-
-      // Format dates as YYYY-MM-DD for comparison
-      const targetDate = sevenDaysFromNow.toISOString().split('T')[0];
-
-      const transactions = await db
+  private static async selectPending(dueDateWindow: SQL): Promise<DuesTransactionRow[]> {
+    return withSystemContext((tx) =>
+      tx
         .select({
           id: duesTransactions.id,
           memberId: duesTransactions.memberId,
@@ -210,12 +211,23 @@ export class DuesReminderScheduler {
           metadata: duesTransactions.metadata,
         })
         .from(duesTransactions)
-        .where(
-          and(
-            eq(duesTransactions.status, 'pending'),
-            sql`${duesTransactions.dueDate}::text = ${targetDate}`
-          )
-        );
+        .where(and(eq(duesTransactions.status, 'pending'), dueDateWindow)),
+    );
+  }
+
+  /**
+   * Get transactions needing 7-day reminder
+   */
+  private static async getTransactionsForSevenDayReminder(): Promise<DuesTransactionRow[]> {
+    try {
+      const today = new Date();
+      const sevenDaysFromNow = new Date(today);
+      sevenDaysFromNow.setDate(today.getDate() + 7);
+
+      // Format dates as YYYY-MM-DD for comparison
+      const targetDate = sevenDaysFromNow.toISOString().split('T')[0];
+
+      const transactions = await this.selectPending(sql`${duesTransactions.dueDate}::text = ${targetDate}`);
 
       // Filter out transactions that already have 7-day reminder sent
       return transactions.filter((txn) => {
@@ -239,29 +251,7 @@ export class DuesReminderScheduler {
 
       const targetDate = tomorrow.toISOString().split('T')[0];
 
-      const transactions = await db
-        .select({
-          id: duesTransactions.id,
-          memberId: duesTransactions.memberId,
-          organizationId: duesTransactions.organizationId,
-          totalAmount: duesTransactions.totalAmount,
-          duesAmount: duesTransactions.duesAmount,
-          copeAmount: duesTransactions.copeAmount,
-          pacAmount: duesTransactions.pacAmount,
-          strikeFundAmount: duesTransactions.strikeFundAmount,
-          dueDate: duesTransactions.dueDate,
-          periodStart: duesTransactions.periodStart,
-          periodEnd: duesTransactions.periodEnd,
-          status: duesTransactions.status,
-          metadata: duesTransactions.metadata,
-        })
-        .from(duesTransactions)
-        .where(
-          and(
-            eq(duesTransactions.status, 'pending'),
-            sql`${duesTransactions.dueDate}::text = ${targetDate}`
-          )
-        );
+      const transactions = await this.selectPending(sql`${duesTransactions.dueDate}::text = ${targetDate}`);
 
       // Filter out transactions that already have 1-day reminder sent
       return transactions.filter((txn) => {
@@ -281,29 +271,7 @@ export class DuesReminderScheduler {
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      const transactions = await db
-        .select({
-          id: duesTransactions.id,
-          memberId: duesTransactions.memberId,
-          organizationId: duesTransactions.organizationId,
-          totalAmount: duesTransactions.totalAmount,
-          duesAmount: duesTransactions.duesAmount,
-          copeAmount: duesTransactions.copeAmount,
-          pacAmount: duesTransactions.pacAmount,
-          strikeFundAmount: duesTransactions.strikeFundAmount,
-          dueDate: duesTransactions.dueDate,
-          periodStart: duesTransactions.periodStart,
-          periodEnd: duesTransactions.periodEnd,
-          status: duesTransactions.status,
-          metadata: duesTransactions.metadata,
-        })
-        .from(duesTransactions)
-        .where(
-          and(
-            eq(duesTransactions.status, 'pending'),
-            sql`${duesTransactions.dueDate}::text < ${today}`
-          )
-        );
+      const transactions = await this.selectPending(sql`${duesTransactions.dueDate}::text < ${today}`);
 
       // Filter: send overdue notice only once per day
       const now = new Date();
@@ -327,78 +295,81 @@ export class DuesReminderScheduler {
   }
 
   /**
-   * Send 7-day reminder
+   * Send 7-day reminder. The member lookup, the notification and the mark are one system transaction: it commits as a whole or, when anything
+   * in it fails, rolls back as a whole.
    */
   private static async sendSevenDayReminder(transaction: DuesTransactionRow): Promise<boolean> {
     try {
-      // Get member details
-      const member = await this.getMemberDetails(transaction.memberId);
-      if (!member) {
-        logger.warn('Member not found for 7-day reminder', {
+      return await withSystemContext(async (tx) => {
+        // Get member details
+        const member = await this.getMemberDetails(tx, transaction.organizationId, transaction.memberId);
+        if (!member) {
+          logger.warn('Member not found for 7-day reminder', {
+            memberId: transaction.memberId,
+          });
+          return false;
+        }
+
+        const notificationService = getNotificationService();
+        const template = DuesNotificationTemplates.DUES_REMINDER_7_DAYS;
+
+        const organizationName = await this.getOrganizationName(tx, transaction.organizationId);
+        const data: DuesNotificationData = {
+          memberName: member.name,
+          memberEmail: member.email,
+          organizationName,
+          amount: transaction.totalAmount,
+          dueDate: transaction.dueDate,
+          periodStart: transaction.periodStart,
+          periodEnd: transaction.periodEnd,
+          transactionId: transaction.id,
+          breakdown: {
+            dues: transaction.duesAmount,
+            cope: transaction.copeAmount || '0.00',
+            pac: transaction.pacAmount || '0.00',
+            strikeFund: transaction.strikeFundAmount || '0.00',
+          },
+          paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
+        };
+
+        // Send email
+        await notificationService.send({
+          organizationId: transaction.organizationId,
+          recipientId: transaction.memberId,
+          recipientEmail: member.email,
+          type: 'email',
+          priority: 'normal',
+          subject: template.subject(data),
+          title: template.title(data),
+          body: template.body(data),
+          htmlBody: template.htmlBody(data),
+          templateId: template.id,
+          metadata: {
+            type: 'dues_reminder_7days',
+            transactionId: transaction.id,
+          },
+        });
+
+        // Mark as sent in metadata
+        await tx
+          .update(duesTransactions)
+          .set({
+            metadata: sql`jsonb_set(
+              COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
+              '{sevenDayReminderSent}',
+              'true'::jsonb
+            )`,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
+
+        logger.info('7-day reminder sent', {
+          transactionId: transaction.id,
           memberId: transaction.memberId,
         });
-        return false;
-      }
 
-      const notificationService = getNotificationService();
-      const template = DuesNotificationTemplates.DUES_REMINDER_7_DAYS;
-
-      const organizationName = await this.getOrganizationName(transaction.organizationId);
-      const data: DuesNotificationData = {
-        memberName: member.name,
-        memberEmail: member.email,
-        organizationName,
-        amount: transaction.totalAmount,
-        dueDate: transaction.dueDate,
-        periodStart: transaction.periodStart,
-        periodEnd: transaction.periodEnd,
-        transactionId: transaction.id,
-        breakdown: {
-          dues: transaction.duesAmount,
-          cope: transaction.copeAmount || '0.00',
-          pac: transaction.pacAmount || '0.00',
-          strikeFund: transaction.strikeFundAmount || '0.00',
-        },
-        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
-      };
-
-      // Send email
-      await notificationService.send({
-        organizationId: transaction.organizationId,
-        recipientId: transaction.memberId,
-        recipientEmail: member.email,
-        type: 'email',
-        priority: 'normal',
-        subject: template.subject(data),
-        title: template.title(data),
-        body: template.body(data),
-        htmlBody: template.htmlBody(data),
-        templateId: template.id,
-        metadata: {
-          type: 'dues_reminder_7days',
-          transactionId: transaction.id,
-        },
+        return true;
       });
-
-      // Mark as sent in metadata
-      await db
-        .update(duesTransactions)
-        .set({
-          metadata: sql`jsonb_set(
-            COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
-            '{sevenDayReminderSent}',
-            'true'::jsonb
-          )`,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
-
-      logger.info('7-day reminder sent', {
-        transactionId: transaction.id,
-        memberId: transaction.memberId,
-      });
-
-      return true;
     } catch (error) {
       logger.error('Error sending 7-day reminder', {
         error,
@@ -409,89 +380,91 @@ export class DuesReminderScheduler {
   }
 
   /**
-   * Send 1-day reminder
+   * Send 1-day reminder (one system transaction, as the 7-day reminder)
    */
   private static async sendOneDayReminder(transaction: DuesTransactionRow): Promise<boolean> {
     try {
-      const member = await this.getMemberDetails(transaction.memberId);
-      if (!member) {
-        logger.warn('Member not found for 1-day reminder', {
-          memberId: transaction.memberId,
-        });
-        return false;
-      }
+      return await withSystemContext(async (tx) => {
+        const member = await this.getMemberDetails(tx, transaction.organizationId, transaction.memberId);
+        if (!member) {
+          logger.warn('Member not found for 1-day reminder', {
+            memberId: transaction.memberId,
+          });
+          return false;
+        }
 
-      const notificationService = getNotificationService();
-      const template = DuesNotificationTemplates.DUES_REMINDER_1_DAY;
+        const notificationService = getNotificationService();
+        const template = DuesNotificationTemplates.DUES_REMINDER_1_DAY;
 
-      const organizationName = await this.getOrganizationName(transaction.organizationId);
-      const data: DuesNotificationData = {
-        memberName: member.name,
-        memberEmail: member.email,
-        organizationName,
-        amount: transaction.totalAmount,
-        dueDate: transaction.dueDate,
-        periodStart: transaction.periodStart,
-        periodEnd: transaction.periodEnd,
-        transactionId: transaction.id,
-        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
-      };
-
-      // Send email
-      await notificationService.send({
-        organizationId: transaction.organizationId,
-        recipientId: transaction.memberId,
-        recipientEmail: member.email,
-        type: 'email',
-        priority: 'high',
-        subject: template.subject(data),
-        title: template.title(data),
-        body: template.body(data),
-        htmlBody: template.htmlBody(data),
-        templateId: template.id,
-        metadata: {
-          type: 'dues_reminder_1day',
+        const organizationName = await this.getOrganizationName(tx, transaction.organizationId);
+        const data: DuesNotificationData = {
+          memberName: member.name,
+          memberEmail: member.email,
+          organizationName,
+          amount: transaction.totalAmount,
+          dueDate: transaction.dueDate,
+          periodStart: transaction.periodStart,
+          periodEnd: transaction.periodEnd,
           transactionId: transaction.id,
-        },
-      });
+          paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
+        };
 
-      // Send push notification if available
-      if (member.firebaseToken) {
+        // Send email
         await notificationService.send({
           organizationId: transaction.organizationId,
           recipientId: transaction.memberId,
-          recipientFirebaseToken: member.firebaseToken,
-          type: 'push',
+          recipientEmail: member.email,
+          type: 'email',
           priority: 'high',
+          subject: template.subject(data),
           title: template.title(data),
-          body: `Your dues payment of $${transaction.totalAmount} is due tomorrow`,
+          body: template.body(data),
+          htmlBody: template.htmlBody(data),
           templateId: template.id,
           metadata: {
             type: 'dues_reminder_1day',
             transactionId: transaction.id,
           },
         });
-      }
 
-      // Mark as sent
-      await db
-        .update(duesTransactions)
-        .set({
-          metadata: sql`jsonb_set(
-            COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
-            '{oneDayReminderSent}',
-            'true'::jsonb
-          )`,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
+        // Send push notification if available
+        if (member.firebaseToken) {
+          await notificationService.send({
+            organizationId: transaction.organizationId,
+            recipientId: transaction.memberId,
+            recipientFirebaseToken: member.firebaseToken,
+            type: 'push',
+            priority: 'high',
+            title: template.title(data),
+            body: `Your dues payment of $${transaction.totalAmount} is due tomorrow`,
+            templateId: template.id,
+            metadata: {
+              type: 'dues_reminder_1day',
+              transactionId: transaction.id,
+            },
+          });
+        }
 
-      logger.info('1-day reminder sent', {
-        transactionId: transaction.id,
-        memberId: transaction.memberId,
+        // Mark as sent
+        await tx
+          .update(duesTransactions)
+          .set({
+            metadata: sql`jsonb_set(
+              COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
+              '{oneDayReminderSent}',
+              'true'::jsonb
+            )`,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
+
+        logger.info('1-day reminder sent', {
+          transactionId: transaction.id,
+          memberId: transaction.memberId,
+        });
+
+        return true;
       });
-
-      return true;
     } catch (error) {
       logger.error('Error sending 1-day reminder', {
         error,
@@ -502,90 +475,92 @@ export class DuesReminderScheduler {
   }
 
   /**
-   * Send overdue notice
+   * Send overdue notice (one system transaction, as the 7-day reminder)
    */
   private static async sendOverdueNotice(transaction: DuesTransactionRow): Promise<boolean> {
     try {
-      const member = await this.getMemberDetails(transaction.memberId);
-      if (!member) {
-        logger.warn('Member not found for overdue notice', {
-          memberId: transaction.memberId,
-        });
-        return false;
-      }
+      return await withSystemContext(async (tx) => {
+        const member = await this.getMemberDetails(tx, transaction.organizationId, transaction.memberId);
+        if (!member) {
+          logger.warn('Member not found for overdue notice', {
+            memberId: transaction.memberId,
+          });
+          return false;
+        }
 
-      const notificationService = getNotificationService();
-      const template = DuesNotificationTemplates.DUES_OVERDUE;
+        const notificationService = getNotificationService();
+        const template = DuesNotificationTemplates.DUES_OVERDUE;
 
-      const organizationName = await this.getOrganizationName(transaction.organizationId);
-      const data: DuesNotificationData = {
-        memberName: member.name,
-        memberEmail: member.email,
-        organizationName,
-        amount: transaction.totalAmount,
-        dueDate: transaction.dueDate,
-        periodStart: transaction.periodStart,
-        periodEnd: transaction.periodEnd,
-        transactionId: transaction.id,
-        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
-      };
-
-      // Send email
-      await notificationService.send({
-        organizationId: transaction.organizationId,
-        recipientId: transaction.memberId,
-        recipientEmail: member.email,
-        type: 'email',
-        priority: 'urgent',
-        subject: template.subject(data),
-        title: template.title(data),
-        body: template.body(data),
-        htmlBody: template.htmlBody(data),
-        templateId: template.id,
-        metadata: {
-          type: 'dues_overdue',
+        const organizationName = await this.getOrganizationName(tx, transaction.organizationId);
+        const data: DuesNotificationData = {
+          memberName: member.name,
+          memberEmail: member.email,
+          organizationName,
+          amount: transaction.totalAmount,
+          dueDate: transaction.dueDate,
+          periodStart: transaction.periodStart,
+          periodEnd: transaction.periodEnd,
           transactionId: transaction.id,
-        },
-      });
+          paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
+        };
 
-      // Send push notification
-      if (member.firebaseToken) {
+        // Send email
         await notificationService.send({
           organizationId: transaction.organizationId,
           recipientId: transaction.memberId,
-          recipientFirebaseToken: member.firebaseToken,
-          type: 'push',
+          recipientEmail: member.email,
+          type: 'email',
           priority: 'urgent',
-          title: '🔴 Payment Overdue',
-          body: `Your dues payment of $${transaction.totalAmount} is overdue`,
+          subject: template.subject(data),
+          title: template.title(data),
+          body: template.body(data),
+          htmlBody: template.htmlBody(data),
           templateId: template.id,
           metadata: {
             type: 'dues_overdue',
             transactionId: transaction.id,
           },
         });
-      }
 
-      // Update status to overdue and mark notice sent
-      await db
-        .update(duesTransactions)
-        .set({
-          status: 'overdue',
-          metadata: sql`jsonb_set(
-            COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
-            '{lastOverdueNotice}',
-            to_jsonb(now()::text)
-          )`,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
+        // Send push notification
+        if (member.firebaseToken) {
+          await notificationService.send({
+            organizationId: transaction.organizationId,
+            recipientId: transaction.memberId,
+            recipientFirebaseToken: member.firebaseToken,
+            type: 'push',
+            priority: 'urgent',
+            title: '🔴 Payment Overdue',
+            body: `Your dues payment of $${transaction.totalAmount} is overdue`,
+            templateId: template.id,
+            metadata: {
+              type: 'dues_overdue',
+              transactionId: transaction.id,
+            },
+          });
+        }
 
-      logger.info('Overdue notice sent', {
-        transactionId: transaction.id,
-        memberId: transaction.memberId,
+        // Update status to overdue and mark notice sent
+        await tx
+          .update(duesTransactions)
+          .set({
+            status: 'overdue',
+            metadata: sql`jsonb_set(
+              COALESCE(${duesTransactions.metadata}, '{}'::jsonb),
+              '{lastOverdueNotice}',
+              to_jsonb(now()::text)
+            )`,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
+
+        logger.info('Overdue notice sent', {
+          transactionId: transaction.id,
+          memberId: transaction.memberId,
+        });
+
+        return true;
       });
-
-      return true;
     } catch (error) {
       logger.error('Error sending overdue notice', {
         error,
@@ -596,53 +571,49 @@ export class DuesReminderScheduler {
   }
 
   /**
-   * Get member details
+   * Get member details. A database failure propagates: it must fail the reminder, never read as "member not found".
    */
   private static async getMemberDetails(
+    tx: RLSTx,
+    organizationId: string,
     memberId: string
   ): Promise<{ name: string; email: string; firebaseToken?: string } | null> {
-    try {
-      const member = await db
-        .select({
-          name: organizationMembers.name,
-          email: organizationMembers.email,
-          metadata: organizationMembers.metadata,
-        })
-        .from(organizationMembers)
-        .where(eq(organizationMembers.id, memberId))
-        .limit(1);
+    // A dues transaction keeps the member id as text; only a uuid can name an organization member
+    if (!UUID.test(memberId)) return null;
 
-      if (!member || member.length === 0) {
-        return null;
-      }
+    // Cross-organization role: the member must belong to the organization of the dues transaction
+    const member = await tx
+      .select({
+        name: organizationMembers.name,
+        email: organizationMembers.email,
+        metadata: organizationMembers.metadata,
+      })
+      .from(organizationMembers)
+      .where(and(eq(organizationMembers.id, memberId), eq(organizationMembers.organizationId, organizationId)))
+      .limit(1);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const metadata = (member[0].metadata as any) || {};
-      return {
-        name: member[0].name,
-        email: member[0].email,
-        firebaseToken: metadata.firebaseToken,
-      };
-    } catch (error) {
-      logger.error('Error getting member details', { error, memberId });
+    if (!member || member.length === 0) {
       return null;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = (member[0].metadata as any) || {};
+    return {
+      name: member[0].name,
+      email: member[0].email,
+      firebaseToken: metadata.firebaseToken,
+    };
   }
 
-  private static async getOrganizationName(organizationId: string): Promise<string> {
-    try {
-      const [org] = await db
-        .select({ name: organizations.name })
-        .from(organizations)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .where(eq(organizations.id, organizationId as any))
-        .limit(1);
+  private static async getOrganizationName(tx: RLSTx, organizationId: string): Promise<string> {
+    const [org] = await tx
+      .select({ name: organizations.name })
+      .from(organizations)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .where(eq(organizations.id, organizationId as any))
+      .limit(1);
 
-      return org?.name || 'UnionEyes';
-    } catch (error) {
-      logger.error('Error getting organization name', { error, organizationId });
-      return 'UnionEyes';
-    }
+    return org?.name || 'UnionEyes';
   }
 }
 

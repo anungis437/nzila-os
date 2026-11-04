@@ -15453,10 +15453,6 @@
       "domain": "REPORT_DEFINITIONS",
       "callers": [
         {
-          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
-          "quote": "const response = await fetch('/api/reports');"
-        },
-        {
           "ref": "apps/union-eyes/lib/api/deprecation.ts",
           "quote": "{ deprecated: '/api/v1/reports/membership', canonical: '/api/reports', reason: 'Misnamed — was CRUD on claims table', phase: 1 },"
         },
@@ -15465,7 +15461,7 @@
           "quote": "app.use('/api/reports', authenticate, reportsRouter)"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
       "riskScreen": {
         "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
           "reason": "The route serves rows of the reports table, which stores the report definition (name, flags, config JSON) and no result: it reads no claims, member, dues or finance table, so no source column is copied into the response.",
@@ -15632,10 +15628,6 @@
       "domain": "REPORT_DEFINITIONS",
       "callers": [
         {
-          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
-          "quote": "const response = await fetch('/api/reports');"
-        },
-        {
           "ref": "apps/union-eyes/lib/api/deprecation.ts",
           "quote": "{ deprecated: '/api/v1/reports/membership', canonical: '/api/reports', reason: 'Misnamed — was CRUD on claims table', phase: 1 },"
         },
@@ -15644,7 +15636,7 @@
           "quote": "app.use('/api/reports', authenticate, reportsRouter)"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
       "riskScreen": {
         "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
           "reason": "The route serves rows of the reports table, which stores the report definition (name, flags, config JSON) and no result: it reads no claims, member, dues or finance table, so no source column is copied into the response.",
@@ -15815,21 +15807,8 @@
       "crudTable": "reports",
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "SCHEDULED_REPORT_DELIVERY",
-      "callers": [
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled/${schedule.id}`, {"
-        },
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled/${scheduleId}`, {"
-        },
-        {
-          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
-          "quote": "? `/api/reports/scheduled/${schedule.id}`"
-        }
-      ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "callers": [],
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
       "riskScreen": {
         "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
           "reason": "The route serves rows of the reports table, which stores the report definition (name, flags, config JSON) and no result: it reads no claims, member, dues or finance table, so no source column is copied into the response.",
@@ -15997,21 +15976,8 @@
       "crudTable": "reports",
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "SCHEDULED_REPORT_DELIVERY",
-      "callers": [
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled/${schedule.id}`, {"
-        },
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled/${scheduleId}`, {"
-        },
-        {
-          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
-          "quote": "? `/api/reports/scheduled/${schedule.id}`"
-        }
-      ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "callers": [],
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
       "riskScreen": {
         "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
           "reason": "The route serves rows of the reports table, which stores the report definition (name, flags, config JSON) and no result: it reads no claims, member, dues or finance table, so no source column is copied into the response.",
@@ -16198,21 +16164,8 @@
       "crudTable": "reports",
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "SCHEDULED_REPORT_DELIVERY",
-      "callers": [
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled/${schedule.id}`, {"
-        },
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled/${scheduleId}`, {"
-        },
-        {
-          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
-          "quote": "? `/api/reports/scheduled/${schedule.id}`"
-        }
-      ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "callers": [],
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
       "riskScreen": {
         "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
           "reason": "The route serves rows of the reports table, which stores the report definition (name, flags, config JSON) and no result: it reads no claims, member, dues or finance table, so no source column is copied into the response.",
@@ -16380,17 +16333,8 @@
       "crudTable": "reports",
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "SCHEDULED_REPORT_DELIVERY",
-      "callers": [
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled?${params}`);"
-        },
-        {
-          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
-          "quote": ": '/api/reports/scheduled';"
-        }
-      ],
-      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "callers": [],
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
       "riskScreen": {
         "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
           "reason": "The route serves rows of the reports table, which stores the report definition (name, flags, config JSON) and no result: it reads no claims, member, dues or finance table, so no source column is copied into the response.",
@@ -16577,17 +16521,8 @@
       "crudTable": "reports",
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "SCHEDULED_REPORT_DELIVERY",
-      "callers": [
-        {
-          "ref": "apps/union-eyes/app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "quote": "const response = await fetch(`/api/reports/scheduled?${params}`);"
-        },
-        {
-          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
-          "quote": ": '/api/reports/scheduled';"
-        }
-      ],
-      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "callers": [],
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
       "riskScreen": {
         "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
           "reason": "The route serves rows of the reports table, which stores the report definition (name, flags, config JSON) and no result: it reads no claims, member, dues or finance table, so no source column is copied into the response.",

@@ -37,6 +37,7 @@ function isStewardPlus(role: string | null): boolean {
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     body: searchSchema,
     entitlement: 'union_knowledge_suite',
@@ -56,6 +57,6 @@ export const POST = withApi(
       semanticWeight: body.semanticWeight ?? 0.6,
     });
 
-    return { data: results, total: results.length };
+    return results;
   },
 );

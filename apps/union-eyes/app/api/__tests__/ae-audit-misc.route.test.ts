@@ -5,6 +5,8 @@ const h = vi.hoisted(() => ({
   queue: [] as unknown[],
   audit: vi.fn(),
   roles: [] as string[],
+  // The options each `withApi` route loaded in this file declared, in load order
+  declared: [] as Array<{ auth?: { minRole?: string }; openapi?: { summary?: string } }>,
   createPrecedent: vi.fn(),
   executeResult: vi.fn(),
   compareInOrg: vi.fn(),
@@ -27,7 +29,10 @@ function chain(): Record<string, unknown> {
 const tx = chain();
 
 vi.mock('@/lib/api/framework', () => ({
-  withApi: (_cfg: unknown, handler: (ctx: unknown) => unknown) => (ctx: unknown) => handler(ctx),
+  withApi: (cfg: unknown, handler: (ctx: unknown) => unknown) => {
+    h.declared.push(cfg as { auth?: { minRole?: string }; openapi?: { summary?: string } });
+    return (ctx: unknown) => handler(ctx);
+  },
   z: require('zod'),
   ApiError: {
     badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }),
@@ -124,19 +129,26 @@ describe('precedents POST', () => {
     caseNumber: 'CN-1', caseTitle: 'T', tribunal: 'other', decisionType: 'grievance', decisionDate: '2025-01-01',
     arbitrator: 'A', union: 'U', employer: 'E', outcome: 'settled', precedentValue: 'high', fullText: 'text',
   };
+  // The wrapper is replaced above by a function that runs the handler on the context the wrapper would resolve
+  const create = (body: unknown) => ({ request: post(body), userId: 'u1', organizationId: 'org-1' });
 
   it('adds to the shared precedent library only for a platform content manager, attributing the audit to the acting organization', async () => {
     const { POST } = await import('../precedents/route');
-    expect(h.roles).toContain('content_manager');
+    const declared = h.declared.find((options) => options.openapi?.summary === 'Create a precedent draft awaiting review');
+    expect(declared?.auth).toEqual({ minRole: 'content_manager' });
     h.createPrecedent.mockResolvedValue({ id: 'p1' });
-    const response = await POST(post({ ...valid, isPublic: false, embedding: 'x', id: 'forced' }));
+    const response = await (POST as unknown as (context: unknown) => Promise<Response>)(create({ ...valid, isPublic: false, embedding: 'x', id: 'forced' }));
     expect(response.status).toBe(200);
-    expect(h.createPrecedent).toHaveBeenCalledWith({ organizationId: 'org-1', userId: 'u1' }, expect.not.objectContaining({ id: 'forced', embedding: 'x', isPublic: false }));
+    expect(h.createPrecedent).toHaveBeenCalledWith({ organizationId: 'org-1', userId: 'u1' }, expect.any(Object));
+    // What the caller forced on the row is dropped before the service sees it
+    const [, written] = h.createPrecedent.mock.calls[0];
+    expect(written).toMatchObject({ caseNumber: 'CN-1', outcome: 'settled' });
+    for (const forced of ['id', 'embedding', 'isPublic']) expect(written).not.toHaveProperty(forced);
   });
 
   it('rejects a malformed precedent instead of writing it', async () => {
     const { POST } = await import('../precedents/route');
-    const response = await POST(post({ ...valid, tribunal: 'moon' }));
+    const response = await (POST as unknown as (context: unknown) => Promise<Response>)(create({ ...valid, tribunal: 'moon' }));
     expect(response.status).toBe(400);
     expect(h.createPrecedent).not.toHaveBeenCalled();
   });

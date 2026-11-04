@@ -18,6 +18,7 @@
 
 import { useState } from 'react';
 import type { ReportTierId } from '@/lib/icra/types';
+import { apiErrorMessage } from '@/lib/client/api-envelope';
 import { COPY } from '@/lib/icra/copy';
 import { ICRA_PAID_REPORT_PRICES } from '@/lib/icra/pricing';
 import { TurnstileWidget, isTurnstileConfigured } from './TurnstileWidget';
@@ -96,13 +97,13 @@ export function ICRAReportGate({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assessmentId, tierId: requiredTier, locale, turnstileToken: challengeToken ?? '' }),
       });
-      const data = (await res.json()) as { url?: string; error?: string; tierId?: string };
+      const data = (await res.json()) as { url?: string; tierId?: string };
       if (res.status === 409 && data.tierId) {
         window.location.reload();
         return;
       }
       if (!res.ok || !data.url) {
-        setError(data.error ?? 'Could not open checkout. Please try again.');
+        setError(apiErrorMessage(data, 'Could not open checkout. Please try again.'));
         return;
       }
       window.location.href = data.url;

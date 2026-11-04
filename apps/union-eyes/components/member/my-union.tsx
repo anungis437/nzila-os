@@ -6,13 +6,15 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
+import { asRecord, optionalString } from '@/lib/client/row-fields';
 
 type Membership = {
   organizationName: string | null;
   status: string | null;
   membershipNumber: string | null;
   category: string | null;
-  joinedAt: string | null;
+  joinedAt: Date | null;
   department: string | null;
   position: string | null;
 };
@@ -21,31 +23,71 @@ type Membership = {
 // so each is listed as unavailable and is never rendered as a link, balance or empty result.
 const UNAVAILABLE_SERVICES = ['agreement', 'dues', 'benefits', 'events', 'participation', 'credential'] as const;
 
+const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+/**
+ * /api/members/me answers { success, data: { membership } } where membership is the caller's record or null when the organization holds none.
+ * An answer without a `membership` member is not "no record": it is an error.
+ */
+async function readMembership(response: Response): Promise<Membership | null> {
+  const body: unknown = await response.json().catch(() => {
+    throw new ApiShapeError('the answer is not JSON');
+  });
+  const payload = envelopeData(body);
+  if (!('membership' in payload)) throw new ApiShapeError('no membership');
+  if (payload.membership === null) return null;
+  const row = asRecord(payload.membership, 'membership');
+  const joinedAt = optionalString(row, 'joinedAt');
+  const joined = joinedAt === null ? null : new Date(joinedAt);
+  if (joined !== null && Number.isNaN(joined.getTime())) throw new ApiShapeError('joinedAt is not a date');
+  return {
+    organizationName: optionalString(row, 'organizationName'),
+    status: optionalString(row, 'status'),
+    membershipNumber: optionalString(row, 'membershipNumber'),
+    category: optionalString(row, 'category'),
+    joinedAt: joined,
+    department: optionalString(row, 'department'),
+    position: optionalString(row, 'position'),
+  };
+}
+
+async function fetchMembership(): Promise<Membership | null> {
+  const response = await fetch('/api/members/me');
+  if (!response.ok) throw new Error(await readApiError(response, `Request failed with status ${response.status}`));
+  return readMembership(response);
+}
+
 export function MyUnion() {
   const t = useTranslations('myUnion');
   const locale = useLocale();
-  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
-  const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'long' });
+  // A join date is a calendar date stored at midnight UTC: shown in UTC it is the day that was recorded, in a local zone it can be the day before.
+  const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' });
 
-  const load = useCallback(async () => {
-    setState('loading');
-    try {
-      const response = await fetch('/api/members/me');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const body = await response.json();
-      const value = body?.data?.membership ?? body?.membership ?? null;
-      setMembership(value);
-      setState('ready');
-    } catch {
-      setState('error');
-    }
+  const load = useCallback(() => {
+    fetchMembership().then(
+      (value) => {
+        setMembership(value);
+        setLoadError(null);
+        setLoading(false);
+      },
+      (error: unknown) => {
+        setLoadError(reasonOf(error));
+        setLoading(false);
+      },
+    );
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load();
+    load();
   }, [load]);
+
+  const retry = () => {
+    setLoading(true);
+    load();
+  };
 
   const statusLabel = (value: string | null) => {
     const key = `status.${String(value ?? '').toLowerCase()}`;
@@ -67,14 +109,15 @@ export function MyUnion() {
 
       <section aria-labelledby="union-membership" className="rounded-lg border p-4">
         <h2 id="union-membership" className="mb-3 text-lg font-semibold">{t('membershipTitle')}</h2>
-        {state === 'loading' && <Skeleton className="h-24 w-full" role="status" aria-busy="true" />}
-        {state === 'error' && (
+        {loading && <Skeleton className="h-24 w-full" role="status" aria-busy="true" />}
+        {!loading && loadError !== null && (
           <div role="alert" className="text-sm text-destructive">
             {t('loadError')}
-            <Button variant="link" size="sm" onClick={() => void load()}>{t('retry')}</Button>
+            <span className="block text-xs">{loadError}</span>
+            <Button variant="link" size="sm" onClick={retry}>{t('retry')}</Button>
           </div>
         )}
-        {state === 'ready' && !membership && (
+        {!loading && loadError === null && !membership && (
           <div data-testid="membership-missing">
             <p className="text-sm">{t('missingTitle')}</p>
             <p className="text-sm text-muted-foreground">{t('missingBody')}</p>
@@ -83,7 +126,7 @@ export function MyUnion() {
             </Button>
           </div>
         )}
-        {state === 'ready' && membership && (
+        {!loading && loadError === null && membership && (
           <>
             <dl className="grid gap-4 sm:grid-cols-2" data-testid="membership-details">
               {field(t('union'), membership.organizationName)}
@@ -93,7 +136,7 @@ export function MyUnion() {
               </div>
               {field(t('membershipNumber'), membership.membershipNumber)}
               {field(t('category'), membership.category?.replace(/[-_]+/g, ' '))}
-              {field(t('memberSince'), membership.joinedAt ? dateFormat.format(new Date(membership.joinedAt)) : null)}
+              {field(t('memberSince'), membership.joinedAt ? dateFormat.format(membership.joinedAt) : null)}
               {field(t('department'), membership.department)}
               {field(t('position'), membership.position)}
             </dl>

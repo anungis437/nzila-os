@@ -42,6 +42,7 @@ const dbMock = vi.hoisted(() => {
         where() { return c; },
         orderBy() { return c; },
         limit() { return c; },
+        offset() { return c; },
         groupBy() { return c; },
         values(v: any) { c._values = v; return c; },
         set(v: any) { c._set = v; return c; },
@@ -84,9 +85,6 @@ vi.mock('@/db/schema', () => {
     platformPayments: t('platformPayments'),
     paymentAllocations: t('paymentAllocations'),
     subscriptionPlans: t('subscriptionPlans'),
-    usageAggregates: t('usageAggregates'),
-    usageEvents: t('usageEvents'),
-    usageMeters: t('usageMeters'),
     organizations: t('organizations'),
   };
 });
@@ -264,11 +262,6 @@ describe('generateInvoice', () => {
       id: 'plan-1', name: 'Pro', code: 'PRO', baseFee: '100.00',
       perLocalFee: '10.00', perSeatFee: '5.00', perModuleFee: '2.00', updatedAt: new Date('2025-01-01'),
     }];
-    state.selects.usageAggregates = [{
-      id: 'agg-1', meterId: 'meter-1', billableQuantity: '10', unitPrice: '1.00',
-      totalAmount: '10.00', status: 'final', meterCode: 'API', meterUnit: 'calls',
-    }];
-    state.selects.usageEvents = [{ id: 'ue-1' }, { id: 'ue-2' }];
     state.inserts.platformInvoices = [{ id: 'inv-new', invoiceNumber: 'INV-X' }];
   }
 
@@ -327,7 +320,7 @@ describe('generateInvoice', () => {
     );
   });
 
-  it('generates an invoice with base/local/seat/module/usage lines, discount and subsidy', async () => {
+  it('generates an invoice with base/local/seat/module lines, discount and subsidy, and reads no metering table (metering is not implemented)', async () => {
     happyState();
     const r = await generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1', createdBy: 'admin-1' });
     expect(r.id).toBe('inv-new');

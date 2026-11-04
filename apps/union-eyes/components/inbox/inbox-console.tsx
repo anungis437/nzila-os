@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Signal, SignalType, SignalUrgency } from "@/lib/types/signal";
 import { ActionHint } from "@/components/onboarding/action-hint";
+import { ApiShapeError, envelopeData, envelopeRows, isRecord, readApiError } from "@/lib/client/api-envelope";
+import { asRecord, optionalString, requiredString } from "@/lib/client/row-fields";
 
 // ── Type → icon mapping ─────────────────────────────────────────────────────
 const TYPE_ICONS: Record<SignalType, React.ReactNode> = {
@@ -51,35 +53,64 @@ const TYPE_LABEL_KEYS: Record<SignalType, string> = {
 };
 
 // ── Transform API data into Signal format ────────────────────────────────────
-function claimToSignal(c: Record<string, unknown>, defaults: { newSubmission: string; defaultType: string }): Signal {
+/** A failure the server explained: its words are shown as they came. */
+class ServerMessage extends Error {}
+
+const humanize = (code: string) => code.replace(/_/g, " ");
+
+// A row of GET /api/claims (the crud factory's list): claimId, claimType, description, priority, status, createdAt.
+function claimToSignal(value: unknown, defaults: { newSubmission: string; defaultType: string }): Signal | null {
+  const c = asRecord(value, "claim");
+  // The route does not filter by status; a claim that is not a new submission is not an intake signal.
+  if (c.status !== "submitted") return null;
+  const claimId = requiredString(c, "claimId");
+  const claimType = optionalString(c, "claimType");
+  const description = optionalString(c, "description");
   return {
-    id: `intake-${c.claimId || c.id}`,
+    id: `intake-${claimId}`,
     type: "intake",
-    title: `${c.claimType || defaults.defaultType}: ${(c.description as string)?.slice(0, 60) || defaults.newSubmission}`,
-    preview: (c.description as string)?.slice(0, 120) || "",
+    title: `${claimType ? humanize(claimType) : defaults.defaultType}: ${description?.slice(0, 60) ?? defaults.newSubmission}`,
+    preview: description?.slice(0, 120) ?? "",
     status: "unread",
-    urgency: c.priority === "urgent" ? "high" : c.priority === "critical" ? "critical" : "normal",
-    createdAt: (c.createdAt as string) || new Date().toISOString(),
-    relatedEntityId: (c.claimId || c.id) as string,
+    urgency: c.priority === "critical" ? "critical" : c.priority === "high" ? "high" : "normal",
+    createdAt: requiredString(c, "createdAt"),
+    relatedEntityId: claimId,
     relatedEntityType: "case",
   };
 }
 
-function notificationToSignal(n: Record<string, unknown>, defaults: { defaultNotification: string }): Signal {
+// A row of GET /api/notifications (in_app_notifications): the table has no priority and no sender column, so the notice's own type is its urgency.
+function notificationToSignal(value: unknown, defaults: { defaultNotification: string }): Signal {
+  const n = asRecord(value, "notification");
   // A secure-conversation notice (assignment, waiting in the queue, new message) opens the staff conversation workspace.
-  const data = (n.data ?? {}) as { event?: unknown; threadId?: unknown };
+  const data = isRecord(n.data) ? n.data : {};
   const threadId = typeof data.threadId === "string" && String(data.event ?? "").startsWith("thread_") ? data.threadId : undefined;
   return {
-    id: `alert-${n.id}`,
-    type: threadId || n.type === "message" ? "message" : "alert",
-    title: (n.title as string) || defaults.defaultNotification,
-    preview: (n.message as string)?.slice(0, 120) || "",
-    status: n.read ? "read" : "unread",
-    urgency: n.priority === "high" ? "high" : "normal",
-    createdAt: (n.createdAt as string) || new Date().toISOString(),
-    actor: n.actor as string | undefined,
+    id: `alert-${requiredString(n, "id")}`,
+    type: threadId ? "message" : "alert",
+    title: optionalString(n, "title") ?? defaults.defaultNotification,
+    preview: optionalString(n, "message")?.slice(0, 120) ?? "",
+    status: n.read === true ? "read" : "unread",
+    urgency: n.type === "error" ? "high" : "normal",
+    createdAt: requiredString(n, "createdAt"),
     ...(threadId ? { relatedEntityId: data.event === "thread_triage_waiting" ? "queue" : threadId, relatedEntityType: "message" as const } : {}),
   };
+}
+
+async function readSource<T>(response: PromiseSettledResult<Response>, rowsOf: (body: unknown) => unknown[], map: (row: unknown) => T | null): Promise<T[]> {
+  if (response.status === "rejected") throw response.reason;
+  if (!response.value.ok) throw new ServerMessage(await readApiError(response.value, ""));
+  return rowsOf(await response.value.json()).flatMap((row) => {
+    const item = map(row);
+    return item === null ? [] : [item];
+  });
+}
+
+/** The notifications the inbox route answers: { notifications, unreadCount, pagination } inside the withApi body. */
+function notificationRows(body: unknown): unknown[] {
+  const { notifications } = envelopeData(body);
+  if (!Array.isArray(notifications)) throw new ApiShapeError("no notifications");
+  return notifications;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -91,6 +122,7 @@ export function InboxConsole() {
   const searchParams = useSearchParams();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Initialise filters from URL query params (?type=message&urgency=high)
   const initialType = (searchParams.get("type") as SignalType) || "all";
@@ -104,41 +136,37 @@ export function InboxConsole() {
 
   const fetchSignals = useCallback(async () => {
     setLoading(true);
-    try {
-      // Fetch from multiple sources in parallel
-      const [claimsRes, notifRes] = await Promise.allSettled([
-        fetch("/api/claims?status=submitted&limit=20"),
-        fetch("/api/notifications?limit=30"),
-      ]);
+    setError(null);
+    // Fetch from multiple sources in parallel
+    const [claimsRes, notifRes] = await Promise.allSettled([
+      fetch("/api/claims?status=submitted&limit=100"),
+      fetch("/api/notifications?limit=30"),
+    ]);
 
-      const items: Signal[] = [];
+    const claimDefaults = {
+      newSubmission: tInbox("signalTitleNew"),
+      defaultType: tInbox("signalDefaultType"),
+    };
+    const notificationDefaults = { defaultNotification: tInbox("signalNotificationDefault") };
+    const results = await Promise.allSettled([
+      readSource(claimsRes, envelopeRows, (row) => claimToSignal(row, claimDefaults)),
+      readSource(notifRes, notificationRows, (row) => notificationToSignal(row, notificationDefaults)),
+    ]);
 
-      if (claimsRes.status === "fulfilled" && claimsRes.value.ok) {
-        const claimsData = await claimsRes.value.json();
-        const claimsList = Array.isArray(claimsData) ? claimsData : claimsData.claims || [];
-        const defaults = {
-          newSubmission: tInbox("signalTitleNew"),
-          defaultType: tInbox("signalDefaultType"),
-        };
-        items.push(...claimsList.map((c: Record<string, unknown>) => claimToSignal(c, defaults)));
-      }
-
-      if (notifRes.status === "fulfilled" && notifRes.value.ok) {
-        const notifData = await notifRes.value.json();
-        const notifList = Array.isArray(notifData) ? notifData : notifData.notifications || [];
-        const defaults = { defaultNotification: tInbox("signalNotificationDefault") };
-        items.push(...notifList.map((n: Record<string, unknown>) => notificationToSignal(n, defaults)));
-      }
-
-      // Sort by createdAt desc
-      items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      setSignals(items);
-    } catch {
-      // Silent — show empty state
-    } finally {
-      setLoading(false);
+    const items: Signal[] = [];
+    const failures: string[] = [];
+    for (const result of results) {
+      if (result.status === "fulfilled") items.push(...result.value);
+      else failures.push(result.reason instanceof ServerMessage && result.reason.message !== "" ? result.reason.message : t("errors.loadingError"));
     }
-  }, [tInbox]);
+
+    // Sort by createdAt desc
+    items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    setSignals(items);
+    // A source that could not be read is said so: what is listed is not the whole inbox, and an empty list is not "no signals".
+    setError(failures.length > 0 ? [...new Set(failures)].join(" ") : null);
+    setLoading(false);
+  }, [t, tInbox]);
 
   useEffect(() => { fetchSignals(); }, [fetchSignals]);
 
@@ -148,8 +176,8 @@ export function InboxConsole() {
     return true;
   });
 
-  const handleAction = (signal: Signal, action: string) => {
-    if (action === "review" && signal.relatedEntityId) {
+  const handleAction = (signal: Signal) => {
+    if (signal.relatedEntityId) {
       if (signal.relatedEntityType === "case") {
         router.push(`/${locale}/dashboard/claims/${signal.relatedEntityId}`);
       } else if (signal.relatedEntityType === "message") {
@@ -162,8 +190,6 @@ export function InboxConsole() {
       } else {
         router.push(`/${locale}/dashboard/inbox?type=message`);
       }
-    } else if (action === "convert_to_case") {
-      router.push(`/${locale}/dashboard/claims/new`);
     }
   };
 
@@ -213,11 +239,20 @@ export function InboxConsole() {
       </div>
 
       {/* Signal feed */}
+      {error !== null && (
+        <div role="alert" className="flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <span>{error}</span>
+          <Button type="button" variant="outline" size="sm" onClick={() => void fetchSignals()}>
+            {t("common.retry")}
+          </Button>
+        </div>
+      )}
       {loading ? (
         <div className="flex items-center justify-center py-20 text-gray-400">
           <Loader2 size={24} className="animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
+        error !== null && signals.length === 0 ? null : (
         <Card>
           <CardContent className="py-16 text-center">
             <MessageSquare size={40} className="mx-auto text-gray-300 mb-3" />
@@ -238,6 +273,7 @@ export function InboxConsole() {
             )}
           </CardContent>
         </Card>
+        )
       ) : (
         <div className="space-y-2">
           {filtered.map(signal => (
@@ -274,19 +310,9 @@ export function InboxConsole() {
                       variant="ghost"
                       size="sm"
                       className="text-xs h-7"
-                      onClick={() => handleAction(signal, "review")}
+                      onClick={() => handleAction(signal)}
                     >
                       {signal.type === "intake" ? tInbox("actions.reviewCase") : tInbox("actions.open")} <ArrowRight size={12} className="ml-1" />
-                    </Button>
-                  )}
-                  {signal.type === "intake" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs h-7 text-blue-600"
-                      onClick={() => handleAction(signal, "convert_to_case")}
-                    >
-                      {tInbox("actions.convert")}
                     </Button>
                   )}
                 </div>

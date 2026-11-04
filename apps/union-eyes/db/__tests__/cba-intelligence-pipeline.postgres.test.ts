@@ -245,6 +245,12 @@ describe.skipIf(!URL)('the CBA intelligence pipeline on the combined schema, as 
       expect((await review!.getPendingAgreementReviews()).items.map((row) => row.id)).toEqual([state.target])
       const counts = await review!.getReviewQueueCounts()
       expect(counts).toMatchObject({ findings: 3, agreements: 1, wageAdjustments: 2, clauses: 1, total: 7 })
+      // Each kind of row has its own queue, and the number on its tab is the number of rows it lists.
+      expect((await review!.getReviewQueue({ targetType: 'agreement' })).items.map((row) => row.id)).toEqual([state.target])
+      const wages = await review!.getReviewQueue({ targetType: 'wage_adjustment' })
+      expect(wages.total).toBe(counts.wageAdjustments)
+      expect(wages.items.map((row) => row.id)).toContain(state.wageId)
+      expect((await review!.getReviewQueue({ targetType: 'clause' })).items.map((row) => row.id)).toEqual([state.clauseId])
     })
 
     it('records a decision, applies it to its target, and keeps the history', async () => {
@@ -299,7 +305,7 @@ describe.skipIf(!URL)('the CBA intelligence pipeline on the combined schema, as 
       expect(result.comparableCount).toBe(3)
       expect(result.comparables.map((row) => row.agreementId).sort()).toEqual([...state.comparables].sort())
       expect(result.comparables.every((row) => row.comparability === 'exact')).toBe(true)
-      expect(result).toMatchObject({ medianWageIncrease: 3, avgTermMonths: 36, targetWageIncrease: 3.5, targetTermMonths: 36, targetWagePercentile: 67 })
+      expect(result).toMatchObject({ medianWageIncrease: 3, wageIncreaseP25: 2.5, wageIncreaseP75: 3.5, avgTermMonths: 36, targetWageIncrease: 3.5, targetTermMonths: 36, targetWagePercentile: 67 })
       expect(result.clauseFamilyCoverage.wages).toBe(100)
       expect(Object.values(result.clauseFamilyCoverage)).toContain(67)
 
@@ -315,7 +321,7 @@ describe.skipIf(!URL)('the CBA intelligence pipeline on the combined schema, as 
 
     it('says so, and computes no aggregate, when there are too few comparable agreements', async () => {
       const sparse = await benchmark!.findComparableAgreements(state.target, { minComparables: 10 })
-      expect(sparse).toMatchObject({ insufficientData: true, requiredComparables: 10, comparableCount: 3, medianWageIncrease: null, targetWagePercentile: null })
+      expect(sparse).toMatchObject({ insufficientData: true, requiredComparables: 10, comparableCount: 3, medianWageIncrease: null, wageIncreaseP25: null, wageIncreaseP75: null, targetWagePercentile: null })
     })
 
     it('fails for an agreement that does not exist', async () => {

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Download, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
 
 type ExportType =
   | 'gl_journal'
@@ -36,6 +37,7 @@ interface ExportJob {
   status: 'pending' | 'success' | 'error';
   message?: string;
   downloadUrl?: string;
+  filename?: string;
 }
 
 export default function ExportsPage() {
@@ -81,24 +83,31 @@ export default function ExportsPage() {
     try {
       const res = await fetch(`/api/finance/exports?${params.toString()}`);
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: t('messages.exportFailed') }));
+        // The route states what is wrong (a missing id, an unknown type) in the standard error body.
         job.status = 'error';
-        job.message = err.error?.message ?? t('messages.exportFailed');
+        job.message = await readApiError(res, t('messages.exportFailed'));
       } else if (format === 'csv' && exportType === 'gl_journal') {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         job.status = 'success';
         job.downloadUrl = url;
+        job.filename = `${exportType}-export.csv`;
         job.message = t('messages.csvReady');
       } else {
-        const json = await res.json();
-        const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: 'application/json' });
+        // The export is the route's `data`; every export carries its own row count and content hash in `meta`.
+        const payload = envelopeData(await res.json());
+        const meta = payload.meta;
+        if (!isRecord(meta) || typeof meta.rowCount !== 'number' || typeof meta.dataHash !== 'string') {
+          throw new ApiShapeError('no export meta');
+        }
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         job.status = 'success';
         job.downloadUrl = url;
+        job.filename = `${exportType}-export.json`;
         job.message = t('messages.exportedRows', {
-          rows: json.data?.meta?.rowCount ?? 0,
-          hash: json.data?.meta?.dataHash?.slice(0, 12) ?? t('messages.na'),
+          rows: meta.rowCount,
+          hash: meta.dataHash.slice(0, 12),
         });
       }
     } catch (err) {
@@ -223,7 +232,7 @@ export default function ExportsPage() {
                 {job.downloadUrl && (
                   <a
                     href={job.downloadUrl}
-                    download={`${job.type}-export.${format}`}
+                    download={job.filename}
                     className="text-primary underline text-xs"
                   >
                     {t('results.download')}

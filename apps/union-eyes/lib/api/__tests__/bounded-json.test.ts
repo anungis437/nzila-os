@@ -51,4 +51,30 @@ describe('bounded authenticated JSON request reader', () => {
     const request = new Request('http://localhost/import', { method: 'POST', body: '{}' })
     await expect(readBoundedJson(request, 0)).rejects.toBeInstanceOf(RangeError)
   })
+
+  it('refuses an oversized body read from a CLONE without hanging (a cancel on one tee branch settles only when both are cancelled)', async () => {
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('"' + 'x'.repeat(4000) + '"'))
+        controller.close()
+      },
+    })
+    const original = new Request('http://localhost/import', { method: 'POST', body, duplex: 'half' } as RequestInit)
+    const clone = original.clone()
+    await expect(readBoundedJson(clone, 128)).rejects.toBeInstanceOf(RequestBodyTooLargeError)
+  })
+
+  it('refuses a declared oversize on a clone without hanging, and without reading the body', async () => {
+    const original = new Request('http://localhost/import', {
+      method: 'POST',
+      body: '{}',
+      headers: { 'content-length': '99999999' },
+    })
+    await expect(readBoundedJson(original.clone(), 1024)).rejects.toBeInstanceOf(RequestBodyTooLargeError)
+  })
+
+  it('reads a request double that has no headers and no stream whole, since there is nothing to bound', async () => {
+    const double = { json: async () => ({ ok: true }) } as unknown as Request
+    await expect(readBoundedJson(double, 1024)).resolves.toEqual({ ok: true })
+  })
 })

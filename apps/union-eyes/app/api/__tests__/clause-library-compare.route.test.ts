@@ -34,7 +34,7 @@ describe('clause-library/compare route', () => {
     m.audit.mockResolvedValue(undefined);
     m.canReadSharedClause.mockResolvedValue(true);
     m.db.select
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ id: C1, clauseType: 'policy', sector: 'finance', clauseText: 'The grievance procedure applies' }, { id: C2, clauseType: 'policy', sector: 'finance', clauseText: 'A grievance procedure is required' }]) })) }))
+      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ id: C1, clauseType: 'policy', sector: 'finance', province: 'ON', sharingLevel: 'federation', effectiveDate: '2024-01-01', expiryDate: '2026-12-31', clauseText: 'The grievance procedure applies' }, { id: C2, clauseType: 'policy', sector: 'finance', province: 'QC', sharingLevel: 'public', effectiveDate: '2023-06-01', expiryDate: '2025-05-31', clauseText: 'A grievance procedure is required' }]) })) }))
       .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ clauseId: C1, tagName: 'tag-a' }, { clauseId: C2, tagName: 'tag-b' }]) })) }));
     m.db.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
   });
@@ -47,6 +47,15 @@ describe('clause-library/compare route', () => {
     expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(result.analysis.statistics.totalClauses).toBe(2);
     expect(result.clauses).toHaveLength(2);
+    // The screen's "Key Differences" and its province count are answered, not left for the screen to find missing.
+    expect(result.analysis.statistics).toMatchObject({ uniqueTypes: 1, uniqueSectors: 1, uniqueProvinces: 2 });
+    expect(result.analysis.differences).toEqual({
+      clauseTypes: ['policy'],
+      sectors: ['finance'],
+      provinces: ['ON', 'QC'],
+      dateRanges: '2023-06-01 – 2026-12-31',
+      sharingLevels: ['federation', 'public'],
+    });
     // DEF-0B4-CLAUSE-LIBRARY-COMPARE-GET-STUB-AND-EMPTY-KEYWORDS: the keywords are those the compared clauses share.
     expect(result.analysis.commonKeywords).toEqual(['grievance', 'procedure']);
     expect(m.audit).toHaveBeenCalledWith(
@@ -68,6 +77,8 @@ describe('clause-library/compare route', () => {
     const { POST } = await loadRoute();
     const result = await POST({ request: { json: async () => ({ clauseIds: [C1, C2] }) }, organizationId: 'org-a', userId: 'u1' });
     expect(result.clauses).toEqual([]);
+    expect(result.analysis.differences).toEqual({ clauseTypes: [], sectors: [], provinces: [], dateRanges: '', sharingLevels: [] });
+    expect(result.analysis.statistics.uniqueProvinces).toBe(0);
     expect(m.db.update).not.toHaveBeenCalled();
     expect(m.audit).not.toHaveBeenCalled();
   });

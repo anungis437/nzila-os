@@ -14,7 +14,7 @@ vi.mock('@/lib/audit/operation-audit', () => {
     operationAuditResponse: (error: unknown) =>
       error instanceof OperationAuditError ? { status: 409, body: { error: { code: 'OPERATION_AUDIT_UNAVAILABLE', message: error.message } } } : null,
     performAuditedOperation: m.perform,
-    performAtomicAuditedOperation: m.atomic,
+    performAtomicSystemAuditedOperation: m.atomic,
   }
 })
 
@@ -73,7 +73,7 @@ describe('performAtomicPlatformRead', () => {
 
     expect(result).toEqual({ tx: 'system-tx' })
     expect(m.atomic).toHaveBeenCalledWith(
-      expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', scope: 'system', action: 'platform.stats.read', resourceType: 'platform_stats', details: { a: 1 }, resultDetails }),
+      expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', action: 'platform.stats.read', resourceType: 'platform_stats', details: { a: 1 }, resultDetails }),
       work,
     )
     expect(m.perform).not.toHaveBeenCalled()

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomBytes } from 'node:crypto';
+import { sql } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
 import type { PGlite } from '@electric-sql/pglite';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -8,8 +9,9 @@ import { organizations } from '@/db/schema-organizations';
 import { createProofSignature } from '@/lib/staging-proof/deadline-engine-auth';
 import { createTableDatabase } from './support/pglite-tables';
 
-// UE-CONV-K-006: the HMAC-gated staging proof route writes and deletes its own seed rows. Every such statement
-// carries the synthetic organization, so a seed row that no longer belongs to it is neither rewritten nor deleted.
+// UE-CONV-K-006: the HMAC-gated staging proof route runs each scenario, its synthetic organization and seed rows included, in one system transaction that it always rolls
+// back, so it deletes nothing and leaves nothing. Its one UPDATE (the reschedule of the seed deadline) carries the synthetic organization, so a seed row that no longer
+// belongs to it is not rewritten.
 
 const state = vi.hoisted(() => ({
   db: null as unknown,
@@ -23,10 +25,19 @@ vi.mock('@/db', async () => {
   const { lateBoundDb } = await import('./support/pglite-tables');
   return { db: lateBoundDb(state) };
 });
-// The ledger relations are SYSTEM_ONLY: the route writes them through the system context, which here is a transaction on the same PGlite database.
+// The ledger relations are SYSTEM_ONLY and the scenario runs as the system role: both go through the system context, which here is a transaction on the same PGlite
+// database. Inside it `db` is that transaction (as in the application), so a statement of the scenario is part of it and rolls back with it.
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: (operation: (tx: unknown) => Promise<unknown>) =>
-    (state.db as { transaction: (callback: (tx: unknown) => Promise<unknown>) => Promise<unknown> }).transaction((tx) => operation(tx)),
+    (state.db as { transaction: (callback: (tx: unknown) => Promise<unknown>) => Promise<unknown> }).transaction(async (tx) => {
+      const outer = state.db;
+      state.db = tx;
+      try {
+        return await operation(tx);
+      } finally {
+        state.db = outer;
+      }
+    }),
 }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() } }));
 vi.mock('@/lib/deadline-tracking-system', () => ({ completeDeadline: vi.fn() }));
@@ -34,18 +45,20 @@ vi.mock('@/lib/deadline-engine', () => ({
   cancelGrievanceDeadlineReminders: vi.fn(),
   scheduleGrievanceDeadlineReminders: async (args: { sourceDeadlineId: string; grievanceId: string }) => {
     state.scheduleCalls += 1;
-    const pg = state.pg as PGlite;
     if (state.scheduleCalls === 1) await state.onFirstSchedule?.(args);
     else {
-      const row = await pg.query<{ due_date: string }>('SELECT due_date::text AS due_date FROM grievance_deadlines WHERE id = $1', [args.sourceDeadlineId]);
-      state.dueDateAtSecondSchedule = row.rows[0]?.due_date ?? null;
+      const { sql } = await import('drizzle-orm');
+      const rows = await (state.db as { execute: (query: unknown) => Promise<Array<{ due_date: string }>> }).execute(
+        sql`SELECT due_date::text AS due_date FROM grievance_deadlines WHERE id = ${args.sourceDeadlineId}`,
+      );
+      state.dueDateAtSecondSchedule = rows[0]?.due_date ?? null;
     }
     return { scheduled: [], cancelledForReschedule: [] };
   },
 }));
 
 const ORG_OTHER = '22222222-2222-4222-8222-222222222222';
-const SECRET = 'deadline-proof-test-secret';
+const SECRET = '7c41e0a95d2b83f6190ae4c7b58d3f2a6e1d09b47c5a8f23';
 
 let pg: PGlite;
 
@@ -111,7 +124,7 @@ beforeEach(async () => {
 });
 
 describe('staging-proof deadline-engine scenario — organization-bound mutation', () => {
-  it('reschedules and cleans up its own seed rows under the synthetic organization', async () => {
+  it('reschedules inside one transaction and leaves no seed row, deadline or synthetic organization behind', async () => {
     const { POST } = await import('../staging-proof/deadline-engine/scenario/route');
 
     const response = await POST(proofRequest('reschedule'));
@@ -121,23 +134,40 @@ describe('staging-proof deadline-engine scenario — organization-bound mutation
     expect(state.dueDateAtSecondSchedule).not.toBeNull();
     expect(await count('grievance_deadlines')).toBe(0);
     expect(await count('grievances')).toBe(0);
+    expect(await count('organizations')).toBe(0);
   });
 
-  it('neither reschedules nor deletes a seed row that no longer belongs to the synthetic organization', async () => {
+  it('does not reschedule a seed row that no longer belongs to the synthetic organization, and still leaves nothing behind', async () => {
     const { POST } = await import('../staging-proof/deadline-engine/scenario/route');
     let originalDueDate: string | null = null;
     state.onFirstSchedule = async ({ grievanceId }) => {
-      await pg.query('UPDATE grievances SET organization_id = $1 WHERE id = $2', [ORG_OTHER, grievanceId]);
-      originalDueDate = (await pg.query<{ due_date: string }>('SELECT due_date::text AS due_date FROM grievance_deadlines WHERE grievance_id = $1', [grievanceId])).rows[0].due_date;
+      // Inside the scenario's transaction: the handle is the transaction, not the database.
+      const run = (state.db as { execute: (query: unknown) => Promise<Array<{ due_date: string }>> }).execute;
+      await run(sql`UPDATE grievances SET organization_id = ${ORG_OTHER} WHERE id = ${grievanceId}`);
+      originalDueDate = (await run(sql`SELECT due_date::text AS due_date FROM grievance_deadlines WHERE grievance_id = ${grievanceId}`))[0].due_date;
     };
 
     const response = await POST(proofRequest('reschedule'));
 
     expect(response.status).toBe(200);
     expect(state.dueDateAtSecondSchedule).toBe(originalDueDate);
-    expect(await count('grievance_deadlines')).toBe(1);
-    expect(await count('grievances')).toBe(1);
-    const survivor = await pg.query<{ organization_id: string }>('SELECT organization_id FROM grievances');
-    expect(survivor.rows[0].organization_id).toBe(ORG_OTHER);
+    expect(await count('grievance_deadlines')).toBe(0);
+    expect(await count('grievances')).toBe(0);
+  });
+
+  it('rolls everything back when the scenario fails, and records the failed run', async () => {
+    const { POST } = await import('../staging-proof/deadline-engine/scenario/route');
+    state.onFirstSchedule = async () => {
+      throw new Error('the deadline engine failed');
+    };
+
+    const response = await POST(proofRequest('reschedule'));
+
+    expect(response.status).toBe(500);
+    expect(await count('grievance_deadlines')).toBe(0);
+    expect(await count('grievances')).toBe(0);
+    expect(await count('organizations')).toBe(0);
+    const run = await pg.query<{ status: string; cleanup_passed: boolean }>('SELECT status, cleanup_passed FROM staging_proof_runs');
+    expect(run.rows).toEqual([{ status: 'failed', cleanup_passed: true }]);
   });
 });

@@ -17,6 +17,7 @@
 import {  authUserSessions } from '@nzila/db/schema'
 import { and, eq, gt, sql } from 'drizzle-orm'
 import { authDb } from '../auth-db'
+import { isProductionDeployment } from '../runtime-identity'
 
 export type RiskTier = 'low' | 'medium' | 'high'
 
@@ -45,8 +46,13 @@ export interface AssessRiskInput {
 const FAILURE_WINDOW_MS = 15 * 60 * 1000
 const FIRST_SEEN_WINDOW_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 
+/** The QA/E2E and demo risk bypass: honoured by demo, staging and local processes, never by a production deployment. */
+function riskBypassEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return (env.UE_E2E_RISK_BYPASS ?? '').toLowerCase() === 'true' && !isProductionDeployment(env)
+}
+
 export async function assessRisk(input: AssessRiskInput): Promise<RiskAssessment> {
-  if ((process.env.UE_E2E_RISK_BYPASS ?? '').toLowerCase() === 'true') {
+  if (riskBypassEnabled()) {
     return {
       score: 0,
       tier: 'low',

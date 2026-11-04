@@ -5,6 +5,7 @@
  */
 
 import { db } from '@/db';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { 
   recognitionAwards, 
   rewardRedemptions,
@@ -212,6 +213,7 @@ export async function getExpiringCreditsUsers(
   batchSize = BATCH_SIZE,
   organizationId?: string,
   options: { exactDay?: boolean } = {},
+  executor: RLSTx = db,
 ) {
   const now = new Date();
   const expiresBefore = new Date();
@@ -222,11 +224,11 @@ export async function getExpiringCreditsUsers(
   const windowStart = options.exactDay ? startOfDay(expiresBefore) : now;
   const windowEnd = options.exactDay ? new Date(startOfDay(expiresBefore).getTime() + 24 * 60 * 60 * 1000) : null;
 
-  const rows = await db
+  const rows = await executor
     .select({
       userId: rewardWalletLedger.userId,
       orgId: rewardWalletLedger.orgId,
-      userEmail: users.email,
+      userEmail: organizationMembers.email,
       userName: organizationMembers.name,
       organizationId: rewardWalletLedger.orgId,
       organizationName: organizations.name,
@@ -234,7 +236,8 @@ export async function getExpiringCreditsUsers(
       expirationDate: rewardWalletLedger.expiresAt,
     })
     .from(rewardWalletLedger)
-    .leftJoin(users, eq(users.userId, rewardWalletLedger.userId))
+    // The warning goes to the address the member holds in the organization the credits belong to: the scan runs as the system role,
+    // which has no access to the canonical identity store (user_management), and the membership record is the organization's own.
     .leftJoin(organizationMembers, and(
       eq(organizationMembers.userId, rewardWalletLedger.userId),
       eq(organizationMembers.organizationId, rewardWalletLedger.orgId)
@@ -252,7 +255,7 @@ export async function getExpiringCreditsUsers(
     .groupBy(
       rewardWalletLedger.userId,
       rewardWalletLedger.expiresAt,
-      users.email,
+      organizationMembers.email,
       organizationMembers.name,
       rewardWalletLedger.orgId,
       organizations.name
@@ -260,7 +263,7 @@ export async function getExpiringCreditsUsers(
     .limit(batchSize);
 
   // The earnings are dated lots, not allocated against spending, so what can still expire is at most what the member holds now.
-  const balances = await currentBalances(rows.map((row) => ({ orgId: row.orgId, userId: row.userId })));
+  const balances = await currentBalances(rows.map((row) => ({ orgId: row.orgId, userId: row.userId })), executor);
 
   return rows
     .filter((row) => row.userEmail && row.expirationDate)
@@ -284,13 +287,13 @@ export async function getExpiringCreditsUsers(
 }
 
 /** The latest ledger balance of each organization and member in the list. */
-async function currentBalances(members: Array<{ orgId: string; userId: string }>): Promise<Map<string, number>> {
+async function currentBalances(members: Array<{ orgId: string; userId: string }>, executor: RLSTx = db): Promise<Map<string, number>> {
   const balances = new Map<string, number>();
   const userIds = [...new Set(members.map((member) => member.userId))];
   const wanted = new Set(members.map((member) => `${member.orgId}:${member.userId}`));
   for (let i = 0; i < userIds.length; i += 500) {
     const chunk = userIds.slice(i, i + 500);
-    const ledger = await db
+    const ledger = await executor
       .select({ orgId: rewardWalletLedger.orgId, userId: rewardWalletLedger.userId, balanceAfter: rewardWalletLedger.balanceAfter })
       .from(rewardWalletLedger)
       .where(inArray(rewardWalletLedger.userId, chunk))
@@ -313,8 +316,9 @@ async function sendExpirationNotificationToUser(
 ): Promise<NotificationResult> {
   let claimed = false;
   try {
-    // The record is written before the mail leaves, so a retry or an overlapping run cannot mail the same lot twice.
-    claimed = await claimExpiryWarning(entry, tierDays);
+    // The record is written before the mail leaves, so a retry or an overlapping run cannot mail the same lot twice. Each marker write is a
+    // short system transaction of its own (the run has no tenant session), so no transaction is open while the mail is sent.
+    claimed = await withSystemContext((tx) => claimExpiryWarning(entry, tierDays, tx));
     if (!claimed) {
       return { success: true, userId: entry.userId, organizationId: entry.organizationId, emailSent: false, alreadyWarned: true };
     }
@@ -330,7 +334,15 @@ async function sendExpirationNotificationToUser(
   } catch (error) {
     logger.error('[Notifications] Error sending expiration notification', { error, userId: entry.userId });
     // A warning that was not delivered is not a warning that was given: release it so the next run tries again.
-    if (claimed) await releaseExpiryWarning(entry, tierDays).catch(() => undefined);
+    if (claimed) {
+      await withSystemContext((tx) => releaseExpiryWarning(entry, tierDays, tx)).catch((releaseError: unknown) =>
+        logger.error('[Notifications] The expiry warning could not be released after a failed send; it stays recorded as given', {
+          error: releaseError instanceof Error ? releaseError.message : String(releaseError),
+          userId: entry.userId,
+          organizationId: entry.organizationId,
+        }),
+      );
+    }
     return { 
       success: false, 
       userId: entry.userId, 
@@ -356,8 +368,8 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7, options: {
       expiresBefore: expirationDate.toISOString(),
     });
 
-    // Get all users with expiring credits (paginated)
-    const usersWithExpiringCredits = await getExpiringCreditsUsers(daysBeforeExpiration, 10000, undefined, options);
+    // Get all users with expiring credits (paginated). The scan crosses organizations, which only the system role may do.
+    const usersWithExpiringCredits = await withSystemContext((tx) => getExpiringCreditsUsers(daysBeforeExpiration, 10000, undefined, options, tx));
     
     logger.info('[Notifications] Found users with expiring credits', {
       count: usersWithExpiringCredits.length,

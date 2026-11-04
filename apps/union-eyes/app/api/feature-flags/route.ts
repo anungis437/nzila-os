@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { isDeployedRuntime, isLocalQaRuntime } from '@/lib/runtime/production-guard';
 import { evaluateFeatures, LRO_FEATURES, AI_FEATURES } from '@/lib/services/feature-flags';
 import {
   ErrorCode,
@@ -32,7 +33,7 @@ export const GET = withApiAuth(async (request: NextRequest, context: BaseAuthCon
         return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Unknown feature flag');
       }
       const isPilotRuntime = ['pilot', 'demo'].includes((process.env.NZILA_MODE ?? '').toLowerCase());
-      const isQaTestEnv = (process.env.QA_TEST_ENV ?? '').toLowerCase() === 'true' || process.env.NODE_ENV === 'test';
+      const isQaTestEnv = isLocalQaRuntime() || (process.env.NODE_ENV === 'test' && !isDeployedRuntime());
 
       let enabled = false;
       if (requestedFlag === 'pilot-mode') {

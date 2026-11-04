@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
-  withOrganizationAuth: vi.fn(),
-  requireEntitlement: vi.fn(),
-  hasMinRole: vi.fn(),
   db: { select: vi.fn() },
   selectQueue: [] as unknown[][],
   getEffectiveCaseAccess: vi.fn(),
@@ -13,9 +10,7 @@ const m = vi.hoisted(() => ({
   trackPilotEvent: vi.fn(),
 }));
 
-vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (a: any, b?: any) => {
     const fn = typeof a === 'function' ? a : b;
@@ -35,17 +30,20 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 }));
 vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
 
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
+
 async function loadRoute() {
   return import('../grievances/[id]/route');
 }
 
+const G = '22222222-2222-4222-8222-222222222222';
+
 describe('grievances/[id] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.params = { id: G };
     m.selectQueue = [];
-    m.withOrganizationAuth.mockImplementation((handler: any) => (request: Request, context: any = { organizationId: 'org_1', userId: 'u1' }, params: any = { id: 'g1' }) => handler(request, context, params));
-    m.requireEntitlement.mockResolvedValue(undefined);
-    m.hasMinRole.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canManageAssignments: true, isPrimaryOwner: true, canViewPrivateDocuments: true });
     m.listCaseCollaborators.mockResolvedValue([{ id: 'k1', userId: 'u1', relation: 'assignee' }]);
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
@@ -70,24 +68,35 @@ describe('grievances/[id] route', () => {
       .mockImplementation(() => createSelectChain());
   });
 
-  it('returns validation error when id is missing', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new Request('http://localhost/api/grievances/x'), { organizationId: 'org_1', userId: 'u1' }, {});
-    expect(response.status).toBe(400);
+  it('declares what it asks of the wrapper: a member, the case-suite entitlement and a tenant transaction', async () => {
+    await loadRoute();
+    const config = declared.find((entry) => entry.openapi?.summary === 'Fetch a grievance with its events and governed documents');
+    expect(config?.auth).toEqual({ required: true, minRole: 'member' });
+    expect(config?.entitlement).toBe('grievance_case_suite');
+    expect(config?.rlsOrgContext).toBe(true);
   });
 
-  it('returns forbidden for non-member access', async () => {
-    m.hasMinRole.mockResolvedValueOnce(false);
+  it('returns validation error when the id is not a uuid, without querying', async () => {
+    caller.params = { id: 'x' };
     const { GET } = await loadRoute();
-    const response = await GET(new Request('http://localhost/api/grievances/g1'));
+    const response = await GET(new Request('http://localhost/api/grievances/x'));
+    expect(response.status).toBe(400);
+    expect(m.db.select).not.toHaveBeenCalled();
+  });
+
+  it('returns forbidden below the member role', async () => {
+    caller.role = 'guest';
+    const { GET } = await loadRoute();
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
     expect(response.status).toBe(403);
+    expect(m.db.select).not.toHaveBeenCalled();
   });
 
   it('returns not found when the grievance is missing', async () => {
     const { GET } = await loadRoute();
     m.selectQueue = [[]];
 
-    const response = await GET(new Request('http://localhost/api/grievances/g1'));
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
 
     expect(response.status).toBe(404);
   });
@@ -95,18 +104,18 @@ describe('grievances/[id] route', () => {
   it('returns grievance details payload', async () => {
     const { GET } = await loadRoute();
     m.selectQueue = [
-      [{ id: 'g1', createdBy: 'u1', unionRepId: 'u1', organizationId: 'org_1' }],
+      [{ id: G, createdBy: 'u1', unionRepId: 'u1', organizationId: 'org_1' }],
       [],
       [],
       [],
       [],
     ];
 
-    const response = await GET(new Request('http://localhost/api/grievances/g1'));
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ id: 'g1', createdBy: 'u1', primaryLroId: 'u1' });
+    expect(payload.data).toMatchObject({ id: G, createdBy: 'u1', primaryLroId: 'u1' });
     expect(m.listCaseCollaborators).toHaveBeenCalled();
     expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
@@ -114,16 +123,16 @@ describe('grievances/[id] route', () => {
   it('returns forbidden for a steward-level user with no ownership, grant or authorship', async () => {
     const { GET } = await loadRoute();
 
-    // hasMinRole defaults to true for every role in this suite: seniority must not open the file.
+    // Seniority must not open the file.
     m.getEffectiveCaseAccess.mockResolvedValueOnce({
       canViewCase: false,
       canManageAssignments: false,
       isPrimaryOwner: false,
       canViewPrivateDocuments: false,
     });
-    m.selectQueue = [[{ id: 'g1', createdBy: 'other_user', unionRepId: 'u2', organizationId: 'org_1' }]];
+    m.selectQueue = [[{ id: G, createdBy: 'other_user', unionRepId: 'u2', organizationId: 'org_1' }]];
 
-    const response = await GET(new Request('http://localhost/api/grievances/g1'));
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
 
     expect(response.status).toBe(403);
     expect(m.selectQueue).toHaveLength(0);
@@ -132,7 +141,6 @@ describe('grievances/[id] route', () => {
 
   it('returns governed documents and tracks pilot access event', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(true);
     m.getEffectiveCaseAccess.mockResolvedValueOnce({
       canViewCase: true,
       canManageAssignments: false,
@@ -141,7 +149,7 @@ describe('grievances/[id] route', () => {
     });
     m.isDocumentVisibleByPolicy.mockReturnValueOnce(true);
     m.selectQueue = [
-      [{ id: 'g1', createdBy: 'u2', unionRepId: 'u2', organizationId: 'org_1' }],
+      [{ id: G, createdBy: 'u2', unionRepId: 'u2', organizationId: 'org_1' }],
       [{ id: 'ev1' }],
       [{ id: 'legacy_1' }],
       [{ id: 'doc_1', title: 'Evidence', privacyLabel: 'team_confidential', createdAt: '2026-01-01T00:00:00.000Z' }],
@@ -149,7 +157,7 @@ describe('grievances/[id] route', () => {
       [{ id: 'collab_1' }],
     ];
 
-    const response = await GET(new Request('http://localhost/api/grievances/g1'));
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -166,7 +174,7 @@ describe('grievances/[id] route', () => {
       throw new Error('db failure');
     });
 
-    const response = await GET(new Request('http://localhost/api/grievances/g1'));
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
 
     expect(response.status).toBe(500);
   });

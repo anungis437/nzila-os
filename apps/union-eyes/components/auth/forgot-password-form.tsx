@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { postJson, UNEXPECTED_MESSAGE } from './auth-client';
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
@@ -15,21 +16,17 @@ export function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Something went wrong');
+      const answer = await postJson('/api/auth/forgot-password', { email }, 'Something went wrong');
+      if (!answer.ok) {
+        setError(answer.message);
         return;
       }
-
+      // The route answers the same neutral { message } whether or not an account exists; an answer without it is not that.
+      if (typeof answer.data.message !== 'string') {
+        setError(UNEXPECTED_MESSAGE);
+        return;
+      }
       setSubmitted(true);
-    } catch {
-      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

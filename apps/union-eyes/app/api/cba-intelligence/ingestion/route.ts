@@ -32,7 +32,7 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return { data: await listIngestionJobs(filters as IngestionJobFilters, { page, limit }) };
+    return await listIngestionJobs(filters as IngestionJobFilters, { page, limit });
   },
 );
 
@@ -81,6 +81,6 @@ export const POST = withApi(
       });
       return created;
     });
-    return { data: job };
+    return job;
   },
 );

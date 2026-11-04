@@ -25,6 +25,7 @@ const querySchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'secretary_treasurer' },
     entitlement: 'financial_intelligence_suite',
     query: querySchema,

@@ -6,14 +6,23 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db/db';
 import { organizations, organizationMembers } from '@/db/schema-organizations';
 import { and, eq, isNull } from 'drizzle-orm';
 import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { recordOrganizationSelection } from '@/lib/auth/organization-selection-audit';
+import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { UUID_PATTERN } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
+
+const MAX_BODY_BYTES = 4 * 1024;
+
+type Selection =
+  | { kind: 'not-found' }
+  | { kind: 'denied' }
+  | { kind: 'allowed'; org: typeof organizations.$inferSelect };
 
 export async function POST(req: NextRequest) {
   if (currentStateContextEnabled()) {
@@ -28,41 +37,44 @@ export async function POST(req: NextRequest) {
 
   let organizationId: string;
   try {
-    const body = await req.json() as { organizationId?: string };
-    organizationId = body.organizationId ?? '';
-  } catch {
+    const body = await readBoundedJson(req, MAX_BODY_BYTES) as { organizationId?: unknown } | null;
+    organizationId = typeof body?.organizationId === 'string' ? body.organizationId : '';
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+    }
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
   if (!organizationId) {
     return NextResponse.json({ error: 'organizationId is required' }, { status: 400 });
   }
+  if (!UUID_PATTERN.test(organizationId)) {
+    return NextResponse.json({ error: 'organizationId must be a valid organization id' }, { status: 400 });
+  }
 
   const isAdmin = await isPlatformAdminUser(userId);
 
-  // Look up org by UUID
-  const orgs = await db
-    .select()
-    .from(organizations)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .where(eq(organizations.id, organizationId as any))
-    .limit(1);
+  // The caller's memberships span organizations, which no single-organization transaction can show, so the lookup is the system role's,
+  // exactly as the organization read authority does it (lib/organizations/read-authority.ts).
+  const selection = await withSystemContext(async (tx): Promise<Selection> => {
+    const [org] = await tx
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, organizationId))
+      .limit(1);
 
-  const org = orgs[0];
+    if (!org) return { kind: 'not-found' };
 
-  if (!org) {
-    return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
-  }
+    // Platform admins can switch to any org without membership check
+    if (isAdmin) return { kind: 'allowed', org };
 
-  // Platform admins can switch to any org without membership check
-  if (!isAdmin) {
     // An archived or inactive organization cannot be switched to: the resolver that reads the selection requires it to be active.
-    if ((org.status ?? 'active') !== 'active') {
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
-    }
+    if ((org.status ?? 'active') !== 'active') return { kind: 'not-found' };
+
     // Membership organization_id is the organization UUID, matching the Django
     // foreign key. A slug comparison cannot succeed against that column.
-    const userMembership = (await db
+    const [userMembership] = await tx
       .select()
       .from(organizationMembers)
       .where(
@@ -74,12 +86,18 @@ export async function POST(req: NextRequest) {
           isNull(organizationMembers.deletedAt),
         ),
       )
-      .limit(1))[0];
+      .limit(1);
 
-    if (!userMembership) {
-      return NextResponse.json({ error: 'Access denied: not a member of this organization' }, { status: 403 });
-    }
+    return userMembership ? { kind: 'allowed', org } : { kind: 'denied' };
+  });
+
+  if (selection.kind === 'not-found') {
+    return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
   }
+  if (selection.kind === 'denied') {
+    return NextResponse.json({ error: 'Access denied: not a member of this organization' }, { status: 403 });
+  }
+  const org = selection.org;
 
   // A selection that leaves no trail is refused: a platform administrator choosing an organization they hold no membership of is the case
   // that matters most.

@@ -14,6 +14,7 @@ export const GET = withApi(
   {
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
+    rlsOrgContext: true,
     openapi: {
       tags: ['Dues'],
       summary: 'List dues ledger entries for the organization',

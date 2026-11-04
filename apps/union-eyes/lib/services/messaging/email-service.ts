@@ -48,7 +48,7 @@ export interface SendResult {
 }
 
 import { logger } from '@/lib/logger';
-import { getFromEmail, sendResendEmail } from '@/lib/email-service';
+import { getFromEmail, getResendClient, sendResendEmail } from '@/lib/email-service';
 
 export interface EmailProvider {
   name: string;
@@ -187,8 +187,9 @@ export class ResendAdapter implements EmailProvider {
     return results;
   }
 
+  /** True only when a Resend API key is configured; Resend has no cheap probe, so this does not prove the service is reachable. */
   async verifyConnection(): Promise<boolean> {
-    return true;
+    return getResendClient() !== null;
   }
 }
 

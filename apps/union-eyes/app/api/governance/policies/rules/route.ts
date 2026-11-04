@@ -22,6 +22,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Governance'], summary: 'List governance policies' },
   },

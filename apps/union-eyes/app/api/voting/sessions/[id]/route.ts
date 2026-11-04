@@ -31,6 +31,7 @@ async function getOwnedSession(id: string, organizationId: string | null, includ
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Governance'],

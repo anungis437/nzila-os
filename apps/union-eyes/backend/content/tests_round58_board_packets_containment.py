@@ -10,10 +10,11 @@ via this ModelViewSet would omit the new required column and fail (or,
 if the model is ever updated to add the column without a matching queryset
 scope, would allow cross-org reassignment). No legitimate Django consumer
 of this endpoint exists anywhere in the app (repo-wide non-test search
-found none); the canonical writer is the TypeScript surface
-(app/api/governance/board-packets/route.ts and
-lib/services/board-packet-generator.ts), which already derives and writes
-organizationId on every insert. Contained via DenyAllPermission -- same
+found none); the canonical writers are the TypeScript surface
+(app/api/governance/board-packets/route.ts with
+lib/governance/board-packet-service.ts, and
+lib/services/board-packet-generator.ts for distribution), which already derive
+and write organizationId on every insert. Contained via DenyAllPermission -- same
 disposition as SocialAccountsViewSet (round 37).
 
 Run with:

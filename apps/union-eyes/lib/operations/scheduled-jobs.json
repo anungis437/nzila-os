@@ -4,7 +4,6 @@
     { "code": "dlrem", "path": "/api/cron/deadline-reminders", "schedule": "*/5 * * * *", "timeoutSeconds": 100, "legacyJobSuffix": "cron-deadlines" },
     { "code": "dlovd", "path": "/api/cron/deadline-overdue", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },
     { "code": "edu", "path": "/api/cron/education-reminders", "schedule": "0 13 * * *", "timeoutSeconds": 100 },
-    { "code": "cal", "path": "/api/cron/calendar-sync", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },
     { "code": "alert", "path": "/api/cron/observability-alerts", "schedule": "*/10 * * * *", "timeoutSeconds": 100 },
     { "code": "sla", "path": "/api/cron/sla-watchdog", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },
     { "code": "reap", "path": "/api/cron/document-intake-reaper", "schedule": "*/30 * * * *", "timeoutSeconds": 100 },

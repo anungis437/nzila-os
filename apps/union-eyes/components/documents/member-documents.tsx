@@ -6,6 +6,7 @@ import { FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ApiShapeError, envelopeData, isRecord } from '@/lib/client/api-envelope';
 
 type MemberDocument = {
   id: string;
@@ -15,20 +16,18 @@ type MemberDocument = {
   createdAt: Date;
 };
 
-/** The API wraps lists as { success, data } (sometimes nested); accept both shapes. */
+/** The route answers { success, data: [rows], meta, timestamp }; a row carries the title the route normalizes, its type and label, and when it was created. Any other answer is an error, not an empty list. */
 export function parseDocumentList(payload: unknown): MemberDocument[] {
-  const root = payload as { data?: unknown } | unknown[] | null;
-  const inner = Array.isArray(root) ? root : (root as { data?: unknown } | null)?.data;
-  const list = Array.isArray(inner) ? inner : (inner as { data?: unknown } | null)?.data;
-  if (!Array.isArray(list)) return [];
+  const list = isRecord(payload) ? payload.data : undefined;
+  if (!Array.isArray(list)) throw new ApiShapeError('no document list');
   return list.map((row) => {
-    const r = row as Record<string, unknown>;
+    const r = isRecord(row) ? row : {};
     return {
       id: String(r.id ?? ''),
-      title: String(r.title ?? r.filename ?? r.name ?? ''),
+      title: String(r.title ?? ''),
       documentType: String(r.documentType ?? ''),
       privacyLabel: String(r.privacyLabel ?? ''),
-      createdAt: new Date(String(r.createdAt ?? r.updatedAt ?? '')),
+      createdAt: new Date(String(r.createdAt ?? '')),
     };
   }).filter((doc) => doc.id);
 }
@@ -66,10 +65,11 @@ export function MemberDocuments() {
     setDownloadError(null);
     try {
       const response = await fetch(`/api/documents/${encodeURIComponent(id)}/download`);
-      const body = response.ok ? await response.json() : null;
-      const url = body?.data?.downloadUrl ?? body?.data?.data?.downloadUrl ?? body?.downloadUrl;
-      if (!url) throw new Error('unavailable');
-      window.open(String(url), '_blank', 'noopener,noreferrer');
+      if (!response.ok) throw new Error('unavailable');
+      // The route answers { success, data: { downloadUrl } }: the address is under data, and nowhere else.
+      const { downloadUrl } = envelopeData(await response.json());
+      if (typeof downloadUrl !== 'string' || !downloadUrl) throw new Error('unavailable');
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
     } catch {
       setDownloadError(id);
     }

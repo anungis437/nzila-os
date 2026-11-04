@@ -15,9 +15,17 @@
  * ---------------
  * - REFUSES to run unless `STAGING_PROOFS_ENABLED === 'true'`.
  *   Production must NEVER set that flag.
- * - Every scenario runs inside a top-level try/finally that cleans up
- *   its seed rows regardless of assertion outcome, so leaks cannot
- *   accumulate across proof runs.
+ * - Runs as the SYSTEM role. The route is HMAC-authenticated and has no user
+ *   session, and a tenant transaction (`withRLSContext`) needs an
+ *   authenticated actor who is a member of the organization, which a
+ *   synthetic proof tenant never has; the system role is the only principal a
+ *   session-less caller holds, so every statement here is one the storage
+ *   authority manifest grants it.
+ * - Every scenario runs, organization and seed rows included, in ONE system
+ *   transaction that is always rolled back, so nothing it creates can be left
+ *   behind or accumulate across proof runs, and the system role needs no
+ *   DELETE and no UPDATE of an organization. The run itself is recorded in
+ *   the ledger (lib/staging-proof/ledger.ts), which commits separately.
  * - Emits a full evidence envelope (setup, actions, assertions, timings)
  *   the caller writes to `reports/phase0/wave-1-phase-a/`. No secrets,
  *   no PII, no plaintext recipient addresses — email is captured only
@@ -58,6 +66,7 @@ import {
   cancelGrievanceDeadlineReminders,
 } from '@/lib/deadline-engine';
 import { completeDeadline } from '@/lib/deadline-tracking-system';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import { createProofRun, finalizeProofRun } from '@/lib/staging-proof/ledger';
 import {
@@ -101,7 +110,7 @@ async function insertSeedGrievance(input: {
       grievantEmail: input.grievantEmail,
       grievantName: 'Wave 1 Phase A Proof Grievant',
       title: `staging-proof-${input.correlationId}`,
-      description: 'Ephemeral row created by /api/staging-proof/deadline-engine/scenario. Deleted after run.',
+      description: 'Ephemeral row created by /api/staging-proof/deadline-engine/scenario; its transaction is always rolled back.',
       organizationId: input.organizationId,
     })
     .returning({ id: grievances.id, grievanceNumber: grievances.grievanceNumber });
@@ -119,7 +128,7 @@ async function insertSeedDeadline(input: {
     .values({
       grievanceId: input.grievanceId,
       deadlineType: 'wave1a_proof',
-      description: 'staging-proof deadline (auto-deleted)',
+      description: 'staging-proof deadline (rolled back with its transaction)',
       dueDate: input.dueDate,
       status: 'pending',
       reminderDays: input.reminderDays,
@@ -161,43 +170,30 @@ async function fetchReminders(deadlineId: string): Promise<Array<{
   return rows;
 }
 
-async function cleanup(organizationId: string, deadlineId: string | null, grievanceId: string | null): Promise<void> {
-  try {
-    if (deadlineId) {
-      await db.execute(sql`delete from deadline_reminders where source_deadline_id = ${deadlineId}::uuid`);
-      await db
-        .delete(grievanceDeadlines)
-        .where(and(eq(grievanceDeadlines.id, deadlineId), deadlineInOrganization(organizationId)));
-    }
-    if (grievanceId) {
-      await db
-        .delete(grievances)
-        .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)));
-    }
-  } catch (err) {
-    logger.error('deadline-proof: cleanup failed', {
-      err: err instanceof Error ? err.message : String(err),
-      deadlineId,
-      grievanceId,
-    });
-    throw new Error('deadline-proof: cleanup failed');
+async function insertSyntheticOrganization(organizationId: string, proofRunId: string): Promise<void> {
+  await db.insert(organizations).values({ id: organizationId, name: `Staging Proof ${proofRunId}`, slug: `staging-proof-${proofRunId}`, organizationType: 'union', hierarchyPath: [organizationId], hierarchyLevel: 0, status: 'active', settings: { proof_run: true } });
+}
+
+class ScenarioRolledBack<T> extends Error {
+  constructor(readonly result: T) {
+    super('deadline-proof: scenario result carried out of its rolled-back transaction');
   }
 }
 
-async function insertSyntheticOrganization(proofRunId: string): Promise<string> {
-  const organizationId = randomUUID();
-  await db.insert(organizations).values({ id: organizationId, name: `Staging Proof ${proofRunId}`, slug: `staging-proof-${proofRunId}`, organizationType: 'union', hierarchyPath: [organizationId], hierarchyLevel: 0, status: 'active', settings: { proof_run: true, cleanup_required: true } });
-  return organizationId;
-}
-
-async function retireSyntheticOrganization(organizationId: string, proofRunId: string): Promise<void> {
-  await db
-    .update(organizations)
-    .set({
-      status: 'inactive',
-      settings: { proof_run: true, proof_run_id: proofRunId, retained_evidence_tenant: true },
-    })
-    .where(eq(organizations.id, organizationId));
+/**
+ * Runs the work in one system-role transaction and rolls it back whatever the work does, returning what it returned. The organization, the seed rows and everything
+ * the deadline engine wrote exist only inside it, so a scenario that fails half way leaves nothing behind either. `db` resolves to the transaction inside it.
+ */
+async function inRolledBackTransaction<T>(work: () => Promise<T>): Promise<T> {
+  try {
+    await withSystemContext(async () => {
+      throw new ScenarioRolledBack(await work());
+    });
+  } catch (error) {
+    if (error instanceof ScenarioRolledBack) return error.result as T;
+    throw error;
+  }
+  throw new Error('deadline-proof: a scenario transaction committed');
 }
 
 async function fetchDeadline(deadlineId: string, expectedDueDate?: Date): Promise<{
@@ -237,43 +233,37 @@ async function runScheduleBasic(input: RequestBodyT, correlationId: string) {
     reminderDays: input.reminderOffsetsInDays,
   });
 
-  let assertions: Assertion[] = [];
-  let scheduleResult: Awaited<ReturnType<typeof scheduleGrievanceDeadlineReminders>> | null = null;
-  try {
-    scheduleResult = await scheduleGrievanceDeadlineReminders({
-      sourceDeadlineId: seedDeadline.deadlineId,
-      grievanceId: seedGrievance.grievanceId,
-      dueDate,
-      reminderOffsetsInDays: input.reminderOffsetsInDays,
-      timezone: input.timezone,
-      correlationId,
-      actor: { type: 'system', id: null },
-    });
-    const rows = await fetchReminders(seedDeadline.deadlineId);
-    const expectedCount = input.reminderOffsetsInDays.length * 1; // 1 recipient: grievor
-    const expectedHash = hashEmail(input.grievantEmail);
-    assertions = [
-      assert('organization matches synthetic proof tenant', scheduleResult.organizationId === input.organizationId, {
-        expected: input.organizationId,
-        actual: scheduleResult.organizationId,
-      }),
-      assert('correct row count', rows.length === expectedCount, {
-        expected: expectedCount,
-        actual: rows.length,
-      }),
-      assert('all rows pending', rows.every((r) => r.status === 'pending')),
-      assert('all rows tenant-scoped', rows.every((r) => r.organization_id === input.organizationId)),
-      assert('grievor email hashed correctly', rows.every((r) => r.recipient_email_hash === expectedHash)),
-      assert(
-        'offsets match proof configuration',
-        input.reminderOffsetsInDays.every((offset) => rows.some((r) => r.offset_days === offset)),
-        { expected: input.reminderOffsetsInDays, actual: rows.map((r) => r.offset_days) },
-      ),
-      assert('scheduled_for strictly < dueDate', rows.every((r) => new Date(r.scheduled_for) < dueDate)),
-    ];
-  } finally {
-    await cleanup(input.organizationId, seedDeadline.deadlineId, seedGrievance.grievanceId);
-  }
+  const scheduleResult = await scheduleGrievanceDeadlineReminders({
+    sourceDeadlineId: seedDeadline.deadlineId,
+    grievanceId: seedGrievance.grievanceId,
+    dueDate,
+    reminderOffsetsInDays: input.reminderOffsetsInDays,
+    timezone: input.timezone,
+    correlationId,
+    actor: { type: 'system', id: null },
+  });
+  const rows = await fetchReminders(seedDeadline.deadlineId);
+  const expectedCount = input.reminderOffsetsInDays.length * 1; // 1 recipient: grievor
+  const expectedHash = hashEmail(input.grievantEmail);
+  const assertions: Assertion[] = [
+    assert('organization matches synthetic proof tenant', scheduleResult.organizationId === input.organizationId, {
+      expected: input.organizationId,
+      actual: scheduleResult.organizationId,
+    }),
+    assert('correct row count', rows.length === expectedCount, {
+      expected: expectedCount,
+      actual: rows.length,
+    }),
+    assert('all rows pending', rows.every((r) => r.status === 'pending')),
+    assert('all rows tenant-scoped', rows.every((r) => r.organization_id === input.organizationId)),
+    assert('grievor email hashed correctly', rows.every((r) => r.recipient_email_hash === expectedHash)),
+    assert(
+      'offsets match proof configuration',
+      input.reminderOffsetsInDays.every((offset) => rows.some((r) => r.offset_days === offset)),
+      { expected: input.reminderOffsetsInDays, actual: rows.map((r) => r.offset_days) },
+    ),
+    assert('scheduled_for strictly < dueDate', rows.every((r) => new Date(r.scheduled_for) < dueDate)),
+  ];
   return {
     scenario: 'schedule-basic' as const,
     correlationId,
@@ -300,75 +290,70 @@ async function runReschedule(input: RequestBodyT, correlationId: string) {
     reminderDays: input.reminderOffsetsInDays,
   });
 
-  let assertions: Assertion[] = [];
-  try {
-    const first = await scheduleGrievanceDeadlineReminders({
-      sourceDeadlineId: seedDeadline.deadlineId,
-      grievanceId: seedGrievance.grievanceId,
-      dueDate,
-      reminderOffsetsInDays: input.reminderOffsetsInDays,
-      timezone: input.timezone,
-      correlationId,
-      actor: { type: 'system', id: null },
-    });
+  const first = await scheduleGrievanceDeadlineReminders({
+    sourceDeadlineId: seedDeadline.deadlineId,
+    grievanceId: seedGrievance.grievanceId,
+    dueDate,
+    reminderOffsetsInDays: input.reminderOffsetsInDays,
+    timezone: input.timezone,
+    correlationId,
+    actor: { type: 'system', id: null },
+  });
 
-    await db
-      .update(grievanceDeadlines)
-      .set({ dueDate: newDueDate, notes: `Rescheduled by staging proof ${correlationId}` })
-      .where(and(eq(grievanceDeadlines.id, seedDeadline.deadlineId), deadlineInOrganization(input.organizationId)));
+  await db
+    .update(grievanceDeadlines)
+    .set({ dueDate: newDueDate, notes: `Rescheduled by staging proof ${correlationId}` })
+    .where(and(eq(grievanceDeadlines.id, seedDeadline.deadlineId), deadlineInOrganization(input.organizationId)));
 
-    const second = await scheduleGrievanceDeadlineReminders({
-      sourceDeadlineId: seedDeadline.deadlineId,
-      grievanceId: seedGrievance.grievanceId,
-      dueDate: newDueDate,
-      reminderOffsetsInDays: input.reminderOffsetsInDays,
-      timezone: input.timezone,
-      correlationId,
-      actor: { type: 'system', id: null },
-    });
+  const second = await scheduleGrievanceDeadlineReminders({
+    sourceDeadlineId: seedDeadline.deadlineId,
+    grievanceId: seedGrievance.grievanceId,
+    dueDate: newDueDate,
+    reminderOffsetsInDays: input.reminderOffsetsInDays,
+    timezone: input.timezone,
+    correlationId,
+    actor: { type: 'system', id: null },
+  });
 
-    const rows = await fetchReminders(seedDeadline.deadlineId);
-    const sourceDeadline = await fetchDeadline(seedDeadline.deadlineId, newDueDate);
-    const cancelled = rows.filter((r) => r.status === 'cancelled');
-    const pending = rows.filter((r) => r.status === 'pending');
-    const expectedFirstCount = input.reminderOffsetsInDays.length;
-    assertions = [
-      assert('initial schedule created rows', first.scheduled.length === expectedFirstCount),
-      assert('reschedule cancelled prior rows', second.cancelledForReschedule.length === expectedFirstCount),
-      assert('reschedule created new rows', second.scheduled.length === expectedFirstCount),
-      assert('source deadline due date changed', sourceDeadline?.due_date_matches === true),
-      assert('cancelled reason=rescheduled on all cancelled rows', cancelled.every((r) => r.cancelled_reason === 'rescheduled')),
-      assert('pending rows use new due date', pending.every((r) => new Date(r.scheduled_for) < newDueDate)),
-      assert('pending rows > cancelled rows in time', pending.every((r) => {
-        const paired = cancelled.find((c) => c.offset_days === r.offset_days);
-        return paired ? new Date(r.scheduled_for) > new Date(paired.scheduled_for) : true;
-      })),
-      assert('no duplicate pending for same offset+recipient', (() => {
-        const seen = new Set<string>();
-        for (const r of pending) {
-          const k = `${r.offset_days}::${r.recipient_email_hash}`;
-          if (seen.has(k)) return false;
-          seen.add(k);
-        }
-        return true;
-      })()),
-    ];
-    return {
-      scenario: 'reschedule' as const,
-      correlationId,
-      seed: {
-        ...seedGrievance,
-        deadlineId: seedDeadline.deadlineId,
-        originalDueDate: dueDate.toISOString(),
-        newDueDate: newDueDate.toISOString(),
-      },
-      schedules: { first, second },
-      assertions,
-      passed: assertions.every((a) => a.passed),
-    };
-  } finally {
-    await cleanup(input.organizationId, seedDeadline.deadlineId, seedGrievance.grievanceId);
-  }
+  const rows = await fetchReminders(seedDeadline.deadlineId);
+  const sourceDeadline = await fetchDeadline(seedDeadline.deadlineId, newDueDate);
+  const cancelled = rows.filter((r) => r.status === 'cancelled');
+  const pending = rows.filter((r) => r.status === 'pending');
+  const expectedFirstCount = input.reminderOffsetsInDays.length;
+  const assertions: Assertion[] = [
+    assert('initial schedule created rows', first.scheduled.length === expectedFirstCount),
+    assert('reschedule cancelled prior rows', second.cancelledForReschedule.length === expectedFirstCount),
+    assert('reschedule created new rows', second.scheduled.length === expectedFirstCount),
+    assert('source deadline due date changed', sourceDeadline?.due_date_matches === true),
+    assert('cancelled reason=rescheduled on all cancelled rows', cancelled.every((r) => r.cancelled_reason === 'rescheduled')),
+    assert('pending rows use new due date', pending.every((r) => new Date(r.scheduled_for) < newDueDate)),
+    assert('pending rows > cancelled rows in time', pending.every((r) => {
+      const paired = cancelled.find((c) => c.offset_days === r.offset_days);
+      return paired ? new Date(r.scheduled_for) > new Date(paired.scheduled_for) : true;
+    })),
+    assert('no duplicate pending for same offset+recipient', (() => {
+      const seen = new Set<string>();
+      for (const r of pending) {
+        const k = `${r.offset_days}::${r.recipient_email_hash}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+      }
+      return true;
+    })()),
+  ];
+  return {
+    scenario: 'reschedule' as const,
+    correlationId,
+    seed: {
+      ...seedGrievance,
+      deadlineId: seedDeadline.deadlineId,
+      originalDueDate: dueDate.toISOString(),
+      newDueDate: newDueDate.toISOString(),
+    },
+    schedules: { first, second },
+    assertions,
+    passed: assertions.every((a) => a.passed),
+  };
 }
 
 async function runCancel(input: RequestBodyT, correlationId: string) {
@@ -384,71 +369,67 @@ async function runCancel(input: RequestBodyT, correlationId: string) {
     reminderDays: input.reminderOffsetsInDays,
   });
 
-  let assertions: Assertion[] = [];
-  try {
-    const schedule = await scheduleGrievanceDeadlineReminders({
-      sourceDeadlineId: seedDeadline.deadlineId,
-      grievanceId: seedGrievance.grievanceId,
-      dueDate,
-      reminderOffsetsInDays: input.reminderOffsetsInDays,
-      timezone: input.timezone,
-      correlationId,
-      actor: { type: 'system', id: null },
-    });
+  const schedule = await scheduleGrievanceDeadlineReminders({
+    sourceDeadlineId: seedDeadline.deadlineId,
+    grievanceId: seedGrievance.grievanceId,
+    dueDate,
+    reminderOffsetsInDays: input.reminderOffsetsInDays,
+    timezone: input.timezone,
+    correlationId,
+    actor: { type: 'system', id: null },
+  });
 
-    const completion = await completeDeadline(
-      seedDeadline.deadlineId,
-      input.organizationId,
-      'staging-proof',
-      `Completed by staging proof ${correlationId}`,
-    );
-    if (!completion.success) {
-      throw new Error(`deadline-proof: source deadline completion failed: ${completion.error ?? 'unknown error'}`);
-    }
-
-    const cancel = await cancelGrievanceDeadlineReminders({
-      sourceDeadlineId: seedDeadline.deadlineId,
-      organizationId: input.organizationId,
-      reason: 'completed',
-      correlationId,
-      actor: { type: 'system', id: null },
-    });
-
-    const rows = await fetchReminders(seedDeadline.deadlineId);
-    const sourceDeadline = await fetchDeadline(seedDeadline.deadlineId);
-    const expectedCount = input.reminderOffsetsInDays.length;
-    assertions = [
-      assert('schedule created rows', schedule.scheduled.length === expectedCount),
-      assert('cancel returned same row count', cancel.cancelledIds.length === expectedCount),
-      assert('all rows now cancelled', rows.every((r) => r.status === 'cancelled')),
-      assert('all rows have reason=completed', rows.every((r) => r.cancelled_reason === 'completed')),
-      assert('source deadline transitioned to completed', sourceDeadline?.status === 'completed'),
-      assert(
-        'audit contains deadline.completed event',
-        await (async () => {
-          const events = (await db.execute(sql`
-            select event_type
-              from deadline_audit_events
-             where source_deadline_id = ${seedDeadline.deadlineId}::uuid
-               and event_type = 'deadline.completed'
-             limit 1
-          `)) as unknown as Array<{ event_type: string }>;
-          return events.length === 1;
-        })(),
-      ),
-    ];
-    return {
-      scenario: 'cancel' as const,
-      correlationId,
-      seed: { ...seedGrievance, deadlineId: seedDeadline.deadlineId, dueDate: dueDate.toISOString() },
-      schedule,
-      cancel,
-      assertions,
-      passed: assertions.every((a) => a.passed),
-    };
-  } finally {
-    await cleanup(input.organizationId, seedDeadline.deadlineId, seedGrievance.grievanceId);
+  const completion = await completeDeadline(
+    seedDeadline.deadlineId,
+    input.organizationId,
+    'staging-proof',
+    `Completed by staging proof ${correlationId}`,
+  );
+  if (!completion.success) {
+    throw new Error(`deadline-proof: source deadline completion failed: ${completion.error ?? 'unknown error'}`);
   }
+
+  const cancel = await cancelGrievanceDeadlineReminders({
+    sourceDeadlineId: seedDeadline.deadlineId,
+    organizationId: input.organizationId,
+    reason: 'completed',
+    correlationId,
+    actor: { type: 'system', id: null },
+  });
+
+  const rows = await fetchReminders(seedDeadline.deadlineId);
+  const sourceDeadline = await fetchDeadline(seedDeadline.deadlineId);
+  const expectedCount = input.reminderOffsetsInDays.length;
+  const assertions: Assertion[] = [
+    assert('schedule created rows', schedule.scheduled.length === expectedCount),
+    // completeDeadline cancels the deadline's pending reminders itself (the legacy queue and the engine's outbox), so the explicit cancel that follows has nothing left to cancel.
+    assert('completion cancelled every scheduled reminder, so a second cancel finds none', rows.length === expectedCount && cancel.cancelledIds.length === 0),
+    assert('all rows now cancelled', rows.every((r) => r.status === 'cancelled')),
+    assert('all rows have reason=completed', rows.every((r) => r.cancelled_reason === 'completed')),
+    assert('source deadline transitioned to completed', sourceDeadline?.status === 'completed'),
+    assert(
+      'audit contains deadline.completed event',
+      await (async () => {
+        const events = (await db.execute(sql`
+          select event_type
+            from deadline_audit_events
+           where source_deadline_id = ${seedDeadline.deadlineId}::uuid
+             and event_type = 'deadline.completed'
+           limit 1
+        `)) as unknown as Array<{ event_type: string }>;
+        return events.length === 1;
+      })(),
+    ),
+  ];
+  return {
+    scenario: 'cancel' as const,
+    correlationId,
+    seed: { ...seedGrievance, deadlineId: seedDeadline.deadlineId, dueDate: dueDate.toISOString() },
+    schedule,
+    cancel,
+    assertions,
+    passed: assertions.every((a) => a.passed),
+  };
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -459,6 +440,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     STAGING_PROOFS_ENABLED: process.env.STAGING_PROOFS_ENABLED,
     UNION_EYES_RUNTIME_ID: process.env.UNION_EYES_RUNTIME_ID,
     STAGING_PROOF_SECRET: process.env.STAGING_PROOF_SECRET,
+    UE_ENVIRONMENT: process.env.UE_ENVIRONMENT,
+    NZILA_MODE: process.env.NZILA_MODE,
   };
   if (!isAuthorizedStagingProofEnvironment(env)) return new NextResponse(null, { status: 404 });
 
@@ -494,9 +477,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const startedAt = new Date().toISOString();
-  let organizationId: string | null = null;
+  const organizationId = randomUUID();
   try {
-    organizationId = await insertSyntheticOrganization(proofRunId);
     const input: RequestBodyT = {
       ...parsed.data,
       organizationId,
@@ -506,48 +488,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       rescheduleDueDaysFromNow: 44,
       timezone: 'UTC',
     };
-    const result = parsed.data.scenario === 'schedule-basic'
-      ? await runScheduleBasic(input, correlationId)
-      : parsed.data.scenario === 'reschedule'
-        ? await runReschedule(input, correlationId)
-        : await runCancel(input, correlationId);
-    const completedOrganizationId = organizationId;
-    await retireSyntheticOrganization(completedOrganizationId, proofRunId);
+    // The synthetic organization is made inside the scenario's transaction, so it and everything the scenario wrote are rolled back with it.
+    const result = await inRolledBackTransaction(async () => {
+      await insertSyntheticOrganization(organizationId, proofRunId);
+      return parsed.data.scenario === 'schedule-basic'
+        ? runScheduleBasic(input, correlationId)
+        : parsed.data.scenario === 'reschedule'
+          ? runReschedule(input, correlationId)
+          : runCancel(input, correlationId);
+    });
     await finalizeProofRun({
       proofRunId,
       scenario: parsed.data.scenario,
       eventType: 'completed',
       correlationId,
-      createdIdentifiers: { organizationId: completedOrganizationId },
+      createdIdentifiers: { organizationId },
       actualOutcome: { passed: result.passed },
       cleanupPassed: true,
     });
     return NextResponse.json({ ...result, proofRunId, startedAt, finishedAt: new Date().toISOString() });
   } catch (err) {
-    let cleanupPassed = true;
-    let eventType: 'failed' | 'cleanup_failed' = 'failed';
-    if (organizationId) {
-      const cleanupOrganizationId = organizationId;
-      try {
-        await retireSyntheticOrganization(cleanupOrganizationId, proofRunId);
-      } catch (cleanupError) {
-        cleanupPassed = false;
-        eventType = 'cleanup_failed';
-        logger.error('deadline-proof: organization cleanup failed', {
-          proofRunId,
-          correlationId,
-          error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError),
-        });
-      }
-    }
+    // A failed scenario rolled its transaction back too: there is nothing to clean up, and the ledger says the run failed.
     await finalizeProofRun({
       proofRunId,
       scenario: parsed.data.scenario,
-      eventType,
+      eventType: 'failed',
       correlationId,
-      createdIdentifiers: organizationId ? { organizationId } : {},
+      createdIdentifiers: { organizationId },
       actualOutcome: { passed: false },
-      cleanupPassed,
+      cleanupPassed: true,
     }).catch((ledgerError: unknown) => {
       logger.error('deadline-proof: the failed run could not be settled in the ledger', {
         proofRunId,

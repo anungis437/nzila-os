@@ -61,7 +61,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import { OrganizationTree } from "@/components/organization/organization-tree";
 import { BulkOperations } from "@/components/organization/bulk-operations";
-import { BulkImportOrganizations } from "@/components/admin/bulk-import-organizations";
  
 import type { Organization, OrganizationType, OrganizationStatus } from "@/types/organization";
 
@@ -98,6 +97,20 @@ interface OrganizationWithStats extends Organization {
   parentName?: string;
 }
 
+/** A count the server reports per organization, or a dash: the list withholds member and claim counts for organizations the caller does not administer, and a withheld count is not zero. */
+const reported = (value: number | undefined): number | string => (typeof value === 'number' ? value : '—');
+
+/** The sum of a per-organization count, or a dash when any listed organization withheld it: a partial sum would understate the total. */
+function totalOf(organizations: OrganizationWithStats[], pick: (organization: OrganizationWithStats) => number | undefined): number | string {
+  let total = 0;
+  for (const organization of organizations) {
+    const value = pick(organization);
+    if (typeof value !== 'number') return '—';
+    total += value;
+  }
+  return total;
+}
+
 export default function OrganizationsPage() {
   const router = useRouter();
   const t = useTranslations('adminOrganizationsPage');
@@ -108,7 +121,6 @@ export default function OrganizationsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [viewMode, setViewMode] = useState<"table" | "tree">("table");
   const [selectedOrgs, setSelectedOrgs] = useState<Set<string>>(new Set());
-  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   // Admin page: always show all organizations (no parent filter).
   // Non-admin org pages use parent filter for scoped views.
@@ -123,7 +135,11 @@ export default function OrganizationsPage() {
     }
   );
 
-  const organizations: OrganizationWithStats[] = data?.data || [];
+  // A list that did not arrive, or arrived in a shape this page does not know, is a failure to show: never an empty list or a row of zeros.
+  const rows: unknown = data?.data;
+  const loaded = !isLoading && !error && Array.isArray(rows);
+  const loadFailed = Boolean(error) || (!isLoading && data !== undefined && !Array.isArray(rows));
+  const organizations: OrganizationWithStats[] = loaded ? (rows as OrganizationWithStats[]) : [];
 
   // Filter organizations based on search and filters
   const filteredOrganizations = organizations.filter(org => {
@@ -185,14 +201,6 @@ export default function OrganizationsPage() {
           </div>
           <div className="flex gap-2">
             <Button 
-              variant="outline"
-              onClick={() => setBulkImportOpen(true)}
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              {t('bulkImportButton')}
-            </Button>
-            <Button 
               onClick={() => router.push("/dashboard/admin/organizations/new")}
               className="gap-2"
             >
@@ -203,7 +211,8 @@ export default function OrganizationsPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards: shown only for a list that loaded, so a failed or pending load never reads as zeros */}
+      {loaded && (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
@@ -237,7 +246,7 @@ export default function OrganizationsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">{t('totalMembers')}</p>
                 <p className="text-2xl font-bold">
-                  {organizations.reduce((sum, o) => sum + (o.memberCount || 0), 0)}
+                  {totalOf(organizations, (o) => o.memberCount)}
                 </p>
               </div>
               <Users className="w-8 h-8 text-blue-600" />
@@ -251,7 +260,7 @@ export default function OrganizationsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">{t('activeClaims')}</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {organizations.reduce((sum, o) => sum + (o.activeClaims || 0), 0)}
+                  {totalOf(organizations, (o) => o.activeClaims)}
                 </p>
               </div>
               <AlertCircle className="w-8 h-8 text-orange-600" />
@@ -259,6 +268,7 @@ export default function OrganizationsPage() {
           </CardContent>
         </Card>
       </div>
+      )}
 
       {/* Filters */}
       <Card>
@@ -329,7 +339,7 @@ export default function OrganizationsPage() {
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                 </div>
-              ) : error ? (
+              ) : loadFailed ? (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <AlertCircle className="w-12 h-12 mb-4" />
                   <p>{t('failedToLoadOrganizations')}</p>
@@ -412,14 +422,14 @@ export default function OrganizationsPage() {
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              {org.memberCount || 0}
+                              {reported(org.memberCount)}
                             </TableCell>
                             <TableCell className="text-right">
-                              {org.childCount || 0}
+                              {reported(org.childCount)}
                             </TableCell>
                             <TableCell className="text-right">
                               <span className={org.activeClaims ? "text-orange-600 font-medium" : ""}>
-                                {org.activeClaims || 0}
+                                {reported(org.activeClaims)}
                               </span>
                             </TableCell>
                             <TableCell className="text-right">
@@ -479,16 +489,6 @@ export default function OrganizationsPage() {
           setSelectedOrgs(new Set());
         }}
         onClearSelection={() => setSelectedOrgs(new Set())}
-      />
-
-      {/* Bulk Import Dialog */}
-      <BulkImportOrganizations
-        open={bulkImportOpen}
-        onOpenChange={setBulkImportOpen}
-        onSuccess={() => {
-          mutate();
-          setBulkImportOpen(false);
-        }}
       />
     </div>
   );

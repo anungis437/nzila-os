@@ -39,6 +39,7 @@ const createTentativeAgreementSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Bargaining'],

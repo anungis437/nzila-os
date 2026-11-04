@@ -6,7 +6,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  * Supports create, read, update, delete, and publish operations.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createSocialMediaService, postTypeFor } from '@/lib/social-media/social-media-service';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -16,7 +16,8 @@ import { db } from '@/db';
 import { socialPosts, socialAccounts, socialCampaigns } from '@/db/schema/social-media-schema';
 import { eq, and, ilike, desc, count, inArray, SQL } from 'drizzle-orm';
 import { z } from "zod";
-import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
+import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
@@ -27,13 +28,26 @@ import {
 // Members must not see unapproved copy, officer identities, rejection reasons, provider errors or approval metadata.
 const postReadStatuses = z.enum(['draft', 'scheduled', 'published', 'failed', 'deleted']);
 
-export const GET = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
+// A malformed body is a client error, never a server fault.
+async function readJson(request: Request): Promise<{ ok: true; body: unknown } | { ok: false }> {
   try {
-    const { userId, organizationId } = context;
-    if (!userId || !organizationId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
-    }
+    return { ok: true, body: await request.json() };
+  } catch {
+    return { ok: false };
+  }
+}
 
+// Both reads run in the caller organization's tenant transaction (`rlsOrgContext`): the ambient `db` is that transaction.
+export const GET = withApi(
+  {
+    auth: { minRole: 'officer' },
+    rlsOrgContext: true,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Social media'], summary: 'List the social media posts of the organization' },
+  },
+  async ({ request, userId, organizationId: organization }) => {
+  const organizationId = organization!;
+  try {
     const rateLimitResult = await checkRateLimit(
       `social-posts-read:${userId}`,
       RATE_LIMITS.SOCIAL_MEDIA_API,
@@ -62,47 +76,45 @@ export const GET = withRoleAuth('officer', async (request: NextRequest, context:
     if (campaignId?.success) conditions.push(eq(socialPosts.campaignId, campaignId.data));
     if (search) conditions.push(ilike(socialPosts.content, `%${search}%`));
 
-    // Both reads must use the caller's tenant-bound transaction. An explicit field projection
-    // prevents JSON approval records, actor identifiers and provider diagnostics from leaking.
-    const { total, posts } = await withRLSContext({ organizationId, userId }, async (tx) => {
-      const [{ total }] = await tx.select({ total: count() }).from(socialPosts).where(and(...conditions));
-      const posts = await tx.select({
-        id: socialPosts.id,
-        accountId: socialPosts.accountId,
-        campaignId: socialPosts.campaignId,
-        postType: socialPosts.postType,
-        content: socialPosts.content,
-        mediaUrls: socialPosts.mediaUrls,
-        linkUrl: socialPosts.linkUrl,
-        hashtags: socialPosts.hashtags,
-        mentions: socialPosts.mentions,
-        status: socialPosts.status,
-        scheduledFor: socialPosts.scheduledFor,
-        publishedAt: socialPosts.publishedAt,
-        platformUrl: socialPosts.platformUrl,
-        likesCount: socialPosts.likesCount,
-        commentsCount: socialPosts.commentsCount,
-        sharesCount: socialPosts.sharesCount,
-        impressionsCount: socialPosts.impressionsCount,
-        reachCount: socialPosts.reachCount,
-        engagementRate: socialPosts.engagementRate,
-        createdAt: socialPosts.createdAt,
-        updatedAt: socialPosts.updatedAt,
-      }).from(socialPosts)
-        .where(and(...conditions))
-        .orderBy(desc(socialPosts.createdAt))
-        .limit(pagination.limit)
-        .offset(pagination.offset);
-      return { total, posts };
-    });
+    // An explicit field projection prevents JSON approval records, actor identifiers and provider diagnostics from leaking.
+    const [{ total }] = await db.select({ total: count() }).from(socialPosts).where(and(...conditions));
+    const posts = await db.select({
+      id: socialPosts.id,
+      accountId: socialPosts.accountId,
+      campaignId: socialPosts.campaignId,
+      postType: socialPosts.postType,
+      content: socialPosts.content,
+      mediaUrls: socialPosts.mediaUrls,
+      linkUrl: socialPosts.linkUrl,
+      hashtags: socialPosts.hashtags,
+      mentions: socialPosts.mentions,
+      status: socialPosts.status,
+      scheduledFor: socialPosts.scheduledFor,
+      publishedAt: socialPosts.publishedAt,
+      platformUrl: socialPosts.platformUrl,
+      likesCount: socialPosts.likesCount,
+      commentsCount: socialPosts.commentsCount,
+      sharesCount: socialPosts.sharesCount,
+      impressionsCount: socialPosts.impressionsCount,
+      reachCount: socialPosts.reachCount,
+      engagementRate: socialPosts.engagementRate,
+      createdAt: socialPosts.createdAt,
+      updatedAt: socialPosts.updatedAt,
+    }).from(socialPosts)
+      .where(and(...conditions))
+      .orderBy(desc(socialPosts.createdAt))
+      .limit(pagination.limit)
+      .offset(pagination.offset);
 
     return NextResponse.json({ posts, total, limit: pagination.limit, offset: pagination.offset }, {
       headers: { 'Cache-Control': 'private, no-store' },
     });
   } catch (error) {
+    logger.error('Failed to list the social media posts', { error });
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Internal server error', error);
   }
-});
+  },
+);
 
 const socialMediaPostsSchema = z.object({
   platforms: z.array(z.enum(["facebook", "twitter", "linkedin", "instagram"])).min(1, "At least one platform required"),
@@ -120,25 +132,19 @@ const socialMediaPostsSchema = z.object({
 });
 
 // Speaking in the organization's name takes two officers: this route records a draft for the accounts the author names, and a different
-// officer approves it (POST /api/social-media/posts/review) before anything reaches a platform.
-export const POST = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
+// officer approves it (POST /api/social-media/posts/review) before anything reaches a platform. Nothing leaves the database here, so the
+// campaign and account checks, the drafts and their audit records share the tenant transaction of the request (`rlsOrgContext`).
+export const POST = withApi(
+  {
+    auth: { minRole: 'officer' },
+    rlsOrgContext: true,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Social media'], summary: 'Save a social media post as a draft awaiting approval' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
   try {
-      const { userId, organizationId } = context;
-
-      if (!organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
-      if (!userId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No user found'
-        );
-      }
-
       // Rate limit check
       const rateLimitResult = await checkRateLimit(
         `social-posts-create:${userId}`,
@@ -153,9 +159,12 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       }
 
       // Parse and validate request body
-      const body = await request.json();
+      const read = await readJson(request);
+      if (!read.ok) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+      }
       
-      const validation = socialMediaPostsSchema.safeParse(body);
+      const validation = socialMediaPostsSchema.safeParse(read.body);
       if (!validation.success) {
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
@@ -224,39 +233,36 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       }
 
       // One draft per account, written with its audit record; nothing is sent.
-      const drafts = await withRLSContext({ organizationId }, async (tx) => {
-        const rows = [];
-        for (const account of accounts) {
-          const [row] = await tx
-            .insert(socialPosts)
-            .values({
-              organizationId,
-              accountId: account.id,
-              campaignId: campaign_id ?? null,
-              postType: postTypeFor({ media_urls, link_url }),
-              content,
-              mediaUrls: media_urls || [],
-              linkUrl: link_url ?? null,
-              hashtags: hashtags || [],
-              mentions: [],
-              status: 'draft',
-              scheduledFor: scheduled_for ? new Date(scheduled_for) : null,
-              postMetadata: { approval: { state: 'pending', requestedBy: userId, requestedAt: new Date().toISOString() }, linkTitle: link_title, linkDescription: link_description },
-              createdBy: userId,
-            })
-            .returning({ id: socialPosts.id, accountId: socialPosts.accountId });
-          await persistAtomicAudit(tx, {
+      const drafts = [];
+      for (const account of accounts) {
+        const [row] = await db
+          .insert(socialPosts)
+          .values({
             organizationId,
-            userId,
-            action: 'social.post.draft',
-            resourceType: 'social_posts',
-            resourceId: row.id,
-            details: { platform: account.platform, scheduled: !!scheduled_for, mediaCount: (media_urls || []).length },
-          });
-          rows.push(row);
-        }
-        return rows;
-      });
+            accountId: account.id,
+            campaignId: campaign_id ?? null,
+            postType: postTypeFor({ media_urls, link_url }),
+            content,
+            mediaUrls: media_urls || [],
+            linkUrl: link_url ?? null,
+            hashtags: hashtags || [],
+            mentions: [],
+            status: 'draft',
+            scheduledFor: scheduled_for ? new Date(scheduled_for) : null,
+            postMetadata: { approval: { state: 'pending', requestedBy: userId, requestedAt: new Date().toISOString() }, linkTitle: link_title, linkDescription: link_description },
+            createdBy: userId,
+          })
+          .returning({ id: socialPosts.id, accountId: socialPosts.accountId });
+        await persistAtomicAudit(db, {
+          organizationId,
+          userId,
+          action: 'social.post.draft',
+          resourceType: 'social_posts',
+          resourceId: row.id,
+          details: { platform: account.platform, scheduled: !!scheduled_for, mediaCount: (media_urls || []).length },
+        });
+        drafts.push(row);
+      }
 
       return NextResponse.json(
         {
@@ -267,21 +273,23 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         { status: 202 },
       );
     } catch (error) {
+      logger.error('Failed to save the social media post draft', { error });
       return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Internal server error', error);
     }
-});
+  },
+);
 
-export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+// Deleting a post removes it from the platform first (a network call), so no transaction spans the handler: the lookup and the local
+// update each run in the organization's own tenant transaction, and the service scopes its own statements the same way.
+export const DELETE = withApi(
+  {
+    auth: { minRole: 'steward' },
+    openapi: { tags: ['Social media'], summary: 'Delete a social media post from its platform and mark it deleted' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
   try {
-      const { userId, organizationId } = context;
-      
-      if (!organizationId || !userId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
       // Get post ID from query params
       const searchParams = request.nextUrl.searchParams;
       const postId = searchParams.get('id');
@@ -292,17 +300,22 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       'Post ID required'
     );
       }
+      if (!z.guid().safeParse(postId).success) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Post ID must be a valid id');
+      }
 
       // Verify user has access to this post (belongs to their organization)
-      const [post] = await db
-        .select({
-          id: socialPosts.id,
-          orgId: socialAccounts.organizationId,
-        })
-        .from(socialPosts)
-        .innerJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
-        .where(and(eq(socialPosts.id, postId), eq(socialAccounts.organizationId, organizationId)))
-        .limit(1);
+      const [post] = await withRLSContext({ organizationId }, (tx) =>
+        tx
+          .select({
+            id: socialPosts.id,
+            orgId: socialAccounts.organizationId,
+          })
+          .from(socialPosts)
+          .innerJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
+          .where(and(eq(socialPosts.id, postId), eq(socialAccounts.organizationId, organizationId), eq(socialPosts.organizationId, organizationId)))
+          .limit(1),
+      );
 
       if (!post?.id) {
         return standardErrorResponse(
@@ -354,7 +367,8 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
             details: { alreadyRemovedOnPlatform: alreadyRemoved },
           });
         });
-      } catch {
+      } catch (localError) {
+        logger.error('The social media post was removed from the platform but its record could not be updated', { error: localError, postId });
         return NextResponse.json(
           {
             error: 'The post was removed from the platform, but its record could not be updated and still reads published. Repeat the deletion to complete it.',
@@ -372,6 +386,7 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
     } catch (error) {
       const refused = operationAuditResponse(error);
       if (refused) return NextResponse.json(refused.body, { status: refused.status });
+      logger.error('Failed to delete the social media post', { error });
       return NextResponse.json(
         {
           error: 'Failed to delete post',
@@ -379,5 +394,6 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
         { status: 500 }
       );
     }
-});
+  },
+);
 

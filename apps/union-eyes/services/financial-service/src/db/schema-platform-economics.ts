@@ -58,7 +58,7 @@ export const subscriptionEvents = pgTable('subscription_events', {
   mrrChange: numeric('mrr_change', { precision: 10, scale: 2 }).default('0'),
   
   // Source
-  source: varchar('source', { length: 50 }).default('stripe'), // stripe, whop, manual, system
+  source: varchar('source', { length: 50 }).default('stripe'), // stripe, manual, system
   sourceEventId: varchar('source_event_id', { length: 255 }), // Stripe subscription ID, etc.
   
   // Attribution (for CAC calculation)

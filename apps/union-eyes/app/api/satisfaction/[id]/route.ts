@@ -25,6 +25,7 @@ function surveyRefusal(error: unknown): never {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Satisfaction'],
@@ -44,6 +45,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     body: z.object({
       action: z.enum(['submit', 'decline']).default('submit'),

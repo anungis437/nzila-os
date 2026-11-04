@@ -55,7 +55,9 @@ describe('S2 database enforcement of the partial Gate 0 fixes (migration 0040)',
 
   it('writes the expiry warning record before the mail leaves and releases it when the mail fails', () => {
     const service = read('lib/services/rewards/notification-service.ts')
-    expect(service.indexOf('claimExpiryWarning(entry, tierDays)')).toBeLessThan(service.indexOf('await sendCreditExpirationEmail'))
-    expect(service).toContain('releaseExpiryWarning(entry, tierDays)')
+    // Each marker write is a short system transaction of its own (the cron has no tenant session), so none is open while the mail is sent.
+    expect(service.indexOf('claimExpiryWarning(entry, tierDays, tx)')).toBeGreaterThan(-1)
+    expect(service.indexOf('claimExpiryWarning(entry, tierDays, tx)')).toBeLessThan(service.indexOf('await sendCreditExpirationEmail'))
+    expect(service).toContain('releaseExpiryWarning(entry, tierDays, tx)')
   })
 })

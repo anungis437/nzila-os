@@ -77,6 +77,48 @@ describe('public cookie-consent route privacy and essential integrity', () => {
       expect(data).not.toHaveProperty(key)
   })
 
+  it('GET reads the record on the system connection and bounds the read per client', async () => {
+    const { GET } = await import('../route')
+    await GET(request(`/api/gdpr/cookie-consent?consentId=${consentId}`))
+    expect(m.guard).toHaveBeenCalledWith(expect.anything(), { bucket: 'capability', readBody: false })
+    expect(m.get).toHaveBeenCalledWith(consentId, expect.objectContaining({ select: expect.any(Function) }))
+  })
+
+  it('GET answers the rate limit refusal and reads nothing', async () => {
+    const { GET } = await import('../route')
+    m.guard.mockResolvedValue({ ok: false, response: new Response(JSON.stringify({ error: { code: 'RATE_LIMITED' } }), { status: 429 }) })
+    const response = await GET(request(`/api/gdpr/cookie-consent?consentId=${consentId}`))
+    expect(response.status).toBe(429)
+    expect(m.get).not.toHaveBeenCalled()
+  })
+
+  it('GET answers an empty banner check for no consent id, and 400 for an id that is not a uuid, without reading', async () => {
+    const { GET } = await import('../route')
+    const empty = await GET(request('/api/gdpr/cookie-consent'))
+    expect(empty.status).toBe(200)
+    expect(await empty.json()).toEqual({ consent: null })
+    const malformed = await GET(request('/api/gdpr/cookie-consent?consentId=not-a-uuid'))
+    expect(malformed.status).toBe(400)
+    expect(m.get).not.toHaveBeenCalled()
+  })
+
+  it('GET answers null for an unknown consent id', async () => {
+    const { GET } = await import('../route')
+    m.get.mockResolvedValue(null)
+    const response = await GET(request(`/api/gdpr/cookie-consent?consentId=${consentId}`))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ consent: null })
+  })
+
+  it('GET answers 500, not an empty consent, when the database read fails', async () => {
+    const { GET } = await import('../route')
+    m.get.mockRejectedValue(new Error('connection reset'))
+    const response = await GET(request(`/api/gdpr/cookie-consent?consentId=${consentId}`))
+    expect(response.status).toBe(500)
+    expect(await response.json()).toEqual({ error: 'Failed to load cookie consent' })
+    expect(m.error).toHaveBeenCalled()
+  })
+
   it('POST never reflects private internal metadata to a client', async () => {
     const { POST } = await import('../route')
     const response = await POST(request('/api/gdpr/cookie-consent'))

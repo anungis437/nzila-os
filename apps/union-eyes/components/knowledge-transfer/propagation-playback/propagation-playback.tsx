@@ -17,7 +17,6 @@ export interface DegradationTimelineStep {
   operationalCapacity: number;
   affectedDomains: string[];
   criticalFailures: string[];
-  recoveryProgress: number;
 }
 
 export interface MitigationReplayEvent {
@@ -33,7 +32,12 @@ export interface PropagationPlaybackData {
   timeline: DegradationTimelineStep[];
   mitigationReplays: MitigationReplayEvent[];
   bottlenecksExposed: string[];
+  /** The week the simulation says the organization is back to baseline, when it says one. */
   recoveryWeek: number | null;
+  /** Continuity score projected twelve weeks out (0-100), when the simulation gives one. */
+  twelveWeekProjection?: number | null;
+  /** Probability (0-100) that the organization recovers without outside help, when the simulation gives one. */
+  autonomousRecoveryProbability?: number | null;
 }
 
 interface Props {
@@ -167,10 +171,15 @@ export function PropagationPlayback({ playback }: Props) {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
-          <div className="text-xs text-slate-500">Recovery progress</div>
+          <div className="text-xs text-slate-500">Recovery without outside help</div>
           <div className="text-2xl font-semibold text-indigo-600">
-            {step.recoveryProgress}%
+            {playback.autonomousRecoveryProbability != null ? `${playback.autonomousRecoveryProbability}%` : '—'}
           </div>
+          {playback.twelveWeekProjection != null && (
+            <div className="text-xs text-slate-400">
+              Projected continuity after 12 weeks: {playback.twelveWeekProjection}%
+            </div>
+          )}
           {playback.recoveryWeek !== null && (
             <div className="text-xs text-slate-400">
               Full recovery: week {playback.recoveryWeek}

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { signInWithEntra } from '@nzila/platform-auth/entra/client';
+import { defaultLocale, locales } from '@/i18n/config';
+import { getJson, localeOfPath, postJson, UNEXPECTED_MESSAGE } from './auth-client';
 
 type Mode = 'password' | 'magic-link' | 'sso';
 
@@ -26,13 +28,27 @@ const DEFAULT_METHODS: MethodAvailability = {
   inviteRequired: false,
 };
 
+const METHOD_KEYS = Object.keys(DEFAULT_METHODS) as (keyof MethodAvailability)[];
+
+/** The method answer holds every flag as a yes/no; one that does not is not "all methods off" (or on), it is an answer to report. */
+function readMethods(data: Record<string, unknown>): MethodAvailability | null {
+  const flags: Partial<MethodAvailability> = {};
+  for (const key of METHOD_KEYS) {
+    const value = data[key];
+    if (typeof value !== 'boolean') return null;
+    flags[key] = value;
+  }
+  return flags as MethodAvailability;
+}
+
 type LoginFormProps = {
   postLoginPath?: string;
 };
 
 export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormProps) {
   const router = useRouter();
-  const postLoginPath = configuredPostLoginPath ?? '/en-CA/dashboard';
+  const pathname = usePathname();
+  const postLoginPath = configuredPostLoginPath ?? `/${localeOfPath(pathname, locales, defaultLocale)}/dashboard`;
   const [mode, setMode] = useState<Mode>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,29 +56,34 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [methods, setMethods] = useState<MethodAvailability>(DEFAULT_METHODS);
+  const [methodsNote, setMethodsNote] = useState<string | null>(null);
+  const methodsRequest = useRef(0);
   // MFA step-up state
   const [mfaChallengeToken, setMfaChallengeToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState('');
   const [mfaUseRecovery, setMfaUseRecovery] = useState(false);
 
+  // The latest request wins: a slow answer for an address that has since been edited is not applied.
   const refreshMethods = useCallback(async (currentEmail: string) => {
+    const request = ++methodsRequest.current;
     if (!currentEmail || !currentEmail.includes('@')) {
       setMethods(DEFAULT_METHODS);
+      setMethodsNote(null);
       return;
     }
-    try {
-      const res = await fetch(
-        `/api/auth/methods?email=${encodeURIComponent(currentEmail)}`,
-        { cache: 'no-store' },
-      );
-      if (!res.ok) return;
-      const data = (await res.json()) as MethodAvailability;
-      setMethods(data);
-      if (data.ssoRequired) setMode('sso');
-      else if (!data.password && data.magicLink) setMode('magic-link');
-    } catch {
-      // ignore
+    const answer = await getJson(`/api/auth/methods?email=${encodeURIComponent(currentEmail)}`, 'Sign-in options could not be checked');
+    if (request !== methodsRequest.current) return;
+    const available = answer.ok ? readMethods(answer.data) : null;
+    if (available === null) {
+      // The standard options stay on offer, and the person is told they are not the result of a check for this address.
+      setMethods(DEFAULT_METHODS);
+      setMethodsNote(`We could not check which sign-in options apply to this address, so the standard ones are shown. ${answer.ok ? UNEXPECTED_MESSAGE : answer.message}`);
+      return;
     }
+    setMethodsNote(null);
+    setMethods(available);
+    if (available.ssoRequired) setMode('sso');
+    else if (!available.password && available.magicLink) setMode('magic-link');
   }, []);
 
   useEffect(() => {
@@ -76,24 +97,23 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
     setInfo(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Login failed');
+      const answer = await postJson('/api/auth/login', { email, password }, 'Login failed');
+      if (!answer.ok) {
+        setError(answer.message);
         return;
       }
-      if (data.requiresMfa && data.mfaChallengeToken) {
+      const { data } = answer;
+      if (data.requiresMfa === true && typeof data.mfaChallengeToken === 'string' && data.mfaChallengeToken) {
         setMfaChallengeToken(data.mfaChallengeToken);
         setInfo('Enter the 6-digit code from your authenticator app.');
         return;
       }
+      // A signed-in answer names the user; one that does not is not a sign-in, whatever its status.
+      if (typeof data.user !== 'object' || data.user === null) {
+        setError(UNEXPECTED_MESSAGE);
+        return;
+      }
       router.push(postLoginPath);
-    } catch {
-      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -108,19 +128,16 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
       const body = mfaUseRecovery
         ? { challengeToken: mfaChallengeToken, recoveryCode: mfaCode.trim() }
         : { challengeToken: mfaChallengeToken, code: mfaCode.trim() };
-      const res = await fetch('/api/auth/mfa/challenge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Verification failed');
+      const answer = await postJson('/api/auth/mfa/challenge', body, 'Verification failed');
+      if (!answer.ok) {
+        setError(answer.message);
+        return;
+      }
+      if (answer.data.ok !== true) {
+        setError(UNEXPECTED_MESSAGE);
         return;
       }
       router.push(postLoginPath);
-    } catch {
-      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -132,26 +149,20 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
     setInfo(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/magic-link/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Could not send sign-in link');
+      const answer = await postJson('/api/auth/magic-link/request', { email }, 'Could not send sign-in link');
+      if (!answer.ok) {
+        setError(answer.message);
         return;
       }
-      const baseMessage =
-        data.message ?? 'If that email is recognised, a sign-in link has been sent.';
-      if (data.token) {
+      const { data } = answer;
+      if (typeof data.token === 'string' && data.token) {
         const verifyUrl = `/magic-link/verify?token=${encodeURIComponent(data.token)}`;
         setInfo(`Sign-in link sent. (Dev mode) Continue at: ${verifyUrl}`);
+      } else if (typeof data.message === 'string' && data.message) {
+        setInfo(data.message);
       } else {
-        setInfo(baseMessage);
+        setError(UNEXPECTED_MESSAGE);
       }
-    } catch {
-      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -236,6 +247,9 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
       )}
       {info && (
         <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700 wrap-break-word">{info}</div>
+      )}
+      {methodsNote && (
+        <div role="status" className="rounded-xl bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800">{methodsNote}</div>
       )}
 
       {methods.ssoRequired ? (

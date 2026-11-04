@@ -12,6 +12,8 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
+import { ApiShapeError, envelopeData, envelopeRow, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,16 +64,40 @@ interface DistributionList {
   listType: string;
   subscriberCount: number;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface Subscriber {
   id: string;
   email: string;
   status: string;
-  subscribedAt: string;
+  subscribedAt: string | null;
 }
+
+/** A list from the item route; a body that is not a list is an error, and a column the table leaves null reads as the table's own default. */
+function listFrom(row: Record<string, unknown>): DistributionList {
+  if (typeof row.id !== 'string' || typeof row.name !== 'string') throw new ApiShapeError('not a distribution list');
+  return {
+    id: row.id,
+    name: row.name,
+    description: typeof row.description === 'string' ? row.description : null,
+    listType: typeof row.listType === 'string' ? row.listType : 'manual',
+    subscriberCount: typeof row.subscriberCount === 'number' ? row.subscriberCount : 0,
+    isActive: row.isActive !== false,
+  };
+}
+
+function subscriberFrom(row: unknown): Subscriber {
+  if (!isRecord(row) || typeof row.id !== 'string' || typeof row.email !== 'string' || typeof row.status !== 'string') {
+    throw new ApiShapeError('not a subscriber');
+  }
+  return { id: row.id, email: row.email, status: row.status, subscribedAt: typeof row.subscribedAt === 'string' ? row.subscribedAt : null };
+}
+
+// The message catalogues are shared, so the copy for a failed subscriber read is kept here.
+const SUBSCRIBERS_UNAVAILABLE = {
+  en: 'The subscribers could not be loaded. Use the refresh button to try again.',
+  fr: 'Les abonnés n’ont pas pu être chargés. Utilisez le bouton d’actualisation pour réessayer.',
+} as const;
 
 export default function DistributionListDetailPage() {
   const t = useTranslations('distributionListDetailPage');
@@ -79,7 +105,9 @@ export default function DistributionListDetailPage() {
   const locale = useLocale();
   const { id } = useParams<{ id: string }>();
   const [list, setList] = useState<DistributionList | null>(null);
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  // null until the subscribers have been read; an empty array only when the list really has none.
+  const [subscribers, setSubscribers] = useState<Subscriber[] | null>(null);
+  const [subscribersError, setSubscribersError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -107,12 +135,11 @@ export default function DistributionListDetailPage() {
         if (response.status === 404) throw new Error(t('notFound'));
         throw new Error(t('failedToFetch'));
       }
-      const json = await response.json();
-      const data = json.data ?? json;
+      const data = listFrom(envelopeRow(await response.json()));
       setList(data);
       setFormData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('failedToFetch'));
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('failedToFetch'));
     } finally {
       setLoading(false);
     }
@@ -120,14 +147,16 @@ export default function DistributionListDetailPage() {
 
   const fetchSubscribers = async () => {
     try {
+      setSubscribersError(null);
       const response = await fetch(`/api/communications/distribution-lists/${id}/subscribers`);
-      if (response.ok) {
-        const json = await response.json();
-        const data = json.data ?? json;
-        setSubscribers(Array.isArray(data.subscribers) ? data.subscribers : Array.isArray(data) ? data : []);
-      }
-    } catch {
-      // Subscribers fetch is non-critical
+      if (!response.ok) throw new Error(`The subscribers route answered ${response.status}`);
+      const { subscribers: rows } = envelopeData(await response.json());
+      if (!Array.isArray(rows)) throw new ApiShapeError('no subscribers');
+      setSubscribers(rows.map(subscriberFrom));
+    } catch (err) {
+      logger.error('Failed to load distribution list subscribers', err, { listId: id });
+      setSubscribers(null);
+      setSubscribersError(SUBSCRIBERS_UNAVAILABLE[locale.toLowerCase().startsWith('fr') ? 'fr' : 'en']);
     }
   };
 
@@ -147,19 +176,15 @@ export default function DistributionListDetailPage() {
         }),
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || t('failedToSave'));
-      }
+      if (!response.ok) throw new Error(await readApiError(response, t('failedToSave')));
 
-      const json = await response.json();
-      const updated = json.data ?? json;
+      const updated = listFrom(envelopeRow(await response.json()));
       setList(updated);
       setFormData(updated);
       setSuccessMessage(t('successMessage'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('failedToSave'));
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('failedToSave'));
     } finally {
       setSaving(false);
     }
@@ -172,10 +197,7 @@ export default function DistributionListDetailPage() {
       const response = await fetch(`/api/communications/distribution-lists/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || t('failedToDelete'));
-      }
+      if (!response.ok) throw new Error(await readApiError(response, t('failedToDelete')));
       router.push(`/${locale}/dashboard/communications/distribution-lists`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('failedToDelete'));
@@ -298,7 +320,7 @@ export default function DistributionListDetailPage() {
                 {t('subscribersTitle')}
               </CardTitle>
               <CardDescription>
-                {t('subscribersDescription', { count: subscribers.length })}
+                {subscribers && t('subscribersDescription', { count: subscribers.length })}
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={fetchSubscribers}>
@@ -307,7 +329,15 @@ export default function DistributionListDetailPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {subscribers.length === 0 ? (
+          {subscribersError ? (
+            <p role="alert" className="text-center text-destructive py-8">
+              {subscribersError}
+            </p>
+          ) : subscribers === null ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : subscribers.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
               {t('noSubscribers')}
             </p>
@@ -329,7 +359,7 @@ export default function DistributionListDetailPage() {
                         {sub.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm">{formatDate(sub.subscribedAt)}</TableCell>
+                    <TableCell className="text-sm">{sub.subscribedAt ? formatDate(sub.subscribedAt) : '—'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

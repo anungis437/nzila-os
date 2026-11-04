@@ -23,6 +23,7 @@ const evaluateSchema = z.object({
  */
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'admin' },
     entitlement: 'governance_suite',
     body: evaluateSchema,

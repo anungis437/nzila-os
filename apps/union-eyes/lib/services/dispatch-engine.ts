@@ -106,7 +106,7 @@ export async function createDispatchRequest(
 }
 
 /**
- * List open dispatch requests for an org.
+ * List the dispatch requests that still need workers: open ones and partially filled ones (a partly filled request leaves the queue only when it is filled).
  */
 export async function listDispatchQueue(orgId: string) {
   return db
@@ -115,7 +115,7 @@ export async function listDispatchQueue(orgId: string) {
     .where(
       and(
         eq(dispatchRequests.orgId, orgId),
-        eq(dispatchRequests.status, "open"),
+        inArray(dispatchRequests.status, ["open", "partially_filled"]),
       ),
     )
     .orderBy(asc(dispatchRequests.requestedDate));

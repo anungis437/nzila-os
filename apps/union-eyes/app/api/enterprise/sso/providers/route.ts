@@ -22,6 +22,7 @@ export const GET = withApi(
   {
     // The identity-provider configuration (issuer, endpoints, client id, attribute mapping) is an administrator's, not every member's.
     auth: { required: true, minRole: 'admin' },
+    rlsOrgContext: true,
     openapi: {
       tags: ['Auth'],
       summary: 'List SSO providers',

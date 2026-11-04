@@ -28,6 +28,3 @@ export * from './notification-service';
 // Automation & Triggers
 export * from './automation-service';
 
-// Award Templates
-export * from './template-service';
-

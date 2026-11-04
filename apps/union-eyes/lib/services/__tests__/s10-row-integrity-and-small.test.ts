@@ -81,8 +81,17 @@ describe('Gate 0 batch B66/S09: small platform fixes and row integrity', () => {
     const factory = src('lib/api/crud-factory.ts')
     expect(factory).toContain('removed: describe(row)')
     const precedent = src('app/api/precedents/[id]/route.ts')
+    // A cited precedent is retained: judged on the precedent's own citation count, and again in the DELETE's own predicate.
     expect(precedent).toContain('has citation history and is retained')
-    expect(precedent).toContain('removedTagCount')
+    expect(precedent).toContain('(existing.citationCount ?? 0) > 0')
+    expect(precedent).toContain('sql`coalesce(${arbitrationPrecedents.citationCount}, 0) = 0`')
+    // What identified the removed precedent stays in the audit record written with the delete.
+    expect(precedent).toMatch(
+      /action: 'precedent\.delete'[\s\S]*?details: \{\s*caseNumber: existing\.caseNumber,\s*caseTitle: existing\.caseTitle,\s*jurisdiction: existing\.jurisdiction,\s*sharingLevel: existing\.sharingLevel,\s*\}/,
+    )
+    // The tag table is not readable by the application's roles (REVOKE ALL in the round-58 RLS migration), so no tag count is read or audited.
+    expect(precedent).not.toContain('precedentTags')
+    expect(precedent).not.toContain('removedTagCount')
   })
 
   it('applies list filters to the incident and hazard lists and refuses a value outside an enum', () => {

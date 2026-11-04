@@ -49,12 +49,6 @@ export const PUBLIC_API_ROUTES = new Set([
   // Justification: External systems push events, authenticated via signatures
   // ========================================================================
   ...SIGNED_CALLBACK_ROUTES,
-  // ========================================================================
-  // PUBLIC CHECKOUT/PAYMENT FLOWS
-  // Justification: Guest checkout required for payment processor integrations
-  // ========================================================================
-  '/api/whop/unauthenticated-checkout', // Guest checkout flow (creates session on success)
-  // '/api/whop/create-checkout' is intentionally NOT public (requires authenticated user)
   
   // ========================================================================
   // AUTH ENDPOINTS (email/password)

@@ -16,6 +16,7 @@ const signSchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "officer" },
     body: signSchema,
     openapi: { tags: ["Correspondence"], summary: "Sign correspondence" },

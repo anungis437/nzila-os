@@ -53,10 +53,8 @@ const ADAPTER_PATH_PATTERNS = [
   /with-rls-context/,            // RLS context passes through migration-era ids
   /org-resolver/,                // org resolution bridge (clerkOrgId → appOrgId)
   /workspace\/_lib\/house-partner/, // Console bridge uses legacy schema column clerkOrgId
-  /profiles-queries/,            // DB queries that reference clerkId columns
   /state-machine/,               // governance state machine (actorClerkUserId field)
   /auth\/types/,                 // auth type definitions with legacy field names
-  /whop/,                        // Whop integration (passes through clerkId)
   /admin-actions/,               // admin actions with legacy clerk refs
   /PartnerTable/,                // partner table component with legacy props
   /portal\/layout/,              // portal layouts with legacy auth patterns

@@ -253,8 +253,17 @@ export async function getCorrespondenceWithDetails(id: string) {
       .select()
       .from(correspondenceRecipients)
       .where(eq(correspondenceRecipients.correspondenceId, id)),
+    // What happened, who did it and when. The network address, user agent, hash and free-form metadata of each entry stay in the store: a
+    // letter's history is served to every steward, and the chain's integrity is checked where the chain is, not by the reader of the letter.
     db
-      .select()
+      .select({
+        id: correspondenceAuditTrail.id,
+        eventType: correspondenceAuditTrail.eventType,
+        eventDescription: correspondenceAuditTrail.eventDescription,
+        actorName: correspondenceAuditTrail.actorName,
+        actorRole: correspondenceAuditTrail.actorRole,
+        timestamp: correspondenceAuditTrail.timestamp,
+      })
       .from(correspondenceAuditTrail)
       .where(eq(correspondenceAuditTrail.correspondenceId, id))
       .orderBy(asc(correspondenceAuditTrail.timestamp)),

@@ -4,8 +4,7 @@
  */
 
 import { z } from 'zod';
-import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -34,61 +33,61 @@ const createRuleSchema = z.object({
   effectiveFrom: z.string().datetime().optional(),
 });
 
-export const GET = withMinRole('secretary_treasurer', async (_request, context: BaseAuthContext) => {
-  const { organizationId, userId } = context;
-  if (!organizationId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-  try {
-    await requireEntitlement(organizationId, 'allocation_engine', userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
+// The rules are the caller organization's own rows: the handler runs in that organization's tenant transaction, so the
+// ambient handle the engine reads and writes through carries the organization row-level security applies to.
+export const GET = withApi(
+  {
+    auth: { minRole: 'secretary_treasurer' },
+    entitlement: 'allocation_engine',
+    rlsOrgContext: true,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'List allocation rules' },
+  },
+  async ({ organizationId }) => {
+    try {
+      const rules = await getAllocationRules(organizationId!);
+      return standardSuccessResponse(rules);
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch allocation rules', error);
+    }
+  },
+);
 
-  try {
-    const rules = await getAllocationRules(organizationId);
-    return standardSuccessResponse(rules);
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch allocation rules', error);
-  }
-});
+export const POST = withApi(
+  {
+    auth: { minRole: 'admin' },
+    entitlement: 'allocation_engine',
+    rlsOrgContext: true,
+    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'Create an allocation rule' },
+  },
+  async ({ request, organizationId, userId }) => {
+    let rawBody: any;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
+    }
 
-export const POST = withMinRole('admin', async (request, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-  if (!organizationId || !userId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-  try {
-    await requireEntitlement(organizationId, 'allocation_engine', userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
+    const parsed = createRuleSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
+    }
 
-  let rawBody: any;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
-  }
-
-  const parsed = createRuleSchema.safeParse(rawBody);
-  if (!parsed.success) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
-  }
-
-  try {
-    const rule = await createAllocationRule({
-      organizationId,
-      name: parsed.data.name,
-      method: parsed.data.method,
-      weights: parsed.data.parameters as Record<string, number> | undefined,
-      effectiveFrom: parsed.data.effectiveFrom
-        ? new Date(parsed.data.effectiveFrom)
-        : new Date(),
-      createdBy: userId,
-    });
-    return standardSuccessResponse(rule);
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to create allocation rule', error);
-  }
-});
+    try {
+      const rule = await createAllocationRule({
+        organizationId: organizationId!,
+        name: parsed.data.name,
+        method: parsed.data.method,
+        weights: parsed.data.parameters as Record<string, number> | undefined,
+        effectiveFrom: parsed.data.effectiveFrom
+          ? new Date(parsed.data.effectiveFrom)
+          : new Date(),
+        createdBy: userId!,
+      });
+      return standardSuccessResponse(rule);
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to create allocation rule', error);
+    }
+  },
+);

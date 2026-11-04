@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { apiErrorMessage, envelopeRows, isRecord } from '@/lib/client/api-envelope'
 
 interface RemittanceRow {
   id: string
@@ -14,7 +15,8 @@ type PanelState =
   | { kind: 'loading' }
   | { kind: 'empty' }
   | { kind: 'rows'; rows: RemittanceRow[] }
-  | { kind: 'denied'; code: string }
+  | { kind: 'denied'; code: string; message: string | null }
+  | { kind: 'failed'; message: string }
 
 const denialKey = (code: string): 'unissued' | 'duty' | 'segregation' | 'missing' | 'denied' => {
   if (code === 'FINANCIAL_MANDATES_NOT_ISSUED') return 'unissued'
@@ -24,47 +26,42 @@ const denialKey = (code: string): 'unissued' | 'duty' | 'segregation' | 'missing
   return 'denied'
 }
 
+const KNOWN_DENIALS = new Set(['FINANCIAL_MANDATES_NOT_ISSUED', 'DUTY_NOT_HELD', 'SEGREGATION_OF_DUTIES', 'NOT_FOUND'])
+
 export function PrincipalFinancialAuthorityPanel() {
   const t = useTranslations('financialAuthorityPage')
+  const tErrors = useTranslations('errors')
   const [state, setState] = useState<PanelState>({ kind: 'loading' })
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (isCancelled: () => boolean = () => false) => {
     setState({ kind: 'loading' })
     try {
       const response = await fetch('/api/dues/remittances')
-      const body = (await response.json().catch(() => ({}))) as { data?: RemittanceRow[]; code?: string; details?: { code?: string } }
+      if (isCancelled()) return
       if (!response.ok) {
-        setState({ kind: 'denied', code: body.details?.code ?? body.code ?? 'denied' })
+        // A refusal names its reason in `details.code` (development) and states it in `message`; the page words the reasons it knows.
+        const body: unknown = await response.json().catch(() => null)
+        const details = isRecord(body) && isRecord(body.details) ? body.details : null
+        const code = typeof details?.code === 'string' ? details.code : isRecord(body) && typeof body.code === 'string' ? body.code : 'denied'
+        const message = apiErrorMessage(body, '') || null
+        if (!isCancelled()) setState({ kind: 'denied', code, message })
         return
       }
-      const rows = Array.isArray(body.data) ? body.data : []
-      setState(rows.length === 0 ? { kind: 'empty' } : { kind: 'rows', rows })
-    } catch {
-      setState({ kind: 'denied', code: 'denied' })
+      // The route answers { success, data: { data: rows } }.
+      const rows = envelopeRows(await response.json()) as RemittanceRow[]
+      if (!isCancelled()) setState(rows.length === 0 ? { kind: 'empty' } : { kind: 'rows', rows })
+    } catch (error) {
+      if (!isCancelled()) setState({ kind: 'failed', message: error instanceof Error ? error.message : tErrors('loadingError') })
     }
-  }, [])
+  }, [tErrors])
 
   useEffect(() => {
     let cancelled = false
-    void (async () => {
-      try {
-        const response = await fetch('/api/dues/remittances')
-        const body = (await response.json().catch(() => ({}))) as { data?: RemittanceRow[]; code?: string; details?: { code?: string } }
-        if (cancelled) return
-        if (!response.ok) {
-          setState({ kind: 'denied', code: body.details?.code ?? body.code ?? 'denied' })
-          return
-        }
-        const rows = Array.isArray(body.data) ? body.data : []
-        setState(rows.length === 0 ? { kind: 'empty' } : { kind: 'rows', rows })
-      } catch {
-        if (!cancelled) setState({ kind: 'denied', code: 'denied' })
-      }
-    })()
+    void load(() => cancelled)
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [load])
 
   return (
     <section className="space-y-4 p-4 md:p-6">
@@ -72,9 +69,15 @@ export function PrincipalFinancialAuthorityPanel() {
       <p className="text-sm text-muted-foreground">{t('intro')}</p>
       {state.kind === 'loading' ? <p>{t('loading')}</p> : null}
       {state.kind === 'empty' ? <p>{t('empty')}</p> : null}
-      {state.kind === 'denied' ? (
+      {state.kind === 'denied' || state.kind === 'failed' ? (
         <div className="space-y-3">
-          <p role="alert">{t(denialKey(state.code))}</p>
+          <p role="alert">
+            {state.kind === 'failed'
+              ? state.message
+              : KNOWN_DENIALS.has(state.code) || !state.message
+                ? t(denialKey(state.code))
+                : state.message}
+          </p>
           <button type="button" className="rounded border px-3 py-2" onClick={() => void load()}>
             {t('retry')}
           </button>

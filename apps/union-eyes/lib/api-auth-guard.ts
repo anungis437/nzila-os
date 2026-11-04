@@ -68,6 +68,8 @@ import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { getCanonicalOrganizationContext, getCanonicalPasswordActor } from '@/lib/auth/canonical-context';
 import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // =============================================================================
 // AUTH RE-EXPORTS
 // =============================================================================
@@ -586,23 +588,19 @@ export async function getCurrentUser(): Promise<AuthUser | null> {  if (currentS
     // table. With Entra auth, publicMetadata.organizationId may be an AD
     // security-group GUID (not an app org UUID), which would silently filter
     // out all org-scoped data. Clear it so the fallbacks can resolve correctly.
+    // This is a lookup of the claimed organization before any organization context can exist, so it runs as the system role; only
+    // the existence of the row decides anything. An id that is not even a uuid (org_xxx) names no organization and is not sent to the
+    // database, whose invalid-input fault would otherwise have to be swallowed here; any other failure is an authentication fault.
     if (resolvedOrganizationId) {
-      try {
-        const [validOrg] = await db
-          .select({ id: organizations.id })
-          .from(organizations)
-          .where(eq(organizations.id, resolvedOrganizationId))
-          .limit(1);
-        if (!validOrg) {
-          logger.warn('Metadata organizationId does not match any DB org — clearing for fallback', {
-            resolvedOrganizationId,
-            userId,
-          });
-          resolvedOrganizationId = null;
-        }
-      } catch {
-        // If the ID isn't even a valid UUID (e.g. org_xxx format),
-        // the query will throw — clear it so fallbacks can work.
+      const claimedOrganizationId = resolvedOrganizationId;
+      const [validOrg] = UUID_PATTERN.test(claimedOrganizationId)
+        ? await withSystemContext((tx) => tx.select({ id: organizations.id }).from(organizations).where(eq(organizations.id, claimedOrganizationId)).limit(1))
+        : [];
+      if (!validOrg) {
+        logger.warn('Metadata organizationId does not match any DB org — clearing for fallback', {
+          resolvedOrganizationId,
+          userId,
+        });
         resolvedOrganizationId = null;
       }
     }
@@ -612,47 +610,46 @@ export async function getCurrentUser(): Promise<AuthUser | null> {  if (currentS
     // session has no active org and metadata didn't provide one, honour the
     // cookie so that org-scoped API routes work correctly.
     if (!resolvedOrganizationId) {
+      let cookieOrgId: string | null = null;
       try {
         const cookieStore = await cookies();
-        const cookieOrgId =
+        cookieOrgId =
           cookieStore.get('selected_organization_id')?.value ||
           cookieStore.get('selected_org_id')?.value ||
           null;
-        // Basic UUID format validation to prevent injection
-        if (cookieOrgId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cookieOrgId)) {
-          // Verify the org exists in the DB
-          const [org] = await db
+      } catch {
+        // cookies() can throw in non-request contexts; there is then no cookie
+      }
+      // Basic UUID format validation to prevent injection
+      if (cookieOrgId && UUID_PATTERN.test(cookieOrgId)) {
+        const selectedOrganizationId = cookieOrgId;
+        // Verify the org exists in the DB, and that the person belongs to it: platform admins can access any org, others need an active membership.
+        // Both are lookups by explicit id before any organization context exists, so they run as the system role.
+        const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
+          .split(',').map(id => id.trim()).filter(Boolean);
+        const selected = await withSystemContext(async (tx) => {
+          const [org] = await tx
             .select({ id: organizations.id })
             .from(organizations)
-            .where(eq(organizations.id, cookieOrgId))
+            .where(eq(organizations.id, selectedOrganizationId))
             .limit(1);
-          if (org) {
-            // Platform admins can access any org; others need membership
-            const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
-              .split(',').map(id => id.trim()).filter(Boolean);
-            if (platformAdminIds.includes(userId)) {
-              resolvedOrganizationId = org.id;
-            } else {
-              const [membership] = await db
-                .select({ id: organizationMembers.id })
-                .from(organizationMembers)
-                .where(
-                  and(
-                    eq(organizationMembers.userId, userId),
-                    eq(organizationMembers.organizationId, cookieOrgId),
-                    eq(organizationMembers.status, 'active'),
-                    isNull(organizationMembers.deletedAt),
-                  ),
-                )
-                .limit(1);
-              if (membership) {
-                resolvedOrganizationId = org.id;
-              }
-            }
-          }
-        }
-      } catch {
-        // cookies() can throw in non-request contexts; ignore
+          if (!org) return null;
+          if (platformAdminIds.includes(userId)) return org.id;
+          const [membership] = await tx
+            .select({ id: organizationMembers.id })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.userId, userId),
+                eq(organizationMembers.organizationId, selectedOrganizationId),
+                eq(organizationMembers.status, 'active'),
+                isNull(organizationMembers.deletedAt),
+              ),
+            )
+            .limit(1);
+          return membership ? org.id : null;
+        });
+        if (selected) resolvedOrganizationId = selected;
       }
     }
 
@@ -761,19 +758,22 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
     const { getOrganizationIdForUser } = await import('./organization-utils');
     const resolvedOrgId = await getOrganizationIdForUser(userId);
 
-    if (resolvedOrgId) {
-      membership = await db.query.organizationMembers.findFirst({
-        where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId), eq(om.status, 'active'), isNull(om.deletedAt)),
-        columns: { id: true, organizationId: true, role: true },
-      });
-    }
-
-    if (!membership) {
-      membership = await db.query.organizationMembers.findFirst({
-        where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.status, 'active'), isNull(om.deletedAt)),
-        columns: { id: true, organizationId: true, role: true },
-      });
-    }
+    // The person's own memberships, looked up by their id before any organization context exists: the system role reads them.
+    membership = await withSystemContext(async (tx) => {
+      const own = resolvedOrgId
+        ? await tx.query.organizationMembers.findFirst({
+            where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId), eq(om.status, 'active'), isNull(om.deletedAt)),
+            columns: { id: true, organizationId: true, role: true },
+          })
+        : undefined;
+      return (
+        own ??
+        (await tx.query.organizationMembers.findFirst({
+          where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.status, 'active'), isNull(om.deletedAt)),
+          columns: { id: true, organizationId: true, role: true },
+        }))
+      );
+    });
   } catch (dbErr) {
     logger.warn('[Auth] getUserContext: DB membership lookup failed, trying fallbacks', { userId, error: String(dbErr) });
   }
@@ -968,11 +968,13 @@ export async function getUserContextForOrganization(
  */
 export async function getOrgType(organizationId: string): Promise<string | null> {
   try {
-    const [org] = await db
-      .select({ type: organizations.organizationType })
-      .from(organizations)
-      .where(eq(organizations.id, organizationId))
-      .limit(1);
+    const [org] = await withSystemContext((tx) =>
+      tx
+        .select({ type: organizations.organizationType })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1),
+    );
     return org?.type ?? null;
   } catch {
     return null;
@@ -1051,8 +1053,11 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
       organizationId,
       expectedActorUserId: userId,
     })).role);
+  // Membership tables are tenant-RLS org-scoped and this runs before any organization context exists: resolve under system authority
+  // (every lookup still binds the person's own userId, and organizationId where one is named).
+  return withSystemContext(async (tx) => {
   if (organizationId) {
-    const [authMembershipByOrg] = await db
+    const [authMembershipByOrg] = await tx
       .select({ role: authOrganizationUsers.role })
       .from(authOrganizationUsers)
       .where(
@@ -1068,7 +1073,7 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
       return authMembershipByOrg.role
     }
 
-    const membershipByOrg = await db.query.organizationMembers.findFirst({
+    const membershipByOrg = await tx.query.organizationMembers.findFirst({
       where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId), eq(om.status, 'active'), isNull(om.deletedAt)),
       columns: { role: true },
     });
@@ -1078,7 +1083,7 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
     }
   }
 
-  const [authMembership] = await db
+  const [authMembership] = await tx
     .select({ role: authOrganizationUsers.role })
     .from(authOrganizationUsers)
     .where(
@@ -1093,12 +1098,13 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
     return authMembership.role
   }
 
-  const membership = await db.query.organizationMembers.findFirst({
+  const membership = await tx.query.organizationMembers.findFirst({
     where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.status, 'active'), isNull(om.deletedAt)),
     columns: { role: true },
   });
 
   return membership?.role || 'member';
+  });
 }
 
 /**
@@ -1113,11 +1119,13 @@ export async function isSystemAdmin(userIdOverride?: string): Promise<boolean> {
       return false;
     }
 
-    const [user] = await db
-      .select({ isSystemAdmin: users.isSystemAdmin })
-      .from(users)
-      .where(eq(users.userId, userId))
-      .limit(1);
+    const [user] = await withSystemContext((tx) =>
+      tx
+        .select({ isSystemAdmin: users.isSystemAdmin })
+        .from(users)
+        .where(eq(users.userId, userId))
+        .limit(1),
+    );
 
     return user?.isSystemAdmin ?? false;
   } catch (error) {
@@ -1305,15 +1313,17 @@ export async function hasRoleInOrganization(
     const actorUserId = expectedUserId ?? (await getCurrentUser())?.id;
     if (!actorUserId) return false;
     
-    const membership = await db.query.organizationMembers.findFirst({
-      where: (om, { eq, and }) => and(
-        eq(om.userId, actorUserId),
-        eq(om.organizationId, organizationId),
-        eq(om.status, 'active'),
-        isNull(om.deletedAt)
-      ),
-      columns: { role: true },
-    });
+    const membership = await withSystemContext((tx) =>
+      tx.query.organizationMembers.findFirst({
+        where: (om, { eq, and }) => and(
+          eq(om.userId, actorUserId),
+          eq(om.organizationId, organizationId),
+          eq(om.status, 'active'),
+          isNull(om.deletedAt)
+        ),
+        columns: { role: true },
+      }),
+    );
     
     if (!membership) return false;
     
@@ -1351,15 +1361,17 @@ export async function getUserRole(
   // With the auth provider, org IDs are UUIDs directly — no legacy tenants table needed.
   // Delegate to hasRoleInOrganization which queries organizationMembers correctly.
   try {
-    const membership = await db.query.organizationMembers.findFirst({
-      where: (om, { eq, and }) => and(
-        eq(om.userId, userId),
-        eq(om.organizationId, organizationId),
-        eq(om.status, 'active'),
-        isNull(om.deletedAt)
-      ),
-      columns: { role: true },
-    });
+    const membership = await withSystemContext((tx) =>
+      tx.query.organizationMembers.findFirst({
+        where: (om, { eq, and }) => and(
+          eq(om.userId, userId),
+          eq(om.organizationId, organizationId),
+          eq(om.status, 'active'),
+          isNull(om.deletedAt)
+        ),
+        columns: { role: true },
+      }),
+    );
 
     return (membership?.role as UserRole) || null;
   } catch (error) {

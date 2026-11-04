@@ -215,8 +215,8 @@ export class ProvincialPrivacyService {
   /**
    * Check if user has valid consent for a specific action
    */
-  static async hasValidConsent(userId: string, province: Province, consentType: string): Promise<boolean> {
-    const consents = await db
+  static async hasValidConsent(userId: string, province: Province, consentType: string, tx: RLSTx = db): Promise<boolean> {
+    const consents = await tx
       .select()
       .from(provincialConsent)
       .where(

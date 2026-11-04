@@ -8,11 +8,12 @@ const read = (route: string) => readFileSync(join(API, ...route.split('/'), 'rou
 
 describe('F12 communications records', () => {
   // DEF-0B5-COMMS-CAMPAIGN-STATUS-AND-STATS-WRITABLE
-  it('a campaign body cannot set status, send times, statistics or the audience count', () => {
+  it('a campaign body cannot set status, send times, the send-now instruction, statistics or the audience count', () => {
+    const owned = ['status', 'sentAt', 'completedAt', 'scheduledAt', 'sendImmediately', 'stats', 'audienceCount'];
     const create = /writableFields: \[([^\]]*)\]/.exec(read('communications/campaigns'))?.[1] ?? '';
-    for (const field of ['status', 'sentAt', 'completedAt', 'stats', 'audienceCount']) expect(create, field).not.toContain(`'${field}'`);
+    for (const field of owned) expect(create, field).not.toContain(`'${field}'`);
     const patch = /blockedPatchFields: \[([^\]]*)\]/.exec(read('communications/campaigns/[id]'))?.[1] ?? '';
-    for (const field of ['status', 'sentAt', 'completedAt', 'stats', 'audienceCount']) expect(patch, field).toContain(`'${field}'`);
+    for (const field of owned) expect(patch, field).toContain(`'${field}'`);
     expect(read('communications/campaigns')).toContain("readRole: 'steward'");
   });
 

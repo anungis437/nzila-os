@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { caller, declared, resetCaller } from './support/with-api-stub';
+
+const DOC = '11111111-1111-4111-8111-111111111111';
 
 const m = vi.hoisted(() => ({
-  withOrganizationAuth: vi.fn(),
-  requireEntitlement: vi.fn(),
   db: { select: vi.fn(), insert: vi.fn(), update: vi.fn() },
   withRLSContext: vi.fn(),
   persistAtomicAudit: vi.fn(),
@@ -12,9 +13,11 @@ const m = vi.hoisted(() => ({
   getDocumentMutabilityBlockReason: vi.fn(),
 }));
 
-vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
+// The ambient handle must never be reached by this route: a statement on it would run outside the organization's transaction.
+const ambient = new Proxy({}, { get: () => { throw new Error('the ambient database handle was used'); } });
+vi.mock('@/db/db', () => ({ db: ambient }));
+vi.mock('@/db', () => ({ db: ambient }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.getEffectiveCaseAccess }));
@@ -50,24 +53,24 @@ describe('documents/repository/[id]/versions route', () => {
       .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(async () => [{ versionNo: opts.latest ?? 1 }]) })) })) })) }))
       .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => (opts.inUse ? [{ id: 'other' }] : [])) })) })) }));
   };
-  const post = async (body: Record<string, unknown> = { blobPath: 'blob-1' }) => {
+  const post = async (body: Record<string, unknown> = { blobPath: 'blob-1' }, id: string = DOC) => {
     const { POST } = await loadRoute();
     return POST(
-      new NextRequest('http://localhost/api/documents/repository/doc_1/versions', {
+      new NextRequest(`http://localhost/api/documents/repository/${id}/versions`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       }),
-      { organizationId: 'org_1', userId: 'u1' },
-      { id: 'doc_1' },
+      { params: { id } },
     );
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withOrganizationAuth.mockImplementation((handler: (request: Request, context: any, params?: { id: string }) => Promise<unknown>) =>
-      (request: Request, context: any, params?: { id: string }) => handler(request, context, params));
-    m.requireEntitlement.mockResolvedValue(undefined);
+    resetCaller();
+    caller.userId = 'u1';
+    caller.organizationId = 'org_1';
+    caller.role = 'member';
     m.withRLSContext.mockImplementation(async (_context: unknown, fn: (tx: unknown) => unknown) => fn(m.db));
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.getEffectiveCaseAccess.mockResolvedValue({ canModifyDocuments: false });
@@ -78,13 +81,26 @@ describe('documents/repository/[id]/versions route', () => {
     m.db.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
   });
 
+  it('declares no role floor (the document\'s uploader or the case kernel decides) and the case-suite entitlement', async () => {
+    await loadRoute();
+    expect(declared.at(-1)?.auth?.minRole).toBeUndefined();
+    expect(declared.at(-1)?.entitlement).toBe('grievance_case_suite');
+  });
+
+  it('answers a malformed document id as a bad request, before storage or the database', async () => {
+    const response = await post({ blobPath: 'blob-1' }, 'doc_1');
+    expect(response.status).toBe(400);
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
   it('lets the uploader append a new version, audited in the same transaction', async () => {
     const response = await post();
     const json = await response.json();
 
     expect(response.status).toBe(200);
     expect(json.data).toEqual({ id: 'ver_2' });
-    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'document.version_append', organizationId: 'org_1', userId: 'u1', resourceId: 'doc_1' }));
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'document.version_append', organizationId: 'org_1', userId: 'u1', resourceId: DOC }));
   });
 
   it('answers 404 and writes nothing for another member\'s unlinked document', async () => {

@@ -12,7 +12,7 @@
 
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
-import { db } from '@/db/db';
+import { inOrganization } from '../org-scope';
 import { exitInterviews } from '@/db/schema';
 import { buildTopicGraph } from '../topic-graph/topic-graph-builder';
 import {
@@ -41,19 +41,21 @@ import {
  * 6. Compute impact scores and sensitivity levels
  */
 export async function buildDependencyPropagationMap(orgId: string): Promise<PropagationMap> {
-  // Load published interviews
-  const interviews = await db
-    .select({
-      id: exitInterviews.id,
-      roleInUnion: exitInterviews.roleInUnion,
-      yearsOfService: exitInterviews.yearsOfService,
-      topics: exitInterviews.topics,
-      expertiseTags: exitInterviews.expertiseTags,
-      summary: exitInterviews.summary,
-    })
-    .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId))
-    .limit(INTERVIEW_READ_LIMIT);
+  // Load published interviews, as the runtime role in the organization's own tenant transaction
+  const interviews = await inOrganization(orgId, (tx) =>
+    tx
+      .select({
+        id: exitInterviews.id,
+        roleInUnion: exitInterviews.roleInUnion,
+        yearsOfService: exitInterviews.yearsOfService,
+        topics: exitInterviews.topics,
+        expertiseTags: exitInterviews.expertiseTags,
+        summary: exitInterviews.summary,
+      })
+      .from(exitInterviews)
+      .where(derivedAnalyticsCondition(orgId))
+      .limit(INTERVIEW_READ_LIMIT),
+  );
 
   if (interviews.length === 0) {
     return {

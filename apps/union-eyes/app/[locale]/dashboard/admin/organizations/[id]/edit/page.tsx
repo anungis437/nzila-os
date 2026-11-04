@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
+import { readApiError } from "@/lib/client/api-envelope";
 import type { OrganizationType, LabourSector, CAJurisdiction, OrganizationStatus } from "@/types/organization";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -74,16 +75,8 @@ const jurisdictions: { value: CAJurisdiction }[] = [
   { value: "CA-YT" }
 ];
 
-// Organization types
-const orgTypes: { value: OrganizationType }[] = [
-  { value: "platform" },
-  { value: "congress" },
-  { value: "federation" },
-  { value: "union" },
-  { value: "local" },
-  { value: "region" },
-  { value: "district" }
-];
+// Radix Select refuses an item whose value is the empty string, so "no parent" has a value of its own (an organization id is a UUID and cannot be it).
+const NO_PARENT = "none";
 
 // Organization statuses
 const statuses: { value: OrganizationStatus }[] = [
@@ -104,11 +97,10 @@ export default function EditOrganizationPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [availableOrganizations, setAvailableOrganizations] = useState<any[]>([]);
   
-  // Form state
+  // Form state: what the PATCH route accepts (name, slug, parent, status, description, settings). The type is the organization's own and is shown, not edited here.
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
-    type: "local" as OrganizationType,
     parentId: "",
     description: "",
     status: "active" as OrganizationStatus,
@@ -129,15 +121,17 @@ export default function EditOrganizationPage() {
     const loadOrganizations = async () => {
       try {
         const response = await fetch("/api/organizations?status=active&purpose=parent");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         // Filter out current organization and its descendants
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setAvailableOrganizations((data.data || []).filter((org: any) => org.id !== organizationId));
-      } catch (_error) {
-}
+      } catch {
+        setError(t('failedToLoadParentOrganizations'));
+      }
     };
     loadOrganizations();
-  }, [organizationId]);
+  }, [organizationId, t]);
 
   // Populate form when organization data loads
   useEffect(() => {
@@ -146,14 +140,13 @@ export default function EditOrganizationPage() {
       setFormData({
         name: org.name || "",
         slug: org.slug || "",
-        type: org.type || "local",
         parentId: org.parent_id || "",
         description: org.description || "",
         status: org.status || "active",
         sector: org.settings?.sector || "other",
         jurisdiction: org.settings?.jurisdiction || "federal",
-        charterNumber: org.settings?.charter_number || "",
-        affiliationDate: org.settings?.affiliation_date || ""
+        charterNumber: org.charter_number || org.settings?.charter_number || "",
+        affiliationDate: (org.affiliation_date ? String(org.affiliation_date).slice(0, 10) : "") || org.settings?.affiliation_date || ""
       });
     }
   }, [orgData]);
@@ -170,22 +163,20 @@ export default function EditOrganizationPage() {
         body: JSON.stringify({
           name: formData.name,
           slug: formData.slug,
-          type: formData.type,
           parent_id: formData.parentId || null,
           description: formData.description || null,
+          charter_number: formData.charterNumber || null,
+          affiliation_date: formData.affiliationDate || null,
           status: formData.status,
           settings: {
             sector: formData.sector,
-            jurisdiction: formData.jurisdiction,
-            charter_number: formData.charterNumber || null,
-            affiliation_date: formData.affiliationDate || null
+            jurisdiction: formData.jurisdiction
           }
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-          throw new Error(errorData.error || t('failedToUpdateOrganization'));
+        throw new Error(await readApiError(response, t('failedToUpdateOrganization')));
       }
 
       router.push(`/dashboard/admin/organizations/${organizationId}`);
@@ -238,6 +229,8 @@ export default function EditOrganizationPage() {
       </div>
     );
   }
+
+  const organizationType = orgData.data.organization_type as OrganizationType | undefined;
 
   return (
     <div className="container mx-auto p-6 max-w-3xl space-y-6">
@@ -305,24 +298,15 @@ export default function EditOrganizationPage() {
 
             <div className="space-y-2">
               <Label htmlFor="type">{t('organizationTypeLabel')}</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as OrganizationType }))}
-              >
-                <SelectTrigger id="type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {orgTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div>
-                        <div>{t(`orgType.${type.value}`)}</div>
-                        <div className="text-xs text-muted-foreground">{t(`orgTypeDescription.${type.value}`)}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="type"
+                value={organizationType ? t(`orgType.${organizationType}`) : ""}
+                readOnly
+                disabled
+              />
+              {organizationType && (
+                <p className="text-xs text-muted-foreground">{t(`orgTypeDescription.${organizationType}`)}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -369,17 +353,21 @@ export default function EditOrganizationPage() {
             <div className="space-y-2">
               <Label htmlFor="parent">{t('parentOrganizationLabel')}</Label>
               <Select
-                value={formData.parentId}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value }))}
+                value={formData.parentId || NO_PARENT}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value === NO_PARENT ? "" : value }))}
               >
                 <SelectTrigger id="parent">
                   <SelectValue placeholder={t('noParentOption')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('noParentOption')}</SelectItem>
+                  <SelectItem value={NO_PARENT}>{t('noParentOption')}</SelectItem>
+                  {formData.parentId && !availableOrganizations.some(org => org.id === formData.parentId) && (
+                    // The parent the organization has is always a choice: left out, the field would read "no parent" while a save keeps the real one.
+                    <SelectItem value={formData.parentId}>{t('currentParentUnlisted', { id: formData.parentId })}</SelectItem>
+                  )}
                   {availableOrganizations.map(org => (
                     <SelectItem key={org.id} value={org.id}>
-                      {org.name} ({t(`orgType.${org.type}`)})
+                      {org.name} ({t(`orgType.${org.organization_type}`)})
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -39,10 +39,14 @@ export const GET = withApi({
     const [rows, totalRows] = await Promise.all([
       tx.select({
         id: calendarEvents.id,
+        calendarId: calendarEvents.calendarId,
         title: calendarEvents.title,
         description: calendarEvents.description,
+        location: calendarEvents.location,
         startTime: calendarEvents.startTime,
         endTime: calendarEvents.endTime,
+        isAllDay: calendarEvents.isAllDay,
+        eventType: calendarEvents.eventType,
         status: calendarEvents.status,
         organizerId: calendarEvents.organizerId,
         visibility: calendarEvents.visibility,

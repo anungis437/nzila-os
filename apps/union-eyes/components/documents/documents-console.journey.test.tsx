@@ -66,9 +66,6 @@ vi.mock('@/components/documents/document-retention-policy', () => ({
 vi.mock('@/components/documents/document-version-control', () => ({
   DocumentVersionControl: () => null,
 }));
-vi.mock('@/components/documents/document-approval-workflow', () => ({
-  DocumentApprovalWorkflow: () => null,
-}));
 vi.mock('@/components/documents/document-template-manager', () => ({
   DocumentTemplateManager: () => null,
 }));

@@ -8,45 +8,37 @@
  * @module app/api/admin/dues/send-reminders
  */
 
-import { NextRequest } from 'next/server';
 import { manualTriggerReminders } from '@/lib/jobs/dues-reminder-scheduler';
-import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 import { logger } from '@/lib/logger';
-import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max execution
 
-export const POST = withApiAuth(async (_request: NextRequest) => {
+// The reminder job scans the pending dues of every organization: a platform operation, gated by platform authority. The job opens its own
+// system-role transactions (the scan, then one per reminder, so a failing reminder never aborts the others and each one commits on its own).
+// The wrapper opens no tenant transaction: that would be the wrong role, and the intent record the audit boundary writes first must commit
+// on its own.
+export const POST = withApi(
+  {
+    auth: { minRole: 'platform_lead' },
+    openapi: { tags: ['Admin', 'Dues'], summary: 'Manually trigger the dues reminder job' },
+  },
+  async ({ userId, organizationId }) => {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return standardErrorResponse(
-        ErrorCode.AUTH_REQUIRED,
-        'Authentication required'
-      );
-    }
-
-    const canAccess = await hasMinRole('platform_lead');
-    if (!canAccess) {
-      return standardErrorResponse(
-        ErrorCode.FORBIDDEN,
-        'Platform lead role required'
-      );
-    }
-
     logger.info('Manually triggering dues reminders', {
-      userId: user.id,
+      userId,
     });
 
     // Execute dues reminder job
     const result = await performAuditedOperation(
-      { organizationId: user.organizationId, userId: user.id, action: 'platform.dues.send_reminders', resourceType: 'platform_job' },
+      { organizationId, userId, action: 'platform.dues.send_reminders', resourceType: 'platform_job' },
       () => manualTriggerReminders(),
     );
 
@@ -55,7 +47,7 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
       remindersSent: result.remindersSent,
       remindersFailed: result.remindersFailed,
       breakdown: result.breakdown,
-      userId: user.id,
+      userId,
     });
 
     return standardSuccessResponse({
@@ -73,4 +65,5 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
       'Failed to trigger dues reminders'
     );
   }
-});
+  },
+);

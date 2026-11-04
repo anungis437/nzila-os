@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
-  withSystemContext: vi.fn(),
+  withRLSContext: vi.fn(),
   ingestGrievanceBatch: vi.fn(),
   verifyImportBatch: vi.fn(),
   performAuditedOperation: vi.fn(),
@@ -17,7 +17,7 @@ vi.mock('@/lib/api/framework', () => ({
   },
   z: require('zod'),
 }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAuditedOperation: m.performAuditedOperation,
   OperationAuditError: class OperationAuditError extends Error {},
@@ -42,7 +42,7 @@ describe('admin/ingest route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (_context: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({}));
     m.ingestGrievanceBatch.mockResolvedValue({ batchId: 'batch_1', imported: 1, failed: 0 });
     m.verifyImportBatch.mockResolvedValue({ verified: true, issues: [] });
     m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
@@ -76,6 +76,11 @@ describe('admin/ingest route', () => {
     expect(result).toMatchObject({ batchId: 'batch_1', verification: { verified: true } });
     expect(m.ingestGrievanceBatch).toHaveBeenCalled();
     expect(m.verifyImportBatch).toHaveBeenCalledWith('batch_1');
+    // The import and its verification each run as the runtime role in the caller's organization's tenant transaction.
+    expect(m.withRLSContext).toHaveBeenCalledTimes(2);
+    for (const call of m.withRLSContext.mock.calls) {
+      expect(call[0]).toEqual({ organizationId: '11111111-1111-1111-1111-111111111111' });
+    }
     expect(m.performAuditedOperation).toHaveBeenCalledWith(
       expect.objectContaining({
         organizationId: '11111111-1111-1111-1111-111111111111',
@@ -111,5 +116,8 @@ describe('admin/ingest route', () => {
 
     expect(result).toMatchObject({ batchId: 'dry-run', verification: null });
     expect(m.verifyImportBatch).not.toHaveBeenCalled();
+    // The dry run reads the organization's data as the runtime role too.
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: '11111111-1111-1111-1111-111111111111' });
   });
 });

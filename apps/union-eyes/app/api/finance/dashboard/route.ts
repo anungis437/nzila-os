@@ -5,8 +5,8 @@
  * allocation overview, and dues alignment anomalies.
  */
 
-import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { requireEntitlement, EntitlementError } from '@/services/platform-economics/entitlement-guard';
+import { z } from 'zod';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -22,50 +22,57 @@ import { generateDuesAlignmentReport } from '@/services/platform-economics/dues-
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
-  const { organizationId, userId } = context;
-  if (!organizationId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-
-  try {
-    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
-    const url = new URL(request.url);
-    const periodId = url.searchParams.get('periodId') ?? undefined;
-
-    const [billingAccount, ledgerSummary, recentInvoices, recentChargebacks] =
-      await Promise.all([
-        getBillingAccount(organizationId),
-        periodId
-          ? getLedgerSummary({ organizationId, billingPeriodId: periodId })
-          : Promise.resolve(null),
-        getInvoices(organizationId, 5),
-        getChargebacks({ organizationId, billingPeriodId: periodId }),
-      ]);
-
-    const duesReport = await generateDuesAlignmentReport(
-      organizationId,
-      periodId ?? 'current',
-    );
-
-    return standardSuccessResponse({
-      domain: 'NZILA_PLATFORM_BILLING',
-      notUnionFinancialRecords: true,
-      billingAccount,
-      ledgerSummary,
-      recentInvoices,
-      recentChargebacks: recentChargebacks.slice(0, 10),
-      duesAlignment: {
-        anomalyCount: duesReport.anomalies.length,
-        anomalies: duesReport.anomalies,
-        memberCount: duesReport.orgSnapshot.totalMembers,
-        arrearsCount: duesReport.orgSnapshot.arrearsCount,
-      },
-    });
-  } catch (error) {
-    if (error instanceof EntitlementError) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, error.message);
-    }
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to load dashboard', error);
-  }
+// A malformed period id is a client error, never a database fault handed back as a 500.
+const querySchema = z.object({
+  periodId: z.guid().optional(),
 });
+
+// Everything the dashboard reads is the caller organization's own: it runs in that organization's tenant transaction.
+export const GET = withApi(
+  {
+    auth: { minRole: 'secretary_treasurer' },
+    entitlement: 'financial_intelligence_suite',
+    rlsOrgContext: true,
+    query: querySchema,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'Finance dashboard summary of the current organization' },
+  },
+  async ({ organizationId, query }) => {
+    try {
+      const orgId = organizationId!;
+      const periodId = query.periodId;
+
+      const [billingAccount, ledgerSummary, recentInvoices, recentChargebacks] =
+        await Promise.all([
+          getBillingAccount(orgId),
+          periodId
+            ? getLedgerSummary({ organizationId: orgId, billingPeriodId: periodId })
+            : Promise.resolve(null),
+          getInvoices(orgId, 5),
+          getChargebacks({ organizationId: orgId, billingPeriodId: periodId }),
+        ]);
+
+      const duesReport = await generateDuesAlignmentReport(
+        orgId,
+        periodId ?? 'current',
+      );
+
+      return standardSuccessResponse({
+        domain: 'NZILA_PLATFORM_BILLING',
+        notUnionFinancialRecords: true,
+        billingAccount,
+        ledgerSummary,
+        recentInvoices,
+        recentChargebacks: recentChargebacks.slice(0, 10),
+        duesAlignment: {
+          anomalyCount: duesReport.anomalies.length,
+          anomalies: duesReport.anomalies,
+          memberCount: duesReport.orgSnapshot.totalMembers,
+          arrearsCount: duesReport.orgSnapshot.arrearsCount,
+        },
+      });
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to load dashboard', error);
+    }
+  },
+);

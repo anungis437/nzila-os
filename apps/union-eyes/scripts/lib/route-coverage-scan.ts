@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, relative, sep } from 'node:path'
+import ts from 'typescript'
 import { invokesTarget } from './call-reach'
 
 /**
@@ -17,6 +18,9 @@ export type RouteData = 'TENANT_TX' | 'SYSTEM_CONTEXT' | 'CRUD_TENANT_TX' | 'AMB
 export interface RouteEntry {
   route: string
   methods: string[]
+  /** Only when the file serves live methods beside retired ones: the methods whose handler answers 501. A file whose every method does is guard RETIRED instead. */
+  retiredMethods?: string[]
+  /** True when a live method changes state; a retired method writes nothing, so it does not make a route mutating. */
   mutating: boolean
   guard: RouteGuard
   kernel: boolean
@@ -52,11 +56,59 @@ function methodsOf(source: string): string[] {
   return [...found].sort()
 }
 
+/** A handler that only reports the capability as not built: the shared helpers that answer 501, and the 501 error itself. */
+const RETIRED_CALL = /\b(?:retiredFinancialRoute|retiredHandler|recordsASendOnly|capabilityNotImplementedResponse|emergencyNotImplemented|notImplemented)\(/
+const HANDLER_WRITES = /\.(insert|update|delete)\(|persistAtomicAudit/
+// A handler that reads data answers with it; a 501 branch inside one (an unsupported option) does not make the handler retired.
+const HANDLER_READS = /\bdb\b|\.select\(|\.selectDistinct\(|\.query\.|\bexecute\(|withRLSContext|withSystemContext|withSystemRLSContext|withPlatformAdminRLSContext|\bfetch\(/
+
+/**
+ * The exported methods whose handler only answers 501: it makes a retired-capability call and neither writes nor reads. A handler is its own declaration
+ * and, transitively, the module-level declarations it names (`export const POST = handler`). One route file can serve a live GET beside a retired POST; judging the
+ * file as a whole called it retired, which hid its live methods from the audit and kernel counts and made a caller of the live method look like a caller of a route
+ * that cannot answer. A method the file does not declare itself (a destructured factory, a re-export) is live here.
+ */
+export function retiredMethodsOf(source: string): string[] {
+  const file = ts.createSourceFile('route.ts', source, ts.ScriptTarget.Latest, true)
+  const declared = new Map<string, string>()
+  const exported = new Map<string, string>()
+  for (const statement of file.statements) {
+    const isExported = ts.canHaveModifiers(statement) && !!ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+    if (ts.isFunctionDeclaration(statement) && statement.name) {
+      declared.set(statement.name.text, statement.getText(file))
+      if (isExported) exported.set(statement.name.text, statement.name.text)
+    } else if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (!ts.isIdentifier(declaration.name)) continue
+        declared.set(declaration.name.text, declaration.getText(file))
+        if (isExported) exported.set(declaration.name.text, declaration.name.text)
+      }
+    } else if (ts.isExportDeclaration(statement) && !statement.moduleSpecifier && statement.exportClause && ts.isNamedExports(statement.exportClause)) {
+      for (const element of statement.exportClause.elements) exported.set(element.name.text, (element.propertyName ?? element.name).text)
+    }
+  }
+  const handlerText = (name: string): string => {
+    const seen = new Set<string>()
+    const texts: string[] = []
+    for (const queue = [name]; queue.length; ) {
+      const current = queue.pop()!
+      const text = declared.get(current)
+      if (text === undefined || seen.has(current)) continue
+      seen.add(current)
+      texts.push(text)
+      for (const identifier of text.matchAll(/[A-Za-z_$][\w$]*/g)) if (declared.has(identifier[0]) && !seen.has(identifier[0])) queue.push(identifier[0])
+    }
+    return texts.join('\n')
+  }
+  return METHODS.filter((method) => {
+    const local = exported.get(method)
+    if (!local) return false
+    const text = handlerText(local)
+    return RETIRED_CALL.test(text) && !HANDLER_WRITES.test(text) && !HANDLER_READS.test(text)
+  })
+}
+
 function guardOf(source: string): RouteGuard {
-  if (/retired-financial-route/.test(source)) return 'RETIRED'
-  if (/retiredHandler\(/.test(source)) return 'RETIRED'
-  if (/capabilityNotImplementedResponse\(/.test(source) && !/\.(insert|update|delete)\(|persistAtomicAudit/.test(source)) return 'RETIRED'
-  if (/notImplemented\(/.test(source) && !/\.(insert|update|delete)\(|persistAtomicAudit/.test(source)) return 'RETIRED'
   if (/@nzila\/platform-auth\/[\w/-]*handlers/.test(source)) return 'PLATFORM_AUTH_HANDLER'
   if (/crudRoutes\(/.test(source)) return 'CRUD_FACTORY'
   // The identity provider's bearer token is the credential (lib/scim/scim-token.ts); the route acts for the token's organization.
@@ -159,12 +211,11 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'location/track/route.ts': { why: 'Per-ping location telemetry of a consenting member; consent, geofence and disable changes are audited.', control: /withApiAuth/ },
   'cron/external-data-sync/route.ts': { why: 'Platform-wide reference data refresh; no acting organization.', control: /cron:\s*true/ },
   'cron/location-retention/route.ts': { why: 'Platform-wide 24-hour retention sweep over user-scoped location rows; no acting organization. Its evidence row (location_deletion_log) commits in the same system transaction, so a failed evidence write keeps the data for the next run.', control: /cron:\s*true/ },
-  'whop/create-checkout/route.ts': { why: 'Creates a payment-provider checkout session for the signed-in user, who may hold no organization yet; nothing is stored here.', control: /requireUser/ },
   'organizations/switch/route.ts': { why: 'Session rotation is owned and audited by platform-auth; the legacy branch only validates membership and stores nothing.', control: /auth\(\)/ },
   'cron/sla-watchdog/route.ts': { why: 'Platform-wide scan with no acting organization; it writes one deduplicated inbox alert per claim, kind and deadline inside each organization\'s own context (an audit row per alert would double every alert), plus metrics.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
 }
 
-const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit|performAtomicAuditedOperation/
+const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit|performAtomic(?:System)?AuditedOperation/
 
 /**
  * Platform-auth services whose audit record is part of the operation (a failed write fails and rolls back the change).
@@ -293,11 +344,15 @@ export function scanRoutes(root: string): RouteEntry[] {
     .map((file) => {
       const source = readFileSync(file, 'utf8')
       const methods = methodsOf(source)
-      const guard = guardOf(source)
-      const mutating = methods.some((m) => MUTATING.has(m)) && !(guard === 'CRUD_FACTORY' && crudWritesRefused(source, governance, tableNames))
+      const retiredMethods = retiredMethodsOf(source).filter((method) => methods.includes(method))
+      const wholly = methods.length > 0 && retiredMethods.length === methods.length
+      const guard = wholly ? 'RETIRED' : guardOf(source)
+      // A retired route is mutating by its HTTP methods, as before; a route that serves live methods beside retired ones is mutating by the live ones.
+      const mutating = (wholly ? methods : methods.filter((m) => !retiredMethods.includes(m))).some((m) => MUTATING.has(m)) && !(guard === 'CRUD_FACTORY' && crudWritesRefused(source, governance, tableNames))
       return {
         route: relative(api, file).split(sep).join('/'),
         methods,
+        ...(retiredMethods.length > 0 && !wholly ? { retiredMethods } : {}),
         mutating,
         guard,
         kernel: /lib\/authority|case-access-service|lib\/documents\/(?:download-issuance|ocr-authority|intake-lifecycle)|authority\/store\/route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/.test(source),
@@ -319,6 +374,15 @@ export function scanRoutes(root: string): RouteEntry[] {
     const spec = source.match(/(?:\bas\s+Delegate\w+[^}]*\}|export\s*(?:\*|\{[^}]*\}))\s*from\s*['"](\.{1,2}\/[^'"]+)['"]/)?.[1]
     const target = spec ? byFile.get(relative(api, join(api, e.route, '..', spec + '.ts')).split(sep).join('/')) : undefined
     if (target && target.guard === 'RETIRED') e.guard = 'RETIRED'
+    // Which of the delegating file's methods the target retires: the delegate answers 501 for those and serves the rest.
+    const retired = (target?.retiredMethods ?? []).filter((method) => e.methods.includes(method))
+    if (retired.length > 0) {
+      if (retired.length === e.methods.length) e.guard = 'RETIRED'
+      else {
+        e.retiredMethods = retired
+        e.mutating = e.methods.some((method) => MUTATING.has(method) && !retired.includes(method))
+      }
+    }
     if (target) { e.kernel = target.kernel; e.subordinate = target.subordinate; e.data = target.data; e.audit = target.audit }
   }
   return entries

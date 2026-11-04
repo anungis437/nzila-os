@@ -20,11 +20,12 @@ export const dynamic = 'force-dynamic';
 import * as React from 'react';
 import { Metadata } from 'next';
 import { getTrustMetrics } from '@/lib/trust/system-metrics';
+import { formatTableList } from '@/lib/trust/format';
+import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
 import { getTranslations } from 'next-intl/server';
 import { SystemStatusGrid } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout, CalloutPresets } from '@/components/marketing/human-centered-callout';
-import { Shield, Lock, GitBranch, Scale, FileText, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Shield, Lock, GitBranch, Scale, FileText } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Trust & Sovereignty | UnionEyes',
@@ -33,7 +34,9 @@ export const metadata: Metadata = {
 };
 
 export default async function TrustPage() {
-  const metrics = await getTrustMetrics();
+  // The audit figures are the organization's own, read in its context.
+  const { organizationId } = await requireOrganizationScope();
+  const metrics = await getTrustMetrics(organizationId);
   const t = await getTranslations('trust');
 
   return (
@@ -41,19 +44,13 @@ export default async function TrustPage() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                {t("title")}
-              </h1>
-              <p className="text-slate-600">
-                {t("subtitle")}
-              </p>
-            </div>
-            <Button variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              {t("exportReport")}
-            </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              {t("title")}
+            </h1>
+            <p className="text-slate-600">
+              {t("subtitle")}
+            </p>
           </div>
           <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
             <span>{t("lastUpdated")}:</span>
@@ -128,7 +125,8 @@ export default async function TrustPage() {
                   },
                   {
                     label: t("violationsBlocked"),
-                    value: metrics.immutability.violationAttempts,
+                    // Nothing records a refused modification: the figure is not measured, so none is shown.
+                    value: metrics.immutability.violationAttempts ?? '—',
                   },
                   {
                     label: t("lastAudit"),
@@ -247,7 +245,7 @@ export default async function TrustPage() {
                 <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
                   <li>{t("updateTriggers")}</li>
                   <li>{t("deleteTriggers")}</li>
-                  <li>{t("appliedTo")}: {metrics.immutability.tablesProtected.join(', ')}</li>
+                  <li>{t("appliedTo")}: {formatTableList(metrics.immutability.tablesProtected)}</li>
                   <li>{t("verified")}: {metrics.immutability.lastAudit.toLocaleDateString()}</li>
                 </ul>
               </Section>
@@ -260,7 +258,7 @@ export default async function TrustPage() {
                 <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
                   <li>{t("activePolicies")}: {metrics.rlsEnforcement.policiesActive}</li>
                   <li>{t("orgIsolation")}: {metrics.rlsEnforcement.orgIsolation}</li>
-                  <li>{t("tablesProtected")}: {metrics.rlsEnforcement.tablesProtected.join(', ')}</li>
+                  <li>{t("tablesProtected")}: {formatTableList(metrics.rlsEnforcement.tablesProtected)}</li>
                 </ul>
               </Section>
 
@@ -307,11 +305,7 @@ export default async function TrustPage() {
             variant="trust"
             title={t("securityQuestion")}
             description={t("securityDescriptionContact")}
-          >
-            <Button variant="outline" className="mt-2">
-              {t("contactSecurityTeam")}
-            </Button>
-          </HumanCenteredCallout>
+          />
         </div>
       </main>
     </div>

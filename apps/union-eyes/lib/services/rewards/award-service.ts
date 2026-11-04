@@ -7,12 +7,27 @@ import { db } from '@/db';
 import {
   recognitionAwards,
   recognitionAwardTypes,
+  recognitionPrograms,
   type RecognitionAward,
 } from '@/db/schema';
-import { eq, and, inArray, desc } from 'drizzle-orm';
+import { eq, and, count, inArray, desc, sql } from 'drizzle-orm';
 import { applyLedgerEntry } from './wallet-service';
 import { applyBudgetUsage, applyBudgetUsageChecked } from './budget-service';
 import { auditRewards, rewardsActor } from './audit';
+import { UserFacingError } from '@/lib/errors/user-facing-error';
+
+/** How many nominations a member can have waiting for review at once: the administrators' queue is not theirs to fill. */
+export const MAX_PENDING_NOMINATIONS_PER_MEMBER = 10;
+
+export interface NominatePeerOptions {
+  orgId: string;
+  awardTypeId: string;
+  recipientUserId: string;
+  nominatorUserId: string;
+  reason: string;
+  /** Run inside an existing transaction (savepoint) instead of opening a new one on another connection. */
+  executor?: typeof db;
+}
 
 export interface CreateAwardOptions {
   orgId: string;
@@ -67,7 +82,7 @@ export async function createAwardRequest(
   });
 
   if (!awardType) {
-    throw new Error('Award type not found');
+    throw new UserFacingError('Award type not found');
   }
 
   // Determine initial status
@@ -104,6 +119,89 @@ export async function createAwardRequest(
 }
 
 /**
+ * A member nominates a colleague for a peer award. Always a request for review: the award is created pending whatever the type says about
+ * approval, because a nomination is somebody's opinion, not an administrator's decision; credits move only when an administrator approves and
+ * issues it. The nominator is the issuer on the row, the award type must be a peer one of an active program of the organization, and a
+ * nominator cannot nominate themselves, nominate the same colleague for the same award twice while the first waits, or keep more than
+ * MAX_PENDING_NOMINATIONS_PER_MEMBER waiting.
+ */
+export async function createPeerNomination(options: NominatePeerOptions): Promise<RecognitionAward> {
+  const { orgId, awardTypeId, recipientUserId, nominatorUserId, reason } = options;
+  const runner = options.executor ?? db;
+
+  if (recipientUserId === nominatorUserId) {
+    throw new UserFacingError('You cannot nominate yourself');
+  }
+
+  const awardType = await runner.query.recognitionAwardTypes.findFirst({
+    where: and(eq(recognitionAwardTypes.id, awardTypeId), eq(recognitionAwardTypes.orgId, orgId)),
+  });
+  // A type that is not a peer one is as good as absent: a member is not told which other award types exist.
+  if (!awardType || awardType.kind !== 'peer') {
+    throw new UserFacingError('Award type not found');
+  }
+
+  const program = await runner.query.recognitionPrograms.findFirst({
+    columns: { id: true },
+    where: and(
+      eq(recognitionPrograms.id, awardType.programId),
+      eq(recognitionPrograms.orgId, orgId),
+      eq(recognitionPrograms.status, 'active'),
+    ),
+  });
+  if (!program) {
+    throw new UserFacingError('This recognition program is not accepting nominations');
+  }
+
+  return await runner.transaction(async (tx) => {
+    const waiting = and(
+      eq(recognitionAwards.orgId, orgId),
+      eq(recognitionAwards.issuerUserId, nominatorUserId),
+      eq(recognitionAwards.status, 'pending'),
+    );
+
+    const [duplicate] = await tx
+      .select({ id: recognitionAwards.id })
+      .from(recognitionAwards)
+      .where(and(waiting, eq(recognitionAwards.recipientUserId, recipientUserId), eq(recognitionAwards.awardTypeId, awardTypeId)))
+      .limit(1);
+    if (duplicate) {
+      throw new UserFacingError('You have already nominated this colleague for this award; it is waiting for review');
+    }
+
+    const [{ pending }] = await tx.select({ pending: count() }).from(recognitionAwards).where(waiting);
+    if (pending >= MAX_PENDING_NOMINATIONS_PER_MEMBER) {
+      throw new UserFacingError('You have too many nominations waiting for review; wait for a decision on one before nominating again');
+    }
+
+    const [award] = await tx
+      .insert(recognitionAwards)
+      .values({
+        orgId,
+        programId: awardType.programId,
+        awardTypeId,
+        recipientUserId,
+        issuerUserId: nominatorUserId,
+        reason,
+        status: 'pending',
+        metadataJson: { nomination: true },
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: nominatorUserId,
+      action: 'rewards.award.nominate',
+      resourceType: 'recognition_awards',
+      resourceId: award.id,
+      details: { awardTypeId, recipientUserId, status: 'pending' },
+    });
+    return award;
+  });
+}
+
+/**
  * Approve a pending award
  */
 export async function approveAward(
@@ -120,11 +218,11 @@ export async function approveAward(
   });
 
   if (!award) {
-    throw new Error('Award not found');
+    throw new UserFacingError('Award not found');
   }
 
   if (award.status !== 'pending') {
-    throw new Error(`Cannot approve award with status: ${award.status}`);
+    throw new UserFacingError(`Cannot approve award with status: ${award.status}`);
   }
 
   return await db.transaction(async (tx) => {
@@ -144,7 +242,7 @@ export async function approveAward(
         )
       )
       .returning();
-    if (!updated) throw new Error('Cannot approve award: it was changed concurrently');
+    if (!updated) throw new UserFacingError('Cannot approve award: it was changed concurrently');
 
     await auditRewards(tx, {
       organizationId: orgId,
@@ -183,11 +281,11 @@ export async function issueAward(
     });
 
     if (!award || !award.awardType) {
-      throw new Error('Award or award type not found');
+      throw new UserFacingError('Award or award type not found');
     }
 
     if (award.status !== 'approved') {
-      throw new Error(`Cannot issue award with status: ${award.status}`);
+      throw new UserFacingError(`Cannot issue award with status: ${award.status}`);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -215,7 +313,7 @@ export async function issueAward(
     );
 
     if (!budgetApplied) {
-      throw new Error('Insufficient budget to issue award');
+      throw new UserFacingError('Insufficient budget to issue award');
     }
 
     // Update award status
@@ -234,7 +332,7 @@ export async function issueAward(
         )
       )
       .returning();
-    if (!updatedAward) throw new Error('Cannot issue award: it was changed concurrently');
+    if (!updatedAward) throw new UserFacingError('Cannot issue award: it was changed concurrently');
 
     await auditRewards(tx, {
       organizationId: orgId,
@@ -277,11 +375,11 @@ export async function revokeAward(
     });
 
     if (!award) {
-      throw new Error('Award not found');
+      throw new UserFacingError('Award not found');
     }
 
     if (award.status !== 'issued') {
-      throw new Error(`Cannot revoke award with status: ${award.status}`);
+      throw new UserFacingError(`Cannot revoke award with status: ${award.status}`);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -323,7 +421,7 @@ export async function revokeAward(
         )
       )
       .returning();
-    if (!updatedAward) throw new Error('Cannot revoke award: it was changed concurrently');
+    if (!updatedAward) throw new UserFacingError('Cannot revoke award: it was changed concurrently');
 
     await auditRewards(tx, {
       organizationId: orgId,
@@ -356,11 +454,12 @@ export async function rejectAward(
       .set({
         status: 'rejected',
         updatedAt: new Date(),
-        metadataJson: {
+        // Added to what the row already records (a nomination marks itself), not instead of it.
+        metadataJson: sql`coalesce(${recognitionAwards.metadataJson}, '{}'::jsonb) || ${JSON.stringify({
           rejectedBy: rejectedByUserId,
           rejectedReason: reason,
           rejectedAt: new Date().toISOString(),
-        },
+        })}::jsonb`,
       })
       .where(
         and(
@@ -372,7 +471,7 @@ export async function rejectAward(
       .returning();
 
     if (!updated) {
-      throw new Error('Award not found or cannot be rejected');
+      throw new UserFacingError('Award not found or cannot be rejected');
     }
 
     await auditRewards(tx, {
@@ -435,7 +534,8 @@ export async function listAwardsByStatus(
 }
 
 /**
- * List awards for a specific user (recipient)
+ * List awards for a specific user (recipient). Only awards that were decided for the person: a nomination that is still waiting for review,
+ * was rejected or is only approved is between its nominator and the administrators, and the person it names is not told about it.
  */
 export async function listUserAwards(
   orgId: string,
@@ -446,7 +546,8 @@ export async function listUserAwards(
   const awards = await db.query.recognitionAwards.findMany({
     where: and(
       eq(recognitionAwards.orgId, orgId),
-      eq(recognitionAwards.recipientUserId, userId)
+      eq(recognitionAwards.recipientUserId, userId),
+      inArray(recognitionAwards.status, ['issued', 'revoked'])
     ),
     with: {
       awardType: true,

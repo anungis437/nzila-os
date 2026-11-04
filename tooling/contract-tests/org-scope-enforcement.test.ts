@@ -64,7 +64,6 @@ const EXEMPT_ROUTES = new Set([
   'test-auth',      // Test endpoint (dev-only)
   'ready',          // Readiness probe (k8s/infra)
   'version',        // Build version metadata (public)
-  'whop/unauthenticated', // Payment-first checkout (no auth by design)
   'proof-center/public-key', // System-wide public key (not org-specific)
   'contact',        // Public contact/demo-request form (marketing)
   'courtlens/public-intake', // ABR CourtLens — pseudonymous public intake (validated + rate-limited)

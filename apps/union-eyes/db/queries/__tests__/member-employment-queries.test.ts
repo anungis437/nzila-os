@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const ORG_A = '11111111-1111-4111-8111-111111111111'
 const ORG_B = '22222222-2222-4222-8222-222222222222'
-const MEMBER = '33333333-3333-4333-8333-333333333333'
+const UNIT = '55555555-5555-4555-8555-555555555555'
 const scope = {
   ok: true as const,
   userId: 'user-admin-a',
@@ -10,25 +10,24 @@ const scope = {
   capability: 'administer' as const,
   discloseCompensation: false,
 }
-const financeScope = {
-  ...scope,
-  capability: 'finance' as const,
-  discloseCompensation: true,
-}
 
 const mocks = vi.hoisted(() => ({
   queue: [] as unknown[],
   orgs: [] as Array<string | undefined>,
   outcomes: [] as string[],
   sets: [] as unknown[],
-  deletes: 0,
+  inserted: [] as unknown[],
   loggerError: vi.fn(),
 }))
 
 function makeChain() {
   const chain: Record<string, unknown> = {}
-  for (const method of ['from', 'where', 'orderBy', 'limit', 'offset', 'values', 'returning', '$dynamic']) {
+  for (const method of ['from', 'where', 'orderBy', 'limit', 'offset', 'returning', '$dynamic']) {
     chain[method] = () => chain
+  }
+  chain.values = (value: unknown) => {
+    mocks.inserted.push(value)
+    return chain
   }
   chain.set = (value: unknown) => {
     mocks.sets.push(value)
@@ -47,10 +46,7 @@ function makeTx() {
     select: () => makeChain(),
     insert: () => makeChain(),
     update: () => makeChain(),
-    delete: () => {
-      mocks.deletes += 1
-      return makeChain()
-    },
+    delete: () => makeChain(),
   }
 }
 
@@ -96,301 +92,117 @@ beforeEach(() => {
   mocks.orgs = []
   mocks.outcomes = []
   mocks.sets = []
-  mocks.deletes = 0
+  mocks.inserted = []
   vi.clearAllMocks()
 })
 
-describe('member employment query boundary', () => {
-  it('creates inside the authorized organization and commits the audit with the row', async () => {
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([{ id: 'e1', memberId: MEMBER, organizationId: ORG_A }])
-    push([])
-    const row = await q.createMemberEmployment(financeScope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-      jobTitle: 'Welder',
-      hourlyRate: '99.50',
-    } as never)
-    expect(row).toMatchObject({ id: 'e1' })
-    expect(mocks.orgs).toEqual([ORG_A])
-    expect(mocks.outcomes).toEqual(['commit'])
-    expect(JSON.stringify(mocks.loggerError.mock.calls)).not.toContain('99.50')
+describe('job classification query boundary', () => {
+  it('exports only the queries the mounted screen uses', () => {
+    expect(Object.keys(q).sort()).toEqual([
+      'EmploymentBoundaryError',
+      'createJobClassification',
+      'getJobClassificationsByOrganization',
+      'updateJobClassification',
+    ])
   })
 
-  it('rolls back when the legacy audit insert fails', async () => {
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([{ id: 'e1', memberId: MEMBER }])
+  it('creates inside the authorized organization and commits the audit with the row', async () => {
+    push([{ id: 'jc1', organizationId: ORG_A, jobCode: 'ELEC-J01' }])
+    push([])
+    const row = await q.createJobClassification(scope, { organizationId: ORG_A, jobTitle: 'Electrician', jobCode: 'ELEC-J01' } as never)
+
+    expect(row).toMatchObject({ id: 'jc1' })
+    expect(mocks.orgs).toEqual([ORG_A])
+    expect(mocks.outcomes).toEqual(['commit'])
+    expect(mocks.inserted[0]).toMatchObject({ organizationId: ORG_A, createdBy: 'user-admin-a', jobCode: 'ELEC-J01' })
+  })
+
+  it('stores the authorized organization even when the payload names none', async () => {
+    push([{ id: 'jc1' }])
+    push([])
+    await q.createJobClassification(scope, { jobTitle: 'Electrician', jobCode: 'ELEC-J01' } as never)
+
+    expect(mocks.inserted[0]).toMatchObject({ organizationId: ORG_A })
+  })
+
+  it('rolls back when the audit insert fails, and tells the caller nothing the driver said', async () => {
+    push([{ id: 'jc1' }])
     push(new Error('legacy_audit_down'))
-    await expect(q.createMemberEmployment(scope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-    } as never)).rejects.toThrow('Failed to access member employment')
+
+    await expect(q.createJobClassification(scope, { organizationId: ORG_A, jobCode: 'ELEC-J01' } as never)).rejects.toThrow(
+      'Failed to access member employment',
+    )
     expect(mocks.outcomes).toEqual(['rollback'])
     expect(JSON.stringify(mocks.loggerError.mock.calls)).not.toContain('legacy_audit_down')
   })
 
-  it('denies a forged employer and a forged job code', async () => {
-    push([{ id: MEMBER, userId: 'member-user' }])
+  it('denies a bargaining unit of another organization and stores nothing', async () => {
     push([])
-    await expect(q.createMemberEmployment(scope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-      employerId: '55555555-5555-4555-8555-555555555555',
-    } as never)).rejects.toThrow('Forbidden')
 
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([])
-    await expect(q.createMemberEmployment(scope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-      jobCode: 'NOT-IN-ORG',
-    } as never)).rejects.toThrow('Forbidden')
-    expect(mocks.outcomes).toEqual(['rollback', 'rollback'])
+    await expect(
+      q.createJobClassification(scope, { organizationId: ORG_A, jobCode: 'ELEC-J01', bargainingUnitId: UNIT } as never),
+    ).rejects.toThrow('Forbidden')
+    expect(mocks.inserted).toEqual([])
+    expect(mocks.outcomes).toEqual(['rollback'])
   })
 
   it('does not open a transaction for a forged organization id', async () => {
-    await expect(q.createMemberEmployment(scope, {
-      organizationId: ORG_B,
-      memberId: MEMBER,
-    } as never)).rejects.toThrow('Forbidden')
+    await expect(q.createJobClassification(scope, { organizationId: ORG_B, jobCode: 'X' } as never)).rejects.toThrow('Forbidden')
+    await expect(q.updateJobClassification(scope, 'jc1', { organizationId: ORG_B })).rejects.toThrow('Forbidden')
     expect(mocks.orgs).toEqual([])
   })
 
-  it('returns null for a missing employment id in the authorized organization', async () => {
-    push([])
-    expect(await q.getMemberEmploymentById(scope, 'missing')).toBeNull()
-    expect(mocks.orgs).toEqual([ORG_A])
+  it('lists the classifications of the authorized organization', async () => {
+    push([{ id: 'jc1' }, { id: 'jc2' }])
+
+    expect(await q.getJobClassificationsByOrganization(scope)).toEqual([{ id: 'jc1' }, { id: 'jc2' }])
+    expect(await q.getJobClassificationsByOrganization(scope, false)).toEqual([])
+    expect(mocks.orgs).toEqual([ORG_A, ORG_A])
   })
 
-  it('returns no rows when the member is outside the organization', async () => {
-    push([])
-    expect(await q.getAllMemberEmployment(scope, MEMBER)).toEqual([])
-    expect(mocks.outcomes).toEqual(['commit'])
+  it('reports a failed read instead of an empty list', async () => {
+    push(new Error('permission denied for table job_classifications'))
+
+    await expect(q.getJobClassificationsByOrganization(scope)).rejects.toThrow('Failed to access member employment')
+    expect(JSON.stringify(mocks.loggerError.mock.calls)).not.toContain('permission denied')
   })
 
-  it('fails an update that matches no row', async () => {
+  it('fails an update that matches no classification of the organization', async () => {
     push([])
-    await expect(q.updateMemberEmployment(scope, 'e1', { jobTitle: 'Lead' })).rejects.toBeInstanceOf(EmploymentBoundaryError)
+
+    await expect(q.updateJobClassification(scope, 'jc1', { jobTitle: 'Lead' })).rejects.toBeInstanceOf(EmploymentBoundaryError)
     expect(mocks.outcomes).toEqual(['rollback'])
   })
 
-  it('fails when a concurrent update affects no row', async () => {
-    push([{ id: 'e1', memberId: MEMBER, organizationId: ORG_A }])
+  it('fails when a concurrent change leaves the update with no row', async () => {
+    push([{ id: 'jc1', organizationId: ORG_A }])
     push([])
-    await expect(q.updateMemberEmployment(scope, 'e1', { jobTitle: 'Lead' })).rejects.toThrow('Employment record not found')
+
+    await expect(q.updateJobClassification(scope, 'jc1', { jobTitle: 'Lead' })).rejects.toThrow('Job classification not found')
     expect(mocks.outcomes).toEqual(['rollback'])
   })
 
-  it('denies member reassignment', async () => {
-    push([{ id: 'e1', memberId: MEMBER, organizationId: ORG_A }])
-    await expect(q.updateMemberEmployment(scope, 'e1', { memberId: '44444444-4444-4444-8444-444444444444' })).rejects.toThrow('Forbidden')
-    expect(mocks.outcomes).toEqual(['rollback'])
-  })
-
-  it('refuses hard deletion and does not issue a delete', async () => {
-    await expect(q.deleteMemberEmployment(scope, 'e1')).rejects.toThrow('Employment records are retained')
-    expect(mocks.deletes).toBe(0)
-    expect(mocks.orgs).toEqual([])
-  })
-
-  it('maps dues compensation and withholds it when the member is outside the organization', async () => {
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([{
-      id: 'e1',
-      grossWages: '1000.50',
-      baseSalary: '52000.00',
-      hourlyRate: '25.00',
-      regularHoursPerPeriod: '80.00',
-      employmentStatus: 'active',
-      payFrequency: 'bi_weekly',
-    }])
+  it('never lets an update change the organization, the id or the creator', async () => {
+    push([{ id: 'jc1', organizationId: ORG_A }])
+    push([{ id: 'jc1', organizationId: ORG_A, jobTitle: 'Lead' }])
     push([])
-    await expect(q.getEmploymentForDuesCalculation(financeScope, MEMBER)).resolves.toEqual({
-      grossWages: 1000.5,
-      baseSalary: 52000,
-      hourlyRate: 25,
-      hoursWorked: 80,
-      employmentStatus: 'active',
-      payFrequency: 'bi_weekly',
-    })
-
-    push([])
-    expect(await q.getEmploymentForDuesCalculation(financeScope, MEMBER)).toBeNull()
-    await expect(q.getEmploymentForDuesCalculation(scope, MEMBER)).rejects.toThrow('Forbidden')
-  })
-
-  it('rejects leave approval fields and attributes an authorized approval to the actor', async () => {
-    await expect(q.createMemberLeave(scope, {
+    await q.updateJobClassification(scope, 'jc1', {
       organizationId: ORG_A,
-      memberId: MEMBER,
-      isApproved: true,
-      approvedBy: 'forged',
-    } as never)).rejects.toThrow('Approval fields are assigned by the approval action')
-    expect(mocks.orgs).toEqual([])
-
-    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A, duesWaiverApproved: true, isApproved: true, approvedBy: 'other' }])
-    push([{ id: 'l1', duesWaiverApproved: true, isApproved: true, approvedBy: 'other' }])
-    push([])
-    await q.updateMemberLeave(scope, 'l1', {
-      organizationId: ORG_A,
-      reason: 'date change',
-      duesWaiverApproved: false,
-      isApproved: false,
+      id: 'forged',
+      createdBy: 'forged',
+      jobTitle: 'Lead',
     } as never)
-    expect(mocks.sets.at(-1)).toMatchObject({
-      duesWaiverApproved: true,
-      isApproved: true,
-      approvedBy: 'other',
-      reason: 'date change',
-    })
 
-    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
-    push([])
-    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('Forbidden')
-
-    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
-    push([{ id: MEMBER, userId: null }])
-    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('resolved subject identity')
-
-    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
-    push([{ id: MEMBER, userId: '   ' }])
-    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('resolved subject identity')
-
-    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
-    push([{ id: MEMBER, userId: 'user-admin-a' }])
-    await expect(q.approveMemberLeave(scope, 'l1')).rejects.toThrow('Leave approval requires a different member')
-
-    push([{ id: 'l1', memberId: MEMBER, organizationId: ORG_A }])
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([{ id: 'l1', isApproved: true, approvedBy: 'user-admin-a' }])
-    push([])
-    const leave = await q.approveMemberLeave(scope, 'l1')
-    expect(leave.approvedBy).toBe('user-admin-a')
-    expect(mocks.sets.at(-1)).toMatchObject({
-      isApproved: true,
-      approvedBy: 'user-admin-a',
-    })
-    expect(JSON.stringify(mocks.sets)).not.toContain('medical')
+    const patch = mocks.sets.at(-1) as Record<string, unknown>
+    expect(patch).toMatchObject({ jobTitle: 'Lead' })
+    expect(patch).not.toHaveProperty('organizationId')
+    expect(patch).not.toHaveProperty('id')
+    expect(patch).not.toHaveProperty('createdBy')
+    expect(mocks.outcomes).toEqual(['commit'])
   })
 
   it('denies a classification move to another organization', async () => {
     await expect(q.updateJobClassification(scope, 'jc1', { organizationId: ORG_B })).rejects.toThrow('Forbidden')
     expect(mocks.orgs).toEqual([])
-  })
-
-  it('calculates seniority from organization leaves only after the member is in scope', async () => {
-    const seniority = new Date('2020-01-01')
-    const now = new Date('2025-01-01')
-    expect(await q.calculateSeniorityYears(scope, seniority, now)).toBeCloseTo(5, 0)
-    expect(mocks.orgs).toEqual([])
-
-    push([])
-    await expect(q.calculateSeniorityYears(scope, seniority, now, MEMBER)).rejects.toThrow('Forbidden')
-
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([
-      { affectsSeniority: true, seniorityAdjustmentDays: 365 },
-      { affectsSeniority: false, seniorityAdjustmentDays: 100 },
-    ])
-    const years = await q.calculateSeniorityYears(scope, seniority, now, MEMBER)
-    expect(years).toBeCloseTo(4, 0)
-    expect(mocks.orgs).toEqual([ORG_A, ORG_A])
-  })
-
-  it('withholds individual compensation from an employment administrator', async () => {
-    await expect(q.createMemberEmployment(scope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-      hourlyRate: '99.50',
-    } as never)).rejects.toThrow('Forbidden')
-
-    push([{
-      id: 'e1',
-      organizationId: ORG_A,
-      hourlyRate: '25.00',
-      baseSalary: '52000.00',
-      grossWages: '1000.50',
-      jobTitle: 'Welder',
-      customFields: { badge_number: 'B-1', hourly_rate: '25.00' },
-    }])
-    const row = await q.getMemberEmploymentById(scope, 'e1')
-    expect(row).toMatchObject({ jobTitle: 'Welder', hourlyRate: null, baseSalary: null, grossWages: null })
-    expect(JSON.stringify(row)).not.toContain('25.00')
-    expect(JSON.stringify(row)).not.toContain('52000')
-    expect(JSON.stringify(row)).toContain('B-1')
-
-    push([{
-      id: 'e1',
-      hourlyRate: '25.00',
-      baseSalary: '52000.00',
-      grossWages: '1000.50',
-      jobTitle: 'Welder',
-    }])
-    const disclosed = await q.getMemberEmploymentById(financeScope, 'e1')
-    expect(disclosed).toMatchObject({ hourlyRate: '25.00', baseSalary: '52000.00', grossWages: '1000.50' })
-  })
-
-  it('withholds historical snapshots that are not on the operational allowlist', async () => {
-    await expect(q.createEmploymentHistory(scope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-      changeType: 'wage_change',
-      previousValues: { hourlyRate: '20.00' },
-      newValues: { hourly_rate: '25.00' },
-    } as never)).rejects.toThrow('Forbidden')
-    await expect(q.createEmploymentHistory(scope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-      changeType: 'wage_change',
-      previousValues: { rateBefore: '20.00' },
-      newValues: { newRate: '25.00', pay: { amount: '25.00' } },
-    } as never)).rejects.toThrow('Forbidden')
-
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([{ id: 'h1', previousValues: { jobTitle: 'Helper' }, newValues: { job_title: 'Welder' } }])
-    push([])
-    await expect(q.createEmploymentHistory(scope, {
-      organizationId: ORG_A,
-      memberId: MEMBER,
-      changeType: 'promotion',
-      previousValues: { jobTitle: 'Helper' },
-      newValues: { job_title: 'Welder' },
-    } as never)).resolves.toMatchObject({ id: 'h1' })
-
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([{
-      id: 'h1',
-      changeType: 'wage_change',
-      previousValues: {
-        jobTitle: 'Helper',
-        hourlyRate: '20.00',
-        rateBefore: '20.00',
-        jobCode: ['W', { salary: '20.00' }],
-        details: { jobTitle: 'Helper', newRate: '25.00' },
-      },
-      newValues: {
-        jobTitle: { text: 'Welder', grossWages: '1000.50' },
-        newRate: '25.00',
-        employmentStatus: 'active',
-      },
-    }])
-    const [history] = await q.getEmploymentHistoryByMember(scope, MEMBER)
-    expect(history.previousValues).toEqual({ jobTitle: 'Helper' })
-    expect(history.newValues).toEqual({ employmentStatus: 'active' })
-    expect(JSON.stringify(history)).not.toContain('20.00')
-    expect(JSON.stringify(history)).not.toContain('25.00')
-    expect(JSON.stringify(history)).not.toContain('1000.50')
-    expect(JSON.stringify(history)).not.toContain('rateBefore')
-    expect(JSON.stringify(history)).not.toContain('newRate')
-
-    push([{ id: MEMBER, userId: 'member-user' }])
-    push([{
-      id: 'h2',
-      previousValues: { rateBefore: '20.00', nested: { salary: '20.00' } },
-      newValues: { newRate: '25.00' },
-    }])
-    const [disclosed] = await q.getEmploymentHistoryByMember(financeScope, MEMBER)
-    expect(disclosed.previousValues).toMatchObject({ rateBefore: '20.00' })
-    expect(disclosed.newValues).toEqual({ newRate: '25.00' })
   })
 })

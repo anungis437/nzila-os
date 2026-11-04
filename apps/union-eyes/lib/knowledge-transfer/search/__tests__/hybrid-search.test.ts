@@ -48,9 +48,10 @@ import { hybridKnowledgeSearch } from '../hybrid-search';
 
 function row(id: string, sensitivity = 'low') {
   return {
-    id, title: `T${id}`, roleInUnion: 'steward', yearsOfService: 5, summary: 's',
+    id, title: `T${id}`, roleInUnion: 'steward', yearsOfService: 5, summary: 's', aiSummary: `ai ${id}`,
     sensitivityLevel: sensitivity, expertiseTags: ['x'], topics: ['y'],
     publishedAt: { toISOString: () => '2025-01-01T00:00:00.000Z' },
+    indexingStatus: 'indexed',
   };
 }
 
@@ -92,6 +93,17 @@ describe('lib/knowledge-transfer/search/hybrid-search', () => {
     expect(ids).toContain('a');
     expect(ids).toContain('c');
     expect(results[0].relevanceScore).toBeGreaterThanOrEqual(results[1].relevanceScore);
+  });
+
+  it('returns the operational summary and the indexing status of a result, from the keyword search and from the semantic-only one', async () => {
+    h.getCached.mockResolvedValue([0.1, 0.2, 0.3]);
+    h.selectQueue.push([row('a')]); // keyword rows
+    h.selectQueue.push([{ ...row('c'), aiSummary: null, indexingStatus: 'pending' }]); // semantic-only rows
+    h.execute.mockResolvedValue([{ source_id: 'a', similarity: 0.9 }, { source_id: 'c', similarity: 0.8 }]);
+
+    const results = await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: ['low'] });
+    expect(results.find((r) => r.id === 'a')).toMatchObject({ aiSummary: 'ai a', indexingStatus: 'indexed' });
+    expect(results.find((r) => r.id === 'c')).toMatchObject({ aiSummary: null, indexingStatus: 'pending' });
   });
 
   it('generates embedding via AI when cache misses', async () => {

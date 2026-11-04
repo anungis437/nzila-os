@@ -33,6 +33,6 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return { data: await listDocuments(filters as DocumentFilters, { page, limit }) };
+    return await listDocuments(filters as DocumentFilters, { page, limit });
   },
 );

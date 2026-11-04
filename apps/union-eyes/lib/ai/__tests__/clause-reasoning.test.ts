@@ -1,20 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindFirst, mockInsertValues, mockGenerate, mockCaseAccess } = vi.hoisted(() => ({
+const { mockFindFirst, mockFindMany, mockInsertValues, mockGenerate, mockCaseAccess, withRls, sharedDbUse } = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
+  mockFindMany: vi.fn(),
   mockInsertValues: vi.fn(),
   mockGenerate: vi.fn(),
   mockCaseAccess: vi.fn(),
+  withRls: vi.fn(),
+  sharedDbUse: vi.fn(),
 }));
 
 vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: mockCaseAccess }));
 
+// The shared connection is not tenant-scoped: the service must never read or write through it, and a test asserts that.
 vi.mock('@/db/db', () => ({
   db: {
     query: {
-      grievances: { findFirst: mockFindFirst },
+      grievances: { findFirst: sharedDbUse },
+      aiClauseReasonings: { findMany: sharedDbUse },
     },
-    insert: vi.fn(() => ({ values: mockInsertValues })),
+    insert: vi.fn(() => ({ values: sharedDbUse })),
   },
 }));
 
@@ -55,20 +60,22 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 const { audit, operation } = vi.hoisted(() => ({ audit: vi.fn(), operation: vi.fn() }));
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
-    fn({ insert: () => ({ values: mockInsertValues }) }),
-}));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: withRls }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }));
 vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: operation }));
 
 
-import { suggestClausesForGrievance } from '../clause-reasoning';
+import { suggestClausesForGrievance, explainClauseRelevance, getClauseReasoningHistory } from '../clause-reasoning';
 
 describe('suggestClausesForGrievance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCaseAccess.mockResolvedValue({ canViewCase: true });
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+      fn({
+        query: { grievances: { findFirst: mockFindFirst }, aiClauseReasonings: { findMany: mockFindMany } },
+        insert: () => ({ values: mockInsertValues }),
+      }));
     audit.mockResolvedValue(undefined);
     operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
     mockFindFirst.mockResolvedValue({
@@ -120,6 +127,15 @@ describe('suggestClausesForGrievance', () => {
       organizationId: 'org-1',
       userId: 'user-1',
     })).rejects.toThrow('not found');
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it('reads the grievance in the organization\'s own context, never through the shared connection', async () => {
+    await suggestClausesForGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' });
+    expect(withRls).toHaveBeenCalledWith({ organizationId: 'org-1' }, expect.any(Function));
+    expect(mockFindFirst).toHaveBeenCalledOnce();
+    expect(sharedDbUse).not.toHaveBeenCalled();
   });
 
   it('calls AI generate through the audited operation', async () => {
@@ -148,5 +164,54 @@ describe('suggestClausesForGrievance', () => {
   it('does not keep suggestions whose audit record cannot be written', async () => {
     audit.mockRejectedValueOnce(new Error('audit down'));
     await expect(suggestClausesForGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' })).rejects.toThrow('audit down');
+  });
+});
+
+describe('explainClauseRelevance', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCaseAccess.mockResolvedValue({ canViewCase: true });
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+      fn({ query: { grievances: { findFirst: mockFindFirst } } }));
+    operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
+    mockFindFirst.mockResolvedValue({ id: 'grv-1', organizationId: 'org-1', title: 'Test Grievance', description: 'Article 8' });
+    mockGenerate.mockResolvedValue({
+      content: JSON.stringify({ reasoning: 'Hours of work apply', strength: 'strong', confidence: 0.9, explanation: 'Directly on point' }),
+    });
+  });
+
+  it('explains the clause from a grievance read in the organization\'s own context', async () => {
+    const result = await explainClauseRelevance('grv-1', 'Article 8', 'org-1', 'user-1');
+    expect(result.data).toEqual({ reasoning: 'Hours of work apply', strength: 'strong' });
+    expect(withRls).toHaveBeenCalledWith({ organizationId: 'org-1' }, expect.any(Function));
+    expect(sharedDbUse).not.toHaveBeenCalled();
+  });
+
+  it('refuses a case the caller cannot view before any read or provider call', async () => {
+    mockCaseAccess.mockResolvedValueOnce({ canViewCase: false });
+    await expect(explainClauseRelevance('grv-1', 'Article 8', 'org-1', 'user-1')).rejects.toThrow('Case access denied');
+    expect(withRls).not.toHaveBeenCalled();
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
+  it('sends nothing to the provider for a grievance outside the organization', async () => {
+    mockFindFirst.mockResolvedValue(null);
+    await expect(explainClauseRelevance('grv-9', 'Article 8', 'org-1', 'user-1')).rejects.toThrow('not found');
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+});
+
+describe('getClauseReasoningHistory', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+      fn({ query: { aiClauseReasonings: { findMany: mockFindMany } } }));
+  });
+
+  it('lists the suggestions in the organization\'s own context, never through the shared connection', async () => {
+    mockFindMany.mockResolvedValue([{ id: 'suggestion-1' }]);
+    await expect(getClauseReasoningHistory('grv-1', 'org-1')).resolves.toEqual([{ id: 'suggestion-1' }]);
+    expect(withRls).toHaveBeenCalledWith({ organizationId: 'org-1' }, expect.any(Function));
+    expect(sharedDbUse).not.toHaveBeenCalled();
   });
 });

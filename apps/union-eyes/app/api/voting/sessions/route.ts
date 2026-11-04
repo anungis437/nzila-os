@@ -20,6 +20,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Governance'],
@@ -36,25 +37,15 @@ export const GET = withApi(
     const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? limitRaw : 20;
 
-    let result: Awaited<ReturnType<typeof listVotingSessions>>;
-    try {
-      result = await listVotingSessions(
-        {
-          organizationId: organizationId ?? undefined,
-          status,
-          type,
-        },
-        { page, limit }
-      );
-    } catch (error) {
-      logger.warn('Voting sessions listing failed; returning empty list', {
-        error: error instanceof Error ? error.message : String(error),
-        organizationId,
+    // A listing or enrichment failure is an error response: an empty list or option-less sessions would read as "no ballots".
+    const result = await listVotingSessions(
+      {
+        organizationId: organizationId ?? undefined,
         status,
         type,
-      });
-      return { sessions: [], total: 0, page, limit };
-    }
+      },
+      { page, limit }
+    );
 
     const normalizedResult = {
       ...result,
@@ -64,55 +55,47 @@ export const GET = withApi(
     // Enrich sessions with options and vote counts
     const sessionIds = normalizedResult.sessions.map((s) => s.id);
     if (sessionIds.length > 0) {
-      try {
-        const [options, voteCounts] = await Promise.all([
-          db.select().from(votingOptions)
-            .where(inArray(votingOptions.sessionId, sessionIds))
-            .orderBy(votingOptions.orderIndex),
-          db.select({
-            optionId: votesTable.optionId,
-            count: count(),
-          }).from(votesTable)
-            .where(inArray(votesTable.sessionId, sessionIds))
-            .groupBy(votesTable.optionId),
-        ]);
+      const [options, voteCounts] = await Promise.all([
+        db.select().from(votingOptions)
+          .where(inArray(votingOptions.sessionId, sessionIds))
+          .orderBy(votingOptions.orderIndex),
+        db.select({
+          optionId: votesTable.optionId,
+          count: count(),
+        }).from(votesTable)
+          .where(inArray(votesTable.sessionId, sessionIds))
+          .groupBy(votesTable.optionId),
+      ]);
 
-        const voteCountMap = Object.fromEntries(
-          voteCounts.map((vc) => [vc.optionId, Number(vc.count)])
-        );
+      const voteCountMap = Object.fromEntries(
+        voteCounts.map((vc) => [vc.optionId, Number(vc.count)])
+      );
 
-        const optionsBySession: Record<string, typeof options> = {};
-        for (const opt of options) {
-          if (!optionsBySession[opt.sessionId]) optionsBySession[opt.sessionId] = [];
-          optionsBySession[opt.sessionId].push(opt);
-        }
-
-        const enriched = normalizedResult.sessions.map((s) => {
-          const opts = optionsBySession[s.id] || [];
-          const totalVotes = opts.reduce((sum, o) => sum + (voteCountMap[o.id] || 0), 0);
-          return {
-            ...s,
-            options: opts.map((o) => ({
-              id: o.id,
-              text: o.text,
-              description: o.description,
-              orderIndex: o.orderIndex,
-            })),
-            // Participation only. Per-option tallies are an officer-level view of a closed session
-            // (GET /api/voting/sessions/[id]/results); no live or final count is disclosed here.
-            totalVotes,
-            resultsWithheld: true,
-          };
-        });
-
-        return { ...normalizedResult, sessions: enriched };
-      } catch (error) {
-        logger.warn('Voting sessions enrichment failed; returning base sessions', {
-          error: error instanceof Error ? error.message : String(error),
-          sessionCount: normalizedResult.sessions.length,
-        });
-        return normalizedResult;
+      const optionsBySession: Record<string, typeof options> = {};
+      for (const opt of options) {
+        if (!optionsBySession[opt.sessionId]) optionsBySession[opt.sessionId] = [];
+        optionsBySession[opt.sessionId].push(opt);
       }
+
+      const enriched = normalizedResult.sessions.map((s) => {
+        const opts = optionsBySession[s.id] || [];
+        const totalVotes = opts.reduce((sum, o) => sum + (voteCountMap[o.id] || 0), 0);
+        return {
+          ...s,
+          options: opts.map((o) => ({
+            id: o.id,
+            text: o.text,
+            description: o.description,
+            orderIndex: o.orderIndex,
+          })),
+          // Participation only. Per-option tallies are an officer-level view of a closed session
+          // (GET /api/voting/sessions/[id]/results); no live or final count is disclosed here.
+          totalVotes,
+          resultsWithheld: true,
+        };
+      });
+
+      return { ...normalizedResult, sessions: enriched };
     }
 
     return normalizedResult;

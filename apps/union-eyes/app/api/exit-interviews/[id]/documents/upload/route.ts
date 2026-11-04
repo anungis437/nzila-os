@@ -37,6 +37,7 @@ const UE_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     entitlement: 'union_knowledge_suite',
     openapi: {

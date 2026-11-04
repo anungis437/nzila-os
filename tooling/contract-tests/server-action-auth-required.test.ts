@@ -64,11 +64,10 @@ const AUTH_PATTERNS = [
   'currentUser(',               // @nzila/platform-auth/entra/server — returns null if unauthenticated
 ]
 
-/** Paths explicitly allowed to have no auth (e.g. health/status endpoints, DAL layers) */
+/** Paths explicitly allowed to have no auth (e.g. health/status endpoints) */
 const ALLOWLISTED_PATHS = [
   'lib/monitoring/status-actions.ts', // Read-only system status
   'lib/monitoring/status-page',       // Status page helpers
-  'db/queries/',                      // DAL layer — auth enforced by calling server actions
 ]
 
 /**
@@ -141,6 +140,13 @@ describe('server-action directive detection', () => {
     expect(containsServerActionDirective("export async function save() { 'use server'; return 1 }", 'sample.ts')).toBe(true)
     expect(containsServerActionDirective("export async function save() { 'use strict'; 'use server'; return 1 }", 'sample.ts')).toBe(true)
     expect(containsServerActionDirective("export async function save() { const x = 1; 'use server'; return x }", 'sample.ts')).toBe(false)
+  })
+})
+
+describe('the data-access layer is not a server-action surface', () => {
+  it('no module under db/queries carries a server-action directive: every export would be a callable endpoint with no guard of its own', () => {
+    const offenders = walkServerActionFiles(join(APPS_DIR, 'union-eyes', 'db', 'queries')).map((file) => relative(ROOT, file).split(sep).join('/'))
+    expect(offenders).toEqual([])
   })
 })
 

@@ -103,6 +103,9 @@
   },
   "common": {
     "appName": "UnionEyes",
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel",
     "loading": "Chargement...",
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -330,7 +333,7 @@
       },
       "history": {
         "title": "Historique des paiements",
-        "description": "Consultez vos paiements de cotisations passés et téléchargez les reçus",
+        "description": "Consultez vos paiements de cotisations passés et ouvrez les reçus",
         "loading": "Chargement de l'historique des paiements...",
         "empty": "Aucun historique de paiement disponible",
         "columns": {
@@ -1063,7 +1066,6 @@
     "partiesInvolved": "Parties impliquées",
     "partyLabels": {
       "grievant": "Plaignant",
-      "steward": "Délégué syndical",
       "management": "Direction"
     },
     "contractViolation": "Violation du contrat",
@@ -1251,7 +1253,18 @@
     "hoursAgo": "il y a {hours}h",
     "daysAgo": "il y a {days}j",
     "daysLeft": "{days} jours restants",
+    "loadFailed": "Les notifications n'ont pas pu être chargées",
+    "markReadFailed": "La notification n'a pas pu être marquée comme lue",
+    "markAllReadFailed": "Les notifications n'ont pas pu être marquées comme lues",
+    "deleteFailed": "La notification n'a pas pu être supprimée",
+    "matching": "correspondant aux filtres",
+    "showingNewest": "Affichage des {shown} notifications les plus récentes sur {total}",
+    "preferencesLink": "Préférences de notification",
     "types": {
+      "info": "Info",
+      "success": "Succès",
+      "warning": "Avertissement",
+      "error": "Erreur",
       "caseUpdate": "Mise à jour de l'affaire",
       "deadline": "Échéance",
       "grievance": "Grief",
@@ -1499,6 +1512,14 @@
     }
   },
   "duesReceiptPage": {
+    "statusLabel": "Statut",
+    "retryButton": "Réessayer",
+    "status": {
+      "posted": "Comptabilisé",
+      "pending": "En attente",
+      "reversed": "Contre-passé",
+      "voided": "Annulé"
+    },
     "paymentReceiptTitle": "Reçu de paiement",
     "issuedPrefix": "Émis",
     "memberInformationTitle": "Informations sur le membre",
@@ -1934,13 +1955,14 @@
     "channels": {
       "email": "Email",
       "sms": "SMS",
-      "push": "Push"
+      "push": "Push",
+      "multi_channel": "Multi-canal"
     },
     "types": {
       "broadcast": "Diffusion",
-      "campaign": "Campagne",
-      "newsletter": "Bulletin",
-      "alert": "Alerte"
+      "sequence": "Séquence",
+      "triggered": "Déclenchement",
+      "transactional": "Transactionnel"
     },
     "stats": {
       "audience": {
@@ -2732,45 +2754,21 @@
     "metaDescription": "Accédez à UnionEyes pour le traitement des cas, l'intelligence et les services aux membres.",
     "appName": "UnionEyes",
     "tagline": "Un système de décision pour le leadership syndical",
-    "subtitle": "De l'accueil à l'issue - traitement des cas, intelligence et services aux membres dans un seul système.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Sections locales",
-      "membersValue": "50K+",
-      "membersLabel": "Membres",
-      "uptimeValue": "99,9%",
-      "uptimeLabel": "Disponibilité"
-    }
+    "subtitle": "De l'accueil à l'issue - traitement des cas, intelligence et services aux membres dans un seul système."
   },
   "signInPage": {
     "metaTitle": "Se connecter | UnionEyes",
     "metaDescription": "Connectez-vous à UnionEyes - la plateforme intelligente de relations de travail pour les syndicats, sections locales et fédérations.",
     "appName": "UnionEyes",
     "tagline": "L'intelligence syndicale simplifiée",
-    "subtitle": "Suivi des griefs, gestion des arbitrages, analyses des négociations collectives et services aux membres - conçus pour les syndicats.",
-    "stats": {
-      "rolesValue": "35+",
-      "rolesLabel": "Rôles syndicaux",
-      "languagesValue": "6",
-      "languagesLabel": "Langues",
-      "uptimeValue": "99.9%",
-      "uptimeLabel": "Disponibilité"
-    }
+    "subtitle": "Suivi des griefs, gestion des arbitrages, analyses des négociations collectives et services aux membres - conçus pour les syndicats."
   },
   "signUpPage": {
     "metaTitle": "Inscription | UnionEyes",
     "metaDescription": "Créez votre compte UnionEyes pour accéder aux services de gestion de cas, d'intelligence et aux services aux membres.",
     "appName": "UnionEyes",
     "tagline": "Un système de décision pour le leadership syndical",
-    "subtitle": "De l'accueil à l'issue - gestion de cas, intelligence et services aux membres dans un seul système.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Sections locales",
-      "membersValue": "50K+",
-      "membersLabel": "Membres",
-      "uptimeValue": "99.9%",
-      "uptimeLabel": "Disponibilité"
-    }
+    "subtitle": "De l'accueil à l'issue - gestion de cas, intelligence et services aux membres dans un seul système."
   },
   "adminMembersPage": {
     "metaTitle": "Membres Admin | UnionEyes",
@@ -2989,7 +2987,6 @@
   "adminOrganizationsPage": {
     "title": "Organisations",
     "subtitle": "Gérez votre hiérarchie organisationnelle",
-    "bulkImportButton": "Importation en masse",
     "addOrganizationButton": "Ajouter une organisation",
     "totalOrganizations": "Total des organisations",
     "activeOrganizations": "Actives",
@@ -3266,15 +3263,7 @@
     "metaDescription": "Créez votre compte UnionEyes - rejoignez la plateforme intelligente des relations de travail.",
     "appName": "UnionEyes",
     "tagline": "L'intelligence du travail simplifiée",
-    "subtitle": "Suivi des griefs, gestion des arbitrages, analyses des négociations collectives et services aux membres - conçus pour les syndicats.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Sections locales",
-      "membersValue": "50K+",
-      "membersLabel": "Membres",
-      "uptimeValue": "99,9%",
-      "uptimeLabel": "Disponibilité"
-    }
+    "subtitle": "Suivi des griefs, gestion des arbitrages, analyses des négociations collectives et services aux membres - conçus pour les syndicats."
   },
   "employerRemittanceRunDetailPage": {
     "metaTitle": "Détails de l'exécution des remises | UnionEyes",
@@ -3397,6 +3386,7 @@
     }
   },
   "financeInvoicesPage": {
+    "loadMore": "Charger plus de factures",
     "title": "Factures",
     "empty": "Aucune facture générée pour le moment",
     "errors": {
@@ -3713,54 +3703,11 @@
   "movementInsightsExportPage": {
     "metadata": {
       "title": "Exportation de Rapport Législatif",
-      "description": "Générez des exportations de rapports législatifs à partir d'analyses de mouvements anonymisées."
+      "description": "Cette exportation n’est pas disponible dans cette version."
     },
     "header": {
       "title": "Rapport Législatif",
-      "description": "Exportez des analyses anonymisées pour le plaidoyer et le travail politique",
       "backToInsights": "Retour aux Analyses"
-    },
-    "preview": {
-      "exportPdf": "Exporter en PDF",
-      "keyFindings": "Principales Conclusions",
-      "recommendations": "Recommandations",
-      "dataSourceLabel": "Source de Données :"
-    },
-    "customize": {
-      "title": "Personnaliser le Rapport",
-      "description": "Filtrer les analyses par domaine d'intérêt, juridiction ou période",
-      "focusAreaLabel": "Domaine d'Intérêt",
-      "focusAreaOptions": {
-        "workplaceDisputes": "Conflits de Travail",
-        "healthcare": "Soins de Santé",
-        "education": "Éducation",
-        "publicSector": "Secteur Public"
-      },
-      "jurisdictionLabel": "Juridiction",
-      "jurisdictionOptions": {
-        "allCanada": "Tout le Canada",
-        "ontario": "Ontario",
-        "quebec": "Québec"
-      }
-    },
-    "usage": {
-      "title": "Comment Utiliser Ce Rapport",
-      "unionLeadership": {
-        "label": "Pour la Direction Syndicale :",
-        "text": "Utilisez ces analyses dans la planification stratégique, les négociations de contrats et les communications avec les membres."
-      },
-      "clcAdvocacy": {
-        "label": "Pour le Plaidoyer du CTC :",
-        "text": "Référencez les données anonymisées dans les soumissions législatives, les documents de politique et les rapports publics."
-      },
-      "mediaRelations": {
-        "label": "Pour les relations avec les médias :",
-        "text": "Citez les tendances intersyndicales pour démontrer les problèmes systémiques sur le lieu de travail nécessitant des solutions politiques."
-      },
-      "note": {
-        "label": "Remarque :",
-        "text": "Toutes les données sont anonymisées. Aucune organisation ou membre individuel ne peut être identifié. Un minimum de 5 syndicats et 10 cas est requis pour toutes les métriques."
-      }
     }
   },
   "movementInsightsPage": {
@@ -3861,50 +3808,6 @@
       "afterLink": "Seuls vous et votre délégué assigné pouvez voir ces détails."
     }
   },
-  "payPage": {
-    "header": {
-      "title": "Commencez avec Pro",
-      "subtitle": "Achetez maintenant et créez votre compte plus tard"
-    },
-    "billing": {
-      "monthly": "Mensuel",
-      "yearly": "Annuel"
-    },
-    "pricing": {
-      "save": "Économisez {percentage}% ({amount})",
-      "planTitle": "Plan Pro",
-      "planDescription": "Tout ce dont votre syndicat a besoin pour gérer les griefs, les membres et le plaidoyer.",
-      "month": "mois",
-      "year": "an",
-      "billedAnnually": "Facturé annuellement"
-    },
-    "form": {
-      "emailLabel": "Adresse e-mail",
-      "emailPlaceholder": "votre@email.com"
-    },
-    "actions": {
-      "processing": "Traitement en cours...",
-      "upgrade": "Passer à Pro"
-    },
-    "benefits": {
-      "title": "Avantages",
-      "aiCredits": "1 000 crédits AI par cycle de facturation",
-      "aiTriage": "Triage et rédaction de cas alimentés par l'AI",
-      "precedentResearch": "Recherche de précédents et extraction de CBA",
-      "claimsToolkit": "Outils complets pour les réclamations et l'arbitrage",
-      "teamCollaboration": "Collaboration d'équipe multi-rôles",
-      "prioritySupport": "Support prioritaire par des spécialistes du travail"
-    },
-    "errors": {
-      "invalidEmail": "Veuillez entrer une adresse e-mail valide",
-      "checkoutFailed": "Échec de la création du paiement. Veuillez réessayer.",
-      "untrustedCheckoutUrl": "URL de paiement non fiable",
-      "unexpected": "Une erreur inattendue s'est produite. Veuillez réessayer."
-    },
-    "footer": {
-      "disclaimer": "En continuant, vous pourrez créer votre compte après le paiement. Votre achat sera lié à votre adresse e-mail."
-    }
-  },
   "compliancePage": {
     "header": {
       "title": "Tableau de bord de conformité de l'employeur",
@@ -3951,6 +3854,7 @@
     }
   },
   "distributionListsPage": {
+    "onThisPage": "sur cette page",
     "errors": {
       "fetchFailed": "Échec de la récupération des listes de distribution"
     },
@@ -4437,7 +4341,9 @@
     "languages": {
       "en": "Anglais",
       "fr": "Français",
-      "es": "Espagnol"
+      "es": "Espagnol",
+      "it": "Italien",
+      "pt": "Portugais"
     },
     "months": {
       "january": "Janvier",
@@ -4629,6 +4535,11 @@
     "noActiveVotesMessage": "Revenez plus tard pour les votes et bulletins à venir.",
     "noUpcomingVotes": "Aucun vote à venir",
     "noUpcomingVotesMessage": "Restez à l'écoute pour les votes programmés.",
+    "paused": "En pause",
+    "cancelled": "Annulé",
+    "castYourVote": "Votez",
+    "resultsWithheld": "Les résultats sont publiés par le responsable du scrutin après la clôture du vote.",
+    "voteStatusUnknown": "Nous n'avons pas pu confirmer si vous avez déjà voté à ce scrutin; le vote n'est donc pas offert tant que cela ne peut pas être vérifié.",
     "ballotBuilder": {
       "title": "Configuration du bulletin",
       "ballotTitle": "Titre du bulletin",
@@ -5475,6 +5386,7 @@
     "severityPlaceholder": "Gravité",
     "statusPlaceholder": "Statut",
     "thisPeriod": "Cette période",
+    "totalIncidents": "Total des incidents",
     "trendsTab": "Tendances",
     "underInvestigation": "En cours d'enquête"
   },
@@ -5706,6 +5618,10 @@
     "createdDateLabel": "Créé le {date}",
     "priorityLabel": "Priorité {priority}",
     "unknownBadge": "Inconnu",
+    "loadFailedTitle": "Les détails du membre n'ont pas pu être chargés",
+    "retryButton": "Réessayer",
+    "claimsLoadFailed": "Les réclamations n'ont pas pu être chargées",
+    "noClaimNumber": "Aucun numéro de réclamation",
     "role": {
       "member": "Membre",
       "steward": "Délégué",
@@ -5746,6 +5662,7 @@
     "keyIssuesLabel": "Questions clés"
   },
   "communicationsCampaignsPage": {
+    "onThisPage": "sur cette page",
     "title": "Campagnes",
     "subtitle": "Gérez et suivez vos campagnes de communication",
     "failedToFetchCampaigns": "Échec de la récupération des campagnes",
@@ -5797,9 +5714,9 @@
       "multi_channel": "Multi-canal"
     },
     "type": {
-      "campaign": "Campagne",
-      "announcement": "Annonce",
-      "alert": "Alerte",
+      "broadcast": "Diffusion",
+      "sequence": "Séquence",
+      "triggered": "Déclenchement",
       "transactional": "Transactionnel"
     }
   },
@@ -5811,31 +5728,26 @@
     "descriptionLabel": "Description",
     "campaignDescriptionPlaceholder": "Brève description de cette campagne",
     "campaignTypeLabel": "Type de campagne",
-    "typeOptionCampaign": "Campagne - Campagne de marketing ou d'organisation régulière",
-    "typeOptionAnnouncement": "Annonce - Nouvelles ou mises à jour importantes",
-    "typeOptionAlert": "Alerte - Informations urgentes ou sensibles au temps",
-    "typeOptionTransactional": "Transactionnel - Réponse à une action de l'utilisateur",
+    "typeOptionBroadcast": "Diffusion - Un message envoyé une fois à une audience",
+    "typeOptionTransactional": "Transactionnel - Un avis système, comme un rappel de cotisation",
     "channelLabel": "Canal",
     "channelOptionEmail": "Email",
     "channelOptionSms": "SMS",
     "channelOptionPush": "Notification Push",
     "channelOptionMulti": "Multi-Canal (Email + SMS + Push)",
     "selectAudienceTitle": "Sélectionner l'audience",
-    "selectAudienceDescription": "Choisissez qui recevra cette campagne",
-    "segmentIntegrationNote": "La sélection de segment sera intégrée à la base de données des membres. Pour l'instant, la campagne ciblera tous les membres éligibles.",
+    "selectAudienceDescription": "Choisissez le segment de membres enregistré visé par cette campagne",
     "segmentLabel": "Segment (Optionnel)",
     "selectSegmentPlaceholder": "Sélectionnez un segment",
-    "segmentOptionAll": "Tous les membres",
-    "segmentOptionActive": "Membres actifs",
-    "segmentOptionInactive": "Membres inactifs",
-    "segmentOptionNew": "Nouveaux membres (30 derniers jours)",
-    "estimatedAudienceLabel": "Audience estimée",
-    "testModeLabel": "Mode test (envoyer uniquement aux administrateurs)",
+    "segmentOptionNone": "Aucun segment (audience non définie)",
+    "segmentsLoadError": "Les segments de membres enregistrés n'ont pas pu être chargés",
+    "segmentsNone": "Cette organisation n'a encore aucun segment de membres enregistré ; le brouillon est donc enregistré sans audience.",
     "campaignContentTitle": "Contenu de la campagne",
     "campaignContentDescription": "Choisissez un modèle ou rédigez un contenu personnalisé",
     "templateLabel": "Modèle (Optionnel)",
     "selectTemplatePlaceholder": "Sélectionnez un modèle",
     "customContentOption": "Contenu personnalisé",
+    "templatesNone": "Aucun modèle n'existe encore pour ce canal.",
     "subjectLineLabel": "Objet",
     "subjectLinePlaceholder": "Entrez l'objet de l'email",
     "messageLabel": "Message",
@@ -5844,25 +5756,20 @@
     "charactersLabel": "caractères",
     "trackOpensLabel": "Suivre les ouvertures d'emails",
     "trackClicksLabel": "Suivre les clics sur les liens",
-    "scheduleCampaignTitle": "Programmer la campagne",
-    "scheduleCampaignDescription": "Choisissez quand envoyer votre campagne",
-    "sendNowOption": "Envoyer immédiatement après création",
-    "scheduleForLaterOption": "Programmer pour plus tard",
-    "scheduleDateTimeLabel": "Date et heure de programmation",
     "reviewCampaignTitle": "Revoir la campagne",
-    "reviewCampaignDescription": "Vérifiez les détails de votre campagne avant l'envoi",
+    "reviewCampaignDescription": "Vérifiez les détails de votre campagne avant d'enregistrer le brouillon",
     "campaignInformationLabel": "Informations sur la campagne",
     "nameLabel": "Nom",
     "typeLabel": "Type",
     "contentLabel": "Contenu",
     "subjectLabel": "Objet",
-    "scheduleLabel": "Planification",
-    "sendImmediatelyLabel": "Envoyer immédiatement",
-    "scheduledForLabel": "Prévu pour",
-    "testModeDescription": "Cette campagne sera uniquement envoyée aux administrateurs.",
+    "audienceLabel": "Audience",
+    "audienceNotSet": "Non définie",
+    "sendingLabel": "Envoi",
     "backToCampaignsButton": "Retour aux campagnes",
     "createCampaignTitle": "Créer une nouvelle campagne",
-    "createCampaignDescription": "Suivez les étapes pour créer et lancer votre campagne",
+    "createCampaignDescription": "Suivez les étapes pour enregistrer un brouillon de campagne",
+    "draftNotice": "Les campagnes sont enregistrées comme brouillons. Rien n'est envoyé dans cette version.",
     "fetchTemplatesError": "Échec de la récupération des modèles",
     "previousButton": "Précédent",
     "nextButton": "Suivant",
@@ -5870,12 +5777,12 @@
     "stepBasicInfo": "Informations de base",
     "stepContent": "Contenu",
     "stepReview": "Révision",
-    "stepSchedule": "Planification",
-    "creatingStatus": "Création...",
-    "createCampaignButton": "Créer une campagne",
+    "creatingStatus": "Enregistrement...",
+    "createCampaignButton": "Enregistrer le brouillon",
     "createCampaignError": "Échec de la création de la campagne"
   },
   "communicationsTemplatesPage": {
+    "onThisPage": "sur cette page",
     "title": "Modèles de message",
     "subtitle": "Créez et gérez des modèles réutilisables pour vos campagnes",
     "failedToFetchTemplates": "Échec de la récupération des modèles",
@@ -7450,10 +7357,6 @@
     "pricing": {
       "heroHeading": "Tarification simple et transparente",
       "heroDescription": "Pas de frais cachés. Pas de structures à niveaux conçues pour confondre. Une tarification équitable qui évolue avec votre syndicat.",
-      "monthly": "Mensuel",
-      "yearly": "Annuel",
-      "perMonth": "/ mois",
-      "perYear": "/ an",
       "getStarted": "Commencer",
       "pageTitle": "Tarification | UnionEyes",
       "pageDescription": "Tarification simple et transparente pour les syndicats de toutes tailles."
@@ -8647,8 +8550,10 @@
       "filterPending": "En attente",
       "noResultsSearch": "Aucun membre ne correspond à votre recherche",
       "noResultsEmpty": "Aucun membre trouvé",
-      "offlineBanner": "Mode hors ligne - affichage des données en cache",
-      "unsyncedCount": "{count}"
+      "offlineBanner": "Vous êtes hors ligne. La liste des membres ne peut pas être actualisée.",
+      "loadFailed": "Impossible de charger les membres.",
+      "showing": "{shown} membres affichés sur {total}",
+      "loadMore": "Afficher plus"
     },
     "claims": {
       "title": "Réclamations",
@@ -8797,51 +8702,6 @@
       "assignButton": "Attribuer"
     }
   },
-  "billing": {
-    "upgradePlan": {
-      "title": "Passer à Pro",
-      "subtitle": "Vous avez utilisé tous vos crédits ({used}/{total}). Obtenez-en plus avec Pro.",
-      "monthly": "Mensuel",
-      "yearly": "Annuel",
-      "save33": "Économisez 33 %",
-      "monthlyPrice": "30 $",
-      "yearlyPrice": "249 $",
-      "yearlyPriceMonthly": "20 $",
-      "perMonth": "/mois",
-      "billedAnnually": "Facturé annuellement à 249 $",
-      "billedMonthly": "Facturé mensuellement, annulation à tout moment",
-      "benefit1": "1 000 crédits AI par cycle de facturation",
-      "benefit2": "Triage et rédaction de griefs assistés par AI",
-      "benefit3": "Recherche préalable et extraction de CBA",
-      "benefit4": "Support prioritaire par des spécialistes du travail",
-      "configError": "Problème de configuration détecté. Veuillez visiter la page des tarifs pour compléter votre achat.",
-      "checkoutFailed": "Échec de la création du paiement. Veuillez réessayer plus tard.",
-      "checkoutFailedRetry": "Échec de la création du paiement. Veuillez réessayer.",
-      "untrustedUrl": "URL de paiement non fiable",
-      "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer plus tard.",
-      "getProYearly": "Obtenez Pro Annuel",
-      "getProMonthly": "Obtenez Pro Mensuel",
-      "processing": "Traitement...",
-      "nextFreeRenewal": "Prochain renouvellement gratuit : Non programmé",
-      "close": "Fermer"
-    },
-    "paymentSuccess": {
-      "title": "Paiement Réussi !",
-      "subtitleYearly": "Merci d'avoir souscrit à Pro Annuel",
-      "subtitleMonthly": "Merci d'avoir souscrit à Pro Mensuel",
-      "planActive": "Votre Plan Pro est Actif !",
-      "refresh": "Rafraîchir",
-      "credits": "Crédits",
-      "creditsRenewOn": "Les crédits se renouvellent le",
-      "notAvailable": "N/D",
-      "planIncludes": "Votre Plan Pro Comprend :",
-      "benefit1": "1000 crédits à chaque cycle de facturation",
-      "benefit2": "Accès à toutes les fonctionnalités premium",
-      "benefit3": "Support prioritaire",
-      "benefit4": "Analyses avancées et exportations",
-      "closeLabel": "Fermer la boîte de dialogue de succès de paiement"
-    }
-  },
   "unionStructure": {
     "bargainingUnits": {
       "title": "Unités de Négociation",
@@ -8938,29 +8798,6 @@
       "tabCommittees": "Comités",
       "orgStructureTitle": "Structure organisationnelle",
       "orgStructureDescription": "Représentation visuelle de la hiérarchie organisationnelle de votre syndicat"
-    }
-  },
-  "onboarding": {
-    "welcome": {
-      "title": "Bienvenue !",
-      "subtitle": "Merci de nous avoir rejoints ! Nous sommes ravis de vous avoir ici.",
-      "freePlanActive": "Votre plan gratuit est actif !",
-      "proPlanActive": "Votre plan Pro est actif !",
-      "credits": "Crédits",
-      "nextRenewal": "Prochain renouvellement : dans 4 semaines",
-      "freePlanIncludes": "Votre plan gratuit comprend :",
-      "proPlanIncludes": "Votre plan Pro comprend :",
-      "freeBenefit1": "5 crédits gratuits tous les 4 semaines",
-      "freeBenefit2": "Accès aux fonctionnalités de base",
-      "freeBenefit3": "Renouvellements automatiques de crédits",
-      "freeBenefit4": "Passez à Pro à tout moment pour plus de crédits",
-      "proBenefit1": "1000 crédits à chaque cycle de facturation",
-      "proBenefit2": "Accès à toutes les fonctionnalités premium",
-      "proBenefit3": "Support prioritaire",
-      "proBenefit4": "Analyses avancées",
-      "getStarted": "Commençons",
-      "viewProPlans": "Voir les plans Pro",
-      "closeLabel": "Fermer le message de bienvenue"
     }
   },
   "platform": {
@@ -9949,6 +9786,13 @@
     "runBenchmark": "Exécuter le benchmark",
     "computing": "Calcul du benchmark...",
     "errorLoad": "Échec du calcul du benchmark",
+    "errorSave": "Échec de l'enregistrement de l'instantané",
+    "errorHistory": "Échec du chargement de l'historique des instantanés",
+    "comparability": {
+      "exact": "Exacte",
+      "approximate": "Approximative",
+      "insufficient_confidence": "Faible confiance"
+    },
     "summary": {
       "comparables": "Comparables",
       "wageP25": "Salaire P25",
@@ -9992,11 +9836,11 @@
       "allReviews": "Toutes les révisions"
     },
     "reviewStatuses": {
-      "pending": "En attente",
+      "pending_review": "En attente de révision",
       "approved": "Approuvé",
       "rejected": "Rejeté",
-      "needs_revision": "Nécessite une révision",
-      "auto_approved": "Approuvé automatiquement"
+      "needs_followup": "Suivi requis",
+      "superseded": "Remplacé"
     },
     "table": {
       "agreement": "Accord",
@@ -10045,8 +9889,9 @@
         "confidence": "Confiance",
         "review": "Revue"
       }
-    },
-    "vendorList": {
+    }
+  },
+  "vendorList": {
       "title": "Fournisseurs",
       "description": "Gérer l'annuaire des fournisseurs",
       "addVendor": "Ajouter un fournisseur",
@@ -10298,6 +10143,9 @@
       "loading": "Chargement des notes...",
       "empty": "Pas encore de notes de session",
       "emptyHint": "Ajoutez des notes des sessions de négociation pour suivre les discussions",
+      "loadFailed": "Impossible de charger les notes de session.",
+      "noAgreement": "Cette négociation n’est liée à aucune convention : il n’y a donc aucune note de session à afficher.",
+      "showing": "Affichage des {shown} notes les plus récentes sur {total}",
       "attendees": "{count} participants",
       "view": "Voir",
       "sessionTypes": {
@@ -10471,6 +10319,7 @@
       },
       "fallbackName": "Personnel",
       "defaultOrgName": "Congrès du travail du Canada",
+    "loadFailed": "Impossible de charger les organisations affiliées.",
       "subtitle": "Opérations nationales",
       "kpis": {
         "affiliates": {
@@ -10559,6 +10408,7 @@
       },
       "fallbackName": "Personnel",
       "defaultProvince": "Fédération provinciale",
+    "loadFailed": "Impossible de charger les sections locales affiliées.",
       "subtitle": "Opérations de la fédération",
       "kpis": {
         "locals": {
@@ -10699,8 +10549,7 @@
         "title": "Correspondances de précédents par juridiction",
         "description": "Répartition des correspondances de précédents à travers les juridictions du travail"
       }
-    }
-  },
+    },
   "analyticsDashboard": {
     "title": "Tableau de bord analytique",
     "subtitle": "Surveillez les indicateurs clés et les informations pour votre organisation",
@@ -10744,6 +10593,7 @@
     },
     "confidence": "confiance",
     "anomaliesDetected": "{count} anomalies détectées",
+    "noTrends": "Aucune analyse de tendance n'a encore été calculée pour votre organisation.",
     "viewDetails": "Voir les détails",
     "noFlagsFound": "Aucun indicateur trouvé"
   },
@@ -11524,7 +11374,6 @@
     "text17": "Pour en savoir plus, consultez notre",
     "text18": "Politique de confidentialité",
     "text19": "et",
-    "text20": "Politique relative aux témoins",
     "text21": "Enregistrer les préférences",
     "text22": "session_id — Maintient votre session",
     "text23": "csrf_token — Protège contre les attaques",
@@ -11552,7 +11401,9 @@
     "casesLoadError": "Vos dossiers n’ont pas pu être chargés.",
     "noActiveCases": "Vous n’avez aucun dossier actif.",
     "openCase": "Ouvrir un dossier de représentation",
-    "openMessages": "Aller aux messages"
+    "openMessages": "Aller aux messages",
+    "markAllReadError": "Vos notifications n’ont pas pu être marquées comme lues.",
+    "notificationsShowing": "{shown} notifications non lues affichées sur {total}."
   },
   "memberMessages": {
     "title": "Messages",
@@ -11591,6 +11442,7 @@
     "replyPlaceholder": "Écrivez une réponse",
     "closedNotice": "Cette conversation est fermée. Commencez une nouvelle conversation pour joindre votre syndicat.",
     "privacySubject": "Demande relative à la vie privée",
+    "refreshError": "Vos conversations n’ont pas pu être actualisées. Ce que vous voyez peut ne pas être à jour.",
     "loading": "Chargement…",
     "messagesLabel": "Messages de cette conversation",
     "actionsLabel": "Actions sur la conversation",
@@ -11619,6 +11471,7 @@
     "queueTitle": "En attente d’attribution",
     "queueDenied": "La file d’attribution n’est disponible que lorsqu’un administrateur vous a accordé une désignation de triage. Vous n’en détenez pas actuellement.",
     "queueLoadError": "La file n’a pas pu être chargée.",
+    "refreshError": "La file ou vos conversations n’ont pas pu être actualisées. Ce que vous voyez peut ne pas être à jour.",
     "queueEmptyTitle": "Aucune conversation en attente",
     "queueEmptyBody": "Les nouvelles conversations des membres apparaissent ici jusqu’à leur attribution.",
     "queueMetadataNote": "Vous ne voyez que l’objet, la catégorie et la priorité. Les messages et le membre restent privés tant que la conversation n’est pas attribuée.",

@@ -637,7 +637,7 @@ export async function hasVoted(
     return !!vote;
   } catch (error) {
     logger.error("Error checking if voted", { error, sessionId, memberId });
-    return false;
+    throw new Error("Failed to check whether the member has voted");
   }
 }
 

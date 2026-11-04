@@ -15,7 +15,6 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Shield, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,6 +44,7 @@ import {
   ExportableMetrics,
 } from '@/components/leadership/leadership-export';
 import { logger } from '@/lib/logger';
+import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -62,8 +62,26 @@ interface DashboardData {
 
 // ─── Page ─────────────────────────────────────────────────────
 
+/** The route answers { success, data: metrics, timestamp }; a body without the parts the page draws is an error, not a half-empty dashboard. */
+function toDashboardData(body: unknown): DashboardData {
+  const payload = envelopeData(body);
+  const { kpi, employers, trends, categories, stewards, compliance } = payload;
+  if (
+    !isRecord(kpi) ||
+    !Array.isArray(employers) ||
+    !Array.isArray(trends) ||
+    !Array.isArray(categories) ||
+    !Array.isArray(stewards) ||
+    !isRecord(compliance) ||
+    !isRecord(compliance.metrics) ||
+    !Array.isArray(compliance.alerts)
+  ) {
+    throw new ApiShapeError('not a leadership dashboard');
+  }
+  return payload as unknown as DashboardData;
+}
+
 export default function LeadershipPage() {
-  const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('leadershipPage');
   const [loading, setLoading] = useState(true);
@@ -77,15 +95,18 @@ export default function LeadershipPage() {
     try {
       const response = await fetch(`/api/dashboard/leadership?timeframe=${timeframe}`);
       if (response.ok) {
-        const result = await response.json();
-        setData(result.data ?? result);
+        setData(toDashboardData(await response.json()));
       } else {
         logger.warn('Leadership dashboard fetch failed', { status: response.status });
-        setError('Dashboard data unavailable — please try again or contact support.');
+        setError(await readApiError(response, 'Dashboard data unavailable — please try again or contact support.'));
       }
     } catch (err) {
       logger.error('Failed to load leadership dashboard', err);
-      setError('Could not connect to the dashboard service. Check your connection and try again.');
+      setError(
+        err instanceof ApiShapeError
+          ? 'The dashboard service sent data this page cannot read. Try again or contact support.'
+          : 'Could not connect to the dashboard service. Check your connection and try again.',
+      );
     } finally {
       setLoading(false);
     }
@@ -215,11 +236,8 @@ export default function LeadershipPage() {
         <StewardCapacityChart stewards={data.stewards} />
       </div>
 
-      {/* Employer hotspots (full-width) */}
-      <EmployerHotspotsTable
-        employers={data.employers}
-        onViewEmployer={(id) => router.push(`/employers/${id}`)}
-      />
+      {/* Employer hotspots (full-width). There is no employer page to open, so the table offers no "view" control. */}
+      <EmployerHotspotsTable employers={data.employers} />
 
       {/* Compliance summary */}
       <ComplianceSummaryCard

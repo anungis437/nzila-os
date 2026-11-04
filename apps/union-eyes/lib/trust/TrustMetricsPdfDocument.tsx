@@ -6,6 +6,7 @@ import {
   View,
 } from '@react-pdf/renderer';
 import type { TrustMetrics } from '@/types/marketing';
+import { formatTableList } from './format';
 
 const styles = StyleSheet.create({
   page: {
@@ -123,9 +124,9 @@ export function TrustMetricsPdfDocument({ metrics }: { metrics: TrustMetrics }) 
             <Text style={styles.bodyText}>{metrics.immutability.description}</Text>
             <Text style={styles.listLine}>{verificationText(metrics.immutability.verification)}</Text>
             <Text style={styles.listLine}>Triggers active: {metrics.immutability.triggersActive ? 'Yes' : 'No'}</Text>
-            <Text style={styles.listLine}>Violation attempts: {metrics.immutability.violationAttempts}</Text>
+            <Text style={styles.listLine}>Violation attempts: {metrics.immutability.violationAttempts ?? 'not measured'}</Text>
             <Text style={styles.listLine}>
-              Tables protected: {metrics.immutability.tablesProtected.join(', ') || 'None reported'}
+              Tables protected: {formatTableList(metrics.immutability.tablesProtected)}
             </Text>
           </View>
 
@@ -142,7 +143,7 @@ export function TrustMetricsPdfDocument({ metrics }: { metrics: TrustMetrics }) 
             <Text style={styles.listLine}>Policies active: {metrics.rlsEnforcement.policiesActive}</Text>
             <Text style={styles.listLine}>Org isolation: {metrics.rlsEnforcement.orgIsolation}</Text>
             <Text style={styles.listLine}>
-              Protected tables: {metrics.rlsEnforcement.tablesProtected.join(', ') || 'None reported'}
+              Protected tables: {formatTableList(metrics.rlsEnforcement.tablesProtected)}
             </Text>
           </View>
 

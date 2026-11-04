@@ -60,6 +60,14 @@ describe('Gate 0 propagation route behavior', () => {
     const GET = await loadHandler()
     m.build.mockResolvedValueOnce(map())
     const result = await GET({ organizationId: 'org-a', request: request() })
-    expect(result).toMatchObject({ data: { nodes: [] }, meta: { message: 'No published interviews found to analyze' } })
+    expect(result).toMatchObject({ nodes: [], message: 'No published interviews found to analyze' })
+    expect(result).not.toHaveProperty('data')
+  })
+
+  it('answers the map itself, not wrapped in a data key of its own', async () => {
+    const GET = await loadHandler()
+    const result = (await GET({ organizationId: 'org-a', request: request() })) as Record<string, unknown>
+    expect(result.nodes).toEqual([{ id: 'node-1' }])
+    expect(result).not.toHaveProperty('data')
   })
 })

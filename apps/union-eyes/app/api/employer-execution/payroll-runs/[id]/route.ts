@@ -12,8 +12,15 @@ const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
 const transitionSchema = z.object({
   action: z.enum(["approve", "seal"]),
-  acknowledgedEventIds: z.array(z.guid()).default([]),
+  acknowledgedEventIds: z.array(z.guid()).max(500).default([]),
 });
+
+// A run id that is not a uuid is a client error, never a value the database refuses.
+function payrollRunIdOf(params: Record<string, string> | undefined): string {
+  const id = z.guid().safeParse(params?.id);
+  if (!id.success) throw ApiError.badRequest("Payroll run id must be a valid identifier");
+  return id.data;
+}
 
 export const GET = withApi(
   {
@@ -23,8 +30,7 @@ export const GET = withApi(
   },
   async ({ organizationId, userId, params }) => {
     if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
-    const id = params?.id;
-    if (typeof id !== "string") throw ApiError.badRequest("Payroll run id is required");
+    const id = payrollRunIdOf(params);
 
     const loaded = await withRLSContext({ organizationId, userId }, async (tx) => {
       await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view", resourceId: id });
@@ -89,8 +95,7 @@ export const PATCH = withApi(
   },
   async ({ organizationId, params, body, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
-    const id = params?.id;
-    if (typeof id !== "string") throw ApiError.badRequest("Payroll run id is required");
+    const id = payrollRunIdOf(params);
 
     await requireEntitlement(organizationId, PLATFORM_MODULES.EMPLOYER_PAYROLL_OFFICIAL, userId);
 

@@ -153,7 +153,7 @@ describe('external resource routes', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(mocks.db, expect.objectContaining({
       matterId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     }), { recordAllowed: false });
   });
@@ -183,7 +183,7 @@ describe('external resource routes', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(mocks.db, expect.objectContaining({
       matterId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     }), { recordAllowed: false });
   });
@@ -325,11 +325,9 @@ describe('external resource routes', () => {
     const response = await postUpload(uploadBody);
 
     expect(response.status).toBe(201);
-    expect(mocks.withExplicitUserContext).toHaveBeenCalledWith(
-      uploadActor,
-      expect.any(Function),
-      uploadOrg,
-    );
+    // The write runs in the organization's own transaction, opened after the authorization decision's transaction closed.
+    expect(mocks.withRLSContext).toHaveBeenCalledWith({ organizationId: uploadOrg }, expect.any(Function));
+    expect(mocks.withExplicitUserContext).not.toHaveBeenCalled();
     expect(valuesByTable[0]).toMatchObject({
       organizationId: uploadOrg,
       orgId: uploadOrg,
@@ -430,7 +428,7 @@ describe('external resource middleware: a read and its record are one transactio
   it('does not write a separate allowed-decision row for a read: the decision is folded into the read record', async () => {
     mocks.selectQueue.push([row]);
     await read();
-    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(expect.anything(), { recordAllowed: false });
+    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(mocks.db, expect.anything(), { recordAllowed: false });
   });
 
   it('releases nothing when the read cannot be recorded', async () => {
@@ -459,5 +457,29 @@ describe('external resource middleware: a read and its record are one transactio
 
     expect(response.status).toBeGreaterThanOrEqual(400);
     expect(mocks.audit).not.toHaveBeenCalled();
+  });
+
+  it('answers a malformed organization or matter identifier as a bad request, before any database work', async () => {
+    const { GET } = await import('@/app/api/external/grievances/[id]/route');
+
+    const badOrganization = await GET(new Request('https://example.test/api/external/grievances/x?organizationId=not-a-uuid'), { id: GRIEVANCE });
+    const badMatter = await GET(new Request(`https://example.test/api/external/grievances/x?organizationId=${ORGANIZATION}`), { id: 'not-a-uuid' });
+
+    expect(badOrganization.status).toBe(400);
+    expect(badMatter.status).toBe(400);
+    expect(mocks.withRLSContext).not.toHaveBeenCalled();
+    expect(mocks.authorizeExternalMatterAccess).not.toHaveBeenCalled();
+  });
+
+  it('answers a matter type outside the enumeration as a bad request', async () => {
+    const { GET } = await import('@/app/api/external/documents/[id]/route');
+
+    const response = await GET(
+      new Request(`https://example.test/api/external/documents/${GRIEVANCE}?organizationId=${ORGANIZATION}&matterId=${GRIEVANCE}&matterType=not-a-matter-type`),
+      { id: GRIEVANCE },
+    );
+
+    expect(response.status).toBe(400);
+    expect(mocks.withRLSContext).not.toHaveBeenCalled();
   });
 });

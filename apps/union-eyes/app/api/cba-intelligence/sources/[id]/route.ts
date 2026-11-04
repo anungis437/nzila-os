@@ -25,7 +25,7 @@ export const GET = withApi(
   async ({ params }) => {
     const source = await getSourceById(params.id);
     if (!source) throw ApiError.notFound("Source not found");
-    return { data: source };
+    return source;
   },
 );
 
@@ -86,7 +86,7 @@ export const PATCH = withApi(
     if (isActive !== false && fields.length === 0) {
       const source = await getSourceById(params.id);
       if (!source) throw ApiError.notFound("Source not found");
-      return { data: source };
+      return source;
     }
 
     // The change and its audit record commit together; a source that does not exist is a 404 with no audit.
@@ -112,7 +112,7 @@ export const PATCH = withApi(
         resourceId: params.id,
         details: { fields, ...(isActive === false ? { deactivated: true } : {}) },
       });
-      return { data: source };
+      return source;
     });
   },
 );

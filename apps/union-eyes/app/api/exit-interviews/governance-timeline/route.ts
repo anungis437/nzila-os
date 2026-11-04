@@ -27,6 +27,7 @@ const MAX_INTERVIEWS_IN_WINDOW = 5000;
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'union_knowledge_suite',
     openapi: {

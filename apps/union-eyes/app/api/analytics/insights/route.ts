@@ -22,6 +22,8 @@ const { GET } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  // The dashboard asks for the insights nobody has triaged (?status=new); without the filter the parameter was ignored and every status came back.
+  listFilters: { equals: { status: 'status' } },
 });
 export { GET };
 

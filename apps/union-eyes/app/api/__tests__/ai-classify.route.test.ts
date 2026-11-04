@@ -12,9 +12,7 @@ const m = vi.hoisted(() => ({
   batchClassifyClauses: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({
-  withRoleAuth: vi.fn((_: string, handler: (req: NextRequest, ctx: any) => Promise<Response>) => (req: NextRequest, ctx: any = { userId: 'u1', organizationId: 'org_1' }) => handler(req, ctx)),
-}));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { AI_COMPLETION: { requests: 30, window: 60 } },

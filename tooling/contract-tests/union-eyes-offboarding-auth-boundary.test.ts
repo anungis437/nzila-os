@@ -32,10 +32,13 @@ describe('UnionEyes offboarding auth boundary contract', () => {
 
   it('keeps direct document download behind organization auth and fresh document authorization', () => {
     // The route authenticates and delegates; every download path (single and bulk) shares one authorization core.
+    // The wrapper enforces the organization, the member floor and the case-suite entitlement before the handler runs, and the handler runs the
+    // authorization core inside the caller's own organization transaction.
     const route = read(DOWNLOAD_ROUTE_PATH);
-    expect(route).toContain('withOrganizationAuth');
-    expect(route).toContain("await requireEntitlement(organizationId, 'grievance_case_suite')");
-    expect(route).toContain("await hasMinRole('member')");
+    expect(route).toContain('withApi(');
+    expect(route).toMatch(/auth:\s*\{\s*required:\s*true,\s*minRole:\s*'member'\s*\}/);
+    expect(route).toContain("entitlement: 'grievance_case_suite'");
+    expect(route).toContain('withRLSContext({ organizationId }');
     expect(route).toContain('issueDocumentDownload(');
     expect(route).not.toMatch(/generateSasUrl|fileUrl/);
 

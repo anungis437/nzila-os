@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
-  withOrganizationAuth: vi.fn(),
-  requireEntitlement: vi.fn(),
-  hasMinRole: vi.fn(),
   db: { select: vi.fn() },
   getEffectiveCaseAccess: vi.fn(),
   getRelatedDocuments: vi.fn(),
@@ -14,9 +11,7 @@ const m = vi.hoisted(() => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.getEffectiveCaseAccess }));
 vi.mock('@/services/case-intelligence/related-documents-service', () => ({ getRelatedDocuments: m.getRelatedDocuments }));
@@ -26,65 +21,73 @@ vi.mock('@/services/case-intelligence/case-knowledge-graph-service', () => ({ bu
 vi.mock('@/lib/audit-logger', () => ({ auditDataAccess: m.auditDataAccess }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
+
 async function loadRoute() {
   return import('../grievances/[id]/intelligence/route');
 }
 
+const GRIEVANCE = '22222222-2222-4222-8222-222222222222';
+const get = () => new Request(`http://localhost/api/grievances/${GRIEVANCE}/intelligence`);
+const grievanceRow = (createdBy: string) => vi.fn(() => ({
+  from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ id: GRIEVANCE, createdBy }]) })) })),
+}));
+
 describe('grievances/[id]/intelligence route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withOrganizationAuth.mockImplementation((handler: any) => {
-      return (request: Request, context: any = { organizationId: 'org_1', userId: 'u1' }, params: any = { id: 'g1' }) =>
-        handler(request, context, params);
-    });
-    m.requireEntitlement.mockResolvedValue(undefined);
-    m.hasMinRole.mockResolvedValue(true);
+    resetCaller();
+    caller.params = { id: GRIEVANCE };
     m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true });
     m.getRelatedDocuments.mockResolvedValue([{ id: 'd1' }]);
     m.findSimilarCases.mockResolvedValue([{ id: 'g2' }]);
     m.findPrecedentDocuments.mockResolvedValue([{ id: 'p1' }]);
-    m.buildCaseGraph.mockResolvedValue({ nodes: [{ id: 'g1' }], edges: [] });
+    m.buildCaseGraph.mockResolvedValue({ nodes: [{ id: GRIEVANCE }], edges: [] });
     m.auditDataAccess.mockResolvedValue(undefined);
-    m.db.select = vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(() => ({
-          limit: vi.fn(async () => [{ id: 'g1', createdBy: 'u1' }]),
-        })),
-      })),
-    }));
+    m.db.select = grievanceRow('u1');
   });
 
-  it('returns validation error when grievance id is missing', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new Request('http://localhost/api/grievances/x/intelligence'), { organizationId: 'org_1', userId: 'u1' }, {});
-    expect([200, 400, 403, 404, 500]).toContain(response.status);
+  it('declares what it asks of the wrapper: a member, the case-suite entitlement and a tenant transaction', async () => {
+    await loadRoute();
+    const config = declared.find((entry) => entry.openapi?.summary === 'Case intelligence for a grievance');
+    expect(config?.auth).toEqual({ required: true, minRole: 'member' });
+    expect(config?.entitlement).toBe('grievance_case_suite');
+    expect(config?.rlsOrgContext).toBe(true);
   });
 
-  it('returns forbidden when member access is missing', async () => {
-    m.hasMinRole.mockResolvedValueOnce(false);
+  it('answers 400 for a grievance id that is not a uuid, reading nothing', async () => {
+    caller.params = { id: 'g1' };
     const { GET } = await loadRoute();
-    const response = await GET(new Request('http://localhost/api/grievances/g1/intelligence'));
-    expect([200, 403, 500]).toContain(response.status);
+    expect((await GET(get())).status).toBe(400);
+    expect(m.db.select).not.toHaveBeenCalled();
   });
 
-  it('returns intelligence payload', async () => {
+  it('answers 404 for a grievance of another organization and computes nothing', async () => {
+    m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => []) })) })) }));
     const { GET } = await loadRoute();
-    const response = await GET(new Request('http://localhost/api/grievances/g1/intelligence'));
-    expect([200, 400, 403, 404, 500]).toContain(response.status);
+    expect((await GET(get())).status).toBe(404);
+    expect(m.getRelatedDocuments).not.toHaveBeenCalled();
+  });
+
+  it('returns the intelligence payload and audits the read', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(get());
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.data).toEqual({
+      graph: { nodes: [{ id: GRIEVANCE }], edges: [] },
+      relatedDocuments: [{ id: 'd1' }],
+      similarCases: [{ id: 'g2' }],
+      precedentDocuments: [{ id: 'p1' }],
+    });
+    expect(m.auditDataAccess).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1', userId: 'u1', resource: 'case_intelligence', resourceId: GRIEVANCE }));
   });
 
   it('denies a steward-level user who has no case relationship and computes nothing', async () => {
-    m.hasMinRole.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: false });
-    m.db.select = vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(() => ({
-          limit: vi.fn(async () => [{ id: 'g1', createdBy: 'someone-else' }]),
-        })),
-      })),
-    }));
+    m.db.select = grievanceRow('someone-else');
     const { GET } = await loadRoute();
-    const response = await GET(new Request('http://localhost/api/grievances/g1/intelligence'));
+    const response = await GET(get());
     expect(response.status).toBe(403);
     expect(m.getRelatedDocuments).not.toHaveBeenCalled();
     expect(m.findSimilarCases).not.toHaveBeenCalled();
@@ -92,16 +95,10 @@ describe('grievances/[id]/intelligence route', () => {
   });
 
   it('never passes role seniority to the intelligence services', async () => {
-    m.db.select = vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(() => ({
-          limit: vi.fn(async () => [{ id: 'g1', createdBy: 'someone-else' }]),
-        })),
-      })),
-    }));
+    m.db.select = grievanceRow('someone-else');
     m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true });
     const { GET } = await loadRoute();
-    await GET(new Request('http://localhost/api/grievances/g1/intelligence'));
+    await GET(get());
     for (const call of [...m.getRelatedDocuments.mock.calls, ...m.findSimilarCases.mock.calls, ...m.buildCaseGraph.mock.calls]) {
       expect(call[0].actor).toEqual({ userId: 'u1' });
     }

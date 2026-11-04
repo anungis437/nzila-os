@@ -339,18 +339,16 @@ export async function suggestRelevantClauses(
  * @param organizationId - Current organization ID
  * @returns Array of peer organization IDs
  */
-export async function findPeerOrganizations(
-  organizationId: string
-): Promise<string[]> {
-  try {
-    const org = await db.query.organizations.findFirst({
-      where: eq(organizations.id, organizationId),
-    });
+type OrganizationRow = typeof organizations.$inferSelect;
 
-    if (!org) {
-      throw new Error('Organization not found');
-    }
-
+/**
+ * The peers of an organization: others of its type, province, size band and sector.
+ *
+ * A peer comparison reads rows of OTHER organizations, which no tenant transaction may see, so it runs as the system role (which holds SELECT
+ * on organizations); only aggregates computed from the peers leave this module (an average and a percentile), never a peer row. Must run
+ * inside withSystemContext.
+ */
+async function peerIdsOf(org: OrganizationRow): Promise<string[]> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filters: any[] = [
       eq(organizations.status, 'active'),
@@ -393,7 +391,30 @@ export async function findPeerOrganizations(
         )
       : peers;
 
-    return sectorFilteredPeers.map(p => p.id).filter(id => id !== organizationId);
+    return sectorFilteredPeers.map(p => p.id).filter(id => id !== org.id);
+}
+
+/**
+ * Find peer organizations based on size, sector, and province
+ * 
+ * @param organizationId - Current organization ID
+ * @returns Array of peer organization IDs
+ */
+export async function findPeerOrganizations(
+  organizationId: string
+): Promise<string[]> {
+  try {
+    return await withSystemContext(async () => {
+      const org = await db.query.organizations.findFirst({
+        where: eq(organizations.id, organizationId),
+      });
+
+      if (!org) {
+        throw new Error('Organization not found');
+      }
+
+      return peerIdsOf(org);
+    });
   } catch (error) {
     logger.error('Failed to find peer organizations', { error });
     throw error;
@@ -512,27 +533,32 @@ export async function getPeerBenchmarks(
   organizationId: string
 ): Promise<PeerBenchmark[]> {
   try {
-    const org = await db.query.organizations.findFirst({
-      where: eq(organizations.id, organizationId),
+    // The organization and its peers are read as the system role in one transaction (see peerIdsOf); the national average is a call to
+    // another service and is made after it, so no transaction waits on it.
+    const { org, peerCounts } = await withSystemContext(async () => {
+      const found = await db.query.organizations.findFirst({
+        where: eq(organizations.id, organizationId),
+      });
+
+      if (!found) {
+        throw new Error('Organization not found');
+      }
+
+      const peerIds = await peerIdsOf(found);
+      const peers = found.memberCount && peerIds.length > 0
+        ? await db.query.organizations.findMany({
+            where: inArray(organizations.id, peerIds),
+            columns: { memberCount: true },
+          })
+        : [];
+
+      return { org: found, peerCounts: peers.map(p => p.memberCount || 0).filter(c => c > 0) };
     });
-
-    if (!org) {
-      throw new Error('Organization not found');
-    }
-
-    const peerIds = await findPeerOrganizations(organizationId);
     const benchmarks: PeerBenchmark[] = [];
 
     // Member count benchmark
-    if (org.memberCount && peerIds.length > 0) {
-      const peers = await db.query.organizations.findMany({
-        where: inArray(organizations.id, peerIds),
-        columns: { memberCount: true },
-      });
-
-      const peerCounts = peers.map(p => p.memberCount || 0).filter(c => c > 0);
-      // A roster with no measured member counts cannot yield a meaningful average or percentile.
-      if (peerCounts.length === 0) return benchmarks;
+    if (org.memberCount && peerCounts.length > 0) {
+      // A roster with no measured member counts cannot yield a meaningful average or percentile (hence the length check above).
       const peerAverage = peerCounts.reduce((a, b) => a + b, 0) / peerCounts.length;
 
       // Calculate percentile (simplified)

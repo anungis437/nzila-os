@@ -4,135 +4,28 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  * 
  * Endpoints for managing social media campaigns.
  * Supports campaign CRUD, goal tracking, and performance analytics.
+ *
+ * None of these handlers calls out of the database, so each runs in the caller organization's tenant transaction (`rlsOrgContext`): the
+ * ambient `db` is that transaction, row-level security shows the organization's own campaigns, and a write commits together with its audit
+ * record.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { socialCampaigns, socialPosts } from '@/db/schema/social-media-schema';
-import { eq, and, ilike, or, gte, lte, desc, count, SQL } from 'drizzle-orm';
+import { eq, and, ilike, or, gte, lte, desc, count, inArray, SQL } from 'drizzle-orm';
 import { z } from "zod";
 import { summarizePosts, averageEngagementRate, figuresRecorded, goalProgress } from '@/lib/social-media/campaign-figures';
-import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
+import { parseSocialPostPagination } from '@/lib/social-media/social-post-pagination';
+import { withApi } from '@/lib/api/framework';
+import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-
-export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
-  try {
-      const { userId, organizationId } = context;
-
-      if (!organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
-      // Rate limit check
-      const rateLimitResult = await checkRateLimit(
-        `social-campaigns-read:${userId}`,
-        RATE_LIMITS.CAMPAIGN_OPERATIONS
-      );
-      if (!rateLimitResult.allowed) {
-        return standardErrorResponse(
-      ErrorCode.RATE_LIMIT_EXCEEDED,
-      'Rate limit exceeded',
-      { resetIn: rateLimitResult.resetIn }
-    );
-      }
-
-      // Parse query parameters
-      const searchParams = request.nextUrl.searchParams;
-      const status = searchParams.get('status');
-      const search = searchParams.get('search');
-      const startDate = searchParams.get('start_date');
-      const endDate = searchParams.get('end_date');
-      const limit = parseInt(searchParams.get('limit') || '50');
-      const offset = parseInt(searchParams.get('offset') || '0');
-
-      // Build query with Drizzle
-      const campaignConditions: SQL[] = [eq(socialCampaigns.organizationId, organizationId)];
-
-      if (status) {
-        campaignConditions.push(eq(socialCampaigns.status, status as typeof socialCampaigns.status._.data));
-      }
-
-      if (search) {
-        campaignConditions.push(or(
-          ilike(socialCampaigns.name, `%${search}%`),
-          ilike(socialCampaigns.description!, `%${search}%`),
-        )!);
-      }
-
-      if (startDate) {
-        campaignConditions.push(gte(socialCampaigns.startDate, startDate));
-      }
-
-      if (endDate) {
-        campaignConditions.push(lte(socialCampaigns.endDate!, endDate));
-      }
-
-      const [{ total: campaignTotal }] = await db
-        .select({ total: count() })
-        .from(socialCampaigns)
-        .where(and(...campaignConditions));
-
-      const campaigns = await db
-        .select()
-        .from(socialCampaigns)
-        .where(and(...campaignConditions))
-        .orderBy(desc(socialCampaigns.createdAt))
-        .limit(limit)
-        .offset(offset);
-
-      // Calculate campaign metrics
-      const campaignsWithMetrics = await Promise.all(
-        campaigns.map(async (campaign) => {
-          // Get post performance
-          const posts = await db
-            .select({
-              impressionsCount: socialPosts.impressionsCount,
-              reachCount: socialPosts.reachCount,
-              engagementRate: socialPosts.engagementRate,
-              likesCount: socialPosts.likesCount,
-              commentsCount: socialPosts.commentsCount,
-              sharesCount: socialPosts.sharesCount,
-            })
-            .from(socialPosts)
-            .where(and(eq(socialPosts.campaignId, campaign.id), eq(socialPosts.organizationId, campaign.organizationId)));
-
-          const metrics = summarizePosts(posts);
-
-          return {
-            ...campaign,
-            metrics,
-            figures_recorded: figuresRecorded(posts),
-            goal_progress: goalProgress(campaign, metrics, averageEngagementRate(posts)),
-          };
-        })
-      );
-
-      return NextResponse.json({
-        campaigns: campaignsWithMetrics,
-        total: campaignTotal,
-        limit,
-        offset,
-      });
-    } catch (_error) {
-return NextResponse.json(
-        {
-          error: 'Internal server error',
-        },
-        { status: 500 }
-      );
-    }
-});
-
 
 const campaignPlatforms = z.enum(['facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok']);
 const campaignStatuses = z.enum(['planning', 'active', 'paused', 'completed', 'cancelled']);
@@ -164,17 +57,162 @@ const socialMediaCampaignUpdateSchema = socialMediaCampaignsSchema.partial().ref
   'At least one campaign field is required',
 );
 
-export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
-  try {
-      const { userId, organizationId } = context;
+// A calendar day written YYYY-MM-DD that exists (2026-02-30 does not).
+const isDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
 
-      if (!organizationId) {
+// A malformed body is a client error, never a server fault.
+async function readJson(request: Request): Promise<{ ok: true; body: unknown } | { ok: false }> {
+  try {
+    return { ok: true, body: await request.json() };
+  } catch {
+    return { ok: false };
+  }
+}
+
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'List the social media campaigns of the organization with their figures' },
+  },
+  async ({ request, userId, organizationId: organization }) => {
+  const organizationId = organization!;
+  try {
+      // Rate limit check
+      const rateLimitResult = await checkRateLimit(
+        `social-campaigns-read:${userId}`,
+        RATE_LIMITS.CAMPAIGN_OPERATIONS
+      );
+      if (!rateLimitResult.allowed) {
         return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
+      ErrorCode.RATE_LIMIT_EXCEEDED,
+      'Rate limit exceeded',
+      { resetIn: rateLimitResult.resetIn }
+    );
       }
 
+      // Parse query parameters: every one is checked before it reaches a query
+      const searchParams = request.nextUrl.searchParams;
+      const pagination = parseSocialPostPagination(searchParams, { limit: 50 });
+      if (!pagination) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'limit must be 1-100 and offset must be 0-10000');
+      }
+      const { limit, offset } = pagination;
+
+      const rawStatus = searchParams.get('status');
+      const status = rawStatus ? campaignStatuses.safeParse(rawStatus) : null;
+      if (status && !status.success) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid campaign status');
+      }
+
+      const search = searchParams.get('search');
+      if (search !== null && search.length > 200) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Search is too long');
+      }
+
+      const startDate = searchParams.get('start_date');
+      const endDate = searchParams.get('end_date');
+      if ((startDate && !isDay(startDate)) || (endDate && !isDay(endDate))) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'start_date and end_date must be valid YYYY-MM-DD dates');
+      }
+
+      // Build query with Drizzle
+      const campaignConditions: SQL[] = [eq(socialCampaigns.organizationId, organizationId)];
+
+      if (status?.success) {
+        campaignConditions.push(eq(socialCampaigns.status, status.data));
+      }
+
+      if (search) {
+        campaignConditions.push(or(
+          ilike(socialCampaigns.name, `%${search}%`),
+          ilike(socialCampaigns.description!, `%${search}%`),
+        )!);
+      }
+
+      if (startDate) {
+        campaignConditions.push(gte(socialCampaigns.startDate, startDate));
+      }
+
+      if (endDate) {
+        campaignConditions.push(lte(socialCampaigns.endDate!, endDate));
+      }
+
+      const [{ total: campaignTotal }] = await db
+        .select({ total: count() })
+        .from(socialCampaigns)
+        .where(and(...campaignConditions));
+
+      const campaigns = await db
+        .select()
+        .from(socialCampaigns)
+        .where(and(...campaignConditions))
+        .orderBy(desc(socialCampaigns.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      // The post performance of every campaign of the page, in one statement
+      const postRows = campaigns.length === 0
+        ? []
+        : await db
+          .select({
+            campaignId: socialPosts.campaignId,
+            impressionsCount: socialPosts.impressionsCount,
+            reachCount: socialPosts.reachCount,
+            engagementRate: socialPosts.engagementRate,
+            likesCount: socialPosts.likesCount,
+            commentsCount: socialPosts.commentsCount,
+            sharesCount: socialPosts.sharesCount,
+          })
+          .from(socialPosts)
+          .where(and(inArray(socialPosts.campaignId, campaigns.map((campaign) => campaign.id)), eq(socialPosts.organizationId, organizationId)));
+      const postsByCampaign = new Map<string, typeof postRows>();
+      for (const post of postRows) {
+        if (!post.campaignId) continue;
+        postsByCampaign.set(post.campaignId, [...(postsByCampaign.get(post.campaignId) ?? []), post]);
+      }
+
+      // Calculate campaign metrics
+      const campaignsWithMetrics = campaigns.map((campaign) => {
+        const posts = postsByCampaign.get(campaign.id) ?? [];
+        const metrics = summarizePosts(posts);
+
+        return {
+          ...campaign,
+          metrics,
+          figures_recorded: figuresRecorded(posts),
+          goal_progress: goalProgress(campaign, metrics, averageEngagementRate(posts)),
+        };
+      });
+
+      return NextResponse.json({
+        campaigns: campaignsWithMetrics,
+        total: campaignTotal,
+        limit,
+        offset,
+      });
+    } catch (error) {
+      logger.error('Failed to list the social media campaigns', { error });
+      return NextResponse.json(
+        {
+          error: 'Internal server error',
+        },
+        { status: 500 }
+      );
+    }
+  },
+);
+
+export const POST = withApi(
+  {
+    auth: { minRole: 'steward' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'Create a social media campaign' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
+  try {
       // Rate limit check
       const rateLimitResult = await checkRateLimit(
         `social-campaigns-create:${userId}`,
@@ -188,16 +226,12 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
     );
       }
 
-      if (!organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
+      const read = await readJson(request);
+      if (!read.ok) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
       }
-
-      const body = await request.json();
     // Validate request body
-    const validation = socialMediaCampaignsSchema.safeParse(body);
+    const validation = socialMediaCampaignsSchema.safeParse(read.body);
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
@@ -238,62 +272,60 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       // Goals are mapped to real persisted columns; unsupported metrics are rejected by the schema.
       const goalByMetric = new Map((goals ?? []).map(goal => [goal.metric, goal.target_value]));
 
-      // Create campaign and record the audit together
-      const campaign = await withRLSContext({ organizationId }, async (tx) => {
-        const [row] = await tx
-          .insert(socialCampaigns)
-          .values({
-            organizationId,
-            name,
-            description,
-            platforms: platforms || [],
-            startDate: start_date ? start_date.split('T')[0] : new Date().toISOString().split('T')[0],
-            endDate: end_date ? end_date.split('T')[0] : null,
-            campaignHashtags: hashtags ?? [],
-            targetAudience: target_audience,
-            status: status ?? 'planning',
-            goalImpressions: goalByMetric.get('impressions') ?? null,
-            goalEngagementRate: goalByMetric.has('engagement_rate')
-              ? goalByMetric.get('engagement_rate')!.toFixed(2) : null,
-            goalConversions: goalByMetric.get('conversions') ?? null,
-            createdBy: userId,
-          })
-          .returning();
-        await persistAtomicAudit(tx, {
+      // Create campaign and record the audit together: both statements are in the tenant transaction of the request
+      const [campaign] = await db
+        .insert(socialCampaigns)
+        .values({
           organizationId,
-          userId,
-          action: 'social.campaign.create',
-          resourceType: 'social_campaigns',
-          resourceId: row.id,
-          details: { name, platforms },
-        });
-        return row;
+          name,
+          description,
+          platforms: platforms || [],
+          startDate: start_date ? start_date.split('T')[0] : new Date().toISOString().split('T')[0],
+          endDate: end_date ? end_date.split('T')[0] : null,
+          campaignHashtags: hashtags ?? [],
+          targetAudience: target_audience,
+          status: status ?? 'planning',
+          goalImpressions: goalByMetric.get('impressions') ?? null,
+          goalEngagementRate: goalByMetric.has('engagement_rate')
+            ? goalByMetric.get('engagement_rate')!.toFixed(2) : null,
+          goalConversions: goalByMetric.get('conversions') ?? null,
+          createdBy: userId,
+        })
+        .returning();
+      await persistAtomicAudit(db, {
+        organizationId,
+        userId,
+        action: 'social.campaign.create',
+        resourceType: 'social_campaigns',
+        resourceId: campaign.id,
+        details: { name, platforms },
       });
 
       return standardSuccessResponse(
       {  campaign  }
     );
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      logger.error('Failed to create the social media campaign', { error });
+      return NextResponse.json(
         {
           error: 'Failed to create campaign',
         },
         { status: 500 }
       );
     }
-});
+  },
+);
 
-export const PUT = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+export const PUT = withApi(
+  {
+    auth: { minRole: 'steward' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'Update a social media campaign' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
   try {
-      const { userId, organizationId } = context;
-
-      if (!organizationId || !userId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
       // Get campaign ID from query params
       const searchParams = request.nextUrl.searchParams;
       const campaignId = searchParams.get('id');
@@ -303,6 +335,9 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
       ErrorCode.MISSING_REQUIRED_FIELD,
       'Campaign ID required'
     );
+      }
+      if (!z.guid().safeParse(campaignId).success) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Campaign ID must be a valid id');
       }
 
       // Verify user has access to this campaign
@@ -319,7 +354,11 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
     );
       }
 
-      const parsed = socialMediaCampaignUpdateSchema.safeParse(await request.json());
+      const read = await readJson(request);
+      if (!read.ok) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+      }
+      const parsed = socialMediaCampaignUpdateSchema.safeParse(read.body);
       if (!parsed.success) {
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid campaign update', parsed.error.flatten());
       }
@@ -334,6 +373,13 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
             ErrorCode.VALIDATION_ERROR,
             'Start date must be before end date'
           );
+        }
+      } else if (start_date !== undefined || end_date !== undefined) {
+        // One date changes while the other stays as stored: the campaign must still start before it ends
+        const nextStart = start_date !== undefined ? start_date.split('T')[0] : campaign.startDate;
+        const nextEnd = end_date !== undefined ? end_date.split('T')[0] : campaign.endDate;
+        if (nextEnd && nextStart > nextEnd) {
+          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Start date must be before end date');
         }
       }
 
@@ -357,49 +403,46 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
         updateData.goalConversions = goalByMetric.get('conversions') ?? null;
       }
 
-      const updatedCampaign = await withRLSContext({ organizationId }, async (tx) => {
-        const [row] = await tx
-          .update(socialCampaigns)
-          .set(updateData)
-          .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
-          .returning();
-        if (!row) return null;
-        await persistAtomicAudit(tx, {
-          organizationId,
-          userId,
-          action: 'social.campaign.update',
-          resourceType: 'social_campaigns',
-          resourceId: campaignId,
-          details: { fields: Object.keys(updateData).filter((key) => key !== 'updatedAt') },
-        });
-        return row;
-      });
+      const [updatedCampaign] = await db
+        .update(socialCampaigns)
+        .set(updateData)
+        .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
+        .returning();
       if (!updatedCampaign) {
         return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Campaign not found');
       }
+      await persistAtomicAudit(db, {
+        organizationId,
+        userId,
+        action: 'social.campaign.update',
+        resourceType: 'social_campaigns',
+        resourceId: campaignId,
+        details: { fields: Object.keys(updateData).filter((key) => key !== 'updatedAt') },
+      });
 
       return NextResponse.json({ campaign: updatedCampaign });
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      logger.error('Failed to update the social media campaign', { error });
+      return NextResponse.json(
         {
           error: 'Failed to update campaign',
         },
         { status: 500 }
       );
     }
-});
+  },
+);
 
-export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+export const DELETE = withApi(
+  {
+    auth: { minRole: 'steward' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'Delete a social media campaign that has no posts' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
   try {
-      const { userId, organizationId } = context;
-
-      if (!organizationId || !userId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
       // Get campaign ID from query params
       const searchParams = request.nextUrl.searchParams;
       const campaignId = searchParams.get('id');
@@ -409,6 +452,9 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       ErrorCode.MISSING_REQUIRED_FIELD,
       'Campaign ID required'
     );
+      }
+      if (!z.guid().safeParse(campaignId).success) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Campaign ID must be a valid id');
       }
 
       // Verify user has access to this campaign
@@ -425,11 +471,11 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
     );
       }
 
-      // Check if campaign has posts
+      // Check if campaign has posts (of this organization)
       const postsCheck = await db
         .select({ id: socialPosts.id })
         .from(socialPosts)
-        .where(eq(socialPosts.campaignId, campaignId))
+        .where(and(eq(socialPosts.campaignId, campaignId), eq(socialPosts.organizationId, organizationId)))
         .limit(1);
 
       if (postsCheck.length > 0) {
@@ -443,36 +489,34 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       }
 
       // Delete campaign and record the audit together
-      const removed = await withRLSContext({ organizationId }, async (tx) => {
-        const rows = await tx
-          .delete(socialCampaigns)
-          .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
-          .returning({ id: socialCampaigns.id });
-        if (rows.length === 0) return false;
-        await persistAtomicAudit(tx, {
-          organizationId,
-          userId,
-          action: 'social.campaign.delete',
-          resourceType: 'social_campaigns',
-          resourceId: campaignId,
-          details: { name: campaign.name },
-        });
-        return true;
-      });
-      if (!removed) {
+      const removedRows = await db
+        .delete(socialCampaigns)
+        .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
+        .returning({ id: socialCampaigns.id });
+      if (removedRows.length === 0) {
         return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Campaign not found');
       }
+      await persistAtomicAudit(db, {
+        organizationId,
+        userId,
+        action: 'social.campaign.delete',
+        resourceType: 'social_campaigns',
+        resourceId: campaignId,
+        details: { name: campaign.name },
+      });
 
       return NextResponse.json({
         message: 'Campaign deleted successfully',
         campaign_id: campaignId,
       });
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      logger.error('Failed to delete the social media campaign', { error });
+      return NextResponse.json(
         {
           error: 'Failed to delete campaign',
         },
         { status: 500 }
       );
     }
-});
+  },
+);

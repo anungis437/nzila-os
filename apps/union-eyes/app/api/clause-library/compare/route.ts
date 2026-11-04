@@ -18,6 +18,7 @@ import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
 import { commonKeywords } from '@/lib/clause-library/common-keywords';
+import { clauseDifferences } from '@/lib/clause-library/comparison-differences';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
@@ -74,7 +75,11 @@ export const POST = withApi(
       if (authorizedIds.length === 0) {
         return {
           clauses: [],
-          analysis: { statistics: { totalClauses: 0, averageTextLength: 0, uniqueTypes: 0, uniqueSectors: 0 }, commonKeywords: [] },
+          analysis: {
+            statistics: { totalClauses: 0, averageTextLength: 0, uniqueTypes: 0, uniqueSectors: 0, uniqueProvinces: 0 },
+            commonKeywords: [],
+            differences: clauseDifferences([]),
+          },
         };
       }
 
@@ -122,8 +127,7 @@ export const POST = withApi(
       });
 
       // Basic analysis
-      const types = new Set(clauses.map((c) => c.clauseType));
-      const sectorSet = new Set(clauses.map((c) => c.sector).filter(Boolean));
+      const differences = clauseDifferences(clauses);
       const totalTextLength = clauses.reduce((sum, c) => sum + (c.clauseText?.length || 0), 0);
 
       return {
@@ -132,10 +136,12 @@ export const POST = withApi(
           statistics: {
             totalClauses: clauses.length,
             averageTextLength: clauses.length > 0 ? Math.round(totalTextLength / clauses.length) : 0,
-            uniqueTypes: types.size,
-            uniqueSectors: sectorSet.size,
+            uniqueTypes: differences.clauseTypes.length,
+            uniqueSectors: differences.sectors.length,
+            uniqueProvinces: differences.provinces.length,
           },
           commonKeywords: commonKeywords(clauses.map((c) => c.clauseText)),
+          differences,
         },
       };
     });

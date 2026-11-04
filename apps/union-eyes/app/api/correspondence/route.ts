@@ -43,6 +43,7 @@ const createSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     openapi: { tags: ["Correspondence"], summary: "List correspondence" },
   },

@@ -22,7 +22,6 @@ const PUBLIC_BY_DESIGN: Record<string, string> = {
   'communications/unsubscribe/[recipientId]/route.ts': 'Recipient unsubscribe by a signed, action-bound link: the token names the recipient, campaign or scope, and the write is confined to that organization.',
   'icra/telemetry/route.ts': 'Anonymous product telemetry for the public assessment; rate limited to 60 requests a minute.',
   'staging-proof/deadline-engine/scenario/route.ts': 'Staging proof harness. Answers only an image built for staging (build-time NEXT_PUBLIC_APP_ENV), with the runtime switches, an HMAC over a fresh timestamp and a single-use nonce; every run creates and retires its own synthetic organization.',
-  'whop/unauthenticated-checkout/route.ts': 'Pre-account checkout; creates a Whop checkout session and always redirects to signup.',
   'workbook/checkout/route.ts': 'Public workbook purchase; verifies the workbook exists, then creates a Stripe checkout.',
   'workbook/start/route.ts': 'Public pseudonymous intake: creates a workbook with no tenant and no access to tenant data; the id is a bearer reference until an authenticated user claims it.',
 }
@@ -49,7 +48,6 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
       'communications/unsubscribe/[recipientId]/route.ts': /verifyTrackingToken\(/,
       'workbook/start/route.ts': /guardPublicIntake/,
       'workbook/checkout/route.ts': /guardPublicIntake/,
-      'whop/unauthenticated-checkout/route.ts': /guardPublicIntake/,
       'icra/telemetry/route.ts': /checkRateLimit\(/,
       'staging-proof/deadline-engine/scenario/route.ts': /BUILD_APP_ENV:\s*process\.env\.NEXT_PUBLIC_APP_ENV/,
     };

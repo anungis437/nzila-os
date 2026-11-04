@@ -304,6 +304,18 @@ describe('FEATURE_FLAGS', () => {
     expect(FEATURE_FLAGS.AI_CHATBOT).toBe('ai-chatbot');
     expect(FEATURE_FLAGS.DOCUSIGN_INTEGRATION).toBe('docusign-integration');
     expect(FEATURE_FLAGS.STRIPE_PAYMENTS).toBe('stripe-payments');
-    expect(Object.keys(FEATURE_FLAGS).length).toBe(10);
+    // The Whop integration is retired (its checkout routes, action and processor are deleted), and its flag went with it.
+    expect(FEATURE_FLAGS).not.toHaveProperty('WHOP_PAYMENTS');
+    expect(Object.keys(FEATURE_FLAGS).sort()).toEqual([
+      'ADVANCED_ANALYTICS',
+      'AI_CHATBOT',
+      'CLC_SYNC',
+      'CONGRESS_SHARING',
+      'DOCUSIGN_INTEGRATION',
+      'ML_PREDICTIONS',
+      'MOBILE_APP',
+      'STRIPE_PAYMENTS',
+      'VOICE_TRANSCRIPTION',
+    ]);
   });
 });

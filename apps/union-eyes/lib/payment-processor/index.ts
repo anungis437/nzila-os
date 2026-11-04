@@ -2,7 +2,7 @@
  * Payment Processor Abstraction Layer - Main Export
  * 
  * This module provides a unified interface for working with multiple
- * payment processors (Stripe, Whop, PayPal, Square, etc.)
+ * payment processors (Stripe, PayPal, Square, etc.)
  * 
  * Usage Example:
  * ```typescript
@@ -32,7 +32,6 @@ export { BasePaymentProcessor, mapProcessorStatus } from './processors/base-proc
 
 // Implemented processors
 export { StripeProcessor } from './processors/stripe-processor';
-export { WhopProcessor } from './processors/whop-processor';
 
 // Future processors
 export { PayPalProcessor, SquareProcessor, ManualProcessor } from './processors/future-processors';

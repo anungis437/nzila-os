@@ -4,8 +4,7 @@
  */
 
 import { z } from 'zod';
-import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -36,62 +35,62 @@ const createSchema = z.object({
   netTermsDays: z.number().int().min(1).max(120).optional(),
 });
 
-export const GET = withMinRole('secretary_treasurer', async (_request, context: BaseAuthContext) => {
-  const { organizationId, userId } = context;
-  if (!organizationId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-  try {
-    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
-
-  try {
-    const account = await getBillingAccount(organizationId);
-    if (!account) {
-      return standardErrorResponse(ErrorCode.NOT_FOUND, 'No billing account found');
+// The billing account is the caller organization's own row: the handlers run in that organization's tenant transaction, so the
+// ambient handle the billing service reads and writes through carries the organization row-level security applies to.
+export const GET = withApi(
+  {
+    auth: { minRole: 'secretary_treasurer' },
+    entitlement: 'financial_intelligence_suite',
+    rlsOrgContext: true,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'Get the billing account of the current organization' },
+  },
+  async ({ organizationId }) => {
+    try {
+      const account = await getBillingAccount(organizationId!);
+      if (!account) {
+        return standardErrorResponse(ErrorCode.NOT_FOUND, 'No billing account found');
+      }
+      return standardSuccessResponse(account);
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch billing account', error);
     }
-    return standardSuccessResponse(account);
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch billing account', error);
-  }
-});
+  },
+);
 
-export const POST = withMinRole('admin', async (request, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-  if (!organizationId || !userId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-  try {
-    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
+export const POST = withApi(
+  {
+    auth: { minRole: 'admin' },
+    entitlement: 'financial_intelligence_suite',
+    rlsOrgContext: true,
+    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'Create the billing account of the current organization' },
+  },
+  async ({ request, organizationId, userId }) => {
+    let rawBody: any;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
+    }
 
-  let rawBody: any;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
-  }
+    const parsed = createSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
+    }
 
-  const parsed = createSchema.safeParse(rawBody);
-  if (!parsed.success) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
-  }
-
-  try {
-    const account = await createBillingAccount({
-      organizationId,
-      ...parsed.data,
-      createdBy: userId,
-    });
-    return standardSuccessResponse(account);
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to create billing account', error);
-  }
-});
+    try {
+      const account = await createBillingAccount({
+        organizationId: organizationId!,
+        ...parsed.data,
+        createdBy: userId!,
+      });
+      return standardSuccessResponse(account);
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to create billing account', error);
+    }
+  },
+);
 
 const updateSchema = z.object({
   displayName: z.string().min(1).max(255).optional(),
@@ -110,36 +109,35 @@ const updateSchema = z.object({
   netTermsDays: z.number().int().min(1).max(120).optional(),
 });
 
-export const PATCH = withMinRole('admin', async (request, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-  if (!organizationId || !userId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-  try {
-    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
-
-  let rawBody: any;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
-  }
-
-  const parsed = updateSchema.safeParse(rawBody);
-  if (!parsed.success) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
-  }
-
-  try {
-    const updated = await updateBillingAccount(organizationId, parsed.data, userId);
-    if (!updated) {
-      return standardErrorResponse(ErrorCode.NOT_FOUND, 'No billing account found');
+export const PATCH = withApi(
+  {
+    auth: { minRole: 'admin' },
+    entitlement: 'financial_intelligence_suite',
+    rlsOrgContext: true,
+    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'Update the billing account of the current organization' },
+  },
+  async ({ request, organizationId, userId }) => {
+    let rawBody: any;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
     }
-    return standardSuccessResponse(updated);
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to update billing account', error);
-  }
-});
+
+    const parsed = updateSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
+    }
+
+    try {
+      const updated = await updateBillingAccount(organizationId!, parsed.data, userId!);
+      if (!updated) {
+        return standardErrorResponse(ErrorCode.NOT_FOUND, 'No billing account found');
+      }
+      return standardSuccessResponse(updated);
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to update billing account', error);
+    }
+  },
+);

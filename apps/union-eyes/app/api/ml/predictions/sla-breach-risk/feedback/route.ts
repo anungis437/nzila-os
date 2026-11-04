@@ -134,14 +134,17 @@ export const POST = withApi(
     const { prediction, model, absError, stats } = result;
 
     // Pilot tracking is usage telemetry, not a governed change: the feedback is committed, so a telemetry failure must not turn a
-    // recorded result into an error response.
-    await trackPilotEvent({
-      userId: userId ?? 'system:ml-feedback',
-      organizationId,
-      sessionId: `ml-feedback:${prediction.id}`,
-      eventType: 'feedback_submitted',
-      metadata: { predictionId: prediction.id, modelVersion: model.version, absError, retrainRecommended: stats.retrainRecommended },
-    }).catch((error) => logger.warn('sla feedback pilot event was not recorded', { error: String(error) }));
+    // recorded result into an error response. The event is written in the organization's own context (its table shows nothing,
+    // and accepts nothing, outside one).
+    await withRLSContext({ organizationId }, async (tx) =>
+      trackPilotEvent({
+        userId: userId ?? 'system:ml-feedback',
+        organizationId,
+        sessionId: `ml-feedback:${prediction.id}`,
+        eventType: 'feedback_submitted',
+        metadata: { predictionId: prediction.id, modelVersion: model.version, absError, retrainRecommended: stats.retrainRecommended },
+      }, tx),
+    ).catch((error) => logger.warn('sla feedback pilot event was not recorded', { error: String(error) }));
 
     return {
       predictionId: prediction.id,

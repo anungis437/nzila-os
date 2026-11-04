@@ -17,7 +17,7 @@ import { pilotEnrollments } from "@/db/schema/domains/pilot/pilot-enrollments";
 import { pilotMilestones } from "@/db/schema/domains/pilot/pilot-milestones";
 import { organizations } from "@/db/schema-organizations";
 import { asc, eq, inArray, sql } from "drizzle-orm";
-import { operationAuditResponse, performAtomicAuditedOperation } from "@/lib/audit/operation-audit";
+import { operationAuditResponse, performAtomicSystemAuditedOperation } from "@/lib/audit/operation-audit";
 import { DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import type { PilotMilestone } from "@/types/marketing";
 
@@ -57,9 +57,8 @@ export async function GET(request?: Request) {
     const limit = boundedInteger(params.get("limit"), DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
     const offset = boundedInteger(params.get("offset"), 0, 0, 1_000_000);
 
-    const page = await performAtomicAuditedOperation(
+    const page = await performAtomicSystemAuditedOperation(
       {
-        scope: "system",
         organizationId: user.organizationId ?? DEFAULT_ORGANIZATION_ID,
         userId: user.userId,
         action: "pilot.overview.read",

@@ -43,12 +43,14 @@ describe('Gate 0: stored organization security settings must not masquerade as e
 
   it('keeps the warning visible after reload and refuses to claim a failed save succeeded', () => {
     const screen = source('app/[locale]/dashboard/settings/_components/org-settings-content.tsx');
-    expect(screen).toContain('setNotEnforced(Array.isArray(json.data.notEnforced)');
+    expect(screen).toContain('setNotEnforced(entriesOf(data.notEnforced))');
     expect(screen).toContain('Stored preferences, not enforced controls');
     expect(screen).toContain('Préférences enregistrées, non appliquées');
     expect(screen).toContain('role="status"');
-    expect(screen).toContain("if (!res.ok || !json.success || json.data?.updated !== true)");
-    expect(screen).toContain('setSaveError(true)');
+    // A save is a success only when the route says it updated; any other answer is an error the person sees, with their edits kept.
+    expect(screen).toContain('if (!res.ok) throw new Error(await readApiError(res,');
+    expect(screen).toContain('if (data === null || data.updated !== true) {');
+    expect(screen).toContain('setSaveError(failure instanceof Error && failure.message');
     expect(screen).toContain('Settings were not saved. Your changes are preserved');
     expect(screen).toContain('setHasChanges(false)');
   });

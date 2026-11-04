@@ -26,8 +26,7 @@ const state = vi.hoisted(() => ({
 }));
 state.kernel = NO_KERNEL;
 
-vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: (handler: (...args: unknown[]) => unknown) => handler }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: vi.fn(async () => undefined) }));
+vi.mock('@/lib/api/framework', async () => (await import('@/app/api/__tests__/support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: async (role: string) => role === 'member' }));
 vi.mock('@/db/db', () => ({ db: new Proxy({}, { get: (_t, p) => { const d = state.db as Record<PropertyKey, unknown> | null; const v = d?.[p]; return typeof v === 'function' ? (v as (...a: unknown[]) => unknown).bind(d) : v; } }) }));
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -48,13 +47,20 @@ vi.mock('@/lib/documents/ocr-extract', () => ({
 
 const { createDocumentDatabase, resetDocumentDatabase } = await import('@/lib/documents/test-support/pglite-document-database');
 const { POST: ocr } = await import('@/app/api/documents/[id]/ocr/route');
+const stub = await import('@/app/api/__tests__/support/with-api-stub');
 
 let pg: PGlite;
 const q = (text: string, params: unknown[] = []) => pg.query(text, params);
 const sha = (value: string) => createHash('sha256').update(value).digest('hex');
 const KEY = `documents/${ORG}/file-1`;
-const run = (userId = PEER, docId = DOC, organizationId = ORG) =>
-  ocr(new Request(`https://t.test/api/documents/${docId}/ocr`, { method: 'POST' }) as never, { organizationId, userId }, { id: docId });
+const run = (userId = PEER, docId = DOC, organizationId = ORG) => {
+  // The wrapper resolves the caller (a member of the organization) and the route params.
+  stub.resetCaller();
+  stub.caller.organizationId = organizationId;
+  stub.caller.userId = userId;
+  stub.caller.role = 'member';
+  return ocr(new Request(`https://t.test/api/documents/${docId}/ocr`, { method: 'POST' }) as never, { params: { id: docId } });
+};
 const revisionCount = async () => (await q('SELECT 1 FROM document_transcript_revisions')).rows.length;
 const audits = async () => (await q('SELECT action FROM audit_security.audit_logs')).rows.map((r) => (r as { action: string }).action);
 

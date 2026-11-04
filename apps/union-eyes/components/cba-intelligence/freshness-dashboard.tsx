@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
+import { useOperationalHealth } from "./use-operational-health";
 import {
   Card,
   CardContent,
@@ -39,22 +41,6 @@ interface FreshnessOverview {
     expired: number;
     unknown: number;
     total: number;
-  };
-}
-
-interface FreshnessResponse {
-  success: boolean;
-  data: FreshnessOverview;
-}
-
-interface OperationalHealthResponse {
-  success: boolean;
-  data: {
-    checks: Array<{
-      name: string;
-      level: "healthy" | "warning" | "critical";
-      detail: string;
-    }>;
   };
 }
 
@@ -118,22 +104,24 @@ export function FreshnessDashboard() {
     expiredDays: String(expiredDays),
   });
 
-  const { data, isLoading, error } = useQuery<FreshnessResponse>({
+  const { data: overview, isLoading, error } = useQuery<FreshnessOverview>({
     queryKey: ["cba-intel-freshness", agingDays, staleDays, expiredDays],
-    queryFn: () => fetch(`/api/cba-intelligence/freshness?${freshnessQuery}`).then((r) => r.json()),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/freshness?${freshnessQuery}`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, t("loadError")));
+      const freshness: FreshnessOverview = envelopeData(body) as unknown as FreshnessOverview;
+      return freshness;
+    },
     refetchInterval: 60_000,
   });
 
-  const { data: healthData } = useQuery<OperationalHealthResponse>({
-    queryKey: ["cba-intel-operational-health"],
-    queryFn: () => fetch("/api/cba-intelligence/health").then((r) => r.json()),
-    refetchInterval: 60_000,
-  });
+  const { data: health } = useOperationalHealth();
 
-  const overview = data?.data;
   const sources = overview?.sources ?? [];
   const summary = overview?.summary;
-  const sourceFreshnessHealth = healthData?.data.checks.find((c) => c.name === "source_freshness");
+  const sourceFreshnessHealth = health?.checks.find((c) => c.name === "source_freshness");
   const showFreshnessAlert = sourceFreshnessHealth && sourceFreshnessHealth.level !== "healthy";
 
   const pieData = summary
@@ -273,7 +261,7 @@ export function FreshnessDashboard() {
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">{t("loading")}</div>
             ) : error ? (
-              <div className="text-center py-8 text-red-500">{t("loadError")}</div>
+              <div role="alert" className="text-center py-8 text-red-500">{failureText(error, t("loadError"))}</div>
             ) : sources.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">{t("noSources")}</div>
             ) : (

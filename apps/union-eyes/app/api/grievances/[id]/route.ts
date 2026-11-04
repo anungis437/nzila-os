@@ -4,13 +4,11 @@
  * GET /api/grievances/[id] — Fetch grievance detail with events
  */
 
-import { NextRequest as _NextRequest, NextResponse as _NextResponse } from "next/server";
 import { db } from "@/db/db";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { documents, documentAccessGrants, documentLinks } from "@/db/schema/documents-schema";
-import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { getEffectiveCaseAccess, listCaseCollaborators } from "@/lib/services/case-access-service";
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from "@/lib/services/document-governance-service";
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
@@ -20,32 +18,34 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, and, desc, sql } from "drizzle-orm";
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
-export const GET = withOrganizationAuth(async (request, context, params?: { id: string }) => {
-  const { organizationId, userId } = context;
-  await requireEntitlement(organizationId, 'grievance_case_suite');
-
-  try {
-    if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-    const canAccess = await hasMinRole("member");
-    if (!canAccess) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "Unauthorized");
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    entitlement: 'grievance_case_suite',
+    // Every read below goes through the ambient handle, so the handler runs in the caller's organization transaction.
+    rlsOrgContext: true,
+    openapi: { tags: ['Grievances'], summary: 'Fetch a grievance with its events and governed documents' },
+  },
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) {
+      throw ApiError.forbidden('Organization context required — select an organization before accessing this resource');
+    }
+    const grievanceId = params.id;
+    if (!grievanceId || !zUUID.safeParse(grievanceId).success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid grievance ID");
     }
 
-    const [grievance] = await withRLSContext({ organizationId }, async () => {
-      const rows = await db
-        .select()
-        .from(grievances)
-        .where(
-          and(
-            eq(grievances.id, params.id),
-            eq(grievances.organizationId, organizationId),
-          ),
-        );
-      return rows;
-    });
+    const [grievance] = await db
+      .select()
+      .from(grievances)
+      .where(
+        and(
+          eq(grievances.id, grievanceId),
+          eq(grievances.organizationId, organizationId),
+        ),
+      );
 
     if (!grievance) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
@@ -55,11 +55,9 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     // active unexpired case-access assignment may read this grievance.
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
-      grievanceId: params.id,
+      grievanceId,
       userId,
     });
-    // Collaborator administration is a case-management power held by the primary owner, not by role seniority.
-    const effectiveAccessForResponse = effectiveAccess;
 
     if (grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have access to this grievance.");
@@ -69,7 +67,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     const events = await db
       .select()
       .from(grievanceEvents)
-      .where(eq(grievanceEvents.grievanceId, params.id))
+      .where(eq(grievanceEvents.grievanceId, grievanceId))
       .orderBy(desc(grievanceEvents.createdAt));
 
     // Governed repository documents linked to this case/grievance.
@@ -92,7 +90,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
         and(
           eq(documents.organizationId, organizationId),
           eq(documentLinks.organizationId, organizationId),
-          sql`${documentLinks.linkedEntityId} = ${params.id}::uuid`,
+          sql`${documentLinks.linkedEntityId} = ${grievanceId}::uuid`,
           sql`${documents.deletedAt} IS NULL`,
         ),
       )
@@ -118,9 +116,9 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     const governedDocuments = linkedDocuments.filter((doc) =>
       isDocumentVisibleByPolicy(toGovernanceLabel({ privacyLabel: doc.privacyLabel ?? undefined }), {
         isOrgMember: true,
-        isPrimaryOwner: effectiveAccessForResponse.isPrimaryOwner,
-        hasCaseAccess: grievance.createdBy === userId || effectiveAccessForResponse.canViewCase,
-        canViewPrivateDocuments: effectiveAccessForResponse.canViewPrivateDocuments,
+        isPrimaryOwner: effectiveAccess.isPrimaryOwner,
+        hasCaseAccess: grievance.createdBy === userId || effectiveAccess.canViewCase,
+        canViewPrivateDocuments: effectiveAccess.canViewPrivateDocuments,
         hasExplicitDocumentGrant: explicitGrantIds.has(doc.id),
       }),
     );
@@ -129,10 +127,10 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       await trackPilotEvent({
         userId,
         organizationId,
-        sessionId: `server:${params.id}`,
+        sessionId: `server:${grievanceId}`,
         eventType: 'document_accessed',
         metadata: {
-          grievanceId: params.id,
+          grievanceId,
           governedCount: governedDocuments.length,
         },
       });
@@ -140,7 +138,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
 
     // The roster shows who holds live kernel relationships to this case; expiry is evaluated by the kernel.
     const collaborators = effectiveAccess.canViewCase
-      ? await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, params.id))
+      ? await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, grievanceId))
       : [];
     const primaryLroId = collaborators.find((c) => c.relation !== 'collaborator')?.userId ?? null;
 
@@ -151,9 +149,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       governedDocuments,
       primaryLroId,
       collaborators,
-      effectiveAccess: effectiveAccessForResponse,
+      effectiveAccess,
     });
-  } catch (_error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to fetch grievance");
-  }
-});
+  },
+);

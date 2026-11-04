@@ -50,7 +50,7 @@ export function CreateProgramDialog() {
       const result = await createRecognitionProgram(data);
       
       if (!result.success) {
-        setError(result.error || t('error', { defaultValue: 'Failed to create program' }));
+        setError(('error' in result && result.error) || t('error', { defaultValue: 'Failed to create program' }));
         setLoading(false);
         return;
       }

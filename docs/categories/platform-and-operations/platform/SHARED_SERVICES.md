@@ -6,13 +6,13 @@ The platform layer provides shared services that all apps consume through typed 
 
 ## Platform Auth (`@nzila/platform-auth`)
 
-Shared authentication and authorization layer that wraps Clerk and provides platform-level abstractions.
+Shared authentication and authorization layer that resolves identity through Microsoft Entra ID and provides platform-level abstractions.
 
 ### Key Exports
 
 | Export | Purpose |
 |--------|---------|
-| `resolveIdentityFromClerk()` | Maps Clerk auth to `AuthenticatedIdentity` |
+| `resolveIdentityFromEntra()` | Maps an Entra session to `AuthenticatedIdentity` (`@nzila/platform-auth/entra/adapter`) |
 | `hasPlatformRole()` | Role hierarchy check |
 | `hasPermission()` / `hasAllPermissions()` | Permission check |
 | `canAccessModule()` | Module access check (role + entitlement + enablement) |

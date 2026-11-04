@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server';
 import { extractClausesFromPDF, batchExtractClauses } from '@/lib/services/ai/clause-extraction-service';
 import { z } from "zod";
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { operationAuditResponse } from '@/lib/audit/operation-audit';
@@ -17,32 +17,41 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
-  import { AI_FEATURES } from '@/lib/services/feature-flags';
-  import { enforceAISafety } from '@nzila/policies';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 
 // Extraction stores clauses on an agreement and rewrites its text, so it is a steward-level action on the caller's own
 // organization; the organization is never taken from the body.
 const aiExtractClausesSchema = z.object({
-  pdfUrl: z.string().url('Invalid URL'),
+  pdfUrl: z.string().url('Invalid URL').max(2048),
   cbaId: z.guid('Invalid cbaId'),
   organizationId: z.guid('Invalid organizationId').optional(),
   autoSave: z.boolean().optional(),
   batch: z.boolean().optional(),
   cbas: z
-    .array(z.object({ id: z.guid('Invalid cba id'), documentUrl: z.string().url('Invalid URL') }))
+    .array(z.object({ id: z.guid('Invalid cba id'), documentUrl: z.string().url('Invalid URL').max(2048) }))
     .max(25)
     .optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request, context) => {
-  if (!context.organizationId || !context.userId) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
-  }
+// The service reads and writes the agreement in the organization's own context (`withRLSContext`) and runs the provider outside it, so the route does not
+// set `rlsOrgContext`. The entitlement is checked here, not by the wrapper, to keep its answer (with the upgrade address) as it was.
+export const POST = withApi(
+  {
+    auth: { minRole: 'steward' },
+    body: aiExtractClausesSchema,
+    registry: { audience: 'steward', productionStatus: 'active', evidenceRequired: false, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Extract clauses from a CBA document with AI' },
+  },
+  async ({ user, userId, organizationId, body }) => {
+    if (!organizationId || !userId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+    }
 
     // CRITICAL: Rate limit AI calls (expensive OpenAI API)
     const rateLimitResult = await checkRateLimit(
-      `ai-completion:${context.userId}`,
+      `ai-completion:${userId}`,
       RATE_LIMITS.AI_COMPLETION
     );
 
@@ -57,7 +66,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
     }
 
     // CRITICAL: Check subscription entitlement for AI extract-clauses
-    const entitlement = await checkEntitlement(context.organizationId as string, 'ai_extract_clauses');
+    const entitlement = await checkEntitlement(organizationId, 'ai_extract_clauses');
     if (!entitlement.allowed) {
       return NextResponse.json(
         { 
@@ -69,42 +78,19 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       );
     }
 
-      // OWASP AI: Feature flag + AI safety gate
-      const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: context.userId, organizationId: context.organizationId });
-      if (blocked) return blocked;
-      enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
+    // OWASP AI: Feature flag + AI safety gate
+    const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId, organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId, userId, userRole: user?.role ?? 'steward', dataClass: 'internal' });
 
     try {
-      const body = await request.json();
-      // Validate request body
-      const validation = aiExtractClausesSchema.safeParse(body);
-      if (!validation.success) {
-        return standardErrorResponse(
-          ErrorCode.VALIDATION_ERROR,
-          'Invalid request data',
-          validation.error.issues
-        );
-      }
-      
-      const { pdfUrl, cbaId, organizationId: requestedOrganizationId, autoSave = true, batch = false, cbas = [] } = validation.data;
-      const organizationId = context.organizationId;
-      const userId = context.userId;
-      // DUPLICATE REMOVED (Phase 2): Multi-line destructuring of body
-      // const {
-      // pdfUrl,
-      // cbaId,
-      // organizationId,
-      // autoSave = true,
-      // batch = false,
-      // cbas = [],
-      // } = body;
+      const { pdfUrl, cbaId, organizationId: requestedOrganizationId, autoSave = true, batch = false, cbas = [] } = body;
       if (requestedOrganizationId && requestedOrganizationId !== organizationId) {
         return standardErrorResponse(
           ErrorCode.FORBIDDEN,
           'Forbidden'
         );
       }
-
 
       // Batch extraction
       if (batch && cbas.length > 0) {
@@ -130,13 +116,6 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       }
 
       // Single extraction
-      if (!pdfUrl || !cbaId || !organizationId) {
-        return standardErrorResponse(
-          ErrorCode.VALIDATION_ERROR,
-          'Missing required fields: pdfUrl, cbaId, organizationId'
-        );
-      }
-
       const result = await extractClausesFromPDF(pdfUrl, cbaId, {
         organizationId,
         userId,
@@ -159,4 +138,5 @@ export const POST = withRoleAuth('steward', async (request, context) => {
         error
       );
     }
-});
+  },
+);

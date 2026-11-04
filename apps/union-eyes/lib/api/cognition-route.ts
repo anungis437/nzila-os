@@ -1,4 +1,5 @@
 import { withApi } from '@/lib/api/framework';
+import { standardSuccessResponse } from '@/lib/api/standardized-responses';
 import type { InstitutionalExplainabilityEnvelope } from '@nzila/organizational-cognition-core';
 
 export type CognitionEngineFn<T> = (
@@ -8,10 +9,9 @@ export type CognitionEngineFn<T> = (
 /**
  * Standard route factory for cognition engines.
  *
- * Returns the canonical envelope's payload as `data` for backward
- * compatibility, and the full envelope (sans payload) under
- * `explainability` so callers can opt into evidence/reasoning/governance
- * implications without a second request.
+ * The answer is `{ success, data, meta, timestamp }`: `data` is the engine's payload, where every caller reads it, and `meta.explainability` is the rest of the
+ * canonical envelope (evidence, reasoning, governance implications) for callers that want it without a second request. The response is built here, not returned
+ * as `{ data, explainability }`, because `withApi` wraps whatever a handler returns under `data`, which would bury the payload one level below where it is read.
  */
 export function cognitionRoute<T>(engine: CognitionEngineFn<T>) {
   return withApi(
@@ -22,10 +22,7 @@ export function cognitionRoute<T>(engine: CognitionEngineFn<T>) {
     async ({ organizationId }) => {
       const envelope = await engine(organizationId!);
       const { payload, ...envelopeWithoutPayload } = envelope;
-      return {
-        data: payload,
-        explainability: envelopeWithoutPayload,
-      };
+      return standardSuccessResponse(payload, { explainability: envelopeWithoutPayload });
     },
   );
 }

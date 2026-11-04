@@ -15,6 +15,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from '@nzila/platform-auth/entra/client';
 import { CANONICAL_ORGANIZATION_AUTHORITY } from '@/lib/auth/organization-authority';
+import { apiErrorMessage } from '@/lib/client/api-envelope';
 
 // Organization type definitions
 export interface Organization {
@@ -403,8 +404,8 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to switch organization' }));
-        throw new Error(errorData.error || 'Access denied');
+        const errorData: unknown = await response.json().catch(() => null);
+        throw new Error(apiErrorMessage(errorData, errorData === null ? 'Failed to switch organization' : 'Access denied'));
       }
 
       const data = await response.json();

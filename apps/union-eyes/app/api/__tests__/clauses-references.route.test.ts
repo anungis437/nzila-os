@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const m = vi.hoisted(() => ({ queue: [] as unknown[][] }));
+const m = vi.hoisted(() => ({ queue: [] as unknown[][], contexts: [] as string[] }));
 
 vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: () => ({ GET: vi.fn(), POST: vi.fn() }) }));
 vi.mock('@/lib/api/errors', () => ({
@@ -10,8 +10,15 @@ vi.mock('@/lib/api/errors', () => ({
     notFound: (what: string) => Object.assign(new Error(what), { code: 'NOT_FOUND' }),
   },
 }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (context: { organizationId: string }, work: (tx: unknown) => Promise<unknown>) => {
+    m.contexts.push(context.organizationId);
+    return work({ select: () => ({ from: () => ({ where: () => ({ limit: async () => m.queue.shift() ?? [] }) }) }) });
+  },
+}));
+// The references are read through the explicit tenant transaction: the ambient handle must never be touched.
 vi.mock('@/db/db', () => ({
-  db: { select: () => ({ from: () => ({ where: () => ({ limit: async () => m.queue.shift() ?? [] }) }) }) },
+  db: new Proxy({}, { get: () => { throw new Error('the ambient db handle must not be used'); } }),
 }));
 vi.mock('@/db/schema', () => ({
   cbaClause: { id: 'id', cbaId: 'cba_id', organizationId: 'organization_id' },
@@ -22,7 +29,7 @@ const CBA = '11111111-1111-4111-8111-111111111111';
 const PARENT = '22222222-2222-4222-8222-222222222222';
 
 describe('clauses collection reference checks', () => {
-  beforeEach(() => { m.queue = []; });
+  beforeEach(() => { m.queue = []; m.contexts = []; });
 
   // DEF-0B4-CLAUSES-CREATE-ACCEPTS-ANY-CBA-ID
   it('refuses an agreement id that is not the caller organization\'s, as not found', async () => {
@@ -36,6 +43,7 @@ describe('clauses collection reference checks', () => {
     await expect(verifyClauseReferences({ cbaId: 'x' }, 'org-1')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     await expect(verifyClauseReferences({}, 'org-1')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     await expect(verifyClauseReferences({ cbaId: CBA }, null)).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.contexts).toEqual([]);
   });
 
   it('accepts an agreement of the organization and checks a parent clause against the same agreement', async () => {
@@ -46,5 +54,18 @@ describe('clauses collection reference checks', () => {
     await expect(verifyClauseReferences({ cbaId: CBA, parentClauseId: PARENT }, 'org-1')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     m.queue.push([{ id: CBA }], [{ id: PARENT }]);
     await expect(verifyClauseReferences({ cbaId: CBA, parentClauseId: PARENT }, 'org-1')).resolves.toBeTruthy();
+  });
+
+  it('reads the references in the tenant transaction of the caller organization, once per check', async () => {
+    const { verifyClauseReferences } = await import('../clauses/route');
+    m.queue.push([{ id: CBA }], [{ id: PARENT }]);
+    await verifyClauseReferences({ cbaId: CBA, parentClauseId: PARENT }, 'org-7');
+    expect(m.contexts).toEqual(['org-7']);
+  });
+
+  it('refuses a malformed parent clause id as a client error, not a database error', async () => {
+    const { verifyClauseReferences } = await import('../clauses/route');
+    m.queue.push([{ id: CBA }]);
+    await expect(verifyClauseReferences({ cbaId: CBA, parentClauseId: 'not-a-uuid' }, 'org-1')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
   });
 });

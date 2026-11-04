@@ -6,11 +6,11 @@
  * @module app/api/admin/billing-cycles/preview
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
 import { resolveBillingPeriod } from '@/lib/finance/billing-period-input';
 import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
-import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -28,24 +28,22 @@ const previewSchema = z.object({
   periodEnd: z.string().optional(),
 });
 
-export const POST = withApiAuth(async (request: NextRequest) => {
+// A platform lead previews the cycle of the organization the request names, not of the one they are acting in: the mandate check and the
+// service open that organization's own transaction, so the wrapper opens none. A platform lead need not belong to an organization.
+export const POST = withApi(
+  {
+    auth: { minRole: 'platform_lead' },
+    requireOrg: false,
+    openapi: { tags: ['Admin', 'Billing'], summary: 'Preview a billing cycle before execution' },
+  },
+  async ({ request, user }) => {
   try {
-    const user = await getCurrentUser();
     if (!user) {
       return standardErrorResponse(
         ErrorCode.AUTH_REQUIRED,
         'Authentication required'
       );
     }
-
-    const canAccess = await hasMinRole('platform_lead');
-    if (!canAccess) {
-      return standardErrorResponse(
-        ErrorCode.FORBIDDEN,
-        'Platform lead role required'
-      );
-    }
-
     let body: unknown;
     try {
       body = await request.json();
@@ -66,7 +64,9 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     try {
       await requireBillingCycleAuthority(organizationId, user.id);
-    } catch {
+    } catch (error) {
+      // Fail closed. A mandate that is absent and a lookup that failed both refuse the preview; the log tells them apart.
+      logger.warn('Billing cycle preview refused: the live financial mandate could not be confirmed', { organizationId, userId: user.id, error });
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'Live financial execution mandate required for target organization');
     }
 
@@ -122,4 +122,5 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       'Failed to preview billing cycle'
     );
   }
-});
+  },
+);

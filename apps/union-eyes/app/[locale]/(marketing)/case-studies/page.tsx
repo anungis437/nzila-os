@@ -44,14 +44,13 @@ import { HumanCenteredCallout } from '@/components/marketing/human-centered-call
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { logger } from '@/lib/logger';
-import { caseStudyRows } from '@/lib/marketing/case-study-response';
+import { envelopeRows } from '@/lib/client/api-envelope';
 
 const CASE_STUDIES_COPY: Record<string, {
   loading: string;
+  failed: string;
   category: string;
-  sector: string;
   orgType: string;
-  jurisdiction: string;
   all: string;
   empty: string;
   ctaBody: string;
@@ -59,10 +58,9 @@ const CASE_STUDIES_COPY: Record<string, {
 }> = {
   'en-CA': {
     loading: 'Loading case studies...',
+    failed: 'Case studies could not be loaded. Please try again later.',
     category: 'Category',
-    sector: 'Sector',
     orgType: 'Org type',
-    jurisdiction: 'Jurisdiction',
     all: 'All',
     empty: 'No case studies match your filters. Try adjusting your selections.',
     ctaBody: 'Your organization could be the next guided rollout.',
@@ -70,10 +68,9 @@ const CASE_STUDIES_COPY: Record<string, {
   },
   'fr-CA': {
     loading: 'Chargement des etudes de cas...',
+    failed: "Les etudes de cas n'ont pas pu etre chargees. Veuillez reessayer plus tard.",
     category: 'Categorie',
-    sector: 'Secteur',
     orgType: "Type d'organisation",
-    jurisdiction: 'Juridiction',
     all: 'Toutes',
     empty: 'Aucune etude de cas ne correspond a vos filtres. Essayez dajuster vos selections.',
     ctaBody: 'Votre organisation pourrait etre le prochain deploiement guide.',
@@ -81,10 +78,9 @@ const CASE_STUDIES_COPY: Record<string, {
   },
   it: {
     loading: 'Caricamento dei casi studio...',
+    failed: 'Impossibile caricare i casi studio. Riprova piu tardi.',
     category: 'Categoria',
-    sector: 'Settore',
     orgType: 'Tipo di organizzazione',
-    jurisdiction: 'Giurisdizione',
     all: 'Tutte',
     empty: 'Nessun caso studio corrisponde ai filtri selezionati. Prova a modificarli.',
     ctaBody: 'La tua organizzazione potrebbe essere il prossimo deployment controllato.',
@@ -92,10 +88,9 @@ const CASE_STUDIES_COPY: Record<string, {
   },
   pt: {
     loading: 'Carregando estudos de caso...',
+    failed: 'Nao foi possivel carregar os estudos de caso. Tente novamente mais tarde.',
     category: 'Categoria',
-    sector: 'Setor',
     orgType: 'Tipo de organizacao',
-    jurisdiction: 'Jurisdicao',
     all: 'Todas',
     empty: 'Nenhum estudo de caso corresponde aos filtros selecionados. Tente ajusta-los.',
     ctaBody: 'Sua organizacao pode ser a proxima implantacao controlada.',
@@ -115,23 +110,21 @@ export default function LocaleCaseStudiesPage() {
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
   const [filteredStudies, setFilteredStudies] = useState<CaseStudy[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedSector, setSelectedSector] = useState<string>('all');
   const [selectedOrgType, setSelectedOrgType] = useState<string>('all');
-  const [selectedJurisdiction, setSelectedJurisdiction] = useState<string>('all');
 
   useEffect(() => {
     async function loadCaseStudies() {
       try {
         const response = await fetch('/api/case-studies?status=published');
-        if (response.ok) {
-          const payload: unknown = await response.json();
-          const studies = caseStudyRows<CaseStudy>(payload);
-          setCaseStudies(studies);
-          setFilteredStudies(studies);
-        }
+        if (!response.ok) throw new Error(`Case studies answered ${response.status}`);
+        const studies = envelopeRows(await response.json()) as CaseStudy[];
+        setCaseStudies(studies);
+        setFilteredStudies(studies);
       } catch (error) {
         logger.error('Failed to load case studies:', error);
+        setFailed(true);
       } finally {
         setLoading(false);
       }
@@ -142,16 +135,12 @@ export default function LocaleCaseStudiesPage() {
   useEffect(() => {
     let filtered = [...caseStudies];
     if (selectedCategory !== 'all') filtered = filtered.filter((cs) => cs.category === selectedCategory);
-    if (selectedSector !== 'all') filtered = filtered.filter((cs) => cs.sector === selectedSector);
     if (selectedOrgType !== 'all') filtered = filtered.filter((cs) => cs.organizationType === selectedOrgType);
-    if (selectedJurisdiction !== 'all') filtered = filtered.filter((cs) => cs.jurisdiction === selectedJurisdiction);
     setFilteredStudies(filtered);
-  }, [caseStudies, selectedCategory, selectedSector, selectedOrgType, selectedJurisdiction]);
+  }, [caseStudies, selectedCategory, selectedOrgType]);
 
   const categories = ['all', ...new Set(caseStudies.map((cs) => cs.category))];
-  const sectors: string[] = ['all', ...new Set(caseStudies.map((cs) => cs.sector).filter((x): x is string => Boolean(x)))];
   const orgTypes = ['all', ...new Set(caseStudies.map((cs) => cs.organizationType))];
-  const jurisdictions: string[] = ['all', ...new Set(caseStudies.map((cs) => cs.jurisdiction).filter((x): x is string => Boolean(x)))];
 
   if (loading) {
     return (
@@ -184,30 +173,20 @@ export default function LocaleCaseStudiesPage() {
             onChange={setSelectedCategory}
           />
           <FilterSelect
-            label={copy.sector}
-            value={selectedSector}
-            options={sectors}
-            allLabel={copy.all}
-            onChange={setSelectedSector}
-          />
-          <FilterSelect
             label={copy.orgType}
             value={selectedOrgType}
             options={orgTypes}
             allLabel={copy.all}
             onChange={setSelectedOrgType}
           />
-          <FilterSelect
-            label={copy.jurisdiction}
-            value={selectedJurisdiction}
-            options={jurisdictions}
-            allLabel={copy.all}
-            onChange={setSelectedJurisdiction}
-          />
         </div>
 
         {/* Results */}
-        {filteredStudies.length === 0 ? (
+        {failed ? (
+          <div className="text-center py-12" role="alert">
+            <p className="text-red-700">{copy.failed}</p>
+          </div>
+        ) : filteredStudies.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">{copy.empty}</p>
           </div>

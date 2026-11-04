@@ -13,7 +13,7 @@
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { PropagationMap } from '../propagation/propagation-models';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
-import { db } from '@/db/db';
+import { inOrganization } from '../org-scope';
 import { exitInterviews } from '@/db/schema';
 import type { ContinuityForecast } from './forecast-models';
 
@@ -27,7 +27,10 @@ export interface CurrentMetrics {
 }
 
 async function countEligibleInterviews(orgId: string): Promise<number> {
-  const rows = await db.select({ id: exitInterviews.id }).from(exitInterviews).where(derivedAnalyticsCondition(orgId));
+  // Read as the runtime role in the organization's own tenant transaction.
+  const rows = await inOrganization(orgId, (tx) =>
+    tx.select({ id: exitInterviews.id }).from(exitInterviews).where(derivedAnalyticsCondition(orgId)),
+  );
   return rows.length;
 }
 

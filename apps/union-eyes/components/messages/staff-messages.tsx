@@ -6,18 +6,9 @@ import { Inbox, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationPanel } from '@/components/messages/conversation-panel';
-import { assignmentProblem, pick, type AssignmentProblem } from '@/components/messages/messages-api';
+import { logger } from '@/lib/logger';
+import { assignmentProblem, queueFrom, threadsFrom, type AssignmentProblem, type QueueEntry, type ThreadSummary } from '@/components/messages/messages-api';
 
-type QueueItem = { id: string; subject: string; category: string | null; priority: string | null; createdAt: string };
-type Thread = {
-  id: string;
-  subject: string;
-  status: string;
-  isArchived: boolean;
-  lastMessageAt: string | null;
-  createdAt: string;
-  viewerRole: 'member' | 'assignee';
-};
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 const POLL_MS = 30000;
@@ -30,10 +21,14 @@ const POLL_MS = 30000;
  */
 export function StaffMessages({ userId, initialThreadId }: { userId: string; initialThreadId?: string }) {
   const t = useTranslations('staffMessages') as unknown as Translate;
-  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [queue, setQueue] = useState<QueueEntry[]>([]);
   const [queueState, setQueueState] = useState<'loading' | 'ready' | 'denied' | 'error'>('loading');
-  const [threads, setThreads] = useState<Thread[]>([]);
+  const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [threadState, setThreadState] = useState<'loading' | 'ready' | 'error'>('loading');
+  // The lists on screen are the last ones that were read; these say that a later read of one of them failed, so it may be out of date.
+  const [queueStale, setQueueStale] = useState(false);
+  const [threadsStale, setThreadsStale] = useState(false);
+  const refreshFailed = queueStale || threadsStale;
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
   const [showArchived, setShowArchived] = useState(false);
 
@@ -44,13 +39,17 @@ export function StaffMessages({ userId, initialThreadId }: { userId: string; ini
       // Without a live triage designation the server answers 404 exactly as for a route that does not exist.
       if (response.status === 404 || response.status === 403) {
         setQueue([]);
+        setQueueStale(false);
         return setQueueState('denied');
       }
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      setQueue(pick<QueueItem[]>(await response.json(), 'queue') ?? []);
+      setQueue(queueFrom(await response.json()));
       setQueueState('ready');
-    } catch {
-      if (!quiet) setQueueState('error');
+      setQueueStale(false);
+    } catch (err) {
+      logger.error('Failed to read the triage queue', err);
+      if (quiet) setQueueStale(true);
+      else setQueueState('error');
     }
   }, []);
 
@@ -59,10 +58,13 @@ export function StaffMessages({ userId, initialThreadId }: { userId: string; ini
     try {
       const response = await fetch('/api/messages/threads');
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      setThreads((pick<Thread[]>(await response.json(), 'threads') ?? []).filter((thread) => thread.viewerRole === 'assignee'));
+      setThreads(threadsFrom(await response.json()).filter((thread) => thread.viewerRole === 'assignee'));
       setThreadState('ready');
-    } catch {
-      if (!quiet) setThreadState('error');
+      setThreadsStale(false);
+    } catch (err) {
+      logger.error('Failed to read the assigned conversations', err);
+      if (quiet) setThreadsStale(true);
+      else setThreadState('error');
     }
   }, []);
 
@@ -89,6 +91,9 @@ export function StaffMessages({ userId, initialThreadId }: { userId: string; ini
         <p className="text-sm text-muted-foreground">{t('description')}</p>
       </div>
       <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{t('privacyNote')}</p>
+      {refreshFailed && (
+        <p role="status" className="rounded-md border border-destructive/40 p-3 text-sm" data-testid="refresh-failed">{t('refreshError')}</p>
+      )}
 
       <div className="grid gap-6 md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <div className={`space-y-6 ${activeId ? 'hidden md:block' : ''}`}>
@@ -180,7 +185,7 @@ function ListSkeleton({ label }: { label: string }) {
   );
 }
 
-function ThreadList({ threads, activeId, onOpen, t }: { threads: Thread[]; activeId: string | null; onOpen: (id: string) => void; t: Translate }) {
+function ThreadList({ threads, activeId, onOpen, t }: { threads: ThreadSummary[]; activeId: string | null; onOpen: (id: string) => void; t: Translate }) {
   const locale = useLocale();
   const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' });
   return (
@@ -206,7 +211,7 @@ function ThreadList({ threads, activeId, onOpen, t }: { threads: Thread[]; activ
   );
 }
 
-function QueueRow({ item, userId, onAssigned }: { item: QueueItem; userId: string; onAssigned: () => void }) {
+function QueueRow({ item, userId, onAssigned }: { item: QueueEntry; userId: string; onAssigned: () => void }) {
   const t = useTranslations('staffMessages') as unknown as Translate;
   const locale = useLocale();
   const [other, setOther] = useState('');

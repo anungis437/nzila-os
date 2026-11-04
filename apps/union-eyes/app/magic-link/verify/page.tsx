@@ -14,6 +14,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { apiErrorMessage } from '@/lib/client/api-envelope';
 
 export default function MagicLinkVerifyPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function MagicLinkVerifyPage() {
         const data = await res.json();
         if (cancelled) return;
         if (!res.ok) {
-          setError(data.error || 'Could not verify sign-in link');
+          setError(apiErrorMessage(data, 'Could not verify sign-in link'));
           setStatus('error');
           return;
         }

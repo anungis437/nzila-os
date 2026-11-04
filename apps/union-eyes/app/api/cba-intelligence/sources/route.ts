@@ -37,7 +37,7 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return { data: await listSources(filters as Record<string, unknown>, { page, limit }) };
+    return await listSources(filters as Record<string, unknown>, { page, limit });
   },
 );
 
@@ -106,6 +106,6 @@ export const POST = withApi(
       });
       return created;
     });
-    return { data: source };
+    return source;
   },
 );

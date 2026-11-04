@@ -27,8 +27,10 @@ export const NOT_REQUESTS: Readonly<Record<string, string>> = {
 /** A module that reads DJANGO_API_URL talks to the Django backend, whose routes are not these. */
 const DJANGO_CLIENT = /\bDJANGO_API_URL\b/
 
-// What is not the frontend: the route handlers themselves, tests, tooling, the services that run their own servers, the Python backend, the mobile client and build output.
-const SKIP_DIRS = new Set(['node_modules', '.next', '.turbo', 'dist', 'coverage', 'archive', 'backups', 'mobile', 'backend', 'services', 'e2e', 'tests', 'public', 'docs', 'scripts', '.storybook', 'nzila-scripts-book-template', '.git', '__tests__', '__mocks__'])
+// What is not the frontend: the route handlers themselves, tests, tooling, the services that run their own servers, the Python backend, the mobile client and build output. The
+// directories named for the root (`public`, `docs`, `services`...) are skipped only there: `components/public` holds screens, and a screen is read wherever it lives.
+const SKIP_ANYWHERE = new Set(['node_modules', '.next', '.turbo', 'coverage', '.git', '__tests__', '__mocks__'])
+const SKIP_AT_ROOT = new Set(['dist', 'archive', 'backups', 'mobile', 'backend', 'services', 'e2e', 'tests', 'public', 'docs', 'scripts', '.storybook', 'nzila-scripts-book-template'])
 const SKIP_FILES = /(\.test\.|\.spec\.|\.stories\.|\.d\.ts$)/
 const SOURCE = /\.(ts|tsx|js|jsx|mts)$/
 
@@ -75,7 +77,7 @@ export function sourceFiles(root: string = APP_ROOT): string[] {
       const full = path.join(dir, name)
       const relative = path.relative(root, full).replace(/\\/g, '/')
       if (statSync(full).isDirectory()) {
-        if (SKIP_DIRS.has(name) || relative === 'app/api') continue
+        if (SKIP_ANYWHERE.has(name) || (dir === root && SKIP_AT_ROOT.has(name)) || relative === 'app/api') continue
         walk(full)
       } else if (SOURCE.test(name) && !SKIP_FILES.test(name)) out.push(relative)
     }
@@ -85,8 +87,8 @@ export function sourceFiles(root: string = APP_ROOT): string[] {
 }
 
 export function loadRoutes(): RouteEntry[] {
-  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8')) as { routes: Array<{ route: string; methods: string[]; guard: string }> }
-  return manifest.routes.map(({ route, methods, guard }) => ({ route, methods, guard }))
+  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8')) as { routes: Array<{ route: string; methods: string[]; guard: string; retiredMethods?: string[] }> }
+  return manifest.routes.map(({ route, methods, guard, retiredMethods }) => ({ route, methods, guard, ...(retiredMethods ? { retiredMethods } : {}) }))
 }
 
 /** The calls of the frontend, each with how it is reached when `withReach` (this reads the whole program: minutes, not seconds). */

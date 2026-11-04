@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FinancialAiInsights from './FinancialAiInsights';
+import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
 
 // ── Types matching API response shapes ───────────────────────────────────────
 
@@ -37,7 +38,6 @@ interface FinancialKpis {
   totalCollected: number;
   totalOutstanding: number;
   totalOverdue: number;
-  currentBalance: number;
 }
 
 interface PaymentStats {
@@ -49,11 +49,11 @@ interface PaymentStats {
 
 interface RecentPayment {
   id: string;
-  memberName: string;
+  memberName: string | null;
   amount: number;
   status: string;
   paidDate: string | null;
-  dueDate: string;
+  dueDate: string | null;
 }
 
 interface PeriodStats {
@@ -78,8 +78,8 @@ interface DuesDashboard {
 interface ArrearsCase {
   id: string;
   memberId: string;
-  memberName: string;
-  email: string;
+  memberName: string | null;
+  email: string | null;
   amountOwed: string;
   status: string;
   hasPaymentPlan: boolean;
@@ -244,8 +244,9 @@ function formatDate(dateStr: string | null): string {
   }).format(new Date(dateStr));
 }
 
+// A change against a period with nothing in it has no percentage: it is not 100%.
 function percentChange(current: number, previous: number): number | null {
-  if (previous === 0) return current > 0 ? 100 : null;
+  if (previous === 0) return null;
   return Math.round(((current - previous) / previous) * 100);
 }
 
@@ -269,7 +270,12 @@ function KpiSkeleton() {
   );
 }
 
+// Whether the screen is still reading its data. A placeholder that stands in for a section whose read has finished means the read failed, and says so.
+const StillLoading = createContext(true);
+
 function TableSkeleton({ rows = 5 }: { rows?: number }) {
+  const stillLoading = useContext(StillLoading);
+  if (!stillLoading) return <p className="text-sm text-muted-foreground">—</p>;
   return (
     <div className="animate-pulse space-y-3">
       {Array.from({ length: rows }).map((_, i) => (
@@ -375,68 +381,91 @@ function PaymentStatusBadge({ status }: { status: string }) {
 // FinancialOverview — organizational finance visibility surface
 // ═════════════════════════════════════════════════════════════════════════════
 
+type SectionKey = 'overview' | 'dashboard' | 'arrears' | 'summary';
+
+const SECTION_LABEL: Record<SectionKey, string> = {
+  overview: 'Dues overview',
+  dashboard: 'Remittance dashboard',
+  arrears: 'Members in arrears',
+  summary: 'Executive summary',
+};
+
+// Each route answers its own object inside { success, data, timestamp }. A body that is not that object is an error for its section, never zeros.
+function readOverview(body: unknown): DuesOverview {
+  const data = envelopeData(body);
+  if (!isRecord(data.financialKpis) || !isRecord(data.paymentStats) || !Array.isArray(data.recentPayments) || !isRecord(data.periodStats)) {
+    throw new ApiShapeError('no dues overview');
+  }
+  return data as unknown as DuesOverview;
+}
+
+function readDashboard(body: unknown): DuesDashboard {
+  const data = envelopeData(body);
+  if (
+    typeof data.totalCollected !== 'number' ||
+    typeof data.pendingRemittances !== 'number' ||
+    typeof data.inArrears !== 'number' ||
+    typeof data.reconciliationQueue !== 'number'
+  ) {
+    throw new ApiShapeError('no remittance dashboard');
+  }
+  return data as unknown as DuesDashboard;
+}
+
+function readArrears(body: unknown): ArrearsCase[] {
+  const data = envelopeData(body);
+  if (!Array.isArray(data.members)) throw new ApiShapeError('no member list');
+  return data.members as ArrearsCase[];
+}
+
+function readSummary(body: unknown): ExecutiveSummary {
+  const data = envelopeData(body);
+  const nested = ['memberStanding', 'paymentPlans', 'reconciliation', 'strikeFund', 'perCapitaTax', 'perCapitaInbound', 'grievanceCosts', 'pensionHealth', 'glSnapshot'];
+  if (nested.some((key) => !isRecord(data[key])) || !Array.isArray(data.remittanceTrend) || !Array.isArray(data.financialPeriods) || !Array.isArray(data.budgets)) {
+    throw new ApiShapeError('no executive summary');
+  }
+  return data as unknown as ExecutiveSummary;
+}
+
 export default function FinancialOverview() {
   const [overview, setOverview] = useState<DuesOverview | null>(null);
   const [dashboard, setDashboard] = useState<DuesDashboard | null>(null);
   const [arrearsCases, setArrearsCases] = useState<ArrearsCase[]>([]);
   const [executive, setExecutive] = useState<ExecutiveSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Each of the four reads can fail on its own: what failed is stated, what it fed shows "—", and nothing falls back to zero.
+  const [sectionErrors, setSectionErrors] = useState<Partial<Record<SectionKey, string>>>({});
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    setError(null);
-    try {
-      const [overviewRes, dashboardRes, arrearsRes, execRes] = await Promise.allSettled([
-        fetch('/api/admin/dues/overview'),
-        fetch('/api/dues/dashboard'),
-        fetch('/api/dues/arrears'),
-        fetch('/api/finance/summary'),
-      ]);
+    const errors: Partial<Record<SectionKey, string>> = {};
 
-      if (overviewRes.status === 'fulfilled' && overviewRes.value.ok) {
-        const overviewJson = await overviewRes.value.json();
-        setOverview(overviewJson.data ?? overviewJson);
+    async function load<T>(key: SectionKey, url: string, read: (body: unknown) => T, apply: (value: T | null) => void) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await readApiError(res, `${SECTION_LABEL[key]} could not be loaded (HTTP ${res.status})`));
+        apply(read(await res.json()));
+      } catch (err) {
+        apply(null);
+        errors[key] = err instanceof Error ? err.message : `${SECTION_LABEL[key]} could not be loaded`;
       }
-      if (dashboardRes.status === 'fulfilled' && dashboardRes.value.ok) {
-        const dashJson = await dashboardRes.value.json();
-        setDashboard(dashJson.data ?? dashJson);
-      }
-      if (arrearsRes.status === 'fulfilled' && arrearsRes.value.ok) {
-        const arrearsJson = await arrearsRes.value.json();
-        const members = arrearsJson.data?.members ?? arrearsJson.members ?? [];
-        setArrearsCases(members);
-      }
-      if (execRes.status === 'fulfilled' && execRes.value.ok) {
-        const execJson = await execRes.value.json();
-        setExecutive(execJson.data ?? execJson);
-      }
-    } catch {
-      setError('Failed to load financial data');
-    } finally {
-      setLoading(false);
     }
+
+    await Promise.all([
+      load('overview', '/api/admin/dues/overview', readOverview, setOverview),
+      load('dashboard', '/api/dues/dashboard', readDashboard, setDashboard),
+      load('arrears', '/api/dues/arrears', readArrears, (value) => setArrearsCases(value ?? [])),
+      load('summary', '/api/finance/summary', readSummary, setExecutive),
+    ]);
+    setSectionErrors(errors);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <XCircle className="h-12 w-12 text-red-400 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900">Unable to Load Financial Data</h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-md">{error}</p>
-        <button
-          onClick={fetchData}
-          className="mt-4 px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  const failedSections = Object.entries(sectionErrors) as Array<[SectionKey, string]>;
 
   const kpis = overview?.financialKpis;
   const period = overview?.periodStats;
@@ -445,7 +474,32 @@ export default function FinancialOverview() {
     : null;
 
   return (
+    <StillLoading.Provider value={loading}>
     <div className="space-y-6">
+      {failedSections.length > 0 && (
+        <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <div className="flex items-start gap-3">
+            <XCircle className="h-5 w-5 shrink-0 text-red-500" />
+            <div className="flex-1">
+              <p className="font-medium">Some financial data could not be loaded. What depends on it shows “—”, not zero.</p>
+              <ul className="mt-1 list-disc pl-5">
+                {failedSections.map(([key, message]) => (
+                  <li key={key}>
+                    {SECTION_LABEL[key]}: {message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button
+              onClick={fetchData}
+              className="px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── KPI Cards ───────────────────────────────────────────────────── */}
       {loading ? (
         <KpiSkeleton />
@@ -454,8 +508,8 @@ export default function FinancialOverview() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard
               title="Total Collected"
-              value={formatCurrency(kpis?.totalCollected ?? 0)}
-              subtitle={`${overview?.paymentStats.paid ?? 0} payments posted`}
+              value={kpis ? formatCurrency(kpis.totalCollected) : '—'}
+              subtitle={overview ? `${overview.paymentStats.paid} payments posted` : '—'}
               icon={DollarSign}
               trend={collectionTrend}
               trendLabel="vs last month"
@@ -463,24 +517,26 @@ export default function FinancialOverview() {
             />
             <KpiCard
               title="Outstanding"
-              value={formatCurrency(kpis?.totalOutstanding ?? 0)}
-              subtitle={`${overview?.paymentStats.pending ?? 0} pending`}
+              value={kpis ? formatCurrency(kpis.totalOutstanding) : '—'}
+              subtitle={overview ? `${overview.paymentStats.pending} pending` : '—'}
               icon={Clock}
               variant="warning"
             />
             <KpiCard
               title="Total Overdue"
-              value={formatCurrency(kpis?.totalOverdue ?? 0)}
-              subtitle={`${overview?.paymentStats.overdue ?? 0} members in arrears`}
+              value={kpis ? formatCurrency(kpis.totalOverdue) : '—'}
+              subtitle={overview ? `${overview.paymentStats.overdue} members in arrears` : '—'}
               icon={AlertTriangle}
               variant="danger"
             />
             <KpiCard
               title="Collection Rate"
-              value={executive?.collectionRate == null ? 'N/A' : `${executive.collectionRate}%`}
-              subtitle={executive?.totalCharged
-                ? `${executive.uniquePayingMembers} of ${executive.totalOrgMembers} members`
-                : 'No dues charges recorded'}
+              value={executive?.collectionRate == null ? '—' : `${executive.collectionRate}%`}
+              subtitle={!executive
+                ? '—'
+                : executive.totalCharged
+                  ? `${executive.uniquePayingMembers} of ${executive.totalOrgMembers} members`
+                  : 'No dues charges recorded'}
               icon={Percent}
               variant={executive?.collectionRate == null ? 'default' : executive.collectionRate >= 90 ? 'success' : executive.collectionRate >= 75 ? 'warning' : 'danger'}
             />
@@ -591,6 +647,8 @@ export default function FinancialOverview() {
               <CardContent>
                 {loading ? (
                   <TableSkeleton rows={3} />
+                ) : !period ? (
+                  <p className="text-sm text-muted-foreground">—</p>
                 ) : (
                   <div className="space-y-4">
                     <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
@@ -600,22 +658,22 @@ export default function FinancialOverview() {
                     </div>
                     <PeriodRow
                       label="Collected"
-                      current={period?.thisMonth.collected ?? 0}
-                      previous={period?.lastMonth.collected ?? 0}
+                      current={period.thisMonth.collected}
+                      previous={period.lastMonth.collected}
                     />
                     <PeriodRow
                       label="Outstanding"
-                      current={period?.thisMonth.outstanding ?? 0}
-                      previous={period?.lastMonth.outstanding ?? 0}
+                      current={period.thisMonth.outstanding}
+                      previous={period.lastMonth.outstanding}
                       invertTrend
                     />
                     <div className="grid grid-cols-3 gap-4 text-sm pt-2 border-t">
                       <span className="font-medium">Transactions</span>
                       <span className="text-right font-semibold">
-                        {period?.thisMonth.transactionCount ?? 0}
+                        {period.thisMonth.transactionCount}
                       </span>
                       <span className="text-right text-muted-foreground">
-                        {period?.lastMonth.transactionCount ?? 0}
+                        {period.lastMonth.transactionCount}
                       </span>
                     </div>
                   </div>
@@ -631,31 +689,33 @@ export default function FinancialOverview() {
               <CardContent>
                 {loading ? (
                   <TableSkeleton rows={4} />
+                ) : !dashboard ? (
+                  <p className="text-sm text-muted-foreground">—</p>
                 ) : (
                   <div className="space-y-4">
                     <SummaryRow
                       icon={CheckCircle}
                       iconColor="text-emerald-600"
                       label="Reconciled Remittances"
-                      value={formatCurrency(dashboard?.totalCollected ?? 0)}
+                      value={formatCurrency(dashboard.totalCollected)}
                     />
                     <SummaryRow
                       icon={Clock}
                       iconColor="text-amber-600"
                       label="Pending Remittances"
-                      value={formatCurrency(dashboard?.pendingRemittances ?? 0)}
+                      value={formatCurrency(dashboard.pendingRemittances)}
                     />
                     <SummaryRow
                       icon={AlertTriangle}
                       iconColor="text-red-600"
                       label="In Arrears"
-                      value={formatCurrency(dashboard?.inArrears ?? 0)}
+                      value={formatCurrency(dashboard.inArrears)}
                     />
                     <SummaryRow
                       icon={FileWarning}
                       iconColor="text-blue-600"
                       label="Reconciliation Queue"
-                      value={`${dashboard?.reconciliationQueue ?? 0} items`}
+                      value={`${dashboard.reconciliationQueue} items`}
                     />
                   </div>
                 )}
@@ -670,26 +730,28 @@ export default function FinancialOverview() {
               <CardContent>
                 {loading ? (
                   <TableSkeleton rows={2} />
+                ) : !overview ? (
+                  <p className="text-sm text-muted-foreground">—</p>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <StatBlock
                       label="Posted"
-                      value={overview?.paymentStats.paid ?? 0}
+                      value={overview.paymentStats.paid}
                       color="bg-emerald-500"
                     />
                     <StatBlock
                       label="Pending"
-                      value={overview?.paymentStats.pending ?? 0}
+                      value={overview.paymentStats.pending}
                       color="bg-amber-500"
                     />
                     <StatBlock
                       label="Overdue"
-                      value={overview?.paymentStats.overdue ?? 0}
+                      value={overview.paymentStats.overdue}
                       color="bg-red-500"
                     />
                     <StatBlock
                       label="Total"
-                      value={overview?.paymentStats.total ?? 0}
+                      value={overview.paymentStats.total}
                       color="bg-blue-500"
                     />
                   </div>
@@ -715,6 +777,10 @@ export default function FinancialOverview() {
             <CardContent>
               {loading ? (
                 <TableSkeleton rows={5} />
+              ) : sectionErrors.arrears ? (
+                <p role="alert" className="py-10 text-center text-sm text-red-700">
+                  The members in arrears could not be loaded: {sectionErrors.arrears}
+                </p>
               ) : arrearsCases.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center">
                   <CheckCircle className="h-10 w-10 text-emerald-400 mb-3" />
@@ -741,8 +807,8 @@ export default function FinancialOverview() {
                         <tr key={c.id} className="hover:bg-muted/50 transition-colors">
                           <td className="py-3">
                             <div>
-                              <p className="font-medium">{c.memberName || 'Unknown'}</p>
-                              <p className="text-xs text-muted-foreground">{c.email}</p>
+                              <p className="font-medium">{c.memberName ?? '—'}</p>
+                              <p className="text-xs text-muted-foreground">{c.email ?? '—'}</p>
                             </div>
                           </td>
                           <td className="py-3 font-semibold text-red-600">
@@ -789,7 +855,11 @@ export default function FinancialOverview() {
             <CardContent>
               {loading ? (
                 <TableSkeleton rows={5} />
-              ) : (overview?.recentPayments ?? []).length === 0 ? (
+              ) : !overview ? (
+                <p role="alert" className="py-10 text-center text-sm text-red-700">
+                  The recent payments could not be loaded{sectionErrors.overview ? `: ${sectionErrors.overview}` : '.'}
+                </p>
+              ) : overview.recentPayments.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center">
                   <CreditCard className="h-10 w-10 text-gray-300 mb-3" />
                   <p className="text-sm font-medium text-gray-900">No Recent Payments</p>
@@ -810,9 +880,9 @@ export default function FinancialOverview() {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {(overview?.recentPayments ?? []).map((p) => (
+                      {overview.recentPayments.map((p) => (
                         <tr key={p.id} className="hover:bg-muted/50 transition-colors">
-                          <td className="py-3 font-medium">{p.memberName}</td>
+                          <td className="py-3 font-medium">{p.memberName ?? '—'}</td>
                           <td className="py-3 font-semibold">
                             {formatCurrencyFull(Math.abs(p.amount))}
                           </td>
@@ -1520,6 +1590,7 @@ export default function FinancialOverview() {
         </TabsContent>
       </Tabs>
     </div>
+    </StillLoading.Provider>
   );
 }
 

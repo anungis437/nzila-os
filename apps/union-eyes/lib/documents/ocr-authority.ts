@@ -13,11 +13,12 @@
  *     what a principal may see.
  *   - The old representative-identifier column, a steward role and a view or download grant are not inputs.
  *
- * The decision is pure; resolveOcrAuthority loads the facts from the kernel and the document tables.
+ * The decision is pure; resolveOcrAuthority loads the facts from the kernel and the document tables. The document
+ * tables are read through the caller's own organization transaction (`tx`), never the ambient handle.
  */
 import { and, eq, sql } from 'drizzle-orm';
-import { db } from '@/db/db';
 import { documentAccessGrants, documentLinks, documents } from '@/db/schema/documents-schema';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
   isDocumentVisibleByPolicy,
@@ -132,15 +133,21 @@ export interface DocumentAuthorityContext {
   kernel: CaseAccess | null;
 }
 
-/** Loads the facts. Returns null when the document does not exist in this organization. */
-export async function loadDocumentAuthorityContext(input: {
-  organizationId: string;
-  userId: string;
-  documentId: string;
-}): Promise<DocumentAuthorityContext | null> {
+/**
+ * Loads the facts. Returns null when the document does not exist in this organization. `tx` must be a transaction
+ * opened for `input.organizationId`; the kernel decision is made on its own connection and fails closed.
+ */
+export async function loadDocumentAuthorityContext(
+  tx: RLSTx,
+  input: {
+    organizationId: string;
+    userId: string;
+    documentId: string;
+  },
+): Promise<DocumentAuthorityContext | null> {
   const { organizationId, userId, documentId } = input;
   const row = (
-    await db
+    await tx
       .select({
         id: documents.id,
         privacyLabel: documents.privacyLabel,
@@ -162,7 +169,7 @@ export async function loadDocumentAuthorityContext(input: {
   if (!row) return null;
 
   const grant = (
-    await db
+    await tx
       .select({ canView: documentAccessGrants.canView, canProcessOcr: documentAccessGrants.canProcessOcr })
       .from(documentAccessGrants)
       .where(
@@ -220,13 +227,16 @@ export function ocrFactsFrom(ctx: DocumentAuthorityContext, userId: string, memb
 }
 
 /** Loads the facts and decides. Returns null when the document does not exist in this organization. */
-export async function resolveOcrAuthority(input: {
-  organizationId: string;
-  userId: string;
-  documentId: string;
-  memberPolicy?: OcrMemberPolicy;
-}): Promise<ResolvedOcrAuthority | null> {
-  const ctx = await loadDocumentAuthorityContext(input);
+export async function resolveOcrAuthority(
+  tx: RLSTx,
+  input: {
+    organizationId: string;
+    userId: string;
+    documentId: string;
+    memberPolicy?: OcrMemberPolicy;
+  },
+): Promise<ResolvedOcrAuthority | null> {
+  const ctx = await loadDocumentAuthorityContext(tx, input);
   if (!ctx) return null;
   return {
     documentId: ctx.documentId,

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
+import type { CbaIntelAgreement, CbaIntelClause, CbaIntelWageAdjustment } from "@/lib/services/cba-intelligence/extraction-service";
+import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
 import {
   Card,
   CardContent,
@@ -42,87 +44,39 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
-interface Agreement {
-  id: string;
-  cbaNumber: string | null;
-  title: string;
-  employer: string | null;
-  unionName: string | null;
-  jurisdiction: string | null;
-  sector: string | null;
-  effectiveDate: string | null;
-  expiryDate: string | null;
-  employeeCoverage: number | null;
-  overallConfidence: number | null;
-  reviewStatus: string;
-  createdAt: string;
-}
+/** A row as it arrives in JSON: dates are text (the decimal columns are text already). Typed from the rows the services return, so a field the table does not have is not one a screen can name. */
+type Wire<T> = { [K in keyof T]: T[K] extends Date ? string : T[K] extends Date | null ? string | null : T[K] };
 
-interface AgreementListResponse {
-  success: boolean;
-  data: {
-    items: Agreement[];
-    total: number;
-    page: number;
-    limit: number;
-  };
+type Agreement = Wire<CbaIntelAgreement>;
+type WageAdjustment = Wire<CbaIntelWageAdjustment>;
+type Clause = Wire<CbaIntelClause>;
+
+interface AgreementPage {
+  items: Agreement[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 interface AgreementDetail {
-  id: string;
-  cbaNumber: string | null;
-  title: string;
-  employer: string | null;
-  unionName: string | null;
-  jurisdiction: string | null;
-  sector: string | null;
-  effectiveDate: string | null;
-  expiryDate: string | null;
-  employeeCoverage: number | null;
-  overallConfidence: number | null;
-  reviewStatus: string;
-}
-
-interface WageAdjustment {
-  id: string;
-  effectiveDate: string | null;
-  year: number | null;
-  adjustmentType: string;
-  adjustmentPercent: string | null;
-  adjustmentFlat: string | null;
-  classification: string | null;
-  confidence: number | null;
-}
-
-interface Clause {
-  id: string;
-  clauseFamily: string;
-  clauseNumber: string | null;
-  clauseTitle: string | null;
-  summary: string | null;
-  confidence: number | null;
-  reviewStatus: string;
-}
-
-interface AgreementDetailResponse {
-  success: boolean;
-  data: {
-    agreement: AgreementDetail;
-    wageAdjustments: WageAdjustment[];
-    clauses: Clause[];
-  };
+  agreement: Agreement;
+  wageAdjustments: WageAdjustment[];
+  clauses: Clause[];
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-const REVIEW_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "outline",
+/** The statuses a row is reviewed into (cba_intel_review_status). A reader of the dataset only ever sees `approved`; the others are the curators'. */
+const REVIEW_STATUSES = ["pending_review", "approved", "rejected", "needs_followup", "superseded"] as const;
+
+const REVIEW_BADGE: Record<(typeof REVIEW_STATUSES)[number], "default" | "secondary" | "destructive" | "outline"> = {
+  pending_review: "outline",
   approved: "default",
   rejected: "destructive",
-  needs_revision: "secondary",
-  auto_approved: "default",
+  needs_followup: "secondary",
+  superseded: "secondary",
 };
 
 const JURISDICTIONS = [
@@ -130,7 +84,14 @@ const JURISDICTIONS = [
   "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT",
 ];
 
-function confidenceBadge(c: number | null) {
+/** A decimal column arrives as text; null when there is none or it is not a number. */
+function asNumber(value: string | null): number | null {
+  if (value === null || value === "" || Number.isNaN(Number(value))) return null;
+  return Number(value);
+}
+
+function confidenceBadge(value: string | null) {
+  const c = asNumber(value);
   if (c === null) return <Badge variant="outline">—</Badge>;
   const pct = Math.round(c * 100);
   if (pct >= 80) return <Badge variant="default">{pct}%</Badge>;
@@ -141,6 +102,12 @@ function confidenceBadge(c: number | null) {
 function formatDate(d: string | null): string {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-CA");
+}
+
+function ReviewBadge({ status }: { status: string | null }) {
+  const t = useTranslations("agreementExplorer");
+  const known = REVIEW_STATUSES.find((value) => value === status);
+  return <Badge variant={known ? REVIEW_BADGE[known] : "outline"}>{known ? t(`reviewStatuses.${known}`) : (status ?? "—")}</Badge>;
 }
 
 // ---------------------------------------------------------------------------
@@ -155,10 +122,17 @@ function AgreementDetailPanel({
   onClose: () => void;
 }) {
   const t = useTranslations("agreementExplorer");
-  const { data, isLoading } = useQuery<AgreementDetailResponse>({
+  const { data, isLoading, error } = useQuery<AgreementDetail>({
     queryKey: ["cba-intel-agreement", agreementId],
-    queryFn: () =>
-      fetch(`/api/cba-intelligence/agreements/${agreementId}`).then((r) => r.json()),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/agreements/${agreementId}`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorLoad")));
+      const detail: AgreementDetail = envelopeData(body) as unknown as AgreementDetail;
+      if (!detail.agreement) throw new ApiShapeError("no agreement");
+      return detail;
+    },
   });
 
   if (isLoading) {
@@ -171,11 +145,20 @@ function AgreementDetailPanel({
     );
   }
 
-  const agreement = data?.data?.agreement;
-  const wages = data?.data?.wageAdjustments ?? [];
-  const clauses = data?.data?.clauses ?? [];
+  if (error || !data) {
+    return (
+      <Card>
+        <CardContent className="space-y-4 py-8 text-center">
+          <div role="alert" className="text-red-500">{failureText(error, t("errorLoad"))}</div>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            {t("detail.back")}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  if (!agreement) return null;
+  const { agreement, wageAdjustments: wages, clauses } = data;
 
   return (
     <Card>
@@ -184,7 +167,6 @@ function AgreementDetailPanel({
           <div>
             <CardTitle className="text-lg">{agreement.title}</CardTitle>
             <CardDescription>
-              {agreement.cbaNumber && `${t("detail.cbaPrefix", { number: agreement.cbaNumber })} · `}
               {agreement.jurisdiction} · {agreement.sector}
             </CardDescription>
           </div>
@@ -200,14 +182,14 @@ function AgreementDetailPanel({
             <div className="text-sm text-muted-foreground">{t("detail.employer")}</div>
             <div className="flex items-center gap-1 font-medium">
               <Building2 className="h-3.5 w-3.5" />
-              {agreement.employer ?? "—"}
+              {agreement.employerNormalized}
             </div>
           </div>
           <div>
             <div className="text-sm text-muted-foreground">{t("detail.union")}</div>
             <div className="flex items-center gap-1 font-medium">
               <Users className="h-3.5 w-3.5" />
-              {agreement.unionName ?? "—"}
+              {agreement.unionNormalized}
             </div>
           </div>
           <div>
@@ -288,17 +270,15 @@ function AgreementDetailPanel({
                       </TableCell>
                       <TableCell className="font-medium">
                         {c.clauseNumber && `§${c.clauseNumber}`}
-                        {c.clauseTitle && ` ${c.clauseTitle}`}
-                        {!c.clauseNumber && !c.clauseTitle && "—"}
+                        {c.title && ` ${c.title}`}
+                        {!c.clauseNumber && !c.title && "—"}
                       </TableCell>
                       <TableCell className="max-w-75 truncate text-sm">
                         {c.summary ?? "—"}
                       </TableCell>
                       <TableCell>{confidenceBadge(c.confidence)}</TableCell>
                       <TableCell>
-                        <Badge variant={REVIEW_BADGE[c.reviewStatus] ?? "outline"}>
-                          {(['pending','approved','rejected','needs_revision','auto_approved'] as const).includes(c.reviewStatus as 'pending') ? t(`reviewStatuses.${c.reviewStatus}` as 'reviewStatuses.pending') : c.reviewStatus.replace(/_/g, ' ')}
-                        </Badge>
+                        <ReviewBadge status={c.reviewStatus} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -316,7 +296,7 @@ function AgreementDetailPanel({
 // Main Component
 // ---------------------------------------------------------------------------
 
-export function AgreementExplorer() {
+export function AgreementExplorer({ canCurate = false }: { canCurate?: boolean }) {
   const t = useTranslations("agreementExplorer");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -325,31 +305,41 @@ export function AgreementExplorer() {
   const [reviewStatus, setReviewStatus] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // Only the platform staff who curate the dataset may name a review status: every other reader is shown approved agreements, whatever is asked for.
+  const status = canCurate && reviewStatus !== "all" ? reviewStatus : null;
+
   const queryParams = new URLSearchParams({ page: String(page), limit: "25" });
   if (search) queryParams.set("search", search);
   if (jurisdiction !== "all") queryParams.set("jurisdiction", jurisdiction);
   if (sector) queryParams.set("sector", sector);
-  if (reviewStatus !== "all") queryParams.set("reviewStatus", reviewStatus);
+  if (status) queryParams.set("reviewStatus", status);
 
   const exportQueryParams = new URLSearchParams();
   if (search) exportQueryParams.set("search", search);
   if (jurisdiction !== "all") exportQueryParams.set("jurisdiction", jurisdiction);
   if (sector) exportQueryParams.set("sector", sector);
-  if (reviewStatus !== "all") exportQueryParams.set("reviewStatus", reviewStatus);
+  if (status) exportQueryParams.set("reviewStatus", status);
   const exportHref = `/api/cba-intelligence/agreements/export${exportQueryParams.size > 0 ? `?${exportQueryParams.toString()}` : ""}`;
 
-  const { data, isLoading, error } = useQuery<AgreementListResponse>({
-    queryKey: ["cba-intel-agreements", page, search, jurisdiction, sector, reviewStatus],
-    queryFn: () =>
-      fetch(`/api/cba-intelligence/agreements?${queryParams}`).then((r) => r.json()),
+  const { data, isLoading, error } = useQuery<AgreementPage>({
+    queryKey: ["cba-intel-agreements", page, search, jurisdiction, sector, status],
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/agreements?${queryParams}`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorLoad")));
+      const agreements: AgreementPage = envelopeData(body) as unknown as AgreementPage;
+      if (!Array.isArray(agreements.items)) throw new ApiShapeError("no agreements");
+      return agreements;
+    },
   });
 
   if (selectedId) {
     return <AgreementDetailPanel agreementId={selectedId} onClose={() => setSelectedId(null)} />;
   }
 
-  const items = data?.data?.items ?? [];
-  const total = data?.data?.total ?? 0;
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 25);
 
   return (
@@ -398,18 +388,19 @@ export function AgreementExplorer() {
               setPage(1);
             }}
           />
-          <Select value={reviewStatus} onValueChange={(v) => { setReviewStatus(v); setPage(1); }}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder={t("filters.reviewPlaceholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("filters.allReviews")}</SelectItem>
-              <SelectItem value="pending">{t("reviewStatuses.pending")}</SelectItem>
-              <SelectItem value="approved">{t("reviewStatuses.approved")}</SelectItem>
-              <SelectItem value="rejected">{t("reviewStatuses.rejected")}</SelectItem>
-              <SelectItem value="needs_revision">{t("reviewStatuses.needs_revision")}</SelectItem>
-            </SelectContent>
-          </Select>
+          {canCurate && (
+            <Select value={reviewStatus} onValueChange={(v) => { setReviewStatus(v); setPage(1); }}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder={t("filters.reviewPlaceholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("filters.allReviews")}</SelectItem>
+                {REVIEW_STATUSES.map((value) => (
+                  <SelectItem key={value} value={value}>{t(`reviewStatuses.${value}`)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Button asChild variant="outline" className="ml-auto">
             <a href={exportHref} download>
               <Download className="mr-2 h-4 w-4" />
@@ -441,8 +432,8 @@ export function AgreementExplorer() {
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-red-500">
-                    {t("errorLoad")}
+                  <TableCell colSpan={7} role="alert" className="text-center py-8 text-red-500">
+                    {failureText(error, t("errorLoad"))}
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
@@ -459,33 +450,24 @@ export function AgreementExplorer() {
                     onClick={() => setSelectedId(a.id)}
                   >
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{a.title}</div>
-                        {a.cbaNumber && (
-                          <div className="text-xs text-muted-foreground">#{a.cbaNumber}</div>
-                        )}
-                      </div>
+                      <div className="font-medium">{a.title}</div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {a.employer && (
-                          <div className="flex items-center gap-1">
-                            <Building2 className="h-3 w-3 text-muted-foreground" />
-                            {a.employer}
-                          </div>
-                        )}
-                        {a.unionName && (
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            {a.unionName}
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3 text-muted-foreground" />
+                          {a.employerNormalized}
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Users className="h-3 w-3" />
+                          {a.unionNormalized}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-sm">{a.jurisdiction ?? "—"}</span>
+                        <span className="text-sm">{a.jurisdiction}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">
@@ -493,9 +475,7 @@ export function AgreementExplorer() {
                     </TableCell>
                     <TableCell>{confidenceBadge(a.overallConfidence)}</TableCell>
                     <TableCell>
-                      <Badge variant={REVIEW_BADGE[a.reviewStatus] ?? "outline"}>
-                        {(['pending','approved','rejected','needs_revision','auto_approved'] as const).includes(a.reviewStatus as 'pending') ? t(`reviewStatuses.${a.reviewStatus}` as 'reviewStatuses.pending') : a.reviewStatus.replace(/_/g, ' ')}
-                      </Badge>
+                      <ReviewBadge status={a.reviewStatus} />
                     </TableCell>
                     <TableCell>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />

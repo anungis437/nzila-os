@@ -126,7 +126,6 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'NEXT_PUBLIC_SITE_URL', value: siteUrl }
             { name: 'AUTH_URL', value: appUrl }
             { name: 'AUTH_TRUST_HOST', value: 'true' }
-            { name: 'DATABASE_TYPE', value: 'postgresql' }
             { name: 'DB_POOL_MAX', value: '10' }
             { name: 'AZURE_KEY_VAULT_URL', value: keyVaultUri }
             { name: 'AZURE_STORAGE_ACCOUNT_NAME', value: storageAccountName }

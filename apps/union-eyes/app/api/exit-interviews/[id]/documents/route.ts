@@ -50,6 +50,7 @@ const attachDocumentSchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     entitlement: 'union_knowledge_suite',
     body: attachDocumentSchema,
@@ -114,6 +115,7 @@ export const POST = withApi(
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     entitlement: 'union_knowledge_suite',
     openapi: {

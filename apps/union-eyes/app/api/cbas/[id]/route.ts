@@ -14,27 +14,35 @@ import {
 import { getClausesByCBAId } from "@/lib/services/clause-service";
 import { getBargainingNotesByCBA } from "@/lib/services/bargaining-notes-service";
 import { z } from "zod";
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { logger } from "@/lib/logger";
 
- 
- 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('member', async (request, context) => {
-  const { params, organizationId, userId } = context as { params: { id: string } | Promise<{ id: string }>; organizationId?: string; userId?: string };
-  if (!organizationId) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
-  }
+
+// A malformed id is a client error here, never a database fault handed back as a 500.
+const isCbaId = (id: string) => z.guid().safeParse(id).success;
+
+// The agreement, its clauses and its bargaining notes are read in the caller organization's tenant transaction (`rlsOrgContext`).
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['CBAs'], summary: 'Read a collective agreement with its clauses and bargaining notes' },
+  },
+  async ({ request, userId, organizationId: organization, params }) => {
+  const organizationId = organization!;
   try {
-      const { id } = await params;
+      const { id } = params;
+      if (!isCbaId(id)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'CBA id must be a valid id');
+      }
       const { searchParams } = new URL(request.url);
 
       const includeClauses = searchParams.get("includeClauses") === "true";
       const includeNotes = searchParams.get("includeNotes") === "true";
-      const includeAnalytics = searchParams.get("includeAnalytics") === "true";
 
       // Fetch CBA within the caller's organization
       const cba = await getCbaForOrganization(organizationId, id, { countView: false });
@@ -76,7 +84,8 @@ export const GET = withRoleAuth('member', async (request, context) => {
       error
     );
     }
-});
+  },
+);
 
 
 const cbasSchema = z.object({
@@ -100,15 +109,27 @@ const cbasSchema = z.object({
   documentUrl: z.string().url().optional(),
 });
 
-export const PATCH = withRoleAuth('steward', async (request, context) => {
-    const { userId, organizationId, params } = context as { userId: string; organizationId?: string; params: { id: string } | Promise<{ id: string }> };
-    if (!organizationId || !userId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
-    }
+// The audited update opens its own tenant transaction and writes its audit record in it, so the wrapper opens none.
+export const PATCH = withApi(
+  {
+    auth: { minRole: 'steward' },
+    openapi: { tags: ['CBAs'], summary: 'Update a collective agreement' },
+  },
+  async ({ request, userId: actor, organizationId: organization, params }) => {
+    const userId = actor!;
+    const organizationId = organization!;
 
   try {
-      const { id } = await params;
-      const body = await request.json();
+      const { id } = params;
+      if (!isCbaId(id)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'CBA id must be a valid id');
+      }
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+      }
     // Publishing an agreement outside the organization is not a steward-level decision.
     if (body && typeof body === 'object' && 'isPublic' in body) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'Changing agreement visibility is not permitted here');
@@ -158,15 +179,23 @@ export const PATCH = withRoleAuth('steward', async (request, context) => {
       error
     );
     }
-});
+  },
+);
 
-export const DELETE = withRoleAuth('steward', async (_request, context) => {
-  const { params, userId, organizationId } = context as { params: { id: string } | Promise<{ id: string }>; userId?: string; organizationId?: string };
-  if (!organizationId || !userId) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
-  }
+// The audited archive opens its own tenant transaction and writes its audit record in it, so the wrapper opens none.
+export const DELETE = withApi(
+  {
+    auth: { minRole: 'steward' },
+    openapi: { tags: ['CBAs'], summary: 'Archive a collective agreement (never a hard delete)' },
+  },
+  async ({ userId: actor, organizationId: organization, params }) => {
+  const userId = actor!;
+  const organizationId = organization!;
   try {
-      const { id } = await params;
+      const { id } = params;
+      if (!isCbaId(id)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'CBA id must be a valid id');
+      }
       // A "hard" delete request is not honoured: an agreement is only ever archived, so its clauses and notes survive.
 
       const result = await archiveCbaAudited({ organizationId, userId }, id);
@@ -193,4 +222,5 @@ export const DELETE = withRoleAuth('steward', async (_request, context) => {
       error
     );
     }
-});
+  },
+);

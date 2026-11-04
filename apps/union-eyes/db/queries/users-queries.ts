@@ -1,5 +1,3 @@
-"use server";
-
 import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";

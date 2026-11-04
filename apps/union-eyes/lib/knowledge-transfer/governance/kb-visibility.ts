@@ -9,10 +9,21 @@ import { knowledgeBase } from '@/db/schema';
 export function knowledgeBaseOrganizationCondition(orgId: string, parentId: string | undefined): SQL {
   const own = eq(knowledgeBase.organizationId, orgId);
   if (!parentId) return own;
-  const sharedFromParent = and(
+  return or(own, knowledgeBaseParentSharedCondition(orgId, parentId))!;
+}
+
+/**
+ * The parent's rows that were shared with the organization, and only those: public, or naming the organization in the allowed list. A row made from
+ * an exit interview is never one of them: an interview's copy stays with the organization that owns the interview.
+ *
+ * Row-level security shows a tenant only its own organization's rows, so a child reads these through a gated system read (the knowledge suite
+ * entitlement and the hierarchy's own record of the parent), not in its tenant transaction.
+ */
+export function knowledgeBaseParentSharedCondition(orgId: string, parentId: string): SQL {
+  return and(
     eq(knowledgeBase.organizationId, parentId),
     or(eq(knowledgeBase.isPublic, true), sql`${knowledgeBase.allowedOrganizations} @> ${JSON.stringify([orgId])}::jsonb`),
+    sql`coalesce(${knowledgeBase.sourceType}, '') <> 'exit_interview'`,
   )!;
-  return or(own, sharedFromParent)!;
 }
 

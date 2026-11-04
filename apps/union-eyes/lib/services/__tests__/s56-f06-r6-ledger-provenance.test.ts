@@ -23,6 +23,10 @@ const REMOVED_LATER: Record<string, string> = {
   'apps/union-eyes/lib/email/report-email-templates.ts':
     'dead code (nothing that runs reaches it) deleted with the scheduled-report executor it served, in the mismatch census (UE-CONV-H-017); the batch commit holds the file',
   'apps/union-eyes/lib/email/__tests__/report-email-templates.test.ts': 'the test of the deleted module above',
+  'apps/union-eyes/actions/icra/get-adaptive-resolution.ts':
+    'unmounted code (no page, route or component imports it) deleted in the orphan census (UE-CONV-H-027); the batch commit holds the file',
+  'apps/union-eyes/components/dashboards/nzila-ops-dashboard.tsx':
+    'unmounted UI (no page renders it) deleted in the orphan census (UE-CONV-H-027); the batch commit holds the file',
 }
 
 describe('F06 ledger provenance', () => {

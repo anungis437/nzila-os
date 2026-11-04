@@ -40,7 +40,7 @@ export interface SubscriptionEventInput {
   previousPlanId?: string;
   previousMonthlyAmount?: number;
   previousAnnualAmount?: number;
-  source?: 'stripe' | 'whop' | 'manual' | 'system';
+  source?: 'stripe' | 'manual' | 'system';
   sourceEventId?: string;
   attributionSource?: string;
   attributionCampaign?: string;

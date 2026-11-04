@@ -4,8 +4,34 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
 
 type Prefs = { inAppEnabled: boolean; claimUpdates: boolean; saved: boolean };
+type SaveResult = { kind: 'saved' } | { kind: 'failed'; reason: string };
+
+const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+/** GET and PUT answer with the stored (or default) preferences in withApi's envelope; a body that does not hold all three flags is not read as "all off". */
+async function readPrefs(response: Response): Promise<Prefs> {
+  const body: unknown = await response.json().catch(() => {
+    throw new ApiShapeError('the answer is not JSON');
+  });
+  const { inAppEnabled, claimUpdates, saved } = envelopeData(body);
+  if (typeof inAppEnabled !== 'boolean' || typeof claimUpdates !== 'boolean' || typeof saved !== 'boolean') {
+    throw new ApiShapeError('the preferences are incomplete');
+  }
+  return { inAppEnabled, claimUpdates, saved };
+}
+
+async function refusal(response: Response): Promise<Error> {
+  return new Error(await readApiError(response, `Request failed with status ${response.status}`));
+}
+
+async function fetchPrefs(): Promise<Prefs> {
+  const response = await fetch('/api/notifications/preferences');
+  if (!response.ok) throw await refusal(response);
+  return readPrefs(response);
+}
 
 /**
  * Only controls backed by delivery that exists are shown: in-app notices are produced by case
@@ -14,32 +40,38 @@ type Prefs = { inAppEnabled: boolean; claimUpdates: boolean; saved: boolean };
  */
 export function MemberPreferences() {
   const t = useTranslations('memberPreferences');
-  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [prefs, setPrefs] = useState<Prefs>({ inAppEnabled: true, claimUpdates: true, saved: false });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState<'saved' | 'failed' | null>(null);
+  const [result, setResult] = useState<SaveResult | null>(null);
 
-  const load = useCallback(async () => {
-    setState('loading');
-    try {
-      const response = await fetch('/api/notifications/preferences');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const body = await response.json();
-      const data = body?.data ?? body;
-      setPrefs({ inAppEnabled: Boolean(data.inAppEnabled), claimUpdates: Boolean(data.claimUpdates), saved: Boolean(data.saved) });
-      setState('ready');
-    } catch {
-      setState('error');
-    }
+  const load = useCallback(() => {
+    fetchPrefs().then(
+      (value) => {
+        setPrefs(value);
+        setLoadError(null);
+        setLoading(false);
+      },
+      (error: unknown) => {
+        setLoadError(reasonOf(error));
+        setLoading(false);
+      },
+    );
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load();
+    load();
   }, [load]);
+
+  const retry = () => {
+    setLoading(true);
+    load();
+  };
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (prefs === null) return;
     setSaving(true);
     setResult(null);
     try {
@@ -48,11 +80,12 @@ export function MemberPreferences() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ inAppEnabled: prefs.inAppEnabled, claimUpdates: prefs.claimUpdates }),
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      setPrefs((p) => ({ ...p, saved: true }));
-      setResult('saved');
-    } catch {
-      setResult('failed');
+      if (!response.ok) throw await refusal(response);
+      // The route answers with the row it stored: the form shows that, not what was typed.
+      setPrefs(await readPrefs(response));
+      setResult({ kind: 'saved' });
+    } catch (error) {
+      setResult({ kind: 'failed', reason: reasonOf(error) });
     } finally {
       setSaving(false);
     }
@@ -64,14 +97,15 @@ export function MemberPreferences() {
         <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">{t('description')}</p>
       </div>
-      {state === 'loading' && <Skeleton className="h-32 w-full" role="status" aria-busy="true" />}
-      {state === 'error' && (
+      {loading && <Skeleton className="h-32 w-full" role="status" aria-busy="true" />}
+      {!loading && loadError !== null && (
         <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm">
           {t('loadError')}
-          <Button variant="outline" size="sm" className="ml-3" onClick={() => void load()}>{t('retry')}</Button>
+          <span className="block text-xs text-muted-foreground">{loadError}</span>
+          <Button variant="outline" size="sm" className="mt-2" onClick={retry}>{t('retry')}</Button>
         </div>
       )}
-      {state === 'ready' && (
+      {!loading && prefs !== null && (
         <form onSubmit={save} className="space-y-4 rounded-lg border p-4">
           {!prefs.saved && <p className="text-sm text-muted-foreground" data-testid="prefs-defaults">{t('defaultsNote')}</p>}
           <label className="flex items-start gap-3 text-sm">
@@ -79,7 +113,7 @@ export function MemberPreferences() {
               type="checkbox"
               className="mt-1 h-4 w-4"
               checked={prefs.inAppEnabled}
-              onChange={(e) => setPrefs((p) => ({ ...p, inAppEnabled: e.target.checked }))}
+              onChange={(e) => setPrefs({ ...prefs, inAppEnabled: e.target.checked })}
             />
             <span>
               <span className="block font-medium">{t('inApp')}</span>
@@ -92,7 +126,7 @@ export function MemberPreferences() {
               className="mt-1 h-4 w-4"
               checked={prefs.claimUpdates}
               disabled={!prefs.inAppEnabled}
-              onChange={(e) => setPrefs((p) => ({ ...p, claimUpdates: e.target.checked }))}
+              onChange={(e) => setPrefs({ ...prefs, claimUpdates: e.target.checked })}
             />
             <span>
               <span className="block font-medium">{t('caseUpdates')}</span>
@@ -101,8 +135,13 @@ export function MemberPreferences() {
           </label>
           <p className="text-xs text-muted-foreground">{t('otherChannels')}</p>
           <div aria-live="polite">
-            {result === 'saved' && <p className="text-sm text-green-700" data-testid="prefs-saved">{t('saved')}</p>}
-            {result === 'failed' && <p role="alert" className="text-sm text-destructive">{t('saveError')}</p>}
+            {result?.kind === 'saved' && <p className="text-sm text-green-700" data-testid="prefs-saved">{t('saved')}</p>}
+            {result?.kind === 'failed' && (
+              <p role="alert" className="text-sm text-destructive">
+                {t('saveError')}
+                <span className="block text-xs">{result.reason}</span>
+              </p>
+            )}
           </div>
           <Button type="submit" disabled={saving}>{saving ? t('saving') : t('save')}</Button>
         </form>

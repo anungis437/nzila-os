@@ -9,7 +9,7 @@ import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
-import { withOrganizationAuth } from "@/lib/organization-middleware";
+import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { canTransitionGrievance } from "@/lib/cases/grievance-transition-authority";
 import { getEffectiveCaseAccess } from "@/lib/services/case-access-service";
@@ -29,7 +29,6 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 // Map UE roles to unified FSM actor roles
 function mapToActorRole(hasAdmin: boolean, hasStaff: boolean): ActorRole {
@@ -48,14 +47,24 @@ const statusSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const PATCH = withOrganizationAuth(async (request, context, params?: { id: string }) => {
-  const { organizationId, userId } = context;
-  await requireEntitlement(organizationId, 'grievance_case_suite');
-
-  try {
-    if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-    const body = await request.json();
-    const parsed = statusSchema.safeParse(body);
+export const PATCH = withApi(
+  {
+    // No role floor: what the caller may do is the authority they hold over this matter (canTransitionGrievance below); the role only picks the FSM actor.
+    auth: { required: true },
+    entitlement: 'grievance_case_suite',
+    // The grievance is read through the ambient handle, so the handler runs in the caller's organization transaction.
+    rlsOrgContext: true,
+    openapi: { tags: ['Grievances'], summary: 'Advance a grievance through the lifecycle' },
+  },
+  async ({ request, params, organizationId, userId }) => {
+    if (!organizationId || !userId) {
+      throw ApiError.forbidden('Organization context required — select an organization before accessing this resource');
+    }
+    const grievanceId = params.id;
+    if (!grievanceId || !zUUID.safeParse(grievanceId).success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid grievance ID");
+    }
+    const parsed = statusSchema.safeParse(await request.json());
     if (!parsed.success) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid status", parsed.error.flatten());
     }
@@ -68,7 +77,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       .from(grievances)
       .where(
         and(
-          eq(grievances.id, params.id),
+          eq(grievances.id, grievanceId),
           eq(grievances.organizationId, organizationId),
         ),
       );
@@ -78,7 +87,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     }
 
     // Role level is necessary but not sufficient: the actor needs authority over this matter.
-    const caseAccess = await getEffectiveCaseAccess({ organizationId, grievanceId: params.id, userId });
+    const caseAccess = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
     const mayTransition = canTransitionGrievance({
       isPrimaryOwner: caseAccess.isPrimaryOwner,
       accessRole: caseAccess.isSecondaryCollaborator ? caseAccess.accessRole : null,
@@ -93,7 +102,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
         organizationId,
         resource: "grievances",
         action: "status_transition",
-        resourceId: params.id,
+        resourceId: grievanceId,
         details: { reason: "Representative has no authority over this matter", requestedStatus: newStatus },
         outcome: "failure",
       });
@@ -121,7 +130,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     // Validate FSM transition via unified case-lifecycle
     const result = validateTransition({
       actorRole,
-      caseId: params.id,
+      caseId: grievanceId,
       currentState: unifiedCurrent,
       targetState: unifiedTarget,
       assignedTo: grievance.unionRepId,
@@ -133,9 +142,9 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
 
     const previousState = { status: grievance.status };
 
-    // Apply update
-    const [updated] = await withRLSContext(async (tx) => {
-      const [u] = await tx
+    // Apply update, only from the status that was validated: a transition that raced this one finds the matter already moved.
+    const [updated] = await withRLSContext({ organizationId }, async (tx) => {
+      const rows = await tx
         .update(grievances)
         .set({
           status: newStatus,
@@ -143,12 +152,13 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
           ...(newStatus === "settled" ? { resolvedAt: new Date() } : {}),
           ...(newStatus === "closed" ? { closedAt: new Date() } : {}),
         })
-        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
+        .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId), eq(grievances.status, grievance.status)))
         .returning();
+      if (rows.length === 0) throw ApiError.conflict('The grievance changed while its status was being updated');
 
       // Emit event
       await tx.insert(grievanceEvents).values({
-        grievanceId: params.id,
+        grievanceId,
         eventType: "status_changed",
         actorUserId: userId,
         notes: notes ?? `Status changed: ${currentStatus} → ${newStatus}`,
@@ -163,27 +173,27 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
         userId,
         action: 'grievance.status_change',
         resourceType: 'grievances',
-        resourceId: params.id,
+        resourceId: grievanceId,
         details: { previousState, newState: { status: newStatus }, ...(intakeAction ? { intakeAction } : {}) },
       });
 
-      return [u];
+      return rows;
     });
 
     buildUnionEvidencePack({
       actionType: 'GRIEVANCE_STATUS_CHANGED',
       orgId: organizationId,
       actorId: userId,
-      artifacts: [{ type: 'grievance', data: { grievanceId: params.id, from: currentStatus, to: newStatus } }],
+      artifacts: [{ type: 'grievance', data: { grievanceId, from: currentStatus, to: newStatus } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_STATUS_CHANGED' }));
 
     await trackPilotEvent({
       userId,
       organizationId,
-      sessionId: `server:${params.id}`,
+      sessionId: `server:${grievanceId}`,
       eventType: 'case_transitioned',
       metadata: {
-        grievanceId: params.id,
+        grievanceId,
         fromStatus: currentStatus,
         toStatus: newStatus,
       },
@@ -193,17 +203,15 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       await trackPilotEvent({
         userId,
         organizationId,
-        sessionId: `server:${params.id}`,
+        sessionId: `server:${grievanceId}`,
         eventType: 'case_closed',
         metadata: {
-          grievanceId: params.id,
+          grievanceId,
           finalStatus: newStatus,
         },
       });
     }
 
     return standardSuccessResponse(updated);
-  } catch (_error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to update grievance status");
-  }
-});
+  },
+);

@@ -28,7 +28,7 @@ describe('S53 ICRA claim and capability withdrawal', () => {
     expect(src).toMatch(/claimedOrgId:\s*icraAssessments\.claimedOrgId|select\(\)/)
   })
 
-  it.each(['actions/icra/get-profile.ts', 'actions/icra/get-adaptive-resolution.ts'])('%s uses the same gate', (file) => {
+  it.each(['actions/icra/get-profile.ts'])('%s uses the same gate', (file) => {
     const src = read(file)
     expect(src).toMatch(/authorizeAssessmentToken\s*\(/)
     expect(src).not.toMatch(/\bcheckCapability\s*\(/)

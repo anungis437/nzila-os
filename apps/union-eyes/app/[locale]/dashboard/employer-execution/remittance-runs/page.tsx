@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { requireUser } from "@/lib/api-auth-guard";
-import { db } from "@/db";
-import { employerRemittanceRuns } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { requireOrganizationScope } from "@/lib/page-data/organization-scope";
+import { listRemittanceRuns } from "@/lib/employer-execution/page-reads";
 import { getTranslations } from "next-intl/server";
 import { RemittanceRunTable } from "@/components/employer-execution";
 
@@ -25,15 +23,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function EmployerExecutionRemittanceRunsPage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "employerRemittanceRunsPage" });
-  const context = await requireUser();
-  const organizationId = context.organizationId;
+  const { organizationId } = await requireOrganizationScope();
 
-  const runs = await db
-    .select()
-    .from(employerRemittanceRuns)
-    .where(eq(employerRemittanceRuns.organizationId, organizationId))
-    .orderBy(desc(employerRemittanceRuns.createdAt))
-    .limit(50);
+  const runs = await listRemittanceRuns(organizationId);
 
   return (
     <div className="space-y-6">

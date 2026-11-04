@@ -18,7 +18,7 @@ import { SystemStatusBadge } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { logger } from '@/lib/logger';
 
-export default function PilotDashboard() {
+export default function PilotDashboard({ supportEmail }: { supportEmail: string }) {
   const [metrics, setMetrics] = useState<PilotMetrics | null>(null);
   const [allOrgs, setAllOrgs] = useState<PilotMetrics[] | null>(null);
   const [isPlatformView, setIsPlatformView] = useState(false);
@@ -82,13 +82,13 @@ export default function PilotDashboard() {
             >
               ← Back to Overview
             </button>
-            <OrgPilotDetail metrics={activeMetrics} />
+            <OrgPilotDetail metrics={activeMetrics} supportEmail={supportEmail} />
           </div>
         </div>
       );
     }
 
-    return <PlatformOverview orgs={allOrgs} onSelectOrg={setSelectedOrg} />;
+    return <PlatformOverview orgs={allOrgs} onSelectOrg={setSelectedOrg} supportEmail={supportEmail} />;
   }
 
   // Single org view (pilot org sees its own data)
@@ -112,7 +112,7 @@ export default function PilotDashboard() {
     );
   }
 
-  return <OrgPilotDetail metrics={metrics} />;
+  return <OrgPilotDetail metrics={metrics} supportEmail={supportEmail} />;
 }
 
 // ============================================================================
@@ -122,9 +122,11 @@ export default function PilotDashboard() {
 function PlatformOverview({
   orgs,
   onSelectOrg,
+  supportEmail,
 }: {
   orgs: PilotMetrics[];
   onSelectOrg: (id: string) => void;
+  supportEmail: string;
 }) {
   // Aggregate stats
   const avgHealth =
@@ -314,7 +316,7 @@ function PlatformOverview({
           </p>
           <div className="flex gap-4 justify-center">
             <a
-              href="mailto:pilot-support@unioneyes.org"
+              href={`mailto:${supportEmail}`}
               className="bg-white text-indigo-600 px-6 py-3 rounded-md font-medium hover:bg-indigo-50 transition-colors"
             >
               Pilot Support
@@ -336,7 +338,7 @@ function PlatformOverview({
 // Org Pilot Detail (used for both single-org and drill-down views)
 // ============================================================================
 
-function OrgPilotDetail({ metrics }: { metrics: PilotMetrics }) {
+function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supportEmail: string }) {
   const breakdown = calculatePilotHealthBreakdown(metrics);
   const status = getHealthScoreStatus(breakdown.overall);
 
@@ -533,7 +535,7 @@ function OrgPilotDetail({ metrics }: { metrics: PilotMetrics }) {
         </p>
         <div className="flex gap-4 justify-center">
           <a
-            href="mailto:pilot-support@unioneyes.org"
+            href={`mailto:${supportEmail}`}
             className="bg-white text-blue-600 px-6 py-3 rounded-md font-medium hover:bg-blue-50 transition-colors"
           >
             Email Support

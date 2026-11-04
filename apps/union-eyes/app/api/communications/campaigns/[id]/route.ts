@@ -13,7 +13,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   orgScoped: true,
   itemRoute: true,
   readRole: 'steward',
-  blockedPatchFields: ['status', 'sentAt', 'completedAt', 'stats', 'audienceCount'],
+  blockedPatchFields: ['status', 'sentAt', 'completedAt', 'scheduledAt', 'sendImmediately', 'stats', 'audienceCount'],
   writeRole: 'steward',
 });
 export { GET, PATCH, DELETE };

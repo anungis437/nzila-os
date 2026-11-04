@@ -4,6 +4,7 @@
  */
 
 import { db } from '@/db';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import {
   rewardRedemptions,
   type RewardRedemption,
@@ -11,6 +12,7 @@ import {
 import { eq, and, desc, count, inArray, sql } from 'drizzle-orm';
 import { applyLedgerEntry } from './wallet-service';
 import { auditRewards, rewardsActor } from './audit';
+import { UserFacingError } from '@/lib/errors/user-facing-error';
 import { creditsToReturn } from './shopify-redemption-rules';
 
 /** Adds keys to the stored provider payload without discarding what is already there (the checkout URL, the order, earlier refunds). */
@@ -106,7 +108,7 @@ export async function updateRedemptionCheckout(
         )
       )
       .returning();
-    if (!updated) throw new Error('Redemption not found or not awaiting checkout');
+    if (!updated) throw new UserFacingError('Redemption not found or not awaiting checkout');
 
     await auditRewards(tx, {
       organizationId: orgId,
@@ -148,7 +150,7 @@ export async function markRedemptionOrdered(
         )
       )
       .returning();
-    if (!updated) throw new Error('Redemption not found or not awaiting payment');
+    if (!updated) throw new UserFacingError('Redemption not found or not awaiting payment');
 
     await auditRewards(tx, {
       organizationId: orgId,
@@ -188,7 +190,7 @@ export async function markRedemptionFulfilled(
         )
       )
       .returning();
-    if (!updated) throw new Error('Redemption not found or not awaiting fulfilment');
+    if (!updated) throw new UserFacingError('Redemption not found or not awaiting fulfilment');
 
     await auditRewards(tx, {
       organizationId: orgId,
@@ -231,11 +233,11 @@ export async function cancelRedemption(
     });
 
     if (!redemption || (actor?.mustOwn && redemption.userId !== actor.userId)) {
-      throw new Error('Redemption not found');
+      throw new UserFacingError('Redemption not found');
     }
 
     if (!['initiated', 'pending_payment'].includes(redemption.status)) {
-      throw new Error(`Cannot cancel redemption with status: ${redemption.status}`);
+      throw new UserFacingError(`Cannot cancel redemption with status: ${redemption.status}`);
     }
 
     // Update redemption status first: the status predicate stops a concurrent cancel or order from also refunding.
@@ -258,7 +260,7 @@ export async function cancelRedemption(
         )
       )
       .returning();
-    if (!updated) throw new Error('Cannot cancel redemption: it was changed concurrently');
+    if (!updated) throw new UserFacingError('Cannot cancel redemption: it was changed concurrently');
 
     // Refund credits
     const ledgerEntry = await applyLedgerEntry(tx, {
@@ -314,9 +316,9 @@ export async function processRedemptionRefund(
       .where(and(eq(rewardRedemptions.id, redemptionId), eq(rewardRedemptions.orgId, orgId)))
       .limit(1)
       .for('update');
-    if (!redemption) throw new Error('Redemption not found');
+    if (!redemption) throw new UserFacingError('Redemption not found');
     if (redemption.status !== 'ordered' && redemption.status !== 'fulfilled' && redemption.status !== 'refunded') {
-      throw new Error('Redemption has no paid order to refund');
+      throw new UserFacingError('Redemption has no paid order to refund');
     }
 
     const payload = (redemption.providerPayloadJson ?? {}) as { order?: { line_items_total_cents?: number }; refunds?: RecordedRefund[] };
@@ -353,7 +355,7 @@ export async function processRedemptionRefund(
         eq(rewardRedemptions.status, redemption.status)
       ))
       .returning();
-    if (!updated) throw new Error('Redemption refund conflicts with a concurrent change');
+    if (!updated) throw new UserFacingError('Redemption refund conflicts with a concurrent change');
 
     const ledgerEntry = creditsReturned > 0
       ? await applyLedgerEntry(tx, {
@@ -465,7 +467,8 @@ export async function listUserRedemptions(
   userId: string,
   limit = 20,
   offset = 0,
-  status?: RewardRedemption['status']
+  status?: RewardRedemption['status'],
+  tx: RLSTx = db,
 ): Promise<{
   redemptions: RewardRedemption[];
   total: number;
@@ -473,7 +476,7 @@ export async function listUserRedemptions(
   const own = status
     ? and(eq(rewardRedemptions.orgId, orgId), eq(rewardRedemptions.userId, userId), eq(rewardRedemptions.status, status))
     : and(eq(rewardRedemptions.orgId, orgId), eq(rewardRedemptions.userId, userId));
-  const redemptions = await db.query.rewardRedemptions.findMany({
+  const redemptions = await tx.query.rewardRedemptions.findMany({
     where: own,
     orderBy: [desc(rewardRedemptions.createdAt)],
     limit,
@@ -481,7 +484,7 @@ export async function listUserRedemptions(
   });
 
   // Get total count
-  const [{ total: totalCount }] = await db
+  const [{ total: totalCount }] = await tx
     .select({ total: count() })
     .from(rewardRedemptions)
     .where(own);

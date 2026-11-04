@@ -7,9 +7,8 @@
  */
 
 import { withApi, z, ApiError } from '@/lib/api/framework';
-import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
 import { db } from '@/db/db';
-import { eq, and, desc, count } from 'drizzle-orm';
+import { eq, and, desc, count, inArray } from 'drizzle-orm';
 import {
   duplicateGroups,
   duplicateGroupMembers,
@@ -28,6 +27,8 @@ const listQuerySchema = z.object({
 
 export const GET = withApi(
   {
+    // duplicate_groups and its members are tenant tables: the read runs in the caller's own tenant transaction, as the runtime role.
+    rlsOrgContext: true,
     auth: { minRole: 'admin' },
     query: listQuerySchema,
     openapi: {
@@ -51,42 +52,41 @@ export const GET = withApi(
 
     const whereClause = and(...conditions);
 
-    const [totalResult] = await withSystemContext(async () =>
-      db.select({ count: count() }).from(duplicateGroups).where(whereClause),
-    );
+    const [totalResult] = await db.select({ count: count() }).from(duplicateGroups).where(whereClause);
 
-    const groups = await withSystemContext(async () =>
-      db
-        .select()
-        .from(duplicateGroups)
-        .where(whereClause)
-        .orderBy(desc(duplicateGroups.createdAt))
-        .limit(query.limit)
-        .offset(query.offset),
-    );
+    const groups = await db
+      .select()
+      .from(duplicateGroups)
+      .where(whereClause)
+      .orderBy(desc(duplicateGroups.createdAt))
+      .limit(query.limit)
+      .offset(query.offset);
 
-    // Fetch members for each group
-    const groupsWithMembers = await Promise.all(
-      groups.map(async (group) => {
-        const members = await withSystemContext(async () =>
-          db
-            .select()
-            .from(duplicateGroupMembers)
-            .where(eq(duplicateGroupMembers.groupId, group.id)),
-        );
-        return {
-          ...group,
-          autoScore: group.autoScore,
-          createdAt: group.createdAt.toISOString(),
-          reviewedAt: group.reviewedAt?.toISOString() ?? null,
-          members: members.map((m) => ({
-            ...m,
-            similarityScore: m.similarityScore,
-            createdAt: m.createdAt.toISOString(),
-          })),
-        };
-      }),
-    );
+    // The members of every listed group, in one query.
+    const members = groups.length === 0
+      ? []
+      : await db
+          .select()
+          .from(duplicateGroupMembers)
+          .where(inArray(duplicateGroupMembers.groupId, groups.map((group) => group.id)));
+    const membersByGroup = new Map<string, typeof members>();
+    for (const member of members) {
+      const list = membersByGroup.get(member.groupId) ?? [];
+      list.push(member);
+      membersByGroup.set(member.groupId, list);
+    }
+
+    const groupsWithMembers = groups.map((group) => ({
+      ...group,
+      autoScore: group.autoScore,
+      createdAt: group.createdAt.toISOString(),
+      reviewedAt: group.reviewedAt?.toISOString() ?? null,
+      members: (membersByGroup.get(group.id) ?? []).map((m) => ({
+        ...m,
+        similarityScore: m.similarityScore,
+        createdAt: m.createdAt.toISOString(),
+      })),
+    }));
 
     return {
       groups: groupsWithMembers,
@@ -117,22 +117,6 @@ export const POST = withApi(
       throw ApiError.badRequest('Organization context required');
     }
 
-    const [group] = await withSystemContext(async () =>
-      db
-        .select()
-        .from(duplicateGroups)
-        .where(
-          and(
-            eq(duplicateGroups.id, body.group_id),
-            eq(duplicateGroups.organizationId, organizationId),
-          ),
-        ),
-    );
-
-    if (!group) {
-      throw ApiError.notFound('Duplicate group not found');
-    }
-
     const statusMap = {
       confirm: 'confirmed',
       dismiss: 'dismissed',
@@ -141,8 +125,23 @@ export const POST = withApi(
 
     const newStatus = statusMap[body.action];
 
-    // The resolution and its audit record commit together.
+    // The lookup, the resolution and its audit record are one tenant transaction: they commit together, and the group is read under the
+    // caller's organization's row-level security as well as by the explicit predicate.
     await withRLSContext({ organizationId }, async (tx) => {
+      const [group] = await tx
+        .select()
+        .from(duplicateGroups)
+        .where(
+          and(
+            eq(duplicateGroups.id, body.group_id),
+            eq(duplicateGroups.organizationId, organizationId),
+          ),
+        );
+
+      if (!group) {
+        throw ApiError.notFound('Duplicate group not found');
+      }
+
       await tx
         .update(duplicateGroups)
         .set({

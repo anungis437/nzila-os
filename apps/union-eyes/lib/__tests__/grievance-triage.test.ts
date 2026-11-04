@@ -101,10 +101,8 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("@/lib/db/with-rls-context", () => ({
-  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
-    fn({ insert: () => ({ values: async () => undefined }) }),
-}));
+const { withRls } = vi.hoisted(() => ({ withRls: vi.fn() }));
+vi.mock("@/lib/db/with-rls-context", () => ({ withRLSContext: withRls }));
 vi.mock("@/lib/audit/atomic-audit", () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock("@/lib/audit/operation-audit", () => ({
   performAuditedOperation: async (_op: unknown, fn: () => Promise<unknown>) => fn(),
@@ -121,8 +119,11 @@ import {
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("Grievance Triage AI", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // The tenant transaction hands the service the same connection stub the rest of this file mocks
+    const { db } = await import("@/db/db");
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(db));
   });
 
   describe("exports", () => {
@@ -164,6 +165,7 @@ describe("Grievance Triage AI", () => {
       const callArgs = mockGenerate.mock.calls[0][0];
       expect(callArgs.profileKey).toBe("ue-grievance-triage");
       expect(callArgs.orgId).toBe("00000000-0000-0000-0000-000000000000");
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 
@@ -171,6 +173,7 @@ describe("Grievance Triage AI", () => {
     it("returns an array", async () => {
       const result = await getTriageHistory("gr-1", "org-1");
       expect(Array.isArray(result)).toBe(true);
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 

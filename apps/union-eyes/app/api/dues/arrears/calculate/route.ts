@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'List current arrears for the organization' },
@@ -33,6 +34,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Calculate arrears summary for organization' },
   },

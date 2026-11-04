@@ -13,6 +13,7 @@
  */
 
 import { useState, useId } from 'react';
+import { readApiError } from '@/lib/client/api-envelope';
 
 interface EmailResultsCardProps {
   assessmentId: string;
@@ -85,8 +86,7 @@ export function EmailResultsCard({ assessmentId, locale = 'en-CA' }: EmailResult
         body: JSON.stringify({ assessmentId, email, locale, acknowledgeLinkAccess: true }),
       });
       if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
-        setErrorMsg(data.error ?? copy.error);
+        setErrorMsg(await readApiError(res, copy.error));
         setStatus('error');
         return;
       }

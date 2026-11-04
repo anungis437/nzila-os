@@ -24,7 +24,6 @@ import {
   getClientIP,
   validateWebhook,
   withWebhookValidation,
-  whopWebhookConfig,
   stripeWebhookConfig,
 } from '../webhook-security';
 import type { WebhookConfig } from '../webhook-security';
@@ -384,12 +383,6 @@ describe('webhook-security', () => {
   });
 
   describe('webhook config constants', () => {
-    it('whopWebhookConfig has expected signature header', () => {
-      expect(whopWebhookConfig.signatureHeader).toBe('x-whop-signature');
-      expect(whopWebhookConfig.timestampHeader).toBe('x-whop-timestamp');
-      expect(whopWebhookConfig.timestampTolerance).toBe(300000);
-    });
-
     it('stripeWebhookConfig has expected signature header', () => {
       expect(stripeWebhookConfig.signatureHeader).toBe('stripe-signature');
     });

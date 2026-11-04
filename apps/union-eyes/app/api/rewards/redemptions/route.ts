@@ -1,24 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   cancelRedemption,
   listUserRedemptions,
 } from '@/lib/services/rewards/redemption-service';
 import { cancelRedemptionSchema } from '@/lib/validation/rewards-schemas';
 import { z } from 'zod';
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
 
- 
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('member', async (request: NextRequest, context) => {
-  try {
-    const { userId, organizationId } = context as { userId: string; organizationId: string };
 
-    if (!organizationId) {
+const MAX_BODY_BYTES = 8 * 1024;
+
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Rewards'],
+      summary: 'List the signed-in member\'s reward redemptions',
+      description: 'Returns the member\'s own redemptions in the active organization, newest first; the payment provider\'s payload and checkout identifier are not returned.',
+    },
+  },
+  async ({ request, userId, organizationId }) => {
+  try {
+    if (!organizationId || !userId) {
       return standardErrorResponse(
         ErrorCode.MISSING_REQUIRED_FIELD,
         'Organization context required'
@@ -44,13 +54,14 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
       );
     }
 
-    // Tenant-bound execution, not merely an explicit organization predicate.
-    const result = await withRLSContext({ organizationId }, () => listUserRedemptions(
+    // Tenant-bound execution, not merely an explicit organization predicate: the read runs on the tenant transaction.
+    const result = await withRLSContext({ organizationId }, (tx) => listUserRedemptions(
       organizationId,
       userId,
       limit,
       offset,
-      status as (typeof validStatuses)[number] | undefined
+      status as (typeof validStatuses)[number] | undefined,
+      tx,
     ));
 
     return NextResponse.json(
@@ -72,12 +83,20 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
       error
     );
   }
-});
+  },
+);
 
-export const POST = withRoleAuth('member', async (request: NextRequest, context) => {
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Rewards'],
+      summary: 'Cancel one of the signed-in member\'s redemptions',
+      description: 'Cancels the member\'s own redemption and returns the credits to the member who spent them.',
+    },
+  },
+  async ({ request, userId, organizationId }) => {
   try {
-    const { userId, organizationId } = context as { userId: string; organizationId: string };
-
     if (!organizationId || !userId) {
       return standardErrorResponse(
         ErrorCode.MISSING_REQUIRED_FIELD,
@@ -88,12 +107,15 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
     // This path cancels a redemption, so it validates a cancellation: an initiation body (program, credits) is rejected rather than parsed and discarded.
     let validated;
     try {
-      const body = await request.json();
+      const body = await readBoundedJson(request, MAX_BODY_BYTES);
       validated = cancelRedemptionSchema
         .extend({ reason: z.string().trim().min(1).max(200) })
         .strict()
         .parse(body);
     } catch (error) {
+      if (error instanceof RequestBodyTooLargeError) {
+        return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+      }
       if (error instanceof z.ZodError) {
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
@@ -145,5 +167,5 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
       error
     );
   }
-});
-
+  },
+);

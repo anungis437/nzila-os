@@ -10,6 +10,8 @@ export interface RouteEntry {
   methods: readonly string[]
   /** The manifest's guard class; RETIRED is a route that answers 501. */
   guard: string
+  /** The methods that answer 501 in a file that serves others (its guard is then not RETIRED). */
+  retiredMethods?: readonly string[]
 }
 
 export type FindingKind = 'ROUTE_MISSING' | 'METHOD_MISSING' | 'CALLS_RETIRED'
@@ -85,6 +87,7 @@ export function judgeCall(call: Pick<ClientCall, 'pattern' | 'method'> & { prefi
   const method = call.method && !IMPLICIT.has(call.method) ? call.method : null
   const serving = method ? candidates.filter((entry) => entry.methods.includes(method)) : candidates
   if (method && serving.length === 0) return { kind: 'METHOD_MISSING', routes: candidates }
-  if (serving.every((entry) => entry.guard === 'RETIRED')) return { kind: 'CALLS_RETIRED', routes: serving }
+  const retired = (entry: RouteEntry): boolean => entry.guard === 'RETIRED' || (method !== null && !!entry.retiredMethods?.includes(method))
+  if (serving.every(retired)) return { kind: 'CALLS_RETIRED', routes: serving }
   return { kind: null, routes: serving }
 }

@@ -25,6 +25,7 @@ type ClaimStatus =
 import { claims, claimUpdates } from '@/db/schema'
 import { eq, and, count } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { isDeployedRuntime, isLocalQaRuntime } from '@/lib/runtime/production-guard'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { wrapSchemaQuery } from '@/lib/schema-error'
 import { eventBus, AppEvents } from '@/lib/events'
@@ -216,7 +217,7 @@ export async function POST(request: NextRequest) {
     if (denied) return denied
     logger.error('Workflow transition failed', { error: String(err) })
     const message = err instanceof Error ? err.message : 'Internal error'
-    const exposeDetails = process.env.QA_TEST_ENV === 'true' || process.env.NODE_ENV !== 'production'
+    const exposeDetails = isLocalQaRuntime() || !isDeployedRuntime()
     const e = err as Error & { cause?: any }
     const cause = e?.cause as { message?: string; code?: string } | undefined
 

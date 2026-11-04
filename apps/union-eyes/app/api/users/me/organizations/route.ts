@@ -9,12 +9,12 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { createLogger } from '@nzila/os-core'
 import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 const logger = createLogger('users:me:organizations')
 
@@ -40,49 +40,54 @@ export async function GET(_req: NextRequest) {
 
     const isAdmin = await isPlatformAdminUser(userId);
 
-    // Memberships are those bound to the authenticated user id.
-    const memberships = await db
-      .select()
-      .from(organizationMembers)
-      .where(eq(organizationMembers.userId, userId));
+    // A person's memberships span organizations, which no single-organization transaction can show, so they are read by the system role,
+    // as the organization read authority does (lib/organizations/read-authority.ts). Only an active, non-removed membership is the caller's:
+    // a suspended or removed member is not offered an organization they can no longer switch into.
+    const { memberships, orgs } = await withSystemContext(async (tx) => {
+      const ownMemberships = await tx
+        .select()
+        .from(organizationMembers)
+        .where(and(
+          eq(organizationMembers.userId, userId),
+          eq(organizationMembers.status, 'active'),
+          isNull(organizationMembers.deletedAt),
+        ));
 
-    // A membership is never linked to the caller here. An e-mail address is not proof of identity (the provider can
-    // return an unverified one, and a roster row may carry any address), so matching on it used to rebind every
-    // membership of that address, in any organization, and every membership of another user id, to the caller.
-    // A membership is bound to an identity by accepting an invitation or by the canonical onboarding flow.
+      // A membership is never linked to the caller here. An e-mail address is not proof of identity (the provider can
+      // return an unverified one, and a roster row may carry any address), so matching on it used to rebind every
+      // membership of that address, in any organization, and every membership of another user id, to the caller.
+      // A membership is bound to an identity by accepting an invitation or by the canonical onboarding flow.
 
-    logger.info('[/api/users/me/organizations] Membership resolution complete', {
-      userId,
-      membershipCount: memberships.length,
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let orgs: any[] = [];
-
-    if (isAdmin) {
-      // Platform admins can see ALL organizations
-      orgs = await db.select().from(organizations).limit(500);
-      logger.info('[/api/users/me/organizations] Platform admin — returning all orgs', {
+      logger.info('[/api/users/me/organizations] Membership resolution complete', {
         userId,
-        count: orgs.length,
+        membershipCount: ownMemberships.length,
       });
-    } else {
-      // Regular users only see orgs they are members of
-      const orgIds = [...new Set(memberships.map(m => m.organizationId))];
 
-      if (orgIds.length > 0) {
-        orgs = await db
-          .select()
-          .from(organizations)
-          .where(inArray(organizations.id, orgIds));
+      if (isAdmin) {
+        // Platform admins can see ALL organizations
+        const allOrgs = await tx.select().from(organizations).limit(500);
+        logger.info('[/api/users/me/organizations] Platform admin — returning all orgs', {
+          userId,
+          count: allOrgs.length,
+        });
+        return { memberships: ownMemberships, orgs: allOrgs };
       }
+
+      // Regular users only see the active organizations they are members of
+      const orgIds = [...new Set(ownMemberships.map(m => m.organizationId))];
+      const memberOrgs = orgIds.length > 0
+        ? await tx.select().from(organizations).where(inArray(organizations.id, orgIds))
+        : [];
+      const activeOrgs = memberOrgs.filter(o => (o.status ?? 'active') === 'active');
+      const activeIds = new Set(activeOrgs.map(o => o.id));
 
       logger.info('[/api/users/me/organizations] Non-admin org resolution complete', {
         userId,
-        membershipCount: memberships.length,
-        orgCount: orgs.length,
+        membershipCount: ownMemberships.length,
+        orgCount: activeOrgs.length,
       });
-    }
+      return { memberships: ownMemberships.filter(m => activeIds.has(m.organizationId)), orgs: activeOrgs };
+    });
 
     return NextResponse.json({
       organizations: orgs.map(o => ({

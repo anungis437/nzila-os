@@ -1,5 +1,4 @@
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
-import { db } from '@/db/db';
 import {
   externalDocumentAccessGrants,
   externalMatterAccessGrants,
@@ -8,7 +7,7 @@ import {
   type ExternalMatterAccessGrant,
   type RepresentationAuthority,
 } from '@/db/schema/representation-authority-schema';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { evaluateRepresentationAuthority } from './representation-authority-service';
@@ -217,14 +216,14 @@ export function evaluateExternalDocumentAccess(input: {
   };
 }
 
-export async function authorizeExternalMatterAccess(input: {
+export async function authorizeExternalMatterAccess(tx: RLSTx, input: {
   actor: ExternalActor;
   organizationId: string;
   matterType: RepresentationAuthority['matterType'];
   matterId: string;
   requiredPermission: ExternalMatterPermission;
 }, options: { recordAllowed?: boolean } = {}): Promise<ExternalAuthorizationDecision> {
-  const [authority] = await db
+  const [authority] = await tx
     .select()
     .from(representationAuthorities)
     .where(
@@ -241,7 +240,7 @@ export async function authorizeExternalMatterAccess(input: {
     .limit(1);
 
   const [matterGrant] = authority
-    ? await db
+    ? await tx
       .select()
       .from(externalMatterAccessGrants)
       .where(
@@ -272,7 +271,7 @@ export async function authorizeExternalMatterAccess(input: {
   return decision;
 }
 
-export async function authorizeExternalDocumentAccess(input: {
+export async function authorizeExternalDocumentAccess(tx: RLSTx, input: {
   actor: ExternalActor;
   organizationId: string;
   matterType: RepresentationAuthority['matterType'];
@@ -280,7 +279,7 @@ export async function authorizeExternalDocumentAccess(input: {
   documentId: string;
   requiredPermission: ExternalDocumentPermission;
 }): Promise<ExternalAuthorizationDecision> {
-  const [authority] = await db
+  const [authority] = await tx
     .select()
     .from(representationAuthorities)
     .where(
@@ -297,7 +296,7 @@ export async function authorizeExternalDocumentAccess(input: {
     .limit(1);
 
   const [matterGrant] = authority
-    ? await db
+    ? await tx
       .select()
       .from(externalMatterAccessGrants)
       .where(
@@ -316,7 +315,7 @@ export async function authorizeExternalDocumentAccess(input: {
     : [undefined];
 
   const [documentGrant] = matterGrant
-    ? await db
+    ? await tx
       .select()
       .from(externalDocumentAccessGrants)
       .where(

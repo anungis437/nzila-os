@@ -15,14 +15,12 @@
  *   { valuationDocumentText?: string }  — max 10 000 chars of raw document text
  */
 
-import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { summarizeTrusteeReport } from '@/lib/ai/pension-intelligence';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
 import { financeViewMandateDenial } from '@/lib/finance/finance-view-mandate';
@@ -31,57 +29,70 @@ const trusteeSummarySchema = z.object({
   valuationDocumentText: z.string().max(10_000).optional(),
 });
 
-export const POST = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
-  // 0. A live mandate must cover this particular pension plan (or the organization ledger).
-  const planId = request.nextUrl.pathname.split('/').at(-2) ?? '';
-  if (!planId) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Pension plan identifier is required');
-  const noMandate = await financeViewMandateDenial(context.organizationId!, context.userId!, planId);
-  if (noMandate) return noMandate;
+// The helper reads the plan in the organization's own context and ends that transaction before the provider is called, so the route does not set
+// `rlsOrgContext`. The entitlement is checked by the wrapper.
+export const POST = withApi(
+  {
+    auth: { minRole: 'officer' },
+    entitlement: 'ai_advanced_insights',
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'AI trustee summary of one pension plan (advisory)' },
+  },
+  async ({ request, user, userId, organizationId, params }) => {
+    // 0. A live mandate must cover this particular pension plan (or the organization ledger).
+    const planId = z.guid().safeParse(params.id);
+    if (!planId.success) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Pension plan identifier is required');
+    const noMandate = await financeViewMandateDenial(organizationId!, userId!, planId.data);
+    if (noMandate) return noMandate;
 
-  // 1. Rate limit
-  const rl = await checkRateLimit(`ai-pension-trustee:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
-  if (!rl.allowed) {
-    return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
-  }
-
-  // 2. Feature gate
-  const blocked = await guardAiFeature(AI_FEATURES.PENSION_TRUSTEE_SUMMARY, {
-    userId: context.userId,
-    organizationId: context.organizationId,
-  });
-  if (blocked) return blocked;
-
-  // 3. Entitlement
-  await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
-  enforceAISafety({ origin: 'pension-trustee-summary', action: 'POST', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'pension_financial' });
-
-  // 4. Validate body
-  let bodyData: { valuationDocumentText?: string } = {};
-  try {
-    const rawBody = await request.json();
-    const parsed = trusteeSummarySchema.safeParse(rawBody);
-    if (!parsed.success) {
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        'Invalid request body',
-        parsed.error.flatten(),
-      );
+    // 1. Rate limit
+    const rl = await checkRateLimit(`ai-pension-trustee:${userId}`, RATE_LIMITS.AI_COMPLETION);
+    if (!rl.allowed) {
+      return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
     }
-    bodyData = parsed.data;
-  } catch {
-    // Empty body is acceptable — valuation text is optional
-  }
 
-  // 5. Execute
-  try {
-    const result = await summarizeTrusteeReport({
-      planId,
-      organizationId: context.organizationId!,
-      userId: context.userId!,
-      valuationDocumentText: bodyData.valuationDocumentText,
+    // 2. Feature gate
+    const blocked = await guardAiFeature(AI_FEATURES.PENSION_TRUSTEE_SUMMARY, {
+      userId: userId!,
+      organizationId: organizationId!,
     });
-    return standardSuccessResponse(result);
-  } catch (_error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Trustee summary generation failed.');
-  }
-});
+    if (blocked) return blocked;
+
+    // 3. AI safety
+    enforceAISafety({ origin: 'pension-trustee-summary', action: 'POST', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'officer', dataClass: 'pension_financial' });
+
+    // 4. Validate body: an empty body is acceptable (the valuation text is optional), a body that is present must be valid JSON of the right shape
+    let bodyData: { valuationDocumentText?: string } = {};
+    const rawBody = await request.text();
+    if (rawBody.trim() !== '') {
+      let json: unknown;
+      try {
+        json = JSON.parse(rawBody);
+      } catch {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Request body must be valid JSON');
+      }
+      const parsed = trusteeSummarySchema.safeParse(json);
+      if (!parsed.success) {
+        return standardErrorResponse(
+          ErrorCode.VALIDATION_ERROR,
+          'Invalid request body',
+          parsed.error.flatten(),
+        );
+      }
+      bodyData = parsed.data;
+    }
+
+    // 5. Execute
+    try {
+      const result = await summarizeTrusteeReport({
+        planId: planId.data,
+        organizationId: organizationId!,
+        userId: userId!,
+        valuationDocumentText: bodyData.valuationDocumentText,
+      });
+      return standardSuccessResponse(result);
+    } catch (_error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Trustee summary generation failed.');
+    }
+  },
+);

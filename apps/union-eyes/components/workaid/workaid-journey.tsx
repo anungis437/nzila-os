@@ -83,24 +83,31 @@ interface WordingProposal {
   proposedAt: string
 }
 
-async function readJson(response: Response): Promise<{ ok: boolean; status: number; data: Record<string, unknown> }> {
-  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>
+/**
+ * What a workaid route answered. A request that never reached the server is a refusal like any other (code NETWORK_ERROR), not an exception thrown into
+ * an event handler or an effect, and a body that is not JSON is an empty answer whose status is the reason.
+ */
+async function readJson(pending: Response | Promise<Response>): Promise<{ ok: boolean; status: number; data: Record<string, unknown> }> {
+  let response: Response
+  try {
+    response = await pending
+  } catch (failure) {
+    return { ok: false, status: 0, data: { code: 'NETWORK_ERROR', message: failure instanceof Error ? failure.message : 'The request failed' } }
+  }
+  const body: unknown = await response.json().catch(() => null)
+  const data = typeof body === 'object' && body !== null && !Array.isArray(body) ? (body as Record<string, unknown>) : {}
   return { ok: response.ok, status: response.status, data }
 }
 
-function asConsents(value: unknown): ConsentRow[] {
-  if (!Array.isArray(value)) return []
-  return value as ConsentRow[]
-}
+/** The reason a refused answer gives: its code, else its error, else its message, else its status. */
+const reasonOf = (result: { status: number; data: Record<string, unknown> }): string =>
+  String(result.data.code ?? result.data.error ?? result.data.message ?? result.status)
 
-function asReferable(value: unknown): Referable[] {
-  if (!Array.isArray(value)) return []
-  return value as Referable[]
-}
+const UNEXPECTED_ANSWER = 'UNEXPECTED_RESPONSE'
 
-function asRecorded(value: unknown): RecordedReferral[] {
-  if (!Array.isArray(value)) return []
-  return value as RecordedReferral[]
+/** The rows of a list an answer carries, or null when it carries something else: a list that is not one is not an empty list. */
+function listOf<T>(value: unknown): T[] | null {
+  return Array.isArray(value) ? (value as T[]) : null
 }
 
 function releasableCategories(row: RecordedReferral): string[] {
@@ -146,8 +153,8 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
     setLoading(true)
     setError(null)
     const [textRes, listRes] = await Promise.all([
-      readJson(await fetch('/api/workaid/consent-text')),
-      readJson(await fetch('/api/workaid/consents')),
+      readJson(fetch('/api/workaid/consent-text')),
+      readJson(fetch('/api/workaid/consents')),
     ])
     if (textRes.status === 409 && textRes.data.code === 'CONSENT_TEXT_UNAVAILABLE') {
       setConsentText(null)
@@ -155,16 +162,21 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
     } else if (textRes.ok && textRes.data.consentText && typeof textRes.data.consentText === 'object') {
       setConsentText(textRes.data.consentText as ConsentText)
       setTextUnavailable(false)
-    } else if (!textRes.ok) {
-      setError(String(textRes.data.code ?? textRes.data.error ?? textRes.status))
+    } else {
+      setError(textRes.ok ? UNEXPECTED_ANSWER : reasonOf(textRes))
     }
-    if (listRes.ok) setConsents(asConsents(listRes.data.consents))
-    else setError(String(listRes.data.code ?? listRes.data.error ?? listRes.status))
+    if (listRes.ok) {
+      const rows = listOf<ConsentRow>(listRes.data.consents)
+      if (rows === null) setError(UNEXPECTED_ANSWER)
+      else setConsents(rows)
+    } else {
+      setError(reasonOf(listRes))
+    }
     setLoading(false)
   }, [])
 
   const loadProposals = useCallback(async () => {
-    const result = await readJson(await fetch('/api/workaid/consent-text/proposals'))
+    const result = await readJson(fetch('/api/workaid/consent-text/proposals'))
     if (result.status === 501 && result.data.code === 'STORE_UNAPPLIED') {
       setProposals([])
       setWordingUnavailable(true)
@@ -172,10 +184,15 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
     }
     setWordingUnavailable(false)
     if (!result.ok) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(reasonOf(result))
       return
     }
-    setProposals(Array.isArray(result.data.proposals) ? result.data.proposals as WordingProposal[] : [])
+    const rows = listOf<WordingProposal>(result.data.proposals)
+    if (rows === null) {
+      setError(UNEXPECTED_ANSWER)
+      return
+    }
+    setProposals(rows)
   }, [])
 
   useEffect(() => {
@@ -187,7 +204,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
     if (!consentText || !acknowledged) return
     setNotice(null)
     setError(null)
-    const result = await readJson(await fetch('/api/workaid/consents', {
+    const result = await readJson(fetch('/api/workaid/consents', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -200,7 +217,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       }),
     }))
     if (!result.ok || result.data.delivered !== false) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setNotice(t('recordedUnionSide'))
@@ -209,9 +226,9 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
 
   async function revokeConsent(consentId: string) {
     setNotice(null)
-    const result = await readJson(await fetch(`/api/workaid/consents/${consentId}/revoke`, { method: 'POST' }))
+    const result = await readJson(fetch(`/api/workaid/consents/${consentId}/revoke`, { method: 'POST' }))
     if (!result.ok) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(reasonOf(result))
       return
     }
     setNotice(t('revoked'))
@@ -220,9 +237,9 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
 
   async function revokeDocument(authorisationId: string) {
     setNotice(null)
-    const result = await readJson(await fetch(`/api/workaid/documents/${authorisationId}/revoke`, { method: 'POST' }))
+    const result = await readJson(fetch(`/api/workaid/documents/${authorisationId}/revoke`, { method: 'POST' }))
     if (!result.ok) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(reasonOf(result))
       return
     }
     setNotice(t('revoked'))
@@ -231,13 +248,13 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
 
   async function authoriseDocument() {
     setNotice(null)
-    const result = await readJson(await fetch('/api/workaid/documents', {
+    const result = await readJson(fetch('/api/workaid/documents', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ matterId: matterForDocument, documentId }),
     }))
     if (!result.ok || result.data.delivered !== false) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setNotice(t('recordedUnionSide'))
@@ -247,17 +264,19 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   async function loadReferable(options: { clearNotice?: boolean } = {}) {
     setError(null)
     if (options.clearNotice) setNotice(null)
-    const result = await readJson(await fetch(`/api/workaid/referrals?caseId=${encodeURIComponent(staffCaseId)}`))
-    if (!result.ok) {
+    const result = await readJson(fetch(`/api/workaid/referrals?caseId=${encodeURIComponent(staffCaseId)}`))
+    const nextReferable = result.ok ? listOf<Referable>(result.data.referable) : null
+    const nextRecorded = result.ok ? listOf<RecordedReferral>(result.data.recorded) : null
+    if (nextReferable === null || nextRecorded === null) {
       setReferable([])
       setRecorded([])
       setCaseReviewed(false)
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
-    const next = asReferable(result.data.referable)
+    const next = nextReferable
     setReferable(next)
-    setRecorded(asRecorded(result.data.recorded))
+    setRecorded(nextRecorded)
     setScopeChoice((current) => {
       const kept: Record<string, string[]> = {}
       for (const row of next) kept[row.matterId] = current[row.matterId] ?? row.categories
@@ -296,13 +315,13 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   async function referOwn(row: ConsentRow) {
     setNotice(null)
     setError(null)
-    const result = await readJson(await fetch('/api/workaid/referrals', {
+    const result = await readJson(fetch('/api/workaid/referrals', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ matterId: row.matterId, categories: row.categories }),
     }))
     if (!result.ok || result.data.delivered !== false || result.data.counselAcknowledged !== false) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setNotice(t('recordedUnionSide'))
@@ -312,13 +331,13 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   async function proposeWording() {
     setNotice(null)
     setError(null)
-    const result = await readJson(await fetch('/api/workaid/consent-text/proposals', {
+    const result = await readJson(fetch('/api/workaid/consent-text/proposals', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ version: wordingVersion, body: wordingBody }),
     }))
     if (!result.ok || result.data.adopted !== false) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setWordingVersion('')
@@ -330,9 +349,9 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   async function adoptWording(proposalId: string) {
     setNotice(null)
     setError(null)
-    const result = await readJson(await fetch(`/api/workaid/consent-text/proposals/${proposalId}/adopt`, { method: 'POST' }))
+    const result = await readJson(fetch(`/api/workaid/consent-text/proposals/${proposalId}/adopt`, { method: 'POST' }))
     if (!result.ok || result.data.current !== true) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setNotice(t('wordingAdopted'))
@@ -342,9 +361,9 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   async function withdrawWording(proposalId: string) {
     setNotice(null)
     setError(null)
-    const result = await readJson(await fetch(`/api/workaid/consent-text/proposals/${proposalId}/withdraw`, { method: 'POST' }))
+    const result = await readJson(fetch(`/api/workaid/consent-text/proposals/${proposalId}/withdraw`, { method: 'POST' }))
     if (!result.ok || result.data.current !== false) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setNotice(t('wordingWithdrawn'))
@@ -355,13 +374,13 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
     setNotice(null)
     const categories = chosenCategories(row)
     if (categories.length === 0) return
-    const result = await readJson(await fetch('/api/workaid/referrals', {
+    const result = await readJson(fetch('/api/workaid/referrals', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ matterId: row.matterId, categories }),
     }))
     if (!result.ok || result.data.delivered !== false || result.data.counselAcknowledged !== false) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setNotice(t('recordedUnionSide'))
@@ -373,13 +392,13 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
     setNotice(null)
     setError(null)
     if (categories.length === 0 || !releaseConfirmed[row.matterId]) return
-    const result = await readJson(await fetch('/api/workaid/shares', {
+    const result = await readJson(fetch('/api/workaid/shares', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ matterId: row.matterId, categories, confirm: true }),
     }))
     if (!result.ok || result.data.delivered !== false || result.data.counselAcknowledged !== false) {
-      setError(String(result.data.code ?? result.data.error ?? result.status))
+      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
       return
     }
     setNotice(t('recordedUnionSide'))
@@ -428,7 +447,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
             </form>
           ) : null}
 
-          {consents.length === 0 && !loading ? <p>{t('emptyConsents')}</p> : null}
+          {consents.length === 0 && !loading && error === null ? <p>{t('emptyConsents')}</p> : null}
           {consents.map((row) => (
             <article key={row.consentId} className="flex flex-col gap-2 rounded-md border p-3" data-testid="consent-row">
               <p className="text-sm">{t('caseId')}: {row.caseId}</p>
@@ -483,7 +502,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
             <label className="flex flex-col gap-1 text-sm">{t('staffCaseLabel')}<input className="rounded border p-2" value={staffCaseId} onChange={(event) => setStaffCaseId(event.target.value)} required /></label>
             <Button type="submit" className="w-full sm:w-auto">{t('loadReferable')}</Button>
           </form>
-          {referable.length === 0 ? <p>{t('referableEmpty')}</p> : null}
+          {caseReviewed && referable.length === 0 ? <p>{t('referableEmpty')}</p> : null}
           {referable.map((row) => (
             <article key={row.matterId} className="flex flex-col gap-2 rounded-md border p-3">
               <p className="text-sm">{row.purpose}</p>

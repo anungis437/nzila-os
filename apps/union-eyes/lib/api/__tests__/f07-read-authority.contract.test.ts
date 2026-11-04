@@ -78,12 +78,12 @@ describe('F07 read authority beyond a role floor', () => {
   // DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY-WITH-ADMIN-LEVEL-SCOPES-AND-PICKS-THE-FIRST-PAGE-AUTOMATICALLY
   it('connecting a publishing identity is an administrator act with no admin-level scope and no first-page pick', () => {
     const accounts = read('social-media/accounts');
-    expect(accounts).toContain("export const POST = withRoleAuth('admin'");
-    expect(accounts).toContain("export const DELETE = withRoleAuth('admin'");
+    expect(accounts).toMatch(/export const POST = withApi\(\s*\{\s*auth: \{ minRole: 'admin' \}/);
+    expect(accounts).toMatch(/export const DELETE = withApi\(\s*\{\s*auth: \{ minRole: 'admin' \}/);
     expect(accounts).not.toContain('business_management');
     expect(accounts).not.toContain('rw_organization_admin');
     const callback = read('social-media/accounts/callback');
-    expect(callback).toContain("export const GET = withRoleAuth('admin'");
+    expect(callback).toMatch(/export const GET = withApi\(\s*\{\s*auth: \{ minRole: 'admin' \}/);
     expect(callback).toContain('pages.length > 1');
   });
 

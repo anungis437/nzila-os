@@ -48,7 +48,6 @@ const envSchema = z.object({
   NZILA_MODE: z.enum(['development', 'test', 'staging', 'internal', 'pilot', 'demo', 'production']).optional(),
 
   // ============== CRITICAL - Database ==============
-  DATABASE_TYPE: z.enum(['postgresql', 'azure-sql', 'mssql']).optional(),
   DATABASE_URL: z.string()
     .startsWith('postgresql://', 'Database must be PostgreSQL')
     .describe('PostgreSQL connection string (required in all environments)'),
@@ -100,22 +99,10 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string()
     .min(10, 'STRIPE_WEBHOOK_SECRET is required')
     .optional(),
-  WHOP_WEBHOOK_SECRET: z.string()
-    .min(10, 'WHOP_WEBHOOK_SECRET is required')
-    .optional(),
-  WHOP_WEBHOOK_KEY: z.string().optional(),
   
   // ============== HIGH - Stripe Integration ==============
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
-
-  // ============== HIGH - WHOP Payment Provider ==============
-  WHOP_PLAN_ID_MONTHLY: z.string().optional(),
-  WHOP_PLAN_ID_YEARLY: z.string().optional(),
-  WHOP_API_KEY: z.string().optional(),
-  NEXT_PUBLIC_WHOP_REDIRECT_URL: z.string().url('Invalid WHOP_REDIRECT_URL').optional(),
-  NEXT_PUBLIC_WHOP_PORTAL_LINK: z.string().url('Invalid WHOP_PORTAL_LINK').optional(),
-  ACTIVE_PAYMENT_PROVIDER: z.enum(['stripe', 'whop']).optional(),
 
   // ============== HIGH - Notification Services ==============
   SENDGRID_API_KEY: z.string()
@@ -471,8 +458,8 @@ class EnvironmentManager {
           if (!this.environment.SENTRY_DSN) {
             warnings.push('[WARN] SENTRY_DSN not configured - error tracking disabled');
           }
-          if (!this.environment.STRIPE_SECRET_KEY && !this.environment.WHOP_WEBHOOK_SECRET) {
-            warnings.push('[WARN] Neither STRIPE nor WHOP webhook secrets configured');
+          if (!this.environment.STRIPE_SECRET_KEY || !this.environment.STRIPE_WEBHOOK_SECRET) {
+            warnings.push('[WARN] STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET not configured - payment webhooks cannot be verified');
           }
           if (this.environment.EMAIL_PROVIDER === 'resend' && !this.environment.RESEND_API_KEY) {
             warnings.push('[WARN] RESEND_API_KEY missing for EMAIL_PROVIDER=resend');

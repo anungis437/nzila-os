@@ -14,8 +14,6 @@
  *  - Denials, missing documents and storage failures write no access record.
  */
 import { and, desc, eq, sql } from 'drizzle-orm';
-import { hasMinRole } from '@/lib/api-auth-guard';
-import { db } from '@/db/db';
 import {
   documentAccessGrants,
   documentLinks,
@@ -26,6 +24,7 @@ import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from '@/lib/services/document-governance-service';
 import { generateSasUrl } from '@/lib/blob-client';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { logger } from '@/lib/logger';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import {
@@ -49,18 +48,23 @@ export interface DownloadIssuanceInput {
   organizationId: string;
   userId: string;
   documentId: string;
-  /** Resolved once by a bulk caller; a single caller leaves it to be resolved here. */
-  isStaff?: boolean;
+  /** Representative-level role (steward or above), resolved by the caller once, before it opens the transaction. */
+  isStaff: boolean;
   /** The route that asked, recorded on the access record. */
   route: string;
 }
 
-export async function issueDocumentDownload(input: DownloadIssuanceInput): Promise<DownloadOutcome> {
-  const { organizationId, userId, documentId, route } = input;
+/**
+ * `tx` is the caller's own transaction for `input.organizationId`: the reads, the access record and (through it) the
+ * decision to issue a link are one unit, and a bulk caller opens one transaction per document so that a failure on
+ * one document cannot poison the others.
+ */
+export async function issueDocumentDownload(tx: RLSTx, input: DownloadIssuanceInput): Promise<DownloadOutcome> {
+  const { organizationId, userId, documentId, route, isStaff } = input;
   if (!isDocumentId(documentId)) return { kind: 'invalid_id' };
 
   const row = (
-    await db
+    await tx
       .select({
         id: documents.id,
         title: documents.title,
@@ -88,7 +92,7 @@ export async function issueDocumentDownload(input: DownloadIssuanceInput): Promi
   if (!row) return { kind: 'not_found' };
 
   const explicitGrant = (
-    await db
+    await tx
       .select({
         id: documentAccessGrants.id,
         canDownload: documentAccessGrants.canDownload,
@@ -109,7 +113,6 @@ export async function issueDocumentDownload(input: DownloadIssuanceInput): Promi
   )[0];
 
   // Representative-level role: eligibility for organization-level (unlinked) documents only, never case content.
-  const isStaff = input.isStaff ?? (await hasMinRole('steward'));
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
@@ -152,7 +155,7 @@ export async function issueDocumentDownload(input: DownloadIssuanceInput): Promi
   if (explicitGrant && !explicitGrant.canDownload) return { kind: 'denied', reason: 'download_not_granted' };
 
   const latestVersion = (
-    await db
+    await tx
       .select({ storageKey: documentVersions.storageKey })
       .from(documentVersions)
       .where(
@@ -177,13 +180,14 @@ export async function issueDocumentDownload(input: DownloadIssuanceInput): Promi
   let downloadUrl: string;
   try {
     downloadUrl = await generateSasUrl(DOCUMENT_BLOB_CONTAINER, blobPath);
-  } catch {
+  } catch (error) {
+    logger.error('Document download link could not be signed', { documentId: row.id, error: error instanceof Error ? error.message : String(error) });
     return { kind: 'storage_unavailable' };
   }
   if (!downloadUrl) return { kind: 'storage_unverified' };
 
   try {
-    await persistAtomicAudit(db as unknown as RLSTx, {
+    await persistAtomicAudit(tx, {
       organizationId,
       action: 'document.download',
       resourceType: 'documents',
@@ -191,7 +195,8 @@ export async function issueDocumentDownload(input: DownloadIssuanceInput): Promi
       userId,
       details: { route, privacyLabel: row.privacyLabel ?? null },
     });
-  } catch {
+  } catch (error) {
+    logger.error('Document download access record could not be written', { documentId: row.id, error: error instanceof Error ? error.message : String(error) });
     return { kind: 'audit_failed' };
   }
 

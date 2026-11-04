@@ -5,6 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { createHash } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
+import { caller, resetCaller } from './support/with-api-stub';
 
 const ORG_A = '11111111-1111-4111-8111-111111111111';
 const ORG_B = '22222222-2222-4222-8222-222222222222';
@@ -17,10 +18,7 @@ const state = vi.hoisted(() => ({
   sas: vi.fn(),
 }));
 
-vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: (handler: (...args: unknown[]) => unknown) => handler,
-}));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: vi.fn(async () => undefined) }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/api-auth-guard', () => ({
   hasMinRole: async (role: string) => role === 'member',
 }));
@@ -86,19 +84,30 @@ const auditRows = async () =>
     action: string; resource_id: string | null; user_id: string | null; metadata: { route?: string };
   }>;
 
-const getOne = (docId: string) =>
-  download(new Request(`https://t.test/api/documents/${docId}/download`), { organizationId: ORG_A, userId: USER }, { id: docId });
-const bulk = (documentIds: unknown) =>
-  bulkPost(
+// The wrapper resolves the caller (organization A's member) and the route params; each call below is that caller's request.
+const asCaller = () => {
+  resetCaller();
+  caller.organizationId = ORG_A;
+  caller.userId = USER;
+  caller.role = 'member';
+};
+const getOne = (docId: string) => {
+  asCaller();
+  return download(new Request(`https://t.test/api/documents/${docId}/download`), { params: { id: docId } });
+};
+const bulk = (documentIds: unknown) => {
+  asCaller();
+  return bulkPost(
     new Request('https://t.test/api/documents/repository/downloads', { method: 'POST', body: JSON.stringify({ documentIds }) }),
-    { organizationId: ORG_A, userId: USER },
   );
-const append = (docId: string, body: Record<string, unknown>) =>
-  appendVersion(
+};
+const append = (docId: string, body: Record<string, unknown>) => {
+  asCaller();
+  return appendVersion(
     new Request(`https://t.test/api/documents/repository/${docId}/versions`, { method: 'POST', body: JSON.stringify(body) }),
-    { organizationId: ORG_A, userId: USER },
-    { id: docId },
+    { params: { id: docId } },
   );
+};
 
 beforeAll(async () => {
   process.env.AZURE_STORAGE_ACCOUNT_NAME = 'uestore';

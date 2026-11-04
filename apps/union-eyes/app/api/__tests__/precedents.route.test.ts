@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
   listPrecedents: vi.fn(),
   createPrecedentAudited: vi.fn(),
   getPrecedentStatistics: vi.fn(),
@@ -10,7 +9,7 @@ const m = vi.hoisted(() => ({
   getPrecedentsByIssueType: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/services/precedent-service', () => ({
   listPrecedents: m.listPrecedents,
   getPrecedentStatistics: m.getPrecedentStatistics,
@@ -20,20 +19,9 @@ vi.mock('@/lib/services/precedent-service', () => ({
 vi.mock('@/lib/services/precedent-audited-service', () => ({
   createPrecedentAudited: m.createPrecedentAudited,
 }));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: {
-    VALIDATION_ERROR: 'VALIDATION_ERROR',
-    MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD',
-    FORBIDDEN: 'FORBIDDEN',
-    ALREADY_EXISTS: 'ALREADY_EXISTS',
-    INTERNAL_ERROR: 'INTERNAL_ERROR',
-  },
-  standardErrorResponse: (code: string, message: string, details?: unknown) =>
-    new Response(JSON.stringify({ code, message, details }), {
-      status: code === 'INTERNAL_ERROR' ? 500 : code === 'FORBIDDEN' ? 403 : 400,
-    }),
-  standardSuccessResponse: (data: unknown) => new Response(JSON.stringify(data), { status: 200 }),
-}));
+vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));
+
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   return import('../precedents/route');
@@ -42,16 +30,27 @@ async function loadRoute() {
 describe('precedents route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRoleAuth.mockImplementation(
-      (_role: string, handler: (request: NextRequest, context: any) => Promise<Response>) =>
-        (request: NextRequest, context: any = {}) => handler(request, context),
-    );
+    resetCaller();
+    // The library is read by members and written by the platform's content managers; this role does both.
+    caller.role = 'content_manager';
     m.getPrecedentStatistics.mockResolvedValue({ total: 12 });
     m.listPrecedents.mockResolvedValue({ precedents: [{ id: 'p3' }], count: 1 });
     m.createPrecedentAudited.mockResolvedValue({ id: 'p4' });
   });
 
+  it('declares what it asks of the wrapper: a member to read (in the organization\'s tenant transaction) and a content manager to create, in a transaction the audited service opens itself', async () => {
+    await loadRoute();
+    const list = declared.find((entry) => entry.openapi?.summary === 'List, filter and rank arbitration precedents');
+    const create = declared.find((entry) => entry.openapi?.summary === 'Create a precedent draft awaiting review');
+
+    expect(list?.auth).toEqual({ minRole: 'member' });
+    expect(list?.rlsOrgContext).toBe(true);
+    expect(create?.auth).toEqual({ minRole: 'content_manager' });
+    expect(create?.rlsOrgContext).toBeUndefined();
+  });
+
   it('bounds pagination on all list modes before calling the service', async () => {
+    caller.role = 'member';
     const { GET } = await loadRoute();
     for (const suffix of [
       '?limit=1000000', '?page=-1', '?page=1junk', '?limit=0',
@@ -109,19 +108,24 @@ describe('precedents route', () => {
       body: JSON.stringify(body),
     });
 
-  it('requires the content_manager role to create a precedent', async () => {
-    vi.resetModules();
-    await loadRoute();
-    expect(m.withRoleAuth).toHaveBeenCalledWith('content_manager', expect.any(Function));
+  it('requires a platform role to create a precedent: a tenant steward or administrator is refused before the service is reached', async () => {
+    const { POST } = await loadRoute();
+
+    for (const role of ['member', 'steward', 'officer', 'admin']) {
+      caller.role = role;
+      const response = await POST(postRequest(await validBody()));
+      expect(response.status, role).toBe(403);
+    }
+    expect(m.createPrecedentAudited).not.toHaveBeenCalled();
   });
 
   it('creates a precedent through the audited service scoped to the caller organization and user', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(postRequest(await validBody()), { userId: 'u1', organizationId: 'org_1' });
+    const response = await POST(postRequest(await validBody()));
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json.precedent).toEqual({ id: 'p4' });
+    expect(json.data).toEqual({ precedent: { id: 'p4' }, publicationStatus: 'pending_review', publiclyDiscoverable: false });
     expect(m.createPrecedentAudited).toHaveBeenCalledWith(
       { organizationId: 'org_1', userId: 'u1' },
       expect.objectContaining({ caseNumber: '1', decisionDate: expect.any(Date) }),
@@ -130,33 +134,34 @@ describe('precedents route', () => {
 
   it('rejects a body with invalid enum values without creating anything', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(
-      postRequest(await validBody({ tribunal: 'tribunal', outcome: 'outcome' })),
-      { userId: 'u1', organizationId: 'org_1' },
-    );
+    const response = await POST(postRequest(await validBody({ tribunal: 'tribunal', outcome: 'outcome' })));
 
     expect(response.status).toBe(400);
     expect(m.createPrecedentAudited).not.toHaveBeenCalled();
   });
 
-  it('fails closed without an active organization or user and does not create', async () => {
+  it('fails closed without an active organization or an authenticated user and does not create', async () => {
     const { POST } = await loadRoute();
     const body = await validBody();
 
-    const noOrg = await POST(postRequest(body), { userId: 'u1' });
-    const noUser = await POST(postRequest(body), { organizationId: 'org_1' });
+    caller.organizationId = null;
+    const noOrg = await POST(postRequest(body));
+    caller.organizationId = 'org_1';
+    caller.userId = null;
+    const noUser = await POST(postRequest(body));
 
     expect(noOrg.status).toBe(403);
-    expect(noUser.status).toBe(403);
+    expect(noUser.status).toBe(401);
     expect(m.createPrecedentAudited).not.toHaveBeenCalled();
   });
 
   it('maps a duplicate case number to a conflict response', async () => {
     m.createPrecedentAudited.mockRejectedValue(Object.assign(new Error('dup'), { code: '23505' }));
     const { POST } = await loadRoute();
-    const response = await POST(postRequest(await validBody()), { userId: 'u1', organizationId: 'org_1' });
+    const response = await POST(postRequest(await validBody()));
     const json = await response.json();
 
+    expect(response.status).toBe(409);
     expect(json.code).toBe('ALREADY_EXISTS');
   });
 });

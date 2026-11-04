@@ -254,7 +254,8 @@ const isOriginAllowed = (origin: string | null): boolean => {
   return allowedOrigins.includes(origin);
 };
 
-// This handles both payment provider use cases from whop-setup.md and stripe-setup.md
+// Edge request handling: request id, dashboard and locale redirects, API rate limits and CORS, i18n routing.
+// Authentication is enforced by the server-side layouts and route handlers, not here.
 async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   try {
   // os-core: generate / forward a request-id for distributed tracing

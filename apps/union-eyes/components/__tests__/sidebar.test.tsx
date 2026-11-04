@@ -59,9 +59,6 @@ beforeEach(() => {
 function renderSidebar(userRole: string) {
   return render(
     <DashboardNavigationProvider><DashboardMenuTrigger /><Sidebar
-      profile={null}
-      whopMonthlyPlanId="m"
-      whopYearlyPlanId="y"
       userRole={userRole}
     /></DashboardNavigationProvider>,
   );

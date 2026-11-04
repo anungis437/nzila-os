@@ -1,16 +1,15 @@
 import { z } from 'zod';
 import { and, desc, eq, gte, ilike, lte, sql } from 'drizzle-orm';
-import { withOrganizationAuth } from '@/lib/organization-middleware';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { withApi, ApiError } from '@/lib/api/framework';
 import {
   standardErrorResponse,
   standardSuccessResponse,
   ErrorCode,
 } from '@/lib/api/standardized-responses';
-import { db } from '@/db/db';
 import {
   documents,
   documentLinks,
+  documentPrivacyLabelEnum,
   documentVersions,
 } from '@/db/schema/documents-schema';
 import { hasMinRole } from '@/lib/api-auth-guard';
@@ -30,6 +29,7 @@ import { blobIntakeStorage } from '@/lib/documents/intake-storage';
 import { intakeRefusal } from '@/lib/documents/intake-acceptance';
 import { generateSasUrl } from '@/lib/blob-client';
 import { listPage } from '@/lib/api/list-page';
+import { loadUploaderNames } from '@/lib/documents/uploader-names';
 
 const uploadDocumentSchema = z.object({
   title: z.string().min(1).max(300),
@@ -68,13 +68,17 @@ const uploadDocumentSchema = z.object({
   path: ['mimeType'],
 });
 
-export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId, userId } = context;
-  await requireEntitlement(organizationId, 'grievance_case_suite');
-
-  const canRead = await hasMinRole('member');
-  if (!canRead) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized');
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    entitlement: 'grievance_case_suite',
+    // The candidate rows are read in one short organization transaction below. The per-case authority decisions that
+    // follow each take their own connection, so none is held while another waits for one.
+    openapi: { tags: ['Documents'], summary: 'List the documents of the organization repository the caller may see' },
+  },
+  async ({ request, organizationId, userId }) => {
+  if (!organizationId || !userId) {
+    throw ApiError.forbidden('Organization context required — select an organization before accessing this resource');
   }
 
   const searchParams = new URL(request.url).searchParams;
@@ -97,6 +101,11 @@ export const GET = withOrganizationAuth(async (request, context) => {
   if ((fromDate && !Number.isFinite(Date.parse(fromDate))) || (toDate && !Number.isFinite(Date.parse(toDate)))) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document date filter');
   }
+  // The label column is an enumeration: a value outside it is a bad request, not a database error.
+  const labelFilter = label ? z.enum(documentPrivacyLabelEnum.enumValues).safeParse(label) : null;
+  if (labelFilter && !labelFilter.success) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document label filter');
+  }
 
   const conditions = [eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`];
 
@@ -111,8 +120,8 @@ export const GET = withOrganizationAuth(async (request, context) => {
     );
   }
 
-  if (label) {
-    conditions.push(eq(documents.privacyLabel, label as never));
+  if (labelFilter?.success) {
+    conditions.push(eq(documents.privacyLabel, labelFilter.data));
   }
 
   if (documentType) {
@@ -137,30 +146,46 @@ export const GET = withOrganizationAuth(async (request, context) => {
     conditions.push(lte(documents.createdAt, new Date(toDate)));
   }
 
-  const rows = await db
-    .select({
-      id: documents.id,
-      title: documents.title,
-      name: documents.name,
-      filename: documents.filename,
-      documentType: documents.documentType,
-      privacyLabel: documents.privacyLabel,
-      uploadedBy: documents.uploadedBy,
-      createdAt: documents.createdAt,
-      updatedAt: documents.updatedAt,
-      linkedEntityType: documentLinks.linkedEntityType,
-      linkedEntityId: documentLinks.linkedEntityId,
-    })
-    .from(documents)
-    .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
-    .where(and(...conditions))
-    .orderBy(desc(documents.updatedAt), desc(documents.id))
-    .limit(limit)
-    .offset(offset);
+  const rows = await withRLSContext({ organizationId }, (tx) =>
+    tx
+      .select({
+        id: documents.id,
+        title: documents.title,
+        name: documents.name,
+        filename: documents.filename,
+        documentType: documents.documentType,
+        privacyLabel: documents.privacyLabel,
+        uploadedBy: documents.uploadedBy,
+        createdAt: documents.createdAt,
+        updatedAt: documents.updatedAt,
+        linkedEntityType: documentLinks.linkedEntityType,
+        linkedEntityId: documentLinks.linkedEntityId,
+      })
+      .from(documents)
+      .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
+      .where(and(...conditions))
+      .orderBy(desc(documents.updatedAt), desc(documents.id))
+      .limit(limit)
+      .offset(offset),
+  );
 
   // Representative-level role: eligibility for organization-level (unlinked) documents and the uploader
   // projection only, never case content.
   const isStaff = await hasMinRole('steward');
+
+  // A representative sees who filed each document by name (never by id alone); a member sees neither.
+  const uploaderNames = isStaff ? await loadUploaderNames(organizationId, rows.map((row) => row.uploadedBy)) : {};
+
+  // Many documents hang off the same case: its kernel decision is made once per page, not once per document.
+  const caseAccessByCase = new Map<string, ReturnType<typeof getEffectiveCaseAccess>>();
+  const caseAccessFor = (grievanceId: string) => {
+    let access = caseAccessByCase.get(grievanceId);
+    if (!access) {
+      access = getEffectiveCaseAccess({ organizationId, grievanceId, userId });
+      caseAccessByCase.set(grievanceId, access);
+    }
+    return access;
+  };
 
   const visible = await Promise.all(
     rows.map(async (row) => {
@@ -171,11 +196,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
       };
 
       if (row.linkedEntityType === 'grievance' && row.linkedEntityId) {
-        const effective = await getEffectiveCaseAccess({
-          organizationId,
-          grievanceId: row.linkedEntityId,
-          userId,
-        });
+        const effective = await caseAccessFor(row.linkedEntityId);
         caseAccess = {
           isPrimaryOwner: effective.isPrimaryOwner,
           canViewCase: effective.canViewCase,
@@ -210,7 +231,9 @@ export const GET = withOrganizationAuth(async (request, context) => {
       const { uploadedBy: uploaderId, ...withoutUploader } = row;
 
       return {
-        ...(isStaff ? { ...withoutUploader, uploadedBy: uploaderId } : withoutUploader),
+        ...(isStaff
+          ? { ...withoutUploader, uploadedBy: uploaderId, uploadedByName: (uploaderId ? uploaderNames[uploaderId] : undefined) ?? null }
+          : withoutUploader),
         title: normalizeDocumentTitle(row),
       };
     }),
@@ -225,15 +248,20 @@ export const GET = withOrganizationAuth(async (request, context) => {
     pageSize: limit,
     nextOffset: offset + limit,
   });
-});
+  },
+);
 
-export const POST = withOrganizationAuth(async (request, context) => {
-  const { organizationId, userId } = context;
-  await requireEntitlement(organizationId, 'grievance_case_suite');
-
-  const canUpload = await hasMinRole('member');
-  if (!canUpload) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized');
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    entitlement: 'grievance_case_suite',
+    // The intake and storage checks reach out to blob storage, so no database transaction is held across them: the
+    // reads before the write and the write itself are each their own organization transaction.
+    openapi: { tags: ['Documents'], summary: 'Record an uploaded file as a governed document' },
+  },
+  async ({ request, organizationId, userId }) => {
+  if (!organizationId || !userId) {
+    throw ApiError.forbidden('Organization context required — select an organization before accessing this resource');
   }
 
   const body = await request.json();
@@ -249,11 +277,14 @@ export const POST = withOrganizationAuth(async (request, context) => {
   } else if (parsed.data.linkedEntityId) {
     // A different link type must not be a way around the case check: an id that names a case of this organization is
     // filed against that case, so the same kernel decision applies. Any other id is a non-case target.
-    const [namedCase] = await db
-      .select({ id: grievances.id })
-      .from(grievances)
-      .where(and(eq(grievances.id, parsed.data.linkedEntityId), eq(grievances.organizationId, organizationId)))
-      .limit(1);
+    const linkedEntityId = parsed.data.linkedEntityId;
+    const [namedCase] = await withRLSContext({ organizationId }, (tx) =>
+      tx
+        .select({ id: grievances.id })
+        .from(grievances)
+        .where(and(eq(grievances.id, linkedEntityId), eq(grievances.organizationId, organizationId)))
+        .limit(1),
+    );
     if (namedCase) {
       const access = await getEffectiveCaseAccess({ organizationId, grievanceId: namedCase.id, userId });
       if (!access.canViewCase || !access.canUploadDocuments) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Case not found');
@@ -272,11 +303,14 @@ export const POST = withOrganizationAuth(async (request, context) => {
       if (!check.ok) return intakeRefusal(check);
       if (check.replay) {
         // The same principal asking again gets the original result; nothing is written twice.
-        const [existing] = await db
-          .select()
-          .from(documents)
-          .where(and(eq(documents.id, check.intake.acceptedDocumentId ?? ''), eq(documents.organizationId, organizationId)))
-          .limit(1);
+        const acceptedDocumentId = check.intake.acceptedDocumentId ?? '';
+        const [existing] = await withRLSContext({ organizationId }, (tx) =>
+          tx
+            .select()
+            .from(documents)
+            .where(and(eq(documents.id, acceptedDocumentId), eq(documents.organizationId, organizationId)))
+            .limit(1),
+        );
         return existing ? standardSuccessResponse({ ...existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
       }
       intakeId = check.intake.id;
@@ -392,4 +426,5 @@ export const POST = withOrganizationAuth(async (request, context) => {
   }
 
   return standardSuccessResponse(created);
-});
+  },
+);

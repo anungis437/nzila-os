@@ -1,6 +1,5 @@
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { db } from '@/db/db';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
 import { BlobTooLargeError, readBlobBounded } from '@/lib/blob-client';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
@@ -10,7 +9,9 @@ import {
   resolveExternalDocumentResource,
 } from '@/lib/external-resource-route-utils';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import type { RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { isDocumentId } from '@/lib/documents/canonical-journey';
+import { logger } from '@/lib/logger';
 import { authorizeExternalDocumentAccess } from '@/lib/services/external-resource-authorization-service';
 
 /**
@@ -18,6 +19,10 @@ import { authorizeExternalDocumentAccess } from '@/lib/services/external-resourc
  * it expires, revoking the grant cannot recall it, and the audit row could only say a link was issued. Here the grant, its expiry and
  * its revocation are checked on every read, the bytes are only released after the access record is written, and that record names the
  * bytes actually delivered. A streamed read is bounded; a larger file is refused.
+ *
+ * The file is read from storage, which can be slow and is up to 50 MB: no database connection is held while it is. The grant, the
+ * document and the version are read in one short organization transaction, the file is read, and the access record is written in a
+ * second one that commits before any byte is released.
  */
 export const EXTERNAL_DOWNLOAD_MAX_BYTES = 50 * 1024 * 1024;
 
@@ -34,6 +39,8 @@ export const GET = withExternalMatterResourceAuth(
     resolve: resolveExternalDocumentResource,
     // The download writes its own, more specific record naming the bytes delivered.
     readRecord: 'handler',
+    // Only the authorization decision holds a transaction; the handler opens its own around the database work, not the storage read.
+    transaction: 'authorization',
   },
   async (_request, context, params?: { id?: string }) => {
     if (!params?.id || !context.organizationId || !context.matterId) {
@@ -42,60 +49,78 @@ export const GET = withExternalMatterResourceAuth(
     if (context.matterType !== 'grievance') {
       return NextResponse.json({ error: 'Unsupported matter type' }, { status: 400 });
     }
-
-    const decision = await authorizeExternalDocumentAccess({
-      actor: context.actor,
-      organizationId: context.organizationId,
-      matterType: context.matterType,
-      matterId: context.matterId,
-      documentId: params.id,
-      requiredPermission: 'download',
-    });
-    if (!decision.allowed) {
-      return externalForbidden();
-    }
-
-    const [row] = await db
-      .select({
-        id: documents.id,
-        title: documents.title,
-        name: documents.name,
-        filename: documents.filename,
-        mimeType: documents.mimeType,
-      })
-      .from(documents)
-      .innerJoin(documentLinks, eq(documentLinks.documentId, documents.id))
-      .where(
-        and(
-          eq(documents.id, params.id),
-          eq(documents.organizationId, context.organizationId),
-          eq(documents.status, 'active'),
-          isNull(documents.deletedAt),
-          eq(documentLinks.linkedEntityType, 'grievance'),
-          eq(documentLinks.linkedEntityId, context.matterId),
-        ),
-      )
-      .limit(1);
-
-    if (!row) {
+    // A malformed identifier names no document: it is answered here, not as a database error.
+    if (!isDocumentId(params.id)) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
+    const documentId = params.id;
+    const { organizationId, matterId, matterType } = context;
 
-    // A grant pinned to a version releases that version only; a version added later is not covered by it. An unpinned (earlier) grant
-    // keeps releasing the current version.
-    const pinned = decision.documentVersionNo ?? null;
-    const [latestVersion] = await db
-      .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey })
-      .from(documentVersions)
-      .where(
-        and(
-          eq(documentVersions.organizationId, context.organizationId),
-          eq(documentVersions.documentId, row.id),
-          ...(pinned !== null ? [eq(documentVersions.versionNo, pinned)] : []),
-        ),
-      )
-      .orderBy(desc(documentVersions.versionNo))
-      .limit(1);
+    const located = await withRLSContext({ organizationId }, async (tx) => {
+      const decision = await authorizeExternalDocumentAccess(tx, {
+        actor: context.actor,
+        organizationId,
+        matterType,
+        matterId,
+        documentId,
+        requiredPermission: 'download',
+      });
+      if (!decision.allowed) {
+        return { kind: 'forbidden' as const };
+      }
+
+      const [row] = await tx
+        .select({
+          id: documents.id,
+          title: documents.title,
+          name: documents.name,
+          filename: documents.filename,
+          mimeType: documents.mimeType,
+        })
+        .from(documents)
+        .innerJoin(documentLinks, eq(documentLinks.documentId, documents.id))
+        .where(
+          and(
+            eq(documents.id, documentId),
+            eq(documents.organizationId, organizationId),
+            eq(documents.status, 'active'),
+            isNull(documents.deletedAt),
+            eq(documentLinks.linkedEntityType, 'grievance'),
+            eq(documentLinks.linkedEntityId, matterId),
+          ),
+        )
+        .limit(1);
+
+      if (!row) {
+        return { kind: 'not_found' as const };
+      }
+
+      // A grant pinned to a version releases that version only; a version added later is not covered by it. An unpinned (earlier) grant
+      // keeps releasing the current version.
+      const pinned = decision.documentVersionNo ?? null;
+      const [latestVersion] = await tx
+        .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey })
+        .from(documentVersions)
+        .where(
+          and(
+            eq(documentVersions.organizationId, organizationId),
+            eq(documentVersions.documentId, row.id),
+            ...(pinned !== null ? [eq(documentVersions.versionNo, pinned)] : []),
+          ),
+        )
+        .orderBy(desc(documentVersions.versionNo))
+        .limit(1);
+
+      return { kind: 'located' as const, row, latestVersion };
+    });
+
+    if (located.kind === 'forbidden') {
+      return externalForbidden();
+    }
+    if (located.kind === 'not_found') {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    const { row, latestVersion } = located;
 
     if (!latestVersion?.storageKey) {
       return NextResponse.json({ error: 'Download is not available' }, { status: 404 });
@@ -108,32 +133,36 @@ export const GET = withExternalMatterResourceAuth(
       if (error instanceof BlobTooLargeError) {
         return NextResponse.json({ error: 'This file is too large to download here' }, { status: 413 });
       }
+      logger.error('External document could not be read from storage', { documentId: row.id, error: error instanceof Error ? error.message : String(error) });
       return NextResponse.json({ error: 'Download is not available' }, { status: 503 });
     }
 
     // The access is on the record before any byte leaves the server, and it names what is delivered.
     try {
-      await persistAtomicAudit(db as unknown as RLSTx, {
-        organizationId: context.organizationId,
-        userId: context.actor.userId,
-        action: 'document.external_download',
-        resourceType: 'documents',
-        resourceId: row.id,
-        details: {
-          actorKind: 'external_representative',
-          representativeOrganizationId: context.actor.representativeOrganizationId ?? null,
-          authorityId: context.authorityId,
-          matterGrantId: context.matterGrantId,
-          matterType: context.matterType,
-          matterId: context.matterId,
-          documentId: row.id,
-          versionId: latestVersion.id,
-          versionNo: latestVersion.versionNo,
-          delivery: 'served_by_route',
-          sizeBytes: bytes.length,
-        },
-      });
-    } catch {
+      await withRLSContext({ organizationId }, (tx) =>
+        persistAtomicAudit(tx, {
+          organizationId,
+          userId: context.actor.userId,
+          action: 'document.external_download',
+          resourceType: 'documents',
+          resourceId: row.id,
+          details: {
+            actorKind: 'external_representative',
+            representativeOrganizationId: context.actor.representativeOrganizationId ?? null,
+            authorityId: context.authorityId,
+            matterGrantId: context.matterGrantId,
+            matterType,
+            matterId,
+            documentId: row.id,
+            versionId: latestVersion.id,
+            versionNo: latestVersion.versionNo,
+            delivery: 'served_by_route',
+            sizeBytes: bytes.length,
+          },
+        }),
+      );
+    } catch (error) {
+      logger.error('External document download could not be recorded', { documentId: row.id, error: error instanceof Error ? error.message : String(error) });
       return NextResponse.json({ error: 'Download is unavailable' }, { status: 503 });
     }
 

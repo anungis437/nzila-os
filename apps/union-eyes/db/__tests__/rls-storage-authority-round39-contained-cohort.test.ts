@@ -25,14 +25,17 @@
  * now proves each table is TENANT_RLS_REQUIRED with the DML its specific
  * adapter actually performs (SELECT+INSERT+UPDATE for HRIS/accounting/
  * insurance adapters that do a findFirst existence check before writing;
- * INSERT+UPDATE only for the LMS adapter, which upserts via
- * onConflictDoUpdate with no separate SELECT).
+ * SELECT+INSERT+UPDATE for the LMS adapter too, which upserts via
+ * onConflictDoUpdate: PostgreSQL reads the conflicting row for DO UPDATE, so
+ * the runtime role needs SELECT as well as INSERT and UPDATE (UE-CONV-H-023
+ * privilege census; the earlier "no separate SELECT statement" reading
+ * left the upsert refused to the real role)).
  *
- * external_invoices remains the cohort's one table that was ALREADY
- * TENANT_RLS_REQUIRED before round 40, via its own independent real,
- * legitimate live path (app/api/billing/invoices/route.ts, a
- * lib/api/crud-factory.ts orgScoped collection route, SELECT+INSERT only —
- * no PATCH/DELETE route exists) — unaffected by this correction.
+ * external_invoices was ALREADY TENANT_RLS_REQUIRED before round 40 via the
+ * read route app/api/billing/invoices/route.ts, but the control-plane-approved
+ * QuickBooks and Xero adapters also insert and update it (the policy's
+ * `invoices` entity is SELECT+INSERT+UPDATE), so it carries the same
+ * SELECT+INSERT+UPDATE as the rest of the accounting cohort (UE-CONV-H-023).
  *
  * Any future cohort change in this family should extend REOPENED_COHORT
  * below rather than add a new standalone test file.
@@ -69,18 +72,18 @@ const REOPENED_SELECT_INSERT_UPDATE: CohortRow[] = [
   { table: 'external_positions', dml: ['SELECT', 'INSERT', 'UPDATE'] },
 ];
 
-// INSERT+UPDATE only: LinkedIn Learning adapter upserts via
-// .insert(...).onConflictDoUpdate({target:[orgId,provider,externalId]}),
-// with no separate SELECT statement.
-const REOPENED_INSERT_UPDATE_ONLY: CohortRow[] = [
-  { table: 'external_lms_completions', dml: ['INSERT', 'UPDATE'] },
-  { table: 'external_lms_courses', dml: ['INSERT', 'UPDATE'] },
-  { table: 'external_lms_enrollments', dml: ['INSERT', 'UPDATE'] },
-  { table: 'external_lms_learners', dml: ['INSERT', 'UPDATE'] },
-  { table: 'external_lms_progress', dml: ['INSERT', 'UPDATE'] },
+// SELECT+INSERT+UPDATE: the LinkedIn Learning adapter upserts via
+// .insert(...).onConflictDoUpdate({target:[orgId,provider,externalId]}).
+// DO UPDATE reads the conflicting row, so the role needs SELECT as well.
+const REOPENED_UPSERT: CohortRow[] = [
+  { table: 'external_lms_completions', dml: ['SELECT', 'INSERT', 'UPDATE'] },
+  { table: 'external_lms_courses', dml: ['SELECT', 'INSERT', 'UPDATE'] },
+  { table: 'external_lms_enrollments', dml: ['SELECT', 'INSERT', 'UPDATE'] },
+  { table: 'external_lms_learners', dml: ['SELECT', 'INSERT', 'UPDATE'] },
+  { table: 'external_lms_progress', dml: ['SELECT', 'INSERT', 'UPDATE'] },
 ];
 
-const REOPENED_COHORT: CohortRow[] = [...REOPENED_SELECT_INSERT_UPDATE, ...REOPENED_INSERT_UPDATE_ONLY];
+const REOPENED_COHORT: CohortRow[] = [...REOPENED_SELECT_INSERT_UPDATE, ...REOPENED_UPSERT];
 
 function tableToCamelExportName(table: string): string {
   return table.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
@@ -153,20 +156,20 @@ describe.each(REOPENED_COHORT)('round 40 REOPENED cohort (was round-39 CONTAINED
   });
 });
 
-describe('round 39 exception (unaffected by round 40): external_invoices (TENANT_RLS_REQUIRED, real live path)', () => {
+describe('round 39 exception: external_invoices (TENANT_RLS_REQUIRED, a read route plus the approved accounting adapters)', () => {
   const table = 'external_invoices';
 
-  it('is classified TENANT_RLS_REQUIRED with the minimum proven DML set (SELECT+INSERT only)', () => {
+  it('is classified TENANT_RLS_REQUIRED with the DML the approved adapters perform (SELECT+INSERT+UPDATE)', () => {
     const entry = storageAuthorityManifest.find((e) => e.table === table);
     expect(entry, `${table}: no manifest entry found`).toBeTruthy();
     expect(entry!.classification).toBe('TENANT_RLS_REQUIRED');
-    expect(entry!.requiredRuntimePrivileges).toEqual(['SELECT', 'INSERT']);
+    expect(entry!.requiredRuntimePrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE']);
     expect(entry!.requiredSystemPrivileges).toEqual([]);
     expect(entry!.invocationAuthority).toBe('TENANT_USER');
     expect(entry!.dbExecutionPrincipal).toBe('TENANT_RUNTIME');
   });
 
-  it('has one real route as its sole consumer: a mandate-checked, organization-scoped read that no longer writes through the factory', () => {
+  it('is read through one route (a mandate-checked, organization-scoped read) and written by the approved QuickBooks and Xero adapters', () => {
     const routeSrc = readFileSync(resolve(APP_ROOT, 'app/api/billing/invoices/route.ts'), 'utf8');
     expect(routeSrc).toMatch(/\.from\(externalInvoices\)/);
     expect(routeSrc).toMatch(/requireLiveFinancialMandate/);
@@ -176,6 +179,13 @@ describe('round 39 exception (unaffected by round 40): external_invoices (TENANT
     expect(routeSrc).toMatch(/ApiError\.notImplemented/);
     // No item route (PATCH/DELETE) exists for this resource.
     expect(routeSrc).not.toMatch(/PATCH|DELETE/);
+    // The inserts and updates come from the control-plane-approved accounting adapters, each scoped by organization.
+    for (const adapter of ['quickbooks', 'xero']) {
+      const adapterSrc = readFileSync(resolve(APP_ROOT, `lib/integrations/adapters/accounting/${adapter}-adapter.ts`), 'utf8');
+      expect(adapterSrc, adapter).toMatch(/\.update\(externalInvoices\)/);
+      expect(adapterSrc, adapter).toMatch(/\.insert\(externalInvoices\)/);
+      expect(adapterSrc, adapter).toMatch(/eq\(externalInvoices\.organizationId, this\.config!\.organizationId\)/);
+    }
   });
 
   it('has no PATCH/DELETE item route for external_invoices', () => {

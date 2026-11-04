@@ -64,6 +64,12 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
+// The route asks the wrapper for a tenant transaction (rlsOrgContext); the database is replaced here, so the transaction runs the handler against the mocked handle.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: (_context: unknown, work: () => Promise<unknown>) => work(),
+  withSystemContext: (work: () => Promise<unknown>) => work(),
+}));
+
 // ── Import the route under test ───────────────────────────────────────────────
 
 import { GET } from '../route';
@@ -133,10 +139,12 @@ describe('GET /api/members — cross-org access control', () => {
   it('lets a steward list case-context members of their own organization', async () => {
     mockGetCurrentUser.mockResolvedValue({ ...regularMember, role: 'steward', roles: ['steward'] });
 
-    mockDbSelect.mockImplementation(() => {
+    // The page query goes on to order, limit and offset; the count query (select({ total })) is awaited at its where.
+    mockDbSelect.mockImplementation((shape?: unknown) => {
       const chain: Record<string, unknown> = {};
       chain.from = vi.fn(() => chain);
-      chain.where = vi.fn(() => chain);
+      chain.where = vi.fn(() => (shape ? Promise.resolve([{ total: 7 }]) : chain));
+      chain.orderBy = vi.fn(() => chain);
       chain.limit = vi.fn(() => chain);
       chain.offset = vi.fn(async () => [{
         id: 'm1', name: 'Alice', email: 'a@test.com',
@@ -154,6 +162,8 @@ describe('GET /api/members — cross-org access control', () => {
     const body = await res.json();
     const members = body.data?.members ?? body.members;
     expect(members).toHaveLength(1);
+    // The total is how many members the caller may see, not how many are on the page.
+    expect(body.data?.total ?? body.total).toBe(7);
     // A steward does not receive sensitive employment attributes or metadata.
     expect(members[0]).toMatchObject({ hireDate: null, seniority: null, metadata: {} });
     expect(mockAuditDataAccess).toHaveBeenCalledWith(expect.objectContaining({

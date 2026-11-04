@@ -7,6 +7,10 @@ const m = vi.hoisted(() => ({
   withSystemContext: vi.fn(),
   withExplicitUserContext: vi.fn(),
   hasRoleInOrganization: vi.fn(),
+  // The transaction the claimant's user context opened (the active tenant handle inside withExplicitUserContext).
+  claimantTx: { kind: 'claimant-tx' },
+  activeTenantDb: vi.fn(),
+  appendPublicIntakeAudit: vi.fn(),
 }));
 
 // A single-row workbook select chain fed by selectQueue. The claimed-workbook
@@ -32,6 +36,8 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: (...args: unknown[]) => m.withSystemContext(...args),
   withExplicitUserContext: (...args: unknown[]) => m.withExplicitUserContext(...args),
 }));
+vi.mock('@/db/tenant-context-storage', () => ({ getActiveTenantDb: () => m.activeTenantDb() }));
+vi.mock('@/lib/public-intake/intake-audit', () => ({ appendPublicIntakeAudit: m.appendPublicIntakeAudit }));
 
 async function loadModule() {
   return import('../access-control');
@@ -52,6 +58,7 @@ describe('claimed-workbook access control', () => {
     m.hasRoleInOrganization.mockResolvedValue(true);
     m.withSystemContext.mockImplementation((cb: any) => cb(mockTx));
     m.withExplicitUserContext.mockImplementation((_userId: string, cb: any) => cb());
+    m.activeTenantDb.mockReturnValue(m.claimantTx);
   });
 
   describe('same-organization peer role floor', () => {
@@ -184,7 +191,7 @@ describe('claimed-workbook access control', () => {
       m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
       m.auth.mockResolvedValueOnce({ userId: 'owner_1' });
 
-      const cb = vi.fn(async () => 'RESULT');
+      const cb = vi.fn(async (_authority: unknown) => 'RESULT');
       const result = await withClaimedWorkbookAccess({ workbookId: 'w1', operation: 'read' }, cb);
 
       expect(result).toEqual(
@@ -194,12 +201,28 @@ describe('claimed-workbook access control', () => {
         expect(result.authority.kind).toBe('claimant');
         // The DB session principal IS the real actor (the claimant).
         expect(result.authority.actorUserId).toBe('owner_1');
+        // The returned decision does not carry the transaction, which is closed once the callback returns.
+        expect('tx' in result.authority).toBe(false);
       }
       // Claimant executes under its own user context, not system.
       expect(m.withExplicitUserContext).toHaveBeenCalledTimes(1);
       expect(m.withExplicitUserContext.mock.calls[0][0]).toBe('owner_1');
+      // The callback receives the claimant's transaction as authority.tx, so its statements and audit records run on it.
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ kind: 'claimant', tx: m.claimantTx }));
       // Only the ownership lookup used the system context.
       expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails closed when the claimant transaction is not open', async () => {
+      const { withClaimedWorkbookAccess } = await loadModule();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'owner_1' });
+      m.activeTenantDb.mockReturnValueOnce(undefined);
+
+      const cb = vi.fn(async (_authority: unknown) => 'SHOULD_NOT_RUN');
+
+      await expect(withClaimedWorkbookAccess({ workbookId: 'w1', operation: 'read' }, cb)).rejects.toThrow(/claimant transaction is not open/);
+      expect(cb).not.toHaveBeenCalled();
     });
 
     it('runs the same-org callback under a bounded system context (no owner impersonation)', async () => {
@@ -208,7 +231,7 @@ describe('claimed-workbook access control', () => {
       m.auth.mockResolvedValueOnce({ userId: 'peer_1' });
       m.getOrganizationIdForUser.mockResolvedValueOnce('org_shared');
 
-      const cb = vi.fn(async () => 'OK');
+      const cb = vi.fn(async (_authority: unknown) => 'OK');
       const result = await withClaimedWorkbookAccess({ workbookId: 'w1', operation: 'write' }, cb);
 
       expect(result.ok).toBe(true);
@@ -224,6 +247,8 @@ describe('claimed-workbook access control', () => {
       // and never as the owner.
       expect(m.withExplicitUserContext).not.toHaveBeenCalled();
       expect(m.withSystemContext).toHaveBeenCalledTimes(2);
+      // The callback runs on the system transaction it was handed.
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ kind: 'same_org', tx: mockTx }));
     });
 
     it('runs the preclaim callback under a bounded system context', async () => {
@@ -232,7 +257,7 @@ describe('claimed-workbook access control', () => {
       const cap = issueWorkbookCapability();
       m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null, capabilityTokenHash: cap.tokenHash, capabilityTokenExpiresAt: cap.expiresAt }]);
 
-      const cb = vi.fn(async () => 'PRECLAIM');
+      const cb = vi.fn(async (_authority: unknown) => 'PRECLAIM');
       const result = await withClaimedWorkbookAccess({ workbookId: 'w1', operation: 'write', capability: cap.token }, cb);
 
       expect(result.ok).toBe(true);
@@ -241,6 +266,27 @@ describe('claimed-workbook access control', () => {
       // Ownership lookup + callback both ran under system context.
       expect(m.withSystemContext).toHaveBeenCalledTimes(2);
       expect(cb).toHaveBeenCalledTimes(1);
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ kind: 'preclaim', tx: mockTx }));
+    });
+
+    it('hands an unclaimed workbook the pseudonymous audit writer bound to the system transaction it opened, and a claimant none', async () => {
+      const { withClaimedWorkbookAccess } = await loadModule();
+      const { issueWorkbookCapability } = await import('@/lib/workbook/workbook-capability');
+      const cap = issueWorkbookCapability();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null, capabilityTokenHash: cap.tokenHash, capabilityTokenExpiresAt: cap.expiresAt }]);
+      m.appendPublicIntakeAudit.mockResolvedValue({ subjectRef: 'r', contentHash: 'h' });
+
+      await withClaimedWorkbookAccess({ workbookId: 'w1', operation: 'read', capability: cap.token }, async (authority) => {
+        await authority.appendPublicIntakeAudit?.({ surface: 's', action: 'a', operation: 'read', subjectKind: 'unclaimed_workbook', subjectId: 'w1', resourceRef: null, details: {} });
+      });
+      expect(m.appendPublicIntakeAudit).toHaveBeenCalledTimes(1);
+      expect(m.appendPublicIntakeAudit.mock.calls[0][0]).toBe(mockTx);
+
+      m.selectQueue.push([{ id: 'w2', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'owner_1' });
+      const claimantCallback = vi.fn(async (_authority: unknown) => 'OK');
+      await withClaimedWorkbookAccess({ workbookId: 'w2', operation: 'read' }, claimantCallback);
+      expect(claimantCallback.mock.calls[0][0]).not.toHaveProperty('appendPublicIntakeAudit');
     });
 
     it('does not run the callback when authorization is denied', async () => {

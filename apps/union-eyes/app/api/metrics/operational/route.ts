@@ -11,12 +11,13 @@
  * Neither is measured here: they are not returned, rather than returned as proxies. A failed read is an error, not zero.
  */
 import { NextResponse } from 'next/server'
-import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'
-import { eq, sql, count, gte, and } from 'drizzle-orm'
+import { sql, count, gte, and } from 'drizzle-orm'
 import { getAllQueueStats } from '@/lib/job-queue'
 import { requireApiAuth, isPlatformAdminUser } from '@/lib/api-auth-guard'
 import { constantTimeEquals } from '@/lib/security/constant-time'
+import { withSystemContext } from '@/lib/db/with-rls-context'
+import { logger } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,12 +43,18 @@ export async function GET(req: Request) {
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
   try {
-    const [transitions, slaViolations, failureLike, queueStats] = await Promise.all([
-      db
-        .select({ count: count() })
+    // The counters span every organization, so they are read as the system role (the platform operator's own principal), after the
+    // operator check above and in one read-only transaction. No organization's transaction can show another organization's rows.
+    // The two claim_updates figures come from one scan of the last day's rows rather than two.
+    const { updateCounts, slaViolations } = await withSystemContext(async (tx) => {
+      const updateRows = await tx
+        .select({
+          transitions: sql<number>`count(*) filter (where ${claimUpdates.updateType} = 'status_change')`.mapWith(Number),
+          failureLike: sql<number>`count(*) filter (where ${claimUpdates.message} ILIKE '%error%' OR ${claimUpdates.message} ILIKE '%failed%')`.mapWith(Number),
+        })
         .from(claimUpdates)
-        .where(and(eq(claimUpdates.updateType, 'status_change'), gte(claimUpdates.createdAt, oneDayAgo))),
-      db
+        .where(gte(claimUpdates.createdAt, oneDayAgo))
+      const slaRows = await tx
         .select({ count: count() })
         .from(claims)
         .where(
@@ -55,26 +62,18 @@ export async function GET(req: Request) {
             sql`${claims.status} NOT IN ('closed', 'resolved', 'rejected')`,
             sql`${claims.updatedAt} < NOW() - INTERVAL '5 days'`,
           ),
-        ),
-      db
-        .select({ count: count() })
-        .from(claimUpdates)
-        .where(
-          and(
-            sql`(${claimUpdates.message} ILIKE '%error%' OR ${claimUpdates.message} ILIKE '%failed%')`,
-            gte(claimUpdates.createdAt, oneDayAgo),
-          ),
-        ),
-      getAllQueueStats(),
-    ])
+        )
+      return { updateCounts: updateRows, slaViolations: slaRows }
+    })
+    const queueStats = await getAllQueueStats()
 
     const queueDepth = queueStats.reduce((sum, q) => sum + (q.active ?? 0) + (q.reserved ?? 0) + (q.scheduled ?? 0), 0)
 
     return NextResponse.json({
       scope: 'platform',
-      workflow_transition_rate: transitions[0]?.count ?? 0,
+      workflow_transition_rate: updateCounts[0]?.transitions ?? 0,
       sla_violations: slaViolations[0]?.count ?? 0,
-      failure_like_updates: failureLike[0]?.count ?? 0,
+      failure_like_updates: updateCounts[0]?.failureLike ?? 0,
       queue_depth: queueDepth,
       // Request and error rates come from the observability system; this route does not measure them.
       request_count: null,
@@ -82,7 +81,8 @@ export async function GET(req: Request) {
       window: '24h',
       generated_at: now.toISOString(),
     })
-  } catch {
+  } catch (error) {
+    logger.error('operational_metrics_failed', { error })
     return NextResponse.json({ error: 'Failed to compute metrics' }, { status: 500 })
   }
 }

@@ -284,7 +284,6 @@ describe('EC-G03 guards', () => {
         '/dashboard/governance',
         '/dashboard/audits',
         '/dashboard/security',
-        '/dashboard/movement-insights/export',
         '/dashboard/integrations',
         '/dashboard/operations',
         '/dashboard/settings',

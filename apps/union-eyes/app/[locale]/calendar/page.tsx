@@ -12,7 +12,7 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { CalendarSidebar } from '@/components/calendar/CalendarSidebar';
 import { EventDialog } from '@/components/calendar/EventDialog';
@@ -29,6 +29,31 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Plus, Settings } from 'lucide-react';
+import { ApiShapeError, envelopeRows, isRecord, readApiError } from '@/lib/client/api-envelope';
+import {
+  createEventBody,
+  eventDetailFrom,
+  updateEventBody,
+  type CalendarEventDetail,
+  type EventFormData,
+} from '@/lib/calendar/event-form';
+
+const COPY = {
+  en: {
+    calendarsLoadFailed: 'Calendars could not be loaded.',
+    eventsLoadFailed: 'Events could not be loaded.',
+    saveFailed: 'The event could not be saved.',
+    deleteFailed: 'The event could not be deleted.',
+    createCalendarFailed: 'The calendar could not be created.',
+  },
+  fr: {
+    calendarsLoadFailed: 'Les calendriers n’ont pas pu être chargés.',
+    eventsLoadFailed: 'Les événements n’ont pas pu être chargés.',
+    saveFailed: 'L’événement n’a pas pu être enregistré.',
+    deleteFailed: 'L’événement n’a pas pu être supprimé.',
+    createCalendarFailed: 'Le calendrier n’a pas pu être créé.',
+  },
+} as const;
 
 interface CalendarSummary {
   id: string;
@@ -36,13 +61,9 @@ interface CalendarSummary {
   color: string;
   isDefault: boolean;
   visibility: boolean;
-  syncEnabled?: boolean;
-  syncStatus?: 'synced' | 'syncing' | 'failed' | 'pending';
-  provider?: 'google' | 'microsoft' | 'local';
-  connectionId?: string;
-  externalCalendarId?: string;
 }
 
+/** The event shape the month, week and day views draw. */
 interface CalendarEventRecord {
   id: string;
   title: string;
@@ -55,20 +76,48 @@ interface CalendarEventRecord {
   calendarId?: string;
 }
 
+const viewEventOf = (event: CalendarEventDetail): CalendarEventRecord => ({
+  id: event.id,
+  title: event.title,
+  startTime: event.startTime,
+  endTime: event.endTime,
+  eventType: event.eventType ?? 'other',
+  status: event.status,
+  location: event.location ?? undefined,
+  isAllDay: event.isAllDay,
+  calendarId: event.calendarId || undefined,
+});
+
+/** A calendar row of GET /api/calendars. A calendar starts visible; the row does not carry that choice. */
+function calendarSummaryFrom(row: unknown): CalendarSummary {
+  if (!isRecord(row) || typeof row.id !== 'string' || typeof row.name !== 'string') throw new ApiShapeError('not a calendar');
+  return {
+    id: row.id,
+    name: row.name,
+    color: typeof row.color === 'string' ? row.color : '#3B82F6',
+    isDefault: false,
+    visibility: true,
+  };
+}
+
 export default function CalendarPage() {
   const t = useTranslations();
+  const copy = useLocale().toLowerCase().startsWith('fr') ? COPY.fr : COPY.en;
   const [calendars, setCalendars] = useState<CalendarSummary[]>([]);
   const [selectedCalendarId, setSelectedCalendarId] = useState<string>('');
-  const [events, setEvents] = useState<CalendarEventRecord[]>([]);
+  const [events, setEvents] = useState<CalendarEventDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  // What failed to load, and what the server said about it (the page words the failure in the reader's language when it said nothing).
+  const [loadError, setLoadError] = useState<{ source: 'calendars' | 'events'; serverMessage: string | null } | null>(null);
 
   // Dialog states
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [syncManagerOpen, setSyncManagerOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEventRecord | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEventDetail | null>(null);
   const [initialDate, setInitialDate] = useState<Date | undefined>();
   const [createCalendarOpen, setCreateCalendarOpen] = useState(false);
   const [isCreatingCalendar, setIsCreatingCalendar] = useState(false);
+  const [createCalendarError, setCreateCalendarError] = useState<string | null>(null);
   const [newCalendarName, setNewCalendarName] = useState('');
   const [newCalendarDescription, setNewCalendarDescription] = useState('');
   const [newCalendarColor, setNewCalendarColor] = useState('#2563eb');
@@ -85,31 +134,48 @@ export default function CalendarPage() {
   }, [selectedCalendarId]);
 
   const fetchCalendars = async () => {
+    let serverMessage: string | null = null;
     try {
       const response = await fetch('/api/calendars');
-      const json = await response.json();
-      const rows = json?.data?.data ?? json?.data ?? json?.calendars ?? [];
-      
+      if (!response.ok) {
+        serverMessage = (await readApiError(response, '')) || null;
+        throw new Error('Calendars were refused');
+      }
+      const rows = envelopeRows(await response.json()).map(calendarSummaryFrom);
+
       setCalendars(rows);
-      
+      setLoadError(null);
+
       // Select first calendar by default
       if (rows.length > 0) {
         setSelectedCalendarId(rows[0].id);
       }
     } catch (_error) {
+      setLoadError({ source: 'calendars', serverMessage });
     } finally {
       setLoading(false);
     }
   };
 
   const fetchEvents = async (calendarId: string) => {
+    let serverMessage: string | null = null;
     try {
       const response = await fetch(`/api/calendars/${calendarId}/events`);
-      const json = await response.json();
-      const rows = json?.data?.data ?? json?.data ?? json?.events ?? [];
-      
-      setEvents(Array.isArray(rows) ? rows : []);
+      if (!response.ok) {
+        serverMessage = (await readApiError(response, '')) || null;
+        throw new Error('Events were refused');
+      }
+      const rows = envelopeRows(await response.json()).map((row) => {
+        if (!isRecord(row)) throw new ApiShapeError('not an event');
+        return eventDetailFrom(row);
+      });
+
+      setEvents(rows);
+      setLoadError(null);
     } catch (_error) {
+      // The events on screen belong to the calendar that was selected before, so they are not left standing under this one.
+      setEvents([]);
+      setLoadError({ source: 'events', serverMessage });
     }
   };
 
@@ -120,47 +186,48 @@ export default function CalendarPage() {
   };
 
   const handleEditEvent = (event: CalendarEventRecord) => {
-    setSelectedEvent(event);
+    const stored = events.find((candidate) => candidate.id === event.id);
+    if (!stored) return;
+    setSelectedEvent(stored);
     setInitialDate(undefined);
     setEventDialogOpen(true);
   };
 
-  const handleSaveEvent = async (eventData: unknown) => {
-    try {
-      if (selectedEvent) {
-        // Update existing event
-        await fetch(`/api/calendars/${selectedCalendarId}/events/${selectedEvent.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData),
-        });
-      } else {
-        // Create new event
-        await fetch(`/api/calendars/${selectedCalendarId}/events`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData),
-        });
-      }
+  /** The error a failed event request becomes: what the server said, or the fallback. */
+  const failureOf = async (response: Response, fallback: string) => new Error(await readApiError(response, fallback));
 
-      // Refresh events
-      await fetchEvents(selectedCalendarId);
-    } catch (error) {
-      throw error;
+  const handleSaveEvent = async (form: EventFormData) => {
+    if (selectedEvent) {
+      const changes = updateEventBody(form, selectedEvent);
+      // Nothing was changed, so there is nothing to save.
+      if (changes === null) return;
+      const response = await fetch(`/api/calendar/events/${selectedEvent.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changes),
+      });
+      if (!response.ok) throw await failureOf(response, copy.saveFailed);
+    } else {
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createEventBody(form, selectedCalendarId)),
+      });
+      if (!response.ok) throw await failureOf(response, copy.saveFailed);
     }
+
+    // Refresh events
+    await fetchEvents(selectedCalendarId);
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    try {
-      await fetch(`/api/calendars/${selectedCalendarId}/events/${eventId}`, {
-        method: 'DELETE',
-      });
+    const response = await fetch(`/api/calendar/events/${eventId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw await failureOf(response, copy.deleteFailed);
 
-      // Refresh events
-      await fetchEvents(selectedCalendarId);
-    } catch (error) {
-      throw error;
-    }
+    // Refresh events
+    await fetchEvents(selectedCalendarId);
   };
 
   const handleToggleCalendarVisibility = (calendarId: string, visible: boolean) => {
@@ -177,6 +244,7 @@ export default function CalendarPage() {
     }
 
     setIsCreatingCalendar(true);
+    setCreateCalendarError(null);
 
     try {
       const response = await fetch('/api/calendars', {
@@ -191,55 +259,34 @@ export default function CalendarPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create calendar');
-      }
+      if (!response.ok) throw await failureOf(response, copy.createCalendarFailed);
 
-      const json = await response.json();
+      const json: unknown = await response.json();
       await fetchCalendars();
 
-      const created = json?.data;
-      if (created?.id) {
-        setSelectedCalendarId(created.id);
+      const createdId = isRecord(json) && isRecord(json.data) && isRecord(json.data.data) ? json.data.data.id : undefined;
+      if (typeof createdId === 'string') {
+        setSelectedCalendarId(createdId);
       }
 
       setCreateCalendarOpen(false);
       setNewCalendarName('');
       setNewCalendarDescription('');
-    } catch (_error) {
-alert('Failed to create calendar');
+    } catch (error) {
+      // The dialog stays open with what was typed, and says why (the server's own message when it gave one: a member may not create a calendar).
+      setCreateCalendarError(error instanceof Error && error.message ? error.message : copy.createCalendarFailed);
     } finally {
       setIsCreatingCalendar(false);
     }
   };
 
-  const handleSyncCalendar = async (calendarId: string) => {
-    // Trigger sync via API
-    try {
-      const calendar = calendars.find(c => c.id === calendarId);
-      if (!calendar?.connectionId) return;
-
-      await fetch(`/api/calendar-sync/connections/${calendar.connectionId}/sync`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          localCalendarId: calendarId,
-          externalCalendarId: calendar.externalCalendarId,
-        }),
-      });
-
-      // Refresh events
-      await fetchEvents(selectedCalendarId);
-    } catch (_error) {
-alert('Failed to sync calendar');
-    }
-  };
-
   // Filter visible events
-  const visibleEvents = events.filter(event => {
-    const calendar = calendars.find(cal => cal.id === event.calendarId);
-    return calendar?.visibility !== false;
-  });
+  const visibleEvents = events
+    .filter(event => {
+      const calendar = calendars.find(cal => cal.id === event.calendarId);
+      return calendar?.visibility !== false;
+    })
+    .map(viewEventOf);
 
   if (loading) {
     return (
@@ -257,8 +304,10 @@ alert('Failed to sync calendar');
         selectedCalendarId={selectedCalendarId}
         onSelectCalendar={setSelectedCalendarId}
         onToggleVisibility={handleToggleCalendarVisibility}
-        onCreateCalendar={() => setCreateCalendarOpen(true)}
-        onSyncCalendar={handleSyncCalendar}
+        onCreateCalendar={() => {
+          setCreateCalendarError(null);
+          setCreateCalendarOpen(true);
+        }}
         onManageSync={() => setSyncManagerOpen(true)}
       />
 
@@ -268,7 +317,7 @@ alert('Failed to sync calendar');
         <div className="border-b p-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{t('calendar.title')}</h1>
           <div className="flex space-x-2">
-            <Button onClick={() => handleCreateEvent()}>
+            <Button onClick={() => handleCreateEvent()} disabled={!selectedCalendarId}>
               <Plus className="h-4 w-4 mr-2" />
               {t('calendar.newEvent')}
             </Button>
@@ -279,20 +328,28 @@ alert('Failed to sync calendar');
           </div>
         </div>
 
+        {loadError && (
+          <p role="alert" className="border-b border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+            {loadError.serverMessage ?? (loadError.source === 'calendars' ? copy.calendarsLoadFailed : copy.eventsLoadFailed)}
+          </p>
+        )}
+
         {/* Calendar View */}
         {selectedCalendarId ? (
           <CalendarView
             calendarId={selectedCalendarId}
             events={visibleEvents}
             onEventClick={handleEditEvent}
-            onDateClick={(_date) => undefined}
             onCreateEvent={handleCreateEvent}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <p className="mb-4">{t('calendar.noCalendarSelected')}</p>
-              <Button onClick={() => setCreateCalendarOpen(true)}>
+              <Button onClick={() => {
+                setCreateCalendarError(null);
+                setCreateCalendarOpen(true);
+              }}>
                 {t('calendar.createFirstCalendar')}
               </Button>
             </div>
@@ -373,6 +430,10 @@ alert('Failed to sync calendar');
               />
             </div>
           </div>
+
+          {createCalendarError && (
+            <p role="alert" className="text-sm text-destructive">{createCalendarError}</p>
+          )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateCalendarOpen(false)}>

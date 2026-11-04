@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockSendResendEmail = vi.hoisted(() => vi.fn());
+const mockGetResendClient = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -8,6 +9,7 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/email-service', () => ({
   sendResendEmail: mockSendResendEmail,
+  getResendClient: mockGetResendClient,
   getFromEmail: (label?: string) => label ? `${label} <noreply@unioneyes.app>` : 'noreply@unioneyes.app',
 }));
 
@@ -177,9 +179,12 @@ describe('ResendAdapter', () => {
     expect(result.error).toBe('Network error');
   });
 
-  it('verifyConnection returns true when client exists', async () => {
-    const ok = await adapter.verifyConnection();
-    expect(ok).toBe(true);
+  it('verifyConnection is true only while a Resend API key is configured', async () => {
+    mockGetResendClient.mockReturnValue({});
+    expect(await adapter.verifyConnection()).toBe(true);
+
+    mockGetResendClient.mockReturnValue(null);
+    expect(await adapter.verifyConnection()).toBe(false);
   });
 
   it('sendBatch iterates and returns all results', async () => {

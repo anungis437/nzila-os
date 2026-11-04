@@ -8,8 +8,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { generateWorkbookPdf } from '@/lib/workbook-pdf/generateWorkbookPdf';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
@@ -32,13 +32,18 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: workbookId } = await params;
+  // A malformed identifier names no workbook: it is answered as an absent one, not sent to SQL to fail there.
+  if (!z.guid().safeParse(workbookId).success) {
+    return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
+  }
 
   try {
     // Authorization is resolved first (claimant or same-organization peer);
-    // the tier read and every protected PDF child read then run inside the DB
-    // execution context that matches the resolved authority. The export
-    // surface is claimed-only: an unclaimed (pre-claim) workbook has no
-    // identity-bound owner and is not exported on the strength of its capability.
+    // the tier read and every protected PDF child read then run on the
+    // transaction of the DB execution context that matches the resolved
+    // authority. The export surface is claimed-only: an unclaimed (pre-claim)
+    // workbook has no identity-bound owner and is not exported on the strength
+    // of its capability.
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'read', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
@@ -46,7 +51,7 @@ export async function GET(
           return { kind: 'unclaimed' as const };
         }
 
-        const [wb] = await db
+        const [wb] = await authority.tx
           .select({ reportTierId: workbooks.reportTierId })
           .from(workbooks)
           .where(eq(workbooks.id, workbookId))
@@ -59,7 +64,7 @@ export async function GET(
           return { kind: 'tier' as const };
         }
 
-        const buffer = await generateWorkbookPdf({ workbookId });
+        const buffer = await generateWorkbookPdf(authority.tx, { workbookId });
         if (!buffer) {
           return { kind: 'not_found' as const };
         }

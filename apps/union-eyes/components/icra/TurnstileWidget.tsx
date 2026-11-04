@@ -98,7 +98,7 @@ export function TurnstileWidget({ onVerified, locale = 'en' }: TurnstileWidgetPr
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch {
-          // ignore
+          // The widget is already gone (the script was removed or the page is unloading); there is nothing left to release.
         }
       }
     };

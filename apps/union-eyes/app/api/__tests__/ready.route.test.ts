@@ -36,7 +36,6 @@ describe('ready route', () => {
     delete process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS;
     delete process.env.READY_REQUIRE_EMAIL_DELIVERY;
     delete process.env.READY_REQUIRE_CALENDAR_TOKEN_ENCRYPTION;
-    delete process.env.READY_REQUIRE_CALENDAR_SCHEDULER;
     process.env.NODE_ENV = 'test';
     m.dbExecute.mockResolvedValue(undefined);
     m.containerExists.mockResolvedValue(true);
@@ -82,7 +81,6 @@ describe('ready route', () => {
     expect(json.checks).not.toHaveProperty('calendarIntegrations');
     expect(json.checks).not.toHaveProperty('emailDelivery');
     expect(json.checks).not.toHaveProperty('calendarTokenEncryption');
-    expect(json.checks).not.toHaveProperty('calendarScheduler');
   });
 
   it('returns 503 when queue is required and queue health fails', async () => {
@@ -146,7 +144,6 @@ describe('ready route', () => {
     process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS = 'true';
     process.env.READY_REQUIRE_EMAIL_DELIVERY = 'true';
     process.env.READY_REQUIRE_CALENDAR_TOKEN_ENCRYPTION = 'true';
-    process.env.READY_REQUIRE_CALENDAR_SCHEDULER = 'true';
     process.env.GOOGLE_CALENDAR_CLIENT_ID = 'google-client';
     process.env.GOOGLE_CALENDAR_CLIENT_SECRET = 'google-secret';
     process.env.GOOGLE_CALENDAR_REDIRECT_URI = 'https://example.com/google';
@@ -157,8 +154,6 @@ describe('ready route', () => {
     process.env.SENDGRID_API_KEY = 'sendgrid-key';
     process.env.SENDGRID_FROM_EMAIL = 'noreply@example.com';
     process.env.CALENDAR_TOKEN_ENCRYPTION_KEY = 'calendar-key';
-    process.env.CALENDAR_SYNC_CRON_ENABLED = 'true';
-    process.env.CRON_SECRET = 'cron-secret';
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true })) as any);
 
     const response = await GET();
@@ -171,7 +166,6 @@ describe('ready route', () => {
       calendarIntegrations: true,
       emailDelivery: true,
       calendarTokenEncryption: true,
-      calendarScheduler: true,
     });
   });
 });

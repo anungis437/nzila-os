@@ -18,13 +18,11 @@ import {
   MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
-import { db } from '@/db';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
 import CLCAnalyticsDashboard from '@/components/admin/clc-analytics-dashboard';
 import { ClcRemittancesDashboard } from '@/components/admin/clc-remittances-dashboard';
-import { perCapitaRemittances } from '@/db/schema/domains/infrastructure/clc-per-capita';
-import { sql, and, eq, lt } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
+import { listAffiliates } from '@/lib/organizations/affiliates';
+import { loadRemittanceMetrics } from '@/lib/organizations/per-capita-standing';
 
 export const metadata: Metadata = {
   title: 'CLC Continuity Coordination | UnionEyes',
@@ -41,110 +39,23 @@ async function checkCLCAccess(userId: string, orgId: string): Promise<boolean> {
   }
 }
 
-async function getCLCMetrics(orgId: string) {
-  try {
-    // Fetch direct-chartered unions and provincial federations
-    const affiliates = await db.query.organizations.findMany({
-      where: (organizations, { eq }) => eq(organizations.parentId, orgId),
-    });
-
-    // Filter by type
-    const directCharteredUnions = affiliates.filter(a => a.organizationType === 'union');
-    const provincialFederations = affiliates.filter(a => a.organizationType === 'federation');
-
-    // Get total members from latest remittances of all affiliates
-    const memberCountResult = await db
-      .select({ totalMembers: sql<number>`COALESCE(SUM(${perCapitaRemittances.remittableMembers}), 0)` })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          eq(perCapitaRemittances.toOrganizationId, orgId),
-          // Get most recent remittances (last 2 months)
-          sql`${perCapitaRemittances.remittanceYear} >= EXTRACT(YEAR FROM NOW() - INTERVAL '2 months')`
-        )
-      );
-    const totalMembers = Number(memberCountResult[0]?.totalMembers || 0);
-
-    // Count pending remittances
-    const pendingResult = await db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          eq(perCapitaRemittances.toOrganizationId, orgId),
-          eq(perCapitaRemittances.status, 'pending')
-        )
-      );
-    const pendingRemittances = Number(pendingResult[0]?.count || 0);
-
-    // Count overdue remittances (past due date and still pending)
-    const overdueResult = await db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          eq(perCapitaRemittances.toOrganizationId, orgId),
-          eq(perCapitaRemittances.status, 'pending'),
-          lt(perCapitaRemittances.dueDate, sql`CURRENT_DATE`)
-        )
-      );
-    const overdueRemittances = Number(overdueResult[0]?.count || 0);
-
-    // Calculate compliance rate (% of remittances submitted on time in last 12 months)
-    const complianceResult = await db
-      .select({
-        total: sql<number>`COUNT(*)`,
-        onTime: sql<number>`COUNT(*) FILTER (WHERE ${perCapitaRemittances.submittedDate} <= ${perCapitaRemittances.dueDate})`
-      })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          eq(perCapitaRemittances.toOrganizationId, orgId),
-          sql`${perCapitaRemittances.remittanceYear} >= EXTRACT(YEAR FROM NOW() - INTERVAL '12 months')`
-        )
-      );
-    const complianceRate = complianceResult[0]?.total
-      ? Math.round((Number(complianceResult[0]?.onTime || 0) / Number(complianceResult[0]?.total)) * 100)
-      : 0;
-
-    // Sum total revenue from approved/paid remittances in current fiscal year
-    const revenueResult = await db
-      .select({ totalRevenue: sql<number>`COALESCE(SUM(${perCapitaRemittances.totalAmount}), 0)` })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          eq(perCapitaRemittances.toOrganizationId, orgId),
-          sql`${perCapitaRemittances.status} IN ('approved', 'paid')`,
-          sql`${perCapitaRemittances.remittanceYear} = EXTRACT(YEAR FROM NOW())`
-        )
-      );
-    const totalRevenue = Number(revenueResult[0]?.totalRevenue || 0);
-
-    return {
-      totalAffiliates: affiliates.length,
-      directCharteredUnions: directCharteredUnions.length,
-      provincialFederations: provincialFederations.length,
-      totalMembers,
-      pendingRemittances,
-      overdueRemittances,
-      complianceRate,
-      totalRevenue,
-      affiliates,
-    };
-  } catch (error) {
-    logger.error('Error fetching CLC metrics:', error);
-    return {
-      totalAffiliates: 0,
-      directCharteredUnions: 0,
-      provincialFederations: 0,
-      totalMembers: 0,
-      pendingRemittances: 0,
-      overdueRemittances: 0,
-      complianceRate: 0,
-      totalRevenue: 0,
-      affiliates: [],
-    };
-  }
+/**
+ * The congress's affiliates (a system read, authorized by the caller's administrative standing over the organization) and the
+ * per-capita remittances addressed to it (read in its own context). A failed read is an error: it must not render as a congress
+ * with no affiliates and nothing owed.
+ */
+async function getCLCMetrics(userId: string, orgId: string) {
+  const [affiliates, remittances] = await Promise.all([
+    listAffiliates({ userId, organizationId: orgId }),
+    loadRemittanceMetrics(orgId),
+  ]);
+  return {
+    totalAffiliates: affiliates.length,
+    directCharteredUnions: affiliates.filter((a) => a.organizationType === 'union').length,
+    provincialFederations: affiliates.filter((a) => a.organizationType === 'federation').length,
+    ...remittances,
+    affiliates,
+  };
 }
 
 export default async function CLCDashboardPage() {
@@ -158,7 +69,7 @@ export default async function CLCDashboardPage() {
   }
 
   const t = await getTranslations('clc');
-  const metrics = await getCLCMetrics(orgId);
+  const metrics = await getCLCMetrics(userId, orgId);
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -253,7 +164,7 @@ export default async function CLCDashboardPage() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.complianceRate}%</div>
+            <div className="text-2xl font-bold">{metrics.complianceRate === null ? '—' : `${metrics.complianceRate}%`}</div>
             <p className="text-xs text-muted-foreground">
               {t('metrics.thirtyDayAverage', { defaultValue: '30-day average' })}
             </p>
@@ -295,14 +206,6 @@ export default async function CLCDashboardPage() {
                 <FileText className="h-5 w-5 mb-2" />
                 <div className="font-semibold">{t('actions.compliance', { defaultValue: 'Compliance Reports' })}</div>
                 <div className="text-xs text-muted-foreground">{t('actions.complianceDesc', { defaultValue: 'National tracking' })}</div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto p-4 flex-col items-start" asChild>
-              <Link href="/dashboard/admin/clc-analytics">
-                <BarChart3 className="h-5 w-5 mb-2" />
-                <div className="font-semibold">{t('actions.analytics', { defaultValue: 'CLC Analytics' })}</div>
-                <div className="text-xs text-muted-foreground">{t('actions.analyticsDesc', { defaultValue: 'Trends and forecasts' })}</div>
               </Link>
             </Button>
 
@@ -376,11 +279,6 @@ export default async function CLCDashboardPage() {
                         <div className="text-sm text-muted-foreground">{(federation as any).province || federation.provinceTerritory || 'N/A'}</div>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/dashboard/federation?id=${federation.id}`}>
-                        View Details
-                      </Link>
-                    </Button>
                   </div>
                 ))}
             </div>

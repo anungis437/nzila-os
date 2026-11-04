@@ -9,16 +9,24 @@
 import { NextResponse } from 'next/server';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { analyzeMultiYearTrends } from '@/services/clc/compliance-reports';
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('admin', async (request, context) => {
-    const { userId, organizationId } = context;
+// The trends read the caller organization's per-capita remittances: the handler runs in that organization's tenant transaction.
+export const GET = withApi(
+  {
+    auth: { minRole: 'admin' },
+    rlsOrgContext: true,
+    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Admin', 'CLC'], summary: 'CLC multi-year remittance trends (3, 5 or 10 years)' },
+  },
+  async ({ request, userId, organizationId }) => {
     if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+    if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
 
   try {
         // Rate limiting: 50 CLC operations per hour per user
@@ -55,7 +63,6 @@ export const GET = withRoleAuth('admin', async (request, context) => {
     );
         }
 
-        if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
         const trends = await analyzeMultiYearTrends({ years: years as 3 | 5 | 10, organizationId });
 
         logApiAuditEvent({
@@ -82,12 +89,13 @@ export const GET = withRoleAuth('admin', async (request, context) => {
           severity: 'high',
           details: { error: error instanceof Error ? error.message : 'Unknown error' },
         });
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Failed to fetch trend data',
-      error
-    );
+        return standardErrorResponse(
+          ErrorCode.INTERNAL_ERROR,
+          'Failed to fetch trend data',
+          error
+        );
       }
-});
+  },
+);
 
 

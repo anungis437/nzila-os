@@ -1,37 +1,19 @@
 /**
  * GET POST /api/governance/board-packets
- * Board packet management — replaces Django proxy.
+ *
+ * The organization's board packets. A packet is prepared as a draft by an admin, finalized (certified) and then distributed; see
+ * lib/governance/board-packet-lifecycle.ts. The list carries each packet's descriptors and status, not its sections or PDF: those are on the packet itself.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { parseCrudPagination } from '@/lib/api/pagination';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
-import { desc, count, eq } from 'drizzle-orm';
+import { and, count, desc, eq, ne } from 'drizzle-orm';
 import { z } from 'zod';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { createBoardPacketSchema } from '@/lib/governance/board-packet-input';
+import { createBoardPacket } from '@/lib/governance/board-packet-service';
 
-const createBoardPacketSchema = z.object({
-  title: z.string().min(1).max(255),
-  description: z.string().max(5000).optional(),
-  packetType: z.string().min(1).max(50),
-  periodStart: z.string().min(1),
-  periodEnd: z.string().min(1),
-  fiscalYear: z.number().int().min(1900).max(2100),
-  fiscalQuarter: z.number().int().min(1).max(4).optional(),
-  generatedBy: z.string().min(1).max(255),
-  status: z.enum(['draft', 'finalized', 'distributed', 'archived']).default('draft'),
-  financialSummary: z.record(z.string(), z.unknown()),
-  membershipStats: z.record(z.string(), z.unknown()),
-  caseSummary: z.record(z.string(), z.unknown()),
-  motionsAndVotes: z.record(z.string(), z.unknown()).optional(),
-  auditExceptions: z.record(z.string(), z.unknown()).optional(),
-  complianceStatus: z.record(z.string(), z.unknown()),
-  actionItems: z.record(z.string(), z.unknown()).optional(),
-  recipientRoles: z.array(z.string().max(100)),
-  distributionList: z.record(z.string(), z.unknown()).optional(),
-  pdfUrl: z.string().url().max(2000).optional(),
-  attachments: z.record(z.string(), z.unknown()).optional(),
-});
+const statusSchema = z.enum(['draft', 'finalized', 'distributed', 'archived']);
 
 export const dynamic = 'force-dynamic';
 
@@ -42,23 +24,50 @@ export const GET = withApi(
     openapi: { tags: ['Governance'], summary: 'List board packets' },
   },
   async ({ request, organizationId }) => {
-    const url = new URL(request.url);
-    const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
-    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20')));
-    const offset = (page - 1) * limit;
+    const search = new URL(request.url).searchParams;
+    const { page, limit, offset } = parseCrudPagination(search, 20);
+    const requested = search.get('status');
+    const filter = requested === null ? null : statusSchema.safeParse(requested);
+    if (filter && !filter.success) throw ApiError.badRequest('status must be draft, finalized, distributed or archived');
 
-    const [_totalResult, packets] = await Promise.all([
-      db.select({ total: count() }).from(boardPackets).where(eq(boardPackets.organizationId, organizationId!)),
-      db
-        .select()
+    // Archiving is how a packet is deleted, so an archived packet is listed only when it is asked for.
+    const scope = and(
+      eq(boardPackets.organizationId, organizationId!),
+      filter ? eq(boardPackets.status, filter.data) : ne(boardPackets.status, 'archived'),
+    );
+
+    const { total, packets } = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [counted] = await tx.select({ total: count() }).from(boardPackets).where(scope);
+      const rows = await tx
+        .select({
+          id: boardPackets.id,
+          title: boardPackets.title,
+          packetType: boardPackets.packetType,
+          periodStart: boardPackets.periodStart,
+          periodEnd: boardPackets.periodEnd,
+          fiscalYear: boardPackets.fiscalYear,
+          fiscalQuarter: boardPackets.fiscalQuarter,
+          status: boardPackets.status,
+          generatedBy: boardPackets.generatedBy,
+          generatedAt: boardPackets.generatedAt,
+          finalizedAt: boardPackets.finalizedAt,
+          signedBy: boardPackets.signedBy,
+          signedAt: boardPackets.signedAt,
+          contentHash: boardPackets.contentHash,
+          distributedAt: boardPackets.distributedAt,
+          recipientRoles: boardPackets.recipientRoles,
+          createdAt: boardPackets.createdAt,
+          updatedAt: boardPackets.updatedAt,
+        })
         .from(boardPackets)
-        .where(eq(boardPackets.organizationId, organizationId!))
-        .orderBy(desc(boardPackets.createdAt))
+        .where(scope)
+        .orderBy(desc(boardPackets.createdAt), desc(boardPackets.id))
         .limit(limit)
-        .offset(offset),
-    ]);
+        .offset(offset);
+      return { total: counted?.total ?? 0, packets: rows };
+    });
 
-    return packets;
+    return { data: packets, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
   },
 );
 
@@ -69,22 +78,11 @@ export const POST = withApi(
     openapi: { tags: ['Governance'], summary: 'Create board packet' },
   },
   async ({ body, userId, organizationId }) => {
-    const parsed = createBoardPacketSchema.parse(body);
-    // The packet and its audit record commit together; organizationId always comes from the resolved caller
-    // context, never client input, so a create request cannot mint a board packet for another organization.
-    const [packet] = await withRLSContext(async (tx) => {
-      const [created] = await tx.insert(boardPackets).values({ ...parsed, organizationId: organizationId! }).returning()
-      await persistAtomicAudit(tx, {
-        organizationId: organizationId!,
-        userId: userId!,
-        action: 'governance.board_packet.create',
-        resourceType: 'board_packets',
-        resourceId: created.id,
-        details: { title: parsed.title, packetType: parsed.packetType, status: parsed.status },
-      })
-      return [created]
-    });
-    return packet;
+    const packet = createBoardPacketSchema.parse(body);
+    // The packet and its audit record commit together. The organization and the preparer are the resolved caller's: a request that names either, or a status,
+    // is refused by the schema, so a create cannot mint a packet for another organization, in another person's name or already finalized.
+    return withRLSContext({ organizationId: organizationId! }, (tx) =>
+      createBoardPacket(tx, { organizationId: organizationId!, userId: userId!, packet }),
+    );
   },
 );
-

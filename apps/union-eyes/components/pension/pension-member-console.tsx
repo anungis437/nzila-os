@@ -1,251 +1,185 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useOrganizationId } from '@/lib/hooks/use-organization';
-import { Briefcase, TrendingUp, Calendar, DollarSign, FileText, AlertCircle, CheckCircle, Clock, Download } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
+import Link from 'next/link';
+import { Briefcase, Calendar, DollarSign, FileText, CheckCircle, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
+import { readApiError } from '@/lib/client/api-envelope';
+import {
+  fetchPensionRows,
+  PensionServerMessage,
+  readContribution,
+  readPensionDocument,
+  readPensionMember,
+  readPensionRows,
+  readPlan,
+  readT4a,
+  type PensionContribution,
+  type PensionDocument,
+  type PensionMember,
+  type PensionPlan,
+  type T4ARecord,
+} from './pension-readers';
 
-interface PensionPlan {
-  id: string;
-  planName: string;
-  planType: string;
-  membershipStatus: string;
-  vestingStatus: string;
-  yearsOfService: number;
-  enrollmentDate: string | null;
-  totalAssets: string;
-  fundingStatus: string;
-  activeMembers: number;
-  status: string;
-  description: string | null;
+type Section<T> = { state: 'loading' } | { state: 'ready'; value: T } | { state: 'failed'; message: string };
+
+const LOAD_FAILED = 'Unable to load pension information. Please try again later.';
+const words = (code: string) => code.replace(/_/g, ' ');
+
+function failure(error: unknown): { state: 'failed'; message: string } {
+  return { state: 'failed', message: error instanceof PensionServerMessage ? error.message : LOAD_FAILED };
 }
 
-interface Contribution {
-  id: string;
-  memberName: string;
-  period: string;
-  amount: string;
-  paymentStatus: string;
-  paymentDate: string | null;
+function Failed({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div role="alert" className="flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <span>{message}</span>
+      <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+        Retry
+      </Button>
+    </div>
+  );
 }
 
-interface BenefitEstimate {
-  eligibilityAge: number;
-  estimatedMonthlyBenefit: number;
-  estimatedAnnualPension: number;
-  yearsOfService: number;
-  vestingPercentage: number;
-}
-
-interface PensionDocument {
-  id: string;
-  name: string;
-  category: string | null;
-  fileType: string;
-  createdAt: string;
-}
-
-interface T4aRecord {
-  id: string;
-  memberName: string;
-  taxYear: number;
-  pensionIncome: string;
-  status: string;
-  generatedDate: string | null;
+async function fetchDocuments(): Promise<PensionDocument[]> {
+  // Pension documents come from the canonical repository, which applies each document's classification policy.
+  const response = await fetch('/api/documents/repository?documentType=pension&limit=50');
+  if (!response.ok) throw new PensionServerMessage(await readApiError(response, LOAD_FAILED));
+  return readPensionRows(await response.json()).map(readPensionDocument);
 }
 
 export default function PensionMemberConsole() {
-  const organizationId = useOrganizationId();
-  const [loading, setLoading] = useState(true);
-  const [plan, setPlan] = useState<PensionPlan | null>(null);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [benefitEstimate, setBenefitEstimate] = useState<BenefitEstimate | null>(null);
-  const [documents, setDocuments] = useState<PensionDocument[]>([]);
-  const [t4aRecords, setT4aRecords] = useState<T4aRecord[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const locale = useLocale();
+  // The application's locale, never the host's: the same amount reads the same everywhere.
+  const money = (value: number) => value.toLocaleString(locale, { style: 'currency', currency: 'CAD' });
+  const [plans, setPlans] = useState<Section<PensionPlan[]>>({ state: 'loading' });
+  const [enrolments, setEnrolments] = useState<Section<PensionMember[]>>({ state: 'loading' });
+  const [documents, setDocuments] = useState<Section<PensionDocument[]>>({ state: 'loading' });
+  const [selectedEnrolmentId, setSelectedEnrolmentId] = useState<string | null>(null);
+  const [contributions, setContributions] = useState<Section<PensionContribution[]>>({ state: 'loading' });
+  const [t4aRecords, setT4aRecords] = useState<Section<T4ARecord[]>>({ state: 'loading' });
 
-  const fetchPensionData = useCallback(async () => {
-    if (!organizationId) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const plansRes = await fetch(`/api/pension/plans?organizationId=${encodeURIComponent(organizationId)}&limit=12`);
-      if (!plansRes.ok) {
-        throw new Error('Failed to fetch pension plans');
-      }
-
-      const plansData = await plansRes.json();
-      if (!plansData.data || plansData.data.length === 0) {
-        setLoading(false);
-        return;
-      }
-
-      const firstPlan = plansData.data[0];
-      const firstPlanId = firstPlan.id;
-
-      let memberPensionId: string | null = null;
-
-      const planRes = await fetch(`/api/pension/members?planId=${encodeURIComponent(firstPlanId)}`);
-      if (planRes.ok) {
-        const planData = await planRes.json();
-        if (planData.data && planData.data.length > 0) {
-          const memberRecord = planData.data[0];
-          memberPensionId = memberRecord.id;
-          // Merge plan-level fields into the member record
-          setPlan({
-            ...memberRecord,
-            planType: firstPlan.planType,
-            totalAssets: firstPlan.totalAssets,
-            fundingStatus: firstPlan.fundingStatus,
-            activeMembers: firstPlan.activeMembers,
-            status: firstPlan.status,
-            description: firstPlan.description,
-          });
-        }
-      }
-
-      // Fetch contributions scoped to this member's pension enrollment
-      if (memberPensionId) {
-        const contribRes = await fetch(`/api/pension/contributions?memberId=${encodeURIComponent(memberPensionId)}`);
-        if (contribRes.ok) {
-          const contribData = await contribRes.json();
-          if (contribData.data && contribData.data.length > 0) {
-            setContributions(contribData.data);
-          }
-        }
-      }
-
-      // Pension documents come from the canonical repository, which applies each document's classification policy.
-      const docsRes = await fetch('/api/documents/repository?documentType=pension');
-      if (docsRes.ok) {
-        const docsData = (await docsRes.json()) as {
-          data?: Array<{ id: string; title?: string | null; name?: string | null; filename?: string | null; documentType?: string | null; createdAt: string }>;
-        };
-        if (docsData.data && docsData.data.length > 0) {
-          setDocuments(
-            docsData.data.slice(0, 20).map((row) => ({
-              id: row.id,
-              name: row.title ?? row.name ?? row.filename ?? 'Document',
-              category: row.documentType ?? null,
-              fileType: row.filename?.split('.').pop() ?? 'file',
-              createdAt: row.createdAt,
-            })),
-          );
-        }
-      }
-
-      // Fetch T4A tax records scoped to this member's pension enrollment
-      if (memberPensionId) {
-        const t4aRes = await fetch(`/api/pension/t4a?memberId=${encodeURIComponent(memberPensionId)}`);
-        if (t4aRes.ok) {
-          const t4aData = await t4aRes.json();
-          if (t4aData.data && t4aData.data.length > 0) {
-            setT4aRecords(t4aData.data);
-          }
-        }
-      }
-    } catch {
-      setError('Unable to load pension information. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  }, [organizationId]);
+  const loadPlans = useCallback(
+    () => fetchPensionRows('/api/pension/plans', readPlan, LOAD_FAILED).then((value) => setPlans({ state: 'ready', value }), (error) => setPlans(failure(error))),
+    [],
+  );
+  // For a member the route answers their own enrolments only, one per plan.
+  const loadEnrolments = useCallback(
+    () =>
+      fetchPensionRows('/api/pension/members', readPensionMember, LOAD_FAILED).then(
+        (value) => setEnrolments({ state: 'ready', value }),
+        (error) => setEnrolments(failure(error)),
+      ),
+    [],
+  );
+  const loadDocuments = useCallback(
+    () => fetchDocuments().then((value) => setDocuments({ state: 'ready', value }), (error) => setDocuments(failure(error))),
+    [],
+  );
 
   useEffect(() => {
-    fetchPensionData();
-  }, [fetchPensionData]);
+    void Promise.all([loadPlans(), loadEnrolments(), loadDocuments()]);
+  }, [loadPlans, loadEnrolments, loadDocuments]);
 
-  // Compute benefit estimate from real data
+  const enrolmentRows = enrolments.state === 'ready' ? enrolments.value : null;
+  const enrolment = enrolmentRows === null ? null : (enrolmentRows.find((row) => row.id === selectedEnrolmentId) ?? enrolmentRows[0] ?? null);
+  const enrolmentId = enrolment?.id ?? null;
+
+  const loadContributions = useCallback(
+    () =>
+      enrolmentId === null
+        ? Promise.resolve()
+        : fetchPensionRows(`/api/pension/contributions?memberId=${encodeURIComponent(enrolmentId)}`, readContribution, LOAD_FAILED).then(
+            (value) => setContributions({ state: 'ready', value }),
+            (error) => setContributions(failure(error)),
+          ),
+    [enrolmentId],
+  );
+  const loadT4a = useCallback(
+    () =>
+      enrolmentId === null
+        ? Promise.resolve()
+        : fetchPensionRows(`/api/pension/t4a?memberId=${encodeURIComponent(enrolmentId)}`, readT4a, LOAD_FAILED).then(
+            (value) => setT4aRecords({ state: 'ready', value }),
+            (error) => setT4aRecords(failure(error)),
+          ),
+    [enrolmentId],
+  );
+
   useEffect(() => {
-    if (!plan) {
-      setBenefitEstimate(null);
-      return;
-    }
+    setContributions({ state: 'loading' });
+    setT4aRecords({ state: 'loading' });
+    void Promise.all([loadContributions(), loadT4a()]);
+  }, [loadContributions, loadT4a]);
 
-    const years = plan.yearsOfService || 0;
-    // Standard 5-year graded vesting: 20% per year, fully vested at 5+
-    const vestingPct = Math.min(years * 20, 100);
+  const heading = (
+    <div>
+      <h1 className="text-3xl font-bold flex items-center gap-2">
+        <Briefcase className="w-8 h-8" />
+        My Pension &amp; Benefits
+      </h1>
+    </div>
+  );
 
-    const totalContributions = contributions.reduce(
-      (sum, c) => sum + parseFloat(c.amount || '0'),
-      0,
-    );
-
-    // Estimate: use a 2% accrual factor × years × average annual contribution
-    const yearsWithContributions = Math.max(years, 1);
-    const avgAnnualContrib = totalContributions / yearsWithContributions;
-    const estimatedAnnual = years * 0.02 * avgAnnualContrib * 12 * (vestingPct / 100);
-    const estimatedMonthly = estimatedAnnual / 12;
-
-    setBenefitEstimate({
-      eligibilityAge: 65,
-      estimatedMonthlyBenefit: Math.round(estimatedMonthly * 100) / 100,
-      estimatedAnnualPension: Math.round(estimatedAnnual * 100) / 100,
-      yearsOfService: years,
-      vestingPercentage: vestingPct,
-    });
-  }, [plan, contributions]);
-
-  if (loading) {
+  if (plans.state === 'loading' || enrolments.state === 'loading') {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-100">
-          <div className="text-center">
-            <Clock className="w-12 h-12 mx-auto mb-4 animate-spin text-muted-foreground" />
-            <p className="text-muted-foreground">Loading your pension information...</p>
-          </div>
-        </div>
+        {heading}
+        <p role="status" className="text-muted-foreground">
+          Loading your pension information...
+        </p>
+      </div>
+    );
+  }
+  if (plans.state === 'failed' || enrolments.state === 'failed') {
+    return (
+      <div className="p-6 space-y-6">
+        {heading}
+        <Failed
+          message={plans.state === 'failed' ? plans.message : (enrolments as { message: string }).message}
+          onRetry={() => void Promise.all([loadPlans(), loadEnrolments()])}
+        />
       </div>
     );
   }
 
-  if (error) {
+  // The plans route sends the figures an administrator keeps (assets, funding, enrolment count) to an administrator only. An administrator is
+  // sent every enrolment of the organization, so none of them can be called "my" pension.
+  const administrator = plans.value.some((plan) => plan.activeMembers !== null || plan.totalAssets !== null);
+  if (administrator) {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-100">
-          <div className="text-center">
-            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-600" />
-            <p className="text-muted-foreground">{error}</p>
-          </div>
-        </div>
+        {heading}
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            <p>This page shows a member&apos;s own pension. Pension administrators manage every plan, enrolment and contribution from Pension Administration.</p>
+            <Button asChild variant="outline">
+              <Link href={`/${locale}/dashboard/pension/admin`}>Open Pension Administration</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (!plan) {
+  if (enrolment === null || enrolmentRows === null) {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Briefcase className="w-8 h-8" />
-              My Pension & Benefits
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Retirement planning and benefit tracking
-            </p>
-          </div>
-        </div>
-
+        {heading}
         <Card className="border-2 border-dashed bg-muted/50">
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <Briefcase className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-xl font-semibold mb-2">No Pension Plan Enrollment</h3>
-              <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                You are not currently enrolled in a pension plan. Contact your union representative
-                to learn about available retirement benefits and enrollment options.
+              <p className="text-muted-foreground max-w-md mx-auto">
+                You are not currently enrolled in a pension plan. Contact your union representative to learn about available retirement benefits and
+                enrollment options.
               </p>
-              <Button variant="outline">
-                Contact Union Office
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -253,29 +187,44 @@ export default function PensionMemberConsole() {
     );
   }
 
+  const plan = plans.value.find((row) => row.id === enrolment.planId) ?? null;
+  const contributionRows = contributions.state === 'ready' ? contributions.value : null;
+  const totalContributions = contributionRows === null ? null : contributionRows.reduce((sum, row) => sum + row.amount, 0);
+
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Briefcase className="w-8 h-8" />
-            My Pension & Benefits
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {plan.planName}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <Briefcase className="w-8 h-8" />
+          My Pension &amp; Benefits
+        </h1>
+        <p className="text-muted-foreground mt-1">{enrolment.planName}</p>
       </div>
 
-      {/* Plan Status Overview */}
+      {enrolmentRows.length > 1 && (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Your pension plans">
+          {enrolmentRows.map((row) => (
+            <Button
+              key={row.id}
+              type="button"
+              size="sm"
+              variant={row.id === enrolment.id ? 'default' : 'outline'}
+              aria-pressed={row.id === enrolment.id}
+              onClick={() => setSelectedEnrolmentId(row.id)}
+            >
+              {row.planName}
+            </Button>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Plan Type</p>
-                <p className="text-2xl font-bold">{plan.planType}</p>
+                <p className="text-2xl font-bold capitalize">{plan === null ? '—' : words(plan.planType)}</p>
               </div>
               <Briefcase className="w-8 h-8 text-blue-600" />
             </div>
@@ -287,7 +236,7 @@ export default function PensionMemberConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Years of Service</p>
-                <p className="text-2xl font-bold">{plan.yearsOfService || '0'}</p>
+                <p className="text-2xl font-bold">{enrolment.yearsOfService}</p>
               </div>
               <Calendar className="w-8 h-8 text-green-600" />
             </div>
@@ -299,9 +248,7 @@ export default function PensionMemberConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Vesting Status</p>
-                <Badge variant={plan.vestingStatus === 'fully_vested' ? 'default' : 'secondary'}>
-                  {plan.vestingStatus || 'Not Vested'}
-                </Badge>
+                <Badge variant={enrolment.vestingStatus === 'fully_vested' ? 'default' : 'secondary'}>{words(enrolment.vestingStatus)}</Badge>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
@@ -313,9 +260,7 @@ export default function PensionMemberConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Membership</p>
-                <Badge variant={plan.membershipStatus === 'active' ? 'default' : 'secondary'}>
-                  {plan.membershipStatus || 'Active'}
-                </Badge>
+                <Badge variant={enrolment.membershipStatus === 'active' ? 'default' : 'secondary'}>{words(enrolment.membershipStatus)}</Badge>
               </div>
               <CheckCircle className="w-8 h-8 text-blue-600" />
             </div>
@@ -323,7 +268,6 @@ export default function PensionMemberConsole() {
         </Card>
       </div>
 
-      {/* Tabbed Content */}
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -333,75 +277,6 @@ export default function PensionMemberConsole() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Retirement Eligibility */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Retirement Eligibility
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Normal Retirement Age</span>
-                    <span className="font-semibold">65 years</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Early Retirement Age</span>
-                    <span className="font-semibold">55 years</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Years of Service</span>
-                    <span className="font-semibold">{plan.yearsOfService || 0} years</span>
-                  </div>
-                  {plan.enrollmentDate && (
-                    <div className="flex justify-between items-center p-3 bg-muted rounded">
-                      <span className="text-sm">Enrolled Since</span>
-                      <span className="font-semibold">{new Date(plan.enrollmentDate).toLocaleDateString()}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Fund Health */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Fund Health
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Total Plan Assets</span>
-                    <span className="font-semibold">
-                      ${parseFloat(plan.totalAssets || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Funding Status</span>
-                    <span className="font-semibold">{parseFloat(plan.fundingStatus || '0')}%</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Active Members</span>
-                    <span className="font-semibold">{plan.activeMembers || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Plan Status</span>
-                    <Badge variant={plan.status === 'active' ? 'default' : 'secondary'}>
-                      {plan.status || 'active'}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Plan Information */}
           <Card>
             <CardHeader>
               <CardTitle>Plan Information</CardTitle>
@@ -410,26 +285,22 @@ export default function PensionMemberConsole() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Plan Name</p>
-                  <p className="font-medium">{plan.planName}</p>
+                  <p className="font-medium">{enrolment.planName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Plan Type</p>
-                  <p className="font-medium">{plan.planType}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Plan Status</p>
+                  <p className="font-medium capitalize">{plan === null ? '—' : words(plan.status)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Vesting Status</p>
-                  <Badge variant={plan.vestingStatus === 'fully_vested' ? 'default' : 'secondary'}>
-                    {plan.vestingStatus || 'Not Vested'}
-                  </Badge>
+                  <p className="text-sm text-muted-foreground mb-1">Enrolled Since</p>
+                  <p className="font-medium">{new Date(enrolment.enrollmentDate).toLocaleDateString(locale)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Total Contributions</p>
-                  <p className="font-medium">
-                    ${contributions.reduce((sum, c) => sum + parseFloat(c.amount || '0'), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
+                  <p className="font-medium">{totalContributions === null ? '—' : money(totalContributions)}</p>
                 </div>
               </div>
-              {plan.description && (
+              {plan?.description != null && (
                 <div className="mt-4 pt-4 border-t">
                   <p className="text-sm text-muted-foreground mb-1">Description</p>
                   <p className="text-sm">{plan.description}</p>
@@ -440,138 +311,80 @@ export default function PensionMemberConsole() {
         </TabsContent>
 
         <TabsContent value="contributions" className="space-y-4">
-          {/* Contribution Summary */}
-          {contributions.length > 0 && (
+          {contributions.state === 'loading' && (
+            <p role="status" className="text-muted-foreground">
+              Loading...
+            </p>
+          )}
+          {contributions.state === 'failed' && <Failed message={contributions.message} onRetry={() => void loadContributions()} />}
+          {contributions.state === 'ready' && contributions.value.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardContent className="pt-6">
                   <p className="text-sm text-muted-foreground">Total Contributions</p>
-                  <p className="text-2xl font-bold">
-                    ${contributions.reduce((sum, c) => sum + parseFloat(c.amount || '0'), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
+                  <p className="text-2xl font-bold">{money(totalContributions ?? 0)}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6">
                   <p className="text-sm text-muted-foreground">Contribution Periods</p>
-                  <p className="text-2xl font-bold">{contributions.length}</p>
+                  <p className="text-2xl font-bold">{contributions.value.length}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6">
                   <p className="text-sm text-muted-foreground">Latest Status</p>
-                  <Badge variant={contributions[0]?.paymentStatus === 'received' ? 'default' : 'secondary'} className="mt-1">
-                    {contributions[0]?.paymentStatus || 'N/A'}
+                  <Badge variant={contributions.value[0].paymentStatus === 'received' ? 'default' : 'secondary'} className="mt-1">
+                    {contributions.value[0].paymentStatus}
                   </Badge>
                 </CardContent>
               </Card>
             </div>
           )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5" />
-                Contribution History
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {contributions.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">
-                    No contribution history available. Contributions will appear here once processed.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {contributions.map((contrib) => (
-                    <div key={contrib.id} className="flex justify-between items-center p-3 border rounded">
-                      <div>
-                        <p className="font-medium">
-                          {contrib.period}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {contrib.memberName}
-                        </p>
+          {contributions.state === 'ready' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Contribution History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {contributions.value.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No contribution history available. Contributions will appear here once processed.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {contributions.value.map((contribution) => (
+                      <div key={contribution.id} className="flex justify-between items-center p-3 border rounded">
+                        <div>
+                          <p className="font-medium">{contribution.period}</p>
+                          <p className="text-sm text-muted-foreground">{contribution.memberName}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant={contribution.paymentStatus === 'received' ? 'default' : contribution.paymentStatus === 'overdue' ? 'destructive' : 'secondary'}
+                          >
+                            {contribution.paymentStatus}
+                          </Badge>
+                          <p className="font-semibold">{money(contribution.amount)}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant={contrib.paymentStatus === 'received' ? 'default' : contrib.paymentStatus === 'overdue' ? 'destructive' : 'secondary'}>
-                          {contrib.paymentStatus}
-                        </Badge>
-                        <p className="font-semibold">${parseFloat(contrib.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="benefits" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Retirement Benefit Estimate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="text-center p-6 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-2">Estimated Monthly Benefit at Age 65</p>
-                  <p className="text-4xl font-bold">
-                    {benefitEstimate
-                      ? `$${benefitEstimate.estimatedMonthlyBenefit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                      : '$--'}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">Based on current service and contributions</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 border rounded">
-                    <p className="text-sm text-muted-foreground mb-1">Years of Service</p>
-                    <p className="text-2xl font-bold">{benefitEstimate?.yearsOfService ?? plan.yearsOfService ?? '0'}</p>
-                  </div>
-                  <div className="text-center p-4 border rounded">
-                    <p className="text-sm text-muted-foreground mb-1">Vesting</p>
-                    <p className="text-2xl font-bold">{benefitEstimate ? `${benefitEstimate.vestingPercentage}%` : '--%'}</p>
-                  </div>
-                  <div className="text-center p-4 border rounded">
-                    <p className="text-sm text-muted-foreground mb-1">Annual Pension</p>
-                    <p className="text-2xl font-bold">
-                      {benefitEstimate
-                        ? `$${benefitEstimate.estimatedAnnualPension.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : '$--'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded">
-                  <div className="flex gap-2">
-                    <AlertCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-blue-900">Estimate Disclaimer</p>
-                      <p className="text-sm text-blue-800 mt-1">
-                        This is an estimate only. Actual benefits may vary based on final plan provisions,
-                        earnings history, and actuarial calculations. For a personalized benefit estimate,
-                        contact the pension plan administrator.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <Button className="w-full">
-                  Request Detailed Benefit Statement
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <CapabilityUnavailable locale={locale} capability="UE-FIN-PENSION-BENEFIT-ESTIMATE" />
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
-          {/* T4A Tax Records */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -580,23 +393,26 @@ export default function PensionMemberConsole() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {t4aRecords.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No T4A records available yet.
+              {t4aRecords.state === 'loading' && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  Loading...
                 </p>
-              ) : (
+              )}
+              {t4aRecords.state === 'failed' && <Failed message={t4aRecords.message} onRetry={() => void loadT4a()} />}
+              {t4aRecords.state === 'ready' && t4aRecords.value.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No T4A records available yet.</p>
+              )}
+              {t4aRecords.state === 'ready' && t4aRecords.value.length > 0 && (
                 <div className="space-y-2">
-                  {t4aRecords.map((record) => (
+                  {t4aRecords.value.map((record) => (
                     <div key={record.id} className="flex justify-between items-center p-3 border rounded">
                       <div>
                         <p className="font-medium">T4A — {record.taxYear}</p>
                         <p className="text-sm text-muted-foreground">
-                          {record.memberName} · Pension Income: ${parseFloat(record.pensionIncome).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {record.memberName} · Pension Income: {money(record.pensionIncome)}
                         </p>
                       </div>
-                      <Badge variant={record.status === 'filed' ? 'default' : 'secondary'}>
-                        {record.status}
-                      </Badge>
+                      <Badge variant={record.status === 'filed' ? 'default' : 'secondary'}>{record.status}</Badge>
                     </div>
                   ))}
                 </div>
@@ -604,7 +420,6 @@ export default function PensionMemberConsole() {
             </CardContent>
           </Card>
 
-          {/* Pension Documents */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -613,16 +428,21 @@ export default function PensionMemberConsole() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {documents.length === 0 ? (
+              {documents.state === 'loading' && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  Loading...
+                </p>
+              )}
+              {documents.state === 'failed' && <Failed message={documents.message} onRetry={() => void loadDocuments()} />}
+              {documents.state === 'ready' && documents.value.length === 0 && (
                 <div className="text-center py-8">
                   <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">
-                    No pension documents available. Documents will appear here once uploaded by your plan administrator.
-                  </p>
+                  <p className="text-muted-foreground">No pension documents available. Documents will appear here once uploaded by your plan administrator.</p>
                 </div>
-              ) : (
+              )}
+              {documents.state === 'ready' && documents.value.length > 0 && (
                 <div className="space-y-2">
-                  {documents.map((doc) => (
+                  {documents.value.map((doc) => (
                     <a
                       key={doc.id}
                       href={`/api/documents/${doc.id}/download`}
@@ -633,7 +453,7 @@ export default function PensionMemberConsole() {
                         <div>
                           <p className="font-medium">{doc.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {doc.fileType.toUpperCase()} · {new Date(doc.createdAt).toLocaleDateString()}
+                            {doc.fileType.toUpperCase()} · {new Date(doc.createdAt).toLocaleDateString(locale)}
                           </p>
                         </div>
                       </div>
@@ -642,13 +462,6 @@ export default function PensionMemberConsole() {
                   ))}
                 </div>
               )}
-
-              <div className="mt-6 p-4 bg-muted rounded">
-                <p className="text-sm text-muted-foreground">
-                  Need help? Contact the pension plan administrator at your union office
-                  or call the trust fund office for assistance with your pension benefits.
-                </p>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

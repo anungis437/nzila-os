@@ -22,6 +22,8 @@ import {
   computeStewardWorkload,
   computeWorkloadFairness,
   findPrecedents,
+  latestCaseRiskByCase,
+  listCaseRiskSnapshots,
   setUeCognitionStoreRoot,
   buildExecutiveSummary,
   recordAudit,
@@ -131,6 +133,50 @@ describe('case-risk engine', () => {
     })
     expect(['request_documentation', 'request_status_update', 'hold_steady', 'escalate_to_chief_steward'])
       .toContain(snap.recommendedAction)
+  })
+
+  it('reads back the snapshot of a case with fewer than two events instead of making the store unreadable', () => {
+    const snap = computeCaseRisk({
+      caseId: 'case-one-event',
+      caseKind: 'grievance',
+      subject: caseSubject('case-one-event'),
+      filedDate: '2025-01-01T00:00:00Z',
+      status: 'in_progress',
+      stepStage: 'step-1',
+      responseDeadline: null,
+      assignedStewardWorkloadRatio: null,
+      attachmentsCount: 0,
+      requiredDocumentCount: 0,
+      events: [event('grievance_filed', '2025-01-01T00:00:00Z')],
+      now: '2025-01-05T00:00:00Z',
+    })
+    expect(snap.trajectory.features.meanGapDays).toBe(Number.POSITIVE_INFINITY)
+
+    const stored = listCaseRiskSnapshots()
+    expect(stored).toHaveLength(1)
+    expect(stored[0].trajectory.features.meanGapDays).toBe(Number.POSITIVE_INFINITY)
+    expect(latestCaseRiskByCase('case-one-event')?.id).toBe(snap.id)
+  })
+
+  it('keeps a finite gap as it was written', () => {
+    computeCaseRisk({
+      caseId: 'case-two-events',
+      caseKind: 'grievance',
+      subject: caseSubject('case-two-events'),
+      filedDate: '2025-01-01T00:00:00Z',
+      status: 'in_progress',
+      stepStage: 'step-1',
+      responseDeadline: null,
+      assignedStewardWorkloadRatio: null,
+      attachmentsCount: 0,
+      requiredDocumentCount: 0,
+      events: [
+        event('grievance_filed', '2025-01-01T00:00:00Z'),
+        event('grievance_acknowledged', '2025-01-03T00:00:00Z'),
+      ],
+      now: '2025-01-05T00:00:00Z',
+    })
+    expect(latestCaseRiskByCase('case-two-events')?.trajectory.features.meanGapDays).toBeCloseTo(2)
   })
 })
 

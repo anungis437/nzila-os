@@ -13,7 +13,6 @@ const m = vi.hoisted(() => ({
   emitCapeAuditEvent: vi.fn(),
   buildUnionEvidencePack: vi.fn(),
   trackPilotEvent: vi.fn(),
-  recordUsage: vi.fn(),
 }));
 
 const mockDb = {
@@ -59,7 +58,6 @@ vi.mock('@/lib/audit/cape-audit-events', () => ({
 }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
-vi.mock('@/services/platform-economics', () => ({ recordUsage: m.recordUsage }));
 vi.mock('@/lib/logger', () => ({ logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 
 async function loadRoute() {
@@ -81,7 +79,6 @@ describe('grievances route', () => {
     m.auditLog.mockResolvedValue(undefined);
     m.emitCapeAuditEvent.mockResolvedValue(undefined);
     m.trackPilotEvent.mockResolvedValue(undefined);
-    m.recordUsage.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockReturnValue(Promise.resolve(undefined));
   });
 
@@ -182,7 +179,6 @@ describe('grievances route', () => {
     expect(m.hasCaseFilingCapacity).toHaveBeenCalledWith({ userId: 'user_1', organizationId: 'org_1' }, 'handler');
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'grievance.create_official_case' }));
     expect(m.trackPilotEvent).toHaveBeenCalledTimes(2);
-    expect(m.recordUsage).toHaveBeenCalled();
   });
 
   it('GET returns forbidden without handler filing capacity and reads nothing', async () => {

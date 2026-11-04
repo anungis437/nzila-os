@@ -217,10 +217,10 @@ export class CookieConsentManager {
   }
 
   /**
-   * Get cookie consent by browser ID
+   * Get cookie consent by browser ID. A visitor has no tenant session, so the caller reads it on the system connection and passes that transaction.
    */
-  static async getCookieConsent(consentId: string) {
-    const result = await db
+  static async getCookieConsent(consentId: string, tx: RLSTx = db) {
+    const result = await tx
       .select()
       .from(cookieConsents)
       .where(eq(cookieConsents.consentId, consentId))
@@ -232,8 +232,8 @@ export class CookieConsentManager {
   /**
    * Check if cookie consent is still valid
    */
-  static async isConsentValid(consentId: string): Promise<boolean> {
-    const consent = await this.getCookieConsent(consentId);
+  static async isConsentValid(consentId: string, tx: RLSTx = db): Promise<boolean> {
+    const consent = await this.getCookieConsent(consentId, tx);
     if (!consent) return false;
 
     const now = new Date();

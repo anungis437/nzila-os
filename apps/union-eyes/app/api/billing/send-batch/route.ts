@@ -24,6 +24,7 @@ const bodySchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'admin' },
     requireOrg: true,
     entitlement: 'financial_intelligence_suite',

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { LogOut } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -12,14 +13,17 @@ type MemberProfileProps = {
   organization: string;
   role: string;
   onSignOut: () => void;
+  /** Pages that really manage something of the person's own (each one a page the application serves); nothing is listed that has no page behind it. */
+  manage?: ReadonlyArray<{ href: string; title: string; description: string }>;
 };
 
 /**
- * Least-privilege profile for members: their own identity, read-only. Nothing here is editable,
+ * Least-privilege profile: the person's own identity, read-only. Nothing here is editable,
  * deletable or exportable because the profile service does not persist changes; the notice tells the
- * member who to contact instead of presenting controls that do nothing.
+ * person who to contact instead of presenting controls that do nothing. A setting that is real and has
+ * a page of its own (two-factor authentication) is linked, never imitated.
  */
-export function MemberProfile({ name, email, phone, organization, role, onSignOut }: MemberProfileProps) {
+export function MemberProfile({ name, email, phone, organization, role, onSignOut, manage }: MemberProfileProps) {
   const t = useTranslations();
   const rows: Array<[string, string]> = [
     [t('profile.fullName'), name],
@@ -44,6 +48,21 @@ export function MemberProfile({ name, email, phone, organization, role, onSignOu
             ))}
           </dl>
         </Card>
+        {manage && manage.length > 0 && (
+          <section className="mt-6" aria-labelledby="member-profile-manage">
+            <h2 id="member-profile-manage" className="mb-3 text-lg font-semibold text-gray-900">{t('memberProfile.manageTitle')}</h2>
+            <ul className="space-y-2">
+              {manage.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className="block rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50">
+                    <span className="block text-sm font-medium text-gray-900">{item.title}</span>
+                    <span className="block text-sm text-gray-600">{item.description}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <div className="mt-6">
           <Button variant="outline" onClick={onSignOut}>
             <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />

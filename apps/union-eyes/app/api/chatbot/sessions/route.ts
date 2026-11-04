@@ -17,8 +17,9 @@ const sessionManager = new ChatSessionManager();
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'member' },
-    entitlement: 'ai_chatbot',
+    entitlement: 'ai_advanced_insights',
     rateLimit: RATE_LIMITS.AI_COMPLETION,
     openapi: { tags: ['AI'], summary: 'List user chat sessions' },
   },
@@ -49,7 +50,7 @@ export const POST = withApi(
   {
     body: createBody,
     auth: { minRole: 'member' },
-    entitlement: 'ai_chatbot',
+    entitlement: 'ai_advanced_insights',
     rateLimit: RATE_LIMITS.AI_COMPLETION,
     openapi: { tags: ['AI'], summary: 'Create new chat session' },
   },

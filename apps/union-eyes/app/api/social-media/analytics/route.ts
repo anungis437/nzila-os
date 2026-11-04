@@ -6,13 +6,14 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  * Supports account analytics, post performance, campaign metrics, and exports.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { format, subDays } from 'date-fns';
 import { db } from '@/db';
-import { socialAnalytics, socialPosts, socialAccounts, socialCampaigns } from '@/db/schema/social-media-schema';
+import { socialAnalytics, socialPosts, socialAccounts, socialCampaigns, socialPlatformEnum } from '@/db/schema/social-media-schema';
 import { eq, and, gte, lte, asc, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
-import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
+import { logger } from '@/lib/logger';
 import { csvCell } from '@/lib/employer-execution/csv-cell';
 import { auditSocialAnalyticsExport } from '@/lib/social-media/export-audit';
 import {
@@ -49,21 +50,24 @@ const CAMPAIGN_EXPORT_KEYS: Record<string, string> = {
   Clicks: 'total_clicks',
 };
 
-export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+const platformFilter = z.enum(socialPlatformEnum.enumValues);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Every read of this module runs in the caller organization's tenant transaction (`rlsOrgContext`): none of them calls out of the database,
+// so the ambient `db` is that transaction and row-level security shows the organization's own analytics.
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'Social media analytics of the organization (steward-only with export=true)' },
+  },
+  async ({ request, userId, organizationId: organization, params }) => {
   // An export is a separate, steward-gated read. The normal analytics view remains member-readable.
   if (request.nextUrl.searchParams.get('export') === 'true') {
-    return exportSocialMediaAnalyticsWithAuth(request, context);
+    return exportSocialMediaAnalyticsWithAuth(request, { params });
   }
+  const organizationId = organization!;
   try {
-      const { userId, organizationId } = context;
-
-      if (!organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
       // Rate limit check
       const rateLimitResult = await checkRateLimit(
         `social-analytics-read:${userId}`,
@@ -84,7 +88,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       const endDate = searchParams.get('end_date') || format(new Date(), 'yyyy-MM-dd');
       const accountId = searchParams.get('account_id');
 
-      // The range and the account id are validated and bounded before they reach a query.
+      // The range, the platform and the account id are validated and bounded before they reach a query.
       const isDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value));
       if (!isDay(startDate) || !isDay(endDate) || startDate > endDate) {
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'start_date and end_date must be valid YYYY-MM-DD dates in order');
@@ -92,8 +96,12 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       if ((Date.parse(endDate) - Date.parse(startDate)) / 86_400_000 > 366) {
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'The date range may not exceed 366 days');
       }
-      if (accountId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(accountId)) {
+      if (accountId && !UUID.test(accountId)) {
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'account_id must be a valid id');
+      }
+      const platformChoice = platform ? platformFilter.safeParse(platform) : null;
+      if (platformChoice && !platformChoice.success) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'platform must be a supported social media platform');
       }
 
       // Build query with Drizzle
@@ -103,8 +111,8 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         lte(socialAnalytics.analyticsDate, endDate),
       ];
 
-      if (platform) {
-        analyticsConditions.push(eq(socialAccounts.platform, platform as typeof socialAccounts.platform._.data));
+      if (platformChoice?.success) {
+        analyticsConditions.push(eq(socialAccounts.platform, platformChoice.data));
       }
 
       if (accountId) {
@@ -211,37 +219,38 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         data_collected: dataCollected,
         ...(dataCollected ? {} : { message: 'Platform analytics have not been collected for this organization, so no figure is available.' }),
       });
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      logger.error('Failed to read the social media analytics', { error });
+      return NextResponse.json(
         {
           error: 'Internal server error',
         },
         { status: 500 }
       );
     }
-});
+  },
+);
 
 
 const socialMediaAnalyticsSchema = z.object({
-  platform: z.unknown().optional(),
+  platform: platformFilter.optional(),
   campaign_id: z.guid('Invalid campaign_id'),
   start_date: z.string().datetime().optional(),
   end_date: z.string().datetime().optional(),
-  limit: z.number().optional().default(50),
-  offset: z.number().optional().default(0),
+  // Bounded before they reach a query: a negative or huge page is a client error, not a database fault
+  limit: z.number().int().min(1).max(100).optional().default(50),
+  offset: z.number().int().min(0).max(10000).optional().default(0),
 });
 
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const POST = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'Performance of the published posts of a campaign' },
+  },
+  async ({ request, userId, organizationId: organization }) => {
+  const organizationId = organization!;
   try {
-      const { userId, organizationId } = context;
-
-      if (!organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
       // Rate limit check
       const rateLimitResult = await checkRateLimit(
         `social-analytics-refresh:${userId}`,
@@ -255,7 +264,12 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     );
       }
 
-      const body = await request.json();
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+      }
     // Validate request body
     const validation = socialMediaAnalyticsSchema.safeParse(body);
     if (!validation.success) {
@@ -274,13 +288,14 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       // Build query with Drizzle
       const postConditions: SQL[] = [
         eq(socialAccounts.organizationId, organizationId),
+        eq(socialPosts.organizationId, organizationId),
         eq(socialPosts.status, 'published'),
         gte(socialPosts.publishedAt, new Date(startDateStr)),
         lte(socialPosts.publishedAt, new Date(endDateStr)),
       ];
 
       if (platform) {
-        postConditions.push(eq(socialAccounts.platform, platform as typeof socialAccounts.platform._.data));
+        postConditions.push(eq(socialAccounts.platform, platform));
       }
 
       if (campaign_id) {
@@ -367,10 +382,15 @@ return NextResponse.json(
     }
 });
 
-export const PUT = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const PUT = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'Figures and timeline of a campaign' },
+  },
+  async ({ request, organizationId: organization }) => {
+  const organizationId = organization!;
   try {
-      const { _userId, organizationId } = context;
-
       // Get campaign ID from query params
       const searchParams = request.nextUrl.searchParams;
       const campaignId = searchParams.get('id');
@@ -380,6 +400,9 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       ErrorCode.MISSING_REQUIRED_FIELD,
       'Campaign ID required'
     );
+      }
+      if (!UUID.test(campaignId)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Campaign ID must be a valid id');
       }
 
       // Verify user has access to this campaign
@@ -465,28 +488,30 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         timeline: Object.values(timeline),
         top_posts: [...(posts || [])].sort((a, b) => (Number(b.engagementRate) || 0) - (Number(a.engagementRate) || 0)).slice(0, 5),
       });
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      logger.error('Failed to read the social media campaign analytics', { error });
+      return NextResponse.json(
         {
           error: 'Failed to fetch campaign analytics',
         },
         { status: 500 }
       );
     }
-});
+  },
+);
 
-// An export of the organization's posts, account figures and campaigns is a staff read.
-const exportSocialMediaAnalyticsWithAuth = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+// An export of the organization's posts, account figures and campaigns is a staff read. It is reached through GET with `export=true` (and
+// refuses anyone below steward there); it runs inside the tenant transaction GET has already opened.
+const exportSocialMediaAnalyticsWithAuth = withApi(
+  {
+    auth: { minRole: 'steward' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Social media'], summary: 'Export the social media analytics of the organization' },
+  },
+  async ({ request, userId: actor, organizationId: organization }) => {
+  const userId = actor!;
+  const organizationId = organization!;
   try {
-      const { userId, organizationId } = context;
-
-      if (!organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'No organization found'
-        );
-      }
-
       const exportLimit = await checkRateLimit(`social-analytics-export:${userId}`, RATE_LIMITS.SOCIAL_MEDIA_API);
       if (!exportLimit.allowed) {
         return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded', { resetIn: exportLimit.resetIn });
@@ -621,7 +646,7 @@ const exportSocialMediaAnalyticsWithAuth = withRoleAuth('steward', async (reques
                   sharesCount: socialPosts.sharesCount,
                 })
                 .from(socialPosts)
-                .where(eq(socialPosts.campaignId, campaign.id))
+                .where(and(eq(socialPosts.campaignId, campaign.id), eq(socialPosts.organizationId, organizationId)))
                 .limit(MAX_EXPORT_ROWS + 1);
               if (campaignPosts.length > MAX_EXPORT_ROWS) throw new Error('Campaign post export exceeds safe bound');
 
@@ -724,17 +749,25 @@ const exportSocialMediaAnalyticsWithAuth = withRoleAuth('steward', async (reques
         },
         exported_at: new Date().toISOString(),
       }, { headers: { 'Cache-Control': 'private, no-store' } });
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      logger.error('The social media analytics export failed', { error });
+      return NextResponse.json(
         {
           error: 'Export temporarily unavailable',
         },
         { status: 503 }
       );
     }
-});
+  },
+);
 
 // DELETE never performed a deletion; it formerly exported data. Refuse that misleading verb.
-export const DELETE = withRoleAuth('steward', async () =>
-  NextResponse.json({ error: 'Use GET /api/social-media/analytics?export=true' },
-    { status: 405, headers: { Allow: 'GET', 'Cache-Control': 'no-store' } }));
+export const DELETE = withApi(
+  {
+    auth: { minRole: 'steward' },
+    openapi: { tags: ['Social media'], summary: 'Refused: use GET with export=true' },
+  },
+  async () =>
+    NextResponse.json({ error: 'Use GET /api/social-media/analytics?export=true' },
+      { status: 405, headers: { Allow: 'GET', 'Cache-Control': 'no-store' } }),
+);

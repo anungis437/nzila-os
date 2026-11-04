@@ -18,6 +18,7 @@ const processSchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'admin' },
     entitlement: 'commercial_reporting',
     body: processSchema,
@@ -45,6 +46,7 @@ export const POST = withApi(
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'officer' },
     entitlement: 'commercial_reporting',
     openapi: {

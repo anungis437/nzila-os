@@ -1,53 +1,40 @@
 /**
  * Course Catalog Component
- * Browse and enroll in training courses with filters and capacity checking
- * Phase 3: Education & Training UI
+ * Browse the live training courses and enroll in one of their open sessions.
  */
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { buildEducationEnrollment, parseCourseFee, type EnrollmentSession } from '@/lib/education/enrollment-selection';
-import { readEducationCrudRows, assertEducationRegistrationCreated } from '@/lib/education/crud-response';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocale } from 'next-intl';
+import { buildEducationEnrollment } from '@/lib/education/enrollment-selection';
+import { assertEducationRegistrationCreated } from '@/lib/education/crud-response';
+import { ApiShapeError, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { fetchAllRows } from '@/lib/client/crud-lists';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { BookOpen, Clock, Users, Award, Search, Filter, CheckCircle2 } from 'lucide-react';
 import {
-  BookOpen,
-  Clock,
-  Users,
-  Award,
-  Search,
-  Filter,
-  CheckCircle2,
-} from 'lucide-react';
-
-interface Course {
-  id: string;
-  course_code: string;
-  course_name: string;
-  course_description: string;
-  course_category: string;
-  delivery_method: string;
-  course_difficulty: string;
-  duration_hours: number;
-  duration_days: number;
-  provides_certification: boolean;
-  certification_name: string;
-  clc_approved: boolean;
-  course_fee: number | null;
-  min_enrollment: number;
-  max_enrollment: number;
-}
+  formatDay,
+  humanizeCode,
+  readCourse,
+  readSession,
+  toEnrollmentSession,
+  type Course,
+  type CourseSession,
+} from './education-data';
 
 interface CourseCatalogProps {
   organizationId: string;
   memberId?: string;
 }
+
+type Catalogue = { state: 'loading' } | { state: 'error'; reason: string } | { state: 'ready'; courses: Course[] };
+type Sessions = { state: 'idle' } | { state: 'loading' } | { state: 'error'; reason: string } | { state: 'ready'; sessions: CourseSession[] };
 
 const categoryColors: Record<string, string> = {
   steward_training: 'bg-blue-600',
@@ -62,27 +49,52 @@ const categoryColors: Record<string, string> = {
   workplace_rights: 'bg-cyan-600',
 };
 
-const deliveryMethodIcons: Record<string, string> = {
-  in_person: 'ðŸ¢',
-  virtual_live: 'ðŸ’»',
-  self_paced_online: 'ðŸ“±',
-  hybrid: 'ðŸ”„',
-  webinar: 'ðŸŽ¥',
-  workshop: 'ðŸ› ï¸',
+const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+// The table holds drafts and archived courses beside the live ones, and staff read all of them; only a live course can be enrolled in.
+async function loadCourses(): Promise<Course[]> {
+  const rows = await fetchAllRows<unknown>('/api/education/courses');
+  return rows.map(readCourse).filter((course) => course.isActive);
+}
+
+// The sessions route lists every session of the organization, so the course's own are picked out here (before they are read, so another course's
+// malformed row cannot hide this course's sessions).
+async function loadSessionsOf(courseId: string): Promise<CourseSession[]> {
+  const rows = await fetchAllRows<unknown>('/api/education/sessions');
+  return rows.filter((row) => isRecord(row) && row.courseId === courseId).map(readSession);
+}
+
+function distinct(values: string[]): string[] {
+  return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+}
+
+const feeText = (fee: number | null): string => (fee === null ? 'Fee unavailable' : fee > 0 ? `$${fee.toFixed(2)}` : 'Free');
+
+const durationText = (course: Course): string | null => {
+  const parts: string[] = [];
+  if (course.durationHours !== null) parts.push(`${course.durationHours} hours`);
+  if (course.durationDays !== null) parts.push(`${course.durationDays} days`);
+  return parts.length > 0 ? parts.join(' • ') : null;
+};
+
+const capacityText = (course: Course): string | null => {
+  if (course.minEnrollment !== null && course.maxEnrollment !== null) return `${course.minEnrollment}-${course.maxEnrollment} participants`;
+  if (course.maxEnrollment !== null) return `Up to ${course.maxEnrollment} participants`;
+  if (course.minEnrollment !== null) return `At least ${course.minEnrollment} participants`;
+  return null;
 };
 
 export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
+  const locale = useLocale();
+  const [catalogue, setCatalogue] = useState<Catalogue>({ state: 'loading' });
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [enrolling, setEnrolling] = useState(false);
-  const [sessions, setSessions] = useState<EnrollmentSession[]>([]);
+  const [sessions, setSessions] = useState<Sessions>({ state: 'idle' });
   const [selectedSessionId, setSelectedSessionId] = useState('');
-  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
   const [enrollmentMessage, setEnrollmentMessage] = useState<string | null>(null);
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
-  const catalogueRequest = useRef<AbortController | null>(null);
+  const catalogueRequest = useRef(0);
+  const sessionsRequest = useRef(0);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,171 +103,148 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const [clcApprovedOnly, setClcApprovedOnly] = useState(false);
 
-  const fetchCourses = useCallback(async () => {
-    catalogueRequest.current?.abort();
-    const controller = new AbortController();
-    catalogueRequest.current = controller;
-    setCourses([]);
-    setSelectedCourse(null);
-    try {
-      setLoading(true);
-      const response = await fetch('/api/education/courses', { signal: controller.signal, cache: 'no-store' });
-      
-      if (!response.ok) throw new Error('Failed to fetch courses');
-      
-      const data = await response.json();
-      if (controller.signal.aborted) return;
-      setCourses(readEducationCrudRows(data).map((c: Record<string, unknown>) => ({
-        id: String(c.id ?? ''),
-        course_code: String(c.courseCode ?? c.course_code ?? ''),
-        course_name: String(c.courseName ?? c.course_name ?? 'Course details unavailable'),
-        course_description: String(c.courseDescription ?? c.course_description ?? ''),
-        course_category: String(c.courseCategory ?? c.course_category ?? 'other'),
-        delivery_method: String(c.deliveryMethod ?? c.delivery_method ?? 'unknown'),
-        course_difficulty: String(c.courseDifficulty ?? c.course_difficulty ?? 'all_levels'),
-        duration_hours: Number(c.durationHours ?? c.duration_hours ?? 0),
-        duration_days: Number(c.durationDays ?? c.duration_days ?? 0),
-        provides_certification: c.providesCertification === true || c.provides_certification === true,
-        certification_name: String(c.certificationName ?? c.certification_name ?? ''),
-        clc_approved: c.clcApproved === true || c.clc_approved === true,
-        course_fee: parseCourseFee(c.courseFee ?? c.course_fee),
-        min_enrollment: Number(c.minEnrollment ?? c.min_enrollment ?? 0),
-        max_enrollment: Number(c.maxEnrollment ?? c.max_enrollment ?? 0),
-      })));
-    } catch (_error) {
-      if (!controller.signal.aborted) {
-        setEnrollmentError('Course catalogue could not be loaded. Please retry.');
-        setCourses([]);
-      }
-    } finally {
-      if (!controller.signal.aborted) setLoading(false);
-    }
-  }, [organizationId]);
-
-  const applyFilters = useCallback(() => {
-    let filtered = [...courses];
-
-    // Search
-    if (searchTerm) {
-      filtered = filtered.filter(course =>
-        course.course_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.course_description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Category
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(course => course.course_category === categoryFilter);
-    }
-
-    // Delivery
-    if (deliveryFilter !== 'all') {
-      filtered = filtered.filter(course => course.delivery_method === deliveryFilter);
-    }
-
-    // Difficulty
-    if (difficultyFilter !== 'all') {
-      filtered = filtered.filter(course => course.course_difficulty === difficultyFilter);
-    }
-
-    // CLC Approved
-    if (clcApprovedOnly) {
-      filtered = filtered.filter(course => course.clc_approved);
-    }
-
-    setFilteredCourses(filtered);
-  }, [courses, searchTerm, categoryFilter, deliveryFilter, difficultyFilter, clcApprovedOnly]);
+  // The latest request wins: a slow answer to an earlier request (or to another organization) is never shown.
+  const loadCatalogue = useCallback(() => {
+    const request = ++catalogueRequest.current;
+    loadCourses().then(
+      (courses) => {
+        if (request === catalogueRequest.current) setCatalogue({ state: 'ready', courses });
+      },
+      (error: unknown) => {
+        if (request === catalogueRequest.current) setCatalogue({ state: 'error', reason: reasonOf(error) });
+      },
+    );
+  }, []);
 
   useEffect(() => {
-    fetchCourses();
-    return () => { catalogueRequest.current?.abort(); };
-  }, [fetchCourses]);
+    loadCatalogue();
+    return () => {
+      catalogueRequest.current += 1;
+    };
+  }, [organizationId, loadCatalogue]);
 
-  useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
-
-  useEffect(() => {
-    if (!selectedCourse) {
-      setSessions([]);
-      setSelectedSessionId('');
-      return;
-    }
-    let cancelled = false;
-    setSessionsLoading(true);
-    setEnrollmentError(null);
+  const openCourse = (course: Course) => {
+    const request = ++sessionsRequest.current;
+    setSelectedCourse(course);
     setSelectedSessionId('');
-    fetch('/api/education/sessions', { cache: 'no-store' })
-      .then(async response => {
-        if (!response.ok) throw new Error('Session list unavailable');
-        const body = await response.json();
-        const scoped: EnrollmentSession[] = readEducationCrudRows(body)
-          .filter((row: Record<string, unknown>) =>
-            (row.courseId ?? row.course_id) === selectedCourse.id)
-          .map((row: Record<string, unknown>) => ({
-            id: String(row.id ?? ''),
-            courseId: String(row.courseId ?? row.course_id ?? ''),
-            sessionStatus: String(row.sessionStatus ?? row.session_status ?? ''),
-            startDate: typeof (row.startDate ?? row.start_date) === 'string' ? String(row.startDate ?? row.start_date) : null,
-            endDate: typeof (row.endDate ?? row.end_date) === 'string' ? String(row.endDate ?? row.end_date) : null,
-            registrationOpenDate: typeof (row.registrationOpenDate ?? row.registration_open_date) === 'string' ? String(row.registrationOpenDate ?? row.registration_open_date) : null,
-            registrationCloseDate: typeof (row.registrationCloseDate ?? row.registration_close_date) === 'string' ? String(row.registrationCloseDate ?? row.registration_close_date) : null,
-            maxEnrollment: row.maxEnrollment == null && row.max_enrollment == null ? null : Number(row.maxEnrollment ?? row.max_enrollment),
-            registrationCount: row.registrationCount == null && row.registration_count == null ? null : Number(row.registrationCount ?? row.registration_count),
-          }));
-        if (!cancelled) setSessions(scoped);
-      })
-      .catch(() => { if (!cancelled) setEnrollmentError('Sessions could not be loaded. Enrollment is unavailable.'); })
-      .finally(() => { if (!cancelled) setSessionsLoading(false); });
-    return () => { cancelled = true; };
-  }, [selectedCourse]);
+    setEnrollmentError(null);
+    setEnrollmentMessage(null);
+    setSessions({ state: 'loading' });
+    loadSessionsOf(course.id).then(
+      (rows) => {
+        if (request === sessionsRequest.current) setSessions({ state: 'ready', sessions: rows });
+      },
+      (error: unknown) => {
+        if (request === sessionsRequest.current) setSessions({ state: 'error', reason: reasonOf(error) });
+      },
+    );
+  };
 
-  const handleEnroll = async () => {
-    if (!memberId || !selectedCourse) {
-      setEnrollmentError('Sign in and select a course before enrolling.');
-      return;
-    }
+  const closeCourse = () => {
+    sessionsRequest.current += 1;
+    setSelectedCourse(null);
+    setSessions({ state: 'idle' });
+  };
+
+  const refresh = () => {
+    setCatalogue({ state: 'loading' });
+    closeCourse();
+    setEnrollmentMessage(null);
+    loadCatalogue();
+  };
+
+  const courses = catalogue.state === 'ready' ? catalogue.courses : [];
+  const filteredCourses = courses.filter((course) => {
+    const term = searchTerm.trim().toLowerCase();
+    if (term && !course.name.toLowerCase().includes(term) && !(course.description ?? '').toLowerCase().includes(term)) return false;
+    if (categoryFilter !== 'all' && course.category !== categoryFilter) return false;
+    if (deliveryFilter !== 'all' && course.deliveryMethod !== deliveryFilter) return false;
+    if (difficultyFilter !== 'all' && course.difficulty !== difficultyFilter) return false;
+    if (clcApprovedOnly && !course.clcApproved) return false;
+    return true;
+  });
+
+  // Only sessions the enrollment guard accepts (scheduled, registration window open, not full) are offered.
+  const allSessions = sessions.state === 'ready' ? sessions.sessions.map(toEnrollmentSession) : [];
+  const openSessions = sessions.state === 'ready' && selectedCourse
+    ? sessions.sessions.filter((session) => {
+        try {
+          buildEducationEnrollment(selectedCourse.id, session.id, allSessions);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+    : [];
+
+  const sessionLabel = (session: CourseSession) => {
+    const dates = session.startDate === session.endDate
+      ? formatDay(session.startDate, locale)
+      : `${formatDay(session.startDate, locale)} – ${formatDay(session.endDate, locale)}`;
+    return `${session.name ?? session.code} · ${dates}`;
+  };
+
+  const enroll = async () => {
+    if (!memberId || !selectedCourse) return;
+    setEnrolling(true);
+    setEnrollmentError(null);
     try {
-      setEnrolling(true);
-      setEnrollmentError(null);
-      const payload = buildEducationEnrollment(selectedCourse.id, selectedSessionId, sessions);
+      const payload = buildEducationEnrollment(selectedCourse.id, selectedSessionId, allSessions);
       const response = await fetch('/api/education/registrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error('Registration was refused');
+      if (!response.ok) throw new Error(await readApiError(response, `Registration was refused (status ${response.status})`));
+      const result: unknown = await response.json().catch(() => {
+        throw new ApiShapeError('the answer is not JSON');
+      });
       assertEducationRegistrationCreated(result, payload.courseId, payload.sessionId);
       setEnrollmentMessage('Registration submitted. Check My Courses for its current status.');
-      setSelectedCourse(null);
-    } catch {
-      setEnrollmentError('Registration could not be completed. Check the selected session or contact your union.');
+      closeCourse();
+    } catch (error) {
+      setEnrollmentError(`Registration could not be completed: ${reasonOf(error)}`);
     } finally {
       setEnrolling(false);
     }
   };
 
-  if (loading) {
+  if (catalogue.state === 'loading') {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-8" role="status" aria-busy="true">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
+
+  if (catalogue.state === 'error') {
+    return (
+      <div role="alert" className="space-y-3 rounded-lg border border-destructive/40 p-4 text-sm">
+        <p className="font-medium text-destructive">The course catalogue could not be loaded.</p>
+        <p className="text-muted-foreground">{catalogue.reason}</p>
+        <Button onClick={refresh}>Try again</Button>
+      </div>
+    );
+  }
+
+  const categories = distinct(courses.map((course) => course.category));
+  const deliveryMethods = distinct(courses.map((course) => course.deliveryMethod));
+  const difficulties = distinct(courses.flatMap((course) => (course.difficulty === null ? [] : [course.difficulty])));
+  const selectClass = 'w-full rounded-md border bg-background p-2 text-sm';
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Course Catalog</h2>
-          <p className="text-muted-foreground">{filteredCourses.length} courses available</p>
+          <p className="text-muted-foreground">
+            {filteredCourses.length === courses.length ? `${courses.length} courses` : `${filteredCourses.length} of ${courses.length} courses`}
+          </p>
         </div>
-        <Button onClick={fetchCourses}>Refresh</Button>
+        <Button onClick={refresh}>Refresh</Button>
       </div>
 
       {enrollmentMessage && <p role="status" className="text-sm text-green-700">{enrollmentMessage}</p>}
-      {enrollmentError && !selectedCourse && <p role="alert" className="text-sm text-destructive">{enrollmentError}</p>}
 
       {/* Filters */}
       <Card>
@@ -283,56 +272,38 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="steward_training">Steward Training</SelectItem>
-                  <SelectItem value="leadership_development">Leadership</SelectItem>
-                  <SelectItem value="health_and_safety">Health & Safety</SelectItem>
-                  <SelectItem value="collective_bargaining">Bargaining</SelectItem>
-                  <SelectItem value="grievance_handling">Grievance</SelectItem>
-                  <SelectItem value="labor_law">Labor Law</SelectItem>
-                </SelectContent>
-              </Select>
+              <select id="category" className={selectClass} value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+                <option value="all">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>{humanizeCode(category)}</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="delivery">Delivery Method</Label>
-              <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Methods</SelectItem>
-                  <SelectItem value="in_person">In Person</SelectItem>
-                  <SelectItem value="virtual_live">Virtual Live</SelectItem>
-                  <SelectItem value="self_paced_online">Self-Paced</SelectItem>
-                  <SelectItem value="hybrid">Hybrid</SelectItem>
-                </SelectContent>
-              </Select>
+              <select id="delivery" className={selectClass} value={deliveryFilter} onChange={(e) => setDeliveryFilter(e.target.value)}>
+                <option value="all">All Methods</option>
+                {deliveryMethods.map((method) => (
+                  <option key={method} value={method}>{humanizeCode(method)}</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="difficulty">Difficulty</Label>
-              <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
+              <select id="difficulty" className={selectClass} value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value)}>
+                <option value="all">All Levels</option>
+                {difficulties.map((difficulty) => (
+                  <option key={difficulty} value={difficulty}>{humanizeCode(difficulty)}</option>
+                ))}
+              </select>
             </div>
 
             <div className="flex items-end">
               <Button
-                variant={clcApprovedOnly ? "default" : "outline"}
+                variant={clcApprovedOnly ? 'default' : 'outline'}
+                aria-pressed={clcApprovedOnly}
                 onClick={() => setClcApprovedOnly(!clcApprovedOnly)}
                 className="w-full"
               >
@@ -347,45 +318,58 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
       {/* Course Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredCourses.map((course) => (
-          <Card key={course.id} className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => setSelectedCourse(course)}>
+          <Card
+            key={course.id}
+            role="button"
+            tabIndex={0}
+            aria-label={`${course.name}, details`}
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => openCourse(course)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openCourse(course);
+              }
+            }}
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">{deliveryMethodIcons[course.delivery_method]}</span>
-                    {course.clc_approved && (
+                    <Badge variant="secondary" className="text-xs">{humanizeCode(course.deliveryMethod)}</Badge>
+                    {course.clcApproved && (
                       <Badge variant="outline" className="text-xs">CLC Approved</Badge>
                     )}
                   </div>
-                  <CardTitle className="text-lg">{course.course_name}</CardTitle>
-                  <CardDescription className="text-xs">{course.course_code}</CardDescription>
+                  <CardTitle className="text-lg">{course.name}</CardTitle>
+                  <CardDescription className="text-xs">{course.code}</CardDescription>
                 </div>
-                <Badge className={categoryColors[course.course_category] || 'bg-gray-600'}>
-                  {course.course_category.replace(/_/g, ' ')}
+                <Badge className={categoryColors[course.category] || 'bg-gray-600'}>
+                  {humanizeCode(course.category)}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {course.course_description}
-              </p>
+              {course.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+              )}
 
               <div className="space-y-2">
-                {course.duration_hours && (
+                {durationText(course) !== null && (
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="h-4 w-4 mr-2" />
-                    {course.duration_hours} hours
-                    {course.duration_days && ` â€¢ ${course.duration_days} days`}
+                    {durationText(course)}
                   </div>
                 )}
 
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Users className="h-4 w-4 mr-2" />
-                  {course.min_enrollment}-{course.max_enrollment} participants
-                </div>
+                {capacityText(course) !== null && (
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 mr-2" />
+                    {capacityText(course)}
+                  </div>
+                )}
 
-                {course.provides_certification && (
+                {course.providesCertification && (
                   <div className="flex items-center text-sm text-green-600">
                     <Award className="h-4 w-4 mr-2" />
                     Provides certification
@@ -395,15 +379,11 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
 
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="text-sm">
-                  <Badge variant="outline">{course.course_difficulty}</Badge>
+                  {course.difficulty !== null && <Badge variant="outline">{humanizeCode(course.difficulty)}</Badge>}
                 </div>
-                {course.course_fee === null ? (
-                  <div className="text-sm text-muted-foreground">Fee unavailable</div>
-                ) : course.course_fee > 0 ? (
-                  <div className="text-sm font-medium">${course.course_fee}</div>
-                ) : (
-                  <div className="text-sm text-green-600 font-medium">Free</div>
-                )}
+                <div className={course.fee === 0 ? 'text-sm text-green-600 font-medium' : course.fee === null ? 'text-sm text-muted-foreground' : 'text-sm font-medium'}>
+                  {feeText(course.fee)}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -411,75 +391,66 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
       </div>
 
       {/* Course Details Modal */}
-      <Dialog open={selectedCourse !== null} onOpenChange={() => setSelectedCourse(null)}>
+      <Dialog open={selectedCourse !== null} onOpenChange={(open) => { if (!open) closeCourse(); }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           {selectedCourse && (
             <>
               <DialogHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <DialogTitle className="text-2xl">{selectedCourse.course_name}</DialogTitle>
+                    <DialogTitle className="text-2xl">{selectedCourse.name}</DialogTitle>
                     <DialogDescription className="mt-2">
-                      {selectedCourse.course_code} â€¢ {selectedCourse.delivery_method.replace(/_/g, ' ')}
+                      {selectedCourse.code} • {humanizeCode(selectedCourse.deliveryMethod)}
                     </DialogDescription>
                   </div>
-                  <Badge className={categoryColors[selectedCourse.course_category] || 'bg-gray-600'}>
-                    {selectedCourse.course_category.replace(/_/g, ' ')}
+                  <Badge className={categoryColors[selectedCourse.category] || 'bg-gray-600'}>
+                    {humanizeCode(selectedCourse.category)}
                   </Badge>
                 </div>
               </DialogHeader>
 
               <div className="space-y-6">
-                {/* Course Info */}
-                <div>
-                  <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-sm text-muted-foreground">{selectedCourse.course_description}</p>
-                </div>
-
-                {/* Course Details */}
-                <div className="grid grid-cols-2 gap-4">
+                {selectedCourse.description && (
                   <div>
-                    <h4 className="text-sm font-medium mb-2">Duration</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedCourse.duration_hours} hours
-                      {selectedCourse.duration_days && ` (${selectedCourse.duration_days} days)`}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Difficulty</h4>
-                    <Badge variant="outline">{selectedCourse.course_difficulty}</Badge>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Capacity</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedCourse.min_enrollment}-{selectedCourse.max_enrollment} participants
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Cost</h4>
-                    <p className="text-sm font-semibold">
-                      {selectedCourse.course_fee === null ? 'Fee unavailable' : selectedCourse.course_fee > 0 ? `${selectedCourse.course_fee}` : 'Free'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Certification */}
-                {selectedCourse.provides_certification && (
-                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Award className="h-5 w-5 text-green-600" />
-                      <h4 className="font-semibold text-green-900 dark:text-green-100">
-                        Certification Provided
-                      </h4>
-                    </div>
-                    <p className="text-sm text-green-800 dark:text-green-200">
-                      {selectedCourse.certification_name}
-                    </p>
+                    <h3 className="font-semibold mb-2">Description</h3>
+                    <p className="text-sm text-muted-foreground">{selectedCourse.description}</p>
                   </div>
                 )}
 
-                {/* CLC Approval */}
-                {selectedCourse.clc_approved && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Duration</h4>
+                    <p className="text-sm text-muted-foreground">{durationText(selectedCourse) ?? 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Difficulty</h4>
+                    {selectedCourse.difficulty !== null
+                      ? <Badge variant="outline">{humanizeCode(selectedCourse.difficulty)}</Badge>
+                      : <p className="text-sm text-muted-foreground">Not recorded</p>}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Capacity</h4>
+                    <p className="text-sm text-muted-foreground">{capacityText(selectedCourse) ?? 'Not recorded'}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Cost</h4>
+                    <p className="text-sm font-semibold">{feeText(selectedCourse.fee)}</p>
+                  </div>
+                </div>
+
+                {selectedCourse.providesCertification && (
+                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Award className="h-5 w-5 text-green-600" />
+                      <h4 className="font-semibold text-green-900 dark:text-green-100">Certification Provided</h4>
+                    </div>
+                    {selectedCourse.certificationName && (
+                      <p className="text-sm text-green-800 dark:text-green-200">{selectedCourse.certificationName}</p>
+                    )}
+                  </div>
+                )}
+
+                {selectedCourse.clcApproved && (
                   <div className="flex items-center gap-2 text-sm text-blue-600">
                     <CheckCircle2 className="h-4 w-4" />
                     <span>This course is approved by the Canadian Labour Congress</span>
@@ -489,33 +460,40 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
                 {/* Enroll against a real course session, never the course ID. */}
                 <div className="space-y-2">
                   <Label htmlFor="education-session">Available session</Label>
-                  <select id="education-session" className="w-full rounded-md border bg-background p-2 text-sm"
-                    value={selectedSessionId} onChange={event => setSelectedSessionId(event.target.value)}
-                    disabled={sessionsLoading || enrolling}>
+                  <select
+                    id="education-session"
+                    className={selectClass}
+                    value={selectedSessionId}
+                    onChange={(event) => setSelectedSessionId(event.target.value)}
+                    disabled={sessions.state !== 'ready' || enrolling}
+                  >
                     <option value="">Select a session</option>
-                    {sessions.filter(session => {
-                      try { buildEducationEnrollment(selectedCourse.id, session.id, sessions); return true; }
-                      catch { return false; }
-                    }).map(session => (
-                      <option key={session.id} value={session.id}>
-                        {session.startDate ?? 'Date to be confirmed'} — {session.id}
-                      </option>
+                    {openSessions.map((session) => (
+                      <option key={session.id} value={session.id}>{sessionLabel(session)}</option>
                     ))}
                   </select>
-                  {sessionsLoading && <p className="text-sm text-muted-foreground">Loading available sessions…</p>}
-                  {!sessionsLoading && sessions.length === 0 && <p className="text-sm text-muted-foreground">No available sessions are listed. Contact your union for scheduling.</p>}
-                  {selectedCourse.course_fee === null && <p className="text-sm text-muted-foreground">Course fee is unavailable; enrollment is paused until it can be confirmed.</p>}
+                  {sessions.state === 'loading' && <p className="text-sm text-muted-foreground">Loading available sessions…</p>}
+                  {sessions.state === 'error' && (
+                    <p role="alert" className="text-sm text-destructive">
+                      Sessions could not be loaded, so enrollment is unavailable. {sessions.reason}
+                    </p>
+                  )}
+                  {sessions.state === 'ready' && openSessions.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No session of this course is open for registration. Contact your union for scheduling.</p>
+                  )}
+                  {selectedCourse.fee === null && <p className="text-sm text-muted-foreground">Course fee is unavailable; enrollment is paused until it can be confirmed.</p>}
+                  {!memberId && <p className="text-sm text-muted-foreground">Sign in to enroll.</p>}
                   {enrollmentError && <p role="alert" className="text-sm text-destructive">{enrollmentError}</p>}
                 </div>
                 <div className="flex gap-2 pt-4 border-t">
                   <Button
-                    onClick={handleEnroll}
+                    onClick={enroll}
                     className="flex-1"
-                    disabled={enrolling || sessionsLoading || !memberId || !selectedSessionId || selectedCourse.course_fee === null}
+                    disabled={enrolling || sessions.state !== 'ready' || !memberId || !selectedSessionId || selectedCourse.fee === null}
                   >
                     {enrolling ? 'Submitting registration…' : 'Enroll in selected session'}
                   </Button>
-                  <Button variant="outline" onClick={() => setSelectedCourse(null)}>
+                  <Button variant="outline" onClick={closeCourse}>
                     Close
                   </Button>
                 </div>
@@ -529,8 +507,17 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium">No courses found</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+            {courses.length === 0 ? (
+              <>
+                <p className="text-lg font-medium">No courses are listed</p>
+                <p className="text-sm text-muted-foreground">Your union has not published any course yet.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-medium">No courses found</p>
+                <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
@@ -539,4 +526,3 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
 }
 
 export default CourseCatalog;
-

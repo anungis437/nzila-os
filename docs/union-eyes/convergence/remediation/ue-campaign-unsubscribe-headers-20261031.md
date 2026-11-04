@@ -2,6 +2,8 @@
 
 **Disposition:** Engineering source and regression tests committed, qualification pending, NOT CLOSED or GO.
 
+**Superseded in part (2026-11-03):** the `CampaignService` this note describes had no caller anywhere in the application and was deleted together with its tests (and the SMS sender beside it). No campaign email is sent in this release (sending is `UE-ACTION-CAMPAIGN-SEND`, NOT_IMPLEMENTED), so nothing live attaches a List-Unsubscribe header to a campaign message, and no claim below about outbound campaign headers describes the running system. The one-click unsubscribe route (`app/api/communications/unsubscribe/[recipientId]/route.ts`) is unchanged and still verifies a signed link; the SendGrid header forwarding in `email-service.ts` and its test remain. The note is kept as the record of what was built.
+
 **Existing frozen defects:** DEF-0B5-UNSUBSCRIBE-NO-CONSENT-RECORD-WITHOUT-CAMPAIGN and related communications unsubscribe family. No additional defect-count credit is claimed.
 
 CampaignService now creates an action-bound HMAC token for each campaign/recipient pair, builds the unsubscribe URL from the Union Eyes app topology, and sends both RFC 8058 List-Unsubscribe and List-Unsubscribe-Post headers. A missing signing key or recipient/campaign binding refuses the email rather than falsely treating a non-unsubscribable campaign as sent. The Resend adapter already forwarded message headers; the SendGrid adapter now forwards them too. The companion route accepts direct one-click POST and keeps scanner GET read-only.

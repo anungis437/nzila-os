@@ -18,6 +18,7 @@ const state = vi.hoisted(() => ({
   selects: {} as Record<string, unknown>,
   inserts: {} as Record<string, unknown>,
   updates: {} as Record<string, unknown>,
+  scopes: [] as Array<{ organizationId: string }>,
 }));
 
 const dbMock = vi.hoisted(() => {
@@ -61,7 +62,13 @@ const dbMock = vi.hoisted(() => {
   return { ...makeBuilder(), transaction: async (cb: (tx: unknown) => unknown) => cb(makeBuilder()) };
 });
 
-vi.mock('@/db', () => ({ db: dbMock }));
+// Every step of the service runs in the tenant transaction of the organization it names: the table-aware fake database is that transaction.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (scope: { organizationId: string }, run: (tx: unknown) => Promise<unknown>) => {
+    state.scopes.push(scope);
+    return run(dbMock);
+  },
+}));
 
 vi.mock('@/db/schema/social-media-schema', () => {
   const t = (name: string) => new Proxy({ __name: name }, { get: (o: any, k) => (k in o ? o[k] : { __col: String(k) }) });
@@ -72,7 +79,8 @@ vi.mock('@/db/schema/social-media-schema', () => {
   };
 });
 
-vi.mock('drizzle-orm', () => ({
+vi.mock('drizzle-orm', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('drizzle-orm')>()),
   eq: (...a: unknown[]) => ({ __op: 'eq', a }),
   and: (...a: unknown[]) => ({ __op: 'and', a }),
   inArray: (...a: unknown[]) => ({ __op: 'inArray', a }),
@@ -118,6 +126,7 @@ beforeEach(() => {
   state.selects = {};
   state.inserts = {};
   state.updates = {};
+  state.scopes = [];
 
   clients.meta = {
     publishFacebookPost: vi.fn().mockResolvedValue({ id: 'fb-post-1', permalink_url: 'https://fb/p/1' }),
@@ -189,11 +198,11 @@ describe('refreshAccessToken', () => {
     await expect(svc.refreshAccessToken('acct-1', 'org-1')).rejects.toThrow(/No refresh token/);
   });
 
-  it('refreshes a LinkedIn token using the refresh token', async () => {
-    state.selects.socialAccounts = [account({ platform: 'linkedin' })];
+  it('refreshes a LinkedIn token with the refresh token opened, not the sealed value it is stored as', async () => {
+    state.selects.socialAccounts = [account({ platform: 'linkedin', accessToken: 'enc:v1:sealed(access-plain)', refreshToken: 'enc:v1:sealed(refresh-plain)' })];
     const svc = new SocialMediaService();
     await svc.refreshAccessToken('acct-1', 'org-1');
-    expect(clients.linkedin.refreshAccessToken).toHaveBeenCalled();
+    expect(clients.linkedin.refreshAccessToken).toHaveBeenCalledWith('refresh-plain');
   });
 
   it('marks the account expired and rethrows when refresh fails', async () => {
@@ -503,5 +512,20 @@ describe('publishPost options', () => {
     } finally {
       (dbMock as any).insert = original;
     }
+  });
+});
+
+// The service calls the platforms between its database steps, so each step opens the tenant transaction of the organization it was asked about.
+describe('tenant context', () => {
+  it('runs every database step of a token refresh, a publish and a deletion in the context of the organization it names', async () => {
+    const svc = new SocialMediaService();
+
+    state.selects.socialAccounts = [account({ platform: 'facebook' })];
+    await svc.refreshAccessToken('acct-1', 'org-1');
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    await svc.publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1', { accountIds: ['acct-1'] });
+
+    expect(state.scopes.length).toBeGreaterThanOrEqual(4);
+    expect(state.scopes.every((scope) => scope.organizationId === 'org-1')).toBe(true);
   });
 });

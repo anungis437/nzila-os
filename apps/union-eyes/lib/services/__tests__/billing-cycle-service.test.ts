@@ -5,27 +5,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { mockSelect, mockWithRLS, mockCalcEngine, mockRequireMandate } = vi.hoisted(() => ({
+const { mockSelect, mockWithRLS, mockCalculate, mockRequireMandate } = vi.hoisted(() => ({
   mockSelect: vi.fn(),
   mockWithRLS: vi.fn(),
   mockRequireMandate: vi.fn(),
-  mockCalcEngine: {
-    calculateMemberDues: vi.fn(() => ({
-      baseDues: 50,
-      copeAllocation: 5,
-      pacAllocation: 2,
-      strikeFundAllocation: 3,
-      totalDues: 60,
-    })),
-  },
+  mockCalculate: vi.fn(),
 }));
 
 vi.mock('@/db/schema-organizations', () => ({
   organizationMembers: {},
-}));
-
-vi.mock('@/db/schema/domains/member/member-employment', () => ({
-  memberEmployment: {},
 }));
 
 vi.mock('@/db/schema/domains/finance/dues', () => ({
@@ -42,7 +30,7 @@ vi.mock('drizzle-orm/node-postgres', () => ({
 }));
 
 vi.mock('@/lib/dues-calculation-engine', () => ({
-  DuesCalculationEngine: vi.fn(() => mockCalcEngine),
+  DuesCalculationEngine: { calculateMemberDues: mockCalculate },
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -103,7 +91,7 @@ describe('BillingCycleService', () => {
       boundTx = {
         select: () => {
           order.push('read-members');
-          return { from: () => ({ leftJoin: () => ({ where: async () => [] }) }) };
+          return { from: () => ({ where: async () => [] }) };
         },
       };
       return callback(boundTx);
@@ -172,11 +160,127 @@ describe('BillingCycleService', () => {
     expect(params.dryRun).toBe(true);
   });
 
-  it('calculation engine computes per-member dues', () => {
-    const result = mockCalcEngine.calculateMemberDues();
-    expect(result.baseDues).toBe(50);
-    expect(result.copeAllocation).toBe(5);
-    expect(result.totalDues).toBe(60);
+  describe('generation of the charges of a cycle', () => {
+    const ORG = '11111111-1111-4111-8111-111111111111';
+    const MEMBER = '33333333-3333-4333-8333-333333333333';
+    const OTHER = '44444444-4444-4444-8444-444444444444';
+    const cycle = {
+      organizationId: ORG,
+      periodStart: new Date('2026-03-01T00:00:00.000Z'),
+      periodEnd: new Date('2026-03-31T23:59:59.999Z'),
+      frequency: 'monthly' as const,
+      executedBy: 'user-1',
+    };
+    const calculation = (assignmentId: string, amount = 100) => ({
+      amount,
+      calculationType: 'assignment',
+      assignmentId,
+      frequency: 'monthly',
+      dueDate: new Date('2026-04-15T00:00:00.000Z'),
+    });
+
+    // The cycle's transaction: members first, then the members already charged for the period; inserts are recorded
+    const fakeTx = (members: unknown[], billed: unknown[] = []) => {
+      const inserts: Array<Record<string, unknown>> = [];
+      let reads = 0;
+      const tx = {
+        select: vi.fn(() => ({ from: () => ({ where: async () => (reads++ === 0 ? members : billed) }) })),
+        insert: vi.fn(() => ({
+          values: (values: Record<string, unknown>) => {
+            inserts.push(values);
+            return { returning: async () => [{ id: `txn-${inserts.length}` }] };
+          },
+        })),
+      };
+      mockWithRLS.mockImplementationOnce(async (_scope, callback) => callback(tx));
+      return { tx, inserts };
+    };
+    const member = (id: string, extra: Record<string, unknown> = {}) => ({ id, userId: `user-${id}`, status: 'active', joinedAt: null, membershipNumber: null, ...extra });
+
+    it("charges each active member the amount of their dues assignment, on the assignment, in the cycle's own transaction", async () => {
+      const { tx, inserts } = fakeTx([member(MEMBER)]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-1'));
+
+      const result = await BillingCycleService.generateBillingCycle(cycle);
+
+      expect(mockCalculate).toHaveBeenCalledWith(
+        { organizationId: ORG, memberId: MEMBER, periodStart: cycle.periodStart, periodEnd: cycle.periodEnd, frequency: 'monthly' },
+        tx,
+      );
+      expect(inserts).toHaveLength(1);
+      expect(inserts[0]).toMatchObject({
+        organizationId: ORG,
+        memberId: MEMBER,
+        assignmentId: 'assignment-1',
+        transactionType: 'charge',
+        status: 'pending',
+        amount: '100',
+        totalAmount: '100',
+        periodStart: '2026-03-01',
+        periodEnd: '2026-03-31',
+        dueDate: '2026-04-15',
+        duesAmount: '85',
+        copeAmount: '10',
+        pacAmount: '3',
+        strikeFundAmount: '2',
+        metadata: { calculationType: 'assignment', assignmentId: 'assignment-1', isProRated: false },
+      });
+      expect(result).toMatchObject({ success: true, transactionsCreated: 1, totalAmount: 100 });
+    });
+
+    it('never charges a member twice for the same period: a cycle run again skips the members already charged', async () => {
+      const { inserts } = fakeTx([member(MEMBER), member(OTHER)], [{ memberId: MEMBER }]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-2', 50));
+
+      const result = await BillingCycleService.generateBillingCycle(cycle);
+
+      expect(mockCalculate).toHaveBeenCalledTimes(1);
+      expect(mockCalculate).toHaveBeenCalledWith(expect.objectContaining({ memberId: OTHER }), expect.anything());
+      expect(inserts).toHaveLength(1);
+      expect(inserts[0]).toMatchObject({ memberId: OTHER });
+      expect(result.members).toMatchObject({ processed: 2, skipped: 1 });
+      expect(result.transactionsCreated).toBe(1);
+    });
+
+    it('skips a member with no assignment on the cycle frequency, and writes nothing for them', async () => {
+      const { inserts } = fakeTx([member(MEMBER)]);
+      mockCalculate.mockResolvedValueOnce(null);
+
+      const result = await BillingCycleService.generateBillingCycle(cycle);
+
+      expect(inserts).toHaveLength(0);
+      expect(result).toMatchObject({ success: true, transactionsCreated: 0, members: { skipped: 1 } });
+    });
+
+    it('prorates the charge of a member who joined mid-cycle and says so on the transaction', async () => {
+      const { inserts } = fakeTx([member(MEMBER, { joinedAt: new Date('2026-03-16T00:00:00.000Z') })]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-3', 31));
+
+      await BillingCycleService.generateBillingCycle(cycle);
+
+      expect(inserts[0]).toMatchObject({ amount: '16', metadata: { isProRated: true } });
+    });
+
+    it('previews the amounts without writing a charge', async () => {
+      const { tx, inserts } = fakeTx([member(MEMBER)]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-4', 80));
+
+      const result = await BillingCycleService.generateBillingCycle({ ...cycle, dryRun: true });
+
+      expect(tx.insert).not.toHaveBeenCalled();
+      expect(inserts).toHaveLength(0);
+      expect(result.totalAmount).toBe(80);
+      expect(result.breakdown.duesAmount).toBe(68);
+    });
+
+    it('aborts the whole cycle, writing nothing it does not roll back, when a member cannot be calculated', async () => {
+      const { inserts } = fakeTx([member(MEMBER), member(OTHER)]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-5')).mockRejectedValueOnce(new Error('assignment unreadable'));
+
+      await expect(BillingCycleService.generateBillingCycle(cycle)).rejects.toThrow('Billing cycle aborted');
+      // the first charge was written inside the same transaction that now rolls back
+      expect(inserts).toHaveLength(1);
+    });
   });
 
   it('supports all billing frequencies', () => {

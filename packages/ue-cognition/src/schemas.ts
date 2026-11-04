@@ -29,13 +29,20 @@ const cognitionSubjectSchema = z.object({
   entityId: z.string().optional(),
 })
 
+// zod 4 rejects Infinity, which here means "fewer than two events". JSON cannot carry Infinity either: the
+// store writes it as null, so a null read back is the same "no gap" and must not make the whole store unreadable.
+const meanGapDaysSchema = z.preprocess(
+  (value) => (value === null ? Number.POSITIVE_INFINITY : value),
+  z.union([z.number(), z.literal(Number.POSITIVE_INFINITY)]),
+)
+
 const trajectoryFeaturesSchema = z.object({
   subject: cognitionSubjectSchema,
   windowStart: z.string(),
   windowEnd: z.string(),
   eventCount: z.number().nonnegative(),
   distinctTypes: z.number().nonnegative(),
-  meanGapDays: z.union([z.number(), z.literal(Number.POSITIVE_INFINITY)]), // zod 4 rejects Infinity; it means "fewer than two events"
+  meanGapDays: meanGapDaysSchema,
   frequencySlope: z.number(),
   recencyDays: z.number(),
   negativeSignal: z.number(),

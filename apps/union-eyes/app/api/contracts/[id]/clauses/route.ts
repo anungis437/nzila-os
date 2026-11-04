@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'officer' },
     entitlement: 'commercial_reporting',
     openapi: {

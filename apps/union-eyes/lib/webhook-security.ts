@@ -256,16 +256,6 @@ export async function validateWebhook(
 }
 
 /**
- * Whop webhook configuration
- */
-export const whopWebhookConfig: WebhookConfig = {
-  secret: process.env.WHOP_WEBHOOK_SECRET || '',
-  signatureHeader: 'x-whop-signature',
-  timestampHeader: 'x-whop-timestamp',
-  timestampTolerance: 300000, // 5 minutes
-};
-
-/**
  * Stripe webhook configuration
  */
 export const stripeWebhookConfig: WebhookConfig = {

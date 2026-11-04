@@ -49,15 +49,15 @@ describe('cba-intelligence/benchmark/[id]', () => {
 
   it('GET computes and returns a benchmark and never saves one', async () => {
     const { GET } = await import('../cba-intelligence/benchmark/[id]/route');
-    const result = await (GET as never as (c: unknown) => Promise<{ data: unknown }>)({ ...ctx, query: {} });
-    expect(result.data).toMatchObject({ comparableCount: 2 });
+    const result = await (GET as never as (c: unknown) => Promise<unknown>)({ ...ctx, query: {} });
+    expect(result).toMatchObject({ comparableCount: 2 });
     expect(m.save).not.toHaveBeenCalled();
   });
 
   // DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE: an organization's steward holds a role floor, not authority over the platform's review queue.
   it('GET shows the benchmark or the saved history of an unapproved agreement only to platform staff, and to everyone else it does not exist', async () => {
     const { GET } = await import('../cba-intelligence/benchmark/[id]/route');
-    const read = (query: Record<string, unknown>) => (GET as never as (c: unknown) => Promise<{ data: unknown }>)({ ...ctx, query });
+    const read = (query: Record<string, unknown>) => (GET as never as (c: unknown) => Promise<unknown>)({ ...ctx, query });
     m.getAgreement.mockResolvedValue({ id: 'a1', reviewStatus: 'pending_review' });
     for (const query of [{}, { history: true }]) {
       await expect(read(query)).rejects.toMatchObject({ status: 404 });
@@ -65,8 +65,8 @@ describe('cba-intelligence/benchmark/[id]', () => {
     expect(m.findComparable).not.toHaveBeenCalled();
     expect(m.getSnapshots).not.toHaveBeenCalled();
     m.isPlatformAdmin.mockResolvedValue(true);
-    expect((await read({})).data).toMatchObject({ comparableCount: 2 });
-    expect((await read({ history: true })).data).toEqual([]);
+    expect(await read({})).toMatchObject({ comparableCount: 2 });
+    expect(await read({ history: true })).toEqual([]);
     m.getAgreement.mockResolvedValue(null);
     await expect(read({})).rejects.toMatchObject({ status: 404 });
   });
@@ -86,12 +86,13 @@ describe('cba-intelligence/benchmark/[id]', () => {
     expect(m.save).not.toHaveBeenCalled();
   });
 
-  it('POST saves and audits in one system-scope transaction, and returns the snapshot id', async () => {
+  it('POST saves and audits in one transaction of the acting organization (the runtime role holds the grants on the dataset), and returns the snapshot id', async () => {
     const { POST } = await import('../cba-intelligence/benchmark/[id]/route');
-    const result = await (POST as never as (c: unknown) => Promise<{ data: { snapshotId: string } }>)({ ...ctx, body: { sector: 'public' } });
-    expect(m.operation).toHaveBeenCalledWith(expect.objectContaining({ action: 'cba_benchmark.snapshot', userId: 'u1', resourceId: 'a1', scope: 'system' }), expect.any(Function));
-    expect(m.operation.mock.calls[0][0].resultDetails({ data: { snapshotId: 's1', comparableCount: 2 } })).toEqual({ snapshotId: 's1', comparableCount: 2 });
-    expect(result.data.snapshotId).toBe('s1');
+    const result = await (POST as never as (c: unknown) => Promise<{ snapshotId: string }>)({ ...ctx, body: { sector: 'public' } });
+    expect(m.operation).toHaveBeenCalledWith(expect.objectContaining({ action: 'cba_benchmark.snapshot', userId: 'u1', resourceId: 'a1' }), expect.any(Function));
+    expect(m.operation.mock.calls[0][0]).not.toHaveProperty('scope');
+    expect(m.operation.mock.calls[0][0].resultDetails({ snapshotId: 's1', comparableCount: 2 })).toEqual({ snapshotId: 's1', comparableCount: 2 });
+    expect(result.snapshotId).toBe('s1');
   });
 
   it('POST saves nothing when the audit record cannot be written', async () => {

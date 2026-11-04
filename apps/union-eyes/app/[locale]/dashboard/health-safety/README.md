@@ -28,7 +28,6 @@ app/[locale]/dashboard/health-safety/
 - Navigation cards to sub-sections (Incidents, Inspections, Hazards, Training)
 - Embedded `HealthSafetyDashboard` component with full metrics
 - Period selector (7d, 30d, 90d, 12m)
-- Export functionality
 - Quick action: Report Incident button
 
 **Key Components Used:**
@@ -43,12 +42,11 @@ app/[locale]/dashboard/health-safety/
 **Route:** `/dashboard/health-safety/incidents`
 
 **Features:**
-- Statistics cards (Total, Under Investigation, Resolved, Avg. Resolution Time)
-- Advanced filtering (search, status, severity, date range)
+- Statistics cards (Total, Under Investigation, Closed, Avg. Resolution Time) for the chosen period; an unknown figure is a dash, and failed statistics are an alert with a retry
+- Period selector (7 days, 30 days, 90 days, 12 months): it applies to the statistics and the trends. The list has its own search and status and severity filters
 - Tabbed view (List, Trends)
 - Incident list table with status badges
 - Trend analysis charts
-- Export incidents data
 - Quick action: Report Incident button
 
 **Key Components Used:**
@@ -58,7 +56,7 @@ app/[locale]/dashboard/health-safety/
 
 **Navigation:**
 - Back to main H&S dashboard
-- Forward to individual incident details
+- Incident reporting (there is no incident detail page, so listed incidents cannot be opened)
 
 ---
 
@@ -70,19 +68,24 @@ app/[locale]/dashboard/health-safety/
 - Comprehensive incident report form
 - Important safety notice banner
 - Anonymous reporting option
-- File attachments support
+- Witness information
 - Form validation
-- Auto-save drafts (component feature)
-- Success toast notifications
+- Success toast notifications (a refusal is shown by the form, which stays open with what was typed)
 
 **Key Components Used:**
 - `IncidentReportForm`
 
 **Workflow:**
 1. User fills out incident details
-2. Submits form
+2. Submits form (the route needs the health_safety_rep role)
 3. Success notification
 4. Redirects to incidents list
+
+> **How the report reaches the route:** `toIncidentRequest` (`components/health-safety/incident-payload.ts`) turns the form into the body
+> of `POST /api/health-safety/incidents`. The body names no organization (the route takes the caller's own and refuses a body that
+> names one) and carries only fields the route stores. What the form asks for that has no column of its own (immediate cause, injuries,
+> witness contacts, preventive measures, how to reach the reporter) is written, labelled, into the incident's narrative (`whatHappened`),
+> so nothing typed is dropped. The form takes no attachments and keeps no draft: no route stores a file and nothing restored a draft.
 
 ---
 
@@ -91,14 +94,12 @@ app/[locale]/dashboard/health-safety/
 **Route:** `/dashboard/health-safety/inspections`
 
 **Features:**
-- Statistics cards (Total, Overdue, Compliance Rate, Avg. Score)
-- Advanced filtering (search, status, type, date range)
+- Statistics cards (Total, Overdue, Compliance Rate, Avg. Score); a rate nobody scored is a dash, not 0%
 - Three-tab view:
-  - **Calendar:** Visual schedule of inspections
-  - **List View:** Detailed inspection list with reports
-  - **Findings:** Issues requiring attention
-- Export inspections data
-- Quick action: Schedule Inspection button
+  - **Calendar:** Visual schedule of inspections (an inspection chosen there opens in the list view)
+  - **List View:** Select an inspection to see it as recorded (checklist results, score, findings and notes)
+  - **Findings:** Issues requiring attention; each finding's View Full Report opens it in the list view
+- Scheduling an inspection is not offered: no screen for it exists
 
 **Key Components Used:**
 - `InspectionScheduleCalendar`
@@ -107,7 +108,6 @@ app/[locale]/dashboard/health-safety/
 
 **Navigation:**
 - Back to main H&S dashboard
-- Forward to inspection scheduling
 
 ---
 
@@ -116,27 +116,22 @@ app/[locale]/dashboard/health-safety/
 **Route:** `/dashboard/health-safety/hazards`
 
 **Features:**
-- Statistics cards (Total, Critical, In Progress, Avg. Resolution Time)
-- Advanced filtering (search, status, priority)
-- View mode toggle (Grid / List)
-- Two-tab view:
-  - **Hazard Reports:** All reported hazards
-  - **Corrective Actions:** Action tracking
-- Export hazards data
+- Statistics cards (Total, Critical, In Progress, Avg. Resolution Time); an unknown figure is a dash
+- Hazard list (all reported hazards), with search and status and level filters of its own
 - Quick action: Report Hazard button
-- Inline hazard report form
+- Inline hazard report form, also opened by `?report=1`
 
 **Key Components Used:**
 - `HazardsList`
 - `HazardReportForm`
 - `HazardPriorityBadge`
-- `CorrectiveActionTracker`
 
 **Workflow:**
 1. Click "Report Hazard" → Shows form
-2. Submit hazard report
+2. Submit hazard report (the route needs the health_safety_rep role; a refusal is shown and the form stays open)
 3. Returns to hazards list
-4. View hazard details
+
+There is no hazard detail page, so listed hazards cannot be opened.
 
 ---
 
@@ -156,7 +151,7 @@ All pages follow consistent UnionEyes patterns:
 - Breadcrumb navigation (Back button)
 - Page title with icon
 - Description text
-- Action buttons (Export, Primary action)
+- Action buttons (primary action)
 ```
 
 ### Statistics Cards
@@ -201,8 +196,10 @@ GET  /api/health-safety/incidents?organizationId={id}
 GET  /api/health-safety/inspections?organizationId={id}
 GET  /api/health-safety/hazards?organizationId={id}
 
-// Export
-GET /api/health-safety/export?type={incidents|inspections|hazards}
+// Inspection as recorded (CRUD item route)
+GET  /api/health-safety/inspections/{id}
+
+// No export route: no export service or authority model covers members' health data.
 ```
 
 ---
@@ -295,7 +292,6 @@ All pages are fully responsive with mobile-first design.
 - [ ] Statistics load correctly
 - [ ] Filters update data
 - [ ] Tab navigation works
-- [ ] Export buttons trigger actions
 - [ ] Forms validate input
 - [ ] Success/error toasts display
 - [ ] Navigation flows correctly
@@ -310,10 +306,9 @@ All pages are fully responsive with mobile-first design.
 2. **Add permission checks** at page/component level
 3. **Complete translations** for all text
 4. **Add role-based feature toggling**
-5. **Implement export functionality**
-6. **Add detailed incident/inspection/hazard views**
-7. **Create training module page**
-8. **Add dashboard to navigation sidebar**
+5. **Add detailed incident/hazard views**
+6. **Create training module page**
+7. **Add dashboard to navigation sidebar**
 
 ---
 
@@ -323,7 +318,7 @@ All pages are fully responsive with mobile-first design.
 - Toast notifications use Sonner library
 - All components are from `@/components/health-safety`
 - Animation delays create smooth sequential loading
-- Export functions are placeholders - implement file generation
+- There are no export buttons and no corrective-action tab: neither has a route and authority model behind it
 
 ---
 

@@ -7,8 +7,8 @@
 
 import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
-import { db } from '@/db';
 import { workbookMemoryHolders, workbooks } from '@/db/schema/workbook-schema';
+import { isUuid } from '@/lib/page-data/uuid';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { auditWorkbookRead } from '@/lib/workbook/claimed-write-audit';
@@ -26,6 +26,9 @@ export default async function MemoryHoldersPage({
 }) {
   const { locale, id } = await params;
 
+  // An identifier that is not a uuid names no workbook.
+  if (!isUuid(id)) notFound();
+
   // ROUND 50 SECURITY FIX: this server component previously queried
   // workbookMemoryHolders (including free-text `notes`) directly, bypassing
   // the ownership check already required once a workbook is claimed — see
@@ -37,7 +40,8 @@ export default async function MemoryHoldersPage({
   // matching this page's anti-surveillance posture (never reveal existence via response shape).
   const capability = await readWorkbookCapabilityCookie(id);
   const loaded = await withClaimedWorkbookAccess({ workbookId: id, operation: 'read', capability }, async (authority) => {
-    const [wb] = await db
+    // The statements run on the transaction the boundary opened for this authority (authority.tx), not on the module-level handle.
+    const [wb] = await authority.tx
       .select({ id: workbooks.id })
       .from(workbooks)
       .where(eq(workbooks.id, id))
@@ -51,7 +55,7 @@ export default async function MemoryHoldersPage({
       details: { authority: authority.kind, surface: 'page' },
     });
 
-    const holders = await db
+    const holders = await authority.tx
       .select({
         id: workbookMemoryHolders.id,
         role: workbookMemoryHolders.role,

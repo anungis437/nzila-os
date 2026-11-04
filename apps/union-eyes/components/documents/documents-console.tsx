@@ -20,11 +20,6 @@ import {
   type DocumentVersion,
 } from "@/components/documents/document-version-control";
 import {
-  DocumentApprovalWorkflow,
-  type ApprovalRecord,
-  type WorkflowStatus,
-} from "@/components/documents/document-approval-workflow";
-import {
   DocumentTemplateManager,
   type DocumentTemplate,
 } from "@/components/documents/document-template-manager";
@@ -62,6 +57,7 @@ type RepositoryDocumentRow = {
   documentType?: string | null;
   privacyLabel?: string | null;
   uploadedBy?: string | null;
+  uploadedByName?: string | null;
   createdAt?: string | Date | null;
   updatedAt?: string | Date | null;
   fileUrl?: string | null;
@@ -83,8 +79,8 @@ type RepositoryDetailResponse = RepositoryDocumentRow & {
     id: string;
     versionNo: number;
     uploadedAt: string | Date;
-    uploadedBy: string;
-    storageKey: string;
+    uploadedBy?: string | null;
+    uploadedByName?: string | null;
     contentHash: string;
   }>;
 };
@@ -107,10 +103,7 @@ function toRepositoryDocumentItem(row: RepositoryDocumentRow): DocumentItem {
     size: row.fileSize ?? undefined,
     createdAt: toDate(row.createdAt),
     updatedAt: toDate(row.updatedAt),
-    createdBy: {
-      id: row.uploadedBy ?? 'unknown',
-      name: row.uploadedBy ?? 'Unknown user',
-    },
+    ...(row.uploadedByName ? { createdBy: { id: row.uploadedBy ?? row.uploadedByName, name: row.uploadedByName } } : {}),
     parentId: null,
     path: [],
     starred: false,
@@ -129,16 +122,8 @@ function toVersionView(version: NonNullable<RepositoryDetailResponse['versions']
     id: version.id,
     versionNumber: version.versionNo,
     createdAt: toDate(version.uploadedAt),
-    createdBy: {
-      id: version.uploadedBy,
-      name: version.uploadedBy,
-    },
-    size: 0,
-    comment: version.contentHash,
-    changes: {
-      type: 'updated',
-      summary: version.storageKey,
-    },
+    ...(version.uploadedByName ? { createdBy: { id: version.uploadedBy ?? version.uploadedByName, name: version.uploadedByName } } : {}),
+    contentHash: version.contentHash,
     isCurrent,
     downloadUrl: '',
   };
@@ -154,10 +139,6 @@ export function DocumentsConsole() {
   const [selectedDocumentId, setSelectedDocumentId] = React.useState<string | null>(null);
   const [selectedDocument, setSelectedDocument] = React.useState<RepositoryDetailResponse | null>(null);
   const [selectedDocumentVersions, setSelectedDocumentVersions] = React.useState<DocumentVersion[]>([]);
-  const [approvalConfigsByDocument, setApprovalConfigsByDocument] = React.useState<
-    Record<string, NonNullable<React.ComponentProps<typeof DocumentApprovalWorkflow>['existingConfig']>>
-  >({});
-  const [approvalStatusByDocument, setApprovalStatusByDocument] = React.useState<Record<string, WorkflowStatus>>({});
   const [selectedLibraryItems, setSelectedLibraryItems] = React.useState<DocumentItem[]>([]);
   const [selectionResetSignal, setSelectionResetSignal] = React.useState(0);
   const [repoDocs, setRepoDocs] = React.useState<RepositoryDocumentRow[]>([]);
@@ -243,35 +224,10 @@ export function DocumentsConsole() {
   const availableUsers = React.useMemo(() => {
     const users = new Map<string, string>();
     for (const row of repoDocs) {
-      if (row.uploadedBy) users.set(row.uploadedBy, row.uploadedBy);
+      if (row.uploadedBy && row.uploadedByName) users.set(row.uploadedBy, row.uploadedByName);
     }
     return Array.from(users, ([id, name]) => ({ id, name }));
   }, [repoDocs]);
-
-  const activeApprovalDocument = React.useMemo(() => {
-    if (selectedDocumentId) {
-      return repoDocs.find((document) => document.id === selectedDocumentId) ?? null;
-    }
-    return repoDocs[0] ?? null;
-  }, [repoDocs, selectedDocumentId]);
-
-  const activeApprovalConfig = React.useMemo(() => {
-    if (!activeApprovalDocument) {
-      return undefined;
-    }
-    return approvalConfigsByDocument[activeApprovalDocument.id];
-  }, [activeApprovalDocument, approvalConfigsByDocument]);
-
-  const activeApprovalStatus = React.useMemo(() => {
-    if (!activeApprovalDocument) {
-      return undefined;
-    }
-    return approvalStatusByDocument[activeApprovalDocument.id];
-  }, [activeApprovalDocument, approvalStatusByDocument]);
-
-  const activePendingReview = React.useMemo<ApprovalRecord | undefined>(() => {
-    return activeApprovalStatus?.approvals.find((approval) => approval.status === 'pending');
-  }, [activeApprovalStatus]);
 
   const templateItems = React.useMemo<DocumentTemplate[]>(() => {
     return repoDocs
@@ -284,15 +240,8 @@ export function DocumentsConsole() {
         name: document.title ?? document.name ?? document.filename ?? document.id,
         category: document.documentType ?? 'template',
         description: document.filename ?? undefined,
-        content: '',
-        variables: [],
         createdAt: toDate(document.createdAt),
         updatedAt: toDate(document.updatedAt),
-        createdBy: {
-          id: document.uploadedBy ?? 'unknown',
-          name: document.uploadedBy ?? 'Unknown user',
-        },
-        usageCount: 0,
       }));
   }, [repoDocs]);
 
@@ -443,79 +392,6 @@ export function DocumentsConsole() {
     setNotice('share_blocked');
   };
 
-  const handleSaveApprovalConfig: NonNullable<React.ComponentProps<typeof DocumentApprovalWorkflow>['onSaveConfig']> = async (config) => {
-    setApprovalConfigsByDocument((previous) => ({
-      ...previous,
-      [config.documentId]: config,
-    }));
-
-    const firstStage = config.stages[0];
-    const approvalSeed: WorkflowStatus = {
-      currentStage: 0,
-      overallStatus: 'pending',
-      approvals: (firstStage?.reviewerIds ?? []).map((reviewerId) => ({
-        id: `${config.documentId}:${firstStage?.name}:${reviewerId}`,
-        stageId: String(firstStage?.order ?? 1),
-        stageName: firstStage?.name ?? 'Initial Review',
-        reviewerId,
-        reviewerName: reviewerId,
-        status: 'pending',
-      })),
-    };
-
-    setApprovalStatusByDocument((previous) => ({
-      ...previous,
-      [config.documentId]: approvalSeed,
-    }));
-  };
-
-  const handleSubmitApprovalReview: NonNullable<React.ComponentProps<typeof DocumentApprovalWorkflow>['onSubmitReview']> = async (
-    approvalId,
-    nextStatus,
-    comment,
-  ) => {
-    if (!activeApprovalDocument) {
-      return;
-    }
-
-    setApprovalStatusByDocument((previous) => {
-      const current = previous[activeApprovalDocument.id];
-      if (!current) {
-        return previous;
-      }
-
-      const approvals = current.approvals.map((approval) => {
-        if (approval.id !== approvalId) {
-          return approval;
-        }
-        return {
-          ...approval,
-          status: nextStatus,
-          comment,
-          timestamp: new Date(),
-        };
-      });
-
-      const hasRejected = approvals.some((approval) => approval.status === 'rejected');
-      const hasPending = approvals.some((approval) => approval.status === 'pending');
-      const overallStatus: WorkflowStatus['overallStatus'] = hasRejected
-        ? 'rejected'
-        : hasPending
-          ? 'in_progress'
-          : 'approved';
-
-      return {
-        ...previous,
-        [activeApprovalDocument.id]: {
-          ...current,
-          approvals,
-          overallStatus,
-          currentStage: overallStatus === 'approved' ? 1 : 0,
-        },
-      };
-    });
-  };
-
   const appendVersion = async (documentId: string) => {
     const fileUrl = window.prompt(t('prompts.versionFileUrl'));
     const contentHash = window.prompt(t('prompts.versionContentHash'));
@@ -596,7 +472,6 @@ export function DocumentsConsole() {
           <TabsTrigger value="library">{t('tabs.library')}</TabsTrigger>
           <TabsTrigger value="search">{t('tabs.search')}</TabsTrigger>
           <TabsTrigger value="templates">{t('tabs.templates')}</TabsTrigger>
-          <TabsTrigger value="approvals">{t('tabs.approvals')}</TabsTrigger>
           <TabsTrigger value="retention">{t('tabs.retention')}</TabsTrigger>
           <TabsTrigger value="bulk">{t('tabs.bulk')}</TabsTrigger>
         </TabsList>
@@ -690,7 +565,6 @@ export function DocumentsConsole() {
         <TabsContent value="library">
           <DocumentLibraryBrowser
             items={repositoryItems}
-            onNavigate={(_folderId) => undefined}
             onUpload={() => setActiveTab('repository')}
             onDownload={handleDownloadDocument}
             onPreview={handlePreviewDocument}
@@ -731,26 +605,6 @@ export function DocumentsConsole() {
           />
         </TabsContent>
 
-        <TabsContent value="approvals">
-          {activeApprovalDocument ? (
-            <DocumentApprovalWorkflow
-              documentId={activeApprovalDocument.id}
-              documentName={activeApprovalDocument.title ?? activeApprovalDocument.name ?? activeApprovalDocument.filename ?? t('approvals.documentName')}
-              existingConfig={activeApprovalConfig}
-              status={activeApprovalStatus}
-              reviewers={availableUsers.map((user) => ({ id: user.id, name: user.name, email: `${user.id}@example.com`, role: 'reviewer' }))}
-              isReviewer={Boolean(activePendingReview)}
-              pendingReview={activePendingReview}
-              onSaveConfig={handleSaveApprovalConfig}
-              onSubmitReview={handleSubmitApprovalReview}
-            />
-          ) : (
-            <div className="rounded-lg border px-4 py-3 text-sm text-gray-600">
-              {t('approvals.empty')}
-            </div>
-          )}
-        </TabsContent>
-
         <TabsContent value="retention">
           <DocumentRetentionPolicy
             legalHolds={null}
@@ -788,6 +642,7 @@ export function DocumentsConsole() {
             totalVersions: selectedDocumentVersions.length || 1,
           }}
           versions={selectedDocumentVersions}
+          canDownload={(version) => version.isCurrent}
           onDownload={() => {
             void openAuthorizedDownload(selectedDocumentId);
           }}

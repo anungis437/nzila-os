@@ -52,13 +52,13 @@ export const GET = withApi(
         page: query.page,
         limit: query.limit,
       });
-      return { data: snapshots };
+      return snapshots;
     }
 
     const { history: _history, page: _page, limit: _limit, ...filters } = query;
     const result = await findComparableAgreements(agreementId, filters as Record<string, unknown>);
 
-    return { data: result };
+    return result;
   },
 );
 
@@ -72,8 +72,10 @@ const saveSchema = z.object({
 
 // ---------------------------------------------------------------------------
 // POST /api/cba-intelligence/benchmark/[id] — Compute and persist a snapshot
-// The snapshots belong to the platform-wide CBA dataset (no organization column), so persisting one is platform authority, and the intent
-// is written in the same transaction as the snapshot: a snapshot whose audit cannot be written is not stored.
+// The snapshots belong to the platform-wide CBA dataset (no organization column), so persisting one is platform authority (requireSystemAdmin), and
+// the intent is written in the same transaction as the snapshot: a snapshot whose audit cannot be written is not stored. The dataset is global
+// reference data that the application's runtime role reads and writes, and the system role holds no grant on it, so the transaction is the acting
+// organization's (the audit record is keyed to it): platform authority is checked above, the role that executes is the runtime role.
 // ---------------------------------------------------------------------------
 export const POST = withApi(
   {
@@ -93,17 +95,16 @@ export const POST = withApi(
         {
           organizationId,
           userId,
-          scope: "system",
           action: "cba_benchmark.snapshot",
           resourceType: "cba_intel_benchmark_snapshots",
           resourceId: params.id,
           details: { filters: Object.keys(body) },
-          resultDetails: (result) => ({ snapshotId: result.data.snapshotId, comparableCount: result.data.comparableCount }),
+          resultDetails: (result) => ({ snapshotId: result.snapshotId, comparableCount: result.comparableCount }),
         },
         async () => {
           const result = await findComparableAgreements(params.id, body as Record<string, unknown>);
           const snapshot = await saveBenchmarkSnapshot(result, userId);
-          return { data: { ...result, snapshotId: snapshot.id } };
+          return { ...result, snapshotId: snapshot.id };
         },
       );
     } catch (error) {

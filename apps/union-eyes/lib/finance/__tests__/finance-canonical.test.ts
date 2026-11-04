@@ -23,8 +23,8 @@ function sourceFiles(dir: string): string[] {
 }
 
 // What still touches financial-service, and why it is not an approval path. Anything else is a regression.
+// (lib/dues-calculation-engine.ts used to be listed: it reads the canonical dues_assignments table now and imports nothing from the service.)
 const REMAINING = new Map<string, string>([
-  ['lib/dues-calculation-engine.ts', 'reads financial-service table definitions to calculate dues; approves and pays nothing'],
   ['app/api/employer-execution/_lib.ts', 'imports the pure payroll, compliance, replay and remittance-generation engines; approves and pays nothing'],
 ]);
 // Mentions only: the capability register describes the service, it does not import it.

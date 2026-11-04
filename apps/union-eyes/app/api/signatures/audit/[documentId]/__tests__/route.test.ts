@@ -2,16 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  withApiAuth: vi.fn(),
-  getCurrentUser: vi.fn(),
   verifyDocumentAccess: vi.fn(),
   getDocumentSender: vi.fn(),
   getDocumentAudit: vi.fn(),
   generateAuditReport: vi.fn(),
-  standardErrorResponse: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser }));
+vi.mock('@/lib/api/framework', async () => (await import('@/app/api/__tests__/support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/signature/signature-service', () => ({
   AuditTrailService: {
     getDocumentAudit: m.getDocumentAudit,
@@ -22,68 +19,80 @@ vi.mock('@/lib/signature/signature-service', () => ({
     getDocumentSender: m.getDocumentSender,
   },
 }));
-vi.mock('@/lib/api/standardized-responses', () => {
-  const statusByCode: Record<string, number> = {
-    AUTH_REQUIRED: 401,
-    FORBIDDEN: 403,
-    INTERNAL_ERROR: 500,
-  };
-  return {
-    ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', FORBIDDEN: 'FORBIDDEN', INTERNAL_ERROR: 'INTERNAL_ERROR' },
-    standardErrorResponse: m.standardErrorResponse.mockImplementation((code: string, message: string) =>
-      new Response(JSON.stringify({ code, message }), { status: statusByCode[code] ?? 400 })),
-  };
-});
+vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() } }));
 
-async function loadRoute() {
-  return import('../route');
+const { caller, declared, resetCaller } = await import('@/app/api/__tests__/support/with-api-stub');
+
+const DOC_VICTIM = '00000000-0000-4000-8000-0000000000aa';
+const DOC_OWN = '00000000-0000-4000-8000-0000000000bb';
+
+async function get(documentId: string, query = '') {
+  const { GET } = await import('../route');
+  return GET(new NextRequest(`http://localhost/api/signatures/audit/${documentId}${query}`), { params: { documentId } });
 }
 
 describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant IDOR fix)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withApiAuth.mockImplementation((handler: any) => handler);
-    m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id', organizationId: 'org-own' });
+    resetCaller();
+    caller.userId = 'caller-own-id';
+    caller.organizationId = 'org-own';
     m.verifyDocumentAccess.mockResolvedValue(true);
     m.getDocumentSender.mockResolvedValue('caller-own-id');
     m.getDocumentAudit.mockResolvedValue([{ id: 'evt_1' }]);
+    m.generateAuditReport.mockResolvedValue({ documentId: DOC_OWN, events: [{ id: 'evt_1' }] });
+  });
+
+  it('asks the wrapper for an authenticated caller and the caller organization tenant transaction', async () => {
+    await get(DOC_OWN);
+
+    expect(declared.at(-1)).toMatchObject({ auth: { required: true }, rlsOrgContext: true });
   });
 
   it('returns 403 when the caller has no access to the document (cross-tenant IDOR regression)', async () => {
-    const { GET } = await loadRoute();
     m.verifyDocumentAccess.mockResolvedValueOnce(false);
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/signatures/audit/doc_victim'),
-      { params: { documentId: 'doc_victim' } },
-    );
+    const response = await get(DOC_VICTIM);
 
     expect(response.status).toBe(403);
-    expect(m.verifyDocumentAccess).toHaveBeenCalledWith('doc_victim', 'caller-own-id', 'org-own');
+    expect(m.verifyDocumentAccess).toHaveBeenCalledWith(DOC_VICTIM, 'caller-own-id', 'org-own');
     expect(m.getDocumentAudit).not.toHaveBeenCalled();
   });
 
   it('returns the audit trail when the caller has access', async () => {
-    const { GET } = await loadRoute();
-
-    const response = await GET(
-      new NextRequest('http://localhost/api/signatures/audit/doc_own'),
-      { params: { documentId: 'doc_own' } },
-    );
+    const response = await get(DOC_OWN);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload.events).toEqual([{ id: 'evt_1' }]);
-    expect(m.getDocumentAudit).toHaveBeenCalledWith('doc_own', 'org-own');
+    expect(payload.totalEvents).toBe(1);
+    expect(m.getDocumentAudit).toHaveBeenCalledWith(DOC_OWN, 'org-own');
+  });
+
+  it('returns the audit report for format=report, read in the caller organization', async () => {
+    const response = await get(DOC_OWN, '?format=report');
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.message).toBe('Audit report generated successfully');
+    expect(payload.report).toEqual({ documentId: DOC_OWN, events: [{ id: 'evt_1' }] });
+    expect(m.generateAuditReport).toHaveBeenCalledWith(DOC_OWN, 'org-own');
+    expect(m.getDocumentAudit).not.toHaveBeenCalled();
+  });
+
+  it('answers a malformed document id as a client error before any lookup, never a database fault', async () => {
+    const response = await get('doc_victim');
+
+    expect(response.status).toBe(400);
+    expect(m.verifyDocumentAccess).not.toHaveBeenCalled();
+    expect(m.getDocumentAudit).not.toHaveBeenCalled();
   });
 
   it('fails closed when the authenticated user has no current organization', async () => {
-    const { GET } = await loadRoute();
-    m.getCurrentUser.mockResolvedValueOnce({ id: 'caller-own-id' });
-    const response = await GET(
-      new NextRequest('http://localhost/api/signatures/audit/doc_own'),
-      { params: { documentId: 'doc_own' } },
-    );
+    caller.organizationId = null;
+
+    const response = await get(DOC_OWN);
+
     expect(response.status).toBe(403);
     expect(m.verifyDocumentAccess).not.toHaveBeenCalled();
     expect(m.getDocumentSender).not.toHaveBeenCalled();
@@ -92,12 +101,10 @@ describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant
   });
 
   it('rejects an explicitly empty tenant even for report format, before any signature lookup', async () => {
-    const { GET } = await loadRoute();
-    m.getCurrentUser.mockResolvedValueOnce({ id: 'caller-own-id', organizationId: '' });
-    const response = await GET(
-      new NextRequest('http://localhost/api/signatures/audit/doc_own?format=report'),
-      { params: { documentId: 'doc_own' } },
-    );
+    caller.organizationId = '';
+
+    const response = await get(DOC_OWN, '?format=report');
+
     expect(response.status).toBe(403);
     expect(m.verifyDocumentAccess).not.toHaveBeenCalled();
     expect(m.getDocumentSender).not.toHaveBeenCalled();
@@ -106,13 +113,9 @@ describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant
   });
 
   it('returns 401 when unauthenticated', async () => {
-    const { GET } = await loadRoute();
-    m.getCurrentUser.mockResolvedValueOnce(null);
+    caller.userId = null;
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/signatures/audit/doc_own'),
-      { params: { documentId: 'doc_own' } },
-    );
+    const response = await get(DOC_OWN);
 
     expect(response.status).toBe(401);
     expect(m.verifyDocumentAccess).not.toHaveBeenCalled();

@@ -9,7 +9,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { performAtomicAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { performAtomicSystemAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { addressSha256, liftAddressSuppression } from '@/lib/communications/address-suppression';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
@@ -32,11 +32,10 @@ export const POST = withSystemAdminAuth(async (request, context: BaseAuthContext
 
   class NothingToLift extends Error {}
   try {
-    await performAtomicAuditedOperation(
+    await performAtomicSystemAuditedOperation(
       {
         organizationId,
         userId,
-        scope: 'system',
         action: 'communications.address_suppression.lift',
         resourceType: 'email_address_suppressions',
         details: { addressSha256Prefix: fragment, reasonLength: reason.length },

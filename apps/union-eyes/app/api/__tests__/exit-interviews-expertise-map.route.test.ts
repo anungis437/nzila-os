@@ -51,11 +51,13 @@ describe('exit-interviews/expertise-map route', () => {
     } as any);
   });
 
-  it('returns an expertise map', async () => {
+  it('returns an expertise map as the handler payload, which withApi puts under data once', async () => {
     const { GET } = await loadRoute();
     const result = await GET({ organizationId: 'org_1' });
 
-    expect(result.data.organizationId).toBe('org_1');
-    expect(result.data.domains).toHaveLength(1);
+    expect(result.organizationId).toBe('org_1');
+    expect(result.domains).toHaveLength(1);
+    // A `data` key of its own would reach the screen as json.data.data, one level below where it reads `domains`.
+    expect(result).not.toHaveProperty('data');
   });
 });

@@ -11,7 +11,7 @@ import { sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { isPlatformAdminUser, getCurrentUser } from '@/lib/api-auth-guard';
-import { performAtomicAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { performAtomicSystemAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,13 +28,12 @@ export async function POST() {
 
   try {
     const actor = await getCurrentUser();
-    const coverage = await performAtomicAuditedOperation<AnalyzeCoverage>(
+    const coverage = await performAtomicSystemAuditedOperation<AnalyzeCoverage>(
       {
         organizationId: actor?.organizationId,
         userId,
         action: 'platform.database.analyze',
         resourceType: 'database',
-        scope: 'system',
         resultDetails: (result) => ({ tablesAnalyzable: result.analyzable, tablesSkipped: result.total - result.analyzable }),
       },
       async (tx) => {

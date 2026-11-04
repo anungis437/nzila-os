@@ -1,8 +1,6 @@
-import { requireUser } from "@/lib/api-auth-guard";
+import { requireOrganizationScope } from "@/lib/page-data/organization-scope";
 import { Metadata } from "next";
-import { db } from "@/db";
-import { employerRemittanceRuns, employerExecutionArtifacts, employerExecutionComplianceEvents } from "@/db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { loadRemittanceRunDetail } from "@/lib/employer-execution/page-reads";
 import { getTranslations } from "next-intl/server";
 import { RemittanceArtifactCard } from "@/components/employer-execution";
 
@@ -24,40 +22,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function EmployerExecutionRemittanceRunDetailPage({ params }: PageProps) {
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: "employerRemittanceRunDetailPage" });
-  const context = await requireUser();
-  const organizationId = context.organizationId;
+  const { organizationId } = await requireOrganizationScope();
 
-  const [run] = await db
-    .select()
-    .from(employerRemittanceRuns)
-    .where(and(eq(employerRemittanceRuns.organizationId, organizationId), eq(employerRemittanceRuns.id, id)))
-    .limit(1);
-
-  if (!run) {
+  const detail = await loadRemittanceRunDetail(organizationId, id);
+  if (!detail) {
     return <div className="p-6 text-sm text-muted-foreground">{t("notFound")}</div>;
   }
-
-  const artifacts = await db
-    .select()
-    .from(employerExecutionArtifacts)
-    .where(
-      and(
-        eq(employerExecutionArtifacts.organizationId, organizationId),
-        eq(employerExecutionArtifacts.remittanceRunId, run.id),
-      ),
-    )
-    .orderBy(desc(employerExecutionArtifacts.createdAt));
-
-  const complianceEvents = await db
-    .select()
-    .from(employerExecutionComplianceEvents)
-    .where(
-      and(
-        eq(employerExecutionComplianceEvents.organizationId, organizationId),
-        eq(employerExecutionComplianceEvents.remittanceRunId, run.id),
-      ),
-    )
-    .orderBy(desc(employerExecutionComplianceEvents.detectedAt));
+  const { run, artifacts, complianceEvents } = detail;
 
   const chainLinks = artifacts
     .map((artifact) => ((artifact.manifestJson as Record<string, unknown>)?.chainLink ?? null) as Record<string, unknown> | null)

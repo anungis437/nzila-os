@@ -11,7 +11,6 @@ const h = vi.hoisted(() => {
     readQueue: [] as unknown[],
     calItems: [] as unknown[],
     events: [] as unknown[],
-    nextSyncToken: 'sync-1' as string | undefined,
     oauthInstance,
     calendarApi: null as unknown as {
       calendarList: { list: ReturnType<typeof vi.fn> };
@@ -21,7 +20,7 @@ const h = vi.hoisted(() => {
   state.calendarApi = {
     calendarList: { list: vi.fn(async () => ({ data: { items: state.calItems } })) },
     events: {
-      list: vi.fn(async () => ({ data: { items: state.events, nextSyncToken: state.nextSyncToken } })),
+      list: vi.fn(async () => ({ data: { items: state.events } })),
       insert: vi.fn(async () => ({ data: { id: 'g-new' } })),
       update: vi.fn(async () => ({ data: { id: 'g-upd' } })),
       delete: vi.fn(async () => undefined),
@@ -77,7 +76,6 @@ import {
   exchangeCodeForTokens,
   exportEventToGoogle,
   getAuthorizationUrl,
-  getSyncToken,
   importGoogleEvents,
   listGoogleCalendars,
   refreshAccessToken,
@@ -92,7 +90,6 @@ beforeEach(() => {
   h.readQueue = [];
   h.calItems = [];
   h.events = [];
-  h.nextSyncToken = 'sync-1';
 });
 
 describe('auth helpers', () => {
@@ -155,7 +152,6 @@ describe('importGoogleEvents', () => {
       [{ id: 'evdb-gone' }], // handleDeleted select
       [{ id: 'evdb-existing' }], // existing select
       [], // new select -> none
-      [{ calendarMappings: [{ externalId: 'g-cal', localCalendarId: 'localcal', syncToken: 'old' }] }], // updateSyncToken select
     ];
     const result = await importGoogleEvents('c1', 'localcal', 'g-cal');
     expect(result.deleted).toBe(1);
@@ -165,59 +161,45 @@ describe('importGoogleEvents', () => {
   });
 });
 
-describe('importGoogleEvents — paging, incremental sync and failures', () => {
+describe('importGoogleEvents — paging and failures', () => {
   const ev = (id: string) => ({ id, summary: id, status: 'confirmed', start: { date: '2024-02-01' }, end: { date: '2024-02-02' } });
   const page = (ids: string[], extra: Record<string, unknown> = {}) => ({ data: { items: ids.map(ev), ...extra } });
   const setup = () => { h.readQueue = [[conn], [{ id: 'localcal', organizationId: 'org1' }]]; };
 
-  it('follows every page and stores the sync token that comes with the last one', async () => {
+  it('follows every page of the requested window', async () => {
     setup();
     calendarApi.events.list.mockClear();
     calendarApi.events.list
       .mockResolvedValueOnce(page(['a', 'b'], { nextPageToken: 'p2' }))
-      .mockResolvedValueOnce(page(['c'], { nextSyncToken: 'final-token' }));
+      .mockResolvedValueOnce(page(['c']));
     const result = await importGoogleEvents('c1', 'localcal', 'g-cal');
-    expect(result).toMatchObject({ total: 3, imported: 3, pages: 2, incremental: false });
+    expect(result).toMatchObject({ total: 3, imported: 3, pages: 2 });
     expect(calendarApi.events.list.mock.calls[0][0]).toMatchObject({ maxResults: 250, orderBy: 'startTime' });
     expect(calendarApi.events.list.mock.calls[0][0].pageToken).toBeUndefined();
     expect(calendarApi.events.list.mock.calls[1][0].pageToken).toBe('p2');
   });
 
-  it('asks for changes only when it holds a sync token, without the window or ordering Google rejects with one', async () => {
+  it('lists the window it was given, not an open-ended one', async () => {
     setup();
     calendarApi.events.list.mockClear();
-    calendarApi.events.list.mockResolvedValueOnce(page(['a'], { nextSyncToken: 't2' }));
-    const result = await importGoogleEvents('c1', 'localcal', 'g-cal', { syncToken: 't1', timeMin: new Date(), timeMax: new Date() });
-    expect(result.incremental).toBe(true);
-    const params = calendarApi.events.list.mock.calls[0][0];
-    expect(params.syncToken).toBe('t1');
-    expect(params).not.toHaveProperty('orderBy');
-    expect(params).not.toHaveProperty('timeMin');
-    expect(params).not.toHaveProperty('timeMax');
+    calendarApi.events.list.mockResolvedValueOnce(page(['a']));
+    const timeMin = new Date('2024-03-01T00:00:00Z');
+    const timeMax = new Date('2024-04-01T00:00:00Z');
+    await importGoogleEvents('c1', 'localcal', 'g-cal', { timeMin, timeMax });
+    expect(calendarApi.events.list.mock.calls[0][0]).toMatchObject({
+      timeMin: timeMin.toISOString(),
+      timeMax: timeMax.toISOString(),
+    });
   });
 
-  it('falls back to a full sync when Google no longer accepts the stored token', async () => {
+  it('does not report success when an event could not be applied', async () => {
     setup();
-    calendarApi.events.list.mockClear();
-    calendarApi.events.list
-      .mockRejectedValueOnce(Object.assign(new Error('Gone'), { code: 410 }))
-      .mockResolvedValueOnce(page(['a'], { nextSyncToken: 'fresh' }));
-    const result = await importGoogleEvents('c1', 'localcal', 'g-cal', { syncToken: 'expired', timeMin: new Date() });
-    expect(result).toMatchObject({ total: 1, incremental: true });
-    expect(calendarApi.events.list.mock.calls[1][0]).not.toHaveProperty('syncToken');
-    expect(calendarApi.events.list.mock.calls[1][0]).toHaveProperty('timeMin');
-  });
-
-  it('does not store a token or report success when an event could not be applied', async () => {
     const { db } = await import('@/db/db');
-    setup();
-    vi.mocked(db.update).mockClear();
     vi.mocked(db.insert).mockImplementationOnce(() => { throw new Error('insert refused'); });
-    calendarApi.events.list.mockResolvedValueOnce(page(['a', 'b'], { nextSyncToken: 'never-stored' }));
+    calendarApi.events.list.mockResolvedValueOnce(page(['a', 'b']));
     await expect(importGoogleEvents('c1', 'localcal', 'g-cal')).rejects.toMatchObject({
       name: 'CalendarImportError', detail: { failed: 1, incomplete: false },
     });
-    expect(vi.mocked(db.update)).not.toHaveBeenCalled();
   });
 
   it('fails an import that would run past the page bound instead of reporting it complete', async () => {
@@ -226,7 +208,7 @@ describe('importGoogleEvents — paging, incremental sync and failures', () => {
     try {
       await expect(importGoogleEvents('c1', 'localcal', 'g-cal')).rejects.toMatchObject({ detail: { incomplete: true, pages: 50 } });
     } finally {
-      calendarApi.events.list.mockImplementation(async () => ({ data: { items: h.events, nextSyncToken: h.nextSyncToken } }));
+      calendarApi.events.list.mockImplementation(async () => ({ data: { items: h.events } }));
     }
   });
 });
@@ -260,12 +242,5 @@ describe('deleteEventFromGoogle', () => {
     h.readQueue = [[conn]];
     await expect(deleteEventFromGoogle('c1', 'g-cal', 'ev-1')).resolves.toBeUndefined();
     expect(calendarApi.events.delete).toHaveBeenCalled();
-  });
-});
-
-describe('getSyncToken', () => {
-  it('returns sync token or null', () => {
-    expect(getSyncToken({ calendarMappings: [{ externalId: 'g1', syncToken: 's1' }] }, 'g1')).toBe('s1');
-    expect(getSyncToken({ calendarMappings: null }, 'g1')).toBeNull();
   });
 });

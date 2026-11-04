@@ -8,7 +8,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { and, eq, sql } from 'drizzle-orm';
-import { db } from '@/db';
 import { workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { extractWorkbookCapability } from '@/lib/workbook/workbook-capability';
@@ -56,6 +55,10 @@ export async function PATCH(
   const intake = await guardPublicIntake(request, { bucket: 'capability' });
   if (!intake.ok) return intake.response;
 
+  // A malformed identifier names nothing: it is answered as an absent workbook or holder, not sent to SQL to fail there.
+  if (!z.guid().safeParse(workbookId).success) return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
+  if (!z.guid().safeParse(holderId).success) return NextResponse.json({ error: 'Memory holder not found' }, { status: 404 });
+
   const parse = patchSchema.safeParse(intake.json);
   if (!parse.success) {
     return NextResponse.json(
@@ -84,7 +87,7 @@ export async function PATCH(
         // What the holder already has stored counts: a name may be edited once its notice is verified, without recording the notice again.
         let storedEvidence: NoticeEvidence = 'none';
         if (writesIdentifyingDetail) {
-          const [stored] = await db
+          const [stored] = await authority.tx
             .select({ noticeState: workbookMemoryHolders.noticeState, noticeEvidence: workbookMemoryHolders.noticeEvidence })
             .from(workbookMemoryHolders)
             .where(and(eq(workbookMemoryHolders.id, holderId), eq(workbookMemoryHolders.workbookId, workbookId)))
@@ -105,7 +108,7 @@ export async function PATCH(
         }
         if (notice && authority.actorUserId) Object.assign(patch, noticeColumns(notice, authority.actorUserId, new Date(), verification));
         const orgId = authority.claimedOrgId;
-        const updated = await db
+        const updated = await authority.tx
           .update(workbookMemoryHolders)
           .set(patch)
           .where(
@@ -168,6 +171,10 @@ export async function DELETE(
   const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false });
   if (!intake.ok) return intake.response;
 
+  // A malformed identifier names nothing: it is answered as an absent workbook or holder, not sent to SQL to fail there.
+  if (!z.guid().safeParse(workbookId).success) return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
+  if (!z.guid().safeParse(holderId).success) return NextResponse.json({ error: 'Memory holder not found' }, { status: 404 });
+
   try {
     // Authorization is resolved first; the protected delete then runs inside
     // the DB execution context that matches the resolved authority.
@@ -175,7 +182,7 @@ export async function DELETE(
       { workbookId, operation: 'write', capability: extractWorkbookCapability(request, workbookId) },
       async (authority) => {
         const orgId = authority.claimedOrgId;
-        const removed = await db
+        const removed = await authority.tx
           .delete(workbookMemoryHolders)
           .where(
             and(

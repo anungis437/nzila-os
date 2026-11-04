@@ -1,57 +1,57 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1011,
-  "mutating": 682,
+  "routes": 1007,
+  "mutating": 674,
   "kernel": 60,
   "byGuard": {
-   "ADMIN_AUTH": 20,
+   "ADMIN_AUTH": 18,
    "CAPABILITY_TOKEN": 12,
-   "CRON_SECRET": 2,
+   "CRON_SECRET": 1,
    "CRUD_FACTORY": 141,
    "DELEGATED": 17,
    "NONE": 48,
-   "ORG_AUTH": 12,
+   "ORG_AUTH": 7,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 236,
-   "ROLE_AUTH": 173,
-   "SESSION_AUTH": 56,
+   "RETIRED": 237,
+   "ROLE_AUTH": 105,
+   "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 279,
+   "WITH_API": 354,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
-   "ADMIN_AUTH": 19,
+   "ADMIN_AUTH": 17,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 85,
-   "DELEGATED": 11,
-   "NONE": 9,
-   "ORG_AUTH": 8,
+   "CRUD_FACTORY": 83,
+   "DELEGATED": 10,
+   "NONE": 8,
+   "ORG_AUTH": 3,
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 222,
-   "ROLE_AUTH": 98,
-   "SESSION_AUTH": 31,
+   "ROLE_AUTH": 55,
+   "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 179
+   "WITH_API": 227
   },
   "mutatingByAudit": {
-   "ATOMIC": 158,
+   "ATOMIC": 156,
    "ATOMIC_SERVICE": 117,
    "COMPUTE_ONLY": 31,
-   "CRUD_ATOMIC": 86,
+   "CRUD_ATOMIC": 83,
    "EXEMPT_BALLOT_SECRECY": 2,
-   "EXEMPT_UNATTRIBUTABLE": 28,
-   "INTENT_OUTCOME": 31,
-   "NO_WRITES_FOUND": 10,
-   "NONE": 219
+   "EXEMPT_UNATTRIBUTABLE": 27,
+   "INTENT_OUTCOME": 28,
+   "NO_WRITES_FOUND": 9,
+   "NONE": 221
   },
   "mutatingByData": {
-   "AMBIENT_DB": 12,
-   "CRUD_TENANT_TX": 86,
-   "NONE": 344,
-   "SYSTEM_CONTEXT": 55,
-   "TENANT_TX": 185
+   "AMBIENT_DB": 1,
+   "CRUD_TENANT_TX": 83,
+   "NONE": 307,
+   "SYSTEM_CONTEXT": 54,
+   "TENANT_TX": 229
   }
  },
  "routes": [
@@ -64,7 +64,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -192,7 +192,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -217,10 +217,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "SYSTEM_CONTEXT",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -229,10 +229,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -254,10 +254,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -266,10 +266,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -304,10 +304,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -457,7 +457,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -473,7 +473,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -576,7 +576,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -588,7 +588,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -600,7 +600,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -612,7 +612,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "TENANT_TX",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -793,7 +793,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
   {
@@ -802,7 +802,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -853,11 +853,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
-   "audit": "INTENT_OUTCOME"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "admin/pki/signatures/[id]/verify/route.ts",
@@ -865,11 +865,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "NONE"
   },
   {
    "route": "admin/pki/signatures/route.ts",
@@ -892,11 +892,11 @@
     "PUT"
    ],
    "mutating": true,
-   "guard": "ADMIN_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "NONE"
   },
   {
    "route": "admin/pki/workflows/route.ts",
@@ -919,10 +919,10 @@
     "PUT"
    ],
    "mutating": true,
-   "guard": "ADMIN_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -1123,7 +1123,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1136,7 +1136,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1148,7 +1148,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1160,7 +1160,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1172,10 +1172,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -1185,7 +1185,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -1200,7 +1200,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -1209,7 +1209,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1221,7 +1221,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1233,7 +1233,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1258,7 +1258,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1270,7 +1270,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1283,7 +1283,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1295,7 +1295,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1307,7 +1307,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1319,7 +1319,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1331,7 +1331,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -1344,7 +1344,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -1357,10 +1357,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -1372,7 +1372,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -1599,6 +1599,9 @@
    "methods": [
     "GET",
     "PATCH",
+    "POST"
+   ],
+   "retiredMethods": [
     "POST"
    ],
    "mutating": true,
@@ -1833,12 +1836,12 @@
     "GET",
     "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "READ_ONLY"
+   "audit": "CRUD_ATOMIC"
   },
   {
    "route": "arbitration/precedents/[id]/citations/route.ts",
@@ -2426,12 +2429,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
-   "guard": "RETIRED",
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "READ_ONLY"
   },
   {
    "route": "billing/replay-invoice/route.ts",
@@ -3111,7 +3117,7 @@
    "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -3160,7 +3166,7 @@
    "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -3222,10 +3228,10 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -3254,6 +3260,18 @@
    "audit": "INTENT_OUTCOME"
   },
   {
+   "route": "chatbot/sessions/[sessionId]/archive/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
+  },
+  {
    "route": "chatbot/sessions/[sessionId]/messages/route.ts",
    "methods": [
     "GET"
@@ -3262,7 +3280,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -3275,7 +3293,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -3870,12 +3888,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
-   "guard": "RETIRED",
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "READ_ONLY"
   },
   {
    "route": "committees/[id]/meetings/[meetingId]/attendance/route.ts",
@@ -4086,7 +4107,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -4148,12 +4169,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "communications/sms/conversations/[conversationId]/read/route.ts",
@@ -4174,12 +4198,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "communications/sms/route.ts",
@@ -4187,12 +4214,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "communications/surveys/[surveyId]/export/route.ts",
@@ -4532,7 +4562,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -4545,7 +4575,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4596,7 +4626,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4608,7 +4638,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4620,7 +4650,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4632,7 +4662,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4645,7 +4675,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4657,7 +4687,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4669,7 +4699,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4682,7 +4712,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4695,7 +4725,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -4728,11 +4758,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "cron/deadline-overdue/route.ts",
@@ -5159,7 +5189,7 @@
    "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5168,7 +5198,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5194,7 +5224,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5284,7 +5314,7 @@
    "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -5306,7 +5336,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5321,7 +5351,7 @@
    "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -5356,10 +5386,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -5383,7 +5413,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -5396,7 +5426,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -5420,7 +5450,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5432,7 +5462,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5441,10 +5471,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -5492,7 +5522,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5516,7 +5546,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5540,19 +5570,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "READ_ONLY"
-  },
-  {
-   "route": "dues/payment-methods/route.ts",
-   "methods": [
-    "GET"
-   ],
-   "mutating": false,
-   "guard": "WITH_API",
-   "kernel": false,
-   "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5577,7 +5595,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5840,6 +5858,9 @@
     "GET",
     "PATCH"
    ],
+   "retiredMethods": [
+    "DELETE"
+   ],
    "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
@@ -5928,7 +5949,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6173,10 +6194,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6267,7 +6288,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6328,7 +6349,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -6413,7 +6434,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6462,7 +6483,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6511,7 +6532,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6595,7 +6616,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6835,7 +6856,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6872,7 +6893,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6933,7 +6954,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -6945,7 +6966,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -6957,7 +6978,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -6993,7 +7014,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -7111,7 +7132,7 @@
    "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": "EXTERNAL_AUTHORITY",
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -7123,7 +7144,7 @@
    "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": "EXTERNAL_AUTHORITY",
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7135,7 +7156,7 @@
    "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": "EXTERNAL_AUTHORITY",
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7147,7 +7168,7 @@
    "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": "EXTERNAL_AUTHORITY",
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "ATOMIC"
   },
   {
@@ -7159,7 +7180,7 @@
    "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": "EXTERNAL_AUTHORITY",
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7274,10 +7295,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7286,10 +7307,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7300,10 +7321,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7312,10 +7333,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -7324,10 +7345,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -7336,10 +7357,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -7349,10 +7370,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7361,10 +7382,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -7374,10 +7395,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7422,10 +7443,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7567,7 +7588,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -7595,7 +7616,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7610,7 +7631,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "governance/board-packets/route.ts",
@@ -7623,7 +7644,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "governance/bylaws/route.ts",
@@ -7634,7 +7655,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -7922,7 +7943,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -8009,7 +8030,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -8069,7 +8090,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -8081,7 +8102,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8093,7 +8114,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8105,10 +8126,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -8117,7 +8138,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8129,7 +8150,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8141,10 +8162,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -8153,7 +8174,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8177,7 +8198,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8190,7 +8211,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "WITH_API",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8218,7 +8239,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -8685,12 +8706,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "DELEGATED",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "CRUD_ATOMIC",
+   "retiredMethods": [
+    "POST"
+   ]
   },
   {
    "route": "investigations/audit/route.ts",
@@ -8787,7 +8811,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -8799,7 +8823,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -8968,7 +8992,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -9166,7 +9190,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -9205,7 +9229,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -9394,7 +9418,7 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
   {
@@ -9442,10 +9466,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -9601,7 +9625,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -9704,7 +9728,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -9755,7 +9779,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -9982,7 +10006,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -10279,7 +10303,7 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "SYSTEM_CONTEXT",
    "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
@@ -10507,18 +10531,6 @@
    "audit": "NONE"
   },
   {
-   "route": "payment/status/route.ts",
-   "methods": [
-    "GET"
-   ],
-   "mutating": false,
-   "guard": "SESSION_AUTH",
-   "kernel": false,
-   "subordinate": null,
-   "data": "NONE",
-   "audit": "READ_ONLY"
-  },
-  {
    "route": "payments/[id]/duties/route.ts",
    "methods": [
     "GET",
@@ -10537,7 +10549,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "SESSION_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -10692,12 +10704,16 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
-   "guard": "RETIRED",
+   "retiredMethods": [
+    "PATCH",
+    "DELETE"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "pension/trustees/route.ts",
@@ -10705,12 +10721,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
-   "guard": "RETIRED",
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "pilot/apply/[id]/approve-commercial-terms/route.ts",
@@ -11079,7 +11098,7 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -11129,10 +11148,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -11141,10 +11160,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -11201,18 +11220,6 @@
    "audit": "NONE"
   },
   {
-   "route": "profile/me/route.ts",
-   "methods": [
-    "GET"
-   ],
-   "mutating": false,
-   "guard": "SESSION_AUTH",
-   "kernel": false,
-   "subordinate": null,
-   "data": "NONE",
-   "audit": "READ_ONLY"
-  },
-  {
    "route": "profile/roles/route.ts",
    "methods": [
     "GET",
@@ -11231,7 +11238,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "CRON_SECRET",
+   "guard": "NONE",
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -11489,7 +11496,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11501,10 +11508,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -11517,7 +11524,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -11641,10 +11648,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -11692,7 +11699,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11707,7 +11714,7 @@
     "PUT"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11722,10 +11729,10 @@
     "PUT"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -11737,7 +11744,7 @@
     "PUT"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11762,7 +11769,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11776,7 +11783,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11791,7 +11798,7 @@
    "guard": "NONE",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -12253,7 +12260,7 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
   {
@@ -12265,7 +12272,7 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -12413,7 +12420,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -12465,7 +12472,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -12521,30 +12528,6 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
-  },
-  {
-   "route": "whop/create-checkout/route.ts",
-   "methods": [
-    "POST"
-   ],
-   "mutating": true,
-   "guard": "SESSION_AUTH",
-   "kernel": false,
-   "subordinate": null,
-   "data": "NONE",
-   "audit": "EXEMPT_UNATTRIBUTABLE"
-  },
-  {
-   "route": "whop/unauthenticated-checkout/route.ts",
-   "methods": [
-    "POST"
-   ],
-   "mutating": true,
-   "guard": "NONE",
-   "kernel": false,
-   "subordinate": null,
-   "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
   },
   {
    "route": "workaid/consent-text/proposals/[proposalId]/adopt/route.ts",

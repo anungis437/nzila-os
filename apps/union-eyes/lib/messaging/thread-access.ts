@@ -2,6 +2,7 @@ import { and, asc, desc, eq, or, sql, type SQL } from 'drizzle-orm'
 import { messages, messageThreads } from '@/db/schema/messages-schema'
 import { inAppNotifications } from '@/db/schema'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { messageThreadUrl } from '@/lib/notifications/links'
 import { notifyTriagers } from '@/lib/messaging/thread-assignment'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import { loadParticipationContext, participationAllows, type ConversationRow } from '@/lib/messaging/conversation-participation'
@@ -210,7 +211,7 @@ export async function postThreadMessage(
       message: 'You have a new message in a secure conversation.',
       type: 'info',
       actionLabel: 'Open conversation',
-      actionUrl: recipientIsMember ? `/dashboard/messages?thread=${thread.id}` : `/dashboard/messages/staff?thread=${thread.id}`,
+      actionUrl: messageThreadUrl(thread.id, recipientIsMember ? 'member' : 'staff'),
       data: { event: 'thread_message', threadId: thread.id },
     })
   }

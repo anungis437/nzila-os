@@ -18,6 +18,9 @@ const mocks = vi.hoisted(() => ({
   mockFetch: vi.fn(),
   mockCatch: vi.fn(),
   mockFirebaseSend: vi.fn(),
+  systemOpen: 0,
+  // Whether the caller holds a tenant transaction (the fake of db/tenant-context-storage returns the same mocked handle while it does).
+  callerOpen: true,
 }));
 
 vi.mock('@/db', () => ({
@@ -27,6 +30,24 @@ vi.mock('@/db', () => ({
     update: mocks.mockUpdate,
     delete: mocks.mockDelete,
   },
+}));
+
+// A delivery step of a caller with no `systemSteps` runs on the transaction the caller holds.
+vi.mock('@/db/system-context-storage', () => ({ getActiveSystemDb: () => undefined }));
+vi.mock('@/db/tenant-context-storage', () => ({
+  getActiveTenantDb: () => (mocks.callerOpen ? { insert: mocks.mockInsert, select: mocks.mockSelect, update: mocks.mockUpdate, delete: mocks.mockDelete } : undefined),
+}));
+
+// A system step is a short transaction of its own: the fake counts how many are open at any moment.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn(async (operation: (tx: unknown) => Promise<unknown>) => {
+    mocks.systemOpen += 1;
+    try {
+      return await operation({ insert: mocks.mockInsert, select: mocks.mockSelect, update: mocks.mockUpdate, delete: mocks.mockDelete });
+    } finally {
+      mocks.systemOpen -= 1;
+    }
+  }),
 }));
 
 vi.mock('uuid', () => ({
@@ -767,6 +788,7 @@ describe('NotificationService', () => {
           action: 'NOTIFICATION_SENT',
           userId: 'user-1',
         }),
+        expect.anything(),
       );
     });
 
@@ -789,6 +811,7 @@ describe('NotificationService', () => {
         expect.objectContaining({
           description: expect.stringContaining('+15550001111'),
         }),
+        expect.anything(),
       );
     });
 
@@ -815,7 +838,69 @@ describe('NotificationService', () => {
         expect.objectContaining({
           description: expect.stringContaining('member-42'),
         }),
+        expect.anything(),
       );
+    });
+
+    // A webhook or a job has no tenant session: each database step of the delivery is its own short system transaction, committed before the
+    // provider is called, and none is open while it is.
+    it('with systemSteps, runs every database step in its own short system transaction and calls the provider with none open', async () => {
+      const { withSystemContext } = await import('@/lib/db/with-rls-context');
+      const openDuringProvider: number[] = [];
+      const openDuringInsert: number[] = [];
+      mocks.mockInsert.mockImplementation(() => {
+        openDuringInsert.push(mocks.systemOpen);
+        return { values: vi.fn(() => Promise.resolve([])) };
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', {
+        name: 'mock',
+        send: vi.fn(async () => {
+          openDuringProvider.push(mocks.systemOpen);
+          return { id: 'msg-sys', status: 'sent', sentAt: new Date() };
+        }),
+      });
+      mocks.mockCreateAuditLog.mockResolvedValue(undefined);
+
+      const response = await service.send({ ...emailPayload, userId: 'user-1' }, { systemSteps: true });
+
+      expect(response.status).toBe('sent');
+      expect(openDuringProvider).toEqual([0]);
+      expect(openDuringInsert.length).toBeGreaterThanOrEqual(3);
+      expect(openDuringInsert.every((open) => open === 1)).toBe(true);
+      expect(vi.mocked(withSystemContext).mock.calls.length).toBeGreaterThanOrEqual(openDuringInsert.length);
+      // The audit entry is written on the system step's transaction, not on the ambient handle.
+      expect(mocks.mockCreateAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'NOTIFICATION_SENT' }),
+        expect.objectContaining({ insert: mocks.mockInsert }),
+      );
+    });
+
+    it('without systemSteps, opens no system transaction of its own', async () => {
+      const { withSystemContext } = await import('@/lib/db/with-rls-context');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', {
+        name: 'mock',
+        send: vi.fn().mockResolvedValue({ id: 'msg-amb', status: 'sent', sentAt: new Date() }),
+      });
+
+      await service.send({ ...emailPayload, userId: 'user-1' });
+
+      expect(withSystemContext).not.toHaveBeenCalled();
+    });
+
+    it('without systemSteps and with no transaction held by the caller, writes nothing and sends nothing instead of using the pooled connection', async () => {
+      const providerSend = vi.fn().mockResolvedValue({ id: 'msg-none', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send: providerSend });
+      mocks.callerOpen = false;
+      try {
+        await expect(service.send({ ...emailPayload, userId: 'user-1' })).rejects.toThrow(/needs a tenant or system transaction/);
+      } finally {
+        mocks.callerOpen = true;
+      }
+      expect(providerSend).not.toHaveBeenCalled();
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
     });
 
     it('does not call the provider when the delivery ledger rejects the attempt', async () => {

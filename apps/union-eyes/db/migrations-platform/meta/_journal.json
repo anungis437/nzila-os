@@ -561,6 +561,13 @@
       "when": 1759350000000,
       "tag": "0078_staging_proof_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1759360000000,
+      "tag": "0079_deadline_reminders_pending_partial",
+      "breakpoints": true
     }
   ]
 }

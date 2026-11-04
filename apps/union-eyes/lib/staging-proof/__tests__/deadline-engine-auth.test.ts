@@ -14,7 +14,9 @@ const ENV = {
   TARGET_ENVIRONMENT: 'staging',
   STAGING_PROOFS_ENABLED: 'true',
   UNION_EYES_RUNTIME_ID: 'union-eyes-staging',
-  STAGING_PROOF_SECRET: 'test-proof-secret',
+  STAGING_PROOF_SECRET: '5d0a7e91c3b84f26a1e7d905bc38f4a2617d9e0c4ab35f87',
+  UE_ENVIRONMENT: 'staging',
+  NZILA_MODE: 'staging',
 };
 
 function request(overrides: Partial<{ timestamp: string; nonce: string; signature: string; scenario: string; env: typeof ENV }> = {}) {
@@ -50,6 +52,20 @@ describe('deadline-engine staging proof authorization', () => {
   it('rejects a disabled proof route and a wrong application identity', () => {
     expect(request({ env: { ...ENV, STAGING_PROOFS_ENABLED: 'false' } }).authorized).toBe(false);
     expect(request({ env: { ...ENV, UNION_EYES_RUNTIME_ID: 'union-eyes-pilot' } }).authorized).toBe(false);
+  });
+
+  it('is impossible on a production deployment: any identity saying production refuses it, whatever else is set', () => {
+    for (const production of [{ UE_ENVIRONMENT: 'production' }, { UE_ENVIRONMENT: 'prod' }, { NZILA_MODE: 'production' }]) {
+      expect(request({ env: { ...ENV, ...production } }).authorized, JSON.stringify(production)).toBe(false);
+    }
+    // The staging deployment is named by its identity and needs nothing else.
+    expect(request({ env: { ...ENV, UE_ENVIRONMENT: 'staging', NZILA_MODE: undefined } }).authorized).toBe(true);
+  });
+
+  it('is impossible without a real secret: missing, a placeholder, repeated characters or short', () => {
+    for (const weak of [undefined, '', 'change-me', 'test-proof-secret', 'a'.repeat(48), '0123456789abcdef']) {
+      expect(request({ env: { ...ENV, STAGING_PROOF_SECRET: weak } }).authorized, String(weak)).toBe(false);
+    }
   });
 
   it('rejects invalid, expired, and malformed signed requests', () => {

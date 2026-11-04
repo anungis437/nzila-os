@@ -6,20 +6,21 @@
  * 
  * Usage:
  * ```typescript
- * import { checkEntitlement, consumeCredits, getOrganizationCredits } from '@/lib/services/entitlements';
+ * import { checkEntitlement, getOrganizationCredits } from '@/lib/services/entitlements';
  * 
  * // Check if feature is allowed
  * const result = await checkEntitlement(orgId, 'ai_summarize');
  * if (!result.allowed) {
  *   return { error: 'Upgrade required', upgradeUrl: '/pricing' };
  * }
- * 
- * // Consume credits for feature usage
- * await consumeCredits(orgId, 1);
  * ```
+ *
+ * Credits are read, never spent: nothing in the application consumes, adds or resets them, so the credit check below can only fail for an
+ * organization whose settings were given a balance of zero or less. (A spending path existed and was removed with UE-CONV-H-019: it had no caller, and
+ * every one of its writes replaced the organization's whole settings document with the credit counter.)
  */
 
-import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { organizations } from '@/db/schema-organizations';
 import { eq } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -179,13 +180,15 @@ export async function checkEntitlement(
 ): Promise<EntitlementCheck> {
   try {
     // Get organization's subscription tier
-    const org = await db.query.organizations.findFirst({
-      where: eq(organizations.id, organizationId),
-      columns: {
-        subscriptionTier: true,
-        featuresEnabled: true,
-      },
-    });
+    const org = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.organizations.findFirst({
+        where: eq(organizations.id, organizationId),
+        columns: {
+          subscriptionTier: true,
+          featuresEnabled: true,
+        },
+      }),
+    );
 
     if (!org) {
       logger.warn('Entitlement check for unknown organization', { organizationId, feature });
@@ -288,249 +291,42 @@ export async function checkEntitlements(
 export async function getOrganizationCredits(
   organizationId: string
 ): Promise<CreditBalance> {
-  try {
-    const org = await db.query.organizations.findFirst({
+  const org = await withRLSContext({ organizationId }, (tx) =>
+    tx.query.organizations.findFirst({
       where: eq(organizations.id, organizationId),
       columns: {
         subscriptionTier: true,
         settings: true,
       },
-    });
+    }),
+  );
 
-    const tier = ((org?.subscriptionTier) as SubscriptionTier) || 'free';
-    
-    // Enterprise has unlimited credits
-    if (tier === 'enterprise') {
-      return {
-        organizationId,
-        credits: 0, // 0 means unlimited
-        tier: 'enterprise',
-      };
-    }
+  const tier = ((org?.subscriptionTier) as SubscriptionTier) || 'free';
 
-    // Get credits from settings or use tier default
-    const settings = (org?.settings as Record<string, unknown>) || {};
-    const credits = (settings.credits as number) ?? TIER_CREDITS[tier];
-    const renewalDate = settings.nextCreditRenewal 
-      ? new Date(settings.nextCreditRenewal as string)
-      : getNextRenewalDate();
-
+  // Enterprise has unlimited credits
+  if (tier === 'enterprise') {
     return {
       organizationId,
-      credits,
-      tier,
-      renewalDate,
-    };
-
-  } catch (error) {
-    logger.error('Failed to get credits', error instanceof Error ? error : new Error(String(error)), {
-      organizationId,
-    });
-    
-    // Return default for tier on error
-    const tier: SubscriptionTier = 'free';
-    return {
-      organizationId,
-      credits: TIER_CREDITS[tier],
-      tier,
+      credits: 0, // 0 means unlimited
+      tier: 'enterprise',
     };
   }
+
+  // Get credits from settings or use tier default
+  const settings = (org?.settings as Record<string, unknown>) || {};
+  const credits = (settings.credits as number) ?? TIER_CREDITS[tier];
+  const renewalDate = settings.nextCreditRenewal 
+    ? new Date(settings.nextCreditRenewal as string)
+    : getNextRenewalDate();
+
+  return {
+    organizationId,
+    credits,
+    tier,
+    renewalDate,
+  };
 }
 
-/**
- * Consume credits for feature usage
- * Returns false if insufficient credits (non-enterprise only)
- */
-export async function consumeCredits(
-  organizationId: string,
-  amount: number,
-  feature?: GatedFeature
-): Promise<{
-  success: boolean;
-  remainingCredits: number;
-  error?: string;
-}> {
-  try {
-    const balance = await getOrganizationCredits(organizationId);
-
-    // Enterprise tier has unlimited credits
-    if (balance.tier === 'enterprise') {
-      return {
-        success: true,
-        remainingCredits: 0, // Unlimited
-      };
-    }
-
-    // Check if enough credits
-    if (balance.credits < amount) {
-      logger.warn('Insufficient credits', {
-        organizationId,
-        requested: amount,
-        available: balance.credits,
-        feature,
-      });
-      
-      return {
-        success: false,
-        remainingCredits: balance.credits,
-        error: `Insufficient credits. Need ${amount}, have ${balance.credits}.`,
-      };
-    }
-
-    // Deduct credits
-    const newBalance = balance.credits - amount;
-    const settings = {};
-    
-    await db
-      .update(organizations)
-      .set({
-        settings: {
-          ...settings,
-          credits: newBalance,
-        } as never,
-      })
-      .where(eq(organizations.id, organizationId));
-
-    logger.info('Credits consumed', {
-      organizationId,
-      amount,
-      remaining: newBalance,
-      feature,
-    });
-
-    return {
-      success: true,
-      remainingCredits: newBalance,
-    };
-
-  } catch (error) {
-    logger.error('Failed to consume credits', error instanceof Error ? error : new Error(String(error)), {
-      organizationId,
-      amount,
-      feature,
-    });
-    
-    return {
-      success: false,
-      remainingCredits: 0,
-      error: 'Failed to process credits',
-    };
-  }
-}
-
-/**
- * Add credits to an organization (admin function, e.g., for purchases)
- */
-export async function addCredits(
-  organizationId: string,
-  amount: number,
-  reason?: string
-): Promise<{
-  success: boolean;
-  newBalance: number;
-}> {
-  try {
-    const balance = await getOrganizationCredits(organizationId);
-    
-    if (balance.tier === 'enterprise') {
-      return {
-        success: true,
-        newBalance: 0, // Unlimited
-      };
-    }
-
-    const newBalance = balance.credits + amount;
-    
-    await db
-      .update(organizations)
-      .set({
-        settings: {
-          credits: newBalance,
-          lastCreditPurchase: new Date().toISOString(),
-          lastCreditReason: reason,
-        } as never,
-      })
-      .where(eq(organizations.id, organizationId));
-
-    logger.info('Credits added', {
-      organizationId,
-      amount,
-      newBalance,
-      reason,
-    });
-
-    return {
-      success: true,
-      newBalance,
-    };
-
-  } catch (error) {
-    logger.error('Failed to add credits', error instanceof Error ? error : new Error(String(error)), {
-      organizationId,
-      amount,
-    });
-    
-    return {
-      success: false,
-      newBalance: 0,
-    };
-  }
-}
-
-/**
- * Reset credits for a new billing cycle (called by cron job)
- */
-export async function resetCreditsForBillingCycle(
-  organizationId: string
-): Promise<{
-  success: boolean;
-  newCredits: number;
-}> {
-  try {
-    const balance = await getOrganizationCredits(organizationId);
-    
-    if (balance.tier === 'enterprise') {
-      return {
-        success: true,
-        newCredits: 0,
-      };
-    }
-
-    const newCredits = TIER_CREDITS[balance.tier];
-    
-    await db
-      .update(organizations)
-      .set({
-        settings: {
-          credits: newCredits,
-          lastCreditReset: new Date().toISOString(),
-          nextCreditRenewal: getNextRenewalDate().toISOString(),
-        } as never,
-      })
-      .where(eq(organizations.id, organizationId));
-
-    logger.info('Credits reset for billing cycle', {
-      organizationId,
-      tier: balance.tier,
-      newCredits,
-    });
-
-    return {
-      success: true,
-      newCredits,
-    };
-
-  } catch (error) {
-    logger.error('Failed to reset credits', error instanceof Error ? error : new Error(String(error)), {
-      organizationId,
-    });
-    
-    return {
-      success: false,
-      newCredits: 0,
-    };
-  }
-}
 
 // ============================================================================
 // HELPER FUNCTIONS

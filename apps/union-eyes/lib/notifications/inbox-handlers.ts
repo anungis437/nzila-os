@@ -31,7 +31,10 @@ const createSchema = z.object({
   expiresAt: z.string().datetime().refine((value) => new Date(value).getTime() > Date.now(), 'expiresAt must be in the future').optional(),
 }).strict();
 
-/** The inbox read, shared by every path that serves the in-app inbox. */
+/**
+ * The inbox read, shared by every path that serves the in-app inbox. Every route that serves it declares `rlsOrgContext`, so `db` below is
+ * the caller's tenant transaction (an inbox row is the caller's own, in the caller's organization).
+ */
 export const listNotifications = async ({ request, userId, organizationId }: ApiContext) => {
     const url = new URL(request.url);
     // A non-numeric page or limit is a bad request, not a query that fails and then reads as an empty inbox.
@@ -127,7 +130,7 @@ export const createNotification = async ({ body, organizationId, userId }: ApiCo
         .where(and(
           eq(inAppNotifications.organizationId, organizationId),
           sql`(${inAppNotifications.data} -> 'origin' ->> 'userId') = ${userId}`,
-          sql` > now() - interval '1 hour'`,
+          sql`${inAppNotifications.createdAt} > now() - interval '1 hour'`,
         ));
       if ((sent?.total ?? 0) >= STEWARD_NOTIFICATIONS_PER_HOUR) throw new ApiError(ErrorCode.RATE_LIMIT_EXCEEDED, 'Too many notifications sent this hour');
 
