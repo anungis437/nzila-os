@@ -153,6 +153,7 @@ customer documents are loaded.
 - **Credential rotation / maintenance:** section 4; Azure minor-version maintenance in an agreed
   low-traffic window, `azure.extensions` unchanged.
 - **First administrator (R-10: engineering PASS, production execution pending).** An operator-only tool (scripts/production/first-admin-cli.ts): no HTTP surface, no default identity or password, one transaction under an advisory lock, idempotent, canonical audit, enrolled MFA, refuses when any administrator exists. Procedure: [RUNBOOK_FIRST_ADMIN_BOOTSTRAP.md](./RUNBOOK_FIRST_ADMIN_BOOTSTRAP.md).
+- **Staging deploy identities in the new subscription (prepared, not executed).** GitHub OIDC identities, least-privilege roles, digest-only promotion and a reviewed what-if before a manual, change-recorded apply for the isolated V2 staging stack (`nzila-canada-staging-rg`, registry `nzilaventuresacr`). Setup and the full role list: [RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md](./RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md). No production deployment is authorized.
 
 ## 9. Redis and rate limiting
 
