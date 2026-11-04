@@ -34,6 +34,14 @@ describe('Union Eyes V2 Container Apps health probes', () => {
     expect(main).not.toMatch(/deploymentEnvironment:\s*'prod'/)
   })
 
+  it('requires an explicit deployment target and keeps staging identity and data separate by default', () => {
+    expect(main).toMatch(/@allowed\\(\\['staging', 'prod'\\]\\)[\\s\\S]*?param env string(?:\\s|$)/m)
+    expect(main).not.toMatch(/param env string\\s*=/)
+    expect(main).toMatch(/param appDatabaseName string = env == 'prod' \\? 'ue_v2_prod' : 'ue_v2_staging'/)
+    expect(main).toMatch(/param publicHostName string = env == 'prod' \\? 'app\\.unioneyes\\.app' : 'staging\\.unioneyes\\.app'/)
+    expect(main).toMatch(/param appMinReplicas int = env == 'prod' \\? 2 : 1/)
+  })
+
   it('does not label staging as production in the application revision', () => {
     expect(source).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param deploymentEnvironment string/)
     expect(source).toMatch(/name: 'UE_ENVIRONMENT', value: deploymentEnvironment == 'prod' \? 'production' : 'staging'/)
