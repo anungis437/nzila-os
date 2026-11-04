@@ -3,7 +3,7 @@
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 64,
+  "workflowCount": 66,
   "contractTestCount": 306,
   "tsTestFileCount": 3607,
   "pythonTestFileCount": 52,
@@ -914,6 +914,8 @@
     "ue-native-postgres.yml",
     "ue-security-regression.yml",
     "ue-staging-discovery.yml",
+    "ue-v2-staging-build.yml",
+    "ue-v2-staging-deploy.yml",
     "union-eyes-authority-rollout.yml",
     "zonga-check.yml"
   ]

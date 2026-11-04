@@ -9,7 +9,7 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 64 |
+| GitHub Workflows | 66 |
 | Contract Test Files | 306 |
 | TS/JS Test Files | 3607 |
 | Python Test Files | 52 |
@@ -111,5 +111,7 @@
 - ue-native-postgres.yml
 - ue-security-regression.yml
 - ue-staging-discovery.yml
+- ue-v2-staging-build.yml
+- ue-v2-staging-deploy.yml
 - union-eyes-authority-rollout.yml
 - zonga-check.yml
