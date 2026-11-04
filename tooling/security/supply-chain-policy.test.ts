@@ -104,6 +104,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Missing package identity'))).toBe(true)
   })
 
+  it('rejects conflicting package aliases even when one matches an active waiver', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-conflicting-package-alias.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('Conflicting or malformed package identities'))).toBe(true)
+  })
+
   it('rejects an expired waiver without extending its validity', () => {
     const afterExpiry = new Date('2026-11-05T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
