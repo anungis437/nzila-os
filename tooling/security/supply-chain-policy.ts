@@ -456,7 +456,7 @@ export function checkVulnerabilityPolicy(
       const advisory = raw as Record<string, unknown>
       // Bind the advisory map key to its declared identity. A mismatched ID
       // must never inherit a waiver belonging to a different finding.
-      if (advisory.id !== undefined && String(advisory.id) !== key) {
+      if (advisory.id !== undefined && (typeof advisory.id !== 'string' || advisory.id !== key)) {
         throw new Error(`Advisory identity mismatch: ${key}`)
       }
       const severity = advisory.severity
@@ -480,7 +480,7 @@ export function checkVulnerabilityPolicy(
       // blocking threshold. Otherwise incomplete scanner evidence can pass.
       const packageAliases = [advisory.package, advisory.module_name, advisory.name]
         .filter((candidate) => candidate !== undefined)
-      if (packageAliases.some((candidate) => typeof candidate !== 'string' || !candidate.trim() || candidate !== candidate.trim()) ||
+      if (packageAliases.some((candidate) => typeof candidate !== 'string' || !candidate.trim() || candidate !== candidate.trim() || /[\\u0000-\\u001f\\u007f]/.test(candidate)) ||
           new Set(packageAliases.map((candidate) => (candidate as string).trim())).size > 1) {
         throw new Error(`Conflicting or malformed package identities for advisory: ${key}`)
       }
