@@ -46,6 +46,13 @@ function safeResolveUnderRoot(filePath: string): string {
 }
 
 function readUtf8(filePath: string): string {
+  // Lexical containment is insufficient: a repository symlink can resolve to
+  // arbitrary host files. Refuse any audit/SBOM input outside the real root.
+  const realRoot = fs.realpathSync(ROOT)
+  const realInput = fs.realpathSync(filePath)
+  if (!isWithinBase(realInput, realRoot)) {
+    throw new Error('Security input resolves outside repository root')
+  }
   return child_process.execFileSync(
     process.execPath,
     ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', filePath],
