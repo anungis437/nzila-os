@@ -20,6 +20,7 @@ import { requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
 import { createHash } from 'crypto';
 import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { incidentInstant } from '@/lib/cases/incident-instant';
 
 export const dynamic = 'force-dynamic';
 
@@ -143,7 +144,7 @@ export async function POST(request: Request) {
               claimType,
               priority: record.priority as 'low' | 'medium' | 'high' | 'critical',
               description: record.description,
-              incidentDate: new Date(record.incidentDate),
+              incidentDate: incidentInstant(record.incidentDate),
               location: record.location ?? null,
               desiredOutcome: record.desiredOutcome ?? '',
               isAnonymous: false,

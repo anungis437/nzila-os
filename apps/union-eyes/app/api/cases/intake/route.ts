@@ -24,6 +24,7 @@ import { createHash } from 'crypto';
 import { claims } from '@/db/schema/claims-schema';
 import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { incidentInstant } from '@/lib/cases/incident-instant';
 import { enforceDecision, type DecisionProofAdapter } from '@nzila/decision-core';
 import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
 import { platformDb } from '@nzila/db/platform';
@@ -206,7 +207,7 @@ export async function POST(request: Request) {
           claimType: mapCaseTypeToClaimType(data.caseType),
           priority: data.priority as 'low' | 'medium' | 'high' | 'critical',
           description: data.description,
-          incidentDate: new Date(data.incidentDate),
+          incidentDate: incidentInstant(data.incidentDate),
           location: data.location,
           desiredOutcome: data.desiredOutcome ?? '',
           isAnonymous: data.isAnonymous,
