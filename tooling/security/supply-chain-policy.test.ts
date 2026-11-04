@@ -139,6 +139,17 @@ describe('security audit policy: fail closed', () => {
 
 
 describe('security license policy: exact allowlist', () => {
+  it('rejects a forbidden SPDX expression even when another entry claims MIT', () => {
+    const violations = validateSbomLicenses(fixture('sbom-expression-evidence.json'))
+    expect(violations.map((item) => item.package)).toEqual(['forbidden-expression'])
+    expect(violations[0]?.status).toBe('forbidden')
+  })
+
+  it('rejects an allowed license object paired with a contradictory SPDX expression', () => {
+    expect(() => validateSbomLicenses(fixture('sbom-expression-conflict.json')))
+      .toThrow('Ambiguous SPDX license evidence')
+  })
+
   it('rejects an empty SBOM inventory instead of treating it as proof of compliance', () => {
     expect(() => validateSbomLicenses(fixture('sbom-empty-inventory.json')))
       .toThrow('SBOM contains no components to validate')
