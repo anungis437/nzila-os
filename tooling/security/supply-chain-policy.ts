@@ -303,6 +303,7 @@ interface SbomComponent {
   name?: string
   version?: string
   licenses?: Array<{ license?: { id?: string; name?: string } }>
+  components?: SbomComponent[]
   [key: string]: unknown
 }
 
@@ -336,11 +337,25 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
     throw new Error('SBOM contains no components to validate')
   }
 
-  for (const component of sbom.components) {
+  // CycloneDX permits nested component inventories. Validating only the root
+  // array would let forbidden licenses inside nested dependencies evade the gate.
+  const pending: Array<{ component: SbomComponent; depth: number }> = sbom.components.map((component) => ({ component, depth: 0 }))
+  let inspected = 0
+  while (pending.length > 0) {
+    const { component, depth } = pending.pop()!
+    if (++inspected > 100000 || depth > 64) {
+      throw new Error('SBOM component inventory exceeds validation limits')
+    }
     if (!component || typeof component !== 'object' || Array.isArray(component) ||
         typeof component.name !== 'string' || !component.name.trim() ||
         typeof component.version !== 'string' || !component.version.trim()) {
       throw new Error('SBOM contains a component without canonical name and version')
+    }
+    if (component.components !== undefined) {
+      if (!Array.isArray(component.components)) {
+        throw new Error(`Malformed nested component inventory for ${component.name}`)
+      }
+      for (const nested of component.components) pending.push({ component: nested, depth: depth + 1 })
     }
     if (!Array.isArray(component.licenses)) {
       throw new Error(`SBOM component ${component.name} has no licenses array`)
