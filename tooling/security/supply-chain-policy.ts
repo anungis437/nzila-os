@@ -55,7 +55,7 @@ function readUtf8(filePath: string): string {
   }
   return child_process.execFileSync(
     process.execPath,
-    ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', filePath],
+    ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', realInput],
     { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
   )
 }
