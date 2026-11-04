@@ -1,0 +1,24 @@
+{
+  "advisories": {
+    "test-advisory": {
+      "id": "test-advisory",
+      "severity": "low",
+      "package": "test-package",
+      "ghsa_id": "not-a-ghsa"
+    }
+  },
+  "metadata": {
+    "source": "npm-bulk-advisories",
+    "status": "complete",
+    "lockfile": "pnpm-lock.yaml",
+    "totalDependencies": 2,
+    "vulnerabilities": {
+      "info": 0,
+      "low": 1,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 1
+    }
+  }
+}
