@@ -1,0 +1,31 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "components": [
+    {
+      "type": "library",
+      "name": "unlicensed-empty",
+      "version": "1.0.0",
+      "licenses": []
+    },
+    {
+      "type": "library",
+      "name": "unlicensed-missing",
+      "version": "1.0.0",
+      "licenses": []
+    },
+    {
+      "type": "library",
+      "name": "approved-license",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    }
+  ]
+}
