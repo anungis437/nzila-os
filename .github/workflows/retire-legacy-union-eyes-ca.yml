@@ -84,6 +84,22 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Refuse the new Azure subscription (legacy Union Eyes workflow)
+        if: env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        # The build/production GitHub Environments now resolve to the new subscription
+        # (d562ba7f-...). This workflow targets the retired subscription only; Union Eyes
+        # in the new subscription deploys through ue-v2-staging-deploy.yml.
+        run: |
+          set -euo pipefail
+          ACTUAL="$(az account show --query id -o tsv)"
+          if [ "$ACTUAL" != "5d819f33-d16f-429c-a3c0-5b0e94740ba3" ]; then
+            echo "::error::Authenticated subscription $ACTUAL is not the legacy Union Eyes subscription 5d819f33-d16f-429c-a3c0-5b0e94740ba3. Refusing to run a legacy Union Eyes workflow against it."
+            exit 1
+          fi
 
       - name: Require OIDC (fail-closed — long-lived AZURE_CREDENTIALS fallback removed, Phase 4A)
         if: ${{ env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == '' }}
