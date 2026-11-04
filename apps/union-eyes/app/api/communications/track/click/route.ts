@@ -9,10 +9,6 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
-function requireOrgAccess(_request: NextRequest): boolean {
-  return true;
-}
-
 function getSafeRedirectUrl(url: string | null): string | null {
   if (!url) return null;
   try {
@@ -44,10 +40,6 @@ export async function GET(request: NextRequest) {
 
   if (!redirectTarget) {
     return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 });
-  }
-
-  if (!requireOrgAccess(request)) {
-    return linkRejectionResponse();
   }
 
   if (!campaignId || !recipientId) {

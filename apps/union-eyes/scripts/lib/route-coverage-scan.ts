@@ -118,10 +118,11 @@ function guardOf(source: string): RouteGuard {
   if (/withAdminAuth|withSystemAdminAuth|requireSystemAdmin\(/.test(source)) return 'ADMIN_AUTH'
   if (/withRoleAuth|withEnhancedRoleAuth|withSecureAPI|withMinRole|withApiAuth|\bhasMinRole\(/.test(source)) return 'ROLE_AUTH'
   if (/withOrganizationAuth|withOrganizationMiddleware|withExternalResourceAuth|external-resource-middleware/.test(source)) return 'ORG_AUTH'
-  if (/withApi\(/.test(source)) return /required:\s*false/.test(source) ? 'WITH_API_PUBLIC' : 'WITH_API'
+  // cognitionRoute(engine) is the cognition engines' route factory: it wraps withApi with a signed-in, officer-or-above caller and the knowledge entitlement (lib/api/cognition-route.ts).
+  if (/withApi\(|cognitionRoute\(/.test(source)) return /required:\s*false/.test(source) ? 'WITH_API_PUBLIC' : 'WITH_API'
   if (/CRON_SECRET|verifyCronAuth|cronAuth/i.test(source)) return 'CRON_SECRET'
   if (/verify\w*(Webhook|Signature)|constructEvent|svix|x-signature|stripe-signature/i.test(source)) return 'WEBHOOK_SIGNATURE'
-  if (/requireUser|requireApiAuth|getCurrentUser|\bauth\(\)|getCaseActor\(|requireCaseAction|requirePermission|requireAuth/.test(source)) return 'SESSION_AUTH'
+  if (/requireUser|requireApiAuth|getCurrentUser|\bauth\(\)|authenticateUser\(|getCaseActor\(|requireCaseAction|requirePermission|requireAuth/.test(source)) return 'SESSION_AUTH'
   if (/withClaimedWorkbookAccess|assessment-capability|verifyCapability/.test(source)) return 'CAPABILITY_TOKEN'
   if (/^\s*export\s*(\*|\{[^}]*\})\s*from\s*['"]\.{1,2}\//m.test(source) || /\bimport\s*\{[^}]*\bas\s+Delegate\w+[^}]*\}\s*from\s*['"]\.{1,2}\//.test(source)) return 'DELEGATED'
   return 'NONE'

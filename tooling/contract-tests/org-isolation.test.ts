@@ -67,6 +67,7 @@ const AUTH_CALL_PATTERNS = [
   /requireUser\s*\(/,            // UE/UX auth guard (validates user identity)
   /getAuth\s*\(/,               // Clerk getAuth (low-level auth extraction)
   /cognitionRoute\s*\(/,         // Cognition route factory — wraps withApi() with required auth
+  /verifyTrackingToken\s*\(/,    // UE signed, action-bound tracking-link token: the open and click routes record nothing without it
 ]
 
 /** Public routes that are intentionally exempt from auth requirements. */

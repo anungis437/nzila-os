@@ -10,14 +10,14 @@
    "CRON_SECRET": 1,
    "CRUD_FACTORY": 139,
    "DELEGATED": 17,
-   "NONE": 48,
+   "NONE": 21,
    "ORG_AUTH": 7,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 239,
    "ROLE_AUTH": 105,
-   "SESSION_AUTH": 52,
+   "SESSION_AUTH": 53,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 354,
+   "WITH_API": 380,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -6419,7 +6419,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6443,7 +6443,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6455,7 +6455,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6505,7 +6505,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6517,7 +6517,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6541,7 +6541,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6553,7 +6553,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6565,7 +6565,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6577,7 +6577,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6589,7 +6589,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6601,7 +6601,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6685,7 +6685,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6697,7 +6697,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6709,7 +6709,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6733,7 +6733,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6745,7 +6745,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6757,7 +6757,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6769,7 +6769,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6781,7 +6781,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6805,7 +6805,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6829,7 +6829,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6841,7 +6841,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6878,7 +6878,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6902,7 +6902,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6914,7 +6914,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -6987,7 +6987,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -8039,7 +8039,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",

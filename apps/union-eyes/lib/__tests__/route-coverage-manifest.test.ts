@@ -26,6 +26,23 @@ const PUBLIC_BY_DESIGN: Record<string, string> = {
   'workbook/start/route.ts': 'Public pseudonymous intake: creates a workbook with no tenant and no access to tenant data; the id is a bearer reference until an authenticated user claims it.',
 }
 
+/** Routes that only read or redirect and carry no guard: each is reachable without a session on purpose, and says why. Every other read route answers to withApi, a role or session check, a capability or a secret. */
+const PUBLIC_READS_BY_DESIGN: Record<string, string> = {
+  'auth/[...nextauth]/route.ts': 'The identity provider\'s sign-in, callback and session handlers (@nzila/platform-auth/entra/config): the sign-in flow is the credential.',
+  'auth_core/health/route.ts': 'Health probe that combines the application health answer with the reachability of the Django API; no tenant data.',
+  'health/liveness/route.ts': 'Liveness probe for the platform: answers 200 while the server runs.',
+  'health/route.ts': 'Health probe for the platform: the dependency checks, no tenant data.',
+  'ready/route.ts': 'Readiness probe for the platform: database, queue, storage and catalog admission checks, no tenant data.',
+  'status/route.ts': 'Public system status (lib/monitoring/status-page.ts): service state, no tenant data.',
+  'version/route.ts': 'Build and environment metadata for deployment verification.',
+  'communications/track/click/route.ts': 'Click tracking by a signed, destination-bound link: an unsigned or forged link redirects nowhere (TRACKING_CLICK_OPEN_REDIRECT = NO).',
+  'communications/track/open/[campaignId]/[recipientId]/route.ts': 'Open-tracking pixel: only an action-bound signed token records an open; every other request is answered with the neutral pixel.',
+  'exit-interviews/institutional-cognition/route.ts': 'Legacy slug: a 308 redirect to the organizational-cognition route, which holds the guard; it answers no data.',
+  'exit-interviews/institutional-learning/route.ts': 'Legacy slug: a 308 redirect to the organizational-learning route, which holds the guard; it answers no data.',
+  'exit-interviews/institutional-narratives/route.ts': 'Legacy slug: a 308 redirect to the organizational-narratives route, which holds the guard; it answers no data.',
+  'exit-interviews/institutional-precedent/route.ts': 'Legacy slug: a 308 redirect to the organizational-precedent route, which holds the guard; it answers no data.',
+}
+
 describe('route coverage manifest (UE-CONV-K-008)', () => {
   it('is current: every route file is recorded exactly as the scanner sees it', () => {
     expect(manifest.routes).toEqual(fresh)
@@ -39,6 +56,18 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     const unguarded = fresh.filter((e) => e.mutating && e.guard === 'NONE').map((e) => e.route)
     expect(unguarded.filter((r) => !(r in PUBLIC_BY_DESIGN))).toEqual([])
     expect(Object.keys(PUBLIC_BY_DESIGN).filter((r) => !unguarded.includes(r))).toEqual([])
+  })
+
+  it('lists no read route without an authentication mechanism, except the documented public ones', () => {
+    const open = fresh.filter((e) => !e.mutating && e.guard === 'NONE').map((e) => e.route)
+    expect(open.filter((r) => !(r in PUBLIC_READS_BY_DESIGN))).toEqual([])
+    expect(Object.keys(PUBLIC_READS_BY_DESIGN).filter((r) => !open.includes(r))).toEqual([])
+  })
+
+  it('does not record a route as unguarded when it is written with a factory or a session check that guards it', () => {
+    for (const e of fresh.filter((r) => r.guard === 'NONE')) {
+      expect(readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8'), e.route).not.toMatch(/\bwithApi\(|\bcognitionRoute\(|\bauthenticateUser\(/)
+    }
   })
 
   it('bounds every public write with a control the route can be shown to carry', () => {

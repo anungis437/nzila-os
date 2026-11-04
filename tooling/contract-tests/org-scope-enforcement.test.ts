@@ -122,6 +122,7 @@ describe('Org-scope enforcement patterns', () => {
     content.includes('auth()') ||
     content.includes('getAuth(') ||
     content.includes('requirePlatformRole(') ||
+    content.includes('verifyTrackingToken(') ||   // UE signed, action-bound tracking-link token: the open and click routes record nothing without it
     content.includes('cognitionRoute(')
 
   it('ORG-ENFC-001: org-scoped apps use withOrgScope or requireOrgAccess in API routes', () => {

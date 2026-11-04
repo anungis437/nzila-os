@@ -153,6 +153,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'withOrgWrite(',              // Write-restricted org-scoped guard (withOrgScope + canWrite role check)
     'withRequiredRole(',          // TrustCore role-based auth guard
     'cognitionRoute(',            // Cognition route factory — wraps withApi() with required auth (apps/union-eyes/lib/api/cognition-route.ts)
+    'verifyTrackingToken(',       // union-eyes signed, action-bound tracking-link token (lib/communications/tracking-token.ts): the open and click routes record nothing without it
   ]
 
   // Routes that are explicitly public
