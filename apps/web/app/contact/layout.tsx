@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Contact',
-  description: 'Get in touch with Nzila Ventures — partnerships, investment inquiries, or platform demos. Reach our team today.',
+  description: 'Connect with the Nzila Ventures team about Union Eyes pilot discovery, CIVIC institutional briefings, partnerships, and responsible software design.',
   openGraph: {
     title: 'Contact Nzila Ventures',
-    description: 'Partnerships, investment inquiries, and platform demos.',
-    images: [{ url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Modern open-plan office with large windows and natural light' }],
+    description: 'Start a human conversation about Union Eyes, CIVIC, institutional continuity, or collaboration.',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Nzila Ventures — Human-centered institutional software' }],
   },
   alternates: { canonical: '/contact' },
 };

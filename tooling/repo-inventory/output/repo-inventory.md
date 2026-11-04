@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 260 |
 | GitHub Workflows | 64 |
 | Contract Test Files | 305 |
-| TS/JS Test Files | 3604 |
+| TS/JS Test Files | 3606 |
 | Python Test Files | 52 |
 
 ## Apps
@@ -43,7 +43,7 @@
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 93 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 108 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 100 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 462 | Africa-first music distribution, streaming, and royalty management platform. |
 

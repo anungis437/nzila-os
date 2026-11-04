@@ -5,7 +5,7 @@
   "workspacePackageCount": 260,
   "workflowCount": 64,
   "contractTestCount": 305,
-  "tsTestFileCount": 3604,
+  "tsTestFileCount": 3606,
   "pythonTestFileCount": 52,
   "apps": [
     {
@@ -783,7 +783,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 93
+      "codeFileCount": 108
     },
     {
       "name": "weekone",

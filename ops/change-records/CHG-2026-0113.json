@@ -1,0 +1,36 @@
+{
+  "change_id": "CHG-2026-0113",
+  "title": "Web production: rebuild in the new Azure subscription and release the human-centered public site (PR #1044)",
+  "description": "The previous Azure subscription (5d819f33-d16f-429c-a3c0-5b0e94740ba3) was disabled, which suspended nzila-canada-prod-env (ManagedClusterSuspended) and took nzilaventures.com down. Production web was rebuilt in the new subscription (d562ba7f-d891-4504-a489-10917c0ebaaf, Canada Central): resource group nzila-canada-prod-rg, ACR nzilaventuresacr, Log Analytics nzila-canada-prod-law (0.5 GB/day cap), Container Apps environment nzila-canada-prod-env and container app nzila-os-web-prod (0.25 vCPU / 0.5 GiB, min replicas 0, system-assigned identity with AcrPull). GitHub OIDC identities nzila-os-build (AcrPush) and nzila-os-deploy-prod (Contributor on the resource group) were created for the build and production environments. Cloudflare DNS for nzilaventures.com and www was repointed and managed certificates were bound. A bridge image built from the PR #1044 branch was deployed manually to restore service. This change runs the governed pipeline (.github/workflows/deploy-web-production.yml, now targeting nzilaventuresacr) from main at the merge of PR #1044 so production runs a digest-pinned, inspected artifact built from main: it carries the human-centered public site redesign, site search, system-status/security links, careers page, maturity ledger, and the status page now probing production hostnames. Approver: Aubert Nungisa (anungis437), platform owner, holding service_owner and change_manager; go-live authorized 2026-10-31 by explicit instruction ('approved, it can go live, proceed through all required steps').",
+  "service": "web",
+  "environment": "PROD",
+  "change_type": "NORMAL",
+  "risk_level": "MEDIUM",
+  "impact_summary": "Public marketing web app only. One image swap on nzila-os-web-prod (single revision, min replicas 0). No database, schema or role change. New subscription, registry and identities are already in place. Union Eyes at app.unioneyes.app and other apps are not deployed by this change and still point at the retired environment; the status page will report Union Eyes as an outage until it is redeployed.",
+  "requested_by": "anungis437",
+  "approvers_required": [
+    "service_owner",
+    "change_manager"
+  ],
+  "approved_by": [
+    "service_owner",
+    "change_manager"
+  ],
+  "approval_status": "APPROVED",
+  "implementation_window_start": "2026-10-31T00:00:00Z",
+  "implementation_window_end": "2026-11-07T23:59:59Z",
+  "rollback_plan": "The deploy job captures the previous revision and image and, if the post-deploy proof fails, runs az containerapp update back to that image automatically. Manual rollback: az containerapp update --name nzila-os-web-prod --resource-group nzila-canada-prod-rg --image nzilaventuresacr.azurecr.io/nzila/web@sha256:853e14ffa034db37134013dc2b2f50abc54c38ffbf632d76b97496808a24c59e (the bridge image currently serving) or a later digest from the run summary. DNS stays DNS-only at Cloudflare, so no DNS change is needed to roll back.",
+  "test_evidence_refs": [
+    "https://github.com/anungis437/nzila-os/pull/1044",
+    "https://github.com/anungis437/nzila-os/actions/runs/41219265745"
+  ],
+  "linked_prs": [
+    "1044"
+  ],
+  "linked_commits": [
+    "e1ed5b047f5ebabdd601cb719388c8d4b295ccab"
+  ],
+  "status": "APPROVED",
+  "created_at": "2026-10-31T16:45:00Z",
+  "updated_at": "2026-10-31T16:45:00Z"
+}

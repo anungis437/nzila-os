@@ -34,6 +34,8 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -42,6 +44,7 @@ body {
   font-family: var(--font-poppins), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
@@ -366,4 +369,85 @@ body {
   scroll-margin-top: 5rem;
 }
 .doc-prose h2 { border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; }
+
+
+/* Progressive entrance motion: content remains visible when animation is off. */
+@keyframes nzila-enter {
+  from {
+    opacity: 0.82;
+    transform: var(--nzila-reveal-from, translate3d(0, 12px, 0));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nzila-reveal {
+    animation-name: nzila-enter;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  .nzila-reveal,
+  .gradient-text,
+  .shimmer,
+  .pulse-glow {
+    animation: none !important;
+  }
+
+  .hover-lift,
+  .img-zoom img {
+    transition: none !important;
+  }
+
+  .hover-lift:hover,
+  .img-zoom:hover img {
+    transform: none !important;
+  }
+}
+
+/* Human-centered design primitives: readable typography, decisive focus, calm motion. */
+:where(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+:where(p, li) {
+  overflow-wrap: break-word;
+}
+
+:where(button, a, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #b88e3c;
+  outline-offset: 3px;
+}
+
+:where(section[id], div[id][class*="scroll-mt"]) {
+  scroll-margin-top: 6rem;
+}
+
+@media (max-width: 639px) {
+  :where(h1, h2, h3) {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(*, *::before, *::after) {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
