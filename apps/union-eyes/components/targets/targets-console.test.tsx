@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 
 const toastMock = vi.hoisted(() => vi.fn())
+vi.mock('next-intl', () => ({ useLocale: () => 'en-CA' }))
 vi.mock('@/components/ui/use-toast', () => ({ useToast: () => ({ toast: toastMock }) }))
 vi.mock('recharts', () => {
   const Box = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>

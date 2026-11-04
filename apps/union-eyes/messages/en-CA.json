@@ -7582,6 +7582,8 @@
     "locationPlaceholder": "e.g., Section B, Floor 2",
     "witnesses": "Witnesses (Optional)",
     "witnessesPlaceholder": "Names of any witnesses",
+    "fileAnonymously": "File anonymously",
+    "fileAnonymouslyHelp": "Your name and contact details are shown only to you and to the representatives directly handling your case.",
     "supportingDocs": "Supporting Documents (Optional)",
     "uploadInstructions": "Click to upload or drag and drop",
     "uploadFormats": "PDF, DOC, JPG, PNG up to 10MB",

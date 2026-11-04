@@ -69,7 +69,7 @@ describe('claim writes against canonical Django column defaults', () => {
     expect(created.claimId).toMatch(/^[a-f0-9-]{36}$/)
     expect(created.createdAt).toBeInstanceOf(Date)
     expect(created.updatedAt).toBeInstanceOf(Date)
-    expect(created).toMatchObject({organizationId:org,memberId:member,isAnonymous:true,previouslyReported:false,witnessesPresent:false,progress:0,status:'submitted',priority:'medium'})
+    expect(created).toMatchObject({organizationId:org,memberId:member,isAnonymous:false,previouslyReported:false,witnessesPresent:false,progress:0,status:'submitted',priority:'medium'})
   })
 
   it('preserves explicit caller values and generates fresh identifiers for subsequent claims', async () => {

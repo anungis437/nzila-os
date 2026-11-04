@@ -98,5 +98,5 @@ export const formatStatusLabel = (status: string) =>
     .join(' ');
 
 /** A `date` column is a calendar day with no zone: it is shown as that day, not shifted into the viewer's zone (which would read a day early in Canada). */
-export const formatCampaignDate = (value: string | null) =>
-  value === null ? 'Not set' : new Date(value).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+export const formatCampaignDate = (value: string | null, locale: string = 'en-CA') =>
+  value === null ? 'Not set' : new Date(value).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });

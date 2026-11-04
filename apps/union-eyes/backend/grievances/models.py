@@ -105,7 +105,7 @@ class Claims(BaseModel):
     # Ownership
     organization_id = models.UUIDField()
     member_id = models.TextField(null=True, blank=True)  # Auth provider user ID
-    is_anonymous = models.BooleanField(default=True)
+    is_anonymous = models.BooleanField(default=False)  # opt-in; see 0010_claims_is_anonymous_default_false
 
     # Type & State
     claim_type = models.CharField(

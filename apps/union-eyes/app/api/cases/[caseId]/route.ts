@@ -9,6 +9,7 @@ import { claims } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getCaseActor, findReadableCase, redactCaseRow } from '@/lib/cases/case-authorization';
+import { claimIdentitySelect } from '@/lib/cases/claim-identity';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +35,6 @@ export const GET = withApi(
       SELECT c.claim_id        AS "claimId",
              c.claim_number    AS "claimNumber",
              c.organization_id AS "organizationId",
-             c.member_id       AS "memberId",
              c.is_anonymous    AS "isAnonymous",
              c.claim_type      AS "claimType",
              c.status,
@@ -63,9 +63,7 @@ export const GET = withApi(
              c.resolution_outcome AS "resolutionOutcome",
              c.resolved_at       AS "resolvedAt",
              c.progress,
-             m.name   AS "memberName",
-             m.email  AS "memberEmail",
-             m.phone  AS "memberPhone"
+             ${claimIdentitySelect(actor, true)}
       FROM claims c
       LEFT JOIN organization_members m
         ON m.user_id = c.member_id

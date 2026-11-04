@@ -4,6 +4,8 @@ import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 import { deadlineInOrganization as inOrganization } from '@/lib/deadline-engine/deadline-scope';
+import { endOfDayInZone } from '@/lib/deadline-engine/deadline-day';
+import { loadOrganizationTimeZone } from '@/lib/deadline-engine/organization-time-zone';
 
 export type DeadlineConfirmationStatus =
   | 'SYSTEM_CALCULATED'
@@ -42,15 +44,22 @@ export async function confirmDeadline(params: {
   });
 }
 
+/**
+ * `overrideDueDate` is either an instant (a datetime somebody entered, kept as given) or a calendar day ("2026-03-04"), which
+ * falls due at 23:59 that day in the organization's zone (lib/deadline-engine/deadline-day.ts).
+ */
 export async function overrideDeadline(params: {
   organizationId: string;
   deadlineId: string;
   actorId: string;
-  overrideDueDate: Date;
+  overrideDueDate: Date | string;
   overrideReason: string;
 }) {
   const now = new Date();
   return withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    const overrideDueDate = typeof params.overrideDueDate === 'string'
+      ? endOfDayInZone(params.overrideDueDate, (await loadOrganizationTimeZone(params.organizationId)).timeZone)
+      : params.overrideDueDate;
     const [current] = await tx
       .select({
         id: grievanceDeadlines.id,
@@ -67,11 +76,11 @@ export async function overrideDeadline(params: {
       .set({
         confirmationStatus: 'OVERRIDDEN',
         calculatedDueDate: current.calculatedDueDate ?? current.dueDate,
-        overrideDueDate: params.overrideDueDate,
+        overrideDueDate,
         overrideReason: params.overrideReason,
         overrideAt: now,
         overrideBy: params.actorId,
-        dueDate: params.overrideDueDate,
+        dueDate: overrideDueDate,
         updatedAt: now,
       })
       .where(and(eq(grievanceDeadlines.id, params.deadlineId), inOrganization(params.organizationId)))
@@ -81,7 +90,7 @@ export async function overrideDeadline(params: {
       await auditDeadlineConfirmation(tx, 'deadline.overridden', params, {
         deadlineId: updated.id,
         calculatedDueDate: updated.calculatedDueDate?.toISOString(),
-        overrideDueDate: params.overrideDueDate.toISOString(),
+        overrideDueDate: overrideDueDate.toISOString(),
         overrideReason: params.overrideReason,
       });
     }

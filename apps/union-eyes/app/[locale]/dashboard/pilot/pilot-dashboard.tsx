@@ -12,12 +12,14 @@
 import Link from 'next/link';
 
 import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { PilotMetrics } from '@/types/marketing';
 import { calculatePilotHealthBreakdown, getHealthScoreStatus } from '@/lib/pilot/health-scoring';
 import { SystemStatusBadge } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { logger } from '@/lib/logger';
 import { formatDay } from '@/lib/client/day';
+import { formattingLocale } from '@/lib/locales';
 
 export default function PilotDashboard({ supportEmail }: { supportEmail: string }) {
   const [metrics, setMetrics] = useState<PilotMetrics | null>(null);
@@ -342,6 +344,8 @@ function PlatformOverview({
 function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supportEmail: string }) {
   const breakdown = calculatePilotHealthBreakdown(metrics);
   const status = getHealthScoreStatus(breakdown.overall);
+  // Month-first numeric days for English readers, as this screen has always shown them; the reader's own conventions otherwise.
+  const dayLocale = formattingLocale(useLocale(), 'en-US');
 
   return (
     <div>
@@ -514,12 +518,12 @@ function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supp
                 </div>
                 {milestone.targetDate && (
                   <p className="text-sm text-gray-500 mt-2">
-                    Target: {formatDay(milestone.targetDate, 'en-US', 'numeric')}
+                    Target: {formatDay(milestone.targetDate, dayLocale, 'numeric')}
                   </p>
                 )}
                 {milestone.completedAt && (
                   <p className="text-sm text-green-600 mt-2">
-                    Completed: {new Date(milestone.completedAt).toLocaleDateString('en-US')}
+                    Completed: {new Date(milestone.completedAt).toLocaleDateString(dayLocale)}
                   </p>
                 )}
               </div>

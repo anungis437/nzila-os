@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import { useState, useEffect, useCallback, useMemo, createContext, useContext } from 'react';
+import { useLocale } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -218,31 +219,35 @@ interface ExecutiveSummary {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-CA', {
+// Money and days in the reader's language (useLocale): "$1,235" and "Mar 4, 2026" in English, "1 235 $" and "4 mars 2026" in French. Currency stays CAD.
+function formattersFor(locale: string) {
+  const whole = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'CAD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-function formatCurrencyFull(amount: number): string {
-  return new Intl.NumberFormat('en-CA', {
+  });
+  const full = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'CAD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '—';
-  return new Intl.DateTimeFormat('en-CA', {
+  });
+  const day = new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(recordedDay(dateStr));
+  });
+  return {
+    formatCurrency: (amount: number): string => whole.format(amount),
+    formatCurrencyFull: (amount: number): string => full.format(amount),
+    formatDate: (dateStr: string | null): string => (dateStr ? day.format(recordedDay(dateStr)) : '—'),
+  };
+}
+
+function useFormatters() {
+  const locale = useLocale();
+  return useMemo(() => formattersFor(locale), [locale]);
 }
 
 // A change against a period with nothing in it has no percentage: it is not 100%.
@@ -429,6 +434,7 @@ function readSummary(body: unknown): ExecutiveSummary {
 }
 
 export default function FinancialOverview() {
+  const { formatCurrency, formatCurrencyFull, formatDate } = useFormatters();
   const [overview, setOverview] = useState<DuesOverview | null>(null);
   const [dashboard, setDashboard] = useState<DuesDashboard | null>(null);
   const [arrearsCases, setArrearsCases] = useState<ArrearsCase[]>([]);
@@ -1608,6 +1614,7 @@ function PeriodRow({
   previous: number;
   invertTrend?: boolean;
 }) {
+  const { formatCurrency } = useFormatters();
   const change = percentChange(current, previous);
   const isPositive = invertTrend ? (change !== null && change <= 0) : (change !== null && change >= 0);
 
@@ -1749,6 +1756,7 @@ function PeriodStatusBadge({ status }: { status: string }) {
 }
 
 function RemittanceChart({ data }: { data: RemittancePeriod[] }) {
+  const { formatCurrency } = useFormatters();
   const maxAmount = Math.max(...data.map((d) => d.amount), 1);
 
   return (

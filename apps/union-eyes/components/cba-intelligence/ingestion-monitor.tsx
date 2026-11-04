@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
 import { useOperationalHealth } from "./use-operational-health";
@@ -91,9 +92,9 @@ function formatDuration(start: string | null, end: string | null): string {
   return `${mins}m ${secs}s`;
 }
 
-function formatTime(dateStr: string | null): string {
+function formatTime(dateStr: string | null, locale: string): string {
   if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleTimeString("en-CA", {
+  return new Date(dateStr).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -104,6 +105,7 @@ function formatTime(dateStr: string | null): string {
 // ---------------------------------------------------------------------------
 
 export function IngestionMonitor() {
+  const locale = useLocale();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
@@ -268,7 +270,7 @@ export function IngestionMonitor() {
                         {formatDuration(job.startedAt, job.completedAt)}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {formatTime(job.startedAt)}
+                        {formatTime(job.startedAt, locale)}
                       </TableCell>
                       <TableCell>
                         {job.errorMessage && (

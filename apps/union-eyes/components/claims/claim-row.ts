@@ -23,14 +23,18 @@ export interface ClaimRow {
   assignedToName: string | null;
   /** The row comes from the triage queue: metadata only. */
   triageOnly: boolean;
+  /** Filed anonymously and the reader is not one of the people who see who filed it (lib/cases/claim-identity.ts). */
+  memberWithheld: boolean;
 }
 
 export function readClaimRow(value: unknown): ClaimRow {
   const row = asRecord(value, 'case');
+  const memberName = optionalString(row, 'memberName');
+  const triageOnly = row.triageOnly === true;
   return {
     claimId: requiredString(row, 'claimId'),
     claimNumber: optionalString(row, 'claimNumber'),
-    memberName: optionalString(row, 'memberName'),
+    memberName,
     claimType: optionalString(row, 'claimType'),
     status: requiredString(row, 'status'),
     priority: requiredString(row, 'priority'),
@@ -38,6 +42,8 @@ export function readClaimRow(value: unknown): ClaimRow {
     createdAt: requiredDate(row, 'createdAt'),
     assigned: optionalString(row, 'assignedTo') !== null,
     assignedToName: optionalString(row, 'assignedToName'),
-    triageOnly: row.triageOnly === true,
+    triageOnly,
+    // The list route nulls the name of an anonymous filer for readers who may not identify them (lib/cases/claim-identity.ts).
+    memberWithheld: !triageOnly && row.isAnonymous === true && memberName === null,
   };
 }

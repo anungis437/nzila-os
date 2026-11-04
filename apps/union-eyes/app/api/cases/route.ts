@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
 import { getCaseActor, caseReadScope, caseTriageQueueScope, requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
+import { claimIdentitySelect } from '@/lib/cases/claim-identity';
 import type { CaseListRow, CaseQueueRow } from '@/lib/cases/case-list';
 
 const caseCreateSchema = z.object({
@@ -67,7 +68,6 @@ export const GET = withApi(
         SELECT c.claim_id        AS "claimId",
                c.claim_number    AS "claimNumber",
                c.organization_id AS "organizationId",
-               c.member_id       AS "memberId",
                c.is_anonymous    AS "isAnonymous",
                c.claim_type      AS "claimType",
                c.status,
@@ -88,8 +88,7 @@ export const GET = withApi(
                c.resolution_outcome AS "resolutionOutcome",
                c.resolved_at       AS "resolvedAt",
                c.progress,
-               m.name   AS "memberName",
-               m.email  AS "memberEmail",
+               ${claimIdentitySelect(actor)},
                a.name   AS "assignedToName"
         FROM claims c
         LEFT JOIN organization_members m

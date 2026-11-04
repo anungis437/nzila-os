@@ -86,8 +86,10 @@ export function rowsOf(result: unknown): Record<string, unknown>[] {
   return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : []
 }
 
-const longDate = (value: unknown, withWeekday: boolean) =>
-  new Date(value as string).toLocaleDateString('en-US', {
+// The reminder rows carry no recipient language (neither query reads one) and the training e-mails they fill are written in English only
+// (emails/training/*), so the dates are written in the English those e-mails have always used. A caller that knows the recipient's language passes it.
+const longDate = (value: unknown, withWeekday: boolean, locale: string = 'en-US') =>
+  new Date(value as string).toLocaleDateString(locale, {
     ...(withWeekday ? { weekday: 'long' as const } : {}),
     year: 'numeric',
     month: 'long',

@@ -50,7 +50,11 @@ export type ClaimDetailWire = {
   resolutionOutcome: string | null
   resolvedAt: string | null
   progress: number | null
-  /** The member's own record, from a left join: null when the person is no longer a member of the organization. */
+  /**
+   * The member's own record, from a left join: null when the person is no longer a member of the organization, and
+   * null (with memberId) when the claim was filed anonymously and the reader is neither the filer nor a representative
+   * directly on the case (lib/cases/claim-identity.ts). A screen tells the two apart by `isAnonymous`.
+   */
   memberName: string | null
   memberEmail: string | null
   memberPhone: string | null

@@ -117,7 +117,7 @@ export function ClaimListTable({
         if (claim.memberName !== null) return <span className="truncate">{claim.memberName}</span>;
         // The triage queue shows what a case is, never whose: the absence is the design, not a missing value.
         return (
-          <span className="text-sm text-gray-400">{claim.triageOnly ? "Triage queue" : "—"}</span>
+          <span className="text-sm text-gray-400">{claim.triageOnly ? "Triage queue" : claim.memberWithheld ? "Anonymous" : "—"}</span>
         );
       },
     },

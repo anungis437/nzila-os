@@ -47,6 +47,10 @@ beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(fs.readFileSync(new URL('../../../../db/queries/__tests__/fixtures/canonical-claim-write.sql', import.meta.url), 'utf8'))
   await pg.exec('CREATE TABLE organization_members (user_id text, organization_id uuid, name text, email text, phone text)')
+  // The member-identity gate on anonymous claims (lib/cases/claim-identity.ts) reads the live case relationships.
+  await pg.exec(`CREATE TABLE ue_authority_resource_relationships (organization_id uuid, principal_user_id text, resource_type text, resource_id uuid,
+    relation text, status text, revoked_at timestamptz, effective_at timestamptz DEFAULT now(), expires_at timestamptz);
+    CREATE TABLE ue_authority_recusals (organization_id uuid, principal_user_id text, resource_type text, resource_id uuid, lifted_at timestamptz)`)
   m.db = drizzle(pg) as unknown as typeof m.db
   const rows: Array<[keyof typeof ids, string, string, string | null, string]> = [
     ['own', org, 'member-1', null, 'own case'],

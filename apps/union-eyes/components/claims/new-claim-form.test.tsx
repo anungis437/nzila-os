@@ -86,9 +86,22 @@ describe('NewClaimForm', () => {
     expect(url).toBe('/api/cases/intake')
     expect(init.method).toBe('POST')
     expect(JSON.parse(init.body)).toMatchObject({ memberId: 'user-1', title: 'Schedule changed without notice', caseType: 'safety', incidentDate: '2026-01-15' })
-    // The case carries the member's own id and the representative sees who filed it, so the form does not label it anonymous.
-    expect(JSON.parse(init.body)).not.toHaveProperty('isAnonymous')
+    // Anonymous filing is an opt-in: left unticked, the case is filed under the member's name.
+    expect(JSON.parse(init.body)).toMatchObject({ isAnonymous: false })
     expect(h.incrementPilotCaseCount).toHaveBeenCalled()
+  })
+
+  it('files anonymously only when the member ticks the box, and says who will still see them', async () => {
+    intakeAnswers(filed({ success: true, claimId: 'claim-10', claimNumber: 'CASE-10', status: 'submitted', decision: 'allow' }))
+    const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    const box = screen.getByRole('checkbox', { name: 'forms.fileAnonymously' })
+    expect(box).not.toBeChecked()
+    expect(box).toHaveAccessibleDescription('forms.fileAnonymouslyHelp')
+    fireEvent.click(box)
+    fillAndSubmit(container)
+    await waitFor(() => expect(h.trackCaseCreated).toHaveBeenCalledWith('claim-10'))
+    const [, init] = intakeCall()
+    expect(JSON.parse(init.body)).toMatchObject({ memberId: 'user-1', isAnonymous: true })
   })
 
   it('says the case was filed without an id, instead of following nothing', async () => {

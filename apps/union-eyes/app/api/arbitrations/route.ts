@@ -9,6 +9,8 @@ import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { ApiError } from '@/lib/api/errors';
 import { mayWriteArbitrationFor } from '@/lib/arbitration/arbitration-case-authority';
 import { arbitrations, grievances } from '@/db/schema';
+import { ARBITRATION_DEADLINE_DAY_FIELDS } from '@/lib/deadline-engine/deadline-day';
+import { dayDeadlineFieldsAtEndOfDay } from '@/lib/deadline-engine/organization-time-zone';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +27,8 @@ const { GET, POST } = crudRoutes({
     if (!(await mayWriteArbitrationFor({ organizationId, grievanceId: String(values.grievanceId), userId }))) {
       throw ApiError.forbidden('You do not hold this case');
     }
-    return values;
+    // A deadline sent as a calendar day falls due at 23:59 that day in the organization's zone; a datetime is kept as sent.
+    return dayDeadlineFieldsAtEndOfDay(values, ARBITRATION_DEADLINE_DAY_FIELDS, organizationId);
   },
 });
 export { GET, POST };

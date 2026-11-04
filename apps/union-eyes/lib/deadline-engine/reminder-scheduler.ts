@@ -20,6 +20,8 @@ import { db } from '@/db';
 import { logger } from '@/lib/logger';
 import { writeDeadlineAuditEvent } from './audit';
 import { resolveGrievanceDeadlineRecipients } from './recipient-resolver';
+import { isKnownTimeZone, shiftByCalendarDaysInZone } from './deadline-day';
+import { loadOrganizationTimeZone } from './organization-time-zone';
 import type { DeadlineReminderKind, RecipientSnapshot } from './types';
 
 export interface ScheduleGrievanceRemindersInput {
@@ -27,6 +29,10 @@ export interface ScheduleGrievanceRemindersInput {
   grievanceId: string;
   dueDate: Date;
   reminderOffsetsInDays: number[];
+  /**
+   * IANA zone the reminder offsets are counted in, recorded on each reminder row. Omitted: the organization's own zone
+   * (organization-time-zone.ts), so "N days before" keeps the deadline's local time of day across a daylight-saving change.
+   */
   timezone?: string;
   correlationId?: string;
   actor?: { type: 'user' | 'system' | 'worker'; id: string | null };
@@ -49,15 +55,13 @@ export interface ScheduleGrievanceRemindersResult {
 }
 
 /**
- * Compute the scheduled_for timestamp for a reminder N days before dueDate.
- * We compute in UTC then let PostgreSQL interpret the offset — no timezone
- * arithmetic in Node beyond a simple ms subtraction. Callers that need
- * calendar-aware offsets (e.g. "3 business days before, at 08:00 local")
- * MUST expand that into an explicit UTC Date before calling.
+ * The scheduled_for instant for a reminder N days before dueDate: N calendar days earlier at the same wall-clock time in the
+ * organization's zone. A deadline due at 23:59 (a calendar-day deadline, deadline-day.ts) is reminded at 23:59 N days before,
+ * even when a daylight-saving change lies between; in UTC this is plain 24-hour arithmetic. Callers that need business-day
+ * offsets or a fixed send hour MUST expand that into an explicit UTC Date before calling.
  */
-function computeScheduledFor(dueDate: Date, offsetDays: number): Date {
-  const ms = dueDate.getTime() - offsetDays * 24 * 60 * 60 * 1000;
-  return new Date(ms);
+export function computeScheduledFor(dueDate: Date, offsetDays: number, timezone: string): Date {
+  return shiftByCalendarDaysInZone(dueDate, -offsetDays, timezone);
 }
 
 function hashEmail(email: string): string {
@@ -74,11 +78,13 @@ export async function scheduleGrievanceDeadlineReminders(
 ): Promise<ScheduleGrievanceRemindersResult> {
   const correlationId = input.correlationId ?? randomUUID();
   const actor = input.actor ?? { type: 'system', id: null };
-  const timezone = input.timezone ?? 'UTC';
   const reminderKind: DeadlineReminderKind = input.reminderKind ?? 'upcoming';
 
   if (input.reminderOffsetsInDays.length === 0) {
     throw new Error('deadline-engine.scheduler: reminderOffsetsInDays must be non-empty');
+  }
+  if (input.timezone !== undefined && !isKnownTimeZone(input.timezone)) {
+    throw new Error(`deadline-engine.scheduler: timezone "${input.timezone}" is not a known IANA time zone`);
   }
 
   // 1. Recipient resolution (outside the txn — read-only).
@@ -118,12 +124,17 @@ export async function scheduleGrievanceDeadlineReminders(
     };
   }
 
+  const timezone = input.timezone ?? (await loadOrganizationTimeZone(resolution.organizationId)).timeZone;
+
   const now = new Date();
   const skippedInPast: Array<{ offsetDays: number; scheduledFor: string }> = [];
 
   // 2. Compute the planned reminder rows.
   const planned = input.reminderOffsetsInDays.flatMap((offsetDays) => {
-    const scheduledFor = computeScheduledFor(input.dueDate, offsetDays);
+    const computed = computeScheduledFor(input.dueDate, offsetDays, timezone);
+    // An overdue reminder is past its due instant by definition (the overdue cron only finds past-due deadlines): it is
+    // sent as soon as it is detected instead of being discarded as "in the past", which left overdue reminders unsent.
+    const scheduledFor = reminderKind === 'overdue' && computed.getTime() < now.getTime() ? now : computed;
     if (scheduledFor.getTime() < now.getTime()) {
       skippedInPast.push({
         offsetDays,

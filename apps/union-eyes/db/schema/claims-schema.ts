@@ -63,7 +63,7 @@ export const claims = pgTable("claims", {
   claimNumber: varchar("claim_number", { length: 50 }),
   organizationId: uuid("organization_id").notNull().references(() => organizations.id),
   memberId: varchar("member_id", { length: 255 }),
-  isAnonymous: boolean("is_anonymous").default(true).$defaultFn(() => true),
+  isAnonymous: boolean("is_anonymous").default(false).$defaultFn(() => false), // opt-in at filing; lib/cases/claim-identity.ts
   
   // Claim details
   claimType: claimTypeEnum("claim_type"),

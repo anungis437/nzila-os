@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   BarChart3,
@@ -97,8 +98,8 @@ function TrendIcon({ trend }: { trend: string | null | undefined }) {
 }
 
 /** The period end the value belongs to, as the calendar day it was stored for, whatever zone the viewer is in. */
-function formatAsOf(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+function formatAsOf(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
 }
 
 // ---------------------------------------------------------------------------
@@ -243,7 +244,7 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
 // ---------------------------------------------------------------------------
 // Column definitions
 // ---------------------------------------------------------------------------
-function buildColumns(onToggle: (id: string, active: boolean) => void, busyId: string | null): ColumnDef<KPITarget, unknown>[] {
+function buildColumns(onToggle: (id: string, active: boolean) => void, busyId: string | null, locale: string): ColumnDef<KPITarget, unknown>[] {
   return [
     {
       accessorKey: 'name',
@@ -299,7 +300,7 @@ function buildColumns(onToggle: (id: string, active: boolean) => void, busyId: s
               {tv !== null && <span className="text-xs text-muted-foreground">/ {tv.toLocaleString()}</span>}
               <TrendIcon trend={row.original.trend} />
             </div>
-            {row.original.asOf && <div className="text-[11px] text-muted-foreground">as of {formatAsOf(row.original.asOf)}</div>}
+            {row.original.asOf && <div className="text-[11px] text-muted-foreground">as of {formatAsOf(row.original.asOf, locale)}</div>}
             {row.original.stale && <div className="text-[11px] text-muted-foreground">Latest stored value is too old to judge</div>}
           </div>
         );
@@ -338,6 +339,7 @@ function buildColumns(onToggle: (id: string, active: boolean) => void, busyId: s
 // Main console
 // ---------------------------------------------------------------------------
 export function TargetsConsole() {
+  const locale = useLocale();
   const [summary, setSummary] = useState<TargetSummary | null>(null);
   const [targets, setTargets] = useState<KPITarget[]>([]);
   const [loading, setLoading] = useState(true);
@@ -385,7 +387,7 @@ export function TargetsConsole() {
     }
   };
 
-  const columns = buildColumns(handleToggle, busyId);
+  const columns = buildColumns(handleToggle, busyId, locale);
 
   // Radial gauge data for summary
   const gaugeData = summary

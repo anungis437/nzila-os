@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,7 @@ function getStatusIcon(status: string) {
 }
 
 export function OrganizingConsole() {
+  const locale = useLocale();
   const params = useParams<{ locale?: string }>();
   const localePrefix = params?.locale ? `/${params.locale}` : '';
 
@@ -274,14 +276,14 @@ export function OrganizingConsole() {
                       <p className="text-xs text-muted-foreground">Start Date</p>
                       <p className="text-sm font-semibold flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {formatCampaignDate(campaign.campaignStartDate)}
+                        {formatCampaignDate(campaign.campaignStartDate, locale)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Card Deadline</p>
                       <p className="text-sm font-semibold flex items-center gap-1">
                         <Target className="w-3 h-3" />
-                        {formatCampaignDate(campaign.targetCardDeadline)}
+                        {formatCampaignDate(campaign.targetCardDeadline, locale)}
                       </p>
                     </div>
                     <div>

@@ -106,6 +106,7 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
     location: "",
     date: "",
     witnesses: "",
+    isAnonymous: false,
     documents: [] as File[],
   });
 
@@ -252,6 +253,7 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
         description: formData.description,
         desiredOutcome: `Resolution requested for: ${formData.title}`,
         witnesses: formData.witnesses || undefined,
+        isAnonymous: formData.isAnonymous,
       };
 
       const response = await fetch("/api/cases/intake", {
@@ -580,6 +582,26 @@ setIsSubmitting(false);
                     placeholder={t('forms.witnessesPlaceholder')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                </div>
+
+                {/* Anonymous filing (lib/cases/claim-identity.ts decides who still sees the member) */}
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="file-anonymously"
+                    checked={formData.isAnonymous}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isAnonymous: e.target.checked }))}
+                    aria-describedby="file-anonymously-help"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <label htmlFor="file-anonymously" className="block text-sm font-semibold text-gray-900">
+                      {t('forms.fileAnonymously')}
+                    </label>
+                    <p id="file-anonymously-help" className="text-sm text-gray-600">
+                      {t('forms.fileAnonymouslyHelp')}
+                    </p>
+                  </div>
                 </div>
 
                 {/* File Upload */}

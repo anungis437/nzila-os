@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
 import { useOperationalHealth } from "./use-operational-health";
 import {
@@ -74,9 +74,10 @@ function formatDaysAgo(
 function formatDate(
   dateStr: string | null,
   t: (key: string, vars?: Record<string, string | number | Date>) => string,
+  locale: string,
 ): string {
   if (!dateStr) return t("never");
-  return new Date(dateStr).toLocaleDateString("en-CA", {
+  return new Date(dateStr).toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -91,6 +92,7 @@ function parseDays(value: string, fallback: number): number {
 
 export function FreshnessDashboard() {
   const t = useTranslations("freshnessDashboard");
+  const locale = useLocale();
   const [draftAgingDays, setDraftAgingDays] = useState("14");
   const [draftStaleDays, setDraftStaleDays] = useState("30");
   const [draftExpiredDays, setDraftExpiredDays] = useState("90");
@@ -292,7 +294,7 @@ export function FreshnessDashboard() {
                               {formatDaysAgo(source.daysSinceLastSuccess, t)}
                             </div>
                           </TableCell>
-                          <TableCell className="text-sm">{formatDate(source.lastSuccessAt, t)}</TableCell>
+                          <TableCell className="text-sm">{formatDate(source.lastSuccessAt, t, locale)}</TableCell>
                           <TableCell className="text-sm">{source.documentCount}</TableCell>
                           <TableCell>
                             {source.staleDocumentCount > 0 ? (

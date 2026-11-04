@@ -163,16 +163,16 @@ export function abbreviateNumber(value: number): string {
 /**
  * Format date for chart display
  */
-export function formatChartDate(date: Date | string, format: 'short' | 'medium' | 'long' = 'short'): string {
+export function formatChartDate(date: Date | string, format: 'short' | 'medium' | 'long' = 'short', locale: string = 'en-US'): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   
   switch (format) {
     case 'short':
       return `${d.getMonth() + 1}/${d.getDate()}`;
     case 'medium':
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
     case 'long':
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
   }
 }
 

@@ -24,7 +24,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -251,6 +251,9 @@ function LoadFailure({ title, detail, onRetry }: { title: string; detail: string
 
 export default function CLCAnalyticsDashboard() {
   const t = useTranslations('clcAnalyticsDashboard');
+  // CAD in the reader's language: "$1,234.50" in English, "1 234,50 $" in French.
+  const locale = useLocale();
+  const cad = (amount: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 }).format(amount);
   // State management
   const [loadingReport, setLoadingReport] = useState(true);
   const [reportError, setReportError] = useState<string | null>(null);
@@ -383,8 +386,8 @@ export default function CLCAnalyticsDashboard() {
           
           <SummaryCard
             title="Total Amount"
-            value={`$${annualReport.summary.totalAmount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}`}
-            description={`Paid: $${annualReport.summary.paidAmount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}`}
+            value={cad(annualReport.summary.totalAmount)}
+            description={`Paid: ${cad(annualReport.summary.paidAmount)}`}
             icon={<DollarSign className="h-4 w-4" />}
             trend={null}
           />
@@ -399,8 +402,8 @@ export default function CLCAnalyticsDashboard() {
           
           <SummaryCard
             title="Outstanding"
-            value={`$${annualReport.summary.outstandingAmount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}`}
-            description={`Overdue: $${annualReport.summary.overdueAmount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}`}
+            value={cad(annualReport.summary.outstandingAmount)}
+            description={`Overdue: ${cad(annualReport.summary.overdueAmount)}`}
             icon={<AlertTriangle className="h-4 w-4" />}
             trend={annualReport.summary.outstandingAmount > 0 ? 'down' : 'up'}
           />
@@ -687,9 +690,9 @@ export default function CLCAnalyticsDashboard() {
                         <TableCell className="font-medium">{org.organizationName}</TableCell>
                         <TableCell>{org.charterNumber}</TableCell>
                         <TableCell className="text-right">{org.remittanceCount}</TableCell>
-                        <TableCell className="text-right">${org.totalAmount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}</TableCell>
-                        <TableCell className="text-right">${org.paidAmount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}</TableCell>
-                        <TableCell className="text-right">${org.outstandingAmount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}</TableCell>
+                        <TableCell className="text-right">{cad(org.totalAmount)}</TableCell>
+                        <TableCell className="text-right">{cad(org.paidAmount)}</TableCell>
+                        <TableCell className="text-right">{cad(org.outstandingAmount)}</TableCell>
                         <TableCell className="text-right">{org.overdueCount}</TableCell>
                         <TableCell className="text-right">{org.complianceRate.toFixed(1)}%</TableCell>
                         <TableCell>

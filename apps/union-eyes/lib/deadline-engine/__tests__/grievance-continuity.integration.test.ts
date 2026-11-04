@@ -67,6 +67,9 @@ vi.mock('@nzila/platform-auth/auth-execution', () => ({
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 vi.mock('../audit', () => ({ writeDeadlineAuditEvent: mocks.audit }));
+vi.mock('../organization-time-zone', () => ({
+  loadOrganizationTimeZone: vi.fn(async () => ({ timeZone: 'America/Toronto', source: 'default' })),
+}));
 vi.mock('drizzle-orm', () => ({
   and: vi.fn(),
   eq: vi.fn(),

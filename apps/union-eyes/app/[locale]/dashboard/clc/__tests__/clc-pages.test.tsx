@@ -20,6 +20,7 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api-auth-guard', () => ({ requireUser: vi.fn(async () => ({ userId: 'user-1', organizationId: 'clc-org' })) }))
 vi.mock('next/navigation', () => ({ redirect: m.redirect }))
 vi.mock('next-intl/server', () => ({
+  getLocale: vi.fn(async () => 'en-CA'),
   getTranslations: vi.fn(async () => (key: string, options?: { defaultValue?: string }) => options?.defaultValue ?? key),
 }))
 vi.mock('@/lib/organization-utils', () => ({ getUserRoleInOrganization: vi.fn(async () => m.role) }))

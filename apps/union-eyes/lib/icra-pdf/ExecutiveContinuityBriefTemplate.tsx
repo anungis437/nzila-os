@@ -15,7 +15,7 @@
  * Palette: institutional navy, warm grays, muted editorial tones.
  */
 
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import {
   Document,
   Page,
@@ -24,6 +24,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 import type { PdfReportData } from './reportDataMapper';
+import { formattingLocale } from '@/lib/locales';
 import {
   COLORS,
   FONTS,
@@ -373,6 +374,17 @@ const S = StyleSheet.create({
 // Footer (shared across pages)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** The language the report's dates are written in: the report's own `locale` (mapToPdfReportData, en-CA unless the caller chose one). */
+const BriefLocale = createContext<string>('en-CA');
+
+function briefDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 function PageFooter({
   institutionName,
   generatedAt,
@@ -380,11 +392,7 @@ function PageFooter({
   institutionName?: string;
   generatedAt: Date;
 }) {
-  const dateStr = generatedAt.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const dateStr = briefDate(generatedAt, useContext(BriefLocale));
   return (
     <View style={S.pageFooter} fixed>
       <Text style={S.footerText}>
@@ -401,11 +409,7 @@ function PageFooter({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CoverPage({ data }: { data: PdfReportData }) {
-  const dateStr = data.generatedAt.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const dateStr = briefDate(data.generatedAt, useContext(BriefLocale));
 
   return (
     <Page size={PAGE.size} style={S.coverPage}>
@@ -858,11 +862,7 @@ function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
-  const dateStr = data.generatedAt.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const dateStr = briefDate(data.generatedAt, useContext(BriefLocale));
 
   return (
     <Page size={PAGE.size} style={S.page}>
@@ -965,6 +965,7 @@ export function ExecutiveContinuityBriefTemplate({
       creator="UnionEyes ICRA Platform"
       producer="UnionEyes / Nzila OS"
     >
+      <BriefLocale.Provider value={formattingLocale(data.locale)}>
       <CoverPage data={data} />
       <ExecutiveSummaryPage data={data} />
       <ContinuityProfilePage data={data} />
@@ -975,6 +976,7 @@ export function ExecutiveContinuityBriefTemplate({
       <ExecutiveReflectionPage data={data} />
       {data.stabilizationMovement ? <StabilizationMovementAppendixPage data={data} /> : null}
       <AssessmentMetadataPage data={data} />
+      </BriefLocale.Provider>
     </Document>
   );
 }

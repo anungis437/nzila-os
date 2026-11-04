@@ -32,7 +32,17 @@ describe('readClaimRow', () => {
       assigned: true,
       assignedToName: 'Sam Lee',
       triageOnly: false,
+      memberWithheld: false,
     });
+  });
+
+  it('marks the member withheld on an anonymous case the reader may not identify, and only then', () => {
+    expect(readClaimRow({ ...full, isAnonymous: true, memberId: null, memberName: null })).toMatchObject({ memberName: null, memberWithheld: true });
+    // The filer, or a representative on the case, gets the identity back from the route: nothing is withheld.
+    expect(readClaimRow({ ...full, isAnonymous: true })).toMatchObject({ memberName: 'Ana Roy', memberWithheld: false });
+    // A former member on a named case has no name either, but nothing was withheld.
+    expect(readClaimRow({ ...full, isAnonymous: false, memberName: null })).toMatchObject({ memberWithheld: false });
+    expect(readClaimRow({ ...full, isAnonymous: true, memberId: null, memberName: null, triageOnly: true })).toMatchObject({ memberWithheld: false });
   });
 
   it('keeps what the database leaves empty empty: no member, assignee, number, type or incident date is made up', () => {

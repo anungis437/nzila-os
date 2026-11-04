@@ -420,4 +420,21 @@ describe('reminder-worker', () => {
       expect(deliverArgs.claimUrl).toBe('https://custom.test/g/grievance-custom');
     });
   });
+
+  it('reads the reminder zone back with the claim and counts the days to a 23:59 deadline in it', async () => {
+    // Scheduled 23:59 EST on 5 March 2026, three calendar days before a deadline due 23:59 EDT on 8 March (Toronto springs forward).
+    const scheduledFor = new Date('2026-03-06T04:59:00.000Z');
+    mocks.execute
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([makeRow({ scheduled_for: scheduledFor.toISOString(), offset_days: 3, timezone: 'America/Toronto' })])
+      .mockResolvedValueOnce(makeEligibleRevalidation());
+    mocks.deliver.mockResolvedValueOnce({ kind: 'sent', provider: 'resend', providerMessageId: 'm-tz' });
+
+    await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => scheduledFor });
+
+    const claimSql = mocks.execute.mock.calls[1][0].strings.join(' ').replace(/\s+/g, ' ');
+    expect(claimSql).toContain('deadline_reminders.timezone');
+    expect(mocks.deliver.mock.calls[0][0].daysToDeadline).toBe(3);
+  });
 });
+

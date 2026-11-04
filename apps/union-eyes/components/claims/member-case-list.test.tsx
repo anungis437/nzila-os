@@ -16,11 +16,11 @@ afterEach(cleanup)
 
 const rows: ClaimRow[] = [
   { claimId: 'claim-1', claimNumber: 'UE-QA-0001', memberName: null, claimType: 'grievance_pay', status: 'submitted',
-    priority: 'medium', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false },
+    priority: 'medium', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false, memberWithheld: false },
   { claimId: 'claim-2', claimNumber: 'UE-QA-0002', memberName: null, claimType: 'grievance_discipline', status: 'under_review',
-    priority: 'critical', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false },
+    priority: 'critical', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false, memberWithheld: false },
   { claimId: 'claim-3', claimNumber: 'UE-QA-0003', memberName: null, claimType: 'some_new_type', status: 'mystery_state',
-    priority: 'weird', incidentDate: null, createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false },
+    priority: 'weird', incidentDate: null, createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false, memberWithheld: false },
 ]
 
 function renderList(locale: 'en-CA' | 'fr-CA') {

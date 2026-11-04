@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
 import {
@@ -85,9 +86,9 @@ const TRUST_LABELS: Record<string, string> = {
   unverified: "Unverified",
 };
 
-function formatDate(dateStr: string | null): string {
+function formatDate(dateStr: string | null, locale: string): string {
   if (!dateStr) return "Never";
-  return new Date(dateStr).toLocaleDateString("en-CA", {
+  return new Date(dateStr).toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -101,6 +102,7 @@ function formatDate(dateStr: string | null): string {
 // ---------------------------------------------------------------------------
 
 export function SourceRegistryTable() {
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [sourceTypeFilter, setSourceTypeFilter] = useState<string>("all");
   const [healthFilter, setHealthFilter] = useState<string>("all");
@@ -256,7 +258,7 @@ export function SourceRegistryTable() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {formatDate(source.lastSuccessAt)}
+                        {formatDate(source.lastSuccessAt, locale)}
                       </TableCell>
                       <TableCell>
                         {source.consecutiveFailures > 0 ? (

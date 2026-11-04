@@ -8,6 +8,7 @@
  */
 
 import * as React from 'react';
+import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { TrendingDown, TrendingUp, ArrowRight } from 'lucide-react';
 
@@ -34,6 +35,7 @@ export function ImpactMetricCard({
   className,
   compact = false,
 }: ImpactMetricCardProps) {
+  const locale = useLocale();
   // Calculate improvement if not provided
   const calculatedImprovement = improvement || calculateImprovement(before, after);
   const isPositive = higherIsBetter ? after > before : after < before;
@@ -51,7 +53,7 @@ export function ImpactMetricCard({
           <p className="text-sm text-slate-600 mb-1">{label}</p>
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-slate-900">
-              {formatNumber(after)} {unit}
+              {formatNumber(after, locale)} {unit}
             </span>
             <span
               className={cn(
@@ -90,7 +92,7 @@ export function ImpactMetricCard({
         <div>
           <p className="text-xs text-slate-500 mb-1">Before</p>
           <p className="text-2xl font-bold text-slate-400">
-            {formatNumber(before)}
+            {formatNumber(before, locale)}
             <span className="text-sm font-normal text-slate-400 ml-1">{unit}</span>
           </p>
         </div>
@@ -100,7 +102,7 @@ export function ImpactMetricCard({
         <div>
           <p className="text-xs text-slate-500 mb-1">After</p>
           <p className="text-2xl font-bold text-slate-900">
-            {formatNumber(after)}
+            {formatNumber(after, locale)}
             <span className="text-sm font-normal text-slate-600 ml-1">{unit}</span>
           </p>
         </div>
@@ -140,10 +142,10 @@ function calculateImprovement(before: number, after: number): string {
   return `${sign}${Math.round(percentChange)}%`;
 }
 
-function formatNumber(num: number): string {
+function formatNumber(num: number, locale: string): string {
   // Format with commas for thousands
   if (num >= 1000) {
-    return num.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    return num.toLocaleString(locale, { maximumFractionDigits: 1 });
   }
   
   // Show decimals for small numbers

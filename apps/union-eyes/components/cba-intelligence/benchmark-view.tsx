@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import type { BenchmarkResult } from "@/lib/services/cba-intelligence/benchmark-service";
 import { ApiShapeError, apiErrorMessage, envelopeData, failureText, readApiError } from "@/lib/client/api-envelope";
@@ -80,6 +80,7 @@ function formatPct(v: number | null | string): string {
 
 export function BenchmarkView({ canSaveSnapshot = false }: { canSaveSnapshot?: boolean }) {
   const t = useTranslations("benchmarkView");
+  const locale = useLocale();
   const [agreementId, setAgreementId] = useState("");
   const [jurisdiction, setJurisdiction] = useState("all");
   const [sector, setSector] = useState("");
@@ -372,7 +373,7 @@ export function BenchmarkView({ canSaveSnapshot = false }: { canSaveSnapshot?: b
                           <TableCell>{h.comparableCount}</TableCell>
                           <TableCell>{formatPct(h.medianWageIncrease)}</TableCell>
                           <TableCell>
-                            {new Date(h.createdAt).toLocaleDateString("en-CA")}
+                            {new Date(h.createdAt).toLocaleDateString(locale)}
                           </TableCell>
                         </TableRow>
                       ))}

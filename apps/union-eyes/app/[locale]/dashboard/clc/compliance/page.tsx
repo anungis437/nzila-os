@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
 import { requireUser } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -138,7 +138,7 @@ async function getComplianceData(userId: string, clcId: string) {
   };
 }
 
-const money = (value: number) => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(value);
+const money = (value: number, locale: string) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD' }).format(value);
 
 const getComplianceStatusColor = (rate: number | null) => {
   if (rate === null) return 'text-muted-foreground';
@@ -165,6 +165,7 @@ export default async function CLCCompliancePage() {
   }
 
   const t = await getTranslations('clc.compliance');
+  const locale = await getLocale();
   const metrics = await getComplianceData(userId, orgId);
 
   const StatusIcon = getComplianceStatusIcon(metrics.national.overallComplianceRate);
@@ -308,9 +309,9 @@ export default async function CLCCompliancePage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{money(metrics.remittances.totalAmountDue)}</div>
+            <div className="text-2xl font-bold">{money(metrics.remittances.totalAmountDue, locale)}</div>
             <p className="text-xs text-muted-foreground">
-              {money(metrics.remittances.totalAmountReceived)} {t('remittances.received', { defaultValue: 'received' })}
+              {money(metrics.remittances.totalAmountReceived, locale)} {t('remittances.received', { defaultValue: 'received' })}
             </p>
           </CardContent>
         </Card>

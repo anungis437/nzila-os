@@ -3,11 +3,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
+// The screen formats money and days in the reader's language (useLocale); a test may switch it to French.
+const intl = vi.hoisted(() => ({ locale: 'en-CA' }))
+vi.mock('next-intl', () => ({ useLocale: () => intl.locale }))
+
 import FinancialOverview from './FinancialOverview'
 import FinancialAiInsights from './FinancialAiInsights'
 
 afterEach(() => {
   cleanup()
+  intl.locale = 'en-CA'
   vi.unstubAllGlobals()
 })
 
@@ -80,6 +85,15 @@ describe('FinancialOverview', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     // This month collected 600 against 400 last month, both from the ledger: the KPI trend and the month-over-month row both say so.
     expect(screen.getAllByText('+50%').length).toBeGreaterThan(0)
+  })
+
+  it('writes the money in French for a French reader, still in Canadian dollars', async () => {
+    intl.locale = 'fr-CA'
+    stubRoutes(allAnswer())
+    render(<FinancialOverview />)
+    expect(await screen.findByText('12 500 $')).toBeInTheDocument()
+    expect(screen.getByText('4 300 $')).toBeInTheDocument()
+    expect(screen.queryByText('$12,500')).not.toBeInTheDocument()
   })
 
   it('shows a dash, not $0, for what a failed section feeds, says which section failed and why, and keeps the other sections', async () => {
