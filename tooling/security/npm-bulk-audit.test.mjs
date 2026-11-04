@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -147,5 +147,25 @@ test('ambiguous audit CLI flags fail before reading a lockfile or contacting the
     })
     assert.equal(result.status, 2, flags.join(' '))
     assert.match(result.stderr, /Ambiguous or empty audit options/)
+  }
+})
+
+test('audit report paths containing equals signs are preserved without truncation', () => {
+  const folder = mkdtempSync(join(tmpdir(), 'nzila-audit-output-'))
+  try {
+    writeFileSync(join(folder, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n')
+    const mock = join(folder, 'mock-registry.mjs')
+    writeFileSync(mock, "globalThis.fetch = async () => ({ ok: true, json: async () => ({}) })\\n")
+    const reportName = 'audit=security=report.json'
+    const script = fileURLToPath(new URL('./npm-bulk-audit.mjs', import.meta.url))
+    const result = spawnSync(process.execPath, ['--import', mock, script, '--audit-level=high', '--output=' + reportName], {
+      cwd: folder, encoding: 'utf8', timeout: 5000,
+    })
+    assert.equal(result.status, 0, result.stderr)
+    const report = JSON.parse(readFileSync(join(folder, reportName), 'utf8'))
+    assert.equal(report.metadata.status, 'complete')
+    assert.equal(report.metadata.source, 'npm-bulk-advisories')
+  } finally {
+    rmSync(folder, { recursive: true, force: true })
   }
 })
