@@ -141,6 +141,9 @@ test('ambiguous audit CLI flags fail before reading a lockfile or contacting the
     ['--audit-level=critical', '--audit-level=high'],
     ['--output=report.json', '--output=other.json'],
     ['--output='],
+    ['--json', '--json'],
+    ['--json', '--output=report.json'],
+    ['--output=report.json', '--json'],
   ]) {
     const result = spawnSync(process.execPath, [resolve(file), ...flags], {
       encoding: 'utf8', timeout: 5000,
