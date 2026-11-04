@@ -27,6 +27,7 @@ operation (section 14). Two caveats apply and are not hidden:
 Machine-readable record: [UE_PRODUCTION_HARDENING_PACKAGE.json](./UE_PRODUCTION_HARDENING_PACKAGE.json).
 Template: [infrastructure/bicep/ue-v2/](../../../infrastructure/bicep/ue-v2/main.bicep).
 Smoke: [go-live-smoke.ts](../../../apps/union-eyes/scripts/production/go-live-smoke.ts).
+Test-auth and risk-bypass switches (directive 2026-11-04 item 4): [TEST_BYPASS_SWITCHES.md](./TEST_BYPASS_SWITCHES.md).
 
 ## 1. What this pass found and proved
 
