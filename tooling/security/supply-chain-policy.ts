@@ -478,8 +478,13 @@ export function checkVulnerabilityPolicy(
       }
       // Every finding must identify its affected artifact, even below the
       // blocking threshold. Otherwise incomplete scanner evidence can pass.
-      const packageName = advisory.package ?? advisory.module_name ?? advisory.name
-      const packageString = typeof packageName === 'string' ? packageName.trim() : ''
+      const packageAliases = [advisory.package, advisory.module_name, advisory.name]
+        .filter((candidate) => candidate !== undefined)
+      if (packageAliases.some((candidate) => typeof candidate !== 'string' || !candidate.trim()) ||
+          new Set(packageAliases.map((candidate) => (candidate as string).trim())).size > 1) {
+        throw new Error(`Conflicting or malformed package identities for advisory: ${key}`)
+      }
+      const packageString = (packageAliases[0] as string | undefined)?.trim() ?? ''
       if (!packageString) {
         throw new Error(`Missing package identity for advisory: ${key}`)
       }
