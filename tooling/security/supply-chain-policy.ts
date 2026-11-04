@@ -476,11 +476,16 @@ export function checkVulnerabilityPolicy(
           (typeof advisory.ghsa_id !== 'string' || !/^GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}$/i.test(advisory.ghsa_id))) {
         throw new Error(`Malformed GHSA identifier for advisory: ${key}`)
       }
+      // Every finding must identify its affected artifact, even below the
+      // blocking threshold. Otherwise incomplete scanner evidence can pass.
+      const packageName = advisory.package ?? advisory.module_name ?? advisory.name
+      const packageString = typeof packageName === 'string' ? packageName.trim() : ''
+      if (!packageString) {
+        throw new Error(`Missing package identity for advisory: ${key}`)
+      }
       totalVulns++
       if (severity !== 'high' && severity !== 'critical') continue
       highOrCritical++
-      const packageName = advisory.package ?? advisory.module_name ?? advisory.name
-      const packageString = typeof packageName === 'string' ? packageName.trim() : ''
       const additionalIds: string[] = advisory.cves === undefined ? [] : advisory.cves as string[]
       const ids = [key, ...additionalIds]
       if (typeof advisory.ghsa_id === 'string') ids.push(advisory.ghsa_id)
