@@ -5,20 +5,21 @@
  * that every API route backing a page has proper auth gating, and that
  * all CRUD routes reference valid database schema tables.
  *
- * Representative personas (one per tier):
- *   member (10)             — base union member
- *   health_safety_rep (30)  — specialised representative
- *   bargaining_committee(40)— front-line rep
- *   steward (50)            — front-line rep with write access
- *   officer (60)            — senior representative
- *   admin (95)              — local executive
- *   platform_lead (270)     — Nzila Ventures operations
+ * Representative personas (one per tier; levels are those the application enforces, from getRoleLevel in apps/union-eyes/lib/auth/roles.ts):
+ *   member                  — base union member
+ *   health_safety_rep       — specialised representative
+ *   bargaining_committee    — front-line rep
+ *   steward                 — front-line rep with write access
+ *   officer                 — senior representative
+ *   admin                   — local executive
+ *   platform_lead           — Nzila Ventures operations
  *
  * @invariant PERSONA_ACCESS_001
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { UserRole, getRoleLevel } from '../../apps/union-eyes/lib/auth/roles'
 import { ROOT, walkSync, readContent, relPath, safeJoin, formatViolations, type Violation } from './governance-helpers'
 
 // ── Configuration ───────────────────────────────────────────────────────────
@@ -27,43 +28,15 @@ const UE_DIR = join(ROOT, 'apps', 'union-eyes')
 const DASHBOARD_DIR = join(UE_DIR, 'app', '[locale]', 'dashboard')
 const API_DIR = join(UE_DIR, 'app', 'api')
 
-// ── Role Hierarchy (mirrors api-auth-guard.ts) ──────────────────────────────
+// ── Role Hierarchy (the levels the application enforces) ────────────────────
 
-const ROLE_HIERARCHY: Record<string, number> = {
-  app_owner: 300,
-  coo: 295,
-  cto: 290,
-  platform_lead: 270,
-  customer_success_director: 260,
-  support_manager: 250,
-  data_analytics_manager: 240,
-  billing_manager: 230,
-  integration_manager: 220,
-  compliance_manager: 210,
-  security_manager: 200,
-  support_agent: 180,
-  data_analyst: 170,
-  billing_specialist: 160,
-  integration_specialist: 150,
-  content_manager: 145,
-  training_coordinator: 140,
-  system_admin: 135,
-  clc_executive: 130,
-  clc_staff: 120,
-  fed_executive: 115,
-  fed_staff: 105,
-  national_officer: 100,
-  admin: 95,
-  president: 90,
-  vice_president: 85,
-  secretary_treasurer: 85,
-  chief_steward: 70,
-  officer: 60,
-  steward: 50,
-  bargaining_committee: 40,
-  health_safety_rep: 30,
-  member: 10,
-}
+/**
+ * Not a copy: lib/api-auth-guard.ts (ROLE_HIERARCHY, hasMinRole) and the page guards rank roles by getRoleLevel, so this test reads the same numbers. A hand-written mirror had
+ * drifted (app_owner 300 against 250, system_admin 135 against 200, secretary_treasurer level with vice_president) and judged the matrix by an order the application does not use.
+ */
+const ROLE_HIERARCHY: Record<string, number> = Object.fromEntries(
+  (Object.values(UserRole) as string[]).map((role) => [role, getRoleLevel(role as UserRole)]),
+)
 
 // ── Personas ────────────────────────────────────────────────────────────────
 
@@ -75,13 +48,13 @@ interface Persona {
 }
 
 const PERSONAS: Persona[] = [
-  { name: 'Base Member',       role: 'member',                level: 10,  description: 'Regular union member — dues, receipts, basic access' },
-  { name: 'H&S Rep',           role: 'health_safety_rep',     level: 30,  description: 'Health & safety representative' },
-  { name: 'Bargaining Rep',    role: 'bargaining_committee',  level: 40,  description: 'Bargaining committee member — negotiations access' },
-  { name: 'Steward',           role: 'steward',               level: 50,  description: 'Front-line steward — write access to most resources' },
-  { name: 'Officer',           role: 'officer',               level: 60,  description: 'Senior representative — leadership dashboard, pilot' },
-  { name: 'Local Admin',       role: 'admin',                 level: 95,  description: 'Local union executive — full org-level access' },
-  { name: 'Platform Lead',     role: 'platform_lead',         level: 270, description: 'Nzila Ventures ops — cross-org access' },
+  { name: 'Base Member',       role: 'member',                level: ROLE_HIERARCHY.member,               description: 'Regular union member — dues, receipts, basic access' },
+  { name: 'H&S Rep',           role: 'health_safety_rep',     level: ROLE_HIERARCHY.health_safety_rep,    description: 'Health & safety representative' },
+  { name: 'Bargaining Rep',    role: 'bargaining_committee',  level: ROLE_HIERARCHY.bargaining_committee, description: 'Bargaining committee member — negotiations access' },
+  { name: 'Steward',           role: 'steward',               level: ROLE_HIERARCHY.steward,              description: 'Front-line steward — write access to most resources' },
+  { name: 'Officer',           role: 'officer',               level: ROLE_HIERARCHY.officer,              description: 'Senior representative — leadership dashboard, pilot' },
+  { name: 'Local Admin',       role: 'admin',                 level: ROLE_HIERARCHY.admin,                description: 'Local union executive — full org-level access' },
+  { name: 'Platform Lead',     role: 'platform_lead',         level: ROLE_HIERARCHY.platform_lead,        description: 'Nzila Ventures ops — cross-org access' },
 ]
 
 // ── Page → Minimum Role Mapping ─────────────────────────────────────────────
