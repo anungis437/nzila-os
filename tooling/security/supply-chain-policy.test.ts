@@ -116,6 +116,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Conflicting or malformed package identities'))).toBe(true)
   })
 
+  it('rejects a noncanonical advisory map key even if a secondary CVE matches an active waiver', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-noncanonical-map-key.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('Malformed advisory map key'))).toBe(true)
+  })
+
   it('rejects numeric advisory IDs rather than coercing them into waiver keys', () => {
     const result = checkVulnerabilityPolicy(fixture('audit-numeric-advisory-id.json'), atApproval)
     expect(result.passed).toBe(false)
