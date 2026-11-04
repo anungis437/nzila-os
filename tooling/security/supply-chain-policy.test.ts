@@ -80,6 +80,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Malformed GHSA identifier'))).toBe(true)
   })
 
+  it('rejects malformed CVE identifiers even for low-severity findings', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-invalid-low-cve.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('Malformed CVE identifiers'))).toBe(true)
+  })
+
   it('rejects an expired waiver without extending its validity', () => {
     const afterExpiry = new Date('2026-11-05T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
