@@ -127,7 +127,7 @@ export type DualNavHomes = {
  */
 export function getDualNavHomes(role?: string | null): DualNavHomes {
   const experience = getDashboardExperience(role);
-  const roleHomeHref = ROLE_EXECUTION_HOME_BY_EXPERIENCE[experience];
+  const roleHomeHref = getRoleLandingPath(role);
   return {
     experience,
     roleHomeHref,
@@ -136,10 +136,18 @@ export function getDualNavHomes(role?: string | null): DualNavHomes {
   };
 }
 
+/**
+ * Where a role lands. The role execution home of its experience, unless that destination's own guard refuses the role: the dashboard root sends every
+ * non-member to its landing, so a landing that redirects the role back to the root would bounce it between the two for ever. Such a role lands on
+ * the first destination it may open.
+ */
 export function getRoleLandingPath(role?: string | null): string {
-  // Role execution home. Not rewritten to the Workspace orientation hub.
-  // The sidebar highlights the nav item whose href matches this path.
-  return ROLE_EXECUTION_HOME_BY_EXPERIENCE[getDashboardExperience(role)];
+  const experience = getDashboardExperience(role);
+  const home = ROLE_EXECUTION_HOME_BY_EXPERIENCE[experience];
+  const normalized = (role ?? 'member').toLowerCase();
+  if (meetsDestinationRole(home, normalized, experience)) return home;
+  const [first] = getVisibleNavigationForExperience(experience, false, normalized);
+  return first ? first.href.split('?')[0] : '/dashboard';
 }
 
 export function getNavigationForExperience(experience: DashboardExperience): NavigationItem[] {
@@ -310,12 +318,34 @@ export function canAccessDashboardPath(pathname: string, experience: DashboardEx
 const PLATFORM_LEAD_ROLES = ['app_owner', 'coo', 'cto', 'platform_lead'];
 const SUPPORT_MANAGER_ROLES = [...PLATFORM_LEAD_ROLES, 'customer_success_director', 'support_manager'];
 const INTEGRATION_MANAGER_ROLES = [...SUPPORT_MANAGER_ROLES, 'data_analytics_manager', 'billing_manager', 'integration_manager'];
+// The security page admits security_manager and above (levels in lib/auth/roles.ts): the integration, billing and data managers rank below it.
+const SECURITY_ROLES = [...PLATFORM_LEAD_ROLES, 'customer_success_director', 'security_manager'];
 const PLATFORM_NAVIGATION_ROLES: Record<string, readonly string[]> = {
   '/dashboard/operations': PLATFORM_LEAD_ROLES,
   '/dashboard/admin/members': SUPPORT_MANAGER_ROLES,
   '/dashboard/integrations': INTEGRATION_MANAGER_ROLES,
-  '/dashboard/security': [...INTEGRATION_MANAGER_ROLES, 'compliance_manager', 'security_manager'],
+  '/dashboard/security': SECURITY_ROLES,
 };
+
+/**
+ * Destinations whose own page guard admits fewer roles than the experience that lists them: pathname -> the least role that guard admits.
+ * scripts/runtime/nav-guard-census.ts holds this table to the guards in the pages and layouts, so a destination is never offered to a role it would redirect.
+ */
+export const DESTINATION_MIN_ROLE: Readonly<Record<string, UserRole>> = {
+  '/dashboard/workbench': UserRole.STEWARD,
+  '/dashboard/members': UserRole.STEWARD,
+  '/dashboard/correspondence': UserRole.STEWARD,
+  // The clause library page redirects below steward; do not advertise it to those roles.
+  '/dashboard/clause-library': UserRole.STEWARD,
+  '/dashboard/audits': UserRole.ADMIN,
+};
+
+function meetsDestinationRole(pathname: string, role: string, experience: DashboardExperience): boolean {
+  const min = DESTINATION_MIN_ROLE[pathname];
+  if (min && getRoleLevel(role as UserRole) < getRoleLevel(min)) return false;
+  // The executive table states the executive menu's own requirement for a href that other experiences list under their own guard.
+  return experience !== 'executive' || meetsExecutiveDestinationRole(pathname, role);
+}
 
 /**
  * Single source of truth for which navigation entries are actually visible.
@@ -335,10 +365,7 @@ export function getVisibleNavigationForExperience(
     const pathname = item.href.split('?')[0];
     const platformRoles = PLATFORM_NAVIGATION_ROLES[pathname];
     if (platformRoles && !platformRoles.includes(role)) return false;
-    if (experience === 'executive' && !meetsExecutiveDestinationRole(pathname, role)) return false;
-    if (pathname === '/dashboard/audits' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.ADMIN)) return false;
-    // The clause library page redirects below steward; do not advertise it to those roles.
-    if (pathname === '/dashboard/clause-library' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.STEWARD)) return false;
+    if (!meetsDestinationRole(pathname, role, experience)) return false;
     return canAccessDashboardPath(pathname, experience, isPilotMode);
   });
 }

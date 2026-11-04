@@ -15,6 +15,7 @@
     "census:response": "tsx scripts/runtime/response-shape-census.ts --strict",
     "census:untyped": "tsx scripts/runtime/untyped-read-census.ts --strict",
     "census:day-render": "tsx scripts/runtime/day-render-census.ts --strict",
+    "census:nav-guards": "tsx scripts/runtime/nav-guard-census.ts --strict",
     "census:wiring": "tsx scripts/runtime/component-wiring-census.ts --strict",
     "census:fake-content": "tsx scripts/runtime/fake-content-census.ts --strict",
     "census:dead-controls": "tsx scripts/runtime/dead-controls-census.ts --strict",

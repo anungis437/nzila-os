@@ -4,6 +4,7 @@ import {
   canAccessDashboardPath,
   getAllowedPrefixesByExperience,
   getDashboardExperience,
+  getDualNavHomes,
   getNavigationForExperience,
   getRoleLandingPath,
   getVisibleNavigationForExperience,
@@ -134,6 +135,43 @@ describe('lib/dashboard/role-experience', () => {
     it('does not advertise the knowledge destination to staff roles below steward', () => {
       for (const role of ['bargaining_committee', 'health_safety_rep']) {
         expect(getVisibleNavigationForExperience('staff', false, role).some(item => item.href === '/dashboard/clause-library')).toBe(false);
+      }
+    });
+
+    it('offers a staff role below steward only the destinations whose pages let it in', () => {
+      for (const role of ['bargaining_committee', 'health_safety_rep']) {
+        const hrefs = getVisibleNavigationForExperience('staff', false, role).map(item => item.href);
+        for (const refused of ['/dashboard/workbench', '/dashboard/members', '/dashboard/correspondence', '/dashboard/clause-library']) {
+          expect(hrefs, `${role} is redirected away from ${refused}`).not.toContain(refused);
+        }
+        expect(hrefs, role).toContain('/dashboard/inbox');
+        expect(hrefs, role).toContain('/dashboard/settings');
+      }
+      for (const role of ['steward', 'support_agent', 'chief_steward']) {
+        const hrefs = getVisibleNavigationForExperience('staff', false, role).map(item => item.href);
+        for (const offered of ['/dashboard/workbench', '/dashboard/members', '/dashboard/correspondence', '/dashboard/clause-library']) {
+          expect(hrefs, `${role} may open ${offered}`).toContain(offered);
+        }
+      }
+    });
+
+    it('lands a staff role below steward on the first destination it may open: the workbench would send it back to the root, which sends it to the workbench', () => {
+      for (const role of ['bargaining_committee', 'health_safety_rep']) {
+        expect(getRoleLandingPath(role)).toBe('/dashboard/inbox');
+        expect(getDualNavHomes(role).roleHomeHref).toBe('/dashboard/inbox');
+        expect(canAccessDashboardPath(getRoleLandingPath(role), getDashboardExperience(role), false)).toBe(true);
+      }
+      for (const role of ['steward', 'support_agent', 'chief_steward']) {
+        expect(getRoleLandingPath(role)).toBe('/dashboard/workbench');
+      }
+    });
+
+    it('offers the security destination only to the roles its page admits', () => {
+      for (const role of ['integration_manager', 'billing_manager', 'data_analytics_manager']) {
+        expect(getVisibleNavigationForExperience('admin', false, role).some(item => item.href === '/dashboard/security'), role).toBe(false);
+      }
+      for (const role of ['app_owner', 'platform_lead']) {
+        expect(getVisibleNavigationForExperience('admin', false, role).some(item => item.href === '/dashboard/security'), role).toBe(true);
       }
     });
   });
