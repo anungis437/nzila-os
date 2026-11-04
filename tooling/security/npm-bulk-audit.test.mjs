@@ -172,3 +172,13 @@ test('audit report paths containing equals signs are preserved without truncatio
     rmSync(folder, { recursive: true, force: true })
   }
 })
+
+
+test('noncanonical snapshot headers cannot conceal a second dependency graph', () => {
+  for (const header of ['snapshots: ', 'snapshots :', 'snapshots:\t']) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n' + header + '\n  node-forge@1.4.0:\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Malformed snapshots section header/))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
+})
