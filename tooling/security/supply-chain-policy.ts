@@ -349,7 +349,18 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
       if (!licenseEntry || typeof licenseEntry !== 'object' || Array.isArray(licenseEntry)) {
         throw new Error(`Malformed license entry for ${component.name}`)
       }
-      const licenseId = licenseEntry.license?.id ?? licenseEntry.license?.name ?? 'UNKNOWN'
+      // CycloneDX license identifiers and names must not contradict each other.
+      // Prefer rejecting ambiguous evidence over silently authorizing an allowed id.
+      const license = licenseEntry.license
+      if (license !== undefined && (!license || typeof license !== 'object' || Array.isArray(license))) {
+        throw new Error(`Malformed license identity for ${component.name}`)
+      }
+      if (license && ((license.id !== undefined && typeof license.id !== 'string') ||
+          (license.name !== undefined && typeof license.name !== 'string') ||
+          (license.id !== undefined && license.name !== undefined && license.id !== license.name))) {
+        throw new Error(`Conflicting or malformed license identity for ${component.name}`)
+      }
+      const licenseId = license?.id ?? license?.name ?? 'UNKNOWN'
 
       if (FORBIDDEN_LICENSES.includes(licenseId)) {
         violations.push({
