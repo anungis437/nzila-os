@@ -28,6 +28,8 @@ class ServingProcessTests(unittest.TestCase):
             ["/usr/local/bin/celery", "-A", "config", "worker"],
             ["celery", "-A", "config", "beat"],
             ["C:\\Python\\Scripts\\gunicorn.exe"],
+            ["C:\\Python\\Scripts\\celery.exe", "-A", "config", "worker"],
+            ["C:\\Python\\Lib\\site-packages\\gunicorn\\__main__.py"],
             ["/usr/lib/python3/site-packages/gunicorn/__main__.py"],
             ["/usr/local/bin/uvicorn"],
             ["/usr/local/bin/daphne"],
