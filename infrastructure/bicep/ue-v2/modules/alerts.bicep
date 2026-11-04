@@ -1,4 +1,4 @@
-// Production alerts for Union Eyes V2. Log queries use the exact patterns validated against the
+// Alerts for Union Eyes V2 (production and staging; names carry the environment prefix). Log queries use the exact patterns validated against the
 // staging application's real logs (see docs/union-eyes/production/UE_PRODUCTION_HARDENING_PACKAGE.json).
 // Signals with no log line (ClamAV outage, database availability, cron job failure) use platform
 // metrics/system logs instead of guessing a log pattern.
@@ -9,6 +9,10 @@ param appName string
 param appId string
 param clamavAppId string
 param pgServerId string
+@description('Alert when the app has no running replica. Off for a scale-to-zero app.')
+param appReplicaAlert bool = true
+@description('Alert when the scanner has no running replica. Off for a scale-to-zero scanner.')
+param clamavReplicaAlert bool = true
 param prefix string
 param tags object = {}
 
@@ -130,7 +134,7 @@ resource dbAlive 'Microsoft.Insights/metricAlerts@2018-03-01' = {
   }
 }
 
-resource clamavDown 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+resource clamavDown 'Microsoft.Insights/metricAlerts@2018-03-01' = if (clamavReplicaAlert) {
   name: '${prefix}-clamav-unavailable'
   location: 'global'
   tags: tags
@@ -159,7 +163,7 @@ resource clamavDown 'Microsoft.Insights/metricAlerts@2018-03-01' = {
   }
 }
 
-resource appDown 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+resource appDown 'Microsoft.Insights/metricAlerts@2018-03-01' = if (appReplicaAlert) {
   name: '${prefix}-app-no-replicas'
   location: 'global'
   tags: tags

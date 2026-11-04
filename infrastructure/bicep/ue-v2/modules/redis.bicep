@@ -5,6 +5,8 @@
 param name string
 param location string
 param skuName string = 'Balanced_B1'
+@description('High availability (replica). Disabled is a dev/test option that roughly halves the cost.')
+param highAvailability bool = true
 param peSubnetId string
 param redisDnsZoneId string
 param tags object = {}
@@ -14,10 +16,11 @@ resource cluster 'Microsoft.Cache/redisEnterprise@2025-07-01' = {
   location: location
   tags: tags
   sku: { name: skuName }
-  properties: {
+  // highAvailability is only written when disabled, so the production resource body is unchanged.
+  properties: union({
     minimumTlsVersion: '1.2'
     publicNetworkAccess: 'Disabled'
-  }
+  }, highAvailability ? {} : { highAvailability: 'Disabled' })
 }
 
 resource database 'Microsoft.Cache/redisEnterprise/databases@2025-07-01' = {
