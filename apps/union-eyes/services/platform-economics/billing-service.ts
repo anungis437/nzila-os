@@ -538,8 +538,14 @@ export async function recordPayment(input: RecordPaymentInput) {
     throw new Error('Invoice does not belong to this organization');
   }
 
+  // Reject malformed CAD amounts before financial writes; centsSafe alone can round precision.
+  if (!/^\d+(?:\.\d{1,2})?$/.test(input.amount)) {
+    throw new Error('Payment amount must be a valid CAD amount with at most two decimals');
+  }
   const paymentAmountCents = centsSafe(input.amount);
-  if (paymentAmountCents <= 0) throw new Error('Payment amount must be positive');
+  if (!Number.isSafeInteger(paymentAmountCents) || paymentAmountCents <= 0) {
+    throw new Error('Payment amount must be positive and within safe CAD limits');
+  }
 
   const result = await db.transaction(async (tx) => {
     // Insert payment
