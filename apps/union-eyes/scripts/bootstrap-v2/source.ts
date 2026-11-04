@@ -1166,20 +1166,22 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     const column = tables
       .find((table) => table.name === name)
       ?.columns.find((entry) => entry.name === 'organization_id')
-    if (column?.type !== 'uuid' || column.notNull)
+    // Current Django source requires the owner (tranche 10, d42d05ba5, 2026-11-02); a nullable column here means the
+    // plan was built from stale models.
+    if (column?.type !== 'uuid' || !column.notNull)
       throw new Error(`UE_V2_CURRENT_NULLABILITY_REQUIRED:${name}`)
     decisions.push({
       relation: name,
-      canonicalDecision: 'UUID NULLABLE',
+      canonicalDecision: 'UUID NOT NULL',
       sourceDefinition: column,
       applicationUsage: storageAuthorityManifest.find((entry) => entry.table === name)
         ?.supportingCapability,
       rlsImplication:
-        'NULL rows are inaccessible to ordinary tenant role; no global read inference. System access only from explicit manifest grants.',
+        'Every row has an owning organization; there is no ownerless row for any role to read. System access only from explicit manifest grants.',
       tenantIsolationImplication:
-        'NULL cannot match a nonnull authenticated org context; tenant writes must include own org.',
+        'A write without an organization is refused by the column itself; tenant writes must include their own org.',
       rationale:
-        'Current Django source wins over historical W4P NOT NULL; no historical payload replay.',
+        'Current Django source wins: tranche 10 (d42d05ba5) made organization_id required, matching the Drizzle declarations. A fresh V2 database has no legacy ownerless rows to preserve.',
     })
   }
   return {
