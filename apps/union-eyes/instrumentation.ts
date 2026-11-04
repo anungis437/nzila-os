@@ -1,5 +1,9 @@
  
 export async function register() {
+  // Every stored calendar day is anchored to UTC midnight and the Django backend runs in UTC (TIME_ZONE = "UTC"). The Node server formats and compares in UTC as well, so a host
+  // set to another zone cannot move a day in an e-mail, a PDF, a receipt or a due-date calculation (day-render census, UE-CONV-H-029). Set before anything reads a date.
+  if (process.env.NEXT_RUNTIME === 'nodejs') process.env.TZ = 'UTC';
+
   // IMPORTANT: OpenTelemetry must be initialized FIRST, before any other imports
   // This ensures auto-instrumentation can wrap all modules correctly
   if (process.env.NEXT_RUNTIME === 'nodejs' && process.env.NEXT_PHASE !== 'phase-production-build') {

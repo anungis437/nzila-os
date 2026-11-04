@@ -38,6 +38,8 @@ const failed = (status: number, message: string) => ({ ok: false, status, status
 const routes = (answers: { claim: unknown; timeline: unknown }) =>
   fetchMock.mockImplementation(async (url: string) => (url === '/api/claims/claim-1' ? answers.claim : answers.timeline))
 
+const zone = process.env.TZ
+
 beforeEach(() => {
   fetchMock.mockReset()
   h.trackCaseViewed.mockReset()
@@ -47,6 +49,8 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   vi.unstubAllGlobals()
+  if (zone === undefined) delete process.env.TZ
+  else process.env.TZ = zone
 })
 
 describe('ClaimDetailPage', () => {
@@ -86,5 +90,25 @@ describe('ClaimDetailPage', () => {
     render(<ClaimDetailPage />)
     expect(await screen.findByText('CASE-2026-0042')).toBeInTheDocument()
     expect(await screen.findByTestId('case-activity-error')).toBeInTheDocument()
+  })
+
+  it('shows the incident day that was recorded, not the evening before it, for a reader west of Greenwich', async () => {
+    process.env.TZ = 'America/Toronto'
+    // A day entered on a date input and stored as UTC midnight: 4 March, which is the evening of 3 March in Toronto when read as an instant.
+    const dated = { ...claim, incidentDate: '2026-03-04T00:00:00.000Z', createdAt: '2026-03-10T15:00:00.000Z', updatedAt: '2026-03-10T15:00:00.000Z' }
+    routes({ claim: wrapped({ data: dated }), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    await screen.findByText('CASE-2026-0042')
+    expect(screen.getByText(new Date(2026, 2, 4, 12).toLocaleDateString())).toBeInTheDocument()
+    expect(screen.queryByText(new Date(2026, 2, 3, 12).toLocaleDateString())).toBeNull()
+  })
+
+  it('says no incident date was recorded when the case has none, instead of printing "Invalid Date"', async () => {
+    const undated = { ...claim, incidentDate: null, createdAt: '2026-03-10T15:00:00.000Z', updatedAt: '2026-03-10T15:00:00.000Z' }
+    routes({ claim: wrapped({ data: undated }), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    await screen.findByText('CASE-2026-0042')
+    expect(screen.getByText('claims.incidentDateNotRecorded')).toBeInTheDocument()
+    expect(screen.queryByText('Invalid Date')).toBeNull()
   })
 })

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { ClaimDeadlineUnavailable } from '@/components/claims/claim-deadline-unavailable';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import { envelopeRow, envelopeRows, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 import Link from 'next/link';
 
 interface ClaimAttachment {
@@ -39,7 +40,7 @@ interface Claim {
   claimType: string;
   status: string;
   priority: string;
-  incidentDate: string;
+  incidentDate: string | null;
   location: string;
   description: string;
   desiredOutcome: string;
@@ -353,7 +354,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <Calendar size={18} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">{t('claims.incidentDate')}</p>
-                      <p className="text-gray-900">{new Date(claim.incidentDate).toLocaleDateString()}</p>
+                      <p className="text-gray-900">{claim.incidentDate ? formatDay(claim.incidentDate, undefined, 'numeric') : t('claims.incidentDateNotRecorded')}</p>
                     </div>
                   </div>
 

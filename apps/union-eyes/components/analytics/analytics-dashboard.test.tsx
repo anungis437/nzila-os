@@ -164,23 +164,28 @@ function renderDashboard() {
 
 const card = (title: string) => screen.getByText(title).closest('[class*="rounded"]') as HTMLElement
 
+const zone = process.env.TZ
+
 beforeEach(() => {
   toasts.toast.mockReset()
 })
 afterEach(() => {
   cleanup()
   vi.unstubAllGlobals()
+  if (zone === undefined) delete process.env.TZ
+  else process.env.TZ = zone
 })
 
 describe('analytics dashboard: what it shows', () => {
-  it('shows the stored figures with the period each covers, and the count of insights the route reports', async () => {
+  it('shows the stored figures with the period each covers, as the days it was recorded for, and the count of insights the route reports', async () => {
+    // The period starts at UTC midnight on 1 May and closes at the end of 31 May: read as plain instants, a reader in Toronto would be shown the evening of 30 April as its first day.
+    process.env.TZ = 'America/Toronto'
     stubFetch(standardRouter())
     renderDashboard()
     await screen.findByText('Claims This Month')
 
     expect(within(card('Claims This Month')).getByText('42')).toBeInTheDocument()
-    const period = `${new Date('2026-05-01T00:00:00.000Z').toLocaleDateString('en-CA')} – ${new Date('2026-05-31T23:59:59.000Z').toLocaleDateString('en-CA')}`
-    expect(within(card('Claims This Month')).getByText(period)).toBeInTheDocument()
+    expect(within(card('Claims This Month')).getByText('2026-05-01 – 2026-05-31')).toBeInTheDocument()
     expect(within(card('Avg Resolution Time')).getByText('6.5 days')).toBeInTheDocument()
     // The seven insights nobody has triaged, not the one row this page asked for.
     expect(within(card('Active Insights')).getByText('7')).toBeInTheDocument()

@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Calendar, Users, FileText, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { recordedDay } from "@/lib/client/day";
 
 interface Negotiation {
   id: string;
@@ -231,7 +232,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
                       {negotiation.firstSessionDate && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {t("started", { date: format(new Date(negotiation.firstSessionDate), "MMM d, yyyy") })}
+                          {t("started", { date: format(recordedDay(negotiation.firstSessionDate), "MMM d, yyyy") })}
                         </span>
                       )}
                       <span>{t("round", { round: negotiation.currentRound, sessions: negotiation.totalSessions })}</span>
@@ -294,7 +295,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
                     </Badge>
                     {negotiation.targetCompletionDate && (
                       <span className="text-sm text-muted-foreground">
-                        {t("target", { date: format(new Date(negotiation.targetCompletionDate), "MMM d, yyyy") })}
+                        {t("target", { date: format(recordedDay(negotiation.targetCompletionDate), "MMM d, yyyy") })}
                       </span>
                     )}
                   </div>

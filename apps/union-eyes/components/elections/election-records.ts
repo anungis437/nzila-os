@@ -1,4 +1,5 @@
 import type { CouncilElectionRecord } from '@/lib/api/index';
+import { formatDay } from '@/lib/client/day';
 
 type Certifiable = Pick<CouncilElectionRecord, 'verifiedBy' | 'verificationDate'>;
 type Resultable = Certifiable & Pick<CouncilElectionRecord, 'winners' | 'totalVotes' | 'participationRate'>;
@@ -26,13 +27,9 @@ export function electionPaths(locale: string) {
   return { list, create: `${list}/new`, detail: (id: string) => `${list}/${encodeURIComponent(id)}` };
 }
 
-/** `YYYY-MM-DD` as a local calendar date. Parsing it as UTC would show the previous day west of Greenwich. */
+/** `YYYY-MM-DD` as the day it names. Parsing it as UTC would show the previous day west of Greenwich. */
 export function formatElectionDate(value: string, locale: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
-  if (!match) return value;
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+  return formatDay(value, locale, 'long');
 }
 
 export interface RecordedEntry {

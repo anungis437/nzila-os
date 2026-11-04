@@ -25,6 +25,7 @@ import { canAccessDashboardPath, getDashboardExperience, getRoleLandingPath } fr
 import { usePilotMode } from "@/contexts/pilot-mode-context";
 import { ApiShapeError, readApiError } from "@/lib/client/api-envelope";
 import { humanize } from "@/lib/client/row-fields";
+import { daysUntilDay, formatDay, isDayPast } from "@/lib/client/day";
 import { readDeadlinePage, readGrievances, type DeadlineRow, type GrievanceRow, type Urgency } from "./priorities-readers";
 
 interface PriorityItem {
@@ -56,7 +57,6 @@ const URGENCY_STYLES: Record<string, string> = {
 
 const URGENCY_RANK: Record<Urgency, number> = { critical: 0, high: 1, normal: 2 };
 const SHOWN = 10;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 function copyFor(locale: string) {
   const fr = locale.startsWith("fr");
@@ -124,7 +124,7 @@ export function PrioritiesConsole({ role }: { role?: string | null }) {
     const now = Date.now();
 
     const deadlineItem = (row: DeadlineRow, overdue: boolean): PriorityItem => {
-      const days = Math.floor((row.dueDate.getTime() - now) / DAY_MS);
+      const days = daysUntilDay(row.dueDate, new Date(now));
       return {
         id: `deadline-${row.id}`,
         title: row.deadlineName,
@@ -137,11 +137,11 @@ export function PrioritiesConsole({ role }: { role?: string | null }) {
     };
 
     const grievanceItem = (row: GrievanceRow): PriorityItem => {
-      const overdue = row.responseDeadline !== null && row.responseDeadline.getTime() < now;
+      const overdue = row.responseDeadline !== null && isDayPast(row.responseDeadline, new Date(now));
       return {
         id: `grievance-${row.id}`,
         title: copy.grievanceTitle(row.title ?? row.grievanceNumber),
-        reason: overdue ? copy.responsePassed : row.responseDeadline ? copy.responseDue(row.responseDeadline.toLocaleDateString(locale)) : copy.status(row.status),
+        reason: overdue ? copy.responsePassed : row.responseDeadline ? copy.responseDue(formatDay(row.responseDeadline, locale, "numeric")) : copy.status(row.status),
         urgency: overdue ? "critical" : row.priority === "urgent" || row.status === "arbitration" ? "high" : "normal",
         dueDate: row.responseDeadline,
         href: `/${locale}/dashboard/grievances/${row.id}`,
@@ -270,7 +270,7 @@ export function PrioritiesConsole({ role }: { role?: string | null }) {
                         {item.dueDate && (
                           <span className="flex items-center gap-1 mt-1 text-[11px] text-gray-400">
                             <Calendar size={10} />
-                            {item.dueDate.toLocaleDateString(locale)}
+                            {formatDay(item.dueDate, locale, "numeric")}
                           </span>
                         )}
                       </div>

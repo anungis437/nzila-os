@@ -19,6 +19,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent } from "@/components/ui/card";
 import { StewardRecommendations } from "@/components/steward-recommendations";
 import { ApiShapeError, isRecord, readApiError } from "@/lib/client/api-envelope";
+import { formatDay } from "@/lib/client/day";
 import type { grievanceTypeEnum } from "@/db/schema/domains/claims/grievances";
 import {
   Scale,
@@ -218,7 +219,7 @@ export function GrievancesConsole() {
   const formatDate = (value: string | null): string => {
     if (!value) return copy.none;
     const time = Date.parse(value);
-    return Number.isNaN(time) ? copy.none : new Date(time).toLocaleDateString(locale);
+    return Number.isNaN(time) ? copy.none : formatDay(value, locale, "numeric");
   };
   const categoryLabel = (category: string): string => {
     const labels: Partial<Record<string, { en: string; fr: string }>> = TYPE_LABELS;

@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
 import { isRecord, readApiError } from "@/lib/client/api-envelope";
+import { dayOf } from "@/lib/client/day";
 import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
 import Link from "next/link";
 import { VoiceDisclosurePrompt, useVoiceDisclosure } from "@/components/voice-disclosure-consent";
@@ -538,7 +539,7 @@ setIsSubmitting(false);
                       type="date"
                       value={formData.date}
                       onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                      max={new Date().toISOString().split('T')[0]}
+                      max={dayOf()}
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         errors.date ? "border-red-500" : "border-gray-300"
                       }`}

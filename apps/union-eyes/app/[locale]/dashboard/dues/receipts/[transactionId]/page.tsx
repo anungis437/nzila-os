@@ -24,6 +24,7 @@ import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { ApiShapeError, envelopeRow, readApiError } from '@/lib/client/api-envelope';
 import { optionalString, requiredString } from '@/lib/client/row-fields';
+import { recordedDay } from '@/lib/client/day';
 
 // =============================================================================
 // TYPES
@@ -66,7 +67,7 @@ function readLedgerReceipt(row: Record<string, unknown>): LedgerReceipt {
 // =============================================================================
 
 function formatDate(date: string, locale: string): string {
-  const parsed = new Date(date);
+  const parsed = recordedDay(date);
   if (Number.isNaN(parsed.getTime())) return date;
   return new Intl.DateTimeFormat(locale, {
     month: 'long',

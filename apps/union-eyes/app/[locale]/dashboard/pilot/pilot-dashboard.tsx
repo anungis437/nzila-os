@@ -17,6 +17,7 @@ import { calculatePilotHealthBreakdown, getHealthScoreStatus } from '@/lib/pilot
 import { SystemStatusBadge } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { logger } from '@/lib/logger';
+import { formatDay } from '@/lib/client/day';
 
 export default function PilotDashboard({ supportEmail }: { supportEmail: string }) {
   const [metrics, setMetrics] = useState<PilotMetrics | null>(null);
@@ -513,7 +514,7 @@ function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supp
                 </div>
                 {milestone.targetDate && (
                   <p className="text-sm text-gray-500 mt-2">
-                    Target: {new Date(milestone.targetDate).toLocaleDateString('en-US')}
+                    Target: {formatDay(milestone.targetDate, 'en-US', 'numeric')}
                   </p>
                 )}
                 {milestone.completedAt && (

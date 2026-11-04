@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Target, Calendar, Users, CheckCircle } from "lucide-react";
+import { formatDay } from "@/lib/client/day";
 
 /** Row shape returned by /api/executive/dashboard (strategic_goals). */
 export interface StrategicGoalRecord {
@@ -96,7 +97,7 @@ export default function StrategicPlanningBoard({ goals }: StrategicPlanningBoard
                   <div className="flex items-center gap-4 text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      <span>Due: {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : "no due date recorded"}</span>
+                      <span>Due: {goal.dueDate ? formatDay(goal.dueDate, undefined, "numeric") : "no due date recorded"}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="h-3 w-3" />

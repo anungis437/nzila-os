@@ -17,6 +17,7 @@ import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { DollarSign, CreditCard, TrendingUp, Users, FileText, AlertCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { loadBillingAdminData } from '@/lib/platform-economics/billing-admin-data';
 import { formatCurrency } from '@/lib/utils';
+import { recordedDay } from '@/lib/client/day';
 import { getTranslations } from 'next-intl/server';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -156,7 +157,7 @@ function paymentStatusVariant(status: string) {
 }
 
 function formatDate(dateStr: string | Date, locale: string) {
-  return new Date(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+  return recordedDay(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function timeAgo(dateStr: string | Date, t: Awaited<ReturnType<typeof getTranslations>>) {

@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 
 // What GET /api/finance/dashboard answers inside { success, data, timestamp }. The ledger summary is null unless the request names a billing
 // period, and this page does not, so it is unknown here and never shown as zero.
@@ -269,8 +270,8 @@ export default function FinanceDashboardPage() {
                   <TableCell>
                     <Badge variant={statusColor(inv.status)}>{inv.status}</Badge>
                   </TableCell>
-                  <TableCell>{new Date(inv.issueDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDay(inv.issueDate, undefined, 'numeric')}</TableCell>
+                  <TableCell>{formatDay(inv.dueDate, undefined, 'numeric')}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

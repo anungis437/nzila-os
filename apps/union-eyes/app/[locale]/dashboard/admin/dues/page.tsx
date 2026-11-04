@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { recordedDay } from '@/lib/client/day';
 
 // =============================================================================
 // TYPES
@@ -92,7 +93,7 @@ function formatDate(date: string, locale: string): string {
     month: 'short',
     day: '2-digit',
     year: 'numeric',
-  }).format(new Date(date));
+  }).format(recordedDay(date));
 }
 
 function getStatusBadge(status: string, t: (key: string) => string) {

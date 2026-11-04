@@ -24,6 +24,7 @@ import {
 import { FileText, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { ApiShapeError, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 
 interface Invoice {
   id: string;
@@ -171,8 +172,8 @@ export default function InvoicesPage() {
                   <TableCell>
                     <Badge variant={statusColor(inv.status)}>{inv.status}</Badge>
                   </TableCell>
-                  <TableCell>{new Date(inv.issueDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDay(inv.issueDate, undefined, 'numeric')}</TableCell>
+                  <TableCell>{formatDay(inv.dueDate, undefined, 'numeric')}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

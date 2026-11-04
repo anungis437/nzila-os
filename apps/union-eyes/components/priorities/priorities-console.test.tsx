@@ -104,13 +104,21 @@ function stubFetch(routes: { overdue?: Reply; upcoming?: Reply; grievances?: Rep
 
 const titles = (container: HTMLElement) => Array.from(container.querySelectorAll('span.font-medium')).map((el) => el.textContent)
 
+const zone = process.env.TZ
+
+// A fixed local noon: "today", "tomorrow" and "in N days" are calendar days, and an offset of a few hours from the real clock would cross midnight at some hours of the day.
 beforeEach(() => {
   push.mockReset()
   deadlineSeq = 0
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(2026, 4, 31, 12, 0, 0))
 })
 afterEach(() => {
   cleanup()
   vi.unstubAllGlobals()
+  vi.useRealTimers()
+  if (zone === undefined) delete process.env.TZ
+  else process.env.TZ = zone
 })
 
 describe('priorities console', () => {
@@ -248,5 +256,34 @@ describe('priorities console', () => {
     render(<PrioritiesConsole role="steward" />)
     await screen.findByText('Nothing urgent right now')
     expect(screen.queryByRole('button', { name: /Team view|My priorities/ })).not.toBeInTheDocument()
+  })
+
+  it('reads a deadline stored as a day (UTC midnight) as that day for a reader in Toronto, late in the evening of the day itself', async () => {
+    process.env.TZ = 'America/Toronto'
+    // 9:30 in the evening of 31 May in Toronto is already 1 June in UTC.
+    vi.setSystemTime(new Date(2026, 4, 31, 21, 30, 0))
+    stubFetch({
+      upcoming: { body: deadlineList([deadline({ deadlineName: 'Due this very day', dueDate: '2026-05-31T00:00:00.000Z' }), deadline({ deadlineName: 'Due the day after', dueDate: '2026-06-01T00:00:00.000Z' })]) },
+      grievances: { body: grievancesBody([grievanceCase({ responseDeadline: '2026-05-31T00:00:00.000Z' })]) },
+    })
+    render(<PrioritiesConsole role="steward" />)
+    await screen.findByText('Due this very day')
+
+    expect(screen.getByText('Due today')).toBeInTheDocument()
+    expect(screen.getByText('Due tomorrow')).toBeInTheDocument()
+    // The grievance is answered by the end of 31 May: it is not "passed" at half past nine that evening.
+    expect(screen.queryByText('Response deadline passed')).not.toBeInTheDocument()
+    expect(screen.getByText('Response due 2026-05-31')).toBeInTheDocument()
+    // The date shown is the day that was recorded, not the evening before.
+    expect(screen.getAllByText('2026-05-31').length).toBeGreaterThan(0)
+    expect(screen.queryByText('2026-05-30')).not.toBeInTheDocument()
+  })
+
+  it('calls a response deadline passed once its day is over', async () => {
+    process.env.TZ = 'America/Toronto'
+    vi.setSystemTime(new Date(2026, 5, 1, 0, 30, 0))
+    stubFetch({ grievances: { body: grievancesBody([grievanceCase({ responseDeadline: '2026-05-31T00:00:00.000Z' })]) } })
+    render(<PrioritiesConsole role="steward" />)
+    expect(await screen.findByText('Response deadline passed')).toBeInTheDocument()
   })
 })

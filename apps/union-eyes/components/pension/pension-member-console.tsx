@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 import {
   fetchPensionRows,
   PensionServerMessage,
@@ -293,7 +294,7 @@ export default function PensionMemberConsole() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Enrolled Since</p>
-                  <p className="font-medium">{new Date(enrolment.enrollmentDate).toLocaleDateString(locale)}</p>
+                  <p className="font-medium">{formatDay(enrolment.enrollmentDate, locale, 'numeric')}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Total Contributions</p>

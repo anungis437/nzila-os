@@ -65,6 +65,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { useTranslations } from "next-intl";
 import { fetchAllRows } from "@/lib/client/crud-lists";
+import { formatDay } from "@/lib/client/day";
 
 const UNIT_TYPES = [
   "full_time",
@@ -161,9 +162,7 @@ async function failureMessage(response: Response, fallback: string): Promise<str
 
 /** A calendar date has no time zone: reading "2026-12-31" as UTC midnight would show 30 December west of Greenwich. */
 function formatDateOnly(value: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
-  const date = match ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+  return formatDay(value, undefined, "numeric");
 }
 
 export function BargainingUnitManagement({

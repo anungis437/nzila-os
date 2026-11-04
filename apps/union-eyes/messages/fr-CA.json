@@ -564,6 +564,7 @@
     "assignedDescription": "Vous êtes l'agent des relations de travail assigné à ce dossier. Mettez à jour le statut et ajoutez des notes au fur et à mesure que le dossier progresse.",
     "incidentInfo": "Information sur l'incident",
     "incidentDate": "Date de l'incident",
+    "incidentDateNotRecorded": "Non consignée",
     "location": "Emplacement",
     "submittedBy": "Soumis par le membre",
     "lastUpdated": "Dernière mise à jour",

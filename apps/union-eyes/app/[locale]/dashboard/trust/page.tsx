@@ -21,6 +21,7 @@ import * as React from 'react';
 import { Metadata } from 'next';
 import { getTrustMetrics } from '@/lib/trust/system-metrics';
 import { formatTableList } from '@/lib/trust/format';
+import { formatDay } from '@/lib/client/day';
 import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
 import { getTranslations } from 'next-intl/server';
 import { SystemStatusGrid } from '@/components/marketing/system-status-badge';
@@ -289,7 +290,7 @@ export default async function TrustPage() {
                   </li>
                   {metrics.governance.lastElectionDate && (
                     <li>
-                      {t("lastElection")}: {metrics.governance.lastElectionDate.toLocaleDateString()}
+                      {t("lastElection")}: {formatDay(metrics.governance.lastElectionDate, undefined, 'numeric')}
                     </li>
                   )}
                   <li>{t("classVotingRights")}</li>

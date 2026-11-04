@@ -17,6 +17,7 @@ import {
 import { AlertTriangle, FileText } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { envelopeRows, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 
 // What GET /api/dues/payment-history sends for each posted, pending, reversed or voided payment of the signed-in member. The period and the
 // method are null when the ledger entry does not state them.
@@ -129,11 +130,11 @@ export default function PaymentHistory({ userId }: PaymentHistoryProps) {
               {payments.map((payment) => (
                 <TableRow key={payment.id}>
                   <TableCell>
-                    {new Date(payment.date).toLocaleDateString()}
+                    {formatDay(payment.date, undefined, 'numeric')}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {payment.periodStart !== null && payment.periodEnd !== null
-                      ? `${new Date(payment.periodStart).toLocaleDateString()} - ${new Date(payment.periodEnd).toLocaleDateString()}`
+                      ? `${formatDay(payment.periodStart, undefined, 'numeric')} - ${formatDay(payment.periodEnd, undefined, 'numeric')}`
                       : '—'}
                   </TableCell>
                   <TableCell>{formatCurrency(payment.amount)}</TableCell>

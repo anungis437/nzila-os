@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { Shield, DollarSign, FileCheck, Users, FileText, AlertTriangle } from 'lucide-react';
+import { formatDay } from '@/lib/client/day';
 import {
   fetchPensionRows,
   PensionServerMessage,
@@ -29,8 +30,7 @@ const LOAD_FAILED = 'Failed to load pension data. Please try again.';
 const DASH = '—';
 
 const formatCurrency = (amount: number) => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(amount);
-const formatDate = (value: string) =>
-  new Date(value).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+const formatDate = (value: string) => formatDay(value, 'en-CA', 'long');
 const words = (code: string) => code.replace(/_/g, ' ');
 
 function statusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {

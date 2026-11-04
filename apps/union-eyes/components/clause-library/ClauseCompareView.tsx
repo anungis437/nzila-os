@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
+import { recordedDay } from "@/lib/client/day";
 import { X, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -310,13 +311,13 @@ export function ClauseCompareView({
                   {clause.effectiveDate && (
                     <div>
                       <div className="text-xs text-muted-foreground">Effective</div>
-                      <div>{format(new Date(clause.effectiveDate), "MMM yyyy")}</div>
+                      <div>{format(recordedDay(clause.effectiveDate), "MMM yyyy")}</div>
                     </div>
                   )}
                   {clause.expiryDate && (
                     <div>
                       <div className="text-xs text-muted-foreground">Expiry</div>
-                      <div>{format(new Date(clause.expiryDate), "MMM yyyy")}</div>
+                      <div>{format(recordedDay(clause.expiryDate), "MMM yyyy")}</div>
                     </div>
                   )}
                 </div>
@@ -415,7 +416,7 @@ export function ClauseCompareView({
                   {clauses.map((clause) => (
                     <td key={clause.id} className="py-2">
                       {clause.effectiveDate
-                        ? format(new Date(clause.effectiveDate), "MMM d, yyyy")
+                        ? format(recordedDay(clause.effectiveDate), "MMM d, yyyy")
                         : "-"}
                     </td>
                   ))}

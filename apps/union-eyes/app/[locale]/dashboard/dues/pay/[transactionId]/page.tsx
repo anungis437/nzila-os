@@ -31,6 +31,7 @@ import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
 import { envelopeData, readApiError } from '@/lib/client/api-envelope';
 import { fetchAllRows } from '@/lib/client/crud-lists';
+import { isDayPast, recordedDay } from '@/lib/client/day';
 
 // =============================================================================
 // TYPES
@@ -77,7 +78,7 @@ function formatDate(date: string | null, locale: string, t: (key: string) => str
       month: 'long',
       day: '2-digit',
       year: 'numeric',
-    }).format(new Date(date));
+    }).format(recordedDay(date));
   } catch {
     return t('invalidDate');
   }
@@ -90,7 +91,7 @@ function formatDate(date: string | null, locale: string, t: (key: string) => str
 function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
   const t = useTranslations('duesPayPage');
   const locale = useLocale();
-  const isDue = new Date(transaction.dueDate) < new Date();
+  const isDue = isDayPast(transaction.dueDate);
   
   return (
     <Card>

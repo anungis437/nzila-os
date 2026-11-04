@@ -7,6 +7,7 @@
  */
 import { ApiShapeError } from '@/lib/client/api-envelope';
 import { asRecord, flagOrFalse, optionalString, requiredString } from '@/lib/client/row-fields';
+import { dayOf } from '@/lib/client/day';
 import { parseCourseFee, type EnrollmentSession } from '@/lib/education/enrollment-selection';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -34,8 +35,8 @@ function optionalDay(row: Record<string, unknown>, key: string): string | null {
 
 export { formatDay } from '@/lib/client/day';
 
-/** Today as "YYYY-MM-DD" (UTC), the form the stored dates are compared in. */
-export const todayDay = (now: Date = new Date()): string => now.toISOString().slice(0, 10);
+/** Today as "YYYY-MM-DD" in the reader's own zone, the form the stored dates are compared in: a day ends at the reader's midnight, not at midnight UTC. */
+export const todayDay = (now: Date = new Date()): string => dayOf(now);
 
 export function daysBetween(fromDay: string, toDay: string): number {
   return Math.round((Date.parse(`${toDay}T00:00:00Z`) - Date.parse(`${fromDay}T00:00:00Z`)) / 86_400_000);

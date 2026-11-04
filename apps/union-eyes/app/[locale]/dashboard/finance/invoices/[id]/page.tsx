@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -238,8 +239,8 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             <div>
               <h1 className="text-xl font-bold">{invoice.invoiceNumber}</h1>
               <p className="text-sm text-muted-foreground">
-                {t('issuedLabel')} {new Date(invoice.issueDate).toLocaleDateString(locale)} ·
-                {t('dueLabel')} {new Date(invoice.dueDate).toLocaleDateString(locale)}
+                {t('issuedLabel')} {formatDay(invoice.issueDate, locale, 'numeric')} ·
+                {t('dueLabel')} {formatDay(invoice.dueDate, locale, 'numeric')}
               </p>
             </div>
           </div>

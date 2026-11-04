@@ -472,6 +472,7 @@
     "assignedDescription": "You are the assigned Labor Relations Officer for this case. Update the status and add notes as the case progresses.",
     "incidentInfo": "Incident Information",
     "incidentDate": "Incident Date",
+    "incidentDateNotRecorded": "Not recorded",
     "location": "Location",
     "submittedBy": "Submitted by Member",
     "lastUpdated": "Last Updated",

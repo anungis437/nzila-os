@@ -31,6 +31,7 @@ import {
 import { cn } from '@/lib/utils';
 import FinancialAiInsights from './FinancialAiInsights';
 import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { recordedDay } from '@/lib/client/day';
 
 // ── Types matching API response shapes ───────────────────────────────────────
 
@@ -241,7 +242,7 @@ function formatDate(dateStr: string | null): string {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(dateStr));
+  }).format(recordedDay(dateStr));
 }
 
 // A change against a period with nothing in it has no percentage: it is not 100%.

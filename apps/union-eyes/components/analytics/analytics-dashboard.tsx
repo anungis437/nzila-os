@@ -17,6 +17,7 @@ import { TrendingUp, TrendingDown, AlertCircle, RefreshCw } from 'lucide-react';
 import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { useToast } from '@/components/ui/use-toast';
 import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 import { requiredCount } from '@/lib/client/row-fields';
 import { MetricCard } from './metric-card';
 import { TrendChart } from './trend-chart';
@@ -209,7 +210,7 @@ export function AnalyticsDashboard(_props: AnalyticsDashboardProps) {
   const period = (point: MetricPoint | null) =>
     point === null
       ? undefined
-      : `${new Date(point.periodStart).toLocaleDateString(locale)} – ${new Date(point.periodEnd).toLocaleDateString(locale)}`;
+      : `${formatDay(point.periodStart, locale, 'numeric')} – ${formatDay(point.periodEnd, locale, 'numeric')}`;
   const unitLabel = (unit: string | null) => (unit === null ? '' : unit === 'days' ? ` ${t('days')}` : ` ${unit}`);
 
   const claims = latest(ready?.claims);

@@ -45,6 +45,7 @@ import { format } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { recordedDay } from '@/lib/client/day';
 
 // =============================================================================
 // TYPES
@@ -93,7 +94,7 @@ function readCycle(body: unknown): BillingCycleResult {
 // =============================================================================
 
 function formatDate(date: string): string {
-  return format(new Date(date), 'MMM dd, yyyy');
+  return format(recordedDay(date), 'MMM dd, yyyy');
 }
 
 // =============================================================================

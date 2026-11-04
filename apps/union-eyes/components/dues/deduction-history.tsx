@@ -16,6 +16,7 @@ import {
 import { FileText, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { envelopeRows, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 
 // The columns GET /api/dues/deductions selects: numeric columns arrive as decimal text, and gross pay is null when the source did not state it.
 interface DeductionItem {
@@ -128,8 +129,8 @@ export default function DeductionHistory({ userId, onReportIssue }: DeductionHis
               {deductions.map((deduction) => (
                 <TableRow key={deduction.id}>
                   <TableCell className="text-sm">
-                    {new Date(deduction.payPeriodStart).toLocaleDateString()} –{' '}
-                    {new Date(deduction.payPeriodEnd).toLocaleDateString()}
+                    {formatDay(deduction.payPeriodStart, undefined, 'numeric')} –{' '}
+                    {formatDay(deduction.payPeriodEnd, undefined, 'numeric')}
                   </TableCell>
                   <TableCell className="font-medium">
                     {formatCurrency(Number(deduction.unionDuesAmount))}

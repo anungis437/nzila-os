@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logger } from "@/lib/logger";
 import { envelopeRow, readApiError } from "@/lib/client/api-envelope";
+import { formatDay } from "@/lib/client/day";
 import { ApiShapeError, asRecord, countOrNull, humanize, isRecord, optionalString, requiredDate, requiredString } from "@/lib/client/row-fields";
 
 // ── Rows ───────────────────────────────────────────────────────────────────
@@ -202,13 +203,6 @@ const todayIso = () => {
   const now = new Date();
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 };
-
-/** A calendar day has no time zone: "2026-12-31" is shown as 31 December wherever the viewer is. */
-function formatDay(value: string, locale: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
-  const date = match ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(locale);
-}
 
 const isOpen = (item: ActionItem) => OPEN_STATUSES.includes(item.status);
 const isOverdue = (item: ActionItem) => item.dueDate !== null && isOpen(item) && item.dueDate.slice(0, 10) < todayIso();
@@ -504,7 +498,7 @@ export function CommitteeWorkspace({
                             {item.dueDate && (
                               <p className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Clock size={10} />
-                                Due: {formatDay(item.dueDate, locale)}
+                                Due: {formatDay(item.dueDate, locale, "numeric")}
                                 {(item.carryCount ?? 0) > 0 && (
                                   <span className="text-orange-500">(carried {item.carryCount}x)</span>
                                 )}
@@ -640,7 +634,7 @@ export function CommitteeWorkspace({
                           {item.dueDate && (
                             <span className={`flex items-center gap-1 ${isOverdue(item) ? "text-destructive font-medium" : ""}`}>
                               <Clock size={10} />
-                              {formatDay(item.dueDate, locale)}
+                              {formatDay(item.dueDate, locale, "numeric")}
                             </span>
                           )}
                         </div>

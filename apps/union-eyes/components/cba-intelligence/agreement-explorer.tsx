@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import type { CbaIntelAgreement, CbaIntelClause, CbaIntelWageAdjustment } from "@/lib/services/cba-intelligence/extraction-service";
 import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
+import { formatDay } from "@/lib/client/day";
 import {
   Card,
   CardContent,
@@ -101,7 +102,7 @@ function confidenceBadge(value: string | null) {
 
 function formatDate(d: string | null): string {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-CA");
+  return formatDay(d, "en-CA", "numeric");
 }
 
 function ReviewBadge({ status }: { status: string | null }) {

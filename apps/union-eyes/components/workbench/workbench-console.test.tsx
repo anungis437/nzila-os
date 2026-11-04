@@ -77,7 +77,8 @@ describe('workbench inline case access', () => {
     serve({ notes: () => ({ ok: false }) });
     render(<WorkbenchConsole />);
     await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
-    expect(await screen.findByText('workbench.caseNotesUnavailable')).toBeVisible();
+    // The message sits inside an element that fades in: it exists before it is visible.
+    await waitFor(() => expect(screen.getByText('workbench.caseNotesUnavailable')).toBeVisible());
     expect(screen.queryByText('workbench.caseNotesLoading')).not.toBeInTheDocument();
   });
 
