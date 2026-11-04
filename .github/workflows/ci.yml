@@ -188,6 +188,7 @@ jobs:
         run: |
           set -euo pipefail
           node --test tooling/scripts/lib/union-eyes-deployment-safety.test.mjs
+          node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs
           POSTGRES_BIN="$(pg_config --bindir)"
           test -x "$POSTGRES_BIN/initdb"
           UE_TEST_POSTGRES_BIN="$POSTGRES_BIN" node --test tooling/scripts/lib/union-eyes-staging-runner.test.mjs
