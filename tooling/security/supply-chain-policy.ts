@@ -512,6 +512,12 @@ export function checkVulnerabilityPolicy(
         throw new Error(`Malformed advisory record: ${key}`)
       }
       const advisory = raw as Record<string, unknown>
+      // The map key is the primary finding identity. Never allow an empty,
+      // whitespace-spoofed, or control-character key to borrow a secondary
+      // CVE/GHSA waiver, even when the declared id is absent.
+      if (!key.trim() || key !== key.trim() || /[\u0000-\u001f\u007f]/.test(key)) {
+        throw new Error(`Malformed advisory map key: ${JSON.stringify(key)}`)
+      }
       // Bind the advisory map key to its declared identity. A mismatched ID
       // must never inherit a waiver belonging to a different finding.
       if (advisory.id !== undefined && (typeof advisory.id !== 'string' || advisory.id !== key)) {
