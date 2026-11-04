@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { checkVulnerabilityPolicy } from './supply-chain-policy'
+import { checkVulnerabilityPolicy, validateSbomLicenses } from './supply-chain-policy'
 
 const atApproval = new Date('2026-10-10T12:00:00Z')
 const fixture = (name: string) => `tooling/security/fixtures/${name}`
@@ -134,5 +134,14 @@ describe('security audit policy: fail closed', () => {
     expect(result.passed).toBe(false)
     expect(result.expiredWaivers).toContain('1240912')
     expect(result.unwaived).toBe(1)
+  })
+})
+
+
+describe('security license policy: exact allowlist', () => {
+  it('rejects license substring spoofing and missing identifiers without rejecting reviewed dual licenses', () => {
+    const violations = validateSbomLicenses('tooling/security/fixtures/sbom-license-substring-spoof.json')
+    expect(violations.map((violation) => violation.package)).toEqual(['spoofed-license', 'missing-license'])
+    expect(violations.every((violation) => violation.status === 'unknown')).toBe(true)
   })
 })
