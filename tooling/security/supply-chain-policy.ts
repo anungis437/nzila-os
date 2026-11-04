@@ -327,9 +327,28 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
   const sbom: SbomDocument = JSON.parse(readUtf8(resolvedSbomPath))
   const violations: LicenseViolation[] = []
 
-  for (const component of sbom.components ?? []) {
-    const licenses = component.licenses ?? []
+  if (!Array.isArray(sbom.components)) {
+    throw new Error('SBOM missing components array')
+  }
+
+  for (const component of sbom.components) {
+    if (!component || typeof component !== 'object' || Array.isArray(component) ||
+        typeof component.name !== 'string' || !component.name.trim() ||
+        typeof component.version !== 'string' || !component.version.trim()) {
+      throw new Error('SBOM contains a component without canonical name and version')
+    }
+    if (!Array.isArray(component.licenses)) {
+      throw new Error(`SBOM component ${component.name} has no licenses array`)
+    }
+    const licenses = component.licenses
+    if (licenses.length === 0) {
+      violations.push({ package: component.name, version: component.version, license: 'UNKNOWN', status: 'unknown' })
+      continue
+    }
     for (const licenseEntry of licenses) {
+      if (!licenseEntry || typeof licenseEntry !== 'object' || Array.isArray(licenseEntry)) {
+        throw new Error(`Malformed license entry for ${component.name}`)
+      }
       const licenseId = licenseEntry.license?.id ?? licenseEntry.license?.name ?? 'UNKNOWN'
 
       if (FORBIDDEN_LICENSES.includes(licenseId)) {
