@@ -661,7 +661,15 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
   if (!account) throw new Error(`No billing account for org ${input.organizationId}`);
 
   const normalizedStatus = input.status ?? 'completed';
+  // Refuse invalid settlement amounts before persisting a payment or mutating an invoice.
+  // A failed attempt may report zero, but can never represent a negative transfer.
+  if (!/^\d+(?:\.\d{1,2})?$/.test(input.amount)) {
+    throw new Error('External payment amount must be a non-negative CAD amount with at most two decimals');
+  }
   const paymentAmountCents = centsSafe(input.amount);
+  if (normalizedStatus === 'completed' && paymentAmountCents <= 0) {
+    throw new Error('Completed external payment amount must be positive');
+  }
 
   const [payment] = await db
     .insert(platformPayments)
