@@ -85,6 +85,12 @@ export function parseLockfilePackages(lockfilePath) {
   if (versions.length !== 1 || !/^lockfileVersion: ['\"]?9(?:\.0)?['\"]?\s*$/.test(versions[0])) {
     throw new Error('Unsupported pnpm lockfile version or ambiguous declarations; expected exactly one v9 declaration')
   }
+  // Reject noncanonical snapshot headers, including trailing whitespace, before
+  // they can evade the exact-section count and hide a second resolved graph.
+  const snapshotHeaders = lines.filter((line) => /^snapshots\s*:/.test(line))
+  if (snapshotHeaders.some((line) => line !== 'snapshots:')) {
+    throw new Error('Malformed snapshots section header in pnpm-lock.yaml')
+  }
   const start = lines.findIndex((line) => line === 'snapshots:')
   if (start === -1) {
     throw new Error('Missing snapshots/packages section in pnpm-lock.yaml; cannot establish dependency inventory')
