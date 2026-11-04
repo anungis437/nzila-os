@@ -1,0 +1,493 @@
+name: Union Eyes V2 · Staging Deploy (new subscription)
+
+# Isolated Union Eyes V2 staging stack in the NEW Azure subscription
+# (d562ba7f-d891-4504-a489-10917c0ebaaf), resource group nzila-canada-staging-rg,
+# registry nzilaventuresacr, template infrastructure/bicep/ue-v2/main.bicep with
+# env=staging, fresh V2 database and synthetic data only.
+#
+# Order (each step fails closed):
+#   plan        no Azure. Source SHA on main; images by sha256 digest only (a
+#               tag is refused); deployment parameters must be staging, digest-
+#               bound and free of test bypasses; for apply, the named change
+#               record must be an approved, in-window UE STAGING record that
+#               links the source SHA.
+#   what-if     environment `ue-staging-plan` (read-only plan identity). Proves
+#               subscription/tenant, re-attests every digest in the registry,
+#               runs `az deployment group what-if`, refuses deletes and changes
+#               outside the staging group, uploads the output as an artifact.
+#   change-gate apply only, no Azure. validate-change-window.ts (approvals,
+#               window, freeze calendar) for union-eyes STAGING.
+#   apply       manual (operation=apply) and environment `ue-staging`, which has
+#               required reviewers: the reviewer reads the what-if artifact of
+#               this run before approving. Re-checks the change record, re-
+#               attests digests, re-runs what-if and refuses if it drifted from
+#               the reviewed one, then `az deployment group create`.
+#
+# Identities (OIDC through azure/login, no client secret, no registry admin):
+#   ue-staging-plan -> nzila-os-ue-staging-plan   (read + what-if)
+#   ue-staging      -> nzila-os-ue-staging-deploy (staging RG deployer)
+# Roles and federated credentials: docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md
+#
+# Never set here, by design: PLAYWRIGHT_TEST_AUTH, UE_E2E_RISK_BYPASS,
+# UNION_EYES_ACCEPTANCE_AUTH_ENABLED (the parameters gate refuses them).
+# This workflow cannot target production: the resource group, subscription
+# and env are constants checked by the gate, not inputs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: what-if previews only. apply additionally deploys after reviewer approval of the ue-staging environment.
+        required: true
+        type: choice
+        options:
+          - what-if
+          - apply
+        default: what-if
+      source_sha:
+        description: Full 40-character commit SHA on main (the images' source and the Bicep revision deployed)
+        required: true
+        type: string
+      app_image_digest:
+        description: sha256 digest of nzila-os-union-eyes-v2 (from the staging build release manifest). Tags are refused.
+        required: true
+        type: string
+      clamav_image_digest:
+        description: sha256 digest of ue-clamav-http-adapter in nzilaventuresacr. Tags are refused.
+        required: true
+        type: string
+      cron_image_digest:
+        description: sha256 digest of ue-cron-curl in nzilaventuresacr. Tags are refused.
+        required: true
+        type: string
+      change_record_id:
+        description: Approved Union Eyes STAGING change record (CHG-YYYY-NNNN). Required for apply.
+        required: false
+        type: string
+        default: ''
+      parameters_file:
+        description: Staging parameters file at source_sha (no secrets; digests are injected from the inputs above)
+        required: false
+        type: string
+        default: infrastructure/bicep/ue-v2/main.staging.parameters.json
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ue-v2-staging-deploy
+  cancel-in-progress: false
+
+env:
+  STAGING_RG: nzila-canada-staging-rg
+  REGISTRY_NAME: nzilaventuresacr
+  REGISTRY_RG: nzila-canada-prod-rg
+  TEMPLATE: infrastructure/bicep/ue-v2/main.bicep
+  GATE: tooling/scripts/union-eyes-v2-staging-gate-cli.mjs
+
+jobs:
+  plan:
+    name: UE V2 Staging · Plan (no Azure)
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.inputs.outputs.sha }}
+    steps:
+      - name: Checkout workflow definition (gates and change records)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Refuse dispatch from anything but main
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Dispatch this workflow from main (got $GITHUB_REF)."
+            exit 1
+          fi
+
+      - name: Validate inputs
+        id: inputs
+        env:
+          OPERATION: ${{ inputs.operation }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          CHANGE_ID: ${{ inputs.change_record_id }}
+          PARAMETERS_FILE: ${{ inputs.parameters_file }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::source_sha must be a full 40-character lowercase commit SHA."
+            exit 1
+          fi
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$SOURCE_SHA" origin/main; then
+            echo "::error::$SOURCE_SHA is not contained in origin/main."
+            exit 1
+          fi
+          if ! [[ "$PARAMETERS_FILE" =~ ^infrastructure/bicep/ue-v2/[A-Za-z0-9._-]+\.json$ ]]; then
+            echo "::error::parameters_file must be a JSON file directly under infrastructure/bicep/ue-v2/."
+            exit 1
+          fi
+          if [ "$OPERATION" = "apply" ] && [ -z "$CHANGE_ID" ]; then
+            echo "::error::operation=apply requires change_record_id. Refusing to apply without an approved change record."
+            exit 1
+          fi
+          echo "sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Build the digest-only release manifest (tags refused)
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          APP_DIGEST: ${{ inputs.app_image_digest }}
+          CLAMAV_DIGEST: ${{ inputs.clamav_image_digest }}
+          CRON_DIGEST: ${{ inputs.cron_image_digest }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/plan"
+          node --input-type=module -e "
+            import fs from 'node:fs'
+            const lib = await import(process.cwd() + '/tooling/scripts/lib/union-eyes-v2-staging-release.mjs')
+            const e = process.env
+            const manifest = lib.buildReleaseManifest({
+              sourceSha: e.SOURCE_SHA,
+              workflowSha: e.GITHUB_SHA,
+              workflowRunId: e.GITHUB_RUN_ID,
+              createdAt: new Date().toISOString(),
+              images: {
+                app: { digest: e.APP_DIGEST.trim() },
+                clamav: { digest: e.CLAMAV_DIGEST.trim() },
+                cron: { digest: e.CRON_DIGEST.trim() },
+              },
+            })
+            fs.writeFileSync(e.RUNNER_TEMP + '/plan/release-manifest.json', JSON.stringify(manifest, null, 2) + '\n')
+          "
+          node "$GATE" --gate manifest --manifest "$RUNNER_TEMP/plan/release-manifest.json"
+
+      - name: Change record gate (apply only)
+        if: ${{ inputs.operation == 'apply' }}
+        env:
+          CHANGE_ID: ${{ inputs.change_record_id }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: node "$GATE" --gate change-record --change-id "$CHANGE_ID" --source-sha "$SOURCE_SHA" --change-dir ops/change-records
+
+      - name: Render and gate deployment parameters from source_sha
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          PARAMETERS_FILE: ${{ inputs.parameters_file }}
+        run: |
+          set -euo pipefail
+          SRC="$RUNNER_TEMP/source"
+          git worktree add --detach "$SRC" "$SOURCE_SHA"
+          if [ ! -f "$SRC/$PARAMETERS_FILE" ]; then
+            echo "::error::$PARAMETERS_FILE does not exist at $SOURCE_SHA."
+            exit 1
+          fi
+          node --input-type=module -e "
+            import fs from 'node:fs'
+            const lib = await import(process.cwd() + '/tooling/scripts/lib/union-eyes-v2-staging-release.mjs')
+            const e = process.env
+            const manifest = JSON.parse(fs.readFileSync(e.RUNNER_TEMP + '/plan/release-manifest.json', 'utf8'))
+            const file = JSON.parse(fs.readFileSync(e.RUNNER_TEMP + '/source/' + e.PARAMETERS_FILE, 'utf8'))
+            const parameters = { ...(file.parameters ?? {}) }
+            for (const image of lib.V2_IMAGES) {
+              parameters[image.parameter] = { value: manifest.images[image.key].digest }
+              parameters[image.repositoryParameter] = { value: manifest.images[image.key].repository }
+            }
+            const out = { ...file, parameters }
+            fs.writeFileSync(e.RUNNER_TEMP + '/plan/deploy-parameters.json', JSON.stringify(out, null, 2) + '\n')
+          "
+          node "$GATE" --gate parameters --manifest "$RUNNER_TEMP/plan/release-manifest.json" --parameters "$RUNNER_TEMP/plan/deploy-parameters.json"
+          cp "$SRC/$TEMPLATE" "$RUNNER_TEMP/plan/template-main.bicep.snapshot"
+          sha256sum "$SRC/$TEMPLATE" | awk '{print $1}' > "$RUNNER_TEMP/plan/template.sha256"
+
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-staging-plan-${{ github.run_id }}
+          path: ${{ runner.temp }}/plan/
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Summary
+        env:
+          OPERATION: ${{ inputs.operation }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          CHANGE_ID: ${{ inputs.change_record_id }}
+        run: |
+          {
+            echo "### UE V2 staging plan"
+            echo "- Operation: \`$OPERATION\`"
+            echo "- Source SHA: \`$SOURCE_SHA\`"
+            echo "- Target: \`$STAGING_RG\` in subscription d562ba7f-… (new), registry \`$REGISTRY_NAME\`"
+            echo "- Change record: \`${CHANGE_ID:-none (what-if only)}\`"
+            echo '```json'
+            cat "$RUNNER_TEMP/plan/release-manifest.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  what-if:
+    name: UE V2 Staging · What-if (read-only identity)
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: ue-staging-plan
+    outputs:
+      fingerprint: ${{ steps.gate.outputs.fingerprint }}
+    steps:
+      - name: Checkout workflow definition
+        uses: actions/checkout@v5
+
+      - name: Checkout source_sha (Bicep template)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          path: source
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: ue-v2-staging-plan-${{ github.run_id }}
+          path: ${{ runner.temp }}/plan
+
+      - name: Template unchanged since plan
+        run: |
+          set -euo pipefail
+          test "$(sha256sum "source/$TEMPLATE" | awk '{print $1}')" = "$(cat "$RUNNER_TEMP/plan/template.sha256")"
+
+      - name: Assert plan identity is configured (fail-closed)
+        env:
+          C: ${{ secrets.AZURE_CLIENT_ID }}
+          T: ${{ secrets.AZURE_TENANT_ID }}
+          S: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$C" ] || [ -z "$T" ] || [ -z "$S" ]; then
+            echo "::error::No plan identity on the 'ue-staging-plan' GitHub Environment."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, plan identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Assert new subscription, tenant and resource group
+        run: |
+          set -euo pipefail
+          az account show -o json > "$RUNNER_TEMP/account.json"
+          node "$GATE" --gate account --account "$RUNNER_TEMP/account.json"
+          if [ "$(az group exists --name "$STAGING_RG")" != "true" ]; then
+            echo "::error::$STAGING_RG does not exist in the new subscription. It is created once by the platform engineer (runbook step 1)."
+            exit 1
+          fi
+
+      - name: Re-attest image digests in the registry
+        run: |
+          set -euo pipefail
+          M="$RUNNER_TEMP/plan/release-manifest.json"
+          mkdir -p "$RUNNER_TEMP/evidence"
+          for KEY in app clamav cron; do
+            REPO=$(jq -r ".images.$KEY.repository" "$M")
+            DIGEST=$(jq -r ".images.$KEY.digest" "$M")
+            bash tooling/scripts/union-eyes-read-acr-attestation.sh "$REGISTRY_NAME" "$REPO" "$DIGEST" "$RUNNER_TEMP/evidence/acr-$KEY.json"
+          done
+          node "$GATE" --gate attest --manifest "$M" \
+            --acr-app "$RUNNER_TEMP/evidence/acr-app.json" \
+            --acr-clamav "$RUNNER_TEMP/evidence/acr-clamav.json" \
+            --acr-cron "$RUNNER_TEMP/evidence/acr-cron.json"
+
+      - name: az deployment group what-if
+        run: |
+          set -euo pipefail
+          # The real database admin password never reaches the plan identity.
+          # what-if cannot read write-only secure properties, so a throwaway
+          # value yields the same change set; the apply job re-runs what-if
+          # with the real value and refuses on any drift.
+          THROWAWAY="Wf1-$(openssl rand -hex 24)"
+          echo "::add-mask::$THROWAWAY"
+          az deployment group what-if \
+            --resource-group "$STAGING_RG" \
+            --name "ue-v2-staging-whatif-${GITHUB_RUN_ID}" \
+            --template-file "source/$TEMPLATE" \
+            --parameters "@$RUNNER_TEMP/plan/deploy-parameters.json" \
+            --parameters dbAdminPassword="$THROWAWAY" \
+            --result-format FullResourcePayloads \
+            --no-pretty-print -o json > "$RUNNER_TEMP/evidence/what-if.json"
+          jq -r '"| Change | Resource |", "|---|---|", (.changes[] | "| \(.changeType) | `\(.resourceId)` |")' \
+            "$RUNNER_TEMP/evidence/what-if.json" > "$RUNNER_TEMP/evidence/what-if-summary.md"
+
+      - name: What-if gate (no deletes, staging group only)
+        id: gate
+        run: |
+          set -euo pipefail
+          node "$GATE" --gate what-if --what-if "$RUNNER_TEMP/evidence/what-if.json" \
+            --registry-resource-group "$REGISTRY_RG" | tee "$RUNNER_TEMP/evidence/what-if-gate.json"
+          echo "fingerprint=$(jq -r .fingerprint "$RUNNER_TEMP/evidence/what-if-gate.json")" >> "$GITHUB_OUTPUT"
+          {
+            echo "### What-if for $STAGING_RG"
+            echo "Reviewers of the \`ue-staging\` environment: read this and the \`ue-v2-staging-what-if-${GITHUB_RUN_ID}\` artifact before approving apply."
+            echo
+            cat "$RUNNER_TEMP/evidence/what-if-summary.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload what-if
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-staging-what-if-${{ github.run_id }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 90
+          if-no-files-found: error
+
+  change-gate:
+    name: UE V2 Staging · Change window gate
+    needs: [plan, what-if]
+    if: ${{ inputs.operation == 'apply' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Change window (union-eyes STAGING)
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: node --import tsx scripts/validate-change-window.ts --env=STAGING --service=union-eyes "--commit=${SOURCE_SHA}"
+
+  apply:
+    name: UE V2 Staging · Apply (manual, reviewed)
+    needs: [plan, what-if, change-gate]
+    if: ${{ inputs.operation == 'apply' }}
+    runs-on: ubuntu-latest
+    # Required reviewers + main-only deployment branch policy live on this environment.
+    environment: ue-staging
+    steps:
+      - name: Checkout workflow definition
+        uses: actions/checkout@v5
+
+      - name: Checkout source_sha (Bicep template)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          path: source
+
+      - name: Download plan and reviewed what-if
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ue-v2-staging-*-${{ github.run_id }}
+          path: ${{ runner.temp }}/artifacts
+
+      - name: Re-check change record at apply time
+        env:
+          CHANGE_ID: ${{ inputs.change_record_id }}
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          node "$GATE" --gate change-record --change-id "$CHANGE_ID" --source-sha "$SOURCE_SHA" --change-dir ops/change-records
+          test "$(sha256sum "source/$TEMPLATE" | awk '{print $1}')" = "$(cat "$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}/template.sha256")"
+
+      - name: Assert deploy identity and database secret are configured (fail-closed)
+        env:
+          C: ${{ secrets.AZURE_CLIENT_ID }}
+          T: ${{ secrets.AZURE_TENANT_ID }}
+          S: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          HAS_DB_SECRET: ${{ secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD != '' }}
+        run: |
+          set -euo pipefail
+          if [ -z "$C" ] || [ -z "$T" ] || [ -z "$S" ]; then
+            echo "::error::No deploy identity on the 'ue-staging' GitHub Environment."
+            exit 1
+          fi
+          if [ "$HAS_DB_SECRET" != "true" ]; then
+            echo "::error::UE_V2_STAGING_DB_ADMIN_PASSWORD is not set on the 'ue-staging' environment."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, staging deploy identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Assert new subscription and tenant
+        run: |
+          set -euo pipefail
+          az account show -o json > "$RUNNER_TEMP/account.json"
+          node "$GATE" --gate account --account "$RUNNER_TEMP/account.json"
+
+      - name: Re-attest image digests
+        run: |
+          set -euo pipefail
+          M="$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}/release-manifest.json"
+          mkdir -p "$RUNNER_TEMP/evidence"
+          for KEY in app clamav cron; do
+            bash tooling/scripts/union-eyes-read-acr-attestation.sh "$REGISTRY_NAME" \
+              "$(jq -r ".images.$KEY.repository" "$M")" "$(jq -r ".images.$KEY.digest" "$M")" "$RUNNER_TEMP/evidence/acr-$KEY.json"
+          done
+          node "$GATE" --gate attest --manifest "$M" \
+            --acr-app "$RUNNER_TEMP/evidence/acr-app.json" \
+            --acr-clamav "$RUNNER_TEMP/evidence/acr-clamav.json" \
+            --acr-cron "$RUNNER_TEMP/evidence/acr-cron.json"
+
+      - name: Fresh what-if and drift gate against the reviewed what-if
+        env:
+          DB_ADMIN_PASSWORD: ${{ secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          PLAN="$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}"
+          REVIEWED="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}/what-if.json"
+          az deployment group what-if \
+            --resource-group "$STAGING_RG" \
+            --name "ue-v2-staging-whatif-apply-${GITHUB_RUN_ID}" \
+            --template-file "source/$TEMPLATE" \
+            --parameters "@$PLAN/deploy-parameters.json" \
+            --parameters dbAdminPassword="$DB_ADMIN_PASSWORD" \
+            --result-format FullResourcePayloads \
+            --no-pretty-print -o json > "$RUNNER_TEMP/evidence/what-if-apply.json"
+          node "$GATE" --gate what-if --what-if "$RUNNER_TEMP/evidence/what-if-apply.json" --registry-resource-group "$REGISTRY_RG"
+          node "$GATE" --gate drift --reviewed "$REVIEWED" --fresh "$RUNNER_TEMP/evidence/what-if-apply.json"
+
+      - name: az deployment group create
+        env:
+          DB_ADMIN_PASSWORD: ${{ secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD }}
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          PLAN="$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}"
+          az deployment group create \
+            --resource-group "$STAGING_RG" \
+            --name "ue-v2-staging-${SOURCE_SHA:0:12}-${GITHUB_RUN_ID}" \
+            --template-file "source/$TEMPLATE" \
+            --parameters "@$PLAN/deploy-parameters.json" \
+            --parameters dbAdminPassword="$DB_ADMIN_PASSWORD" \
+            --query '{name:name, provisioningState:properties.provisioningState, outputs:properties.outputs}' \
+            -o json > "$RUNNER_TEMP/evidence/deployment.json"
+          test "$(jq -r .provisioningState "$RUNNER_TEMP/evidence/deployment.json")" = "Succeeded"
+
+      - name: Record deployment (no secrets)
+        if: always()
+        env:
+          CHANGE_ID: ${{ inputs.change_record_id }}
+          REVIEWED_FINGERPRINT: ${{ needs.what-if.outputs.fingerprint }}
+        run: |
+          set -euo pipefail
+          PLAN="$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}"
+          DEPLOYMENT=$(cat "$RUNNER_TEMP/evidence/deployment.json" 2>/dev/null || true)
+          if ! echo "${DEPLOYMENT:-x}" | jq -e . >/dev/null 2>&1; then DEPLOYMENT=null; fi
+          jq -n \
+            --slurpfile manifest "$PLAN/release-manifest.json" \
+            --arg changeRecordId "$CHANGE_ID" \
+            --arg whatIfFingerprint "$REVIEWED_FINGERPRINT" \
+            --arg runId "$GITHUB_RUN_ID" \
+            --arg actor "$GITHUB_ACTOR" \
+            --argjson deployment "$DEPLOYMENT" \
+            '{manifest:$manifest[0], changeRecordId:$changeRecordId, whatIfFingerprint:$whatIfFingerprint, runId:$runId, actor:$actor, deployment:$deployment}' \
+            > "$RUNNER_TEMP/evidence/deployment-record.json"
+
+      - name: Upload deployment record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-staging-deployment-${{ github.run_id }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 365
+          if-no-files-found: warn
