@@ -3679,6 +3679,7 @@
     "parentOrganizationLabel": "Organisation parente",
     "noParentOption": "Aucun parent (organisation racine)",
     "parentChangeWarning": "Changer le parent peut affecter les permissions d'accès pour les membres",
+    "notSetOption": "Non défini",
     "currentParentUnlisted": "Organisation parente actuelle ({id})",
     "classificationTitle": "Classification",
     "classificationDescription": "Informations sur le secteur et la juridiction",
@@ -3993,11 +3994,6 @@
       "email": "Courriel",
       "noEmail": "Aucun courriel",
       "fullName": "Nom complet"
-    },
-    "claimsCard": {
-      "title": "Réclamations attribuées",
-      "description": "Réclamations actuellement attribuées à cet utilisateur",
-      "none": "Aucune réclamation attribuée à cet utilisateur"
     },
     "dbCard": {
       "title": "Étapes d'intégration de la base de données",
@@ -5515,6 +5511,7 @@
     "restrictedMember": "Dossier restreint",
     "restrictedMatterNotice": "Vous n'avez pas l'autorité requise pour ce dossier. Seuls les renseignements de triage sont affichés.",
     "assignDenied": "Vous n'êtes pas autorisé à assigner ce dossier.",
+    "actionFailed": "L'action n'a pas pu être effectuée. Réessayez.",
     "unknownMember": "Membre inconnu",
     "title": "Poste de travail des dossiers",
     "subtitle": "Gérer vos files d'attente, attributions et escalades de dossiers",
@@ -5598,6 +5595,8 @@
     "memberContact": "Coordonnées du membre",
     "caseNotes": "Notes de dossier ({count})",
     "addCaseNote": "Ajouter une note de dossier",
+    "caseNotesLoading": "Chargement des notes de dossier…",
+    "caseNotesUnavailable": "Les notes de dossier n'ont pas pu être chargées. Fermez puis rouvrez le dossier pour réessayer.",
     "addNotePlaceholder": "Entrez votre note ou mise à jour...",
     "addNote": "Ajouter une note",
     "assignToMe": "M'assigner",

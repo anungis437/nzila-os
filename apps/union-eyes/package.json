@@ -13,6 +13,7 @@
     "census:page-links": "tsx scripts/runtime/page-link-census.ts --strict",
     "census:body": "tsx scripts/runtime/body-contract-census.ts --strict",
     "census:response": "tsx scripts/runtime/response-shape-census.ts --strict",
+    "census:untyped": "tsx scripts/runtime/untyped-read-census.ts --strict",
     "census:wiring": "tsx scripts/runtime/component-wiring-census.ts --strict",
     "census:fake-content": "tsx scripts/runtime/fake-content-census.ts --strict",
     "census:dead-controls": "tsx scripts/runtime/dead-controls-census.ts --strict",

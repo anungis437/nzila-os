@@ -3052,6 +3052,7 @@
     "parentOrganizationLabel": "Organisation parente",
     "noParentOption": "Aucune parente (organisation racine)",
     "parentChangeWarning": "Changer le parent peut affecter les autorisations d'accès pour les membres",
+    "notSetOption": "Non défini",
     "classificationTitle": "Classification",
     "classificationDescription": "Informations sur le secteur et la juridiction",
     "primarySectorLabel": "Secteur principal",
@@ -3364,11 +3365,6 @@
       "email": "Email",
       "noEmail": "Pas d'email",
       "fullName": "Nom complet"
-    },
-    "claimsCard": {
-      "title": "Réclamations attribuées",
-      "description": "Réclamations actuellement attribuées à cet utilisateur",
-      "none": "Aucune réclamation attribuée à cet utilisateur"
     },
     "dbCard": {
       "title": "Étapes d'intégration de la base de données",
@@ -4975,12 +4971,15 @@
     "memberContact": "Informations de contact du membre",
     "caseNotes": "Notes de dossier ({count})",
     "addCaseNote": "Ajouter une note de dossier",
+    "caseNotesLoading": "Chargement des notes de dossier…",
+    "caseNotesUnavailable": "Les notes de dossier n'ont pas pu être chargées. Fermez puis rouvrez le dossier pour réessayer.",
     "addNotePlaceholder": "Entrez votre note ou mise à jour...",
     "addNote": "Ajouter une note",
     "assignToMe": "M'assigner",
     "restrictedMember": "Dossier restreint",
     "restrictedMatterNotice": "Vous n'avez pas l'autorité requise pour ce dossier. Seuls les renseignements de triage sont affichés.",
     "assignDenied": "Vous n'êtes pas autorisé à assigner ce dossier.",
+    "actionFailed": "L'action n'a pas pu être effectuée. Réessayez.",
     "viewFullDetails": "Voir les détails complets",
     "updateStatusLabel": "Mettre à jour le statut…",
     "statusOptions": {

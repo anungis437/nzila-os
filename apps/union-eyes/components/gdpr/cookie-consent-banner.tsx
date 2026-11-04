@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Cookie, Shield, Settings } from "lucide-react";
 
-import { CONSENT_DECISION_EVENT, hasStoredConsentDecision } from '@/lib/privacy/consent-decision';
+import { CONSENT_DECISION_EVENT, readStoredConsentPreferences } from '@/lib/privacy/consent-decision';
 import { defaultLocale, locales } from '@/lib/locales';
 
 /** The locale the page is served under: the first segment of its path when it names one the application serves. The banner sits above the locale layouts. */
@@ -141,26 +141,21 @@ export function CookieConsentBanner({ organizationId, messages }: CookieConsentB
   useEffect(() => {
     // Check if user has already consented
     const consentId = localStorage.getItem("cookie_consent_id");
-    const consentData = localStorage.getItem("cookie_consent");
+    const saved = readStoredConsentPreferences();
 
-    if (!consentId || !consentData || !hasStoredConsentDecision()) {
+    if (!consentId || !saved) {
       // Privacy precedes onboarding; no competing presentation timers.
+      // A stored decision that cannot be read is not a decision: the banner asks again.
       setShowBanner(true);
     } else {
       // Load existing preferences
-      try {
-        const saved = JSON.parse(consentData);
-        setPreferences(saved.preferences);
-        applyConsent(saved.preferences);
-        // A decision whose record never reached the server is sent again (the request carries an idempotency key, so a repeat is harmless).
-        if (localStorage.getItem(UNRECORDED_KEY)) {
-          recordConsent(consentId, saved.preferences).then((recorded) => {
-            if (recorded) localStorage.removeItem(UNRECORDED_KEY);
-          });
-        }
-      } catch {
-        // A stored decision that cannot be read is not a decision: the banner asks again.
-        setShowBanner(true);
+      setPreferences(saved);
+      applyConsent(saved);
+      // A decision whose record never reached the server is sent again (the request carries an idempotency key, so a repeat is harmless).
+      if (localStorage.getItem(UNRECORDED_KEY)) {
+        recordConsent(consentId, saved).then((recorded) => {
+          if (recorded) localStorage.removeItem(UNRECORDED_KEY);
+        });
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

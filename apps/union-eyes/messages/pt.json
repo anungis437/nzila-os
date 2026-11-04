@@ -3152,6 +3152,7 @@
     "parentOrganizationLabel": "Organização Pai",
     "noParentOption": "Sem pai (organização raiz)",
     "parentChangeWarning": "Alterar o pai pode afetar as permissões de acesso para membros",
+    "notSetOption": "Não definido",
     "classificationTitle": "Classificação",
     "classificationDescription": "Informações de setor e jurisdição",
     "primarySectorLabel": "Setor Primário",
@@ -3464,11 +3465,6 @@
       "email": "Email",
       "noEmail": "Nenhum email",
       "fullName": "Nome Completo"
-    },
-    "claimsCard": {
-      "title": "Reivindicações Atribuídas",
-      "description": "Reivindicações atualmente atribuídas a este usuário",
-      "none": "Nenhuma reivindicação atribuída a este usuário"
     },
     "dbCard": {
       "title": "Etapas de Integração com o Banco de Dados",
@@ -5068,12 +5064,15 @@
     "memberContact": "Informações de Contato do Membro",
     "caseNotes": "Notas do Caso ({count})",
     "addCaseNote": "Adicionar Nota ao Caso",
+    "caseNotesLoading": "A carregar as notas do caso…",
+    "caseNotesUnavailable": "Não foi possível carregar as notas do caso. Feche e reabra o caso para tentar novamente.",
     "addNotePlaceholder": "Insira sua nota ou atualização...",
     "addNote": "Adicionar Nota",
     "assignToMe": "Atribuir a Mim",
     "restrictedMember": "Caso restrito",
     "restrictedMatterNotice": "Não tem autoridade ao nível do caso para este assunto. Apenas são mostrados os detalhes de triagem.",
     "assignDenied": "Não está autorizado a atribuir este caso.",
+    "actionFailed": "A ação não pôde ser concluída. Tente novamente.",
     "viewFullDetails": "Ver Detalhes Completos",
     "updateStatusLabel": "Atualizar Status…",
     "statusOptions": {

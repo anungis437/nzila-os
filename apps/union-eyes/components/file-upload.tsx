@@ -86,7 +86,7 @@ export function FileUpload({
         body: formData,
       });
 
-      const data = await response.json().catch(() => null);
+      const data = (await response.json().catch(() => null)) as { data?: { attachment?: AttachmentMetadata } } | null;
 
       if (!response.ok) {
         throw new Error(apiErrorMessage(data, 'Upload failed'));

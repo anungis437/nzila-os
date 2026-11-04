@@ -94,6 +94,29 @@ interface HierarchyNode {
   clc_affiliated?: boolean;
 }
 
+/** What the organization routes list under `data`. */
+interface ListAnswer<T> {
+  data?: T[];
+}
+
+/** An organization of /api/organizations/{id}/children: the record in snake_case, with the member count the page shows. */
+interface ChildOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  organization_type?: OrganizationType;
+  type?: OrganizationType;
+  status?: string;
+  memberCount?: number;
+}
+
+/** An organization of /api/organizations/{id}/ancestors. */
+interface AncestorOrganization {
+  id: string;
+  name: string;
+  type?: OrganizationType;
+}
+
 export default function OrganizationDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -101,42 +124,35 @@ export default function OrganizationDetailPage() {
   const organizationId = params.id as string;
 
   // Fetch organization details
-  const { data: orgData, error: orgError, isLoading: orgLoading } = useSWR(
+  const { data: orgData, error: orgError, isLoading: orgLoading } = useSWR<{ data?: OrganizationWithDetails }>(
     organizationId ? `/api/organizations/${organizationId}` : null,
     fetcher
   );
 
   // Fetch organization children
-  const { data: childrenData, isLoading: childrenLoading } = useSWR(
+  const { data: childrenData, isLoading: childrenLoading } = useSWR<ListAnswer<ChildOrganization>>(
     organizationId ? `/api/organizations/${organizationId}/children` : null,
     fetcher
   );
 
-  // Fetch organization members
-  const { data: membersData, isLoading: _membersLoading } = useSWR(
-    organizationId ? `/api/organizations/${organizationId}/members` : null,
-    fetcher
-  );
-
   // Fetch organization ancestors (breadcrumb path)
-  const { data: ancestorsData } = useSWR(
+  const { data: ancestorsData } = useSWR<ListAnswer<AncestorOrganization>>(
     organizationId ? `/api/organizations/${organizationId}/ancestors` : null,
     fetcher
   );
 
-  const { data: pathData } = useSWR(
+  const { data: pathData } = useSWR<ListAnswer<HierarchyNode>>(
     organizationId ? `/api/organizations/${organizationId}/path` : null,
     fetcher
   );
 
-  const { data: descendantsData, isLoading: descendantsLoading } = useSWR(
+  const { data: descendantsData, isLoading: descendantsLoading } = useSWR<ListAnswer<HierarchyNode>>(
     organizationId ? `/api/organizations/${organizationId}/descendants` : null,
     fetcher
   );
 
   const organization: OrganizationWithDetails | null = orgData?.data || null;
   const children = childrenData?.data || [];
-  const members = membersData?.data || [];
   const ancestors = ancestorsData?.data || [];
 
   const hierarchyNodes = React.useMemo(() => {
@@ -347,7 +363,7 @@ alert("Failed to archive organization");
         <TabsList>
           <TabsTrigger value="overview">{t('overviewTab')}</TabsTrigger>
           <TabsTrigger value="analytics">{t('analyticsTab')}</TabsTrigger>
-          <TabsTrigger value="members">{t('membersTab')} ({members.length})</TabsTrigger>
+          <TabsTrigger value="members">{t('membersTab')} ({organization.memberCount ?? 0})</TabsTrigger>
           <TabsTrigger value="hierarchy">{t('hierarchyTab')} ({children.length})</TabsTrigger>
           <TabsTrigger value="settings">{t('settingsTab')}</TabsTrigger>
         </TabsList>
@@ -515,8 +531,7 @@ alert("Failed to archive organization");
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {ancestors.map((ancestor: any, index: number) => (
+                  {ancestors.map((ancestor, index) => (
                     <div key={ancestor.id} className="flex items-center gap-2">
                       {index > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
                       <Button
@@ -525,7 +540,7 @@ alert("Failed to archive organization");
                         onClick={() => router.push(`/dashboard/admin/organizations/${ancestor.id}`)}
                         className="gap-2"
                       >
-                        {typeConfig[ancestor.type as OrganizationType]?.icon}
+                        {ancestor.type ? typeConfig[ancestor.type]?.icon : null}
                         {ancestor.name}
                       </Button>
                     </div>
@@ -609,9 +624,9 @@ alert("Failed to archive organization");
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {children.map((child: any) => {
-                    const childTypeInfo = typeConfig[(child.organization_type || child.type) as OrganizationType] ?? typeConfig.union;
+                  {children.map((child) => {
+                    const childType = child.organization_type ?? child.type;
+                    const childTypeInfo = (childType ? typeConfig[childType] : undefined) ?? typeConfig.union;
                     const childStatusInfo = statusConfig[child.status as OrganizationStatus] ?? statusConfig.active;
                     
                     return (

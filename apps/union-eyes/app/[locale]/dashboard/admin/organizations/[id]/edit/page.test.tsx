@@ -80,6 +80,20 @@ describe('EditOrganizationPage', () => {
     await waitFor(() => expect(h.push).toHaveBeenCalledWith(`/dashboard/admin/organizations/${ORG_ID}`))
   })
 
+  it('does not invent a sector or a jurisdiction for an organization that records none: both show as not set and neither is sent', async () => {
+    // "federal" is not a jurisdiction the form offers (they are CA-FED, CA-ON and so on), so it is not shown as one either.
+    h.data = { data: { ...organization, settings: { jurisdiction: 'federal' } } }
+    renderPage()
+    await waitFor(() => expect(screen.getByDisplayValue('CUPE Local 1000')).toBeInTheDocument())
+    expect(screen.getAllByText('Not set').length).toBeGreaterThanOrEqual(2)
+    fireEvent.submit(screen.getByDisplayValue('CUPE Local 1000').closest('form')!)
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(`/api/organizations/${ORG_ID}`, expect.objectContaining({ method: 'PATCH' })))
+    const body = patchBody()
+    expect(body.settings).toEqual({})
+    expect(organizationPatchSchema.safeParse(body).success, JSON.stringify(organizationPatchSchema.safeParse(body).error?.issues)).toBe(true)
+  })
+
   it('shows the type the organization has, read-only, because this route does not change it', async () => {
     renderPage()
     const field = await screen.findByLabelText('Organization Type')

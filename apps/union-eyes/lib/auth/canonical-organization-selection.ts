@@ -20,6 +20,7 @@ import {
 } from '@nzila/platform-auth/org-binding'
 import { createLogger } from '@nzila/os-core'
 import { organizations } from '@/db/schema-organizations'
+import { organizationWire } from '@/lib/organizations/organization-wire'
 import { recordOrganizationSelection, recordOrganizationSelectionOutcome } from './organization-selection-audit'
 import { canonicalMembershipRole } from './canonical-membership-role'
 import {
@@ -153,16 +154,7 @@ async function choicesInIdentityScope(userId: string) {
   const ids = new Set(rows.map((row) => row.id))
   return {
     organizations: rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      slug: row.slug,
-      type: row.organizationType,
-      parentId: row.parentId,
-      sector: row.sectors?.[0] ?? null,
-      jurisdiction: row.provinceTerritory,
-      description: row.description,
-      createdAt: row.createdAt?.toISOString() ?? null,
-      updatedAt: row.updatedAt?.toISOString() ?? null,
+      ...organizationWire(row),
       hierarchyPath: row.hierarchyPath,
       hierarchyLevel: row.hierarchyLevel,
       memberCount: row.memberCount,

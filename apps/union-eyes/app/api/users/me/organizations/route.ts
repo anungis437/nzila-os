@@ -15,6 +15,7 @@ import { createLogger } from '@nzila/os-core'
 import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { organizationWire } from '@/lib/organizations/organization-wire';
 
 const logger = createLogger('users:me:organizations')
 
@@ -90,18 +91,7 @@ export async function GET(_req: NextRequest) {
     });
 
     return NextResponse.json({
-      organizations: orgs.map(o => ({
-        id: o.id,
-        name: o.name,
-        slug: o.slug,
-        type: o.organizationType ?? 'union',
-        parentId: o.parentId ?? null,
-        sector: o.sectors?.[0] ?? null,
-        jurisdiction: o.provinceTerritory ?? null,
-        description: o.description ?? null,
-        createdAt: o.createdAt?.toISOString() ?? null,
-        updatedAt: o.updatedAt?.toISOString() ?? null,
-      })),
+      organizations: orgs.map(organizationWire),
       memberships: memberships.map(m => ({
         id: m.id,
         organizationId: m.organizationId,

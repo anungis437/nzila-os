@@ -46,8 +46,8 @@ export default function ExecutiveDashboard({ userRole }: ExecutiveDashboardProps
         setState({ status: "unavailable", httpStatus: res.status });
         return;
       }
-      const body = await res.json();
-      const data = body?.data;
+      const body = (await res.json()) as { data?: { metrics?: ExecutiveIndicators; strategicGoals?: StrategicGoalRecord[] } };
+      const data = body.data;
       if (!data?.metrics) {
         setState({ status: "unavailable" });
         return;

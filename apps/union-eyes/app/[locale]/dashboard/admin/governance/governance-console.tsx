@@ -131,8 +131,9 @@ export default function GovernanceConsole() {
       setLoading(true);
       const response = await fetch("/api/governance/dashboard");
       if (!response.ok) throw new Error("Failed to load governance dashboard");
-      const data = await response.json();
-      setDashboard(data.data);
+      const body = (await response.json()) as { data?: GovernanceDashboard };
+      if (!body.data) throw new Error("Unexpected governance dashboard response");
+      setDashboard(body.data);
     } catch (_error) {
 toast.error("Unable to load governance dashboard");
     } finally {

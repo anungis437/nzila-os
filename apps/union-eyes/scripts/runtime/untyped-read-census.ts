@@ -26,7 +26,18 @@ export type UntypedKind = 'ANY_READ' | 'READER_KEY_NOT_RETURNED'
 export const ACCEPTED_ANY: ReadonlyArray<{ file: string; reads: number; reason: string }> = []
 
 /** A key a reader takes that no route its screens request sends, and why it is right anyway. */
-export const ACCEPTED_KEYS: ReadonlyArray<{ file: string; key: string; reason: string }> = []
+export const ACCEPTED_KEYS: ReadonlyArray<{ file: string; key: string; reason: string }> = [
+  {
+    file: 'app/[locale]/dashboard/communications/templates/page.tsx',
+    key: 'required',
+    reason: "A key of one entry of the template's `variables` (a jsonb column the route sends whole: { name, description, required, example }), not of the template row.",
+  },
+  {
+    file: 'app/[locale]/dashboard/communications/templates/page.tsx',
+    key: 'example',
+    reason: "A key of one entry of the template's `variables` (a jsonb column the route sends whole: { name, description, required, example }), not of the template row.",
+  },
+]
 
 export interface UntypedFinding {
   kind: UntypedKind

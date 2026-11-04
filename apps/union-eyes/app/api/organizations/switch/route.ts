@@ -14,6 +14,7 @@ import { recordOrganizationSelection } from '@/lib/auth/organization-selection-a
 import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { UUID_PATTERN } from '@/lib/organizations/read-authority';
+import { organizationWire } from '@/lib/organizations/organization-wire';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,17 +110,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    organization: {
-      id: org.id,
-      name: org.name,
-      slug: org.slug,
-      type: org.organizationType ?? 'union',
-      parentId: org.parentId ?? null,
-      sector: (org.sectors ?? [])[0] ?? null,
-      jurisdiction: org.provinceTerritory ?? null,
-      description: org.description ?? null,
-      createdAt: org.createdAt?.toISOString() ?? new Date().toISOString(),
-      updatedAt: org.updatedAt?.toISOString() ?? new Date().toISOString(),
-    },
+    organization: organizationWire(org),
   });
 }

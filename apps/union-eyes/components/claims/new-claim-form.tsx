@@ -23,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
-import { readApiError } from "@/lib/client/api-envelope";
+import { isRecord, readApiError } from "@/lib/client/api-envelope";
 import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
 import Link from "next/link";
 import { VoiceDisclosurePrompt, useVoiceDisclosure } from "@/components/voice-disclosure-consent";
@@ -140,8 +140,8 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
           if (!current.appendDisclosure(form)) return;
           const response = await fetch('/api/voice/transcribe', { method: 'POST', body: form });
           if (!response.ok) throw new Error('transcription refused');
-          const data = await response.json();
-          const transcript = typeof data.text === 'string' ? data.text.trim() : '';
+          const body: unknown = await response.json().catch(() => null);
+          const transcript = isRecord(body) && typeof body.text === 'string' ? body.text.trim() : '';
           if (!transcript) throw new Error('empty transcript');
           setFormData(prev => ({
             ...prev,
@@ -251,7 +251,6 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
         description: formData.description,
         desiredOutcome: `Resolution requested for: ${formData.title}`,
         witnesses: formData.witnesses || undefined,
-        isAnonymous: true,
       };
 
       const response = await fetch("/api/cases/intake", {

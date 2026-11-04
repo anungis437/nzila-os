@@ -45,7 +45,8 @@ export function envelopePages(body: unknown): number {
 }
 
 /**
- * The message a failed answer states, from the body that was already read: `message` (the framework's own `{ code, message }`), `error.message` or `error` (a route's own).
+ * The message a failed answer states, from the body that was already read: `message` (the framework's own `{ code, message }`), `error.message` or `error` (a route's own), or the AI feature
+ * guard's `reason` with its `fallbackAdvice`.
  * A body that names none gives the fallback. A screen never reads `body.error` itself: depending on the route it is a string, an object, or not there at all.
  */
 export function apiErrorMessage(body: unknown, fallback: string): string {
@@ -53,6 +54,10 @@ export function apiErrorMessage(body: unknown, fallback: string): string {
     if (typeof body.message === 'string' && body.message) return body.message;
     if (isRecord(body.error) && typeof body.error.message === 'string' && body.error.message) return body.error.message;
     if (typeof body.error === 'string' && body.error) return body.error;
+    // The AI feature guard refuses with { available: false, reason, fallbackAdvice }: the reason, and then what to do about it.
+    if (typeof body.reason === 'string' && body.reason) {
+      return typeof body.fallbackAdvice === 'string' && body.fallbackAdvice ? `${body.reason} ${body.fallbackAdvice}` : body.reason;
+    }
   }
   return fallback;
 }

@@ -73,11 +73,9 @@ export function LedgerTable({ entries }: LedgerTableProps) {
                     <span className="font-medium">
                       {getTransactionTitle(entry, t)}
                     </span>
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(entry as any).notes && (
+                    {entry.memo && (
                       <span className="text-sm text-muted-foreground">
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {(entry as any).notes}
+                        {entry.memo}
                       </span>
                     )}
                   </div>

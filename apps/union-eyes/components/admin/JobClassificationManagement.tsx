@@ -61,9 +61,15 @@ import {
   getJobClassificationsByOrganizationAction,
   updateJobClassificationAction,
 } from "@/actions/member-employment-actions";
+import type { z } from "zod";
 
 // TYPES
 // =============================================================================
+
+/** What the form holds while it is edited (an unset rate is absent) and what the schema hands the submit handler. */
+type ClassificationFormInput = z.input<typeof createJobClassificationSchema>;
+type ClassificationFormValues = z.output<typeof createJobClassificationSchema>;
+type ClassificationInput = Parameters<typeof createJobClassificationAction>[0];
 
 interface JobClassification {
   id: string;
@@ -281,9 +287,8 @@ function ClassificationFormDialog({
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
 
-  const form = useForm({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createJobClassificationSchema) as any,
+  const form = useForm<ClassificationFormInput, unknown, ClassificationFormValues>({
+    resolver: zodResolver(createJobClassificationSchema),
     defaultValues: editingClassification
       ? {
           organizationId: editingClassification.organizationId,
@@ -307,13 +312,11 @@ function ClassificationFormDialog({
         },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ClassificationFormValues) => {
     setSubmitting(true);
     try {
       // Convert numeric rates to strings
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const classificationData: any = {
+      const classificationData: ClassificationInput = {
         ...data,
         minimumRate: data.minimumRate ? String(data.minimumRate) : undefined,
         maximumRate: data.maximumRate ? String(data.maximumRate) : undefined,

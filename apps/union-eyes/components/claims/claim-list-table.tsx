@@ -16,7 +16,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, FilterFn } from "@tanstack/react-table";
 import {
   MoreHorizontal,
   Eye,
@@ -65,6 +65,9 @@ const priorityColor: Record<string, string> = {
   high: "text-orange-700 bg-orange-100",
   critical: "text-red-700 bg-red-100",
 };
+
+/** A faceted filter holds the chosen values; a row passes when its value is one of them. */
+const facetFilter: FilterFn<ClaimRow> = (row, id, value: unknown) => Array.isArray(value) && value.includes(row.getValue(id));
 
 export function ClaimListTable({
   data,
@@ -126,9 +129,7 @@ export function ClaimListTable({
       cell: ({ row }) => (
         <span>{row.original.claimType === null ? "—" : typeLabel(row.original.claimType)}</span>
       ),
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
+      filterFn: facetFilter,
     },
     {
       accessorKey: "status",
@@ -139,9 +140,7 @@ export function ClaimListTable({
         const status = row.original.status;
         return <Badge variant={statusVariant(status)}>{statusLabel(status)}</Badge>;
       },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
+      filterFn: facetFilter,
     },
     {
       accessorKey: "priority",
@@ -152,9 +151,7 @@ export function ClaimListTable({
         const priority = row.original.priority;
         return <Badge className={priorityColor[priority]}>{priorityLabel(priority)}</Badge>;
       },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
+      filterFn: facetFilter,
     },
     {
       accessorKey: "incidentDate",

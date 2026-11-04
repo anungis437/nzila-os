@@ -13,6 +13,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
+import { organizationWire } from '@/lib/organizations/organization-wire';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,17 +29,8 @@ function isUuid(value: string): boolean {
 type OrgRow = typeof organizations.$inferSelect;
 function formatOrg(o: OrgRow) {
   return {
-    id: o.id,
-    name: o.name,
-    slug: o.slug,
-    type: o.organizationType ?? 'union',
-    parentId: o.parentId ?? null,
-    sector: (o.sectors ?? [])[0] ?? null,
-    jurisdiction: o.provinceTerritory ?? null,
-    description: o.description ?? null,
+    ...organizationWire(o),
     hierarchyLevel: o.hierarchyLevel ?? 0,
-    createdAt: o.createdAt?.toISOString() ?? new Date().toISOString(),
-    updatedAt: o.updatedAt?.toISOString() ?? new Date().toISOString(),
   };
 }
 

@@ -49,8 +49,14 @@ describe('api-envelope', () => {
     expect(apiErrorMessage({ error: 'MEMBER_IDENTITY_MISMATCH', message: 'Self-service intake must use the authenticated member.' }, 'fallback')).toBe('Self-service intake must use the authenticated member.');
   });
 
+  it('reads the AI feature guard\'s refusal: its reason, and then what to do about it', () => {
+    expect(apiErrorMessage({ available: false, reason: 'The feature is off.', fallbackAdvice: 'Ask your administrator.' }, 'fallback')).toBe('The feature is off. Ask your administrator.');
+    expect(apiErrorMessage({ available: false, reason: 'The feature is off.' }, 'fallback')).toBe('The feature is off.');
+    expect(apiErrorMessage({ available: false, reason: 4, fallbackAdvice: 'Ask your administrator.' }, 'fallback')).toBe('fallback');
+  });
+
   it('never hands a non-string to a screen as its message, and falls back for anything that names none', () => {
-    for (const body of [null, undefined, 'text', 4, [], {}, { error: {} }, { error: { message: 4 } }, { error: 4 }, { message: 4 }, { error: '' }, { message: '' }]) {
+    for (const body of [null, undefined, 'text', 4, [], {}, { error: {} }, { error: { message: 4 } }, { error: 4 }, { message: 4 }, { error: '' }, { message: '' }, { reason: '' }]) {
       expect(apiErrorMessage(body, 'fallback')).toBe('fallback');
     }
   });

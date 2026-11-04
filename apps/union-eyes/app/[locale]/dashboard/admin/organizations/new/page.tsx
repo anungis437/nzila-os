@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
-import type { OrganizationType, LabourSector, CAJurisdiction } from "@/types/organization";
+import type { Organization, OrganizationType, LabourSector, CAJurisdiction } from "@/types/organization";
 
 const sectors: LabourSector[] = [
   "healthcare",
@@ -83,6 +83,9 @@ const orgTypes: OrganizationType[] = [
 // Radix Select refuses an item whose value is the empty string, so "no parent" has a value of its own (an organization id is a UUID and cannot be it).
 const NO_PARENT = "none";
 
+/** An organization offered as a parent, as the organization list answers it (purpose=parent). */
+type ParentOption = Pick<Organization, "id" | "name" | "organization_type">;
+
 export default function NewOrganizationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,8 +94,7 @@ export default function NewOrganizationPage() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [availableOrganizations, setAvailableOrganizations] = useState<any[]>([]);
+  const [availableOrganizations, setAvailableOrganizations] = useState<ParentOption[]>([]);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -113,8 +115,9 @@ export default function NewOrganizationPage() {
       try {
         const response = await fetch("/api/organizations?status=active&purpose=parent");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        setAvailableOrganizations(data.data || []);
+        const body = (await response.json()) as { data?: ParentOption[] };
+        if (!Array.isArray(body.data)) throw new Error("Unexpected organization list");
+        setAvailableOrganizations(body.data);
       } catch {
         setError(t("failedToLoadParentOrganizations"));
       }
@@ -163,8 +166,10 @@ export default function NewOrganizationPage() {
         throw new Error(await readApiError(response, t("failedToCreateOrganization")));
       }
 
-      const result = await response.json();
-      router.push(`/dashboard/admin/organizations/${result.data.id}`);
+      const result = (await response.json()) as { data?: { id?: string } };
+      const createdId = result.data?.id;
+      if (!createdId) throw new Error(t("failedToCreateOrganization"));
+      router.push(`/dashboard/admin/organizations/${createdId}`);
     } catch (error) {
       setError(error instanceof Error ? error.message : t("error"));
       setIsSubmitting(false);

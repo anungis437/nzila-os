@@ -86,6 +86,8 @@ describe('NewClaimForm', () => {
     expect(url).toBe('/api/cases/intake')
     expect(init.method).toBe('POST')
     expect(JSON.parse(init.body)).toMatchObject({ memberId: 'user-1', title: 'Schedule changed without notice', caseType: 'safety', incidentDate: '2026-01-15' })
+    // The case carries the member's own id and the representative sees who filed it, so the form does not label it anonymous.
+    expect(JSON.parse(init.body)).not.toHaveProperty('isAnonymous')
     expect(h.incrementPilotCaseCount).toHaveBeenCalled()
   })
 

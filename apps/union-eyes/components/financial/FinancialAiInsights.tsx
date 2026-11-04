@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AIBanner } from '@/components/ai';
-import { ApiShapeError, envelopeData, isRecord } from '@/lib/client/api-envelope';
+import { ApiShapeError, apiErrorMessage, envelopeData, isRecord } from '@/lib/client/api-envelope';
 
 // ── Types matching the API envelope ─────────────────────────────────────────
 
@@ -65,17 +65,6 @@ interface AiEnvelope {
   auditRef: string;
 }
 
-// The words a refused call carries: the standard error body's `message`, or the AI feature guard's own `reason` when the feature is off.
-function refusalMessage(body: unknown, status: number): string {
-  if (isRecord(body)) {
-    if (typeof body.message === 'string' && body.message) return body.message;
-    if (typeof body.reason === 'string' && body.reason) {
-      return typeof body.fallbackAdvice === 'string' && body.fallbackAdvice ? `${body.reason} ${body.fallbackAdvice}` : body.reason;
-    }
-  }
-  return `Request failed (${status})`;
-}
-
 // ── Main Component ──────────────────────────────────────────────────────────
 
 export default function FinancialAiInsights() {
@@ -89,7 +78,8 @@ export default function FinancialAiInsights() {
     try {
       const res = await fetch('/api/ai/finance/analysis?type=comprehensive&timeframe=90d');
       if (!res.ok) {
-        throw new Error(refusalMessage(await res.json().catch(() => null), res.status));
+        // A refusal states its reason: the standard error body's `message`, or the AI feature guard's `reason` when the feature is off.
+        throw new Error(apiErrorMessage(await res.json().catch(() => null), `Request failed (${res.status})`));
       }
       // The route answers { success, data: AiEnvelope, timestamp }.
       const payload = envelopeData(await res.json());

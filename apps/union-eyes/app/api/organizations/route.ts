@@ -12,20 +12,13 @@ import {
   resolveOrganizationAccess,
   UUID_PATTERN,
 } from '@/lib/organizations/read-authority';
+import { ORGANIZATION_TYPES, isOrganizationType } from '@/types/organization';
 
 export const dynamic = 'force-dynamic';
 
 /** A raw query answers an array on the production driver and { rows } on others; both are rows. */
 const rowsOf = <T,>(result: unknown): T[] =>
   Array.isArray(result) ? (result as T[]) : ((result as { rows?: T[] } | null)?.rows ?? Array.from((result ?? []) as Iterable<T>));
-
-/** Canonical organization types (see types/organization.ts) */
-const ORGANIZATION_TYPES = ['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'] as const;
-type OrganizationType = typeof ORGANIZATION_TYPES[number];
-
-function isOrganizationType(value: unknown): value is OrganizationType {
-  return typeof value === 'string' && (ORGANIZATION_TYPES as readonly string[]).includes(value);
-}
 
 /** Active grievance statuses (not closed/settled/withdrawn/denied) */
 const _ACTIVE_CLAIM_STATUSES = [

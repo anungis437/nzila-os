@@ -17,10 +17,26 @@ describe('F12 responses that state only what was stored or may be shared', () =>
 
   // DEF-0B12-PLT-ORGANIZATIONS-RESPONSE-FABRICATES-A-CREATION-TIME-FOR-A-ROW-WITHOUT-ONE
   it('a missing stored time is returned as null, never as the time of the call', () => {
+    // The mapping every organization route shares: a date the row does not have is null, and the type is the row's own.
+    const wire = read('lib/organizations/organization-wire.ts')
+    expect(wire).not.toContain('?? new Date().toISOString()')
+    expect(wire).not.toContain("?? 'union'")
+    expect(wire).toContain('createdAt: row.createdAt?.toISOString() ?? null')
+    expect(wire).toContain('updatedAt: row.updatedAt?.toISOString() ?? null')
+    expect(wire).toContain('type: row.organizationType,')
+
     const source = read('app/api/users/me/organizations/route.ts')
     expect(source).not.toContain('?? new Date().toISOString()')
-    expect(source).toContain('createdAt: o.createdAt?.toISOString() ?? null')
+    expect(source).toContain('organizations: orgs.map(organizationWire)')
     expect(source).toContain('joinedAt: m.joinedAt?.toISOString() ?? m.createdAt?.toISOString() ?? null')
+
+    // Every other place that sends an organization uses the same mapping, so none states a time it does not have or a type it does not know.
+    for (const route of ['app/api/organizations/[id]/path/route.ts', 'app/api/organizations/tree/route.ts', 'app/api/organizations/switch/route.ts', 'lib/auth/canonical-organization-selection.ts']) {
+      const text = read(route)
+      expect(text, route).toContain('organizationWire(')
+      expect(text, route).not.toContain('?? new Date().toISOString()')
+      expect(text, route).not.toContain("?? 'union'")
+    }
   })
 
   // DEF-0B12-PLT-QUEUE-STATUS-GIVES-ANY-SIGNED-IN-SESSION-THE-QUEUE-COUNTS

@@ -3152,6 +3152,7 @@
     "parentOrganizationLabel": "Organizzazione Madre",
     "noParentOption": "Nessuna madre (organizzazione radice)",
     "parentChangeWarning": "Cambiare la madre potrebbe influire sui permessi di accesso per i membri",
+    "notSetOption": "Non impostato",
     "classificationTitle": "Classificazione",
     "classificationDescription": "Informazioni su settore e giurisdizione",
     "primarySectorLabel": "Settore Primario",
@@ -3464,11 +3465,6 @@
       "email": "Email",
       "noEmail": "Nessuna email",
       "fullName": "Nome Completo"
-    },
-    "claimsCard": {
-      "title": "Reclami Assegnati",
-      "description": "Reclami attualmente assegnati a questo utente",
-      "none": "Nessun reclamo assegnato a questo utente"
     },
     "dbCard": {
       "title": "Passaggi di Integrazione del Database",
@@ -5068,12 +5064,15 @@
     "memberContact": "Informazioni di contatto del membro",
     "caseNotes": "Note del caso ({count})",
     "addCaseNote": "Aggiungi nota al caso",
+    "caseNotesLoading": "Caricamento delle note del caso…",
+    "caseNotesUnavailable": "Impossibile caricare le note del caso. Chiudi e riapri il caso per riprovare.",
     "addNotePlaceholder": "Inserisci la tua nota o aggiornamento...",
     "addNote": "Aggiungi Nota",
     "assignToMe": "Assegna a Me",
     "restrictedMember": "Pratica riservata",
     "restrictedMatterNotice": "Non hai l'autorità a livello di pratica per questo caso. Vengono mostrati solo i dettagli di triage.",
     "assignDenied": "Non sei autorizzato ad assegnare questa pratica.",
+    "actionFailed": "Impossibile completare l'azione. Riprova.",
     "viewFullDetails": "Visualizza Dettagli Completi",
     "updateStatusLabel": "Aggiorna Stato…",
     "statusOptions": {

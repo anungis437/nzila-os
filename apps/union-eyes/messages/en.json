@@ -3115,6 +3115,7 @@
     "parentOrganizationLabel": "Parent Organization",
     "noParentOption": "No parent (root organization)",
     "parentChangeWarning": "Changing the parent may affect access permissions for members",
+    "notSetOption": "Not set",
     "classificationTitle": "Classification",
     "classificationDescription": "Sector and jurisdiction information",
     "primarySectorLabel": "Primary Sector",
@@ -3427,11 +3428,6 @@
       "email": "Email",
       "noEmail": "No email",
       "fullName": "Full Name"
-    },
-    "claimsCard": {
-      "title": "Assigned Claims",
-      "description": "Claims currently assigned to this user",
-      "none": "No claims assigned to this user"
     },
     "dbCard": {
       "title": "Database Integration Steps",
@@ -5038,12 +5034,15 @@
     "memberContact": "Member Contact Information",
     "caseNotes": "Case Notes ({count})",
     "addCaseNote": "Add Case Note",
+    "caseNotesLoading": "Loading case notes…",
+    "caseNotesUnavailable": "Case notes could not be loaded. Close and reopen the case to try again.",
     "addNotePlaceholder": "Enter your note or update...",
     "addNote": "Add Note",
     "assignToMe": "Assign to Me",
     "restrictedMember": "Restricted matter",
     "restrictedMatterNotice": "You do not have case-level authority for this matter. Only triage details are shown.",
     "assignDenied": "You are not authorized to assign this case.",
+    "actionFailed": "The action could not be completed. Try again.",
     "viewFullDetails": "View Full Details",
     "updateStatusLabel": "Update Status…",
     "statusOptions": {

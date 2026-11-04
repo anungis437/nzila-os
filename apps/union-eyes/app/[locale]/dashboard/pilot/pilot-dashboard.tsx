@@ -31,8 +31,8 @@ export default function PilotDashboard({ supportEmail }: { supportEmail: string 
         // Try to load the platform overview first (only succeeds for NZILA)
         const overviewRes = await fetch('/api/pilot/overview');
         if (overviewRes.ok) {
-          const data = await overviewRes.json();
-          if (data.organizations && data.organizations.length > 0) {
+          const data = (await overviewRes.json()) as { organizations?: PilotMetrics[] };
+          if (Array.isArray(data.organizations) && data.organizations.length > 0) {
             setAllOrgs(data.organizations);
             setIsPlatformView(true);
             setLoading(false);
@@ -43,8 +43,8 @@ export default function PilotDashboard({ supportEmail }: { supportEmail: string 
         // Fallback: load single-org metrics
         const response = await fetch('/api/pilot/current');
         if (response.ok) {
-          const data = await response.json();
-          setMetrics(data.metrics);
+          const data = (await response.json()) as { metrics?: PilotMetrics };
+          setMetrics(data.metrics ?? null);
         }
       } catch (error) {
         logger.error('Failed to load pilot metrics:', error);

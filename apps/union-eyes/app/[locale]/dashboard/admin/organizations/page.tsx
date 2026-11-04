@@ -64,7 +64,7 @@ import { BulkOperations } from "@/components/organization/bulk-operations";
  
 import type { Organization, OrganizationType, OrganizationStatus } from "@/types/organization";
 
-const fetcher = (url: string) => {
+const fetcher = (url: string): Promise<{ data?: unknown }> => {
   if (!url.startsWith('/')) throw new Error('Only relative URLs are allowed');
   return fetch(url).then(res => {
     if (!res.ok) throw new Error(`Request failed: ${res.status}`);

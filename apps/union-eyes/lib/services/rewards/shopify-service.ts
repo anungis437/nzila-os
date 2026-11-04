@@ -131,10 +131,14 @@ interface ShopifyDiscountCodeResponse {
   discount_code?: ShopifyDiscountCode;
 }
 
-type ShopifyShop = Record<string, unknown>;
+/** What the Shopify Admin API's shop.json says about the shop; the admin page shows the name and the domain. */
+export interface ShopifyShop {
+  name: string;
+  domain: string;
+}
 
 interface ShopifyShopResponse {
-  shop?: ShopifyShop;
+  shop?: { name?: unknown; domain?: unknown };
 }
 
 /**
@@ -347,7 +351,11 @@ export async function testShopifyConnection(): Promise<ShopifyShop | null> {
     }
 
     const result = (await response.json()) as ShopifyShopResponse;
-    return result.shop ?? null;
+    const { shop } = result;
+    // A connection is confirmed by a shop that names itself, not by any answer.
+    if (shop && typeof shop.name === 'string' && typeof shop.domain === 'string') return { name: shop.name, domain: shop.domain };
+    logger.error('[Shopify] Connection test answered without a shop name and domain');
+    return null;
   } catch (error) {
     logger.error('[Shopify] Connection error', { error });
     return null;

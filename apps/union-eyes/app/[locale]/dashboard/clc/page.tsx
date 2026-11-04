@@ -275,8 +275,7 @@ export default async function CLCDashboardPage() {
                       <Building2 className="h-5 w-5 text-muted-foreground" />
                       <div>
                         <div className="font-medium">{federation.name}</div>
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        <div className="text-sm text-muted-foreground">{(federation as any).province || federation.provinceTerritory || 'N/A'}</div>
+                        <div className="text-sm text-muted-foreground">{federation.provinceTerritory ?? '—'}</div>
                       </div>
                     </div>
                   </div>

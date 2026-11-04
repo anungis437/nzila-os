@@ -13,6 +13,7 @@ import { asc, inArray } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { readableOrganizationIds, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
+import { organizationWire } from '@/lib/organizations/organization-wire';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,22 +48,13 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({
     data: orgs.map((o) => ({
-      id: o.id,
-      name: o.name,
-      slug: o.slug,
-      organization_type: o.organizationType ?? 'union',
-      type: o.organizationType ?? 'union',
-      parentId: o.parentId ?? null,
-      sector: (o.sectors ?? [])[0] ?? null,
-      jurisdiction: o.provinceTerritory ?? null,
-      description: o.description ?? null,
+      ...organizationWire(o),
+      organization_type: o.organizationType,
       hierarchyLevel: o.hierarchyLevel ?? 0,
       // memberCount keeps the 0 older callers read; member_count is null where the count was never computed, which is not zero.
       member_count: o.memberCount,
       memberCount: o.memberCount ?? 0,
       status: o.status ?? 'active',
-      createdAt: o.createdAt?.toISOString() ?? new Date().toISOString(),
-      updatedAt: o.updatedAt?.toISOString() ?? new Date().toISOString(),
     })),
   });
 }

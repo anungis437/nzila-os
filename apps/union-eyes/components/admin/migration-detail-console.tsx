@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { envelopeData, readApiError } from "@/lib/client/api-envelope";
+import { envelopeData, isRecord, readApiError } from "@/lib/client/api-envelope";
 import {
   Table,
   TableBody,
@@ -144,15 +144,15 @@ export default function MigrationDetailConsole({ batchId }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ batch_id: batchId }),
       });
-      const data = await res.json().catch(() => ({}));
+      const body: unknown = await res.json().catch(() => null);
       if (!res.ok) {
         setRetryResult("Retry request failed; no completed replay is confirmed.");
         return;
       }
       // withApi wraps successful responses under "data". The server only moves
       // failed records back to pending; never report an import as completed.
-      const result = data?.success === true && data?.data ? data.data : data;
-      setRetryResult(result?.message ?? "Retry request accepted; records queued for processing.");
+      const answer = isRecord(body) && body.success === true && isRecord(body.data) ? body.data : body;
+      setRetryResult(isRecord(answer) && typeof answer.message === "string" ? answer.message : "Retry request accepted; records queued for processing.");
       await fetchDetail();
     } catch {
       setRetryResult("Retry failed");

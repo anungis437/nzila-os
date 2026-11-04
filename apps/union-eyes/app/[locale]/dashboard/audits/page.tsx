@@ -44,9 +44,8 @@ export default async function AuditsPage({ params }: PageProps) {
     const cookie = (await headers()).get("cookie") ?? "";
     const res = await fetch(`${baseUrl}/api/audits`, { cache: 'no-store', headers: { cookie } });
     if (res.ok) {
-      const json = await res.json();
-      const payload = json?.data ?? json;
-      const list = Array.isArray(payload) ? payload : payload?.audits;
+      const json = (await res.json()) as { data?: { audits?: typeof audits } };
+      const list = json.data?.audits;
       if (Array.isArray(list)) {
         audits = list;
         retrieval = "ok";
