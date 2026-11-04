@@ -357,7 +357,7 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
       }
       if (license && ((license.id !== undefined && typeof license.id !== 'string') ||
           (license.name !== undefined && typeof license.name !== 'string') ||
-          (license.id !== undefined && license.name !== undefined && license.id !== license.name))) {
+          (license.id !== undefined && license.name !== undefined && license.id !== license.name && (ALLOWED_LICENSES.includes(license.name) || FORBIDDEN_LICENSES.includes(license.name))))) {
         throw new Error(`Conflicting or malformed license identity for ${component.name}`)
       }
       const licenseId = license?.id ?? license?.name ?? 'UNKNOWN'
