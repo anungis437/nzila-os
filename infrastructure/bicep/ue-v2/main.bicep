@@ -17,7 +17,8 @@
 targetScope = 'resourceGroup'
 
 @allowed(['staging', 'prod'])
-param env string = 'prod'
+@description('Required explicit target. Never infer production for an omitted environment.')
+param env string
 param location string = resourceGroup().location
 param prefix string = 'nzila-ue-v2-${env}'
 
@@ -48,14 +49,14 @@ param cronImageDigest string
 @secure()
 param dbAdminPassword string
 param dbAdminLogin string = 'uev2admin'
-param appDatabaseName string = 'ue_v2_prod'
+param appDatabaseName string = env == 'prod' ? 'ue_v2_prod' : 'ue_v2_staging'
 param dbSku string = 'GP_Standard_D4ds_v5'
 param dbStorageGb int = 256
 param dbBackupRetentionDays int = 35
 
-param appMinReplicas int = 2
+param appMinReplicas int = env == 'prod' ? 2 : 1
 param appMaxReplicas int = 6
-param publicHostName string = 'app.unioneyes.app'
+param publicHostName string = env == 'prod' ? 'app.unioneyes.app' : 'staging.unioneyes.app'
 param siteUrl string = 'https://unioneyes.app'
 param emailFrom string = 'noreply@unioneyes.app'
 param emailReplyTo string = 'support@unioneyes.app'
