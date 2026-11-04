@@ -1,3 +1,5 @@
+@allowed(['staging', 'prod'])
+param deploymentEnvironment string
 param location string
 param environmentId string
 param environmentDefaultDomain string
@@ -108,7 +110,9 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               type: 'Readiness'
-              httpGet: { path: '/api/health', port: 3000 }
+              // Readiness must fail closed when the database, identity or required services are unavailable.
+              // Liveness remains /api/health so a temporary dependency outage does not cause restart loops.
+              httpGet: { path: '/api/ready', port: 3000 }
               initialDelaySeconds: 10
               periodSeconds: 10
             }
@@ -118,10 +122,10 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PORT', value: '3000' }
             { name: 'AZURE_CLIENT_ID', value: identityClientId }
             { name: 'UE_CANONICAL_BOOTSTRAP_V2', value: '1' }
-            { name: 'UE_ENVIRONMENT', value: 'production' }
-            { name: 'UE_DEPLOYMENT_TYPE', value: 'prod' }
+            { name: 'UE_ENVIRONMENT', value: deploymentEnvironment == 'prod' ? 'production' : 'staging' }
+            { name: 'UE_DEPLOYMENT_TYPE', value: deploymentEnvironment }
             { name: 'UE_FEATURE_PROFILE', value: featureProfile }
-            { name: 'NEXT_PUBLIC_APP_ENV', value: 'production' }
+            { name: 'NEXT_PUBLIC_APP_ENV', value: deploymentEnvironment == 'prod' ? 'production' : 'staging' }
             { name: 'NEXT_PUBLIC_APP_URL', value: appUrl }
             { name: 'NEXT_PUBLIC_SITE_URL', value: siteUrl }
             { name: 'AUTH_URL', value: appUrl }
