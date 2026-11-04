@@ -356,6 +356,15 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
       }
       // CycloneDX license identifiers and names must not contradict each other.
       // Prefer rejecting ambiguous evidence over silently authorizing an allowed id.
+      // CycloneDX permits either an SPDX expression or a license object.
+      // Never let an allowed license object mask a contradictory expression.
+      const expression = (licenseEntry as Record<string, unknown>).expression
+      if (expression !== undefined && (typeof expression !== 'string' || !expression.trim() || expression !== expression.trim())) {
+        throw new Error(`Malformed SPDX license expression for ${component.name}`)
+      }
+      if (expression !== undefined && licenseEntry.license !== undefined) {
+        throw new Error(`Ambiguous SPDX license evidence for ${component.name}`)
+      }
       const license = licenseEntry.license
       if (license !== undefined && (!license || typeof license !== 'object' || Array.isArray(license))) {
         throw new Error(`Malformed license identity for ${component.name}`)
@@ -365,7 +374,7 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
           (license.id !== undefined && license.name !== undefined && license.id !== license.name && (ALLOWED_LICENSES.includes(license.name) || FORBIDDEN_LICENSES.includes(license.name))))) {
         throw new Error(`Conflicting or malformed license identity for ${component.name}`)
       }
-      const licenseId = license?.id ?? license?.name ?? 'UNKNOWN'
+      const licenseId = (expression as string | undefined) ?? license?.id ?? license?.name ?? 'UNKNOWN'
 
       if (FORBIDDEN_LICENSES.includes(licenseId)) {
         violations.push({
