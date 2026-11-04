@@ -16,6 +16,7 @@
 
 targetScope = 'resourceGroup'
 
+@allowed(['staging', 'prod'])
 param env string = 'prod'
 param location string = resourceGroup().location
 param prefix string = 'nzila-ue-v2-${env}'
@@ -323,6 +324,7 @@ module apps 'modules/apps.bicep' = {
   name: 'apps'
   params: {
     location: location
+    deploymentEnvironment: env
     environmentId: acaEnv.id
     environmentDefaultDomain: acaEnv.properties.defaultDomain
     identityId: appIdentity.id
