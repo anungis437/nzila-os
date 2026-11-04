@@ -86,6 +86,11 @@ VECTOR`), role assignments (Key Vault Secrets User, Key Vault Crypto User, AcrPu
 environment, three workloads and the alerts. PgBouncer is off because V2 relies on per-transaction
 `SET LOCAL ROLE`.
 
+The same template deploys a cost-sized **staging** stack with `env=staging`. Production defaults
+are unchanged. The staging parameters, cost choices and prerequisites (an action group can be created
+by the template, an optional budget, an optional Log Analytics daily cap) are in
+[STAGING_PARAMETERS.md](./STAGING_PARAMETERS.md). That page changes no gate in section 14.
+
 ## 4. Production secret manifest
 
 No value appears here or in the repository. Every secret is a Key Vault secret referenced by the Container App through the user-assigned identity. **Stripe secrets are optional at initial launch.**
