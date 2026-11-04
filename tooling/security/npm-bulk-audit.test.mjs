@@ -153,9 +153,9 @@ test('ambiguous audit CLI flags fail before reading a lockfile or contacting the
 test('audit report paths containing equals signs are preserved without truncation', () => {
   const folder = mkdtempSync(join(tmpdir(), 'nzila-audit-output-'))
   try {
-    writeFileSync(join(folder, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n')
+    writeFileSync(join(folder, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n')
     const mock = join(folder, 'mock-registry.mjs')
-    writeFileSync(mock, "globalThis.fetch = async () => ({ ok: true, json: async () => ({}) })\\n")
+    writeFileSync(mock, "globalThis.fetch = async () => ({ ok: true, json: async () => ({}) })\n")
     const reportName = 'audit=security=report.json'
     const script = fileURLToPath(new URL('./npm-bulk-audit.mjs', import.meta.url))
     const result = spawnSync(process.execPath, ['--import', mock, script, '--audit-level=high', '--output=' + reportName], {
