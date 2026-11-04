@@ -49,8 +49,9 @@ if (invalidOptions.length) {
 // select a weaker threshold or redirect the report to an unexpected path.
 const levelFlags = args.filter((a) => a.startsWith('--audit-level='))
 const outputFlags = args.filter((a) => a.startsWith('--output='))
-if (levelFlags.length > 1 || outputFlags.length > 1 || outputFlags.some((a) => a.length === '--output='.length)) {
-  console.error('Ambiguous or empty audit options: provide at most one --audit-level and one nonempty --output')
+if (levelFlags.length > 1 || outputFlags.length > 1 || args.filter((a) => a === '--json').length > 1 ||
+    (jsonMode && outputFlags.length > 0) || outputFlags.some((a) => a.length === '--output='.length)) {
+  console.error('Ambiguous or empty audit options: provide at most one --audit-level, one output mode, and a nonempty --output')
   process.exit(2)
 }
 
