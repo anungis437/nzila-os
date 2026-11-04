@@ -2,18 +2,18 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 1007,
-  "mutating": 674,
+  "mutating": 676,
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 18,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 141,
+   "CRUD_FACTORY": 139,
    "DELEGATED": 17,
    "NONE": 48,
    "ORG_AUTH": 7,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 237,
+   "RETIRED": 239,
    "ROLE_AUTH": 105,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
@@ -29,7 +29,7 @@
    "NONE": 8,
    "ORG_AUTH": 3,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 222,
+   "RETIRED": 224,
    "ROLE_AUTH": 55,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
@@ -44,12 +44,12 @@
    "EXEMPT_UNATTRIBUTABLE": 27,
    "INTENT_OUTCOME": 28,
    "NO_WRITES_FOUND": 9,
-   "NONE": 221
+   "NONE": 223
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 83,
-   "NONE": 308,
+   "NONE": 310,
    "SYSTEM_CONTEXT": 53,
    "TENANT_TX": 229
   }
@@ -5000,12 +5000,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": false,
-   "guard": "CRUD_FACTORY",
+   "mutating": true,
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "READ_ONLY"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "deadlines/[id]/extend/route.ts",
@@ -5014,12 +5014,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": false,
-   "guard": "CRUD_FACTORY",
+   "mutating": true,
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "READ_ONLY"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "deadlines/compliance/route.ts",

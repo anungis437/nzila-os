@@ -965,7 +965,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   },
   {
     id: 'UE-CLAIM-DEADLINES-SURFACE',
-    title: 'Claim deadlines (claim_deadlines table) — latent, unexposed surface',
+    title: 'Claim deadlines (claim_deadlines table) — listed on Priorities, with no recipients, reminders, completion or extension',
     state: 'NOT_IMPLEMENTED',
     ownedBy: [
       'apps/union-eyes/db/schema/deadlines-schema.ts',
@@ -974,12 +974,12 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     evidence: [
       'db/schema/domains/claims/deadlines.ts — defines a fully-formed claim_deadlines table (deadlineRules, deadlineExtensions sidecar tables, its own organizationId FK) distinct from grievance_deadlines',
       'lib/deadline-engine/recipient-resolver.ts — resolveGrievanceDeadlineRecipients() explicitly throws "not yet supported (Phase A grievance-only)" when sourceTable === "claim_deadlines"',
-      'Repo-wide search found zero API routes referencing claim_deadlines, claimDeadlines, or the deadlines/deadlineRules/deadlineExtensions table bindings under app/api/',
-      'Repo-wide search found no confirmed UI navigation entry wiring any dashboard page to the claim_deadlines table (components/deadlines/* and components/jurisdiction/deadline-calculator.tsx consume grievance deadlines, not this table, based on naming/import inspection)',
+      'app/api/deadlines/route.ts, overdue/route.ts and upcoming/route.ts are the generic CRUD collection and list routes of claim_deadlines (steward write floor, no case relationship) and dashboard/route.ts summarises them; app/api/deadlines/[id]/complete and /extend were the generic item handler under those names (a DELETE deleted the deadline) and now answer 501 (app/api/__tests__/retired-routes.route.test.ts)',
+      'components/priorities/priorities-console.tsx, served by app/[locale]/dashboard/priorities and listed as "Priorities" in components/workspace/workspace-config.ts, lists the overdue and upcoming claim deadlines; nothing in the application creates, completes, extends or sends a reminder for a claim deadline',
     ],
     targetWave: 99,
     notes:
-      'Classification (per this remediation\'s scope check): LATENT/UNEXPOSED. The table, its rules, and its extensions sidecar are fully modeled in the schema but have no API surface and no confirmed navigable UI entry point — a real user cannot reach this surface today. It is therefore kept OUT of the grievance-continuity fix in this PR. If a future audit finds it IS reachable through a route or page not caught by this search, it must be reclassified to SEPARATE_SUPPORTED_SURFACE_REQUIRES_REMEDIATION and given equivalent operational treatment (recipient resolution, reminder scheduling, continuity-on-reassignment) before overall SaaS readiness can pass.',
+      'Classification: the table is reachable through the Priorities console and the deadline dashboard (read) and through the generic create route, so it is a SEPARATE_SUPPORTED_SURFACE_REQUIRES_REMEDIATION and is no longer latent or unexposed. It has no recipient resolution, no reminder scheduling, no continuity-on-reassignment and no completion or extension, so it stays NOT_IMPLEMENTED for those; the two item routes that suggested otherwise are retired. It is kept OUT of the grievance-continuity fix in this PR, and it must be given that operational treatment, or its listing removed from Priorities, before overall SaaS readiness can pass.',
   },
 
   // ------------------------------------------------------------------------

@@ -7,6 +7,7 @@ const ALL_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
 const CASE_ROUTES = 'the dedicated case routes under /api/cases/{caseId}';
 const DOCS = '/api/documents/repository';
+const DEADLINES = 'GET /api/deadlines, /api/deadlines/overdue and /api/deadlines/upcoming to read claim deadlines';
 
 // Each retired endpoint, the only methods it still exports, and the endpoint it points callers to.
 const RETIRED: Array<[string, () => Promise<Record<string, unknown>>, readonly string[], string]> = [
@@ -20,6 +21,8 @@ const RETIRED: Array<[string, () => Promise<Record<string, unknown>>, readonly s
   ['claims/[id]/status', () => import('../claims/[id]/status/route'), ['GET', 'PATCH', 'DELETE'], '/api/cases/{caseId}/transition'],
   ['claims/[id]/updates', () => import('../claims/[id]/updates/route'), ['GET', 'PATCH', 'DELETE'], '/api/cases/{caseId}/notes'],
   ['claims/[id]/workflow', () => import('../claims/[id]/workflow/route'), ['GET', 'PATCH', 'DELETE'], '/api/cases/{caseId}/next-actions'],
+  ['deadlines/[id]/complete', () => import('../deadlines/[id]/complete/route'), ['GET', 'PATCH', 'DELETE'], DEADLINES],
+  ['deadlines/[id]/extend', () => import('../deadlines/[id]/extend/route'), ['GET', 'PATCH', 'DELETE'], DEADLINES],
   ['documents', () => import('../documents/route'), ['GET', 'POST'], DOCS],
   ['documents/bulk', () => import('../documents/bulk/route'), ['POST'], DOCS],
   ['documents/categories', () => import('../documents/categories/route'), ['GET', 'POST'], DOCS],
