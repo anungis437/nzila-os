@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-31 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-04 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,7 +9,7 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 60 |
+| GitHub Workflows | 62 |
 | Contract Test Files | 300 |
 | TS/JS Test Files | 2858 |
 | Python Test Files | 43 |
@@ -107,5 +107,7 @@
 - trivy.yml
 - ue-build-push-proof.yml
 - ue-staging-discovery.yml
+- ue-v2-staging-build.yml
+- ue-v2-staging-deploy.yml
 - union-eyes-authority-rollout.yml
 - zonga-check.yml
