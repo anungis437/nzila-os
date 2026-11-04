@@ -132,3 +132,20 @@ test('duplicate resolved snapshot keys fail closed instead of silently collapsin
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n  undici@7.29.2:\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).get('undici')], ['7.29.1', '7.29.2']))
 })
+
+
+test('ambiguous audit CLI flags fail before reading a lockfile or contacting the registry', () => {
+  const file = fileURLToPath(new URL('./npm-bulk-audit.mjs', import.meta.url))
+  for (const flags of [
+    ['--audit-level=high', '--audit-level=critical'],
+    ['--audit-level=critical', '--audit-level=high'],
+    ['--output=report.json', '--output=other.json'],
+    ['--output='],
+  ]) {
+    const result = spawnSync(process.execPath, [resolve(file), ...flags], {
+      encoding: 'utf8', timeout: 5000,
+    })
+    assert.equal(result.status, 2, flags.join(' '))
+    assert.match(result.stderr, /Ambiguous or empty audit options/)
+  }
+})
