@@ -2515,12 +2515,10 @@ jobs:
               "NEXT_PUBLIC_UE_DEMO_PROFILE=${{ needs.plan.outputs.demo_profile }}"
               "UE_DEMO_ORG_ID=${{ needs.plan.outputs.demo_org_id }}"
               "NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ needs.plan.outputs.demo_org_slug }}"
-              # Demo personas log in from CI/manual probes with no prior
-              # session history; the risk scorer would otherwise classify
-              # first-seen IP + short UA as "medium" and force MFA enrollment
-              # that demo accounts cannot complete. Bypassing risk here keeps
-              # the demo personas reachable without weakening real auth.
-              "UE_E2E_RISK_BYPASS=true"
+              # Login risk scoring is never bypassed in a deployed environment
+              # (directive 2026-11-04 item 4). The app refuses to boot with a
+              # risk-bypass switch outside local/test; see
+              # apps/union-eyes/lib/reality/test-bypass-guard.ts.
             )
           fi
 

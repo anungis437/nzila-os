@@ -45,6 +45,26 @@ export async function register() {
       process.exit(1);
     }
 
+    // ------------------------------------------------------------------
+    // Test-authentication / risk-bypass guard (directive 2026-11-04 item 4).
+    // A deployed (non-local) runtime must not carry PLAYWRIGHT_TEST_AUTH,
+    // UE_E2E_RISK_BYPASS, UNION_EYES_ACCEPTANCE_AUTH_ENABLED or QA_TEST_ENV.
+    // proxy.ts and /api/ready enforce the same verdict per request.
+    // See apps/union-eyes/lib/reality/test-bypass-guard.ts.
+    // ------------------------------------------------------------------
+    try {
+      const { evaluateTestBypassGuard, readTestBypassGuardEnv } = await import('./lib/reality/test-bypass-guard');
+      const verdict = evaluateTestBypassGuard(readTestBypassGuardEnv());
+      if (!verdict.ok) {
+        console.error(`[test-bypass-guard] REFUSED (${verdict.reasonCode}): ${verdict.reason}`);
+        process.exit(1);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('[test-bypass-guard] failed to evaluate; refusing to start:', message);
+      process.exit(1);
+    }
+
     // Initialize distributed tracing via @nzila/os-core/telemetry (must be first!)
     try {
       const { initOtel } = await import('@nzila/os-core/telemetry');

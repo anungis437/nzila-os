@@ -51,6 +51,7 @@ import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public
 import { cronSecretMatches } from './lib/api/cron-secret';
 import { decideApiLimit, isGuardExempt, logDegradedOnce, presentedCredential } from './lib/rate-limit/proxy-api-guard';
 import { checkRateLimit, RATE_LIMITS } from './lib/rate-limiter';
+import { evaluateTestBypassGuard, readTestBypassGuardEnv } from './lib/reality/test-bypass-guard';
 
 // Edge-safe logger — os-core's createLogger uses Node.js APIs (process.stdout,
 // node:crypto, node:async_hooks) that are unavailable on the Edge Runtime.
@@ -627,9 +628,31 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+/**
+ * Per-request half of the test-authentication / risk-bypass guard
+ * (directive 2026-11-04 item 4; boot half lives in instrumentation.ts).
+ * When a bypass switch is present in a deployed environment every request
+ * is refused with 503, except `/api/ready`, which reports the reason code
+ * itself so probes and operators can see why the revision is not ready.
+ */
+export function testBypassRefusal(pathname: string): NextResponse | null {
+  const verdict = evaluateTestBypassGuard(readTestBypassGuardEnv());
+  if (verdict.ok || pathname === '/api/ready') return null;
+  return new NextResponse(
+    JSON.stringify({
+      error: 'Service unavailable',
+      reasonCode: verdict.reasonCode,
+      switchesPresent: verdict.switchesPresent,
+    }),
+    { status: 503, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } },
+  );
+}
+
 // Export the auth middleware directly
 export async function proxy(req: NextRequest): Promise<NextResponse> {
   try {
+    const refusal = testBypassRefusal(req.nextUrl.pathname);
+    if (refusal) return refusal;
     const response = await authMiddleware(req);
     const mode = limiterMode.get(req);
     if (mode) response.headers.set('X-RateLimit-Mode', mode);

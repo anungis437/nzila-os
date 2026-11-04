@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getBuildMetadata, isReadyFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 import { evaluateCatalogAdmission } from '@/lib/operations/catalog-admission'
 import { probeQueue, probeStorage } from '@/lib/operations/service-probes'
+import { evaluateTestBypassGuard, readTestBypassGuardEnv } from '@/lib/reality/test-bypass-guard'
 
 const APP = 'union-eyes'
 
@@ -97,8 +98,13 @@ export async function GET() {
     false,
   )
 
+  // Directive 2026-11-04 item 4: a test-auth / risk-bypass switch in a
+  // deployed environment makes the revision not-ready, with a reason code.
+  const testBypass = evaluateTestBypassGuard(readTestBypassGuardEnv())
+
   const checksInput: Record<string, boolean | 'unknown'> = {
     process: true,
+    noTestBypass: testBypass.ok,
     database,
     catalogAuthority,
     storage,
@@ -125,6 +131,7 @@ export async function GET() {
 
   const requiredChecks = [
     'process',
+    'noTestBypass',
     'database',
     'catalogAuthority',
     ...(requireStorage ? ['storage'] : []),
@@ -141,6 +148,15 @@ export async function GET() {
       status: ready ? 'ready' : 'not_ready',
       ...getBuildMetadata(APP),
       checks,
+      ...(testBypass.ok
+        ? {}
+        : {
+            reasonCodes: [testBypass.reasonCode],
+            testBypass: {
+              switchesPresent: testBypass.switchesPresent,
+              classifiedBy: testBypass.classifiedBy,
+            },
+          }),
     },
     { status: ready ? 200 : 503 },
   )
