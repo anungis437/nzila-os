@@ -339,19 +339,16 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
           license: licenseId,
           status: 'forbidden',
         })
-      } else if (!ALLOWED_LICENSES.includes(licenseId) && licenseId !== 'UNKNOWN') {
-        // Check if it's a compound license with at least one allowed
-        const isCompoundAllowed = ALLOWED_LICENSES.some((al) =>
-          licenseId.includes(al),
-        )
-        if (!isCompoundAllowed) {
-          violations.push({
-            package: component.name ?? 'unknown',
-            version: component.version ?? 'unknown',
-            license: licenseId,
-            status: 'unknown',
-          })
-        }
+      } else if (!ALLOWED_LICENSES.includes(licenseId)) {
+        // License expressions must match an explicitly reviewed allowlist entry.
+        // Substring matching can authorize forbidden or fabricated expressions
+        // merely because they contain an allowed identifier such as "MIT".
+        violations.push({
+          package: component.name ?? 'unknown',
+          version: component.version ?? 'unknown',
+          license: licenseId,
+          status: 'unknown',
+        })
       }
     }
   }
