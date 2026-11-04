@@ -356,10 +356,16 @@ describe('the frontend against the routes it reads', () => {
     const report = runCensus()
     expect(report.files).toBeGreaterThan(1000)
     // The requests whose answer the syntax can follow, against what the routes answer with; a following that stops working shows here before it shows as a screen that reads nothing.
-    expect(report.judgedCalls).toBeGreaterThan(130)
-    expect(report.judgedReads).toBeGreaterThan(500)
+    expect(report.judgedCalls).toBeGreaterThan(170)
+    expect(report.judgedReads).toBeGreaterThan(650)
     // The requests whose screen declares the type of the answer, judged against the types of the routes' answers: those screens must not fall out of the census.
     expect(report.judged.filter((request) => request.declared > 0).length).toBeGreaterThan(130)
+    // Where the census cannot see, listed in report.blind (`--blind`) and held by ceilings that can only fall: a screen that reads the answer of a route whose shape the syntax cannot
+    // read is a set of reads nothing checks (what is left: pilot/apply's list, finance exports whose shape follows the type asked for, the password handlers of a package).
+    expect(report.blind.unreadableRoutes.length).toBe(report.notJudged.unreadableRoute)
+    expect(report.blind.unfollowable.length).toBe(report.notJudged.noReads)
+    expect(report.blind.unreadableRoutes.filter((site) => site.reads > 0).length).toBeLessThanOrEqual(4)
+    expect(report.blind.unfollowable.length).toBeLessThanOrEqual(129)
     const over = report.findings.length > CEILING ? report.findings.map((finding) => `${finding.kind} ${finding.method} ${finding.pattern.replace(/\u0001/g, '{…}')} ${finding.kind === 'DECLARED_KEY_NOT_RETURNED' ? 'declares' : 'reads'} ${finding.keys.join(' | ')}  ${finding.sites[0].file}:${finding.sites[0].line}`) : []
     expect(over).toEqual([])
   }, 300_000)

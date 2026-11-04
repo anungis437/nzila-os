@@ -54,6 +54,14 @@ function specificity(client: readonly string[], route: readonly Segment[]): numb
   return route.reduce((total, segment, index) => total + (segment.kind === 'literal' && client[index] === segment.value ? 1 : 0), 0)
 }
 
+/**
+ * A computed segment of the URL (`/api/claims/${id}`) stands for an identifier. A route that names a word at that place (`claims/bulk`, `precedents/search`, `agreements/export`) is
+ * the sibling of the dynamic route (`claims/[id]`), reached only when the identifier is that very word, which is not what a screen that computes an id asks for.
+ */
+function namesWordAtComputedSegment(client: readonly string[], route: readonly Segment[]): boolean {
+  return route.some((segment, index) => segment.kind === 'literal' && client[index] === DYNAMIC)
+}
+
 export interface Verdict {
   kind: FindingKind | null
   routes: RouteEntry[]
@@ -85,8 +93,13 @@ export function judgeCall(call: Pick<ClientCall, 'pattern' | 'method'> & { prefi
   }
 
   const method = call.method && !IMPLICIT.has(call.method) ? call.method : null
-  const serving = method ? candidates.filter((entry) => entry.methods.includes(method)) : candidates
+  let serving = method ? candidates.filter((entry) => entry.methods.includes(method)) : candidates
   if (method && serving.length === 0) return { kind: 'METHOD_MISSING', routes: candidates }
+  // Among the routes that serve the call, the dynamic one answers a computed identifier: its literal siblings are kept only when nothing dynamic serves it.
+  if (client.includes(DYNAMIC) && serving.length > 1) {
+    const dynamic = serving.filter((entry) => !namesWordAtComputedSegment(client, routeSegments(entry.route)))
+    if (dynamic.length > 0) serving = dynamic
+  }
   const retired = (entry: RouteEntry): boolean => entry.guard === 'RETIRED' || (method !== null && !!entry.retiredMethods?.includes(method))
   if (serving.every(retired)) return { kind: 'CALLS_RETIRED', routes: serving }
   return { kind: null, routes: serving }

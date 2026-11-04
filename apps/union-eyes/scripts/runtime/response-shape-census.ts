@@ -20,7 +20,7 @@
  * `error` / `message` keys of a failed answer are not judged against the route's success answer. Read-only, no database.
  *
  * Usage (from apps/union-eyes):
- *   npx tsx scripts/runtime/response-shape-census.ts [--write=<json>] [--markdown=<md>] [--strict] [--quiet]
+ *   npx tsx scripts/runtime/response-shape-census.ts [--write=<json>] [--markdown=<md>] [--strict] [--quiet] [--blind]
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -55,6 +55,8 @@ export interface ResponseReport {
   judgedReads: number
   /** Why the other requests were not judged: no route matched, the route's answer is not readable, the screen's reads are not followable (by how the URL is used). */
   notJudged: { noRoute: number; unreadableRoute: number; noReads: number; noReadsByVia: Record<string, number> }
+  /** Where the census is blind, so a blind spot is looked at by a person rather than counted: each request whose route answer the syntax could not read (with how many reads and declared names of its answer the screen has: none means nothing in the answer is used), and each whose reads it could not follow. */
+  blind: { unreadableRoutes: Array<{ file: string; line: number; method: string; pattern: string; routes: string[]; reads: number }>; unfollowable: Array<{ file: string; line: number; method: string; pattern: string; via: string }> }
   byKind: Record<ResponseKind, number>
   findings: ResponseFinding[]
   /** Each request that was judged, with how many reads and declared names of its answer were placed against the route: what the census is looking at. */
@@ -224,6 +226,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
   let judgedCalls = 0
   let judgedReads = 0
   const notJudged: ResponseReport['notJudged'] = { noRoute: 0, unreadableRoute: 0, noReads: 0, noReadsByVia: {} }
+  const blind: ResponseReport['blind'] = { unreadableRoutes: [], unfollowable: [] }
 
   for (const file of files) {
     if (file in NOT_REQUESTS) continue
@@ -261,6 +264,8 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
       }
       if (!readable) {
         notJudged.unreadableRoute += 1
+        const used = readsOfRequest(call.node, loader, false, [])
+        blind.unreadableRoutes.push({ file, line: call.line, method, pattern: call.pattern, routes: verdict.routes.map((entry) => entry.route), reads: used.length })
         continue
       }
       const declared: DeclaredAnswer[] = []
@@ -269,6 +274,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
       if (reads.length === 0 && declarations.length === 0) {
         notJudged.noReads += 1
         notJudged.noReadsByVia[call.via] = (notJudged.noReadsByVia[call.via] ?? 0) + 1
+        blind.unfollowable.push({ file, line: call.line, method, pattern: call.pattern, via: call.via })
         continue
       }
       judgedCalls += 1
@@ -300,7 +306,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
   const findings = [...grouped.values()].sort((a, b) => a.kind.localeCompare(b.kind) || a.pattern.localeCompare(b.pattern) || a.keys.join().localeCompare(b.keys.join()))
   const byKind: Record<ResponseKind, number> = { ROOT_KEY_NOT_RETURNED: 0, DATA_KEY_NOT_RETURNED: 0, KEY_NOT_RETURNED_EITHER: 0, FAILURE_MESSAGE_BY_HAND: 0, DECLARED_KEY_NOT_RETURNED: 0 }
   for (const finding of findings) byKind[finding.kind] += 1
-  return { files: files.length, calls, judgedCalls, judgedReads, notJudged, byKind, findings, judged, placed: [...placed] }
+  return { files: files.length, calls, judgedCalls, judgedReads, notJudged, blind, byKind, findings, judged, placed: [...placed] }
 }
 
 export function toMarkdown(report: ResponseReport): string {
@@ -338,6 +344,12 @@ function main(): void {
     for (const finding of report.findings) {
       console.log(`  ${finding.kind.padEnd(26)} ${finding.method} ${show(finding.pattern)}  ${finding.kind === 'DECLARED_KEY_NOT_RETURNED' ? 'declares' : 'reads'} ${finding.keys.join(' | ')}  [${finding.sites[0].file}:${finding.sites[0].line}${finding.sites.length > 1 ? ` +${finding.sites.length - 1}` : ''}]  → ${finding.routes.join(', ')}`)
     }
+  }
+  if (args.includes('--blind')) {
+    console.log(`\nanswer not readable (${report.blind.unreadableRoutes.length}; ${report.blind.unreadableRoutes.filter((site) => site.reads > 0).length} of them are read by the screen):`)
+    for (const site of report.blind.unreadableRoutes) console.log(`  ${site.method.padEnd(6)} ${show(site.pattern)}  reads=${site.reads}  [${site.file}:${site.line}]  → ${site.routes.join(', ')}`)
+    console.log(`\nreads not followable (${report.blind.unfollowable.length}):`)
+    for (const site of report.blind.unfollowable) console.log(`  ${site.method.padEnd(6)} ${show(site.pattern)}  via ${site.via}  [${site.file}:${site.line}]`)
   }
   if (args.includes('--strict') && report.findings.length > 0) process.exit(1)
 }

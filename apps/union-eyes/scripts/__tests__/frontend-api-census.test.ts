@@ -98,6 +98,40 @@ describe('matching a URL to the route files', () => {
   })
 })
 
+describe('which routes serve a URL with a computed segment', () => {
+  const routes: RouteEntry[] = [
+    { route: 'claims/[id]/route.ts', methods: ['GET', 'PATCH'], guard: 'WITH_API' },
+    { route: 'claims/bulk/route.ts', methods: ['GET', 'POST'], guard: 'WITH_API' },
+    { route: 'ocra/start/route.ts', methods: ['POST'], guard: 'WITH_API' },
+    { route: 'ocra/submit/route.ts', methods: ['POST'], guard: 'WITH_API' },
+    { route: 'clauses/[id]/route.ts', methods: ['GET'], guard: 'RETIRED' },
+    { route: 'clauses/search/route.ts', methods: ['GET'], guard: 'WITH_API' },
+  ]
+  const served = (pattern: string, method: string | null) => judgeCall({ pattern, method }, routes).routes.map((entry) => entry.route)
+
+  it('serves a computed identifier by the dynamic route, not by its literal sibling', () => {
+    // `claims/${id}` is the case that id names; it is `claims/bulk` only when the id is the word "bulk".
+    expect(served(`/api/claims/${DYNAMIC}`, 'GET')).toEqual(['claims/[id]/route.ts'])
+    expect(served(`/api/claims/${DYNAMIC}`, 'PATCH')).toEqual(['claims/[id]/route.ts'])
+  })
+
+  it('keeps the literal sibling when nothing dynamic serves the method', () => {
+    expect(served(`/api/claims/${DYNAMIC}`, 'POST')).toEqual(['claims/bulk/route.ts'])
+  })
+
+  it('serves a static URL by the literal route, as before', () => {
+    expect(served('/api/claims/bulk', 'GET')).toEqual(['claims/bulk/route.ts'])
+  })
+
+  it('keeps every literal route when there is no dynamic route to prefer', () => {
+    expect(served(`/api/ocra/${DYNAMIC}`, 'POST')).toEqual(['ocra/start/route.ts', 'ocra/submit/route.ts'])
+  })
+
+  it('calls a computed identifier retired when the dynamic route that serves it is, whatever its live sibling does', () => {
+    expect(judgeCall({ pattern: `/api/clauses/${DYNAMIC}`, method: 'GET' }, routes).kind).toBe('CALLS_RETIRED')
+  })
+})
+
 // What the frontend asks for that nothing serves. The ceilings are the end: zero.
 const CEILING = { ROUTE_MISSING: 0, METHOD_MISSING: 0, CALLS_RETIRED: 0 } as const
 
