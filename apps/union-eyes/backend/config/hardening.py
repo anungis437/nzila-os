@@ -11,6 +11,7 @@ the Django entries true, kept apart from ``settings.py`` so they can be tested w
 * ``manage.py`` commands (migrate, collectstatic, test, shell, runserver) are not serving processes and keep their development defaults.
 """
 import os
+import ntpath
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -28,9 +29,9 @@ def is_serving_process(argv):
     if not argv or not argv[0]:
         return False
     path = os.path.normpath(argv[0])
-    name = os.path.basename(path).lower()
+    name = ntpath.basename(path).lower()
     if name.startswith("__main__"):
-        name = os.path.basename(os.path.dirname(path)).lower()
+        name = ntpath.basename(ntpath.dirname(path)).lower()
     for suffix in (".exe", ".py"):
         if name.endswith(suffix):
             name = name[: -len(suffix)]
