@@ -469,11 +469,11 @@ export function checkVulnerabilityPolicy(
       // conceal inconsistent scanner evidence or accidentally authorize a waiver.
       if (advisory.cves !== undefined &&
           (!Array.isArray(advisory.cves) ||
-           advisory.cves.some((id: unknown) => typeof id !== 'string' || !id.trim()))) {
+           advisory.cves.some((id: unknown) => typeof id !== 'string' || !/^CVE-[0-9]{4}-[0-9]{4,}$/i.test(id)))) {
         throw new Error(`Malformed CVE identifiers for advisory: ${key}`)
       }
       if (advisory.ghsa_id !== undefined &&
-          (typeof advisory.ghsa_id !== 'string' || !advisory.ghsa_id.trim())) {
+          (typeof advisory.ghsa_id !== 'string' || !/^GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}$/i.test(advisory.ghsa_id))) {
         throw new Error(`Malformed GHSA identifier for advisory: ${key}`)
       }
       totalVulns++
