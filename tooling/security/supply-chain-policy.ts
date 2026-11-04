@@ -330,6 +330,11 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
   if (!Array.isArray(sbom.components)) {
     throw new Error('SBOM missing components array')
   }
+  // An empty inventory is not evidence that the dependency graph was scanned.
+  // Refuse an empty CycloneDX document rather than declaring all licenses safe.
+  if (sbom.components.length === 0) {
+    throw new Error('SBOM contains no components to validate')
+  }
 
   for (const component of sbom.components) {
     if (!component || typeof component !== 'object' || Array.isArray(component) ||
