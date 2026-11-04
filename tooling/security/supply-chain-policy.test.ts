@@ -139,6 +139,11 @@ describe('security audit policy: fail closed', () => {
 
 
 describe('security license policy: exact allowlist', () => {
+  it('rejects forbidden licenses in nested CycloneDX components', () => {
+    const violations = validateSbomLicenses(fixture('sbom-nested-forbidden-license.json'))
+    expect(violations).toEqual([{ package: 'nested-forbidden', version: '2.0.0', license: 'GPL-3.0-only', status: 'forbidden' }])
+  })
+
   it('rejects a forbidden SPDX expression even when another entry claims MIT', () => {
     const violations = validateSbomLicenses(fixture('sbom-expression-evidence.json'))
     expect(violations.map((item) => item.package)).toEqual(['forbidden-expression'])
