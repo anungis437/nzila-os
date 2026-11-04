@@ -182,3 +182,47 @@ test('noncanonical snapshot headers cannot conceal a second dependency graph', (
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
 })
+
+test('the shapes pnpm actually writes are inventoried: quoted keys and empty inline mappings', () => {
+  const lock = [
+    'lockfileVersion: 9.0',
+    'snapshots:',
+    "  '@adobe/css-tools@4.4.4': {}",
+    "  '@scope/pkg@1.2.3(react@18.3.1)':",
+    '    dependencies:',
+    '      react: 18.3.1',
+    '  js-tokens@4.0.0: {}',
+    '  react@18.3.1:',
+    '    dependencies:',
+    '      js-tokens: 4.0.0',
+    '',
+  ].join('\n')
+  withLockfile(lock, (file) => {
+    const result = parseLockfilePackages(file)
+    assert.deepEqual([...result.get('@adobe/css-tools')], ['4.4.4'])
+    assert.deepEqual([...result.get('@scope/pkg')], ['1.2.3'])
+    assert.deepEqual([...result.get('js-tokens')], ['4.0.0'])
+    assert.deepEqual([...result.get('react')], ['18.3.1'])
+  })
+  // A quoted and a bare spelling of one key are the same YAML key: still a duplicate.
+  withLockfile("lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1: {}\n  'undici@7.29.1': {}\n", (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Duplicate resolved snapshot key/))
+  // Only an empty inline mapping is accepted; any other inline value or a dangling quote is malformed.
+  for (const bad of ["  undici@7.29.1: {a: 1}", "  'undici@7.29.1: {}", '  "undici@7.29.1": {}', '  undici@7.29.1: []']) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n' + bad + '\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Malformed resolved snapshot key/, bad))
+  }
+})
+
+test("the repository's own pnpm-lock.yaml parses completely", () => {
+  const root = resolve(fileURLToPath(new URL('../..', import.meta.url)))
+  const lock = join(root, 'pnpm-lock.yaml')
+  const inventory = parseLockfilePackages(lock)
+  const entries = readFileSync(lock, 'utf-8').split(/\r?\n/)
+  const start = entries.indexOf('snapshots:')
+  const keys = entries.slice(start + 1).filter((line) => /^ {2}\S/.test(line)).length
+  let versions = 0
+  for (const set of inventory.values()) versions += set.size
+  assert.ok(keys > 1000, `expected a real lockfile, saw ${keys} snapshot keys`)
+  assert.ok(versions > 1000 && versions <= keys, `${versions} versions from ${keys} keys`)
+})

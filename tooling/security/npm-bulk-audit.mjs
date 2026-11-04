@@ -102,14 +102,22 @@ export function parseLockfilePackages(lockfilePath) {
     const line = lines[i]
     if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
-    const match = /^ {2}((?:@[^\s@/:]+\/)?[^\s@/:]+)@([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)(?:\([^\n]*\))?:\s*$/.exec(line)
+    // pnpm writes a snapshot key either bare or single-quoted (it quotes every key
+    // that starts with `@`), followed by `:` and either nothing (a nested mapping
+    // follows) or an empty inline mapping ` {}` (a package with no dependencies).
+    // Those are the only two accepted shapes; anything else is malformed.
+    const entry = /^ {2}(?:'([^'\n]+)'|([^\s'"][^\n]*?)):(?: \{\})?\s*$/.exec(line)
+    const snapshotKey = entry ? (entry[1] ?? entry[2]) : null
+    const match = snapshotKey
+      ? /^((?:@[^\s@/:]+\/)?[^\s@/:]+)@([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)(?:\([^\n]*\))?$/.exec(snapshotKey)
+      : null
     if (!match) {
       throw new Error('Malformed resolved snapshot key in pnpm-lock.yaml')
     }
     const [, name, version] = match
     // YAML duplicate mapping keys can silently replace an earlier resolution.
-    // Reject them rather than certifying an incomplete or ambiguous inventory.
-    const snapshotKey = line.slice(2, line.lastIndexOf(':')).trim()
+    // Reject them rather than certifying an incomplete or ambiguous inventory;
+    // a quoted and an unquoted spelling of one key are the same key.
     if (seenSnapshots.has(snapshotKey)) {
       throw new Error(`Duplicate resolved snapshot key in pnpm-lock.yaml: ${snapshotKey}`)
     }
