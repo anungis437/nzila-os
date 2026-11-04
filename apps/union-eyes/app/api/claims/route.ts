@@ -10,7 +10,6 @@ import { crudRoutes } from '@/lib/api/crud-factory'
 import { withApi } from '@/lib/api/with-api'
 import { ApiError } from '@/lib/api/errors'
 import { claims } from '@/db/schema'
-import { sql } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { allocateClaimNumber } from '@/lib/claims/claim-number'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
@@ -52,7 +51,8 @@ const claimCreateSchema = z
     witnessesPresent: z.boolean().optional(),
     witnessDetails: z.string().max(5000).optional().nullable(),
     priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-    isAnonymous: z.boolean().optional(),
+    // The other two ways a case is opened (/api/cases, /api/cases/intake) store false when the body says nothing; the column's own default is true.
+    isAnonymous: z.boolean().optional().default(false),
     claimAmount: z.union([z.string(), z.number()]).optional().nullable(),
     status: z
       .enum([

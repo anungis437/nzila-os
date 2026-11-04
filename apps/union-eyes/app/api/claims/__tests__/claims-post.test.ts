@@ -206,6 +206,20 @@ describe('POST /api/claims', () => {
     expect(typeof capturedInsertValues!.incidentDate).not.toBe('string');
   });
 
+  it('stores a case as not anonymous when the body does not say: the column default is true, and the other two ways of opening a case store false', async () => {
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
+    await handler(makeCtx());
+
+    expect(capturedInsertValues!.isAnonymous).toBe(false);
+  });
+
+  it('keeps the choice the body makes', async () => {
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
+    await handler(makeCtx({ body: { ...makeCtx().body, isAnonymous: true } }));
+
+    expect(capturedInsertValues!.isAnonymous).toBe(true);
+  });
+
   it('returns inserted row data', async () => {
     const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     const result = await handler(makeCtx()) as { data: Record<string, unknown> };

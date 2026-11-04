@@ -565,6 +565,7 @@
     "incidentInfo": "Information sur l'incident",
     "incidentDate": "Date de l'incident",
     "incidentDateNotRecorded": "Non consignée",
+    "notRecorded": "Non renseigné",
     "location": "Emplacement",
     "submittedBy": "Soumis par le membre",
     "lastUpdated": "Dernière mise à jour",

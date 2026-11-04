@@ -99,8 +99,30 @@ describe('ClaimDetailPage', () => {
     routes({ claim: wrapped({ data: dated }), timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
     await screen.findByText('CASE-2026-0042')
-    expect(screen.getByText(new Date(2026, 2, 4, 12).toLocaleDateString())).toBeInTheDocument()
-    expect(screen.queryByText(new Date(2026, 2, 3, 12).toLocaleDateString())).toBeNull()
+    expect(screen.getByText(new Date(2026, 2, 4, 12).toLocaleDateString('en-CA'))).toBeInTheDocument()
+    expect(screen.queryByText(new Date(2026, 2, 3, 12).toLocaleDateString('en-CA'))).toBeNull()
+  })
+
+  it('labels the day the case was filed as submitted, and shows when it was last updated, in the page locale', async () => {
+    process.env.TZ = 'America/Toronto'
+    const dated = { ...claim, incidentDate: '2026-03-04T00:00:00.000Z', createdAt: '2026-03-10T15:00:00.000Z', updatedAt: '2026-03-12T15:00:00.000Z' }
+    routes({ claim: wrapped({ data: dated }), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    await screen.findByText('CASE-2026-0042')
+    expect(screen.getByText('claims.submitted')).toBeInTheDocument()
+    expect(screen.queryByText('claims.submittedBy')).toBeNull()
+    expect(screen.getByText(new Date(2026, 2, 10, 12).toLocaleDateString('en-CA'))).toBeInTheDocument()
+    expect(screen.getByText(new Date(2026, 2, 12, 12).toLocaleDateString('en-CA'))).toBeInTheDocument()
+  })
+
+  it('says what was not recorded, instead of a label with nothing under it or "Invalid Date"', async () => {
+    const sparse = { ...claim, claimNumber: null, claimType: null, location: null, description: '  ', desiredOutcome: null, createdAt: null, updatedAt: 'not a date' }
+    routes({ claim: wrapped({ data: sparse }), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByRole('heading', { level: 1, name: 'claims.claimDetails' })).toBeInTheDocument()
+    expect(screen.getAllByText('claims.notRecorded')).toHaveLength(3)
+    expect(screen.getAllByText('—')).toHaveLength(2)
+    expect(screen.queryByText('Invalid Date')).toBeNull()
   })
 
   it('says no incident date was recorded when the case has none, instead of printing "Invalid Date"', async () => {

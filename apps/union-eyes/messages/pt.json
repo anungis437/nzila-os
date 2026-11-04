@@ -560,6 +560,7 @@
     "incidentInfo": "Informações do Incidente",
     "incidentDate": "Data do Incidente",
     "incidentDateNotRecorded": "Não registrada",
+    "notRecorded": "Não informado",
     "location": "Localização",
     "submittedBy": "Enviado pelo Membro",
     "lastUpdated": "Última Atualização",

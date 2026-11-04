@@ -565,6 +565,7 @@
     "incidentInfo": "Incident Information",
     "incidentDate": "Incident Date",
     "incidentDateNotRecorded": "Not recorded",
+    "notRecorded": "Not recorded",
     "location": "Location",
     "submittedBy": "Submitted by Member",
     "lastUpdated": "Last Updated",

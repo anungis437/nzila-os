@@ -9,6 +9,7 @@ import { claims } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getCaseActor, findReadableCase, redactCaseRow } from '@/lib/cases/case-authorization';
 import { claimDetailQuery } from '@/lib/cases/claim-detail-query';
+import type { ClaimDetailWire } from '@/lib/cases/claim-detail-wire';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,8 @@ const GET = withApi(
       const readable = await findReadableCase(tx, actor, id, false, 'case:read');
       if (!readable) return null;
       const rows = await tx.execute(claimDetailQuery(actor, readable.claimId));
-      return rows[0] ? { row: rows[0], visibility: readable.visibility } : null;
+      // The select list is pinned to ClaimDetailWire by lib/cases/claim-detail-wire.test.ts: the one cast between the driver's rows and the declared answer.
+      return rows[0] ? { row: rows[0] as unknown as ClaimDetailWire, visibility: readable.visibility } : null;
     });
     if (!found) throw ApiError.notFound('Claim not found');
     return { data: redactCaseRow(found.row, found.visibility) };

@@ -100,6 +100,9 @@ describe('the frontend against what nothing checks', () => {
     expect(report.files).toBeGreaterThan(1000)
     expect(report.judgedKeys).toBeGreaterThan(600)
     expect(report.anyChecked).toBeGreaterThan(10)
+    // The reader keys no route's answer could be held against (a server component reads no request; a route whose answer the syntax cannot read) can only fall: a file that joins this list is a blind spot to look at.
+    expect(report.unjudged.reduce((total, entry) => total + entry.keys, 0), 'reader keys held against no route').toBeLessThanOrEqual(144)
+    expect(report.unjudged.length, 'files with a reader key held against no route').toBeLessThanOrEqual(14)
     // An acceptance whose read has been fixed is not counted, so a stale one fails here instead of lingering.
     expect(report.accepted).toBe(ACCEPTED_KEYS.length + ACCEPTED_ANY.reduce((sum, entry) => sum + entry.reads, 0))
     const counts = countByKind(report.findings)

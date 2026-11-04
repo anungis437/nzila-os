@@ -56,6 +56,8 @@ export interface UntypedReport {
   readerKeys: number
   /** Reader keys that could be held against the answers of the routes the screens request. */
   judgedKeys: number
+  /** The files whose reader keys were not held against any route (so the keys read there are checked by nothing but the reader at run time), with why and how many keys: no request found in the file or in what imports it, or a route among them whose answer the syntax cannot read. */
+  unjudged: Array<{ file: string; keys: number; why: 'no request' | 'route answer not readable' }>
   accepted: number
   findings: UntypedFinding[]
 }
@@ -157,6 +159,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
   let anyChecked = 0
   let readerKeys = 0
   let judgedKeys = 0
+  const unjudged: UntypedReport['unjudged'] = []
   let accepted = 0
   for (const file of files) {
     const tree = types.treeOf(file)
@@ -179,7 +182,10 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
     readerKeys += keys.length
     if (keys.length === 0) continue
     const known = universe(file)
-    if (!known || !known.complete) continue
+    if (!known || !known.complete) {
+      unjudged.push({ file, keys: keys.length, why: known ? 'route answer not readable' : 'no request' })
+      continue
+    }
     for (const read of keys) {
       judgedKeys += 1
       if (known.keys.has(read.key)) continue
@@ -188,7 +194,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
     }
   }
   findings.sort((a, b) => a.kind.localeCompare(b.kind) || a.file.localeCompare(b.file) || a.line - b.line)
-  return { files: files.length, anyReads, anyChecked, readerKeys, judgedKeys, accepted, findings }
+  return { files: files.length, anyReads, anyChecked, readerKeys, judgedKeys, unjudged, accepted, findings }
 }
 
 export function countByKind(findings: UntypedFinding[]): Record<UntypedKind, number> {
@@ -227,6 +233,10 @@ function main(): void {
     const counts = countByKind(report.findings)
     for (const [kind, count] of Object.entries(counts)) console.log(`  ${kind.padEnd(26)} ${String(count).padStart(4)}`)
     for (const finding of report.findings) console.log(`  ${finding.kind.padEnd(26)} ${finding.file}:${finding.line}  ${finding.text}`)
+  }
+  if (args.includes('--blind')) {
+    console.log(`\nreader keys not held against a route (${report.unjudged.reduce((total, entry) => total + entry.keys, 0)} keys in ${report.unjudged.length} files):`)
+    for (const entry of report.unjudged) console.log(`  ${String(entry.keys).padStart(4)}  ${entry.file}  (${entry.why})`)
   }
   if (args.includes('--strict') && report.findings.length > 0) process.exit(1)
 }

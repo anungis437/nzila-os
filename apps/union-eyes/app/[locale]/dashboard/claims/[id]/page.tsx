@@ -14,16 +14,8 @@ import { ClaimDeadlineUnavailable } from '@/components/claims/claim-deadline-una
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import { envelopeRow, envelopeRows, readApiError } from '@/lib/client/api-envelope';
 import { formatDay } from '@/lib/client/day';
+import type { ClaimAttachmentWire as ClaimAttachment, ClaimDetailWire } from '@/lib/cases/claim-detail-wire';
 import Link from 'next/link';
-
-interface ClaimAttachment {
-  url: string;
-  fileName: string;
-  fileSize: number;
-  fileType: string;
-  uploadedAt: string;
-  uploadedBy: string;
-}
 
 interface CaseActivity {
   id: string;
@@ -31,31 +23,36 @@ interface CaseActivity {
   description: string | null;
 }
 
-interface Claim {
-  claimId: string;
-  claimNumber: string;
-  organizationId: string;
-  memberId: string;
-  isAnonymous: boolean;
-  claimType: string;
-  status: string;
-  priority: string;
-  incidentDate: string | null;
-  location: string;
-  description: string;
-  desiredOutcome: string;
-  attachments: ClaimAttachment[];
-  witnessesPresent: boolean;
-  witnessDetails: string | null;
-  filedDate?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// What GET /api/claims/{id} answers with and this page reads: the declaration the route and the test of its query share (a column the schema leaves nullable is null when nothing was recorded).
+type Claim = Pick<
+  ClaimDetailWire,
+  | 'claimId'
+  | 'claimNumber'
+  | 'claimType'
+  | 'status'
+  | 'priority'
+  | 'incidentDate'
+  | 'location'
+  | 'description'
+  | 'desiredOutcome'
+  | 'attachments'
+  | 'witnessesPresent'
+  | 'witnessDetails'
+  | 'createdAt'
+  | 'updatedAt'
+>;
 
 export default function ClaimDetailPage() {
   const t = useTranslations();
   const locale = useLocale();
-  
+
+  // A column the schema leaves nullable is blank when nothing was recorded: say so, rather than print an empty value or "Invalid Date".
+  const recorded = (value: string | null) => (value?.trim() ? value : t('claims.notRecorded'));
+  const instantDay = (value: string | null) => {
+    const instant = value ? new Date(value) : null;
+    return instant && !Number.isNaN(instant.getTime()) ? instant.toLocaleDateString(locale) : '—';
+  };
+
   const statusLabels: Record<string, { label: string; color: string }> = {
     submitted: { label: t('claimStatus.submitted'), color: 'bg-blue-100 text-blue-800' },
     under_review: { label: t('claimStatus.underReview'), color: 'bg-yellow-100 text-yellow-800' },
@@ -217,8 +214,8 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
           
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{claim.claimNumber}</h1>
-              <p className="text-gray-600">{claimTypeLabels[claim.claimType] || claim.claimType}</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{claim.claimNumber ?? t('claims.claimDetails')}</h1>
+              {claim.claimType && <p className="text-gray-600">{claimTypeLabels[claim.claimType] || claim.claimType}</p>}
             </div>
             <div className="flex gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
@@ -250,12 +247,12 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500">{t('claims.incidentDescription')}</label>
-                    <p className="text-gray-900 mt-1">{claim.description}</p>
+                    <p className="text-gray-900 mt-1">{recorded(claim.description)}</p>
                   </div>
                   
                   <div>
                     <label className="text-sm font-medium text-gray-500">{t('claims.desiredOutcome')}</label>
-                    <p className="text-gray-900 mt-1">{claim.desiredOutcome}</p>
+                    <p className="text-gray-900 mt-1">{recorded(claim.desiredOutcome)}</p>
                   </div>
 
                   {claim.witnessesPresent && claim.witnessDetails && (
@@ -322,7 +319,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                         <div key={item.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
                           {item.timestamp && (
                             <span className="text-xs text-gray-500">
-                              {new Date(item.timestamp).toLocaleDateString(locale)}
+                              {instantDay(item.timestamp)}
                             </span>
                           )}
                           {item.description && (
@@ -354,7 +351,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <Calendar size={18} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">{t('claims.incidentDate')}</p>
-                      <p className="text-gray-900">{claim.incidentDate ? formatDay(claim.incidentDate, undefined, 'numeric') : t('claims.incidentDateNotRecorded')}</p>
+                      <p className="text-gray-900">{claim.incidentDate ? formatDay(claim.incidentDate, locale, 'numeric') : t('claims.incidentDateNotRecorded')}</p>
                     </div>
                   </div>
 
@@ -362,15 +359,15 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <MapPin size={18} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">{t('claims.location')}</p>
-                      <p className="text-gray-900">{claim.location}</p>
+                      <p className="text-gray-900">{recorded(claim.location)}</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <Clock size={18} className="text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500">{t('claims.submittedBy')}</p>
-                      <p className="text-gray-900">{new Date(claim.createdAt).toLocaleDateString()}</p>
+                      <p className="text-sm font-medium text-gray-500">{t('claims.submitted')}</p>
+                      <p className="text-gray-900">{instantDay(claim.createdAt)}</p>
                     </div>
                   </div>
 
@@ -378,7 +375,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <Clock size={18} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">{t('claims.lastUpdated')}</p>
-                      <p className="text-gray-900">{new Date(claim.updatedAt).toLocaleDateString()}</p>
+                      <p className="text-gray-900">{instantDay(claim.updatedAt)}</p>
                     </div>
                   </div>
                 </CardContent>
