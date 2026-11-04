@@ -385,6 +385,17 @@ describe('recordPayment', () => {
     await expect(recordPayment({ ...base, amount: '0.00' })).rejects.toThrow(/must be positive/);
   });
 
+  it.each(['-1.00', '1.001', 'NaN', 'Infinity', '1e3', '999999999999999999999'])(
+    'refuses malformed direct payment %s without ledger or audit writes',
+    async (amount) => {
+      state.selects.billingAccounts = [{ id: 'acct-1' }];
+      state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+      await expect(recordPayment({ ...base, amount })).rejects.toThrow(/CAD amount|safe CAD limits/);
+      expect(appendLedgerEntry).not.toHaveBeenCalled();
+      expect(auditLog).not.toHaveBeenCalled();
+    },
+  );
+
   it('records a full payment, marks invoice paid, bridges ledger and audits', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00', billingPeriodId: 'bp-1' }];
