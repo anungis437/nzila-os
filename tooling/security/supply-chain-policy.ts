@@ -339,7 +339,7 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
 
   // CycloneDX permits nested component inventories. Validating only the root
   // array would let forbidden licenses inside nested dependencies evade the gate.
-  const pending: Array<{ component: SbomComponent; depth: number }> = sbom.components.map((component) => ({ component, depth: 0 }))
+  const pending: Array<{ component: SbomComponent; depth: number }> = sbom.components.map((component) => ({ component, depth: 0 })).reverse()
   let inspected = 0
   while (pending.length > 0) {
     const { component, depth } = pending.pop()!
@@ -355,7 +355,9 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
       if (!Array.isArray(component.components)) {
         throw new Error(`Malformed nested component inventory for ${component.name}`)
       }
-      for (const nested of component.components) pending.push({ component: nested, depth: depth + 1 })
+      for (let index = component.components.length - 1; index >= 0; index--) {
+        pending.push({ component: component.components[index], depth: depth + 1 })
+      }
     }
     if (!Array.isArray(component.licenses)) {
       throw new Error(`SBOM component ${component.name} has no licenses array`)
