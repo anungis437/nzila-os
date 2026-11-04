@@ -27,4 +27,11 @@ describe('Union Eyes V2 Container Apps health probes', () => {
       expect(source).not.toContain(forbidden)
     }
   })
+  it('does not label staging as production in the application revision', () => {
+    expect(source).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param deploymentEnvironment string/)
+    expect(source).toMatch(/name: 'UE_ENVIRONMENT', value: deploymentEnvironment == 'prod' \? 'production' : 'staging'/)
+    expect(source).toMatch(/name: 'UE_DEPLOYMENT_TYPE', value: deploymentEnvironment/)
+    expect(source).toMatch(/name: 'NEXT_PUBLIC_APP_ENV', value: deploymentEnvironment == 'prod' \? 'production' : 'staging'/)
+  })
+
 })
