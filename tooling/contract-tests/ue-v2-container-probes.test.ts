@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest'
  */
 describe('Union Eyes V2 Container Apps health probes', () => {
   const source = readFileSync(join(__dirname, '..', '..', 'infrastructure', 'bicep', 'ue-v2', 'modules', 'apps.bicep'), 'utf8')
+  const main = readFileSync(join(__dirname, '..', '..', 'infrastructure', 'bicep', 'ue-v2', 'main.bicep'), 'utf8')
   const probe = (kind: string) => {
     const match = source.match(new RegExp("type: '"+kind+"'[\\s\\S]*?httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
     return match?.[1]
@@ -27,6 +28,12 @@ describe('Union Eyes V2 Container Apps health probes', () => {
       expect(source).not.toContain(forbidden)
     }
   })
+  it('passes the selected staging or production environment from the root deployment into the app module', () => {
+    expect(main).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param env string/)
+    expect(main).toMatch(/module apps 'modules\/apps\.bicep'[\s\S]*?deploymentEnvironment: env/)
+    expect(main).not.toMatch(/deploymentEnvironment:\s*'prod'/)
+  })
+
   it('does not label staging as production in the application revision', () => {
     expect(source).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param deploymentEnvironment string/)
     expect(source).toMatch(/name: 'UE_ENVIRONMENT', value: deploymentEnvironment == 'prod' \? 'production' : 'staging'/)
