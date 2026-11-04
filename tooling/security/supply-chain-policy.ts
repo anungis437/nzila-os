@@ -463,11 +463,8 @@ export function checkVulnerabilityPolicy(
       if (!['info', 'low', 'moderate', 'high', 'critical'].includes(String(severity))) {
         throw new Error(`Unknown severity for advisory: ${key}`)
       }
-      totalVulns++
-      if (severity !== 'high' && severity !== 'critical') continue
-      highOrCritical++
-      const packageName = advisory.package ?? advisory.module_name ?? advisory.name
-      const packageString = typeof packageName === 'string' ? packageName.trim() : ''
+      // Validate secondary identifiers at EVERY severity, including low/info.
+      // Otherwise malformed scanner evidence can be hidden in below-threshold entries.
       // Never silently discard malformed secondary identifiers: doing so can
       // conceal inconsistent scanner evidence or accidentally authorize a waiver.
       if (advisory.cves !== undefined &&
@@ -479,6 +476,11 @@ export function checkVulnerabilityPolicy(
           (typeof advisory.ghsa_id !== 'string' || !advisory.ghsa_id.trim())) {
         throw new Error(`Malformed GHSA identifier for advisory: ${key}`)
       }
+      totalVulns++
+      if (severity !== 'high' && severity !== 'critical') continue
+      highOrCritical++
+      const packageName = advisory.package ?? advisory.module_name ?? advisory.name
+      const packageString = typeof packageName === 'string' ? packageName.trim() : ''
       const additionalIds: string[] = advisory.cves === undefined ? [] : advisory.cves as string[]
       const ids = [key, ...additionalIds]
       if (typeof advisory.ghsa_id === 'string') ids.push(advisory.ghsa_id)
