@@ -139,6 +139,16 @@ describe('security audit policy: fail closed', () => {
 
 
 describe('security license policy: exact allowlist', () => {
+  it('rejects empty license arrays without rejecting an explicitly approved license', () => {
+    const violations = validateSbomLicenses(fixture('sbom-empty-licenses.json'))
+    expect(violations.map((violation) => violation.package)).toEqual(['unlicensed-empty', 'unlicensed-missing'])
+    expect(violations.every((violation) => violation.license === 'UNKNOWN' && violation.status === 'unknown')).toBe(true)
+  })
+
+  it('fails closed when an arbitrary JSON document is supplied as an SBOM', () => {
+    expect(() => validateSbomLicenses('package.json')).toThrow('SBOM missing components array')
+  })
+
   it('rejects license substring spoofing and missing identifiers without rejecting reviewed dual licenses', () => {
     const violations = validateSbomLicenses('tooling/security/fixtures/sbom-license-substring-spoof.json')
     expect(violations.map((violation) => violation.package)).toEqual(['spoofed-license', 'missing-license'])
