@@ -45,6 +45,15 @@ if (invalidOptions.length) {
   process.exit(2)
 }
 
+// Ambiguous repeated flags must not allow a wrapper or caller to silently
+// select a weaker threshold or redirect the report to an unexpected path.
+const levelFlags = args.filter((a) => a.startsWith('--audit-level='))
+const outputFlags = args.filter((a) => a.startsWith('--output='))
+if (levelFlags.length > 1 || outputFlags.length > 1 || outputFlags.some((a) => a.length === '--output='.length)) {
+  console.error('Ambiguous or empty audit options: provide at most one --audit-level and one nonempty --output')
+  process.exit(2)
+}
+
 const minSeverityIdx = SEVERITY_ORDER.indexOf(auditLevel)
 if (minSeverityIdx === -1) {
   console.error(`Unknown --audit-level value: "${auditLevel}". Use: low|moderate|high|critical`)
