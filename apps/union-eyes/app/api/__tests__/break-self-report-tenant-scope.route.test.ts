@@ -85,7 +85,7 @@ describe('break self-report item mutation boundary', () => {
 
   it('puts report id, authenticated organization and authenticated member into the UPDATE predicate', async () => {
     const { PATCH } = await import('../breaks/[id]/route');
-    await (PATCH as Function)(ctx);
+    await (PATCH as unknown as (ctx: unknown) => Promise<unknown>)(ctx);
     const query = new PgDialect().sqlToQuery(m.predicates[0] as SQL);
     expect(query.sql).toContain('"member_breaks"."organization_id"');
     expect(query.sql).toContain('"member_breaks"."member_id"');
@@ -99,7 +99,7 @@ describe('break self-report item mutation boundary', () => {
   it('rejects an inactive or missing membership before touching the report or audit', async () => {
     m.members = [];
     const { PATCH } = await import('../breaks/[id]/route');
-    await expect((PATCH as Function)(ctx)).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    await expect((PATCH as unknown as (ctx: unknown) => Promise<unknown>)(ctx)).rejects.toMatchObject({ code: 'FORBIDDEN' });
     expect(m.updateCount).toBe(0);
     expect(m.audit).not.toHaveBeenCalled();
   });
@@ -107,7 +107,7 @@ describe('break self-report item mutation boundary', () => {
   it('does not update or audit a report absent from the member-scoped read', async () => {
     m.reports = [];
     const { PATCH } = await import('../breaks/[id]/route');
-    await expect((PATCH as Function)(ctx)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect((PATCH as unknown as (ctx: unknown) => Promise<unknown>)(ctx)).rejects.toMatchObject({ code: 'NOT_FOUND' });
     expect(m.updateCount).toBe(0);
     expect(m.audit).not.toHaveBeenCalled();
   });
