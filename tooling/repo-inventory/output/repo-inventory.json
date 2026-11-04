@@ -3,7 +3,7 @@
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 60,
+  "workflowCount": 62,
   "contractTestCount": 300,
   "tsTestFileCount": 2860,
   "pythonTestFileCount": 43,
@@ -911,6 +911,8 @@
     "trivy.yml",
     "ue-build-push-proof.yml",
     "ue-staging-discovery.yml",
+    "ue-v2-staging-build.yml",
+    "ue-v2-staging-deploy.yml",
     "union-eyes-authority-rollout.yml",
     "zonga-check.yml"
   ]

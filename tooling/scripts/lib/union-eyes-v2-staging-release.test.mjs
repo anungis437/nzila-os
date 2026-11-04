@@ -1,0 +1,172 @@
+import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import test from 'node:test'
+import { fileURLToPath } from 'node:url'
+import {
+  NEW_SUBSCRIPTION_ID,
+  NEW_TENANT_ID,
+  LEGACY_SUBSCRIPTION_ID,
+  buildReleaseManifest,
+  changeRecordDefects,
+  deploymentParameterDefects,
+  digestDefects,
+  registryAttestationDefects,
+  releaseManifestDefects,
+  subscriptionDefects,
+  whatIfDefects,
+  whatIfFingerprint,
+} from './union-eyes-v2-staging-release.mjs'
+
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
+const SHA = 'a'.repeat(40)
+const D = (c) => `sha256:${c.repeat(64)}`
+const STAGING = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-staging-rg`
+const REGISTRY = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.ContainerRegistry/registries/nzilaventuresacr`
+
+function manifest() {
+  return buildReleaseManifest({ sourceSha: SHA, images: { app: { digest: D('1') }, clamav: { digest: D('2') }, cron: { digest: D('3') } } })
+}
+
+function parameters(overrides = {}) {
+  return {
+    parameters: {
+      env: { value: 'staging' },
+      acrName: { value: 'nzilaventuresacr' },
+      appImageDigest: { value: D('1') },
+      clamavImageDigest: { value: D('2') },
+      cronImageDigest: { value: D('3') },
+      publicHostName: { value: 'staging-app.unioneyes.app' },
+      ...overrides,
+    },
+  }
+}
+
+function record(overrides = {}) {
+  return {
+    change_id: 'CHG-2026-0200',
+    service: 'union-eyes',
+    environment: 'STAGING',
+    approval_status: 'APPROVED',
+    status: 'APPROVED',
+    approvers_required: ['service_owner'],
+    approved_by: ['service_owner'],
+    implementation_window_start: '2026-11-01T00:00:00Z',
+    implementation_window_end: '2026-11-30T00:00:00Z',
+    linked_commits: [SHA],
+    ...overrides,
+  }
+}
+
+test('digests are the only accepted image references', () => {
+  assert.deepEqual(digestDefects('app', D('f')), [])
+  assert.deepEqual(digestDefects('app', 'latest'), ['DIGEST_INVALID:app'])
+  assert.deepEqual(digestDefects('app', 'nzila-os-union-eyes-v2:staging'), ['TAG_REFERENCE_REJECTED:app'])
+  assert.deepEqual(digestDefects('app', `repo@${D('f')}`), ['TAG_REFERENCE_REJECTED:app'])
+  assert.deepEqual(digestDefects('app', 'f'.repeat(64)), ['DIGEST_PREFIX_MISSING:app'])
+  assert.deepEqual(digestDefects('app', ''), ['DIGEST_MISSING:app'])
+})
+
+test('a complete digest manifest passes; a tag anywhere fails', () => {
+  assert.deepEqual(releaseManifestDefects(manifest()), [])
+  const tagged = buildReleaseManifest({ sourceSha: SHA, images: { app: { digest: 'v2-staging' }, clamav: { digest: D('2') }, cron: { digest: D('3') } } })
+  assert.ok(releaseManifestDefects(tagged).includes('DIGEST_INVALID:app'))
+  const wrongEnv = { ...manifest(), environment: 'prod' }
+  assert.ok(releaseManifestDefects(wrongEnv).includes('RELEASE_MANIFEST_NOT_STAGING'))
+  const legacy = { ...manifest(), subscriptionId: LEGACY_SUBSCRIPTION_ID }
+  assert.ok(releaseManifestDefects(legacy).includes('RELEASE_MANIFEST_WRONG_SUBSCRIPTION'))
+  assert.ok(releaseManifestDefects({ ...manifest(), registry: 'nzilacanadaacr' }).includes('RELEASE_MANIFEST_WRONG_REGISTRY'))
+})
+
+test('registry attestation must match digest and the app revision label', () => {
+  const m = manifest()
+  const att = (digest, revision) => ({ source: 'acr', digest, tags: [], labels: revision ? { 'org.opencontainers.image.revision': revision } : {} })
+  assert.deepEqual(registryAttestationDefects(m, { app: att(D('1'), SHA), clamav: att(D('2')), cron: att(D('3')) }), [])
+  assert.deepEqual(registryAttestationDefects(m, { app: att(D('9'), SHA), clamav: att(D('2')), cron: att(D('3')) }), ['WRONG_IMAGE_APP_DIGEST'])
+  assert.deepEqual(registryAttestationDefects(m, { app: att(D('1'), 'b'.repeat(40)), clamav: att(D('2')), cron: att(D('3')) }), ['WRONG_IMAGE_APP_LABEL'])
+  assert.deepEqual(registryAttestationDefects(m, { app: att(D('1'), SHA), clamav: att(D('2')) }), ['IMAGE_ATTESTATION_MISSING_CRON'])
+})
+
+test('deployment parameters must be staging, digest-bound and free of test bypasses', () => {
+  const m = manifest()
+  assert.deepEqual(deploymentParameterDefects(parameters(), m), [])
+  assert.ok(deploymentParameterDefects(parameters({ env: { value: 'prod' } }), m).includes('PARAMETERS_ENV_NOT_STAGING'))
+  assert.ok(deploymentParameterDefects(parameters({ appImageDigest: { value: D('9') } }), m).includes('PARAMETERS_DIGEST_MISMATCH:app'))
+  assert.ok(deploymentParameterDefects(parameters({ dbAdminPassword: { value: 'x' } }), m).includes('PARAMETERS_FILE_CARRIES_SECRET'))
+  assert.ok(deploymentParameterDefects(parameters({ publicHostName: { value: 'prod.unioneyes.app' } }), m).includes('PARAMETERS_PRODUCTION_VALUE:publicHostName'))
+  for (const flag of ['PLAYWRIGHT_TEST_AUTH', 'UE_E2E_RISK_BYPASS', 'UNION_EYES_ACCEPTANCE_AUTH_ENABLED']) {
+    const p = parameters({ extraEnv: { value: [{ name: flag, value: 'true' }] } })
+    assert.ok(deploymentParameterDefects(p, m).includes(`FORBIDDEN_RUNTIME_FLAG:${flag}`), flag)
+  }
+})
+
+test('change record must be a named, approved, in-window UE staging record linking the SHA', () => {
+  const now = Date.parse('2026-11-04T12:00:00Z')
+  assert.deepEqual(changeRecordDefects(record(), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }), [])
+  assert.deepEqual(changeRecordDefects(record(), { changeId: '', sourceSha: SHA, nowMs: now }), ['CHANGE_RECORD_ID_INVALID'])
+  assert.deepEqual(changeRecordDefects(null, { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }), ['CHANGE_RECORD_MISSING'])
+  assert.ok(changeRecordDefects(record({ environment: 'PROD' }), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }).includes('CHANGE_RECORD_WRONG_ENVIRONMENT'))
+  assert.ok(changeRecordDefects(record({ service: 'web' }), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }).includes('CHANGE_RECORD_WRONG_SERVICE'))
+  assert.ok(changeRecordDefects(record({ approval_status: 'PENDING' }), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }).includes('CHANGE_RECORD_NOT_APPROVED'))
+  assert.ok(changeRecordDefects(record({ approved_by: [] }), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }).includes('CHANGE_RECORD_APPROVALS_MISSING'))
+  assert.ok(changeRecordDefects(record(), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: Date.parse('2026-12-04T00:00:00Z') }).includes('CHANGE_RECORD_OUTSIDE_WINDOW'))
+  assert.ok(changeRecordDefects(record({ linked_commits: [] }), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }).includes('CHANGE_RECORD_SOURCE_SHA_NOT_LINKED'))
+})
+
+test('what-if stays in the staging group; only the registry AcrPull assignment may cross groups', () => {
+  const ok = {
+    status: 'Succeeded',
+    changes: [
+      { resourceId: `${STAGING}/providers/Microsoft.App/containerApps/nzila-ue-v2-staging-app`, changeType: 'Create' },
+      { resourceId: `${REGISTRY}/providers/Microsoft.Authorization/roleAssignments/abc`, changeType: 'Create' },
+      { resourceId: `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-canada-prod-law`, changeType: 'NoChange' },
+    ],
+  }
+  assert.deepEqual(whatIfDefects(ok, { registryResourceGroup: 'nzila-canada-prod-rg' }), [])
+  const deletes = { changes: [{ resourceId: `${STAGING}/providers/Microsoft.KeyVault/vaults/kv`, changeType: 'Delete' }] }
+  assert.equal(whatIfDefects(deletes, {})[0].startsWith('WHAT_IF_CHANGE_TYPE_REFUSED:Delete'), true)
+  const prodWrite = { changes: [{ resourceId: `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/containerApps/nzila-os-web-prod`, changeType: 'Modify' }] }
+  assert.equal(whatIfDefects(prodWrite, { registryResourceGroup: 'nzila-canada-prod-rg' })[0].startsWith('WHAT_IF_OUTSIDE_STAGING_RESOURCE_GROUP'), true)
+  const legacy = { changes: [{ resourceId: `/subscriptions/${LEGACY_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-staging-rg/x`, changeType: 'Create' }] }
+  assert.equal(whatIfDefects(legacy, {})[0].startsWith('WHAT_IF_OUTSIDE_SUBSCRIPTION'), true)
+  assert.deepEqual(whatIfDefects({}, {}), ['WHAT_IF_OUTPUT_INVALID'])
+  assert.deepEqual(whatIfDefects({ status: 'Failed', changes: [] }, {}), ['WHAT_IF_NOT_SUCCEEDED'])
+})
+
+test('what-if fingerprint ignores order and case but not change type', () => {
+  const a = { changes: [{ resourceId: `${STAGING}/A`, changeType: 'Create' }, { resourceId: `${STAGING}/B`, changeType: 'NoChange' }] }
+  const b = { changes: [{ resourceId: `${STAGING}/b`, changeType: 'NoChange' }, { resourceId: `${STAGING}/a`, changeType: 'Create' }] }
+  const c = { changes: [{ resourceId: `${STAGING}/A`, changeType: 'Modify' }, { resourceId: `${STAGING}/B`, changeType: 'NoChange' }] }
+  assert.equal(whatIfFingerprint(a), whatIfFingerprint(b))
+  assert.notEqual(whatIfFingerprint(a), whatIfFingerprint(c))
+})
+
+test('only the new subscription and tenant are accepted', () => {
+  assert.deepEqual(subscriptionDefects({ id: NEW_SUBSCRIPTION_ID, tenantId: NEW_TENANT_ID }), [])
+  assert.deepEqual(subscriptionDefects({ id: LEGACY_SUBSCRIPTION_ID, tenantId: NEW_TENANT_ID }), ['WRONG_SUBSCRIPTION'])
+})
+
+test('CLI fails closed on a missing change record and a tag manifest', () => {
+  const cli = path.join(REPO, 'tooling/scripts/union-eyes-v2-staging-gate-cli.mjs')
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-v2-gate-'))
+  const run = (...args) => spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8' })
+
+  const missing = run('--gate', 'change-record', '--change-id', 'CHG-2099-9999', '--source-sha', SHA, '--change-dir', dir)
+  assert.equal(missing.status, 1)
+  assert.deepEqual(JSON.parse(missing.stdout).defects, ['CHANGE_RECORD_MISSING'])
+
+  const empty = run('--gate', 'change-record', '--change-id', '', '--source-sha', SHA, '--change-dir', dir)
+  assert.equal(empty.status, 1)
+
+  fs.writeFileSync(path.join(dir, 'CHG-2026-0200.json'), JSON.stringify(record()))
+  const present = run('--gate', 'change-record', '--change-id', 'CHG-2026-0200', '--source-sha', SHA, '--change-dir', dir, '--now', '2026-11-04T12:00:00Z')
+  assert.equal(present.status, 0, present.stdout)
+
+  const tagged = { ...manifest(), images: { ...manifest().images, app: { repository: 'nzila-os-union-eyes-v2', digest: 'staging', reference: 'nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2:staging' } } }
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(tagged))
+  const result = run('--gate', 'manifest', '--manifest', path.join(dir, 'manifest.json'))
+  assert.equal(result.status, 1)
+  assert.ok(JSON.parse(result.stdout).defects.includes('DIGEST_INVALID:app'))
+})
