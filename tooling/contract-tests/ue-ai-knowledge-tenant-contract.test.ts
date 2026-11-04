@@ -12,12 +12,28 @@ import { join } from 'node:path';
 const root = join(__dirname, '..', '..', 'apps', 'union-eyes');
 const source = (path: string) => readFileSync(join(root, path), 'utf8');
 
+/** One exported handler: from its `export const NAME =` to the next export (or the end), so what one method of a route does is not credited to another. */
+const handlerOf = (file: string, name: 'POST' | 'GET'): string => {
+  const start = file.indexOf(`export const ${name} =`);
+  expect(start).toBeGreaterThan(-1);
+  const next = file.indexOf('\nexport const ', start + 1);
+  return next === -1 ? file.slice(start) : file.slice(start, next);
+};
+
+/** What the route hands the wrapper, which enforces it before the handler runs: the handler's text up to its `async (`. */
+const wrapperOptionsOf = (file: string, name: 'POST' | 'GET'): string => {
+  const handler = handlerOf(file, name);
+  const end = handler.indexOf('\n  async (');
+  expect(end).toBeGreaterThan(-1);
+  return handler.slice(0, end);
+};
+
 describe('UE AI knowledge tenant isolation', () => {
   it('summarize requires an authenticated organization before entitlement and retrieval', () => {
     const file = source('app/api/ai/summarize/route.ts');
-    const guard = file.indexOf('if (!context.organizationId)');
+    const guard = file.indexOf('if (!organizationId)');
     const entitlement = file.indexOf('await checkEntitlement(');
-    const lookup = file.indexOf('db.query.knowledgeBase.findFirst(');
+    const lookup = file.indexOf('tx.query.knowledgeBase.findFirst(');
     expect(guard).toBeGreaterThan(-1);
     expect(guard).toBeLessThan(entitlement);
     expect(entitlement).toBeLessThan(lookup);
@@ -25,16 +41,27 @@ describe('UE AI knowledge tenant isolation', () => {
 
   it('summarize binds document ID and tenant in the database predicate, not a post-read public flag', () => {
     const file = source('app/api/ai/summarize/route.ts');
-    const lookup = file.match(/db\.query\.knowledgeBase\.findFirst\(\{[\s\S]*?\}\);/);
+    const lookup = file.match(/tx\.query\.knowledgeBase\.findFirst\(\{[\s\S]*?\}\);/);
     expect(lookup).not.toBeNull();
     expect(lookup![0]).toContain('eq(knowledgeBase.id, document_id)');
     expect(lookup![0]).toContain('eq(knowledgeBase.organizationId, orgId)');
     expect(lookup![0]).not.toMatch(/\bisPublic\s*\?/);
+    // The lookup runs in the organization's own row-level-security context, which binds the tenant again.
+    expect(file).toContain('withRLSContext({ organizationId: orgId }');
   });
 
   it('semantic search binds knowledge rows to authenticated organization', () => {
     const file = source('app/api/ai/search/route.ts');
-    expect(file).toContain('const orgId = context.organizationId as string');
+    // The wrapper refuses a caller with no resolved organization before the POST handler runs (requireOrg defaults to true for an authenticated route).
+    const post = wrapperOptionsOf(file, 'POST');
+    expect(post).toContain("auth: { minRole: 'member' }");
+    expect(post).not.toContain('requireOrg: false');
+    // The index-health GET opts out of the wrapper's refusal and answers a caller with no organization 400 itself, before it queries anything.
+    expect(wrapperOptionsOf(file, 'GET')).toContain('requireOrg: false');
+    const get = handlerOf(file, 'GET');
+    expect(get).toContain('if (!organizationId)');
+    expect(get.indexOf('if (!organizationId)')).toBeLessThan(get.indexOf('withRLSContext('));
+    expect(file).toContain('const orgId = organizationId as string');
     // The route hands only the authenticated organization to the one query, which binds it in its predicate (and row-level security binds it again).
     expect(file).toContain('organizationId: orgId,');
     expect(file).toContain('knowledgeBaseSourceCondition(reader, orgId)');

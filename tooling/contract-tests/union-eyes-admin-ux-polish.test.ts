@@ -13,7 +13,7 @@ describe('Union Eyes admin UX polish contract', () => {
     const source = read('apps/union-eyes/app/[locale]/dashboard/pilot/onboarding/onboarding-console.tsx');
 
     expect(source).toContain('buildChecklistFromFlags');
-    expect(source).toContain('payload?.items');
+    expect(source).toContain('result.data?.items');
   });
 
   it('members admin console includes invite flow and taxonomy management surface', () => {

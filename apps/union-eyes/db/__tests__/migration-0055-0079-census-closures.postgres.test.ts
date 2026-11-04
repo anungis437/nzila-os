@@ -215,10 +215,9 @@ describe('cache 0055, platform 0079 and the declared privileges, on real Postgre
 
   describe('the privileges the census declared', () => {
     const SYSTEM_HELD: Record<string, string[]> = {
-      grievances: ['SELECT', 'INSERT'],
-      grievance_deadlines: ['SELECT', 'INSERT', 'UPDATE'],
-      deadline_audit_events: ['SELECT', 'INSERT'],
-      notifications: ['SELECT', 'UPDATE'],
+      grievances: ['SELECT'],
+      grievance_deadlines: ['SELECT'],
+      deadline_audit_events: ['INSERT'],
       in_app_notifications: ['SELECT', 'INSERT', 'DELETE'],
       newsletter_distribution_lists: ['SELECT'],
       newsletter_list_subscribers: ['SELECT', 'UPDATE'],
@@ -260,6 +259,12 @@ describe('cache 0055, platform 0079 and the declared privileges, on real Postgre
     it('lets the system role delete nothing of what this task changed but the delivery markers of in_app_notifications', async () => {
       const deleting = (await Promise.all(Object.keys(SYSTEM_HELD).map(async (table) => ((await privileges(SYSTEM, table)).includes('DELETE') ? table : null)))).filter(Boolean)
       expect(deleting).toEqual(['in_app_notifications'])
+    })
+
+    it('keeps the system role off what the retired staging proof harness would have needed: no write on grievances or grievance_deadlines, nothing on notifications', async () => {
+      expect(await privileges(SYSTEM, 'grievances')).toEqual(['SELECT'])
+      expect(await privileges(SYSTEM, 'grievance_deadlines')).toEqual(['SELECT'])
+      expect(await privileges(SYSTEM, 'notifications')).toEqual([])
     })
 
     it('gives the runtime role no privilege on the system-only relations this task closed', async () => {
