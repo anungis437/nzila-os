@@ -4,7 +4,7 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { installFetch, type Answer, type Call } from '@/components/union-structure/__tests__/fetch-harness';
-import { COURSE_A, COURSE_B, SESSION_A1, SESSION_A2, SESSION_B1, courseRow, crudItem, crudList, failure, ok, registrationRow, sessionRow } from './education-rows';
+import { COURSE_A, COURSE_B, SESSION_A1, SESSION_A2, SESSION_B1, courseRow, crudItem, crudList, failure, ok, registrationRow, sessionRow } from '@/lib/__tests__/support/education-rows';
 import { CourseCatalog } from '../CourseCatalog';
 
 vi.mock('next-intl', () => ({ useLocale: () => 'en-CA' }));

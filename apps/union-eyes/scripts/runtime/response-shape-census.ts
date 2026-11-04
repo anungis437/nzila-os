@@ -59,6 +59,8 @@ export interface ResponseReport {
   findings: ResponseFinding[]
   /** Each request that was judged, with how many reads and declared names of its answer were placed against the route: what the census is looking at. */
   judged: Array<{ file: string; line: number; method: string; pattern: string; reads: number; declared: number }>
+  /** The reads that were placed against a route's answer, as `file:line:key`: a read of a value nothing types is not unchecked when it is one of these (untyped-read-census.ts). */
+  placed: string[]
 }
 
 const DJANGO_CLIENT = /\bDJANGO_API_URL\b/
@@ -217,6 +219,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
   const files = sourceFiles(root)
   const grouped = new Map<string, ResponseFinding>()
   const judged: ResponseReport['judged'] = []
+  const placed = new Set<string>()
   let calls = 0
   let judgedCalls = 0
   let judgedReads = 0
@@ -272,6 +275,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
       judged.push({ file, line: call.line, method, pattern: call.pattern, reads: reads.length, declared: declarations.length })
       for (const read of reads) {
         judgedReads += 1
+        for (const alternative of read.alternatives) placed.add(`${read.file}:${read.line}:${alternative.key}`)
         const kind = judgeRead(read, shapes)
         if (!kind) continue
         const keys = read.alternatives.map((alternative) => alternative.key)
@@ -296,7 +300,7 @@ export function runCensus(root: string = APP_ROOT, routes: RouteEntry[] = loadRo
   const findings = [...grouped.values()].sort((a, b) => a.kind.localeCompare(b.kind) || a.pattern.localeCompare(b.pattern) || a.keys.join().localeCompare(b.keys.join()))
   const byKind: Record<ResponseKind, number> = { ROOT_KEY_NOT_RETURNED: 0, DATA_KEY_NOT_RETURNED: 0, KEY_NOT_RETURNED_EITHER: 0, FAILURE_MESSAGE_BY_HAND: 0, DECLARED_KEY_NOT_RETURNED: 0 }
   for (const finding of findings) byKind[finding.kind] += 1
-  return { files: files.length, calls, judgedCalls, judgedReads, notJudged, byKind, findings, judged }
+  return { files: files.length, calls, judgedCalls, judgedReads, notJudged, byKind, findings, judged, placed: [...placed] }
 }
 
 export function toMarkdown(report: ResponseReport): string {

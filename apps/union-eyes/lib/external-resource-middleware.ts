@@ -106,6 +106,10 @@ export function withExternalMatterResourceAuth<TParams extends object = External
       const user = await requireUser();
       const routeParams = await resolveRouteParams(params);
       const resource = options.resolve(request, routeParams);
+      // A request that names no organization or no matter holds no grant: it is refused as any request without one is (default deny).
+      if (!resource.organizationId || !resource.matterId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
       // A malformed organization or matter identifier, or an unknown matter type, names nothing: it is a bad request, not something to
       // send to the database to fail there.
       if (

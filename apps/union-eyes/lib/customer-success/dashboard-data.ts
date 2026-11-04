@@ -3,7 +3,8 @@
  *
  * Cross-organization by design, so these loaders run on the system role: the dashboard page admits only platform staff (isSystemAdmin) and then
  * calls them inside withSystemContext. They use the module-level handle, which inside that context is the system transaction. The system role needs
- * SELECT on organizations, grievances, collective_agreements, settlements, support_tickets, customer_nps_surveys and customer_onboarding_milestones.
+ * SELECT on organizations, grievances, collective_agreements, support_tickets, customer_nps_surveys and customer_onboarding_milestones. It has none on
+ * settlements, and a platform-wide settlement figure is not something platform staff need, so none is read (see lib/queries/platform-stats.ts).
  */
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
@@ -20,8 +21,6 @@ export interface OverviewStats {
   activeCBAs: number;
   expiredCBAs: number;
   negotiatingCBAs: number;
-  totalSettlements: number;
-  totalSettlementValue: number;
   openTickets: number;
   avgSatisfaction: number;
   npsScore: number;
@@ -98,13 +97,6 @@ export async function loadOverview(): Promise<OverviewStats> {
     `)
   ).map((r: Record<string, unknown>) => r);
 
-  const [settlementStats] = Array.from(
-    await db.execute(sql`
-      SELECT COUNT(*) as total, COALESCE(SUM(monetary_amount), 0) as total_value
-      FROM settlements
-    `)
-  ).map((r: Record<string, unknown>) => r);
-
   const [ticketStats] = Array.from(
     await db.execute(sql`
       SELECT
@@ -138,8 +130,6 @@ export async function loadOverview(): Promise<OverviewStats> {
     activeCBAs: Number(cbaStats.active ?? 0),
     expiredCBAs: Number(cbaStats.expired ?? 0),
     negotiatingCBAs: Number(cbaStats.negotiating ?? 0),
-    totalSettlements: Number(settlementStats.total ?? 0),
-    totalSettlementValue: Number(settlementStats.total_value ?? 0),
     openTickets: Number(ticketStats.open_tickets ?? 0),
     avgSatisfaction: Number(ticketStats.avg_satisfaction ?? 0),
     npsScore: Number(npsStats.nps_score ?? 0),

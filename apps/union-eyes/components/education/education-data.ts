@@ -32,10 +32,7 @@ function optionalDay(row: Record<string, unknown>, key: string): string | null {
   return value;
 }
 
-/** A calendar date ("YYYY-MM-DD") as the day that was recorded: parsed and shown in UTC, so a western time zone never shows the day before. */
-export function formatDay(day: string, locale: string, style: 'medium' | 'long' = 'medium'): string {
-  return new Intl.DateTimeFormat(locale, { dateStyle: style, timeZone: 'UTC' }).format(new Date(`${day}T00:00:00Z`));
-}
+export { formatDay } from '@/lib/client/day';
 
 /** Today as "YYYY-MM-DD" (UTC), the form the stored dates are compared in. */
 export const todayDay = (now: Date = new Date()): string => now.toISOString().slice(0, 10);

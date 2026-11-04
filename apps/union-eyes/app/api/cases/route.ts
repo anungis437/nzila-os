@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
 import { getCaseActor, caseReadScope, caseTriageQueueScope, requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
+import type { CaseListRow, CaseQueueRow } from '@/lib/cases/case-list';
 
 const caseCreateSchema = z.object({
   claimType: z.enum([
@@ -88,11 +89,15 @@ export const GET = withApi(
                c.resolved_at       AS "resolvedAt",
                c.progress,
                m.name   AS "memberName",
-               m.email  AS "memberEmail"
+               m.email  AS "memberEmail",
+               a.name   AS "assignedToName"
         FROM claims c
         LEFT JOIN organization_members m
           ON m.user_id = c.member_id
          AND m.organization_id::text = c.organization_id::text
+        LEFT JOIN organization_members a
+          ON a.user_id = c.assigned_to
+         AND a.organization_id::text = c.organization_id::text
         WHERE TRUE
           ${orgFilter}
           ${statusFilter}
@@ -116,9 +121,10 @@ export const GET = withApi(
         LIMIT 200
       `),
     );
-    const full = Array.from(rows) as Array<{ claimId: string }>;
+    const full = Array.from(rows) as unknown as CaseListRow[];
     const seen = new Set(full.map((r) => r.claimId));
-    return { data: [...full, ...(Array.from(queue) as Array<{ claimId: string }>).filter((r) => !seen.has(r.claimId))] };
+    const queued = Array.from(queue) as unknown as CaseQueueRow[];
+    return { data: [...full, ...queued.filter((r) => !seen.has(r.claimId))] };
   },
 );
 

@@ -38,8 +38,6 @@ interface OverviewStats {
   inArbitration: number;
   resolvedGrievances: number;
   totalGrievances: number;
-  totalSettlements: number;
-  totalSettlementValue: number;
   avgResponseHours: number;
   avgResolutionHours: number;
   avgSatisfaction: number;
@@ -69,8 +67,6 @@ interface GrievanceRow {
   priority: string;
   orgName: string;
   createdAt: string;
-  monetaryAmount: number | null;
-  settlementStatus: string | null;
 }
 
 interface OrgBreakdown {
@@ -120,13 +116,6 @@ async function loadOverview(): Promise<OverviewStats> {
     `)
   ).map((r: Record<string, unknown>) => r);
 
-  const [settlementStats] = Array.from(
-    await db.execute(sql`
-      SELECT COUNT(*) as total, COALESCE(SUM(monetary_amount), 0) as total_value
-      FROM settlements
-    `)
-  ).map((r: Record<string, unknown>) => r);
-
   return {
     openTickets: Number(ticketStats.open_tickets ?? 0),
     inProgressTickets: Number(ticketStats.in_progress_tickets ?? 0),
@@ -137,8 +126,6 @@ async function loadOverview(): Promise<OverviewStats> {
     inArbitration: Number(grievanceStats.in_arbitration ?? 0),
     resolvedGrievances: Number(grievanceStats.resolved_grievances ?? 0),
     totalGrievances: Number(grievanceStats.total_grievances ?? 0),
-    totalSettlements: Number(settlementStats.total ?? 0),
-    totalSettlementValue: Number(settlementStats.total_value ?? 0),
     avgResponseHours: Number(ticketStats.avg_response_hours ?? 0),
     avgResolutionHours: Number(ticketStats.avg_resolution_hours ?? 0),
     avgSatisfaction: Number(ticketStats.avg_satisfaction ?? 0),
@@ -190,11 +177,9 @@ async function loadGrievances(): Promise<GrievanceRow[]> {
   const rows = Array.from(
     await db.execute(sql`
       SELECT g.id, g.grievance_number, g.title, g.status, g.priority,
-             o.name as org_name, g.created_at::text,
-             s.monetary_amount, s.status as settlement_status
+             o.name as org_name, g.created_at::text
       FROM grievances g
       JOIN organizations o ON o.id = g.organization_id
-      LEFT JOIN settlements s ON s.grievance_id = g.id
       ORDER BY
         CASE g.priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
         g.created_at DESC
@@ -207,8 +192,6 @@ async function loadGrievances(): Promise<GrievanceRow[]> {
     priority: String(r.priority),
     orgName: String(r.org_name),
     createdAt: String(r.created_at),
-    monetaryAmount: r.monetary_amount ? Number(r.monetary_amount) : null,
-    settlementStatus: r.settlement_status ? String(r.settlement_status) : null,
   }));
   return rows;
 }
@@ -449,15 +432,6 @@ export default async function SupportDashboard({
                       </span>
                     </div>
                   ))}
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-sm text-muted-foreground">{t('settlementsLabel')}</span>
-                    <span className="text-lg font-bold">
-                      {overview.totalSettlements}{' '}
-                      <span className="text-sm font-normal text-muted-foreground">
-                        ({t('currencyAmount', { value: new Intl.NumberFormat(locale).format(overview.totalSettlementValue) })})
-                      </span>
-                    </span>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -608,7 +582,6 @@ export default async function SupportDashboard({
                     <th className="pb-2 font-medium">{t('tableOrganization')}</th>
                     <th className="pb-2 font-medium">{t('tablePriority')}</th>
                     <th className="pb-2 font-medium">{t('tableStatus')}</th>
-                    <th className="pb-2 font-medium">{t('tableSettlement')}</th>
                     <th className="pb-2 font-medium">{t('tableFiled')}</th>
                   </tr>
                 </thead>
@@ -627,11 +600,6 @@ export default async function SupportDashboard({
                         <Badge variant={grievanceStatusVariant(g.status)} className="capitalize">
                           {g.status}
                         </Badge>
-                      </td>
-                      <td className="py-2">
-                        {g.monetaryAmount
-                          ? t('settlementValue', { value: new Intl.NumberFormat(locale).format(g.monetaryAmount), status: g.settlementStatus ?? '' })
-                          : t('emptyDash')}
                       </td>
                       <td className="py-2 text-muted-foreground">
                         {new Date(g.createdAt).toLocaleDateString(locale)}

@@ -716,12 +716,10 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: [
       'apps/union-eyes/lib/deadline-engine/reminder-scheduler.ts',
       'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts',
-      'apps/union-eyes/lib/deadline-tracking-system.ts',
     ],
     evidence: [
       'apps/union-eyes/lib/deadline-engine/reminder-scheduler.ts — atomic cancel-then-insert transaction; pending-uniqueness partial index prevents duplicates on reschedule',
       'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts — snapshot resolution against grievances (grievor + assigned officer); tenant check via grievance.organizationId',
-      'apps/union-eyes/lib/deadline-tracking-system.ts — scheduleReminders() no-op REMOVED; delegates to scheduleGrievanceDeadlineReminders',
     ],
     targetWave: 1,
     notes:
@@ -949,7 +947,6 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: [
       'apps/union-eyes/lib/deadline-engine/assignment-sync.ts',
       'apps/union-eyes/lib/deadline-engine/reminder-worker.ts',
-      'apps/union-eyes/lib/deadline-tracking-system.ts',
       'apps/union-eyes/app/api/grievances/[id]/assign/route.ts',
     ],
     evidence: [
@@ -958,11 +955,9 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'lib/deadline-engine/reminder-worker.ts — runDeadlineReminderWorker() sweeps pending convergence tasks on every periodic run (sweepPendingAssignmentConvergence), so a handoff that failed to fully converge in-request (deadline N of M failed to reschedule) is retried automatically without requiring a human to re-hit the assign endpoint',
       'lib/deadline-engine/reminder-worker.ts — a dispatch-time revalidation query runs immediately before every delivery attempt: a reminder whose source deadline is now completed, or whose assigned_officer recipient no longer matches grievances.unionRepId, is fail-closed suppressed (status=cancelled, execution outcome=skipped_cancelled, audit event reminder.superseded_at_dispatch) instead of being sent — closing the race where a rep change or completion happens between claim and dispatch, up to leaseMs=60s later',
       'lib/deadline-engine/reminder-worker.ts — the reminder deep link is now built from the deadline\'s actual grievance_id (resolved via the same revalidation query), not the deadline row\'s own id; the prior default builder used source_deadline_id as if it were the grievance id',
-      'lib/deadline-tracking-system.ts — completeDeadline() now verifies grievance-organization ownership before mutating (tenant-scoped via an inner join through grievances, since grievance_deadlines has no organizationId column of its own), records the completing actor in the notes, and calls cancelGrievanceDeadlineReminders() so a completed deadline cancels any pending durable-outbox reminder, not just legacy notifications-table rows',
-      'lib/deadline-tracking-system.ts — getUpcomingDeadlines()/getOverdueDeadlines()/getGrievanceDeadlines()/escalateMissedDeadlines() now join through grievances, filter by organizationId, and return a discriminated { status: "ok" | "unavailable" } result instead of a bare array/count — a query failure (DB unreachable, timeout) is no longer indistinguishable from a genuine zero-deadline result; previously both a real "[]" and a caught exception silently returned the same empty array (or 0 for escalation count)',
       'migrations/0048_union_eyes_deadline_continuity_audit_events.sql — extends the deadline_audit_events.event_type CHECK constraint with reminder.recipients_refreshed and reminder.superseded_at_dispatch',
       'apps/union-eyes/db/migrations-cache/0019_deadline_reassignment_convergence.sql — canonical create-or-close for deadline_reassignment_convergence: drops the 0049 PUBLIC fallback, installs 0010 direct-org policies with FORCE RLS, grants SELECT/INSERT to union_eyes_runtime and SELECT/UPDATE to union_eyes_system, and rejects a later replay of the 0049 policy. Source-tested on PGlite. Not applied to staging by this change, and not a runtime isolation pass',
-      'lib/deadline-engine/__tests__/assignment-sync.test.ts, reminder-worker.test.ts, grievance-continuity.integration.test.ts, lib/__tests__/deadline-tracking-system.test.ts, app/api/__tests__/grievances-assign.route.test.ts — full test coverage for the reassignment-refresh path, the durable convergence task lifecycle (request/process/sweep, idempotent retry, never-strands-the-handoff), the dispatch-time suppression matrix (deadline completed / stale officer / missing source), the deep-link fix, org-isolation of the legacy tenant-safety functions, and the ok/unavailable discriminated result for the deadline-list helpers',
+      'lib/deadline-engine/__tests__/assignment-sync.test.ts, reminder-worker.test.ts, grievance-continuity.integration.test.ts, app/api/__tests__/grievances-assign.route.test.ts — full test coverage for the reassignment-refresh path, the durable convergence task lifecycle (request/process/sweep, idempotent retry, never-strands-the-handoff), the dispatch-time suppression matrix (deadline completed / stale officer / missing source) and the deep-link fix',
     ],
     targetWave: 1,
     notes:
@@ -980,7 +975,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'db/schema/domains/claims/deadlines.ts — defines a fully-formed claim_deadlines table (deadlineRules, deadlineExtensions sidecar tables, its own organizationId FK) distinct from grievance_deadlines',
       'lib/deadline-engine/recipient-resolver.ts — resolveGrievanceDeadlineRecipients() explicitly throws "not yet supported (Phase A grievance-only)" when sourceTable === "claim_deadlines"',
       'Repo-wide search found zero API routes referencing claim_deadlines, claimDeadlines, or the deadlines/deadlineRules/deadlineExtensions table bindings under app/api/',
-      'Repo-wide search found no confirmed UI navigation entry wiring any dashboard page to the claim_deadlines table (components/deadlines/* and components/jurisdiction/deadline-calculator.tsx consume grievance deadlines via deadline-tracking-system.ts, not this table, based on naming/import inspection)',
+      'Repo-wide search found no confirmed UI navigation entry wiring any dashboard page to the claim_deadlines table (components/deadlines/* and components/jurisdiction/deadline-calculator.tsx consume grievance deadlines, not this table, based on naming/import inspection)',
     ],
     targetWave: 99,
     notes:

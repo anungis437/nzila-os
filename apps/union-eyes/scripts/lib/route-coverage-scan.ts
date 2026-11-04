@@ -168,6 +168,8 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
 export const READ_ONLY_POST_ROUTES = [
   // POST is a guarded, explicit HTTP 501; no role repair or data mutation occurs.
   'admin/fix-super-admin-roles/route.ts',
+  // POST answers HTTP 501 to a caller that passes the staging and signature gates: the deadline-engine proof is retired and writes nothing.
+  'staging-proof/deadline-engine/scenario/route.ts',
   // ai/classify, ai/match-precedents, ai/search and ai/summarize now write an atomic audit record, so they are audited routes, not read-only.
   // The education reminder job only reads and sends email; it writes no row, and its per-send outcome is the job result.
   'cron/education-reminders/route.ts',

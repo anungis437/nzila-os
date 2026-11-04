@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
-import { employerRow, list, unitRow, worksiteRow } from './route-rows';
+import { employerRow, list, unitRow, worksiteRow } from '@/lib/__tests__/support/union-structure-route-rows';
 import { installFetch, type Answer, type Call } from './fetch-harness';
 
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));

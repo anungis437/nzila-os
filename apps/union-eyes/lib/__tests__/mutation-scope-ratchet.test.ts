@@ -34,7 +34,6 @@ describe('mutation scope ratchet', () => {
     const current = scanUnscopedMutations()
     const closed = [
       'lib/services/deadline-confirmation-service.ts',
-      'lib/deadline-tracking-system.ts|grievance_deadlines',
       'app/api/clause-library/[id]/route.ts',
       'app/api/admin/ingest/retry/route.ts',
       'app/api/grievances/[id]/assign/route.ts',

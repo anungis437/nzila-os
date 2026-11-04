@@ -471,6 +471,16 @@ describe('external resource middleware: a read and its record are one transactio
     expect(mocks.authorizeExternalMatterAccess).not.toHaveBeenCalled();
   });
 
+  it('refuses a request that names no organization as forbidden, like any request without a grant, before any database work', async () => {
+    const { GET } = await import('@/app/api/external/grievances/[id]/route');
+
+    const response = await GET(new Request('https://example.test/api/external/grievances/x'), { id: GRIEVANCE });
+
+    expect(response.status).toBe(403);
+    expect(mocks.withRLSContext).not.toHaveBeenCalled();
+    expect(mocks.authorizeExternalMatterAccess).not.toHaveBeenCalled();
+  });
+
   it('answers a matter type outside the enumeration as a bad request', async () => {
     const { GET } = await import('@/app/api/external/documents/[id]/route');
 

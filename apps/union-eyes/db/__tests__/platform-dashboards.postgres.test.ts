@@ -10,10 +10,10 @@
  *   - the billing read returns the subscriptions, invoices and payments of both seeded organizations with the organization names joined;
  *   - control: a tenant session sees only its own organization's subscriptions and, with no organization, nothing, so a tenant context cannot serve these pages.
  *
- * The system role needs SELECT on settlements and subscription_plans, which neither the manifest nor the bootstrap grant it today (settlements: runtime
- * SELECT only; subscription_plans: runtime SELECT only). This applies exactly the grants the proposed manifest entries declare, as
- * workbook-capability.postgres.test.ts does for the workbook tables; without them the customer success overview and the billing subscriptions list fail with
- * "permission denied" on the real roles.
+ * The system role needs SELECT on subscription_plans, which neither the manifest nor the bootstrap grant it today (runtime SELECT only). This applies exactly
+ * the grant the proposed manifest entry declares, as workbook-capability.postgres.test.ts does for the workbook tables; without it the billing subscriptions
+ * list fails with "permission denied" on the real roles. The system role holds no privilege on settlements, so the customer success overview reads none
+ * and carries no settlement figure.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
@@ -59,8 +59,7 @@ describe.skipIf(!URL)('the platform dashboards\' reads on the combined schema, a
 
   beforeAll(async () => {
     admin = await harness.start(URL!)
-    // The grants the proposed manifest entries declare for the system role.
-    await admin.query('GRANT SELECT ON settlements TO union_eyes_system')
+    // The grant the proposed manifest entry declares for the system role.
     await admin.query('GRANT SELECT ON subscription_plans TO union_eyes_system')
 
     await insertOrganization(admin, tag, { id: ORG_A, name: `Alpha ${tag}`, memberCount: 40 })
@@ -69,10 +68,9 @@ describe.skipIf(!URL)('the platform dashboards\' reads on the combined schema, a
 
     const grievance = async (organizationId: string, number: string, status: string) =>
       (await admin.query(`INSERT INTO grievances (grievance_number, description, organization_id, title, type, status) VALUES ($1, 'd', $2, 't', 'grievance', $3) RETURNING id::text AS id`, [`${number}-${tag}`, organizationId, status])).rows[0].id as string
-    const aSettled = await grievance(ORG_A, 'a-settled', 'settled')
+    await grievance(ORG_A, 'a-settled', 'settled')
     await grievance(ORG_A, 'a-open', 'filed')
     await grievance(ORG_B, 'b-open', 'filed')
-    await admin.query(`INSERT INTO settlements (settlement_type, grievance_id, organization_id, monetary_amount) VALUES ('monetary', $1, $2, 250.50)`, [aSettled, ORG_A])
     await admin.query(
       `INSERT INTO collective_agreements (organization_id, cba_number, title, jurisdiction, employer_name, union_name, effective_date, expiry_date, industry_sector, status)
        VALUES ($1, $2, 'CBA', 'ontario', 'E', 'U', now(), now() + interval '1 year', 'public', 'active')`,
@@ -104,12 +102,16 @@ describe.skipIf(!URL)('the platform dashboards\' reads on the combined schema, a
     it('reads the platform-wide figures across every organization, as an independent count of the tables does', async () => {
       const overview = await withSystemContext(() => success!.loadOverview())
       expect(overview.totalGrievances).toBe(await count('grievances'))
-      expect(overview.totalSettlements).toBe(await count('settlements'))
       expect(overview.totalNpsSurveys).toBe(await count('customer_nps_surveys'))
       expect(overview.totalCBAs).toBe(await count('collective_agreements'))
       expect(overview.totalGrievances).toBeGreaterThanOrEqual(3)
-      expect(overview.totalSettlementValue).toBeGreaterThanOrEqual(250.5)
       expect(overview.openTickets).toBeGreaterThanOrEqual(1)
+      expect(Object.keys(overview).filter((key) => /settlement/i.test(key))).toEqual([])
+    })
+
+    it('has no privilege on settlements as the system role, so none can be read for the platform', async () => {
+      const { rows } = await admin.query(`SELECT has_table_privilege('union_eyes_system', 'settlements', 'SELECT') AS ok`)
+      expect(rows[0].ok).toBe(false)
     })
 
     it('gives each organization its own health row, and leaves the congress organization out', async () => {

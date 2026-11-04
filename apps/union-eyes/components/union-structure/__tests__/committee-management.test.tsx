@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { getTableColumns } from 'drizzle-orm';
 import { committees } from '@/db/schema/union-structure-schema';
-import { committeeRow, item, list, unitRow, worksiteRow } from './route-rows';
+import { committeeRow, item, list, unitRow, worksiteRow } from '@/lib/__tests__/support/union-structure-route-rows';
 import { installFetch, writesOf, type Answer, type Call } from './fetch-harness';
 
 // Radix menus, dialogs and selects measure and scroll elements that jsdom does not implement.

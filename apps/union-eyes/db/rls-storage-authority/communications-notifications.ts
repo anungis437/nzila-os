@@ -330,12 +330,12 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
   {
     table: "notifications",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "Manually verified 2026-09-02: direct NOT NULL organization_id + user_id columns (db/schema/domains/communications/notifications.ts). Reachable via multiple live HTTP routes (app/api/notifications/route.ts, app/api/notifications/[id]/route.ts, app/api/notifications/count/route.ts, app/api/notifications/mark-all-read/route.ts, app/api/notifications/preferences/route.ts, app/api/notifications/device/route.ts, app/api/notifications/test/route.ts, app/api/mobile/notifications/route.ts) and cron routes (app/api/cron/education-reminders, overdue-notifications, process-notifications, observability-alerts). Needs the same ue_create_direct_org_rls_policy treatment as the 0108 protected set. SYSTEM SELECT/UPDATE (census CTX-3): lib/deadline-tracking-system.ts cancelDeadlineReminders (the legacy reminder queue cancelled when a deadline completes: UPDATE ... SET status = cancelled WHERE type, status and the deadline's organization) runs inside the deadline-engine staging-proof harness (app/api/staging-proof/deadline-engine/scenario/route.ts, HMAC-gated, staging only) as the system role in a transaction it always rolls back; the UPDATE reads its WHERE columns, hence SELECT. No other system path touches this table.",
-    supportingCapability: ["app/api/notifications/route.ts","app/api/notifications/[id]/route.ts","app/api/notifications/count/route.ts","app/api/notifications/mark-all-read/route.ts","app/api/notifications/preferences/route.ts","app/api/notifications/device/route.ts","app/api/notifications/test/route.ts","app/api/mobile/notifications/route.ts","app/api/cron/education-reminders/route.ts","app/api/cron/overdue-notifications/route.ts","app/api/cron/process-notifications/route.ts","lib/services/notification-service.ts","app/api/staging-proof/deadline-engine/scenario/route.ts"],
+    reason: "Manually verified 2026-09-02: direct NOT NULL organization_id + user_id columns (db/schema/domains/communications/notifications.ts). Reachable via multiple live HTTP routes (app/api/notifications/route.ts, app/api/notifications/[id]/route.ts, app/api/notifications/count/route.ts, app/api/notifications/mark-all-read/route.ts, app/api/notifications/preferences/route.ts, app/api/notifications/device/route.ts, app/api/notifications/test/route.ts, app/api/mobile/notifications/route.ts) and cron routes (app/api/cron/education-reminders, overdue-notifications, process-notifications, observability-alerts). Needs the same ue_create_direct_org_rls_policy treatment as the 0108 protected set.",
+    supportingCapability: ["app/api/notifications/route.ts","app/api/notifications/[id]/route.ts","app/api/notifications/count/route.ts","app/api/notifications/mark-all-read/route.ts","app/api/notifications/preferences/route.ts","app/api/notifications/device/route.ts","app/api/notifications/test/route.ts","app/api/mobile/notifications/route.ts","app/api/cron/education-reminders/route.ts","app/api/cron/overdue-notifications/route.ts","app/api/cron/process-notifications/route.ts","lib/services/notification-service.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
-    requiredSystemPrivileges: ["SELECT","UPDATE"],
-    invocationAuthority: "MIXED",
-    dbExecutionPrincipal: "MIXED",
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "HIGH",
   },
   {

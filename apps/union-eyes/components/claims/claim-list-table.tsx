@@ -38,21 +38,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
- 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useClaimLabels } from "@/components/claims/claim-labels";
+import type { ClaimRow } from "@/components/claims/claim-row";
 
-export interface ClaimRow {
-  claimId: string;
-  claimNumber: string;
-  memberName: string;
-  memberAvatar?: string;
-  claimType: string;
-  status: string;
-  priority: string;
-  incidentDate: Date;
-  createdAt: Date;
-  assignedToName?: string;
-}
+export type { ClaimRow };
 
 export interface ClaimListTableProps {
   data: ClaimRow[];
@@ -63,20 +52,18 @@ export interface ClaimListTableProps {
   loading?: boolean;
 }
 
-const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  pending: { label: "Pending", variant: "secondary" },
-  "in-review": { label: "In Review", variant: "default" },
-  "under-investigation": { label: "Investigating", variant: "default" },
-  resolved: { label: "Resolved", variant: "outline" },
-  closed: { label: "Closed", variant: "secondary" },
-  rejected: { label: "Rejected", variant: "destructive" },
+const statusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+  if (status === "resolved") return "outline";
+  if (status === "rejected") return "destructive";
+  if (status === "closed") return "secondary";
+  return "default";
 };
 
-const priorityConfig: Record<string, { label: string; color: string }> = {
-  low: { label: "Low", color: "text-gray-700 bg-gray-100" },
-  medium: { label: "Medium", color: "text-blue-700 bg-blue-100" },
-  high: { label: "High", color: "text-orange-700 bg-orange-100" },
-  urgent: { label: "Urgent", color: "text-red-700 bg-red-100" },
+const priorityColor: Record<string, string> = {
+  low: "text-gray-700 bg-gray-100",
+  medium: "text-blue-700 bg-blue-100",
+  high: "text-orange-700 bg-orange-100",
+  critical: "text-red-700 bg-red-100",
 };
 
 export function ClaimListTable({
@@ -87,6 +74,7 @@ export function ClaimListTable({
   onStatusChange,
   loading: _loading = false,
 }: ClaimListTableProps) {
+  const { typeLabel, statusLabel, priorityLabel } = useClaimLabels();
   const columns: ColumnDef<ClaimRow>[] = [
     {
       id: "select",
@@ -113,7 +101,7 @@ export function ClaimListTable({
         <DataTableColumnHeader column={column} title="Claim #" />
       ),
       cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("claimNumber")}</div>
+        <div className="font-medium">{row.original.claimNumber ?? "—"}</div>
       ),
     },
     {
@@ -122,17 +110,11 @@ export function ClaimListTable({
         <DataTableColumnHeader column={column} title="Member" />
       ),
       cell: ({ row }) => {
-        const member = row.original;
+        const claim = row.original;
+        if (claim.memberName !== null) return <span className="truncate">{claim.memberName}</span>;
+        // The triage queue shows what a case is, never whose: the absence is the design, not a missing value.
         return (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={member.memberAvatar} />
-              <AvatarFallback>
-                {member.memberName[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <span className="truncate">{member.memberName}</span>
-          </div>
+          <span className="text-sm text-gray-400">{claim.triageOnly ? "Triage queue" : "—"}</span>
         );
       },
     },
@@ -142,7 +124,7 @@ export function ClaimListTable({
         <DataTableColumnHeader column={column} title="Type" />
       ),
       cell: ({ row }) => (
-        <span className="capitalize">{row.getValue("claimType")}</span>
+        <span>{row.original.claimType === null ? "—" : typeLabel(row.original.claimType)}</span>
       ),
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
@@ -154,13 +136,8 @@ export function ClaimListTable({
         <DataTableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const config = statusConfig[status];
-        return (
-          <Badge variant={config?.variant || "secondary"}>
-            {config?.label || status}
-          </Badge>
-        );
+        const status = row.original.status;
+        return <Badge variant={statusVariant(status)}>{statusLabel(status)}</Badge>;
       },
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
@@ -172,13 +149,8 @@ export function ClaimListTable({
         <DataTableColumnHeader column={column} title="Priority" />
       ),
       cell: ({ row }) => {
-        const priority = row.getValue("priority") as string;
-        const config = priorityConfig[priority];
-        return (
-          <Badge className={config?.color}>
-            {config?.label || priority}
-          </Badge>
-        );
+        const priority = row.original.priority;
+        return <Badge className={priorityColor[priority]}>{priorityLabel(priority)}</Badge>;
       },
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
@@ -190,21 +162,21 @@ export function ClaimListTable({
         <DataTableColumnHeader column={column} title="Incident Date" />
       ),
       cell: ({ row }) => {
-        return format(row.getValue("incidentDate"), "MMM d, yyyy");
+        const date = row.original.incidentDate;
+        return date === null ? "—" : format(date, "MMM d, yyyy");
       },
     },
     {
       accessorKey: "assignedToName",
       header: "Assigned To",
       cell: ({ row }) => {
-        const name = row.getValue("assignedToName") as string | undefined;
-        return name ? (
+        const claim = row.original;
+        if (!claim.assigned) return <span className="text-sm text-gray-400">Unassigned</span>;
+        return (
           <div className="flex items-center gap-1">
             <User className="h-3 w-3 text-gray-400" />
-            <span className="text-sm">{name}</span>
+            <span className="text-sm">{claim.assignedToName ?? "Assigned"}</span>
           </div>
-        ) : (
-          <span className="text-sm text-gray-400">Unassigned</span>
         );
       },
     },
@@ -214,7 +186,7 @@ export function ClaimListTable({
         <DataTableColumnHeader column={column} title="Created" />
       ),
       cell: ({ row }) => {
-        return format(row.getValue("createdAt"), "MMM d, yyyy");
+        return format(row.original.createdAt, "MMM d, yyyy");
       },
     },
     {
@@ -249,7 +221,7 @@ export function ClaimListTable({
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => onStatusChange(claim.claimId, "in-review")}
+                    onClick={() => onStatusChange(claim.claimId, "under_review")}
                   >
                     <Clock className="mr-2 h-4 w-4" />
                     Mark In Review

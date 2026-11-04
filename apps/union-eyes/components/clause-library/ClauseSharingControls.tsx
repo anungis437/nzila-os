@@ -91,6 +91,11 @@ type SharingLevel = (typeof SHARING_LEVELS)[number]["value"];
 const isOffered = (value: string): value is SharingLevel =>
   SHARING_LEVELS.some((level) => level.value === value && level.available);
 
+/** The level a clause is stored at, as one the controls know. A level they do not know is shown as private, the narrowest; a save sends the level that was chosen. */
+export function sharingLevelOf(value: string): SharingLevel {
+  return SHARING_LEVELS.some((level) => level.value === value) ? (value as SharingLevel) : "private";
+}
+
 export function ClauseSharingControls({
   open,
   onOpenChange,

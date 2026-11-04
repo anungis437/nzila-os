@@ -6,7 +6,7 @@ import '@testing-library/jest-dom/vitest';
 import { getTableColumns } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
 import { committeeActionItems, committeeDocuments, committeeMeetings } from '@/db/schema/committee-workspace-schema';
-import { committeeRow, item } from '@/components/union-structure/__tests__/route-rows';
+import { committeeRow, item } from '@/lib/__tests__/support/union-structure-route-rows';
 import { installFetch, type Answer, type Call } from '@/components/union-structure/__tests__/fetch-harness';
 
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));

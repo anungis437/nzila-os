@@ -57,11 +57,6 @@ interface GrievanceStats {
   inArbitration: number;
 }
 
-interface SettlementStats {
-  total: number;
-  totalMonetaryValue: number;
-}
-
 interface Overview {
   totalOrgs: number;
   activeOrgs: number;
@@ -193,21 +188,6 @@ async function loadGrievanceStats(): Promise<GrievanceStats> {
   };
 }
 
-async function loadSettlementStats(): Promise<SettlementStats> {
-  const rows = Array.from(
-    await db.execute(sql`
-      SELECT COUNT(*)::int as total,
-        COALESCE(SUM(monetary_amount), 0)::numeric as total_value
-      FROM settlements
-    `)
-  );
-  const r = rows[0] as Record<string, unknown>;
-  return {
-    total: Number(r.total),
-    totalMonetaryValue: Number(r.total_value),
-  };
-}
-
 /* ── Helpers ── */
 function formatSector(s: string) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -215,14 +195,6 @@ function formatSector(s: string) {
 
 function formatNumber(value: number, locale: string) {
   return new Intl.NumberFormat(locale).format(value);
-}
-
-function formatCurrency(value: number, locale: string) {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: 'CAD',
-    maximumFractionDigits: 0,
-  }).format(value);
 }
 
 /* ── Page ── */
@@ -240,14 +212,13 @@ export default async function SectorAnalyticsPage(props: {
   const searchParams = await props.searchParams;
   const tab = typeof searchParams.tab === 'string' ? searchParams.tab : 'overview';
 
-  const [overview, orgs, sectors, cba, grievances, settlements] = await withSystemContext(() =>
+  const [overview, orgs, sectors, cba, grievances] = await withSystemContext(() =>
     Promise.all([
       loadOverview(),
       loadOrganizations(),
       loadSectorBreakdown(),
       loadCbaStats(),
       loadGrievanceStats(),
-      loadSettlementStats(),
     ])
   );
 
@@ -385,17 +356,9 @@ export default async function SectorAnalyticsPage(props: {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{t('bargainingSummary.settlementsAndGrievancesTitle')}</CardTitle>
+                <CardTitle className="text-lg">{t('bargainingTab.grievancePipelineTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingSummary.totalSettlements')}</span>
-                  <span className="font-semibold">{settlements.total}</span>
-                </div>
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingSummary.settlementValue')}</span>
-                  <span className="font-semibold text-green-600">{formatCurrency(settlements.totalMonetaryValue, locale)}</span>
-                </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
                   <span>{t('bargainingSummary.grievancesResolved')}</span>
                   <span className="font-semibold text-green-600">{grievances.resolved}</span>
@@ -534,7 +497,7 @@ export default async function SectorAnalyticsPage(props: {
         </div>
       )}
 
-      {/* ── Bargaining & Settlements Tab ── */}
+      {/* ── Bargaining Tab ── */}
       {tab === 'bargaining' && (
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -593,31 +556,6 @@ export default async function SectorAnalyticsPage(props: {
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
                   <span>{t('bargainingTab.resolvedSettled')}</span>
                   <span className="font-bold text-green-600">{grievances.resolved}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{t('bargainingTab.settlementSummaryTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingSummary.totalSettlements')}</span>
-                  <span className="font-bold">{settlements.total}</span>
-                </div>
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingTab.totalMonetaryValue')}</span>
-                  <span className="font-bold text-green-600">{formatCurrency(settlements.totalMonetaryValue, locale)}</span>
-                </div>
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingTab.averageSettlement')}</span>
-                  <span className="font-bold">
-                    {formatCurrency(
-                      settlements.total > 0 ? Math.round(settlements.totalMonetaryValue / settlements.total) : 0,
-                      locale,
-                    )}
-                  </span>
                 </div>
               </CardContent>
             </Card>

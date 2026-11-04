@@ -23,7 +23,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
-import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
+import { formatClause } from '@/lib/clause-library/clause-detail';
 import { clauseTextSha256, recordClauseVersion } from '@/lib/clause-library/version-history';
 
 export const dynamic = 'force-dynamic';
@@ -46,6 +46,7 @@ async function getClauseRow(id: string, executor: typeof db) {
       effectiveDate: sharedClauseLibrary.effectiveDate,
       expiryDate: sharedClauseLibrary.expiryDate,
       viewCount: sharedClauseLibrary.viewCount,
+      comparisonCount: sharedClauseLibrary.comparisonCount,
       version: sharedClauseLibrary.version,
       sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
       createdBy: sharedClauseLibrary.createdBy,
@@ -57,41 +58,6 @@ async function getClauseRow(id: string, executor: typeof db) {
     .limit(1);
 
   return rows[0] ?? null;
-}
-
-function formatClause(
-  r: Awaited<ReturnType<typeof getClauseRow>>,
-  callerOrgId: string | null,
-  tags: { id: string; tagName: string }[],
-  sourceName: string | null,
-) {
-  const isOwner = callerOrgId ? r!.sourceOrganizationId === callerOrgId : false;
-  return {
-    id: r!.id,
-    clauseNumber: r!.clauseNumber,
-    clauseTitle: r!.clauseTitle,
-    clauseText: r!.clauseText,
-    clauseType: r!.clauseType,
-    sharingLevel: r!.sharingLevel,
-    // owner-internal sharing configuration — never exposed to a non-owner
-    // reader, even one authorized to read the clause content itself.
-    sharedWithOrgIds: isOwner ? r!.sharedWithOrgIds : undefined,
-    isAnonymized: r!.isAnonymized,
-    originalEmployerName: isOwner || r!.isAnonymized === false ? r!.originalEmployerName : undefined,
-    anonymizedEmployerName: r!.anonymizedEmployerName,
-    sector: r!.sector,
-    province: r!.province,
-    effectiveDate: r!.effectiveDate,
-    expiryDate: r!.expiryDate,
-    viewCount: r!.viewCount,
-    version: r!.version,
-    sourceOrganization: clauseSourceProjection({ ...r!, organizationName: sourceName }, callerOrgId ?? ''),
-    createdBy: isOwner ? r!.createdBy : undefined,
-    createdAt: r!.createdAt,
-    updatedAt: r!.updatedAt,
-    tags: tags.map((t) => ({ id: t.id, tagName: t.tagName })),
-    isOwner,
-  };
 }
 
 export const GET = withApi(

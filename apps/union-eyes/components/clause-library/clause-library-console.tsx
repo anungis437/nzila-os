@@ -13,12 +13,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ClauseLibrarySearch } from "@/components/clause-library/ClauseLibrarySearch";
 import { ClauseViewer } from "@/components/clause-library/ClauseViewer";
 import { ClauseCompareView } from "@/components/clause-library/ClauseCompareView";
-import { ClauseSharingControls } from "@/components/clause-library/ClauseSharingControls";
+import { ClauseSharingControls, sharingLevelOf } from "@/components/clause-library/ClauseSharingControls";
 import { ClauseTagManager } from "@/components/clause-library/ClauseTagManager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { envelopeData, readApiError } from "@/lib/client/api-envelope";
+import type { ClauseDetailWire } from "@/lib/clause-library/clause-detail";
 import { ClauseEditorDialog } from "@/components/clause-library/ClauseEditorDialog";
 
 interface SearchFilters {
@@ -49,17 +50,7 @@ interface ClausesData {
   pagination?: { totalPages: number };
 }
 
-interface SelectedClause {
-  id: string;
-  isOwner: boolean;
-  tags?: Array<{ id: string; tagName: string }>;
-  sharingLevel: "private" | "federation" | "congress" | "public";
-  sharedWithOrgIds?: string[];
-  isAnonymized: boolean;
-  originalEmployerName?: string;
-  anonymizedEmployerName?: string;
-  [key: string]: unknown;
-}
+type SelectedClause = ClauseDetailWire;
 
 interface ComparisonData {
   clauses: React.ComponentProps<typeof ClauseCompareView>['clauses'];
@@ -511,7 +502,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
               {selectedClause.isOwner && (
                 <ClauseTagManager
                   clauseId={selectedClause.id}
-                  tags={selectedClause.tags || []}
+                  tags={selectedClause.tags}
                   isOwner={selectedClause.isOwner}
                   onAddTag={async (tagName) => {
                     try {
@@ -571,11 +562,11 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                 onOpenChange={setSharingDialogOpen}
                 clauseId={selectedClause.id}
                 currentSettings={{
-                  sharingLevel: selectedClause.sharingLevel,
-                  sharedWithOrgIds: selectedClause.sharedWithOrgIds,
-                  isAnonymized: selectedClause.isAnonymized,
-                  originalEmployerName: selectedClause.originalEmployerName,
-                  anonymizedEmployerName: selectedClause.anonymizedEmployerName,
+                  sharingLevel: sharingLevelOf(selectedClause.sharingLevel),
+                  sharedWithOrgIds: selectedClause.sharedWithOrgIds ?? undefined,
+                  isAnonymized: selectedClause.isAnonymized === true,
+                  originalEmployerName: selectedClause.originalEmployerName ?? undefined,
+                  anonymizedEmployerName: selectedClause.anonymizedEmployerName ?? undefined,
                 }}
                 onSave={async (settings) => {
                   // A refusal is thrown to the dialog, which shows it and stays open; the dialog closes only for a change the server accepted.

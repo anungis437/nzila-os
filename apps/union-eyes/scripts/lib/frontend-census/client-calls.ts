@@ -32,21 +32,49 @@ const SWR_HOOKS = new Set(['useSWR', 'useSWRImmutable', 'useQuery', 'useSuspense
 
 type Part = { text: string } | { dynamic: true }
 
-/** The static shape of an expression that builds a string, or null when it does not start as one. */
-function partsOf(node: ts.Expression): Part[] | null {
-  if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isNonNullExpression(node) || ts.isSatisfiesExpression(node)) return partsOf(node.expression)
+/** How many names a URL is followed through: a name that holds a name that holds the URL, no deeper. */
+const MAX_NAME_DEPTH = 2
+
+/** The initializer of the `const` a name refers to, in the scopes of the same file around it; null when it is not a `const` there. */
+function constInitializer(identifier: ts.Identifier): ts.Expression | null {
+  for (let scope: ts.Node | undefined = identifier.parent; scope; scope = scope.parent) {
+    const statements = ts.isBlock(scope) || ts.isSourceFile(scope) || ts.isModuleBlock(scope) ? scope.statements : undefined
+    if (!statements) continue
+    for (const statement of statements) {
+      if (!ts.isVariableStatement(statement) || !(statement.declarationList.flags & ts.NodeFlags.Const)) continue
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name) && declaration.name.text === identifier.text && declaration.initializer) return declaration.initializer
+      }
+    }
+  }
+  return null
+}
+
+/**
+ * The static shape of an expression that builds a string, or null when it does not start as one. A name that stands for a string the same file builds
+ * (`const base = `/api/x/${id}``, then `${base}/y`) is the string it stands for, so the URL a screen assembles from a base is the URL it spells.
+ */
+function partsOf(node: ts.Expression, depth = 0): Part[] | null {
+  if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isNonNullExpression(node) || ts.isSatisfiesExpression(node)) return partsOf(node.expression, depth)
   if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return [{ text: node.text }]
+  if (ts.isIdentifier(node)) {
+    const initializer = depth < MAX_NAME_DEPTH ? constInitializer(node) : null
+    return initializer ? partsOf(initializer, depth + 1) : null
+  }
   if (ts.isTemplateExpression(node)) {
     const parts: Part[] = [{ text: node.head.text }]
     for (const span of node.templateSpans) {
-      parts.push({ dynamic: true }, { text: span.literal.text })
+      const named = ts.isIdentifier(span.expression) ? partsOf(span.expression, depth + 1) : null
+      if (named) parts.push(...named)
+      else parts.push({ dynamic: true })
+      parts.push({ text: span.literal.text })
     }
     return parts
   }
   if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-    const left = partsOf(node.left)
+    const left = partsOf(node.left, depth)
     if (!left) return null
-    const right = partsOf(node.right) ?? [{ dynamic: true as const }]
+    const right = partsOf(node.right, depth) ?? [{ dynamic: true as const }]
     return [...left, ...right]
   }
   return null

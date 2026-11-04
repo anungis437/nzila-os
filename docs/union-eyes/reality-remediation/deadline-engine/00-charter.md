@@ -1,6 +1,7 @@
 # Union Eyes Deadline Engine — Programme Charter
 
 **Status:** ACTIVE (Wave 1 Phase A landed; awaiting live staging proof)
+**Staging proof harness:** RETIRED. `app/api/staging-proof/deadline-engine/scenario/route.ts` authenticates as before and answers HTTP 501. A session-less caller cannot seed the case the engine schedules reminders for under the hardened database roles (the system role holds no INSERT on `grievances`, the tenant role needs a session user with a membership, and a `SECURITY DEFINER` seeding function is refused by the catalog admission contract). The proof is unbuilt, not passed; a replacement seeds through the tenant path as an operator who holds a membership.
 **Owner:** Aubert Nungisa (sole approver)
 **Branch:** `fix/union-eyes-reality-remediation`
 **Scope boundary:** `nzila-canada-staging-rg` only. Pilot and production resources are OUT OF SCOPE.
@@ -94,5 +95,5 @@ A capability is **complete** only after:
 - Cron routes:
   - [apps/union-eyes/app/api/cron/deadline-reminders/route.ts](../../../../apps/union-eyes/app/api/cron/deadline-reminders/route.ts)
   - [apps/union-eyes/app/api/cron/deadline-overdue/route.ts](../../../../apps/union-eyes/app/api/cron/deadline-overdue/route.ts)
-- Wire-in: [apps/union-eyes/lib/deadline-tracking-system.ts](../../../../apps/union-eyes/lib/deadline-tracking-system.ts) (lines 522+)
+- Wire-in: `apps/union-eyes/lib/deadline-tracking-system.ts` was deleted, since no production code called it; reminders are scheduled by `apps/union-eyes/lib/deadline-engine/assignment-sync.ts` and the `deadline-overdue` cron route above
 - Registry: [apps/union-eyes/lib/reality/capability-registry.ts](../../../../apps/union-eyes/lib/reality/capability-registry.ts) (5 new IDs)

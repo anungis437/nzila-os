@@ -4,7 +4,7 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { installFetch, type Answer, type Call } from '@/components/union-structure/__tests__/fetch-harness';
-import { certificationRow, crudList, failure, ok } from './education-rows';
+import { certificationRow, crudList, failure, ok } from '@/lib/__tests__/support/education-rows';
 import { MemberCertificates } from '../MemberCertificates';
 
 vi.mock('next-intl', () => ({ useLocale: () => 'en-CA' }));

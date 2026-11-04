@@ -242,6 +242,38 @@ describe('payments/webhooks/paypal route', () => {
     expect(m.recordWebhookProcessed).not.toHaveBeenCalled();
   });
 
+  it('answers 400 for a JSON object that is not a PayPal event, before calling PayPal', async () => {
+    const { POST } = await loadRoute();
+
+    for (const body of [{}, { id: 'evt-1' }, { event_type: 'PAYMENT.CAPTURE.COMPLETED' }, { id: 7, event_type: 'X' }, { id: 'evt-1', event_type: 'X', resource: 'nope' }]) {
+      const response = await POST(makeRequest(body));
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toMatchObject({ error: 'Invalid payload' });
+    }
+    expect(fetch).not.toHaveBeenCalled();
+    expect(m.isWebhookProcessed).not.toHaveBeenCalled();
+  });
+
+  it('has PayPal verify the event exactly as PayPal sent it, fields the application does not read included', async () => {
+    const { POST } = await loadRoute();
+    const sent = { id: 'evt-raw', event_type: 'PAYMENT.CAPTURE.COMPLETED', create_time: '2026-06-11T00:00:00Z', resource: { id: 'pay-1', custom_id: 'txn-1', amount: { value: '1.00', currency_code: 'CAD' }, links: [{ rel: 'self' }] } };
+
+    await POST(makeRequest(sent));
+
+    const verifyCall = vi.mocked(fetch).mock.calls.find(([url]) => String(url).includes('/v1/notifications/verify-webhook-signature'));
+    expect(JSON.parse(String(verifyCall?.[1]?.body)).webhook_event).toEqual(sent);
+    expect(m.recordWebhookProcessed).toHaveBeenCalledWith(expect.objectContaining({ webhookId: 'evt-raw', payloadJson: sent }));
+  });
+
+  it('acts on no payment, and answers 200 so it is not redelivered, for a completed capture that names no capture', async () => {
+    const { POST } = await loadRoute();
+
+    const response = await POST(makeRequest({ id: 'evt-no-capture', event_type: 'PAYMENT.CAPTURE.COMPLETED', resource: { custom_id: 'txn-1', amount: { value: '1.00' } } }));
+
+    expect(response.status).toBe(200);
+    expect(m.handlePaymentSuccess).not.toHaveBeenCalled();
+  });
+
   it('answers 422, not success and not a retry-into-nothing 5xx, for an event the application refuses', async () => {
     const { POST } = await loadRoute();
     const { PaymentAuthorityError } = await import('@/lib/services/payment-service');

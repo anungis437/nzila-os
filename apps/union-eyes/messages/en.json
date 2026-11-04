@@ -1900,9 +1900,6 @@
     "bargainingSummary": {
       "collectiveAgreementsTitle": "Collective Agreements",
       "totalCbas": "Total CBAs",
-      "settlementsAndGrievancesTitle": "Settlements & Grievances",
-      "totalSettlements": "Total Settlements",
-      "settlementValue": "Settlement Value",
       "grievancesResolved": "Grievances Resolved"
     },
     "table": {
@@ -1923,10 +1920,7 @@
       "totalGrievances": "Total Grievances",
       "openGrievances": "Open (Filed / Investigating / Escalated / Mediation)",
       "inArbitration": "In Arbitration",
-      "resolvedSettled": "Resolved / Settled",
-      "settlementSummaryTitle": "Settlement Summary",
-      "totalMonetaryValue": "Total Monetary Value",
-      "averageSettlement": "Avg. Settlement"
+      "resolvedSettled": "Resolved / Settled"
     },
     "empty": {
       "overview": "No sector data available. Organizations need sectors assigned.",
@@ -10876,8 +10870,6 @@
     "pipelineOpen": "Open",
     "pipelineArbitration": "In Arbitration",
     "pipelineResolved": "Resolved",
-    "settlementsLabel": "Settlements",
-    "currencyAmount": "${value}",
     "ticketBreakdownTitle": "Ticket Breakdown",
     "byCategoryTitle": "By Category",
     "byChannelTitle": "By Channel",
@@ -10901,14 +10893,12 @@
     "tableChannel": "Channel",
     "tableAssigned": "Assigned",
     "tableRating": "Rating",
-    "tableSettlement": "Settlement",
     "tableFiled": "Filed",
     "tableOpenTickets": "Open Tickets",
     "tableResolvedTickets": "Resolved Tickets",
     "tableSatisfaction": "Satisfaction",
     "tableActiveCases": "Active Cases",
     "tableResolvedGrievances": "Resolved Grievances",
-    "settlementValue": "${value} ({status})",
     "supportByOrganizationTitle": "Support by Organization",
     "emptyDash": "—"
   },
@@ -10994,8 +10984,6 @@
     "activeNegotiatingLabel": "{active} active · {negotiating} negotiating",
     "grievancesTitle": "Grievances",
     "openResolvedLabel": "{open} open · {resolved} resolved",
-    "settlementsTitle": "Settlements",
-    "settlementTotalLabel": "${amount} total",
     "cbaHealthTitle": "CBA Health",
     "statusActive": "Active",
     "statusNegotiating": "Negotiating",

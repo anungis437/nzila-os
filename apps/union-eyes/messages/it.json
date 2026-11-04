@@ -1994,9 +1994,6 @@
     "bargainingSummary": {
       "collectiveAgreementsTitle": "Accordi Collettivi",
       "totalCbas": "Totale CBA",
-      "settlementsAndGrievancesTitle": "Accordi e Reclami",
-      "totalSettlements": "Accordi Totali",
-      "settlementValue": "Valore del Regolamento",
       "grievancesResolved": "Controversie Risolte"
     },
     "table": {
@@ -2017,10 +2014,7 @@
       "totalGrievances": "Totale Controversie",
       "openGrievances": "Aperte (Presentate / In Investigazione / Escalate / Mediazione)",
       "inArbitration": "In Arbitrato",
-      "resolvedSettled": "Risolte / Regolate",
-      "settlementSummaryTitle": "Riepilogo del Regolamento",
-      "totalMonetaryValue": "Valore Monetario Totale",
-      "averageSettlement": "Regolamento Medio"
+      "resolvedSettled": "Risolte / Regolate"
     },
     "empty": {
       "overview": "Nessun dato di settore disponibile. Le organizzazioni devono avere settori assegnati.",
@@ -9196,8 +9190,6 @@
     "pipelineOpen": "Aperti",
     "pipelineArbitration": "In Arbitrato",
     "pipelineResolved": "Risolti",
-    "settlementsLabel": "Accordi",
-    "currencyAmount": "${value}",
     "ticketBreakdownTitle": "Ripartizione dei Ticket",
     "byCategoryTitle": "Per Categoria",
     "byChannelTitle": "Per Canale",
@@ -9221,14 +9213,12 @@
     "tableChannel": "Canale",
     "tableAssigned": "Assegnato",
     "tableRating": "Valutazione",
-    "tableSettlement": "Risoluzione",
     "tableFiled": "Archiviato",
     "tableOpenTickets": "Ticket aperti",
     "tableResolvedTickets": "Ticket risolti",
     "tableSatisfaction": "Soddisfazione",
     "tableActiveCases": "Casi attivi",
     "tableResolvedGrievances": "Reclami Risolti",
-    "settlementValue": "${value} ({status})",
     "supportByOrganizationTitle": "Supporto per Organizzazione",
     "emptyDash": "—"
   },
@@ -9314,8 +9304,6 @@
     "activeNegotiatingLabel": "{active} attivi · {negotiating} in negoziazione",
     "grievancesTitle": "Reclami",
     "openResolvedLabel": "{open} aperti · {resolved} risolti",
-    "settlementsTitle": "Accordi",
-    "settlementTotalLabel": "${amount} totale",
     "cbaHealthTitle": "Salute CBA",
     "statusActive": "Attivo",
     "statusNegotiating": "In Negoziazione",

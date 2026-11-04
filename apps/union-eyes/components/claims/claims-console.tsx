@@ -3,18 +3,20 @@
 /**
  * Claims Console
  *
- * Fetches and renders the claims list.
- * Members see their own claims; stewards+ see org-wide claims.
- * Consumes GET /api/claims
+ * Fetches and renders the list of cases the caller may see: their own, and the ones they hold a relationship to (the case authority of
+ * GET /api/cases), with the triage queue for a caller who triages.
+ * Consumes GET /api/cases
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { ClaimListTable, type ClaimRow } from '@/components/claims/claim-list-table';
+import { ClaimListTable } from '@/components/claims/claim-list-table';
+import { readClaimRow, type ClaimRow } from '@/components/claims/claim-row';
 import { MemberCaseList } from '@/components/claims/member-case-list';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { apiErrorMessage, envelopeRows, failureText } from '@/lib/client/api-envelope';
 import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
 
 type ClaimsConsoleProps = {
@@ -36,33 +38,13 @@ export function ClaimsConsole({ view = 'staff' }: ClaimsConsoleProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/claims');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      // Standard envelope is { success, data: { data: [...] } }; tolerate flatter shapes.
-      const payload = data?.data ?? data;
-      const list: unknown[] = Array.isArray(payload)
-        ? payload
-        : (payload?.data ?? payload?.claims ?? data?.claims ?? []);
-      const raw: ClaimRow[] = (Array.isArray(list) ? list : []).map(
-        (c) => c as Record<string, unknown>,
-      ).map(
-        (c: Record<string, unknown>) => ({
-          claimId: String(c.claimId ?? c.id ?? ''),
-          claimNumber: String(c.claimNumber ?? c.caseNumber ?? c.id ?? ''),
-          memberName: String(c.memberName ?? c.member_name ?? ''),
-          memberAvatar: c.memberAvatar as string | undefined,
-          claimType: String(c.claimType ?? c.claim_type ?? c.type ?? ''),
-          status: String(c.status ?? ''),
-          priority: String(c.priority ?? 'medium'),
-          incidentDate: c.incidentDate ? new Date(c.incidentDate as string) : new Date(c.createdAt as string),
-          createdAt: new Date(c.createdAt as string),
-          assignedToName: c.assignedToName as string | undefined,
-        })
-      );
-      setClaims(raw);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('loadError'));
+      const response = await fetch('/api/cases');
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, t('loadError')));
+      // The route's { data: rows } is what the framework wraps as { success, data, timestamp }.
+      setClaims(envelopeRows(body).map(readClaimRow));
+    } catch (failure) {
+      setError(failureText(failure, t('loadError')));
     } finally {
       setLoading(false);
     }

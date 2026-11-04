@@ -63,7 +63,7 @@ describe('reading the answer of a route', () => {
 
   it('reads what the generic CRUD writer answers: a list is { data, pagination } and an item is { data }, both under data', () => {
     const collection = answer(`const { GET, POST } = crudRoutes({ table: t, writableFields: ['a'] })\nexport { GET, POST }`)
-    expect(collection?.keys.data).toEqual({ keys: { data: ['array', null], pagination: null }, open: false })
+    expect(collection?.keys.data).toEqual({ keys: { data: ['array', null], pagination: { keys: { page: null, limit: null, total: null, totalPages: null }, open: false } }, open: false })
     expect(answer(`const { GET, POST } = crudRoutes({ table: t })\nexport { GET, POST }`, 'POST')?.keys.data).toEqual({ keys: { data: null }, open: false })
     expect(answer(`export const { GET, PATCH, DELETE } = crudRoutes({ table: t, itemRoute: true })`, 'GET')?.keys.data).toEqual({ keys: { data: null }, open: false })
   })

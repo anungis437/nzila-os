@@ -54,6 +54,8 @@ const ROUTES: Record<string, string> = {
   cast: `export const GET = withApi({}, async () => ({ rows: raw as { id: string }[] }))`,
   spread: `export const GET = withApi({}, async () => { const page = await listRows(); return { ...page, generatedAt: 'now' } })`,
   conditional: `export const GET = withApi({}, async () => { if (raw.length === 0) return { clauses: [] }; return { clauses: raw.map((row) => ({ id: row.id })) } })`,
+  crud: `declare function crudRoutes(options: { table: unknown; itemRoute?: boolean; omitFromResponse?: string[] }): { GET: unknown; POST: unknown }\ninterface TableRow { id: string; name: string; secret: string | null; createdAt: Date; owner: { id: string } }\ndeclare const things: { $inferSelect: TableRow }\nexport const { GET, POST } = crudRoutes({ table: things, omitFromResponse: ['secret'] })`,
+  crudItem: `declare function crudRoutes(options: { table: unknown; itemRoute?: boolean }): { GET: unknown; PATCH: unknown }\ninterface TableRow { id: string; name: string }\ndeclare const things: { $inferSelect: TableRow }\nexport const { GET, PATCH } = crudRoutes({ table: things, itemRoute: true })`,
 }
 
 const files = Object.fromEntries(Object.entries(ROUTES).map(([name, code]) => [`app/api/${name}/route.ts`, `${PRELUDE}\n${code}`]))
@@ -129,6 +131,12 @@ describe('reading the answer of a route from the types of what it returns', () =
 
   it('keeps the element of a list across the answers of a handler, where one answer is an empty list', () => {
     expect(dataOf('conditional')).toEqual({ keys: { clauses: ['array', { keys: { id: null }, open: false }] }, open: false })
+  })
+
+  it('reads the row a CRUD route lists and returns off the table it is mounted on, without the columns it leaves out of the response', () => {
+    const row = { keys: { id: null, name: null, createdAt: null, owner: { keys: { id: null }, open: false } }, open: false }
+    expect(dataOf('crud')).toEqual({ keys: { data: ['array', row], pagination: { keys: { page: null, limit: null, total: null, totalPages: null }, open: false } }, open: false })
+    expect(dataOf('crudItem')).toEqual({ keys: { data: { keys: { id: null, name: null }, open: false } }, open: false })
   })
 
   it('does nothing without the checker: the syntax alone reads no more than it did', () => {

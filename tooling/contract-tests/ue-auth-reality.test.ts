@@ -78,6 +78,9 @@ const ALLOWED_PATTERNS = [
   'apps/union-eyes/app/[locale]/dashboard/correspondence/',
   // role-experience.ts: 'clerk' is the union role string value
   'apps/union-eyes/lib/dashboard/role-experience.ts',
+  // Notification inbox links and header actions by role: "clerk" is the union recording-clerk role (UserRole.CLERK), not the auth vendor
+  'apps/union-eyes/lib/notifications/__tests__/links.test.ts',
+  'apps/union-eyes/components/__tests__/header-actions.test.tsx',
   // MODULE_PAGE_INVENTORY.md: `clerk` is the union officer role name (recording clerk), not auth vendor (moved to docs/governance/)
   'apps/union-eyes/docs/governance/MODULE_PAGE_INVENTORY.md',
 ]

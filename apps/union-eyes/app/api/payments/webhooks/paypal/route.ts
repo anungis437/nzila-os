@@ -16,6 +16,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { PaymentAuthorityError, PaymentService } from '@/lib/services/payment-service';
 import { isWebhookProcessed, recordWebhookProcessed } from '@/lib/services/rewards/webhook-service';
@@ -25,6 +26,28 @@ export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 const MAX_WEBHOOK_BYTES = 256 * 1024;
+
+/** What an event must be, and the parts of its resource the handler reads. PayPal sends more, which is kept as sent: its signature is checked over the event as it came. */
+const paypalEventSchema = z
+  .object({
+    id: z.string().min(1).max(255),
+    event_type: z.string().min(1).max(255),
+    resource: z
+      .object({
+        id: z.string().optional(),
+        custom_id: z.string().optional(),
+        invoice_id: z.string().optional(),
+        status: z.string().optional(),
+        amount: z.object({ value: z.string().optional() }).passthrough().optional(),
+        status_details: z.object({ reason: z.string().optional() }).passthrough().optional(),
+        supplementary_data: z.object({ related_ids: z.object({ order_id: z.string().optional() }).passthrough().optional() }).passthrough().optional(),
+      })
+      .passthrough()
+      .optional(),
+  })
+  .passthrough();
+
+type PayPalEvent = z.infer<typeof paypalEventSchema>;
 
 /** A request that cannot be an authentic PayPal event: the caller's error, never retried into success. */
 class WebhookRequestError extends Error {
@@ -102,18 +125,17 @@ async function verifyPayPalWebhook(
   return data.verification_status === 'SUCCESS';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getTransactionIdFromPayPalEvent(resource: any): string | null {
+function getTransactionIdFromPayPalEvent(resource: NonNullable<PayPalEvent['resource']>): string | null {
   return (
-    resource?.custom_id ||
-    resource?.invoice_id ||
-    resource?.supplementary_data?.related_ids?.order_id ||
+    resource.custom_id ||
+    resource.invoice_id ||
+    resource.supplementary_data?.related_ids?.order_id ||
     null
   );
 }
 
-/** The event body, read under a size cap. It is a JSON object: anything else cannot be a PayPal event. */
-async function readEvent(request: NextRequest): Promise<Record<string, unknown>> {
+/** The event body, read under a size cap, and the event it must be. A body that is not a PayPal event is the caller's error. */
+async function readEvent(request: NextRequest): Promise<{ raw: Record<string, unknown>; event: PayPalEvent }> {
   let parsed: unknown;
   try {
     parsed = await readBoundedJson(request, MAX_WEBHOOK_BYTES);
@@ -121,8 +143,10 @@ async function readEvent(request: NextRequest): Promise<Record<string, unknown>>
     if (error instanceof RequestBodyTooLargeError) throw new WebhookRequestError('Payload too large', 413);
     throw new WebhookRequestError('Invalid payload', 400);
   }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new WebhookRequestError('Invalid payload', 400);
-  return parsed as Record<string, unknown>;
+  const event = paypalEventSchema.safeParse(parsed);
+  if (!event.success) throw new WebhookRequestError('Invalid payload', 400);
+  // The signature is verified over the body as PayPal sent it, not over the parsed copy.
+  return { raw: parsed as Record<string, unknown>, event: event.data };
 }
 
 /**
@@ -146,11 +170,11 @@ export async function POST(request: NextRequest) {
       ? 'https://api-m.paypal.com'
       : 'https://api-m.sandbox.paypal.com';
 
-    const event = await readEvent(request);
+    const { raw, event } = await readEvent(request);
 
     // The signature is checked first: nothing below reads or writes the database for a request that is not PayPal's.
     const verified = await verifyPayPalWebhook(
-      event,
+      raw,
       request.headers,
       baseUrl,
       clientId,
@@ -167,12 +191,11 @@ export async function POST(request: NextRequest) {
     }
 
     const eventType = event.event_type;
-    const eventId = event.id as string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const resource = (event.resource || {}) as Record<string, any>;
+    const eventId = event.id;
+    const resource: NonNullable<PayPalEvent['resource']> = event.resource ?? {};
 
     // Idempotency: skip already-processed events
-    if (eventId && await isWebhookProcessed('paypal', eventId)) {
+    if (await isWebhookProcessed('paypal', eventId)) {
       return NextResponse.json({ received: true, status: 'duplicate' }, { status: 200 });
     }
 
@@ -186,16 +209,16 @@ export async function POST(request: NextRequest) {
     try {
       switch (eventType) {
         case 'PAYMENT.CAPTURE.COMPLETED':
-          if (transactionId) {
+          if (transactionId && resource.id) {
             await PaymentService.handlePaymentSuccess({
               transactionId,
               processorPaymentId: resource.id,
               processorType: 'paypal',
-              amount: resource?.amount?.value || '0.00',
+              amount: resource.amount?.value || '0.00',
               paymentMethod: 'paypal',
             });
           } else {
-            logger.warn('PayPal payment completed without transaction id', { eventId: event.id });
+            logger.warn('PayPal payment completed without transaction id or capture id', { eventId });
           }
           break;
 
@@ -206,16 +229,16 @@ export async function POST(request: NextRequest) {
               transactionId,
               processorPaymentId: resource.id,
               processorType: 'paypal',
-              errorMessage: resource?.status || 'PayPal payment failed',
-              errorCode: resource?.status_details?.reason || 'PAYPAL_FAILED',
+              errorMessage: resource.status || 'PayPal payment failed',
+              errorCode: resource.status_details?.reason || 'PAYPAL_FAILED',
             });
           } else {
-            logger.warn('PayPal payment failed without transaction id', { eventId: event.id });
+            logger.warn('PayPal payment failed without transaction id', { eventId });
           }
           break;
 
         case 'PAYMENT.CAPTURE.REFUNDED':
-          logger.info('PayPal refund received', { eventId: event.id, resourceId: resource.id });
+          logger.info('PayPal refund received', { eventId, resourceId: resource.id });
           break;
 
         default:
@@ -235,14 +258,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Record successful processing for idempotency
-    if (eventId) {
-      await recordWebhookProcessed({
-        provider: 'paypal',
-        webhookId: eventId,
-        eventType: String(eventType || 'unknown'),
-        payloadJson: event,
-      });
-    }
+    await recordWebhookProcessed({
+      provider: 'paypal',
+      webhookId: eventId,
+      eventType,
+      payloadJson: raw,
+    });
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {

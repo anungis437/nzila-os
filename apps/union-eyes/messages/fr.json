@@ -1894,9 +1894,6 @@
     "bargainingSummary": {
       "collectiveAgreementsTitle": "Accords collectifs",
       "totalCbas": "Total des CBA",
-      "settlementsAndGrievancesTitle": "Règlements & Griefs",
-      "totalSettlements": "Total des règlements",
-      "settlementValue": "Valeur du règlement",
       "grievancesResolved": "Griefs résolus"
     },
     "table": {
@@ -1917,10 +1914,7 @@
       "totalGrievances": "Total des griefs",
       "openGrievances": "Ouverts (Déposés / Enquête / Escaladés / Médiation)",
       "inArbitration": "En arbitrage",
-      "resolvedSettled": "Résolus / Réglés",
-      "settlementSummaryTitle": "Résumé des règlements",
-      "totalMonetaryValue": "Valeur monétaire totale",
-      "averageSettlement": "Règlement moy."
+      "resolvedSettled": "Résolus / Réglés"
     },
     "empty": {
       "overview": "Aucune donnée sectorielle disponible. Les organisations doivent avoir des secteurs assignés.",
@@ -9113,8 +9107,6 @@
     "pipelineOpen": "Ouvert",
     "pipelineArbitration": "En arbitrage",
     "pipelineResolved": "Résolu",
-    "settlementsLabel": "Règlements",
-    "currencyAmount": "${value}",
     "ticketBreakdownTitle": "Répartition des tickets",
     "byCategoryTitle": "Par catégorie",
     "byChannelTitle": "Par canal",
@@ -9138,14 +9130,12 @@
     "tableChannel": "Canal",
     "tableAssigned": "Assigné",
     "tableRating": "Évaluation",
-    "tableSettlement": "Règlement",
     "tableFiled": "Déposé",
     "tableOpenTickets": "Tickets ouverts",
     "tableResolvedTickets": "Tickets résolus",
     "tableSatisfaction": "Satisfaction",
     "tableActiveCases": "Cas actifs",
     "tableResolvedGrievances": "Griefs résolus",
-    "settlementValue": "${value} ({status})",
     "supportByOrganizationTitle": "Soutien par organisation",
     "emptyDash": "—"
   },
@@ -9231,8 +9221,6 @@
     "activeNegotiatingLabel": "{active} actifs · {negotiating} en négociation",
     "grievancesTitle": "Plaintes",
     "openResolvedLabel": "{open} ouvertes · {resolved} résolues",
-    "settlementsTitle": "Règlements",
-    "settlementTotalLabel": "{amount} $ total",
     "cbaHealthTitle": "Santé CBA",
     "statusActive": "Actif",
     "statusNegotiating": "En négociation",

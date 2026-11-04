@@ -34,7 +34,7 @@ import {
   BarChart3,
   Clipboard,
 } from 'lucide-react';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 
 /* ── Helpers ── */
 const TAB_KEYS = ['overview', 'health', 'onboarding', 'feedback'] as const;
@@ -59,7 +59,6 @@ export default async function CustomerSuccessDashboard({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { locale: routeLocale } = await paramsPromise;
-  const locale = await getLocale();
   const t = await getTranslations('customerSuccessPage');
   await requireUser();
 
@@ -257,13 +256,6 @@ export default async function CustomerSuccessDashboard({
                     <p className="text-lg font-bold">{overview.totalGrievances}</p>
                     <p className="text-xs text-muted-foreground">
                       {t('openResolvedLabel', { open: overview.openGrievances, resolved: overview.resolvedGrievances })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('settlementsTitle')}</p>
-                    <p className="text-lg font-bold">{overview.totalSettlements}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t('settlementTotalLabel', { amount: new Intl.NumberFormat(locale).format(overview.totalSettlementValue) })}
                     </p>
                   </div>
                 </div>

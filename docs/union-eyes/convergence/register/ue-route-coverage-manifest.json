@@ -37,8 +37,8 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 156,
-   "ATOMIC_SERVICE": 117,
-   "COMPUTE_ONLY": 31,
+   "ATOMIC_SERVICE": 116,
+   "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 83,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
@@ -49,8 +49,8 @@
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 83,
-   "NONE": 307,
-   "SYSTEM_CONTEXT": 54,
+   "NONE": 308,
+   "SYSTEM_CONTEXT": 53,
    "TENANT_TX": 229
   }
  },
@@ -11798,8 +11798,8 @@
    "guard": "NONE",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC_SERVICE"
+   "data": "NONE",
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "status/route.ts",

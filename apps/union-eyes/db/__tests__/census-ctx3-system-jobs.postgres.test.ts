@@ -6,9 +6,6 @@
  * route handlers and services over the combined Django + Drizzle schema, with only the request boundary and the outgoing mail replaced, and proves that
  *   - the Shopify webhook can resolve a shop domain to its organization as the system role (system SELECT on shopify_config), that the tenant runtime role cannot read
  *     the table at all, and that no application role can write it (a row is provisioned by a platform operator);
- *   - the staging proof harness (POST /api/staging-proof/deadline-engine/scenario) runs every scenario as the system role in ONE transaction that is always
- *     rolled back: the synthetic organization, the seed rows and everything the deadline engine wrote are gone afterwards, the system role needs no DELETE and no
- *     UPDATE of an organization, and the run is recorded in the ledger, which commits on its own;
  *   - the daily education reminder job finds the sessions and certifications it must mail as the system role (system SELECT on course_registrations, training_courses,
  *     course_sessions, member_certifications), writes its delivery marker (in_app_notifications INSERT), skips what is already marked, and releases the marker of a
  *     mail the provider refused (DELETE);
@@ -21,7 +18,7 @@
  *
  * Needs UE_AUTHORITY_COMBINED_URL (an ADMIN connection to a disposable, fully bootstrapped database); it fails, it does not skip, without it.
  */
-import { randomBytes, randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { NextRequest } from 'next/server'
 import type pg from 'pg'
 import { sql } from 'drizzle-orm'
@@ -71,13 +68,11 @@ vi.mock('@/lib/services/crm-service', () => ({ upsertContact: async () => null, 
 
 const { savepointHarness, RUNTIME_ROLE, SYSTEM_ROLE } = await import('./native-savepoint-harness')
 const shop = await import('@/lib/services/rewards/webhook-service')
-const stagingProof = await import('@/app/api/staging-proof/deadline-engine/scenario/route')
 const education = await import('@/app/api/cron/education-reminders/route')
 const rewardsCron = await import('@/app/api/rewards/cron/route')
 const pilotApply = await import('@/app/api/pilot/apply/route')
 const rewardsNotifications = await import('@/lib/services/rewards/notification-service')
 const unsubscribe = await import('@/app/api/communications/unsubscribe/[recipientId]/route')
-const { createProofSignature } = await import('@/lib/staging-proof/deadline-engine-auth')
 const { signTrackingPayload } = await import('@/lib/communications/tracking-token')
 
 type Row = Record<string, any>
@@ -134,71 +129,6 @@ describe('the cross-organization system jobs and webhooks, as the real roles', (
       expect(await codeOf(as(SYSTEM_ROLE, `INSERT INTO shopify_config (org_id, shop_domain, storefront_token_secret_ref, webhook_secret_ref) VALUES ('${randomUUID()}', 'x.myshopify.com', 'r', 'r')`))).toBe('42501')
       expect(await codeOf(as(SYSTEM_ROLE, `UPDATE shopify_config SET shop_domain = 'y.myshopify.com'`))).toBe('42501')
       expect(await codeOf(as(SYSTEM_ROLE, `DELETE FROM shopify_config`))).toBe('42501')
-    })
-  })
-
-  describe('the staging proof scenarios', () => {
-    const secret = randomBytes(24).toString('hex')
-    const request = (scenario: string, nonce = randomBytes(18).toString('base64url')) => {
-      const timestamp = new Date().toISOString()
-      return new NextRequest('http://localhost/api/staging-proof/deadline-engine/scenario', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-staging-proof-timestamp': timestamp,
-          'x-staging-proof-nonce': nonce,
-          'x-staging-proof-signature': createProofSignature(secret, timestamp, nonce, scenario as 'schedule-basic'),
-        },
-        body: JSON.stringify({ scenario }),
-      })
-    }
-    const leftBehind = async () => ({
-      organizations: Number((await rows(`SELECT count(*)::int AS n FROM organizations WHERE slug LIKE 'staging-proof-%'`))[0].n),
-      grievances: Number((await rows(`SELECT count(*)::int AS n FROM grievances WHERE title LIKE 'staging-proof-%'`))[0].n),
-      deadlines: Number((await rows(`SELECT count(*)::int AS n FROM grievance_deadlines WHERE deadline_type = 'wave1a_proof'`))[0].n),
-    })
-
-    beforeAll(() => {
-      env({
-        NEXT_PUBLIC_APP_ENV: 'staging',
-        TARGET_ENVIRONMENT: 'staging',
-        STAGING_PROOFS_ENABLED: 'true',
-        UNION_EYES_RUNTIME_ID: 'union-eyes-staging',
-        UE_ENVIRONMENT: 'staging',
-        STAGING_PROOF_SECRET: secret,
-      })
-    })
-
-    it.each(['schedule-basic', 'reschedule', 'cancel'])('runs %s as the system role in a transaction that is rolled back, and every assertion of the scenario holds', async (scenario) => {
-      const response = await stagingProof.POST(request(scenario))
-      const body = (await response.json()) as Row
-
-      expect(response.status, JSON.stringify(body).slice(0, 600)).toBe(200)
-      expect(body.scenario).toBe(scenario)
-      expect((body.assertions as Array<{ name: string; passed: boolean; detail?: unknown }>).filter((assertion) => !assertion.passed), JSON.stringify(body).slice(0, 2500)).toEqual([])
-      expect(body.passed).toBe(true)
-      expect(await leftBehind()).toEqual({ organizations: 0, grievances: 0, deadlines: 0 })
-
-      const [run] = await rows(`SELECT status, scenario FROM staging_proof_runs WHERE id = $1`, [body.proofRunId])
-      expect(run).toEqual({ status: 'completed', scenario })
-    })
-
-    it('refuses a request signed for another scenario, and writes nothing', async () => {
-      const timestamp = new Date().toISOString()
-      const nonce = randomBytes(18).toString('base64url')
-      const forged = new NextRequest('http://localhost/api/staging-proof/deadline-engine/scenario', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-staging-proof-timestamp': timestamp,
-          'x-staging-proof-nonce': nonce,
-          'x-staging-proof-signature': createProofSignature(secret, timestamp, nonce, 'cancel'),
-        },
-        body: JSON.stringify({ scenario: 'reschedule' }),
-      })
-
-      expect((await stagingProof.POST(forged)).status).toBe(404)
-      expect(await leftBehind()).toEqual({ organizations: 0, grievances: 0, deadlines: 0 })
     })
   })
 

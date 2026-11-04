@@ -15,12 +15,12 @@ import type { ClaimRow } from './claim-list-table'
 afterEach(cleanup)
 
 const rows: ClaimRow[] = [
-  { claimId: 'claim-1', claimNumber: 'UE-QA-0001', memberName: '', claimType: 'grievance_pay', status: 'submitted',
-    priority: 'medium', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z') },
-  { claimId: 'claim-2', claimNumber: 'UE-QA-0002', memberName: '', claimType: 'grievance_discipline', status: 'under_review',
-    priority: 'critical', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z') },
-  { claimId: 'claim-3', claimNumber: 'UE-QA-0003', memberName: '', claimType: 'some_new_type', status: 'mystery_state',
-    priority: 'weird', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z') },
+  { claimId: 'claim-1', claimNumber: 'UE-QA-0001', memberName: null, claimType: 'grievance_pay', status: 'submitted',
+    priority: 'medium', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false },
+  { claimId: 'claim-2', claimNumber: 'UE-QA-0002', memberName: null, claimType: 'grievance_discipline', status: 'under_review',
+    priority: 'critical', incidentDate: new Date('2026-04-27'), createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false },
+  { claimId: 'claim-3', claimNumber: 'UE-QA-0003', memberName: null, claimType: 'some_new_type', status: 'mystery_state',
+    priority: 'weird', incidentDate: null, createdAt: new Date('2026-04-30T12:00:00Z'), assigned: false, assignedToName: null, triageOnly: false },
 ]
 
 function renderList(locale: 'en-CA' | 'fr-CA') {

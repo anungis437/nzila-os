@@ -36,6 +36,8 @@ export type Shape = ObjectShape | ArrayShape | null
 /** What can say, for a node of the source, which JSON its value becomes: the type checker (type-shapes.ts). Null is "not known". */
 export interface TypeOracle {
   shapeOfNode(node: ts.Node): Shape
+  /** The row a Drizzle table selects (`$inferSelect`): what `crudRoutes({ table })` lists and returns. Null where the node is not a table the checker knows. */
+  rowShapeOfTable?(node: ts.Node): Shape
 }
 
 export const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const
@@ -383,15 +385,34 @@ export class RouteResponseReader {
           } else if (ts.isObjectBindingPattern(declaration.name) && ts.isCallExpression(initializer) && /(?:^|\.)crudRoutes$/.test(calleeText(initializer))) {
             const options = initializer.arguments.map(unwrap).find((argument): argument is ts.ObjectLiteralExpression => ts.isObjectLiteralExpression(argument))
             const item = !!options?.properties.some((p) => ts.isPropertyAssignment(p) && propertyName(p.name) === 'itemRoute' && unwrap(p.initializer).kind === ts.SyntaxKind.TrueKeyword)
+            const row = options ? this.crudRow(options) : null
             for (const element of declaration.name.elements) {
               const name = ts.isIdentifier(element.name) ? element.name.text : null
-              if (name && methods.has(name) && isExported(statement, name)) out.set(name, crudShape(name, item))
+              if (name && methods.has(name) && isExported(statement, name)) out.set(name, crudShape(name, item, row))
             }
           }
         }
       }
     }
     return out
+  }
+
+  /**
+   * The row the generic CRUD writer lists and returns for the options of a `crudRoutes` call: the table's selected columns (the checker reads them off the table named in `table`), without the
+   * columns named in `omitFromResponse`. Null where the table is not one the checker knows.
+   */
+  private crudRow(options: ts.ObjectLiteralExpression): Shape {
+    const property = (name: string): ts.ObjectLiteralElementLike | undefined => options.properties.find((p) => (ts.isPropertyAssignment(p) || ts.isShorthandPropertyAssignment(p)) && propertyName(p.name) === name)
+    const table = property('table')
+    const node = table && ts.isPropertyAssignment(table) ? unwrap(table.initializer) : table && ts.isShorthandPropertyAssignment(table) ? table.name : null
+    const row = node ? (this.types?.rowShapeOfTable?.(node) ?? null) : null
+    if (!row || row.kind !== 'object') return row
+    const omitted = property('omitFromResponse')
+    const list = omitted && ts.isPropertyAssignment(omitted) ? unwrap(omitted.initializer) : null
+    if (!list || !ts.isArrayLiteralExpression(list)) return row
+    const keys = new Map(row.keys)
+    for (const element of list.elements) if (ts.isStringLiteralLike(element)) keys.delete(element.text)
+    return { kind: 'object', keys, open: row.open }
   }
 
   private shapeOfExport(initializer: ts.Expression, source: ts.SourceFile): Shape {
@@ -411,10 +432,10 @@ function cognitionShape(): Shape {
   return objectOf({ success: null, data: null, meta: objectOf({ explainability: null }), timestamp: null })
 }
 
-/** What the generic CRUD writer answers, inside the `withApi` envelope (lib/api/crud-factory.ts). */
-function crudShape(method: string, item: boolean): Shape {
-  const collectionList = objectOf({ data: arrayOf(null), pagination: null })
-  const one = objectOf({ data: null })
+/** What the generic CRUD writer answers, inside the `withApi` envelope (lib/api/crud-factory.ts): a list is `{ data: rows, pagination }`, anything else is `{ data: row }`. */
+function crudShape(method: string, item: boolean, row: Shape = null): Shape {
+  const collectionList = objectOf({ data: arrayOf(row), pagination: objectOf({ page: null, limit: null, total: null, totalPages: null }) })
+  const one = objectOf({ data: row })
   const data = !item && method === 'GET' ? collectionList : one
   return objectOf({ success: null, data, timestamp: null })
 }

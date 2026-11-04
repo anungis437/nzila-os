@@ -128,9 +128,9 @@ test.describe('R-42: role floors resolve the real membership role', () => {
     // The route then stops at an entitlement that is not enabled for the QA organization: a different refusal. What is proven
     // is that the ROLE gate no longer refuses real stewards and administrators.
     const roleGate = async (who: { userId: string; orgId: string }) => (await (await as(who)).get('/api/ai/copilot/query')).text()
-    expect(await roleGate(U.stewardPrimary)).not.toContain('Requires steward role')
-    expect(await roleGate(U.adminPrimary)).not.toContain('Requires steward role')
-    expect(await roleGate(U.memberPrimary)).toContain('Requires steward role')
+    expect(await roleGate(U.stewardPrimary)).not.toContain("Requires at least 'steward' role")
+    expect(await roleGate(U.adminPrimary)).not.toContain("Requires at least 'steward' role")
+    expect(await roleGate(U.memberPrimary)).toContain("Requires at least 'steward' role")
   })})
 
 test.describe('promotion: DEF-0B10-PIL telemetry routes read only the caller\'s own organization', () => {

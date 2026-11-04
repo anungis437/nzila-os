@@ -70,6 +70,13 @@ export class TypeShapes implements TypeOracle {
     return this.checker
   }
 
+  /** The program's own tree of a file of the application (named relative to the root), with the checker that knows it: for a census that asks about every node of a file. */
+  treeOf(relative: string): { source: ts.SourceFile; checker: ts.TypeChecker } | null {
+    const checker = this.ensure()
+    const source = this.files.get(normalize(relative))
+    return source ? { source, checker } : null
+  }
+
   /** The node of the program that is the same text at the same place as a node of a source the census parsed itself, or null when the program does not have the file. */
   private locate(node: ts.Node): ts.Node | null {
     this.ensure()
@@ -95,6 +102,15 @@ export class TypeShapes implements TypeOracle {
     const checker = this.ensure()
     const type = checker.getTypeAtLocation(located)
     return this.toShape(checker.getAwaitedType(type) ?? type, 0, new Set())
+  }
+
+  /** The row a Drizzle table selects: the type its `$inferSelect` member names. */
+  rowShapeOfTable(node: ts.Node): Shape {
+    const located = this.locate(node)
+    if (!located) return null
+    const checker = this.ensure()
+    const select = checker.getTypeAtLocation(located).getProperty('$inferSelect')
+    return select ? this.toShape(checker.getTypeOfSymbolAtLocation(select, located), 0, new Set()) : null
   }
 
   private remember(type: ts.Type, shape: Shape): Shape {
