@@ -1,7 +1,7 @@
 {
   "advisories": {
     "1240912": {
-      "id": 1240912,
+      "id": "1240912",
       "package": "node-forge",
       "module_name": "other-package",
       "severity": "high",
