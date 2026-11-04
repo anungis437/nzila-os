@@ -445,6 +445,24 @@ describe('reconcileExternalInvoicePayment', () => {
     expect(auditLog).not.toHaveBeenCalled();
   });
 
+  it.each(['0.00', '-1.00', '1.001', 'NaN'])('refuses invalid completed external amount %s without writes', async (amount) => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+    state.selects.platformPayments = [];
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    await expect(reconcileExternalInvoicePayment({ ...base, amount })).rejects.toThrow(/amount/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it('refuses negative failed external payments without writes', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1' }];
+    state.selects.platformPayments = [];
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    await expect(reconcileExternalInvoicePayment({ ...base, amount: '-10.00', status: 'failed' })).rejects.toThrow(/amount/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
   it('records a completed external payment and allocates it', async () => {
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00', metadata: null }];
     state.selects.platformPayments = [];
