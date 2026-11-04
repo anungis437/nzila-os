@@ -15,7 +15,7 @@
  * Palette: institutional navy, warm grays, muted editorial tones.
  */
 
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import {
   Document,
   Page,
@@ -374,8 +374,9 @@ const S = StyleSheet.create({
 // Footer (shared across pages)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** The language the report's dates are written in: the report's own `locale` (mapToPdfReportData, en-CA unless the caller chose one). */
-const BriefLocale = createContext<string>('en-CA');
+// The language the report's dates are written in: the report's own `locale` (mapToPdfReportData, en-CA unless the caller
+// chose one). Passed as a value rather than a React context, because API routes render this template on the server, where
+// Next.js does not allow React context in the module graph.
 
 function briefDate(date: Date, locale: string): string {
   return date.toLocaleDateString(locale, {
@@ -388,11 +389,13 @@ function briefDate(date: Date, locale: string): string {
 function PageFooter({
   institutionName,
   generatedAt,
+  locale,
 }: {
   institutionName?: string;
   generatedAt: Date;
+  locale?: string | null;
 }) {
-  const dateStr = briefDate(generatedAt, useContext(BriefLocale));
+  const dateStr = briefDate(generatedAt, formattingLocale(locale));
   return (
     <View style={S.pageFooter} fixed>
       <Text style={S.footerText}>
@@ -409,7 +412,7 @@ function PageFooter({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CoverPage({ data }: { data: PdfReportData }) {
-  const dateStr = briefDate(data.generatedAt, useContext(BriefLocale));
+  const dateStr = briefDate(data.generatedAt, formattingLocale(data.locale));
 
   return (
     <Page size={PAGE.size} style={S.coverPage}>
@@ -501,6 +504,7 @@ function ExecutiveSummaryPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -569,6 +573,7 @@ function ContinuityProfilePage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -613,6 +618,7 @@ function GovernanceEntropyPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -660,6 +666,7 @@ function MemoryHoldersPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -699,6 +706,7 @@ function ModernizationReviewPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -771,6 +779,7 @@ function RecommendationsPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -820,6 +829,7 @@ function ExecutiveReflectionPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -852,6 +862,7 @@ function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -862,7 +873,7 @@ function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
-  const dateStr = briefDate(data.generatedAt, useContext(BriefLocale));
+  const dateStr = briefDate(data.generatedAt, formattingLocale(data.locale));
 
   return (
     <Page size={PAGE.size} style={S.page}>
@@ -940,6 +951,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -965,7 +977,6 @@ export function ExecutiveContinuityBriefTemplate({
       creator="UnionEyes ICRA Platform"
       producer="UnionEyes / Nzila OS"
     >
-      <BriefLocale.Provider value={formattingLocale(data.locale)}>
       <CoverPage data={data} />
       <ExecutiveSummaryPage data={data} />
       <ContinuityProfilePage data={data} />
@@ -976,7 +987,6 @@ export function ExecutiveContinuityBriefTemplate({
       <ExecutiveReflectionPage data={data} />
       {data.stabilizationMovement ? <StabilizationMovementAppendixPage data={data} /> : null}
       <AssessmentMetadataPage data={data} />
-      </BriefLocale.Provider>
     </Document>
   );
 }
