@@ -36,7 +36,7 @@ const SEVERITY_ORDER = ['info', 'low', 'moderate', 'high', 'critical']
 const args = process.argv.slice(2)
 const auditLevel = args.find((a) => a.startsWith('--audit-level='))?.split('=')[1] ?? 'critical'
 const jsonMode = args.includes('--json')
-const outFile = args.find((a) => a.startsWith('--output='))?.split('=')[1]
+const outFile = args.find((a) => a.startsWith('--output='))?.slice('--output='.length)
 const invalidOptions = args.filter((a) =>
   a !== '--json' && !/^--audit-level=(info|low|moderate|high|critical)$/.test(a) && !a.startsWith('--output='),
 )
