@@ -110,7 +110,9 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               type: 'Readiness'
-              httpGet: { path: '/api/health', port: 3000 }
+              // Readiness must fail closed when the database, identity or required services are unavailable.
+              // Liveness remains /api/health so a temporary dependency outage does not cause restart loops.
+              httpGet: { path: '/api/ready', port: 3000 }
               initialDelaySeconds: 10
               periodSeconds: 10
             }
