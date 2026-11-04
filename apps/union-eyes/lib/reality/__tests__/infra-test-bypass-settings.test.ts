@@ -102,6 +102,17 @@ interface Finding {
   switchName: string;
 }
 
+/**
+ * A whole-line comment documents a switch (for example "never set here: PLAYWRIGHT_TEST_AUTH"); it cannot set one.
+ * YAML comments start with `#`; Bicep comments with `//`, or `/*` / `*` inside a block comment. A switch after code on
+ * the same line is still a finding.
+ */
+function isCommentOnly(rel: string, text: string): boolean {
+  const t = text.trim();
+  if (rel.endsWith('.yml') || rel.endsWith('.yaml')) return t.startsWith('#');
+  return t.startsWith('//') || t.startsWith('/*') || t.startsWith('*');
+}
+
 function scan(): Finding[] {
   const findings: Finding[] = [];
   for (const root of SCAN_ROOTS) {
@@ -110,6 +121,7 @@ function scan(): Finding[] {
       const lines = readFileSync(abs, 'utf8').split('\n');
       const jobs = rel.startsWith('.github/workflows/') ? jobForEachLine(lines) : lines.map(() => null);
       lines.forEach((text, i) => {
+        if (isCommentOnly(rel, text)) return;
         const match = SWITCH_PATTERN.exec(text);
         if (match) findings.push({ file: rel, line: i + 1, job: jobs[i], switchName: match[1] });
       });
@@ -124,6 +136,13 @@ function isAllowed(finding: Finding): boolean {
 
 describe('infrastructure never ships test-auth / risk-bypass switches', () => {
   const findings = scan();
+
+  it('ignores whole-line comments only, never a switch set after code', () => {
+    expect(isCommentOnly('.github/workflows/x.yml', '# Never set here: PLAYWRIGHT_TEST_AUTH')).toBe(true);
+    expect(isCommentOnly('.github/workflows/x.yml', '  PLAYWRIGHT_TEST_AUTH: "1" # set')).toBe(false);
+    expect(isCommentOnly('infrastructure/bicep/a.bicep', '  // UE_E2E_RISK_BYPASS is refused')).toBe(true);
+    expect(isCommentOnly('infrastructure/bicep/a.bicep', " { name: 'UE_E2E_RISK_BYPASS', value: '1' } // no")).toBe(false);
+  });
 
   it('scans both roots', () => {
     expect(walk(path.join(REPO_ROOT, '.github/workflows')).length).toBeGreaterThan(0);
