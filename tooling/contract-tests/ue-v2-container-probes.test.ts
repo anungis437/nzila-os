@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 describe('Union Eyes V2 Container Apps health probes', () => {
   const source = readFileSync(resolve(process.cwd(), 'infrastructure/bicep/ue-v2/modules/apps.bicep'), 'utf8')
   const probe = (kind: string) => {
-    const match = source.match(new RegExp("type: '"+kind+"'\\s+httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
+    const match = source.match(new RegExp("type: '"+kind+"'[\\s\\S]*?httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
     return match?.[1]
   }
 
