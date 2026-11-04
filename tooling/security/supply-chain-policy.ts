@@ -480,7 +480,7 @@ export function checkVulnerabilityPolicy(
       // blocking threshold. Otherwise incomplete scanner evidence can pass.
       const packageAliases = [advisory.package, advisory.module_name, advisory.name]
         .filter((candidate) => candidate !== undefined)
-      if (packageAliases.some((candidate) => typeof candidate !== 'string' || !candidate.trim()) ||
+      if (packageAliases.some((candidate) => typeof candidate !== 'string' || !candidate.trim() || candidate !== candidate.trim()) ||
           new Set(packageAliases.map((candidate) => (candidate as string).trim())).size > 1) {
         throw new Error(`Conflicting or malformed package identities for advisory: ${key}`)
       }
