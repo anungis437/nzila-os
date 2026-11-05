@@ -225,7 +225,7 @@ describe('createSubscription', () => {
       id: 'sub_1',
       status: 'incomplete',
       latest_invoice: {
-        payment_intent: { client_secret: 'pi_secret_1' },
+        confirmation_secret: { client_secret: 'pi_secret_1' },
       },
       items: {
         data: [{ current_period_end: 1720000000 }],
@@ -257,7 +257,7 @@ describe('createSubscription', () => {
     mockSubscriptionsCreate.mockResolvedValue({
       id: 'sub_2',
       status: 'trialing',
-      latest_invoice: { payment_intent: null },
+      latest_invoice: { confirmation_secret: null },
       items: { data: [{ current_period_end: 1720000000 }] },
     })
 
@@ -278,7 +278,7 @@ describe('createSubscription', () => {
     mockSubscriptionsCreate.mockResolvedValue({
       id: 'sub_3',
       status: 'incomplete',
-      latest_invoice: { payment_intent: { client_secret: 'cs' } },
+      latest_invoice: { confirmation_secret: { client_secret: 'cs' } },
       items: { data: [{ current_period_end: 1720000000 }] },
     })
 

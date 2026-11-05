@@ -55,7 +55,7 @@ describe('getStripeClient', () => {
     const client = getStripeClient()
     expect(client).toBeDefined()
     expect(mocks.mockStripeConstructor).toHaveBeenCalledWith('sk_test_client123', {
-      apiVersion: '2026-02-25.clover',
+      apiVersion: '2026-10-28.endive',
       typescript: true,
       maxNetworkRetries: 3,
     })

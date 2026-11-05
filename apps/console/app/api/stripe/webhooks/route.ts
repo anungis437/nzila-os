@@ -79,7 +79,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
 
     case 'invoice.paid': {
       const invoice = event.data.object as Stripe.Invoice
-      // Stripe v20: invoice.subscription removed → use invoice.parent.subscription_details
+      // Current Endive contract: invoice.subscription removed → use invoice.parent.subscription_details
       const subRef = invoice.parent?.subscription_details?.subscription
       if (subRef) {
         const subId = typeof subRef === 'string' ? subRef : subRef.id
@@ -94,7 +94,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
 
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice
-      // Stripe v20: invoice.subscription removed → use invoice.parent.subscription_details
+      // Current Endive contract: invoice.subscription removed → use invoice.parent.subscription_details
       const subRef = invoice.parent?.subscription_details?.subscription
       if (subRef) {
         const subId = typeof subRef === 'string' ? subRef : subRef.id
@@ -132,7 +132,7 @@ async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
   const price = priceItem?.price
   const product = price?.product
 
-  // Stripe v20: current_period_start/end moved from Subscription to SubscriptionItem
+  // Current Endive contract: current_period_start/end moved from Subscription to SubscriptionItem
   const values = {
     stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
     stripePriceId: price?.id ?? '',
