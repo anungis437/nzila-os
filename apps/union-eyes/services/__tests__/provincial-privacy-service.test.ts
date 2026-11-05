@@ -47,8 +47,10 @@ vi.mock('drizzle-orm', async (orig) => ({
   and: vi.fn(() => ({})),
   lte: vi.fn(() => ({})),
   isNull: vi.fn(() => ({})),
+  desc: vi.fn((column: unknown) => ({ desc: column })),
 }));
 
+import { eq, desc } from 'drizzle-orm';
 import { ProvincialPrivacyService } from '../provincial-privacy-service';
 
 const S = ProvincialPrivacyService;
@@ -56,6 +58,10 @@ const S = ProvincialPrivacyService;
 beforeEach(() => {
   h.queue.length = 0;
   h.sendMock.mockClear();
+  vi.mocked(eq).mockClear();
+  vi.mocked(desc).mockClear();
+  h.db.select.mockClear();
+  h.db.insert.mockClear();
 });
 
 describe('provincial-privacy-service', () => {
@@ -82,12 +88,34 @@ describe('provincial-privacy-service', () => {
   describe('recordConsent', () => {
     const base = {
       userId: 'u1', province: 'QC' as const, consentType: 'marketing', consentGiven: true,
-      consentMethod: 'explicit', consentText: 't', consentLanguage: 'en' as const,
+      consentMethod: 'explicit_checkbox', consentText: 't', consentLanguage: 'en' as const,
     };
 
     it('rejects implied consent in Quebec', async () => {
       pushSel([]); // getProvinceConfig → default QC (explicitOptIn true)
       await expect(S.recordConsent({ ...base, consentMethod: 'implied_action' })).rejects.toThrow('explicit consent');
+    });
+
+    it.each(['implicit', 'opt_out'])('rejects a Quebec grant recorded with the non-explicit method %s, and writes nothing', async (consentMethod) => {
+      pushSel([]); // default QC config (explicitOptIn true)
+      await expect(S.recordConsent({ ...base, consentMethod })).rejects.toThrow('explicit consent');
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('accepts a Quebec grant recorded with opt_in', async () => {
+      pushSel([], [{ id: 'c3' }]);
+      expect(await S.recordConsent({ ...base, consentMethod: 'opt_in' })).toEqual({ id: 'c3' });
+      expect(h.db.insert).toHaveBeenCalledOnce();
+    });
+
+    it('records a Quebec refusal whatever its method (a refusal is never blocked)', async () => {
+      pushSel([], [{ id: 'c4' }]);
+      expect(await S.recordConsent({ ...base, consentGiven: false, consentMethod: 'opt_out' })).toEqual({ id: 'c4' });
+    });
+
+    it('still records an implicit grant where explicit opt-in is not required', async () => {
+      pushSel([], [{ id: 'c5' }]);
+      expect(await S.recordConsent({ ...base, province: 'BC', consentMethod: 'implicit' })).toEqual({ id: 'c5' });
     });
 
     it('defaults QC consent language to fr and records consent', async () => {
@@ -110,18 +138,34 @@ describe('provincial-privacy-service', () => {
     });
 
     it('returns false when the latest consent is revoked', async () => {
-      pushSel([{ revokedAt: new Date() }]);
+      pushSel([{ consentGiven: true, revokedAt: new Date() }]);
       expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(false);
     });
 
     it('returns false when consent has expired', async () => {
-      pushSel([{ revokedAt: null, expiresAt: new Date('2000-01-01') }]);
+      pushSel([{ consentGiven: true, revokedAt: null, expiresAt: new Date('2000-01-01') }]);
       expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(false);
     });
 
     it('returns true for a valid consent', async () => {
-      pushSel([{ revokedAt: null, expiresAt: new Date('2999-01-01') }]);
+      pushSel([{ consentGiven: true, revokedAt: null, expiresAt: new Date('2999-01-01') }]);
       expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(true);
+    });
+
+    it('returns false when a newer refusal follows an earlier grant', async () => {
+      // The query returns only the latest decision; that decision is the refusal.
+      pushSel([{ id: 'c-refuse', consentGiven: false, revokedAt: null, expiresAt: null }]);
+      expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(false);
+    });
+
+    it('reads the latest decision regardless of consentGiven, newest first by createdAt then id, one row', async () => {
+      pushSel([{ consentGiven: true, revokedAt: null, expiresAt: null }]);
+      await S.hasValidConsent('u1', 'QC', 'marketing');
+      const filteredColumns = vi.mocked(eq).mock.calls.map(([column]) => (column as { __col?: string }).__col);
+      expect(filteredColumns).toEqual(['userId', 'province', 'consentType']);
+      const chain = h.db.select.mock.results[0].value as Record<string, ReturnType<typeof vi.fn>>;
+      expect(chain.orderBy).toHaveBeenCalledWith({ desc: { __col: 'createdAt' } }, { desc: { __col: 'id' } });
+      expect(chain.limit).toHaveBeenCalledWith(1);
     });
   });
 

@@ -7,10 +7,11 @@ import {
   provincialDataHandling,
   dataSubjectAccessRequests,
 } from "@/db/schema/provincial-privacy-schema";
-import { eq, and, lte, isNull } from "drizzle-orm";
+import { eq, and, lte, isNull, desc } from "drizzle-orm";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
 import { NotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
+import { EXPLICIT_CONSENT_METHODS, violatesExplicitOptIn } from "@/lib/privacy/explicit-consent";
 
 /**
  * Provincial Privacy Service
@@ -165,9 +166,11 @@ export class ProvincialPrivacyService {
   static async recordConsent(request: ConsentRequest, tx: RLSTx = db) {
     const config = await this.getProvinceConfig(request.province);
 
-    // Validate Quebec explicit consent requirement
-    if (config.explicitOptIn && request.consentMethod === "implied_action") {
-      throw new Error("Quebec Law 25 requires explicit consent, not implied consent");
+    // Quebec Law 25: a positive grant where explicit opt-in is required must come from an explicit method.
+    if (violatesExplicitOptIn(config, request.consentGiven, request.consentMethod)) {
+      throw new Error(
+        `${request.province} requires explicit consent (${EXPLICIT_CONSENT_METHODS.join(", ")}); method "${request.consentMethod}" cannot record a grant`,
+      );
     }
 
     // Quebec Bill 96 / Law 25: French is the default language for consent.
@@ -216,22 +219,21 @@ export class ProvincialPrivacyService {
    * Check if user has valid consent for a specific action
    */
   static async hasValidConsent(userId: string, province: Province, consentType: string, tx: RLSTx = db): Promise<boolean> {
-    const consents = await tx
+    // The latest decision wins, whether it granted or refused: a later refusal overrides an earlier grant.
+    const [latestConsent] = await tx
       .select()
       .from(provincialConsent)
       .where(
         and(
           eq(provincialConsent.userId, userId),
           eq(provincialConsent.province, province),
-          eq(provincialConsent.consentType, consentType),
-          eq(provincialConsent.consentGiven, true)
+          eq(provincialConsent.consentType, consentType)
         )
       )
-      .orderBy(provincialConsent.createdAt);
+      .orderBy(desc(provincialConsent.createdAt), desc(provincialConsent.id))
+      .limit(1);
 
-    if (consents.length === 0) return false;
-
-    const latestConsent = consents[consents.length - 1];
+    if (!latestConsent || latestConsent.consentGiven !== true) return false;
 
     // Check if consent has been revoked
     if (latestConsent.revokedAt) return false;
