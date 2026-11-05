@@ -178,6 +178,9 @@ jobs:
           esac
         env:
           UNIT_LANE: ${{ matrix.lane }}
+          # Repository-scan census tests (response-shape, untyped-read) outgrow the default worker heap; two workers x 6 GB
+          # fit the 16 GB runner.
+          NODE_OPTIONS: '--max-old-space-size=6144'
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           P3_2_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
           UE_0108_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
@@ -188,6 +191,7 @@ jobs:
         run: |
           set -euo pipefail
           node --test tooling/scripts/lib/union-eyes-deployment-safety.test.mjs
+          node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs
           POSTGRES_BIN="$(pg_config --bindir)"
           test -x "$POSTGRES_BIN/initdb"
           UE_TEST_POSTGRES_BIN="$POSTGRES_BIN" node --test tooling/scripts/lib/union-eyes-staging-runner.test.mjs
@@ -1123,6 +1127,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
-          MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
-          export MA_CHANGED_PATHS
+          MA_CHANGED_PATHS_FILE="$RUNNER_TEMP/ma-changed-paths.txt"
+          git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA" > "$MA_CHANGED_PATHS_FILE"
+          export MA_CHANGED_PATHS_FILE
           node tooling/ci/merge-authority/publish.mjs reconcile-this-run

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -68,6 +69,7 @@ function getStatusIcon(status: string) {
 const figure = (value: number | null) => (value === null ? DASH : value.toLocaleString());
 
 export function CampaignDetailConsole({ campaignId }: { campaignId: string }) {
+  const locale = useLocale();
   const params = useParams<{ locale?: string }>();
   const localePrefix = params?.locale ? `/${params.locale}` : '';
 
@@ -276,9 +278,9 @@ export function CampaignDetailConsole({ campaignId }: { campaignId: string }) {
                 <CardTitle className="text-base">Key Dates</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                <Row label="Start Date" value={formatCampaignDate(campaign.campaignStartDate)} icon={<Calendar className="w-3 h-3" />} />
-                <Row label="Card Deadline" value={formatCampaignDate(campaign.targetCardDeadline)} icon={<Target className="w-3 h-3" />} />
-                <Row label="Certification" value={formatCampaignDate(campaign.certificationDate)} icon={<Award className="w-3 h-3" />} />
+                <Row label="Start Date" value={formatCampaignDate(campaign.campaignStartDate, locale)} icon={<Calendar className="w-3 h-3" />} />
+                <Row label="Card Deadline" value={formatCampaignDate(campaign.targetCardDeadline, locale)} icon={<Target className="w-3 h-3" />} />
+                <Row label="Certification" value={formatCampaignDate(campaign.certificationDate, locale)} icon={<Award className="w-3 h-3" />} />
               </CardContent>
             </Card>
             {campaign.keyIssues.length > 0 && (
@@ -382,12 +384,13 @@ function Row({ label, value, icon }: { label: string; value: string; icon?: Reac
 }
 
 function TimelineItem({ label, date, icon }: { label: string; date: string | null; icon: React.ReactNode }) {
+  const locale = useLocale();
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg border">
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">{icon}</div>
       <div className="flex-1">
         <div className="font-medium text-sm">{label}</div>
-        <div className="text-xs text-muted-foreground">{formatCampaignDate(date)}</div>
+        <div className="text-xs text-muted-foreground">{formatCampaignDate(date, locale)}</div>
       </div>
       {date !== null && (
         <Badge variant="outline" className="text-xs">

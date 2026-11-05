@@ -7582,6 +7582,8 @@
     "locationPlaceholder": "par ex., Section B, Étage 2",
     "witnesses": "Témoins (Optionnel)",
     "witnessesPlaceholder": "Noms des témoins",
+    "fileAnonymously": "Déposer de façon anonyme",
+    "fileAnonymouslyHelp": "Votre nom et vos coordonnées ne sont visibles que par vous et par les représentants qui traitent directement votre dossier.",
     "supportingDocs": "Documents justificatifs (Optionnel)",
     "uploadInstructions": "Cliquez pour télécharger ou glissez-déposez",
     "uploadFormats": "PDF, DOC, JPG, PNG jusqu'à 10 Mo",

@@ -5,6 +5,8 @@
 // runbook step. Managed-identity (user-delegation SAS) support is a post-launch hardening item.
 param name string
 param location string
+@allowed(['Standard_GZRS', 'Standard_ZRS', 'Standard_LRS'])
+param skuName string = 'Standard_GZRS'
 param containerName string
 param peSubnetId string
 param blobDnsZoneId string
@@ -16,7 +18,8 @@ resource account 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   location: location
   tags: tags
   kind: 'StorageV2'
-  sku: { name: 'Standard_GZRS' }
+  // checkov:skip=CKV_AZURE_206:Replication is a parameter. Production passes Standard_GZRS; only a synthetic-data staging stack uses Standard_LRS.
+  sku: { name: skuName }
   properties: {
     minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true

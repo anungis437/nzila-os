@@ -1,53 +1,52 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import HumanCenteredAI from '@/components/public/HumanCenteredAI';
 import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
-import AnimatedCounter from '@/components/public/AnimatedCounter';
-import SectionHeading from '@/components/public/SectionHeading';
-import ImageCard from '@/components/public/ImageCard';
+import HomeExperience from '@/components/public/HomeExperience';
+import TrustStrip from '@/components/public/TrustStrip';
+import ProofLedger from '@/components/public/ProofLedger';
+import { BuildingLibraryIcon, CubeTransparentIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import SectionDivider from '@/components/public/SectionDivider';
 import TrackedLink from '@/components/public/TrackedLink';
-import { MARKETING_FACTS } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Home',
-  description: 'Nzila Ventures builds organizational continuity infrastructure for trust-sensitive organizations that need governance, operational memory, evidence, and trust to survive transition.',
-  openGraph: {
-    title: 'Nzila Ventures | Organizational Continuity Infrastructure',
-    description: 'Governed operational infrastructure for continuity, operational memory, audit evidence, and organizational trust.',
-    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing organizational continuity infrastructure' }],
-  },
-  alternates: { canonical: '/' },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const isFr = (await getLocale()) === 'fr-CA';
+  const description = isFr
+    ? 'Nzila Ventures conçoit des logiciels centrés sur l’humain pour préserver la mémoire institutionnelle et relier les décisions à des preuves. Découvrez Union Eyes et CIVIC.'
+    : 'Nzila Ventures builds human-centered software to preserve institutional knowledge and keep decisions accountable. Discover Union Eyes for unions and CIVIC for public institutions.';
+  return {
+    title: isFr ? 'Logiciels pensés pour les personnes et les institutions | Nzila Ventures' : 'Human-Centered Software for Institutions | Nzila Ventures',
+    description,
+    openGraph: {
+      title: isFr ? 'Nzila Ventures | Des logiciels au service des personnes' : 'Nzila Ventures | Software That Keeps People in Control',
+      description,
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Nzila Ventures — Human-centered institutional software' }],
+    },
+    alternates: { canonical: '/' },
+  };
+}
 
 const verticals = [
-  { name: 'Fintech', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800', alt: 'Financial trading charts with candlestick patterns on dark screens', description: 'Banking, payments, insurance', tam: '$100B+' },
-  { name: 'Agrotech', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800', alt: 'Aerial view of lush green agricultural farmland rows', description: 'Farm management, supply chain', tam: '$8.6B' },
-  { name: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'Workers gathered in a professional labor meeting', description: 'Labor rights, union management', tam: '$50B' },
-  { name: 'Legaltech', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800', alt: 'Scales of justice on a desk with legal documents', description: 'Case management, legal support tools', tam: '$13B+' },
-  { name: 'EdTech', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800', alt: 'Students collaborating around laptops in a modern classroom', description: 'Learning, training, certification', tam: '$13B+' },
-  { name: 'Entertainment', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800', alt: 'Musician performing live on stage under spotlight', description: 'Streaming, content platforms', tam: '$50B' },
-  { name: 'Commerce', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800', alt: 'Customer completing a digital payment at retail checkout', description: 'Order-centric trade ops, quoting, logistics', tam: '$25B' },
-  { name: 'Healthtech', image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800', alt: 'Doctor using digital tablet for patient health records', description: 'Care, wellness, cognitive', tam: '$20B' },
-  { name: 'Insurtech', image: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=800', alt: 'Business analyst reviewing insurance risk data on screens', description: 'Arbitrage, underwriting support', tam: '$30B' },
-  { name: 'Justice', image: 'https://images.unsplash.com/photo-1591291621164-2c6367723315?w=800', alt: 'Raised fist silhouette against sunset representing social justice advocacy', description: 'Advocacy, DEI training', tam: '$1.5B' },
-];
-
-const flagships = [
-  { name: 'Union Eyes', vertical: 'Flagship validation wedge', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'Union Eyes - continuity infrastructure for labor organizations', tam: 'Pilot-paid', description: 'Continuity and governance infrastructure for unions: grievance lineage, steward handoffs, operational memory, and evidence-sealed audit trails.' },
-  { name: 'TrustCore', vertical: 'Governance operations', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800', alt: 'TrustCore - governance and compliance operations infrastructure', tam: 'Governance', description: 'Governance and compliance operations infrastructure for organizations that need decisions, approvals, and evidence to remain explainable.' },
-  { name: 'Veridian Care', vertical: 'Healthcare continuity', image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800', alt: 'Veridian Care - healthcare coordination and continuity infrastructure', tam: 'Healthcare', description: 'Continuity-first coordination infrastructure for healthcare organizations, designed around handoffs, auditability, privacy, and human accountability.' },
-  { name: 'Memora', vertical: 'Cognitive continuity', image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800', alt: 'Memora - cognitive continuity systems designed around dignity and memory', tam: 'Dignity', description: 'Cognitive continuity systems designed around dignity, memory, care, and consent-aware operational support.' },
+  { name: 'Fintech', description: 'Financial services and planning' },
+  { name: 'Agrotech', description: 'Agriculture and supply chains' },
+  { name: 'Uniontech', description: 'Union representation and operations' },
+  { name: 'Legaltech', description: 'Justice and legal workflows' },
+  { name: 'EdTech', description: 'Research and learning' },
+  { name: 'Entertainment', description: 'Creative and cultural operations' },
+  { name: 'Commerce', description: 'Trade and business operations' },
+  { name: 'Healthtech', description: 'Care and wellbeing' },
+  { name: 'Insurtech', description: 'Insurance and governance' },
+  { name: 'Justice', description: 'Access, equity and accountability' },
 ];
 
 const intelligenceCapabilities = [
-  { name: 'Operational Memory', metric: 'Continuity', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'Structured operational records connected across time', description: 'Preserved procedures, precedents, workflows, decisions, rationale, and organizational context' },
-  { name: 'Governance Evidence', metric: 'Audit-ready', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Governance evidence dashboard with traceable records', description: 'Decision lineage, approvals, audit trails, reviewable records, and governance replay' },
-  { name: 'Explainable Assistance', metric: 'Human-led', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Explainable system infrastructure with visible controls', description: 'AI-assisted summaries and recommendations that remain traceable, inspectable, and overridable' },
-  { name: 'Sovereign Federation', metric: 'Portable', image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800', alt: 'Federated infrastructure preserving local data boundaries', description: 'Cross-organization coordination without centralizing control or weakening local ownership' },
+  { name: 'Operational Memory', description: 'Procedures, precedents and decisions retain the context needed for the next responsible person.' },
+  { name: 'Governance Evidence', description: 'Ownership, approvals and rationale stay connected to reviewable records.' },
+  { name: 'Explainable Assistance', description: 'AI can support human reviews while preserving uncertainty, inspection and override.' },
+  { name: 'Sovereign Coordination', description: 'Organizations can cooperate without erasing their distinct responsibilities and access boundaries.' },
 ];
 
 const verticalDescriptionFr: Record<string, string> = {
@@ -63,33 +62,22 @@ const verticalDescriptionFr: Record<string, string> = {
   Justice: 'Plaidoyer et formation DEI',
 };
 
-const flagshipDescriptionFr: Record<string, string> = {
-  'Union Eyes': 'Infrastructure de continuité et de gouvernance pour les syndicats: griefs, transitions de délégués, mémoire opérationnelle et journaux de preuve.',
-  TrustCore: 'Infrastructure d opérations de gouvernance et conformité pour rendre décisions, approbations et preuves explicables.',
-  'Veridian Care': 'Infrastructure de coordination santé axée continuité, transferts, auditabilité, confidentialité et responsabilité humaine.',
-  Memora: 'Systèmes de continuité cognitive conçus autour de la dignité, de la mémoire, du soin et du consentement.',
-};
-
-const intelligenceFr: Record<string, { name: string; metric: string; description: string }> = {
+const intelligenceFr: Record<string, { name: string; description: string }> = {
   'Operational Memory': {
     name: 'Mémoire opérationnelle',
-    metric: 'Continuité',
-    description: 'Procédures, précédents, décisions, raisons et contexte institutionnel préservés',
+    description: 'Procédures, précédents et décisions gardent le contexte nécessaire à la relève.',
   },
   'Governance Evidence': {
     name: 'Preuves de gouvernance',
-    metric: 'Audit-ready',
-    description: 'Lignée des décisions, approbations, journaux d audit et gouvernance rejouable',
+    description: 'Responsables, approbations et motifs restent associés à des dossiers consultables.',
   },
   'Explainable Assistance': {
     name: 'Assistance explicable',
-    metric: 'Responsabilité humaine',
-    description: 'Résumés et recommandations traçables, inspectables et révisables par des humains',
+    description: 'L’IA peut soutenir les examens humains tout en préservant l’incertitude, l’inspection et la révision.',
   },
-  'Sovereign Federation': {
-    name: 'Fédération souveraine',
-    metric: 'Portable',
-    description: 'Coordination entre organisations sans centraliser le contrôle ni affaiblir la propriété locale',
+  'Sovereign Coordination': {
+    name: 'Coordination souveraine',
+    description: 'Les organisations peuvent collaborer tout en préservant leurs responsabilités et limites d’accès.',
   },
 };
 
@@ -99,161 +87,56 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen">
-      {/* ═══════════════════════ HERO ═══════════════════════ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920"
-          alt="Earth at night showing illuminated cities and global digital connectivity networks"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
-        <div className="absolute inset-0 bg-mesh opacity-60" />
+      {/* Product-led homepage hero and interactive journey introduction */}
+      <HomeExperience isFr={isFr} />
+      <TrustStrip isFr={isFr} />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-          <ScrollReveal>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              {isFr ? 'Infrastructure de continuité organisationnelle' : 'Organizational Continuity Infrastructure'}
-            </span>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.05}>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-emerald/10 text-emerald mb-4 border border-emerald/20">
-              {isFr ? 'Anti-surveillance par doctrine' : 'Anti-surveillance by doctrine'}
-            </span>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.1}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              {isFr ? 'Les organisations ne devraient pas perdre' : 'Organizations should not lose'}<br />
-              <span className="gradient-text">{isFr ? 'leur continuité' : 'continuity when key people leave'}</span>
-            </h1>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.2}>
-            <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
-              {isFr
-                ? 'Nzila Ventures construit Nzila OS: une infrastructure gouvernée qui préserve la mémoire opérationnelle, les décisions, les preuves et la confiance organisationnelle pendant les transitions.'
-                : 'Nzila Ventures builds Nzila OS: governed infrastructure that preserves operational memory, decision rationale, evidence, and organizational trust across leadership change, restructuring, and system transition.'}
+      {/* Two routes into the same governed operating architecture. */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">
+              {isFr ? 'Pour commencer' : 'Where to start'}
             </p>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.25}>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <TrackedLink
-                href="/continuity-assessment"
-                eventName="cta_continuity_assessment"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-all text-lg shadow-lg shadow-gold/30 btn-press"
-              >
-                {isFr ? 'Parcours OCRA: évaluer la continuité' : 'OCRA-first: Assess Continuity'}
-              </TrackedLink>
-              <TrackedLink
-                href="/union-eyes"
-                eventName="cta_union_eyes"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
-              >
-                {isFr ? 'Parcours opérations: stabiliser les workflows' : 'Operations-first: Stabilize Workflows'}
-              </TrackedLink>
-              <TrackedLink
-                href="/anti-surveillance"
-                eventName="cta_anti_surveillance"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-white font-bold rounded-xl border border-white/20 hover:bg-white/10 transition-all text-lg btn-press"
-              >
-                {isFr ? 'Lire l engagement' : 'Read the Commitment'}
-              </TrackedLink>
-            </div>
-          </ScrollReveal>
-
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5">
-            <div className="w-1.5 h-3 rounded-full bg-white/60 animate-bounce" />
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ STATS BAR ═══════════════════════ */}
-      <section className="relative bg-navy-light py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-40" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { target: 1, prefix: '', suffix: '', label: isFr ? 'Produit de validation phare' : 'Flagship Validation Wedge' },
-              { target: MARKETING_FACTS.governedApplications, prefix: '', suffix: '', label: isFr ? 'Applications gouvernées' : 'Governed Applications' },
-              { target: 10, prefix: '', suffix: '+', label: isFr ? 'Secteurs sensibles à la confiance' : 'Trust-Sensitive Sectors' },
-              { target: 7, prefix: '', suffix: '', label: isFr ? 'Piliers de doctrine' : 'Doctrine Pillars' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  <AnimatedCounter
-                    target={stat.target}
-                    prefix={stat.prefix}
-                    suffix={stat.suffix}
-                  />
-                </div>
-                <div className="text-gray-400 font-medium text-sm tracking-wider uppercase">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ DUAL ENTRY GTM ═══════════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Modèle commercial' : 'Go-To-Market Model'}
-            title={isFr ? 'Deux parcours d entrée valides. Une seule architecture de continuité.' : 'Two valid entry paths. One continuity architecture.'}
-            subtitle={isFr
-              ? 'Les organisations peuvent entrer par la stratégie de continuité (OCRA) ou par la stabilisation opérationnelle (Union Eyes). Les deux parcours convergent vers la même infrastructure.'
-              : 'Organizations can enter through continuity intelligence (OCRA-first) or operational stabilization (Operations-first). Both paths converge into the same continuity infrastructure.'}
-          />
-
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-              <p className="text-xs uppercase tracking-wider text-electric font-semibold mb-2">{isFr ? 'Parcours A' : 'Path A'}</p>
-              <h3 className="text-2xl font-bold text-navy mb-3">{isFr ? 'OCRA-first' : 'OCRA-first'}</h3>
-              <p className="text-gray-700 mb-4">{isFr ? 'Diagnostiquer puis opérationnaliser. Pour la direction, la modernisation et la gouvernance.' : 'Diagnose then operationalize. Best for executive, modernization, and governance-led buyers.'}</p>
-              <TrackedLink
-                href="/continuity-assessment"
-                eventName="cta_dual_path_ocra"
-                eventProps={{ source: 'home_dual_entry' }}
-                className="inline-flex items-center justify-center px-5 py-3 bg-navy text-white font-semibold rounded-xl hover:bg-navy-light transition-all"
-              >
-                {isFr ? 'Entrer par OCRA' : 'Enter via OCRA'}
-              </TrackedLink>
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-              <p className="text-xs uppercase tracking-wider text-electric font-semibold mb-2">{isFr ? 'Parcours B' : 'Path B'}</p>
-              <h3 className="text-2xl font-bold text-navy mb-3">{isFr ? 'Operations-first' : 'Operations-first'}</h3>
-              <p className="text-gray-700 mb-4">{isFr ? 'Opérationnaliser puis diagnostiquer. Pour les équipes qui ont besoin d un soulagement workflow immédiat.' : 'Operationalize then diagnose. Best for teams that need immediate workflow stabilization.'}</p>
-              <TrackedLink
-                href="/union-eyes"
-                eventName="cta_dual_path_ops"
-                eventProps={{ source: 'home_dual_entry' }}
-                className="inline-flex items-center justify-center px-5 py-3 bg-navy text-white font-semibold rounded-xl hover:bg-navy-light transition-all"
-              >
-                {isFr ? 'Entrer par les opérations' : 'Enter via Operations'}
-              </TrackedLink>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-navy/15 bg-white p-6">
-            <p className="text-sm text-gray-700">
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-navy md:text-5xl">
+              {isFr ? 'Commencez par le problème que vous connaissez.' : 'Start with the problem you recognize.'}
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-slate-600">
               {isFr
-                ? 'Règle architecture: ne jamais séparer la continuité en produits fragmentés. Les parcours se distinguent à l entrée, puis se reconnectent rapidement dans la même ontologie de continuité.'
-                : 'Architecture rule: never split continuity into fragmented products. Paths diverge at entry and reconnect quickly in the same continuity ontology.'}
+                ? 'Vous pouvez d’abord examiner vos risques de continuité ou vous concentrer sur un processus opérationnel à sécuriser.'
+                : 'You can begin by understanding your continuity risks or by stabilizing the operational work that needs attention now.'}
             </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+            <article className="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Parcours stratégique' : 'Strategic starting point'}</p>
+              <h3 className="mt-3 text-2xl font-semibold text-navy">
+                {isFr ? 'Où notre continuité est-elle fragile?' : 'Where is our continuity fragile?'}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                {isFr
+                  ? 'Explorer les dépendances aux personnes, les pertes de contexte, les décisions sans trace et les risques de transition.'
+                  : 'Examine reliance on individual knowledge, missing decision context, handoff risks and gaps in governance evidence.'}
+              </p>
+              <TrackedLink href="/continuity-assessment" eventName="home_path_continuity" className="mt-6 inline-flex min-h-11 items-center text-sm font-bold text-electric hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+                {isFr ? 'Explorer l’évaluation' : 'Explore the assessment'} <span aria-hidden="true" className="ml-2">→</span>
+              </TrackedLink>
+            </article>
+            <article className="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Parcours opérationnel' : 'Operational starting point'}</p>
+              <h3 className="mt-3 text-2xl font-semibold text-navy">
+                {isFr ? 'Comment préserver le suivi du travail?' : 'How do we keep operational work connected?'}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                {isFr
+                  ? 'Découvrir un parcours concret de suivi des dossiers, de transfert des responsabilités et de préservation des preuves.'
+                  : 'Explore a concrete journey through case continuity, responsibility handoffs and evidence-aware operations.'}
+              </p>
+              <TrackedLink href="/union-eyes" eventName="home_path_operations" className="mt-6 inline-flex min-h-11 items-center text-sm font-bold text-electric hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+                {isFr ? 'Explorer Union Eyes' : 'Explore Union Eyes'} <span aria-hidden="true" className="ml-2">→</span>
+              </TrackedLink>
+            </article>
           </div>
         </div>
       </section>
@@ -287,33 +170,40 @@ export default async function Home() {
             </ScrollReveal>
 
             <ScrollReveal direction="right">
-              <div className="relative rounded-2xl overflow-hidden aspect-4/3">
-                <Image
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
-                  alt="Diverse team of engineers collaborating around laptops in a sunlit workspace"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-navy/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 glass-card rounded-xl p-4">
-                  <div className="flex items-center gap-6 text-white">
-                    <div>
-                      <div className="text-2xl font-bold">$4M+</div>
-                      <div className="text-xs text-gray-300">{isFr ? 'Investissement ingénierie' : 'Engineering Investment'}</div>
+              <div className="rounded-3xl border border-slate-200 bg-[#101a2c] p-6 shadow-[0_25px_70px_rgba(8,14,28,0.16)] sm:p-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dfbe70]">
+                  {isFr ? 'À préserver lors d’une transition' : 'What should survive a transition'}
+                </p>
+                <div className="mt-7 space-y-5">
+                  {[
+                    {
+                      index: '01',
+                      title: isFr ? 'Le contexte' : 'The context',
+                      description: isFr ? 'Pourquoi une décision a été prise' : 'Why a decision was made',
+                    },
+                    {
+                      index: '02',
+                      title: isFr ? 'Les responsabilités' : 'The ownership',
+                      description: isFr ? 'Qui doit agir et qui peut consulter' : 'Who acts, and who has authorized access',
+                    },
+                    {
+                      index: '03',
+                      title: isFr ? 'Les preuves' : 'The evidence',
+                      description: isFr ? 'Ce qui permet de vérifier la suite' : 'What the next team can verify',
+                    },
+                  ].map((item) => (
+                    <div key={item.index} className="flex items-start gap-4 border-b border-white/10 pb-5 last:border-0 last:pb-0">
+                      <span className="rounded-lg border border-white/15 px-2.5 py-2 text-xs font-semibold text-[#dfbe70]">{item.index}</span>
+                      <div>
+                        <h3 className="font-semibold text-white">{item.title}</h3>
+                        <p className="mt-1 text-sm leading-relaxed text-slate-300">{item.description}</p>
+                      </div>
                     </div>
-                    <div className="w-px h-10 bg-white/20" />
-                    <div>
-                      <div className="text-2xl font-bold">56%</div>
-                      <div className="text-xs text-gray-300">{isFr ? 'Réduction pilote visée' : 'Pilot Reduction Target'}</div>
-                    </div>
-                    <div className="w-px h-10 bg-white/20" />
-                    <div>
-                      <div className="text-2xl font-bold">80%+</div>
-                      <div className="text-xs text-gray-300">{isFr ? 'Réutilisation gouvernée' : 'Governed Reuse'}</div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
+                <p className="mt-8 rounded-xl bg-white/5 px-4 py-3 text-sm leading-relaxed text-slate-300">
+                  {isFr ? 'Le savoir institutionnel ne devrait pas dépendre d’une seule personne.' : 'Institutional continuity should not depend on one person remembering everything.'}
+                </p>
               </div>
             </ScrollReveal>
           </div>
@@ -343,161 +233,147 @@ export default async function Home() {
 
       <SectionDivider variant="glow" />
 
-      {/* ═══════════════════════ FLAGSHIP PLATFORMS ═══════════════════════ */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Architecture de marque' : 'Brand Architecture'}
-            title={isFr ? 'Une infrastructure, un produit de validation, plusieurs lignes de continuité' : 'One operating infrastructure, one flagship wedge, multiple continuity lines'}
-            subtitle={isFr ? 'Nzila Ventures est la société d exploitation. Nzila OS est l infrastructure gouvernée. Union Eyes est la preuve commerciale la plus claire.' : 'Nzila Ventures is the operating company. Nzila OS is the governed infrastructure. Union Eyes is the clearest commercial proof point.'}
-          />
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {flagships.map((platform, i) => (
-              <ScrollReveal key={platform.name} delay={i * 0.1}>
-                <ImageCard src={platform.image} alt={platform.alt} aspect="video">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-electric/80 text-white">
-                      {platform.name === 'Union Eyes' ? (isFr ? 'Produit phare' : 'Flagship') : (isFr ? 'Ligne produit' : 'Product line')}
-                    </span>
-                    <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white/20 text-white backdrop-blur-sm">
-                      {platform.vertical}
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-1">{platform.name}</h3>
-                  <p className="text-gray-300 text-sm mb-3">{isFr ? (flagshipDescriptionFr[platform.name] ?? platform.description) : platform.description}</p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-gold font-semibold">{platform.tam}</span>
-                  </div>
-                </ImageCard>
-              </ScrollReveal>
-            ))}
+      {/* Priority product paths are explicit; portfolio maturity is not implied. */}
+      <section className="bg-[#f6f8fb] py-24" id="solutions">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-electric">
+              {isFr ? 'Nos solutions' : 'Our solutions'}
+            </p>
+            <h2 className="text-3xl font-semibold leading-tight tracking-tight text-navy md:text-5xl">
+              {isFr ? 'Une architecture commune. Des réalités institutionnelles distinctes.' : 'Shared foundations. Different institutional realities.'}
+            </h2>
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
+              {isFr
+                ? 'Union Eyes et CIVIC abordent des enjeux concrets avec des parcours adaptés. Les autres initiatives du portefeuille ont leur propre portée et niveau de maturité.'
+                : 'Union Eyes and CIVIC address specific institutional challenges through distinct journeys. Other portfolio initiatives have their own scope and maturity.'}
+            </p>
           </div>
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            <article className="flex flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-shadow hover:shadow-lg sm:p-8">
+              <span aria-hidden="true" className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-electric/10 text-electric"><UserGroupIcon className="h-6 w-6" /></span>
+              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Organisations syndicales' : 'Labour organizations'}</p>
+              <h3 className="mt-4 text-3xl font-semibold tracking-tight text-navy">Union Eyes</h3>
+              <p className="mt-4 flex-1 text-sm leading-7 text-slate-600">
+                {isFr
+                  ? 'Protéger la continuité des dossiers, les transitions de représentation et la mémoire opérationnelle du syndicat.'
+                  : 'Preserve case history, representative handoffs and union operational memory across transitions.'}
+              </p>
+              <p className="mt-7 text-xs font-semibold text-slate-500">{isFr ? 'Parcours de validation pilote' : 'Pilot-validation journey'}</p>
+              <TrackedLink href="/union-eyes" eventName="home_solution_union_eyes" className="mt-4 inline-flex min-h-11 items-center self-start text-sm font-bold text-electric underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+                {isFr ? 'Explorer Union Eyes' : 'Explore Union Eyes'} <span aria-hidden="true" className="ml-2">→</span>
+              </TrackedLink>
+            </article>
 
-          <ScrollReveal className="text-center mt-12">
-            <TrackedLink
-              href="/union-eyes"
-              eventName="cta_union_eyes"
-              eventProps={{ source: 'home_flagships' }}
-              className="inline-flex items-center text-electric font-semibold hover:text-blue-700 text-lg"
-            >
-              {isFr ? 'Voir le chemin Union Eyes ->' : 'View the Union Eyes path ->'}
+            <article className="flex flex-col rounded-3xl border border-slate-200 bg-[#101a2c] p-7 shadow-lg sm:p-8">
+              <span aria-hidden="true" className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#dfbe70]"><BuildingLibraryIcon className="h-6 w-6" /></span>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#dfbe70]">{isFr ? 'Institutions publiques' : 'Public institutions'}</p>
+              <h3 className="mt-4 text-3xl font-semibold tracking-tight text-white">CIVIC</h3>
+              <p className="mt-4 flex-1 text-sm leading-7 text-slate-300">
+                {isFr
+                  ? 'Relier les engagements, les responsables, les preuves et les décisions au fil des programmes de modernisation.'
+                  : 'Connect commitments, accountable owners, evidence and decisions across modernization initiatives.'}
+              </p>
+              <p className="mt-7 text-xs font-semibold text-slate-400">{isFr ? 'Présentations et découverte' : 'Briefings and discovery'}</p>
+              <TrackedLink href="/public-service" eventName="home_solution_civic" className="mt-4 inline-flex min-h-11 items-center self-start text-sm font-bold text-[#dfbe70] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                {isFr ? 'Explorer CIVIC' : 'Explore CIVIC'} <span aria-hidden="true" className="ml-2">→</span>
+              </TrackedLink>
+            </article>
+
+            <article className="flex flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-shadow hover:shadow-lg sm:p-8">
+              <span aria-hidden="true" className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-electric/10 text-electric"><CubeTransparentIcon className="h-6 w-6" /></span>
+              <p className="text-xs font-semibold uppercase tracking-wider text-electric">{isFr ? 'Fondation gouvernée' : 'Governed foundation'}</p>
+              <h3 className="mt-4 text-3xl font-semibold tracking-tight text-navy">Nzila OS</h3>
+              <p className="mt-4 flex-1 text-sm leading-7 text-slate-600">
+                {isFr
+                  ? 'Identité, isolation des données, politiques, preuves et observabilité partagées entre les applications gouvernées de Nzila.'
+                  : 'Shared identity, data isolation, policy, evidence and observability across Nzila’s governed applications.'}
+              </p>
+              <p className="mt-7 text-xs font-semibold text-slate-500">{isFr ? 'Aperçu de la plateforme' : 'Platform overview'}</p>
+              <TrackedLink href="/platform" eventName="home_solution_platform" className="mt-4 inline-flex min-h-11 items-center self-start text-sm font-bold text-electric underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+                {isFr ? 'Découvrir la plateforme' : 'Explore the platform'} <span aria-hidden="true" className="ml-2">→</span>
+              </TrackedLink>
+            </article>
+          </div>
+          <p className="mt-8 text-sm text-slate-600">
+            {isFr ? 'Vous cherchez autre chose ? ' : 'Looking for something else? '}
+            <TrackedLink href="/products" eventName="home_solution_all_products" className="font-bold text-electric underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+              {isFr ? 'Voir tous les produits et leur maturité' : 'See every product and its maturity'}
             </TrackedLink>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ INTELLIGENCE DIFFERENTIATOR ═══════════════════════ */}
-      <section className="py-24 bg-navy relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-30" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Ce que Nzila OS préserve' : 'What Nzila OS Preserves'}
-            title={isFr ? 'La continuité devient une propriété du système' : 'Continuity becomes a system property'}
-            subtitle={isFr ? 'Le système structure les décisions, la mémoire, les preuves et les droits d accès pour que l institution puisse rester gouvernable.' : 'The system structures decisions, memory, evidence, and access rights so the institution remains governable across change.'}
-            light
-          />
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {intelligenceCapabilities.map((cap, i) => (
-              <ScrollReveal key={cap.name} delay={i * 0.1}>
-                <div className="group relative rounded-2xl overflow-hidden aspect-3/4 hover-lift">
-                  <Image
-                    src={cap.image}
-                    alt={cap.alt}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    sizes="(max-width: 768px) 100vw, 25vw"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-navy via-navy/60 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-gold/20 text-gold mb-3">
-                      {isFr ? (intelligenceFr[cap.name]?.metric ?? cap.metric) : cap.metric}
-                    </span>
-                    <h3 className="text-lg font-bold text-white mb-1">{isFr ? (intelligenceFr[cap.name]?.name ?? cap.name) : cap.name}</h3>
-                    <p className="text-sm text-gray-400">{isFr ? (intelligenceFr[cap.name]?.description ?? cap.description) : cap.description}</p>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <SectionDivider variant="dots" />
-
-      {/* ═══════════════════════ VERTICALS ═══════════════════════ */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Institutions servies' : 'Who We Serve'}
-            title={isFr ? 'Des secteurs où la continuité est matérielle' : 'Sectors where continuity is materially important'}
-            subtitle={isFr ? 'Nous servons les organisations qui ne peuvent pas se permettre de perdre mémoire, preuves ou gouvernance lors des transitions.' : 'We serve organizations that cannot afford to lose memory, evidence, or governance during transitions.'}
-          />
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {verticals.map((vertical, i) => (
-              <ScrollReveal key={vertical.name} delay={i * 0.05}>
-                <TrackedLink
-                  href={`/verticals/${vertical.name.toLowerCase().replace('/', '')}`}
-                  eventName="vertical_open"
-                  eventProps={{ vertical: vertical.name, source: 'home_vertical_grid' }}
-                >
-                  <div className="group relative rounded-2xl overflow-hidden aspect-3/4 hover-lift cursor-pointer">
-                    <Image
-                      src={vertical.image}
-                      alt={vertical.alt}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 768px) 50vw, 20vw"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-4">
-                      <h3 className="font-bold text-white text-lg mb-0.5">{vertical.name}</h3>
-                      <p className="text-xs text-gray-300">{isFr ? (verticalDescriptionFr[vertical.name] ?? vertical.description) : vertical.description}</p>
-                      <span className="inline-block mt-2 text-xs font-semibold text-gold">
-                        {vertical.tam} TAM
-                      </span>
-                    </div>
-                  </div>
-                </TrackedLink>
-              </ScrollReveal>
-            ))}
-          </div>
+          </p>
         </div>
       </section>
 
       <SectionDivider variant="glow" />
 
-      {/* ═══════════════════════ IP & VALUE ═══════════════════════ */}
-      <section className="py-24 bg-navy-light relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-40" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            badge={isFr ? 'Confiance et preuves' : 'Trust and Evidence'}
-            title={isFr ? 'L adoption institutionnelle exige des preuves, pas du bruit' : 'Organizational adoption requires evidence, not noise'}
-            subtitle={isFr ? 'Les pilotes, évaluations et études de cas doivent montrer des améliorations mesurables de continuité, gouvernance et confiance.' : 'Pilots, assessments, and case studies must show measurable improvement in continuity, governance, and trust.'}
-            light
-          />
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { value: 'OCRA', label: isFr ? 'Diagnostic de continuité' : 'Continuity Diagnostic', color: 'from-electric to-violet' },
-              { value: 'UE', label: isFr ? 'Validation Union Eyes' : 'Union Eyes Validation', color: 'from-gold to-gold-light' },
-              { value: 'ICI', label: isFr ? 'Indice de continuité' : 'Continuity Index', color: 'from-emerald to-cyan-400' },
-            ].map((item, i) => (
-              <ScrollReveal key={item.label} delay={i * 0.15}>
-                <div className="relative rounded-2xl p-8 text-center bg-white/5 border border-white/10 hover-lift">
-                  <div className={`text-4xl md:text-5xl font-bold bg-linear-to-r ${item.color} bg-clip-text text-transparent mb-3`}>
-                    {item.value}
-                  </div>
-                  <div className="text-gray-400 font-medium">{item.label}</div>
-                </div>
+      {/* Durable infrastructure principles without stock-photo simulations. */}
+      <section className="relative overflow-hidden bg-[#101a2c] py-20 text-white sm:py-24">
+        <div aria-hidden="true" className="pointer-events-none absolute right-[-10rem] top-[-12rem] h-[32rem] w-[32rem] rounded-full bg-electric/15 blur-[100px]" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#dfbe70]">
+            {isFr ? 'Notre fondation' : 'Our foundation'}
+          </p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight md:text-5xl">
+            {isFr ? 'Des systèmes conçus pour préserver le contexte.' : 'Systems designed to keep the context.'}
+          </h2>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
+            {isFr
+              ? 'La continuité n’est pas une promesse de tableau de bord. Elle exige des responsabilités claires, des preuves consultables et une gouvernance adaptée.'
+              : 'Continuity is not a dashboard promise. It takes clear ownership, reviewable records and governance suited to the people involved.'}
+          </p>
+          <div className="mt-12 grid gap-4 md:grid-cols-2">
+            {intelligenceCapabilities.map((cap, index) => (
+              <ScrollReveal key={cap.name} delay={index * 0.08}>
+                <article className="h-full rounded-2xl border border-white/15 bg-white/[0.045] p-7">
+                  <p className="text-xs font-semibold tracking-wider text-[#dfbe70]">{String(index + 1).padStart(2, '0')}</p>
+                  <h3 className="mt-5 text-2xl font-semibold text-white">
+                    {isFr ? (intelligenceFr[cap.name]?.name ?? cap.name) : cap.name}
+                  </h3>
+                  <p className="mt-4 max-w-md text-sm leading-7 text-slate-300">
+                    {isFr ? (intelligenceFr[cap.name]?.description ?? cap.description) : cap.description}
+                  </p>
+                </article>
               </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Sector interests lead to a clearly scoped portfolio, not to claims of market deployment. */}
+      <section className="bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">
+            {isFr ? 'Domaines d’exploration' : 'Areas of exploration'}
+          </p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-navy md:text-5xl">
+            {isFr ? 'Des enjeux distincts. Un souci commun de continuité.' : 'Different challenges. A shared concern for continuity.'}
+          </h2>
+          <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">
+            {isFr
+              ? 'Notre portefeuille explore plusieurs domaines. Les secteurs ci-dessous ne constituent pas des références clients ni des affirmations de disponibilité commerciale.'
+              : 'Our portfolio explores several domains. These sectors are not customer references or claims of commercial availability.'}
+          </p>
+          <div className="mt-10 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            {verticals.map((vertical) => (
+              <article key={vertical.name} className="rounded-2xl border border-slate-200 bg-[#f6f8fb] p-5">
+                <h3 className="text-base font-semibold text-navy">{vertical.name}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {isFr ? (verticalDescriptionFr[vertical.name] ?? vertical.description) : vertical.description}
+                </p>
+              </article>
+            ))}
+          </div>
+          <TrackedLink href="/portfolio" eventName="home_sector_portfolio" className="mt-9 inline-flex min-h-11 items-center text-sm font-bold text-electric hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric">
+            {isFr ? 'Explorer les initiatives' : 'Explore the initiatives'} <span aria-hidden="true" className="ml-2">→</span>
+          </TrackedLink>
+        </div>
+      </section>
+
+      <SectionDivider variant="glow" />
+
+      <HumanCenteredAI isFr={isFr} />
+
+      <ProofLedger isFr={isFr} />
 
       {/* ═══════════════════════ TECH STACK ═══════════════════════ */}
       <section className="py-16 bg-white">

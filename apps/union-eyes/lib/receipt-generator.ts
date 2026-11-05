@@ -5,6 +5,7 @@
 import { jsPDF } from 'jspdf';
 import { putBlob } from '@/lib/blob-client';
 import { logger } from '@/lib/logger';
+import { formattingLocale } from '@/lib/locales';
 
 interface ReceiptData {
   transactionId: string;
@@ -21,12 +22,15 @@ interface ReceiptData {
   paymentReference: string;
   periodStart: Date;
   periodEnd: Date;
+  /** The member's language for the dates on the receipt (a stored 'fr', 'fr-CA'... is read by formattingLocale); en-CA when not known. */
+  locale?: string | null;
 }
 
 export async function generateReceipt(data: ReceiptData): Promise<string> {
   try {
     // Create PDF document
     const doc = new jsPDF();
+    const locale = formattingLocale(data.locale);
     
     // Header
     doc.setFontSize(20);
@@ -41,10 +45,10 @@ export async function generateReceipt(data: ReceiptData): Promise<string> {
     // Receipt details
     doc.setFontSize(10);
     doc.text(`Receipt #: ${data.transactionId.substring(0, 8).toUpperCase()}`, 20, 50);
-    doc.text(`Date: ${data.paidDate.toLocaleDateString('en-CA')}`, 20, 60);
+    doc.text(`Date: ${data.paidDate.toLocaleDateString(locale)}`, 20, 60);
     doc.text(`Payment Reference: ${data.paymentReference}`, 20, 70);
     doc.text(`Member: ${data.memberName}`, 20, 80);
-    doc.text(`Period: ${data.periodStart.toLocaleDateString('en-CA')} - ${data.periodEnd.toLocaleDateString('en-CA')}`, 20, 90);
+    doc.text(`Period: ${data.periodStart.toLocaleDateString(locale)} - ${data.periodEnd.toLocaleDateString(locale)}`, 20, 90);
     
     // Payment breakdown
     doc.setFont('helvetica', 'bold');

@@ -10,6 +10,8 @@ import type { TrustMetrics } from '@/types/marketing';
 
 const h = vi.hoisted(() => ({ locale: 'fr-CA' }));
 vi.mock('next-intl/server', () => ({ getLocale: async () => h.locale, getTranslations: async () => (key: string) => key }));
+// The status badges are client components that format in the reader's locale (useLocale).
+vi.mock('next-intl', () => ({ useLocale: () => h.locale, useTranslations: () => (key: string) => key }));
 vi.mock('@/lib/page-data/organization-scope', () => ({ requireOrganizationScope: async () => ({ organizationId: 'org-1' }) }));
 
 const AUDIT = new Date('2026-05-24T18:30:00.000Z');

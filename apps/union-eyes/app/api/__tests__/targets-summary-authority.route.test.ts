@@ -69,14 +69,14 @@ describe('KPI target summary — disclosure and read audit', () => {
   it('requires officer authority rather than granting every member KPI configurations', async () => {
     const { GET } = await import('../targets/summary/route');
     expect(m.options).toMatchObject({ auth: { minRole: 'officer' }, requireOrg: true });
-    await expect((GET as Function)({ organizationId: null, userId: officer }))
+    await expect((GET as unknown as (ctx: unknown) => Promise<unknown>)({ organizationId: null, userId: officer }))
       .rejects.toMatchObject({ code: 'FORBIDDEN' });
     expect(m.scopes).toHaveLength(0);
   });
 
   it('returns an explicit projection and writes a scoped audit without exposing sensitive fields', async () => {
     const { GET } = await import('../targets/summary/route');
-    const result = await (GET as Function)({ organizationId: org, userId: officer });
+    const result = await (GET as unknown as (ctx: unknown) => Promise<unknown>)({ organizationId: org, userId: officer });
     expect(m.scopes).toEqual([{ organizationId: org, userId: officer }]);
     expect(result.summary.total).toBe(1);
     expect(result.targets[0]).toMatchObject({ id: 'target-1', name: 'Case response time' });
@@ -93,7 +93,7 @@ describe('KPI target summary — disclosure and read audit', () => {
   it('does not return a successful summary if its audit write fails', async () => {
     m.audit.mockRejectedValueOnce(new Error('audit unavailable'));
     const { GET } = await import('../targets/summary/route');
-    await expect((GET as Function)({ organizationId: org, userId: officer }))
+    await expect((GET as unknown as (ctx: unknown) => Promise<unknown>)({ organizationId: org, userId: officer }))
       .rejects.toThrow('audit unavailable');
   });
 });

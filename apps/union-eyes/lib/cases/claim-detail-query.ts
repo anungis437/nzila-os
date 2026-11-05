@@ -1,5 +1,6 @@
 import { sql, type SQL } from 'drizzle-orm'
 import type { CaseActor } from './case-authorization'
+import { claimIdentitySelect } from './claim-identity'
 
 /**
  * Single-case projection for the claims detail endpoint. It is tenant-bound, but it is NOT the authorization: the
@@ -10,7 +11,6 @@ export function claimDetailQuery(actor: CaseActor, reference: string): SQL {
       SELECT c.claim_id        AS "claimId",
              c.claim_number    AS "claimNumber",
              c.organization_id AS "organizationId",
-             c.member_id       AS "memberId",
              c.is_anonymous    AS "isAnonymous",
              c.claim_type      AS "claimType",
              c.status,
@@ -39,9 +39,7 @@ export function claimDetailQuery(actor: CaseActor, reference: string): SQL {
              c.resolution_outcome AS "resolutionOutcome",
              c.resolved_at       AS "resolvedAt",
              c.progress,
-             m.name   AS "memberName",
-             m.email  AS "memberEmail",
-             m.phone  AS "memberPhone"
+             ${claimIdentitySelect(actor, true)}
       FROM claims c
       LEFT JOIN organization_members m
         ON m.user_id = c.member_id

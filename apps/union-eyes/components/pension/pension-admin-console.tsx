@@ -29,8 +29,6 @@ type Section<T> = { state: 'loading' } | { state: 'ready'; rows: T[] } | { state
 const LOAD_FAILED = 'Failed to load pension data. Please try again.';
 const DASH = '—';
 
-const formatCurrency = (amount: number) => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(amount);
-const formatDate = (value: string) => formatDay(value, 'en-CA', 'long');
 const words = (code: string) => code.replace(/_/g, ' ');
 
 function statusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
@@ -68,6 +66,8 @@ function SectionStatus<T>({ section, onRetry, empty }: { section: Section<T>; on
 
 export default function PensionAdminConsole() {
   const locale = useLocale();
+  const formatCurrency = (amount: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD' }).format(amount);
+  const formatDate = (value: string) => formatDay(value, locale, 'long');
   const [plans, setPlans] = useState<Section<PensionPlan>>({ state: 'loading' });
   const [contributions, setContributions] = useState<Section<PensionContribution>>({ state: 'loading' });
   const [claims, setClaims] = useState<Section<BenefitClaim>>({ state: 'loading' });

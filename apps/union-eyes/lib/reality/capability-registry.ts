@@ -981,6 +981,26 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     notes:
       'Classification: the table is reachable through the Priorities console and the deadline dashboard (read) and through the generic create route, so it is a SEPARATE_SUPPORTED_SURFACE_REQUIRES_REMEDIATION and is no longer latent or unexposed. It has no recipient resolution, no reminder scheduling, no continuity-on-reassignment and no completion or extension, so it stays NOT_IMPLEMENTED for those; the two item routes that suggested otherwise are retired. It is kept OUT of the grievance-continuity fix in this PR, and it must be given that operational treatment, or its listing removed from Priorities, before overall SaaS readiness can pass.',
   },
+  {
+    id: 'UE-CLAIM-ANONYMOUS-FILING',
+    title: 'Claims — opt-in anonymous filing, member identity withheld from readers who are not representing the member',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/cases/claim-identity.ts',
+      'apps/union-eyes/components/claims/new-claim-form.tsx',
+      'apps/union-eyes/backend/grievances/migrations/0010_claims_is_anonymous_default_false.py',
+    ],
+    evidence: [
+      'components/claims/new-claim-form.tsx — an unticked-by-default "File anonymously" checkbox; the intake POST carries isAnonymous=false unless the member ticks it (components/claims/new-claim-form.test.tsx)',
+      'lib/cases/claim-identity.ts — claimIdentitySelect() gates memberId, memberName, memberEmail and memberPhone in SQL: shown when is_anonymous IS FALSE, to the filer, or to a principal with a live, non-recused creator/owner/assignee/represented_member relationship to the case; NULL for everyone else (collaborators, mandates, delegations, emergency grants, other organizations). Unknown flag values count as anonymous',
+      'Applied to every claim read that returns the member: lib/cases/claim-detail-query.ts (GET /api/claims/{id}), app/api/cases/route.ts (GET list), app/api/cases/[caseId]/route.ts, app/api/workbench/assigned/route.ts; lib/services/case-timeline-service.ts no longer puts the name of an anonymous filer into staff dashboard signals; lib/data-export-import.ts already omitted memberId for anonymous rows',
+      'lib/cases/claim-identity.pglite.test.ts — real SQL on PGlite: filer, assignee, creator and owner see the member; collaborator, recused, revoked, expired, other-organization and unrelated readers get NULL identity with isAnonymous=true',
+      'Defaults are opt-in everywhere: Django model + grievances 0010 (physical DEFAULT false, guarded, reversible), Drizzle schema, lib/validation.ts, @nzila/cupe-vocabulary intake schema, POST /api/claims and POST /api/cases',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED, not REAL: source- and PGlite-proven only; 0010 has not been applied to staging, and no deployed browser session has filed an anonymous claim. Existing rows are not rewritten: rows stored with is_anonymous=true while no screen offered the choice (the old physical default) are now treated as anonymous, which hides identity from collaborators and oversight readers but never exposes it. Resetting those historical rows is an owner decision with its own change record. Not covered: identity inside free-text fields (description, witness details, attachments) is not redacted, and the member is told only that the representatives directly handling the case see their name.',
+  },
 
   // ------------------------------------------------------------------------
   // Phase 3A capability registry reality audit (2026-08-31) — findings

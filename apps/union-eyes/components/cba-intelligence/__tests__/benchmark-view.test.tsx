@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom/vitest';
 
 vi.mock('next-intl', () => ({
+  useLocale: () => 'en-CA',
   useTranslations: () => (key: string, values?: Record<string, unknown>) => (values ? `${key} ${JSON.stringify(values)}` : key),
 }));
 vi.mock('recharts', () => {

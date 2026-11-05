@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-11-04 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-05 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,9 +9,9 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 64 |
-| Contract Test Files | 305 |
-| TS/JS Test Files | 3599 |
+| GitHub Workflows | 66 |
+| Contract Test Files | 306 |
+| TS/JS Test Files | 3609 |
 | Python Test Files | 52 |
 
 ## Apps
@@ -38,12 +38,12 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 6275 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 6287 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 80 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 93 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 108 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 100 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 462 | Africa-first music distribution, streaming, and royalty management platform. |
 
@@ -111,5 +111,7 @@
 - ue-native-postgres.yml
 - ue-security-regression.yml
 - ue-staging-discovery.yml
+- ue-v2-staging-build.yml
+- ue-v2-staging-deploy.yml
 - union-eyes-authority-rollout.yml
 - zonga-check.yml

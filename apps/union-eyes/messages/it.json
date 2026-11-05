@@ -7094,6 +7094,8 @@
     "locationPlaceholder": "es., Sezione B, Piano 2",
     "witnesses": "Testimoni (Opzionale)",
     "witnessesPlaceholder": "Nomi di eventuali testimoni",
+    "fileAnonymously": "Presenta in forma anonima",
+    "fileAnonymouslyHelp": "Il tuo nome e i tuoi recapiti sono visibili solo a te e ai rappresentanti che seguono direttamente il tuo caso.",
     "supportingDocs": "Documenti di Supporto (Opzionale)",
     "uploadInstructions": "Clicca per caricare o trascina e rilascia",
     "uploadFormats": "PDF, DOC, JPG, PNG fino a 10MB",

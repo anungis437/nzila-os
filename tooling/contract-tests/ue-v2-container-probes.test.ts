@@ -38,9 +38,12 @@ describe('Union Eyes V2 Container Apps health probes', () => {
     expect(main).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param env string(?:\s|$)/m)
     expect(main).not.toMatch(/param env string\s*=/)
     expect(main).toMatch(/param appDatabaseName string = env == 'prod' \? 'ue_v2_prod' : 'ue_v2_staging'/)
-    expect(main).toMatch(/param publicHostName string = env == 'prod' \? 'app\.unioneyes\.app' : 'staging\.unioneyes\.app'/)
-    expect(main).toMatch(/param siteUrl string = env == 'prod' \? 'https:\/\/unioneyes\.app' : 'https:\/\/staging\.unioneyes\.app'/)
-    expect(main).toMatch(/param appMinReplicas int = env == 'prod' \? 2 : 1/)
+    // Staging gets no production host or site: empty falls back to the Container Apps default FQDN (owner decision
+    // 2026-11-04: staging.unioneyes.app still points at the legacy subscription).
+    expect(main).toMatch(/param publicHostName string = env == 'prod' \? 'app\.unioneyes\.app' : ''/)
+    expect(main).toMatch(/param siteUrl string = env == 'prod' \? 'https:\/\/unioneyes\.app' : ''/)
+    // Staging scales to zero for cost (owner decision 2026-11-04); raise appMinReplicas for an acceptance run.
+    expect(main).toMatch(/param appMinReplicas int = env == 'prod' \? 2 : 0/)
   })
 
   it('does not label staging as production in the application revision', () => {

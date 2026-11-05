@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 
 vi.mock('next/navigation', () => ({ useParams: () => ({ locale: 'en-CA' }) }))
+vi.mock('next-intl', () => ({ useLocale: () => 'en-CA' }))
 
 import { OrganizingConsole } from './organizing-console'
 import { CampaignDetailConsole } from './campaign-detail-console'

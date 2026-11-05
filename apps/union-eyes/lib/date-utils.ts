@@ -90,6 +90,7 @@ export function now(): string {
  * @param date - Date to format (ISO string, Date object, or timestamp)
  * @param timezone - IANA timezone (e.g., "America/Toronto", "UTC")
  * @param options - Intl.DateTimeFormat options
+ * @param locale - BCP-47 tag to format in (a screen passes its `useLocale()`); defaults to the US English the function has always produced
  * @returns Formatted date string
  * 
  * @example
@@ -108,11 +109,12 @@ export function formatForDisplay(
   options: Intl.DateTimeFormatOptions = {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }
+  },
+  locale: string = 'en-US'
 ): string {
   const dateObj = parseDate(date);
   
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat(locale, {
     ...options,
     timeZone: timezone,
   }).format(dateObj);
@@ -136,6 +138,7 @@ export function formatAsDate(
 ): string {
   const dateObj = parseDate(date);
   
+  // A machine format, not a display: en-CA is the locale whose numeric date is YYYY-MM-DD, so it stays fixed whatever the reader's language.
   return new Intl.DateTimeFormat('en-CA', {
     year: 'numeric',
     month: '2-digit',
@@ -161,6 +164,7 @@ export function formatAsTime(
 ): string {
   const dateObj = parseDate(date);
   
+  // A machine format (HH:MM:SS, 24-hour), fixed whatever the reader's language: fr-CA would write "15 h 30 min 45 s".
   return new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
     minute: '2-digit',
@@ -347,6 +351,7 @@ export function startOfDay(
   
   // If timezone is not UTC, we need to adjust
   if (timezone !== 'UTC') {
+    // Read back as numeric parts, never shown: the locale is fixed so the parts parse the same everywhere.
     const parts = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
       year: 'numeric',

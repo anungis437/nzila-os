@@ -12,12 +12,18 @@ param cronImage string
 param keyVaultUri string
 param storageAccountName string
 param documentsContainerName string
+@description('Custom host name. Empty = the app\'s Container Apps default FQDN.')
 param publicHostName string
+@description('Marketing/site URL. Empty = the app URL.')
 param siteUrl string
 param emailFrom string
 param emailReplyTo string
 param minReplicas int = 2
 param maxReplicas int = 6
+param clamavMinReplicas int = 1
+param clamavMaxReplicas int = 2
+@description('Optional ingress IP allow-list for the app (CIDR strings). Empty = no restriction.')
+param ingressAllowedIpRanges array = []
 param prefix string
 @description('Server runtime profile. Qualification exercised the server under "internal"; the owner decides before go-live.')
 @allowed(['internal', 'executive'])
@@ -51,7 +57,18 @@ var stripeEnv = enableStripe ? [
   { name: 'STRIPE_SECRET_KEY', secretRef: 'stripe-secret-key' }
   { name: 'STRIPE_WEBHOOK_SECRET', secretRef: 'stripe-webhook-secret' }
 ] : []
-var appUrl = 'https://${publicHostName}'
+var appHost = empty(publicHostName) ? '${prefix}-app.${environmentDefaultDomain}' : publicHostName
+var appUrl = 'https://${appHost}'
+var effectiveSiteUrl = empty(siteUrl) ? appUrl : siteUrl
+var ipRestrictions = [
+  for (cidr, i) in ingressAllowedIpRanges: {
+    name: 'allow-${i}'
+    ipAddressRange: cidr
+    action: 'Allow'
+  }
+]
+// ipSecurityRestrictions is only written when an allow-list is given, so production ingress is unchanged.
+var appIngress = union({ external: true, targetPort: 3000, transport: 'auto', allowInsecure: false }, empty(ingressAllowedIpRanges) ? {} : { ipSecurityRestrictions: ipRestrictions })
 var clamavUrl = 'https://${prefix}-clamav.internal.${environmentDefaultDomain}'
 
 resource clamav 'Microsoft.App/containerApps@2024-03-01' = {
@@ -75,8 +92,9 @@ resource clamav 'Microsoft.App/containerApps@2024-03-01' = {
           resources: { cpu: json('1.75'), memory: '3.5Gi' }
         }
       ]
-      // The scanner is a launch dependency: never scale to zero, and uploads fail closed without it.
-      scale: { minReplicas: 1, maxReplicas: 2 }
+      // The scanner is a launch dependency: production never scales it to zero, and uploads fail
+      // closed without it. A cost-sized staging may scale it to zero (cold start fails uploads closed).
+      scale: { minReplicas: clamavMinReplicas, maxReplicas: clamavMaxReplicas }
     }
   }
 }
@@ -91,7 +109,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
-      ingress: { external: true, targetPort: 3000, transport: 'auto', allowInsecure: false }
+      ingress: appIngress
       registries: [{ server: acrLoginServer, identity: identityId }]
       secrets: secrets
     }
@@ -127,7 +145,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'UE_FEATURE_PROFILE', value: featureProfile }
             { name: 'NEXT_PUBLIC_APP_ENV', value: deploymentEnvironment == 'prod' ? 'production' : 'staging' }
             { name: 'NEXT_PUBLIC_APP_URL', value: appUrl }
-            { name: 'NEXT_PUBLIC_SITE_URL', value: siteUrl }
+            { name: 'NEXT_PUBLIC_SITE_URL', value: effectiveSiteUrl }
             { name: 'AUTH_URL', value: appUrl }
             { name: 'AUTH_TRUST_HOST', value: 'true' }
             { name: 'DB_POOL_MAX', value: '10' }

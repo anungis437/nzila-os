@@ -132,7 +132,7 @@ export const bodySchemas = {
     description: z.string().min(20, 'Description must be at least 20 characters').max(10000, 'Description too long'),
     desiredOutcome: z.string().min(10, 'Desired outcome must be at least 10 characters').max(5000, 'Desired outcome too long'),
     priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
-    isAnonymous: z.boolean().default(true),
+    isAnonymous: z.boolean().default(false),
     witnessesPresent: z.boolean().default(false),
     witnessDetails: z.string().max(5000, 'Witness details too long').optional().nullable(),
     previouslyReported: z.boolean().default(false),

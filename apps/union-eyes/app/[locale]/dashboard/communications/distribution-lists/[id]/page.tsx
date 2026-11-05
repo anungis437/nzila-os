@@ -208,7 +208,7 @@ export default function DistributionListDetailPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',

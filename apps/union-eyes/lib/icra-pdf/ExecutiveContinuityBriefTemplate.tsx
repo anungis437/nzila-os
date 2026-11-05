@@ -24,6 +24,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 import type { PdfReportData } from './reportDataMapper';
+import { formattingLocale } from '@/lib/locales';
 import {
   COLORS,
   FONTS,
@@ -373,18 +374,28 @@ const S = StyleSheet.create({
 // Footer (shared across pages)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function PageFooter({
-  institutionName,
-  generatedAt,
-}: {
-  institutionName?: string;
-  generatedAt: Date;
-}) {
-  const dateStr = generatedAt.toLocaleDateString('en-CA', {
+// The language the report's dates are written in: the report's own `locale` (mapToPdfReportData, en-CA unless the caller
+// chose one). Passed as a value rather than a React context, because API routes render this template on the server, where
+// Next.js does not allow React context in the module graph.
+
+function briefDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+}
+
+function PageFooter({
+  institutionName,
+  generatedAt,
+  locale,
+}: {
+  institutionName?: string;
+  generatedAt: Date;
+  locale?: string | null;
+}) {
+  const dateStr = briefDate(generatedAt, formattingLocale(locale));
   return (
     <View style={S.pageFooter} fixed>
       <Text style={S.footerText}>
@@ -401,11 +412,7 @@ function PageFooter({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CoverPage({ data }: { data: PdfReportData }) {
-  const dateStr = data.generatedAt.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const dateStr = briefDate(data.generatedAt, formattingLocale(data.locale));
 
   return (
     <Page size={PAGE.size} style={S.coverPage}>
@@ -497,6 +504,7 @@ function ExecutiveSummaryPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -565,6 +573,7 @@ function ContinuityProfilePage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -609,6 +618,7 @@ function GovernanceEntropyPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -656,6 +666,7 @@ function MemoryHoldersPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -695,6 +706,7 @@ function ModernizationReviewPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -767,6 +779,7 @@ function RecommendationsPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -816,6 +829,7 @@ function ExecutiveReflectionPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -848,6 +862,7 @@ function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );
@@ -858,11 +873,7 @@ function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
-  const dateStr = data.generatedAt.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const dateStr = briefDate(data.generatedAt, formattingLocale(data.locale));
 
   return (
     <Page size={PAGE.size} style={S.page}>
@@ -940,6 +951,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
       <PageFooter
         institutionName={data.institutionName}
         generatedAt={data.generatedAt}
+        locale={data.locale}
       />
     </Page>
   );

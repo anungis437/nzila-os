@@ -1,10 +1,10 @@
 {
   "contract": "APPLICATION_USER_ID=TEXT",
-  "candidateColumns": 77,
+  "candidateColumns": 85,
   "classificationCounts": {
     "APPLICATION_USER_ID": 44,
-    "DOMAIN_ENTITY_UUID": 19,
-    "DEAD_OR_UNREACHABLE": 14
+    "DEAD_OR_UNREACHABLE": 19,
+    "DOMAIN_ENTITY_UUID": 22
   },
   "unclassifiedCurrentIdentityColumns": 0,
   "applicationUserIdColumns": [
@@ -82,6 +82,24 @@
       "targetType": "text",
       "evidence": [],
       "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity."
+    },
+    {
+      "table": "alert_recipients",
+      "column": "recipient_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required."
+    },
+    {
+      "table": "bargaining_team_members",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required."
     },
     {
       "table": "board_packet_distributions",
@@ -494,8 +512,35 @@
       "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier."
     },
     {
+      "table": "member_roles",
+      "column": "acting_for_member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier."
+    },
+    {
+      "table": "member_roles",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier."
+    },
+    {
       "table": "mfa_configurations",
       "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required."
+    },
+    {
+      "table": "newsletter_engagement",
+      "column": "recipient_id",
       "currentType": "uuid",
       "classification": "DEAD_OR_UNREACHABLE",
       "targetType": "uuid",
@@ -619,6 +664,15 @@
       "targetType": "uuid",
       "evidence": [],
       "rationale": "Pension trustee rows reference pension entities by uuid; no application user id is written."
+    },
+    {
+      "table": "permission_exceptions",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier."
     },
     {
       "table": "ppe_equipment",
@@ -747,6 +801,15 @@
       "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity."
     },
     {
+      "table": "sso_sessions",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required."
+    },
+    {
       "table": "stewards",
       "column": "user_id",
       "currentType": "uuid",
@@ -777,6 +840,15 @@
       "targetType": "uuid",
       "evidence": [],
       "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier."
+    },
+    {
+      "table": "voting_notifications",
+      "column": "recipient_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required."
     },
     {
       "table": "wcb_claims",

@@ -9,7 +9,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +69,7 @@ function readAccount(body: unknown): BillingAccount {
 export default function BillingPage() {
   const t = useTranslations('financeBillingPage');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const [account, setAccount] = useState<BillingAccount | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -249,7 +250,7 @@ export default function BillingPage() {
               )}
               <div className="sm:col-span-2 pt-2 border-t flex items-center gap-2 text-muted-foreground">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                {t('accountCreated', { date: new Date(account.createdAt).toLocaleDateString('en-CA') })}
+                {t('accountCreated', { date: new Date(account.createdAt).toLocaleDateString(locale) })}
               </div>
             </div>
           ) : (
