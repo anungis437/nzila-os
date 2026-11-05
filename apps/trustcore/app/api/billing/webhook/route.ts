@@ -50,15 +50,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }
 
-  // ── Idempotency guard ────────────────────────────────────────────────────
+  // This is a best-effort local replay filter, NOT durable event processing.
+  // Failures must always be retried by Stripe; never mark them processed.
   if (processedEventIds.has(event.id)) {
     return NextResponse.json({ received: true, duplicate: true })
-  }
-  processedEventIds.add(event.id)
-  // Keep the set bounded to prevent unbounded growth in long-running instances
-  if (processedEventIds.size > 10_000) {
-    const first = processedEventIds.values().next().value
-    if (first) processedEventIds.delete(first)
   }
 
   // ── Event handling ───────────────────────────────────────────────────────
@@ -150,10 +145,17 @@ export async function POST(req: NextRequest) {
         break
     }
   } catch {
-    // Return 500 so Stripe retries the event
+    // Failed deliveries MUST remain retryable; do not acknowledge as processed.
     return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
   }
 
+  // Only mark events after successful persistence. Multi-replica exactly-once
+  // still requires the durable ledger tracked as a release blocker.
+  processedEventIds.add(event.id)
+  if (processedEventIds.size > 10_000) {
+    const oldest = processedEventIds.values().next().value
+    if (oldest) processedEventIds.delete(oldest)
+  }
   return NextResponse.json({ received: true })
 }
 
