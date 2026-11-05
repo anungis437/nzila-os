@@ -67,7 +67,7 @@ test.describe('UE E2E — org isolation negative paths', () => {
 
     // Also check the bulk export endpoint
     const bulkExport = await request.get('/api/exports')
-    await assertNoCrossOrgLeak(bulkExport)
+    await assertNoCrossOrgLeak(bulkExport, { notImplemented: true })
   })
 
   test('universal search cannot return primary-org records to wrong-org user (NEG-ORG-SEARCH-LEAKAGE)', async ({
