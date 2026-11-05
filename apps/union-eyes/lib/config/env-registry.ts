@@ -576,7 +576,7 @@ export const ENV_PATTERNS: readonly EnvPattern[] = [
   // @@PATTERNS@@
 ]
 
-const BY_NAME = new Map(ENV_REGISTRY.map((entry) => [entry.name, entry]))
+const BY_NAME = new Map(ENV_REGISTRY.map((entry) => [entry.name, entry])) // ga-check:exempt — read-only lookup index over the constant ENV_REGISTRY, not persisted state
 
 export function getEnvEntry(name: string): EnvEntry | undefined {
   return BY_NAME.get(name)

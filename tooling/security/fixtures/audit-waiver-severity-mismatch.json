@@ -1,0 +1,24 @@
+{
+  "advisories": {
+    "1108110": {
+      "id": "1108110",
+      "package": "xlsx",
+      "severity": "critical",
+      "title": "fixture: correct package"
+    }
+  },
+  "metadata": {
+    "source": "npm-bulk-advisories",
+    "status": "complete",
+    "lockfile": "pnpm-lock.yaml",
+    "totalDependencies": 2,
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 1,
+      "total": 1
+    }
+  }
+}

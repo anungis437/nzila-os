@@ -96,7 +96,7 @@ const tableOf = (labelName: string): DeclaredTable => {
   return t
 }
 
-let declared = new Map<string, DeclaredTable>()
+let declared = new Map<string, DeclaredTable>() // ga-check:exempt — build-script working state for one generator run, not app persistence
 const columnOf = (t: DeclaredTable, name: string): DeclaredColumn => {
   const c = t.columns.find((x) => x.name === name)
   if (!c) throw new Error(`${t.label}.${name} is not declared`)

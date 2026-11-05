@@ -42,15 +42,14 @@ const ALLOWED_JOBS: readonly AllowedJob[] = [
     file: '.github/workflows/e2e.yml',
     job: 'e2e-canonical',
     reason:
-      'Same as e2e, restored from a verified staging snapshot into the runner-local ci_e2e Postgres container ' +
-      '(Azure login is used only to download that snapshot blob); the server runs on localhost with ' +
-      'UE_ENVIRONMENT=local and is discarded with the runner.',
+      'Same as e2e, run after a push to main: a fresh synthetic ci_e2e Postgres container on the runner (no ' +
+      'staging snapshot, no Azure login), the server on localhost with UE_ENVIRONMENT=local, discarded with the runner.',
   },
 ];
 
 /**
  * Commands that would mean a job changes deployed Azure resources. Logging
- * in is not enough: e2e-canonical logs in only to download a snapshot blob.
+ * in alone is not enough to count as one.
  */
 const DEPLOYMENT_MARKERS = [
   /\baz\s+containerapp\b/,

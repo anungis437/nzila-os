@@ -64,7 +64,8 @@ class ClaimsModelTest(TestCase):
         obj = create_valid(Claims, organization_id=uuid.uuid4())
         self.assertEqual(obj.status, "submitted")
         self.assertEqual(obj.priority, "medium")
-        self.assertTrue(obj.is_anonymous)
+        # Anonymous filing is opt-in (grievances/0010_claims_is_anonymous_default_false).
+        self.assertFalse(obj.is_anonymous)
         self.assertEqual(obj.progress, 0)
 
 

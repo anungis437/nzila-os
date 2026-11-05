@@ -256,6 +256,7 @@ interface SbomComponent {
   name?: string
   version?: string
   licenses?: Array<{ license?: { id?: string; name?: string } }>
+  components?: SbomComponent[]
   [key: string]: unknown
 }
 
@@ -280,10 +281,70 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
   const sbom: SbomDocument = JSON.parse(readUtf8(resolvedSbomPath))
   const violations: LicenseViolation[] = []
 
-  for (const component of sbom.components ?? []) {
-    const licenses = component.licenses ?? []
+  if (!Array.isArray(sbom.components)) {
+    throw new Error('SBOM missing components array')
+  }
+  // An empty inventory is not evidence that the dependency graph was scanned.
+  // Refuse an empty CycloneDX document rather than declaring all licenses safe.
+  if (sbom.components.length === 0) {
+    throw new Error('SBOM contains no components to validate')
+  }
+
+  // CycloneDX permits nested component inventories. Validating only the root
+  // array would let forbidden licenses inside nested dependencies evade the gate.
+  const pending: Array<{ component: SbomComponent; depth: number }> = sbom.components.map((component) => ({ component, depth: 0 })).reverse()
+  let inspected = 0
+  while (pending.length > 0) {
+    const { component, depth } = pending.pop()!
+    if (++inspected > 100000 || depth > 64) {
+      throw new Error('SBOM component inventory exceeds validation limits')
+    }
+    if (!component || typeof component !== 'object' || Array.isArray(component) ||
+        typeof component.name !== 'string' || !component.name.trim() ||
+        typeof component.version !== 'string' || !component.version.trim()) {
+      throw new Error('SBOM contains a component without canonical name and version')
+    }
+    if (component.components !== undefined) {
+      if (!Array.isArray(component.components)) {
+        throw new Error(`Malformed nested component inventory for ${component.name}`)
+      }
+      for (let index = component.components.length - 1; index >= 0; index--) {
+        pending.push({ component: component.components[index], depth: depth + 1 })
+      }
+    }
+    if (!Array.isArray(component.licenses)) {
+      throw new Error(`SBOM component ${component.name} has no licenses array`)
+    }
+    const licenses = component.licenses
+    if (licenses.length === 0) {
+      violations.push({ package: component.name, version: component.version, license: 'UNKNOWN', status: 'unknown' })
+      continue
+    }
     for (const licenseEntry of licenses) {
-      const licenseId = licenseEntry.license?.id ?? licenseEntry.license?.name ?? 'UNKNOWN'
+      if (!licenseEntry || typeof licenseEntry !== 'object' || Array.isArray(licenseEntry)) {
+        throw new Error(`Malformed license entry for ${component.name}`)
+      }
+      // CycloneDX license identifiers and names must not contradict each other.
+      // Prefer rejecting ambiguous evidence over silently authorizing an allowed id.
+      // CycloneDX permits either an SPDX expression or a license object.
+      // Never let an allowed license object mask a contradictory expression.
+      const expression = (licenseEntry as Record<string, unknown>).expression
+      if (expression !== undefined && (typeof expression !== 'string' || !expression.trim() || expression !== expression.trim())) {
+        throw new Error(`Malformed SPDX license expression for ${component.name}`)
+      }
+      if (expression !== undefined && licenseEntry.license !== undefined) {
+        throw new Error(`Ambiguous SPDX license evidence for ${component.name}`)
+      }
+      const license = licenseEntry.license
+      if (license !== undefined && (!license || typeof license !== 'object' || Array.isArray(license))) {
+        throw new Error(`Malformed license identity for ${component.name}`)
+      }
+      if (license && ((license.id !== undefined && typeof license.id !== 'string') ||
+          (license.name !== undefined && typeof license.name !== 'string') ||
+          (license.id !== undefined && license.name !== undefined && license.id !== license.name && (ALLOWED_LICENSES.includes(license.name) || FORBIDDEN_LICENSES.includes(license.name))))) {
+        throw new Error(`Conflicting or malformed license identity for ${component.name}`)
+      }
+      const licenseId = (expression as string | undefined) ?? license?.id ?? license?.name ?? 'UNKNOWN'
 
       if (FORBIDDEN_LICENSES.includes(licenseId)) {
         violations.push({
@@ -292,19 +353,16 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
           license: licenseId,
           status: 'forbidden',
         })
-      } else if (!ALLOWED_LICENSES.includes(licenseId) && licenseId !== 'UNKNOWN') {
-        // Check if it's a compound license with at least one allowed
-        const isCompoundAllowed = ALLOWED_LICENSES.some((al) =>
-          licenseId.includes(al),
-        )
-        if (!isCompoundAllowed) {
-          violations.push({
-            package: component.name ?? 'unknown',
-            version: component.version ?? 'unknown',
-            license: licenseId,
-            status: 'unknown',
-          })
-        }
+      } else if (!ALLOWED_LICENSES.includes(licenseId)) {
+        // License expressions must match an explicitly reviewed allowlist entry.
+        // Substring matching can authorize forbidden or fabricated expressions
+        // merely because they contain an allowed identifier such as "MIT".
+        violations.push({
+          package: component.name ?? 'unknown',
+          version: component.version ?? 'unknown',
+          license: licenseId,
+          status: 'unknown',
+        })
       }
     }
   }
@@ -330,21 +388,35 @@ export interface VulnPolicyResult {
  */
 export function checkVulnerabilityPolicy(
   auditReportPath: string,
+  now: Date = new Date(),
 ): VulnPolicyResult {
-  const now = new Date()
   const errors: string[] = []
 
-  // Check for expired waivers
-  const expiredWaivers = ACTIVE_WAIVERS
-    .filter((w) => new Date(w.expiresAt) < now)
-    .map((w) => w.id)
-
-  // Active (non-expired) waivers
-  const activeWaiverIds = new Set(
-    ACTIVE_WAIVERS
-      .filter((w) => new Date(w.expiresAt) >= now)
-      .map((w) => w.id),
-  )
+  // Waivers expire at the END of their recorded UTC calendar day. No invalid
+  // date, duplicate record, expired exception, or ambiguous approval is valid.
+  const activeWaivers = new Map<string, VulnerabilityWaiver>()
+  const expiredWaivers: string[] = []
+  const seenIds = new Set<string>()
+  for (const waiver of ACTIVE_WAIVERS) {
+    const endOfDay = /^\d{4}-\d{2}-\d{2}$/.test(waiver.expiresAt)
+      ? new Date(`${waiver.expiresAt}T23:59:59.999Z`) : new Date(Number.NaN)
+    if (!Number.isFinite(endOfDay.valueOf())) {
+      errors.push(`Malformed expiry on waiver ${waiver.id}`)
+      continue
+    }
+    if (!waiver.id || !waiver.package || !waiver.approvedBy?.trim() || !waiver.reason?.trim() || seenIds.has(waiver.id) ||
+        !['high', 'critical'].includes(waiver.severity) ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(waiver.approvedAt) ||
+        !Number.isFinite(new Date(`${waiver.approvedAt}T00:00:00.000Z`).valueOf()) ||
+        new Date(`${waiver.approvedAt}T00:00:00.000Z`) > now ||
+        new Date(`${waiver.approvedAt}T00:00:00.000Z`) > endOfDay) {
+      errors.push(`Invalid or duplicate waiver record: ${waiver.id || 'missing-id'}`)
+      continue
+    }
+    seenIds.add(waiver.id)
+    if (endOfDay < now) expiredWaivers.push(waiver.id)
+    else activeWaivers.set(waiver.id, waiver)
+  }
 
   let totalVulns = 0
   let highOrCritical = 0
@@ -353,31 +425,129 @@ export function checkVulnerabilityPolicy(
 
   try {
     const resolvedAuditReportPath = safeResolveUnderRoot(auditReportPath)
-    const report = JSON.parse(readUtf8(resolvedAuditReportPath))
-    const advisories: Record<string, { severity?: string; cves?: string[]; ghpiit_id?: string }> =
-      report.advisories ?? report.vulnerabilities ?? {}
+    const report: unknown = JSON.parse(readUtf8(resolvedAuditReportPath))
+    if (!report || typeof report !== 'object' || Array.isArray(report)) {
+      throw new Error('Audit report must be an object')
+    }
+    const root = report as Record<string, unknown>
+    const metadata = root.metadata
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+      throw new Error('Audit report missing completion metadata')
+    }
+    const details = metadata as Record<string, unknown>
+    const summary = details.vulnerabilities
+    if (!summary || typeof summary !== 'object' || Array.isArray(summary)) {
+      throw new Error('Audit report missing vulnerability summary')
+    }
+    // A forged empty report must not pass by omitting the collector's
+    // completion evidence. Only the audited bulk-collector schema is accepted.
+    if (details.source !== 'npm-bulk-advisories' ||
+        details.status !== 'complete' ||
+        details.lockfile !== 'pnpm-lock.yaml') {
+      throw new Error('Audit report lacks supported collector provenance or completion')
+    }
+    if (!Number.isSafeInteger(details.totalDependencies) ||
+        (details.totalDependencies as number) <= 0) {
+      throw new Error('Audit report has no verified dependency inventory')
+    }
+    // The collector emits one canonical advisory map. Conflicting alternative
+    // maps must not be used to conceal findings by precedence/fallback.
+    if (Object.prototype.hasOwnProperty.call(root, 'vulnerabilities')) {
+      throw new Error('Unexpected alternate vulnerabilities collection in bulk audit report')
+    }
+    const value = root.advisories
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      throw new Error('Audit report has no valid advisories/vulnerabilities collection')
+    }
 
-    for (const [key, advisory] of Object.entries(advisories)) {
+    for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        throw new Error(`Malformed advisory record: ${key}`)
+      }
+      const advisory = raw as Record<string, unknown>
+      // The map key is the primary finding identity. Never allow an empty,
+      // whitespace-spoofed, or control-character key to borrow a secondary
+      // CVE/GHSA waiver, even when the declared id is absent.
+      if (!key.trim() || key !== key.trim() || /[\u0000-\u001f\u007f]/.test(key)) {
+        throw new Error(`Malformed advisory map key: ${JSON.stringify(key)}`)
+      }
+      // Bind the advisory map key to its declared identity. A mismatched ID
+      // must never inherit a waiver belonging to a different finding.
+      if (advisory.id !== undefined && (typeof advisory.id !== 'string' || advisory.id !== key)) {
+        throw new Error(`Advisory identity mismatch: ${key}`)
+      }
+      const severity = advisory.severity
+      if (!['info', 'low', 'moderate', 'high', 'critical'].includes(String(severity))) {
+        throw new Error(`Unknown severity for advisory: ${key}`)
+      }
+      // Validate secondary identifiers at EVERY severity, including low/info.
+      // Otherwise malformed scanner evidence can be hidden in below-threshold entries.
+      // Never silently discard malformed secondary identifiers: doing so can
+      // conceal inconsistent scanner evidence or accidentally authorize a waiver.
+      if (advisory.cves !== undefined &&
+          (!Array.isArray(advisory.cves) ||
+           advisory.cves.some((id: unknown) => typeof id !== 'string' || !/^CVE-[0-9]{4}-[0-9]{4,}$/i.test(id)))) {
+        throw new Error(`Malformed CVE identifiers for advisory: ${key}`)
+      }
+      if (advisory.ghsa_id !== undefined &&
+          (typeof advisory.ghsa_id !== 'string' || !/^GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}$/i.test(advisory.ghsa_id))) {
+        throw new Error(`Malformed GHSA identifier for advisory: ${key}`)
+      }
+      // Every finding must identify its affected artifact, even below the
+      // blocking threshold. Otherwise incomplete scanner evidence can pass.
+      const packageAliases = [advisory.package, advisory.module_name, advisory.name]
+        .filter((candidate) => candidate !== undefined)
+      if (packageAliases.some((candidate) => typeof candidate !== 'string' || !candidate.trim() || candidate !== candidate.trim() || /[\u0000-\u001f\u007f]/.test(candidate)) ||
+          new Set(packageAliases.map((candidate) => (candidate as string).trim())).size > 1) {
+        throw new Error(`Conflicting or malformed package identities for advisory: ${key}`)
+      }
+      const packageString = (packageAliases[0] as string | undefined)?.trim() ?? ''
+      if (!packageString) {
+        throw new Error(`Missing package identity for advisory: ${key}`)
+      }
       totalVulns++
-      const severity = advisory.severity ?? 'unknown'
-      if (severity === 'high' || severity === 'critical') {
-        highOrCritical++
-        // Check if waived by CVE or GHSA ID
-        const ids = [key, ...(advisory.cves ?? [])]
-        const isWaived = ids.some((id) => activeWaiverIds.has(id))
-        if (isWaived) {
-          waived++
-        } else {
-          unwaived++
-          errors.push(`Unwaived ${severity} vulnerability: ${key}`)
-        }
+      if (severity !== 'high' && severity !== 'critical') continue
+      highOrCritical++
+      const additionalIds: string[] = advisory.cves === undefined ? [] : advisory.cves as string[]
+      const ids = [key, ...additionalIds]
+      if (typeof advisory.ghsa_id === 'string') ids.push(advisory.ghsa_id)
+      const isWaived = !!packageString && ids.some((id) => {
+        const waiver = activeWaivers.get(id)
+        return waiver !== undefined && waiver.package === packageString && waiver.severity === severity
+      })
+      if (isWaived) waived++
+      else {
+        unwaived++
+        errors.push(`Unwaived ${severity} vulnerability: ${key} (${packageString || 'unknown-package'})`)
       }
     }
+
+    const summaryDetails = summary as Record<string, unknown>
+    const severities = ['info', 'low', 'moderate', 'high', 'critical'] as const
+    for (const severity of [...severities, 'total']) {
+      const supplied = summaryDetails[severity]
+      if (!Number.isSafeInteger(supplied) || (supplied as number) < 0) {
+        throw new Error(`Malformed or missing vulnerability summary: ${severity}`)
+      }
+    }
+    const counted = Object.fromEntries(severities.map((severity) => [severity, 0])) as Record<string, number>
+    for (const raw of Object.values(value as Record<string, unknown>)) {
+      const severity = (raw as Record<string, unknown>).severity as string
+      counted[severity]++
+    }
+    for (const severity of severities) {
+      if (counted[severity] !== summaryDetails[severity]) {
+        throw new Error(`Audit advisory count disagrees with collector metadata: ${severity}`)
+      }
+    }
+    if (totalVulns !== summaryDetails.total) {
+      throw new Error('Audit advisory total disagrees with collector metadata')
+    }
   } catch (err) {
-    errors.push(`Failed to parse audit report: ${(err as Error).message}`)
+    errors.push(`Invalid or unreadable audit report: ${(err as Error).message}`)
   }
 
-  if (expiredWaivers.length > 0) {
+  if (expiredWaivers.length) {
     errors.push(`Expired waivers requiring review: ${expiredWaivers.join(', ')}`)
   }
 

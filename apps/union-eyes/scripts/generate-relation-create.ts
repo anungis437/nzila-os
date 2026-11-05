@@ -30,7 +30,7 @@ if (new Set(tableNames).size !== tableNames.length) throw new Error('--tables na
 const marker = `platform-migration:${label}`
 const ROLES = ['union_eyes_runtime', 'union_eyes_system']
 
-const declared = new Map<string, { key: string; table: PgTable }>()
+const declared = new Map<string, { key: string; table: PgTable }>() // ga-check:exempt — build-script working state for one generator run, not app persistence
 const labelOf = (table: PgTable): string => {
   const config = getTableConfig(table)
   return config.schema && config.schema !== 'public' ? `${config.schema}.${config.name}` : config.name
@@ -48,10 +48,10 @@ for (const [key, value] of Object.entries(declarations as Record<string, unknown
 for (const name of tableNames) if (!declared.has(name)) throw new Error(`no Drizzle declaration for ${name}`)
 const schemasUsed = [...new Set(tableNames.map((t) => specOf(t).schema))].filter((s) => s !== 'public').sort()
 
-const enumsUsed = new Map<string, { enumName: string; enumValues: string[] }>()
+const enumsUsed = new Map<string, { enumName: string; enumValues: string[] }>() // ga-check:exempt — build-script working state
 const imports: Record<string, unknown> = {}
-const columnCounts = new Map<string, number>()
-const dependsOn = new Map<string, Set<string>>()
+const columnCounts = new Map<string, number>() // ga-check:exempt — build-script working state
+const dependsOn = new Map<string, Set<string>>() // ga-check:exempt — build-script working state
 for (const name of tableNames) {
   const { key, table } = declared.get(name)!
   const config = getTableConfig(table)
