@@ -21,9 +21,9 @@
 
 targetScope = 'resourceGroup'
 
-@description('Deployment environment. Every environment-dependent default below is derived from it.')
+@description('Required explicit deployment target; never inferred as production. Every environment-dependent default below is derived from it.')
 @allowed(['staging', 'prod'])
-param env string = 'prod'
+param env string
 param location string = resourceGroup().location
 param prefix string = 'nzila-ue-v2-${env}'
 
@@ -66,7 +66,7 @@ param cronImageDigest string
 @secure()
 param dbAdminPassword string
 param dbAdminLogin string = 'uev2admin'
-param appDatabaseName string = env == 'prod' ? 'ue_v2_prod' : 'ue_v2_${env}'
+param appDatabaseName string = env == 'prod' ? 'ue_v2_prod' : 'ue_v2_staging'
 @description('PostgreSQL SKU (allowed values are enforced by ../modules/postgres.bicep). Burstable SKUs get no HA and no geo backup.')
 param dbSku string = env == 'prod' ? 'GP_Standard_D4ds_v5' : 'B_Standard_B1ms'
 param dbStorageGb int = env == 'prod' ? 256 : 32
