@@ -128,28 +128,6 @@ export interface VulnerabilityWaiver {
  */
 export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
   {
-    // node-forge RSA PKCS#1 v1.5 signature verification (npm advisory 1240912). No patched version published.
-    // Path: apps/union-eyes > firebase-admin > node-forge. Review by 2026-11-04.
-    id: '1240912',
-    package: 'node-forge',
-    reason: 'No patched version exists upstream. Transitive via firebase-admin; app does not verify untrusted RSA PKCS#1 v1.5 signatures with node-forge. Re-review when upstream fix ships.',
-    approvedBy: 'Aubert Nungisa',
-    approvedAt: '2026-10-04',
-    expiresAt: '2026-11-04',
-    severity: 'high',
-  },
-  {
-    // braces stack-exhaustion DoS (npm advisory 1240992). No patched version published.
-    // Path: @changesets/cli > @changesets/config > micromatch > braces (dev tooling only).
-    id: '1240992',
-    package: 'braces',
-    reason: 'No patched version exists upstream. Dev-only changesets tooling; never shipped in a runtime and no untrusted input reaches it.',
-    approvedBy: 'Aubert Nungisa',
-    approvedAt: '2026-10-04',
-    expiresAt: '2026-11-04',
-    severity: 'high',
-  },
-  {
     // minimatch ReDoS via repeated wildcards (CVE-2026-26996 / GHSA-3ppc-4f35-3m26 / npm advisory 1113371)
     // Affected paths: devDependency chains only (eslint > minimatch, eslint-config-next > typescript-eslint > minimatch)
     // No user-controlled input ever reaches minimatch in production — only in local lint tooling.
@@ -260,41 +238,16 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
   //   - 1117941–1117943 (otel) — auto-instrumentations-node>=0.75.0 / sdk-node@0.217+; absent from audit
   // Fresh high finding 1239030 (adm-zip) remediated by override adm-zip>=0.6.1 (also clears 1193734).
 
-  // npm advisory feed rollover (2026-08-01): new IDs for previously triaged dependency families.
-  // Approved as a temporary bridge while dependency upgrades are prepared.
-  ...[
-    { id: '1123898', pkg: 'brace-expansion' },
-    { id: '1130591', pkg: 'brace-expansion' },
-    { id: '1123911', pkg: 'js-yaml' },
-    { id: '1123912', pkg: 'js-yaml' },
-    { id: '1123940', pkg: 'tar', severity: 'critical' as const },
-    { id: '1123941', pkg: 'tar' },
-    { id: '1123943', pkg: 'socket.io' },
-    { id: '1123944', pkg: 'shell-quote' },
-    { id: '1123967', pkg: 'axios' },
-    { id: '1124007', pkg: 'immutable' },
-    { id: '1124017', pkg: 'immutable' },
-    { id: '1124064', pkg: 'fast-uri' },
-    { id: '1130178', pkg: 'fast-uri' },
-    { id: '1124066', pkg: 'sharp' },
-    { id: '1124170', pkg: 'next' },
-    { id: '1124171', pkg: 'next' },
-    { id: '1124184', pkg: 'next' },
-    { id: '1124192', pkg: 'next' },
-    { id: '1124242', pkg: 'next-auth', severity: 'critical' as const },
-    { id: '1124244', pkg: 'next-auth' },
-    { id: '1124246', pkg: 'next-auth', severity: 'critical' as const },
-    { id: '1124273', pkg: 'find-my-way' },
-    { id: '1124288', pkg: 'postcss' },
-  ].map(({ id, pkg, severity }) => ({
-    id,
-    package: pkg,
-    reason: 'Temporary advisory-ID rollover waiver (2026-08-01). Risk previously triaged for this dependency family; tracked for remediation in the next dependency upgrade sweep.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-01',
-    expiresAt: '2026-10-31',
-    severity: severity ?? ('high' as const),
-  })),
+  // NOTE: Waivers removed 2026-11-04 (fix/deps-security-baseline) after remediation review.
+  // Every removed advisory is absent from `npm-bulk-audit.mjs --audit-level=low` against the
+  // regenerated pnpm-lock.yaml:
+  //   - 1123898, 1130591 (brace-expansion), 1123911, 1123912 (js-yaml), 1123940, 1123941 (tar),
+  //     1123943 (socket.io), 1123944 (shell-quote), 1123967 (axios), 1124007, 1124017 (immutable),
+  //     1124064, 1130178 (fast-uri), 1124066 (sharp), 1124170, 1124171, 1124184, 1124192 (next),
+  //     1124242, 1124244, 1124246 (next-auth), 1124273 (find-my-way), 1124288 (postcss) — the
+  //     2026-08-01 advisory-ID rollover bridge; existing overrides already resolve patched versions.
+  //   - 1240912 (node-forge) — override node-forge>=1.4.1 resolves the patched release.
+  //   - 1240992 (braces) — advisory no longer reported for the installed braces@3.0.3.
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────
