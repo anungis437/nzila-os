@@ -43,8 +43,8 @@ This document defines the **compatibility-first** path for resolving that tail. 
 
 Implemented in:
 
-- [apps/union-eyes/lib/runtime/identity/runtimeIdentityAliasMap.ts](../../../../apps/union-eyes/lib/runtime/identity/runtimeIdentityAliasMap.ts)
-- [apps/union-eyes/lib/runtime/identity/compatibilityFallbacks.ts](../../../../apps/union-eyes/lib/runtime/identity/compatibilityFallbacks.ts)
+- `apps/union-eyes/lib/runtime/identity/runtimeIdentityAliasMap.ts` (removed as dead code in 4bc1602e9, 2026-11-02)
+- `apps/union-eyes/lib/runtime/identity/compatibilityFallbacks.ts` (removed as dead code in 4bc1602e9, 2026-11-02)
 
 The alias map is the **single source of truth** for ICRA↔OCRA equivalence at every surface. Resolution helpers in `compatibilityFallbacks.ts` consume it.
 
