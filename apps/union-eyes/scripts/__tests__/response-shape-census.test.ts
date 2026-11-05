@@ -368,5 +368,5 @@ describe('the frontend against the routes it reads', () => {
     expect(report.blind.unfollowable.length).toBeLessThanOrEqual(129)
     const over = report.findings.length > CEILING ? report.findings.map((finding) => `${finding.kind} ${finding.method} ${finding.pattern.replace(/\u0001/g, '{…}')} ${finding.kind === 'DECLARED_KEY_NOT_RETURNED' ? 'declares' : 'reads'} ${finding.keys.join(' | ')}  ${finding.sites[0].file}:${finding.sites[0].line}`) : []
     expect(over).toEqual([])
-  }, 300_000)
+  }, 900_000) // ~4 min under coverage instrumentation (2026-11-05); a repository-wide scan that grows with the app
 })
