@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@nzila/payments-stripe', () => ({
   createStripeClientForKey: (...args: unknown[]) => {
-    mocks.factory(...args)
+    mocks.factory(args[0])
     return {
       paymentIntents: { create: mocks.intentCreate, capture: mocks.intentCapture },
       charges: { retrieve: mocks.chargeRetrieve },

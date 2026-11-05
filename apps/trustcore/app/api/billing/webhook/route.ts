@@ -3,10 +3,9 @@
  *
  * POST /api/billing/webhook
  *
- * Handles incoming Stripe webhook events. Signature verification is enforced
- * when STRIPE_WEBHOOK_SECRET is set. Events are idempotent — duplicate event
- * IDs are ignored via an in-process Set (sufficient for single-instance;
- * replace with a DB table for multi-replica deployments).
+ * Handles incoming Stripe webhook events. Signature verification is mandatory.
+ * The current in-memory replay guard is not a durable multi-replica delivery ledger;
+ * production rollout remains blocked pending exactly-once durable processing.
  *
  * Handled events:
  *   - checkout.session.completed      → upsert subscription as active/pro
@@ -21,6 +20,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { upsertTrustcoreSubscription } from '@nzila/db/queries/trustcore'
 import { getStripeClient } from '@nzila/payments-stripe'
+import type { Stripe } from '@nzila/payments-stripe'
 
 // In-process idempotency cache (sufficient for single-instance deployments)
 const processedEventIds = new Set<string>()
@@ -32,9 +32,9 @@ export async function POST(req: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
-  // ── No Stripe configured — log and ack ───────────────────────────────────
+  // Fail closed: returning 2xx would irreversibly acknowledge an unverified event.
   if (!stripeKey || !webhookSecret) {
-    return NextResponse.json({ received: true, note: 'Stripe not yet configured' })
+    return NextResponse.json({ error: 'Stripe webhook is not configured' }, { status: 503 })
   }
 
   // ── Signature verification ───────────────────────────────────────────────
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
   }
 
-  let event: import('stripe').Stripe.Event
+  let event: Stripe.Event
   try {
     const stripe = getStripeClient()
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as import('stripe').Stripe.Checkout.Session
+        const session = event.data.object as Stripe.Checkout.Session
         const orgId = session.metadata?.orgId
         const plan = (session.metadata?.plan ?? 'pro') as 'pro' | 'premium'
         if (!orgId) {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'invoice.paid': {
-        const invoice = event.data.object as import('stripe').Stripe.Invoice
+        const invoice = event.data.object as Stripe.Invoice
         // In Stripe v22 (dahlia), subscription ID lives on invoice.parent
         const parentSub = invoice.parent?.subscription_details?.subscription
         const subId = typeof parentSub === 'string' ? parentSub : null
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.updated': {
-        const sub = event.data.object as import('stripe').Stripe.Subscription
+        const sub = event.data.object as Stripe.Subscription
         const orgId = sub.metadata?.orgId
         if (!orgId) {
           break
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.deleted': {
-        const sub = event.data.object as import('stripe').Stripe.Subscription
+        const sub = event.data.object as Stripe.Subscription
         const orgId = sub.metadata?.orgId
         if (!orgId) {
           break
