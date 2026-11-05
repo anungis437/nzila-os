@@ -2,10 +2,22 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 import { describe, it, expect } from 'vitest'
-import { checkVulnerabilityPolicy, validateSbomLicenses } from './supply-chain-policy'
+import { checkVulnerabilityPolicy, isCanonicalUtcDate, validateSbomLicenses } from './supply-chain-policy'
 
 const atApproval = new Date('2026-10-10T12:00:00Z')
 const fixture = (name: string) => `tooling/security/fixtures/${name}`
+
+describe('waiver calendar integrity', () => {
+  it('accepts valid leap days and rejects normalized impossible dates', () => {
+    expect(isCanonicalUtcDate('2024-02-29')).toBe(true)
+    expect(isCanonicalUtcDate('2026-02-29')).toBe(false)
+    expect(isCanonicalUtcDate('2026-02-30')).toBe(false)
+    expect(isCanonicalUtcDate('2026-04-31')).toBe(false)
+    expect(isCanonicalUtcDate('2026-13-01')).toBe(false)
+    expect(isCanonicalUtcDate('2026-11-05')).toBe(true)
+    expect(isCanonicalUtcDate('2026-11-05T00:00:00Z')).toBe(false)
+  })
+})
 
 describe('security gate input containment', () => {
   it('refuses directory inputs rather than treating them as an empty audit or SBOM', () => {
