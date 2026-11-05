@@ -210,7 +210,7 @@ describe('EC-G03 guards', () => {
     });
   });
 
-  it('does not widen canAccessDashboardPath allow-lists', () => {
+  it('pins role-eligible deep-link allow-lists independently of frozen primary navigation', () => {
     expect(getAllowedPrefixesByExperience()).toEqual({
       // Widened only by the frozen UE-MEMBER-CANONICAL-2.1 destinations; each has a member page.
       member: [
@@ -234,6 +234,7 @@ describe('EC-G03 guards', () => {
         '/dashboard/operations',
         '/dashboard/inbox',
         '/dashboard/intelligence',
+        '/dashboard/cba-intelligence',
         '/dashboard/members',
         '/dashboard/documents',
         '/dashboard/correspondence',
@@ -255,6 +256,7 @@ describe('EC-G03 guards', () => {
         '/dashboard/priorities',
         '/dashboard/committees',
         '/dashboard/intelligence',
+        '/dashboard/cba-intelligence',
         '/dashboard/executive-operating-intelligence',
         '/dashboard/governance-center',
         '/dashboard/outcomes',
@@ -270,6 +272,7 @@ describe('EC-G03 guards', () => {
         '/dashboard/workbench',
         '/dashboard/continuity-intelligence',
         '/dashboard/intelligence',
+        '/dashboard/cba-intelligence',
         '/dashboard/audits',
         '/dashboard/settings',
         '/dashboard/profile',
@@ -282,6 +285,7 @@ describe('EC-G03 guards', () => {
         '/dashboard/admin/members',
         '/dashboard/admin/onboarding',
         '/dashboard/governance',
+        '/dashboard/cba-intelligence',
         '/dashboard/audits',
         '/dashboard/security',
         '/dashboard/integrations',

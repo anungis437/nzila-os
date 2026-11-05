@@ -234,6 +234,8 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/operations',
     '/dashboard/inbox',
     '/dashboard/intelligence',
+    // Existing server-side CBA role and entitlement guards remain authoritative.
+    '/dashboard/cba-intelligence', // Non-primary deep link; not a frozen staff destination.
     '/dashboard/members',
     '/dashboard/documents',
     '/dashboard/correspondence',
@@ -252,6 +254,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/workbench',
     '/dashboard/continuity-intelligence',
     '/dashboard/intelligence',
+    '/dashboard/cba-intelligence', // Eligible governance reader deep link; page/API enforce access.
     '/dashboard/audits',
     '/dashboard/settings',
     '/dashboard/profile',
@@ -264,6 +267,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/admin/members',
     '/dashboard/admin/onboarding',
     '/dashboard/governance',
+    '/dashboard/cba-intelligence', // Eligible admin deep link; not a sidebar destination.
     '/dashboard/audits',
     '/dashboard/security',
     '/dashboard/integrations',
