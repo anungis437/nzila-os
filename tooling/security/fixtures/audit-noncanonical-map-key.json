@@ -1,0 +1,26 @@
+{
+  "advisories": {
+    " ": {
+      "package": "minimatch",
+      "severity": "high",
+      "cves": [
+        "CVE-2026-26996"
+      ],
+      "title": "fixture: whitespace primary ID with valid secondary waiver"
+    }
+  },
+  "metadata": {
+    "source": "npm-bulk-advisories",
+    "status": "complete",
+    "lockfile": "pnpm-lock.yaml",
+    "totalDependencies": 2,
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 1,
+      "critical": 0,
+      "total": 1
+    }
+  }
+}

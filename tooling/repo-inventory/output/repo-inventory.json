@@ -3,9 +3,9 @@
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 66,
+  "workflowCount": 67,
   "contractTestCount": 306,
-  "tsTestFileCount": 3609,
+  "tsTestFileCount": 3610,
   "pythonTestFileCount": 52,
   "apps": [
     {
@@ -906,6 +906,7 @@
     "runtime-governance-attestation.yml",
     "sbom.yml",
     "secret-scan.yml",
+    "security-bulk-audit-contract.yml",
     "security-design-review.yml",
     "trivy.yml",
     "ue-build-push-proof.yml",

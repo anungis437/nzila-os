@@ -1,0 +1,33 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "components": [
+    {
+      "type": "library",
+      "name": "conflicting-license",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "name": "GPL-3.0-only"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "descriptive-license",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "name": "MIT License"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "components": [
+    {
+      "type": "library",
+      "name": "allowed-expression",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "forbidden-expression",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "expression": "GPL-3.0-only"
+        }
+      ]
+    }
+  ]
+}
