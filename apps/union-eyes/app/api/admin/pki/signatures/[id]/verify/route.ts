@@ -1,66 +1,24 @@
-// =====================================================================================
-// PKI Verify Signature API
-// =====================================================================================
-// POST /api/admin/pki/signatures/[id]/verify - Verify a signature
-// =====================================================================================
+/**
+ * POST /api/admin/pki/signatures/[id]/verify
+ *
+ * Not implemented. The route verified an attestation record that only the signing route (itself not implemented) could have written, against
+ * a signature table no other code populates; an attestation holds no cryptographic signature value, so a verification could confirm a record
+ * but never a signature. It answers HTTP 501 rather than present itself as signature verification.
+ */
+import { withApi, ApiError } from '@/lib/api/framework';
 
-import { NextResponse } from 'next/server'
-import { verifySignature, verifyDocumentIntegrity } from '@/services/pki/verification-service'
-import { z } from 'zod'
-import { withRoleAuth } from '@/lib/api-auth-guard'
-import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses'
-import { logger } from '@/lib/logger'
-import { throwIfUnprovisionedRelation } from '@/lib/api/authorization-denial'
+export const dynamic = 'force-dynamic';
 
-const adminPkiSignaturesVerifySchema = z.object({
-  verifyType: z.string().optional(),
-  documentContent: z.string().optional(),
-})
-
-export const POST = withRoleAuth('admin', async (request, context) => {
-  const { params } = context as { params: { id: string } }
-  try {
-    const signatureOrDocumentId = params.id
-    const body = await request.json()
-    // Validate request body
-    const validation = adminPkiSignaturesVerifySchema.safeParse(body)
-    if (!validation.success) {
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        'Invalid request data',
-        validation.error.errors,
-      )
-    }
-
-    const { verifyType, documentContent } = validation.data
-
-    // Determine verification type
-    if (verifyType === 'document') {
-      // Verify entire document integrity
-      const result = await verifyDocumentIntegrity(
-        signatureOrDocumentId,
-        documentContent ? Buffer.from(documentContent, 'base64') : undefined,
-      )
-
-      return NextResponse.json({
-        success: true,
-        verification: result,
-      })
-    } else {
-      // Verify single signature (default)
-      const result = await verifySignature(
-        signatureOrDocumentId,
-        documentContent ? Buffer.from(documentContent, 'base64') : undefined,
-      )
-
-      return NextResponse.json({
-        success: true,
-        verification: result,
-      })
-    }
-  } catch (error) {
-    throwIfUnprovisionedRelation(error)
-    logger.error('Failed to verify signature', { error })
-    return NextResponse.json({ error: 'Failed to verify signature' }, { status: 500 })
-  }
-})
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: {
+      tags: ['Signatures'],
+      summary: '/api/admin/pki/signatures/[id]/verify (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/admin/pki/signatures/[id]/verify is not implemented: no signature record can exist for it to verify, and an attestation holds no cryptographic signature to check.');
+  },
+);

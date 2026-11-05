@@ -33,7 +33,7 @@ const callers = {
   recognition_awards: 'lib/services/rewards/award-service.ts',
   reserved_matter_votes: 'app/api/governance/reserved-matters/[id]/class-b-vote/route.ts',
   union_density: 'lib/services/external-data/wage-enrichment-service.ts',
-  user_notification_preferences: 'lib/workers/notification-worker.ts',
+  user_notification_preferences: 'app/api/notifications/preferences/route.ts',
   wage_benchmarks: 'lib/services/external-data/wage-enrichment-service.ts',
   webhook_receipts: 'lib/services/rewards/webhook-service.ts',
   commercial_contracts: 'app/api/pilot/apply/[id]/commercial-transition/route.ts',

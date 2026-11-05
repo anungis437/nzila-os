@@ -3,14 +3,9 @@ import {
   UserRole,
   Permission,
   ROLE_PERMISSIONS,
-  ROUTE_PERMISSIONS,
-  NAV_ITEMS,
-  ADMIN_NAV_ITEMS,
   hasPermission,
   hasAnyPermission,
   hasAllPermissions,
-  canAccessRoute,
-  getAccessibleNavItems,
   getRoleLevel,
   hasHigherOrEqualRole,
 } from '../roles';
@@ -132,11 +127,12 @@ describe('ROLE_PERMISSIONS mapping', () => {
     expect(stPerms).toContain(Permission.APPROVE_FINANCIAL);
   });
 
-  it('steward has claim assignment permission', () => {
+  it('steward holds no organization-wide claim read/edit/assignment grant (case authority is per case)', () => {
     const stewardPerms = ROLE_PERMISSIONS[UserRole.STEWARD];
-    expect(stewardPerms).toContain(Permission.ASSIGN_CLAIMS);
-    expect(stewardPerms).toContain(Permission.VIEW_ALL_CLAIMS);
-    expect(stewardPerms).toContain(Permission.EDIT_ALL_CLAIMS);
+    expect(stewardPerms).not.toContain(Permission.ASSIGN_CLAIMS);
+    expect(stewardPerms).not.toContain(Permission.VIEW_ALL_CLAIMS);
+    expect(stewardPerms).not.toContain(Permission.EDIT_ALL_CLAIMS);
+    expect(ROLE_PERMISSIONS[UserRole.CHIEF_STEWARD]).toContain(Permission.ASSIGN_CLAIMS);
   });
 
   it('CLC executive has cross-org and congress permissions', () => {
@@ -213,58 +209,6 @@ describe('hasAllPermissions', () => {
   });
 });
 
-describe('canAccessRoute', () => {
-  it('allows access to dashboard for any role', () => {
-    expect(canAccessRoute(UserRole.MEMBER, '/dashboard')).toBe(true);
-    expect(canAccessRoute(UserRole.GUEST, '/dashboard')).toBe(true);
-  });
-
-  it('restricts admin panel to roles with VIEW_ADMIN_PANEL', () => {
-    expect(canAccessRoute(UserRole.ADMIN, '/admin')).toBe(true);
-    expect(canAccessRoute(UserRole.MEMBER, '/admin')).toBe(false);
-  });
-
-  it('allows access to undefined routes', () => {
-    expect(canAccessRoute(UserRole.MEMBER, '/some-undefined-route')).toBe(true);
-  });
-
-  it('restricts claims route to roles with VIEW_OWN_CLAIMS', () => {
-    expect(canAccessRoute(UserRole.MEMBER, '/dashboard/claims')).toBe(true);
-    expect(canAccessRoute(UserRole.GUEST, '/dashboard/claims')).toBe(false);
-  });
-
-  it('restricts congress route properly', () => {
-    expect(canAccessRoute(UserRole.CLC_EXECUTIVE, '/dashboard/congress')).toBe(true);
-    expect(canAccessRoute(UserRole.MEMBER, '/dashboard/congress')).toBe(false);
-  });
-});
-
-describe('getAccessibleNavItems', () => {
-  it('returns nav items accessible to admin', () => {
-    const items = getAccessibleNavItems(UserRole.ADMIN);
-    expect(items.length).toBeGreaterThan(0);
-    expect(items.map(i => i.href)).toContain('/dashboard');
-  });
-
-  it('returns fewer items for member', () => {
-    const adminItems = getAccessibleNavItems(UserRole.ADMIN);
-    const memberItems = getAccessibleNavItems(UserRole.MEMBER);
-    expect(memberItems.length).toBeLessThanOrEqual(adminItems.length);
-  });
-
-  it('returns admin nav items when adminMode=true', () => {
-    const items = getAccessibleNavItems(UserRole.ADMIN, true);
-    expect(items.length).toBeGreaterThan(0);
-    const hrefs = items.map(i => i.href);
-    expect(hrefs.some(h => h.startsWith('/admin'))).toBe(true);
-  });
-
-  it('returns no admin nav items for member', () => {
-    const items = getAccessibleNavItems(UserRole.MEMBER, true);
-    expect(items).toHaveLength(0);
-  });
-});
-
 describe('getRoleLevel', () => {
   it('APP_OWNER has highest level', () => {
     expect(getRoleLevel(UserRole.APP_OWNER)).toBe(250);
@@ -300,27 +244,6 @@ describe('hasHigherOrEqualRole', () => {
 
   it('same role returns true', () => {
     expect(hasHigherOrEqualRole(UserRole.STEWARD, UserRole.STEWARD)).toBe(true);
-  });
-});
-
-describe('ROUTE_PERMISSIONS', () => {
-  it('defines permissions for core routes', () => {
-    expect(ROUTE_PERMISSIONS['/dashboard']).toEqual([]);
-    expect(ROUTE_PERMISSIONS['/admin']).toContain(Permission.VIEW_ADMIN_PANEL);
-    expect(ROUTE_PERMISSIONS['/dashboard/claims']).toContain(Permission.VIEW_OWN_CLAIMS);
-  });
-});
-
-describe('NAV_ITEMS / ADMIN_NAV_ITEMS', () => {
-  it('NAV_ITEMS has Dashboard as first item', () => {
-    expect(NAV_ITEMS[0].href).toBe('/dashboard');
-    expect(NAV_ITEMS[0].requiredPermissions).toEqual([]);
-  });
-
-  it('ADMIN_NAV_ITEMS all have adminOnly true', () => {
-    for (const item of ADMIN_NAV_ITEMS) {
-      expect(item.adminOnly).toBe(true);
-    }
   });
 });
 

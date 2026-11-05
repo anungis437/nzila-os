@@ -18,7 +18,7 @@ import {
 
 // ── Shared ──────────────────────────────────────────────────────────────────
 
-export const uuidSchema = z.string().uuid()
+export const uuidSchema = z.guid()
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -43,7 +43,7 @@ export const createCustomerSchema = z.object({
   email: z.string().email().nullable().default(null),
   phone: z.string().max(30).nullable().default(null),
   address: customerAddressSchema.nullable().default(null),
-  externalIds: z.record(z.string()).default({}),
+  externalIds: z.record(z.string(), z.string()).prefault({}),
 })
 
 // ── Opportunity ─────────────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ export const ACCEPTANCE_AUTH_VERSION = 'ue-acceptance-v1'
 export const ACCEPTANCE_AUTH_ISSUER = 'union-eyes-staging-acceptance'
 export const ACCEPTANCE_AUTH_AUDIENCE = 'union-eyes-runtime'
 export const ACCEPTANCE_AUTH_MAX_TTL_SECONDS = 15 * 60
+export const ACCEPTANCE_AUTH_MIN_SECRET_LENGTH = 32
 export const ACCEPTANCE_AUTH_MAX_FUTURE_IAT_SECONDS = 60
 
 export interface AcceptanceAuthEnv {
@@ -97,7 +98,8 @@ function allowedUserIds(env: AcceptanceAuthEnv): Set<string> {
 
 export function isAcceptanceAuthRuntimeEnabled(env: AcceptanceAuthEnv = process.env): boolean {
   if (!bool(env.UNION_EYES_ACCEPTANCE_AUTH_ENABLED)) return false
-  if (!env.UNION_EYES_ACCEPTANCE_AUTH_SECRET) return false
+  // A weak shared secret signs tokens anyone can forge: the sign-in stays off rather than run on one.
+  if ((env.UNION_EYES_ACCEPTANCE_AUTH_SECRET ?? '').length < ACCEPTANCE_AUTH_MIN_SECRET_LENGTH) return false
   if (normalize(env.NODE_ENV) !== 'production') return false
 
   const surface = configuredSurfaceEnvironment(env)

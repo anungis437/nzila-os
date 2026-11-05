@@ -1,0 +1,13 @@
+const fs=require('fs');
+const p='app/api/__tests__/organization-members-search.route.test.ts';
+let s=fs.readFileSync(p,'utf8');
+function rep(a,b){if(!s.includes(a))throw new Error('missing '+a.slice(0,50));s=s.split(a).join(b);}
+rep("vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));","vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }) } }));");
+rep("  ilike: vi.fn(),\n  sql: vi.fn(),\n}));","  ilike: vi.fn(),\n  asc: vi.fn(),\n  sql: vi.fn(),\n}));");
+rep("  ilike: m.ilike,\n  sql: m.sql,","  ilike: m.ilike,\n  asc: m.asc,\n  sql: m.sql,");
+rep("    m.sql.mockImplementation(","    m.asc.mockImplementation((a: unknown) => ({ asc: a }));\n    m.sql.mockImplementation(");
+// chain: where -> orderBy -> limit -> offset
+s=s.split("const limit = vi.fn().mockResolvedValue([]);\n    const where = vi.fn().mockReturnValue({ limit });").join("const offset = vi.fn().mockResolvedValue([]);\n    const limit = vi.fn().mockReturnValue({ offset });\n    const where = vi.fn().mockReturnValue({ orderBy: vi.fn().mockReturnValue({ limit }) });");
+rep("const limit = vi.fn().mockResolvedValue(rows);\n    const where = vi.fn().mockReturnValue({ limit });","const offset = vi.fn().mockResolvedValue(rows);\n    const limit = vi.fn().mockReturnValue({ offset });\n    const where = vi.fn().mockReturnValue({ orderBy: vi.fn().mockReturnValue({ limit }) });");
+rep("    expect(limit).toHaveBeenCalledWith(50);\n  });","    expect(limit).toHaveBeenCalledWith(50);\n    expect(offset).toHaveBeenCalledWith(0);\n  });\n\n  it('takes LIKE wildcards in the search text literally and bounds the term (DEF-0B9-ORG-DIRECTORY-SEARCH-UNESCAPED-WILDCARDS)', async () => {\n    const offset = vi.fn().mockResolvedValue([]);\n    const limit = vi.fn().mockReturnValue({ offset });\n    const where = vi.fn().mockReturnValue({ orderBy: vi.fn().mockReturnValue({ limit }) });\n    m.db.select.mockReturnValue({ from: vi.fn().mockReturnValue({ where }) });\n    const { GET } = await loadRoute();\n    await GET(new NextRequest('http://localhost/api/organization/members/search?__test_org_id=org_1&q=100%25_a&limit=500&offset=100'));\n    expect(m.ilike).toHaveBeenCalledWith(m.organizationMembers.name, '%100\\\\%\\\\_a%');\n    expect(limit).toHaveBeenCalledWith(50);\n    expect(offset).toHaveBeenCalledWith(100);\n    await expect(GET(new NextRequest(`http://localhost/api/organization/members/search?__test_org_id=org_1&q=${'a'.repeat(101)}`))).rejects.toThrow('at most 100');\n  });");
+fs.writeFileSync(p,s);

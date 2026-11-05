@@ -15,9 +15,8 @@
  */
 
 import { db } from '@/db';
-import { eq, lte, and } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { memberLocationConsent, locationTracking } from '@/db/schema';
-import { logger } from '@/lib/logger';
 
 export type LocationPurpose = 
   | 'strike_line_tracking'
@@ -264,25 +263,6 @@ export class LocationTrackingService {
   }
 
   /**
-   * Purge expired locations (run hourly via cron)
-   */
-  async purgeExpiredLocations(): Promise<{
-    deletedCount: number;
-    message: string;
-  }> {
-    const now = new Date();
-    
-    const result = await db.delete(locationTracking)
-      .where(lte(locationTracking.expiresAt, now))
-      .returning();
-
-    return {
-      deletedCount: result.length,
-      message: `Purged ${result.length} expired location records (older than ${this.MAX_RETENTION_HOURS} hours)`
-    };
-  }
-
-  /**
    * Purge all location data for a specific member
    * Used when consent is revoked
    */
@@ -377,13 +357,5 @@ export class LocationTrackingService {
 // Export singleton instance
 export const locationTrackingService = new LocationTrackingService();
 
-/**
- * Cron job to run hourly
- * Purges location data older than 24 hours
- */
-export async function scheduledLocationPurge() {
-  const result = await locationTrackingService.purgeExpiredLocations();
-  logger.info('[CRON] Location purge', { message: result.message, deletedCount: result.deletedCount });
-  return result;
-}
+// The 24-hour retention sweep is app/api/cron/location-retention (services/geofence-privacy-service.ts).
 

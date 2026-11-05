@@ -35,10 +35,11 @@
  * that was previously missing. Fail closed: any missing org context is denied.
  */
 import { NextResponse, type NextRequest } from 'next/server';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from '@/db';
-import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations } from '@/db/schema';
+import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations, organizationMembers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
 
@@ -124,9 +125,23 @@ export function getPilotEffectiveOrganizationId(
   return getPilotVerifiedOrganizationId(application) ?? getPilotClaimedOrganizationId(application);
 }
 
+/**
+ * What the server itself could establish about the applicant's link to the organization. These are checks the
+ * system made, not the administrator's statement (that is `basis`).
+ */
+export type PilotOrganizationCorroboration = {
+  /** The applicant's contact e-mail is an active member address of the target organization. */
+  contactIsActiveMember: boolean;
+  /** The organization name the applicant gave equals the target organization's name (case and spacing aside). */
+  organizationNameMatches: boolean;
+};
+
 export type BindPilotOrganizationResult =
-  | { ok: true; organizationId: string }
-  | { ok: false; status: 404 | 409; error: string };
+  | { ok: true; organizationId: string; corroboration?: PilotOrganizationCorroboration; uncorroboratedAcknowledged?: boolean }
+  | { ok: false; status: 404 | 409; error: string; corroboration?: PilotOrganizationCorroboration };
+
+const normalizeOrganizationName = (value: string | null | undefined): string =>
+  (value ?? '').normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
 
 /**
  * True if `pilotId` has ANY real financial artifact — a commercial
@@ -214,12 +229,19 @@ export async function bindPilotOrganization(params: {
   pilotId: string;
   organizationId: string;
   verifiedBy: string;
+  /** What the administrator relied on to conclude the applicant speaks for the organization; kept in the audit record. */
+  basis?: string;
+  /**
+   * Required when the server found nothing linking the applicant to the organization (no member address, no name
+   * match); the audit record then states the verification rests on the administrator's basis alone.
+   */
+  acknowledgeUncorroborated?: boolean;
 }): Promise<BindPilotOrganizationResult> {
-  const { pilotId, organizationId, verifiedBy } = params;
+  const { pilotId, organizationId, verifiedBy, basis, acknowledgeUncorroborated } = params;
 
-  return withSystemContext(async (_tx) => {
+  return withSystemContext(async (tx) => {
     const [org] = await db
-      .select({ id: organizations.id })
+      .select({ id: organizations.id, name: organizations.name })
       .from(organizations)
       .where(eq(organizations.id, organizationId));
 
@@ -228,7 +250,11 @@ export async function bindPilotOrganization(params: {
     }
 
     const [pilot] = await db
-      .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .select({
+        verifiedOrganizationId: pilotApplications.verifiedOrganizationId,
+        contactEmail: pilotApplications.contactEmail,
+        organizationName: pilotApplications.organizationName,
+      })
       .from(pilotApplications)
       .where(eq(pilotApplications.id, pilotId))
       .limit(1)
@@ -251,27 +277,76 @@ export async function bindPilotOrganization(params: {
       };
     }
 
+    const contactEmail = (pilot.contactEmail ?? '').trim().toLowerCase();
+    const [memberMatch] = contactEmail
+      ? await db
+          .select({ id: organizationMembers.id })
+          .from(organizationMembers)
+          .where(
+            and(
+              eq(organizationMembers.organizationId, organizationId),
+              eq(organizationMembers.status, 'active'),
+              sql`lower(${organizationMembers.email}) = ${contactEmail}`,
+            ),
+          )
+          .limit(1)
+      : [];
+    const corroboration: PilotOrganizationCorroboration = {
+      contactIsActiveMember: Boolean(memberMatch),
+      organizationNameMatches:
+        normalizeOrganizationName(pilot.organizationName) !== '' &&
+        normalizeOrganizationName(pilot.organizationName) === normalizeOrganizationName(org.name),
+    };
+    const corroborated = corroboration.contactIsActiveMember || corroboration.organizationNameMatches;
+    if (!corroborated && acknowledgeUncorroborated !== true) {
+      return {
+        ok: false,
+        status: 409,
+        corroboration,
+        error:
+          'Nothing the system can check links this applicant to the organization: the contact e-mail is not an active member address and the organization name differs. ' +
+          'Confirm the basis independently and resubmit with acknowledgeUncorroborated to record the verification as resting on that basis alone.',
+      };
+    }
+
+    const verifiedAt = new Date();
     const [updated] = await db
       .update(pilotApplications)
       .set({
         verifiedOrganizationId: organizationId,
         verifiedBy,
-        verifiedAt: new Date(),
+        verifiedAt,
       })
-      .where(eq(pilotApplications.id, pilotId))
+      .where(and(eq(pilotApplications.id, pilotId), isNull(pilotApplications.verifiedOrganizationId)))
       .returning({ id: pilotApplications.id });
 
     if (!updated) {
-      return { ok: false, status: 409, error: 'Pilot application not found' };
+      return { ok: false, status: 409, error: 'Pilot application not found or already bound' };
     }
 
-    return { ok: true, organizationId };
+    // The binding and its audit record commit together; a failed audit rolls the binding back.
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: verifiedBy,
+      action: 'pilot.application.verify_organization',
+      resourceType: 'pilot_applications',
+      resourceId: pilotId,
+      details: {
+        verifiedOrganizationId: organizationId,
+        verifiedAt: verifiedAt.toISOString(),
+        ...(basis ? { basis } : {}),
+        corroboration,
+        uncorroboratedAcknowledged: !corroborated,
+      },
+    });
+
+    return { ok: true, organizationId, corroboration, uncorroboratedAcknowledged: !corroborated };
   });
 }
 
 export type RebindPilotOrganizationResult =
   | { ok: true; organizationId: string; previousOrganizationId: string }
-  | { ok: false; status: 404 | 409; error: string };
+  | { ok: false; status: 403 | 404 | 409; error: string };
 
 /**
  * Platform-only CORRECTION of an already-bound pilot application's verified
@@ -319,11 +394,12 @@ export type RebindPilotOrganizationResult =
  *     financial-artifact-creating transition. Reachable only when NO
  *     financial artifact exists yet (round 27), so this clear can never
  *     itself create the dead end described above.
- *   - Logs a structured warning (`logger.warn`) with the full
- *     before/after/reason/actor for traceability. This is NOT currently a
- *     durable, queryable audit-event row (no `audit_logs` write) — treat it
- *     as "logged for traceability," not "audited," until that gap is
- *     closed.
+ *   - Records the change durably in the same transaction, under both the new and
+ *     the previous organization (`pilot.application.rebind_organization` /
+ *     `pilot.application.organization_unbound`): a failed audit write rolls the
+ *     rebind back. It also logs a structured warning for traceability.
+ *   - The administrator who made the current binding (`verifiedBy`) cannot
+ *     rebind it (403): a correction needs a second platform administrator.
  */
 export async function rebindPilotOrganization(params: {
   pilotId: string;
@@ -338,7 +414,7 @@ export async function rebindPilotOrganization(params: {
     return { ok: false, status: 409, error: 'A non-empty reason is required to rebind a pilot application\'s verified organization.' };
   }
 
-  return withSystemContext(async (_tx) => {
+  return withSystemContext(async (tx) => {
     const [org] = await db
       .select({ id: organizations.id })
       .from(organizations)
@@ -349,7 +425,10 @@ export async function rebindPilotOrganization(params: {
     }
 
     const [pilot] = await db
-      .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .select({
+        verifiedOrganizationId: pilotApplications.verifiedOrganizationId,
+        verifiedBy: pilotApplications.verifiedBy,
+      })
       .from(pilotApplications)
       .where(eq(pilotApplications.id, pilotId))
       .limit(1)
@@ -373,6 +452,16 @@ export async function rebindPilotOrganization(params: {
       return { ok: true, organizationId, previousOrganizationId };
     }
 
+    // A correction is a second decision on the binding: the administrator who made the binding cannot also approve
+    // its correction.
+    if (pilot.verifiedBy && pilot.verifiedBy === verifiedBy) {
+      return {
+        ok: false,
+        status: 403,
+        error: 'The platform administrator who bound this organization cannot rebind it; a different platform administrator must approve the correction.',
+      };
+    }
+
     const hasFinancialArtifacts = await pilotHasFinancialArtifacts(pilotId);
 
     if (hasFinancialArtifacts) {
@@ -387,12 +476,13 @@ export async function rebindPilotOrganization(params: {
       };
     }
 
-    await db
+    const verifiedAt = new Date();
+    const [updated] = await db
       .update(pilotApplications)
       .set({
         verifiedOrganizationId: organizationId,
         verifiedBy,
-        verifiedAt: new Date(),
+        verifiedAt,
         // Round 26: stale commercial terms approved under the PREVIOUS
         // verified organization must never remain authoritative for the
         // new one — force fresh approveCommercialTerms() before any further
@@ -403,7 +493,37 @@ export async function rebindPilotOrganization(params: {
         commercialTermsApprovedBy: null,
         commercialTermsApprovedAt: null,
       })
-      .where(eq(pilotApplications.id, pilotId));
+      .where(and(eq(pilotApplications.id, pilotId), eq(pilotApplications.verifiedOrganizationId, previousOrganizationId)))
+      .returning({ id: pilotApplications.id });
+
+    if (!updated) {
+      return { ok: false, status: 409, error: 'The pilot application was changed concurrently; reload it and retry.' };
+    }
+
+    // The binding change is recorded under both organizations, in this transaction: a failed audit rolls it back.
+    const details = {
+      previousOrganizationId,
+      organizationId,
+      reason,
+      clearedCommercialTerms: true,
+      verifiedAt: verifiedAt.toISOString(),
+    };
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: verifiedBy,
+      action: 'pilot.application.rebind_organization',
+      resourceType: 'pilot_applications',
+      resourceId: pilotId,
+      details,
+    });
+    await persistAtomicAudit(tx, {
+      organizationId: previousOrganizationId,
+      userId: verifiedBy,
+      action: 'pilot.application.organization_unbound',
+      resourceType: 'pilot_applications',
+      resourceId: pilotId,
+      details,
+    });
 
     logger.warn('pilot application verified-organization rebind (correction)', {
       pilotId,

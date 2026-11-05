@@ -35,7 +35,7 @@ export const SYSTEM_SCHEMA_USAGE = ['public', 'user_management']
  * Exact non-public grants installed by the scoped auth migrations.
  * 0006: runtime SELECT on user_management.users and organization_users.
  * 0007: system grants on the auth tables.
- * 0008: runtime INSERT on audit_security.audit_logs.
+ * 0008: runtime INSERT on audit_security.audit_logs; scoped 0045 adds tenant-RLS SELECT.
  */
 export const SCOPED_NONPUBLIC_PRIVILEGES = [
   { schema: 'user_management', table: 'users', runtime: ['SELECT'], system: ['SELECT', 'UPDATE'] },
@@ -44,7 +44,7 @@ export const SCOPED_NONPUBLIC_PRIVILEGES = [
   { schema: 'user_management', table: 'mfa_totp', runtime: [], system: ['SELECT'] },
   { schema: 'user_management', table: 'org_auth_policies', runtime: [], system: ['SELECT'] },
   { schema: 'user_management', table: 'user_sessions', runtime: [], system: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] },
-  { schema: 'audit_security', table: 'audit_logs', runtime: ['INSERT'], system: [] },
+  { schema: 'audit_security', table: 'audit_logs', runtime: ['SELECT', 'INSERT'], system: [] },
 ]
 
 /**
@@ -109,10 +109,13 @@ function privilegeSet(value, table, side) {
 
 export function loadAuthorityManifest(repoRoot) {
   const script = path.join(repoRoot, 'tooling/scripts/export-union-eyes-authority-contract.ts')
-  const result = spawnSync('pnpm', ['exec', 'tsx', script], {
+  // On Windows pnpm is a .cmd shim, which Node can only start through a shell.
+  const windows = process.platform === 'win32'
+  const result = spawnSync(windows ? 'pnpm.cmd' : 'pnpm', ['exec', 'tsx', windows ? `"${script}"` : script], {
     cwd: path.join(repoRoot, 'apps/union-eyes'),
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,
+    shell: windows,
   })
   if (result.status !== 0) {
     throw new Error(`Storage-authority manifest export failed: ${result.stderr || result.stdout}`)
@@ -341,6 +344,8 @@ export async function remediateCatalogAuthority(client, { repoRoot }) {
     '0017_snapshot_authority_reconciliation.sql',
     '0018_knowledge_transfer_rls_closure.sql',
     '0019_deadline_reassignment_convergence.sql',
+    '0020_authority_kernel_rls_closure.sql',
+    '0021_message_thread_triage_rls_closure.sql',
   ]) {
     const migration = fs.readFileSync(
       path.join(repoRoot, 'apps/union-eyes/db/migrations-cache', fileName),

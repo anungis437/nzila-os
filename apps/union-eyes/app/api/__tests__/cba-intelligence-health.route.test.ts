@@ -25,10 +25,10 @@ describe('cba-intelligence/health route', () => {
     });
   });
 
-  it('returns operational health snapshot', async () => {
+  it('returns operational health snapshot itself; the framework wraps it as the data of the answer', async () => {
     const { GET } = await loadRoute();
     const result = await GET({});
-    expect(result.data).toBeDefined();
-    expect(result.data.status).toBe('healthy');
+    expect(result).toMatchObject({ status: 'healthy', documentsIndexed: 42 });
+    expect(result).not.toHaveProperty('data');
   });
 });

@@ -19,10 +19,10 @@ import {
 import type { LiveStreamStatus } from '@nzila/zonga-streaming-aws'
 
 const createSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.guid(),
   scheduledStart: z.string().datetime().optional(),
   scheduledEnd: z.string().datetime().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export async function POST(request: Request) {

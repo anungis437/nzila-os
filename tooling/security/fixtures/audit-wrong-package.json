@@ -1,7 +1,7 @@
 {
   "advisories": {
-    "1240912": {
-      "id": "1240912",
+    "1108110": {
+      "id": "1108110",
       "package": "other-crypto",
       "severity": "high",
       "title": "fixture: wrong package"

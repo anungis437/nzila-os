@@ -72,7 +72,10 @@ export default function CrossDomainGovernancePanel() {
       ])
 
       if (!policiesRes.ok || !snapshotRes.ok) {
-        throw new Error('Failed to fetch governance data')
+        // A 501 carries the reason (the policy lifecycle is not available in Union Eyes); show it rather than a generic failure.
+        const refused = !policiesRes.ok ? policiesRes : snapshotRes
+        const refusal = refused.status === 501 ? await refused.json().catch(() => null) : null
+        throw new Error(refusal?.error?.message ?? refusal?.message ?? 'Failed to fetch governance data')
       }
 
       const policiesData = await policiesRes.json()
@@ -106,7 +109,7 @@ export default function CrossDomainGovernancePanel() {
       <h1 className="mb-2 text-2xl font-bold">Cross-Domain Policy Governance</h1>
       <p className="mb-6 text-gray-500">
         Read-only platform-wide view of governed policies across all domains.
-        Policy management is scoped to Union Eyes governance console.
+        Policy management is not part of this view; Union Eyes has no policy lifecycle console.
       </p>
 
       {/* Snapshot health bar */}

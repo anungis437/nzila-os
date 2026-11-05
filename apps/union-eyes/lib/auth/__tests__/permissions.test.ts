@@ -69,9 +69,10 @@ describe('getPermissionsForRole', () => {
 describe('getPermissionsForRoles', () => {
   it('unions permissions across multiple roles', () => {
     const perms = getPermissionsForRoles([UserRole.MEMBER, UserRole.STEWARD]);
-    // MEMBER has VIEW_OWN_CLAIMS, STEWARD has VIEW_ALL_CLAIMS
+    // MEMBER has VIEW_OWN_CLAIMS, STEWARD has VIEW_ALL_MEMBERS; neither confers VIEW_ALL_CLAIMS
     expect(perms).toContain(Permission.VIEW_OWN_CLAIMS);
-    expect(perms).toContain(Permission.VIEW_ALL_CLAIMS);
+    expect(perms).toContain(Permission.VIEW_ALL_MEMBERS);
+    expect(perms).not.toContain(Permission.VIEW_ALL_CLAIMS);
   });
 
   it('deduplicates overlapping permissions', () => {

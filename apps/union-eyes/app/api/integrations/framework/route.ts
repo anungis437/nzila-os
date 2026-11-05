@@ -11,7 +11,7 @@ const configureSchema = z.object({
   provider: z.nativeEnum(IntegrationProvider),
   type: z.nativeEnum(IntegrationType),
   enabled: z.boolean().optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
   webhookUrl: z.string().url().nullable().optional(),
   credentialRef: z.string().min(1).max(255).optional(),
 });
@@ -45,9 +45,9 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
     return {
-      integration: await configureIntegrationForOrg(organizationId!, body),
+      integration: await configureIntegrationForOrg(organizationId!, body, userId!),
     };
   },
 );

@@ -6,6 +6,8 @@ import inspect
 import json
 import sys
 import uuid
+from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 
@@ -84,13 +86,25 @@ def main():
                 return "true" if value else "false"
             if isinstance(value, int):
                 return str(value)
+            # DecimalField db_default (for example billing.MemberArrears.total_owed). Only finite values,
+            # in plain positional notation, so the literal is exactly what PostgreSQL stores.
+            if isinstance(value, Decimal) and value.is_finite():
+                return format(value, "f")
+            # DateField db_default (organizations.fiscal_year_end). Exactly date, not datetime (a datetime
+            # would need a time zone decision), rendered ISO 8601.
+            if type(value) is date:
+                return "'" + value.isoformat() + "'"
             if isinstance(value, str) and "\\" not in value and "\x00" not in value:
                 return "'" + value.replace("'", "''") + "'"
             raise RuntimeError("UE_V2_COLLECTION_UNSUPPORTED_DDL_PARAMETER:" + type(value).__name__)
 
         if not isinstance(params, (tuple, list)):
             raise RuntimeError("UE_V2_COLLECTION_UNSUPPORTED_DDL_PARAMETERS:" + type(params).__name__)
-        return sql % tuple(literal(value) for value in params)
+        try:
+            return sql % tuple(literal(value) for value in params)
+        except RuntimeError as error:
+            # Name the statement, so an unsupported parameter can be traced to its model.
+            raise RuntimeError(str(error) + " in: " + " ".join(str(sql).split())[:300]) from None
 
     DatabaseOperations.compose_sql = compose_offline
 

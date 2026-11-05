@@ -10,8 +10,6 @@ import type { UserRole, Permission } from './roles';
  */
 export interface UserContext {
   userId: string;
-  /** @deprecated Legacy field from previous auth provider era. Use userId (Entra subject / NextAuth sub) instead. */
-  clerkId?: string;
   email?: string;
   firstName?: string;
   lastName?: string;

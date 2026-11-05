@@ -1,0 +1,79 @@
+import { caseActionAllowed, casePolicyRole } from '@/lib/cases/case-permissions'
+import { logger } from '@/lib/logger'
+
+export type MemberDirectoryScope = 'none' | 'case-context' | 'organization'
+
+export interface MemberDirectoryAccess {
+  scope: MemberDirectoryScope
+  /** Employment dates, seniority and free-form profile metadata. */
+  includeSensitive: boolean
+}
+
+const DENIED: MemberDirectoryAccess = { scope: 'none', includeSensitive: false }
+
+/**
+ * Directory authority is derived from the case policy, not from a union-wide role name:
+ * a steward sees only members whose matters are assigned to them; organization-wide reads
+ * need the organization-read capability; sensitive attributes need officer-level authority.
+ * Unknown roles, ordinary members and platform roles (app_owner, system_admin, platform_lead) receive nothing:
+ * platform administration is not authority over a customer organization's members.
+ */
+export function memberDirectoryAccess(role: string | null | undefined): MemberDirectoryAccess {
+  const policyRole = role ? casePolicyRole(role) : null
+  if (!policyRole || !caseActionAllowed('note_add_internal', policyRole)) return DENIED
+  if (!caseActionAllowed('case_read_any', policyRole)) return { scope: 'case-context', includeSensitive: false }
+  return { scope: 'organization', includeSensitive: caseActionAllowed('case_reopen', policyRole) }
+}
+
+export interface DirectoryMemberFields {
+  id: string
+  userId: string
+  name: string | null
+  email: string | null
+  phone: string | null
+  role: string
+  status: string
+  department: string | null
+  position: string | null
+  hireDate: Date | null
+  seniority: number | null
+  membershipNumber: string | null
+  unionJoinDate: Date | null
+  createdAt: Date | null
+  metadata: unknown
+}
+
+export function projectDirectoryMember(m: DirectoryMemberFields, access: MemberDirectoryAccess) {
+  let metadata: Record<string, unknown> = {}
+  if (access.includeSensitive && m.metadata) {
+    if (typeof m.metadata === 'string') {
+      try {
+        metadata = JSON.parse(m.metadata)
+      } catch {
+        // Malformed legacy metadata is left out of the directory. It is not silently dropped: it is logged, by member only (the parse error quotes the
+        // content, which can be personal), so that it can be repaired.
+        logger.warn('Member metadata is not valid JSON and was left out of the directory', { memberId: m.id })
+      }
+    } else if (typeof m.metadata === 'object') {
+      metadata = m.metadata as Record<string, unknown>
+    }
+  }
+  return {
+    id: m.id,
+    userId: m.userId,
+    name: m.name,
+    email: m.email,
+    phone: m.phone || '',
+    role: m.role,
+    status: m.status,
+    // An unknown department, position or seniority is null: the directory does not invent "Administration", "Union Member" or 0 years.
+    department: m.department || null,
+    position: m.position || null,
+    hireDate: access.includeSensitive ? m.hireDate?.toISOString() ?? null : null,
+    seniority: access.includeSensitive ? m.seniority : null,
+    membershipNumber: m.membershipNumber || '',
+    unionJoinDate: access.includeSensitive ? m.unionJoinDate?.toISOString() ?? null : null,
+    createdAt: m.createdAt?.toISOString() ?? null,
+    metadata,
+  }
+}

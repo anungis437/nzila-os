@@ -3,6 +3,8 @@
  * 
  * Handles all notification logic for grievance workflows
  * Integrates with notification system for multi-channel delivery
+ *
+ * No notification here carries an actionUrl: the grievance pages are open to no role (lib/notifications/links.ts), so a link would end in a redirect.
  */
 
 import { db } from "@/db";
@@ -51,8 +53,6 @@ export async function sendGrievanceFiledNotification(
         subject: `Grievance Filed - ${context.grievanceNumber}`,
         title: "Grievance Received",
         body: `Your grievance regarding "${context.grievanceSubject}" has been filed and is being reviewed.`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "View Grievance",
         metadata: {
           type: "grievance_filed",
           grievanceId: context.grievanceId,
@@ -91,8 +91,6 @@ export async function sendGrievanceAssignedNotification(
         subject: `Grievance Assigned - ${context.grievanceNumber}`,
         title: "New Grievance Assignment",
         body: `You have been assigned to grievance "${context.grievanceSubject}" filed by ${context.grievantName}.`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "Review Grievance",
         metadata: {
           type: "grievance_assigned",
           grievanceId: context.grievanceId,
@@ -108,7 +106,6 @@ export async function sendGrievanceAssignedNotification(
         priority: "high",
         title: "New Grievance Assignment",
         body: `Grievance ${context.grievanceNumber} assigned to you`,
-        actionUrl: `/grievances/${context.grievanceId}`,
         metadata: {
           type: "grievance_assigned",
         },
@@ -126,8 +123,6 @@ export async function sendGrievanceAssignedNotification(
         subject: `Grievance Officer Assigned - ${context.grievanceNumber}`,
         title: "Officer Assigned",
         body: `${context.assignedOfficerName} has been assigned to your grievance and will be in contact soon.`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "View Grievance",
         metadata: {
           type: "grievance_officer_assigned",
           grievanceId: context.grievanceId,
@@ -169,8 +164,6 @@ export async function sendGrievanceStageChangeNotification(
         subject: `Grievance Status Update - ${context.grievanceNumber}`,
         title: "Status Update",
         body: `Your grievance has progressed from ${context.previousStage} to ${context.newStage}.`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "View Details",
         metadata: {
           type: "grievance_stage_change",
           grievanceId: context.grievanceId,
@@ -191,8 +184,6 @@ export async function sendGrievanceStageChangeNotification(
         subject: `Grievance Progressed - ${context.grievanceNumber}`,
         title: "Stage Change",
         body: `Grievance has moved to ${context.newStage}. Review required actions.`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "Review Grievance",
         metadata: {
           type: "grievance_stage_change_officer",
           grievanceId: context.grievanceId,
@@ -235,8 +226,6 @@ export async function sendGrievanceDeadlineReminder(
         subject: `REMINDER: Grievance Deadline - ${context.grievanceNumber}`,
         title: "Deadline Approaching",
         body: `Grievance "${context.grievanceSubject}" has a deadline in ${context.daysRemaining} day(s) - ${context.deadlineDate.toLocaleDateString()}`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "Take Action",
         metadata: {
           type: "grievance_deadline_reminder",
           grievanceId: context.grievanceId,
@@ -335,8 +324,6 @@ export async function sendGrievanceResolvedNotification(
         subject: `${resolutionTitles[context.resolutionType]} - ${context.grievanceNumber}`,
         title: resolutionTitles[context.resolutionType],
         body: `Your grievance "${context.grievanceSubject}" has been ${context.resolutionType}. ${context.resolutionSummary || ""}`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "View Resolution",
         metadata: {
           type: "grievance_resolved",
           grievanceId: context.grievanceId,
@@ -356,8 +343,6 @@ export async function sendGrievanceResolvedNotification(
         subject: `Grievance Resolved - ${context.grievanceNumber}`,
         title: "Case Closed",
         body: `Grievance has been ${context.resolutionType}. Case is now closed.`,
-        actionUrl: `/grievances/${context.grievanceId}`,
-        actionLabel: "View Final Details",
         metadata: {
           type: "grievance_resolved_officer",
           grievanceId: context.grievanceId,
@@ -400,8 +385,6 @@ export async function sendGrievanceDocumentAddedNotification(
         subject: `New Document - ${context.grievanceNumber}`,
         title: "Document Added",
         body: `A new document "${context.documentName}" has been added to grievance ${context.grievanceNumber}.`,
-        actionUrl: `/grievances/${context.grievanceId}/documents`,
-        actionLabel: "View Document",
         metadata: {
           type: "grievance_document_added",
           grievanceId: context.grievanceId,
@@ -420,8 +403,6 @@ export async function sendGrievanceDocumentAddedNotification(
         subject: `New Document - ${context.grievanceNumber}`,
         title: "Document Added",
         body: `A new document "${context.documentName}" has been added to your grievance.`,
-        actionUrl: `/grievances/${context.grievanceId}/documents`,
-        actionLabel: "View Document",
         metadata: {
           type: "grievance_document_added",
           grievanceId: context.grievanceId,
@@ -470,8 +451,6 @@ export async function sendGrievanceCommentNotification(
           subject: `New Comment - ${context.grievanceNumber}`,
           title: "New Comment",
           body: `${context.commentAuthor} added a comment: "${context.commentPreview}"`,
-          actionUrl: `/grievances/${context.grievanceId}#comments`,
-          actionLabel: "View Comment",
           metadata: {
             type: "grievance_comment",
             grievanceId: context.grievanceId,
@@ -515,8 +494,6 @@ export async function sendGrievanceEscalationNotification(
           subject: `ESCALATION: Grievance ${context.grievanceNumber}`,
           title: "Grievance Escalated",
           body: `Grievance "${context.grievanceSubject}" has been escalated. Reason: ${context.escalationReason}`,
-          actionUrl: `/grievances/${context.grievanceId}`,
-          actionLabel: "Review Grievance",
           metadata: {
             type: "grievance_escalation",
             grievanceId: context.grievanceId,
@@ -560,8 +537,6 @@ export async function sendSettlementProposalNotification(
         subject: `Settlement Proposal - ${context.grievanceNumber}`,
         title: "Settlement Proposed",
         body: `A settlement has been proposed for your grievance: ${context.settlementSummary}`,
-        actionUrl: `/grievances/${context.grievanceId}/settlement`,
-        actionLabel: "Review Proposal",
         metadata: {
           type: "settlement_proposal",
           grievanceId: context.grievanceId,

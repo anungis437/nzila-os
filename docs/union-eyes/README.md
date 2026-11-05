@@ -19,6 +19,12 @@ internal acceleration IP, not a directly sold product. See
 [`../CIVIC_OCI_ALIGNMENT.md`](../CIVIC_OCI_ALIGNMENT.md) for the second
 (cautious, public-institution) commercial lane.
 
+**Dues boundary (owner decision, closed).** Dues and per-capita remittances are handled in an
+external system. Union Eyes reflects the data it holds — read-only, with an honest empty or failed
+state — and does not collect, calculate, remit, reconcile, submit or export dues, and does not build a
+dues or remittance ledger of its own. A dues screen is either a reflection of rows that exist or it is
+absent. The registry entries `UE-DUES-DIRECT-PAYMENT` and `UE-FIN-AFFILIATE-REMITTANCES` record it.
+
 ## 2. Gate status
 
 **`UE_SAAS_OPERATIONAL_READINESS` = `NO_GO — RUNTIME_PROOF_REQUIRED`.**
@@ -75,7 +81,7 @@ anywhere in this programme unless every listed proof is on file.
 
 ## 5. Explicitly parked (not this increment)
 
-Native dues engine · bulk import · federation/cross-local rollup for executive/governance
+Native dues engine (closed — dues are handled in an external system, see §1) · bulk import · federation/cross-local rollup for executive/governance
 roles · institutional-memory nav wiring (`/dashboard/institutional-memory` exists but is not in
 any persona's canonical navigation) · the ~938-route capability-registry backfill · stub
 programme waves 8–13 (see `reality-remediation/`) · CourtLens / Flow go-to-market motions (these

@@ -23,6 +23,10 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
-  await disableMfa(userId, userId, parsed.data.reason ?? 'self_service')
+  const result = await disableMfa(userId, userId, parsed.data.reason ?? 'self_service')
+  // disableMfa reports whether the account's MFA state was actually changed: a refusal is not a success, whatever the request looked like.
+  if (!result.success) {
+    return NextResponse.json({ error: 'MFA mutation not authorized' }, { status: 403 })
+  }
   return NextResponse.json({ ok: true })
 }

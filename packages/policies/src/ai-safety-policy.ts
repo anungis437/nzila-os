@@ -86,6 +86,7 @@ export type AISurfaceOrigin =
   | 'pension-funding'
   | 'pension-trustee-summary'
   | 'chatbot-sessions'
+  | 'chatbot-session-messages'
   | 'ml-monitoring-alerts'
   | 'ml-monitoring-metrics'
   | 'churn-risk'

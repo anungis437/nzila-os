@@ -19,7 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { createLogger } from '@nzila/os-core';
 import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { buildPilotStatus, type PilotConfiguration } from '@/lib/pilot-admin';
 import {
   probePostgresPing,
@@ -34,22 +34,17 @@ import { auth } from '@nzila/platform-auth/entra/server';
 const logger = createLogger('admin:pilot-status');
 
 /**
- * Attempt to count users associated with the given organization id.
- * Returns `null` (unmeasured) on any error so the health check surfaces
- * `unknown` rather than a fabricated zero.
+ * Attempt to count the people the given organization has on its member roll.
+ * Both measurements read the organization's own rows, so they run in that organization's tenant transaction (the runtime role holds SELECT on
+ * its member and worksite tables; the system role holds neither, and the canonical identity store is not readable by either role).
+ * Returns `null` (unmeasured) on any error so the health check surfaces `unknown` rather than a fabricated zero.
  */
 async function measureUsersInvited(orgId: string | null | undefined): Promise<number | null> {
   if (!orgId) return null;
   try {
-    const rows = await withSystemContext((tx) =>
-      tx.execute(sql`
-        SELECT COUNT(*)::int AS n
-        FROM user_management.users u
-        WHERE u.user_id IN (
-          SELECT user_id FROM organization_members WHERE organization_id = ${orgId}
-        )
-      `,
-    ));
+    const rows = await withRLSContext({ organizationId: orgId }, (tx) =>
+      tx.execute(sql`SELECT COUNT(DISTINCT user_id)::int AS n FROM organization_members WHERE organization_id = ${orgId}`),
+    );
     const n = (rows as unknown as Array<{ n: number }>)[0]?.n;
     return typeof n === 'number' ? n : null;
   } catch (error) {
@@ -65,7 +60,7 @@ async function measureUsersInvited(orgId: string | null | undefined): Promise<nu
 async function measureWorksitesConfigured(orgId: string | null | undefined): Promise<number | null> {
   if (!orgId) return null;
   try {
-    const rows = await withSystemContext((tx) =>
+    const rows = await withRLSContext({ organizationId: orgId }, (tx) =>
       tx.execute(sql`SELECT COUNT(*)::int AS n FROM worksites WHERE organization_id = ${orgId}`),
     );
     const n = (rows as unknown as Array<{ n: number }>)[0]?.n;

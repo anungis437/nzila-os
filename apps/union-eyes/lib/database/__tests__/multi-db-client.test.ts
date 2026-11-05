@@ -13,7 +13,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 const mocks = vi.hoisted(() => ({
   mockDrizzlePg: vi.fn(() => ({ _type: "pg" })),
   mockDrizzleMssql: vi.fn(() => ({ _type: "mssql" })),
-  mockPostgres: vi.fn(() => ({})),
+  // What drizzle leaves on a postgres.js client: identity serializers for the temporal types (db/driver-dates.ts wraps them).
+  mockPostgres: vi.fn(() => ({ options: { serializers: { "1184": (v: unknown) => v, "1114": (v: unknown) => v, "1082": (v: unknown) => v } } })),
   mockPool: vi.fn(),
   mockSafeColumnName: vi.fn((name: string) => `safe_${name}`),
   mockSql: Object.assign(
@@ -142,6 +143,9 @@ describe("multi-db-client", () => {
       });
       expect(client).toBeDefined();
       expect(mocks.mockPostgres).toHaveBeenCalled();
+      // the client sends a raw Date parameter as its ISO instant
+      const created = mocks.mockPostgres.mock.results[0].value as unknown as { options: { serializers: Record<string, (v: unknown) => unknown> } };
+      expect(created.options.serializers["1184"](new Date("2026-11-02T18:44:12.531Z"))).toBe("2026-11-02T18:44:12.531Z");
     });
 
     it("creates azure-sql client for azure-sql type", async () => {

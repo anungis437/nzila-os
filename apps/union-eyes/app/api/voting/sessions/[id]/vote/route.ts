@@ -4,43 +4,70 @@
  * GET  /api/voting/sessions/[id]/vote — check if current user has voted
  */
 import { withApi, z } from '@/lib/api/framework';
-import { castVote, hasVoted } from '@/lib/services/voting-service';
-import { buildUnionEvidencePack } from '@/lib/evidence';
-import { logger } from '@/lib/logger';
+import { ApiError } from '@/lib/api/errors';
+import { castVote, hasVoted, getVotingSessionById } from '@/lib/services/voting-service';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { recordBallotAcceptance } from '@/lib/voting/ballot-process-audit';
 
 export const dynamic = 'force-dynamic';
 
+async function requireOpenOwnedSession(sessionId: string, organizationId: string | null, requireActive: boolean) {
+  const session = await getVotingSessionById(sessionId);
+  if (!session || !organizationId || session.organizationId !== organizationId) {
+    throw ApiError.notFound('Voting session');
+  }
+  if (requireActive && session.status !== 'active') {
+    throw ApiError.badRequest('Voting session is not open');
+  }
+}
+
+// castVote reports its refusals as plain Errors, which withApi would answer as a 500 "An internal error occurred".
+function castRefusal(error: unknown): ApiError | null {
+  const message = error instanceof Error ? error.message : '';
+  if (message === 'Vote already cast') return ApiError.conflict(message);
+  if (message === 'Voter is not eligible') return ApiError.forbidden(message);
+  if (message === 'Option does not belong to this voting session') return ApiError.badRequest(message);
+  return null;
+}
+
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     body: z.object({
-      optionId: z.string().uuid(),
+      optionId: z.guid(),
       isAnonymous: z.boolean().optional().default(true),
     }),
     openapi: {
       tags: ['Governance'],
       summary: 'Cast a vote',
-      description: 'Cast a vote in a voting session. Validates eligibility and prevents double voting.',
+      description: 'Cast a vote in an open voting session. Validates organization, eligibility and prevents double voting.',
     },
   },
   async ({ body, userId, organizationId, params }) => {
     const sessionId = params.id;
-    const vote = await castVote(sessionId, body.optionId, userId!, body.isAnonymous);
+    if (body.isAnonymous === false) {
+      throw ApiError.badRequest('Open-roll voting is not available: ballots are secret.');
+    }
+    await requireOpenOwnedSession(sessionId, organizationId, true);
+    let vote: Awaited<ReturnType<typeof castVote>>;
+    try {
+      vote = await castVote(sessionId, body.optionId, userId!, body.isAnonymous);
+    } catch (error) {
+      throw castRefusal(error) ?? error;
+    }
+    await withRLSContext({ organizationId: organizationId! }, (tx) =>
+      recordBallotAcceptance(tx, { organizationId: organizationId!, sessionId, receiptId: vote.id }),
+    );
 
-    // Evidence: every vote gets a tamper-proof audit trail
-    buildUnionEvidencePack({
-      actionType: 'VOTE_CAST',
-      orgId: organizationId ?? 'unknown',
-      actorId: userId!,
-      artifacts: [{ type: 'vote', data: { sessionId, receiptId: vote.receiptId, isAnonymous: body.isAnonymous } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'VOTE_CAST' }))
-
-    return { vote, receiptId: vote.receiptId };
+    // Receipt only: the ballot choice and voter identifier are not echoed back.
+    return { vote: { id: vote.id, sessionId: vote.sessionId, castAt: vote.castAt }, receiptId: vote.receiptId };
   }
 );
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Governance'],
@@ -48,8 +75,9 @@ export const GET = withApi(
       description: 'Check if the current user has already voted in this session.',
     },
   },
-  async ({ userId, params }) => {
+  async ({ userId, organizationId, params }) => {
     const sessionId = params.id;
+    await requireOpenOwnedSession(sessionId, organizationId, false);
     const voted = await hasVoted(sessionId, userId!);
     return { hasVoted: voted };
   }

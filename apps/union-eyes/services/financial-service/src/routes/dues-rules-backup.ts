@@ -5,6 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
+import { partialWithoutDefaults } from './partial-without-defaults';
 import { db } from '../db/index';
 import { duesRules } from '../db/schema';
 import { eq, and, desc } from 'drizzle-orm';
@@ -194,7 +195,7 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     
@@ -223,7 +224,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
     
     // Validate input
-    const validatedData = createDuesRuleSchema.partial().parse(req.body);
+    const validatedData = partialWithoutDefaults(createDuesRuleSchema).parse(req.body);
     
     // Map validation schema to database schema for update
     const dbData: Partial<typeof duesRules.$inferInsert> = {};
@@ -267,7 +268,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     

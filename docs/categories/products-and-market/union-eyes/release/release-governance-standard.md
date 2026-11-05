@@ -91,7 +91,7 @@ A response that contains any of `gitSha:"local"`, `releaseId:"unknown"`, `buildT
 ## 5. Database & seed rules
 
 1. Each environment MUST have its own Postgres database. No cross-env writes.
-2. All seed/reset scripts MUST call `assertNotProduction(scriptName)` from [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts) at module-load. Bypass requires `ALLOW_PRODUCTION_SEED=1`, which is never set in CI or any deployed container.
+2. All seed/reset scripts MUST call `assertNotProduction(scriptName)` from [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts) at module-load. There is no bypass: the guard refuses any production deployment (UE_ENVIRONMENT, NEXT_PUBLIC_APP_ENV, TARGET_ENVIRONMENT or NZILA_MODE saying production, or an unlabeled production container), and the `ALLOW_PRODUCTION_SEED` override it used to honour was removed.
 3. Migrations run via the backend container's startup CMD against the env's own `PGHOST`/`PGDATABASE`. CI MUST refuse to deploy if `db:migrate --dry-run` reports pending migrations against the target env.
 
 ---

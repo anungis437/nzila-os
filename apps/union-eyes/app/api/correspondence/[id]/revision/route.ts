@@ -16,6 +16,7 @@ const revisionSchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "officer" },
     body: revisionSchema,
     openapi: { tags: ["Correspondence"], summary: "Request revision" },

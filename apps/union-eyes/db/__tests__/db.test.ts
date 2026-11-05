@@ -13,9 +13,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  */
 
 const h = vi.hoisted(() => {
+  // What drizzle leaves on a postgres.js client: identity serializers for the temporal types (db/driver-dates.ts wraps them).
+  const identity = (value: unknown) => value;
   const postgres = vi.fn(() => {
     const fakeClient = vi.fn((..._args: unknown[]) => ({ rows: [] }));
-    Object.assign(fakeClient, { end: vi.fn(), __tag: 'pg-client' });
+    Object.assign(fakeClient, {
+      end: vi.fn(),
+      __tag: 'pg-client',
+      options: { serializers: { '1184': identity, '1114': identity, '1082': identity } },
+    });
     return fakeClient;
   });
   const drizzle = vi.fn(() => ({ __tag: 'drizzle-db', query: {} }));
@@ -56,6 +62,13 @@ describe('db/db.ts', () => {
     // Accessing the client Proxy reuses the already-created client.
     void (mod.client as unknown as Record<string, unknown>).__tag;
     expect(h.postgres).toHaveBeenCalledTimes(1);
+
+    // The client sends a raw Date parameter as its ISO instant (drizzle leaves the temporal serializers to its column mappers), and leaves text alone.
+    const created = h.postgres.mock.results[0].value as unknown as { options: { serializers: Record<string, (value: unknown) => unknown> } };
+    for (const oid of ['1184', '1114', '1082']) {
+      expect(created.options.serializers[oid](new Date('2026-11-02T18:44:12.531Z')), oid).toBe('2026-11-02T18:44:12.531Z');
+      expect(created.options.serializers[oid]('2026-11-02T18:44:12.531Z'), oid).toBe('2026-11-02T18:44:12.531Z');
+    }
 
     // getDatabase is re-exported from the unified client.
     expect(mod.getDatabase).toBe(h.getDatabase);

@@ -27,11 +27,11 @@ function getAuthUser(req: Request): AuthUser {
 }
 
 /** Validates a route :param is a UUID before it reaches any query. */
-const uuidParam = z.string().uuid();
+const uuidParam = z.guid();
 
 // Validation schemas
 const checkInSchema = z.object({
-  picketLocationId: z.string().uuid(),
+  picketLocationId: z.guid(),
   checkInMethod: z.enum(['nfc', 'qr_code', 'gps', 'manual']),
   deviceId: z.string().optional(),
   nfcTagUid: z.string().optional(),
@@ -125,7 +125,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -145,7 +145,7 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
     const { _fundId } = req.params;
 
     const checkOutSchema = z.object({
-      attendanceId: z.string().uuid(),
+      attendanceId: z.guid(),
       latitude: z.number().optional(),
       longitude: z.number().optional(),
     });
@@ -188,7 +188,7 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -270,7 +270,7 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -355,7 +355,7 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({

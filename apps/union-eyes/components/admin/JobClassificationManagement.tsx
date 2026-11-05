@@ -61,9 +61,15 @@ import {
   getJobClassificationsByOrganizationAction,
   updateJobClassificationAction,
 } from "@/actions/member-employment-actions";
+import type { z } from "zod";
 
 // TYPES
 // =============================================================================
+
+/** What the form holds while it is edited (an unset rate is absent) and what the schema hands the submit handler. */
+type ClassificationFormInput = z.input<typeof createJobClassificationSchema>;
+type ClassificationFormValues = z.output<typeof createJobClassificationSchema>;
+type ClassificationInput = Parameters<typeof createJobClassificationAction>[0];
 
 interface JobClassification {
   id: string;
@@ -93,33 +99,35 @@ export default function JobClassificationManagement({
   organizationId, 
   bargainingUnitId 
 }: JobClassificationManagementProps) {
-  const { toast } = useToast();
   const [classifications, setClassifications] = useState<JobClassification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClassification, setEditingClassification] = useState<JobClassification | null>(null);
   const [activeOnly, setActiveOnly] = useState(true);
 
   const loadClassifications = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const result = await getJobClassificationsByOrganizationAction(organizationId, activeOnly);
-      if (result.isSuccess && Array.isArray(result.data)) {
-        const filtered = bargainingUnitId 
-          ? result.data.filter((c: JobClassification) => c.bargainingUnitId === bargainingUnitId)
-          : result.data;
-        setClassifications(filtered);
+      if (!result.isSuccess || !Array.isArray(result.data)) {
+        // A failed read is not "no classifications": show the failure, and nothing of the previous list.
+        setClassifications([]);
+        setLoadError(result.message || "Failed to load classifications");
+        return;
       }
+      const filtered = bargainingUnitId
+        ? result.data.filter((c: JobClassification) => c.bargainingUnitId === bargainingUnitId)
+        : result.data;
+      setClassifications(filtered);
     } catch {
-      toast({
-        title: "Error",
-        description: "Failed to load classifications",
-        variant: "destructive",
-      });
+      setClassifications([]);
+      setLoadError("Failed to load classifications");
     } finally {
       setLoading(false);
     }
-  }, [organizationId, activeOnly, bargainingUnitId, toast]);
+  }, [organizationId, activeOnly, bargainingUnitId]);
 
   useEffect(() => {
     loadClassifications();
@@ -181,12 +189,19 @@ export default function JobClassificationManagement({
       <Card>
         <CardHeader>
           <CardTitle>Classifications</CardTitle>
-          <CardDescription>{classifications.length} total records</CardDescription>
+          <CardDescription>{loadError ? "Classifications could not be loaded" : `${classifications.length} total records`}</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : loadError ? (
+            <div role="alert" className="text-center py-8 space-y-3">
+              <p className="text-destructive">{loadError}</p>
+              <Button variant="outline" onClick={() => loadClassifications()}>
+                Try again
+              </Button>
             </div>
           ) : classifications.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -272,9 +287,8 @@ function ClassificationFormDialog({
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
 
-  const form = useForm({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createJobClassificationSchema) as any,
+  const form = useForm<ClassificationFormInput, unknown, ClassificationFormValues>({
+    resolver: zodResolver(createJobClassificationSchema),
     defaultValues: editingClassification
       ? {
           organizationId: editingClassification.organizationId,
@@ -298,13 +312,11 @@ function ClassificationFormDialog({
         },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ClassificationFormValues) => {
     setSubmitting(true);
     try {
       // Convert numeric rates to strings
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const classificationData: any = {
+      const classificationData: ClassificationInput = {
         ...data,
         minimumRate: data.minimumRate ? String(data.minimumRate) : undefined,
         maximumRate: data.maximumRate ? String(data.maximumRate) : undefined,

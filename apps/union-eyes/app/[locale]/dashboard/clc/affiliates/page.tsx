@@ -4,38 +4,23 @@ import { Metadata } from 'next';
 import { requireUser } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { 
-  Building2, 
-  Users, 
-  MapPin, 
-  Mail, 
-  Search,
-  Download,
+import {
+  Building2,
+  Users,
+  MapPin,
   Eye,
   TrendingUp,
   AlertCircle,
   CheckCircle,
-  DollarSign,
-  FileText
 } from 'lucide-react';
 import Link from 'next/link';
-import { db } from '@/db';
-import { organizationMembers } from '@/db/schema-organizations';
-import { eq, count } from 'drizzle-orm';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
+import { listAffiliates } from '@/lib/organizations/affiliates';
+import { loadAffiliateStandings, standingOf } from '@/lib/organizations/per-capita-standing';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { logger } from '@/lib/logger';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -57,6 +42,7 @@ interface AffiliateData {
 }
 
 type IconComponent = React.ComponentType<{ className?: string }>;
+type Translate = Awaited<ReturnType<typeof getTranslations>>;
 
 export const metadata: Metadata = {
   title: 'Manage Affiliates | CLC Dashboard',
@@ -72,68 +58,39 @@ async function checkCLCAccess(userId: string, orgId: string): Promise<boolean> {
   }
 }
 
-async function getAffiliateData(clcId: string) {
-  try {
-    // Fetch all affiliates (direct-chartered unions and provincial federations)
-    const affiliates = await db.query.organizations.findMany({
-      where: (organizations, { eq }) => eq(organizations.parentId, clcId),
-      orderBy: (organizations, { asc }) => [asc(organizations.name)],
-    });
+/**
+ * The congress's affiliates with their real standing. The list is a system read authorized by the caller's administrative standing
+ * over the organization; the standing comes from the per-capita remittances addressed to the organization (read in its own context):
+ * an affiliate with none on file is pending and at risk, never "current" and "compliant". A failed read is an error, not an empty list.
+ */
+async function getAffiliateData(userId: string, clcId: string) {
+  const [rows, standings] = await Promise.all([
+    listAffiliates({ userId, organizationId: clcId }),
+    loadAffiliateStandings(clcId),
+  ]);
+  const affiliates: AffiliateData[] = rows.map((affiliate) => ({
+    id: affiliate.id,
+    name: affiliate.name,
+    organizationType: affiliate.organizationType,
+    province: affiliate.provinceTerritory,
+    memberCount: affiliate.memberCount,
+    ...(standings.get(affiliate.id) ?? standingOf([])),
+  }));
 
-    // Categorize affiliates
-    const directCharteredUnions = affiliates.filter(a => a.organizationType === 'union');
-    const provincialFederations = affiliates.filter(a => a.organizationType === 'federation');
-    const chapters = affiliates.filter(a => a.organizationType === 'local');
-    const locals = affiliates.filter(a => a.organizationType === 'local');
-
-    // Calculate summary metrics
-    const totalAffiliates = affiliates.length;
-
-    // Aggregate member counts from organization_members table
-    const memberCounts = await db
-      .select({
-        organizationId: organizationMembers.organizationId,
-        memberCount: count(),
-      })
-      .from(organizationMembers)
-      .where(eq(organizationMembers.status, 'active'))
-      .groupBy(organizationMembers.organizationId);
-
-    const countMap = new Map(memberCounts.map(mc => [mc.organizationId, mc.memberCount]));
-
-    const affiliatesWithMetrics = affiliates.map(affiliate => ({
-      ...affiliate,
-      memberCount: countMap.get(affiliate.id) ?? 0,
-      remittanceStatus: 'current' as const, // Remittance table not yet available
-      lastRemittanceDate: null,
-      complianceStatus: 'compliant' as const, // Compliance checks pending integration
-    }));
-
-    return {
-      affiliates: affiliatesWithMetrics,
-      summary: {
-        total: totalAffiliates,
-        directCharteredUnions: directCharteredUnions.length,
-        provincialFederations: provincialFederations.length,
-        chapters: chapters.length,
-        locals: locals.length,
-      },
-    };
-  } catch (error) {
-    logger.error('Error fetching affiliate data:', error);
-    return {
-      affiliates: [],
-      summary: {
-        total: 0,
-        directCharteredUnions: 0,
-        provincialFederations: 0,
-        chapters: 0,
-        locals: 0,
-      },
-    };
-  }
+  return {
+    affiliates,
+    summary: {
+      total: affiliates.length,
+      directCharteredUnions: affiliates.filter((a) => a.organizationType === 'union').length,
+      provincialFederations: affiliates.filter((a) => a.organizationType === 'federation').length,
+      // The organization types are union, federation, local and the like; "chapter" is not one, so every local is counted once.
+      chapters: 0,
+      locals: affiliates.filter((a) => a.organizationType === 'local').length,
+    },
+  };
 }
 
+// A status this page does not know is shown as it is stored: it is never read as "current" or "compliant".
 const getStatusBadge = (status: string) => {
   const variants: Record<string, { variant: 'default' | 'destructive' | 'outline' | 'secondary', label: string }> = {
     current: { variant: 'default', label: 'Current' },
@@ -141,7 +98,7 @@ const getStatusBadge = (status: string) => {
     pending: { variant: 'secondary', label: 'Pending' },
     exempt: { variant: 'outline', label: 'Exempt' },
   };
-  const config = variants[status] || variants.current;
+  const config = variants[status] ?? { variant: 'outline' as const, label: status };
   return <Badge variant={config.variant}>{config.label}</Badge>;
 };
 
@@ -151,7 +108,7 @@ const getComplianceBadge = (status: string) => {
     'at-risk': { variant: 'secondary', label: 'At Risk', icon: AlertCircle },
     'non-compliant': { variant: 'destructive', label: 'Non-Compliant', icon: AlertCircle },
   };
-  const config = variants[status] || variants.compliant;
+  const config = variants[status] ?? { variant: 'outline' as const, label: status, icon: AlertCircle };
   const Icon = config.icon;
   return (
     <Badge variant={config.variant}>
@@ -161,11 +118,71 @@ const getComplianceBadge = (status: string) => {
   );
 };
 
-export default async function CLCAffiliatesPage({
-  searchParams: _searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+function AffiliatesTable({ affiliates, t }: { affiliates: AffiliateData[]; t: Translate }) {
+  return (
+    <Card>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('table.name', { defaultValue: 'Name' })}</TableHead>
+            <TableHead>{t('table.type', { defaultValue: 'Type' })}</TableHead>
+            <TableHead>{t('table.location', { defaultValue: 'Location' })}</TableHead>
+            <TableHead className="text-right">{t('table.members', { defaultValue: 'Members' })}</TableHead>
+            <TableHead>{t('table.remittance', { defaultValue: 'Remittance' })}</TableHead>
+            <TableHead>{t('table.compliance', { defaultValue: 'Compliance' })}</TableHead>
+            <TableHead className="text-right">{t('table.actions', { defaultValue: 'Actions' })}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {affiliates.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                {t('table.noAffiliates', { defaultValue: 'No affiliates found' })}
+              </TableCell>
+            </TableRow>
+          ) : (
+            affiliates.map((affiliate) => (
+              <TableRow key={affiliate.id}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    {affiliate.name}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="capitalize">
+                    {affiliate.organizationType}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    {affiliate.province || 'N/A'}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">{affiliate.memberCount.toLocaleString()}</TableCell>
+                <TableCell>{getStatusBadge(affiliate.remittanceStatus)}</TableCell>
+                <TableCell>{getComplianceBadge(affiliate.complianceStatus)}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/dashboard/admin/organizations/${affiliate.id}`} aria-label={`${affiliate.name}`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+}
+
+export default async function CLCAffiliatesPage() {
   const user = await requireUser();
   const userId = user.userId;
   const orgId = user.organizationId!;
@@ -176,7 +193,10 @@ export default async function CLCAffiliatesPage({
   }
 
   const t = await getTranslations('clc.affiliates');
-  const data = await getAffiliateData(orgId);
+  const data = await getAffiliateData(userId, orgId);
+  const unions = data.affiliates.filter((a) => a.organizationType === 'union');
+  const federations = data.affiliates.filter((a) => a.organizationType === 'federation');
+  const locals = data.affiliates.filter((a) => a.organizationType === 'local');
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -272,49 +292,7 @@ export default async function CLCAffiliatesPage({
         </Card>
       </div>
 
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t('search.placeholder', { defaultValue: 'Search by name, number, or region...' })}
-                className="pl-10"
-              />
-            </div>
-            <Select defaultValue="all">
-              <SelectTrigger className="w-50">
-                <SelectValue placeholder={t('filter.type', { defaultValue: 'Organization Type' })} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('filter.all', { defaultValue: 'All Types' })}</SelectItem>
-                <SelectItem value="union">{t('filter.unions', { defaultValue: 'Direct-Chartered' })}</SelectItem>
-                <SelectItem value="federation">{t('filter.federations', { defaultValue: 'Federations' })}</SelectItem>
-                <SelectItem value="local">{t('filter.locals', { defaultValue: 'Locals' })}</SelectItem>
-                <SelectItem value="chapter">{t('filter.chapters', { defaultValue: 'Chapters' })}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select defaultValue="all">
-              <SelectTrigger className="w-50">
-                <SelectValue placeholder={t('filter.status', { defaultValue: 'Status' })} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('filter.allStatuses', { defaultValue: 'All Statuses' })}</SelectItem>
-                <SelectItem value="current">{t('filter.current', { defaultValue: 'Current' })}</SelectItem>
-                <SelectItem value="overdue">{t('filter.overdue', { defaultValue: 'Overdue' })}</SelectItem>
-                <SelectItem value="at-risk">{t('filter.atRisk', { defaultValue: 'At Risk' })}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              {t('export', { defaultValue: 'Export' })}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Affiliates Table */}
+      {/* Affiliates */}
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>
           <TabsTrigger value="all">
@@ -332,160 +310,53 @@ export default async function CLCAffiliatesPage({
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('table.name', { defaultValue: 'Name' })}</TableHead>
-                  <TableHead>{t('table.type', { defaultValue: 'Type' })}</TableHead>
-                  <TableHead>{t('table.location', { defaultValue: 'Location' })}</TableHead>
-                  <TableHead className="text-right">{t('table.members', { defaultValue: 'Members' })}</TableHead>
-                  <TableHead>{t('table.remittance', { defaultValue: 'Remittance' })}</TableHead>
-                  <TableHead>{t('table.compliance', { defaultValue: 'Compliance' })}</TableHead>
-                  <TableHead className="text-right">{t('table.actions', { defaultValue: 'Actions' })}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.affiliates.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      {t('table.noAffiliates', { defaultValue: 'No affiliates found' })}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  data.affiliates.map((affiliate: AffiliateData) => (
-                    <TableRow key={affiliate.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          {affiliate.name}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {affiliate.organizationType}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          {affiliate.province || 'N/A'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {affiliate.memberCount.toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(affiliate.remittanceStatus)}
-                      </TableCell>
-                      <TableCell>
-                        {getComplianceBadge(affiliate.complianceStatus)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/dashboard/admin/organizations/${affiliate.id}`}>
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/dashboard/admin/clc-remittances?org=${affiliate.id}`}>
-                              <DollarSign className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </Card>
+          <AffiliatesTable affiliates={data.affiliates} t={t} />
         </TabsContent>
 
-        <TabsContent value="unions">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground text-center py-8">
-                {t('tabs.unionsFilter', { defaultValue: 'Filtered view showing only direct-chartered unions' })}
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="unions" className="space-y-4">
+          <AffiliatesTable affiliates={unions} t={t} />
         </TabsContent>
 
         <TabsContent value="federations">
           <Card>
             <CardContent className="pt-6 space-y-4">
-              {data.affiliates
-                .filter((a: AffiliateData) => a.organizationType === 'federation')
-                .map((federation: AffiliateData) => (
-                  <div key={federation.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <MapPin className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-lg">{federation.name}</div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-2">
-                          <MapPin className="h-3 w-3" />
-                          {federation.province || 'Canada'}
-                          <span className="mx-2">•</span>
-                          <Users className="h-3 w-3" />
-                          {federation.memberCount.toLocaleString()} members
-                        </div>
-                      </div>
+              {federations.length === 0 && (
+                <p className="text-center py-8 text-muted-foreground">{t('table.noAffiliates', { defaultValue: 'No affiliates found' })}</p>
+              )}
+              {federations.map((federation) => (
+                <div key={federation.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <MapPin className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="flex items-center gap-3">
-                      {getComplianceBadge(federation.complianceStatus)}
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/federation?id=${federation.id}`}>
-                          {t('viewDetails', { defaultValue: 'View Details' })}
-                        </Link>
-                      </Button>
+                    <div>
+                      <div className="font-semibold text-lg">{federation.name}</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-2">
+                        {federation.province && (
+                          <>
+                            <MapPin className="h-3 w-3" />
+                            {federation.province}
+                            <span className="mx-2">•</span>
+                          </>
+                        )}
+                        <Users className="h-3 w-3" />
+                        {federation.memberCount.toLocaleString()} members
+                      </div>
                     </div>
                   </div>
-                ))}
+                  <div className="flex items-center gap-3">
+                    {getComplianceBadge(federation.complianceStatus)}
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="locals">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground text-center py-8">
-                {t('tabs.localsFilter', { defaultValue: 'Filtered view showing only locals and chapters' })}
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="locals" className="space-y-4">
+          <AffiliatesTable affiliates={locals} t={t} />
         </TabsContent>
       </Tabs>
-
-      {/* Bulk Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('bulkActions.title', { defaultValue: 'Bulk Actions' })}</CardTitle>
-          <CardDescription>
-            {t('bulkActions.description', { defaultValue: 'Perform actions across multiple affiliates' })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-3">
-            <Button variant="outline">
-              <FileText className="mr-2 h-4 w-4" />
-              {t('bulkActions.exportReport', { defaultValue: 'Export Report' })}
-            </Button>
-            <Button variant="outline">
-              <Mail className="mr-2 h-4 w-4" />
-              {t('bulkActions.sendReminder', { defaultValue: 'Send Reminders' })}
-            </Button>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              {t('bulkActions.downloadData', { defaultValue: 'Download Data' })}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

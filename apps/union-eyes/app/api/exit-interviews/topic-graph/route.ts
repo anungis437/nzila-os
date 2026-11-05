@@ -21,6 +21,7 @@ function hasStewardPrivileges(role: string | null): boolean {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -35,6 +36,6 @@ export const GET = withApi(
     }
 
     const graph = await buildTopicGraph(organizationId!);
-    return { data: graph };
+    return graph;
   },
 );

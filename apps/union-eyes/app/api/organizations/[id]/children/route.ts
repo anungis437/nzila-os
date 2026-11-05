@@ -4,6 +4,7 @@ import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { eq } from 'drizzle-orm'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { canReadOrganization, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,9 +15,15 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const rows = await withSystemContext(() =>
-    db.select().from(organizations).where(eq(organizations.parentId, id)),
-  )
+  if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 })
+
+  // The children of an organization are listed only to a caller who may read it, and only those children the caller may
+  // read themselves: a member of a federation does not receive its other affiliates.
+  const access = await resolveOrganizationAccess(userId)
+  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const rows = (
+    await withSystemContext(() => db.select().from(organizations).where(eq(organizations.parentId, id)).limit(500))
+  ).filter((row) => canReadOrganization(access, row.id))
 
   const mapped = rows.map((row) => ({
     id: row.id,

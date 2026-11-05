@@ -18,7 +18,7 @@
 
 import {
   pgTable, pgEnum, uuid, varchar, text, timestamp, decimal,
-  integer, jsonb, index, uniqueIndex,
+  integer, jsonb, index,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../../../schema-organizations';
 import { commercialContracts } from './contracts';
@@ -130,7 +130,6 @@ export const transactionFeeEvents = pgTable('transaction_fee_events', {
 }, (t) => ({
   orgIdx: index('txn_fee_events_org_idx').on(t.organizationId),
   ruleIdx: index('txn_fee_events_rule_idx').on(t.ruleId),
-  idempotencyIdx: uniqueIndex('txn_fee_events_idempotency_idx').on(t.idempotencyKey),
   sourceIdx: index('txn_fee_events_source_idx').on(t.sourceTransactionId),
   statusIdx: index('txn_fee_events_status_idx').on(t.status),
   capturedIdx: index('txn_fee_events_captured_idx').on(t.capturedAt),

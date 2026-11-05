@@ -4,14 +4,16 @@
  * CHANGE CLASS: Operational
  *
  * ICRA event observability — lightweight structured event logging.
- * Silent failure: observability errors NEVER surface to users or break flows.
- * No personal identifiers are logged. IP is hashed before storage.
+ * Observability errors NEVER surface to users or break flows.
+ * No personal identifiers are logged. IP is hashed before it is logged.
  *
- * Events are stored in icra_events (not part of icra-schema.ts — append
- * to that schema if you add this table to the migration).
+ * Events are emitted as structured log records. They were written to an icra_events table that no schema file or migration ever
+ * defined, inside a try that swallowed every error, so on a real database every event was silently lost; a store needs its own
+ * reviewed table and retention before events are persisted again.
  */
 
 import { createHash } from 'crypto';
+import { logger } from '@/lib/logger';
 
 export type IcraEventKind =
   | 'assessment_started'
@@ -53,18 +55,20 @@ export function hashIp(ip: string | null | undefined): string | undefined {
 }
 
 /**
- * Track an ICRA observability event. Silent on any failure.
- * Do not await in critical paths — fire and forget.
+ * Track an ICRA observability event as a structured log record. Never throws.
  */
 export async function trackIcraEvent(event: IcraEvent): Promise<void> {
   try {
-    const { db } = await import('@/db');
-    // Dynamic import to avoid circular deps and allow graceful skip if DB unavailable
-    await (db as any as { execute: (q: any) => Promise<any> }).execute(
-      buildInsertSql(event),
-    );
+    logger.info('icra.event', {
+      kind: event.kind,
+      assessmentId: event.assessmentId,
+      sectionId: event.sectionId,
+      metadata: event.metadata,
+      occurredAt: event.occurredAt,
+      ipHash: event.ipHash,
+    });
   } catch {
-    // Silent — observability failures must never affect user flows
+    // A logging failure must never affect a user flow.
   }
 }
 
@@ -72,31 +76,6 @@ export async function trackIcraEvent(event: IcraEvent): Promise<void> {
 export function fireAndForgetEvent(event: Omit<IcraEvent, 'occurredAt'>): void {
   const fullEvent: IcraEvent = { ...event, occurredAt: new Date().toISOString() };
   void trackIcraEvent(fullEvent);
-}
-
-/** Raw SQL insert — avoids schema import cycle (icra-schema not in main index) */
-function buildInsertSql(event: IcraEvent): { sql: string; params: any[] } {
-  return {
-    sql: `
-      INSERT INTO icra_events (
-        id, kind, assessment_id, section_id, metadata, occurred_at, ip_hash
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT DO NOTHING
-    `,
-    params: [
-      generateEventId(),
-      event.kind,
-      event.assessmentId ?? null,
-      event.sectionId ?? null,
-      event.metadata ? JSON.stringify(event.metadata) : null,
-      event.occurredAt,
-      event.ipHash ?? null,
-    ],
-  };
-}
-
-function generateEventId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

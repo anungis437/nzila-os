@@ -14,6 +14,11 @@ import { logger } from '@/lib/logger';
 /** Sunset date for deprecated routes — 90 days from Phase 9 deployment */
 const SUNSET_DATE = new Date('2026-07-07T00:00:00Z');
 
+/** The one sunset the registry route and the headers both report; `sunsetPassed` is computed per call, never stored. */
+export function deprecationSunset(now: Date = new Date()): { sunset: string; sunsetPassed: boolean } {
+  return { sunset: SUNSET_DATE.toISOString(), sunsetPassed: SUNSET_DATE.getTime() <= now.getTime() };
+}
+
 export interface DeprecatedRouteMapping {
   /** Original deprecated path pattern (e.g. '/api/v2/members/dues') */
   deprecated: string;
@@ -38,39 +43,38 @@ export const DEPRECATED_ROUTE_MAP: DeprecatedRouteMapping[] = [
   { deprecated: '/api/cba/clauses/compare', canonical: '/api/clause-library/compare', reason: 'Moved to clause-library domain', phase: 1 },
   { deprecated: '/api/cba/footnotes/[clauseId]', canonical: '/api/cbas/[id]', reason: 'Merged into CBA detail', phase: 1 },
   { deprecated: '/api/cba/precedents', canonical: '/api/precedents', reason: 'Moved to standalone domain', phase: 1 },
-  { deprecated: '/api/organization/switch', canonical: '/api/org/switch', reason: 'Dead stub — no logic', phase: 1 },
-  { deprecated: '/api/organization/current', canonical: '/api/org', reason: 'Merged into org endpoint', phase: 1 },
-  { deprecated: '/api/payments/webhooks/stripe', canonical: '/api/payments/webhooks', reason: 'Consolidated webhook handler', phase: 1 },
-  { deprecated: '/api/user/status', canonical: '/api/auth/session', reason: 'Replaced by session endpoint', phase: 1 },
+  { deprecated: '/api/organization/switch', canonical: 'REMOVED', reason: 'Dead stub — no logic; the route that took its name (/api/org/switch) is retired (501) in this release', phase: 1 },
+  { deprecated: '/api/organization/current', canonical: '/api/org/current', reason: 'Merged into the org endpoint', phase: 1 },
+  { deprecated: '/api/user/status', canonical: '/api/auth/me', reason: 'Replaced by the current-user endpoint', phase: 1 },
   { deprecated: '/api/messaging/preferences', canonical: '/api/notifications/preferences', reason: 'Merged into notifications', phase: 1 },
   { deprecated: '/api/auth/debug-role', canonical: 'REMOVED', reason: 'Security fix — debug endpoint removed', phase: 0 },
 
   // ── Phase 2: Financial Surface Consolidation ──────────────────────────────
-  { deprecated: '/api/financial/reports/aged-receivables', canonical: '/api/billing/reports', reason: 'Consolidated into billing reports', phase: 2 },
-  { deprecated: '/api/financial/reports/balance-sheet', canonical: '/api/billing/reports', reason: 'Consolidated into billing reports', phase: 2 },
-  { deprecated: '/api/financial/reports/cash-flow', canonical: '/api/billing/reports', reason: 'Consolidated into billing reports', phase: 2 },
-  { deprecated: '/api/financial/reports/income-statement', canonical: '/api/billing/reports', reason: 'Consolidated into billing reports', phase: 2 },
+  { deprecated: '/api/financial/reports/aged-receivables', canonical: 'REMOVED', reason: 'No billing report route exists to take its place; the report is not available', phase: 2 },
+  { deprecated: '/api/financial/reports/balance-sheet', canonical: 'REMOVED', reason: 'No billing report route exists to take its place; the report is not available', phase: 2 },
+  { deprecated: '/api/financial/reports/cash-flow', canonical: 'REMOVED', reason: 'No billing report route exists to take its place; the report is not available', phase: 2 },
+  { deprecated: '/api/financial/reports/income-statement', canonical: 'REMOVED', reason: 'No billing report route exists to take its place; the report is not available', phase: 2 },
   { deprecated: '/api/v2/billing/*', canonical: '/api/billing/*', reason: 'v2 mirror removed — use root billing', phase: 2 },
   { deprecated: '/api/v2/dues/*', canonical: '/api/dues/*', reason: 'v2 mirror removed — use root dues', phase: 2 },
   { deprecated: '/api/v2/financial/*', canonical: '/api/financial/*', reason: 'v2 mirror removed — use root financial', phase: 2 },
   { deprecated: '/api/v2/payments/*', canonical: '/api/payments/*', reason: 'v2 mirror removed — use root payments', phase: 2 },
 
   // ── Phase 4: API Duplicate Consolidation ──────────────────────────────────
-  { deprecated: '/api/messaging/campaigns', canonical: '/api/messages', reason: 'Duplicate of messages — same table', phase: 4 },
-  { deprecated: '/api/messaging/campaigns/[id]', canonical: '/api/messages/[id]', reason: 'Duplicate of messages — same table', phase: 4 },
-  { deprecated: '/api/messaging/campaigns/[id]/send', canonical: '/api/messages', reason: 'Merged into messages workflow', phase: 4 },
-  { deprecated: '/api/strike-fund/applications', canonical: '/api/strike/fund', reason: 'Merged into strike fund domain', phase: 4 },
+  { deprecated: '/api/messaging/campaigns', canonical: '/api/messages/threads', reason: 'Duplicate of messages — same table', phase: 4 },
+  { deprecated: '/api/messaging/campaigns/[id]', canonical: '/api/messages/threads/[threadId]', reason: 'Duplicate of messages — same table', phase: 4 },
+  { deprecated: '/api/messaging/campaigns/[id]/send', canonical: '/api/messages/threads/[threadId]/messages', reason: 'Merged into messages workflow', phase: 4 },
+  { deprecated: '/api/strike-fund/applications', canonical: 'REMOVED', reason: 'Merged into the strike fund domain, whose routes (/api/strike/funds) are retired (501) in this release', phase: 4 },
 
   // ── Phase 9: v2 Mirror Wholesale Deprecation ──────────────────────────────
   { deprecated: '/api/v2/*', canonical: '/api/*', reason: 'v2 mirror — identical copy of root API', phase: 9 },
 
   // ── Stub Cleanup: Tables Never Created ────────────────────────────────────
-  { deprecated: '/api/financial/vendors', canonical: '/api/billing/reports', reason: 'Vendors table never created', phase: 9 },
-  { deprecated: '/api/financial/vendors/[id]', canonical: '/api/billing/reports', reason: 'Vendors table never created', phase: 9 },
-  { deprecated: '/api/financial/expenses', canonical: '/api/billing/reports', reason: 'Expenses table never created', phase: 9 },
-  { deprecated: '/api/financial/expenses/[id]', canonical: '/api/billing/reports', reason: 'Expenses table never created', phase: 9 },
-  { deprecated: '/api/financial/budgets', canonical: '/api/billing/reports', reason: 'Budgets table never created', phase: 9 },
-  { deprecated: '/api/financial/budgets/[id]', canonical: '/api/billing/reports', reason: 'Budgets table never created', phase: 9 },
+  { deprecated: '/api/financial/vendors', canonical: 'REMOVED', reason: 'Vendors table never created; Nzila billing reports are not a union vendor record', phase: 9 },
+  { deprecated: '/api/financial/vendors/[id]', canonical: 'REMOVED', reason: 'Vendors table never created; Nzila billing reports are not a union vendor record', phase: 9 },
+  { deprecated: '/api/financial/expenses', canonical: 'REMOVED', reason: 'Expenses table never created; Nzila billing reports are not a union expense record', phase: 9 },
+  { deprecated: '/api/financial/expenses/[id]', canonical: 'REMOVED', reason: 'Expenses table never created; Nzila billing reports are not a union expense record', phase: 9 },
+  { deprecated: '/api/financial/budgets', canonical: 'REMOVED', reason: 'Budgets table never created; Nzila billing reports are not a union budget', phase: 9 },
+  { deprecated: '/api/financial/budgets/[id]', canonical: 'REMOVED', reason: 'Budgets table never created; Nzila billing reports are not a union budget', phase: 9 },
 ];
 
 /**
@@ -115,22 +119,23 @@ export async function logDeprecatedAccess(
 export function deprecatedResponse(
   deprecatedPath: string,
   canonicalPath: string,
-  body?: any,
+  body?: unknown,
 ): NextResponse {
   const res = NextResponse.json(
     {
       _deprecated: true,
       _message: `This endpoint is deprecated. Use ${canonicalPath} instead.`,
       _sunset: SUNSET_DATE.toISOString(),
+      _sunsetPassed: SUNSET_DATE.getTime() <= Date.now(),
       _canonical: canonicalPath,
-      ...(body && typeof body === 'object' ? body : {}),
+      ...(body && typeof body === 'object' ? (body as Record<string, unknown>) : {}),
     },
     { status: 200 },
   );
 
-  // RFC 8594 headers
+  // RFC 8594 headers. A sunset that has already passed is not advertised as upcoming.
   res.headers.set('Deprecation', 'true');
-  res.headers.set('Sunset', SUNSET_DATE.toUTCString());
+  if (SUNSET_DATE.getTime() > Date.now()) res.headers.set('Sunset', SUNSET_DATE.toUTCString());
   res.headers.set('Link', `<${canonicalPath}>; rel="successor-version"`);
 
   return res;

@@ -5,8 +5,10 @@
  */
 
 import { z } from 'zod';
-import { NextRequest, NextResponse } from "next/server";
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { NextResponse } from "next/server";
+import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { GdprRequestManager } from "@/lib/gdpr/consent-manager";
 import { getReportQueue } from "@/lib/job-queue";
 import { logger } from "@/lib/logger";
@@ -18,35 +20,53 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
+
+async function rejectExportRequest(requestId: string, organizationId: string, userId: string, reason: string) {
+  await withRLSContext({ organizationId }, async (tx) => {
+    await GdprRequestManager.updateRequestStatus(requestId, organizationId, 'rejected', { rejectionReason: reason }, tx);
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'gdpr.data_export.reject',
+      resourceType: 'gdpr_data_requests',
+      resourceId: requestId,
+      details: { reason },
+    });
+  });
+}
 /**
  * Request data export
  */
 
 const gdprDataExportSchema = z.object({
-  organizationId: z.string().uuid('Invalid organizationId'),
+  organizationId: z.guid('Invalid organizationId'),
   preferredFormat: z.string().optional(),
-  requestDetails: z.record(z.unknown()).optional(),
+  requestDetails: z.record(z.string(), z.unknown()).optional(),
 });
 
-export const POST = withApiAuth(async (request: NextRequest, context: { organizationId?: string }) => {
+// The export is queued on Redis and the notification is sent by e-mail (network calls), so no transaction spans the handler: the request, its
+// status and its audit record commit together in the organization's tenant transaction, and the notification runs in one of its own.
+export const POST = withApi(
+  {
+    auth: { required: true },
+    openapi: { tags: ['GDPR'], summary: 'Request an export of the caller\'s personal data (Article 15)' },
+  },
+  async ({ request, userId: actor, organizationId: activeOrganizationId }) => {
   try {
-    const user = await getCurrentUser();
-    if (!user || !user.id) {
-      return standardErrorResponse(
-      ErrorCode.AUTH_REQUIRED,
-      'Unauthorized'
-    );
+    const userId = actor!;
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
     }
-    
-    const userId = user.id;
-    const body = await request.json();
     // Validate request body
     const validation = gdprDataExportSchema.safeParse(body);
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     
@@ -54,7 +74,7 @@ export const POST = withApiAuth(async (request: NextRequest, context: { organiza
     const format = preferredFormat || "json";
 
     // A subject-access request may only be filed for the caller's own selected organization.
-    if (context?.organizationId && organizationId !== context.organizationId) {
+    if (organizationId !== activeOrganizationId) {
       return NextResponse.json({ error: 'Forbidden: organization does not match the active organization' }, { status: 403 });
     }
 
@@ -72,50 +92,69 @@ export const POST = withApiAuth(async (request: NextRequest, context: { organiza
       );
     }
 
-    // Create data access request
-    const gdprRequest = await GdprRequestManager.requestDataAccess({
-      userId: userId,
-      organizationId,
-      requestDetails: {
-        preferredFormat: format,
-        ...(requestDetails ?? {}),
-      },
-      verificationMethod: "email",
+    // The request, its status and the audit record commit together; the queue below is the only effect outside.
+    const gdprRequest = await withRLSContext({ organizationId }, async (tx) => {
+      const created = await GdprRequestManager.createDataAccessRequest(
+        {
+          userId: userId,
+          organizationId,
+          requestDetails: {
+            preferredFormat: format,
+            ...(requestDetails ?? {}),
+          },
+          verificationMethod: "email",
+        },
+        tx,
+      );
+      await GdprRequestManager.updateRequestStatus(created.id, organizationId, "in_progress", { processedBy: "system" }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'gdpr.data_export.request',
+        resourceType: 'gdpr_data_requests',
+        resourceId: created.id,
+        details: { format },
+      });
+      return created;
     });
-
-    await GdprRequestManager.updateRequestStatus(gdprRequest.id, "in_progress", {
-      processedBy: "system",
-    });
+    await withRLSContext({ organizationId }, () => GdprRequestManager.notifyDataAccessRequest(gdprRequest));
 
     const queue = getReportQueue();
     if (!queue) {
-      await GdprRequestManager.updateRequestStatus(gdprRequest.id, 'rejected', {
-        rejectionReason: 'Export service unavailable',
-      });
+      await rejectExportRequest(gdprRequest.id, organizationId, userId, 'Export service unavailable');
       return standardErrorResponse(
         ErrorCode.INTERNAL_ERROR,
         'Export service temporarily unavailable. Please try again later.',
       );
     }
 
-    await (queue as any as { add: (...args: any[]) => Promise<any> }).add(
-      "gdpr-export",
-      {
-        reportType: "gdpr_export",
-        organizationId,
-        userId,
-        parameters: {
-          requestId: gdprRequest.id,
-          format,
+    try {
+      await (queue as any as { add: (...args: any[]) => Promise<any> }).add(
+        "gdpr-export",
+        {
+          reportType: "gdpr_export",
+          organizationId,
+          userId,
+          parameters: {
+            requestId: gdprRequest.id,
+            format,
+          },
         },
-      },
-      {
-        attempts: 3,
-        backoff: { type: "exponential", delay: 5000 },
-        removeOnComplete: { count: 1000 },
-        removeOnFail: { count: 2000 },
-      }
-    );
+        {
+          attempts: 3,
+          backoff: { type: "exponential", delay: 5000 },
+          removeOnComplete: { count: 1000 },
+          removeOnFail: { count: 2000 },
+        }
+      );
+    } catch (error) {
+      logger.error('GDPR export could not be queued', { requestId: gdprRequest.id, error });
+      await rejectExportRequest(gdprRequest.id, organizationId, userId, 'Export could not be queued');
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Export service temporarily unavailable. Please try again later.',
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -125,41 +164,45 @@ export const POST = withApiAuth(async (request: NextRequest, context: { organiza
       estimatedCompletion: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
   } catch (error) {
-return standardErrorResponse(
+    logger.error('Failed to process the data export request', { error });
+    return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to process data export request',
       error
     );
   }
-});
+  },
+);
 
 /**
  * Download exported data
  */
-export const GET = withApiAuth(async (request: NextRequest) => {
+// The request is read in the caller's own organization (the one the wrapper resolved); a client-supplied organization may only repeat it.
+export const GET = withApi(
+  {
+    auth: { required: true },
+    openapi: { tags: ['GDPR'], summary: 'Download a completed personal data export' },
+  },
+  async ({ request, userId: actor, organizationId: activeOrganizationId }) => {
   try {
-    const user = await getCurrentUser();
-    if (!user || !user.id) {
-      return standardErrorResponse(
-      ErrorCode.AUTH_REQUIRED,
-      'Unauthorized'
-    );
-    }
-    
-    const userId = user.id;
+    const userId = actor!;
+    const organizationId = activeOrganizationId!;
     const { searchParams } = new URL(request.url);
     const requestId = searchParams.get("requestId");
     const organizationIdFromQuery = searchParams.get("organizationId") ?? searchParams.get("orgId") ?? searchParams.get("organization_id") ?? searchParams.get("org_id");
 
-    if (!requestId || !organizationIdFromQuery) {
+    if (!requestId) {
       return standardErrorResponse(
       ErrorCode.MISSING_REQUIRED_FIELD,
-      'Request ID and Organization ID required'
+      'Request ID required'
     );
+    }
+    if (organizationIdFromQuery && organizationIdFromQuery !== organizationId) {
+      return NextResponse.json({ error: 'Forbidden: organization does not match the active organization' }, { status: 403 });
     }
 
     // Get request status
-    const requests = await GdprRequestManager.getUserRequests(userId, organizationIdFromQuery);
+    const requests = await withRLSContext({ organizationId }, () => GdprRequestManager.getUserRequests(userId, organizationId));
     const gdprRequest = requests.find((r) => r.id === requestId);
 
     if (!gdprRequest) {
@@ -247,5 +290,6 @@ export const GET = withApiAuth(async (request: NextRequest) => {
       error
     );
   }
-});
+  },
+);
 

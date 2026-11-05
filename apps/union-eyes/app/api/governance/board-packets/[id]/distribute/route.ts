@@ -1,23 +1,25 @@
 /**
  * Board Packet Distribution API
- * 
- * Handles distribution of board packets to recipients
+ *
+ * Distributes a finalized board packet to members of the organization. Each recipient's name and address come from their membership record.
  */
 
 import { NextResponse } from 'next/server';
 import { withApi, z, ApiError } from '@/lib/api/framework';
 import { boardPacketGenerator } from '@/lib/services/board-packet-generator';
-import { db } from '@/db/db';
-import { boardPackets } from '@/db/schema/board-packet-schema';
-import { and, eq } from 'drizzle-orm';
+import { parseBoardPacketId } from '@/lib/governance/board-packet-input';
 
-const distributePacketSchema = z.object({
-  recipients: z.array(z.object({
-    recipientId: z.string().uuid(),
-    recipientName: z.string(),
-    recipientEmail: z.string().email(),
-    recipientRole: z.string(),
-  })),
+const distributePacketSchema = z.strictObject({
+  recipients: z
+    .array(
+      z.strictObject({
+        recipientId: z.guid(),
+        recipientRole: z.string().trim().min(1).max(50),
+      }),
+    )
+    .min(1)
+    .max(100)
+    .refine((recipients) => new Set(recipients.map((recipient) => recipient.recipientId)).size === recipients.length, 'A recipient can be named only once'),
 });
 
 /**
@@ -30,30 +32,28 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     body: distributePacketSchema,
   },
-  async ({ body, params, organizationId }) => {
-    const packetId = params.id;
+  async ({ body, params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const packetId = parseBoardPacketId(params.id);
+    if (!packetId) throw ApiError.notFound('Board packet');
     const { recipients } = body;
 
-    // distributePacket() itself only filters by packetId — verify the
-    // packet belongs to the caller's own organization before invoking it,
-    // otherwise any org admin could distribute another org's board packet.
-    const [packet] = await db
-      .select({ id: boardPackets.id })
-      .from(boardPackets)
-      .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId!)));
-    if (!packet) throw ApiError.notFound('Board packet not found');
-
-    const distributions = await boardPacketGenerator.distributePacket(
+    // The service reads the packet by id and organization, so a packet of another organization is not found.
+    const { distributions, delivered, failed } = await boardPacketGenerator.distributePacket(
       packetId,
-      recipients
+      recipients,
+      { organizationId, userId }
     );
 
     return NextResponse.json({
-      message: 'Board packet distributed successfully',
+      message: failed === 0
+        ? 'Board packet distributed successfully'
+        : 'Board packet distribution recorded; delivery failed for some recipients',
       distributions,
       stats: {
         totalRecipients: recipients.length,
-        sent: distributions.length,
+        sent: delivered,
+        failed,
       },
     });
   },

@@ -45,6 +45,8 @@ export const TERMINATION_NOTICE: Record<CanadianJurisdiction, TerminationNoticeS
       { minYears: 5, maxYears: 6, weeksNotice: 6 },
       { minYears: 6, maxYears: 7, weeksNotice: 7 },
       { minYears: 7, maxYears: 8, weeksNotice: 8 },
+      // The statutory maximum is eight weeks; the schedule had no tier above eight years, so a longer tenure matched none and owed nothing.
+      { minYears: 8, maxYears: null, weeksNotice: 8 },
     ],
   },
   AB: {

@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateOpenAPISpec } from '@/lib/api/openapi';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
 /**
  * API Documentation endpoint
  * 
  * GET /api/docs - Returns OpenAPI JSON spec
  * GET /api/docs?format=html - Returns Swagger UI
+ *
+ * This is the complete operation inventory of the platform, a map of its attack surface, so it is served only to an
+ * authenticated administrator, is never cached by a shared cache and is not offered to other origins. The documentation
+ * that is public by design is /api/docs/openapi.json.
  */
-export async function GET(request: NextRequest) {
+export const GET = withRoleAuth('admin', async (request: NextRequest) => {
   const format = request.nextUrl.searchParams.get('format');
   const spec = generateOpenAPISpec();
   
@@ -76,23 +81,12 @@ export async function GET(request: NextRequest) {
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html',
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, no-store',
       },
     });
   }
   
   return NextResponse.json(spec, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=3600',
-    },
+    headers: { 'Cache-Control': 'private, no-store' },
   });
-}
-
-export async function HEAD() {
-  return new NextResponse(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
-}
+});

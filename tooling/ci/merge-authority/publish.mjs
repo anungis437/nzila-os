@@ -7,6 +7,10 @@
  * publish-ci-results    reads MA_RESULT_* job results from the environment.
  *   MA_CHANGED_PATHS, when set, is the current diff. The reporter recomputes
  *   applicability from it and does not rewrite proven NOT_APPLICABLE contexts.
+ *   MA_CHANGED_PATHS_FILE names a file holding the same newline-separated diff;
+ *   workflows use it because one environment string is capped at 128 KiB on
+ *   Linux, which a pull request touching thousands of paths exceeds.
+ *   When both are set they must agree.
  * publish-pull-request  reconciles the frozen pull-request head until all 16
  *   required contexts are terminal or the bounded budget fails closed.
  *   NOT_APPLICABLE is posted immediately. REQUIRES_EXECUTION waits for that
@@ -205,8 +209,18 @@ async function classifyAndPublish() {
   await publishVerdicts(verdicts, headSha)
 }
 
+function changedPathsText() {
+  const file = process.env.MA_CHANGED_PATHS_FILE
+  const inline = process.env.MA_CHANGED_PATHS
+  if (file === undefined || file === '') return inline
+  const fromFile = readFileSync(file, 'utf8')
+  if (inline !== undefined && inline.trim() !== fromFile.trim())
+    throw new Error('MA_CHANGED_PATHS and MA_CHANGED_PATHS_FILE disagree')
+  return fromFile
+}
+
 function diffPathsFromEnv() {
-  const value = process.env.MA_CHANGED_PATHS
+  const value = changedPathsText()
   if (value === undefined) return undefined
   return pathsFromStdin(value)
 }
@@ -660,8 +674,8 @@ export async function republishFrozenHead(options = {}) {
     })
   const requested = options.requestedHeadSha ?? (process.env.MA_REQUESTED_HEAD_SHA || frozen)
   const headSha = publicationTarget(frozen, requested)
-  if (options.diffPaths === undefined && process.env.MA_CHANGED_PATHS === undefined) {
-    throw new Error('MA_CHANGED_PATHS is required to republish a frozen head')
+  if (options.diffPaths === undefined && changedPathsText() === undefined) {
+    throw new Error('MA_CHANGED_PATHS or MA_CHANGED_PATHS_FILE is required to republish a frozen head')
   }
   const diffPaths = options.diffPaths ?? diffPathsFromEnv()
   const intervalMs = options.intervalMs ?? retryIntervalMs()
@@ -680,8 +694,8 @@ export async function republishFrozenHead(options = {}) {
 }
 
 async function publishPullRequest() {
-  if (process.env.MA_CHANGED_PATHS === undefined) {
-    throw new Error('MA_CHANGED_PATHS is required to publish pull request results')
+  if (changedPathsText() === undefined) {
+    throw new Error('MA_CHANGED_PATHS or MA_CHANGED_PATHS_FILE is required to publish pull request results')
   }
   await republishFrozenHead()
 }
@@ -714,8 +728,8 @@ async function publishWorkflowRun() {
     workflowRunHeadSha: process.env.SOURCE_HEAD_SHA,
     pullRequestHeadSha: process.env.PR_HEAD_SHA,
   })
-  if (process.env.SOURCE_EVENT === 'pull_request' && process.env.MA_CHANGED_PATHS === undefined) {
-    throw new Error('MA_CHANGED_PATHS is required to publish workflow results for a pull request')
+  if (process.env.SOURCE_EVENT === 'pull_request' && changedPathsText() === undefined) {
+    throw new Error('MA_CHANGED_PATHS or MA_CHANGED_PATHS_FILE is required to publish workflow results for a pull request')
   }
   const jobs = await listRunJobs(process.env.SOURCE_RUN_ID)
   const workflowName = process.env.SOURCE_WORKFLOW_NAME
@@ -733,8 +747,8 @@ async function publishWorkflowRun() {
 
 async function publishCiResults() {
   const headSha = resolveHeadSha()
-  if (process.env.GITHUB_EVENT_NAME === 'pull_request' && process.env.MA_CHANGED_PATHS === undefined) {
-    throw new Error('MA_CHANGED_PATHS is required to publish CI results for a pull request')
+  if (process.env.GITHUB_EVENT_NAME === 'pull_request' && changedPathsText() === undefined) {
+    throw new Error('MA_CHANGED_PATHS or MA_CHANGED_PATHS_FILE is required to publish CI results for a pull request')
   }
   const results = {}
   for (const [job, envName] of Object.entries(RESULT_ENV)) {
@@ -876,8 +890,8 @@ async function reconcileThisRun() {
   }
   const jobs = await withReadRetries(() => listRunJobs(runId))
   if (workflowName === 'CI') {
-    if (process.env.MA_CHANGED_PATHS === undefined) {
-      throw new Error('MA_CHANGED_PATHS is required to reconcile a pull request run')
+    if (changedPathsText() === undefined) {
+      throw new Error('MA_CHANGED_PATHS or MA_CHANGED_PATHS_FILE is required to reconcile a pull request run')
     }
     await publishVerdicts(evaluateCiResults(ciResultsFromJobs(jobs), diffPathsFromEnv()), headSha)
     return

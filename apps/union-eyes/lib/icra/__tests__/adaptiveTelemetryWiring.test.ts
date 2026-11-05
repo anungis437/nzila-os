@@ -49,17 +49,15 @@ function buildAssessmentRoutedMeta(
     required: bank.requiredQuestions.length,
     optional: bank.optionalContextQuestions.length,
     safeDefault: bank.usedSafeDefault,
-    selection: bank.selectionFingerprint.slice(0, METADATA_MAX_VALUE_LEN),
   };
 }
 
 function buildQuestionDeferredMeta(
-  questionId: string,
+  _questionId: string,
   decision: string,
   ruleId: string,
 ): Record<string, string | number | boolean> {
   return {
-    questionId: questionId.slice(0, METADATA_MAX_VALUE_LEN),
     decision,
     ruleId: ruleId.slice(0, METADATA_MAX_VALUE_LEN),
   };
@@ -93,17 +91,19 @@ describe('OCRA adaptive telemetry wiring — metadata shape', () => {
   });
 
   it('assessment_routed metadata respects the 8-key / 64-char limits', () => {
-    assertMetadataShape(buildAssessmentRoutedMeta(bank));
+    const meta = buildAssessmentRoutedMeta(bank);
+    assertMetadataShape(meta);
+    expect(meta).not.toHaveProperty('selection');
   });
 
   it('adaptive_question_deferred metadata respects the 8-key / 64-char limits', () => {
-    assertMetadataShape(
-      buildQuestionDeferredMeta(
-        'a'.repeat(200),
-        'defer_not_applicable',
-        'b'.repeat(200),
-      ),
+    const meta = buildQuestionDeferredMeta(
+      'a'.repeat(200),
+      'defer_not_applicable',
+      'b'.repeat(200),
     );
+    assertMetadataShape(meta);
+    expect(meta).not.toHaveProperty('questionId');
   });
 
   it('contains no PII-bearing keys (no email, no name, no free text)', () => {

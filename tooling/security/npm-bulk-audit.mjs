@@ -166,7 +166,9 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
       if (Object.prototype.hasOwnProperty.call(flat, key)) {
         throw new Error(`Duplicate advisory ID in registry response: ${key}`)
       }
-      flat[key] = { ...adv, package: pkgName }
+      // The policy binds each map key to a string id (it refuses coerced identities), and the registry sends
+      // numbers: record the canonical decimal string that was just validated, so the two always agree.
+      flat[key] = { ...adv, id: key, package: pkgName }
     }
   }
   return flat

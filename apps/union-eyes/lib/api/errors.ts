@@ -94,11 +94,19 @@ export class ApiError extends Error {
   }
 
   /**
+   * The endpoint is implemented, but the deployment lacks something it needs (an optional database extension, for example), so it cannot be carried out
+   * here. Answers 501 like notImplemented, but is not an unimplemented route: the route-coverage scanner reads `notImplemented(` as a retired route.
+   */
+  static capabilityUnavailable(message: string) {
+    return new ApiError(ErrorCode.NOT_IMPLEMENTED, message);
+  }
+
+  /**
    * Convert a Zod error into a validation ApiError with field-level details.
    */
-  static fromZod(zodError: { errors: Array<{ path: (string | number)[]; message: string }> }) {
-    const fields = zodError.errors.map((e) => ({
-      path: e.path.join('.'),
+  static fromZod(zodError: { issues: Array<{ path: PropertyKey[]; message: string }> }) {
+    const fields = zodError.issues.map((e) => ({
+      path: e.path.map(String).join('.'),
       message: e.message,
     }));
     return new ApiError(ErrorCode.VALIDATION_ERROR, fields[0]?.message ?? 'Validation failed', {

@@ -14,6 +14,9 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
+import { ApiShapeError, envelopePages, envelopeRows } from '@/lib/client/api-envelope';
+import { envelopeTotal } from '@/lib/client/list-total';
+import { asRecord, optionalString, requiredString } from '@/lib/client/row-fields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -48,35 +51,62 @@ import {
 } from '@/components/ui/dialog';
 import { Mail, MessageSquare, Bell, Plus, Search, RefreshCw, Eye } from 'lucide-react';
 
+interface TemplateVariable {
+  name: string;
+  description: string | null;
+  required: boolean;
+  example: string | null;
+}
+
 interface Template {
   id: string;
   name: string;
   description: string | null;
   type: string;
-  category: string;
+  category: string | null;
   subject: string | null;
   body: string;
   preheader: string | null;
-  htmlContent: string | null;
-  plainTextContent: string | null;
-  variables: Array<{
-    name: string;
-    description: string;
-    required: boolean;
-    default: string | null;
-    example: string | null;
-  }>;
+  variables: TemplateVariable[];
   tags: string[];
   isActive: boolean;
-  createdAt: string;
   updatedAt: string;
+}
+
+function variableFrom(value: unknown): TemplateVariable {
+  const row = asRecord(value, 'template variable');
+  return { name: requiredString(row, 'name'), description: optionalString(row, 'description'), required: row.required === true, example: optionalString(row, 'example') };
+}
+
+/**
+ * A message_templates record. The columns the table never leaves empty are required; category, subject and preheader are nullable and stay null; the jsonb
+ * variables and the tags array hold nothing when the record has none. The list route omits archived rows, and a null is_active is the table's default (active).
+ */
+function templateFrom(value: unknown): Template {
+  const row = asRecord(value, 'template');
+  return {
+    id: requiredString(row, 'id'),
+    name: requiredString(row, 'name'),
+    description: optionalString(row, 'description'),
+    type: requiredString(row, 'type'),
+    category: optionalString(row, 'category'),
+    subject: optionalString(row, 'subject'),
+    body: optionalString(row, 'body') ?? '',
+    preheader: optionalString(row, 'preheader'),
+    variables: Array.isArray(row.variables) ? row.variables.map(variableFrom) : [],
+    tags: Array.isArray(row.tags) ? row.tags.filter((tag): tag is string => typeof tag === 'string') : [],
+    isActive: row.isActive !== false,
+    updatedAt: requiredString(row, 'updatedAt'),
+  };
 }
 
 export default function TemplatesPage() {
   const router = useRouter();
   const t = useTranslations('communicationsTemplatesPage');
   const locale = useLocale();
+  const base = `/${locale}/dashboard/communications/templates`;
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -121,13 +151,16 @@ export default function TemplatesPage() {
         throw new Error(t('failedToFetchTemplates'));
       }
 
-      const json = await response.json();
-      // withApi wraps in { success, data: { data, pagination }, timestamp }
-      const payload = json.data ?? json;
-      setTemplates(Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []);
-      setTotalPages(payload.pagination?.totalPages ?? 1);
+      // withApi wraps in { success, data: { data, pagination }, timestamp }; a body of another shape is an error, not an empty list.
+      const body: unknown = await response.json();
+      const rows = envelopeRows(body).map(templateFrom);
+      setTemplates(rows);
+      setTotal(envelopeTotal(body));
+      setTotalPages(envelopePages(body));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('failedToFetchTemplates'));
+      setTemplates([]);
+      setTotal(null);
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('failedToFetchTemplates'));
     } finally {
       setLoading(false);
     }
@@ -163,8 +196,13 @@ export default function TemplatesPage() {
   const filteredTemplates = templates.filter(template =>
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    template.category.toLowerCase().includes(searchQuery.toLowerCase())
+    template.category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // A figure over rows that were not loaded is not zero; it is unknown.
+  const loaded = !loading && !error;
+  const figure = (count: number | null) => (loaded && count !== null ? count : '—');
+  const onPage = (match: (template: Template) => boolean) => templates.filter(match).length;
 
   return (
     <>
@@ -177,7 +215,7 @@ export default function TemplatesPage() {
               {t('subtitle')}
             </p>
           </div>
-          <Button onClick={() => router.push('/dashboard/communications/templates/new')}>
+          <Button onClick={() => router.push(`${base}/new`)}>
             <Plus className="mr-2 h-4 w-4" />
             {t('createTemplateButton')}
           </Button>
@@ -190,7 +228,7 @@ export default function TemplatesPage() {
               <CardTitle className="text-sm font-medium">{t('totalTemplatesTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{templates.length}</div>
+              <div className="text-2xl font-bold">{figure(total)}</div>
             </CardContent>
           </Card>
           
@@ -200,8 +238,9 @@ export default function TemplatesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {templates.filter(t => t.type === 'email').length}
+                {figure(loaded ? onPage((template) => template.type === 'email') : null)}
               </div>
+              <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
             </CardContent>
           </Card>
 
@@ -211,8 +250,9 @@ export default function TemplatesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {templates.filter(t => t.type === 'sms').length}
+                {figure(loaded ? onPage((template) => template.type === 'sms') : null)}
               </div>
+              <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
             </CardContent>
           </Card>
 
@@ -222,8 +262,9 @@ export default function TemplatesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {templates.filter(t => t.isActive).length}
+                {figure(loaded ? onPage((template) => template.isActive) : null)}
               </div>
+              <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
             </CardContent>
           </Card>
         </div>
@@ -296,7 +337,9 @@ export default function TemplatesPage() {
           <CardHeader>
             <CardTitle>{t('allTemplatesTitle')}</CardTitle>
             <CardDescription>
-              {t('templatesFound', { count: filteredTemplates.length })}
+              {loaded && (searchQuery
+                ? `${t('templatesFound', { count: filteredTemplates.length })} (${t('onThisPage')})`
+                : total !== null && t('templatesFound', { count: total }))}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -315,7 +358,7 @@ export default function TemplatesPage() {
             ) : filteredTemplates.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">{t('noTemplatesFound')}</p>
-                <Button onClick={() => router.push('/dashboard/communications/templates/new')} className="mt-4">
+                <Button onClick={() => router.push(`${base}/new`)} className="mt-4">
                   {t('createFirstTemplateButton')}
                 </Button>
               </div>
@@ -338,7 +381,7 @@ export default function TemplatesPage() {
                       <TableRow 
                         key={template.id}
                         className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => router.push(`/dashboard/communications/templates/${template.id}`)}
+                        onClick={() => router.push(`${base}/${template.id}`)}
                       >
                         <TableCell>
                           <div>
@@ -357,7 +400,7 @@ export default function TemplatesPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{t(`category.${template.category}`)}</Badge>
+                          {template.category ? <Badge variant="outline">{t.has(`category.${template.category}`) ? t(`category.${template.category}`) : template.category}</Badge> : <span className="text-sm text-muted-foreground">—</span>}
                         </TableCell>
                         <TableCell>
                           {template.variables.length > 0 ? (
@@ -402,7 +445,7 @@ export default function TemplatesPage() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/dashboard/communications/templates/${template.id}`);
+                                router.push(`${base}/${template.id}`);
                               }}
                             >
                               {t('editButton')}

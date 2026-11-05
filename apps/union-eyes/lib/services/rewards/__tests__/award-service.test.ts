@@ -12,10 +12,12 @@ const mocks = vi.hoisted(() => ({
   mockDeleteWhere: vi.fn(),
   mockQueryRecognitionAwards: { findFirst: vi.fn(), findMany: vi.fn() },
   mockQueryRecognitionAwardTypes: { findFirst: vi.fn(), findMany: vi.fn() },
+  mockQueryRecognitionPrograms: { findFirst: vi.fn() },
   // sibling service mocks
   mockApplyLedgerEntry: vi.fn(),
   mockApplyBudgetUsage: vi.fn(),
   mockApplyBudgetUsageChecked: vi.fn(),
+  mockAudit: vi.fn(),
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -73,14 +75,23 @@ vi.mock('@/db', () => {
       query: {
         recognitionAwards: mocks.mockQueryRecognitionAwards,
         recognitionAwardTypes: mocks.mockQueryRecognitionAwardTypes,
+        recognitionPrograms: mocks.mockQueryRecognitionPrograms,
       },
     },
   };
 });
 
 vi.mock('@/db/schema', () => ({
-  recognitionAwards: { id: 'id', orgId: 'orgId', status: 'status' },
+  recognitionAwards: {
+    id: 'id',
+    orgId: 'orgId',
+    status: 'status',
+    issuerUserId: 'issuerUserId',
+    recipientUserId: 'recipientUserId',
+    awardTypeId: 'awardTypeId',
+  },
   recognitionAwardTypes: { id: 'id', orgId: 'orgId', programId: 'programId' },
+  recognitionPrograms: { id: 'id', orgId: 'orgId', status: 'status' },
 }));
 
 vi.mock('../wallet-service', () => ({
@@ -92,17 +103,74 @@ vi.mock('../budget-service', () => ({
   applyBudgetUsageChecked: mocks.mockApplyBudgetUsageChecked,
 }));
 
+vi.mock('../audit', () => ({
+  auditRewards: mocks.mockAudit,
+  rewardsActor: (userId?: string | null, fallback = 'system:rewards') => (userId && userId !== 'system' ? userId : fallback),
+}));
+
 import {
   createAwardRequest,
+  createPeerNomination,
+  listUserAwards,
+  MAX_PENDING_NOMINATIONS_PER_MEMBER,
   approveAward,
   issueAward,
   revokeAward,
   rejectAward,
 } from '../award-service';
+import { inArray } from 'drizzle-orm';
 
 describe('award-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockAudit.mockResolvedValue(undefined);
+    // Plain writes run on a transaction whose chains are the shared mock chains.
+    mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) =>
+      cb({ insert: mocks.mockInsert, update: mocks.mockUpdate }),
+    );
+  });
+
+  describe('audit on the same transaction', () => {
+    it('audits an automation-created award as the system actor, and creates nothing if the audit fails', async () => {
+      mocks.mockQueryRecognitionAwardTypes.findFirst.mockResolvedValue({ id: 'at-1', orgId: 'org-1', programId: 'prog-1', requiresApproval: false });
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'award-1', status: 'approved' }]);
+      await createAwardRequest({
+        orgId: 'org-1', programId: 'prog-1', awardTypeId: 'at-1', recipientUserId: 'user-1', issuerUserId: 'system', reason: 'Anniversary',
+      });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({ insert: mocks.mockInsert }),
+        expect.objectContaining({ organizationId: 'org-1', userId: 'system:rewards-automation', action: 'rewards.award.create', resourceId: 'award-1' }),
+      );
+
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'award-2', status: 'approved' }]);
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+      await expect(
+        createAwardRequest({ orgId: 'org-1', programId: 'prog-1', awardTypeId: 'at-1', recipientUserId: 'user-1', reason: 'x' }),
+      ).rejects.toThrow('audit unavailable');
+    });
+
+    it('audits an approval by the approver, and refuses one that raced with another change', async () => {
+      mocks.mockQueryRecognitionAwards.findFirst.mockResolvedValue({ id: 'award-1', status: 'pending', recipientUserId: 'user-1' });
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'award-1', status: 'approved' }]);
+      await approveAward({ awardId: 'award-1', orgId: 'org-1', approvedByUserId: 'approver-1' });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'approver-1', action: 'rewards.award.approve', resourceId: 'award-1' }),
+      );
+
+      mocks.mockAudit.mockClear();
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await expect(
+        approveAward({ awardId: 'award-1', orgId: 'org-1', approvedByUserId: 'approver-1' }),
+      ).rejects.toThrow('changed concurrently');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
+
+    it('writes no audit when a rejection matches no pending award', async () => {
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await expect(rejectAward('award-1', 'org-1', 'officer-1', 'no')).rejects.toThrow('cannot be rejected');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
   });
 
   /* ============================= createAwardRequest ============================= */
@@ -369,6 +437,125 @@ describe('award-service', () => {
 
       expect(result.status).toBe('rejected');
       expect(mocks.mockUpdate).toHaveBeenCalled();
+    });
+  });
+
+  /* ============================= createPeerNomination ============================= */
+  describe('createPeerNomination', () => {
+    const peerType = { id: 'type-1', orgId: 'org-1', programId: 'program-1', kind: 'peer', requiresApproval: false };
+    const nomination = { orgId: 'org-1', awardTypeId: 'type-1', recipientUserId: 'colleague', nominatorUserId: 'member-1', reason: 'Stayed late' };
+
+    /** What the select statements inside the transaction answer, in order: the duplicate check, then the count of nominations waiting. */
+    function inTransaction(answers: unknown[][]) {
+      const selectResults = [...answers];
+      const select = () => {
+        const chain: Record<string, unknown> = {
+          from: () => chain,
+          where: () => chain,
+          limit: () => chain,
+          then: (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) =>
+            Promise.resolve(selectResults.shift() ?? []).then(resolve, reject),
+        };
+        return chain;
+      };
+      const tx = { select, insert: mocks.mockInsert };
+      mocks.mockTransaction.mockImplementation(async (cb: (transaction: unknown) => unknown) => cb(tx));
+      return tx;
+    }
+
+    beforeEach(() => {
+      mocks.mockQueryRecognitionAwardTypes.findFirst.mockResolvedValue(peerType);
+      mocks.mockQueryRecognitionPrograms.findFirst.mockResolvedValue({ id: 'program-1' });
+      mocks.mockReturning.mockResolvedValue([{ id: 'award-1', status: 'pending' }]);
+    });
+
+    it('stores a pending request with the nominator as its issuer, even for a type that needs no approval, and audits it on the same transaction', async () => {
+      const tx = inTransaction([[], [{ pending: 0 }]]);
+
+      const award = await createPeerNomination(nomination);
+
+      expect(award).toEqual({ id: 'award-1', status: 'pending' });
+      expect(mocks.mockValues).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orgId: 'org-1',
+          programId: 'program-1',
+          awardTypeId: 'type-1',
+          recipientUserId: 'colleague',
+          issuerUserId: 'member-1',
+          reason: 'Stayed late',
+          status: 'pending',
+          metadataJson: { nomination: true },
+        }),
+      );
+      expect(mocks.mockValues.mock.calls[0][0]).not.toHaveProperty('approvedAt');
+      expect(mocks.mockAudit).toHaveBeenCalledWith(tx, {
+        organizationId: 'org-1',
+        userId: 'member-1',
+        action: 'rewards.award.nominate',
+        resourceType: 'recognition_awards',
+        resourceId: 'award-1',
+        details: { awardTypeId: 'type-1', recipientUserId: 'colleague', status: 'pending' },
+      });
+    });
+
+    it('stores nothing when its audit cannot be written', async () => {
+      inTransaction([[], [{ pending: 0 }]]);
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit sink unavailable'));
+
+      await expect(createPeerNomination(nomination)).rejects.toThrow('audit sink unavailable');
+    });
+
+    it('does not let a member nominate themselves, and reads nothing to find out', async () => {
+      await expect(createPeerNomination({ ...nomination, recipientUserId: 'member-1' })).rejects.toThrow('You cannot nominate yourself');
+
+      expect(mocks.mockQueryRecognitionAwardTypes.findFirst).not.toHaveBeenCalled();
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['an award type that does not exist', undefined],
+      ['an award type that is not a peer one', { ...peerType, kind: 'admin' }],
+      ['a milestone award type', { ...peerType, kind: 'milestone' }],
+      ['an automated award type', { ...peerType, kind: 'automated' }],
+    ])('refuses %s as if it were not there', async (_what, awardType) => {
+      mocks.mockQueryRecognitionAwardTypes.findFirst.mockResolvedValue(awardType);
+
+      await expect(createPeerNomination(nomination)).rejects.toThrow('Award type not found');
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('refuses a program that is not active', async () => {
+      mocks.mockQueryRecognitionPrograms.findFirst.mockResolvedValue(undefined);
+
+      await expect(createPeerNomination(nomination)).rejects.toThrow('This recognition program is not accepting nominations');
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('refuses the same colleague for the same award while the first nomination waits', async () => {
+      inTransaction([[{ id: 'earlier' }]]);
+
+      await expect(createPeerNomination(nomination)).rejects.toThrow('You have already nominated this colleague for this award; it is waiting for review');
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('refuses a nomination from a member who already has the allowed number waiting, and accepts one fewer', async () => {
+      inTransaction([[], [{ pending: MAX_PENDING_NOMINATIONS_PER_MEMBER }]]);
+      await expect(createPeerNomination(nomination)).rejects.toThrow(/too many nominations waiting for review/);
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+
+      inTransaction([[], [{ pending: MAX_PENDING_NOMINATIONS_PER_MEMBER - 1 }]]);
+      await expect(createPeerNomination(nomination)).resolves.toMatchObject({ id: 'award-1' });
+    });
+  });
+
+  /* ============================= listUserAwards ============================= */
+  describe('listUserAwards', () => {
+    it('lists only the awards that were decided for the person, never the nominations still waiting or rejected', async () => {
+      mocks.mockQueryRecognitionAwards.findMany.mockResolvedValue([{ id: 'a' }]);
+
+      expect(await listUserAwards('org-1', 'member-1')).toEqual([{ id: 'a' }]);
+
+      expect(inArray).toHaveBeenCalledWith('status', ['issued', 'revoked']);
     });
   });
 });

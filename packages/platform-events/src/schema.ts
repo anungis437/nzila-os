@@ -11,10 +11,10 @@ import { z } from 'zod'
 // ── Metadata Schema ─────────────────────────────────────────────────────────
 
 export const platformEventMetadataSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   actorId: z.string().min(1),
-  correlationId: z.string().uuid(),
-  causationId: z.string().uuid().nullable(),
+  correlationId: z.guid(),
+  causationId: z.guid().nullable(),
   source: z.string().min(1),
   traceId: z.string().nullable(),
   spanId: z.string().nullable(),
@@ -23,14 +23,14 @@ export const platformEventMetadataSchema = z.object({
 // ── Event Envelope Schema ───────────────────────────────────────────────────
 
 export const platformEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   type: z.string().min(1).regex(/^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$/, {
     message: 'Event type must be dot-namespaced lowercase, e.g. "integration.delivery.completed"',
   }),
   schemaVersion: z.string().regex(/^\d+\.\d+$/, {
     message: 'Schema version must be semver-like, e.g. "1.0"',
   }),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   metadata: platformEventMetadataSchema,
   createdAt: z.string().datetime(),
 })
@@ -49,6 +49,6 @@ export function validateEvent(event: unknown): ValidatedPlatformEvent {
 /**
  * Safe validation — returns result object instead of throwing.
  */
-export function safeValidateEvent(event: unknown): z.SafeParseReturnType<unknown, ValidatedPlatformEvent> {
+export function safeValidateEvent(event: unknown): z.ZodSafeParseResult<ValidatedPlatformEvent> {
   return platformEventSchema.safeParse(event)
 }

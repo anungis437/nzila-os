@@ -50,6 +50,7 @@ import {
   Bell,
   Eye,
 } from 'lucide-react';
+import { ApiShapeError, envelopeRow, readApiError } from '@/lib/client/api-envelope';
 
 interface Variable {
   name: string;
@@ -166,15 +167,15 @@ export default function NewTemplatePage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || t('errors.createFailed'));
+        throw new Error(await readApiError(response, t('errors.createFailed')));
       }
 
-      const json = await response.json();
-      const template = json.data ?? json;
+      // The collection route answers { data: template }, which withApi wraps once more.
+      const template = envelopeRow(await response.json());
+      if (typeof template.id !== 'string') throw new Error(t('errors.createFailed'));
       router.push(`/${locale}/dashboard/communications/templates/${template.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.createFailed'));
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('errors.createFailed'));
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,430 @@
+{
+  "schemaVersion": 1,
+  "lockVersion": 11,
+  "note": "Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.",
+  "anchorCommit": "2247978bd642a89a7d4f8bd720b978f789cb4437",
+  "anchorMatrixPath": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
+  "capabilityIds": [
+    "UE-CAP-A-001",
+    "UE-CAP-A-002",
+    "UE-CAP-A-003",
+    "UE-CAP-A-004",
+    "UE-CAP-A-005",
+    "UE-CAP-A-006",
+    "UE-CAP-A-007",
+    "UE-CAP-B-001",
+    "UE-CAP-B-002",
+    "UE-CAP-C-001",
+    "UE-CAP-D-001",
+    "UE-CAP-D-002",
+    "UE-CAP-D-003",
+    "UE-CAP-E-001",
+    "UE-CAP-F-001",
+    "UE-CAP-F-002",
+    "UE-CAP-F-003",
+    "UE-CAP-G-001",
+    "UE-CAP-G-002",
+    "UE-CAP-G-003",
+    "UE-CAP-H-001",
+    "UE-CAP-H-002",
+    "UE-CAP-H-003",
+    "UE-CAP-H-004",
+    "UE-CAP-H-005",
+    "UE-CAP-H-006",
+    "UE-CAP-H-007",
+    "UE-CAP-I-001",
+    "UE-CAP-I-002",
+    "UE-CAP-J-001",
+    "UE-CAP-K-001",
+    "UE-CAP-K-002",
+    "UE-CAP-K-003",
+    "UE-CAP-K-004",
+    "UE-CAP-K-005",
+    "UE-CAP-K-006",
+    "UE-CAP-K-007",
+    "UE-CAP-K-008",
+    "UE-CAP-K-009",
+    "UE-CAP-K-010",
+    "UE-CAP-K-011",
+    "UE-CAP-REVIEW-INTAKE",
+    "UE-OMIT-A11Y-BILINGUAL",
+    "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+    "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+    "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+    "UE-OMIT-AUDIT-LOG-VISIBILITY",
+    "UE-OMIT-BARGAINING-RECORDS",
+    "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+    "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+    "UE-OMIT-CBA-INTELLIGENCE-DATASET",
+    "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+    "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+    "UE-OMIT-COMMITTEE-WORKSPACE",
+    "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+    "UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY",
+    "UE-OMIT-COMMUNICATIONS-SMS",
+    "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+    "UE-OMIT-COMPLIANCE-ASSURANCE",
+    "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+    "UE-OMIT-COPE-POLITICAL-ACTION",
+    "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+    "UE-OMIT-DEADLINE-OVERDUE",
+    "UE-OMIT-DELIVERY-EVIDENCE",
+    "UE-OMIT-DISPATCH-HALL",
+    "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+    "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+    "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+    "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+    "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+    "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+    "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+    "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+    "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+    "UE-OMIT-FINANCE-UNAVAILABLE",
+    "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+    "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+    "UE-OMIT-KPI-TARGET-CONFIGURATION",
+    "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+    "UE-OMIT-M04-LEGAL-DEADLINE",
+    "UE-OMIT-M04-MEMBER-REQUESTS",
+    "UE-OMIT-MAIN-APP-CRONS",
+    "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+    "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+    "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+    "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+    "UE-OMIT-OHS-REGULATORY-RECORDS",
+    "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+    "UE-OMIT-ORGANIZATION-ONBOARDING",
+    "UE-OMIT-ORGANIZING-CAMPAIGNS",
+    "UE-OMIT-PAY-EQUITY-EXERCISES",
+    "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+    "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+    "UE-OMIT-PKI-SIGNING-WORKFLOW",
+    "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+    "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
+    "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+    "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+    "UE-OMIT-PRIVACY-RIGHTS",
+    "UE-OMIT-REP-CANONICAL-ABSENT",
+    "UE-OMIT-REP-CORRESPONDENCE",
+    "UE-OMIT-REP-TRANSITION-REASON-LEAK",
+    "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+    "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+    "UE-OMIT-ROUTE-DOMAIN-SCOPE",
+    "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+    "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+    "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+    "UE-OMIT-STEWARD-CANONICAL-ABSENT",
+    "UE-OMIT-VOICE-TRANSCRIPTION",
+    "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS"
+  ],
+  "retirements": [],
+  "checkpoints": [
+    {
+      "commit": "6dcc66d292d9a10f3713691a93009e7dc82bd610",
+      "note": "The lock at this commit was accepted by review. Every capability id it holds stays in the lock unless a versioned retirement removes it."
+    }
+  ],
+  "additions": [
+    {
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "GATE-0B.4",
+      "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35",
+      "classifiedOperations": 20,
+      "reason": "Created by GATE-0B.4 as the engineering capability whose obligation covers operations that tranche classified from source evidence: calendar-and-provider-connections."
+    },
+    {
+      "capabilityId": "UE-OMIT-CBA-INTELLIGENCE-DATASET",
+      "tranche": "GATE-0B.4",
+      "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35",
+      "classifiedOperations": 18,
+      "reason": "Created by GATE-0B.4 as the engineering capability whose obligation covers operations that tranche classified from source evidence: cba-intelligence-dataset."
+    },
+    {
+      "capabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "tranche": "GATE-0B.4",
+      "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35",
+      "classifiedOperations": 14,
+      "reason": "Created by GATE-0B.4 as the engineering capability whose obligation covers operations that tranche classified from source evidence: clause-library-sharing."
+    },
+    {
+      "capabilityId": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+      "tranche": "GATE-0B.4",
+      "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35",
+      "classifiedOperations": 13,
+      "reason": "Created by GATE-0B.4 as the engineering capability whose obligation covers operations that tranche classified from source evidence: collective-agreement-register."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY",
+      "tranche": "GATE-0B.4",
+      "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35",
+      "classifiedOperations": 1,
+      "reason": "Created by GATE-0B.4 as the engineering capability whose obligation covers operations that tranche classified from source evidence: communications-campaign-delivery."
+    },
+    {
+      "capabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "GATE-0B.4",
+      "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35",
+      "classifiedOperations": 15,
+      "reason": "Created by GATE-0B.4 as the engineering capability whose obligation covers operations that tranche classified from source evidence: ohs-regulatory-records."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 20,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: committee-workspace."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 29,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: communications-campaign-authoring."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-SMS",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 8,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: communications-sms."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: communications-tracking-and-unsubscribe."
+    },
+    {
+      "capabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 14,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: member-polls-and-surveys."
+    },
+    {
+      "capabilityId": "UE-OMIT-PAY-EQUITY-EXERCISES",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 5,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: pay-equity-exercises."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "GATE-0B.6",
+      "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385",
+      "classifiedOperations": 5,
+      "reason": "Created by GATE-0B.6 as the engineering capability whose obligation covers operations that tranche classified from source evidence: employer-compliance-assurance."
+    },
+    {
+      "capabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "GATE-0B.6",
+      "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.6 as the engineering capability whose obligation covers operations that tranche classified from source evidence: content-library-editorial."
+    },
+    {
+      "capabilityId": "UE-OMIT-COPE-POLITICAL-ACTION",
+      "tranche": "GATE-0B.6",
+      "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.6 as the engineering capability whose obligation covers operations that tranche classified from source evidence: cope-political-action."
+    },
+    {
+      "capabilityId": "UE-OMIT-DISPATCH-HALL",
+      "tranche": "GATE-0B.6",
+      "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.6 as the engineering capability whose obligation covers operations that tranche classified from source evidence: hiring-hall-dispatch."
+    },
+    {
+      "capabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "GATE-0B.6",
+      "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385",
+      "classifiedOperations": 28,
+      "reason": "Created by GATE-0B.6 as the engineering capability whose obligation covers operations that tranche classified from source evidence: education-and-training-records."
+    },
+    {
+      "capabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "GATE-0B.6",
+      "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385",
+      "classifiedOperations": 9,
+      "reason": "Created by GATE-0B.6 as the engineering capability whose obligation covers operations that tranche classified from source evidence: employer-registry-and-communications."
+    },
+    {
+      "capabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 2,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: enterprise-sso-identity-providers."
+    },
+    {
+      "capabilityId": "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: equity-self-identification-and-monitoring."
+    },
+    {
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 46,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: exit-interview-cognition-analytics."
+    },
+    {
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 13,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: exit-interview-knowledge-transfer."
+    },
+    {
+      "capabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "GATE-0B.8",
+      "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af",
+      "classifiedOperations": 24,
+      "reason": "Created by GATE-0B.8 as the engineering capability whose obligation covers operations that tranche classified from source evidence: federation-and-local-hierarchy."
+    },
+    {
+      "capabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "GATE-0B.8",
+      "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af",
+      "classifiedOperations": 14,
+      "reason": "Created by GATE-0B.8 as the engineering capability whose obligation covers operations that tranche classified from source evidence: icra-pseudonymous-assessment-product."
+    },
+    {
+      "capabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "GATE-0B.8",
+      "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af",
+      "classifiedOperations": 2,
+      "reason": "Created by GATE-0B.8 as the engineering capability whose obligation covers operations that tranche classified from source evidence: rewards-redemption-provider-fulfilment."
+    },
+    {
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "GATE-0B.9",
+      "operationsHash": "eafe16b5f25727c021f48057d0a164dccc0796ca382183008d8d43d65f5cbcc9",
+      "classifiedOperations": 18,
+      "reason": "Created by GATE-0B.9 as the engineering capability whose obligation covers operations that tranche classified from source evidence: mobile-devices-and-in-app-notifications."
+    },
+    {
+      "capabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "GATE-0B.9",
+      "operationsHash": "eafe16b5f25727c021f48057d0a164dccc0796ca382183008d8d43d65f5cbcc9",
+      "classifiedOperations": 9,
+      "reason": "Created by GATE-0B.9 as the engineering capability whose obligation covers operations that tranche classified from source evidence: organization-record-roster-and-directory."
+    },
+    {
+      "capabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "GATE-0B.9",
+      "operationsHash": "eafe16b5f25727c021f48057d0a164dccc0796ca382183008d8d43d65f5cbcc9",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.9 as the engineering capability whose obligation covers operations that tranche classified from source evidence: organization-onboarding-assistance."
+    },
+    {
+      "capabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "GATE-0B.10",
+      "operationsHash": "8e0b6ef1b382c817264503a249c4a41dfe7e68a2392697e285a6336781ce4387",
+      "classifiedOperations": 36,
+      "reason": "Created by GATE-0B.10 as the engineering capability whose obligation covers operations that tranche classified from source evidence: organizing-campaign-records-card-check-and-filings."
+    },
+    {
+      "capabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "GATE-0B.10",
+      "operationsHash": "8e0b6ef1b382c817264503a249c4a41dfe7e68a2392697e285a6336781ce4387",
+      "classifiedOperations": 17,
+      "reason": "Created by GATE-0B.10 as the engineering capability whose obligation covers operations that tranche classified from source evidence: pilot-application-intake-and-commercialization."
+    },
+    {
+      "capabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "GATE-0B.10",
+      "operationsHash": "8e0b6ef1b382c817264503a249c4a41dfe7e68a2392697e285a6336781ce4387",
+      "classifiedOperations": 13,
+      "reason": "Created by GATE-0B.10 as the engineering capability whose obligation covers operations that tranche classified from source evidence: pilot-program-operations."
+    },
+    {
+      "capabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: esignature-document-requests-signing-and-audit-trail."
+    },
+    {
+      "capabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: member-dues-self-service-balance-and-payment."
+    },
+    {
+      "capabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 16,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: social-media-publishing-accounts-posts-campaigns-and-analytics."
+    },
+    {
+      "capabilityId": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 5,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: steward-assignment-directory-and-appointment."
+    },
+    {
+      "capabilityId": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 10,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: bargaining-unit-and-worksite-register."
+    },
+    {
+      "capabilityId": "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: cupe-vocabulary-reference-data."
+    },
+    {
+      "capabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 8,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: governance-entropy-workbook-product."
+    },
+    {
+      "capabilityId": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: kpi-target-configuration."
+    },
+    {
+      "capabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 7,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: legacy-compatibility-and-diagnostic-routes."
+    },
+    {
+      "capabilityId": "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: platform-marketing-testimonials."
+    },
+    {
+      "capabilityId": "UE-OMIT-VOICE-TRANSCRIPTION",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 2,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: voice-recording-transcription."
+    },
+    {
+      "capabilityId": "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 10,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: wcb-claims-and-employer-assessments."
+    }
+  ]
+}

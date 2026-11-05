@@ -69,8 +69,6 @@ const PUBLIC_ROUTE_PREFIXES: string[] = [
   "/api/signatures/webhooks",
   "/api/integrations/shopify/webhooks",
   "/api/payments/webhooks",
-  "/api/whop/webhooks",
-  "/api/whop/unauthenticated-checkout",
   "/api/auth",
   "/api/communications/track",
   "/api/communications/unsubscribe",

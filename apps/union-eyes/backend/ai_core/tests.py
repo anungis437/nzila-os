@@ -30,16 +30,17 @@ from .models import (
     ModelMetadata,
     WcagSuccessCriteria,
 )
+from core.testing import create_valid
 
 
 class AbTestsModelTest(TestCase):
     """Test AbTests model."""
 
     def test_create_ab_tests(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="Test Org", slug="test-ab-tests", organization_type="union"
         )
-        obj = AbTests.objects.create(
+        obj = create_valid(AbTests,
             name="Homepage CTA",
             description="Test different CTA button colors",
             type="split",
@@ -52,7 +53,7 @@ class AbTestsModelTest(TestCase):
         self.assertEqual(obj.status, "active")
 
     def test_ab_tests_str(self):
-        obj = AbTests.objects.create(
+        obj = create_valid(AbTests,
             name="My AB Test", description="desc", type="split"
         )
         self.assertEqual(str(obj), "My AB Test")
@@ -63,13 +64,13 @@ class AbTestVariantsModelTest(TestCase):
 
     def test_create_ab_test_variants(self):
         test_id = uuid.uuid4()
-        obj = AbTestVariants.objects.create(test_id=test_id)
+        obj = create_valid(AbTestVariants, test_id=test_id)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
         self.assertEqual(obj.test_id, test_id)
 
     def test_ab_test_variants_str(self):
-        obj = AbTestVariants.objects.create(test_id=uuid.uuid4())
+        obj = create_valid(AbTestVariants, test_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -78,13 +79,13 @@ class AbTestAssignmentsModelTest(TestCase):
 
     def test_create_ab_test_assignments(self):
         test_id = uuid.uuid4()
-        obj = AbTestAssignments.objects.create(test_id=test_id)
+        obj = create_valid(AbTestAssignments, test_id=test_id)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
         self.assertEqual(obj.test_id, test_id)
 
     def test_ab_test_assignments_str(self):
-        obj = AbTestAssignments.objects.create(test_id=uuid.uuid4())
+        obj = create_valid(AbTestAssignments, test_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -93,13 +94,13 @@ class AbTestEventsModelTest(TestCase):
 
     def test_create_ab_test_events(self):
         test_id = uuid.uuid4()
-        obj = AbTestEvents.objects.create(test_id=test_id)
+        obj = create_valid(AbTestEvents, test_id=test_id)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
         self.assertEqual(obj.test_id, test_id)
 
     def test_ab_test_events_str(self):
-        obj = AbTestEvents.objects.create(test_id=uuid.uuid4())
+        obj = create_valid(AbTestEvents, test_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -108,13 +109,13 @@ class AccessibilityAuditsModelTest(TestCase):
 
     def test_create_accessibility_audits(self):
         org_id = uuid.uuid4()
-        obj = AccessibilityAudits.objects.create(organization_id=org_id)
+        obj = create_valid(AccessibilityAudits, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_accessibility_audits_str(self):
-        obj = AccessibilityAudits.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(AccessibilityAudits, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -123,13 +124,13 @@ class AccessibilityIssuesModelTest(TestCase):
 
     def test_create_accessibility_issues(self):
         audit_id = uuid.uuid4()
-        obj = AccessibilityIssues.objects.create(audit_id=audit_id)
+        obj = create_valid(AccessibilityIssues, audit_id=audit_id)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
         self.assertEqual(obj.audit_id, audit_id)
 
     def test_accessibility_issues_str(self):
-        obj = AccessibilityIssues.objects.create(audit_id=uuid.uuid4())
+        obj = create_valid(AccessibilityIssues, audit_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -137,7 +138,7 @@ class WcagSuccessCriteriaModelTest(TestCase):
     """Test WcagSuccessCriteria model."""
 
     def test_create_wcag_success_criteria(self):
-        obj = WcagSuccessCriteria.objects.create(
+        obj = create_valid(WcagSuccessCriteria,
             criteria_number="1.1.1",
             criteria_title="Non-text Content",
             criteria_description="All non-text content has a text alternative.",
@@ -151,7 +152,7 @@ class WcagSuccessCriteriaModelTest(TestCase):
         self.assertEqual(obj.wcag_version, "2.2")
 
     def test_wcag_success_criteria_str(self):
-        obj = WcagSuccessCriteria.objects.create(
+        obj = create_valid(WcagSuccessCriteria,
             criteria_number="2.1.1",
             criteria_title="Keyboard",
             criteria_description="All functionality is operable through a keyboard.",
@@ -166,18 +167,18 @@ class AccessibilityTestSuitesModelTest(TestCase):
     """Test AccessibilityTestSuites model."""
 
     def test_create_accessibility_test_suites(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="A11y Org", slug="test-a11y-suites", organization_type="union"
         )
-        obj = AccessibilityTestSuites.objects.create(organization=org)
+        obj = create_valid(AccessibilityTestSuites, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
     def test_accessibility_test_suites_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="A11y Org 2", slug="test-a11y-suites-str", organization_type="union"
         )
-        obj = AccessibilityTestSuites.objects.create(organization=org)
+        obj = create_valid(AccessibilityTestSuites, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
@@ -186,12 +187,12 @@ class AccessibilityUserTestingModelTest(TestCase):
 
     def test_create_accessibility_user_testing(self):
         org_id = uuid.uuid4()
-        obj = AccessibilityUserTesting.objects.create(organization_id=org_id)
+        obj = create_valid(AccessibilityUserTesting, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_accessibility_user_testing_str(self):
-        obj = AccessibilityUserTesting.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(AccessibilityUserTesting, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -199,12 +200,12 @@ class ChatSessionsModelTest(TestCase):
     """Test ChatSessions model."""
 
     def test_create_chat_sessions(self):
-        obj = ChatSessions.objects.create(user_id="clerk_user_123")
+        obj = create_valid(ChatSessions, user_id="user_123")
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_123")
+        self.assertEqual(obj.user_id, "user_123")
 
     def test_chat_sessions_str(self):
-        obj = ChatSessions.objects.create(user_id="clerk_user_456")
+        obj = create_valid(ChatSessions, user_id="user_456")
         self.assertIsInstance(str(obj), str)
 
 
@@ -213,12 +214,12 @@ class ChatMessagesModelTest(TestCase):
 
     def test_create_chat_messages(self):
         session_id = uuid.uuid4()
-        obj = ChatMessages.objects.create(session_id=session_id)
+        obj = create_valid(ChatMessages, session_id=session_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.session_id, session_id)
 
     def test_chat_messages_str(self):
-        obj = ChatMessages.objects.create(session_id=uuid.uuid4())
+        obj = create_valid(ChatMessages, session_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -227,12 +228,12 @@ class KnowledgeBaseModelTest(TestCase):
 
     def test_create_knowledge_base(self):
         org_id = uuid.uuid4()
-        obj = KnowledgeBase.objects.create(organization_id=org_id)
+        obj = create_valid(KnowledgeBase, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_knowledge_base_str(self):
-        obj = KnowledgeBase.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(KnowledgeBase, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -241,12 +242,12 @@ class ChatbotSuggestionsModelTest(TestCase):
 
     def test_create_chatbot_suggestions(self):
         org_id = uuid.uuid4()
-        obj = ChatbotSuggestions.objects.create(organization_id=org_id)
+        obj = create_valid(ChatbotSuggestions, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_chatbot_suggestions_str(self):
-        obj = ChatbotSuggestions.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(ChatbotSuggestions, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -255,12 +256,12 @@ class ChatbotAnalyticsModelTest(TestCase):
 
     def test_create_chatbot_analytics(self):
         org_id = uuid.uuid4()
-        obj = ChatbotAnalytics.objects.create(organization_id=org_id)
+        obj = create_valid(ChatbotAnalytics, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_chatbot_analytics_str(self):
-        obj = ChatbotAnalytics.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(ChatbotAnalytics, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -268,9 +269,9 @@ class AiSafetyFiltersModelTest(TestCase):
     """Test AiSafetyFilters model."""
 
     def test_create_ai_safety_filters(self):
-        session = ChatSessions.objects.create(user_id="safety_user")
-        msg = ChatMessages.objects.create(session_id=session.id)
-        obj = AiSafetyFilters.objects.create(
+        session = create_valid(ChatSessions, user_id="safety_user")
+        msg = create_valid(ChatMessages, session_id=session.id)
+        obj = create_valid(AiSafetyFilters,
             input="Tell me how to hack a system",
             output="I cannot assist with that.",
             flagged=True,
@@ -287,7 +288,7 @@ class AiSafetyFiltersModelTest(TestCase):
         self.assertEqual(obj.action, "block")
 
     def test_ai_safety_filters_str(self):
-        obj = AiSafetyFilters.objects.create(
+        obj = create_valid(AiSafetyFilters,
             input="Hello",
             action="allow",
             created_at=timezone.now(),
@@ -300,12 +301,12 @@ class AiUsageMetricsModelTest(TestCase):
 
     def test_create_ai_usage_metrics(self):
         org_id = uuid.uuid4()
-        obj = AiUsageMetrics.objects.create(organization_id=org_id)
+        obj = create_valid(AiUsageMetrics, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_ai_usage_metrics_str(self):
-        obj = AiUsageMetrics.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(AiUsageMetrics, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -314,12 +315,12 @@ class AiRateLimitsModelTest(TestCase):
 
     def test_create_ai_rate_limits(self):
         org_id = uuid.uuid4()
-        obj = AiRateLimits.objects.create(organization_id=org_id)
+        obj = create_valid(AiRateLimits, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_ai_rate_limits_str(self):
-        obj = AiRateLimits.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(AiRateLimits, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -328,12 +329,12 @@ class AiBudgetsModelTest(TestCase):
 
     def test_create_ai_budgets(self):
         org_id = uuid.uuid4()
-        obj = AiBudgets.objects.create(organization_id=org_id)
+        obj = create_valid(AiBudgets, organization_id=org_id)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization_id, org_id)
 
     def test_ai_budgets_str(self):
-        obj = AiBudgets.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(AiBudgets, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
@@ -341,18 +342,18 @@ class MlPredictionsModelTest(TestCase):
     """Test MlPredictions model."""
 
     def test_create_ml_predictions(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="ML Org", slug="test-ml-preds", organization_type="union"
         )
-        obj = MlPredictions.objects.create(organization=org)
+        obj = create_valid(MlPredictions, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
     def test_ml_predictions_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="ML Org 2", slug="test-ml-preds-str", organization_type="union"
         )
-        obj = MlPredictions.objects.create(organization=org)
+        obj = create_valid(MlPredictions, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
@@ -360,16 +361,16 @@ class ModelMetadataModelTest(TestCase):
     """Test ModelMetadata model."""
 
     def test_create_model_metadata(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="Meta Org", slug="test-model-meta", organization_type="union"
         )
-        obj = ModelMetadata.objects.create(organization=org)
+        obj = create_valid(ModelMetadata, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
 
     def test_model_metadata_str(self):
-        org = Organizations.objects.create(
+        org = create_valid(Organizations,
             name="Meta Org 2", slug="test-model-meta-str", organization_type="union"
         )
-        obj = ModelMetadata.objects.create(organization=org)
+        obj = create_valid(ModelMetadata, organization=org)
         self.assertIsInstance(str(obj), str)

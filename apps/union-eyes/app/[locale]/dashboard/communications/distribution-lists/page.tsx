@@ -11,7 +11,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { ApiShapeError, envelopePages, envelopeRows } from '@/lib/client/api-envelope';
+import { envelopeTotal } from '@/lib/client/list-total';
+import { asRecord, optionalString, requiredString } from '@/lib/client/row-fields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -37,17 +40,35 @@ interface DistributionList {
   name: string;
   description: string | null;
   listType: string;
-  subscriberCount: number;
+  // The table's cached subscriber counter; null when the record holds none, which is not zero.
+  subscriberCount: number | null;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | null;
+}
+
+/** A newsletter_distribution_lists record: id and name are required; a column the table leaves nullable stays null, and list type and activity read as the table's defaults. */
+function listFrom(value: unknown): DistributionList {
+  const row = asRecord(value, 'distribution list');
+  const subscribers = row.subscriberCount;
+  return {
+    id: requiredString(row, 'id'),
+    name: requiredString(row, 'name'),
+    description: optionalString(row, 'description'),
+    listType: optionalString(row, 'listType') ?? 'manual',
+    subscriberCount: typeof subscribers === 'number' && Number.isFinite(subscribers) ? subscribers : null,
+    isActive: row.isActive !== false,
+    createdAt: optionalString(row, 'createdAt'),
+  };
 }
 
 export default function DistributionListsPage() {
   const t = useTranslations('distributionListsPage');
   const tMarketing = useTranslations('marketing.distributionLists');
   const router = useRouter();
+  const locale = useLocale();
+  const base = `/${locale}/dashboard/communications/distribution-lists`;
   const [lists, setLists] = useState<DistributionList[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,13 +93,16 @@ export default function DistributionListsPage() {
         throw new Error(t('errors.fetchFailed'));
       }
 
-      const json = await response.json();
-      // withApi wraps in { success, data: { data, pagination }, timestamp }
-      const payload = json.data ?? json;
-      setLists(Array.isArray(payload.data) ? payload.data : Array.isArray(payload) ? payload : []);
-      setTotalPages(payload.pagination?.totalPages ?? 1);
+      // withApi wraps in { success, data: { data, pagination }, timestamp }; a body of another shape is an error, not an empty list.
+      const body: unknown = await response.json();
+      const rows = envelopeRows(body).map(listFrom);
+      setLists(rows);
+      setTotal(envelopeTotal(body));
+      setTotalPages(envelopePages(body));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.fetchFailed'));
+      setLists([]);
+      setTotal(null);
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -89,8 +113,9 @@ export default function DistributionListsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(undefined, {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -102,6 +127,13 @@ export default function DistributionListsPage() {
     list.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // A figure over rows that were not loaded is not zero; it is unknown. A page sum with a list that holds no counter is not worked out.
+  const loaded = !loading && !error;
+  const figure = (count: number | null) => (loaded && count !== null ? count : '—');
+  const subscribersOnPage = lists.every((list) => list.subscriberCount !== null)
+    ? lists.reduce((sum, list) => sum + (list.subscriberCount ?? 0), 0)
+    : null;
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
@@ -112,7 +144,7 @@ export default function DistributionListsPage() {
             {t('header.description')}
           </p>
         </div>
-        <Button onClick={() => router.push('/dashboard/communications/distribution-lists/new')}>
+        <Button onClick={() => router.push(`${base}/new`)}>
           <Plus className="mr-2 h-4 w-4" />
           {t('header.createList')}
         </Button>
@@ -125,7 +157,7 @@ export default function DistributionListsPage() {
             <CardTitle className="text-sm font-medium">{t('stats.totalLists')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{lists.length}</div>
+            <div className="text-2xl font-bold">{figure(total)}</div>
           </CardContent>
         </Card>
 
@@ -135,8 +167,9 @@ export default function DistributionListsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {lists.filter(l => l.isActive).length}
+              {figure(loaded ? lists.filter(l => l.isActive).length : null)}
             </div>
+            <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
           </CardContent>
         </Card>
 
@@ -146,8 +179,9 @@ export default function DistributionListsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {lists.reduce((sum, l) => sum + (l.subscriberCount || 0), 0)}
+              {figure(subscribersOnPage)}
             </div>
+            <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
           </CardContent>
         </Card>
       </div>
@@ -177,7 +211,9 @@ export default function DistributionListsPage() {
         <CardHeader>
           <CardTitle>{t('table.title')}</CardTitle>
           <CardDescription>
-            {t('table.foundCount', { count: filteredLists.length })}
+            {loaded && (searchQuery
+              ? `${t('table.foundCount', { count: filteredLists.length })} (${t('onThisPage')})`
+              : total !== null && t('table.foundCount', { count: total }))}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -196,7 +232,7 @@ export default function DistributionListsPage() {
           ) : filteredLists.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">{t('states.empty')}</p>
-              <Button onClick={() => router.push('/dashboard/communications/distribution-lists/new')} className="mt-4">
+              <Button onClick={() => router.push(`${base}/new`)} className="mt-4">
                 {t('states.createFirstList')}
               </Button>
             </div>
@@ -217,7 +253,7 @@ export default function DistributionListsPage() {
                     <TableRow
                       key={list.id}
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => router.push(`/dashboard/communications/distribution-lists/${list.id}`)}
+                      onClick={() => router.push(`${base}/${list.id}`)}
                     >
                       <TableCell>
                         <div>
@@ -237,7 +273,7 @@ export default function DistributionListsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-muted-foreground" />
-                          {list.subscriberCount || 0}
+                          {list.subscriberCount === null ? '—' : list.subscriberCount}
                         </div>
                       </TableCell>
                       <TableCell>

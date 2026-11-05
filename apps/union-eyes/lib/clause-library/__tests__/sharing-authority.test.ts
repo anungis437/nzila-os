@@ -1,39 +1,35 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Round 55 — shared_clause_library OWNER_PLUS_EXPLICIT_SHARING_AUTHORITY.
+// Round 55 — shared_clause_library OWNER_PLUS_EXPLICIT_SHARING_AUTHORITY. The tenant policy of cache 0011/0012 admits the owner, an organization named in
+// the explicit grant list of a private clause, and everyone for a public clause; these helpers state the same rule for the item read and for the list
+// predicate. Federation and congress sharing are readable by the owner only (cache 0048 evaluated them with SECURITY DEFINER functions that the catalog
+// admission contract refuses, and 0050 retired it). The rule over real rows with the real roles is proven in
+// db/__tests__/clause-library-visibility.postgres.test.ts; this file pins the pure rule, the refusal and the name lookup.
 
 const h = vi.hoisted(() => {
-  const queue: unknown[] = [];
-  const makeChain = () => {
-    const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'from', 'where', 'limit']) {
-      chain[m] = () => chain;
-    }
-    chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
-      const v = queue.length ? queue.shift() : [];
-      return (v instanceof Error ? Promise.reject(v) : Promise.resolve(v)).then(res, rej);
-    };
-    return chain;
-  };
-  const db = { select: () => makeChain() };
-  return { queue, db };
+  const systemQueries: Array<{ ids: unknown }> = [];
+  const namesById = new Map<string, string>();
+  const withSystemContext = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
+    callback({
+      select: () => ({
+        from: () => ({
+          where: (predicate: { ids: string[] }) => {
+            systemQueries.push({ ids: predicate.ids });
+            return Promise.resolve(predicate.ids.filter((id) => namesById.has(id)).map((id) => ({ id, name: namesById.get(id) })));
+          },
+        }),
+      }),
+    }),
+  );
+  return { systemQueries, namesById, withSystemContext };
 });
 
-vi.mock('@/db/db', () => ({ db: h.db }));
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
-  and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
-  or: vi.fn((...args: unknown[]) => ({ op: 'or', args })),
-  inArray: vi.fn((col: unknown, val: unknown) => ({ op: 'inArray', col, val })),
-  sql: Object.assign(
-    (strings: TemplateStringsArray, ...values: unknown[]) => ({ op: 'sql', strings, values }),
-    { raw: vi.fn() },
-  ),
+  sql: Object.assign((strings: TemplateStringsArray, ...values: unknown[]) => ({ op: 'sql', strings, values }), { raw: vi.fn() }),
+  inArray: (_column: unknown, ids: string[]) => ({ ids }),
 }));
-vi.mock('@/db/schema', () => ({
-  organizations: { id: 'org.id', organizationType: 'org.organizationType', hierarchyPath: 'org.hierarchyPath', clcAffiliated: 'org.clcAffiliated' },
-  congressMemberships: { id: 'cm.id', organizationId: 'cm.organizationId', status: 'cm.status' },
-}));
+vi.mock('@/db/schema-organizations', () => ({ organizations: { id: 'org.id', name: 'org.name' } }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: h.withSystemContext }));
 vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
   sharedClauseLibrary: {
     id: 'scl.id',
@@ -43,7 +39,9 @@ vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
   },
 }));
 
-const pushSel = (...items: unknown[]) => h.queue.push(...items);
+const A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const C = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 
 describe('isSharedClauseOwner', () => {
   it('is true only for the source organization', async () => {
@@ -54,130 +52,139 @@ describe('isSharedClauseOwner', () => {
 });
 
 describe('canReadSharedClause', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    h.queue.length = 0;
+  it('admits the owner at every level, including the federation and congress levels others cannot read', async () => {
+    const { canReadSharedClause } = await import('../sharing-authority');
+    for (const sharingLevel of ['private', 'public', 'federation', 'congress', 'not-a-real-level', null]) {
+      expect(await canReadSharedClause(A, { sourceOrganizationId: A, sharingLevel })).toBe(true);
+    }
   });
 
-  it('owner can always read regardless of sharingLevel', async () => {
+  it('admits another organization for a public clause and for a private clause that names it, and nothing else', async () => {
     const { canReadSharedClause } = await import('../sharing-authority');
-    const result = await canReadSharedClause('org-a', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'private',
-      sharedWithOrgIds: [],
-    });
-    expect(result).toBe(true);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: A, sharingLevel: 'public' })).toBe(true);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: A, sharingLevel: 'private', sharedWithOrgIds: [C, B] })).toBe(true);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: A, sharingLevel: 'private', sharedWithOrgIds: [C] })).toBe(false);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: A, sharingLevel: 'private', sharedWithOrgIds: null })).toBe(false);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: A, sharingLevel: 'private' })).toBe(false);
   });
 
-  it('public sharingLevel is readable by any organization', async () => {
+  it('fails closed for federation, congress, an unknown level and a missing level when the caller is not the owner', async () => {
     const { canReadSharedClause } = await import('../sharing-authority');
-    const result = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'public',
-      sharedWithOrgIds: null,
-    });
-    expect(result).toBe(true);
+    for (const sharingLevel of ['federation', 'congress', 'not-a-real-level', null]) {
+      expect(await canReadSharedClause(B, { sourceOrganizationId: A, sharingLevel, sharedWithOrgIds: [B] })).toBe(false);
+    }
   });
 
-  it('private sharingLevel is readable only by orgs in the explicit sharedWithOrgIds grant', async () => {
+  it('compares organization ids without regard to case, and ignores a grant that is not a string', async () => {
     const { canReadSharedClause } = await import('../sharing-authority');
-    const granted = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'private',
-      sharedWithOrgIds: ['org-b'],
-    });
-    const notGranted = await canReadSharedClause('org-c', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'private',
-      sharedWithOrgIds: ['org-b'],
-    });
-    expect(granted).toBe(true);
-    expect(notGranted).toBe(false);
+    expect(await canReadSharedClause(B.toUpperCase(), { sourceOrganizationId: A, sharingLevel: 'private', sharedWithOrgIds: [B] })).toBe(true);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: A.toUpperCase(), sharingLevel: 'public' })).toBe(true);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: A, sharingLevel: 'private', sharedWithOrgIds: [null as unknown as string, 7 as unknown as string] })).toBe(false);
   });
 
-  it('private sharingLevel with no explicit grants denies every non-owner org', async () => {
+  it('fails closed for a malformed caller or owner id', async () => {
     const { canReadSharedClause } = await import('../sharing-authority');
-    const result = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'private',
-      sharedWithOrgIds: null,
-    });
-    expect(result).toBe(false);
-  });
-
-  it('unknown/unrecognized sharingLevel fails closed', async () => {
-    const { canReadSharedClause } = await import('../sharing-authority');
-    const result = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'not-a-real-level',
-      sharedWithOrgIds: null,
-    });
-    expect(result).toBe(false);
-  });
-
-  it('federation sharingLevel is readable when caller and owner share the same federation ancestor', async () => {
-    const { canReadSharedClause } = await import('../sharing-authority');
-    // getFederationAncestorId(callerOrgId='org-b'): self lookup -> not a federation -> ancestor lookup
-    pushSel([{ id: 'org-b', organizationType: 'union', hierarchyPath: ['congress-1', 'fed-1'] }]);
-    pushSel([{ id: 'fed-1', organizationType: 'federation' }]);
-    // getFederationAncestorId(sourceOrganizationId='org-a')
-    pushSel([{ id: 'org-a', organizationType: 'union', hierarchyPath: ['congress-1', 'fed-1'] }]);
-    pushSel([{ id: 'fed-1', organizationType: 'federation' }]);
-
-    const result = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'federation',
-      sharedWithOrgIds: null,
-    });
-    expect(result).toBe(true);
-  });
-
-  it('federation sharingLevel denies orgs in a DIFFERENT federation', async () => {
-    const { canReadSharedClause } = await import('../sharing-authority');
-    pushSel([{ id: 'org-b', organizationType: 'union', hierarchyPath: ['congress-1', 'fed-2'] }]);
-    pushSel([{ id: 'fed-2', organizationType: 'federation' }]);
-    pushSel([{ id: 'org-a', organizationType: 'union', hierarchyPath: ['congress-1', 'fed-1'] }]);
-    pushSel([{ id: 'fed-1', organizationType: 'federation' }]);
-
-    const result = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'federation',
-      sharedWithOrgIds: null,
-    });
-    expect(result).toBe(false);
-  });
-
-  it('congress sharingLevel requires BOTH orgs to be CLC-affiliated with an active membership', async () => {
-    const { canReadSharedClause } = await import('../sharing-authority');
-    // isOrgCongressEligible('org-b'): clcAffiliated org lookup, then active-membership lookup
-    pushSel([{ clcAffiliated: true }]);
-    pushSel([{ id: 'membership-b' }]);
-    // isOrgCongressEligible('org-a')
-    pushSel([{ clcAffiliated: true }]);
-    pushSel([{ id: 'membership-a' }]);
-
-    const result = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'congress',
-      sharedWithOrgIds: null,
-    });
-    expect(result).toBe(true);
-  });
-
-  it('congress sharingLevel denies when the owner org has no active congress membership', async () => {
-    const { canReadSharedClause } = await import('../sharing-authority');
-    pushSel([{ clcAffiliated: true }]);
-    pushSel([{ id: 'membership-b' }]);
-    pushSel([{ clcAffiliated: true }]);
-    pushSel([]); // owner has no active membership row
-
-    const result = await canReadSharedClause('org-b', {
-      sourceOrganizationId: 'org-a',
-      sharingLevel: 'congress',
-      sharedWithOrgIds: null,
-    });
-    expect(result).toBe(false);
+    expect(await canReadSharedClause('org-b', { sourceOrganizationId: A, sharingLevel: 'public' })).toBe(false);
+    expect(await canReadSharedClause(B, { sourceOrganizationId: "x'; DROP TABLE shared_clause_library; --", sharingLevel: 'public' })).toBe(false);
+    expect(await canReadSharedClause('', { sourceOrganizationId: A, sharingLevel: 'public' })).toBe(false);
   });
 });
 
+describe('the list predicate', () => {
+  it('states the owner, public and explicit-grant rule over the row columns and the caller, with the caller as the only parameter', async () => {
+    const { buildClauseVisibilityCondition } = await import('../sharing-authority');
+    const condition = (await buildClauseVisibilityCondition(B)) as unknown as { strings: string[]; values: unknown[] };
+    const text = condition.strings.join('?');
+    expect(text).toContain("= 'public'");
+    expect(text).toContain("= 'private'");
+    expect(text).toContain('ANY (COALESCE(');
+    expect(text).not.toMatch(/ue_clause_|federation|congress/);
+    expect(condition.values).toContain(B);
+    expect(condition.values).toContain('scl.sourceOrganizationId');
+    expect(condition.values).toContain('scl.sharingLevel');
+    expect(condition.values).toContain('scl.sharedWithOrgIds');
+  });
 
+  it('matches nothing for a malformed caller', async () => {
+    const { buildClauseVisibilityCondition } = await import('../sharing-authority');
+    const none = (await buildClauseVisibilityCondition("b'; DROP TABLE x; --")) as unknown as { strings: string[] };
+    expect(none.strings.join('')).toBe('false');
+  });
+});
+
+describe('sharingChangeDenial', () => {
+  it('refuses an unknown level, the federation and congress levels no other organization can read, and a malformed grant list', async () => {
+    const { sharingChangeDenial } = await import('../sharing-authority');
+    expect(await sharingChangeDenial(A, { sharingLevel: 'galaxy' })).toMatchObject({ status: 400 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 7 })).toMatchObject({ status: 400 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation' })).toMatchObject({ status: 403, message: expect.stringContaining('federation') });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'congress' })).toMatchObject({ status: 403, message: expect.stringContaining('congress') });
+    expect(await sharingChangeDenial(A, { sharedWithOrgIds: ['not-a-uuid'] })).toMatchObject({ status: 400 });
+    expect(await sharingChangeDenial(A, { sharedWithOrgIds: Array.from({ length: 201 }, () => B) })).toMatchObject({ status: 400 });
+  });
+
+  it('admits a well-formed private or public change, and a change that names no level at all', async () => {
+    const { sharingChangeDenial } = await import('../sharing-authority');
+    expect(await sharingChangeDenial(A, { sharingLevel: 'public', sharedWithOrgIds: [B, C] })).toBeNull();
+    expect(await sharingChangeDenial(A, { sharingLevel: 'private', sharedWithOrgIds: [B] })).toBeNull();
+    expect(await sharingChangeDenial(A, { sharedWithOrgIds: null })).toBeNull();
+    expect(await sharingChangeDenial(A, {})).toBeNull();
+  });
+
+  it('does not treat re-sending the level a clause already has as a change, so a clause stored at a withdrawn level stays editable', async () => {
+    const { sharingChangeDenial } = await import('../sharing-authority');
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation' }, 'federation')).toBeNull();
+    expect(await sharingChangeDenial(A, { sharingLevel: 'congress' }, 'congress')).toBeNull();
+    // Moving to a withdrawn level, or from one withdrawn level to the other, is still a change and is refused.
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation' }, 'private')).toMatchObject({ status: 403 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'congress' }, 'federation')).toMatchObject({ status: 403 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation' }, null)).toMatchObject({ status: 403 });
+    // An unknown level is refused whatever the clause has now, and the grant list is still validated.
+    expect(await sharingChangeDenial(A, { sharingLevel: 'galaxy' }, 'galaxy')).toMatchObject({ status: 400 });
+    expect(await sharingChangeDenial(A, { sharingLevel: 'federation', sharedWithOrgIds: ['not-a-uuid'] }, 'federation')).toMatchObject({ status: 400 });
+  });
+});
+
+describe('sourceNamesFor', () => {
+  beforeEach(() => {
+    h.systemQueries.length = 0;
+    h.namesById.clear();
+    h.withSystemContext.mockClear();
+  });
+
+  it('names only the sources the projection may disclose, by id, on one system read', async () => {
+    h.namesById.set(A, 'Local A');
+    h.namesById.set(B, 'Local B');
+    h.namesById.set(C, 'Local C');
+    const { sourceNamesFor } = await import('../sharing-authority');
+    const names = await sourceNamesFor(
+      [
+        { sourceOrganizationId: A, isAnonymized: false },
+        { sourceOrganizationId: B, isAnonymized: true },
+        { sourceOrganizationId: C, isAnonymized: null },
+        { sourceOrganizationId: A, isAnonymized: false },
+      ],
+      'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    );
+    expect(h.withSystemContext).toHaveBeenCalledTimes(1);
+    expect(h.systemQueries).toEqual([{ ids: [A] }]);
+    expect([...names.entries()]).toEqual([[A, 'Local A']]);
+  });
+
+  it("names the caller's own organization even when its clause is anonymized, and reads nothing when no source is disclosable", async () => {
+    h.namesById.set(A, 'Local A');
+    const { sourceNamesFor } = await import('../sharing-authority');
+    expect([...(await sourceNamesFor([{ sourceOrganizationId: A, isAnonymized: true }], A)).entries()]).toEqual([[A, 'Local A']]);
+    h.withSystemContext.mockClear();
+    expect((await sourceNamesFor([{ sourceOrganizationId: B, isAnonymized: true }], A)).size).toBe(0);
+    expect((await sourceNamesFor([], A)).size).toBe(0);
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('never looks up an id that is not a well-formed organization id', async () => {
+    const { sourceNamesFor } = await import('../sharing-authority');
+    const names = await sourceNamesFor([{ sourceOrganizationId: "x'; DROP TABLE organizations; --", isAnonymized: false }], A);
+    expect(names.size).toBe(0);
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+  });
+});

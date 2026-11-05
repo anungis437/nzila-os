@@ -79,7 +79,7 @@ They are marked `<!-- ARCHIVAL — non-authoritative -->` where appropriate:
 
 ### E) Provisioning Scripts (Archive)
 
-Legacy Clerk provisioning scripts — no longer functional:
+Legacy Clerk provisioning scripts — no longer functional. All have been deleted from the repository:
 
 - `scripts/zonga-clerk-seed.sql`
 - `scripts/zonga-clerk-provision.mjs`

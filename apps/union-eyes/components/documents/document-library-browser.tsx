@@ -67,7 +67,8 @@ export interface DocumentItem {
   size?: number;
   createdAt: Date;
   updatedAt: Date;
-  createdBy: {
+  /** Who filed the document; absent when the viewer may not see it or the person is no longer a member. */
+  createdBy?: {
     id: string;
     name: string;
   };
@@ -280,10 +281,12 @@ export function DocumentLibraryBrowser({
               <span className="text-sm font-medium">
                 {selectedItems.size} item(s) selected
               </span>
-              <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
-                <Trash2 className="h-3 w-3 mr-1" />
-                Delete
-              </Button>
+              {onDelete && (
+                <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Delete
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -305,6 +308,7 @@ export function DocumentLibraryBrowser({
           onSelectAll={handleSelectAll}
           onNavigate={onNavigate}
           onDownload={onDownload}
+          onDelete={onDelete}
           onShare={onShare}
           onPreview={onPreview}
           onToggleStar={onToggleStar}
@@ -371,6 +375,7 @@ function ListView({
   onSelectAll,
   onNavigate,
   onDownload,
+  onDelete,
   onShare,
   onPreview,
   onToggleStar,
@@ -381,6 +386,7 @@ function ListView({
   onSelectAll: (selected: boolean) => void;
   onNavigate?: (folderId: string | null) => void;
   onDownload?: (item: DocumentItem) => void;
+  onDelete?: (items: DocumentItem[]) => void;
   onShare?: (item: DocumentItem) => void;
   onPreview?: (item: DocumentItem) => void;
   onToggleStar?: (item: DocumentItem) => void;
@@ -423,9 +429,11 @@ function ListView({
                 <FileIcon item={item} />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium truncate">{item.name}</div>
-                  <div className="text-sm text-gray-600">
-                    by {item.createdBy.name}
-                  </div>
+                  {item.createdBy && (
+                    <div className="text-sm text-gray-600">
+                      by {item.createdBy.name}
+                    </div>
+                  )}
                 </div>
                 {item.starred && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
               </div>
@@ -467,12 +475,14 @@ function ListView({
                     <Star className="h-4 w-4 mr-2" />
                     {item.starred ? "Unstar" : "Star"}
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {item.permissions.canDelete && (
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
+                  {item.permissions.canDelete && onDelete && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600" onClick={() => onDelete([item])}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -4,10 +4,12 @@
  * Measure organizational continuity resilience across multiple dimensions.
  */
 
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { PropagationMap } from '../propagation/propagation-models';
-import { and, eq } from 'drizzle-orm';
-import { db } from '@/db/db';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
+import { inOrganization } from '../org-scope';
+import { ApiError } from '@/lib/api/errors';
 import { exitInterviews } from '@/db/schema';
 
 type PublishedInterview = Awaited<ReturnType<typeof loadPublishedInterviews>>[number];
@@ -38,15 +40,25 @@ export interface OrganizationalResilienceIndex {
 }
 
 async function loadPublishedInterviews(orgId: string) {
-  return db
-    .select()
-    .from(exitInterviews)
-    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+  // Read as the runtime role in the organization's own tenant transaction.
+  return inOrganization(orgId, (tx) =>
+    tx
+      .select()
+      .from(exitInterviews)
+      .where(derivedAnalyticsCondition(orgId))
+      .limit(INTERVIEW_READ_LIMIT),
+  );
 }
 
 export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {
   const propagationMap = await buildDependencyPropagationMap(orgId);
   const interviews = await loadPublishedInterviews(orgId);
+
+  // Four of the five dimensions are measured over the dependency map. With no nodes they divide by zero, or read a strong score from the
+  // absence of risks that were never looked for, so the index is refused rather than calculated.
+  if (propagationMap.nodes.length === 0) {
+    throw ApiError.conflict('There is no dependency data for this organization, so a resilience index cannot be calculated.');
+  }
 
   // Calculate dimensions
   const redundancyScore = calculateRedundancyScore(propagationMap);

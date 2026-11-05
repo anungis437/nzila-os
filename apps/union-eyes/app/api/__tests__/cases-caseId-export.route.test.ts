@@ -13,6 +13,7 @@ const m = vi.hoisted(() => ({
   auditCaseExport: vi.fn(),
   recordUnionEyesEvidenceExport: vi.fn(),
   db: { select: vi.fn(), execute: vi.fn() },
+  findReadableCase: vi.fn(),
 }));
 
 const mockQuery = {
@@ -49,7 +50,7 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 
 vi.mock('@/lib/cases/case-authorization', async (original) => ({
   ...(await original<typeof import('@/lib/cases/case-authorization')>()),
-  findReadableCase: vi.fn(async () => { const rows = await m.db.select().from({}).where({}).limit(1); return rows[0] ?? null }),
+  findReadableCase: m.findReadableCase,
 }));
 
 async function loadRoute() {
@@ -60,6 +61,7 @@ describe('cases/[caseId]/export route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.canonical = false;
+    m.findReadableCase.mockImplementation(async () => { const rows = await m.db.select().from({}).where({}).limit(1); return rows[0] ? { ...rows[0], visibility: 'internal' } : null });
     m.auth.mockResolvedValue({ userId: 'user-1' });
     m.getOrganizationIdForUser.mockResolvedValue('org-1');
     m.getUserRoleInOrganization.mockResolvedValue('officer');
@@ -130,13 +132,16 @@ describe('cases/[caseId]/export route', () => {
     expect(response.headers.get('Content-Type')).toBe('application/zip');
     expect(m.buildEvidenceZip).toHaveBeenCalled();
   });
-  it('denies member export before reading any case or audit data', async () => {
+  it('denies member export on the kernel decision before reading any case or audit data', async () => {
     const { GET } = await loadRoute();
-    m.getUserRoleInOrganization.mockResolvedValueOnce('member');
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockRejectedValueOnce(ApiError.forbidden('This action is not permitted for this case.'));
     const response = await GET(new Request('http://localhost/api/cases/case-1/export'), { params: Promise.resolve({caseId:'case-1'}) });
     expect(response.status).toBe(403);
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ userId: 'user-1' }), 'case-1', false, 'case:export_sealed_evidence');
     expect(m.db.select).not.toHaveBeenCalled();
     expect(m.buildEvidencePackage).not.toHaveBeenCalled();
+    expect(m.auditCaseExport).not.toHaveBeenCalled();
   });
   it('reads canonical audit evidence through the bound transaction without querying legacy audit storage', async () => {
     const { GET } = await loadRoute();

@@ -13,15 +13,9 @@ export * from './types';
 export {
   Permission,
   ROLE_PERMISSIONS,
-  ROUTE_PERMISSIONS,
-  type NavItem,
-  NAV_ITEMS,
-  ADMIN_NAV_ITEMS,
   hasPermission,
   hasAnyPermission,
   hasAllPermissions,
-  canAccessRoute,
-  getAccessibleNavItems,
   getRoleLevel,
   hasHigherOrEqualRole,
 } from './roles';

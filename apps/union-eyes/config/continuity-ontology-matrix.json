@@ -350,7 +350,8 @@
   ],
   "navComposition": {
     "ignoredGroups": [
-      "Settings"
+      "Settings",
+      "Executive"
     ],
     "domainAliases": {
       "OCI": "OCI",

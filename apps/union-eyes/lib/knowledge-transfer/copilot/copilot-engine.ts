@@ -16,6 +16,10 @@
 
 import { randomUUID } from 'crypto';
 import { sql } from 'drizzle-orm';
+import { ApiError } from '@/lib/api/errors';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { inOrganization, isUuid } from '../org-scope';
 import {
   buildOrgAiTrace,
@@ -36,53 +40,56 @@ import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './co
 // Profile key for continuity copilot — reuses STEWARD_COPILOT as organizational reasoning profile
 const COPILOT_PROFILE = 'ue-steward-copilot';
 
-/** Load or create a conversation. */
+/**
+ * Load or create a conversation, on the caller's transaction. A conversation belongs to the person who opened it: naming one
+ * that is not yours (or does not exist) is a not-found, never a new conversation and never a continuation of someone else's.
+ */
 async function upsertConversation(
+  tx: RLSTx,
   orgId: string,
   conversationId: string | null,
   sessionId: string | null,
   contextSnapshot: Record<string, unknown> | null,
-): Promise<string> {
-  if (conversationId && isUuid(conversationId)) {
-    // Verify it belongs to this org
-    const rows = await inOrganization(orgId, (tx) =>
-      tx.execute(sql`
-        SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND organization_id = ${orgId} LIMIT 1
-      `),
-    );
+  userId: string,
+): Promise<{ id: string; created: boolean }> {
+  if (conversationId) {
+    if (!isUuid(conversationId)) throw ApiError.notFound('Conversation');
+    const rows = await tx.execute(sql`
+      SELECT id FROM ue_copilot_conversations
+      WHERE id = ${conversationId} AND organization_id = ${orgId} AND created_by = ${userId} LIMIT 1
+    `);
     const result = rows as any as Record<string, unknown>[];
-    if (result.length > 0) return conversationId;
+    if (result.length > 0) return { id: conversationId, created: false };
+    throw ApiError.notFound('Conversation');
   }
   // Create new conversation
   const id = randomUUID();
   const now = new Date().toISOString();
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
-      INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_at, updated_at)
-      VALUES (
-        ${id}, ${orgId}, ${sessionId ?? null},
-        ${contextSnapshot ? JSON.stringify(contextSnapshot) : null}::jsonb,
-        ${now}::timestamptz, ${now}::timestamptz
-      )
-    `),
-  );
-  return id;
+  await tx.execute(sql`
+    INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_by, created_at, updated_at)
+    VALUES (
+      ${id}, ${orgId}, ${sessionId ?? null},
+      ${contextSnapshot ? JSON.stringify(contextSnapshot) : null}::jsonb,
+      ${userId}, ${now}::timestamptz, ${now}::timestamptz
+    )
+  `);
+  return { id, created: true };
 }
 
-/** Append a message to a conversation. */
+/** Append a message to a conversation, on the caller's transaction. */
 async function appendMessage(
+  tx: RLSTx,
   orgId: string,
   conversationId: string,
   message: CopilotMessage,
+  userId: string,
 ): Promise<void> {
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
-      UPDATE ue_copilot_conversations
-      SET messages = messages || ${JSON.stringify([message])}::jsonb,
-          updated_at = now()
-      WHERE id = ${conversationId} AND organization_id = ${orgId}
-    `),
-  );
+  await tx.execute(sql`
+    UPDATE ue_copilot_conversations
+    SET messages = messages || ${JSON.stringify([message])}::jsonb,
+        updated_at = now()
+    WHERE id = ${conversationId} AND organization_id = ${orgId} AND created_by = ${userId}
+  `);
 }
 
 /** Build a continuity-aware system prompt from org context. */
@@ -165,7 +172,17 @@ function extractFollowUps(query: string, _responseType: string): string[] {
 export async function processCopilotQuery(
   orgId: string,
   input: CopilotQueryInput,
+  userId: string,
 ): Promise<CopilotQueryResult> {
+  // The model's history is the stored conversation of the caller, never what the client says was said: a caller cannot put
+  // words in the assistant's mouth or smuggle instructions in as prior turns. A conversation that is not theirs is not found.
+  let storedMessages: CopilotMessage[] = [];
+  if (input.conversationId) {
+    const owned = await loadOwnedMessages(orgId, input.conversationId, userId);
+    if (owned === null) throw ApiError.notFound('Conversation');
+    storedMessages = owned;
+  }
+
   // Load org continuity context
   const [propagationMap, resilienceIndex] = await Promise.all([
     buildDependencyPropagationMap(orgId),
@@ -195,23 +212,34 @@ export async function processCopilotQuery(
   // Build message history
   const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
     { role: 'system', content: systemPrompt },
-    ...(input.priorMessages ?? []).map((m) => ({
+    ...storedMessages.slice(-20).map((m) => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     })),
     { role: 'user', content: input.query },
   ];
 
-  // Call AI with governance-safe profile
+  // The provider call cannot share the database transaction: its intent is recorded first and the call is skipped if
+  // that record cannot be written.
   const ai = getAiClient();
-  const aiResult = await ai.generate({
-    orgId: UE_SYSTEM_ORG_ID,
-    trace: buildOrgAiTrace(orgId),
-    appKey: UE_APP_KEY,
-    profileKey: COPILOT_PROFILE,
-    input: messages,
-    dataClass: 'internal',
-  });
+  const aiResult = await performAuditedOperation(
+    {
+      organizationId: orgId,
+      userId,
+      action: 'exit_interview.copilot.generate',
+      resourceType: 'ue_copilot_conversations',
+      details: { conversationId: input.conversationId ?? null },
+    },
+    () =>
+      ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(orgId),
+        appKey: UE_APP_KEY,
+        profileKey: COPILOT_PROFILE,
+        input: messages,
+        dataClass: 'internal',
+      }),
+  );
 
   const answer = aiResult.content;
 
@@ -271,25 +299,37 @@ export async function processCopilotQuery(
     'Review the dependency propagation graph and resilience index for verification.',
   );
 
-  // Persist conversation
-  const convId = await upsertConversation(
-    orgId,
-    input.conversationId ?? null,
-    input.sessionId ?? null,
-    { resilienceScore: resilienceIndex.overallScore, singleSourceCount, totalNodes },
-  );
-
   const userMsgId = randomUUID();
   const assistantMsgId = randomUUID();
   const now = new Date().toISOString();
 
-  await appendMessage(orgId, convId, { id: userMsgId, role: 'user', content: input.query, createdAt: now });
-  await appendMessage(orgId, convId, {
-    id: assistantMsgId,
-    role: 'assistant',
-    content: answer,
-    createdAt: now,
-    explainabilityRef: null,
+  // The conversation and both messages commit with their audit record or not at all
+  const convId = await inOrganization(orgId, async (tx) => {
+    const conversation = await upsertConversation(
+      tx,
+      orgId,
+      input.conversationId ?? null,
+      input.sessionId ?? null,
+      { resilienceScore: resilienceIndex.overallScore, singleSourceCount, totalNodes },
+      userId,
+    );
+    await appendMessage(tx, orgId, conversation.id, { id: userMsgId, role: 'user', content: input.query, createdAt: now }, userId);
+    await appendMessage(tx, orgId, conversation.id, {
+      id: assistantMsgId,
+      role: 'assistant',
+      content: answer,
+      createdAt: now,
+      explainabilityRef: null,
+    }, userId);
+    await persistAtomicAudit(tx, {
+      organizationId: orgId,
+      userId,
+      action: 'exit_interview.copilot.converse',
+      resourceType: 'ue_copilot_conversations',
+      resourceId: conversation.id,
+      details: { newConversation: conversation.created, assistantMessageId: assistantMsgId },
+    });
+    return conversation.id;
   });
 
   const followUps = extractFollowUps(input.query, 'default');
@@ -311,34 +351,41 @@ export async function processCopilotQuery(
   };
 }
 
-/** Load conversation history for a conversation. */
-export async function loadConversationHistory(
-  orgId: string,
-  conversationId: string,
-): Promise<CopilotMessage[]> {
-  if (!isUuid(conversationId)) return [];
+/** The messages of a conversation the caller opened; null when it is not theirs, does not exist, or the id is malformed. */
+async function loadOwnedMessages(orgId: string, conversationId: string, userId: string): Promise<CopilotMessage[] | null> {
+  if (!isUuid(conversationId)) return null;
   const rows = await inOrganization(orgId, (tx) =>
     tx.execute(sql`
       SELECT messages FROM ue_copilot_conversations
-      WHERE id = ${conversationId} AND organization_id = ${orgId}
+      WHERE id = ${conversationId} AND organization_id = ${orgId} AND created_by = ${userId}
       LIMIT 1
     `),
   );
   const result = rows as any as Record<string, unknown>[];
-  if (result.length === 0) return [];
+  if (result.length === 0) return null;
   return (result[0].messages as CopilotMessage[]) ?? [];
 }
 
-/** List recent conversations for an org. */
+/** Load conversation history for a conversation the caller opened (empty for any other). */
+export async function loadConversationHistory(
+  orgId: string,
+  conversationId: string,
+  userId: string,
+): Promise<CopilotMessage[]> {
+  return (await loadOwnedMessages(orgId, conversationId, userId)) ?? [];
+}
+
+/** List the caller's own recent conversations. */
 export async function listConversations(
   orgId: string,
+  userId: string,
   limit = 10,
 ): Promise<Array<{ id: string; title: string; updatedAt: string; messageCount: number }>> {
   const rows = await inOrganization(orgId, (tx) =>
     tx.execute(sql`
       SELECT id, title, updated_at, jsonb_array_length(messages) AS message_count
       FROM ue_copilot_conversations
-      WHERE organization_id = ${orgId}
+      WHERE organization_id = ${orgId} AND created_by = ${userId}
       ORDER BY updated_at DESC
       LIMIT ${limit}
     `),

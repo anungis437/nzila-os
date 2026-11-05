@@ -1,5 +1,3 @@
-"use server";
-
 /**
  * Union Structure Query Functions
  * 

@@ -14,8 +14,7 @@
 
 import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
-import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute, getAccessibleNavItems } from "./roles";
-import type { NavItem } from "./roles";
+import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions } from "./roles";
 
 /**
  * Hook to get user role from the server
@@ -133,24 +132,6 @@ export function useHasAllPermissions(permissions: Permission[]): boolean {
   const { role } = useUserRole();
   if (!role) return false;
   return hasAllPermissions(role, permissions);
-}
-
-/**
- * Hook to check if user can access a route
- */
-export function useCanAccessRoute(route: string): boolean {
-  const { role } = useUserRole();
-  if (!role) return false;
-  return canAccessRoute(role, route);
-}
-
-/**
- * Hook to get accessible navigation items
- */
-export function useAccessibleNavItems(adminMode: boolean = false): NavItem[] {
-  const { role } = useUserRole();
-  if (!role) return [];
-  return getAccessibleNavItems(role, adminMode);
 }
 
 /**

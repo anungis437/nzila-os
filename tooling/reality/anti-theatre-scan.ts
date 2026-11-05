@@ -23,6 +23,11 @@
  *        capability entry in the registry.
  *   R-8  Empty authoritative outputs returned as `NextResponse.json({...},
  *        { status: 200 })` when the array is a placeholder.
+ *   R-9  Generated scaffold fake-success: a `withApi` action handler that
+ *        only reads the body and returns `{ action, status: 'accepted' }`,
+ *        or a status handler that only returns `[]`. Nothing was done, so
+ *        nothing was accepted. Use `ApiError.notImplemented()` (HTTP 501) or
+ *        implement the operation.
  *
  * Design principles:
  *
@@ -582,6 +587,39 @@ const rule_emptyAuthoritativeSuccess: Rule = (ctx) => {
   return findings;
 };
 
+/**
+ * R-9: generated scaffold fake-success. The fingerprint is exact on purpose: an action handler whose whole body is
+ * `await request.json().catch(() => ({})); return { action: '...', status: 'accepted' };`, or a status handler whose
+ * whole body is `return [];`. A genuine asynchronous job that records and enqueues work does not match.
+ */
+const SCAFFOLD_ACCEPTED_RE =
+  /async\s*\(\s*\{\s*request\s*\}\s*\)\s*=>\s*\{\s*await\s+request\.json\(\)\.catch\(\(\)\s*=>\s*\(\{\}\)\);\s*return\s*\{\s*action:\s*'[a-z_]+',\s*status:\s*'accepted'\s*\};?\s*\}/g;
+const SCAFFOLD_EMPTY_STATUS_RE = /async\s*\(\s*\)\s*=>\s*\{\s*return\s*\[\s*\];?\s*\}/g;
+
+const rule_scaffoldFakeSuccess: Rule = (ctx) => {
+  if (!ctx.relPath.startsWith('apps/union-eyes/app/api/')) return [];
+  if (!ctx.relPath.endsWith('/route.ts')) return [];
+  const findings: Finding[] = [];
+  for (const [RE, what] of [
+    [SCAFFOLD_ACCEPTED_RE, "returns { status: 'accepted' } without performing or recording any work"],
+    [SCAFFOLD_EMPTY_STATUS_RE, 'returns an empty list as an operation status'],
+  ] as const) {
+    RE.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = RE.exec(ctx.content)) !== null) {
+      findings.push({
+        rule: 'R-9',
+        file: ctx.relPath,
+        line: ctx.content.slice(0, m.index).split(/\r?\n/).length,
+        message: `Scaffold fake-success: handler ${what}. Implement the operation, or throw ApiError.notImplemented() (HTTP 501).`,
+        evidence: m[0].slice(0, 200).replace(/\s+/g, ' '),
+        severity: 'error',
+      });
+    }
+  }
+  return findings;
+};
+
 const RULES: readonly { id: string; run: Rule }[] = [
   { id: 'R-1', run: rule_notImplementedIn2xx },
   { id: 'R-2', run: rule_hardcodedReadiness },
@@ -591,6 +629,7 @@ const RULES: readonly { id: string; run: Rule }[] = [
   { id: 'R-6', run: rule_silentCatch },
   { id: 'R-7', run: rule_routeNotInRegistry },
   { id: 'R-8', run: rule_emptyAuthoritativeSuccess },
+  { id: 'R-9', run: rule_scaffoldFakeSuccess },
 ] as const;
 
 // ---------------------------------------------------------------------------

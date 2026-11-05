@@ -22,6 +22,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z, ZodSchema, ZodError } from 'zod';
+import { stripMarkup } from '@/lib/utils/strip-markup';
 
 /**
  * Validation result union type
@@ -43,7 +44,7 @@ interface _ValidationErrorDetail {
 /**
  * Sanitization rules
  */
-const sanitizationRules = {
+export const sanitizationRules = {
   /**
    * Trim whitespace and truncate to max length
    */
@@ -70,11 +71,8 @@ const sanitizationRules = {
    */
   html: (value: unknown): string => {
     if (typeof value !== 'string') return '';
-    // Remove HTML tags
-    return value
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // codeql[js/bad-tag-filter] - input sanitization for server-side; not used for rendering
-      .replace(/<[^>]+>/g, '') // codeql[js/bad-tag-filter, js/incomplete-multi-character-sanitization]
-      .trim();
+    // Plain text only: tags and script/style blocks are dropped and the result never contains `<` or `>`.
+    return stripMarkup(value).trim();
   },
 
   /**
@@ -225,8 +223,8 @@ export class RequestValidator {
   static formatZodErrors(error: ZodError): Record<string, string[]> {
     const errors: Record<string, string[]> = {};
 
-    error.errors.forEach(err => {
-      const path = err.path.join('.');
+    error.issues.forEach((err) => {
+      const path = err.path.map(String).join('.');
       const message = err.message;
 
       if (!errors[path]) {
@@ -303,7 +301,7 @@ export const createValidator = {
   /**
    * UUID validation
    */
-  uuid: () => z.string().uuid('Invalid UUID format'),
+  uuid: () => z.guid('Invalid UUID format'),
 
   /**
    * URL validation
@@ -345,8 +343,8 @@ export const createValidator = {
    * Pagination parameters
    */
   pagination: () => z.object({
-    page: z.coerce.number().int().positive().default(1).optional(),
-    limit: z.coerce.number().int().min(1).max(100).default(10).optional(),
+    page: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
     sort: z.string().regex(/^[a-zA-Z_]+:(asc|desc)$/, 'Invalid sort format').optional(),
   }),
 

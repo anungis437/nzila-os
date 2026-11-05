@@ -8,7 +8,8 @@ const mockDb = {
   select: vi.fn(() => {
     const chain = {
       from: vi.fn(() => chain),
-      where: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
+      where: vi.fn(() => chain),
+      limit: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
     };
     return chain;
   }),
@@ -49,20 +50,43 @@ describe('exit-interviews/analytics route', () => {
 
     const payload = await GET({ organizationId: 'org_1' } as any);
 
-    expect(payload.data.organizationId).toBe('org_1');
-    expect(payload.data.totalInterviewsCaptured).toBe(2);
-    expect(payload.data.totalPublished).toBe(1);
-    expect(Array.isArray(payload.data.timeline)).toBe(true);
+    expect(payload.organizationId).toBe('org_1');
+    expect(payload.totalInterviewsCaptured).toBe(2);
+    expect(payload.totalPublished).toBe(1);
+    expect(Array.isArray(payload.timeline)).toBe(true);
   });
 
-  it('handles empty data sets with stable defaults', async () => {
+  it('reports unknown consent coverage and exposure instead of fabricated best-case scores', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([], []);
 
     const payload = await GET({ organizationId: 'org_1' } as any);
 
-    expect(payload.data.totalInterviewsCaptured).toBe(0);
-    expect(payload.data.currentExposureScore).toBe(0);
-    expect(payload.data.trendDirection).toBe('stable');
+    expect(payload.totalInterviewsCaptured).toBe(0);
+    expect(payload.currentExposureScore).toBeNull();
+    expect(payload.timeline).toHaveLength(12);
+    expect(payload.timeline.every((month: { consentCoverageRate: number | null }) => month.consentCoverageRate === null)).toBe(true);
+    expect(payload.trendDirection).toBe('stable');
+  });
+
+  it('computes real consent coverage only for months with interviews', async () => {
+    const { GET } = await loadRoute();
+    const createdAt = new Date(new Date().getFullYear(), new Date().getMonth(), 5);
+    m.selectQueue.push([
+      { id: 'a', status: 'draft', createdAt, publishedAt: null, continuityRiskScore: null, consentGranted: true },
+      { id: 'b', status: 'draft', createdAt, publishedAt: null, continuityRiskScore: null, consentGranted: false },
+    ], []);
+    const payload = await GET({ organizationId: 'org_1' } as any);
+    const thisMonth = payload.timeline.at(-1);
+    expect(thisMonth?.consentCoverageRate).toBe(50);
+    expect(payload.timeline.slice(0, -1).every((m: { consentCoverageRate: number | null }) => m.consentCoverageRate === null)).toBe(true);
+    expect(payload.currentExposureScore).toBeNull();
+  });
+
+  it('refuses an over-limit snapshot rather than returning a misleading truncated report', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(new Array(10001).fill({}), []);
+    await expect(GET({ organizationId: 'org_1' } as any)).rejects.toThrow(/Snapshot exceeds safe limits/);
+    expect(mockDb.select).toHaveBeenCalledTimes(2);
   });
 });

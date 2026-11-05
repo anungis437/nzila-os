@@ -19,7 +19,7 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('stripe:customer-portal')
 
 const CreatePortalSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   customerId: z.string().min(1),
   returnUrl: z.string().url(),
 })

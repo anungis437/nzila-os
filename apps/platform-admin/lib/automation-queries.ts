@@ -14,6 +14,7 @@ import { and, count, desc, eq } from 'drizzle-orm'
 import { platformDb } from '@nzila/db/platform'
 import { itsmAutomationRules } from '@nzila/db/schema'
 import { z } from 'zod'
+import { partialWithoutDefaults } from './partial-without-defaults'
 
 // ── Validation ────────────────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ export const automationActionSchema = z.object({
     'create_ticket',
     'webhook',
   ]),
-  payload: z.record(z.string(), z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
 })
 
 export const createAutomationRuleSchema = z.object({
@@ -48,7 +49,7 @@ export const createAutomationRuleSchema = z.object({
 })
 export type CreateAutomationRuleInput = z.infer<typeof createAutomationRuleSchema>
 
-export const updateAutomationRuleSchema = createAutomationRuleSchema.partial()
+export const updateAutomationRuleSchema = partialWithoutDefaults(createAutomationRuleSchema)
 export type UpdateAutomationRuleInput = z.infer<typeof updateAutomationRuleSchema>
 
 // ── Row shape ────────────────────────────────────────────────────────────────

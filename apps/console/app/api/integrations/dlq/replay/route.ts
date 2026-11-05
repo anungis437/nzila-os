@@ -6,8 +6,8 @@ import { replayDlqEntry } from '@/lib/integrations-runtime-store'
 import { recordAuditEvent } from '@/lib/audit-db'
 
 const ReplaySchema = z.object({
-  orgId: z.string().uuid(),
-  entryId: z.string().uuid(),
+  orgId: z.guid(),
+  entryId: z.guid(),
 })
 
 export async function POST(req: NextRequest) {

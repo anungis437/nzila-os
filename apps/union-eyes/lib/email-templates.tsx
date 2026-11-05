@@ -17,6 +17,7 @@ import {
 } from '@react-email/components';
 import * as React from 'react';
 import { render } from '@react-email/render';
+import { supportEmail } from '@/lib/support-contact';
 
 interface ClaimNotificationEmailProps {
   claimId: string;
@@ -241,7 +242,7 @@ export function ClaimStatusNotificationEmail({
               This is an automated notification from the Union Claims Portal. Please do not reply to this email.
             </Text>
             <Text style={footerText}>
-              If you have questions, please contact your union representative or reply to support@unionclaims.com.
+              If you have questions, please contact your union representative or write to {supportEmail()}.
             </Text>
           </Section>
         </Container>

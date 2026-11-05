@@ -1,97 +1,68 @@
 /**
- * UnionEyes — /api/evidence/export
+ * GET /api/evidence/export — controlled procurement evidence boundary.
  *
- * Returns an evidence pack summary suitable for procurement / security
- * review. Shape mirrors apps/flow's evidence export so Control Plane and
- * platform-evidence-pack adapters can consume both consistently.
- *
- * NOTE: The full sealed evidence bundle is produced by the
- * `pnpm evidence:all` pipeline (collect → seal → verify). This endpoint
- * exposes a live snapshot of the same logical structure.
+ * This endpoint cannot attest controls, an SBOM, a sealed bundle, or a build
+ * without reading and verifying those artifacts. Until the verified evidence
+ * pipeline is integrated, it refuses to issue a purported evidence pack.
+ * The refusal is still actor/tenant-bound and durably audited.
  */
-import { NextResponse } from 'next/server'
-import { authenticateUser, withRequestContext } from '@/lib/api-guards'
-import { auth } from '@nzila/platform-auth/entra/server'
-import { withSpan } from '@nzila/os-core/telemetry'
-import { recordEvidenceExport } from '@/app/api/governance/telemetry/route'
+import { NextResponse } from 'next/server';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
-/**
- * Roles that may NOT access the evidence export endpoint.
- * Plain members have no operational need for the full evidence pack.
- * All staff, steward, admin, governance, and platform roles are allowed.
- */
-const MEMBER_ONLY_ROLES = new Set(['member', 'MEMBER'])
+export const dynamic = 'force-dynamic';
 
-const APP = 'union-eyes'
-const VERSION = process.env.npm_package_version ?? '0.0.0'
-const COMMIT = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'local'
-const BUILD_TS = process.env.BUILD_TIMESTAMP ?? new Date().toISOString()
+export const GET = withApi(
+  { auth: { minRole: 'officer' }, requireOrg: true },
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) {
+      throw ApiError.forbidden('An authenticated organization officer is required');
+    }
 
-export const dynamic = 'force-dynamic'
+    // The session's verified organization is the only possible evidence scope.
+    // A caller cannot issue even a refused attestation in another org's name.
+    const requestedOrg = request.nextUrl.searchParams.get('orgId');
+    if (requestedOrg && requestedOrg !== organizationId) {
+      throw ApiError.forbidden('Requested organization differs from authenticated organization');
+    }
 
-export async function GET(request: Request) {
-  return withRequestContext(request, () =>
-    withSpan('api.evidence.export', { 'http.method': 'GET' }, async () => {
-      const authResult = await authenticateUser()
-      if (!authResult.ok) return authResult.response
-
-      // Role gate: evidence export is restricted to staff/admin/governance.
-      // authenticateUser() only checks identity — we need the resolved role.
-      const { orgRole } = await auth()
-      if (!orgRole || MEMBER_ONLY_ROLES.has(orgRole)) {
-        return NextResponse.json(
-          { error: 'Forbidden', message: 'Evidence export requires staff-level access.' },
-          { status: 403 },
-        )
-      }
-
-      const { searchParams } = new URL(request.url)
-      const orgId = searchParams.get('orgId') ?? 'unscoped'
-
-      recordEvidenceExport()
-
-      return NextResponse.json({
-        org_id: orgId,
-        app: APP,
-        version: VERSION,
-        git_commit: COMMIT,
-        build_timestamp: BUILD_TS,
-        sbom: { format: 'cyclonedx', available: true, source: 'pnpm evidence:collect' },
-        policy_checks: {
-          grievance_creation: 'enforced',
-          grievance_status_transition: 'enforced',
-          escalation_authorization: 'enforced',
-          arbitration_decision_seal: 'enforced',
-          evidence_immutability: 'enforced',
-          cross_org_access: 'denied',
+    // An evidence export attempt is security-relevant even when the artifact
+    // is unavailable. Audit before responding; audit failure must not yield
+    // an apparently successful export or an unaudited response.
+    await withRLSContext({ organizationId, userId }, async (tx) => {
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'evidence.export.unavailable',
+        resourceType: 'evidence_export',
+        details: {
+          reason: 'verified_sealed_artifact_not_loaded',
+          format: 'json',
         },
-        workflow_audit_events: [
-          'grievance.created',
-          'grievance.assigned',
-          'grievance.status_changed',
-          'grievance.escalated',
-          'grievance.settled',
-          'arbitration.opened',
-          'arbitration.decided',
-          'evidence.uploaded',
-          'policy.evaluated',
-        ],
-        lifecycle_statuses: [
-          'intake', 'triage', 'investigation', 'response_pending',
-          'escalated', 'arbitration', 'settled', 'resolved', 'closed',
-        ],
-        org_isolation: {
-          enforced: true,
-          enforced_at: ['db_layer', 'route_layer', 'audit_layer'],
-          cross_org_read_attempts_blocked: true,
-        },
-        pipeline: {
-          collect: 'scripts/evidence/collect.mjs',
-          seal: 'scripts/evidence/seal.mjs',
-          verify: 'scripts/evidence/verify.mjs',
-        },
-        generated_at: new Date().toISOString(),
-      })
-    }),
-  )
-}
+      });
+    });
+
+    return NextResponse.json({
+      app: 'union-eyes',
+      org_id: organizationId,
+      status: 'not_attested',
+      verified: false,
+      error: 'VERIFIED_EVIDENCE_UNAVAILABLE',
+      message: 'No verified sealed evidence bundle is loaded by this endpoint. No control, isolation, SBOM, or build assertion has been made.',
+      nextStep: 'Produce, seal, and independently verify the evidence bundle using the evidence pipeline before publication.',
+      evidencePipeline: {
+        collect: 'scripts/evidence/collect.mjs',
+        seal: 'scripts/evidence/seal.mjs',
+        verify: 'scripts/evidence/verify.mjs',
+      },
+      sbom: { status: 'not_attested', artifact: null },
+      policy_checks: { status: 'not_attested', results: null },
+      org_isolation: { status: 'not_attested', results: null },
+      build: { status: 'not_attested', commit: null, timestamp: null },
+    }, {
+      status: 503,
+      headers: { 'Cache-Control': 'private, no-store' },
+    });
+  },
+);

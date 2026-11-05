@@ -563,8 +563,6 @@ async function completeWorkflow(workflowId: string): Promise<void> {
       subject: `Signature Workflow Completed: ${workflowData.subject || workflow.description}`,
       title: "All Signatures Received",
       body: `All parties have signed ${workflowData.documentName || workflow.name}. The signed document is now available.`,
-      actionUrl: `/documents/${workflow.documentId}`,
-      actionLabel: "View Document",
       metadata: {
         type: "workflow_completed",
         workflowId,

@@ -7,7 +7,6 @@
  */
 
 import { withApi, z, ApiError } from '@/lib/api/framework';
-import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
 import { listBatches, getMetricsSummary } from '@/lib/ingestion/migration-metrics';
 
 const querySchema = z.object({
@@ -18,6 +17,8 @@ const querySchema = z.object({
 
 export const GET = withApi(
   {
+    // ingestion_batches and its dashboards are tenant tables: the read runs in the caller's tenant transaction (runtime role).
+    rlsOrgContext: true,
     auth: { minRole: 'admin' },
     query: querySchema,
     openapi: {
@@ -31,16 +32,12 @@ export const GET = withApi(
       throw ApiError.badRequest('Organization context required');
     }
 
-    const [batchResult, metrics] = await withSystemContext(async () =>
-      Promise.all([
-        listBatches(organizationId, {
-          status: query.status,
-          limit: query.limit,
-          offset: query.offset,
-        }),
-        getMetricsSummary(organizationId),
-      ]),
-    );
+    const batchResult = await listBatches(organizationId, {
+      status: query.status,
+      limit: query.limit,
+      offset: query.offset,
+    });
+    const metrics = await getMetricsSummary(organizationId);
 
     return {
       ...batchResult,

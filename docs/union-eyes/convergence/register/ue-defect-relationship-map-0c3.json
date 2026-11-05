@@ -1,0 +1,953 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-DEFECT-RELATIONSHIP-MAP",
+  "gate": "GATE-0C.3",
+  "version": 1,
+  "anchorCommit": "f90f74d135c209812b4728585c076ea410704719",
+  "preparedOn": "2026-10-27",
+  "status": "RELATIONSHIPS_RECORDED_NO_MERGE_NO_DOWNGRADE",
+  "note": "A map of defects that share a root cause or operations. It merges no defect, changes no severity and drops no obligation. A relationship explains why one repair can cover several defects; each defect keeps its own record, its own owner and its own acceptance condition.",
+  "lineage": {
+    "debtIndexSha256": "457ecd54a080199bd1ebfa276c0eaa170a9a0fe1021b2e49c682e70fe7f5d4d8",
+    "assessmentSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8"
+  },
+  "totals": {
+    "clusters": 14,
+    "clusterMembers": 49,
+    "defectsMerged": 0,
+    "severitiesChanged": 0,
+    "challengePairs": 2,
+    "exposureOperations": 3,
+    "exposureDefects": 3,
+    "exposureReleaseBlockingDefects": 2,
+    "ratchetRules": 14,
+    "trackedItems": 4
+  },
+  "perCapitaSeverityPair": {
+    "members": [
+      {
+        "defectId": "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER-AT-MEMBER-FLOOR",
+        "severity": "MEDIUM",
+        "releaseBlocking": false,
+        "frozenDisposition": null,
+        "debtItemId": null,
+        "merged": false,
+        "severityChangedByGate0C3": false
+      },
+      {
+        "defectId": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+        "severity": "HIGH",
+        "releaseBlocking": true,
+        "frozenDisposition": "RELEASE_BLOCKING",
+        "debtItemId": "DEBT:DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+        "merged": false,
+        "severityChangedByGate0C3": false
+      }
+    ],
+    "finding": "The Gate 0B.8 record rates the health-and-welfare path MEDIUM with no release disposition and the Gate 0B.12 record rates four tax paths over the same table and floor HIGH with a RELEASE_BLOCKING disposition. Both stay as recorded. The difference is flagged for an independent severity review and is not resolved here.",
+    "changed": false,
+    "reviewRequired": "An independent severity review decides whether the MEDIUM health-and-welfare path should carry the HIGH rating of the four tax paths that serve the same ledger at the same floor."
+  },
+  "clusters": [
+    {
+      "clusterId": "CLUSTER-PER-CAPITA-LEDGER-GENERIC-CRUD",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "The generic crudRoutes factory is bound to the per_capita_remittances table at the member read floor, so the whole organization remittance ledger is served under an unrelated advertised path.",
+      "members": [
+        {
+          "defectId": "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER-AT-MEMBER-FLOOR",
+          "severity": "MEDIUM",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": null,
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+          "severity": "HIGH",
+          "releaseBlocking": true,
+          "frozenDisposition": "RELEASE_BLOCKING",
+          "debtItemId": "DEBT:DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [
+        {
+          "defectId": "DEF-0B1-CLC-CROSS-TENANT-READ",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-CLC-CROSS-TENANT-READ",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",
+          "severity": "HIGH",
+          "releaseBlocking": true,
+          "frozenDisposition": "RELEASE_BLOCKING",
+          "debtItemId": "DEBT:DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "relatedNote": "The CLC reports read the same table without an organization predicate and the settings merge writes the per-capita rate in another store. Their root causes differ and they are not merged.",
+      "severityFinding": "The Gate 0B.8 record rates the health-and-welfare path MEDIUM with no release disposition and the Gate 0B.12 record rates four tax paths over the same table and floor HIGH with a RELEASE_BLOCKING disposition. Both stay as recorded. The difference is flagged for an independent severity review and is not resolved here.",
+      "repairImplication": "One repair of the factory binding covers all six operations; the obligations stay per defect so the MEDIUM path is not lost.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-ORGANIZATION-MEMBERS-FACADE",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "The generic CRUD factory is bound to the read-only organization_members table under a route name that advertises another business domain.",
+      "members": [
+        {
+          "defectId": "DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B1-FIX-SUPER-ADMIN-INERT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-FIX-SUPER-ADMIN-INERT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B2-UPDATE-ROLE-INERT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-UPDATE-ROLE-INERT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-BULK-IMPORT-INERT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-BULK-IMPORT-INERT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "All five are HIGH as recorded.",
+      "repairImplication": "Retiring or binding the facades is one pattern; each defect keeps its own operations and acceptance condition.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-GENERIC-FACTORY-BODY-COPY",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "The generic CRUD factory copies caller-supplied body fields into inserts and updates, so protected columns are caller controlled wherever a route relies on it.",
+      "members": [
+        {
+          "defectId": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B2-ANALYTICS-CRUD-FACADE",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-ANALYTICS-CRUD-FACADE",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CLC-SYNC-LOG-MEMBER-READ-AND-FORGEABLE-VERIFICATION",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CLC-SYNC-LOG-MEMBER-READ-AND-FORGEABLE-VERIFICATION",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "All five are HIGH as recorded.",
+      "repairImplication": "A factory-level repair is the shared fix; each route-specific defect still needs its own negative test.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-CALENDAR-SYNC-AUTHORITY",
+      "relation": "SHARED_OPERATIONS_DISTINCT_DEFECTS",
+      "rootCause": "The calendar-sync connection sync route checks organization membership only; it checks neither the connection owner nor the personal calendar owner.",
+      "members": [
+        {
+          "defectId": "DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CALENDAR-SYNC-NO-PERSONAL-CALENDAR-CHECK",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-SYNC-NO-PERSONAL-CALENDAR-CHECK",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [
+        {
+          "defectId": "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "relatedNote": "The personal-calendar checks of the item and event routes fail for the same reason in different operations.",
+      "severityFinding": "All are HIGH as recorded.",
+      "repairImplication": "One operation carries two missing checks; they are two defects and two acceptance conditions.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-CALENDAR-OAUTH-CREDENTIALS",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "The calendar OAuth flow does not bind state to a session and the connection rows carry plaintext provider tokens that routes read and write directly.",
+      "members": [
+        {
+          "defectId": "DEF-0B4-CALENDAR-OAUTH-STATE-IS-USER-ID",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-OAUTH-STATE-IS-USER-ID",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "All four are HIGH as recorded.",
+      "repairImplication": "The repair is one credential-handling redesign; four acceptance conditions remain.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-PKI-SIGNING",
+      "relation": "SHARED_OPERATIONS_DISTINCT_DEFECTS",
+      "rootCause": "The PKI signing routes keep state in process memory and store an attestation, not a cryptographic signature.",
+      "members": [
+        {
+          "defectId": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "Both are HIGH as recorded.",
+      "repairImplication": "Two defects on shared operations; the false-attestation defect is the release concern.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-AI-ADVISORY-AUTHORITY",
+      "relation": "SHARED_OPERATIONS_DISTINCT_DEFECTS",
+      "rootCause": "The AI advisory routes pass role-title checks and data-class labels that do not match the authority or classification of the data they send to a model.",
+      "members": [
+        {
+          "defectId": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "All three are HIGH as recorded.",
+      "repairImplication": "Shared operations, three defects and three acceptance conditions.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-PLATFORM-BILLING-AUTHORITY",
+      "relation": "SHARED_OPERATIONS_DISTINCT_DEFECTS",
+      "rootCause": "Platform billing routes are guarded by organization or union role titles instead of a platform-staff mandate.",
+      "members": [
+        {
+          "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B1-BILLING-HISTORY-FAKE-EMPTY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-BILLING-HISTORY-FAKE-EMPTY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "All are HIGH as recorded.",
+      "repairImplication": "The platform-staff mandate decision is a shared dependency; the repairs are separate.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-ARBITRATION-LIBRARY",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "arbitration_decisions is a shared table without an organization column behind the generic factory.",
+      "members": [
+        {
+          "defectId": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "Both are HIGH as recorded.",
+      "repairImplication": "A read-scope repair and a write-authority repair on three shared operations.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-SHARED-CBA-DATASET",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "Tenant roles write or review a dataset every organization reads, and child records are addressed by agreement id alone.",
+      "members": [
+        {
+          "defectId": "DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CLAUSES-CREATE-ACCEPTS-ANY-CBA-ID",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CLAUSES-CREATE-ACCEPTS-ANY-CBA-ID",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B4-CASE-STUDIES-ORG-ADMIN-WRITES-GLOBAL-CONTENT",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-CASE-STUDIES-ORG-ADMIN-WRITES-GLOBAL-CONTENT",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "All are HIGH as recorded.",
+      "repairImplication": "Platform-owned shared data needs a platform write authority; tenant-owned child records need an organization predicate.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-BARGAINING-CONFIDENTIALITY",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "Bargaining routes read at the member floor or through generic item routes that skip the confidentiality filter.",
+      "members": [
+        {
+          "defectId": "DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-BARGAINING-NOTE-ITEM-ROUTE-BYPASSES-CONFIDENTIALITY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-BARGAINING-NOTE-ITEM-ROUTE-BYPASSES-CONFIDENTIALITY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-BARGAINING-NOTES-SUMMARY-MODES-IGNORE-CONFIDENTIALITY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-BARGAINING-NOTES-SUMMARY-MODES-IGNORE-CONFIDENTIALITY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "All four are HIGH as recorded.",
+      "repairImplication": "Four acceptance conditions; the confidentiality rule is shared.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-EDUCATION-RECORDS",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "Education routes accept caller-supplied references and completion state through the generic factory without organization or completion checks.",
+      "members": [
+        {
+          "defectId": "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [
+        {
+          "defectId": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "relatedNote": "The reminder job fails for a schema reason and is not a factory defect.",
+      "severityFinding": "All are HIGH as recorded.",
+      "repairImplication": "Four acceptance conditions; completion authority is a shared decision.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-OHS-CASE-AUTHORITY",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "Health-and-safety filing records are readable and writable by any steward of the organization without a representation relationship.",
+      "members": [
+        {
+          "defectId": "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [
+        {
+          "defectId": "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "relatedNote": "The same missing representation check appears on grievance and arbitration routes.",
+      "severityFinding": "All are HIGH as recorded.",
+      "repairImplication": "The representation authority decision is a shared dependency.",
+      "obligationsStayPerDefect": true
+    },
+    {
+      "clusterId": "CLUSTER-PLATFORM-DIRECTORY",
+      "relation": "SHARED_ROOT_CAUSE",
+      "rootCause": "Platform directory reads select across organizations at a platform role-title floor with no mandate.",
+      "members": [
+        {
+          "defectId": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+          "severity": "HIGH",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ],
+      "related": [],
+      "relatedNote": "",
+      "severityFinding": "Both are HIGH as recorded.",
+      "repairImplication": "The platform-staff mandate decision is the shared dependency.",
+      "obligationsStayPerDefect": true
+    }
+  ],
+  "challengePairs": [
+    {
+      "challengeId": "CHALLENGE-0B10-OPL-01",
+      "relation": "CHALLENGE_OF_FROZEN_DISPOSITION",
+      "defect": {
+        "defectId": "DEF-0B10-OPL-01",
+        "severity": "HIGH",
+        "releaseBlocking": false,
+        "frozenDisposition": "CONDITIONALLY_BLOCKING",
+        "debtItemId": "DEBT:DEF-0B10-OPL-01",
+        "merged": false,
+        "severityChangedByGate0C3": false
+      },
+      "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "frozenDispositionSupersededByChallenge": false,
+      "challengeSupersededByFrozenDisposition": false,
+      "debtItemId": "DEBT:DEF-0B10-OPL-01"
+    },
+    {
+      "challengeId": "CHALLENGE-0B10-OPL-07",
+      "relation": "CHALLENGE_OF_FROZEN_DISPOSITION",
+      "defect": {
+        "defectId": "DEF-0B10-OPL-07",
+        "severity": "HIGH",
+        "releaseBlocking": false,
+        "frozenDisposition": "CONDITIONALLY_BLOCKING",
+        "debtItemId": "DEBT:DEF-0B10-OPL-07",
+        "merged": false,
+        "severityChangedByGate0C3": false
+      },
+      "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "frozenDispositionSupersededByChallenge": false,
+      "challengeSupersededByFrozenDisposition": false,
+      "debtItemId": "DEBT:DEF-0B10-OPL-07"
+    }
+  ],
+  "exposures": [
+    {
+      "operationId": "docs/openapi/route.ts|GET",
+      "ownerGate": 14,
+      "releaseBlocking": true,
+      "contractSha256": "9c9bb6659f47cbb0d6c5707e70b66d8eb87a820bc3757aee8a62f31be28210da",
+      "defects": [
+        {
+          "defectId": "DEF-0B1-DOCS-UNAUTH-API-SURFACE",
+          "severity": "MEDIUM",
+          "releaseBlocking": true,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-DOCS-UNAUTH-API-SURFACE",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B1-ALLOWLIST-DRIFT",
+          "severity": "MEDIUM",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": null,
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ]
+    },
+    {
+      "operationId": "docs/route.ts|GET",
+      "ownerGate": 14,
+      "releaseBlocking": true,
+      "contractSha256": "ab74a872cd34f6f3f3f1d3e5597df5a01d82ca070bef1d1bc529dcc8715144b7",
+      "defects": [
+        {
+          "defectId": "DEF-0B1-DOCS-UNAUTH-API-SURFACE",
+          "severity": "MEDIUM",
+          "releaseBlocking": true,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-DOCS-UNAUTH-API-SURFACE",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B1-ALLOWLIST-DRIFT",
+          "severity": "MEDIUM",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": null,
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ]
+    },
+    {
+      "operationId": "version/route.ts|GET",
+      "ownerGate": 14,
+      "releaseBlocking": true,
+      "contractSha256": "e80a45fd757ae4efdd684f17c9777087b3138a14347b5eabc4ad95aed2718ce4",
+      "defects": [
+        {
+          "defectId": "DEF-0B1-VERSION-UNAUTH-TOPOLOGY",
+          "severity": "MEDIUM",
+          "releaseBlocking": true,
+          "frozenDisposition": null,
+          "debtItemId": "DEBT:DEF-0B1-VERSION-UNAUTH-TOPOLOGY",
+          "merged": false,
+          "severityChangedByGate0C3": false
+        },
+        {
+          "defectId": "DEF-0B1-ALLOWLIST-DRIFT",
+          "severity": "MEDIUM",
+          "releaseBlocking": false,
+          "frozenDisposition": null,
+          "debtItemId": null,
+          "merged": false,
+          "severityChangedByGate0C3": false
+        }
+      ]
+    }
+  ],
+  "ratchets": {
+    "rules": [
+      {
+        "ruleId": "RETIRED-CLERK-PROVIDER",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "RETIRED-KERNEL-RESOLVERS",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "BINDING-TABLE-ACCESS",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "BEARER-SETTING-CONSUMERS",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "SCHEMA-PUSH-SCRIPT",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "PLATFORM-ROLE-CASE-PROMOTION",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "RANK-DERIVED-CASE-ACCESS",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "MUTABLE-REP-IDENTIFIER",
+        "trackedItems": [
+          {
+            "itemId": "DEBT:MUTABLE-REP-IDENTIFIER@case-ownership-backfill",
+            "file": "apps/union-eyes/lib/authority/store/case-ownership-backfill.ts",
+            "ownerCapabilityId": "UE-CAP-B-001"
+          }
+        ],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "GOVERNANCE-APPROVAL-BEST-EFFORT-AUDIT",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "CASE-MUTATION-BEST-EFFORT-AUDIT",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "RETIRED-CASE-ACCESS-TABLE",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "RETIRED-REPLAY-SEEDS",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "COOKIE-FORWARDED-AS-DATABASE-BEARER",
+        "trackedItems": [],
+        "exactRegisterDefect": null
+      },
+      {
+        "ruleId": "DIRECT-MANDATORY-AUDIT-IMPORT",
+        "trackedItems": [
+          {
+            "itemId": "DEBT:DIRECT-MANDATORY-AUDIT-IMPORT@election-succession",
+            "file": "apps/union-eyes/lib/voting/election-succession.ts",
+            "ownerCapabilityId": "UE-CAP-K-005"
+          }
+        ],
+        "exactRegisterDefect": null
+      }
+    ],
+    "relatedRegisterDefect": {
+      "ruleId": "DIRECT-MANDATORY-AUDIT-IMPORT",
+      "trackedItemId": "DEBT:DIRECT-MANDATORY-AUDIT-IMPORT@election-succession",
+      "relatedDefect": {
+        "defectId": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
+        "severity": "MEDIUM",
+        "releaseBlocking": false,
+        "frozenDisposition": null,
+        "debtItemId": null,
+        "merged": false,
+        "severityChangedByGate0C3": false
+      },
+      "relation": "SAME_OWNER_CAPABILITY_RELATED_AUDIT_ATOMICITY_THEME",
+      "note": "Both sit under the audit-atomicity capability. The register defect concerns a manifest claim of atomic audit in route handlers and the ratchet concerns a direct import in one module. Neither is a duplicate of the other, they are not merged and neither severity changes.",
+      "merged": false
+    },
+    "trackedItemsWithNoRegisterCounterpart": [
+      "DEBT:COUNSEL-PGLITE-SUITE-FAILS-AT-SETUP",
+      "DEBT:DIRECT-MANDATORY-AUDIT-IMPORT@election-succession",
+      "DEBT:MUTABLE-REP-IDENTIFIER@case-ownership-backfill",
+      "DEBT:P0-F2-TRANSITION-REASON-LEAK"
+    ]
+  }
+}

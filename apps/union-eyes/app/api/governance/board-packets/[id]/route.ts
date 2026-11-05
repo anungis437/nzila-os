@@ -1,32 +1,24 @@
 /**
  * GET PATCH DELETE /api/governance/board-packets/[id]
- * Single board packet operations — replaces Django proxy.
+ *
+ * One board packet of the organization. A PATCH either edits a draft's content or moves its status once (finalize, reopen, archive); a finalized packet's
+ * content is locked and a distributed one can only be archived (lib/governance/board-packet-lifecycle.ts). DELETE archives: a packet is never removed.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
 import { and, eq } from 'drizzle-orm';
-import { z } from 'zod';
-
-const updateBoardPacketSchema = z.object({
-  title: z.string().min(1).max(255).optional(),
-  description: z.string().max(5000).optional(),
-  status: z.enum(['draft', 'finalized', 'distributed', 'archived']).optional(),
-  financialSummary: z.record(z.unknown()).optional(),
-  membershipStats: z.record(z.unknown()).optional(),
-  caseSummary: z.record(z.unknown()).optional(),
-  motionsAndVotes: z.record(z.unknown()).optional(),
-  auditExceptions: z.record(z.unknown()).optional(),
-  complianceStatus: z.record(z.unknown()).optional(),
-  actionItems: z.record(z.unknown()).optional(),
-  recipientRoles: z.array(z.string().max(100)).optional(),
-  distributionList: z.record(z.unknown()).optional(),
-  pdfUrl: z.string().url().max(2000).optional(),
-  attachments: z.record(z.unknown()).optional(),
-});
+import { parseBoardPacketId, updateBoardPacketSchema } from '@/lib/governance/board-packet-input';
+import { applyBoardPacketUpdate } from '@/lib/governance/board-packet-service';
 
 export const dynamic = 'force-dynamic';
+
+/** A path id that is not a uuid names no packet. */
+function packetIdOf(params: Record<string, string> | undefined): string {
+  const id = parseBoardPacketId(params?.id);
+  if (!id) throw ApiError.notFound('Board packet');
+  return id;
+}
 
 export const GET = withApi(
   {
@@ -34,14 +26,16 @@ export const GET = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get board packet by ID' },
   },
-  async ({ request, organizationId }) => {
-    const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
-    if (!id) throw ApiError.badRequest('Missing packet ID');
-    const [packet] = await db
-      .select()
-      .from(boardPackets)
-      .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)));
-    if (!packet) throw ApiError.notFound('Board packet not found');
+  async ({ params, organizationId }) => {
+    const id = packetIdOf(params);
+    const [packet] = await withRLSContext({ organizationId: organizationId! }, (tx) =>
+      tx
+        .select()
+        .from(boardPackets)
+        .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)))
+        .limit(1),
+    );
+    if (!packet) throw ApiError.notFound('Board packet');
     return packet;
   },
 );
@@ -52,19 +46,12 @@ export const PATCH = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Update board packet' },
   },
-  async ({ request, body, organizationId }) => {
-    const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
-    if (!id) throw ApiError.badRequest('Missing packet ID');
-    const parsed = updateBoardPacketSchema.parse(body);
-    const [packet] = await withRLSContext(async (tx) =>
-      tx
-        .update(boardPackets)
-        .set({ ...parsed, updatedAt: new Date() })
-        .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)))
-        .returning()
+  async ({ params, body, organizationId, userId }) => {
+    const packetId = packetIdOf(params);
+    const request = updateBoardPacketSchema.parse(body);
+    return withRLSContext({ organizationId: organizationId! }, (tx) =>
+      applyBoardPacketUpdate(tx, { packetId, organizationId: organizationId!, userId: userId!, request }),
     );
-    if (!packet) throw ApiError.notFound('Board packet not found');
-    return packet;
   },
 );
 
@@ -72,20 +59,12 @@ export const DELETE = withApi(
   {
     auth: { required: true, minRole: 'admin' },
     entitlement: 'governance_suite',
-    openapi: { tags: ['Governance'], summary: 'Delete board packet' },
+    openapi: { tags: ['Governance'], summary: 'Archive board packet' },
   },
-  async ({ request, organizationId }) => {
-    const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
-    if (!id) throw ApiError.badRequest('Missing packet ID');
-    const [packet] = await withRLSContext(async (tx) =>
-      tx
-        .update(boardPackets)
-        .set({ status: 'archived', updatedAt: new Date() })
-        .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)))
-        .returning()
+  async ({ params, organizationId, userId }) => {
+    const packetId = packetIdOf(params);
+    return withRLSContext({ organizationId: organizationId! }, (tx) =>
+      applyBoardPacketUpdate(tx, { packetId, organizationId: organizationId!, userId: userId!, request: { status: 'archived' } }),
     );
-    if (!packet) throw ApiError.notFound('Board packet not found');
-    return packet;
   },
 );
-

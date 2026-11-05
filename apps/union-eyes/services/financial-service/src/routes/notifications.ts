@@ -25,7 +25,7 @@ const getOrganizationIdFromHeaders = (req: Request): string | undefined =>
 // ============================================================================
 
 const QueueNotificationSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.guid(),
   type: z.enum([
     'payment_confirmation',
     'payment_failed',
@@ -40,12 +40,12 @@ const QueueNotificationSchema = z.object({
   ]),
   channels: z.array(z.enum(['email', 'sms', 'push', 'in_app'])).min(1),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
-  data: z.record(z.any()),
+  data: z.record(z.string(), z.any()),
   scheduledFor: z.string().datetime().optional(),
 });
 
 const UpdatePreferencesSchema = z.object({
-  preferences: z.record(z.boolean()),
+  preferences: z.record(z.string(), z.boolean()),
 });
 
 // ============================================================================
@@ -195,9 +195,16 @@ router.get('/history', async (req: Request, res: Response) => {
  */
 router.post('/process', async (req: Request, res: Response) => {
   try {
+    const organizationId = getOrganizationIdFromHeaders(req);
+    if (!organizationId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing x-organization-id header',
+      });
+    }
     const batchSize = parseInt(req.body.batchSize as string) || 50;
 
-    const processed = await processPendingNotifications(batchSize);
+    const processed = await processPendingNotifications(organizationId, batchSize);
 
     res.json({
       success: true,
@@ -219,9 +226,16 @@ router.post('/process', async (req: Request, res: Response) => {
  */
 router.post('/retry-failed', async (req: Request, res: Response) => {
   try {
+    const organizationId = getOrganizationIdFromHeaders(req);
+    if (!organizationId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing x-organization-id header',
+      });
+    }
     const maxAttempts = parseInt(req.body.maxAttempts as string) || 3;
 
-    const retried = await retryFailedNotifications(maxAttempts);
+    const retried = await retryFailedNotifications(organizationId, maxAttempts);
 
     res.json({
       success: true,
@@ -268,7 +282,7 @@ router.post('/test', async (req: Request, res: Response) => {
     });
 
     // Process immediately
-    await processPendingNotifications(1);
+    await processPendingNotifications(organizationId, 1);
 
     res.json({
       success: true,

@@ -8,6 +8,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { serializeRawDates } from "./driver-dates";
 
 // Create a single connection (no pooling) for tests
 // This ensures session variables set with set_config() persist
@@ -26,3 +27,5 @@ const testConnectionOptions = {
 // Create test client and db
 export const testClient = postgres(process.env.DATABASE_URL!, testConnectionOptions);
 export const testDb = drizzle(testClient, { schema });
+// after drizzle(): drizzle installs its serializers at construction
+serializeRawDates(testClient);

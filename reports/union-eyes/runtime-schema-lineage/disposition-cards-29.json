@@ -12,16 +12,24 @@
   "legendSource": "USER_BRIEF",
   "counts": {
     "implementedFromA": 19,
-    "remainingNoLineage": 10,
-    "byDispositionRemaining": {
-      "F": 8,
-      "G": 2
-    },
-    "UNADJUDICATED_NO_LINEAGE_TABLES": 0
+    "remainingNoLineage": 0,
+    "byDispositionRemaining": {},
+    "UNADJUDICATED_NO_LINEAGE_TABLES": 0,
+    "implementedFromFG": 10
   },
   "resolutionNotes": {
     "integration_partners": "PLATFORM_SQL_OWNED — no Django refs; Drizzle + dashboard reader + TENANT_RLS_REQUIRED authority; CREATE in migrations-platform/0003",
-    "security_posture_checks": "PLATFORM_SQL_OWNED — no Django refs (authority verified); Drizzle + dashboard reader + TENANT_RLS_REQUIRED; CREATE in migrations-platform/0003"
+    "security_posture_checks": "PLATFORM_SQL_OWNED — no Django refs (authority verified); Drizzle + dashboard reader + TENANT_RLS_REQUIRED; CREATE in migrations-platform/0003",
+    "anti_scab_violations": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "cnesst_filings": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "joint_hs_committees": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "member_dues_issues": "PLATFORM_SQL_OWNED — was G (OTHER EXPLICITLY EVIDENCED DISPOSITION); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "pay_equity_exercises": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "payroll_deductions": "PLATFORM_SQL_OWNED — was G (OTHER EXPLICITLY EVIDENCED DISPOSITION); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "preventive_withdrawals": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "right_of_refusal_events": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "wcb_claims": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure",
+    "wcb_employer_assessments": "PLATFORM_SQL_OWNED — was F (INTENTIONALLY_OPTIONAL FEATURE STORAGE); created by migrations-platform/0061_declared_absent_relations.sql with its row-security closure"
   },
   "implemented": [
     {
@@ -194,68 +202,97 @@
       "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
       "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "CURRENT_BOOTSTRAP_INCLUDED": true
-    }
-  ],
-  "remainingCards": [
+    },
     {
       "TABLE": "anti_scab_violations",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "cnesst_filings",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "joint_hs_committees",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "member_dues_issues",
-      "DISPOSITION": "G",
-      "DISPOSITION_LABEL": "OTHER EXPLICITLY EVIDENCED DISPOSITION",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "G",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "pay_equity_exercises",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "payroll_deductions",
-      "DISPOSITION": "G",
-      "DISPOSITION_LABEL": "OTHER EXPLICITLY EVIDENCED DISPOSITION",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "G",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "preventive_withdrawals",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "right_of_refusal_events",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "wcb_claims",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     },
     {
       "TABLE": "wcb_employer_assessments",
-      "DISPOSITION": "F",
-      "DISPOSITION_LABEL": "INTENTIONALLY_OPTIONAL FEATURE STORAGE",
-      "SCHEMA_OWNER": "UNKNOWN"
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "F",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0061_declared_absent_relations.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
     }
-  ]
+  ],
+  "remainingCards": []
 }

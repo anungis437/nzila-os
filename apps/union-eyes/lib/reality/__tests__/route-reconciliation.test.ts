@@ -19,6 +19,15 @@
  *
  * DO NOT silence this test by editing the invariant. The invariant IS
  * the reconciliation — see docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md.
+ *
+ * One refinement, made on purpose and in the direction of more truth: a page that
+ * stands in for an unbuilt capability used to have to be a bare `notFound()`. It may
+ * now also be the explicit `<CapabilityUnavailable capability="…">` notice (the
+ * pattern for visible retired capabilities), because a bookmarked deep link should
+ * say that a feature is not available rather than 404, but only when the notice
+ * names the registry capability that owns the page, so the page is bound to the
+ * entry that records why. What a tracked page may never do is look as though it
+ * works, and a partly live page may not be listed as the surface of a capability.
  */
 
 import { readFileSync } from 'node:fs';
@@ -26,7 +35,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { getConditionalProduction404DashboardRoutes, getRegistryTracked404DashboardRoutes } from '../capability-registry';
+import { CAPABILITY_REGISTRY, getConditionalProduction404DashboardRoutes, getRegistryTracked404DashboardRoutes, getRegistryTrackedDashboardPageOwners } from '../capability-registry';
 
 const APP_ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)), '../../..');
 
@@ -38,7 +47,6 @@ const APP_ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)), '../../..
  */
 const NAV_SOURCE_FILES = [
   'lib/dashboard/role-experience.ts',
-  'components/dashboards/federation-dashboard.tsx',
   'components/sidebar.tsx',
 ] as const;
 
@@ -60,6 +68,18 @@ function extractDashboardHrefs(source: string): string[] {
   return [...hits];
 }
 
+/** The source of the page that serves a dashboard href: the locale-scoped page, else the top-level one; null when there is none. */
+function pageSource(href: string): string | null {
+  for (const candidate of [`app/[locale]${href}/page.tsx`, `app${href}/page.tsx`]) {
+    try {
+      return readFileSync(resolve(APP_ROOT, candidate), 'utf8');
+    } catch {
+      // try the next location
+    }
+  }
+  return null;
+}
+
 /**
  * Return the set of hrefs from a given nav source file that land on a
  * page whose file body is only `notFound()`. We check the corresponding
@@ -68,24 +88,8 @@ function extractDashboardHrefs(source: string): string[] {
  * component's body reduces to `notFound()`.
  */
 function isUnconditional404(href: string): boolean {
-  // Prefer the locale-scoped page; fall back to top-level.
-  const localePath = resolve(APP_ROOT, `app/[locale]${href}/page.tsx`);
-  const topLevelPath = resolve(APP_ROOT, `app${href}/page.tsx`);
-  const filePath = (() => {
-    try {
-      readFileSync(localePath, 'utf8');
-      return localePath;
-    } catch {
-      try {
-        readFileSync(topLevelPath, 'utf8');
-        return topLevelPath;
-      } catch {
-        return null;
-      }
-    }
-  })();
-  if (!filePath) return false;
-  const content = readFileSync(filePath, 'utf8');
+  const content = pageSource(href);
+  if (content === null) return false;
   // Strip comments (mirrors the anti-theatre scanner's approach).
   const stripped = content
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
@@ -134,19 +138,38 @@ describe('Wave 0 §7 — route reconciliation invariant', () => {
     ).toEqual([]);
   });
 
-  it('every registry-tracked 404 route corresponds to a real page file whose body is only notFound()', () => {
-    const tracked = getRegistryTracked404DashboardRoutes();
+  it('every registry-tracked page is honest about it: a bare notFound(), or the explicit not-available notice naming the capability that owns it', () => {
+    // A page that stands in for a capability that does not exist may disappear (404) or say so by name (CapabilityUnavailable); it may never look as though it works.
+    // A page that is partly live is not the capability's surface and must not be listed as an owner (see getRegistryTrackedDashboardPageOwners).
+    const owners = getRegistryTrackedDashboardPageOwners();
     const inconsistent: string[] = [];
-    for (const href of tracked) {
-      if (!isUnconditional404(href)) inconsistent.push(href);
+    for (const href of getRegistryTracked404DashboardRoutes()) {
+      if (isUnconditional404(href)) continue;
+      const source = pageSource(href) ?? '';
+      const names = (owners.get(href) ?? []).some((id) => /<CapabilityUnavailable\b/.test(source) && new RegExp(`capability=\\{?["'\`]${id}["'\`]`).test(source));
+      if (!names) inconsistent.push(href);
     }
     expect(
       inconsistent,
       inconsistent.length === 0
         ? ''
-        : `Registry claims these routes return 404 but their page bodies do more than call notFound():\n` +
+        : `Registry claims these routes are unavailable capabilities but their page bodies are neither a bare notFound() nor a <CapabilityUnavailable capability="…"> naming the owning capability:\n` +
           inconsistent.map((h) => `  - ${h}`).join('\n'),
     ).toEqual([]);
+  });
+
+  it('every capability a page names as unavailable is a capability that is not built', () => {
+    const ids = new Map(CAPABILITY_REGISTRY.map((cap) => [cap.id, cap.state]));
+    const wrong: string[] = [];
+    for (const href of getRegistryTracked404DashboardRoutes()) {
+      const source = pageSource(href);
+      if (!source) continue;
+      for (const named of source.matchAll(/<CapabilityUnavailable\b[^>]*capability=\{?["'`]([A-Z0-9-]+)["'`]/g)) {
+        const state = ids.get(named[1]);
+        if (state === undefined || !['NOT_IMPLEMENTED', 'REMOVED', 'DISABLED'].includes(state)) wrong.push(`${href}: ${named[1]} (${state ?? 'not in the registry'})`);
+      }
+    }
+    expect(wrong).toEqual([]);
   });
 
   it('DISABLED (conditional-404) routes are never advertised in navigation', () => {

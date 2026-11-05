@@ -20,7 +20,7 @@ function getAuthUser(req: Request): AuthUser {
 
 // Validation schemas
 const calculateStipendsSchema = z.object({
-  strikeFundId: z.string().uuid(),
+  strikeFundId: z.guid(),
   weekStartDate: z.string().datetime(),
   weekEndDate: z.string().datetime(),
   minimumHours: z.number().positive().optional(),
@@ -28,8 +28,8 @@ const calculateStipendsSchema = z.object({
 });
 
 const createDisbursementSchema = z.object({
-  strikeFundId: z.string().uuid(),
-  memberId: z.string().uuid(),
+  strikeFundId: z.guid(),
+  memberId: z.guid(),
   amount: z.number().positive(),
   weekStartDate: z.string().datetime(),
   weekEndDate: z.string().datetime(),
@@ -38,17 +38,17 @@ const createDisbursementSchema = z.object({
 });
 
 const approveDisbursementSchema = z.object({
-  disbursementId: z.string().uuid(),
+  disbursementId: z.guid(),
   approvalNotes: z.string().optional(),
 });
 
 const markPaidSchema = z.object({
-  disbursementId: z.string().uuid(),
+  disbursementId: z.guid(),
   transactionId: z.string().min(1),
 });
 
 const batchCreateSchema = z.object({
-  strikeFundId: z.string().uuid(),
+  strikeFundId: z.guid(),
   weekStartDate: z.string().datetime(),
   weekEndDate: z.string().datetime(),
   minimumHours: z.number().positive().optional(),

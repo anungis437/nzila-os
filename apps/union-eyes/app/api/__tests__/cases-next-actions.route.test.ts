@@ -10,6 +10,12 @@ const m = vi.hoisted(() => ({
   toLifecycleState: vi.fn(),
   toLegacyClaimStatus: vi.fn(),
   logger: { error: vi.fn() },
+  findReadableCase: vi.fn(),
+}));
+
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  findReadableCase: m.findReadableCase,
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
@@ -42,6 +48,7 @@ describe('cases/[caseId]/next-actions route', () => {
     m.toLifecycleState.mockReturnValue('submitted');
     m.getAllowedTransitions.mockReturnValue(['resolved', 'triage']);
     m.toLegacyClaimStatus.mockImplementation((s: string) => s);
+    m.findReadableCase.mockResolvedValue({ claimId: 'c1', status: 'filed', visibility: 'internal' });
 
     m.withRLSContext.mockImplementation(async (fn: any) => {
       const tx = {
@@ -70,18 +77,7 @@ describe('cases/[caseId]/next-actions route', () => {
 
   it('returns 404 when case is missing', async () => {
     const { GET } = await loadRoute();
-    m.withRLSContext.mockImplementationOnce(async (fn: any) => {
-      const tx = {
-        select: vi.fn(() => ({
-          from: vi.fn(() => ({
-            where: vi.fn(() => ({
-              limit: vi.fn(async () => []),
-            })),
-          })),
-        })),
-      };
-      return fn(tx);
-    });
+    m.findReadableCase.mockResolvedValueOnce(null);
 
     const response = await GET(new Request('http://localhost/api/cases/missing/next-actions'), {
       params: Promise.resolve({ caseId: 'missing' }),
@@ -97,6 +93,7 @@ describe('cases/[caseId]/next-actions route', () => {
       params: Promise.resolve({ caseId: 'c1' }),
     });
 
-    expect([200, 500]).toContain(response.status);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ caseId: 'c1', currentStatus: 'filed', allowedTransitions: ['resolved', 'triage'] });
   });
 });

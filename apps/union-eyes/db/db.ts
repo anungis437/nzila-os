@@ -22,6 +22,7 @@ import { getDatabase as getUnifiedDatabase, checkDatabaseHealth } from "@/lib/da
 import { logger } from "@/lib/logger";
 import { getActiveSystemDb } from "./system-context-storage";
 import { getActiveTenantDb } from "./tenant-context-storage";
+import { serializeRawDates } from "./driver-dates";
 
 // Legacy PostgreSQL client (for backward compatibility)
 // Consider migrating to getUnifiedDatabase() for multi-database support
@@ -80,6 +81,8 @@ function getClient() {
 function getDb() {
   if (!_db) {
     _db = drizzle(getClient(), { schema });
+    // after drizzle(): drizzle installs its serializers at construction
+    serializeRawDates(getClient());
   }
   return _db;
 }

@@ -28,6 +28,12 @@ interface TrendChartProps {
   height?: number;
 }
 
+/** What recharts hands the tooltip it is given: the hovered point of each series, with the datum it was drawn from (formattedData below). */
+interface TooltipProps {
+  active?: boolean;
+  payload?: ReadonlyArray<{ value?: unknown; payload?: { formattedDate?: string } }>;
+}
+
 export function TrendChart({
   data,
   type = 'line',
@@ -60,14 +66,14 @@ export function TrendChart({
     margin: { top: 5, right: 30, left: 20, bottom: 5 }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
+  const CustomTooltip = ({ active, payload }: TooltipProps) => {
+    const point = payload?.[0];
+    if (active && point && typeof point.value === 'number') {
       return (
         <div className="bg-background border rounded-lg shadow-lg p-3">
-          <p className="text-sm font-medium">{payload[0].payload.formattedDate}</p>
+          <p className="text-sm font-medium">{point.payload?.formattedDate}</p>
           <p className="text-sm text-primary">
-            Value: {payload[0].value.toFixed(2)}
+            Value: {point.value.toFixed(2)}
           </p>
         </div>
       );

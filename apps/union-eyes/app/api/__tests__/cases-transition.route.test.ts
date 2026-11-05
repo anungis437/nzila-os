@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => {
   const state = {
     claimRows: [] as unknown[],
+    inserted: [] as Array<Record<string, unknown>>,
   };
 
   return {
@@ -16,7 +17,7 @@ const m = vi.hoisted(() => {
     getAllowedTransitions: vi.fn(),
     toLifecycleState: vi.fn(),
     wrapSchemaQuery: vi.fn(),
-    auditDataMutation: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     buildUnionEvidencePack: vi.fn(),
     logger: {
       info: vi.fn(),
@@ -26,6 +27,7 @@ const m = vi.hoisted(() => {
     },
     resetState: () => {
       state.claimRows = [];
+      state.inserted = [];
     },
   };
 });
@@ -43,7 +45,8 @@ vi.mock('@/lib/workflow/case-lifecycle', () => ({
 }));
 vi.mock('@/lib/workflow/state-bridge', () => ({ toLifecycleState: m.toLifecycleState }));
 vi.mock('@/lib/schema-error', () => ({ wrapSchemaQuery: m.wrapSchemaQuery }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation, auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/audit-logger', () => ({ auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
@@ -71,7 +74,9 @@ function makeTx(claimRows: unknown[]) {
       })),
     })),
     insert: vi.fn(() => ({
-      values: vi.fn(async () => undefined),
+      values: vi.fn(async (values: Record<string, unknown>) => {
+        m.state.inserted.push(values);
+      }),
     })),
   };
 }
@@ -105,7 +110,7 @@ describe('cases/[caseId]/transition route', () => {
     });
     m.validateTransition.mockReturnValue({ allowed: true });
     m.getAllowedTransitions.mockReturnValue(['resolved']);
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
       const tx = makeTx(m.state.claimRows);
@@ -178,8 +183,81 @@ describe('cases/[caseId]/transition route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ success: true, claimId: 'case_1', toStatus: 'settled' });
-    expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
     expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ assignedTo: 'agent_1', actorRole: 'steward' }));
+  });
+
+  it('accepts a claim-status name from the workbench and records it in the CUPE vocabulary', async () => {
+    const bridge = await vi.importActual<typeof import('@/lib/workflow/state-bridge')>('@/lib/workflow/state-bridge');
+    m.toLifecycleState.mockImplementation(bridge.toLifecycleState);
+    const { PATCH } = await loadRoute();
+    m.state.claimRows = [{
+      claimId: 'case_1',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'agent_1',
+    }];
+
+    const response = await PATCH(makeRequest({ targetStatus: 'under_review' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ success: true, toStatus: 'acknowledged' });
+    expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ targetState: 'triage' }));
+  });
+
+  it('still refuses a status that belongs to neither vocabulary', async () => {
+    const bridge = await vi.importActual<typeof import('@/lib/workflow/state-bridge')>('@/lib/workflow/state-bridge');
+    m.toLifecycleState.mockImplementation(bridge.toLifecycleState);
+    const { PATCH } = await loadRoute();
+    m.state.claimRows = [{
+      claimId: 'case_1',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'agent_1',
+    }];
+
+    const response = await PATCH(makeRequest({ targetStatus: 'not_a_status' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ error: 'TRANSITION_DENIED' });
+  });
+
+  it('notifies the owning member in-app when their case moves, with a link to their own case', async () => {
+    const { PATCH } = await loadRoute();
+    const claimId = '8d3f6a52-1b0c-4a47-9f0e-0c5a3b7d1e01';
+    m.state.claimRows = [{
+      claimId,
+      memberId: 'member_9',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'agent_1',
+    }];
+
+    const response = await PATCH(makeRequest({ targetStatus: 'settled' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+
+    expect(response.status).toBe(200);
+    expect(m.state.inserted).toContainEqual(expect.objectContaining({
+      userId: 'member_9',
+      organizationId: 'org_1',
+      actionUrl: `/dashboard/claims/${claimId}`,
+    }));
+  });
+
+  it('does not notify a member about a transition they performed themselves', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.claimRows = [{
+      claimId: 'case_1',
+      memberId: 'user_1',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'user_1',
+    }];
+
+    await PATCH(makeRequest({ targetStatus: 'settled' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+
+    expect(m.state.inserted.filter((row) => 'actionUrl' in row)).toHaveLength(0);
   });
 
   it('returns 500 when transition pipeline throws unexpectedly', async () => {

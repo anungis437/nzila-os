@@ -32,7 +32,6 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
   currentUser: async () => null,
   getAuth: m.platformAuth,
   authMiddleware: () => async () => {},
-  clerkMiddleware: () => async () => {},
   createRouteMatcher: () => () => false,
 }));
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
@@ -55,10 +54,12 @@ vi.mock('@/db/db', () => ({
     // Real withRLSContext opens a transaction and set_config()s on tx.execute
     // before running the handler. The fake client must provide that boundary;
     // the handler still queries through the module-level insert/select mocks.
-    transaction: async (fn: (tx: { execute: typeof m.dbExecute }) => Promise<unknown>) =>
-      fn({ execute: m.dbExecute }),
+    transaction: async (fn: (tx: { execute: typeof m.dbExecute; insert: typeof m.dbInsert; select: typeof m.dbSelect }) => Promise<unknown>) =>
+      fn({ execute: m.dbExecute, insert: m.dbInsert, select: m.dbSelect }),
   },
 }));
+// The durable audit write is proven against real PostgreSQL elsewhere.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   // Wrap (not replace) the real eq() so WHERE-clause construction behaves
@@ -162,6 +163,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     const res = await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
       location: 'Loading dock',
       description: 'Worker slipped on wet floor',
@@ -196,6 +198,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     const res = await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
       location: 'Loading dock',
       description: 'Worker slipped on wet floor',
@@ -205,22 +208,40 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     expect(capture()).toBeUndefined();
   });
 
-  it('4. organizationId comes from the authenticated context and cannot be overridden by the request payload', async () => {
+  it('4. refuses client-supplied organizationId rather than accepting a spoofed tenant', async () => {
     const { POST } = await import('../hazards/route');
     m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep', ORG_A));
     m.getOrganizationIdForUser.mockResolvedValue(ORG_A);
     const capture = mockInsertCapture();
 
-    await POST(postRequest('http://localhost/api/health-safety/hazards', {
+    const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
       hazardType: 'fire',
       priority: 'high',
       location: 'Warehouse B',
       description: 'Sparks near flammable storage',
-      organizationId: ORG_B, // attacker-supplied — must be ignored
+      organizationId: ORG_B,
     }));
 
-    expect(capture()?.organizationId).toBe(ORG_A);
-    expect(capture()?.organizationId).not.toBe(ORG_B);
+    expect(response.status).toBe(400);
+    expect(capture()).toBeUndefined();
+  });
+
+  it('4a. rejects an attacker-supplied incident organizationId before insert', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep', ORG_A));
+    const capture = mockInsertCapture();
+
+    const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
+      incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
+      severity: 'minor',
+      location: 'Loading dock',
+      description: 'Worker slipped on wet floor',
+      organizationId: ORG_B,
+    }));
+
+    expect(response.status).toBe(400);
+    expect(capture()).toBeUndefined();
   });
 
   it('4b. organizationId cannot be overridden even if beforeCreate tried to change it', async () => {
@@ -267,6 +288,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
       location: 'Loading dock',
       description: 'Worker slipped on wet floor',
@@ -275,6 +297,94 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     const incidentNumber = capture()?.incidentNumber as string;
     expect(typeof incidentNumber).toBe('string');
     expect(incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  it('6a. refuses caller-supplied report identifiers, statuses and unsupported form fields', async () => {
+    const { POST } = await import('../hazards/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    for (const injected of [
+      { reportNumber: 'HAZ-FORGED' },
+      { status: 'closed' },
+      { metadata: { approval: true } },
+      { unrecognizedField: 'unexpected' },
+    ]) {
+      const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
+        hazardType: 'fire', priority: 'high', location: 'Warehouse B',
+        description: 'Sparks near flammable storage', ...injected,
+      }));
+      expect(response.status).toBe(400);
+      expect(capture()).toBeUndefined();
+    }
+  });
+
+  it('6b. refuses conflicting aliases and canonical fields', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
+      incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z', severity: 'minor', location: 'Dock A',
+      locationDescription: 'Dock B', description: 'Worker slipped',
+    }));
+    expect(response.status).toBe(400);
+    expect(capture()).toBeUndefined();
+  });
+
+  it('6c. refuses missing or invalid incident dates rather than inventing the reporting time', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    for (const bad of [undefined, 'not-a-date']) {
+      const body: Record<string, unknown> = {
+        incidentType: 'near_miss', severity: 'near_miss',
+        location: 'Line 3', description: 'Guard missing on press',
+      };
+      if (bad !== undefined) body.incidentDate = bad;
+      const response = await POST(postRequest('http://localhost/api/health-safety/incidents', body));
+      expect(response.status).toBe(400);
+      expect(capture()).toBeUndefined();
+    }
+  });
+
+  it('6d. preserves fatal severity, structured injury and witness fields without hiding them in metadata', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
+      incidentType: 'fall', severity: 'fatal', incidentDate: '2026-10-29T13:00:00.000Z',
+      location: 'Line 3', description: 'Fall from height',
+      injuredPersonName: 'Protected Person', bodyPartAffected: 'head',
+      injuryNature: 'other', treatmentProvided: 'Emergency response',
+      witnessesPresent: true, witnessNames: ['Witness One'],
+    }));
+    expect(response.status).toBe(200);
+    expect(capture()).toMatchObject({
+      organizationId: ORG_A, incidentType: 'fall', severity: 'fatal',
+      injuredPersonName: 'Protected Person', bodyPartAffected: 'head',
+      treatmentProvided: 'Emergency response', witnessesPresent: true,
+      witnessNames: ['Witness One'],
+    });
+    expect(JSON.stringify(capture()?.metadata ?? {})).not.toContain('Protected Person');
+    expect(JSON.stringify(capture()?.metadata ?? {})).not.toContain('Witness One');
+  });
+
+  it('6e. rejects missing or unrecognized hazard classification instead of assuming moderate/other', async () => {
+    const { POST } = await import('../hazards/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    for (const extra of [
+      { hazardType: 'fire' },
+      { priority: 'high' },
+      { hazardType: 'unknown', priority: 'high' },
+      { hazardType: 'fire', priority: 'unknown' },
+    ]) {
+      const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
+        location: 'Warehouse B', description: 'Sparks near flammable storage', ...extra,
+      }));
+      expect(response.status).toBe(400);
+      expect(capture()).toBeUndefined();
+    }
   });
 
   it('7. malformed required input (no location, no description) is rejected — never silently normalized into a valid record', async () => {
@@ -298,6 +408,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     const res = await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
     }));
 

@@ -7,6 +7,8 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,10 +38,11 @@ export const POST = withApi(
     body: z.object({
       certificateNumber: z.string().min(1),
       issueDate: z.string().min(1),
-      councilMembers: z.array(z.record(z.unknown())),
+      councilMembers: z.array(z.record(z.string(), z.unknown())),
     }),
   },
-  async ({ body }) => {
+  async ({ body, userId, organizationId }) => {
+    // The certificate and its audit record commit together in one system transaction.
     return withSystemContext(async () => {
     const id = crypto.randomUUID();
     await db.execute(sql`
@@ -55,6 +58,14 @@ export const POST = withApi(
         100, 0, 0, false, true, 5, 0, 'active', false
       )
     `);
+    await persistAtomicAudit(db as unknown as RLSTx, {
+      organizationId: organizationId!,
+      userId: userId!,
+      action: 'governance.golden_share.issue',
+      resourceType: 'golden_shares',
+      resourceId: id,
+      details: { certificateNumber: body.certificateNumber, issueDate: body.issueDate },
+    });
     return { id };
     });
   },

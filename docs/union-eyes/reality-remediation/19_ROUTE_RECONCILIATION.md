@@ -79,7 +79,6 @@ are enforced not-advertised by the §7 invariant.
 | Route | Capability | State | Purpose |
 |-------|-----------|-------|---------|
 | `/dashboard/debug` | `UE-DASH-DEBUG` | `DISABLED` | Local diagnostic view of the current authenticated user. |
-| `/sentry-example-page` | `UE-DEV-SENTRY-EXAMPLE` | `DISABLED` | Sentry SDK connectivity smoke test. |
 
 ## Change protocol
 

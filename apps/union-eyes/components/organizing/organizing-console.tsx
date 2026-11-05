@@ -2,49 +2,19 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import {
-  Flag,
-  AlertCircle,
-  Clock,
-  Search,
-  Plus,
-  TrendingUp,
-  Users,
-  CheckCircle,
-  XCircle,
-  Pause,
-  Eye,
-  Edit,
-  BarChart3,
-  MapPin,
-  Calendar,
-  Target,
-  Award,
-} from 'lucide-react';
+import { Flag, AlertCircle, Clock, Search, TrendingUp, Users, CheckCircle, XCircle, Pause, Eye, MapPin, Calendar, Target, Award } from 'lucide-react';
+import { ApiShapeError } from '@/lib/client/api-envelope';
+import { fetchAllRows } from '@/lib/client/crud-lists';
+import { formatCampaignDate, formatStatusLabel, readCampaign, signingPercent, targetPercent, type Campaign } from './organizing-readers';
 
-interface OrganizingCampaign {
-  id: string;
-  campaignName: string;
-  campaignCode: string;
-  campaignType: string;
-  campaignStatus: string;
-  targetEmployerName: string;
-  workplaceCity: string;
-  workplaceProvince: string;
-  estimatedEligibleWorkers: number;
-  cardsSignedCount: number;
-  cardsSignedPercentage: number;
-  cardSigningThresholdPercentage: number;
-  superMajorityThresholdPercentage: number;
-  organizingCommitteeSize: number;
-  campaignLaunchDate?: string;
-  cardCheckDeadline?: string;
-}
+const LOAD_FAILED = 'Unable to load organizing campaigns. Please try again later.';
+const DASH = '—';
 
 function getStatusBadgeVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
   const statusMap: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -55,6 +25,7 @@ function getStatusBadgeVariant(status: string): 'default' | 'secondary' | 'destr
     won: 'default',
     lost: 'destructive',
     research: 'outline',
+    planning: 'outline',
     pre_campaign: 'outline',
     suspended: 'destructive',
     abandoned: 'destructive',
@@ -74,77 +45,50 @@ function getStatusIcon(status: string) {
   return iconMap[status] || <Flag className="w-4 h-4" />;
 }
 
-function formatStatusLabel(status: string) {
-  return status
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-function formatDate(dateString?: string) {
-  if (!dateString) return 'Not set';
-  return new Date(dateString).toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-function getProgressColor(percentage: number, threshold: number, superMajority: number) {
-  if (percentage >= superMajority) return 'bg-green-600';
-  if (percentage >= threshold) return 'bg-yellow-600';
-  return 'bg-red-600';
-}
-
 export function OrganizingConsole() {
+  const locale = useLocale();
   const params = useParams<{ locale?: string }>();
   const localePrefix = params?.locale ? `/${params.locale}` : '';
 
   const [loading, setLoading] = useState(true);
-  const [campaigns, setCampaigns] = useState<OrganizingCampaign[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
 
   const loadCampaigns = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch('/api/v2/organizing/campaigns');
-      if (res.ok) {
-        const json = await res.json();
-        // withApi wraps as { success, data: { data: [...], pagination } }
-        const items = Array.isArray(json) ? json : (json?.campaigns ?? json?.data?.data ?? json?.data ?? []);
-        setCampaigns(Array.isArray(items) ? items : []);
-      } else {
-        const text = await res.text().catch(() => '');
-        setError(`Failed to load campaigns (${res.status}). ${text ? JSON.parse(text)?.error ?? '' : ''}`);
-      }
-    } catch {
-      setError('Unable to load organizing campaigns. Please try again later.');
+      const rows = await fetchAllRows<unknown>('/api/organizing/campaigns');
+      setCampaigns(rows.map(readCampaign));
+    } catch (failure) {
+      setError(failure instanceof ApiShapeError || failure instanceof TypeError ? LOAD_FAILED : (failure as Error).message);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadCampaigns();
+    void loadCampaigns();
   }, [loadCampaigns]);
 
+  const needle = searchQuery.toLowerCase();
   const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesSearch =
-      campaign.campaignName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      campaign.targetEmployerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      campaign.campaignCode.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || campaign.campaignStatus === statusFilter;
-    return matchesSearch && matchesStatus;
+      campaign.campaignName.toLowerCase().includes(needle) ||
+      campaign.targetEmployer.toLowerCase().includes(needle) ||
+      campaign.campaignCode.toLowerCase().includes(needle);
+    return matchesSearch && (statusFilter === 'all' || campaign.status === statusFilter);
   });
+  // The filters are the statuses the campaigns hold, not a fixed list some of them may never use.
+  const statuses = [...new Set(campaigns.map((campaign) => campaign.status))].sort();
 
   const stats = {
     totalCampaigns: campaigns.length,
-    activeCampaigns: campaigns.filter((c) => c.campaignStatus === 'active' || c.campaignStatus === 'card_check').length,
-    wonCampaigns: campaigns.filter((c) => c.campaignStatus === 'won').length,
-    totalWorkers: campaigns.reduce((sum, c) => sum + c.estimatedEligibleWorkers, 0),
+    activeCampaigns: campaigns.filter((c) => c.status === 'active' || c.status === 'card_check').length,
+    certified: campaigns.filter((c) => c.certificationDate !== null).length,
+    totalWorkers: campaigns.reduce((sum, c) => sum + c.estimatedUnitSize, 0),
   };
 
   if (loading) {
@@ -163,13 +107,13 @@ export function OrganizingConsole() {
   if (error) {
     return (
       <div className="p-6 space-y-6">
-        <Card className="border-2 border-red-200 bg-red-50">
+        <Card role="alert" className="border-2 border-red-200 bg-red-50">
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-600" />
               <h3 className="text-xl font-semibold mb-2 text-red-900">Error Loading Campaigns</h3>
               <p className="text-red-800 mb-4">{error}</p>
-              <Button variant="outline" onClick={() => loadCampaigns()}>
+              <Button variant="outline" onClick={() => void loadCampaigns()}>
                 Retry
               </Button>
             </div>
@@ -181,24 +125,14 @@ export function OrganizingConsole() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Flag className="w-8 h-8" />
-            Organizing Campaigns
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage new workplace organizing drives and certification campaigns
-          </p>
-        </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          New Campaign
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <Flag className="w-8 h-8" />
+          Organizing Campaigns
+        </h1>
+        <p className="text-muted-foreground mt-1">Workplace organizing drives and certification campaigns</p>
       </div>
 
-      {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
@@ -228,8 +162,8 @@ export function OrganizingConsole() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Certifications Won</p>
-                <p className="text-2xl font-bold">{stats.wonCampaigns}</p>
+                <p className="text-sm text-muted-foreground">Certified</p>
+                <p className="text-2xl font-bold">{stats.certified}</p>
               </div>
               <Award className="w-10 h-10 text-purple-600" />
             </div>
@@ -240,7 +174,7 @@ export function OrganizingConsole() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Workers</p>
+                <p className="text-sm text-muted-foreground">Estimated Workers</p>
                 <p className="text-2xl font-bold">{stats.totalWorkers.toLocaleString()}</p>
               </div>
               <Users className="w-10 h-10 text-orange-600" />
@@ -249,7 +183,6 @@ export function OrganizingConsole() {
         </Card>
       </div>
 
-      {/* Search and Filters */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
@@ -262,25 +195,20 @@ export function OrganizingConsole() {
                 className="pl-10"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant={statusFilter === 'all' ? 'default' : 'outline'} onClick={() => setStatusFilter('all')}>
                 All
               </Button>
-              <Button variant={statusFilter === 'active' ? 'default' : 'outline'} onClick={() => setStatusFilter('active')}>
-                Active
-              </Button>
-              <Button variant={statusFilter === 'card_check' ? 'default' : 'outline'} onClick={() => setStatusFilter('card_check')}>
-                Card Check
-              </Button>
-              <Button variant={statusFilter === 'research' ? 'default' : 'outline'} onClick={() => setStatusFilter('research')}>
-                Research
-              </Button>
+              {statuses.map((status) => (
+                <Button key={status} variant={statusFilter === status ? 'default' : 'outline'} onClick={() => setStatusFilter(status)}>
+                  {formatStatusLabel(status)}
+                </Button>
+              ))}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Campaign List */}
       <div className="space-y-4">
         {filteredCampaigns.length === 0 ? (
           <Card>
@@ -288,127 +216,99 @@ export function OrganizingConsole() {
               <div className="text-center py-8">
                 <Flag className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-xl font-semibold mb-2">No Campaigns Found</h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchQuery || statusFilter !== 'all'
-                    ? 'Try adjusting your search or filters.'
-                    : 'Start your first organizing campaign to begin building worker power.'}
+                <p className="text-muted-foreground">
+                  {searchQuery || statusFilter !== 'all' ? 'Try adjusting your search or filters.' : 'No organizing campaign has been recorded yet.'}
                 </p>
-                {!searchQuery && statusFilter === 'all' && (
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Launch New Campaign
-                  </Button>
-                )}
               </div>
             </CardContent>
           </Card>
         ) : (
-          filteredCampaigns.map((campaign) => (
-            <Card key={campaign.id} className="border-2 hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold">{campaign.campaignName}</h3>
-                      <Badge variant={getStatusBadgeVariant(campaign.campaignStatus)}>
+          filteredCampaigns.map((campaign) => {
+            const percent = signingPercent(campaign);
+            const target = targetPercent(campaign);
+            return (
+              <Card key={campaign.id} className="border-2 hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-semibold">{campaign.campaignName}</h3>
+                        <Badge variant={getStatusBadgeVariant(campaign.status)}>
+                          <span className="flex items-center gap-1">
+                            {getStatusIcon(campaign.status)}
+                            {formatStatusLabel(campaign.status)}
+                          </span>
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-1">{campaign.targetEmployer}</p>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          {getStatusIcon(campaign.campaignStatus)}
-                          {formatStatusLabel(campaign.campaignStatus)}
+                          <MapPin className="w-4 h-4" />
+                          {campaign.workplaceLocation}
                         </span>
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-1">{campaign.targetEmployerName}</p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {campaign.workplaceCity}, {campaign.workplaceProvince}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        {campaign.estimatedEligibleWorkers} eligible workers
-                      </span>
-                      <span className="text-xs bg-muted px-2 py-1 rounded">{campaign.campaignCode}</span>
+                        <span className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          {campaign.estimatedUnitSize} estimated workers
+                        </span>
+                        <span className="text-xs bg-muted px-2 py-1 rounded">{campaign.campaignCode}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Card Signing Progress */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Card Signing Progress</span>
-                    <span className="text-sm font-semibold">
-                      {campaign.cardsSignedCount} / {campaign.estimatedEligibleWorkers} ({campaign.cardsSignedPercentage.toFixed(1)}%)
-                    </span>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Card Signing Progress</span>
+                      <span className="text-sm font-semibold">
+                        {campaign.cardsSigned ?? DASH} / {campaign.estimatedUnitSize} ({percent === null ? DASH : `${percent.toFixed(1)}%`})
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
+                      {target !== null && <div className="absolute h-full border-l-2 border-yellow-800 opacity-50" style={{ left: `${Math.min(target, 100)}%` }} />}
+                      <div className="h-full transition-all bg-blue-600" style={{ width: `${Math.min(percent ?? 0, 100)}%` }} />
+                    </div>
+                    {campaign.targetCardCount !== null && (
+                      <div className="mt-1 text-xs text-muted-foreground">Target: {campaign.targetCardCount} cards</div>
+                    )}
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
-                    <div
-                      className="absolute h-full border-l-2 border-yellow-800 opacity-50"
-                      style={{ left: `${campaign.cardSigningThresholdPercentage}%` }}
-                    />
-                    <div
-                      className="absolute h-full border-l-2 border-green-800 opacity-50"
-                      style={{ left: `${campaign.superMajorityThresholdPercentage}%` }}
-                    />
-                    <div
-                      className={`h-full transition-all ${getProgressColor(campaign.cardsSignedPercentage, campaign.cardSigningThresholdPercentage, campaign.superMajorityThresholdPercentage)}`}
-                      style={{ width: `${Math.min(campaign.cardsSignedPercentage, 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
-                    <span>Threshold: {campaign.cardSigningThresholdPercentage}%</span>
-                    <span>Super Majority: {campaign.superMajorityThresholdPercentage}%</span>
-                  </div>
-                </div>
 
-                {/* Campaign Metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 pb-4 border-b">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Launch Date</p>
-                    <p className="text-sm font-semibold flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(campaign.campaignLaunchDate)}
-                    </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 pb-4 border-b">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Start Date</p>
+                      <p className="text-sm font-semibold flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatCampaignDate(campaign.campaignStartDate, locale)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Card Deadline</p>
+                      <p className="text-sm font-semibold flex items-center gap-1">
+                        <Target className="w-3 h-3" />
+                        {formatCampaignDate(campaign.targetCardDeadline, locale)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Organizing Team</p>
+                      <p className="text-sm font-semibold flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {campaign.teamSize === null ? DASH : `${campaign.teamSize} members`}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Campaign Type</p>
+                      <p className="text-sm font-semibold">{formatStatusLabel(campaign.campaignType)}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Card Deadline</p>
-                    <p className="text-sm font-semibold flex items-center gap-1">
-                      <Target className="w-3 h-3" />
-                      {formatDate(campaign.cardCheckDeadline)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Committee Size</p>
-                    <p className="text-sm font-semibold flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {campaign.organizingCommitteeSize} members
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Campaign Type</p>
-                    <p className="text-sm font-semibold">{formatStatusLabel(campaign.campaignType)}</p>
-                  </div>
-                </div>
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Link href={`${localePrefix}/dashboard/organizing/${campaign.id}`} className="flex-1">
+                  <Link href={`${localePrefix}/dashboard/organizing/${campaign.id}`}>
                     <Button variant="default" className="w-full" size="sm">
                       <Eye className="w-4 h-4 mr-2" />
                       View Campaign
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Analytics
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
     </div>

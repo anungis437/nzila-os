@@ -5,9 +5,13 @@
  * POST /api/dues/remittances — Create a new employer remittance record
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
-import { db } from '@/db';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { rowsVisibleToGrant } from '@/lib/finance/principal-financial-authority';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
-import { eq, desc } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 
@@ -15,25 +19,28 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'List employer remittances' },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    const rows = await db
-      .select()
-      .from(employerRemittances)
-      .where(eq(employerRemittances.organizationId, organizationId))
-      .orderBy(desc(employerRemittances.createdAt));
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view' });
+      return tx
+        .select()
+        .from(employerRemittances)
+        .where(rowsVisibleToGrant(grant, organizationId, employerRemittances.organizationId, employerRemittances.id))
+        .orderBy(desc(employerRemittances.createdAt));
+    });
 
     return { data: rows };
   },
 );
 
 const createSchema = z.object({
-  employerId: z.string().uuid(),
+  employerId: z.guid(),
   periodStart: z.coerce.date(),
   periodEnd: z.coerce.date(),
   fiscalYear: z.number().int(),
@@ -42,30 +49,42 @@ const createSchema = z.object({
   totalAmount: z.string(),
   memberCount: z.number().int().min(0),
   remittanceNumber: z.string().optional(),
-  fileName: z.string().optional(),
-  fileUrl: z.string().optional(),
   notes: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Create an employer remittance' },
   },
   async ({ organizationId, userId, request }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const body = createSchema.parse(await request.json());
 
-    const [remittance] = await db
-      .insert(employerRemittances)
-      .values({
-        ...body,
+    const remittance = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:prepare', employerId: body.employerId });
+      const [row] = await tx
+        .insert(employerRemittances)
+        .values({
+          ...body,
+          organizationId,
+          processingStatus: 'pending',
+          isReconciled: false,
+          createdBy: userId ?? undefined,
+        })
+        .returning();
+      await persistAtomicAudit(tx, {
         organizationId,
-        createdBy: userId ?? undefined,
-      })
-      .returning();
+        userId: userId!,
+        action: 'dues.remittance.create',
+        resourceType: 'employer_remittances',
+        resourceId: row.id,
+        details: { employerId: body.employerId, totalAmount: body.totalAmount, memberCount: body.memberCount },
+      });
+      return row;
+    });
 
     logger.info('Employer remittance created', { remittanceId: remittance.id, organizationId });
 

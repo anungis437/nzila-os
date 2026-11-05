@@ -80,8 +80,7 @@ export const userConsents = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: text("user_id")
-      .notNull()
-      .references(() => profiles.userId, { onDelete: "cascade" }),
+      .notNull(),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
@@ -113,8 +112,8 @@ export const userConsents = pgTable(
       dataCategories?: string[];
     }>(),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("user_consents_user_id_idx").on(table.userId),
@@ -134,9 +133,10 @@ export const cookieConsents = pgTable(
   "cookie_consents",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    userId: text("user_id").references(() => profiles.userId, {
+    // The profile row of a signed-in visitor; null for an anonymous one. It is the profile's uuid, not the identity string.
+    userId: uuid("user_id").references(() => profiles.id, {
       onDelete: "cascade",
-    }), // Optional - can track anonymous users
+    }),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
@@ -156,7 +156,7 @@ export const cookieConsents = pgTable(
     lastUpdated: timestamp("last_updated").notNull().defaultNow(),
     expiresAt: timestamp("expires_at").notNull(), // Typically 12 months
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("cookie_consents_user_id_idx").on(table.userId),
@@ -176,8 +176,7 @@ export const gdprDataRequests = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: text("user_id")
-      .notNull()
-      .references(() => profiles.userId, { onDelete: "cascade" }),
+      .notNull(),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
@@ -220,8 +219,8 @@ export const gdprDataRequests = pgTable(
     processedBy: text("processed_by"),
     notes: text("notes"),
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("gdpr_requests_user_id_idx").on(table.userId),
@@ -230,113 +229,6 @@ export const gdprDataRequests = pgTable(
     deadlineIdx: index("gdpr_requests_deadline_idx").on(table.deadline),
     organizationIdIdx: index("gdpr_requests_organization_id_idx").on(
       table.organizationId
-    ),
-  })
-);
-
-/**
- * Data Processing Records
- * Article 30: Records of processing activities
- */
-export const dataProcessingRecords = pgTable(
-  "data_processing_records",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Processing activity
-    activityName: text("activity_name").notNull(),
-    processingPurpose: processingPurposeEnum("processing_purpose").notNull(),
-    legalBasis: text("legal_basis").notNull(),
-    
-    // Data details
-    dataCategories: jsonb("data_categories").$type<string[]>().notNull(),
-    dataSubjects: jsonb("data_subjects").$type<string[]>().notNull(),
-    
-    // Recipients
-    recipients: jsonb("recipients").$type<
-      Array<{
-        name: string;
-        type: "internal" | "processor" | "third_party" | "international";
-        country?: string;
-        safeguards?: string;
-      }>
-    >(),
-    
-    // Retention
-    retentionPeriod: text("retention_period").notNull(),
-    deletionProcedure: text("deletion_procedure"),
-    
-    // Security measures
-    securityMeasures: jsonb("security_measures").$type<string[]>(),
-    
-    // DPO (Data Protection Officer)
-    dpoContact: text("dpo_contact"),
-    
-    // Dates
-    lastReviewed: timestamp("last_reviewed").notNull().defaultNow(),
-    nextReviewDue: timestamp("next_review_due").notNull(),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdIdx: index("data_processing_organization_id_idx").on(
-      table.organizationId
-    ),
-    nextReviewIdx: index("data_processing_next_review_idx").on(
-      table.nextReviewDue
-    ),
-  })
-);
-
-/**
- * Data Retention Policies
- * Define how long data is kept before automatic deletion
- */
-export const dataRetentionPolicies = pgTable(
-  "data_retention_policies",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Policy details
-    policyName: text("policy_name").notNull(),
-    dataType: text("data_type").notNull(), // table or category name
-    retentionPeriodDays: text("retention_period_days").notNull(),
-    
-    // Conditions
-    conditions: jsonb("conditions").$type<{
-      userStatus?: string[];
-      membershipStatus?: string[];
-      excludeActiveRecords?: boolean;
-    }>(),
-    
-    // Actions
-    actionOnExpiry: text("action_on_expiry").notNull(), // delete, archive, anonymize
-    archiveLocation: text("archive_location"),
-    
-    // Legal basis
-    legalRequirement: text("legal_requirement"),
-    
-    // Status
-    isActive: boolean("is_active").notNull().default(true),
-    lastExecuted: timestamp("last_executed"),
-    nextExecution: timestamp("next_execution"),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdIdx: index("retention_policies_organization_id_idx").on(
-      table.organizationId
-    ),
-    nextExecutionIdx: index("retention_policies_next_execution_idx").on(
-      table.nextExecution
     ),
   })
 );
@@ -351,13 +243,12 @@ export const dataAnonymizationLog = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     userId: text("user_id").notNull(), // Original user ID (before anonymization)
     organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
+      .notNull(),
     
     // Operation details
     operationType: text("operation_type").notNull(), // anonymize, pseudonymize, delete
     reason: text("reason").notNull(), // RTBF request, retention policy, etc.
-    requestId: uuid("request_id").references(() => gdprDataRequests.id),
+    requestId: uuid("request_id"),
     
     // What was anonymized
     tablesAffected: jsonb("tables_affected").$type<
@@ -380,7 +271,7 @@ export const dataAnonymizationLog = pgTable(
     canReverse: boolean("can_reverse").notNull().default(false),
     backupLocation: text("backup_location"), // For reversible operations
     
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("anonymization_log_user_id_idx").on(table.userId),
@@ -400,10 +291,6 @@ export type CookieConsent = typeof cookieConsents.$inferSelect;
 export type NewCookieConsent = typeof cookieConsents.$inferInsert;
 export type GdprDataRequest = typeof gdprDataRequests.$inferSelect;
 export type NewGdprDataRequest = typeof gdprDataRequests.$inferInsert;
-export type DataProcessingRecord = typeof dataProcessingRecords.$inferSelect;
-export type NewDataProcessingRecord = typeof dataProcessingRecords.$inferInsert;
-export type DataRetentionPolicy = typeof dataRetentionPolicies.$inferSelect;
-export type NewDataRetentionPolicy = typeof dataRetentionPolicies.$inferInsert;
 export type DataAnonymizationLog = typeof dataAnonymizationLog.$inferSelect;
 export type NewDataAnonymizationLog = typeof dataAnonymizationLog.$inferInsert;
 

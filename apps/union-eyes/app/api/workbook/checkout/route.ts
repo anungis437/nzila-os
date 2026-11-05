@@ -18,30 +18,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { WORKBOOK_TIERS } from '@/lib/icra/tiers';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const bodySchema = z.object({
-  workbookId: z.string().uuid('Invalid workbook ID'),
+  workbookId: z.guid('Invalid workbook ID'),
 });
 
 const SELF_GUIDED_TIER_ID = 'workbook_self_guided' as const;
+const CHECKOUT_REUSE_WINDOW_MS = 30 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  const intake = await guardPublicIntake(request, { bucket: 'checkout', challenge: true });
+  if (!intake.ok) return intake.response;
 
-  const parse = bodySchema.safeParse(body);
+  const parse = bodySchema.safeParse(intake.json);
   if (!parse.success) {
     return NextResponse.json(
       { error: 'Validation failed', details: parse.error.flatten().fieldErrors },
@@ -54,18 +53,22 @@ export async function POST(request: NextRequest) {
   // Verify the workbook exists (prevent arbitrary UUID injection)
   let existingTierId: string | null = null;
   try {
-    const [row] = await db
-      .select({ reportTierId: workbooks.reportTierId })
-      .from(workbooks)
-      .where(eq(workbooks.id, workbookId))
-      .limit(1);
+    // An unclaimed workbook (all a buyer has before paying) is invisible to the user isolation policy, so the read names the
+    // system role explicitly rather than running on the pooled connection with no user context.
+    const [row] = await withSystemContext(async (tx) =>
+      tx
+        .select({ reportTierId: workbooks.reportTierId })
+        .from(workbooks)
+        .where(eq(workbooks.id, workbookId))
+        .limit(1),
+    );
 
     if (!row) {
       return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
     }
     existingTierId = row.reportTierId ?? null;
   } catch (err) {
-    logger.error('[workbook-checkout] DB lookup failed', { workbookId, err });
+    logger.error('[workbook-checkout] DB lookup failed', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
 
@@ -82,8 +85,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Tier not available for self-serve checkout' }, { status: 400 });
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  // A payment redirect to localhost would strand the buyer after paying, so production refuses to open a session without a public base URL.
+  const configuredBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  if (!configuredBase && process.env.NODE_ENV === 'production') {
+    logger.error('[workbook-checkout] NEXT_PUBLIC_APP_URL is not configured', { workbookRef: opaqueRef(workbookId) });
+    return NextResponse.json({ error: 'Checkout is temporarily unavailable' }, { status: 503 });
+  }
+  const baseUrl = configuredBase ?? 'http://localhost:3000';
   const successUrl = `${baseUrl}/workbook/${workbookId}?tier_unlocked=${SELF_GUIDED_TIER_ID}`;
   const cancelUrl = `${baseUrl}/workbook/${workbookId}`;
 
@@ -115,6 +123,9 @@ export async function POST(request: NextRequest) {
         product: 'workbook',
       },
       customer_creation: 'if_required',
+    }, {
+      // A repeated request in the same window gets the session already opened instead of a new one.
+      idempotencyKey: `workbook-checkout:${workbookId}:${SELF_GUIDED_TIER_ID}:${Math.floor(Date.now() / CHECKOUT_REUSE_WINDOW_MS)}`,
     });
 
     if (!session.url) {
@@ -122,14 +133,14 @@ export async function POST(request: NextRequest) {
     }
 
     logger.info('[workbook-checkout] Checkout session created', {
-      workbookId,
+      workbookRef: opaqueRef(workbookId),
       tierId: SELF_GUIDED_TIER_ID,
       sessionId: session.id,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    logger.error('[workbook-checkout] Stripe session creation failed', { workbookId, err });
+    logger.error('[workbook-checkout] Stripe session creation failed', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
   }
 }

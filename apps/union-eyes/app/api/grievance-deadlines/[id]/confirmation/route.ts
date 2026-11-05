@@ -7,6 +7,10 @@ import {
   overrideDeadline,
   supersedeDeadline,
 } from '@/lib/services/deadline-confirmation-service';
+import { isCalendarDay } from '@/lib/deadline-engine/deadline-day';
+
+/** A calendar day ("2026-03-04") that exists: it falls due at 23:59 that day in the organization's zone. */
+const calendarDay = z.string().refine(isCalendarDay, 'must be an existing calendar day (YYYY-MM-DD)');
 
 const confirmationSchema = z.discriminatedUnion('action', [
   z.object({
@@ -14,7 +18,8 @@ const confirmationSchema = z.discriminatedUnion('action', [
   }),
   z.object({
     action: z.literal('override'),
-    overrideDueDate: z.string().datetime(),
+    // A datetime is an instant and is kept as sent; a bare day is due at the end of that day in the organization's zone.
+    overrideDueDate: z.union([z.string().datetime(), calendarDay]),
     overrideReason: z.string().min(1).max(1000),
   }),
   z.object({
@@ -48,7 +53,9 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id?
     : parsed.data.action === 'override'
       ? await overrideDeadline({
         ...base,
-        overrideDueDate: new Date(parsed.data.overrideDueDate),
+        overrideDueDate: isCalendarDay(parsed.data.overrideDueDate)
+          ? parsed.data.overrideDueDate
+          : new Date(parsed.data.overrideDueDate),
         overrideReason: parsed.data.overrideReason,
       })
       : await supersedeDeadline(base);

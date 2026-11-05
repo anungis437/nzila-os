@@ -274,7 +274,9 @@ describe('report-executor', () => {
         fields: [{ fieldId: 'id', fieldName: 'ID' }],
       });
       expect(result.success).toBe(false);
-      expect(result.error).toContain('connection failed');
+      // The database message is not returned: it can name tables and columns.
+      expect(result.error).toBe('Report execution failed');
+      expect(result.kind).toBe('failed');
       expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
     });
   });
@@ -780,14 +782,19 @@ describe('report-executor', () => {
       expect(result.success).toBe(true);
     });
 
-    it('falls back to raw column for unknown aggregation', async () => {
+    // F06 R2 (replaces "falls back to raw column for unknown aggregation"): an aggregation the executor does not run listed the plain column
+    // under an aggregate's name, which the authority check read as an aggregate. It is now refused as an invalid configuration.
+    it('refuses an unknown aggregation instead of answering with the raw column', async () => {
       mocks.mockExecute.mockResolvedValue([]);
       const executor = new ReportExecutor('org-1');
       const result = await executor.execute({
         dataSourceId: 'claims',
         fields: [{ fieldId: 'status', fieldName: 'Status', aggregation: 'median' as 'count' }],
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.kind).toBe('invalid');
+      expect(result.error).toContain('Unsupported aggregation');
+      expect(mocks.mockExecute).not.toHaveBeenCalled();
     });
   });
 
@@ -800,7 +807,8 @@ describe('report-executor', () => {
         fields: [{ fieldId: 'id', fieldName: 'ID' }],
       });
       expect(result.success).toBe(false);
-      expect(result.error).toContain('syntax error');
+      expect(result.error).toBe('Report execution failed');
+      expect(result.kind).toBe('failed');
     });
   });
 
@@ -877,9 +885,8 @@ describe('report-executor', () => {
       expect(result.error).toBe('Report execution failed');
     });
 
-    it('skips filter with unknown operator (switch default)', async () => {
-      // L502: switch default → continue; L535: conditions empty → return null
-      // L279: filterSQL falsy → if(filterSQL) false arm
+    it('refuses a filter with an unknown operator instead of dropping it (B75)', async () => {
+      // A dropped filter would return every row; the executor now refuses the configuration.
       mocks.mockExecute.mockResolvedValue([]);
       const executor = new ReportExecutor('org-1');
       const result = await executor.execute({
@@ -887,7 +894,8 @@ describe('report-executor', () => {
         fields: [{ fieldId: 'id', fieldName: 'ID' }],
         filters: [{ fieldId: 'status', operator: 'contains' as 'eq', value: 'open' }],
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(mocks.mockExecute).not.toHaveBeenCalled();
     });
 
     it('closes OR group when transitioning to AND', async () => {

@@ -72,7 +72,7 @@ export const HubSpotContactSchema = z.object({
   lastName: z.string().optional(),
   phone: z.string().optional(),
   company: z.string().optional(),
-  properties: z.record(z.string()).optional(),
+  properties: z.record(z.string(), z.string()).optional(),
 })
 
 export const HubSpotDealSchema = z.object({
@@ -80,7 +80,7 @@ export const HubSpotDealSchema = z.object({
   stage: z.string().min(1),
   amount: z.number().optional(),
   contactId: z.string().optional(),
-  properties: z.record(z.string()).optional(),
+  properties: z.record(z.string(), z.string()).optional(),
 })
 
 export const HubSpotEngagementNoteSchema = z.object({

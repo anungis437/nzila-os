@@ -1,9 +1,18 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   getReviewQueue,
   getReviewQueueCounts,
   submitReview,
 } from "@/lib/services/cba-intelligence/review-service";
+
+// ---------------------------------------------------------------------------
+// The agreements, findings, wage adjustments and clauses reviewed here are one platform-wide extracted dataset: none of its tables has an
+// organization column. A decision changes what every organization reads, so reviewing is platform authority. A steward or administrator
+// of one organization held the floor and could approve, reject or supersede rows for all of them.
+// ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/review — Get review queue
@@ -33,6 +42,7 @@ export const GET = withApi(
     },
   },
   async ({ query }) => {
+    await requireSystemAdmin();
     if (query.counts) {
       return getReviewQueueCounts();
     }
@@ -48,7 +58,7 @@ export const GET = withApi(
 
 const reviewDecisionSchema = z.object({
   targetType: z.enum(["finding", "agreement", "wage_adjustment", "clause"]),
-  targetId: z.string().uuid(),
+  targetId: z.guid(),
   decision: z.enum(["approved", "rejected", "needs_followup", "superseded"]),
   reason: z.string().max(1000).optional(),
   comment: z.string().max(5000).optional(),
@@ -65,13 +75,27 @@ export const POST = withApi(
       summary: "Submit a review decision",
     },
   },
-  async ({ body, userId }) => {
+  async ({ body, userId, organizationId }) => {
     if (!userId) throw ApiError.unauthorized("User context required");
+    await requireSystemAdmin();
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
 
-    return submitReview({
-      ...body,
-      reviewerId: userId,
-      reviewerRole: "steward", // Could be enriched from user context
+    // The decision, the status it sets on its target and the audit record commit together.
+    return withRLSContext({ organizationId }, async (tx) => {
+      const decision = await submitReview({
+        ...body,
+        reviewerId: userId,
+        reviewerRole: "platform_administrator",
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "cba_review.decide",
+        resourceType: `cba_intel_${body.targetType}`,
+        resourceId: body.targetId,
+        details: { decision: body.decision, reviewDecisionId: decision.id },
+      });
+      return decision;
     });
   },
 );

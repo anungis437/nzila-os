@@ -1,8 +1,8 @@
 {
   "advisories": {
-    "1240912": {
+    "1108110": {
       "id": 9999999,
-      "package": "node-forge",
+      "package": "xlsx",
       "severity": "high",
       "title": "fixture: mismatched advisory identity"
     }

@@ -1,94 +1,25 @@
 /**
  * GET  /api/governance/lifecycle/policies
- *   — List governed policies with optional filters
- *
  * POST /api/governance/lifecycle/policies
- *   — Create a new policy draft
+ *
+ * Not available (capability UE-GOVERNANCE-POLICY-LIFECYCLE): see lib/governance/policy-lifecycle-unavailable.ts. Administrators with the governance suite are told
+ * so; nothing is read or written.
  */
 import { withApi, ApiError } from '@/lib/api/framework'
-import { db } from '@/db/db'
-import { withSystemContext } from '@/lib/db/with-rls-context'
-import { governedPolicies, type NewGovernedPolicyRow } from '@nzila/db/schema'
-import { desc, eq, and, type SQL } from 'drizzle-orm'
+import { POLICY_LIFECYCLE_UNAVAILABLE } from '@/lib/governance/policy-lifecycle-unavailable'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'admin' },
-    entitlement: 'governance_suite',
-  },
-  async ({ request }) => {
-    const url = new URL(request.url)
-    const domain = url.searchParams.get('domain')
-    const status = url.searchParams.get('status')
-    const limit = Math.min(Number(url.searchParams.get('limit') ?? 50), 200)
-    const offset = Number(url.searchParams.get('offset') ?? 0)
-
-    return withSystemContext(async () => {
-      const conditions: SQL<any>[] = []
-      if (domain) conditions.push(eq(governedPolicies.domain, domain))
-      if (status) conditions.push(eq(governedPolicies.lifecycleStatus, status as never))
-
-      const rows = await db
-        .select()
-        .from(governedPolicies)
-        .where(conditions.length > 1 ? and(...conditions) : conditions[0])
-        .orderBy(desc(governedPolicies.createdAt))
-        .limit(limit)
-        .offset(offset)
-
-      return { policies: rows, limit, offset }
-    })
+  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
+  async () => {
+    throw ApiError.notImplemented(POLICY_LIFECYCLE_UNAVAILABLE)
   },
 )
 
 export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'admin' },
-    entitlement: 'governance_suite',
-  },
-  async ({ request, user }) => {
-    const actorId = user?.id
-    if (!actorId) {
-      throw ApiError.badRequest('Authenticated user is required to create a policy.')
-    }
-
-    const body = await request.json() as {
-      policyFamilyId: string
-      semver: string
-      name: string
-      domain: string
-      workflowBindings?: any
-      operationalScope?: any
-      authorRole: string
-      governanceRationale: string
-      riskClassification?: string
-      reviewCadenceDays?: number
-      effectiveFrom?: string
-      effectiveUntil?: string
-    }
-
-    return withSystemContext(async () => {
-      const values: NewGovernedPolicyRow = {
-        policyFamilyId: body.policyFamilyId,
-        semver: body.semver,
-        name: body.name,
-        domain: body.domain,
-        workflowBindings: (body.workflowBindings as string[] | undefined) ?? [],
-        operationalScope: (body.operationalScope ?? {}) as Record<string, unknown>,
-        authorId: actorId,
-        authorRole: body.authorRole,
-        governanceRationale: body.governanceRationale,
-        riskClassification: (body.riskClassification ?? 'medium') as 'low' | 'medium' | 'high' | 'critical',
-        reviewCadenceDays: body.reviewCadenceDays ?? 365,
-        lifecycleStatus: 'draft',
-        replayCompatibilityVersion: '1',
-        effectiveFrom: body.effectiveFrom ? new Date(body.effectiveFrom) : null,
-        effectiveUntil: body.effectiveUntil ? new Date(body.effectiveUntil) : null,
-      }
-      const [draft] = await db.insert(governedPolicies).values(values).returning()
-      return { policy: draft }
-    })
+  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
+  async () => {
+    throw ApiError.notImplemented(POLICY_LIFECYCLE_UNAVAILABLE)
   },
 )

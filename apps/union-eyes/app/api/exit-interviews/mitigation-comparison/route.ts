@@ -46,6 +46,6 @@ export const POST = withApi(
   },
   async ({ organizationId, body }) => {
     const result = await compareMitigations(organizationId!, body.scenarios as MitigationScenario[]);
-    return { data: result };
+    return { ...result };
   },
 );

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { envelopeRows, readApiError } from '@/lib/client/api-envelope';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -37,8 +38,7 @@ interface PilotApplicationRecord {
   goals: string[];
   readinessScore?: string | null;
   status: PilotStatus;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  responses?: Record<string, any>;
+  responses?: Record<string, unknown>;
   submittedAt?: string;
   reviewedAt?: string;
   approvedAt?: string;
@@ -77,21 +77,12 @@ const statusClass: Record<PilotStatus, string> = {
   declined: 'bg-rose-100 text-rose-700 border-rose-200',
 };
 
-function toArrayPayload(payload: any): PilotApplicationRecord[] {
-  if (Array.isArray(payload)) return payload as PilotApplicationRecord[];
-  if (payload && typeof payload === 'object') {
-    const obj = payload as Record<string, unknown>;
-    if (Array.isArray(obj.data)) return obj.data as PilotApplicationRecord[];
-    if (Array.isArray(obj.items)) return obj.items as PilotApplicationRecord[];
-  }
-  return [];
-}
-
 export default function AdminPilotApplicationsPage() {
   const params = useParams();
   const locale = (params.locale as string) ?? 'en-CA';
   const [applications, setApplications] = useState<PilotApplicationRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [proposalDraft, setProposalDraft] = useState('');
   const [search, setSearch] = useState('');
@@ -102,6 +93,12 @@ export default function AdminPilotApplicationsPage() {
   const [latestArtifactVersionId, setLatestArtifactVersionId] = useState<string | null>(null);
   const [latestArtifactDiff, setLatestArtifactDiff] = useState<ArtifactDiffSummary | null>(null);
   const [operationalRefresh, setOperationalRefresh] = useState(0);
+  const [acceptance, setAcceptance] = useState({
+    acceptedByName: '',
+    acceptedByRole: '',
+    channel: 'countersigned_document',
+    evidenceReference: '',
+  });
 
   const selected = useMemo(
     () => applications.find((app) => app.id === selectedId) ?? null,
@@ -134,13 +131,14 @@ export default function AdminPilotApplicationsPage() {
 
   async function loadApplications() {
     setLoading(true);
+    setLoadFailed(false);
     try {
       const response = await fetch('/api/pilot/apply', { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`Failed to load applications (${response.status})`);
       }
-      const payload = await response.json();
-      const rows = toArrayPayload(payload).sort((a, b) => {
+      // The collection route is a CRUD list: { success, data: { data: rows, pagination } }. A body that is not that is an error, never an empty queue.
+      const rows = (envelopeRows(await response.json()) as PilotApplicationRecord[]).sort((a, b) => {
         const left = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
         const right = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
         return right - left;
@@ -150,6 +148,7 @@ export default function AdminPilotApplicationsPage() {
         setSelectedId(rows[0].id);
       }
     } catch (error) {
+      setLoadFailed(true);
       toast.error((error as Error).message || 'Failed to load pilot applications');
     } finally {
       setLoading(false);
@@ -209,27 +208,19 @@ export default function AdminPilotApplicationsPage() {
         ]);
 
         if (timelineResponse.ok) {
-          const timelinePayload = await timelineResponse.json();
-          const events = Array.isArray(timelinePayload?.data?.events)
-            ? (timelinePayload.data.events as TimelineEventRecord[])
-            : [];
-          setTimeline(events);
+          const timelinePayload = (await timelineResponse.json()) as { data?: { events?: TimelineEventRecord[] } };
+          const events = timelinePayload.data?.events;
+          setTimeline(Array.isArray(events) ? events : []);
         } else {
           setTimeline([]);
         }
 
         if (artifactResponse.ok) {
-          const artifactPayload = await artifactResponse.json();
-          setLatestArtifactVersionId(
-            typeof artifactPayload?.data?.latestVersionId === 'string'
-              ? artifactPayload.data.latestVersionId
-              : null,
-          );
-          setLatestArtifactDiff(
-            artifactPayload?.data?.latestDiff && typeof artifactPayload.data.latestDiff === 'object'
-              ? (artifactPayload.data.latestDiff as ArtifactDiffSummary)
-              : null,
-          );
+          const artifactPayload = (await artifactResponse.json()) as { data?: { latestVersionId?: unknown; latestDiff?: ArtifactDiffSummary | null } };
+          const latestVersionId = artifactPayload.data?.latestVersionId;
+          setLatestArtifactVersionId(typeof latestVersionId === 'string' ? latestVersionId : null);
+          const latestDiff = artifactPayload.data?.latestDiff;
+          setLatestArtifactDiff(latestDiff && typeof latestDiff === 'object' ? latestDiff : null);
         } else {
           setLatestArtifactVersionId(null);
           setLatestArtifactDiff(null);
@@ -288,8 +279,7 @@ export default function AdminPilotApplicationsPage() {
         body: JSON.stringify(body),
       });
       if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.error || `Failed to update status (${response.status})`);
+        throw new Error(await readApiError(response, `Failed to update status (${response.status})`));
       }
 
       setApplications((prev) => prev.map((app) => (app.id === id ? { ...app, ...body } : app)));
@@ -318,8 +308,8 @@ export default function AdminPilotApplicationsPage() {
       if (!response.ok) {
         throw new Error(`Unable to generate proposal (${response.status})`);
       }
-      const payload = await response.json();
-      const markdown = payload?.data?.markdown as string | undefined;
+      const payload = (await response.json()) as { data?: { markdown?: string } };
+      const markdown = payload.data?.markdown;
       if (!markdown) throw new Error('Proposal payload was empty');
       const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
       const href = URL.createObjectURL(blob);
@@ -343,9 +333,9 @@ export default function AdminPilotApplicationsPage() {
       if (!response.ok) {
         throw new Error(`Unable to export pilot package (${response.status})`);
       }
-      const payload = await response.json();
-      const markdown = payload?.data?.bundleMarkdown as string | undefined;
-      const fileName = (payload?.data?.fileName as string | undefined) ?? 'pilot-package-export.md';
+      const payload = (await response.json()) as { data?: { bundleMarkdown?: string; fileName?: string } };
+      const markdown = payload.data?.bundleMarkdown;
+      const fileName = payload.data?.fileName ?? 'pilot-package-export.md';
       if (!markdown) throw new Error('Export payload was empty');
 
       const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
@@ -370,12 +360,15 @@ export default function AdminPilotApplicationsPage() {
       const response = await fetch(`/api/pilot/apply/${selected.id}/commercial-transition`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetState: next, source: 'admin-ui' }),
+        body: JSON.stringify({
+          targetState: next,
+          source: 'admin-ui',
+          ...(next === 'contract_signed' ? { counterpartAcceptance: acceptance } : {}),
+        }),
       });
 
       if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.error || `Unable to update commercial state (${response.status})`);
+        throw new Error(await readApiError(response, `Unable to update commercial state (${response.status})`));
       }
 
       await loadApplications();
@@ -424,6 +417,8 @@ export default function AdminPilotApplicationsPage() {
           <CardContent className="space-y-3">
             {loading ? (
               <p className="text-sm text-muted-foreground">Loading pilot applications...</p>
+            ) : loadFailed ? (
+              <p role="alert" className="text-sm text-destructive">Pilot applications could not be loaded. Use Refresh queue to try again.</p>
             ) : filtered.length === 0 ? (
               <p className="text-sm text-muted-foreground">No pilot applications found.</p>
             ) : (
@@ -525,6 +520,41 @@ export default function AdminPilotApplicationsPage() {
                         </Badge>
                       ))}
                     </div>
+                    {nextCommercialState(selectedCommercialState) === 'contract_signed' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <p className="md:col-span-2 text-sm text-muted-foreground">
+                          Recording the contract as signed requires evidence that the other party accepted it.
+                        </p>
+                        <Input
+                          aria-label="Accepted by (name)"
+                          placeholder="Accepted by (name)"
+                          value={acceptance.acceptedByName}
+                          onChange={(event) => setAcceptance({ ...acceptance, acceptedByName: event.target.value })}
+                        />
+                        <Input
+                          aria-label="Role of the person who accepted"
+                          placeholder="Their role"
+                          value={acceptance.acceptedByRole}
+                          onChange={(event) => setAcceptance({ ...acceptance, acceptedByRole: event.target.value })}
+                        />
+                        <select
+                          aria-label="How the contract was accepted"
+                          className="h-9 rounded-md border bg-background px-2 text-sm"
+                          value={acceptance.channel}
+                          onChange={(event) => setAcceptance({ ...acceptance, channel: event.target.value })}
+                        >
+                          <option value="countersigned_document">Countersigned document</option>
+                          <option value="e_signature_provider">E-signature provider</option>
+                          <option value="written_confirmation">Written confirmation</option>
+                        </select>
+                        <Input
+                          aria-label="Evidence reference"
+                          placeholder="Evidence reference (document or envelope id)"
+                          value={acceptance.evidenceReference}
+                          onChange={(event) => setAcceptance({ ...acceptance, evidenceReference: event.target.value })}
+                        />
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"

@@ -1,6 +1,10 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
-import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
+import { rowsVisibleToGrant } from "@/lib/finance/principal-financial-authority";
+import { participantsFromRun, recordedRunAmounts } from "@/lib/employer-execution/run-duties";
 import {
   employerPayrollRuns,
   employerPayrollRunItems,
@@ -11,8 +15,10 @@ import {
   cbaRuleVersions,
   employerExecutionProfiles,
 } from "@/db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { createEvidencePack, sha256 } from "../_lib";
+import { enforceRunDuty } from "../_guard";
+import { csvCell } from "@/lib/employer-execution/csv-cell";
 
 const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
@@ -28,7 +34,7 @@ const defaultFormatter: RemittanceFormatter = {
     const header = "employee_external_id,gross_pay,dues_amount,benefit_amount,pension_amount,net_pay";
     const body = rows.map((row) =>
       [
-        row.employeeExternalId,
+        csvCell(row.employeeExternalId),
         row.gross.toFixed(2),
         row.dues.toFixed(2),
         row.benefits.toFixed(2),
@@ -43,141 +49,187 @@ const defaultFormatter: RemittanceFormatter = {
   },
 };
 
+// A group reports the members who actually contribute to it, not every item of the payroll run.
+function contributing(items: Array<Record<string, unknown>>, column: string): number {
+  return items.filter((item) => Number(item[column]) > 0).length;
+}
+
 const createSchema = z.object({
-  payrollRunId: z.string().uuid(),
+  payrollRunId: z.guid(),
 });
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_remittance_generation",
     openapi: { tags: ["Employer Execution"], summary: "List remittance runs" },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
-    const rows = await db
-      .select()
-      .from(employerRemittanceRuns)
-      .where(eq(employerRemittanceRuns.organizationId, organizationId))
-      .orderBy(desc(employerRemittanceRuns.createdAt));
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view" });
+      return tx
+        .select()
+        .from(employerRemittanceRuns)
+        .where(rowsVisibleToGrant(grant, organizationId, employerRemittanceRuns.organizationId, employerRemittanceRuns.id))
+        .orderBy(desc(employerRemittanceRuns.createdAt));
+    });
     return { data: rows };
   },
 );
 
+const toCents = (value: unknown): number => Math.round(Number(value) * 100);
+
 export const POST = withApi(
   {
-    auth: { minRole: "steward" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_remittance_generation",
     body: createSchema,
     successStatus: 201,
     openapi: { tags: ["Employer Execution"], summary: "Generate remittance package from approved run" },
   },
   async ({ organizationId, userId, body }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
 
-    const [payrollRun] = await db
-      .select()
-      .from(employerPayrollRuns)
-      .where(and(eq(employerPayrollRuns.organizationId, organizationId), eq(employerPayrollRuns.id, body.payrollRunId)))
-      .limit(1);
+    // The payroll run is locked for the whole generation, so two concurrent requests cannot both produce a
+    // remittance for it. Generation, its artifacts, its evidence link and the audit record commit together.
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:execute", resourceId: body.payrollRunId });
+      const [payrollRun] = await tx
+        .select()
+        .from(employerPayrollRuns)
+        .where(and(eq(employerPayrollRuns.organizationId, organizationId), eq(employerPayrollRuns.id, body.payrollRunId)))
+        .limit(1)
+        .for("update");
 
-    if (!payrollRun) throw ApiError.notFound("Payroll run not found");
-    if (payrollRun.status !== "approved") throw ApiError.badRequest("Only approved payroll runs can generate remittance");
+      if (!payrollRun) throw ApiError.notFound("Payroll run not found");
+      if (payrollRun.status !== "approved") throw ApiError.badRequest("Only approved payroll runs can generate remittance");
 
-    const [payrollEvidenceManifest] = await db
-      .select()
-      .from(employerExecutionArtifacts)
-      .where(
-        and(
-          eq(employerExecutionArtifacts.organizationId, organizationId),
-          eq(employerExecutionArtifacts.payrollRunId, payrollRun.id),
-          eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
-        ),
-      )
-      .orderBy(desc(employerExecutionArtifacts.createdAt))
-      .limit(1);
+      const participants = participantsFromRun(payrollRun);
+      enforceRunDuty("execute", userId, participants);
 
-    const parentLink =
-      ((payrollEvidenceManifest?.manifestJson as Record<string, unknown> | undefined)?.chainLink as
-        | { linkId?: string; sealHash?: string; chainDepth?: number }
-        | undefined) ?? undefined;
+      const [existingRemittance] = await tx
+        .select({ id: employerRemittanceRuns.id })
+        .from(employerRemittanceRuns)
+        .where(
+          and(
+            eq(employerRemittanceRuns.organizationId, organizationId),
+            eq(employerRemittanceRuns.payrollRunId, payrollRun.id),
+            ne(employerRemittanceRuns.status, "failed"),
+          ),
+        )
+        .limit(1);
 
-    const items = await db
-      .select()
-      .from(employerPayrollRunItems)
-      .where(and(eq(employerPayrollRunItems.organizationId, organizationId), eq(employerPayrollRunItems.payrollRunId, body.payrollRunId)));
+      if (existingRemittance) {
+        throw ApiError.conflict("A remittance has already been generated for this payroll run", {
+          remittanceRunId: existingRemittance.id,
+        });
+      }
 
-    const [ruleVersion] = payrollRun.cbaRuleVersionId
-      ? await db
-          .select()
-          .from(cbaRuleVersions)
-          .where(
-            and(
-              eq(cbaRuleVersions.organizationId, organizationId),
-              eq(cbaRuleVersions.id, payrollRun.cbaRuleVersionId),
-            ),
-          )
-          .limit(1)
-      : [];
+      const payrollManifests = await tx
+        .select()
+        .from(employerExecutionArtifacts)
+        .where(
+          and(
+            eq(employerExecutionArtifacts.organizationId, organizationId),
+            eq(employerExecutionArtifacts.payrollRunId, payrollRun.id),
+            eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
+          ),
+        )
+        .orderBy(desc(employerExecutionArtifacts.createdAt));
 
-    const [profile] = ruleVersion
-      ? await db
-          .select()
-          .from(employerExecutionProfiles)
-          .where(
-            and(
-              eq(employerExecutionProfiles.organizationId, organizationId),
-              eq(employerExecutionProfiles.id, ruleVersion.profileId),
-            ),
-          )
-          .limit(1)
-      : [];
+      // Replays attach their own manifests to the run; the remittance chains from the run's own seal only.
+      const parentLink = payrollManifests
+        .map(
+          (manifest) =>
+            (manifest.manifestJson as Record<string, unknown> | undefined)?.chainLink as
+              | { linkId?: string; sealHash?: string; chainDepth?: number; entityType?: string }
+              | undefined,
+        )
+        .find((link) => link?.entityType === "payroll_run");
 
-    const profileConfig = (profile?.configJson ?? {}) as Record<string, unknown>;
-    const dueDaysValue = Number(profileConfig.remittance_due_days ?? 15);
-    const dueDays = Number.isFinite(dueDaysValue) && dueDaysValue > 0 ? dueDaysValue : 15;
+      const items = await tx
+        .select()
+        .from(employerPayrollRunItems)
+        .where(and(eq(employerPayrollRunItems.organizationId, organizationId), eq(employerPayrollRunItems.payrollRunId, payrollRun.id)));
 
-    const dueDate = new Date(String(payrollRun.periodEnd));
-    dueDate.setDate(dueDate.getDate() + dueDays);
-    const dueDateIso = dueDate.toISOString().slice(0, 10);
+      const [ruleVersion] = payrollRun.cbaRuleVersionId
+        ? await tx
+            .select()
+            .from(cbaRuleVersions)
+            .where(
+              and(
+                eq(cbaRuleVersions.organizationId, organizationId),
+                eq(cbaRuleVersions.id, payrollRun.cbaRuleVersionId),
+              ),
+            )
+            .limit(1)
+        : [];
 
-    const totals = items.reduce(
-      (acc, item) => {
-        acc.dues += Number(item.duesAmount);
-        acc.benefits += Number(item.benefitAmount);
-        acc.pension += Number(item.pensionAmount);
-        return acc;
-      },
-      { dues: 0, benefits: 0, pension: 0 },
-    );
+      const [profile] = ruleVersion
+        ? await tx
+            .select()
+            .from(employerExecutionProfiles)
+            .where(
+              and(
+                eq(employerExecutionProfiles.organizationId, organizationId),
+                eq(employerExecutionProfiles.id, ruleVersion.profileId),
+              ),
+            )
+            .limit(1)
+        : [];
 
-    const mappedRows = items.map((item) => ({
-      employeeExternalId: item.employeeExternalId,
-      dues: Number(item.duesAmount),
-      benefits: Number(item.benefitAmount),
-      pension: Number(item.pensionAmount),
-      gross: Number(item.grossPay),
-      net: Number(item.netPay),
-    }));
+      const profileConfig = (profile?.configJson ?? {}) as Record<string, unknown>;
+      const dueDaysValue = Number(profileConfig.remittance_due_days ?? 15);
+      const dueDays = Number.isFinite(dueDaysValue) && dueDaysValue > 0 ? dueDaysValue : 15;
 
-    const summary = {
-      runCode: payrollRun.runCode,
-      payrollRunId: payrollRun.id,
-      dueDate: dueDateIso,
-      totals,
-      itemCount: items.length,
-      formatter: defaultFormatter.formatCode,
-      generatedAt: new Date().toISOString(),
-    };
+      const dueDate = new Date(String(payrollRun.periodEnd));
+      dueDate.setDate(dueDate.getDate() + dueDays);
+      const dueDateIso = dueDate.toISOString().slice(0, 10);
 
-    const csvOutput = defaultFormatter.buildCsv(mappedRows);
-    const jsonOutput = defaultFormatter.buildJson(summary, mappedRows);
-    const summaryHash = sha256(JSON.stringify(summary));
-    const csvHash = sha256(csvOutput);
-    const jsonHash = sha256(jsonOutput);
+      // Amounts are summed in integer cents from the items on record.
+      const centTotals = items.reduce(
+        (acc, item) => {
+          acc.dues += toCents(item.duesAmount);
+          acc.benefits += toCents(item.benefitAmount);
+          acc.pension += toCents(item.pensionAmount);
+          return acc;
+        },
+        { dues: 0, benefits: 0, pension: 0 },
+      );
+      const totals = {
+        dues: centTotals.dues / 100,
+        benefits: centTotals.benefits / 100,
+        pension: centTotals.pension / 100,
+      };
+      const totalDue = (centTotals.dues + centTotals.benefits + centTotals.pension) / 100;
 
-    const remittanceRun = await withRLSContext(async (tx) => {
-      const [createdRun] = await tx
+      const mappedRows = items.map((item) => ({
+        employeeExternalId: item.employeeExternalId,
+        dues: Number(item.duesAmount),
+        benefits: Number(item.benefitAmount),
+        pension: Number(item.pensionAmount),
+        gross: Number(item.grossPay),
+        net: Number(item.netPay),
+      }));
+
+      const summary = {
+        runCode: payrollRun.runCode,
+        payrollRunId: payrollRun.id,
+        dueDate: dueDateIso,
+        totals,
+        itemCount: items.length,
+        formatter: defaultFormatter.formatCode,
+        generatedAt: new Date().toISOString(),
+      };
+
+      const csvOutput = defaultFormatter.buildCsv(mappedRows);
+      const jsonOutput = defaultFormatter.buildJson(summary, mappedRows);
+      const summaryHash = sha256(JSON.stringify(summary));
+      const csvHash = sha256(csvOutput);
+      const jsonHash = sha256(jsonOutput);
+
+      const [remittanceRun] = await tx
         .insert(employerRemittanceRuns)
         .values({
           organizationId,
@@ -187,7 +239,7 @@ export const POST = withApi(
           periodStart: payrollRun.periodStart,
           periodEnd: payrollRun.periodEnd,
           dueDate: dueDateIso,
-          totalDue: (totals.dues + totals.benefits + totals.pension).toString(),
+          totalDue: totalDue.toString(),
           packageSummary: {
             dues: totals.dues,
             benefits: totals.benefits,
@@ -199,138 +251,136 @@ export const POST = withApi(
           },
           outputFormats: ["csv", "json"],
           immutableSnapshotLocked: true,
-          generatedBy: userId ?? undefined,
+          generatedBy: userId,
           generatedAt: new Date(),
         })
         .returning();
 
+      if (!remittanceRun) throw ApiError.internal("Failed to create remittance run");
+
       await tx.insert(employerRemittanceRunItems).values(
         [
-          { groupKey: "dues", contributionType: "dues", amount: totals.dues },
-          { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits },
-          { groupKey: "pension", contributionType: "pension", amount: totals.pension },
+          { groupKey: "dues", contributionType: "dues", amount: totals.dues, members: contributing(items, "duesAmount") },
+          { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits, members: contributing(items, "benefitAmount") },
+          { groupKey: "pension", contributionType: "pension", amount: totals.pension, members: contributing(items, "pensionAmount") },
         ].map((item) => ({
           organizationId,
-          remittanceRunId: createdRun.id,
+          remittanceRunId: remittanceRun.id,
           groupKey: item.groupKey,
           contributionType: item.contributionType,
           amount: item.amount.toString(),
-          memberCount: items.length.toString(),
+          memberCount: item.members.toString(),
           traceJson: { sourcePayrollRunId: payrollRun.id },
         })),
       );
 
-      return createdRun;
-    });
-
-    const evidencePack = createEvidencePack({
-      entityType: "remittance_run",
-      runRefId: remittanceRun.id,
-      organizationId,
-      createdBy: userId,
-      metadata: {
-        runCode: remittanceRun.runCode,
-        status: remittanceRun.status,
-        engineVersion: payrollRun.engineVersion,
-        ruleVersionIds: payrollRun.cbaRuleVersionId ? [payrollRun.cbaRuleVersionId] : [],
-        inputRefs: { payrollRunId: payrollRun.id, sourceBatchId: payrollRun.sourceBatchId },
-        timesheetBatchIds: payrollRun.sourceBatchId ? [payrollRun.sourceBatchId] : [],
-        approvers: payrollRun.approvedBy ? [{ userId: payrollRun.approvedBy, at: payrollRun.approvedAt }] : [],
-        statusTimestamps: {
-          generatedAt: remittanceRun.generatedAt,
-          payrollApprovedAt: payrollRun.approvedAt,
+      const evidencePack = createEvidencePack({
+        entityType: "remittance_run",
+        runRefId: remittanceRun.id,
+        organizationId,
+        createdBy: userId,
+        metadata: {
+          runCode: remittanceRun.runCode,
+          status: remittanceRun.status,
+          engineVersion: payrollRun.engineVersion,
+          ruleVersionIds: payrollRun.cbaRuleVersionId ? [payrollRun.cbaRuleVersionId] : [],
+          inputRefs: { payrollRunId: payrollRun.id, sourceBatchId: payrollRun.sourceBatchId },
+          timesheetBatchIds: payrollRun.sourceBatchId ? [payrollRun.sourceBatchId] : [],
+          approvers: payrollRun.approvedBy ? [{ userId: payrollRun.approvedBy, at: payrollRun.approvedAt }] : [],
+          statusTimestamps: {
+            generatedAt: remittanceRun.generatedAt,
+            payrollApprovedAt: payrollRun.approvedAt,
+          },
+          calcTraceSummaryHash: payrollRun.calcTraceHash,
+          parentLink:
+            parentLink && parentLink.linkId && parentLink.sealHash
+              ? {
+                  linkId: parentLink.linkId,
+                  sealHash: parentLink.sealHash,
+                  chainDepth: Number(parentLink.chainDepth ?? 1),
+                }
+              : null,
         },
-        calcTraceSummaryHash: payrollRun.calcTraceHash,
-        parentLink:
-          parentLink && parentLink.linkId && parentLink.sealHash
-            ? {
-                linkId: parentLink.linkId,
-                sealHash: parentLink.sealHash,
-                chainDepth: Number(parentLink.chainDepth ?? 1),
-              }
-            : null,
-      },
-      artifacts: [
+        artifacts: [
+          {
+            artifactType: "remittance_csv",
+            artifactName: "remittance.csv",
+            payload: { hash: csvHash },
+          },
+          {
+            artifactType: "remittance_json",
+            artifactName: "remittance.json",
+            payload: { hash: jsonHash },
+          },
+          {
+            artifactType: "summary",
+            artifactName: "remittance-summary.json",
+            payload: summary,
+          },
+        ],
+      });
+
+      await tx.insert(employerExecutionArtifacts).values([
         {
+          organizationId,
+          remittanceRunId: remittanceRun.id,
           artifactType: "remittance_csv",
           artifactName: "remittance.csv",
-          payload: { hash: csvHash },
+          storageRef: `inline://employer-execution/${remittanceRun.id}/remittance.csv`,
+          artifactHash: csvHash,
+          manifestJson: { format: "csv", content: csvOutput, generatedAt: summary.generatedAt },
+          createdBy: userId,
         },
         {
+          organizationId,
+          remittanceRunId: remittanceRun.id,
           artifactType: "remittance_json",
           artifactName: "remittance.json",
-          payload: { hash: jsonHash },
+          storageRef: `inline://employer-execution/${remittanceRun.id}/remittance.json`,
+          artifactHash: jsonHash,
+          manifestJson: { format: "json", content: jsonOutput, generatedAt: summary.generatedAt },
+          createdBy: userId,
         },
         {
+          organizationId,
+          remittanceRunId: remittanceRun.id,
           artifactType: "summary",
           artifactName: "remittance-summary.json",
-          payload: summary,
+          storageRef: `inline://employer-execution/${remittanceRun.id}/summary`,
+          artifactHash: summaryHash,
+          manifestJson: summary,
+          createdBy: userId,
         },
-      ],
-    });
+        {
+          organizationId,
+          remittanceRunId: remittanceRun.id,
+          artifactType: "evidence_manifest",
+          artifactName: "evidence-manifest.json",
+          storageRef: `inline://employer-execution/${remittanceRun.id}/manifest`,
+          artifactHash: evidencePack.manifestHash,
+          manifestJson: {
+            ...evidencePack.manifest,
+            chainLink: evidencePack.chainLink,
+          },
+          createdBy: userId,
+        },
+        {
+          organizationId,
+          remittanceRunId: remittanceRun.id,
+          artifactType: "evidence_seal",
+          artifactName: "evidence-seal.sig",
+          storageRef: `inline://employer-execution/${remittanceRun.id}/seal`,
+          artifactHash: evidencePack.seal,
+          manifestJson: {
+            sealAlgorithm: "sha256",
+            manifestHash: evidencePack.manifestHash,
+            chainLink: evidencePack.chainLink,
+          },
+          createdBy: userId,
+        },
+      ]);
 
-    await withRLSContext(async (tx) => tx.insert(employerExecutionArtifacts).values([
-      {
-        organizationId,
-        remittanceRunId: remittanceRun.id,
-        artifactType: "remittance_csv",
-        artifactName: "remittance.csv",
-        storageRef: `inline://employer-execution/${remittanceRun.id}/remittance.csv`,
-        artifactHash: csvHash,
-        manifestJson: { format: "csv", content: csvOutput, generatedAt: summary.generatedAt },
-        createdBy: userId ?? undefined,
-      },
-      {
-        organizationId,
-        remittanceRunId: remittanceRun.id,
-        artifactType: "remittance_json",
-        artifactName: "remittance.json",
-        storageRef: `inline://employer-execution/${remittanceRun.id}/remittance.json`,
-        artifactHash: jsonHash,
-        manifestJson: { format: "json", content: jsonOutput, generatedAt: summary.generatedAt },
-        createdBy: userId ?? undefined,
-      },
-      {
-        organizationId,
-        remittanceRunId: remittanceRun.id,
-        artifactType: "summary",
-        artifactName: "remittance-summary.json",
-        storageRef: `inline://employer-execution/${remittanceRun.id}/summary`,
-        artifactHash: summaryHash,
-        manifestJson: summary,
-        createdBy: userId ?? undefined,
-      },
-      {
-        organizationId,
-        remittanceRunId: remittanceRun.id,
-        artifactType: "evidence_manifest",
-        artifactName: "evidence-manifest.json",
-        storageRef: `inline://employer-execution/${remittanceRun.id}/manifest`,
-        artifactHash: evidencePack.manifestHash,
-        manifestJson: {
-          ...evidencePack.manifest,
-          chainLink: evidencePack.chainLink,
-        },
-        createdBy: userId ?? undefined,
-      },
-      {
-        organizationId,
-        remittanceRunId: remittanceRun.id,
-        artifactType: "evidence_seal",
-        artifactName: "evidence-seal.sig",
-        storageRef: `inline://employer-execution/${remittanceRun.id}/seal`,
-        artifactHash: evidencePack.seal,
-        manifestJson: {
-          sealAlgorithm: "sha256",
-          manifestHash: evidencePack.manifestHash,
-          chainLink: evidencePack.chainLink,
-        },
-        createdBy: userId ?? undefined,
-      },
-    ]));
-
-    await withRLSContext(async (tx) =>
-      tx.insert(employerExecutionEvidenceLinks).values({
+      await tx.insert(employerExecutionEvidenceLinks).values({
         organizationId,
         entityType: "remittance_run",
         [LEGACY_TARGET_ID_COLUMN]: remittanceRun.id,
@@ -343,10 +393,33 @@ export const POST = withApi(
           payrollRunId: payrollRun.id,
           runCode: remittanceRun.runCode,
         },
-        createdBy: userId ?? undefined,
-      }),
-    );
+        createdBy: userId,
+      });
 
-    return { data: { remittanceRun } };
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "employer_execution.remittance_run.generate",
+        resourceType: "employer_remittance_runs",
+        resourceId: remittanceRun.id,
+        details: {
+          runCode: remittanceRun.runCode,
+          payrollRunId: payrollRun.id,
+          preparedBy: participants.preparedBy,
+          approvers: participants.approvedBy,
+          executedBy: userId,
+          totals,
+          totalDue,
+          payrollRunAmounts: recordedRunAmounts(payrollRun),
+          itemCount: items.length,
+          summaryHash,
+          csvHash,
+          jsonHash,
+          evidenceManifestHash: evidencePack.manifestHash,
+        },
+      });
+
+      return { data: { remittanceRun } };
+    });
   },
 );

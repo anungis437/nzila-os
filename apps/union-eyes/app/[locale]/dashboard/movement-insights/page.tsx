@@ -1,32 +1,30 @@
 /**
- * Movement Insights Dashboard
- * 
- * Shows anonymized cross-union trends for CLC partnership discussions
- * and movement-wide advocacy.
- * 
- * PRIVACY FEATURES:
- * - No individual organization identifiable
- * - Minimum 5 organizations per trend
- * - Clear privacy disclaimers
- * - Consent status visible
+ * Movement Trends
+ *
+ * Shows the aggregated cross-union trends stored in movement_trends and whether this organization's data-sharing consent
+ * is on record. The trends are produced outside this application: the page displays the stored rows as they are
+ * (category, dimension, timeframe, count, contributing organizations, summary) and calculates nothing from them.
+ *
+ * Consent cannot be recorded or withdrawn from this application (see settings/data-sharing), so the page links to the
+ * read-only status and offers no way to opt in.
  */
-
 
 export const dynamic = 'force-dynamic';
 
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { desc, gte } from 'drizzle-orm';
+import { AlertCircle, Shield, Users } from 'lucide-react';
 import { db } from '@/db';
-import { dataAggregationConsent, movementTrends } from '@/db/schema/domains/marketing';
-import { eq, and, desc, gte } from 'drizzle-orm';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, TrendingUp, TrendingDown, Shield, Users, FileText } from 'lucide-react';
+import { movementTrends } from '@/db/schema/domains/marketing';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireUser } from '@/lib/api-auth-guard';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
-import Link from 'next/link';
+import { movementTrendCategoryLabel } from '@/lib/movement-insights/category-labels';
+import { readOrganizationConsent } from '@/lib/movement-insights/consent-read';
 
 /** Roles permitted to view cross-union movement analytics. */
 const MOVEMENT_INSIGHTS_ROLES = [
@@ -37,14 +35,61 @@ const MOVEMENT_INSIGHTS_ROLES = [
   'system_admin',
 ] as const;
 
+const COPY = {
+  en: {
+    subtitle: 'Aggregated cross-union trends, stored for advocacy and learning',
+    aboutTitle: 'What this page shows',
+    about:
+      'The trends stored in the last 30 days. A stored trend carries a count of contributing organizations, not their names or identifiers. This page does not calculate the trends or check how they were produced.',
+    privacyPolicy: 'Privacy Policy',
+    consentOnRecordTitle: 'Consent on record for your organization',
+    consentOnRecord: 'Your organization has consented to contribute to movement insights.',
+    noConsentTitle: 'No consent on record for your organization',
+    noConsent: 'You are viewing trends from other unions. Your organization has not consented to contribute.',
+    viewStatus: 'View consent status',
+    filterDescription: 'Show the stored trends for one timeframe.',
+    allTimeframes: 'All',
+    noTrendsTitle: 'No stored trends',
+    noTrends: 'No trends were stored in the last 30 days.',
+    noTrendsForTimeframe: 'No trend stored in the last 30 days has this timeframe.',
+    count: 'Count',
+    organizations: 'Contributing organizations',
+    confidence: 'Confidence',
+    emerging: 'Emerging pattern',
+    confidenceLevels: { low: 'Low', medium: 'Medium', high: 'High' } as Partial<Record<string, string>>,
+  },
+  fr: {
+    subtitle: 'Tendances agrégées entre syndicats, conservées pour la défense des droits et l’apprentissage',
+    aboutTitle: 'Ce que montre cette page',
+    about:
+      'Les tendances conservées au cours des 30 derniers jours. Une tendance conservée comporte le nombre d’organisations contributrices, et non leur nom ou leur identifiant. Cette page ne calcule pas les tendances et ne vérifie pas comment elles ont été produites.',
+    privacyPolicy: 'Politique de confidentialité',
+    consentOnRecordTitle: 'Consentement enregistré pour votre organisation',
+    consentOnRecord: 'Votre organisation a consenti à contribuer aux analyses du mouvement.',
+    noConsentTitle: 'Aucun consentement enregistré pour votre organisation',
+    noConsent: 'Vous consultez les tendances d’autres syndicats. Votre organisation n’a pas consenti à contribuer.',
+    viewStatus: 'Voir l’état du consentement',
+    filterDescription: 'Afficher les tendances conservées pour une seule période.',
+    allTimeframes: 'Toutes',
+    noTrendsTitle: 'Aucune tendance conservée',
+    noTrends: 'Aucune tendance n’a été conservée au cours des 30 derniers jours.',
+    noTrendsForTimeframe: 'Aucune tendance conservée au cours des 30 derniers jours n’a cette période.',
+    count: 'Compte',
+    organizations: 'Organisations contributrices',
+    confidence: 'Niveau de confiance',
+    emerging: 'Tendance émergente',
+    confidenceLevels: { low: 'Faible', medium: 'Moyen', high: 'Élevé' } as Partial<Record<string, string>>,
+  },
+} as const;
+
+type Language = keyof typeof COPY;
+
 interface MovementInsightsPageProps {
   params: Promise<{
     locale: string;
   }>;
   searchParams: Promise<{
-    timeframe?: 'month' | 'quarter' | 'year';
-    sector?: string;
-    jurisdiction?: string;
+    timeframe?: string | string[];
   }>;
 }
 
@@ -53,353 +98,146 @@ export default async function MovementInsightsPage({
   searchParams,
 }: MovementInsightsPageProps) {
   const { locale } = await params;
+  const { timeframe: requestedTimeframe } = await searchParams;
   const t = await getTranslations('movementInsightsPage');
-  const { timeframe = 'quarter', sector: _sector, jurisdiction: _jurisdiction } = await searchParams;
+  const language: Language = locale.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+  const copy = COPY[language];
+  const timeframe = typeof requestedTimeframe === 'string' && requestedTimeframe !== '' ? requestedTimeframe : undefined;
 
   // Require officer-level role to view cross-union analytics.
   const user = await requireUser();
-  const organizationId = user.organizationId ?? '';
+  const organizationId = user.organizationId;
+  if (!organizationId) {
+    redirect('/dashboard');
+  }
   const userRole = await getUserRoleInOrganization(user.userId, organizationId);
   if (!MOVEMENT_INSIGHTS_ROLES.includes(userRole as typeof MOVEMENT_INSIGHTS_ROLES[number])) {
     redirect('/dashboard');
   }
-  
-  const [consent] = await db
-    .select()
-    .from(dataAggregationConsent)
-    .where(
-      and(
-        eq(dataAggregationConsent.organizationId, organizationId),
-        eq(dataAggregationConsent.consentGiven, true)
-      )
-    )
-    .limit(1);
 
-  // Get recent trends
+  // The organization's own consent record, read in its own context.
+  const consent = (await readOrganizationConsent(organizationId))?.consentGiven ? true : null;
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const trends = await db
     .select()
     .from(movementTrends)
-    .where(
-      and(
-        eq(movementTrends.timeframe, timeframe),
-        gte(movementTrends.createdAt, thirtyDaysAgo)
-      )
-    )
+    .where(gte(movementTrends.createdAt, thirtyDaysAgo))
     .orderBy(desc(movementTrends.createdAt));
 
-  // Group trends by type
-  const trendsByType = trends.reduce((acc, trend) => {
-    if (!acc[trend.category]) {
-      acc[trend.category] = [];
-    }
-    acc[trend.category].push(trend);
-    return acc;
-  }, {} as Record<string, typeof trends>);
+  // The filter offers the timeframes that are stored, so every option it shows matches at least one trend.
+  const timeframes = [...new Set(trends.map((trend) => trend.timeframe))];
+  const shown = timeframe ? trends.filter((trend) => trend.timeframe === timeframe) : trends;
+  const trendsByCategory = new Map<string, typeof trends>();
+  for (const trend of shown) {
+    trendsByCategory.set(trend.category, [...(trendsByCategory.get(trend.category) ?? []), trend]);
+  }
+
+  const numberLocale = language === 'fr' ? 'fr-CA' : 'en-CA';
+  const statusHref = `/${locale}/dashboard/settings/data-sharing`;
 
   return (
     <div className="container mx-auto py-8 space-y-8">
-      {/* Header */}
       <div className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-4xl font-bold">{t('title')}</h1>
-            <p className="text-muted-foreground mt-2">
-              {t('subtitle')}
-            </p>
-          </div>
-
-          {!consent && (
-            <Button asChild>
-              <Link href={`/${locale}/dashboard/settings/data-sharing`}>
-                {t('enableDataSharingButton')}
-              </Link>
-            </Button>
-          )}
+        <div>
+          <h1 className="text-4xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground mt-2">{copy.subtitle}</p>
         </div>
 
-        {/* Privacy Disclaimer */}
-        <Alert>
-          <Shield className="h-4 w-4" />
-          <AlertTitle>{t('privacyFirstTitle')}</AlertTitle>
+        <Alert role="note">
+          <Shield aria-hidden="true" className="h-4 w-4" />
+          <AlertTitle>{copy.aboutTitle}</AlertTitle>
           <AlertDescription>
-            {t('privacyDescriptionPrefix')}{' '}
-            <strong>{t('privacyDescriptionStrong')}</strong>{' '}
-            {t('privacyDescriptionSuffix')}{' '}
+            {copy.about}{' '}
             <Link href={`/${locale}/legal/privacy`} className="underline">
-              {t('privacyLearnMoreLink')}
+              {copy.privacyPolicy}
             </Link>
           </AlertDescription>
         </Alert>
 
-        {/* Consent Status */}
         {consent ? (
-          <Alert className="border-green-200 bg-green-50">
-            <Users className="h-4 w-4 text-green-600" />
-            <AlertTitle>{t('consentParticipatingTitle')}</AlertTitle>
+          <Alert role="note" className="border-green-200 bg-green-50">
+            <Users aria-hidden="true" className="h-4 w-4 text-green-600" />
+            <AlertTitle>{copy.consentOnRecordTitle}</AlertTitle>
             <AlertDescription>
-              {t('consentParticipatingDescription')}{' '}
-              <Link
-                href={`/${locale}/dashboard/settings/data-sharing`}
-                className="underline"
-              >
-                {t('manageConsentPreferencesLink')}
+              {copy.consentOnRecord}{' '}
+              <Link href={statusHref} className="underline">
+                {copy.viewStatus}
               </Link>
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert className="border-yellow-200 bg-yellow-50">
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-            <AlertTitle>{t('consentNotParticipatingTitle')}</AlertTitle>
+          <Alert role="note" className="border-yellow-200 bg-yellow-50">
+            <AlertCircle aria-hidden="true" className="h-4 w-4 text-yellow-600" />
+            <AlertTitle>{copy.noConsentTitle}</AlertTitle>
             <AlertDescription>
-              {t('consentNotParticipatingDescription')}{' '}
-              <Link
-                href={`/${locale}/dashboard/settings/data-sharing`}
-                className="underline"
-              >
-                {t('enableDataSharingLink')}
+              {copy.noConsent}{' '}
+              <Link href={statusHref} className="underline">
+                {copy.viewStatus}
               </Link>
             </AlertDescription>
           </Alert>
         )}
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('filterInsightsTitle')}</CardTitle>
-          <CardDescription>
-            {t('filterInsightsDescription')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('timeframeLabel')}</label>
-              <div className="flex gap-2">
-                <Link
-                  href={`/${locale}/dashboard/movement-insights?timeframe=month`}
-                >
-                  <Badge variant={timeframe === 'month' ? 'default' : 'outline'}>
-                    {t('timeframeMonth')}
-                  </Badge>
-                </Link>
-                <Link
-                  href={`/${locale}/dashboard/movement-insights?timeframe=quarter`}
-                >
-                  <Badge variant={timeframe === 'quarter' ? 'default' : 'outline'}>
-                    {t('timeframeQuarter')}
-                  </Badge>
-                </Link>
-                <Link
-                  href={`/${locale}/dashboard/movement-insights?timeframe=year`}
-                >
-                  <Badge variant={timeframe === 'year' ? 'default' : 'outline'}>
-                    {t('timeframeYear')}
-                  </Badge>
-                </Link>
-              </div>
-            </div>
-
-            {/* Sector filter */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('sectorLabel')}</label>
-              <div className="flex gap-2">
-                {['all', 'public', 'private', 'non-profit'].map((s) => (
-                  <Link
-                    key={s}
-                    href={`/${locale}/dashboard/movement-insights?timeframe=${timeframe}&sector=${s === 'all' ? '' : s}`}
-                  >
-                    <Badge variant={(_sector ?? '') === (s === 'all' ? '' : s) ? 'default' : 'outline'}>
-                      {s === 'all'
-                        ? t('sectorAll')
-                        : s === 'public'
-                          ? t('sectorPublic')
-                          : s === 'private'
-                            ? t('sectorPrivate')
-                            : t('sectorNonProfit')}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Trend Cards */}
-      {Object.keys(trendsByType).length === 0 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t('noInsightsTitle')}</AlertTitle>
-          <AlertDescription>
-            {t('noInsightsDescription')}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Resolution Time Trend */}
-      {trendsByType['avg-resolution-time'] && (
-        <TrendCard
-          title={t('avgResolutionTimeTitle')}
-          description={t('avgResolutionTimeDescription')}
-          trends={trendsByType['avg-resolution-time']}
-          unit={t('unitDays')}
-          lowerIsBetter={true}
-          icon={<TrendingDown className="h-4 w-4" />}
-          t={t}
-        />
-      )}
-
-      {/* Win Rate Trend */}
-      {trendsByType['win-rate'] && (
-        <TrendCard
-          title={t('memberWinRateTitle')}
-          description={t('memberWinRateDescription')}
-          trends={trendsByType['win-rate']}
-          unit={t('unitPercent')}
-          lowerIsBetter={false}
-          icon={<TrendingUp className="h-4 w-4" />}
-          t={t}
-        />
-      )}
-
-      {/* Member Satisfaction */}
-      {trendsByType['member-satisfaction'] && (
-        <TrendCard
-          title={t('memberSatisfactionTitle')}
-          description={t('memberSatisfactionDescription')}
-          trends={trendsByType['member-satisfaction']}
-          unit={t('unitOutOfFive')}
-          lowerIsBetter={false}
-          icon={<TrendingUp className="h-4 w-4" />}
-          t={t}
-        />
-      )}
-
-      {/* Legislative Brief Export */}
-      {trends.length > 0 && (
+      {timeframes.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('exportForAdvocacyTitle')}</CardTitle>
-            <CardDescription>
-              {t('exportForAdvocacyDescription')}
-            </CardDescription>
+            <CardTitle>{t('filterInsightsTitle')}</CardTitle>
+            <CardDescription>{copy.filterDescription}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={`/${locale}/dashboard/movement-insights/export`}>
-                <FileText className="mr-2 h-4 w-4" />
-                {t('generateLegislativeBriefButton')}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium">{t('timeframeLabel')}</span>
+              <Link href={`/${locale}/dashboard/movement-insights`}>
+                <Badge variant={timeframe ? 'outline' : 'default'}>{copy.allTimeframes}</Badge>
               </Link>
-            </Button>
+              {timeframes.map((value) => (
+                <Link key={value} href={`/${locale}/dashboard/movement-insights?timeframe=${encodeURIComponent(value)}`}>
+                  <Badge variant={timeframe === value ? 'default' : 'outline'}>{value}</Badge>
+                </Link>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
+
+      {shown.length === 0 && (
+        <Alert role="status">
+          <AlertCircle aria-hidden="true" className="h-4 w-4" />
+          <AlertTitle>{copy.noTrendsTitle}</AlertTitle>
+          <AlertDescription>{timeframe ? copy.noTrendsForTimeframe : copy.noTrends}</AlertDescription>
+        </Alert>
+      )}
+
+      {[...trendsByCategory].map(([category, rows]) => (
+        <Card key={category}>
+          <CardHeader>
+            <CardTitle>{movementTrendCategoryLabel(category, language)}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="divide-y">
+              {rows.map((trend) => (
+                <li key={trend.id} className="space-y-1 py-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">{trend.dimension}</span>
+                    <Badge variant="outline">{trend.timeframe}</Badge>
+                    {trend.emergingPattern && <Badge>{copy.emerging}</Badge>}
+                  </div>
+                  <p className="text-sm">{trend.insights}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {copy.count}: {trend.aggregatedCount.toLocaleString(numberLocale)} · {copy.organizations}:{' '}
+                    {trend.organizationsContributing.toLocaleString(numberLocale)} · {copy.confidence}:{' '}
+                    {copy.confidenceLevels[trend.confidenceLevel] ?? trend.confidenceLevel}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ))}
     </div>
-  );
-}
-
-/**
- * Reusable trend card component
- */
-function TrendCard({
-  title,
-  description,
-  trends,
-  unit,
-  lowerIsBetter,
-  icon,
-  t,
-}: {
-  title: string;
-  description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trends: any[];
-  unit: string;
-  lowerIsBetter: boolean;
-  icon: React.ReactNode;
-  t: (key: string, values?: Record<string, string | number | Date>) => string;
-}) {
-  const latestTrend = trends[0];
-  const previousTrend = trends[1];
-
-  let change = 0;
-  let changePercent = 0;
-  let improving = false;
-
-  if (previousTrend) {
-    change = latestTrend.aggregatedValue - previousTrend.aggregatedValue;
-    changePercent =
-      previousTrend.aggregatedValue !== 0
-        ? (change / previousTrend.aggregatedValue) * 100
-        : 0;
-    
-    if (lowerIsBetter) {
-      improving = change < 0;
-    } else {
-      improving = change > 0;
-    }
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle className="flex items-center gap-2">
-              {icon}
-              {title}
-            </CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-          <Badge variant={improving ? 'default' : 'secondary'}>
-            {improving ? t('improvingBadge') : t('decliningBadge')}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Current Value */}
-          <div>
-            <div className="text-4xl font-bold">
-              {latestTrend.aggregatedValue.toFixed(1)}
-              {unit}
-            </div>
-            {previousTrend && (
-              <div className="text-sm text-muted-foreground mt-1">
-                {change > 0 ? '+' : ''}
-                {change.toFixed(1)}
-                {unit} ({changePercent.toFixed(1)}%) {t('vsPreviousPeriod')}
-              </div>
-            )}
-          </div>
-
-          {/* Data Source */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              {t('unionCount', { count: latestTrend.participatingOrgs })}
-            </div>
-            <div className="flex items-center gap-1">
-              <FileText className="h-4 w-4" />
-              {t('caseCount', { count: latestTrend.totalCases.toLocaleString() })}
-            </div>
-          </div>
-
-          {/* Geographic/Sector Context */}
-          <div className="flex gap-2">
-            {latestTrend.jurisdiction && (
-              <Badge variant="outline">{latestTrend.jurisdiction}</Badge>
-            )}
-            {latestTrend.sector && (
-              <Badge variant="outline">{latestTrend.sector}</Badge>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

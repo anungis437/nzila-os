@@ -25,6 +25,14 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { useOrganization } from '@/lib/hooks/use-organization';
+import { logger } from '@/lib/logger';
+import {
+  readOrganizationPath,
+  readProfileOrganization,
+  reasonOf,
+  type OrganizationPath,
+  type ProfileOrganization,
+} from './profile-organization';
 
 const organizationTypeIcons = {
   congress: Globe,
@@ -34,12 +42,14 @@ const organizationTypeIcons = {
   chapter: Users,
 };
 
-type FallbackOrganization = {
-  id: string;
-  name: string;
-  slug: string;
-  type: 'platform' | 'congress' | 'federation' | 'union' | 'local' | 'district' | 'chapter';
-};
+/**
+ * What the profile names when the context has no organization: the organization, and its path or why the path could not be read. A profile that
+ * could not be read is its own state: it is not "no organization".
+ */
+type Found =
+  | { status: 'none' }
+  | { status: 'found'; organization: ProfileOrganization; path: OrganizationPath | { error: string } };
+type Fallback = { attempt: number } & ({ status: 'failed'; message: string } | Found);
 
 export function OrganizationSelector() {
   const { 
@@ -55,8 +65,8 @@ export function OrganizationSelector() {
   
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [fallbackOrganization, setFallbackOrganization] = useState<FallbackOrganization | null>(null);
-  const [fallbackPath, setFallbackPath] = useState<Array<{ id: string; name: string }>>([]);
+  const [attempt, setAttempt] = useState(0);
+  const [fallback, setFallback] = useState<Fallback | null>(null);
 
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
@@ -75,58 +85,55 @@ export function OrganizationSelector() {
   // In some auth/context races, `organization` can be null while the org list
   // is already loaded. Fall back to the selected org (or first available)
   // so the selector doesn't get stuck showing "Loading...".
-  const effectiveOrganization = organization
+  const contextOrganization = organization
     ?? userOrganizations.find((org) => org.id === organizationId)
     ?? userOrganizations[0]
-    ?? fallbackOrganization
     ?? null;
+  const needsFallback = mounted && contextOrganization === null && !isLoading;
 
   useEffect(() => {
-    if (!mounted || effectiveOrganization || isLoading) {
+    if (!needsFallback) {
       return;
     }
 
     let cancelled = false;
 
-    const recoverOrganization = async () => {
-      try {
-        const profileResponse = await fetch('/api/users/me/profile', {
-          credentials: 'include',
-        });
-
-        if (!profileResponse.ok) {
-          return;
-        }
-
-        const profileResult = await profileResponse.json();
-        const profileOrg = profileResult.organization as FallbackOrganization | null;
-        if (!profileOrg?.id || cancelled) {
-          return;
-        }
-
-        setFallbackOrganization(profileOrg);
-
-        const pathResponse = await fetch(`/api/organizations/${profileOrg.id}/path`, {
-          credentials: 'include',
-        });
-
-        if (!pathResponse.ok || cancelled) {
-          return;
-        }
-
-        const pathResult = await pathResponse.json();
-        setFallbackPath(pathResult.data || []);
-      } catch {
-        // Keep the existing empty state if recovery fails.
-      }
+    const recoverOrganization = async (): Promise<Found> => {
+      const profileOrganization = await readProfileOrganization();
+      if (profileOrganization === null) return { status: 'none' };
+      // The organization is known; a path that cannot be read is said so beside it.
+      const path = await readOrganizationPath(profileOrganization.id).catch((failure: unknown) => {
+        logger.error('Failed to read the organization path', failure);
+        return { error: reasonOf(failure) };
+      });
+      return { status: 'found', organization: profileOrganization, path };
     };
 
-    void recoverOrganization();
+    recoverOrganization().then(
+      (found) => {
+        if (!cancelled) setFallback({ attempt, ...found });
+      },
+      (failure: unknown) => {
+        logger.error('Failed to recover the organization of the signed-in user', failure);
+        if (!cancelled) setFallback({ attempt, status: 'failed', message: reasonOf(failure) });
+      },
+    );
 
     return () => {
       cancelled = true;
     };
-  }, [effectiveOrganization, isLoading, mounted]);
+  }, [needsFallback, attempt]);
+
+  const settledFallback = fallback !== null && fallback.attempt === attempt ? fallback : null;
+  const effectiveOrganization: { id: string; name: string; type: string | null } | null = contextOrganization
+    ?? (settledFallback?.status === 'found'
+      ? { id: settledFallback.organization.id, name: settledFallback.organization.name, type: settledFallback.organization.type }
+      : null);
+
+  const retry = () => {
+    setAttempt((count) => count + 1);
+    void refreshOrganizations();
+  };
 
   // Prevent hydration mismatch - render placeholder until mounted.
   // Keep this return AFTER all hooks so hook ordering stays stable.
@@ -144,6 +151,7 @@ export function OrganizationSelector() {
       <Button 
         variant="outline" 
         className="ue-organization-selector justify-between text-red-600"
+        title={error}
         onClick={() => refreshOrganizations()}
       >
         <span className="flex items-center gap-2">
@@ -154,12 +162,26 @@ export function OrganizationSelector() {
     );
   }
 
-  if (isLoading && !effectiveOrganization) {
+  if (!effectiveOrganization && (isLoading || (needsFallback && settledFallback === null))) {
     return (
-      <Button variant="outline" disabled className="ue-organization-selector justify-between">
+      <div role="status" className="ue-organization-selector flex h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm text-muted-foreground">
+        <Building2 className="h-4 w-4" />
+        Loading...
+      </div>
+    );
+  }
+
+  if (!effectiveOrganization && settledFallback?.status === 'failed') {
+    return (
+      <Button
+        variant="outline"
+        className="ue-organization-selector justify-between text-red-600"
+        title={settledFallback.message}
+        onClick={retry}
+      >
         <span className="flex items-center gap-2">
           <Building2 className="h-4 w-4" />
-          Loading...
+          Error loading - Click to retry
         </span>
       </Button>
     );
@@ -181,10 +203,16 @@ export function OrganizationSelector() {
   }
 
   const Icon = organizationTypeIcons[effectiveOrganization.type as keyof typeof organizationTypeIcons] || Building2;
-  const resolvedPath = organizationPath.length > 0 ? organizationPath : fallbackPath;
-  const hierarchyLabel = resolvedPath.length > 1
-    ? resolvedPath.slice(0, -1).map((org) => org.name).join(' > ')
-    : null;
+  const fallbackPath = settledFallback?.status === 'found' ? settledFallback.path : null;
+  const pathFailure = organizationPath.length === 0 && fallbackPath !== null && 'error' in fallbackPath ? fallbackPath.error : null;
+  const resolvedPath = organizationPath.length > 0
+    ? organizationPath
+    : fallbackPath !== null && 'entries' in fallbackPath ? fallbackPath.entries : [];
+  const hierarchyLabel = pathFailure !== null
+    ? 'Hierarchy unavailable'
+    : resolvedPath.length > 1
+      ? resolvedPath.slice(0, -1).map((org) => org.name).join(' > ')
+      : null;
 
   // Single-org users don't need a picker — show static label
   if (userOrganizations.length <= 1) {

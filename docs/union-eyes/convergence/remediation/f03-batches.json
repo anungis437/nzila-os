@@ -1,0 +1,54 @@
+{
+  "record": "UE-F03-BATCH-MEMBERSHIP",
+  "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
+  "frozenAt": "2026-11-01",
+  "note": "Membership of the 16 defects of family F03 outstanding at the start of the F03 pass (644/777 corrected). Each frozen Gate 0C.1 defect id appears in exactly one batch. This file groups work; it never edits, deletes or reclassifies the frozen register, and a batch does not credit a defect: credit comes only from the elimination ledger.",
+  "batches": [
+    {
+      "id": "F03-A",
+      "focus": "Highest-risk isolation and destructive operations",
+      "defects": [
+        "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+        "DEF-0B10-OPL-14",
+        "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
+        "DEF-0C1-REV-REVIEW-ROWS-ARE-PROTECTED-BY-AN-ORGANIZATION-ONLY-RLS-POLICY-SO-ADVERSE-PARTY-COMPLAINANT-AND-PRIVILEGE-CONFIDENTIALITY-IS-APPLICATION-CODE-ONLY"
+      ]
+    },
+    {
+      "id": "F03-B",
+      "focus": "Tenant boundaries and shared-data authority",
+      "defects": [
+        "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
+        "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
+        "DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE",
+        "DEF-0B10-OPL-02",
+        "DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-WITH-NO-ORGANIZATION-PREDICATE-AND-ACCEPT-ANY-USER-ID-A-SENDER-TYPED-AS-SIGNER"
+      ]
+    },
+    {
+      "id": "F03-C",
+      "focus": "Identity and governed institutional records",
+      "defects": [
+        "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
+        "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
+        "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403"
+      ]
+    },
+    {
+      "id": "F03-D",
+      "focus": "Cross-tenant background jobs",
+      "defects": [
+        "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
+        "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION"
+      ]
+    },
+    {
+      "id": "F03-E",
+      "focus": "Organization-scoped identifiers",
+      "defects": [
+        "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
+        "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500"
+      ]
+    }
+  ]
+}

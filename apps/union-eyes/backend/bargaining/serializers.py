@@ -9,7 +9,7 @@ from .models import (ArbitrationPrecedents, PrecedentTags, PrecedentCitations, N
 class ArbitrationPrecedentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArbitrationPrecedents
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'source_organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -30,21 +30,21 @@ class PrecedentCitationsSerializer(serializers.ModelSerializer):
 class NegotiationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Negotiations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'expiring_cba']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BargainingProposalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BargainingProposals
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'negotiation']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class TentativeAgreementsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TentativeAgreements
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'negotiation']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -65,7 +65,7 @@ class BargainingTeamMembersSerializer(serializers.ModelSerializer):
 class CbaClausesSerializer(serializers.ModelSerializer):
     class Meta:
         model = CbaClauses
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'cba']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -93,7 +93,7 @@ class BenefitComparisonsSerializer(serializers.ModelSerializer):
 class ArbitrationDecisionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArbitrationDecisions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'case_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -101,13 +101,14 @@ class ArbitratorProfilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArbitratorProfiles
         fields = '__all__'
+        extra_kwargs = {'credentials': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BargainingNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = BargainingNotes
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'cba']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -121,7 +122,7 @@ class CbaFootnotesSerializer(serializers.ModelSerializer):
 class CollectiveAgreementsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CollectiveAgreements
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'cba_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -156,5 +157,5 @@ class ClauseLibraryTagsSerializer(serializers.ModelSerializer):
 class ClauseComparisonsHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ClauseComparisonsHistory
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']

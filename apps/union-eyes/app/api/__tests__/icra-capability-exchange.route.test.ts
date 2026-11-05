@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// The route answers a path value that is not a UUID as not found, so the tests use a real identifier.
+const A1 = '00000000-0000-4000-8000-0000000000a1';
 import { createHash } from 'crypto';
 
 const TOKEN = 'test-capability-token';
@@ -8,7 +11,10 @@ const FUTURE = new Date(Date.now() + 60_000);
 const m = vi.hoisted(() => ({
   withSystemContext: vi.fn(),
   eq: vi.fn(),
+  checkRateLimit: vi.fn(),
 }));
+
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.checkRateLimit }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -45,72 +51,83 @@ async function loadRoute() {
 describe('icra/[assessmentId]/capability/exchange route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.checkRateLimit.mockResolvedValue({ allowed: true });
     m.eq.mockReturnValue('eq');
   });
 
   it('returns 400 for invalid json', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost', { method: 'POST', body: '{bad-json' }), {
-      params: Promise.resolve({ assessmentId: 'a1' }),
+      params: Promise.resolve({ assessmentId: A1 }),
     });
     expect(response.status).toBe(400);
   });
 
   it('returns 400 for a malformed capability payload', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(req({ capability: 'x' }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req({ capability: 'x' }), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(400);
   });
 
   it('returns 404 when the assessment does not exist', async () => {
     mockTx(null);
     const { POST } = await loadRoute();
-    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(404);
   });
 
   it('denies a token issued for a different assessment', async () => {
     mockTx({ capabilityTokenHash: createHash('sha256').update('other-token', 'utf8').digest('hex'), capabilityTokenExpiresAt: FUTURE });
     const { POST } = await loadRoute();
-    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(401);
   });
 
   it('denies an expired token', async () => {
     mockTx({ capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: new Date(Date.now() - 1000) });
     const { POST } = await loadRoute();
-    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(410);
   });
 
   it('sets the HttpOnly capability cookie (never rotates) when the token is valid', async () => {
     mockTx({ capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE });
     const { POST } = await loadRoute();
-    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req({ capability: TOKEN }), { params: Promise.resolve({ assessmentId: A1 }) });
     const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload).toEqual({ ok: true });
     const setCookie = response.headers.get('set-cookie');
-    expect(setCookie).toContain(`icra_cap_a1=${TOKEN}`);
+    expect(setCookie).toContain(`icra_cap_${A1}=${TOKEN}`);
     expect(setCookie).toContain('HttpOnly');
   });
 
-  it('returns 429 after exceeding the per (IP, assessmentId) rate limit', async () => {
+  // DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS
+  // Replaced: this test drove 21 calls through the per-process counter; the route now asks the shared limiter.
+  it('answers 429 when the shared limiter refuses, and 503 when it is unavailable', async () => {
     mockTx({ capabilityTokenHash: createHash('sha256').update('wrong', 'utf8').digest('hex'), capabilityTokenExpiresAt: FUTURE });
     const { POST } = await loadRoute();
-    const assessmentId = 'rate-limit-test-assessment';
-    const rateLimitedReq = () =>
-      new Request('http://localhost/api/icra/rate-limit-test-assessment/capability/exchange', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-forwarded-for': 'rate-limit-test-ip' },
-        body: JSON.stringify({ capability: TOKEN }),
-      });
+    const call = () => POST(new Request('http://localhost/api/x', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': 'spoofed, 5.5.5.5' },
+      body: JSON.stringify({ capability: TOKEN }),
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
-    let lastResponse!: Response;
-    for (let i = 0; i < 21; i += 1) {
-      lastResponse = await POST(rateLimitedReq(), { params: Promise.resolve({ assessmentId }) });
-    }
-    expect(lastResponse.status).toBe(429);
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
+    expect((await call()).status).toBe(429);
+    expect(m.checkRateLimit).toHaveBeenCalledWith(`icra-capability-exchange:5.5.5.5:${A1}`, expect.objectContaining({ limit: 20 }));
+
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, error: 'redis down', resetIn: 60 });
+    expect((await call()).status).toBe(503);
+  });
+
+  // DEF-0B8-ICRA-MALFORMED-IDS-AND-ANSWER-VALUES-SURFACE-AS-SERVER-ERRORS
+  it('answers a path value that is not a UUID as not found, before any limiter or database call', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/x', { method: 'POST', body: '{}' }), { params: Promise.resolve({ assessmentId: 'not-a-uuid' }) });
+    expect(response.status).toBe(404);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 });

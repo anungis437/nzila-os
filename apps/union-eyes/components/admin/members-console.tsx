@@ -22,6 +22,7 @@ import { useToast } from "@/components/ui/use-toast";
 import JobClassificationManagement from "@/components/admin/JobClassificationManagement";
 import { generateCSV, type CSVColumn } from "@/lib/csv-export";
 import { useMembersConsoleData } from "@/lib/hooks/use-members-console-data";
+import { apiErrorMessage } from "@/lib/client/api-envelope";
 import {
   Select,
   SelectContent,
@@ -153,9 +154,9 @@ export default function MembersConsole() {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(data?.error || 'Failed to send invitation');
+        throw new Error(apiErrorMessage(data, 'Failed to send invitation'));
       }
 
       toast({

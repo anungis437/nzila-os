@@ -1,18 +1,27 @@
 /**
- * CRUD item route for federations
+ * GET PATCH DELETE /api/federations/:id/meetings
+ *
+ * Not implemented. This path advertises an operation of its own but was a byte-for-byte copy of the federation item route (the federation row, not its meetings). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { federations } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, PATCH, DELETE } = crudRoutes({
-  table: federations,
-  pk: 'id',
-  tags: ["Organization"],
-  orgScoped: true,
-  itemRoute: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, PATCH, DELETE };
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Organization'],
+      summary: '/api/federations/:id/meetings (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/federations/:id/meetings is not implemented: it performed no operation of its own.');
+  },
+);
+
+export const GET = handler;
+export const PATCH = handler;
+export const DELETE = handler;

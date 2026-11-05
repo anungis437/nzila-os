@@ -170,12 +170,20 @@ describe("cba-service", () => {
   describe("updateCBA", () => {
     it("returns updated CBA", async () => {
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cba-1", title: "Updated" }]);
-      expect(await updateCBA("cba-1", { title: "Updated" } as never)).toEqual({ id: "cba-1", title: "Updated" });
+      expect(await updateCBA("cba-1", "org-1", { title: "Updated" } as never)).toEqual({ id: "cba-1", title: "Updated" });
     });
 
     it("returns null when not found", async () => {
       mocks.mockReturning.mockResolvedValueOnce([undefined]);
-      expect(await updateCBA("nope", {} as never)).toBeNull();
+      expect(await updateCBA("nope", "org-1", {} as never)).toBeNull();
+    });
+
+    it("binds the UPDATE to the acting organization so another organization's CBA is not touched", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await updateCBA("cba-1", "org-b", { title: "x" } as never);
+      const whereArg = mocks.mockSetWhere.mock.calls.at(-1)?.[0] as { _type: string; a: Array<{ v: unknown }> };
+      expect(whereArg._type).toBe("and");
+      expect(whereArg.a.map((c) => c.v)).toEqual(["cba-1", "org-b"]);
     });
   });
 
@@ -183,24 +191,24 @@ describe("cba-service", () => {
   describe("deleteCBA", () => {
     it("soft-deletes by setting status to archived", async () => {
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cba-1", status: "archived" }]);
-      expect(await deleteCBA("cba-1")).toBe(true);
+      expect(await deleteCBA("cba-1", "org-1")).toBe(true);
     });
 
     it("returns false when not found", async () => {
       mocks.mockReturning.mockResolvedValueOnce([undefined]);
-      expect(await deleteCBA("nope")).toBe(false);
+      expect(await deleteCBA("nope", "org-1")).toBe(false);
     });
   });
 
   // ── hardDeleteCBA ────────────────────────────────────────────────────────
   describe("hardDeleteCBA", () => {
     it("returns true on success", async () => {
-      expect(await hardDeleteCBA("cba-1")).toBe(true);
+      expect(await hardDeleteCBA("cba-1", "org-1")).toBe(true);
     });
 
     it("throws on error", async () => {
       mocks.mockDelete.mockImplementationOnce(() => { throw new Error("db"); });
-      await expect(hardDeleteCBA("x")).rejects.toThrow("Failed to hard delete CBA");
+      await expect(hardDeleteCBA("x", "org-1")).rejects.toThrow("Failed to hard delete CBA");
     });
   });
 
@@ -208,12 +216,12 @@ describe("cba-service", () => {
   describe("updateCBAStatus", () => {
     it("updates status and returns CBA", async () => {
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cba-1", status: "expired" }]);
-      expect(await updateCBAStatus("cba-1", "expired")).toEqual({ id: "cba-1", status: "expired" });
+      expect(await updateCBAStatus("cba-1", "org-1", "expired")).toEqual({ id: "cba-1", status: "expired" });
     });
 
     it("returns null when not found", async () => {
       mocks.mockReturning.mockResolvedValueOnce([undefined]);
-      expect(await updateCBAStatus("nope", "active")).toBeNull();
+      expect(await updateCBAStatus("nope", "org-1", "active")).toBeNull();
     });
   });
 
@@ -323,17 +331,17 @@ describe("cba-service", () => {
 
     it("updateCBA throws on DB error (catch block)", async () => {
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("update-fail"); });
-      await expect(updateCBA("cba-1", {} as never)).rejects.toThrow("Failed to update CBA");
+      await expect(updateCBA("cba-1", "org-1", {} as never)).rejects.toThrow("Failed to update CBA");
     });
 
     it("deleteCBA throws on DB error (catch block)", async () => {
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("del-fail"); });
-      await expect(deleteCBA("cba-1")).rejects.toThrow("Failed to delete CBA");
+      await expect(deleteCBA("cba-1", "org-1")).rejects.toThrow("Failed to delete CBA");
     });
 
     it("updateCBAStatus throws on DB error (catch block)", async () => {
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("status-fail"); });
-      await expect(updateCBAStatus("cba-1", "expired" as never)).rejects.toThrow("Failed to update CBA status");
+      await expect(updateCBAStatus("cba-1", "org-1", "expired" as never)).rejects.toThrow("Failed to update CBA status");
     });
 
     it("getCBAsExpiringSoon throws on DB error (catch block)", async () => {

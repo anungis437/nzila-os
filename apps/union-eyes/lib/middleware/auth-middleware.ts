@@ -27,8 +27,8 @@ let getAuthSession: (() => Promise<Session | null>) | null = null;
 
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const clerkAuth = require('@nzila/platform-auth/entra/server');
-  getAuthSession = clerkAuth.auth;
+  const entraAuth = require('@nzila/platform-auth/entra/server');
+  getAuthSession = entraAuth.auth;
 } catch {
 }
 

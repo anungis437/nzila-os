@@ -5,7 +5,6 @@
  * 
  * Email templates for marketing-related events:
  * - Pilot application approvals/rejections
- * - Consent change confirmations
  * - Testimonial approvals (optional - respectful)
  * - Case study publications (internal)
  * 
@@ -169,174 +168,6 @@ The UnionEyes Team`;
 }
 
 /**
- * Send data sharing consent granted confirmation
- * 
- * Thanks user, explains what data is shared, emphasizes privacy protections
- */
-export async function sendConsentGrantedNotification(
-  organizationId: string,
-  userId: string,
-  userEmail: string,
-  userName: string,
-  dataTypes: string[]
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const notificationService = getNotificationService();
-
-    const dataTypeDescriptions: Record<string, string> = {
-      impact_metrics: 'Impact metrics (resolution times, win rates)',
-      resolution_times: 'Resolution time data (anonymized)',
-      demographics: 'Demographic data for your organization (aggregated only)',
-      industry_insights: 'Industry-specific trends',
-      legislative_data: 'Legislative advocacy data',
-    };
-
-    const sharedDataList = dataTypes
-      .map((type) => `- ${dataTypeDescriptions[type] || type}`)
-      .join('\n');
-
-    const body = `Dear ${userName},
-
-Thank you for choosing to share data with the broader labor movement. Your contribution helps unions nationwide learn from each other and build collective power.
-
-**What You&apos;re Sharing:**
-${sharedDataList}
-
-**How Your Data is Protected:**
-- Your data is NEVER shared individually - only in aggregated form with 5+ other organizations
-- Statistical noise (≤2%) is added to all aggregated data to prevent re-identification
-- You can revoke consent at any time through your settings
-- All aggregation respects strict privacy thresholds (minimum 10-25 cases depending on data type)
-- Cross-union insights are used solely for labor movement strengthening
-
-**How This Helps:**
-- Other unions can learn from successful strategies
-- Legislative advocacy is strengthened with cross-union data
-- The labor movement builds shared knowledge
-- Unions can benchmark anonymously without revealing sensitive information
-
-You can view movement insights in your dashboard or revoke consent anytime.
-
-Thank you for your solidarity.
-
-In unity,
-The UnionEyes Team`;
-
-    await notificationService.send({
-      organizationId,
-      recipientEmail: userEmail,
-      type: 'email',
-      priority: 'normal',
-      subject: 'Data Sharing Consent Confirmed - Thank You',
-      title: 'Data Sharing Enabled',
-      body,
-      actionUrl: '/dashboard/movement-insights',
-      actionLabel: 'View Movement Insights',
-      metadata: {
-        type: 'consent_granted',
-        dataTypes,
-      },
-      userId,
-    });
-
-    logger.info('Consent granted notification sent', {
-      organizationId,
-      userId,
-      dataTypes,
-    });
-
-    return { success: true };
-  } catch (error) {
-    logger.error('Failed to send consent granted notification', {
-      error,
-      organizationId,
-      userId,
-    });
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
-/**
- * Send data sharing consent revoked acknowledgment
- * 
- * Respects decision, explains data handling, confirms user can re-enable
- */
-export async function sendConsentRevokedNotification(
-  organizationId: string,
-  userId: string,
-  userEmail: string,
-  userName: string,
-  revokedDataTypes: string[],
-  reason?: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const notificationService = getNotificationService();
-
-    const body = `Dear ${userName},
-
-We've received your request to revoke data sharing consent. Your data sharing has been disabled.
-
-**What Happens Now:**
-- Your organization's data will no longer be included in future aggregations
-- Previously aggregated data cannot be "unshared" (it&apos;s already anonymized and combined)
-- Your organization's individual data remains private and accessible only to you
-- You can re-enable data sharing anytime through your settings
-
-**Your Privacy:**
-- Your decision is respected without question
-- No data from your organization will be used in cross-union insights going forward
-- You can still view movement insights based on other consenting organizations
-- Re-enabling is simple if you change your mind
-
-${reason ? `We appreciate your feedback: "${reason}". This helps us improve our data sharing practices.\n` : ''}
-
-Thank you for considering data sharing. We remain committed to transparency and member sovereignty.
-
-In solidarity,
-The UnionEyes Team`;
-
-    await notificationService.send({
-      organizationId,
-      recipientEmail: userEmail,
-      type: 'email',
-      priority: 'normal',
-      subject: 'Data Sharing Consent Revoked - Confirmed',
-      title: 'Data Sharing Disabled',
-      body,
-      actionUrl: '/dashboard/settings/data-sharing',
-      actionLabel: 'View Data Sharing Settings',
-      metadata: {
-        type: 'consent_revoked',
-        revokedDataTypes,
-        reason,
-      },
-      userId,
-    });
-
-    logger.info('Consent revoked notification sent', {
-      organizationId,
-      userId,
-      revokedDataTypes,
-    });
-
-    return { success: true };
-  } catch (error) {
-    logger.error('Failed to send consent revoked notification', {
-      error,
-      organizationId,
-      userId,
-    });
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
-/**
  * Send testimonial approval notification (OPTIONAL - only if submitter requests it)
  * 
  * Celebrates their contribution, explains where it will appear
@@ -481,8 +312,6 @@ View the case study to review formatting and content.`;
 export default {
   sendPilotApprovalNotification,
   sendPilotRejectionNotification,
-  sendConsentGrantedNotification,
-  sendConsentRevokedNotification,
   sendTestimonialApprovedNotification,
   sendCaseStudyPublishedNotification,
 };

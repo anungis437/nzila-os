@@ -11,6 +11,7 @@ import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -44,7 +45,7 @@ class ClaimPrecedentAnalysis(BaseModel):
     """Migrated from drizzle: cba-intelligence-schema.ts"""
 
     claim_id = models.UUIDField()
-    precedent_matches = models.JSONField(default=dict, null=True, blank=True)
+    precedent_matches = models.JSONField(null=True, blank=True)
     success_probability = models.DecimalField(
         max_digits=19, decimal_places=2, null=True, blank=True
     )
@@ -102,9 +103,9 @@ class Claims(BaseModel):
     claim_number = models.CharField(max_length=50, null=True, blank=True)
 
     # Ownership
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     member_id = models.TextField(null=True, blank=True)  # Auth provider user ID
-    is_anonymous = models.BooleanField(default=True)
+    is_anonymous = models.BooleanField(default=False)  # opt-in; see 0010_claims_is_anonymous_default_false
 
     # Type & State
     claim_type = models.CharField(
@@ -135,7 +136,7 @@ class Claims(BaseModel):
 
     # AI Analysis
     ai_score = models.IntegerField(null=True, blank=True)
-    ai_analysis = models.JSONField(default=dict, null=True, blank=True)
+    ai_analysis = models.JSONField(null=True, blank=True)
     merit_confidence = models.IntegerField(null=True, blank=True)
     precedent_match = models.IntegerField(null=True, blank=True)
     complexity_score = models.IntegerField(null=True, blank=True)
@@ -144,10 +145,10 @@ class Claims(BaseModel):
     progress = models.IntegerField(default=0)
 
     # Financials
-    claim_amount = models.CharField(max_length=20, null=True, blank=True)
-    settlement_amount = models.CharField(max_length=20, null=True, blank=True)
-    legal_costs = models.CharField(max_length=20, null=True, blank=True)
-    court_costs = models.CharField(max_length=20, null=True, blank=True)
+    claim_amount = models.CharField(max_length=20, blank=True, db_default='0', default='0')
+    settlement_amount = models.CharField(max_length=20, blank=True, db_default='0', default='0')
+    legal_costs = models.CharField(max_length=20, blank=True, db_default='0', default='0')
+    court_costs = models.CharField(max_length=20, blank=True, db_default='0', default='0')
 
     # Resolution
     resolution_outcome = models.CharField(max_length=100, null=True, blank=True)
@@ -166,6 +167,7 @@ class Claims(BaseModel):
     idempotency_hash = models.CharField(
         max_length=64, null=True, blank=True, unique=True
     )
+    status_changed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "claims"
@@ -194,6 +196,12 @@ class ClaimUpdates(BaseModel):
     claim = models.ForeignKey(
         "Claims", on_delete=models.CASCADE, related_name="claim_updates_claim_set"
     )
+    update_type = models.CharField(max_length=50, null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    is_internal = models.BooleanField(default=False, null=True, blank=True)
+    visibility_scope = models.TextField(default='member', blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "claim_updates"
@@ -204,22 +212,22 @@ class DeadlineRules(BaseModel):
     """Canonical model for deadline_rules table.
     Defines grievance-processing deadline templates per org."""
 
-    organization_id = models.UUIDField(null=True, blank=True)
-    rule_name = models.CharField(max_length=255, null=True, blank=True)
-    rule_code = models.CharField(max_length=100, null=True, blank=True)
+    organization_id = models.UUIDField()
+    rule_name = models.CharField(max_length=255, blank=True)
+    rule_code = models.CharField(max_length=100, blank=True)
     description = models.TextField(null=True, blank=True)
     claim_type = models.CharField(max_length=100, null=True, blank=True)
     priority_level = models.CharField(max_length=50, null=True, blank=True)
     step_number = models.IntegerField(null=True, blank=True)
-    days_from_event = models.IntegerField(null=True, blank=True)
-    event_type = models.CharField(max_length=100, default="", blank=True)
-    business_days_only = models.BooleanField(default=False)
-    allows_extension = models.BooleanField(default=False)
-    max_extension_days = models.IntegerField(default=0)
-    requires_approval = models.BooleanField(default=False)
+    days_from_event = models.IntegerField()
+    event_type = models.CharField(max_length=100, default='claim_filed', blank=True)
+    business_days_only = models.BooleanField(default=True)
+    allows_extension = models.BooleanField(default=True)
+    max_extension_days = models.IntegerField(default=30)
+    requires_approval = models.BooleanField(default=True)
     escalate_to_role = models.CharField(max_length=255, null=True, blank=True)
     escalation_delay_days = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_system_rule = models.BooleanField(default=False)
     created_by = models.TextField(null=True, blank=True)
 
@@ -233,13 +241,13 @@ class ClaimDeadlines(BaseModel):
     Tracks individual deadline instances linked to claims."""
 
     claim_id = models.UUIDField()
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     deadline_rule_id = models.UUIDField(null=True, blank=True)
-    deadline_name = models.CharField(max_length=255, null=True, blank=True)
-    deadline_type = models.CharField(max_length=100, null=True, blank=True)
-    event_date = models.DateTimeField(null=True, blank=True)
-    original_deadline = models.DateTimeField(null=True, blank=True)
-    due_date = models.DateTimeField(null=True, blank=True)
+    deadline_name = models.CharField(max_length=255, blank=True)
+    deadline_type = models.CharField(max_length=100, blank=True)
+    event_date = models.DateTimeField()
+    original_deadline = models.DateTimeField()
+    due_date = models.DateTimeField()
     completed_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, default="pending")
     priority = models.CharField(max_length=20, default="medium")
@@ -293,7 +301,30 @@ class DefensibilityPacks(BaseModel):
 
     pack_id = models.UUIDField(default=uuid.uuid4, unique=True)
     case_id = models.UUIDField()
-    case_number = models.CharField(max_length=255, null=True, blank=True)
+    case_number = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField()
+    pack_version = models.CharField(max_length=10, default='1.0.0')
+    generated_at = models.DateTimeField(default=timezone.now)
+    generated_by = models.CharField(max_length=255)
+    export_format = models.CharField(max_length=10)
+    export_purpose = models.CharField(max_length=50)
+    requested_by = models.CharField(max_length=255, null=True, blank=True)
+    pack_data = models.JSONField()
+    integrity_hash = models.CharField(max_length=64)
+    timeline_hash = models.CharField(max_length=64)
+    audit_hash = models.CharField(max_length=64)
+    state_transition_hash = models.CharField(max_length=64)
+    verification_status = models.CharField(max_length=20, default='verified')
+    last_verified_at = models.DateTimeField(null=True, blank=True)
+    verification_attempts = models.IntegerField(default=0, null=True, blank=True)
+    download_count = models.IntegerField(default=0, null=True, blank=True)
+    last_downloaded_at = models.DateTimeField(null=True, blank=True)
+    last_downloaded_by = models.CharField(max_length=255, null=True, blank=True)
+    file_size_bytes = models.IntegerField(null=True, blank=True)
+    storage_location = models.TextField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.CharField(max_length=255, null=True, blank=True)
+    deletion_reason = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "defensibility_packs"
@@ -373,14 +404,10 @@ class Grievances(BaseModel):
     ]
 
     # Identity
-    grievance_number = models.CharField(
-        max_length=50, null=True, blank=True, unique=True
-    )
+    grievance_number = models.CharField(max_length=50, blank=True, unique=True)
 
     # Classification
-    type = models.CharField(
-        max_length=20, choices=GRIEVANCE_TYPE_CHOICES, null=True, blank=True
-    )
+    type = models.CharField(max_length=20, choices=GRIEVANCE_TYPE_CHOICES, blank=True)
     status = models.CharField(
         max_length=20, choices=GRIEVANCE_STATUS_CHOICES, default="draft"
     )
@@ -410,8 +437,8 @@ class Grievances(BaseModel):
     cba_section = models.CharField(max_length=100, null=True, blank=True)
 
     # Details
-    title = models.CharField(max_length=500, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    title = models.CharField(max_length=500, blank=True)
+    description = models.TextField(blank=True)
     background = models.TextField(null=True, blank=True)
     desired_outcome = models.TextField(null=True, blank=True)
 
@@ -425,12 +452,12 @@ class Grievances(BaseModel):
     closed_at = models.DateTimeField(null=True, blank=True)
 
     # Timeline & Attachments (JSON)
-    timeline = models.JSONField(default=list, null=True, blank=True)
-    attachments = models.JSONField(default=list, null=True, blank=True)
+    timeline = models.JSONField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
 
     # Related Records
     group_grievance_id = models.UUIDField(null=True, blank=True)
-    related_grievance_ids = models.JSONField(default=list, null=True, blank=True)
+    related_grievance_ids = models.JSONField(null=True, blank=True)
 
     # Flags
     is_group_grievance = models.BooleanField(default=False)
@@ -439,9 +466,16 @@ class Grievances(BaseModel):
     is_confidential = models.BooleanField(default=False)
 
     # Ownership
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     created_by = models.TextField(null=True, blank=True)
     last_updated_by = models.TextField(null=True, blank=True)
+
+    # Import traceability (platform 0077): where an imported case came from, so a re-import changes it instead of adding a second copy.
+    external_case_id = models.CharField(max_length=255, null=True, blank=True)
+    import_fingerprint = models.CharField(max_length=64, null=True, blank=True)
+    source_system = models.CharField(max_length=100, null=True, blank=True)
+    imported_at = models.DateTimeField(null=True, blank=True)
+    import_batch_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = "grievances"
@@ -482,7 +516,42 @@ class Arbitrations(BaseModel):
         on_delete=models.CASCADE,
         related_name="arbitrations_grievance_set",
     )
-    arbitration_number = models.CharField(max_length=255, null=True, blank=True)
+    arbitration_number = models.CharField(max_length=255, blank=True)
+    board_name = models.CharField(max_length=255)
+    board_type = models.CharField(max_length=100)
+    arbitrator_ids = ArrayField(models.UUIDField(), null=True, blank=True)
+    arbitrator_names = ArrayField(models.CharField(max_length=255), null=True, blank=True)
+    union_appointee = models.CharField(max_length=255, null=True, blank=True)
+    employer_appointee = models.CharField(max_length=255, null=True, blank=True)
+    chair_appointee = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'pending', 'scheduled', 'in_progress', 'adjourned', 'reserved', 'award_rendered',
+            'settled', 'withdrawn',
+        ]],
+        default='pending',
+    )
+    scheduled_date = models.DateTimeField(null=True, blank=True)
+    location = models.CharField(max_length=500, null=True, blank=True)
+    virtual_meeting_url = models.CharField(max_length=500, null=True, blank=True)
+    submission_deadline = models.DateTimeField(null=True, blank=True)
+    evidence_deadline = models.DateTimeField(null=True, blank=True)
+    reply_deadline = models.DateTimeField(null=True, blank=True)
+    hearing_days = ArrayField(models.IntegerField(), null=True, blank=True)
+    hearing_dates = ArrayField(models.DateTimeField(), null=True, blank=True)
+    adjourned_to = models.DateTimeField(null=True, blank=True)
+    award_deadline = models.DateTimeField(null=True, blank=True)
+    award_date = models.DateTimeField(null=True, blank=True)
+    award = models.TextField(null=True, blank=True)
+    award_summary = models.TextField(null=True, blank=True)
+    union_cost_share = models.IntegerField(null=True, blank=True)
+    employer_cost_share = models.IntegerField(null=True, blank=True)
+    estimated_cost = models.IntegerField(null=True, blank=True)
+    actual_cost = models.IntegerField(null=True, blank=True)
+    submissions = models.JSONField(null=True, blank=True)
+    exhibits = models.JSONField(null=True, blank=True)
+    organization_id = models.UUIDField()
 
     class Meta:
         db_table = "arbitrations"
@@ -513,7 +582,22 @@ class Settlements(BaseModel):
         blank=True,
     )
     settlement_type = models.CharField(choices=SETTLEMENT_TYPE_CHOICES, max_length=24)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=255, blank=True, db_default='proposed', default='proposed')
+    monetary_amount = models.IntegerField(null=True, blank=True)
+    monetary_details = models.TextField(null=True, blank=True)
+    non_monetary_terms = models.JSONField(null=True, blank=True)
+    implemented_at = models.DateTimeField(null=True, blank=True)
+    implementation_notes = models.TextField(null=True, blank=True)
+    compliance_deadline = models.DateTimeField(null=True, blank=True)
+    compliance_status = models.CharField(max_length=50, null=True, blank=True)
+    compliance_notes = models.TextField(null=True, blank=True)
+    approved_by_grievant = models.BooleanField(null=True, blank=True)
+    approved_by_employer = models.BooleanField(null=True, blank=True)
+    approved_by_union = models.BooleanField(null=True, blank=True)
+    approval_dates = ArrayField(models.DateTimeField(), null=True, blank=True)
+    agreement_url = models.CharField(max_length=500, null=True, blank=True)
+    confidentiality = models.BooleanField(default=False, null=True, blank=True)
+    organization_id = models.UUIDField()
 
     class Meta:
         db_table = "settlements"
@@ -543,15 +627,33 @@ class GrievanceDeadlines(BaseModel):
         on_delete=models.CASCADE,
         related_name="grievance_deadlines_grievance_set",
     )
-    deadline_type = models.CharField(max_length=255, null=True, blank=True)
+    deadline_type = models.CharField(max_length=255, blank=True)
     # Phase 3A: the deadline engine (reminder worker, overdue cron, assignment convergence) reads these two columns, which the
     # Drizzle mirror declares and the canonical model lacked. `due_date` is the EFFECTIVE due date (deadline-confirmation-service
     # writes it together with override_due_date); `status` is pending|extended|completed|cancelled|... Invariants (kept by the writers in
     # lib/deadline-engine/deadline-semantics.ts and guarded by CHECK constraints in grievances.0007): an override in force equals
     # due_date; a superseded deadline is completed or cancelled. The remaining declared-but-missing columns stay REQUIRED_LATER
     # (db/schema-authority/runtime-drift-dispositions.json).
-    due_date = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField()
     status = models.CharField(max_length=50, default="pending", db_default="pending")
+    description = models.CharField(max_length=500, null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    extension_granted = models.BooleanField(default=False, null=True, blank=True)
+    new_deadline = models.DateTimeField(null=True, blank=True)
+    confirmation_status = models.CharField(max_length=32, default='SYSTEM_CALCULATED')
+    calculated_due_date = models.DateTimeField(null=True, blank=True)
+    calculation_provenance = models.JSONField(default=dict, null=True, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    confirmed_by = models.TextField(null=True, blank=True)
+    override_due_date = models.DateTimeField(null=True, blank=True)
+    override_reason = models.TextField(null=True, blank=True)
+    override_at = models.DateTimeField(null=True, blank=True)
+    override_by = models.TextField(null=True, blank=True)
+    superseded_at = models.DateTimeField(null=True, blank=True)
+    superseded_by = models.TextField(null=True, blank=True)
+    reminder_days = ArrayField(models.IntegerField(), null=True, blank=True)
+    reminders_sent = models.JSONField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "grievance_deadlines"
@@ -562,7 +664,24 @@ class GrievanceWorkflows(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
     organization_id = models.UUIDField()
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
+    auto_assign = models.BooleanField(default=False, null=True, blank=True)
+    contract_id = models.UUIDField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    grievance_type = models.CharField(max_length=100, null=True, blank=True)
+    is_default = models.BooleanField(default=False, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    require_approval = models.BooleanField(default=False, null=True, blank=True)
+    sla_days = models.IntegerField(null=True, blank=True)
+    stages = models.JSONField(default=list, null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['active', 'draft', 'archived']],
+        default='active',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = "grievance_workflows"
@@ -583,6 +702,28 @@ class GrievanceStages(BaseModel):
         null=True,
         blank=True,
     )
+    auto_transition = models.BooleanField(default=False, null=True, blank=True)
+    conditions = models.JSONField(default=list, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    entry_actions = models.JSONField(default=list, null=True, blank=True)
+    exit_actions = models.JSONField(default=list, null=True, blank=True)
+    is_required = models.BooleanField(default=True, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    next_stage_id = models.UUIDField(null=True, blank=True)
+    notification_template_id = models.UUIDField(null=True, blank=True)
+    notify_on_deadline = models.BooleanField(default=True, null=True, blank=True)
+    notify_on_entry = models.BooleanField(default=True, null=True, blank=True)
+    order_index = models.IntegerField()
+    require_approval = models.BooleanField(default=False, null=True, blank=True)
+    sla_days = models.IntegerField(null=True, blank=True)
+    stage_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'filed', 'intake', 'investigation', 'step_1', 'step_2', 'step_3', 'mediation',
+            'pre_arbitration', 'arbitration', 'resolved', 'withdrawn', 'denied', 'settled',
+        ]],
+    )
 
     class Meta:
         db_table = "grievance_stages"
@@ -595,6 +736,8 @@ class GrievanceTransitions(BaseModel):
     organization_id = models.UUIDField()
     claim = models.ForeignKey(
         "Claims",
+        # The table's foreign key references claims.claim_id (the business key), not claims.id.
+        to_field="claim_id",
         on_delete=models.CASCADE,
         related_name="grievance_transitions_claim_set",
     )
@@ -614,6 +757,17 @@ class GrievanceTransitions(BaseModel):
     reason = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     transitioned_by = models.CharField(max_length=255, null=True, blank=True)
+    transitioned_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    requires_approval = models.BooleanField(default=False, null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    stage_duration_days = models.IntegerField(null=True, blank=True)
+    visibility_scope = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['member', 'staff', 'admin', 'system']],
+        default='staff',
+    )
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "grievance_transitions"
@@ -626,10 +780,37 @@ class GrievanceAssignments(BaseModel):
     organization_id = models.UUIDField()
     claim = models.ForeignKey(
         "Claims",
+        # The table's foreign key references claims.claim_id (the business key), not claims.id.
+        to_field="claim_id",
         on_delete=models.CASCADE,
         related_name="grievance_assignments_claim_set",
     )
-    assigned_to = models.CharField(max_length=255, null=True, blank=True)
+    assigned_to = models.CharField(max_length=255, blank=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    actual_hours = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    assigned_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    assigned_by = models.CharField(max_length=255)
+    assignment_reason = models.TextField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    estimated_hours = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    role = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'primary_officer', 'secondary_officer', 'legal_counsel', 'external_arbitrator',
+            'management_rep', 'witness', 'observer',
+        ]],
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'assigned', 'accepted', 'in_progress', 'completed', 'reassigned', 'declined',
+        ]],
+        default='assigned',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = "grievance_assignments"
@@ -641,9 +822,48 @@ class GrievanceDocuments(BaseModel):
 
     organization_id = models.UUIDField()
     claim = models.ForeignKey(
-        "Claims", on_delete=models.CASCADE, related_name="grievance_documents_claim_set"
+        "Claims",
+        # The table's foreign key references claims.claim_id (the business key), not claims.id.
+        to_field="claim_id",
+        on_delete=models.CASCADE,
+        related_name="grievance_documents_claim_set",
     )
-    document_name = models.CharField(max_length=255, null=True, blank=True)
+    document_name = models.CharField(max_length=255, blank=True)
+    document_type = models.CharField(max_length=100)
+    file_path = models.TextField()
+    file_size = models.BigIntegerField(null=True, blank=True)
+    mime_type = models.CharField(max_length=100, null=True, blank=True)
+    version = models.IntegerField(default=1, null=True, blank=True)
+    parent_document_id = models.UUIDField(null=True, blank=True)
+    is_latest_version = models.BooleanField(default=True, null=True, blank=True)
+    version_status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'draft', 'pending_review', 'approved', 'rejected', 'superseded',
+        ]],
+        default='draft',
+        null=True,
+        blank=True,
+    )
+    description = models.TextField(null=True, blank=True)
+    tags = ArrayField(models.TextField(), null=True, blank=True)
+    category = models.CharField(max_length=100, null=True, blank=True)
+    is_confidential = models.BooleanField(default=False, null=True, blank=True)
+    access_level = models.CharField(max_length=50, default='standard', null=True, blank=True)
+    requires_signature = models.BooleanField(default=False, null=True, blank=True)
+    signature_status = models.CharField(max_length=50, null=True, blank=True)
+    signed_by = models.CharField(max_length=255, null=True, blank=True)
+    signed_at = models.DateTimeField(null=True, blank=True)
+    signature_data = models.JSONField(null=True, blank=True)
+    ocr_text = models.TextField(null=True, blank=True)
+    indexed = models.BooleanField(default=False, null=True, blank=True)
+    uploaded_by = models.CharField(max_length=255)
+    uploaded_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    retention_period_days = models.IntegerField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "grievance_documents"
@@ -656,10 +876,52 @@ class GrievanceSettlements(BaseModel):
     organization_id = models.UUIDField()
     claim = models.ForeignKey(
         "Claims",
+        # The table's foreign key references claims.claim_id (the business key), not claims.id.
+        to_field="claim_id",
         on_delete=models.CASCADE,
         related_name="grievance_settlements_claim_set",
     )
-    settlement_type = models.CharField(max_length=255, null=True, blank=True)
+    settlement_type = models.CharField(max_length=255, blank=True)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+    finalized_by = models.CharField(max_length=255, null=True, blank=True)
+    management_approved = models.BooleanField(null=True, blank=True)
+    management_approved_at = models.DateTimeField(null=True, blank=True)
+    management_approved_by = models.CharField(max_length=255, null=True, blank=True)
+    member_approved = models.BooleanField(null=True, blank=True)
+    member_approved_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    monetary_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    payment_schedule = models.JSONField(null=True, blank=True)
+    precedent_description = models.TextField(null=True, blank=True)
+    proposed_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    proposed_by = models.CharField(max_length=50)
+    proposed_by_user = models.CharField(max_length=255, null=True, blank=True)
+    requires_management_approval = models.BooleanField(default=True, null=True, blank=True)
+    requires_member_approval = models.BooleanField(default=True, null=True, blank=True)
+    requires_union_approval = models.BooleanField(default=True, null=True, blank=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+    responded_by = models.CharField(max_length=50, null=True, blank=True)
+    responded_by_user = models.CharField(max_length=255, null=True, blank=True)
+    response_notes = models.TextField(null=True, blank=True)
+    set_precedent = models.BooleanField(default=False, null=True, blank=True)
+    settlement_document_id = models.UUIDField(null=True, blank=True)
+    signed_agreement_id = models.UUIDField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'proposed', 'under_review', 'accepted', 'rejected', 'finalized',
+        ]],
+        default='proposed',
+        null=True,
+        blank=True,
+    )
+    terms_description = models.TextField()
+    terms_structured = models.JSONField(null=True, blank=True)
+    union_approved = models.BooleanField(null=True, blank=True)
+    union_approved_at = models.DateTimeField(null=True, blank=True)
+    union_approved_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "grievance_settlements"
@@ -672,10 +934,32 @@ class GrievanceCommunications(BaseModel):
     organization_id = models.UUIDField()
     claim = models.ForeignKey(
         "Claims",
+        # The table's foreign key references claims.claim_id (the business key), not claims.id.
+        to_field="claim_id",
         on_delete=models.CASCADE,
         related_name="grievance_communications_claim_set",
     )
-    communication_type = models.CharField(max_length=255, null=True, blank=True)
+    communication_type = models.CharField(max_length=255, blank=True)
+    attachment_ids = ArrayField(models.UUIDField(), null=True, blank=True)
+    body = models.TextField(null=True, blank=True)
+    calendar_event_id = models.UUIDField(null=True, blank=True)
+    communication_date = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    direction = models.CharField(max_length=20)
+    duration_minutes = models.IntegerField(null=True, blank=True)
+    email_message_id = models.CharField(max_length=255, null=True, blank=True)
+    followup_completed = models.BooleanField(default=False, null=True, blank=True)
+    followup_date = models.DateField(null=True, blank=True)
+    from_external = models.CharField(max_length=255, null=True, blank=True)
+    from_user_id = models.CharField(max_length=255, null=True, blank=True)
+    is_important = models.BooleanField(default=False, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    recorded_by = models.CharField(max_length=255)
+    requires_followup = models.BooleanField(default=False, null=True, blank=True)
+    sms_message_id = models.UUIDField(null=True, blank=True)
+    subject = models.CharField(max_length=500, null=True, blank=True)
+    summary = models.TextField(null=True, blank=True)
+    to_external = ArrayField(models.CharField(max_length=255), null=True, blank=True)
+    to_user_ids = ArrayField(models.CharField(max_length=255), null=True, blank=True)
 
     class Meta:
         db_table = "grievance_communications"
@@ -691,6 +975,13 @@ class GrievanceApprovals(BaseModel):
         on_delete=models.CASCADE,
         related_name="grievance_approvals_transition_set",
     )
+    action = models.CharField(max_length=20)
+    approver_role = models.CharField(max_length=50, null=True, blank=True)
+    approver_user_id = models.CharField(max_length=255)
+    comment = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
 
     class Meta:
         db_table = "grievance_approvals"

@@ -7,7 +7,7 @@
 import { z } from 'zod'
 
 export const qboEnvSchema = z.object({
-  INTUIT_APP_ID: z.string().uuid('INTUIT_APP_ID must be a valid UUID'),
+  INTUIT_APP_ID: z.guid('INTUIT_APP_ID must be a valid UUID'),
   INTUIT_CLIENT_ID: z.string().min(1, 'INTUIT_CLIENT_ID is required'),
   INTUIT_CLIENT_SECRET: z.string().min(1, 'INTUIT_CLIENT_SECRET is required'),
   INTUIT_ENVIRONMENT: z.enum(['sandbox', 'production']).default('sandbox'),

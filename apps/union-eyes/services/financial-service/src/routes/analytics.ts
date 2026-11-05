@@ -37,7 +37,7 @@ function getAuthUser(req: Request): AuthUser {
 // ============================================================================
 
 const ForecastParamsSchema = z.object({
-  fundId: z.string().uuid(),
+  fundId: z.guid(),
   forecastDays: z.coerce.number().min(7).max(365).optional().default(90),
 });
 
@@ -47,7 +47,7 @@ const DateRangeSchema = z.object({
 });
 
 const _AlertsSchema = z.object({
-  organizationId: z.string().uuid().optional(),
+  organizationId: z.guid().optional(),
 });
 
 const getOrganizationIdFromHeaders = (req: Request): string | undefined =>

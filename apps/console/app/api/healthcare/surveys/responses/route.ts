@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const body = await (async () => {
     const BodySchema = z.object({
       token: z.string(),
-      answers: z.record(z.unknown()),
+      answers: z.record(z.string(), z.unknown()),
     })
     return BodySchema.parse(await request.json())
   })()

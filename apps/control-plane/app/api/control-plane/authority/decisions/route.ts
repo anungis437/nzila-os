@@ -26,7 +26,7 @@ const logger = createLogger('control-plane:api:authority:decisions')
 
 const RecordDecisionBodySchema = z.object({
   type: DecisionEventTypeSchema,
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   domain: z.string().min(1),
   actorId: z.string().min(1),
   actorRole: z.string().min(1),
@@ -40,11 +40,11 @@ const RecordDecisionBodySchema = z.object({
   policyVersion: z.string().min(1),
   workflowId: z.string().optional(),
   caseId: z.string().optional(),
-  correlationId: z.string().uuid().optional(),
-  requestId: z.string().uuid().optional(),
+  correlationId: z.guid().optional(),
+  requestId: z.guid().optional(),
   traceId: z.string().optional(),
-  evaluatedContext: z.record(z.unknown()).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  evaluatedContext: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export async function GET(request: NextRequest) {

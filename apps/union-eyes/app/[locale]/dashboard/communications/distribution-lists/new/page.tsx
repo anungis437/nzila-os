@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
+import { ApiShapeError, envelopeRow, readApiError } from '@/lib/client/api-envelope';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -76,16 +77,14 @@ export default function NewDistributionListPage() {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || t('errors.createFailed'));
-      }
+      if (!response.ok) throw new Error(await readApiError(response, t('errors.createFailed')));
 
-      const json = await response.json();
-      const created = json.data ?? json;
+      // The route answers { success, data: { data: record } }; the new list is opened by the id it was given.
+      const created = envelopeRow(await response.json());
+      if (typeof created.id !== 'string') throw new ApiShapeError('no id');
       router.push(`/${locale}/dashboard/communications/distribution-lists/${created.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.createFailed'));
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('errors.createFailed'));
     } finally {
       setLoading(false);
     }

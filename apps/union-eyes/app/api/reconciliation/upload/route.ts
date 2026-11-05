@@ -1,32 +1,25 @@
 /**
- * GET /api/reconciliation/upload — List reconciliation exceptions (open/under_review)
+ * GET /api/reconciliation/upload
  *
- * Upload endpoint reserved for future bank-statement file intake.
- * Currently serves as the exception list for the reconciliation dashboard.
+ * Not implemented. This path advertises an operation of its own but was a list of reconciliation exceptions under an upload name (no file is received). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
-
 import { withApi, ApiError } from '@/lib/api/framework';
-import { listExceptions } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
+const handler = withApi(
   {
-    auth: { minRole: 'officer' },
-    entitlement: 'commercial_reporting',
+    auth: { required: true, minRole: 'officer' },
     openapi: {
       tags: ['Reconciliation'],
-      summary: 'List reconciliation exceptions for the organization',
+      summary: '/api/reconciliation/upload (not implemented)',
+      description: 'Not implemented: answers 501.',
     },
   },
-  async ({ request, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const url = new URL(request.url);
-    const status = url.searchParams.get('status');
-    const statusFilter = status
-      ? (status.split(',') as ('open' | 'under_review' | 'resolved' | 'written_off')[])
-      : undefined;
-    const exceptions = await listExceptions(organizationId, statusFilter);
-    return { exceptions };
+  async () => {
+    throw ApiError.notImplemented('/api/reconciliation/upload is not implemented: it performed no operation of its own.');
   },
 );
+
+export const GET = handler;

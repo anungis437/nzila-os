@@ -298,8 +298,11 @@ from their explicit statement-timestamp creation and are revoked after the
 callback, including rollback and dual-failure paths. This is local synthetic
 proof, not real Entra/staging certification or full domain/application coverage.
 
-The three formerly contradictory nullable UUID columns remain nullable in V2.
-Tenant policies do not treat their NULL values as global visibility. A failed
+The three formerly contradictory UUID columns (`organization_id` on `claims`,
+`grievances` and `security_events`) are `NOT NULL` in V2 since 2026-11-04,
+following current Django source (tranche 10, `d42d05ba5`), which made the owning
+organization required; the Drizzle declarations agree. A fresh V2 database has
+no ownerless rows to preserve. A failed
 security classification is denied and reported; it is not substituted with
 global access.
 

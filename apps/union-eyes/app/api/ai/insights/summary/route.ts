@@ -6,72 +6,67 @@
  * Feature-gated: AI_EXECUTIVE_INSIGHTS
  */
 
-import { NextRequest } from 'next/server';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
-import { getInsightReports } from '@/lib/ai/executive-insights';
+import { getLatestInsightReports } from '@/lib/ai/executive-insights';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
 import { auditAIInvocation } from '@/lib/audit-logger';
 
-export const GET = withRoleAuth('officer', async (_request: NextRequest, context: BaseAuthContext) => {
-  const rl = await checkRateLimit(`ai-insights-summary:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
-  if (!rl.allowed) {
-    return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
-  }
+// The reports are read in the organization's own context by the helper (one transaction, no provider call inside it); the entitlement is checked by the wrapper.
+export const GET = withApi(
+  {
+    auth: { minRole: 'officer' },
+    entitlement: 'ai_advanced_insights',
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Latest executive insight report of each type' },
+  },
+  async ({ user, userId, organizationId }) => {
+    const rl = await checkRateLimit(`ai-insights-summary:${userId}`, RATE_LIMITS.AI_COMPLETION);
+    if (!rl.allowed) {
+      return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
+    }
 
-  const blocked = await guardAiFeature(AI_FEATURES.EXECUTIVE_INSIGHTS, {
-    userId: context.userId,
-    organizationId: context.organizationId,
-  });
-  if (blocked) return blocked;
-
-  try {
-    await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
-
-  enforceAISafety({ origin: 'ai-insights-summary', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'confidential' });
-
-  try {
-    const [trends, hotspots, capacity, escalations, summaries] = await Promise.all([
-      getInsightReports(context.organizationId!, 'trend_forecast', 1),
-      getInsightReports(context.organizationId!, 'employer_hotspots', 1),
-      getInsightReports(context.organizationId!, 'steward_capacity', 1),
-      getInsightReports(context.organizationId!, 'arbitration_escalation', 1),
-      getInsightReports(context.organizationId!, 'executive_summary', 1),
-    ]);
-
-    const auditRefId = await auditAIInvocation({
-      userId: context.userId,
-      organizationId: context.organizationId,
-      origin: 'ai-insights-summary',
-      model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
-      dataClass: 'confidential',
+    const blocked = await guardAiFeature(AI_FEATURES.EXECUTIVE_INSIGHTS, {
+      userId: userId!,
+      organizationId: organizationId!,
     });
+    if (blocked) return blocked;
 
-    return standardSuccessResponse({
-      latestTrendForecast: trends[0] ?? null,
-      latestEmployerHotspots: hotspots[0] ?? null,
-      latestStewardCapacity: capacity[0] ?? null,
-      latestArbitrationEscalation: escalations[0] ?? null,
-      latestExecutiveSummary: summaries[0] ?? null,
-    }, {
-      aiGenerated: true,
-      reviewRequired: true,
-      source: 'ai',
-      model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
-      timestamp: new Date().toISOString(),
-      auditRefId,
-    });
-  } catch (_error) {
-    return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Failed to fetch insight summary',
-    );
-  }
-});
+    enforceAISafety({ origin: 'ai-insights-summary', action: 'GET', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'officer', dataClass: 'confidential' });
+
+    try {
+      const latest = await getLatestInsightReports(organizationId!);
+
+      const auditRefId = await auditAIInvocation({
+        userId: userId!,
+        organizationId: organizationId!,
+        origin: 'ai-insights-summary',
+        model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+        dataClass: 'confidential',
+      });
+
+      return standardSuccessResponse({
+        latestTrendForecast: latest.trendForecast,
+        latestEmployerHotspots: latest.employerHotspots,
+        latestStewardCapacity: latest.stewardCapacity,
+        latestArbitrationEscalation: latest.arbitrationEscalation,
+        latestExecutiveSummary: latest.executiveSummary,
+      }, {
+        aiGenerated: true,
+        reviewRequired: true,
+        source: 'ai',
+        model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+        timestamp: new Date().toISOString(),
+        auditRefId,
+      });
+    } catch (_error) {
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Failed to fetch insight summary',
+      );
+    }
+  },
+);

@@ -1,12 +1,14 @@
 import { z } from 'zod';
+import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { db } from '@/db/db';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
-import { externalDocumentAccessGrants } from '@/db/schema/representation-authority-schema';
-import { withExplicitUserContext } from '@/lib/db/with-rls-context';
+import { externalDocumentAccessGrants, externalMatterAccessGrants } from '@/db/schema/representation-authority-schema';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
 import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
+import { deriveExternalUploadGrant, EXTERNAL_UPLOAD_LABELS } from '@/lib/services/external-upload-authority';
 
 const documentBlobContainer = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
@@ -17,13 +19,7 @@ const externalUploadSchema = z.object({
   blobPath: z.string().min(1).optional(),
   documentType: z.string().min(1).max(120),
   mimeType: z.string().min(1).max(120),
-  privacyLabel: z.enum([
-    'team_confidential',
-    'lro_confidential',
-    'privileged',
-    'case_restricted',
-    'highly_sensitive',
-  ]).default('case_restricted'),
+  privacyLabel: z.enum(EXTERNAL_UPLOAD_LABELS).default('case_restricted'),
   fileSize: z.number().int().nonnegative().optional(),
 }).refine((value) => Boolean(value.blobPath || value.fileUrl), {
   message: 'blobPath or fileUrl is required',
@@ -34,6 +30,11 @@ export const POST = withExternalMatterResourceAuth(
   {
     requiredPermission: 'upload_documents',
     resolve: resolveExternalGrievanceResource,
+    // The upload writes its own record (document.external_upload); it is not a read.
+    readRecord: 'handler',
+    // The stored object is checked against storage before anything is written: only the authorization decision holds a transaction,
+    // and the write below opens its own.
+    transaction: 'authorization',
   },
   async (request, context) => {
     if (context.matterType !== 'grievance' || !context.actor.representativeOrganizationId) {
@@ -53,8 +54,49 @@ export const POST = withExternalMatterResourceAuth(
       fileUrl: parsed.data.fileUrl,
     });
 
-    const created = await withExplicitUserContext(context.actor.userId, async () => {
-      const [insertedDocument] = await db
+    const created = await withRLSContext({ organizationId: context.organizationId }, async (tx) => {
+      const [matterGrant] = await tx
+        .select()
+        .from(externalMatterAccessGrants)
+        .where(and(
+          eq(externalMatterAccessGrants.id, context.matterGrantId),
+          eq(externalMatterAccessGrants.authorityId, context.authorityId),
+          eq(externalMatterAccessGrants.organizationId, context.organizationId),
+          eq(externalMatterAccessGrants.userId, context.actor.userId),
+          eq(externalMatterAccessGrants.representativeOrganizationId, representativeOrganizationId),
+          eq(externalMatterAccessGrants.matterType, matterType),
+          eq(externalMatterAccessGrants.matterId, context.matterId),
+        ))
+        .limit(1);
+      const derived = deriveExternalUploadGrant({
+        actorUserId: context.actor.userId,
+        grant: matterGrant,
+        authorityId: context.authorityId,
+        matterGrantId: context.matterGrantId,
+        organizationId: context.organizationId,
+        representativeOrganizationId,
+        matterType,
+        matterId: context.matterId,
+      });
+      if (!derived.ok) return { forbidden: true as const };
+
+      // The representative names a stored object; nothing shows it is theirs. An object another record already holds (a document
+      // or a version of one) is some other matter's file, so it is never attached here through an upload.
+      const [heldByDocument] = await tx
+        .select({ id: documents.id })
+        .from(documents)
+        .where(and(eq(documents.organizationId, context.organizationId), eq(documents.blobPath, resolvedBlob.blobPath)))
+        .limit(1);
+      const [heldByVersion] = heldByDocument
+        ? []
+        : await tx
+            .select({ id: documentVersions.id })
+            .from(documentVersions)
+            .where(and(eq(documentVersions.organizationId, context.organizationId), eq(documentVersions.storageKey, resolvedBlob.blobPath)))
+            .limit(1);
+      if (heldByDocument || heldByVersion) return { conflict: true as const };
+
+      const [insertedDocument] = await tx
         .insert(documents)
         .values({
           organizationId: context.organizationId,
@@ -82,7 +124,7 @@ export const POST = withExternalMatterResourceAuth(
           name: documents.name,
         });
 
-      await db.insert(documentVersions).values({
+      await tx.insert(documentVersions).values({
         organizationId: context.organizationId,
         documentId: insertedDocument.id,
         versionNo: 1,
@@ -91,7 +133,7 @@ export const POST = withExternalMatterResourceAuth(
         uploadedBy: context.actor.userId,
       });
 
-      await db.insert(documentLinks).values({
+      await tx.insert(documentLinks).values({
         organizationId: context.organizationId,
         documentId: insertedDocument.id,
         linkedEntityType: 'grievance',
@@ -99,7 +141,7 @@ export const POST = withExternalMatterResourceAuth(
         linkedBy: context.actor.userId,
       });
 
-      await db.insert(externalDocumentAccessGrants).values({
+      await tx.insert(externalDocumentAccessGrants).values({
         authorityId: context.authorityId,
         matterGrantId: context.matterGrantId,
         organizationId: context.organizationId,
@@ -109,15 +151,34 @@ export const POST = withExternalMatterResourceAuth(
         matterId: context.matterId,
         documentId: insertedDocument.id,
         status: 'active',
-        canView: true,
-        canDownload: true,
-        canShare: false,
-        grantedBy: context.actor.userId,
+        canView: derived.grant.canView,
+        canDownload: derived.grant.canDownload,
+        canShare: derived.grant.canShare,
+        // The grant covers the one version this upload stored.
+        documentVersionNo: 1,
+        grantedBy: derived.grant.grantedBy,
       });
 
-      return insertedDocument;
-    }, context.organizationId);
+      // The document, its version, its link, the copied matter grant and this record commit together.
+      // Upload permission does not let the representative issue a download or a privilege label.
+      await persistAtomicAudit(tx, {
+        organizationId: context.organizationId,
+        userId: context.actor.userId,
+        action: 'document.external_upload',
+        resourceType: 'documents',
+        resourceId: insertedDocument.id,
+        details: { matterType, matterId: context.matterId, authorityId: context.authorityId, privacyLabel: parsed.data.privacyLabel },
+      });
 
-    return NextResponse.json({ data: { id: created.id, title: created.title ?? created.name } }, { status: 201 });
+      return { forbidden: false as const, conflict: false as const, document: insertedDocument };
+    });
+
+    if ('conflict' in created && created.conflict) {
+      return NextResponse.json({ error: 'The file is already attached to another record' }, { status: 409 });
+    }
+    if (created.forbidden) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    return NextResponse.json({ data: { id: created.document.id, title: created.document.title ?? created.document.name } }, { status: 201 });
   },
 );

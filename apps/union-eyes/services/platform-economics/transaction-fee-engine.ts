@@ -30,9 +30,10 @@ import {
 } from '@/db/schema'
 import { eq, and, lte, gte, isNull, or, desc, inArray } from 'drizzle-orm'
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import type { RLSTx } from '@/lib/db/with-rls-context'
 import { appendLedgerEntry } from './ledger-service'
 import { v4 as uuidv4 } from 'uuid'
-import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { insertWriteOwnedFeeAdjustment, type FeeAdjustmentInsert } from './fee-adjustment-insert'
 
 // ============================================================================
@@ -281,76 +282,77 @@ export async function evaluateFee(
 
 /**
  * Atomically capture a transaction fee event.
+ * The event, its ledger entry and its audit record commit together, so a retry of a half-written capture cannot find the event and skip the rest.
  * Idempotent: duplicate idempotencyKey is a no-op.
  */
 export async function captureTransactionFee(
   input: CaptureTransactionFeeInput,
 ): Promise<TransactionFeeEvent> {
-  // Check idempotency — if this key already exists, return existing
-  const [existing] = await db
-    .select()
-    .from(transactionFeeEvents)
-    .where(eq(transactionFeeEvents.idempotencyKey, input.idempotencyKey))
-    .limit(1)
+  return await db.transaction(async (tx) => {
+    // Check idempotency — if this key already exists, return existing
+    const [existing] = await tx
+      .select()
+      .from(transactionFeeEvents)
+      .where(eq(transactionFeeEvents.idempotencyKey, input.idempotencyKey))
+      .limit(1)
 
-  if (existing) return existing
+    if (existing) return existing
 
-  const [event] = await db
-    .insert(transactionFeeEvents)
-    .values({
+    const [event] = await tx
+      .insert(transactionFeeEvents)
+      .values({
+        organizationId: input.organizationId,
+        ruleId: input.ruleId,
+        contractId: input.contractId,
+        idempotencyKey: input.idempotencyKey,
+        sourceTransactionId: input.sourceTransactionId,
+        sourceTransactionType: input.sourceTransactionType,
+        grossAmountCad: input.grossAmountCad,
+        feeAmountCad: input.feeAmountCad,
+        netAmountCad: input.netAmountCad,
+        feeModel: input.feeModel,
+        percentageRateApplied: input.percentageRateApplied,
+        flatFeeApplied: input.flatFeeApplied,
+        billingPeriodId: input.billingPeriodId,
+        status: 'captured',
+        metadata: input.metadata,
+      })
+      .returning()
+
+    // Bridge fee capture into the canonical DAPL ledger
+    await appendLedgerEntry({
       organizationId: input.organizationId,
-      ruleId: input.ruleId,
-      contractId: input.contractId,
-      idempotencyKey: input.idempotencyKey,
-      sourceTransactionId: input.sourceTransactionId,
-      sourceTransactionType: input.sourceTransactionType,
-      grossAmountCad: input.grossAmountCad,
-      feeAmountCad: input.feeAmountCad,
-      netAmountCad: input.netAmountCad,
-      feeModel: input.feeModel,
-      percentageRateApplied: input.percentageRateApplied,
-      flatFeeApplied: input.flatFeeApplied,
       billingPeriodId: input.billingPeriodId,
-      status: 'captured',
-      metadata: input.metadata,
+      costType: 'transaction_fee',
+      eventType: 'fee_captured',
+      sourceType: 'transaction_fee',
+      sourceId: event.id,
+      unitPriceCad: input.feeAmountCad,
+      amountCad: input.feeAmountCad,
+      description: `Fee captured: ${input.sourceTransactionType} (${input.sourceTransactionId})`,
+      metadata: {
+        grossAmountCad: input.grossAmountCad,
+        netAmountCad: input.netAmountCad,
+        feeModel: input.feeModel,
+        ruleId: input.ruleId,
+      },
+    }, tx)
+
+    await persistAtomicAudit(tx as unknown as RLSTx, {
+      organizationId: input.organizationId,
+      action: 'fee_captured',
+      resourceType: 'transaction_fee_event',
+      resourceId: event.id,
+      details: {
+        sourceTransactionId: input.sourceTransactionId,
+        grossAmountCad: input.grossAmountCad,
+        feeAmountCad: input.feeAmountCad,
+        netAmountCad: input.netAmountCad,
+      },
     })
-    .returning()
 
-  // Bridge fee capture into the canonical DAPL ledger
-  await appendLedgerEntry({
-    organizationId: input.organizationId,
-    billingPeriodId: input.billingPeriodId,
-    costType: 'transaction_fee',
-    eventType: 'fee_captured',
-    sourceType: 'transaction_fee',
-    sourceId: event.id,
-    unitPriceCad: input.feeAmountCad,
-    amountCad: input.feeAmountCad,
-    description: `Fee captured: ${input.sourceTransactionType} (${input.sourceTransactionId})`,
-    metadata: {
-      grossAmountCad: input.grossAmountCad,
-      netAmountCad: input.netAmountCad,
-      feeModel: input.feeModel,
-      ruleId: input.ruleId,
-    },
+    return event
   })
-
-  await auditLog({
-    eventType: AuditEventType.DATA_CREATE,
-    severity: AuditSeverity.HIGH,
-    organizationId: input.organizationId,
-    resource: 'transaction_fee_event',
-    resourceId: event.id,
-    action: 'fee_captured',
-    metadata: {
-      sourceTransactionId: input.sourceTransactionId,
-      grossAmountCad: input.grossAmountCad,
-      feeAmountCad: input.feeAmountCad,
-      netAmountCad: input.netAmountCad,
-    },
-  })
-
-  return event
 }
 
 // ============================================================================
@@ -402,7 +404,7 @@ export async function reverseTransactionFee(
     const [updatedEvent] = await tx
       .update(transactionFeeEvents)
       .set({ status: newStatus })
-      .where(eq(transactionFeeEvents.id, feeEventId))
+      .where(and(eq(transactionFeeEvents.id, feeEventId), eq(transactionFeeEvents.organizationId, event.organizationId)))
       .returning()
 
     // Create reversal adjustment
@@ -416,11 +418,10 @@ export async function reverseTransactionFee(
       approvedBy,
       approvedAt: approvedBy ? new Date() : undefined,
     }
-    const adjustment = currentStateContextEnabled()
-      ? await insertWriteOwnedFeeAdjustment(tx, adjustmentInput)
-      : (await tx.insert(feeAdjustments).values(adjustmentInput).returning())[0]
+    // The write-owned helper never reads the row back (no RETURNING): the roles that record a reversal hold INSERT on fee_adjustments, not SELECT.
+    const adjustment = await insertWriteOwnedFeeAdjustment(tx, adjustmentInput)
 
-    // Bridge fee reversal into the canonical DAPL ledger as contra entry
+    // Bridge fee reversal into the canonical DAPL ledger as contra entry, in the same transaction as the adjustment it reverses
     await appendLedgerEntry({
       organizationId: event.organizationId,
       billingPeriodId: event.billingPeriodId ?? undefined,
@@ -439,17 +440,15 @@ export async function reverseTransactionFee(
         isPartial: !!partialRefundAmount,
       },
       createdBy: approvedBy,
-    })
+    }, tx)
 
-    await auditLog({
-      eventType: AuditEventType.DATA_UPDATE,
-      severity: AuditSeverity.HIGH,
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: event.organizationId,
-      resource: 'transaction_fee_event',
-      resourceId: feeEventId,
-      action: 'fee_reversed',
       userId: approvedBy,
-      metadata: {
+      action: 'fee_reversed',
+      resourceType: 'transaction_fee_event',
+      resourceId: feeEventId,
+      details: {
         reversalAmount: `-${reversalAmount}`,
         isPartial: !!partialRefundAmount,
         partialRefundAmount,
@@ -519,12 +518,22 @@ export async function createSettlementBatch(
       })
       .returning()
 
-    // Link events to batch and create settlement lines
-    const eventIds = events.map((e) => e.id)
-    await tx
-      .update(transactionFeeEvents)
-      .set({ settlementBatchId: batch.id })
-      .where(inArray(transactionFeeEvents.id, eventIds))
+    // Link events to batch and create settlement lines (each organization's events are updated under that organization)
+    const eventIdsByOrganization = new Map<string, string[]>()
+    for (const e of events) {
+      eventIdsByOrganization.set(e.organizationId, [...(eventIdsByOrganization.get(e.organizationId) ?? []), e.id])
+    }
+    for (const [organizationId, organizationEventIds] of eventIdsByOrganization) {
+      await tx
+        .update(transactionFeeEvents)
+        .set({ settlementBatchId: batch.id })
+        .where(
+          and(
+            inArray(transactionFeeEvents.id, organizationEventIds),
+            eq(transactionFeeEvents.organizationId, organizationId),
+          ),
+        )
+    }
 
     for (const e of events) {
       await tx.insert(feeSettlementLines).values({
@@ -572,11 +581,22 @@ export async function closeSettlementBatch(batchId: string, closedBy: string) {
       throw new Error(`Settlement batch ${batchId} not found or not open`)
     }
 
-    // Mark events as settled
-    await tx
-      .update(transactionFeeEvents)
-      .set({ status: 'settled' })
+    // Mark events as settled, one statement per organization represented in the batch
+    const batchEvents = await tx
+      .select({ organizationId: transactionFeeEvents.organizationId })
+      .from(transactionFeeEvents)
       .where(eq(transactionFeeEvents.settlementBatchId, batchId))
+    for (const organizationId of new Set(batchEvents.map((row) => row.organizationId))) {
+      await tx
+        .update(transactionFeeEvents)
+        .set({ status: 'settled' })
+        .where(
+          and(
+            eq(transactionFeeEvents.settlementBatchId, batchId),
+            eq(transactionFeeEvents.organizationId, organizationId),
+          ),
+        )
+    }
 
     await auditLog({
       eventType: AuditEventType.DATA_UPDATE,

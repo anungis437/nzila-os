@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   buildHazardCreateValues,
   generateReportNumber,
@@ -36,10 +37,9 @@ describe('health-safety/hazards route helpers', () => {
       }
     });
 
-    it('falls back to other/moderate for unrecognized values', () => {
-      const result = buildHazardCreateValues({ hazardType: 'unknown_type', priority: 'unknown_priority', location: 'Site A', description: 'desc' });
-      expect(result.hazardCategory).toBe('other');
-      expect(result.hazardLevel).toBe('moderate');
+    it('rejects unknown hazard types and priorities instead of silently downgrading safety severity', () => {
+      expect(() => buildHazardCreateValues({ hazardType: 'unknown_type', priority: 'low', location: 'Site A', description: 'desc' })).toThrow();
+      expect(() => buildHazardCreateValues({ hazardType: 'other', priority: 'unknown_priority', location: 'Site A', description: 'desc' })).toThrow();
     });
 
     it('maps location/description to schema column names', () => {
@@ -63,9 +63,10 @@ describe('health-safety/hazards route helpers', () => {
       expect(result.reportNumber).toMatch(/^HAZ-\d{4}-[0-9a-f-]{36}$/);
     });
 
-    it('preserves a client-supplied reportNumber', () => {
+    it('does not trust a client-supplied report number', () => {
       const result = buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: 'desc', reportNumber: 'HAZ-2020-000001' });
-      expect(result.reportNumber).toBe('HAZ-2020-000001');
+      expect(result.reportNumber).not.toBe('HAZ-2020-000001');
+      expect(result.reportNumber).toMatch(/^HAZ-\d{4}-[0-9a-f-]{36}$/);
     });
 
     it('suppresses reporter identity fields when isAnonymous is true', () => {
@@ -120,5 +121,14 @@ describe('health-safety/hazards route helpers', () => {
     it('rejects a submission with a whitespace-only description', () => {
       expect(() => buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: '   ' })).toThrow();
     });
+  });
+});
+
+
+describe('hazard item disclosure floor', () => {
+  it('requires health and safety representative authority for an individual hazard row', () => {
+    const itemRoute = readFileSync(new URL('../[id]/route.ts', import.meta.url), 'utf8');
+    expect(itemRoute).toContain("readRole: 'health_safety_rep'");
+    expect(itemRoute).not.toContain("readRole: 'member'");
   });
 });

@@ -1,30 +1,25 @@
-import { z } from 'zod';
+/**
+ * POST /api/onboarding/transfers
+ *
+ * Not implemented. This path advertises an operation of its own but was a wrapper over the onboarding events recorder behind a guard that always passes (nothing is transferred). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
+ */
+import { withApi, ApiError } from '@/lib/api/framework';
 
-import { POST as DelegatePOST } from '../events/route';
+export const dynamic = 'force-dynamic';
 
-const MutationBoundarySchema = z.object({ method: z.string() });
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Not implemented'],
+      summary: '/api/onboarding/transfers (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/onboarding/transfers is not implemented: it performed no operation of its own.');
+  },
+);
 
-function requireOrgAccess(_request: Request): boolean {
-  return true;
-}
-
-function validateMutationBoundary(request: Request): boolean {
-  return MutationBoundarySchema.safeParse({ method: request.method }).success;
-}
-
-function unauthorized(): Response {
-  return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-    status: 401,
-    headers: { 'content-type': 'application/json' },
-  });
-}
-
-export async function POST(request: Request, context: any) {
-  if (!requireOrgAccess(request)) {
-    return unauthorized();
-  }
-  if (!validateMutationBoundary(request)) {
-    return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
-  }
-  return DelegatePOST(request as never, context as never);
-}
+export const POST = handler;

@@ -13,6 +13,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   orgScoped: true,
   itemRoute: true,
   readRole: 'member',
+  // Internal notes and custom fields are the committee's working record, not a directory entry.
+  omitFromResponse: ['notes', 'customFields'],
   writeRole: 'steward',
 });
 export { GET, PATCH, DELETE };

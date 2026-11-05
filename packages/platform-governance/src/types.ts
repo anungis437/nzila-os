@@ -30,7 +30,7 @@ export interface AuditTimelineEntry {
 }
 
 export const auditTimelineEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   timestamp: z.string().datetime(),
   eventType: z.enum([
     'policy_evaluated',
@@ -49,7 +49,7 @@ export const auditTimelineEntrySchema = z.object({
   app: z.string().min(1),
   policyResult: z.enum(['pass', 'fail', 'warn']),
   commitHash: z.string().min(1),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 })
 
 // ── Governance Status ───────────────────────────────────

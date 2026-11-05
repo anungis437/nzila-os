@@ -1,4 +1,141 @@
 {
+  "workAidPage": {
+    "metaTitle": "WorkAid | UnionEyes",
+    "metaDescription": "Consenso, documenti e stato dei rinvii lato sindacato. Nulla su questa schermata viene inviato a un legale.",
+    "memberTitle": "Consenso WorkAid",
+    "memberSubtitle": "Rivedi il consenso per il tuo caso, i documenti che hai rilasciato e se è registrato un rinvio.",
+    "staffTitle": "Rinvio WorkAid",
+    "staffSubtitle": "Rinvia una pratica con consenso su un caso che sei autorizzato a gestire. L'identità del socio non è mostrata qui.",
+    "counselBoundary": "Questa schermata conserva solo un registro lato sindacato. Nessun sistema legale è collegato, quindi nulla qui viene trasmesso o accettato da un legale.",
+    "consentTextUnavailable": "Il consenso non può ancora essere acquisito. L'istituzione non ha registrato un testo approvato.",
+    "acknowledge": "Ho letto questo testo e accetto questo ambito.",
+    "grantConsent": "Registra il consenso",
+    "caseId": "Caso",
+    "matterId": "Pratica",
+    "purpose": "Finalità",
+    "expires": "Il consenso termina",
+    "categories": "Ambito",
+    "category": {
+      "case_summary": "Riepilogo del caso",
+      "case_timeline": "Cronologia del caso",
+      "documents": "Documenti che scelgo",
+      "member_identity": "La mia identità"
+    },
+    "loading": "Caricamento del tuo registro WorkAid…",
+    "emptyConsents": "Non hai alcun consenso WorkAid registrato.",
+    "status": "Stato",
+    "state": {
+      "live": "In vigore",
+      "revoked": "Revocato",
+      "expired": "Scaduto"
+    },
+    "referred": "È registrato un rinvio lato sindacato.",
+    "notReferred": "Nessun rinvio registrato.",
+    "withdrawn": "Il rinvio è stato ritirato.",
+    "counselAccepted": "Il registro conservato indica che un legale ha accettato questa pratica. Questa schermata non contatta comunque il legale.",
+    "counselNotAccepted": "Il legale non ha accettato questa pratica.",
+    "requiredIntake": "Un documento può essere rilasciato solo se questo consenso copre i documenti e il file è un tuo invio collegato a questo caso.",
+    "documentsTitle": "Rilascia un documento",
+    "documentsEmpty": "Nessun documento è autorizzato per questo consenso.",
+    "documentLive": "Visibile in base a questo consenso",
+    "documentRevoked": "Rilascio ritirato",
+    "revokeConsent": "Revoca il consenso",
+    "revokeDocument": "Ritira questo documento",
+    "documentId": "Documento",
+    "authoriseDocument": "Autorizza questo documento",
+    "staffCaseLabel": "Caso da esaminare",
+    "loadReferable": "Mostra le pratiche che puoi rinviare",
+    "referableEmpty": "Nessuna pratica con consenso è pronta per il rinvio per questo caso.",
+    "refer": "Registra il rinvio",
+    "recordedUnionSide": "Registrato solo lato sindacato. Nulla è stato inviato a un legale.",
+    "revoked": "Il ritiro è stato registrato.",
+    "refusal": "Rifiutato",
+    "referOwn": "Rinvia questa pratica",
+    "recordedTitle": "Rinvii registrati",
+    "recordedEmpty": "Nessun rinvio registrato per questo caso.",
+    "referredScope": "Ambito di questo rinvio",
+    "releasedScope": "Rilasciato lato sindacato",
+    "releasedNone": "Nessuna categoria è stata rilasciata lato sindacato.",
+    "releaseScope": "Rilascia questo ambito",
+    "notDelivered": "Nulla di questo rinvio viene trasmesso a un legale.",
+    "documentsStayWithMember": "I documenti restano al socio che li ha autorizzati. Questa schermata non rilascia documenti.",
+    "memberReleased": "Rilasciato lato sindacato",
+    "memberReleaseNone": "Nessuna categoria è stata rilasciata. Nulla viene trasmesso a un legale.",
+    "scopeUnavailable": "Le categorie rinviate non possono essere verificate. Non vengono prese dal consenso più ampio.",
+    "scopeConflict": "L'ambito del rinvio conservato non corrisponde al suo registro di audit. Nessuna categoria è mostrata come rinviata.",
+    "releaseChoose": "Categorie da rilasciare ora",
+    "releasePreview": "Questo rilascio conterrà",
+    "releaseConfirm": "Confermo il rilascio esattamente di queste categorie.",
+    "historyTitle": "Cronologia dei rilasci",
+    "historyEmpty": "Nessun rilascio lato sindacato registrato.",
+    "historyReleased": "Rilasciato",
+    "historyCategoriesUnavailable": "Le categorie di questo rilascio non possono essere lette.",
+    "historyEffective": "Ancora rilasciato all'interno del sistema sindacale",
+    "historyWithdrawnState": "Ritirato all'interno del sistema sindacale",
+    "notDeliveredEvent": "Non consegnato a un legale",
+    "deliveredToCounsel": "Consegnato a un legale",
+    "notAcknowledgedEvent": "Non confermato da un legale",
+    "acknowledgedByCounsel": "Confermato da un legale",
+    "notificationNotSent": "Nessuna notifica è stata inviata. Nessuna politica adottata richiede un avviso WorkAid.",
+    "notificationSent": "È stata inviata una notifica.",
+    "wordingTitle": "Testo del consenso",
+    "wordingIntro": "Proponi il testo esatto approvato dall'istituzione. Un altro dirigente lo adotta. Fino ad allora, i soci non possono registrare il consenso.",
+    "wordingVersion": "Versione",
+    "wordingBody": "Testo",
+    "wordingPropose": "Proponi il testo",
+    "wordingAdopt": "Adotta questo testo",
+    "wordingWithdraw": "Ritira questa proposta",
+    "wordingEmpty": "Nessuna proposta di testo è in attesa di un secondo dirigente.",
+    "wordingProposed": "La proposta è stata registrata. Non è il testo del consenso finché un altro dirigente non la adotta.",
+    "wordingAdopted": "Il testo è ora il testo di consenso corrente.",
+    "wordingWithdrawn": "La proposta è stata ritirata. Non è il testo del consenso.",
+    "wordingUnavailable": "L'adozione del testo non è installata su questo database.",
+    "openJourney": "Consenso e rinvio WorkAid"
+  },
+  "memberDocuments": {
+    "title": "I miei documenti",
+    "description": "I documenti che hai caricato e quelli che il tuo sindacato condivide con i membri.",
+    "emptyTitle": "Nessun documento al momento",
+    "emptyBody": "I documenti che carichi nei tuoi casi e quelli condivisi dal sindacato con tutti i membri compaiono qui.",
+    "loadError": "Impossibile caricare i tuoi documenti. Riprova.",
+    "retry": "Riprova",
+    "download": "Scarica",
+    "downloadUnavailable": "Questo file non è disponibile per il download al momento.",
+    "sourceOwn": "Il tuo documento",
+    "sourceShared": "Condiviso dal tuo sindacato"
+  },
+  "memberProfile": {
+    "title": "Profilo",
+    "readOnlyNotice": "Le tue informazioni personali sono mostrate qui sotto. Per modificare nome, email o telefono, o per richiedere una copia dei tuoi dati o modifiche al tuo account, contatta l'amministratore del tuo sindacato."
+  },
+  "claimsPage": {
+    "metaTitle": "Casi | UnionEyes",
+    "metaDescription": "Segui i casi di rappresentanza e il loro stato.",
+    "memberTitle": "La mia rappresentanza",
+    "memberSubtitle": "Segui i casi che hai aperto e il loro stato",
+    "memberNewAction": "Apri un caso di rappresentanza",
+    "memberEmptyTitle": "Nessun caso al momento",
+    "memberEmptyBody": "I casi che apri compaiono qui.",
+    "memberEmptyAction": "Apri il tuo primo caso",
+    "staffTitle": "Reclami",
+    "staffSubtitle": "Monitora e gestisci i reclami presentati",
+    "staffNewAction": "Nuovo reclamo",
+    "staffEmptyTitle": "Nessun reclamo al momento",
+    "staffEmptyBody": "I reclami compaiono qui dopo l'invio da parte di membri o delegati.",
+    "staffEmptyAction": "Presenta il primo reclamo",
+    "retry": "Riprova",
+    "loadError": "Impossibile caricare i casi",
+    "columnCaseNumber": "N. caso",
+    "columnType": "Tipo",
+    "columnStatus": "Stato",
+    "columnPriority": "Priorità",
+    "columnSubmitted": "Inviato il",
+    "viewCase": "Apri caso",
+    "notAvailableTitle": "Caso non disponibile",
+    "notAvailableBody": "Questo caso non esiste oppure non hai accesso.",
+    "deadlineUnavailableTitle": "Scadenze di deposito",
+    "deadlineUnavailableBody": "Il calcolo delle scadenze non è ancora disponibile. Il tuo rappresentante confermerà le scadenze di deposito applicabili a questo caso."
+  },
   "workspaceNav": {
     "metaTitle": "Area di lavoro | UnionEyes",
     "metaDescription": "Una superficie di lavoro per il sindacato.",
@@ -59,6 +196,9 @@
   },
   "common": {
     "appName": "UnionEyes",
+    "daily": "Giornaliero",
+    "weekly": "Settimanale",
+    "monthly": "Mensile",
     "loading": "Caricamento...",
     "save": "Salva",
     "cancel": "Annulla",
@@ -171,7 +311,7 @@
   "dashboard": {
     "welcome": "Welcome back",
     "overview": "",
-    "recentActivity": "",
+    "recentActivity": "Attività recente",
     "quickActions": "",
     "statistics": "",
     "welcomeMessage": "",
@@ -286,7 +426,7 @@
       },
       "history": {
         "title": "Storico dei Pagamenti",
-        "description": "Visualizza i tuoi pagamenti delle quote passati e scarica le ricevute",
+        "description": "Visualizza i tuoi pagamenti delle quote passati e apri le ricevute",
         "loading": "Caricamento dello storico dei pagamenti...",
         "empty": "Nessuno storico dei pagamenti disponibile",
         "columns": {
@@ -419,6 +559,8 @@
     "assignedDescription": "Sei l'ufficiale delle relazioni sindacali assegnato a questo caso. Aggiorna lo stato e aggiungi note man mano che il caso procede.",
     "incidentInfo": "Informazioni sull'Incidente",
     "incidentDate": "Data dell'Incidente",
+    "incidentDateNotRecorded": "Non registrata",
+    "notRecorded": "Non indicato",
     "location": "Luogo",
     "submittedBy": "Inviato dal Membro",
     "lastUpdated": "Ultimo Aggiornamento",
@@ -432,6 +574,9 @@
     "submitSuccess": "Caso Creato con Successo!",
     "submitSuccessMessage": "Il tuo caso è stato ricevuto e assegnato a un rappresentante sindacale.",
     "redirecting": "Reindirizzamento ai tuoi casi...",
+    "transcriptionFailed": "Non è stato possibile trascrivere la registrazione. Inserisci la descrizione manualmente.",
+    "microphoneAccessDenied": "Impossibile accedere al microfono. Consenti l'accesso al microfono e riprova.",
+    "attachmentsPartial": "Il tuo caso è stato inviato, ma {count} allegato/i non sono stati caricati. Apri il caso per riprovare.",
     "submitNewCase": "Crea un Nuovo Caso",
     "tellUsWhat": "Dicci cosa è successo. Il tuo sindacato è qui per aiutarti.",
     "voiceRecording": "Registrazione Vocale (Opzionale)",
@@ -1016,7 +1161,6 @@
     "partiesInvolved": "Parti Coinvolte",
     "partyLabels": {
       "grievant": "Ricorrente",
-      "steward": "Rappresentante sindacale",
       "management": "Gestione"
     },
     "contractViolation": "Violazione del contratto",
@@ -1175,6 +1319,13 @@
     "split": "Decisione Divisa",
     "dismissed": "Respinto"
   },
+  "notificationBell": {
+    "title": "Notifiche",
+    "none": "Notifiche, nessuna non letta",
+    "unread": "Notifiche, {count, plural, one {# non letta} other {# non lette}}",
+    "stale": "Notifiche, {count, plural, one {# non letta} other {# non lette}} (aggiornamento non riuscito, il dato può essere obsoleto)",
+    "failed": "Notifiche, impossibile caricare il numero di notifiche non lette"
+  },
   "notifications": {
     "title": "Notifiche",
     "subtitle": "Rimani aggiornato su casi, scadenze e attività sindacali",
@@ -1204,7 +1355,18 @@
     "hoursAgo": "{hours}h fa",
     "daysAgo": "{days}g fa",
     "daysLeft": "{days} giorni rimasti",
+    "loadFailed": "Impossibile caricare le notifiche",
+    "markReadFailed": "Impossibile segnare la notifica come letta",
+    "markAllReadFailed": "Impossibile segnare le notifiche come lette",
+    "deleteFailed": "Impossibile eliminare la notifica",
+    "matching": "corrispondenti ai filtri",
+    "showingNewest": "Mostrate le {shown} notifiche più recenti su {total}",
+    "preferencesLink": "Preferenze di notifica",
     "types": {
+      "info": "Info",
+      "success": "Successo",
+      "warning": "Avviso",
+      "error": "Errore",
       "caseUpdate": "Aggiornamento caso",
       "deadline": "Scadenza",
       "grievance": "Reclamo",
@@ -1452,6 +1614,14 @@
     }
   },
   "duesReceiptPage": {
+    "statusLabel": "Stato",
+    "retryButton": "Riprova",
+    "status": {
+      "posted": "Registrato",
+      "pending": "In sospeso",
+      "reversed": "Stornato",
+      "voided": "Annullato"
+    },
     "paymentReceiptTitle": "Ricevuta di Pagamento",
     "issuedPrefix": "Emesso",
     "memberInformationTitle": "Informazioni sul Membro",
@@ -1826,9 +1996,6 @@
     "bargainingSummary": {
       "collectiveAgreementsTitle": "Accordi Collettivi",
       "totalCbas": "Totale CBA",
-      "settlementsAndGrievancesTitle": "Accordi e Reclami",
-      "totalSettlements": "Accordi Totali",
-      "settlementValue": "Valore del Regolamento",
       "grievancesResolved": "Controversie Risolte"
     },
     "table": {
@@ -1838,8 +2005,7 @@
       "tickets": "Biglietti",
       "sectors": "Settori",
       "status": "Stato",
-      "active": "Attivo",
-      "logins30d": "Accessi (30g)"
+      "active": "Attivo"
     },
     "organizationsTab": {
       "title": "Tutte le Organizzazioni"
@@ -1850,10 +2016,7 @@
       "totalGrievances": "Totale Controversie",
       "openGrievances": "Aperte (Presentate / In Investigazione / Escalate / Mediazione)",
       "inArbitration": "In Arbitrato",
-      "resolvedSettled": "Risolte / Regolate",
-      "settlementSummaryTitle": "Riepilogo del Regolamento",
-      "totalMonetaryValue": "Valore Monetario Totale",
-      "averageSettlement": "Regolamento Medio"
+      "resolvedSettled": "Risolte / Regolate"
     },
     "empty": {
       "overview": "Nessun dato di settore disponibile. Le organizzazioni devono avere settori assegnati.",
@@ -1866,6 +2029,7 @@
       "notFound": "Campagna non trovata",
       "fetchFailed": "Impossibile recuperare la campagna",
       "sendFailed": "Invio della campagna fallito",
+      "sendUnavailable": "L'invio delle campagne non è ancora disponibile. Nessun messaggio è stato inviato.",
       "deleteFailed": "Eliminazione della campagna fallita"
     },
     "backButton": "Torna alle Campagne",
@@ -1887,13 +2051,14 @@
     "channels": {
       "email": "Email",
       "sms": "SMS",
-      "push": "Push"
+      "push": "Push",
+      "multi_channel": "Multi-Canale"
     },
     "types": {
       "broadcast": "Trasmissione",
-      "campaign": "Campagna",
-      "newsletter": "Newsletter",
-      "alert": "Avviso"
+      "sequence": "Sequenza",
+      "triggered": "Attivata",
+      "transactional": "Transazionale"
     },
     "stats": {
       "audience": {
@@ -2246,74 +2411,24 @@
       "timelineEvents": "Eventi della Cronologia:"
     }
   },
+  "platformUsageTelemetry": {
+    "title": "La telemetria di utilizzo non viene raccolta",
+    "body": "Union Eyes non registra le visualizzazioni di pagina, gli accessi né l'adozione delle funzionalità, quindi i dati di utilizzo non vengono mostrati. Gli altri dati di questa pagina sono letti dal database."
+  },
   "analyticsAdminPage": {
     "title": "Analisi della Piattaforma",
-    "subtitle": "Analisi trasversale dell'organizzazione, modelli di utilizzo e adozione delle funzionalità",
+    "subtitle": "Analisi trasversale tra organizzazioni",
     "tabs": {
       "overview": "Panoramica",
-      "organizations": "Organizzazioni",
-      "usage": "Utilizzo",
-      "features": "Funzionalità"
-    },
-    "common": {
-      "acrossAllModules": "In tutti i moduli",
-      "durationMinutesSeconds": "{minutes}m {seconds}s"
-    },
-    "overview": {
-      "organizationsTitle": "Organizzazioni",
-      "totalMembers": "{count} membri totali",
-      "activeUsers30dTitle": "Utenti Attivi (30g)",
-      "fromPrevious30d": "{value}% rispetto ai 30g precedenti",
-      "pageViews30dTitle": "Visualizzazioni di Pagina (30g)",
-      "featuresTrackedTitle": "Funzionalità Monitorate",
-      "usageByModuleTitle": "Utilizzo per Modulo (30g)",
-      "viewsWithAvg": "{views} visualizzazioni · {seconds}s media",
-      "keyMetricsTitle": "Metriche Chiave"
-    },
-    "metrics": {
-      "logins30d": "Accessi (30g)",
-      "loginGrowth": "Crescita degli Accessi",
-      "avgSessionDuration": "Durata Media della Sessione",
-      "casesFiled": "Casi Presentati",
-      "activeAgreements": "Accordi Attivi"
+      "organizations": "Organizzazioni"
     },
     "organizations": {
       "title": "Approfondimenti sull'Organizzazione",
       "table": {
         "organization": "Organizzazione",
         "type": "Tipo",
-        "members": "Membri",
-        "activeUsers": "Utenti Attivi",
-        "pageViews": "Visualizzazioni di Pagina",
-        "logins": "Accessi",
-        "features": "Funzionalità",
-        "avgSession": "Sessione Media"
+        "members": "Membri"
       }
-    },
-    "usage": {
-      "totalLogins30dTitle": "Accessi Totali (30 giorni)",
-      "vsPreviousPeriod": "{value}% rispetto al periodo precedente",
-      "loginMethodsTitle": "Metodi di Accesso",
-      "loginMethodCount": "{count} ({percent}%)",
-      "modulePageViewsTitle": "Visualizzazioni di Pagina del Modulo (30 giorni)",
-      "avgSeconds": "({seconds}s media)"
-    },
-    "features": {
-      "filteredByModule": "Filtrato per modulo:",
-      "title": "Adozione delle Funzionalità",
-      "table": {
-        "feature": "Funzionalità",
-        "module": "Modulo",
-        "totalUsage": "Utilizzo Totale",
-        "activeUsers": "Utenti Attivi",
-        "orgs": "Organizzazioni",
-        "firstUsed": "Primo Utilizzo",
-        "lastUsed": "Ultimo Utilizzo",
-        "adoption": "Adozione"
-      },
-      "orgCountOfTotal": "{count}/{total}",
-      "moduleSummaryTitle": "Riepilogo del Modulo",
-      "moduleSummaryDetail": "{features} funzionalità · {users} utenti"
     },
     "platformSummary": {
       "title": "Riepilogo della Piattaforma",
@@ -2735,45 +2850,21 @@
     "metaDescription": "Accedi a UnionEyes per pratiche, intelligence e servizi ai membri.",
     "appName": "UnionEyes",
     "tagline": "Un sistema decisionale per la leadership sindacale",
-    "subtitle": "Dall'accoglienza al risultato - pratiche, intelligence e servizi ai membri in un unico sistema.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Sezioni locali",
-      "membersValue": "50K+",
-      "membersLabel": "Membri",
-      "uptimeValue": "99,9%",
-      "uptimeLabel": "Disponibilità"
-    }
+    "subtitle": "Dall'accoglienza al risultato - pratiche, intelligence e servizi ai membri in un unico sistema."
   },
   "signInPage": {
     "metaTitle": "Accedi | UnionEyes",
     "metaDescription": "Accedi a UnionEyes - la piattaforma intelligente per le relazioni sindacali per sindacati, sezioni locali e federazioni.",
     "appName": "UnionEyes",
     "tagline": "Intelligenza sindacale semplificata",
-    "subtitle": "Monitoraggio dei reclami, gestione degli arbitrati, analisi delle contrattazioni collettive e servizi ai membri - progettato appositamente per i sindacati.",
-    "stats": {
-      "rolesValue": "35+",
-      "rolesLabel": "Ruoli sindacali",
-      "languagesValue": "6",
-      "languagesLabel": "Lingue",
-      "uptimeValue": "99,9%",
-      "uptimeLabel": "Disponibilità"
-    }
+    "subtitle": "Monitoraggio dei reclami, gestione degli arbitrati, analisi delle contrattazioni collettive e servizi ai membri - progettato appositamente per i sindacati."
   },
   "signUpPage": {
     "metaTitle": "Registrati | UnionEyes",
     "metaDescription": "Crea il tuo account UnionEyes per accedere a pratiche, intelligence e servizi per i membri.",
     "appName": "UnionEyes",
     "tagline": "Un Sistema Decisionale per la Leadership Sindacale",
-    "subtitle": "Dall'accoglienza al risultato - pratiche, intelligence e servizi per i membri in un unico sistema.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Sezioni locali",
-      "membersValue": "50K+",
-      "membersLabel": "Membri",
-      "uptimeValue": "99,9%",
-      "uptimeLabel": "Disponibilità"
-    }
+    "subtitle": "Dall'accoglienza al risultato - pratiche, intelligence e servizi per i membri in un unico sistema."
   },
   "adminMembersPage": {
     "metaTitle": "Amministrazione Membri | UnionEyes",
@@ -2992,7 +3083,6 @@
   "adminOrganizationsPage": {
     "title": "Organizzazioni",
     "subtitle": "Gestisci la tua gerarchia organizzativa",
-    "bulkImportButton": "Importazione Massiva",
     "addOrganizationButton": "Aggiungi Organizzazione",
     "totalOrganizations": "Totale Organizzazioni",
     "activeOrganizations": "Attive",
@@ -3064,6 +3154,7 @@
     "parentOrganizationLabel": "Organizzazione Madre",
     "noParentOption": "Nessuna madre (organizzazione radice)",
     "parentChangeWarning": "Cambiare la madre potrebbe influire sui permessi di accesso per i membri",
+    "notSetOption": "Non impostato",
     "classificationTitle": "Classificazione",
     "classificationDescription": "Informazioni su settore e giurisdizione",
     "primarySectorLabel": "Settore Primario",
@@ -3269,15 +3360,7 @@
     "metaDescription": "Crea il tuo account UnionEyes - unisciti alla piattaforma intelligente per le relazioni sindacali.",
     "appName": "UnionEyes",
     "tagline": "Intelligenza del lavoro resa semplice",
-    "subtitle": "Monitoraggio dei reclami, gestione delle arbitrati, analisi delle contrattazioni collettive e servizi ai membri - progettato appositamente per i sindacati.",
-    "stats": {
-      "localsValue": "200+",
-      "localsLabel": "Sezioni locali",
-      "membersValue": "50K+",
-      "membersLabel": "Membri",
-      "uptimeValue": "99,9%",
-      "uptimeLabel": "Disponibilità"
-    }
+    "subtitle": "Monitoraggio dei reclami, gestione delle arbitrati, analisi delle contrattazioni collettive e servizi ai membri - progettato appositamente per i sindacati."
   },
   "employerRemittanceRunDetailPage": {
     "metaTitle": "Dettagli Esecuzione Versamento | UnionEyes",
@@ -3385,11 +3468,6 @@
       "noEmail": "Nessuna email",
       "fullName": "Nome Completo"
     },
-    "claimsCard": {
-      "title": "Reclami Assegnati",
-      "description": "Reclami attualmente assegnati a questo utente",
-      "none": "Nessun reclamo assegnato a questo utente"
-    },
     "dbCard": {
       "title": "Passaggi di Integrazione del Database",
       "description": "Come collegare il tuo utente autenticato ai dati di test",
@@ -3400,6 +3478,7 @@
     }
   },
   "financeInvoicesPage": {
+    "loadMore": "Carica altre fatture",
     "title": "Fatture",
     "empty": "Nessuna fattura generata ancora",
     "errors": {
@@ -3716,54 +3795,11 @@
   "movementInsightsExportPage": {
     "metadata": {
       "title": "Esportazione Sintesi Legislativa",
-      "description": "Genera esportazioni di sintesi legislative da approfondimenti sui movimenti anonimizzati."
+      "description": "Questa esportazione non è disponibile in questa versione."
     },
     "header": {
       "title": "Sintesi Legislativa",
-      "description": "Esporta approfondimenti anonimizzati per il lavoro di advocacy e politica",
       "backToInsights": "Torna agli Approfondimenti"
-    },
-    "preview": {
-      "exportPdf": "Esporta PDF",
-      "keyFindings": "Risultati Chiave",
-      "recommendations": "Raccomandazioni",
-      "dataSourceLabel": "Fonte Dati:"
-    },
-    "customize": {
-      "title": "Personalizza Sintesi",
-      "description": "Filtra gli approfondimenti per area di interesse, giurisdizione o periodo di tempo",
-      "focusAreaLabel": "Area di Interesse",
-      "focusAreaOptions": {
-        "workplaceDisputes": "Controversie sul Lavoro",
-        "healthcare": "Sanità",
-        "education": "Istruzione",
-        "publicSector": "Settore Pubblico"
-      },
-      "jurisdictionLabel": "Giurisdizione",
-      "jurisdictionOptions": {
-        "allCanada": "Tutto il Canada",
-        "ontario": "Ontario",
-        "quebec": "Quebec"
-      }
-    },
-    "usage": {
-      "title": "Come Utilizzare Questa Sintesi",
-      "unionLeadership": {
-        "label": "Per la Leadership Sindacale:",
-        "text": "Utilizza questi approfondimenti nella pianificazione strategica, nelle negoziazioni contrattuali e nelle comunicazioni con i membri."
-      },
-      "clcAdvocacy": {
-        "label": "Per l'Advocacy del CLC:",
-        "text": "Riferisci i dati anonimizzati nelle presentazioni legislative, nei documenti politici e nei rapporti pubblici."
-      },
-      "mediaRelations": {
-        "label": "Per le Relazioni con i Media:",
-        "text": "Cita le tendenze intersindacali per dimostrare problemi sistemici sul posto di lavoro che richiedono soluzioni politiche."
-      },
-      "note": {
-        "label": "Nota:",
-        "text": "Tutti i dati sono anonimizzati. Nessuna organizzazione o membro individuale può essere identificato. Sono richiesti un minimo di 5 sindacati e 10 casi per tutte le metriche."
-      }
     }
   },
   "movementInsightsPage": {
@@ -3864,50 +3900,6 @@
       "afterLink": "Solo tu e il tuo rappresentante assegnato potete vedere questi dettagli."
     }
   },
-  "payPage": {
-    "header": {
-      "title": "Inizia con Pro",
-      "subtitle": "Acquista ora e crea il tuo account in seguito"
-    },
-    "billing": {
-      "monthly": "Mensile",
-      "yearly": "Annuale"
-    },
-    "pricing": {
-      "save": "Risparmia {percentage}% ({amount})",
-      "planTitle": "Piano Pro",
-      "planDescription": "Tutto ciò di cui il tuo sindacato ha bisogno per gestire reclami, membri e advocacy.",
-      "month": "mese",
-      "year": "anno",
-      "billedAnnually": "Fatturato annualmente"
-    },
-    "form": {
-      "emailLabel": "Indirizzo email",
-      "emailPlaceholder": "tuo@email.com"
-    },
-    "actions": {
-      "processing": "Elaborazione...",
-      "upgrade": "Aggiorna a Pro"
-    },
-    "benefits": {
-      "title": "Vantaggi",
-      "aiCredits": "1.000 crediti AI per ciclo di fatturazione",
-      "aiTriage": "Smistamento e redazione dei casi con AI",
-      "precedentResearch": "Ricerca di precedenti ed estrazione CBA",
-      "claimsToolkit": "Kit completo per reclami e arbitrati",
-      "teamCollaboration": "Collaborazione in team multi-ruolo",
-      "prioritySupport": "Supporto prioritario da specialisti del lavoro"
-    },
-    "errors": {
-      "invalidEmail": "Inserisci un indirizzo email valido",
-      "checkoutFailed": "Creazione del checkout non riuscita. Riprova.",
-      "untrustedCheckoutUrl": "URL di checkout non attendibile",
-      "unexpected": "Si è verificato un errore imprevisto. Riprova."
-    },
-    "footer": {
-      "disclaimer": "Procedendo, potrai creare il tuo account dopo il pagamento. Il tuo acquisto sarà collegato al tuo indirizzo email."
-    }
-  },
   "compliancePage": {
     "header": {
       "title": "Dashboard di Conformità del Datore di Lavoro",
@@ -3954,6 +3946,7 @@
     }
   },
   "distributionListsPage": {
+    "onThisPage": "in questa pagina",
     "errors": {
       "fetchFailed": "Impossibile recuperare le liste di distribuzione"
     },
@@ -4316,9 +4309,8 @@
     }
   },
   "settings": {
-    "loadUnavailable": "Settings could not be loaded. Default values are not being presented as saved data.",
-    "retryLoad": "Try again",
-
+    "loadUnavailable": "Impossibile caricare le impostazioni. I valori predefiniti non vengono presentati come dati salvati.",
+    "retryLoad": "Riprova",
     "title": "Impostazioni dell'organizzazione",
     "subtitle": "Gestisci la configurazione del tuo sindacato",
     "adminOnly": "Solo amministratori",
@@ -4434,7 +4426,9 @@
     "languages": {
       "en": "Inglese",
       "fr": "Francese",
-      "es": "Español"
+      "es": "Español",
+      "it": "Italiano",
+      "pt": "Portoghese"
     },
     "months": {
       "january": "Gennaio",
@@ -4626,6 +4620,11 @@
     "noActiveVotesMessage": "Controlla più tardi per i prossimi voti e schede.",
     "noUpcomingVotes": "Nessun voto imminente",
     "noUpcomingVotesMessage": "Resta sintonizzato per i voti programmati.",
+    "paused": "In pausa",
+    "cancelled": "Annullato",
+    "castYourVote": "Esprimi il tuo voto",
+    "resultsWithheld": "I risultati sono pubblicati dal responsabile elettorale dopo la chiusura del voto.",
+    "voteStatusUnknown": "Non è stato possibile confermare se hai già votato in questa votazione, quindi il voto non è disponibile finché non sarà possibile verificarlo.",
     "ballotBuilder": {
       "title": "Configurazione Scheda Elettorale",
       "ballotTitle": "Titolo Scheda Elettorale",
@@ -5067,9 +5066,15 @@
     "memberContact": "Informazioni di contatto del membro",
     "caseNotes": "Note del caso ({count})",
     "addCaseNote": "Aggiungi nota al caso",
+    "caseNotesLoading": "Caricamento delle note del caso…",
+    "caseNotesUnavailable": "Impossibile caricare le note del caso. Chiudi e riapri il caso per riprovare.",
     "addNotePlaceholder": "Inserisci la tua nota o aggiornamento...",
     "addNote": "Aggiungi Nota",
     "assignToMe": "Assegna a Me",
+    "restrictedMember": "Pratica riservata",
+    "restrictedMatterNotice": "Non hai l'autorità a livello di pratica per questo caso. Vengono mostrati solo i dettagli di triage.",
+    "assignDenied": "Non sei autorizzato ad assegnare questa pratica.",
+    "actionFailed": "Impossibile completare l'azione. Riprova.",
     "viewFullDetails": "Visualizza Dettagli Completi",
     "updateStatusLabel": "Aggiorna Stato…",
     "statusOptions": {
@@ -5458,6 +5463,7 @@
     "severityPlaceholder": "Gravità",
     "statusPlaceholder": "Stato",
     "thisPeriod": "Questo periodo",
+    "totalIncidents": "Totale incidenti",
     "trendsTab": "Tendenze",
     "underInvestigation": "In fase di indagine"
   },
@@ -5628,7 +5634,7 @@
     "followUpDesc": "Imposta un promemoria per seguire questo membro",
     "followUpTitle": "Follow-up",
     "interactionDateLabel": "Data dell'Interazione *",
-    "memberIdHelper": "L'ID utente Clerk del membro a cui si riferisce questa nota",
+    "memberIdHelper": "L'ID utente del membro a cui si riferisce questa nota",
     "memberIdLabel": "ID Membro *",
     "memberIdPlaceholder": "Inserisci l'ID utente del membro",
     "noteContentDesc": "Cosa è successo durante questa interazione",
@@ -5689,6 +5695,10 @@
     "createdDateLabel": "Creato il {date}",
     "priorityLabel": "Priorità {priority}",
     "unknownBadge": "Sconosciuto",
+    "loadFailedTitle": "Impossibile caricare i dettagli del membro",
+    "retryButton": "Riprova",
+    "claimsLoadFailed": "Impossibile caricare i reclami",
+    "noClaimNumber": "Nessun numero di reclamo",
     "role": {
       "member": "Membro",
       "steward": "Delegato",
@@ -5729,6 +5739,7 @@
     "keyIssuesLabel": "Questioni Chiave"
   },
   "communicationsCampaignsPage": {
+    "onThisPage": "in questa pagina",
     "title": "Campagne",
     "subtitle": "Gestisci e traccia le tue campagne di comunicazione",
     "failedToFetchCampaigns": "Impossibile recuperare le campagne",
@@ -5780,9 +5791,9 @@
       "multi_channel": "Multi-Canale"
     },
     "type": {
-      "campaign": "Campagna",
-      "announcement": "Annuncio",
-      "alert": "Avviso",
+      "broadcast": "Trasmissione",
+      "sequence": "Sequenza",
+      "triggered": "Attivata",
       "transactional": "Transazionale"
     }
   },
@@ -5794,31 +5805,26 @@
     "descriptionLabel": "Descrizione",
     "campaignDescriptionPlaceholder": "Breve descrizione di questa campagna",
     "campaignTypeLabel": "Tipo di campagna",
-    "typeOptionCampaign": "Campagna - Campagna di marketing o organizzazione regolare",
-    "typeOptionAnnouncement": "Annuncio - Notizie o aggiornamenti importanti",
-    "typeOptionAlert": "Allerta - Informazioni urgenti o sensibili al tempo",
-    "typeOptionTransactional": "Transazionale - Risposta all'azione dell'utente",
+    "typeOptionBroadcast": "Trasmissione - Un messaggio inviato una sola volta a un pubblico",
+    "typeOptionTransactional": "Transazionale - Un avviso di sistema, come un promemoria della quota",
     "channelLabel": "Canale",
     "channelOptionEmail": "Email",
     "channelOptionSms": "SMS",
     "channelOptionPush": "Notifica push",
     "channelOptionMulti": "Multi-Canale (Email + SMS + Push)",
     "selectAudienceTitle": "Seleziona il pubblico",
-    "selectAudienceDescription": "Scegli chi riceverà questa campagna",
-    "segmentIntegrationNote": "La selezione del segmento sarà integrata con il database dei membri. Per ora, la campagna sarà indirizzata a tutti i membri idonei.",
+    "selectAudienceDescription": "Scegli il segmento di membri salvato a cui è destinata questa campagna",
     "segmentLabel": "Segmento (Opzionale)",
     "selectSegmentPlaceholder": "Seleziona un segmento",
-    "segmentOptionAll": "Tutti i membri",
-    "segmentOptionActive": "Membri attivi",
-    "segmentOptionInactive": "Membri inattivi",
-    "segmentOptionNew": "Nuovi membri (Ultimi 30 giorni)",
-    "estimatedAudienceLabel": "Pubblico Stimato",
-    "testModeLabel": "Modalità di test (invia solo agli amministratori)",
+    "segmentOptionNone": "Nessun segmento (pubblico non impostato)",
+    "segmentsLoadError": "Impossibile caricare i segmenti di membri salvati",
+    "segmentsNone": "Questa organizzazione non ha ancora segmenti di membri salvati, quindi la bozza viene salvata senza un pubblico.",
     "campaignContentTitle": "Contenuto della Campagna",
     "campaignContentDescription": "Scegli un modello o scrivi contenuti personalizzati",
     "templateLabel": "Modello (Opzionale)",
     "selectTemplatePlaceholder": "Seleziona un modello",
     "customContentOption": "Contenuto Personalizzato",
+    "templatesNone": "Non esistono ancora modelli per questo canale.",
     "subjectLineLabel": "Oggetto",
     "subjectLinePlaceholder": "Inserisci l'oggetto dell'email",
     "messageLabel": "Messaggio",
@@ -5827,25 +5833,20 @@
     "charactersLabel": "caratteri",
     "trackOpensLabel": "Traccia aperture email",
     "trackClicksLabel": "Traccia clic sui link",
-    "scheduleCampaignTitle": "Pianifica Campagna",
-    "scheduleCampaignDescription": "Scegli quando inviare la tua campagna",
-    "sendNowOption": "Invia immediatamente dopo la creazione",
-    "scheduleForLaterOption": "Pianifica per dopo",
-    "scheduleDateTimeLabel": "Data e Ora di Pianificazione",
     "reviewCampaignTitle": "Rivedi Campagna",
-    "reviewCampaignDescription": "Rivedi i dettagli della tua campagna prima di inviare",
+    "reviewCampaignDescription": "Rivedi i dettagli della tua campagna prima di salvare la bozza",
     "campaignInformationLabel": "Informazioni sulla Campagna",
     "nameLabel": "Nome",
     "typeLabel": "Tipo",
     "contentLabel": "Contenuto",
     "subjectLabel": "Oggetto",
-    "scheduleLabel": "Programma",
-    "sendImmediatelyLabel": "Invia immediatamente",
-    "scheduledForLabel": "Programmato per",
-    "testModeDescription": "Questa campagna sarà inviata solo agli amministratori.",
+    "audienceLabel": "Pubblico",
+    "audienceNotSet": "Non impostato",
+    "sendingLabel": "Invio",
     "backToCampaignsButton": "Torna alle Campagne",
     "createCampaignTitle": "Crea Nuova Campagna",
-    "createCampaignDescription": "Segui i passaggi per creare e lanciare la tua campagna",
+    "createCampaignDescription": "Segui i passaggi per salvare una bozza di campagna",
+    "draftNotice": "Le campagne vengono salvate come bozze. In questa versione non viene inviato nulla.",
     "fetchTemplatesError": "Impossibile recuperare i modelli",
     "previousButton": "Precedente",
     "nextButton": "Successivo",
@@ -5853,12 +5854,12 @@
     "stepBasicInfo": "Informazioni di base",
     "stepContent": "Contenuto",
     "stepReview": "Revisione",
-    "stepSchedule": "Programma",
-    "creatingStatus": "Creazione in corso...",
-    "createCampaignButton": "Crea Campagna",
+    "creatingStatus": "Salvataggio in corso...",
+    "createCampaignButton": "Salva bozza",
     "createCampaignError": "Impossibile creare la campagna"
   },
   "communicationsTemplatesPage": {
+    "onThisPage": "in questa pagina",
     "title": "Modelli di Messaggio",
     "subtitle": "Crea e gestisci modelli riutilizzabili per le tue campagne",
     "failedToFetchTemplates": "Impossibile recuperare i modelli",
@@ -7093,6 +7094,8 @@
     "locationPlaceholder": "es., Sezione B, Piano 2",
     "witnesses": "Testimoni (Opzionale)",
     "witnessesPlaceholder": "Nomi di eventuali testimoni",
+    "fileAnonymously": "Presenta in forma anonima",
+    "fileAnonymouslyHelp": "Il tuo nome e i tuoi recapiti sono visibili solo a te e ai rappresentanti che seguono direttamente il tuo caso.",
     "supportingDocs": "Documenti di Supporto (Opzionale)",
     "uploadInstructions": "Clicca per caricare o trascina e rilascia",
     "uploadFormats": "PDF, DOC, JPG, PNG fino a 10MB",
@@ -7433,10 +7436,6 @@
     "pricing": {
       "heroHeading": "Distribuzione basata su contratto",
       "heroDescription": "UnionEyes viene distribuito tramite contratti governati — non abbonamenti self-service. I prezzi sono definiti in base alla tua organizzazione, ai tuoi moduli e al tuo piano di implementazione.",
-      "monthly": "Mensile",
-      "yearly": "Annuale",
-      "perMonth": "/ mese",
-      "perYear": "/ anno",
       "getStarted": "Inizia un pilot",
       "pageTitle": "Prezzi e Distribuzione | UnionEyes",
       "pageDescription": "Prezzi di distribuzione basati su contratto per i sindacati canadesi. Fatturazione a livello di genitore con allocazione locale."
@@ -7785,7 +7784,7 @@
         "encryptionTitle": "Crittografia",
         "encryptionDesc": "Tutti i dati sono crittografati in transito utilizzando TLS 1.2+ e a riposo utilizzando AES-256. Le connessioni al database sono crittografate end-to-end. Segreti e chiavi API sono archiviati in Azure Key Vault — mai nel codice sorgente o nei file di ambiente.",
         "accessControlTitle": "Controllo di Accesso",
-        "accessControlDesc": "UnionEyes utilizza il controllo di accesso basato sui ruoli (RBAC) per garantire che i membri vedano solo ciò che sono autorizzati a vedere. L'autenticazione è gestita da Clerk con supporto per l'autenticazione a più fattori. Le query al database sono delimitate per organizzazione per imporre un isolamento rigoroso dei dati tra i sindacati.",
+        "accessControlDesc": "UnionEyes utilizza il controllo di accesso basato sui ruoli (RBAC) per garantire che i membri vedano solo ciò che sono autorizzati a vedere. L'autenticazione è gestita dal provider di identità configurato, con autenticazione a più fattori dove abilitata. Le query al database sono delimitate per organizzazione per imporre un isolamento rigoroso dei dati tra i sindacati.",
         "infrastructureTitle": "Infrastruttura",
         "infrastructureDesc": "UnionEyes è ospitato su Microsoft Azure nei centri dati canadesi, garantendo che i tuoi dati rimangano all'interno della giurisdizione canadese. Utilizziamo l'isolamento dei container, la scansione automatizzata della sicurezza delle dipendenze e delle immagini Docker, e applichiamo intestazioni di Content Security Policy rigorose su tutte le applicazioni.",
         "monitoringTitle": "Monitoraggio e Audit",
@@ -8552,7 +8551,6 @@
     "reservedMatters": "Questioni Riservate",
     "auditTrail": "Traccia di Audit",
     "eventsLogged": "Eventi Registrati (30 giorni)",
-    "archivedEvents": "Eventi Archiviati",
     "retentionPolicy": "Politica di Conservazione",
     "auditLogDescription": "Tutte le azioni del sistema sono registrate in modo immutabile. I registri di audit non possono essere modificati o eliminati, solo archiviati dopo il periodo di conservazione.",
     "technicalImplementation": "Implementazione Tecnica",
@@ -8631,8 +8629,10 @@
       "filterPending": "In sospeso",
       "noResultsSearch": "Nessun membro corrisponde alla tua ricerca",
       "noResultsEmpty": "Nessun membro trovato",
-      "offlineBanner": "Modalità offline - visualizzazione dati memorizzati nella cache",
-      "unsyncedCount": "{count}"
+      "offlineBanner": "Sei offline. L'elenco dei membri non può essere aggiornato.",
+      "loadFailed": "Impossibile caricare i membri.",
+      "showing": "Visualizzati {shown} membri su {total}",
+      "loadMore": "Mostra altri"
     },
     "claims": {
       "title": "Richieste",
@@ -8781,51 +8781,6 @@
       "assignButton": "Assegna"
     }
   },
-  "billing": {
-    "upgradePlan": {
-      "title": "Passa a Pro",
-      "subtitle": "Hai usato tutti i tuoi crediti ({used}/{total}). Ottieni di più con Pro.",
-      "monthly": "Mensile",
-      "yearly": "Annuale",
-      "save33": "Risparmia 33%",
-      "monthlyPrice": "$30",
-      "yearlyPrice": "$249",
-      "yearlyPriceMonthly": "$20",
-      "perMonth": "/mese",
-      "billedAnnually": "Billed annually at {price}",
-      "billedMonthly": "Fatturato mensilmente, annullabile in qualsiasi momento",
-      "benefit1": "1.000 crediti AI per ciclo di fatturazione",
-      "benefit2": "Smistamento e redazione dei reclami potenziati da AI",
-      "benefit3": "Ricerca precedente e estrazione CBA",
-      "benefit4": "Supporto prioritario da specialisti del lavoro",
-      "configError": "Rilevato un problema di configurazione. Visita la pagina dei prezzi per completare l'acquisto.",
-      "checkoutFailed": "Creazione del checkout non riuscita. Riprova più tardi.",
-      "checkoutFailedRetry": "Creazione del checkout non riuscita. Riprova.",
-      "untrustedUrl": "URL di checkout non attendibile",
-      "unexpectedError": "Si è verificato un errore imprevisto. Riprova più tardi.",
-      "getProYearly": "Ottieni Pro Annuale",
-      "getProMonthly": "Ottieni Pro Mensile",
-      "processing": "Elaborazione...",
-      "nextFreeRenewal": "Next free renewal",
-      "close": "Chiudi"
-    },
-    "paymentSuccess": {
-      "title": "Pagamento Riuscito!",
-      "subtitleYearly": "Grazie per aver effettuato l'upgrade a Pro Annuale",
-      "subtitleMonthly": "Grazie per aver effettuato l'upgrade a Pro Mensile",
-      "planActive": "Il tuo Piano Pro è Attivo!",
-      "refresh": "Aggiorna",
-      "credits": "Crediti",
-      "creditsRenewOn": "I crediti si rinnovano il",
-      "notAvailable": "N/D",
-      "planIncludes": "Il tuo Piano Pro Include:",
-      "benefit1": "{count} credits every billing cycle",
-      "benefit2": "Accesso a tutte le funzionalità premium",
-      "benefit3": "Supporto prioritario",
-      "benefit4": "Analisi avanzate ed esportazioni",
-      "closeLabel": "Get Started with Pro"
-    }
-  },
   "unionStructure": {
     "bargainingUnits": {
       "title": "Unità di Contrattazione",
@@ -8924,29 +8879,6 @@
       "orgStructureDescription": "Rappresentazione visiva della gerarchia organizzativa del tuo sindacato"
     }
   },
-  "onboarding": {
-    "welcome": {
-      "title": "Benvenuto!",
-      "subtitle": "Grazie per esserti unito a noi! Siamo entusiasti di averti qui.",
-      "freePlanActive": "Il tuo Piano Gratuito è Attivo!",
-      "proPlanActive": "Il tuo Piano Pro è Attivo!",
-      "credits": "Crediti",
-      "nextRenewal": "Next renewal",
-      "freePlanIncludes": "Il tuo Piano Gratuito Include:",
-      "proPlanIncludes": "Il tuo Piano Pro Include:",
-      "freeBenefit1": "{count} free credits every {period}",
-      "freeBenefit2": "Accesso alle funzionalità di base",
-      "freeBenefit3": "Rinnovi automatici dei crediti",
-      "freeBenefit4": "Passa a Pro in qualsiasi momento per più crediti",
-      "proBenefit1": "{count} credits every billing cycle",
-      "proBenefit2": "Accesso a tutte le funzionalità premium",
-      "proBenefit3": "Supporto prioritario",
-      "proBenefit4": "Analisi avanzate",
-      "getStarted": "Iniziamo",
-      "viewProPlans": "Visualizza piani Pro",
-      "closeLabel": "Chiudi messaggio di benvenuto"
-    }
-  },
   "platform": {
     "goodMorning": "Buongiorno",
     "goodAfternoon": "Buon pomeriggio",
@@ -8973,7 +8905,7 @@
     "customerSuccess": "Successo del cliente",
     "onboardingRetention": "Onboarding e fidelizzazione",
     "platformAnalytics": "Analisi della piattaforma",
-    "usageGrowthEngagement": "Utilizzo, crescita e coinvolgimento",
+    "platformAnalyticsDescription": "Organizzazioni, membri, reclami e accordi",
     "billingSubscriptions": "Fatturazione e abbonamenti",
     "revenuePlanManagement": "Gestione delle entrate e dei piani",
     "browseOrganizations": "Sfoglia organizzazioni",
@@ -9179,7 +9111,8 @@
     "disabledStatus": "L'autenticazione a due fattori non è abilitata",
     "disabledBody": "Aggiungere un secondo fattore rende molto più difficile per qualcuno accedere come te, anche se la tua password è compromessa.",
     "preparingButton": "Preparazione in corso...",
-    "enableAction": "Abilita l'autenticazione a due fattori"
+    "enableAction": "Abilita l'autenticazione a due fattori",
+    "qrUnavailable": "Non è stato possibile mostrare il codice QR su questo dispositivo. Inserisci manualmente il segreto di configurazione qui sotto nella tua app di autenticazione."
   },
   "headerNav": {
     "home": "Home",
@@ -9260,8 +9193,6 @@
     "pipelineOpen": "Aperti",
     "pipelineArbitration": "In Arbitrato",
     "pipelineResolved": "Risolti",
-    "settlementsLabel": "Accordi",
-    "currencyAmount": "${value}",
     "ticketBreakdownTitle": "Ripartizione dei Ticket",
     "byCategoryTitle": "Per Categoria",
     "byChannelTitle": "Per Canale",
@@ -9285,14 +9216,12 @@
     "tableChannel": "Canale",
     "tableAssigned": "Assegnato",
     "tableRating": "Valutazione",
-    "tableSettlement": "Risoluzione",
     "tableFiled": "Archiviato",
     "tableOpenTickets": "Ticket aperti",
     "tableResolvedTickets": "Ticket risolti",
     "tableSatisfaction": "Soddisfazione",
     "tableActiveCases": "Casi attivi",
     "tableResolvedGrievances": "Reclami Risolti",
-    "settlementValue": "${value} ({status})",
     "supportByOrganizationTitle": "Supporto per Organizzazione",
     "emptyDash": "—"
   },
@@ -9361,7 +9290,6 @@
     "tabOverview": "Panoramica",
     "tabHealth": "Salute del Cliente",
     "tabOnboarding": "Onboarding",
-    "tabAdoption": "Adozione",
     "tabFeedback": "Feedback e NPS",
     "organizationsTitle": "Organizzazioni",
     "activeMembersLabel": "{active} attivi · {members} membri",
@@ -9373,29 +9301,22 @@
     "healthScoreThreshold": "punteggio di salute < 60",
     "customerHealthTitle": "Salute del Cliente",
     "healthScoresByOrg": "Punteggi di salute per organizzazione",
-    "orgMembersLoginsLabel": "{members} membri · {logins} accessi (30g)",
+    "orgMembersLabel": "{members} membri",
     "platformAdoptionTitle": "Adozione della Piattaforma",
-    "moduleUsageDescription": "Utilizzo dei moduli sulla piattaforma",
     "cbasTitle": "CBA",
     "activeNegotiatingLabel": "{active} attivi · {negotiating} in negoziazione",
     "grievancesTitle": "Reclami",
     "openResolvedLabel": "{open} aperti · {resolved} risolti",
-    "settlementsTitle": "Accordi",
-    "settlementTotalLabel": "${amount} totale",
-    "featuresUsedTitle": "Funzionalità Utilizzate",
-    "acrossModulesLabel": "attraverso {count} moduli",
     "cbaHealthTitle": "Salute CBA",
     "statusActive": "Attivo",
     "statusNegotiating": "In Negoziazione",
     "statusExpired": "Scaduto",
     "customerHealthScoresTitle": "Punteggi di Salute del Cliente",
-    "customerHealthScoresDescription": "Punteggio composito basato su attività, soddisfazione, coinvolgimento e stato",
+    "customerHealthScoresDescription": "Punteggio composito calcolato sui segnali registrati: stato dell'organizzazione, membri attivi, NPS, affiliazione al CLC e reclami aperti",
     "tableOrganization": "Organizzazione",
     "tableType": "Tipo",
     "tableHealth": "Salute",
     "tableMembers": "Membri",
-    "tableLogins30d": "Accessi (30g)",
-    "tablePageViews30d": "Visualizzazioni di Pagina (30g)",
     "tableOpenTickets": "Ticket Aperti",
     "tableSatisfaction": "Soddisfazione",
     "tableNps": "NPS",
@@ -9405,19 +9326,6 @@
     "openCount": "{count} aperti",
     "resolvedCount": "{count} risolti",
     "milestonesCompletedLabel": "{completed}/{total} traguardi completati",
-    "totalFeaturesTitle": "Funzionalità Totali",
-    "modulesActiveTitle": "Moduli Attivi",
-    "totalUsageEventsTitle": "Eventi di Utilizzo Totali",
-    "avgOrgCoverageTitle": "Copertura Media dell'Organizzazione",
-    "orgsSuffix": "organizzazioni",
-    "featureAdoptionTitle": "Adozione delle Funzionalità",
-    "featureAdoptionDescription": "Utilizzo sulla piattaforma per funzionalità",
-    "tableFeature": "Funzionalità",
-    "tableModule": "Modulo",
-    "tableUsageCount": "Conteggio Utilizzo",
-    "tableActiveUsers": "Utenti Attivi",
-    "tableOrgCoverage": "Copertura dell'Organizzazione",
-    "orgCoverageCount": "{count} organizzazione{count, plural, one {} other {i}}",
     "npsExcellent": "Eccellente",
     "npsGood": "Buono",
     "npsFair": "Discreto",
@@ -9952,6 +9860,13 @@
     "runBenchmark": "Esegui Benchmark",
     "computing": "Calcolo del benchmark...",
     "errorLoad": "Calcolo del benchmark fallito",
+    "errorSave": "Salvataggio dello snapshot non riuscito",
+    "errorHistory": "Caricamento della cronologia degli snapshot non riuscito",
+    "comparability": {
+      "exact": "Esatta",
+      "approximate": "Approssimativa",
+      "insufficient_confidence": "Bassa affidabilità"
+    },
     "summary": {
       "comparables": "Comparabili",
       "wageP25": "Salario P25",
@@ -9995,11 +9910,11 @@
       "allReviews": "Tutte le revisioni"
     },
     "reviewStatuses": {
-      "pending": "In sospeso",
+      "pending_review": "In attesa di revisione",
       "approved": "Approvato",
       "rejected": "Rifiutato",
-      "needs_revision": "Necessita di revisione",
-      "auto_approved": "Approvato automaticamente"
+      "needs_followup": "Richiede follow-up",
+      "superseded": "Sostituito"
     },
     "table": {
       "agreement": "Accordo",
@@ -10048,8 +9963,9 @@
         "confidence": "Affidabilità",
         "review": "Revisione"
       }
-    },
-    "vendorList": {
+    }
+  },
+  "vendorList": {
       "title": "Fornitori",
       "description": "Gestisci la directory dei fornitori",
       "addVendor": "Aggiungi Fornitore",
@@ -10301,6 +10217,9 @@
       "loading": "Caricamento note...",
       "empty": "Ancora nessuna nota della sessione",
       "emptyHint": "Aggiungi note dalle sessioni di contrattazione per tracciare le discussioni",
+      "loadFailed": "Impossibile caricare le note della sessione.",
+      "noAgreement": "Questa negoziazione non ha un accordo collegato, quindi non ci sono note della sessione da mostrare.",
+      "showing": "Visualizzate le {shown} note più recenti su {total}",
       "attendees": "{count} partecipanti",
       "view": "Visualizza",
       "sessionTypes": {
@@ -10474,6 +10393,7 @@
       },
       "fallbackName": "Personale",
       "defaultOrgName": "Congresso del Lavoro Canadese",
+      "loadFailed": "Impossibile caricare le organizzazioni affiliate.",
       "subtitle": "Operazioni Nazionali",
       "kpis": {
         "affiliates": {
@@ -10562,6 +10482,7 @@
       },
       "fallbackName": "Personale",
       "defaultProvince": "Federazione Provinciale",
+      "loadFailed": "Impossibile caricare le sezioni affiliate.",
       "subtitle": "Operazioni della Federazione",
       "kpis": {
         "locals": {
@@ -10702,8 +10623,7 @@
         "title": "Corrispondenze di Precedenti per Giurisdizione",
         "description": "Distribuzione delle corrispondenze di precedenti tra le giurisdizioni del lavoro"
       }
-    }
-  },
+    },
   "analyticsDashboard": {
     "title": "Dashboard Analitico",
     "subtitle": "Monitora le metriche chiave e le intuizioni per la tua organizzazione",
@@ -10747,6 +10667,7 @@
     },
     "confidence": "fiducia",
     "anomaliesDetected": "{count} anomalie rilevate",
+    "noTrends": "Nessuna analisi delle tendenze è stata ancora calcolata per la tua organizzazione.",
     "viewDetails": "Visualizza dettagli",
     "noFlagsFound": "Nessun flag trovato"
   },
@@ -10857,6 +10778,65 @@
     }
   },
   "rewards": {
+    "peer": {
+      "pageTitle": "Riconosci un collega",
+      "pageDescription": "Candida un collega per un riconoscimento. Un amministratore esamina ogni candidatura prima che venga assegnato qualcosa.",
+      "noPrograms": "Nessun programma di riconoscimento",
+      "noProgramsDescription": "La tua organizzazione non ha ancora creato un programma di riconoscimento.",
+      "noActivePrograms": "Nessun programma di riconoscimento attivo",
+      "noActiveProgramsDescription": "Le candidature si aprono quando un amministratore attiva un programma.",
+      "noPeerAwards": "Nessun premio tra colleghi accetta ancora candidature.",
+      "noPeerAwardsDescription": "Le candidature si aprono quando un amministratore aggiunge un premio tra colleghi al programma.",
+      "title": "Candida un collega",
+      "description": "Raccontaci cosa ha fatto. Un amministratore approva o rifiuta la candidatura e i crediti vengono assegnati solo se viene approvata.",
+      "recipient": "Collega",
+      "selectRecipient": "Seleziona un collega",
+      "noMembers": "Non ci sono colleghi da candidare",
+      "awardType": "Premio",
+      "selectAwardType": "Seleziona un premio",
+      "message": "Perché lo merita?",
+      "messagePlaceholder": "Descrivi cosa ha fatto...",
+      "cancel": "Annulla",
+      "submit": "Invia candidatura",
+      "submitting": "Invio in corso...",
+      "success": "La tua candidatura è stata inviata per la revisione. Un amministratore la approverà o la rifiuterà.",
+      "validation": {
+        "allFieldsRequired": "Scegli un collega e un premio e spiega perché (massimo 500 caratteri)."
+      },
+      "error": {
+        "submit": "Non è stato possibile inviare la candidatura."
+      }
+    },
+    "review": {
+      "nominatedBy": "Candidato da",
+      "reason": "Motivo",
+      "failed": "Non è stato possibile completare l'azione.",
+      "rejectReason": "Motivo del rifiuto",
+      "rejectReasonPlaceholder": "Spiega il motivo a chi ha fatto la candidatura",
+      "confirmReject": "Conferma il rifiuto",
+      "cancel": "Annulla",
+      "create": {
+        "button": "Crea premio",
+        "title": "Crea un premio",
+        "description": "Assegna un premio a un membro. Segue la stessa approvazione di qualsiasi altro premio.",
+        "recipient": "Membro",
+        "selectRecipient": "Seleziona un membro",
+        "awardType": "Premio",
+        "selectAwardType": "Seleziona un premio",
+        "reason": "Motivo",
+        "reasonPlaceholder": "Perché questo membro riceve il premio?",
+        "cancel": "Annulla",
+        "submit": "Crea premio",
+        "invalid": "Scegli un membro e un premio e indica un motivo.",
+        "failed": "Non è stato possibile creare il premio.",
+        "unavailable": "Attiva prima un programma e aggiungi un tipo di premio."
+      }
+    },
+    "redemption": {
+      "recorded": "La tua richiesta di riscatto è stata registrata e {credits} crediti sono stati detratti dal tuo saldo.",
+      "noProgramTitle": "Il riscatto non è ancora disponibile",
+      "noProgramDescription": "La tua organizzazione non ha un programma premi attivo, quindi non c'è nulla per cui riscattare i crediti."
+    },
     "wallet": {
       "title": "Il Mio Portafoglio Premi",
       "description": "Visualizza i tuoi crediti premio e riscattali per prodotti e servizi",
@@ -10928,7 +10908,7 @@
         "notesPlaceholder": "",
         "submitShopify": "",
         "submitManual": "",
-        "noBalance": "",
+        "noBalance": "Hai bisogno di crediti per riscattare",
         "errors": {
           "invalidAmount": "",
           "insufficientBalance": "",
@@ -11364,93 +11344,373 @@
   },
   "experienceNavigation": {
     "close_navigation": "Close navigation",
-  "workspace": "Workspace",
-  "home": "Home",
-  "my_cases": "My Cases",
-  "open_representation_case": "Open Representation Case",
-  "messages": "Messages",
-  "documents": "Documents",
-  "profile_settings": "Profile & Settings",
-  "operations_casework_console": "Operations (Casework Console)",
-  "operations_queue_representation_cases": "Operations Queue (Representation Cases)",
-  "operations_priorities_commitments_deadlines": "Operations Priorities (Commitments & Deadlines)",
-  "members": "Members",
-  "operations_communications": "Operations Communications",
-  "institutional_intelligence_reports": "Institutional Intelligence Reports",
-  "notifications": "Notifications",
-  "ocra_intelligence_executive_overview": "OCRA Intelligence (Executive Overview)",
-  "ocra_signals_continuity_insights": "OCRA Signals (Continuity Insights)",
-  "operations_continuity": "Operations Continuity",
-  "governance_continuity": "Governance Continuity",
-  "operations_outcomes_member_outcomes_ledger": "Operations Outcomes (Member Outcomes Ledger)",
-  "onboarding_survivability_leadership_continuity": "Onboarding Survivability (Leadership Continuity)",
-  "governance_trust_oversight": "Governance Trust & Oversight",
-  "governance_continuity_overview": "Governance Continuity Overview",
-  "governance_trust_explainability": "Governance Trust & Explainability",
-  "governance_continuity_review": "Governance Continuity Review",
-  "ocra_continuity_signals": "OCRA Continuity Signals",
-  "governance_audit_evidence": "Governance Audit & Evidence",
-  "organization": "Organization",
-  "users_roles": "Users & Roles",
-  "pilot_configuration": "Pilot Configuration",
-  "policies": "Policies",
-  "audit": "Audit",
-  "security": "Security",
-  "exports": "Exports",
-  "integrations": "Integrations",
-  "system_status": "System Status",
-  "operations": "Operations",
-  "settings": "Settings",
-  "ocra": "OCRA",
-  "more": "More",
-  "role_execution_navigation": "Role execution navigation",
-  "role_execution_destinations": "Role execution destinations",
-  "this_menu_is_your_role_execution_home_workspace_is_the_orientation_hub": "This menu is your role execution home. Workspace is the orientation hub.",
-  "open_workspace_orientation_hub": "Open Workspace orientation hub",
-  "the_intelligence_destination_is_a_role_execution_home_not_a_workspace_tab": "The Intelligence destination is a role execution home, not a Workspace tab.",
-  "orientation_hub": "Orientation hub",
-  "orientation_hub_and_role_home": "Orientation hub and role home",
-  "role_execution_home": "Role execution home",
-  "role_execution_home_not_a_workspace_tab": "Role execution home. Not a Workspace tab.",
-  "not_a_workspace_tab": "Not a Workspace tab",
-  "collapse_sidebar": "Collapse sidebar",
-  "expand_sidebar": "Expand sidebar",
-  "profile": "Profile",
-  "viewing": "Viewing"
-},
+    "workspace": "Workspace",
+    "home": "Home",
+    "my_representation": "La mia rappresentanza",
+    "my_documents": "I miei documenti",
+    "my_union": "Il mio sindacato",
+    "help_resources": "Aiuto e risorse",
+    "preferences": "Preferenze",
+    "privacy": "Privacy",
+    "account": "Account",
+    "my_cases": "My Cases",
+    "open_representation_case": "Open Representation Case",
+    "messages": "Messages",
+    "documents": "Documents",
+    "profile_settings": "Profile & Settings",
+    "today": "Today",
+    "representation": "Rappresentanza",
+    "members_workplaces": "Membri e luoghi di lavoro",
+    "communications": "Comunicazioni",
+    "documents_evidence": "Documenti e prove",
+    "tasks_deadlines": "Attività e scadenze",
+    "knowledge_guidance": "Conoscenza e orientamento",
+    "operations_casework_console": "Operations (Casework Console)",
+    "operations_queue_representation_cases": "Operations Queue (Representation Cases)",
+    "operations_priorities_commitments_deadlines": "Operations Priorities (Commitments & Deadlines)",
+    "members": "Members",
+    "operations_communications": "Operations Communications",
+    "institutional_intelligence_reports": "Institutional Intelligence Reports",
+    "notifications": "Notifications",
+    "members_service": "Members & Service",
+    "governance_organization": "Governance & Organization",
+    "bargaining_collective_action": "Bargaining & Collective Action",
+    "finance_resources": "Finance & Resources",
+    "communications_relations": "Communications & Relations",
+    "continuity_intelligence": "Continuity & Intelligence",
+    "ocra_intelligence_executive_overview": "OCRA Intelligence (Executive Overview)",
+    "ocra_signals_continuity_insights": "OCRA Signals (Continuity Insights)",
+    "operations_continuity": "Operations Continuity",
+    "governance_continuity": "Governance Continuity",
+    "operations_outcomes_member_outcomes_ledger": "Operations Outcomes (Member Outcomes Ledger)",
+    "onboarding_survivability_leadership_continuity": "Onboarding Survivability (Leadership Continuity)",
+    "governance_trust_oversight": "Governance Trust & Oversight",
+    "governance_continuity_overview": "Governance Continuity Overview",
+    "governance_trust_explainability": "Governance Trust & Explainability",
+    "governance_continuity_review": "Governance Continuity Review",
+    "ocra_continuity_signals": "OCRA Continuity Signals",
+    "governance_audit_evidence": "Governance Audit & Evidence",
+    "organization": "Organization",
+    "users_roles": "Users & Roles",
+    "pilot_configuration": "Pilot Configuration",
+    "policies": "Policies",
+    "audit": "Audit",
+    "security": "Security",
+    "exports": "Exports",
+    "integrations": "Integrations",
+    "system_status": "System Status",
+    "operations": "Operations",
+    "settings": "Settings",
+    "ocra": "OCRA",
+    "more": "More",
+    "role_execution_navigation": "Role execution navigation",
+    "role_execution_destinations": "Role execution destinations",
+    "this_menu_is_your_role_execution_home_workspace_is_the_orientation_hub": "This menu is your role execution home. Workspace is the orientation hub.",
+    "open_workspace_orientation_hub": "Open Workspace orientation hub",
+    "the_intelligence_destination_is_a_role_execution_home_not_a_workspace_tab": "The Intelligence destination is a role execution home, not a Workspace tab.",
+    "orientation_hub": "Orientation hub",
+    "orientation_hub_and_role_home": "Orientation hub and role home",
+    "role_execution_home": "Role execution home",
+    "role_execution_home_not_a_workspace_tab": "Role execution home. Not a Workspace tab.",
+    "not_a_workspace_tab": "Not a Workspace tab",
+    "collapse_sidebar": "Collapse sidebar",
+    "expand_sidebar": "Expand sidebar",
+    "profile": "Profile",
+    "viewing": "Viewing"
+  },
   "experiencePrivacy": {
     "close": "Close",
-  "text0": "We value your privacy",
-  "text1": "We use cookies to enhance your experience, analyze site traffic, and personalize content. You can customize your preferences or accept all cookies.",
-  "text2": "Customize",
-  "text3": "Reject All",
-  "text4": "Accept All",
-  "text5": "Cookie Preferences",
-  "text6": "Manage your cookie preferences. Essential cookies cannot be disabled as they are required for the website to function.",
-  "text7": "Overview",
-  "text8": "Details",
-  "text9": "Essential Cookies",
-  "text10": "Functional Cookies",
-  "text11": "Analytics Cookies",
-  "text12": "Marketing Cookies",
-  "text13": "Required for the website to function properly. These cannot be disabled.",
-  "text14": "Enable enhanced features like language preferences and personalization.",
-  "text15": "Help us understand how visitors interact with our website through anonymized data.",
-  "text16": "Used to deliver personalized advertisements and measure campaign effectiveness.",
-  "text17": "For more information, please read our",
-  "text18": "Privacy Policy",
-  "text19": "and",
-  "text20": "Cookie Policy",
-  "text21": "Save Preferences",
-  "text22": "session_id - Maintains your login session",
-  "text23": "csrf_token - Protects against security attacks",
-  "text24": "auth_token - Authenticates your requests",
-  "text25": "language_preference - Remembers your language choice",
-  "text26": "theme_preference - Stores your theme selection",
-  "text27": "_ga - Google Analytics identifier",
-  "text28": "_gid - Google Analytics session identifier",
-  "text29": "analytics_session - Internal analytics tracking",
-  "text30": "marketing_id - Tracks marketing campaigns",
-  "text31": "ad_personalization - Enables personalized ads"
-}
+    "text0": "We value your privacy",
+    "text1": "We use cookies to enhance your experience, analyze site traffic, and personalize content. You can customize your preferences or accept all cookies.",
+    "text2": "Customize",
+    "text3": "Reject All",
+    "text4": "Accept All",
+    "text5": "Cookie Preferences",
+    "text6": "Manage your cookie preferences. Essential cookies cannot be disabled as they are required for the website to function.",
+    "text7": "Overview",
+    "text8": "Details",
+    "text9": "Essential Cookies",
+    "text10": "Functional Cookies",
+    "text11": "Analytics Cookies",
+    "text12": "Marketing Cookies",
+    "text13": "Required for the website to function properly. These cannot be disabled.",
+    "text14": "Enable enhanced features like language preferences and personalization.",
+    "text15": "Help us understand how visitors interact with our website through anonymized data.",
+    "text16": "Used to deliver personalized advertisements and measure campaign effectiveness.",
+    "text17": "For more information, please read our",
+    "text18": "Privacy Policy",
+    "text19": "and",
+    "text21": "Save Preferences",
+    "text22": "session_id - Maintains your login session",
+    "text23": "csrf_token - Protects against security attacks",
+    "text24": "auth_token - Authenticates your requests",
+    "text25": "language_preference - Remembers your language choice",
+    "text26": "theme_preference - Stores your theme selection",
+    "text27": "_ga - Google Analytics identifier",
+    "text28": "_gid - Google Analytics session identifier",
+    "text29": "analytics_session - Internal analytics tracking",
+    "text30": "marketing_id - Tracks marketing campaigns",
+    "text31": "ad_personalization - Enables personalized ads"
+  },
+  "memberHome": {
+    "greeting": "Benvenuto, {name}",
+    "greetingAnonymous": "Benvenuto",
+    "description": "Ciò che richiede la tua attenzione e a che punto sono le tue pratiche.",
+    "attentionTitle": "Richiede la tua attenzione",
+    "notificationsLoadError": "Non è stato possibile caricare le tue notifiche.",
+    "retry": "Riprova",
+    "noNotifications": "Nessuna nuova notifica.",
+    "open": "Apri",
+    "markAllRead": "Segna tutto come letto",
+    "mattersTitle": "Le tue pratiche attive",
+    "viewAllCases": "Vedi tutte le pratiche",
+    "casesLoadError": "Non è stato possibile caricare le tue pratiche.",
+    "noActiveCases": "Non hai pratiche attive.",
+    "openCase": "Apri una pratica di rappresentanza",
+    "openMessages": "Vai ai messaggi",
+    "markAllReadError": "Non è stato possibile segnare le tue notifiche come lette.",
+    "notificationsShowing": "Mostrate {shown} notifiche non lette su {total}."
+  },
+  "memberMessages": {
+    "title": "Messaggi",
+    "description": "Conversazioni protette con il tuo sindacato.",
+    "newConversation": "Nuova conversazione",
+    "privacyNote": "Solo tu e i rappresentanti sindacali autorizzati per una conversazione potete leggerla. I messaggi non sono monitorati di continuo: se qualcosa non può aspettare, dillo chiaramente e usa il canale di contatto che il tuo sindacato ti ha indicato.",
+    "listLabel": "Conversazioni",
+    "loadError": "Non è stato possibile caricare le tue conversazioni.",
+    "retry": "Riprova",
+    "emptyTitle": "Ancora nessuna conversazione",
+    "emptyBody": "Avvia una conversazione per contattare il tuo sindacato.",
+    "status": {
+      "open": "Aperta",
+      "resolved": "Risolta",
+      "closed": "Chiusa"
+    },
+    "selectPrompt": "Seleziona una conversazione per leggerla.",
+    "subject": "Oggetto",
+    "subjectPlaceholder": "Di cosa si tratta?",
+    "message": "Messaggio",
+    "messagePlaceholder": "Scrivi il tuo messaggio",
+    "attachmentsUnavailable": "Gli allegati non sono disponibili in Messaggi. Aggiungi invece le prove dalla tua pratica.",
+    "sendError": "Il messaggio non è stato inviato. Controlla la connessione e riprova.",
+    "send": "Invia",
+    "sending": "Invio…",
+    "cancel": "Annulla",
+    "unavailableTitle": "Conversazione non disponibile",
+    "unavailableBody": "Questa conversazione non esiste o non hai accesso.",
+    "back": "Torna alle conversazioni",
+    "representativeAssigned": "È assegnato un rappresentante sindacale",
+    "awaitingRepresentative": "In attesa dell’assegnazione di un rappresentante sindacale",
+    "you": "Tu",
+    "union": "Sindacato",
+    "system": "Sistema",
+    "reply": "Rispondi",
+    "replyPlaceholder": "Scrivi una risposta",
+    "closedNotice": "Questa conversazione è chiusa. Avvia una nuova conversazione per contattare il tuo sindacato.",
+    "privacySubject": "Richiesta sulla privacy",
+    "refreshError": "Non è stato possibile aggiornare le tue conversazioni. Quanto vedi potrebbe non essere aggiornato.",
+    "loading": "Caricamento…",
+    "messagesLabel": "Messaggi di questa conversazione",
+    "actionsLabel": "Azioni sulla conversazione",
+    "member": "Iscritto",
+    "readByCounterpart": "Letto dal sindacato",
+    "sentNotRead": "Inviato",
+    "closeConversation": "Chiudi la conversazione",
+    "closeConfirm": "La chiusura è definitiva: nessuno potrà più rispondere e la conversazione non può essere riaperta. I tuoi messaggi vengono conservati. Puoi iniziare una nuova conversazione in qualsiasi momento.",
+    "archive": "Archivia",
+    "archived": "Archiviata",
+    "showArchived": "Mostra le conversazioni archiviate",
+    "lifecycleError": "Non è stato possibile salvare la modifica. Riprova.",
+    "lifecycleConflict": "Questa conversazione è già cambiata. È stata aggiornata.",
+    "retention": {
+      "policy_not_adopted": "Politica di conservazione non adottata. Il tuo sindacato non ha registrato per quanto tempo conserva le conversazioni chiuse: questa conversazione viene quindi conservata e nulla viene eliminato.",
+      "retained": "Il tuo sindacato conserva le conversazioni chiuse secondo le proprie regole di conservazione."
+    }
+  },
+  "staffMessages": {
+    "title": "Conversazioni degli iscritti",
+    "description": "Smista le nuove conversazioni e gestisci quelle assegnate a te.",
+    "privacyNote": "Le conversazioni degli iscritti sono private. Puoi leggere una conversazione solo finché è assegnata a te; la coda mostra solo oggetto, categoria e priorità. Tutto ciò che fai viene registrato.",
+    "loading": "Caricamento…",
+    "retry": "Riprova",
+    "loadError": "Non è stato possibile caricare le tue conversazioni.",
+    "queueTitle": "In attesa di assegnazione",
+    "queueDenied": "La coda di assegnazione è disponibile solo finché un amministratore ti ha conferito una designazione di smistamento. Al momento non ne hai una.",
+    "queueLoadError": "Non è stato possibile caricare la coda.",
+    "refreshError": "Non è stato possibile aggiornare la coda o le tue conversazioni. Quanto vedi potrebbe non essere aggiornato.",
+    "queueEmptyTitle": "Nessuna conversazione in attesa",
+    "queueEmptyBody": "Le nuove conversazioni degli iscritti compaiono qui finché non vengono assegnate.",
+    "queueMetadataNote": "Vedi solo oggetto, categoria e priorità. I messaggi e l’iscritto restano privati finché la conversazione non viene assegnata.",
+    "assignedTitle": "Assegnate a te",
+    "assignedEmptyTitle": "Nessuna conversazione assegnata a te",
+    "assignedEmptyBody": "Le conversazioni compaiono qui quando vengono assegnate a te.",
+    "showArchived": "Mostra le conversazioni archiviate",
+    "archived": "Archiviata",
+    "status": {
+      "open": "Aperta",
+      "resolved": "Risolta",
+      "closed": "Chiusa"
+    },
+    "selectPrompt": "Seleziona una conversazione per leggerla e rispondere.",
+    "conversationLabel": "Conversazione",
+    "priority": "Priorità: {priority}",
+    "assignToMe": "Assegna a me",
+    "assignToMeFor": "Assegna a me: {subject}",
+    "assignToLabel": "Assegna a un altro membro del personale (ID)",
+    "assign": "Assegna",
+    "assignmentGone": "Questa conversazione non è più di tua competenza. L’assegnazione o la tua autorità è cambiata.",
+    "assignmentClosed": "Questa conversazione è chiusa.",
+    "assignmentIneligible": "Questa persona non è un membro del personale idoneo.",
+    "assignmentConflict": "La conversazione è cambiata mentre lavoravi. L’elenco è stato aggiornato.",
+    "assignmentFailed": "Non è stato possibile salvare l’assegnazione. Riprova.",
+    "back": "Torna alle conversazioni",
+    "unavailableTitle": "Conversazione non disponibile",
+    "unavailableBody": "Questa conversazione non esiste, non è assegnata a te oppure non hai più accesso.",
+    "you": "Tu",
+    "member": "Iscritto",
+    "union": "Rappresentante sindacale",
+    "system": "Sistema",
+    "reply": "Rispondi all’iscritto",
+    "replyPlaceholder": "Scrivi una risposta",
+    "send": "Invia",
+    "sending": "Invio…",
+    "sendError": "La tua risposta non è stata inviata. Controlla la connessione e riprova.",
+    "closedNotice": "Questa conversazione è chiusa. Non è più possibile inviare risposte.",
+    "messagesLabel": "Messaggi di questa conversazione",
+    "actionsLabel": "Azioni sulla conversazione",
+    "assignedToYou": "Assegnata a te",
+    "readByCounterpart": "Letto dall’iscritto",
+    "sentNotRead": "Inviato",
+    "closeConversation": "Chiudi la conversazione",
+    "closeConfirm": "La chiusura è definitiva: nessuno potrà più rispondere e la conversazione non può essere riaperta. I messaggi vengono conservati.",
+    "cancel": "Annulla",
+    "archive": "Archivia",
+    "lifecycleError": "Non è stato possibile salvare la modifica. Riprova.",
+    "lifecycleConflict": "Questa conversazione è già cambiata. È stata aggiornata.",
+    "release": "Rimetti in coda",
+    "releaseConfirm": "La conversazione torna nella coda di attesa e non potrai più leggerla.",
+    "reassignLabel": "Riassegna a un altro membro del personale (ID)",
+    "reassign": "Riassegna",
+    "reassignHelp": "Inserisci l’ID utente del membro del personale. Il sistema verifica che sia attivo; perdi l’accesso non appena la conversazione viene riassegnata.",
+    "retention": {
+      "legal_hold": "Questa conversazione è soggetta a conservazione legale e non può diventare idonea allo smaltimento.",
+      "policy_not_adopted": "Politica di conservazione non adottata. Nulla viene eliminato; questa conversazione è conservata finché un amministratore non registra una politica di conservazione.",
+      "closure_unrecorded": "Questa conversazione è stata chiusa prima della registrazione delle date di chiusura, quindi il periodo di conservazione non può essere calcolato.",
+      "retained": "Questa conversazione è nel suo periodo di conservazione.",
+      "retainedUntil": "Conservata fino al {date}.",
+      "retention_elapsed": "Il periodo di conservazione è trascorso. Questo sistema non elimina le conversazioni; lo smaltimento richiede una revisione umana separata."
+    }
+  },
+  "myUnion": {
+    "title": "Il mio sindacato",
+    "description": "La tua iscrizione e i servizi offerti dal tuo sindacato.",
+    "membershipTitle": "La tua iscrizione",
+    "loadError": "Non è stato possibile caricare la tua iscrizione.",
+    "retry": "Riprova",
+    "missingTitle": "Non abbiamo trovato una scheda di iscrizione a tuo nome.",
+    "missingBody": "Ciò non cambia il tuo accesso alle tue pratiche. Scrivi al tuo sindacato per far verificare la tua scheda.",
+    "contactUnion": "Scrivi al tuo sindacato",
+    "union": "Sindacato",
+    "statusLabel": "Stato",
+    "membershipNumber": "Numero di iscritto",
+    "category": "Categoria",
+    "memberSince": "Iscritto dal",
+    "department": "Reparto",
+    "position": "Posizione",
+    "notRecorded": "Non registrato",
+    "recordNote": "Questa è la scheda in possesso del tuo sindacato. Se qualcosa è errato, scrivi al tuo sindacato per chiedere una correzione.",
+    "status": {
+      "active": "Attivo",
+      "inactive": "Non attivo",
+      "suspended": "Sospeso",
+      "pending": "In attesa"
+    },
+    "servicesTitle": "Servizi sindacali",
+    "servicesIntro": "Questi servizi non sono ancora collegati a dati sindacali verificati, quindi non viene mostrato nulla. Una voce vuota o mancante non è mai una dichiarazione sulla tua posizione.",
+    "reviewsTitle": "Richiedi una revisione",
+    "reviewsBody": "Chiedi al tuo sindacato di aprire un reclamo protetto, un ricorso o una riconsiderazione. Aprirne uno registra la tua richiesta. Non assegna un revisore né invia una notifica.",
+    "reviewsLink": "Richiedi una revisione",
+    "notAvailableYet": "Non ancora disponibile",
+    "services": {
+      "agreement": {
+        "title": "Contratto collettivo",
+        "body": "Il contratto applicabile e le politiche sul luogo di lavoro."
+      },
+      "dues": {
+        "title": "Quote e pagamenti",
+        "body": "Quote, trattenute e storico dei pagamenti. La tua posizione non è mostrata e l’assenza di un saldo non significa che sei in regola."
+      },
+      "benefits": {
+        "title": "Benefici",
+        "body": "Benefici e servizi legati all’impiego offerti dal tuo sindacato."
+      },
+      "events": {
+        "title": "Assemblee, eventi e formazione",
+        "body": "Assemblee, eventi e corsi a cui hai diritto."
+      },
+      "participation": {
+        "title": "Sondaggi, consultazioni e voto",
+        "body": "Partecipazione degli iscritti, previa verifica dell’idoneità."
+      },
+      "credential": {
+        "title": "Tessera digitale",
+        "body": "Una credenziale di iscrizione verificabile."
+      }
+    }
+  },
+  "memberHelp": {
+    "title": "Aiuto e risorse",
+    "description": "Come ottenere aiuto dal tuo sindacato con Union Eyes.",
+    "urgentTitle": "Se il tempo stringe",
+    "urgentBody": "Union Eyes non calcola né monitora per te le scadenze legali. Se una scadenza potrebbe essere vicina, indicalo all’inizio della pratica o nel messaggio e contatta il tuo sindacato con il mezzo più rapido che ti ha indicato. In caso di emergenza chiama il 911.",
+    "stepsTitle": "Ottenere rappresentanza",
+    "steps": {
+      "open": "Apri una pratica di rappresentanza e descrivi cosa è successo, quando e il risultato che desideri.",
+      "evidence": "Aggiungi prove alla pratica: documenti, foto o altri atti.",
+      "follow": "Segui la tua pratica in La mia rappresentanza. Vedrai i cambi di stato che il tuo sindacato sceglie di condividere.",
+      "message": "Usa Messaggi per fare domande o inviare altre informazioni."
+    },
+    "openCase": "Apri una pratica di rappresentanza",
+    "messageUnion": "Scrivi al tuo sindacato",
+    "rightsTitle": "I tuoi diritti",
+    "rightsBody": "Il tuo contratto collettivo e le procedure del tuo sindacato stabiliscono le fasi e i termini che ti riguardano. Chiedi al tuo sindacato quali si applicano alla tua situazione.",
+    "notLegalAdvice": "Queste indicazioni sono informazioni generali. Non sono una consulenza legale né una decisione sulla tua pratica.",
+    "contactTitle": "Contattare il tuo sindacato",
+    "contactBody": "Messaggi è il modo supportato per contattare il tuo sindacato da Union Eyes.",
+    "directoryUnavailable": "Un elenco dei contatti sindacali non è ancora disponibile qui.",
+    "accessTitle": "Accessibilità e lingua",
+    "accessBody": "Union Eyes è disponibile in inglese e francese e funziona su telefono e computer. Se hai bisogno di informazioni in un altro formato o di aiuto per usarlo, scrivilo in un messaggio e il tuo sindacato farà il possibile."
+  },
+  "memberPreferences": {
+    "title": "Preferenze",
+    "description": "Scegli quali avvisi ricevere in Union Eyes.",
+    "loadError": "Non è stato possibile caricare le tue preferenze.",
+    "retry": "Riprova",
+    "defaultsNote": "Non hai ancora salvato preferenze. Sono mostrate le impostazioni standard.",
+    "inApp": "Notifiche nell’app",
+    "inAppHelp": "Avvisi nella tua pagina iniziale quando accade qualcosa, come un nuovo messaggio o una modifica alla tua pratica.",
+    "caseUpdates": "Aggiornamenti della pratica",
+    "caseUpdatesHelp": "Avvisami quando lo stato della mia pratica cambia.",
+    "otherChannels": "Le notifiche via e-mail, SMS e push non sono ancora offerte, quindi non ci sono impostazioni per esse.",
+    "saved": "Preferenze salvate.",
+    "saveError": "Non è stato possibile salvare le tue preferenze. Riprova.",
+    "saving": "Salvataggio…",
+    "save": "Salva preferenze"
+  },
+  "memberPrivacy": {
+    "title": "Privacy",
+    "description": "Come vengono usate le tue informazioni in Union Eyes e come fare una richiesta.",
+    "accessTitle": "Chi può vedere le tue informazioni",
+    "accessYou": "Puoi vedere le tue pratiche, i tuoi documenti e le tue conversazioni.",
+    "accessRepresentatives": "I rappresentanti sindacali e gli amministratori possono vederli solo nei limiti consentiti dal loro ruolo e dalle regole del tuo sindacato.",
+    "accessNotMembers": "Gli altri iscritti non possono vedere le tue pratiche, i tuoi documenti o i tuoi messaggi.",
+    "yoursTitle": "Le tue informazioni",
+    "yoursBody": "Consulta i dati che il tuo sindacato conserva su di te e scegli quali avvisi ricevere.",
+    "viewProfile": "Vedi il tuo profilo",
+    "viewPreferences": "Preferenze di notifica",
+    "requestsTitle": "Richieste di accesso, correzione e consenso",
+    "requestsBody": "Puoi chiedere al tuo sindacato una copia dei tuoi dati, chiedere una correzione o revocare un consenso. La richiesta è gestita dal tuo sindacato.",
+    "selfServiceUnavailable": "Il self-service online per queste richieste non è ancora disponibile. Un messaggio protetto è il modo supportato per farne una.",
+    "sendRequest": "Invia una richiesta sulla privacy"
+  }
 }

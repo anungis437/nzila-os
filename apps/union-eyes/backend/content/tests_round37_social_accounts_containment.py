@@ -93,17 +93,22 @@ class SocialAccountsContainmentTests(unittest.TestCase):
         )
 
 
-class SocialAccountsSchemaParityTests(unittest.TestCase):
-    """Locks the proven schema drift between the Django model and the real
-    physical `social_accounts` table (db/schema/social-media-schema.ts). If
-    this starts failing because the model gained the missing OAuth/platform
-    columns, the containment reasoning above must be re-evaluated — a
-    schema fix does not by itself prove a legitimate consumer or
-    organization-ownership enforcement exists.
+class SocialAccountsSchemaConvergenceTests(unittest.TestCase):
+    """The model describes the physical `social_accounts` table (db/schema/social-media-schema.ts).
+
+    This used to lock the proven drift between the model and the table, including that the OAuth credential columns were
+    entirely unmapped, so that a model regeneration would trigger a re-review of the containment reasoning above. The
+    regeneration happened (`manage.py ue_converge_models`, proven against PostgreSQL by `manage.py ue_physical_parity
+    --strict`). The re-review's outcome: the view stays contained (the tests above), because a schema fix does not by
+    itself prove a legitimate consumer or organization-ownership enforcement exists; and no response can return a
+    credential because the serializer makes the credential columns write-only, not because the model is incomplete.
     """
 
-    STALE_FIELDS = {"id", "created_at", "updated_at", "organization"}
-    MISSING_FROM_MODEL = {
+    PHYSICAL_COLUMNS = {
+        "id",
+        "created_at",
+        "updated_at",
+        "organization_id",
         "platform",
         "platform_user_id",
         "username",
@@ -114,22 +119,18 @@ class SocialAccountsSchemaParityTests(unittest.TestCase):
         "status",
     }
 
-    def test_model_field_set_matches_known_stale_snapshot(self):
-        actual_fields = {f.name for f in SocialAccounts._meta.get_fields()}
-        self.assertEqual(actual_fields, self.STALE_FIELDS)
+    def test_model_describes_its_physical_columns(self):
+        actual_columns = {f.column for f in SocialAccounts._meta.concrete_fields}
+        self.assertLessEqual(self.PHYSICAL_COLUMNS, actual_columns)
 
-    def test_model_is_missing_required_oauth_credential_columns(self):
-        actual_fields = {f.name for f in SocialAccounts._meta.get_fields()}
-        missing = self.MISSING_FROM_MODEL - actual_fields
-        self.assertEqual(missing, self.MISSING_FROM_MODEL)
+    def test_no_django_response_can_return_a_credential_field(self):
+        # The serializer says fields='__all__', so what it returns is every model field except the write-only ones.
+        from content.serializers import SocialAccountsSerializer
 
-    def test_no_django_response_can_expose_credential_fields(self):
-        # Even if permission were ever loosened, the serializer's fields='__all__'
-        # can only ever emit the model's own mapped fields — never the raw
-        # access_token/refresh_token columns, since those are entirely unmapped.
-        actual_fields = {f.name for f in SocialAccounts._meta.get_fields()}
-        self.assertNotIn("access_token", actual_fields)
-        self.assertNotIn("refresh_token", actual_fields)
+        fields = SocialAccountsSerializer().fields
+        for credential in ("access_token", "refresh_token"):
+            self.assertIn(credential, fields)
+            self.assertTrue(fields[credential].write_only, f"{credential} must never be returned")
 
 
 if __name__ == "__main__":

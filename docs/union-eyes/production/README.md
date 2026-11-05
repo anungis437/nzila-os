@@ -27,6 +27,7 @@ operation (section 14). Two caveats apply and are not hidden:
 Machine-readable record: [UE_PRODUCTION_HARDENING_PACKAGE.json](./UE_PRODUCTION_HARDENING_PACKAGE.json).
 Template: [infrastructure/bicep/ue-v2/](../../../infrastructure/bicep/ue-v2/main.bicep).
 Smoke: [go-live-smoke.ts](../../../apps/union-eyes/scripts/production/go-live-smoke.ts).
+Test-auth and risk-bypass switches (directive 2026-11-04 item 4): [TEST_BYPASS_SWITCHES.md](./TEST_BYPASS_SWITCHES.md).
 
 ## 1. What this pass found and proved
 
@@ -85,6 +86,11 @@ diagnostics, Azure Managed Redis (API 2025-07-01) + private endpoint, PostgreSQL
 VECTOR`), role assignments (Key Vault Secrets User, Key Vault Crypto User, AcrPull), Container Apps
 environment, three workloads and the alerts. PgBouncer is off because V2 relies on per-transaction
 `SET LOCAL ROLE`.
+
+The same template deploys a cost-sized **staging** stack with `env=staging`. Production defaults
+are unchanged. The staging parameters, cost choices and prerequisites (an action group can be created
+by the template, an optional budget, an optional Log Analytics daily cap) are in
+[STAGING_PARAMETERS.md](./STAGING_PARAMETERS.md). That page changes no gate in section 14.
 
 ## 4. Production secret manifest
 
@@ -148,6 +154,7 @@ customer documents are loaded.
 - **Credential rotation / maintenance:** section 4; Azure minor-version maintenance in an agreed
   low-traffic window, `azure.extensions` unchanged.
 - **First administrator (R-10: engineering PASS, production execution pending).** An operator-only tool (scripts/production/first-admin-cli.ts): no HTTP surface, no default identity or password, one transaction under an advisory lock, idempotent, canonical audit, enrolled MFA, refuses when any administrator exists. Procedure: [RUNBOOK_FIRST_ADMIN_BOOTSTRAP.md](./RUNBOOK_FIRST_ADMIN_BOOTSTRAP.md).
+- **Staging deploy identities in the new subscription (prepared, not executed).** GitHub OIDC identities, least-privilege roles, digest-only promotion and a reviewed what-if before a manual, change-recorded apply for the isolated V2 staging stack (`nzila-canada-staging-rg`, registry `nzilaventuresacr`). Setup and the full role list: [RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md](./RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md). No production deployment is authorized.
 
 ## 9. Redis and rate limiting
 

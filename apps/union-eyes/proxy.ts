@@ -48,8 +48,10 @@ import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
-import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit';
+import { cronSecretMatches } from './lib/api/cron-secret';
+import { decideApiLimit, isGuardExempt, logDegradedOnce, presentedCredential } from './lib/rate-limit/proxy-api-guard';
 import { checkRateLimit, RATE_LIMITS } from './lib/rate-limiter';
+import { evaluateTestBypassGuard, readTestBypassGuardEnv } from './lib/reality/test-bypass-guard';
 
 // Edge-safe logger — os-core's createLogger uses Node.js APIs (process.stdout,
 // node:crypto, node:async_hooks) that are unavailable on the Edge Runtime.
@@ -71,6 +73,9 @@ const logger = createClientLogger('middleware');
 function ensureRequestId(req: Pick<NextRequest, 'headers'>): string {
   return req.headers.get('x-request-id') ?? crypto.randomUUID();
 }
+
+/** The rate-limit store that decided each request (shared Redis, or per-process memory when it was unavailable). */
+const limiterMode = new WeakMap<object, 'shared' | 'degraded'>();
 
 /** Attach telemetry headers to an outgoing response. */
 function withRequestId(response: NextResponse, requestId: string): NextResponse {
@@ -250,7 +255,8 @@ const isOriginAllowed = (origin: string | null): boolean => {
   return allowedOrigins.includes(origin);
 };
 
-// This handles both payment provider use cases from whop-setup.md and stripe-setup.md
+// Edge request handling: request id, dashboard and locale redirects, API rate limits and CORS, i18n routing.
+// Authentication is enforced by the server-side layouts and route handlers, not here.
 async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   try {
   // os-core: generate / forward a request-id for distributed tracing
@@ -276,6 +282,43 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   }
 
   if (req.nextUrl.pathname.startsWith('/api')) {
+    // ── API rate limiting (every API request, public or authenticated) ───
+    // Keyed on the presented credential and the client address, never on a header the caller can choose. The shared (Redis)
+    // limiter is authoritative; if it is unavailable the same limits are enforced from process memory and the response says
+    // so. Probes, signed provider callbacks, cron and the auth endpoints keep their own controls (see isGuardExempt).
+    if (process.env.NODE_ENV !== 'development' && !isGuardExempt(req.nextUrl.pathname, req.method)) {
+      const limit = await decideApiLimit(
+        { pathname: req.nextUrl.pathname, method: req.method, credential: presentedCredential(req.headers), ip: getClientIp(req) },
+        {
+          shared: checkRateLimit,
+          memory: (await import('@nzila/os-core/rateLimit')).checkRateLimit,
+          onDegraded: (info) => logDegradedOnce((message, context) => logger.warn(message, { ...context, requestId }), info),
+        },
+      );
+      limiterMode.set(req, limit.mode);
+      if (!limit.allowed) {
+        return withRequestId(NextResponse.json(
+          {
+            error: 'Too Many Requests',
+            message: `Rate limit exceeded for ${limit.group} requests. Please slow down.`,
+            code: 'API_RATE_LIMIT_EXCEEDED',
+            retryAfter: limit.resetIn,
+          },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': String(limit.resetIn),
+              'X-RateLimit-Limit': String(limit.limit),
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + limit.resetIn),
+              'X-RateLimit-Scope': limit.scope,
+              'X-RateLimit-Mode': limit.mode,
+            },
+          },
+        ), requestId);
+      }
+    }
+
     // PR #4: Use centralized public route checker from api-auth-guard.ts
     if (isPublicApiRoute(req.nextUrl.pathname)) {
       const origin = req.headers.get('origin');
@@ -313,9 +356,8 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
 
     // PR #4: Check cron routes using centralized CRON_API_ROUTES
     if (CRON_API_ROUTES.has(req.nextUrl.pathname)) {
-      const cronSecret = process.env.CRON_SECRET || "";
-      const providedSecret = req.headers.get("x-cron-secret") || "";
-      if (!cronSecret || cronSecret !== providedSecret) {
+      // Same presentation rule, precedence and constant-time comparison as the route's own check (lib/api/cron-secret.ts).
+      if (!(await cronSecretMatches(req.headers))) {
         return withRequestId(new NextResponse("Unauthorized", { status: 401 }), requestId);
       }
       return withRequestId(NextResponse.next(), requestId);
@@ -354,34 +396,8 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
     // Edge middleware's crypto.subtle fails with OpenSSL 3 OperationError
     // on Azure Container Apps; auth() in API routes runs on Node.js.
 
-    // ── Org-scoped rate limiting (per-org + route-group buckets) ─────────
+    // The per-organization header-keyed limiter was removed (R-31); the API guard above replaces it.
     if (process.env.NODE_ENV !== 'development') {
-      const orgId = req.headers.get('x-org-id');
-      if (
-        orgId &&
-        req.nextUrl.pathname.startsWith('/api') &&
-        !(req.nextUrl.pathname.startsWith('/api/auth/') || req.nextUrl.pathname === '/api/auth')
-      ) {
-        const orgRl = checkOrgRateLimit(
-          orgId,
-          req.nextUrl.pathname,
-          req.method,
-        );
-        if (!orgRl.allowed) {
-          return withRequestId(NextResponse.json(
-            {
-              error: 'Org Rate Limit Exceeded',
-              message: `Rate limit exceeded for route group: ${orgRl.routeGroup}`,
-              code: 'ORG_RATE_LIMIT_EXCEEDED',
-            },
-            {
-              status: 429,
-              headers: orgRateLimitHeaders(orgRl),
-            },
-          ), requestId);
-        }
-      }
-
       // ── IP-based rate limiting for auth endpoints (brute-force protection) ──
       // Auth endpoints never carry an x-org-id header (no session yet), so the
       // org rate-limit block above does not apply to them. This block provides
@@ -472,7 +488,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   
   // Check for problematic URLs that might cause 431 errors
   // This covers payment provider redirects ONLY.
-  // NOTE: __clerk_handshake must NOT be stripped — the auth provider uses it to refresh
+  // NOTE: the auth provider's handshake parameter must NOT be stripped — it is used to refresh
   // short-lived session JWTs. Stripping it breaks session refresh and forces
   // authenticated users back to the sign-in page.
   if (
@@ -612,10 +628,35 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   }
 }
 
+/**
+ * Per-request half of the test-authentication / risk-bypass guard
+ * (directive 2026-11-04 item 4; boot half lives in instrumentation.ts).
+ * When a bypass switch is present in a deployed environment every request
+ * is refused with 503, except `/api/ready`, which reports the reason code
+ * itself so probes and operators can see why the revision is not ready.
+ */
+export function testBypassRefusal(pathname: string): NextResponse | null {
+  const verdict = evaluateTestBypassGuard(readTestBypassGuardEnv());
+  if (verdict.ok || pathname === '/api/ready') return null;
+  return new NextResponse(
+    JSON.stringify({
+      error: 'Service unavailable',
+      reasonCode: verdict.reasonCode,
+      switchesPresent: verdict.switchesPresent,
+    }),
+    { status: 503, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } },
+  );
+}
+
 // Export the auth middleware directly
 export async function proxy(req: NextRequest): Promise<NextResponse> {
   try {
-    return await authMiddleware(req);
+    const refusal = testBypassRefusal(req.nextUrl.pathname);
+    if (refusal) return refusal;
+    const response = await authMiddleware(req);
+    const mode = limiterMode.get(req);
+    if (mode) response.headers.set('X-RateLimit-Mode', mode);
+    return response;
   } catch (outerError) {
     const eLogger = createClientLogger('middleware');
     eLogger.error('[middleware] Outer error:', { error: outerError });

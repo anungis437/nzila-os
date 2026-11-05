@@ -1,9 +1,9 @@
 {
   "advisories": {
-    "1240912": {
-      "id": "1240912",
-      "package": "node-forge",
-      "module_name": " node-forge",
+    "1108110": {
+      "id": "1108110",
+      "package": "xlsx",
+      "module_name": " xlsx",
       "severity": "high",
       "title": "noncanonical whitespace in package alias"
     }

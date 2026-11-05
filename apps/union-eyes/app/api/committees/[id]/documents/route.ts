@@ -4,10 +4,16 @@
  */
 
 import { z } from "zod";
+import { requireCommitteeReader } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
+import { ApiError } from "@/lib/api/errors";
+import { assertOrganizationOwns } from "@/lib/api/org-references";
+import { assertOwnStorageUrl } from "@/lib/services/own-storage-reference";
+import { documents } from "@/db/schema/documents-schema";
 import {
   linkDocument,
   listCommitteeDocuments,
+  requireCommitteeScope,
 } from "@/lib/services/committee-workspace-service";
 
 const linkSchema = z.object({
@@ -15,18 +21,21 @@ const linkSchema = z.object({
   fileUrl: z.string().url().optional(),
   fileType: z.string().optional(),
   fileSize: z.number().optional(),
-  documentId: z.string().uuid().optional(),
-  meetingId: z.string().uuid().optional(),
+  documentId: z.guid().optional(),
+  meetingId: z.guid().optional(),
   category: z.string().optional(),
 });
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "List committee documents" },
   },
-  async ({ params, request }) => {
+  async ({ organizationId, userId, params, request }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
+    await requireCommitteeReader(organizationId, committeeId, userId);
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get("category") ?? undefined;
     const meetingId = searchParams.get("meetingId") ?? undefined;
@@ -37,17 +46,22 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: linkSchema,
     openapi: { tags: ["Committees"], summary: "Link document to committee" },
   },
   async ({ body, organizationId, userId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId: body.meetingId });
+    await assertOrganizationOwns([{ field: 'documentId', value: body.documentId, table: documents }], organizationId);
+    assertOwnStorageUrl(body.fileUrl, organizationId);
 
     return linkDocument({
       ...body,
       committeeId,
-      organizationId: organizationId!,
+      organizationId,
       uploadedBy: userId,
     });
   }

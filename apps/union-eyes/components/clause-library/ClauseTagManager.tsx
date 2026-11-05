@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
  
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { failureText } from "@/lib/client/api-envelope";
 
 interface ClauseTag {
   id: string;
@@ -65,7 +66,7 @@ export function ClauseTagManager({
       await onAddTag(trimmedTag);
       setNewTagName("");
     } catch (err) {
-      setError(err.message || "Failed to add tag");
+      setError(failureText(err, "Failed to add tag"));
     } finally {
       setIsAdding(false);
     }
@@ -78,7 +79,7 @@ export function ClauseTagManager({
     try {
       await onRemoveTag(tagName);
     } catch (err) {
-      setError(err.message || "Failed to remove tag");
+      setError(failureText(err, "Failed to remove tag"));
     } finally {
       setRemovingTags((prev) => {
         const next = new Set(prev);

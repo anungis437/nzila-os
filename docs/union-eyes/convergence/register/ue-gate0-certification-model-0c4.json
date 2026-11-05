@@ -1,0 +1,460 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-GATE0-CERTIFICATION-MODEL",
+  "gate": "GATE-0C.4",
+  "version": 1,
+  "anchorCommit": "ab9c184263020a95b91066014395f16dc3ec78e8",
+  "preparedOn": "2026-10-27",
+  "status": "MODEL_NOT_A_VERDICT",
+  "note": "The Gate 0 completion presentation and the deterministic certification checklist. Documentary completeness is shown as documentary only. The checklist is evaluated by a pure function that cannot grant certification from counts and cannot convert a scope-lock decision into a release or production decision.",
+  "gate0Verdict": "IN_PROGRESS",
+  "presentation": {
+    "documentaryScopeRecord": "DOCUMENTARY_SCOPE_RECORD_COMPLETE",
+    "independentGate0Certification": "NOT_GRANTED",
+    "personaRatification": "PENDING",
+    "institutionalAuthorityDecisions": "OUTSTANDING",
+    "releaseAuthorization": "NOT_GRANTED",
+    "ueSaasOperationalReadiness": "NO_GO",
+    "gate0Verdict": "IN_PROGRESS",
+    "documentaryCriteria": {
+      "label": "DOCUMENTARY_SCOPE_RECORD_COMPLETE",
+      "satisfiedByRecord": 7,
+      "of": 7,
+      "criteria": [
+        {
+          "id": "EXHAUSTIVE_ROUTE_INVENTORY",
+          "label": "An exhaustive canonical route-method inventory.",
+          "state": "SATISFIED_BY_RECORD",
+          "remainingItems": []
+        },
+        {
+          "id": "OWNERSHIP_OR_EXCEPTION",
+          "label": "Engineering ownership or an explicit non-authorizing exception for every operation.",
+          "state": "SATISFIED_BY_RECORD",
+          "remainingItems": [
+            "4 carbon operations wait on UE-INST-CARBON-ACCOUNTING-SCOPE."
+          ]
+        },
+        {
+          "id": "PERSONA_TRACEABILITY",
+          "label": "Traceable persona specifications and product decisions.",
+          "state": "SATISFIED_BY_RECORD",
+          "remainingItems": [
+            "steward has no ratified canonical.",
+            "representative has no ratified canonical.",
+            "financial-officer has no ratified canonical."
+          ]
+        },
+        {
+          "id": "HISTORICAL_UNCERTAINTY",
+          "label": "Preserved historical source uncertainty.",
+          "state": "SATISFIED_BY_RECORD",
+          "remainingItems": []
+        },
+        {
+          "id": "DOWNSTREAM_OWNERSHIP",
+          "label": "Complete downstream defect and obligation ownership.",
+          "state": "SATISFIED_BY_RECORD",
+          "remainingItems": [
+            "The 71 proposed dispositions are not accepted; ownership does not depend on their acceptance."
+          ]
+        },
+        {
+          "id": "UNRESOLVED_DECISIONS_EXPLICIT",
+          "label": "Explicit unresolved institutional decisions.",
+          "state": "SATISFIED_BY_RECORD",
+          "remainingItems": []
+        },
+        {
+          "id": "NO_FABRICATED_ACCEPTANCE",
+          "label": "No fabricated acceptance.",
+          "state": "SATISFIED_BY_RECORD",
+          "remainingItems": []
+        }
+      ]
+    },
+    "displayRule": "Any statement that the seven criteria are satisfied must carry the label DOCUMENTARY_SCOPE_RECORD_COMPLETE or the word documentary, and must be accompanied by the five qualifiers recorded beside it."
+  },
+  "checklist": {
+    "checks": [
+      "DOCUMENTARY_SCOPE_COMPLETENESS",
+      "INDEPENDENT_EVIDENCE_QUALIFICATION",
+      "PRODUCT_SPECIFICATION_RATIFICATION",
+      "DEFERRED_DECISIONS_NON_AUTHORIZING",
+      "REQUIRED_INSTITUTIONAL_DECISIONS_ADOPTED",
+      "EXCEPTION_GOVERNANCE_ACCEPTED",
+      "DOWNSTREAM_RELEASE_OBLIGATIONS_CARRIED",
+      "ACTUAL_RELEASE_READINESS"
+    ],
+    "items": [
+      {
+        "id": "CL-1",
+        "check": "DOCUMENTARY_SCOPE_COMPLETENESS",
+        "tier": "DOCUMENTARY",
+        "requirement": "Every route-method operation has one classification, every defect and obligation has an owner, and every unresolved decision is listed. The counts reconcile.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidenceKind": "RECORD_DERIVED",
+        "sufficientAlone": false,
+        "note": "Reconciling counts shows the record is complete. It shows nothing about whether the record is right, approved or safe.",
+        "authorityEvidence": null
+      },
+      {
+        "id": "CL-2",
+        "check": "INDEPENDENT_EVIDENCE_QUALIFICATION",
+        "tier": "AUTHORITY_INDEPENDENT_REVIEW",
+        "requirement": "An authority-independent reviewer accepts or contests the Gate 0C.3 and Gate 0C.4 evidence and names the artifact hashes reviewed.",
+        "state": "NOT_SATISFIED",
+        "evidenceKind": "AUTHORITY_EVIDENCE",
+        "methodIndependentReviewCompleted": true,
+        "authorityIndependentReviewOnFile": false,
+        "openQualifyingFindings": 22,
+        "note": "The Gate 0C.4 review is independent in method only. It is not an authority-independent approval and cannot satisfy this item.",
+        "authorityEvidence": null
+      },
+      {
+        "id": "CL-3",
+        "check": "PRODUCT_SPECIFICATION_RATIFICATION",
+        "tier": "AUTHORIZED_PRODUCT_OWNER",
+        "requirement": "An authorized product owner approves, rejects or returns each of the three persona canonicals with the approval evidence the Gate 0C.2 schema requires.",
+        "state": "NOT_SATISFIED",
+        "evidenceKind": "AUTHORITY_EVIDENCE",
+        "personasRequired": [
+          "steward",
+          "representative",
+          "financial-officer"
+        ],
+        "personasRatified": 0,
+        "note": "A product ratification fixes a specification baseline only and issues no institutional permission.",
+        "authorityEvidence": null
+      },
+      {
+        "id": "CL-4A",
+        "check": "DEFERRED_DECISIONS_NON_AUTHORIZING",
+        "tier": "DOCUMENTARY",
+        "requirement": "Every institutional decision that is not decided carries an explicit non-authorizing scope-lock disposition, keeps its identifier and stays OUTSTANDING.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidenceKind": "RECORD_DERIVED",
+        "deferred": 110,
+        "sufficientAlone": false,
+        "note": "Deferral is not adoption and is not acceptance of release risk.",
+        "authorityEvidence": null
+      },
+      {
+        "id": "CL-4B",
+        "check": "REQUIRED_INSTITUTIONAL_DECISIONS_ADOPTED",
+        "tier": "INSTITUTIONAL_AUTHORITY",
+        "requirement": "Each institutional decision marked REQUIRED_BEFORE_CERTIFICATION is adopted by the deciding authority with an adopted decision record.",
+        "state": "NOT_SATISFIED",
+        "evidenceKind": "AUTHORITY_EVIDENCE",
+        "decisionsRequired": [
+          "UE-INST-CARBON-ACCOUNTING-SCOPE"
+        ],
+        "decisionsAdopted": 0,
+        "note": "No institutional decision record format is adopted in the repository, so none exists.",
+        "authorityEvidence": null
+      },
+      {
+        "id": "CL-5",
+        "check": "EXCEPTION_GOVERNANCE_ACCEPTED",
+        "tier": "INSTITUTIONAL_AUTHORITY",
+        "requirement": "The four decision-bound carbon scope exceptions and the three public exposure contracts are accepted, owned or retired by an authority.",
+        "state": "NOT_SATISFIED",
+        "evidenceKind": "AUTHORITY_EVIDENCE",
+        "exceptions": [
+          "carbon/dashboard/route.ts|GET",
+          "carbon/infrastructure/route.ts|GET",
+          "carbon/validate/route.ts|GET",
+          "carbon/validate/route.ts|POST"
+        ],
+        "exposureContracts": [
+          "docs/openapi/route.ts|GET",
+          "docs/route.ts|GET",
+          "version/route.ts|GET"
+        ],
+        "exceptionsOwned": 0,
+        "exceptionsAuthorized": 0,
+        "note": "A carbon exception is non-authorizing. It is not owned, authorized or counted as owned.",
+        "authorityEvidence": null
+      },
+      {
+        "id": "CL-6",
+        "check": "DOWNSTREAM_RELEASE_OBLIGATIONS_CARRIED",
+        "tier": "DOCUMENTARY",
+        "requirement": "Every release-debt item is carried once, with an owner and a target gate, and none is dropped or counted twice.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidenceKind": "RECORD_DERIVED",
+        "sufficientAlone": false,
+        "note": "Carrying an obligation is not discharging it.",
+        "authorityEvidence": null
+      },
+      {
+        "id": "CL-7",
+        "check": "ACTUAL_RELEASE_READINESS",
+        "tier": "RELEASE",
+        "requirement": "Release readiness is decided by the release gate and is outside Gate 0 certification.",
+        "state": "NO_GO",
+        "evidenceKind": "NOT_PART_OF_GATE_0",
+        "canBeSatisfiedByGate0Certification": false,
+        "rulingDocument": "docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md",
+        "authorityEvidence": null
+      }
+    ],
+    "grantRules": [
+      "Certification may be decided only when CL-1, CL-4A and CL-6 are satisfied by record and CL-2, CL-3, CL-4B and CL-5 each carry authority evidence.",
+      "Authority evidence names a decision maker who is independent of the preparer, a date, the exact artifact hash and a hashed evidence document.",
+      "CL-7 cannot be satisfied by a Gate 0 certification. A certification decision never authorizes a release, never changes the readiness ruling and never starts Gate 1 or Phase 3B.",
+      "Reconciling counts is never sufficient."
+    ],
+    "certificationDecision": {
+      "granted": false,
+      "scope": "GATE_0_SCOPE_LOCK_ONLY",
+      "decidedBy": null,
+      "decidedOn": null,
+      "artifactSha256": null,
+      "evidenceDocumentSha256": null,
+      "impliesReleaseAuthorization": false,
+      "impliesProductionGo": false
+    }
+  },
+  "downstreamObligations": {
+    "debtIndexFile": "docs/union-eyes/convergence/register/ue-release-debt-index-0c3.json",
+    "debtIndexSha256": "457ecd54a080199bd1ebfa276c0eaa170a9a0fe1021b2e49c682e70fe7f5d4d8",
+    "itemCount": 150,
+    "itemIds": [
+      "DEBT:COUNSEL-PGLITE-SUITE-FAILS-AT-SETUP",
+      "DEBT:DEF-0B1-AUDIT-READ-MEMBER-FLOOR",
+      "DEBT:DEF-0B1-BILLING-HISTORY-FAKE-EMPTY",
+      "DEBT:DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+      "DEBT:DEF-0B1-CLC-CROSS-TENANT-READ",
+      "DEBT:DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
+      "DEBT:DEF-0B1-DOCS-UNAUTH-API-SURFACE",
+      "DEBT:DEF-0B1-FIX-SUPER-ADMIN-INERT",
+      "DEBT:DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+      "DEBT:DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+      "DEBT:DEF-0B1-VERSION-UNAUTH-TOPOLOGY",
+      "DEBT:DEF-0B10-OPL-01",
+      "DEBT:DEF-0B10-OPL-05",
+      "DEBT:DEF-0B10-OPL-07",
+      "DEBT:DEF-0B10-OPL-12",
+      "DEBT:DEF-0B10-OPL-14",
+      "DEBT:DEF-0B10-ORG-CAMPAIGN-ROWS-READABLE-BY-ANY-MEMBER-WITH-STRATEGY-EMPLOYER-VULNERABILITIES-TEAM-AND-SUPPORT-COUNTS",
+      "DEBT:DEF-0B10-PEN-PORTAL-UPLOAD-ROUTE-RECEIVES-NO-FILE-AND-STORES-A-CALLER-WRITTEN-FILE-URL",
+      "DEBT:DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-LISTS-EVERY-PENSION-ENROLMENT-OF-THE-ORGANIZATION-TO-ANY-MEMBER",
+      "DEBT:DEF-0B10-PEN-T4A-POST-STORES-AN-ADMINISTRATOR-TYPED-INCOME-AS-A-GENERATED-TAX-RECORD",
+      "DEBT:DEF-0B10-PEN-TRUSTEE-MEETING-READS-RETURN-AGENDA-MINUTES-AND-ATTENDEES-TO-ANY-MEMBER",
+      "DEBT:DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
+      "DEBT:DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
+      "DEBT:DEF-0B10-PIL-REFERENCE-PROFILE-PRESENTS-A-DEFAULT-TESTIMONIAL-A-SIX-HOUR-FLOOR-AND-SCORE-DERIVED-FIGURES-AS-PILOT-OUTCOMES-AND-STORES-THEM-AS-A-VERSIONED-CASE-STUDY",
+      "DEBT:DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
+      "DEBT:DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",
+      "DEBT:DEF-0B11-IDS-STEWARD-ASSIGNMENT-ROWS-READABLE-BY-ANY-MEMBER-WITH-PERSONAL-PHONE-NOTES-AND-GRIEVANCE-LINK",
+      "DEBT:DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT-AND-INTENT-ON-EVERY-CALL-AND-SETTLEMENT-DOES-NOT-RECHECK-THE-BALANCE",
+      "DEBT:DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION",
+      "DEBT:DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
+      "DEBT:DEF-0B11-PRP-RECONCILIATION-PROCESS-GET-RETURNS-ANY-ORGANIZATION-RUN-BY-ID",
+      "DEBT:DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY",
+      "DEBT:DEF-0B11-PRP-REWARDS-EXPORT-RETURNS-EVERY-MEMBER-LEDGER-AWARD-AND-BUDGET-ROW-TO-ANY-MEMBER",
+      "DEBT:DEF-0B11-RPT-EXECUTE-JOINED-TABLES-CARRY-NO-ORGANIZATION-PREDICATE-SO-A-CALLER-CONFIGURED-JOIN-SELECTS-ROWS-OF-OTHER-ORGANIZATIONS",
+      "DEBT:DEF-0B11-SOC-ANY-AUTHENTICATED-USER-SENDS-AN-UPLOADED-FILE-TO-TYPED-ADDRESSES-THROUGH-THE-ORGANIZATION-SIGNATURE-PROVIDER-ACCOUNT",
+      "DEBT:DEF-0B11-SOC-OAUTH-ACCESS-AND-REFRESH-TOKENS-ARE-STORED-AS-PLAINTEXT-TEXT-COLUMNS-WITH-PAGE-AND-ORGANIZATION-ADMIN-SCOPES",
+      "DEBT:DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT-OF-THE-SELECTED-PLATFORMS-AT-STEWARD-FLOOR-WITH-NO-APPROVAL-OR-CLASSIFICATION-CHECK",
+      "DEBT:DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE",
+      "DEBT:DEF-0B11-SOC-SIGNER-IDENTITY-IS-SENDER-TYPED-TEXT-AND-A-SENDER-CAN-SIGN-AS-A-NAMED-PERSON-AND-COMPLETE-THE-DOCUMENT",
+      "DEBT:DEF-0B11-SOC-VOID-SWALLOWS-THE-PROVIDER-FAILURE-AND-RECORDS-VOIDED-WHILE-THE-ENVELOPE-CAN-STILL-BE-SIGNED",
+      "DEBT:DEF-0B11-SOC-X-MEDIA-URL-IS-FETCHED-BY-THE-SERVER-WITH-ONLY-A-SCHEME-CHECK-AND-THE-BODY-IS-UPLOADED-TO-THE-PLATFORM",
+      "DEBT:DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+      "DEBT:DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION",
+      "DEBT:DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
+      "DEBT:DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-FOR-POST-PUT-PATCH-AND-DELETE-SO-A-CALLER-IS-TOLD-A-WRITE-SUCCEEDED",
+      "DEBT:DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
+      "DEBT:DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+      "DEBT:DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+      "DEBT:DEF-0B2-ANALYTICS-CRUD-FACADE",
+      "DEBT:DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",
+      "DEBT:DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
+      "DEBT:DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+      "DEBT:DEF-0B2-UPDATE-ROLE-INERT",
+      "DEBT:DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
+      "DEBT:DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
+      "DEBT:DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
+      "DEBT:DEF-0B3-AUDIT-ROW-FULL-DISCLOSURE",
+      "DEBT:DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
+      "DEBT:DEF-0B3-BARGAINING-NOTE-ITEM-ROUTE-BYPASSES-CONFIDENTIALITY",
+      "DEBT:DEF-0B3-BARGAINING-NOTES-SUMMARY-MODES-IGNORE-CONFIDENTIALITY",
+      "DEBT:DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+      "DEBT:DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
+      "DEBT:DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION",
+      "DEBT:DEF-0B3-BREAKS-CREATE-FOR-OTHER-MEMBER",
+      "DEBT:DEF-0B3-BULK-IMPORT-INERT",
+      "DEBT:DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+      "DEBT:DEF-0B3-EXTERNAL-INVOICES-MEMBER-FLOOR",
+      "DEBT:DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ",
+      "DEBT:DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
+      "DEBT:DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK",
+      "DEBT:DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM",
+      "DEBT:DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
+      "DEBT:DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+      "DEBT:DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
+      "DEBT:DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
+      "DEBT:DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+      "DEBT:DEF-0B4-CALENDAR-OAUTH-STATE-IS-USER-ID",
+      "DEBT:DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
+      "DEBT:DEF-0B4-CALENDAR-SYNC-NO-PERSONAL-CALENDAR-CHECK",
+      "DEBT:DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
+      "DEBT:DEF-0B4-CASE-STUDIES-ORG-ADMIN-WRITES-GLOBAL-CONTENT",
+      "DEBT:DEF-0B4-CASE-STUDIES-READ-IGNORES-PUBLICATION-STATE",
+      "DEBT:DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
+      "DEBT:DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET",
+      "DEBT:DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET",
+      "DEBT:DEF-0B4-CHATBOT-SAFETY-SKIPPED-OR-FAILS-OPEN",
+      "DEBT:DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
+      "DEBT:DEF-0B4-CLAUSES-CREATE-ACCEPTS-ANY-CBA-ID",
+      "DEBT:DEF-0B4-CLC-SYNC-LOG-MEMBER-READ-AND-FORGEABLE-VERIFICATION",
+      "DEBT:DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
+      "DEBT:DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
+      "DEBT:DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+      "DEBT:DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
+      "DEBT:DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS",
+      "DEBT:DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
+      "DEBT:DEF-0B6-CMP-DISPATCH-REFERENCED-IDS-NOT-VERIFIED",
+      "DEBT:DEF-0B6-CMP-VALIDATE-ATTESTS-FROM-CALLER-DATA",
+      "DEBT:DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
+      "DEBT:DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
+      "DEBT:DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
+      "DEBT:DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
+      "DEBT:DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+      "DEBT:DEF-0B6-EMP-REMITTANCE-DETAIL-MEMBER-READ",
+      "DEBT:DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE",
+      "DEBT:DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+      "DEBT:DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY",
+      "DEBT:DEF-0B6-SYS-OBSERVABILITY-SWEEP-RECORDS-EMAIL-SUCCESS-WITHOUT-SENDING",
+      "DEBT:DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER",
+      "DEBT:DEF-0B7-COGA-CROSS-DOMAIN-CORRELATIONS-ARE-FIXED-LITERALS",
+      "DEBT:DEF-0B7-COGA-DERIVED-AGGREGATES-IGNORE-INTERVIEW-SENSITIVITY",
+      "DEBT:DEF-0B7-COGA-FORECAST-PROJECTIONS-ARE-FIXED-RATES-AND-ALWAYS-IMPROVE",
+      "DEBT:DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
+      "DEBT:DEF-0B7-COGB-PRECEDENT-AND-PROCEDURAL-ENGINES-RETURN-CONSTANT-CONTENT-AS-ORGANIZATION-ANALYSIS",
+      "DEBT:DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
+      "DEBT:DEF-0B7-EXC-CONSENT-WITHDRAWAL-AND-RECLASSIFICATION-WITHDRAW-NOTHING-DERIVED",
+      "DEBT:DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE",
+      "DEBT:DEF-0B7-EXC-PUBLISH-SENDS-EVERY-INTERVIEW-TO-AI-WITHOUT-CONSENT-GATE-OR-AUDIT",
+      "DEBT:DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL",
+      "DEBT:DEF-0B7-EXC-SCENARIOS-ALWAYS-RETURN-THE-CANNED-MINIMAL-SIMULATION",
+      "DEBT:DEF-0B7-EXP-EVIDENCE-PACK-ATTESTATIONS-HARD-CODED",
+      "DEBT:DEF-0B7-PLT-EXT-GET-RETURNS-WHOLE-INTEGRATION-ROW-WITH-CREDENTIALS",
+      "DEBT:DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
+      "DEBT:DEF-0B8-HS-ANONYMOUS-REPORTER-STAMPED-IN-CREATED-BY",
+      "DEBT:DEF-0B8-HS-DASHBOARD-ERROR-RETURNS-SUCCESS-WITH-CLEAN-METRICS",
+      "DEBT:DEF-0B8-HS-DASHBOARD-TRAINING-COMPLIANCE-IS-A-CONSTANT",
+      "DEBT:DEF-0B8-HS-INCIDENT-CREATE-SILENTLY-NORMALISES-SEVERITY-TYPE-AND-DATE",
+      "DEBT:DEF-0B8-HS-INCIDENT-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+      "DEBT:DEF-0B8-HS-TRENDS-ORGANIZATION-FROM-QUERY-AND-NO-PREDICATE-WHEN-ABSENT",
+      "DEBT:DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
+      "DEBT:DEF-0B8-ICRA-SHOPIFY-DISCOUNT-CODE-NEVER-MATCHES-THE-WEBHOOK-EXTRACTOR",
+      "DEBT:DEF-0B8-JUR-BC-TERMINATION-SCHEDULE-HAS-NO-TIER-ABOVE-EIGHT-YEARS",
+      "DEBT:DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK",
+      "DEBT:DEF-0B8-JUR-WCB-REPORTING-DEADLINE-SERVED-AS-ARBITRATION-DEADLINE",
+      "DEBT:DEF-0B9-ASM-ONBOARDING-ROOT-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+      "DEBT:DEF-0B9-ASM-PEER-BENCHMARKS-AND-CLAUSE-SUGGESTIONS-TAKE-THE-TARGET-ORGANIZATION-FROM-THE-REQUEST-AND-NEVER-COMPARE-IT-TO-THE-SESSION",
+      "DEBT:DEF-0B9-ML-CHURN-SCORES-COME-FROM-A-RANDOMLY-INITIALISED-NETWORK-FITTED-ON-GENERATED-EXAMPLES-PRESENTED-AS-ML",
+      "DEBT:DEF-0B9-ML-OPERATIONAL-METRICS-COUNT-EVERY-ORGANIZATIONS-CLAIMS-FOR-ANY-SIGNED-IN-CALLER-OR-THE-SERVICE-KEY",
+      "DEBT:DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
+      "DEBT:DEF-0B9-ORG-CHILDREN-ANY-SIGNED-IN-USER-LISTS-CHILDREN-OF-ANY-ORGANIZATION-AS-SYSTEM",
+      "DEBT:DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
+      "DEBT:DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
+      "DEBT:DEF-0B9-ORG-ITEM-DELETE-ORGANIZATION-ADMIN-ARCHIVES-OWN-ORGANIZATION-BYPASSING-STATUS-GOVERNANCE",
+      "DEBT:DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
+      "DEBT:DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",
+      "DEBT:DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
+      "DEBT:DEF-0B9-ORG-ROSTER-GET-ANY-ORGANIZATION-MEMBER-READS-FULL-ROSTER-WITH-CONTACT-DETAILS",
+      "DEBT:DEF-0B9-ORG-ROSTER-POST-STEWARD-GRANTS-ANY-ORGANIZATION-ROLE-TO-ANY-USER-ID-WITHOUT-ACCEPTANCE",
+      "DEBT:DIRECT-MANDATORY-AUDIT-IMPORT@election-succession",
+      "DEBT:MUTABLE-REP-IDENTIFIER@case-ownership-backfill",
+      "DEBT:P0-F2-TRANSITION-REASON-LEAK"
+    ],
+    "handoffObligations": [
+      "OBL-0C-PERSONA-BASELINES",
+      "OBL-0C-INSTITUTIONAL-DECISIONS",
+      "OBL-0C-CARBON-SCOPE-EXCEPTIONS",
+      "OBL-0C-HIGH-DEFECTS-AWAITING-REVIEW",
+      "OBL-0C-RELEASE-DISPOSITIONS",
+      "OBL-0C-OPL-CHALLENGES",
+      "OBL-0C-UNJUSTIFIED-PUBLIC-EXPOSURES",
+      "OBL-0C-TRACKED-RATCHET-AND-TEST-DEFECTS",
+      "OBL-0C-RUNTIME-QUALIFICATION"
+    ],
+    "proposedDispositionsAwaitingAcceptance": 71,
+    "challenges": [
+      "CHALLENGE-0B10-OPL-01",
+      "CHALLENGE-0B10-OPL-07"
+    ],
+    "challengedDefects": [
+      "DEF-0B10-OPL-01",
+      "DEF-0B10-OPL-07"
+    ],
+    "publicExposureOperations": [
+      "docs/openapi/route.ts|GET",
+      "docs/route.ts|GET",
+      "version/route.ts|GET"
+    ],
+    "carbonExceptions": [
+      "carbon/dashboard/route.ts|GET",
+      "carbon/infrastructure/route.ts|GET",
+      "carbon/validate/route.ts|GET",
+      "carbon/validate/route.ts|POST"
+    ],
+    "carriedOnce": true
+  },
+  "counts": {
+    "operations": 1646,
+    "highDefectsQualified": 71,
+    "institutionalDecisions": 111,
+    "productDecisions": 24,
+    "personaRatifications": 3
+  },
+  "evaluation": {
+    "unmet": [
+      "CL-2",
+      "CL-3",
+      "CL-4B",
+      "CL-5"
+    ],
+    "reasons": {
+      "CL-2": "The item has no authority-independent evidence with a decision maker, a date and artifact hashes.",
+      "CL-3": "The item has no authority-independent evidence with a decision maker, a date and artifact hashes.",
+      "CL-4B": "The item has no authority-independent evidence with a decision maker, a date and artifact hashes.",
+      "CL-5": "The item has no authority-independent evidence with a decision maker, a date and artifact hashes."
+    },
+    "eligibleForCertificationDecision": false,
+    "certificationGranted": false,
+    "impliesReleaseAuthorization": false,
+    "impliesProductionGo": false,
+    "readinessUnchanged": "NO_GO"
+  },
+  "remainingBlockers": [
+    {
+      "id": "CL-2",
+      "check": "INDEPENDENT_EVIDENCE_QUALIFICATION",
+      "tier": "AUTHORITY_INDEPENDENT_REVIEW",
+      "requirement": "An authority-independent reviewer accepts or contests the Gate 0C.3 and Gate 0C.4 evidence and names the artifact hashes reviewed."
+    },
+    {
+      "id": "CL-3",
+      "check": "PRODUCT_SPECIFICATION_RATIFICATION",
+      "tier": "AUTHORIZED_PRODUCT_OWNER",
+      "requirement": "An authorized product owner approves, rejects or returns each of the three persona canonicals with the approval evidence the Gate 0C.2 schema requires."
+    },
+    {
+      "id": "CL-4B",
+      "check": "REQUIRED_INSTITUTIONAL_DECISIONS_ADOPTED",
+      "tier": "INSTITUTIONAL_AUTHORITY",
+      "requirement": "Each institutional decision marked REQUIRED_BEFORE_CERTIFICATION is adopted by the deciding authority with an adopted decision record."
+    },
+    {
+      "id": "CL-5",
+      "check": "EXCEPTION_GOVERNANCE_ACCEPTED",
+      "tier": "INSTITUTIONAL_AUTHORITY",
+      "requirement": "The four decision-bound carbon scope exceptions and the three public exposure contracts are accepted, owned or retired by an authority."
+    }
+  ]
+}

@@ -32,7 +32,7 @@ export type GovernanceMaturity = z.infer<typeof governanceMaturitySchema>
 // ─── Potential Risk ───────────────────────────────────────────────────────────
 
 export const potentialRiskSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   description: z.string().min(1),
   category: z.enum([
     'technical',
@@ -65,7 +65,7 @@ export type PotentialRisk = z.infer<typeof potentialRiskSchema>
 // ─── Potential Opportunity ────────────────────────────────────────────────────
 
 export const potentialOpportunitySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   description: z.string().min(1),
   probability: severityScale,
   impact: severityScale,
@@ -84,7 +84,7 @@ export type PotentialOpportunity = z.infer<typeof potentialOpportunitySchema>
 // ─── PPOA Analysis ────────────────────────────────────────────────────────────
 
 export const ppoaAnalysisSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
 
   title: z.string().min(1).max(500),
@@ -94,7 +94,7 @@ export const ppoaAnalysisSchema = z.object({
   // Linked assets
   releaseRef: z.string().nullable(),
   pilotRef: z.string().nullable(),
-  decisionAnalysisRef: z.string().uuid().nullable(),
+  decisionAnalysisRef: z.guid().nullable(),
 
   // Risks
   risks: z.array(potentialRiskSchema),
@@ -140,7 +140,7 @@ export const ppoaAnalysisInputSchema = ppoaAnalysisSchema.omit({
 }).extend({
   releaseRef: z.string().nullable().optional().default(null),
   pilotRef: z.string().nullable().optional().default(null),
-  decisionAnalysisRef: z.string().uuid().nullable().optional().default(null),
+  decisionAnalysisRef: z.guid().nullable().optional().default(null),
   evidenceRefs: z.array(z.string()).optional().default([]),
   targetDate: z.string().datetime().nullable().optional().default(null),
   criticalRiskThreshold: z.number().int().min(1).max(25).optional().default(15),
@@ -156,7 +156,7 @@ export type PPOAAnalysisInput = z.input<typeof ppoaAnalysisInputSchema>
 // ─── Readiness Report ─────────────────────────────────────────────────────────
 
 export const readinessReportSchema = z.object({
-  analysisId: z.string().uuid(),
+  analysisId: z.guid(),
   operationalReadinessScore: z.number().min(0).max(100),
   rolloutConfidenceScore: z.number().min(0).max(100),
   criticalRisks: z.array(potentialRiskSchema),

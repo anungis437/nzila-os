@@ -1,7 +1,7 @@
 # Union-Eyes
 
 > Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.
-> Auth authority: `@nzila/platform-auth` is canonical. Clerk is legacy compatibility only and not the system of record for new authentication work.
+> Auth authority: `@nzila/platform-auth` is canonical (Microsoft Entra ID).
 
 [![CI](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml/badge.svg)](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](apps/union-eyes/tsconfig.json)
@@ -146,7 +146,7 @@ Django is the **authoritative** data layer. The Next.js frontend may read via Dr
 
 | Feature | Description |
 |---------|-------------|
-| **Dues collection** | Stripe / PayPal / Whop integration, arrears tracking |
+| **Dues collection** | Stripe / PayPal integration, arrears tracking |
 | **Strike fund** | Fund accounting, disbursement workflow |
 | **Member management** | Profiles, status tracking, transfer, seniority |
 | **Financial reporting** | Revenue, expenses, fund balances, tax slips |
@@ -297,16 +297,15 @@ See [`.env.example`](.env.example) for the full variable reference.
 ### 3. Set up the database
 
 ```bash
-# Run Drizzle migrations (TypeScript schema)
+# Run Drizzle migrations (TypeScript schema) through the approved bootstrap
 pnpm --filter @nzila/union-eyes db:migrate
-
-# Or push schema directly (development)
-pnpm --filter @nzila/union-eyes db:push
 
 # Django migrations
 cd apps/union-eyes/backend
 python manage.py migrate
 ```
+
+There is no schema-push entrypoint: `drizzle-kit push` bypasses the migration ledger and was removed.
 
 ### 4. Run
 
@@ -458,7 +457,7 @@ See [app/api/health-safety/README.md](app/api/health-safety/README.md) for a com
 | Grievances | `grievances`, `grievance_workflow`, `grievance_assignments` | Hash-chained audit on every transition |
 | Health & Safety | 11 tables (incidents, inspections, JOHS, hazards…) | [Full docs](db/schema/domains/health-safety/README.md) |
 | Federation | 8 tables (CLC hierarchy, locals, regionals, sectors) | [Full docs](db/schema/domains/federation/README.md) |
-| Members | `members`, `member_profiles`, `pending_profiles` | Seniority, transfers |
+| Members | `members`, `member_profiles` | Seniority, transfers |
 | Elections | `elections`, `ballots`, `votes` | Auditable |
 | Finance | `dues`, `strike_fund`, `payments`, `tax_slips` | Stripe-linked |
 | Audit | `audit_events`, `evidence_packs` | Append-only, hash-chained |
@@ -680,7 +679,7 @@ See [`.env.example`](.env.example) for the complete reference. Grouped by concer
 | **Redis** | `REDIS_URL` | Yes |
 | **Django** | `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` | Yes |
 | **AI** | `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT` | No |
-| **Payments** | Stripe (secret + webhook + Connect), PayPal, Whop | No |
+| **Payments** | Stripe (secret + webhook + Connect), PayPal | No |
 | **Email** | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | No |
 | **SMS** | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` | No |
 | **Push** | `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` | No |

@@ -1,367 +1,142 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { PgDialect } from 'drizzle-orm/pg-core';
+import type { SQL } from 'drizzle-orm';
+import { DuesCalculationEngine, assignmentFrequency } from '../dues-calculation-engine';
 
-const mocks = vi.hoisted(() => ({
-  mockSelect: vi.fn(),
-  mockFrom: vi.fn(),
-  mockLeftJoin: vi.fn(),
-  mockWhere: vi.fn(),
-  mockLimit: vi.fn(),
-  mockOrderBy: vi.fn(),
-  mockInsert: vi.fn(),
-  mockUpdate: vi.fn(),
-}));
+const ORG = '11111111-1111-4111-8111-111111111111';
+const MEMBER = '22222222-2222-4222-8222-222222222222';
+const period = { periodStart: new Date('2026-01-01T00:00:00.000Z'), periodEnd: new Date('2026-01-31T23:59:59.999Z') };
 
-vi.mock('@/db', () => {
-  // Create a thenable whereResult so both `await where()` and `where().limit()` work
-  const whereResult = Object.assign(
-    Promise.resolve([]),
-    {
-      limit: mocks.mockLimit,
-      orderBy: mocks.mockOrderBy.mockReturnValue({ limit: mocks.mockLimit }),
-    }
-  );
-  return {
-    db: {
-      select: mocks.mockSelect.mockReturnValue({
-        from: mocks.mockFrom.mockReturnValue({
-          leftJoin: mocks.mockLeftJoin.mockReturnValue({
-            where: mocks.mockWhere.mockReturnValue(whereResult),
-          }),
-          where: mocks.mockWhere,
-        }),
-      }),
-      insert: mocks.mockInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
-      update: mocks.mockUpdate.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      }),
-    },
+const assignment = (over: Record<string, unknown> = {}) => ({ id: 'a1', amount: '45.00', frequency: 'monthly', ...over });
+
+// A transaction that answers the assignment read and records its predicate and ordering
+function fakeExecutor(rows: unknown[]) {
+  const seen: { where?: SQL; orderBy?: SQL[]; limit?: number } = {};
+  const chain = {
+    from: vi.fn(() => chain),
+    where: vi.fn((clause: SQL) => {
+      seen.where = clause;
+      return chain;
+    }),
+    orderBy: vi.fn((...order: SQL[]) => {
+      seen.orderBy = order;
+      return chain;
+    }),
+    limit: vi.fn(async (n: number) => {
+      seen.limit = n;
+      return rows;
+    }),
   };
-});
+  const executor = { select: vi.fn(() => chain) };
+  return { executor: executor as never, seen };
+}
 
-vi.mock('@/services/financial-service/src/db/schema', () => ({
-  duesRules: {
-    id: 'id', calculationType: 'calculationType', flatAmount: 'flatAmount',
-    percentageRate: 'percentageRate', baseField: 'baseField', hourlyRate: 'hourlyRate',
-    hoursPerPeriod: 'hoursPerPeriod', tierStructure: 'tierStructure',
-    customFormula: 'customFormula', billingFrequency: 'billingFrequency', ruleName: 'ruleName',
-  },
-  memberDuesAssignments: {
-    memberId: 'memberId', organizationId: 'organizationId', isActive: 'isActive',
-    effectiveDate: 'effectiveDate', endDate: 'endDate', ruleId: 'ruleId',
-    overrideAmount: 'overrideAmount', id: 'id',
-  },
-  duesTransactions: {
-    organizationId: 'organizationId', memberId: 'memberId', createdAt: 'createdAt',
-    metadata: 'metadata', periodStart: 'periodStart', periodEnd: 'periodEnd',
-    id: 'id', status: 'status', dueDate: 'dueDate', lateFeeAmount: 'lateFeeAmount',
-    amount: 'amount',
-  },
-  members: { id: 'id', organizationId: 'organizationId', status: 'status' },
-}));
-
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: any[]) => a),
-  and: vi.fn((...a: any[]) => a),
-  or: vi.fn((...a: any[]) => a),
-  sql: vi.fn(),
-  lte: vi.fn((...a: any[]) => a),
-  gte: vi.fn((...a: any[]) => a),
-  isNull: vi.fn((...a: any[]) => a),
-  desc: vi.fn((a: any) => a),
-  relations: vi.fn(() => ({})),
-}));
+const text = (clause: SQL | undefined) => new PgDialect().sqlToQuery(clause as SQL);
 
 describe('DuesCalculationEngine', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.resetModules();
-    // Re-establish mock chain defaults
-    mocks.mockLimit.mockResolvedValue([]);
-    const whereResult = Object.assign(
-      Promise.resolve([]),
-      { limit: mocks.mockLimit, orderBy: mocks.mockOrderBy.mockReturnValue({ limit: mocks.mockLimit }) }
-    );
-    mocks.mockWhere.mockReturnValue(whereResult);
-    mocks.mockLeftJoin.mockReturnValue({ where: mocks.mockWhere });
-    mocks.mockFrom.mockReturnValue({ leftJoin: mocks.mockLeftJoin, where: mocks.mockWhere });
-    mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
-    mocks.mockInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) });
-    mocks.mockUpdate.mockReturnValue({
-      set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }),
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns null when the member has no dues assignment", async () => {
+    const { executor } = fakeExecutor([]);
+    expect(await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor)).toBeNull();
+  });
+
+  it("takes the amount of the member's assignment, as a flat dues amount", async () => {
+    const { executor } = fakeExecutor([assignment()]);
+    const result = await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor);
+
+    expect(result).toMatchObject({
+      amount: 45,
+      calculationType: 'assignment',
+      assignmentId: 'a1',
+      frequency: 'monthly',
+      breakdown: { baseAmount: 45, flatAmount: 45 },
     });
   });
 
-  // ── calculateMemberDues ──────────────────────────────────────────────────
+  it('keeps cents exactly', async () => {
+    const { executor } = fakeExecutor([assignment({ amount: '12.34' })]);
+    const result = await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor);
+    expect(result!.amount).toBe(12.34);
+  });
 
-  it('returns null when no assignment found', async () => {
-    mocks.mockLimit.mockResolvedValue([]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
+  it('falls due 15 days after the end of the period', async () => {
+    const { executor } = fakeExecutor([assignment()]);
+    const result = await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor);
+
+    expect(result!.dueDate.toISOString().slice(0, 10)).toBe('2026-02-15');
+    expect(result!.periodStart).toBe(period.periodStart);
+    expect(result!.periodEnd).toBe(period.periodEnd);
+  });
+
+  it('charges nothing for an assignment of zero (a member who is exempt)', async () => {
+    const { executor } = fakeExecutor([assignment({ amount: '0.00' })]);
+    expect(await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor)).toBeNull();
+  });
+
+  describe("the cycle's frequency", () => {
+    it('is not applied when the caller names none: the most recent active assignment applies', async () => {
+      const { executor } = fakeExecutor([assignment({ id: 'newest', frequency: 'quarterly' }), assignment({ id: 'older' })]);
+      const result = await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor);
+      expect(result!.assignmentId).toBe('newest');
     });
-    expect(result).toBeNull();
-  });
 
-  it('returns null when assignment has no rule', async () => {
-    mocks.mockLimit.mockResolvedValue([{ assignment: {}, rule: null }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
+    it('skips an assignment on another frequency and takes the next that matches', async () => {
+      const { executor } = fakeExecutor([assignment({ id: 'quarterly', frequency: 'quarterly' }), assignment({ id: 'monthly-one', frequency: 'Monthly' })]);
+      const result = await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period, frequency: 'monthly' }, executor);
+      expect(result!.assignmentId).toBe('monthly-one');
     });
-    expect(result).toBeNull();
-  });
 
-  it('uses override amount when present', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: '99.99' },
-      rule: { id: 'r1', ruleName: 'Override', calculationType: 'flat_rate', flatAmount: '50', billingFrequency: 'monthly' },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
+    it('returns null when no active assignment is on the frequency', async () => {
+      const { executor } = fakeExecutor([assignment({ frequency: 'quarterly' })]);
+      expect(
+        await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period, frequency: 'weekly' }, executor),
+      ).toBeNull();
     });
-    expect(result!.amount).toBe(99.99);
-    expect(result!.calculationType).toBe('override');
-  });
 
-  it('calculates flat_rate dues', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: { id: 'r1', ruleName: 'Standard Flat', calculationType: 'flat_rate', flatAmount: '45.00', billingFrequency: 'monthly' },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
+    it('recognizes the spellings the assignments use', () => {
+      expect(assignmentFrequency('biweekly')).toBe('bi_weekly');
+      expect(assignmentFrequency('Bi-Weekly')).toBe('bi_weekly');
+      expect(assignmentFrequency('annually')).toBe('annual');
+      expect(assignmentFrequency(' YEARLY ')).toBe('annual');
+      expect(assignmentFrequency('fortnightly')).toBeUndefined();
     });
-    expect(result!.amount).toBe(45);
-    expect(result!.calculationType).toBe('flat_rate');
   });
 
-  it('calculates percentage dues', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r2', ruleName: 'Pct', calculationType: 'percentage',
-        percentageRate: '2.5', baseField: 'grossWages', billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-      memberData: { grossWages: 4000 },
+  describe('the read', () => {
+    it("is scoped to the organization and the member, to active assignments in force at the start of the period, newest first", async () => {
+      const { executor, seen } = fakeExecutor([assignment()]);
+      await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor);
+
+      const where = text(seen.where);
+      expect(where.sql).toContain('"dues_assignments"."organization_id" = $1');
+      expect(where.sql).toContain('"dues_assignments"."member_id" = $2');
+      expect(where.sql).toContain('"dues_assignments"."status" = $3');
+      expect(where.sql).toContain('"dues_assignments"."effective_date" <= $4');
+      expect(where.sql).toContain('"dues_assignments"."end_date" is null');
+      expect(where.params.slice(0, 3)).toEqual([ORG, MEMBER, 'active']);
+      expect(text(seen.orderBy![0]).sql).toContain('"effective_date" desc');
+      expect(seen.limit).toBe(10);
     });
-    expect(result!.amount).toBe(100); // 4000 * 2.5%
-  });
 
-  it('returns 0 for percentage with missing rate', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r2', ruleName: 'Pct', calculationType: 'percentage',
-        percentageRate: null, baseField: null, billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
+    it("runs on the executor it is given, never on a handle of its own", async () => {
+      const { executor } = fakeExecutor([assignment()]);
+      await DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, executor);
+      expect((executor as unknown as { select: ReturnType<typeof vi.fn> }).select).toHaveBeenCalledTimes(1);
     });
-    expect(result!.amount).toBe(0);
-  });
 
-  it('calculates hourly dues', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r3', ruleName: 'Hourly', calculationType: 'hourly',
-        hourlyRate: '0.50', hoursPerPeriod: '160', billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-      memberData: { hoursWorked: 160 },
+    it('refuses a period that ends before it starts', async () => {
+      const { executor } = fakeExecutor([assignment()]);
+      await expect(
+        DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, periodStart: period.periodEnd, periodEnd: period.periodStart }, executor),
+      ).rejects.toThrow('Invalid dues calculation period');
     });
-    expect(result!.amount).toBe(80); // 160 * 0.50
-  });
 
-  it('returns 0 for hourly with no rate', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r3', ruleName: 'Hourly', calculationType: 'hourly',
-        hourlyRate: null, billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
+    it('lets a failed read fail the calculation: it is never an empty result', async () => {
+      const failing = { select: () => ({ from: () => ({ where: () => ({ orderBy: () => ({ limit: async () => { throw new Error('permission denied for table dues_assignments'); } }) }) }) }) };
+      await expect(
+        DuesCalculationEngine.calculateMemberDues({ organizationId: ORG, memberId: MEMBER, ...period }, failing as never),
+      ).rejects.toThrow('permission denied');
     });
-    expect(result!.amount).toBe(0);
-  });
-
-  it('calculates tiered dues — matching tier', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r4', ruleName: 'Tiered', calculationType: 'tiered',
-        tierStructure: [
-          { minAmount: 0, maxAmount: 3000, flatAmount: 30 },
-          { minAmount: 3001, maxAmount: 6000, rate: 2 },
-        ],
-        billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-      memberData: { grossWages: 5000 },
-    });
-    expect(result!.amount).toBe(100); // 5000 * 2%
-    expect(result!.calculationType).toBe('tiered');
-  });
-
-  it('returns 0 for tiered with no matching tier', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r4', ruleName: 'Tiered', calculationType: 'tiered',
-        tierStructure: [{ minAmount: 10000, maxAmount: 20000, flatAmount: 100 }],
-        billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-      memberData: { grossWages: 5000 },
-    });
-    expect(result!.amount).toBe(0);
-  });
-
-  it('returns 0 for tiered with missing/invalid tierStructure', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r4', ruleName: 'Tiered', calculationType: 'tiered',
-        tierStructure: null, billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-    });
-    expect(result!.amount).toBe(0);
-  });
-
-  it('calculates formula-based dues', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r5', ruleName: 'Formula', calculationType: 'formula',
-        customFormula: 'grossWages * 0.02 + 10', billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-      memberData: { grossWages: 5000 },
-    });
-    expect(result!.amount).toBe(110); // 5000 * 0.02 + 10
-    expect(result!.calculationType).toBe('formula');
-  });
-
-  it('returns 0 for formula with no customFormula', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r5', ruleName: 'Formula', calculationType: 'formula',
-        customFormula: null, billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-    });
-    expect(result!.amount).toBe(0);
-  });
-
-  it('returns 0 for unsafe formula with eval keyword', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: {
-        id: 'r5', ruleName: 'Formula', calculationType: 'formula',
-        customFormula: 'eval("process.exit()")', billingFrequency: 'monthly',
-      },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-    });
-    expect(result!.amount).toBe(0);
-  });
-
-  it('returns null for unknown calculation type', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: { id: 'r6', ruleName: 'Unknown', calculationType: 'unknown_type', billingFrequency: 'monthly' },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-    });
-    expect(result).toBeNull();
-  });
-
-  it('includes dueDate 15 days after periodEnd', async () => {
-    mocks.mockLimit.mockResolvedValue([{
-      assignment: { overrideAmount: null },
-      rule: { id: 'r1', ruleName: 'Flat', calculationType: 'flat_rate', flatAmount: '10', billingFrequency: 'monthly' },
-    }]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateMemberDues({
-      organizationId: 'org1', memberId: 'mem1',
-      periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31'),
-    });
-    const expectedDue = new Date('2026-01-31');
-    expectedDue.setDate(expectedDue.getDate() + 15);
-    expect(result!.dueDate.getDate()).toBe(expectedDue.getDate());
-  });
-
-  // ── generateBillingCycle ─────────────────────────────────────────────────
-
-  it('generateBillingCycle returns 0 when no active members', async () => {
-    mocks.mockWhere.mockResolvedValue([]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.generateBillingCycle(
-      'org1', new Date('2026-01-01'), new Date('2026-01-31')
-    );
-    expect(result.success).toBe(true);
-    expect(result.transactionsCreated).toBe(0);
-  });
-
-  // ── calculateLateFees ────────────────────────────────────────────────────
-
-  it('calculateLateFees returns success with 0 updates when no overdue', async () => {
-    mocks.mockWhere.mockResolvedValue([]);
-    const { DuesCalculationEngine } = await import('../dues-calculation-engine');
-    const result = await DuesCalculationEngine.calculateLateFees('org1');
-    expect(result.success).toBe(true);
-    expect(result.transactionsUpdated).toBe(0);
   });
 });

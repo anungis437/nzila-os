@@ -48,3 +48,23 @@ export type {
   DeadlineReminderStatus,
   DeadlineReminderRecipientRole,
 } from './types';
+
+export {
+  DEFAULT_ORGANIZATION_TIME_ZONE,
+  PROVINCE_TIME_ZONES,
+  endOfDayInZone,
+  calendarDayInZone,
+  addCalendarDays,
+  dueAtEndOfDayAfter,
+  shiftByCalendarDaysInZone,
+  zoneForProvince,
+  organizationTimeZone,
+  dayFieldsAtEndOfDay,
+  hasDayField,
+  isCalendarDay,
+  isKnownTimeZone,
+  CLAIM_DEADLINE_DAY_FIELDS,
+  ARBITRATION_DEADLINE_DAY_FIELDS,
+} from './deadline-day';
+export type { OrganizationTimeZone, OrganizationTimeZoneSource, OrganizationZoneFacts } from './deadline-day';
+export { loadOrganizationTimeZone, dayDeadlineFieldsAtEndOfDay } from './organization-time-zone';

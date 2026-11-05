@@ -14,13 +14,13 @@
  * Holder names, lineage prose, and notes never leave the row.
  *
  * AUTHORITY: reads protected workbook child rows (workbook_memory_holders,
- * workbook_governance_lineage_entries) through the module-level `db`. It
- * inherits the active DB execution context and MUST run inside the
- * claimed-workbook authority boundary (withClaimedWorkbookAccess).
+ * workbook_governance_lineage_entries) through the transaction it is given. That
+ * transaction MUST be the one the claimed-workbook authority boundary
+ * (withClaimedWorkbookAccess) opened: it carries the claimant or bounded system context.
  */
 
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import {
   workbookGovernanceLineageEntries,
   workbookMemoryHolders,
@@ -47,7 +47,8 @@ export interface LoadedWorkbookContext {
   cartography: CartographyResult;
   holders: ReadonlyArray<{
     role: string;
-    displayName: string | null;
+    /** Never selected: the register prints roles, not names. */
+    displayName?: string | null;
     responsibility: string;
     tenureBand: string | null;
     criticality: string | null;
@@ -60,11 +61,11 @@ export interface LoadedWorkbookContext {
  * Load every module result the engines can produce today, plus the
  * cartography + raw holder rows the existing Chapter 01 expects.
  */
-export async function loadWorkbookContext(input: {
+export async function loadWorkbookContext(tx: RLSTx, input: {
   workbookId: string;
   status: 'facilitated' | 'self-guided';
 }): Promise<LoadedWorkbookContext> {
-  const holderRows = await loadHolderRows(input.workbookId);
+  const holderRows = await loadHolderRows(tx, input.workbookId);
   const cartographyHolders: CartographyHolderInput[] = holderRows.map((h, idx) => ({
     id: String(idx),
     role: h.role,
@@ -74,7 +75,7 @@ export async function loadWorkbookContext(input: {
   }));
 
   const cartography = runStewardshipCartography(cartographyHolders);
-  const lineageRows = await loadLineageRows(input.workbookId);
+  const lineageRows = await loadLineageRows(tx, input.workbookId);
 
   const modules: WorkbookModuleResults = {};
 
@@ -153,11 +154,10 @@ export async function loadWorkbookContext(input: {
 // Internal projections
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function loadHolderRows(workbookId: string) {
-  return db
+async function loadHolderRows(tx: RLSTx, workbookId: string) {
+  return tx
     .select({
       role: workbookMemoryHolders.role,
-      displayName: workbookMemoryHolders.displayName,
       responsibility: workbookMemoryHolders.responsibility,
       tenureBand: workbookMemoryHolders.tenureBand,
       criticality: workbookMemoryHolders.criticality,
@@ -168,8 +168,8 @@ async function loadHolderRows(workbookId: string) {
     .orderBy(workbookMemoryHolders.capturedAt);
 }
 
-async function loadLineageRows(workbookId: string) {
-  return db
+async function loadLineageRows(tx: RLSTx, workbookId: string) {
+  return tx
     .select({
       lineageId: workbookGovernanceLineageEntries.lineageId,
       decisionDate: workbookGovernanceLineageEntries.decisionDate,

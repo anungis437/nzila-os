@@ -29,6 +29,16 @@ import { IntegrationProvider, SyncType } from '@/lib/integrations/types';
  
 import type { SQL } from 'drizzle-orm';
 
+/**
+ * Claim mutations act only inside the organization of the request context. A missing organization is a denial,
+ * never a platform-wide write.
+ */
+function requireContextOrganization(context: YogaInitialContext): string {
+  const organizationId = (context as YogaInitialContext & { organizationId?: string }).organizationId;
+  if (!organizationId) throw new Error('Organization context required');
+  return organizationId;
+}
+
 export const resolvers = {
   Query: {
     // Claims
@@ -380,16 +390,19 @@ export const resolvers = {
       _parent: any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { id, input }: { id: string; input: Record<string, any> },
-      _context: YogaInitialContext
+      context: YogaInitialContext
     ) => {
+      const organizationId = requireContextOrganization(context);
+      // The owning organization and the row identity are never taken from the client payload.
+      const { organizationId: _ignoredOrganization, claimId: _ignoredClaimId, id: _ignoredId, ...changes } = input;
       const result = await db
         .update(claims)
         .set({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(input as Record<string, any>),
+          ...(changes as Record<string, any>),
           updatedAt: new Date(),
         })
-        .where(eq(claims.claimId, id))
+        .where(and(eq(claims.claimId, id), eq(claims.organizationId, organizationId)))
         .returning();
 
       return result[0];
@@ -398,9 +411,10 @@ export const resolvers = {
     deleteClaim: async (
       _parent: any,
       { id }: { id: string },
-      _context: YogaInitialContext
+      context: YogaInitialContext
     ) => {
-      await db.delete(claims).where(eq(claims.claimId, id));
+      const organizationId = requireContextOrganization(context);
+      await db.delete(claims).where(and(eq(claims.claimId, id), eq(claims.organizationId, organizationId)));
       return true;
     },
 

@@ -9,9 +9,11 @@
  */
 
 import { db } from '@/db/db';
-import { satisfactionSurveys } from '@/db/schema';
-import { eq, and, avg, count, desc, sql } from 'drizzle-orm';
+import { satisfactionSurveys, satisfactionSurveyResponded } from '@/db/schema';
+import { eq, and, avg, count, desc, sql, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import type { NewSatisfactionSurvey, SatisfactionSurvey } from '@/db/schema';
 
 // ============================================================================
@@ -42,6 +44,22 @@ export interface LroPerformance {
   avgOutcome: number;
   overallAverage: number;
   recommendRate: number;
+  /** True when too few responses were completed to show a figure without identifying the people who gave them. */
+  suppressed?: boolean;
+}
+
+/**
+ * Fewest completed responses for which an average is returned. A figure over one or two responses is that response, and a steward
+ * who knows which claim the representative handled can name the member, whatever the form said about anonymity.
+ */
+export const MIN_RESPONSES_FOR_AVERAGES = 5;
+
+/** The member already answered this survey (anonymously); it is not created again. */
+export class SurveyAlreadyAnsweredError extends Error {
+  constructor() {
+    super('This member has already answered the survey for this claim');
+    this.name = 'SurveyAlreadyAnsweredError';
+  }
 }
 
 // ============================================================================
@@ -49,37 +67,64 @@ export interface LroPerformance {
 // ============================================================================
 
 /**
- * Create a satisfaction survey when a claim is resolved/closed
+ * Create a satisfaction survey when a claim is resolved/closed.
+ * The survey and its audit record commit together. `actorUserId` is the steward creating it by hand;
+ * the claim-closure workflow passes none and is recorded as the system.
  */
 export async function createSatisfactionSurvey(
-  data: Pick<NewSatisfactionSurvey, 'organizationId' | 'claimId' | 'memberId' | 'lroId'>
+  data: Pick<NewSatisfactionSurvey, 'organizationId' | 'lroId'> & { claimId: string; memberId: string },
+  actorUserId?: string
 ): Promise<SatisfactionSurvey> {
   try {
-    // Check if survey already exists for this claim+member
-    const existing = await db.query.satisfactionSurveys.findFirst({
-      where: and(
-        eq(satisfactionSurveys.claimId, data.claimId),
-        eq(satisfactionSurveys.memberId, data.memberId)
-      ),
+    return await db.transaction(async (tx) => {
+      // Check if survey already exists for this claim+member in this organization
+      const existing = await tx.query.satisfactionSurveys.findFirst({
+        where: and(
+          eq(satisfactionSurveys.organizationId, data.organizationId),
+          eq(satisfactionSurveys.claimId, data.claimId),
+          eq(satisfactionSurveys.memberId, data.memberId)
+        ),
+      });
+
+      if (existing) {
+        logger.info('Satisfaction survey already exists', { claimId: data.claimId });
+        return existing;
+      }
+
+      // An anonymous response is held without its member and claim, so the survey row no longer shows that this member answered; the
+      // responded record does, and a member who has answered is not sent the survey again.
+      const [answered] = await tx
+        .select({ id: satisfactionSurveyResponded.id })
+        .from(satisfactionSurveyResponded)
+        .where(and(eq(satisfactionSurveyResponded.claimId, data.claimId), eq(satisfactionSurveyResponded.memberId, data.memberId)))
+        .limit(1);
+      if (answered) {
+        throw new SurveyAlreadyAnsweredError();
+      }
+
+      const [survey] = await tx
+        .insert(satisfactionSurveys)
+        .values({
+          ...data,
+          status: 'pending',
+          sentAt: new Date(),
+        })
+        .returning();
+
+      await persistAtomicAudit(tx as unknown as RLSTx, {
+        organizationId: data.organizationId,
+        userId: actorUserId ?? 'system:claim-closure',
+        action: 'satisfaction.survey.create',
+        resourceType: 'satisfaction_surveys',
+        resourceId: survey.id,
+        details: { claimId: data.claimId, lroId: data.lroId },
+      });
+
+      logger.info('Created satisfaction survey', { surveyId: survey.id, claimId: data.claimId });
+      return survey;
     });
-
-    if (existing) {
-      logger.info('Satisfaction survey already exists', { claimId: data.claimId });
-      return existing;
-    }
-
-    const [survey] = await db
-      .insert(satisfactionSurveys)
-      .values({
-        ...data,
-        status: 'pending',
-        sentAt: new Date(),
-      })
-      .returning();
-
-    logger.info('Created satisfaction survey', { surveyId: survey.id, claimId: data.claimId });
-    return survey;
   } catch (error) {
+    if (error instanceof SurveyAlreadyAnsweredError) throw error;
     logger.error('Error creating satisfaction survey', { error, data });
     throw new Error('Failed to create satisfaction survey');
   }
@@ -96,15 +141,34 @@ export async function getSatisfactionSurvey(id: string): Promise<SatisfactionSur
 }
 
 /**
+ * A survey belongs to the member it was sent to: it is returned only to that member, within their organization.
+ */
+export async function getOwnSatisfactionSurvey(
+  id: string,
+  memberId: string,
+  organizationId: string
+): Promise<SatisfactionSurvey | null> {
+  const survey = await db.query.satisfactionSurveys.findFirst({
+    where: and(
+      eq(satisfactionSurveys.id, id),
+      eq(satisfactionSurveys.memberId, memberId),
+      eq(satisfactionSurveys.organizationId, organizationId)
+    ),
+  });
+  return survey ?? null;
+}
+
+/**
  * Get pending surveys for a member
  */
-export async function getPendingSurveys(memberId: string): Promise<SatisfactionSurvey[]> {
+export async function getPendingSurveys(memberId: string, organizationId: string): Promise<SatisfactionSurvey[]> {
   return db
     .select()
     .from(satisfactionSurveys)
     .where(
       and(
         eq(satisfactionSurveys.memberId, memberId),
+        eq(satisfactionSurveys.organizationId, organizationId),
         eq(satisfactionSurveys.status, 'pending')
       )
     )
@@ -133,12 +197,13 @@ export async function getSurveyForClaim(
 export async function submitSatisfactionRatings(
   surveyId: string,
   memberId: string,
-  ratings: SatisfactionRatings
+  ratings: SatisfactionRatings,
+  organizationId?: string
 ): Promise<SatisfactionSurvey> {
   try {
     // Verify ownership
     const survey = await getSatisfactionSurvey(surveyId);
-    if (!survey) throw new Error('Survey not found');
+    if (!survey || (organizationId && survey.organizationId !== organizationId)) throw new Error('Survey not found');
     if (survey.memberId !== memberId) throw new Error('Not authorized to submit this survey');
     if (survey.status === 'completed') throw new Error('Survey already completed');
 
@@ -153,25 +218,47 @@ export async function submitSatisfactionRatings(
     ];
     const overallScore = (ratingValues.reduce((a, b) => a + b, 0) / ratingValues.length).toFixed(2);
 
-    const [updated] = await db
-      .update(satisfactionSurveys)
-      .set({
-        communicationRating: ratings.communicationRating,
-        responsivenessRating: ratings.responsivenessRating,
-        knowledgeRating: ratings.knowledgeRating,
-        advocacyRating: ratings.advocacyRating,
-        professionalismRating: ratings.professionalismRating,
-        outcomeRating: ratings.outcomeRating,
-        overallScore,
-        feedback: ratings.feedback,
-        wouldRecommend: ratings.wouldRecommend,
-        isAnonymous: ratings.isAnonymous ?? false,
-        status: 'completed',
-        completedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(satisfactionSurveys.id, surveyId))
-      .returning();
+    const updated = await db.transaction(async (tx) => {
+      const completionFields = {
+          communicationRating: ratings.communicationRating,
+          responsivenessRating: ratings.responsivenessRating,
+          knowledgeRating: ratings.knowledgeRating,
+          advocacyRating: ratings.advocacyRating,
+          professionalismRating: ratings.professionalismRating,
+          outcomeRating: ratings.outcomeRating,
+          overallScore,
+          feedback: ratings.feedback,
+          wouldRecommend: ratings.wouldRecommend,
+          isAnonymous: ratings.isAnonymous ?? false,
+          status: 'completed',
+          completedAt: new Date(),
+          updatedAt: new Date(),
+        };
+      const [row] = await tx
+        .update(satisfactionSurveys)
+        .set(completionFields)
+        .where(
+          and(
+            eq(satisfactionSurveys.id, surveyId),
+            eq(satisfactionSurveys.memberId, memberId),
+            eq(satisfactionSurveys.organizationId, survey.organizationId),
+            inArray(satisfactionSurveys.status, ['pending', 'sent'])
+          )
+        )
+        .returning();
+      if (!row) throw new Error('Survey already completed');
+
+      // The record names the survey and its outcome, not the ratings or the free text.
+      await persistAtomicAudit(tx as unknown as RLSTx, {
+        organizationId: survey.organizationId,
+        userId: memberId,
+        action: 'satisfaction.survey.submit',
+        resourceType: 'satisfaction_surveys',
+        resourceId: surveyId,
+        details: { claimId: survey.claimId },
+      });
+      return row;
+    });
 
     logger.info('Satisfaction survey completed', { surveyId, overallScore });
     return updated;
@@ -186,19 +273,38 @@ export async function submitSatisfactionRatings(
  */
 export async function declineSurvey(
   surveyId: string,
-  memberId: string
+  memberId: string,
+  organizationId?: string
 ): Promise<SatisfactionSurvey> {
   const survey = await getSatisfactionSurvey(surveyId);
-  if (!survey) throw new Error('Survey not found');
+  if (!survey || (organizationId && survey.organizationId !== organizationId)) throw new Error('Survey not found');
   if (survey.memberId !== memberId) throw new Error('Not authorized');
 
-  const [updated] = await db
-    .update(satisfactionSurveys)
-    .set({ status: 'declined', updatedAt: new Date() })
-    .where(eq(satisfactionSurveys.id, surveyId))
-    .returning();
+  return db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(satisfactionSurveys)
+      .set({ status: 'declined', updatedAt: new Date() })
+      .where(
+        and(
+          eq(satisfactionSurveys.id, surveyId),
+          eq(satisfactionSurveys.memberId, memberId),
+          eq(satisfactionSurveys.organizationId, survey.organizationId),
+          inArray(satisfactionSurveys.status, ['pending', 'sent'])
+        )
+      )
+      .returning();
+    if (!updated) throw new Error('Survey can no longer be declined');
 
-  return updated;
+    await persistAtomicAudit(tx as unknown as RLSTx, {
+      organizationId: survey.organizationId,
+      userId: memberId,
+      action: 'satisfaction.survey.decline',
+      resourceType: 'satisfaction_surveys',
+      resourceId: surveyId,
+      details: { claimId: survey.claimId },
+    });
+    return updated;
+  });
 }
 
 // ============================================================================
@@ -244,6 +350,23 @@ export async function getLroPerformance(
       .where(and(...conditions, sql`${satisfactionSurveys.wouldRecommend} IS NOT NULL`));
 
     const n = (v: string | null) => parseFloat(v ?? '0');
+
+    if (metrics.totalSurveys < MIN_RESPONSES_FOR_AVERAGES) {
+      return {
+        lroId,
+        totalSurveys: metrics.totalSurveys,
+        completedSurveys: metrics.totalSurveys,
+        avgCommunication: 0,
+        avgResponsiveness: 0,
+        avgKnowledge: 0,
+        avgAdvocacy: 0,
+        avgProfessionalism: 0,
+        avgOutcome: 0,
+        overallAverage: 0,
+        recommendRate: 0,
+        suppressed: true,
+      };
+    }
 
     const avgValues = [
       n(metrics.avgCommunication),
@@ -298,7 +421,8 @@ export async function getOrganizationLroRankings(
     );
 
     // Sort by overall average descending
-    performances.sort((a, b) => b.overallAverage - a.overallAverage);
+    // A representative with too few responses is listed without a figure, after the ranked ones.
+    performances.sort((a, b) => Number(a.suppressed ?? false) - Number(b.suppressed ?? false) || b.overallAverage - a.overallAverage);
 
     return performances;
   } catch (error) {

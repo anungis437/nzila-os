@@ -10,6 +10,7 @@ import {
   jsonb,
   boolean,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { employerPayrollRuns } from "./employer-payroll-runs";
 
@@ -46,6 +47,7 @@ export const employerRemittanceRuns = pgTable(
   (table) => ({
     orgIdx: index("employer_remittance_runs_org_idx").on(table.organizationId),
     payrollRunIdx: index("employer_remittance_runs_payroll_run_idx").on(table.payrollRunId),
+    onePerPayrollRunIdx: uniqueIndex("employer_remittance_runs_one_per_payroll_run_uidx").on(table.payrollRunId),
     dueDateIdx: index("employer_remittance_runs_due_date_idx").on(table.dueDate),
     statusIdx: index("employer_remittance_runs_status_idx").on(table.status),
   }),

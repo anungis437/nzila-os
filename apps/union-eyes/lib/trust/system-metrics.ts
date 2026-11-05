@@ -11,8 +11,8 @@
  * Philosophy: Transparency as trust infrastructure
  */
 
-import { db } from '@/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   TrustMetrics,
   ImmutabilityMetric,
@@ -27,11 +27,19 @@ import React from 'react';
 import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
 import type { JSXElementConstructor, ReactElement } from 'react';
 import { TrustMetricsPdfDocument } from './TrustMetricsPdfDocument';
+import { formatTableList } from './format';
+
+/** The history tables whose records must not change. */
+const HISTORY_TABLES = ['grievance_transitions', 'approval_records', 'claim_updates', 'audit_logs'] as const;
 
 /**
- * Get comprehensive trust metrics
+ * Get comprehensive trust metrics for one organization's trust page.
+ *
+ * Every database read runs in withRLSContext({ organizationId }): the audit count is that organization's own, and outside a context the
+ * handle has no organization and row-level security shows the audit trail as empty. The catalog readings (triggers, policies) are
+ * measurements of the schema, the same for every organization.
  */
-export async function getTrustMetrics(): Promise<TrustMetrics> {
+export async function getTrustMetrics(organizationId: string): Promise<TrustMetrics> {
   const [
     immutability,
     rlsEnforcement,
@@ -39,11 +47,11 @@ export async function getTrustMetrics(): Promise<TrustMetrics> {
     governance,
     auditLog,
   ] = await Promise.all([
-    getImmutabilityMetrics(),
-    getRLSMetrics(),
+    getImmutabilityMetrics(organizationId),
+    getRLSMetrics(organizationId),
     getFSMMetrics(),
     getGovernanceMetrics(),
-    getAuditLogMetrics(),
+    getAuditLogMetrics(organizationId),
   ]);
 
   return {
@@ -57,45 +65,47 @@ export async function getTrustMetrics(): Promise<TrustMetrics> {
 }
 
 /**
- * Verify immutability trigger enforcement
+ * Verify immutability trigger enforcement: a history table is protected when an enabled trigger named for immutability refuses its updates
+ * and an enabled one refuses its deletes. Read from pg_trigger, which every role sees whole (information_schema.triggers hides the triggers of
+ * tables the role has no privilege on, which would report a protected table as unprotected). Only the history tables that exist are counted:
+ * a table the schema does not have is neither protected nor unprotected.
  */
-export async function getImmutabilityMetrics(): Promise<ImmutabilityMetric> {
+export async function getImmutabilityMetrics(organizationId: string): Promise<ImmutabilityMetric> {
   try {
-    // Check if immutability triggers exist
-    const triggers = await db.execute(sql`
-      SELECT 
-        trigger_name,
-        event_object_table,
-        action_timing,
-        event_manipulation
-      FROM information_schema.triggers
-      WHERE trigger_name LIKE '%immutability%'
-        OR trigger_name LIKE '%immutable%'
-      ORDER BY event_object_table;
-    `);
+    const rows = (await withRLSContext({ organizationId }, (tx) =>
+      tx.execute(sql`
+        SELECT c.relname::text AS table_name,
+               COALESCE(bool_or((t.tgtype & 16) <> 0), false) AS blocks_update,
+               COALESCE(bool_or((t.tgtype & 8) <> 0), false) AS blocks_delete
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = 'public'
+        LEFT JOIN pg_trigger t
+          ON t.tgrelid = c.oid
+          AND NOT t.tgisinternal
+          AND t.tgenabled <> 'D'
+          AND t.tgname ILIKE '%immutab%'
+        WHERE c.relkind IN ('r', 'p')
+          AND c.relname IN (${sql.join(HISTORY_TABLES.map((table) => sql`${table}`), sql`, `)})
+        GROUP BY c.relname
+        ORDER BY c.relname
+      `),
+    )) as unknown as Array<{ table_name: string; blocks_update: boolean; blocks_delete: boolean }>;
 
-    const tablesProtected = [
-      'grievance_transitions',
-      'approval_records',
-      'claim_updates',
-      'audit_logs',
-    ];
-
-    // Verify each protected table has triggers
-    const triggersActive = triggers.length >= tablesProtected.length * 2; // UPDATE + DELETE
-
-    // Check for recent violation attempts (should always be 0)
-    const violationAttempts = 0; // Would track in error logs if implemented
+    const tablesProtected = rows.filter((row) => row.blocks_update && row.blocks_delete).map((row) => row.table_name);
+    const triggersActive = rows.length > 0 && tablesProtected.length === rows.length;
 
     return {
-      status: triggersActive ? 'active' : 'error',
+      status: rows.length === 0 ? 'unknown' : triggersActive ? 'active' : tablesProtected.length > 0 ? 'degraded' : 'error',
       verification: triggersActive,
       lastCheck: new Date(),
       description:
-        'Database triggers prevent modification of historical records (Migration 0064)',
+        rows.length === 0
+          ? 'None of the history tables exists to be verified'
+          : `${tablesProtected.length} of ${rows.length} history tables have enabled triggers that refuse both updates and deletes`,
       triggersActive,
       tablesProtected,
-      violationAttempts,
+      // Nothing records a refused modification, so there is no figure to report.
+      violationAttempts: null,
       lastAudit: new Date(),
     };
   } catch (error) {
@@ -107,51 +117,67 @@ export async function getImmutabilityMetrics(): Promise<ImmutabilityMetric> {
       description: 'Unable to verify immutability status',
       triggersActive: false,
       tablesProtected: [],
-      violationAttempts: 0,
+      violationAttempts: null,
       lastAudit: new Date(),
     };
   }
 }
 
 /**
- * Verify RLS (Row-Level Security) policies
+ * Verify RLS (Row-Level Security) coverage: the share of the tables that carry an organization column (organization_id or org_id) that have
+ * row-level security enabled, and the policies that enforce it.
  */
-export async function getRLSMetrics(): Promise<RLSMetric> {
+export async function getRLSMetrics(organizationId: string): Promise<RLSMetric> {
   try {
-    // Check RLS policies
-    const policies = await db.execute(sql`
-      SELECT 
-        schemaname,
-        tablename,
-        policyname,
-        permissive,
-        roles,
-        cmd
-      FROM pg_policies
-      WHERE schemaname = 'public'
-      ORDER BY tablename;
-    `);
+    const { tenantTables, policies } = await withRLSContext({ organizationId }, async (tx) => ({
+      tenantTables: (await tx.execute(sql`
+        SELECT c.relname::text AS table_name, c.relrowsecurity AS enabled
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public'
+          AND c.relkind IN ('r', 'p')
+          AND EXISTS (
+            SELECT 1 FROM pg_attribute a
+            WHERE a.attrelid = c.oid
+              AND a.attname IN ('organization_id', 'org_id')
+              AND a.attnum > 0
+              AND NOT a.attisdropped
+          )
+        ORDER BY c.relname
+      `)) as unknown as Array<{ table_name: string; enabled: boolean }>,
+      policies: (await tx.execute(sql`
+        SELECT COUNT(*)::int AS count FROM pg_policies WHERE schemaname = 'public'
+      `)) as unknown as Array<{ count: number }>,
+    }));
 
-    const tablesWithRLS = [
-      'organizations',
-      'members',
-      'grievances',
-      'cases',
-      'documents',
-      'communications',
-    ];
-
+    const tablesProtected = tenantTables.filter((table) => table.enabled).map((table) => table.table_name);
+    const policiesActive = Number(policies[0]?.count ?? 0);
     const lastPolicyCheck = new Date();
 
+    if (tenantTables.length === 0) {
+      return {
+        status: 'unknown',
+        verification: false,
+        lastCheck: lastPolicyCheck,
+        description: 'No table with an organization column was found to measure',
+        policiesActive,
+        orgIsolation: 'Unknown',
+        lastPolicyCheck,
+        tablesProtected,
+      };
+    }
+
+    const everyTableProtected = tablesProtected.length === tenantTables.length;
     return {
-      status: policies.length > 0 ? 'active' : 'degraded',
-      verification: policies.length > 0,
+      status: everyTableProtected ? 'active' : 'degraded',
+      verification: everyTableProtected,
       lastCheck: lastPolicyCheck,
-      description: 'Row-Level Security ensures complete org data isolation',
-      policiesActive: policies.length,
-      orgIsolation: '100%',
+      description: `${tablesProtected.length} of ${tenantTables.length} tables that carry an organization column enforce row-level security`,
+      policiesActive,
+      // Rounded down: a share below 100% is never shown as 100%.
+      orgIsolation: `${Math.floor((tablesProtected.length / tenantTables.length) * 100)}%`,
       lastPolicyCheck,
-      tablesProtected: tablesWithRLS,
+      tablesProtected,
     };
   } catch (error) {
     logger.error('Failed to check RLS metrics', error);
@@ -237,40 +263,30 @@ export async function getGovernanceMetrics(): Promise<GovernanceMetric> {
 }
 
 /**
- * Get audit log metrics
+ * Get audit log metrics: the audit events recorded for the organization in the last 30 days. The count is the organization's own, read
+ * in its context (audit_logs is a tenant table): through the module-level handle the count was of an empty table.
  */
-export async function getAuditLogMetrics(): Promise<AuditLogMetric> {
+export async function getAuditLogMetrics(organizationId: string): Promise<AuditLogMetric> {
   try {
-    // Count audit log events
-    const eventCount = await db.execute(sql`
-      SELECT COUNT(*) as count
-      FROM audit_logs
-      WHERE created_at > NOW() - INTERVAL '30 days';
-    `);
+    const rows = (await withRLSContext({ organizationId }, (tx) =>
+      tx.execute(sql`
+        SELECT COUNT(*)::int AS count
+        FROM audit_logs
+        WHERE organization_id = ${organizationId}
+          AND created_at > NOW() - INTERVAL '30 days'
+      `),
+    )) as unknown as Array<{ count: number }>;
 
-    const eventsLogged = Number((eventCount[0] as Record<string, unknown>)?.count || 0);
+    const eventsLogged = Number(rows[0]?.count ?? 0);
 
-    // Count archived events (audit_log is the legacy table used as archive)
-    let archivedEvents = 0;
-    try {
-      const archivedCount = await db.execute(sql`
-        SELECT COUNT(*) as count
-        FROM audit_log;
-      `);
-      archivedEvents = Number((archivedCount[0] as Record<string, unknown>)?.count || 0);
-    } catch {
-      // audit_log table may not exist in all environments
-    }
-
+    // No archive is recorded: the legacy audit_log relation this once counted does not exist, so an archived-event count and a last-archive date are not reported.
     return {
       status: 'active',
       verification: true,
       lastCheck: new Date(),
-      description: 'Comprehensive audit trail of all system actions',
+      description: 'Audit events recorded for this organization in the last 30 days',
       eventsLogged,
       retentionPolicy: '7 years',
-      lastArchive: new Date(), // Would get from archive metadata
-      archivedEvents,
     };
   } catch (error) {
     logger.error('Failed to check audit log metrics', error);
@@ -281,8 +297,6 @@ export async function getAuditLogMetrics(): Promise<AuditLogMetric> {
       description: 'Unable to verify audit log status',
       eventsLogged: 0,
       retentionPolicy: '7 years',
-      lastArchive: new Date(),
-      archivedEvents: 0,
     };
   }
 }
@@ -309,8 +323,8 @@ export function generateTrustSummary(metrics: TrustMetrics): string {
     '',
     '## Immutability Enforcement',
     `Status: ${metrics.immutability.status.toUpperCase()}`,
-    `Tables Protected: ${metrics.immutability.tablesProtected.join(', ')}`,
-    `Violation Attempts: ${metrics.immutability.violationAttempts}`,
+    `Tables Protected: ${formatTableList(metrics.immutability.tablesProtected)}`,
+    `Violation Attempts: ${metrics.immutability.violationAttempts ?? 'not measured'}`,
     '',
     '## RLS (Row-Level Security)',
     `Status: ${metrics.rlsEnforcement.status.toUpperCase()}`,
@@ -329,7 +343,6 @@ export function generateTrustSummary(metrics: TrustMetrics): string {
     '',
     '## Audit Log',
     `Events Logged (30 days): ${metrics.auditLog.eventsLogged.toLocaleString()}`,
-    `Archived Events: ${metrics.auditLog.archivedEvents.toLocaleString()}`,
     `Retention Policy: ${metrics.auditLog.retentionPolicy}`,
   ];
 
@@ -339,8 +352,8 @@ export function generateTrustSummary(metrics: TrustMetrics): string {
 /**
  * Example usage:
  * 
- * // Get all metrics
- * const metrics = await getTrustMetrics();
+ * // Get all metrics for the signed-in user's organization
+ * const metrics = await getTrustMetrics(organizationId);
  * 
  * // Display on trust dashboard
  * <SystemStatusGrid systems={[
@@ -350,7 +363,7 @@ export function generateTrustSummary(metrics: TrustMetrics): string {
  *     description: metrics.immutability.description,
  *     metadata: [
  *       { label: "Tables Protected", value: metrics.immutability.tablesProtected.length },
- *       { label: "Violations Blocked", value: metrics.immutability.violationAttempts }
+ *       { label: "Violations Blocked", value: metrics.immutability.violationAttempts ?? "—" }
  *     ]
  *   },
  *   // ... other systems

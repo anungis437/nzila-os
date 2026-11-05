@@ -3,50 +3,26 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
 import { requireUser } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   CheckCircle,
   AlertCircle,
   XCircle,
   TrendingUp,
   Calendar,
   FileText,
-  Download,
   MapPin,
   Building2,
   DollarSign,
   Clock,
-  BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
-import { logger } from '@/lib/logger';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-interface ProvincialComplianceData {
-  name: string;
-  affiliates: number;
-  complianceRate: number;
-  compliant: number;
-  code: string;
-}
-
-interface ComplianceIssue {
-  organization: string;
-  description: string;
-  severity: string;
-  daysOverdue: number;
-}
-
+import { listAffiliates } from '@/lib/organizations/affiliates';
+import { loadRemittanceFacts, standingOf, summarizeRemittances, type RemittanceFact } from '@/lib/organizations/per-capita-standing';
 import {
   Table,
   TableBody,
@@ -55,6 +31,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+interface ProvincialComplianceData {
+  name: string;
+  affiliates: number;
+  compliant: number;
+  complianceRate: number;
+}
+
+interface ComplianceIssue {
+  id: string;
+  organization: string;
+  description: string;
+  severity: 'high' | 'medium';
+}
 
 export const metadata: Metadata = {
   title: 'CLC Compliance Tracking | UnionEyes',
@@ -70,83 +60,95 @@ async function checkCLCAccess(userId: string, orgId: string): Promise<boolean> {
   }
 }
 
-async function getComplianceMetrics(clcId: string) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-    const res = await fetch(`${baseUrl}/api/v2/clc/compliance/metrics?clcId=${clcId}`, { cache: 'no-store' });
-    if (res.ok) {
-      return await res.json();
-    }
-    
-    // Fallback to empty metrics
-    const totalAffiliates = 0;
-    const compliantAffiliates = 0;
-    const atRiskAffiliates = 0;
-    const nonCompliantAffiliates = 0;
-    const overallComplianceRate = 0;
-    
-    const totalRemittancesDue = 0;
-    const remittancesSubmitted = 0;
-    const remittancesOverdue = 0;
-    const totalAmountDue = 0;
-    const totalAmountReceived = 0;
-    
-    const provincialCompliance: never[] = [];
-    const recentIssues: never[] = [];
-    const complianceTrends: never[] = [];
+const sumAmounts = (facts: readonly RemittanceFact[]) => facts.reduce((sum, fact) => sum + Number(fact.totalAmount), 0);
 
-    return {
-      national: {
-        totalAffiliates,
-        compliantAffiliates,
-        atRiskAffiliates,
-        nonCompliantAffiliates,
-        overallComplianceRate,
-      },
-      remittances: {
-        totalRemittancesDue,
-        remittancesSubmitted,
-        remittancesOverdue,
-        totalAmountDue,
-        totalAmountReceived,
-        collectionRate: totalAmountDue > 0 ? (totalAmountReceived / totalAmountDue) * 100 : 0,
-      },
-      provincialCompliance,
-      recentIssues,
-      complianceTrends,
-    };
-  } catch (error) {
-    logger.error('Error fetching compliance metrics:', error);
-    return {
-      national: {
-        totalAffiliates: 0,
-        compliantAffiliates: 0,
-        atRiskAffiliates: 0,
-        nonCompliantAffiliates: 0,
-        overallComplianceRate: 0,
-      },
-      remittances: {
-        totalRemittancesDue: 0,
-        remittancesSubmitted: 0,
-        remittancesOverdue: 0,
-        totalAmountDue: 0,
-        totalAmountReceived: 0,
-        collectionRate: 0,
-      },
-      provincialCompliance: [],
-      recentIssues: [],
-      complianceTrends: [],
-    };
+/**
+ * The congress's compliance position, from the per-capita remittances addressed to it (read in its own context) and the affiliates below
+ * it, and nothing else: a rate is null when no remittance fell due, never zero, and an affiliate with nothing on file is pending and at risk,
+ * never compliant. The page used to read /api/v2/clc/compliance/metrics, which answers HTTP 410, and print its fallback zeros under a banner.
+ * A failed read is an error, not a position.
+ */
+async function getComplianceData(userId: string, clcId: string) {
+  const [affiliates, facts] = await Promise.all([
+    listAffiliates({ userId, organizationId: clcId }),
+    loadRemittanceFacts(clcId),
+  ]);
+  const summary = summarizeRemittances(facts);
+  const standings = affiliates.map((affiliate) => {
+    const own = facts.filter((fact) => fact.fromOrganizationId === affiliate.id);
+    return { affiliate, own, standing: standingOf(own) };
+  });
+
+  const due = facts.filter((fact) => fact.fellDueInLastYear);
+  const amountDue = sumAmounts(due);
+  const amountReceived = sumAmounts(due.filter((fact) => fact.status === 'approved' || fact.status === 'paid'));
+
+  const byProvince = new Map<string, { affiliates: number; compliant: number }>();
+  for (const { affiliate, standing } of standings) {
+    const key = affiliate.provinceTerritory ?? '';
+    const entry = byProvince.get(key) ?? { affiliates: 0, compliant: 0 };
+    entry.affiliates += 1;
+    if (standing.complianceStatus === 'compliant') entry.compliant += 1;
+    byProvince.set(key, entry);
   }
+  const provincialCompliance: ProvincialComplianceData[] = [...byProvince]
+    .map(([name, entry]) => ({
+      name,
+      affiliates: entry.affiliates,
+      compliant: entry.compliant,
+      complianceRate: Math.round((entry.compliant / entry.affiliates) * 100),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const recentIssues: ComplianceIssue[] = standings
+    .filter(({ standing }) => standing.complianceStatus !== 'compliant')
+    .map(({ affiliate, own, standing }) => {
+      const overdue = own.filter((fact) => fact.overdue).length;
+      return {
+        id: affiliate.id,
+        organization: affiliate.name,
+        description:
+          standing.remittanceStatus === 'overdue'
+            ? `${overdue} overdue remittance${overdue === 1 ? '' : 's'}`
+            : own.length === 0
+              ? 'No remittance on file'
+              : 'Remittance pending',
+        severity: standing.remittanceStatus === 'overdue' ? 'high' : 'medium',
+      };
+    });
+
+  return {
+    national: {
+      totalAffiliates: affiliates.length,
+      compliantAffiliates: standings.filter(({ standing }) => standing.complianceStatus === 'compliant').length,
+      atRiskAffiliates: standings.filter(({ standing }) => standing.complianceStatus === 'at-risk').length,
+      nonCompliantAffiliates: standings.filter(({ standing }) => standing.complianceStatus === 'non-compliant').length,
+      overallComplianceRate: summary.complianceRate,
+    },
+    remittances: {
+      totalRemittancesDue: due.length,
+      remittancesSubmitted: due.filter((fact) => fact.submittedAt !== null).length,
+      remittancesOverdue: summary.overdueRemittances,
+      totalAmountDue: amountDue,
+      totalAmountReceived: amountReceived,
+      collectionRate: amountDue > 0 ? (amountReceived / amountDue) * 100 : null,
+    },
+    provincialCompliance,
+    recentIssues,
+  };
 }
 
-const getComplianceStatusColor = (rate: number) => {
+const money = (value: number, locale: string) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD' }).format(value);
+
+const getComplianceStatusColor = (rate: number | null) => {
+  if (rate === null) return 'text-muted-foreground';
   if (rate >= 95) return 'text-green-600';
   if (rate >= 85) return 'text-yellow-600';
   return 'text-red-600';
 };
 
-const getComplianceStatusIcon = (rate: number) => {
+const getComplianceStatusIcon = (rate: number | null) => {
+  if (rate === null) return Clock;
   if (rate >= 95) return CheckCircle;
   if (rate >= 85) return AlertCircle;
   return XCircle;
@@ -163,9 +165,11 @@ export default async function CLCCompliancePage() {
   }
 
   const t = await getTranslations('clc.compliance');
-  const metrics = await getComplianceMetrics(orgId);
+  const locale = await getLocale();
+  const metrics = await getComplianceData(userId, orgId);
 
   const StatusIcon = getComplianceStatusIcon(metrics.national.overallComplianceRate);
+  const overallRate = metrics.national.overallComplianceRate;
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -190,9 +194,9 @@ export default async function CLCCompliancePage() {
             </Link>
           </Button>
           <Button asChild>
-            <Link href="/dashboard/admin/clc-remittances">
-              <DollarSign className="mr-2 h-4 w-4" />
-              {t('manageRemittances', { defaultValue: 'Manage Remittances' })}
+            <Link href="/dashboard/clc/affiliates">
+              <Building2 className="mr-2 h-4 w-4" />
+              {t('actions.viewAffiliates', { defaultValue: 'View Affiliates' })}
             </Link>
           </Button>
         </div>
@@ -205,7 +209,7 @@ export default async function CLCCompliancePage() {
             <div>
               <CardTitle className="text-2xl flex items-center gap-2">
                 {/* eslint-disable-next-line react-hooks/static-components */}
-                <StatusIcon className={`h-6 w-6 ${getComplianceStatusColor(metrics.national.overallComplianceRate)}`} />
+                <StatusIcon className={`h-6 w-6 ${getComplianceStatusColor(overallRate)}`} />
                 {t('overallStatus', { defaultValue: 'Overall National Compliance' })}
               </CardTitle>
               <CardDescription className="mt-2">
@@ -213,12 +217,13 @@ export default async function CLCCompliancePage() {
               </CardDescription>
             </div>
             <div className="text-right">
-              <div className={`text-4xl font-bold ${getComplianceStatusColor(metrics.national.overallComplianceRate)}`}>
-                {metrics.national.overallComplianceRate}%
+              <div className={`text-4xl font-bold ${getComplianceStatusColor(overallRate)}`}>
+                {overallRate === null ? '—' : `${overallRate}%`}
               </div>
               <p className="text-sm text-muted-foreground">
                 {t('complianceRate', { defaultValue: 'Compliance Rate' })}
               </p>
+              {overallRate === null && <p className="text-xs text-muted-foreground">No remittance fell due in the last twelve months</p>}
             </div>
           </div>
         </CardHeader>
@@ -304,9 +309,9 @@ export default async function CLCCompliancePage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${metrics.remittances.totalAmountDue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{money(metrics.remittances.totalAmountDue, locale)}</div>
             <p className="text-xs text-muted-foreground">
-              ${metrics.remittances.totalAmountReceived.toLocaleString()} {t('remittances.received', { defaultValue: 'received' })}
+              {money(metrics.remittances.totalAmountReceived, locale)} {t('remittances.received', { defaultValue: 'received' })}
             </p>
           </CardContent>
         </Card>
@@ -319,10 +324,10 @@ export default async function CLCCompliancePage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.remittances.collectionRate.toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">
-              {t('remittances.thirtyDayAverage', { defaultValue: '30-day average' })}
-            </p>
+            <div className="text-2xl font-bold">
+              {metrics.remittances.collectionRate === null ? '—' : `${metrics.remittances.collectionRate.toFixed(1)}%`}
+            </div>
+            <p className="text-xs text-muted-foreground">Remittances that fell due in the last twelve months</p>
           </CardContent>
         </Card>
       </div>
@@ -330,76 +335,38 @@ export default async function CLCCompliancePage() {
       {/* Provincial Compliance Breakdown */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                {t('provincial.title', { defaultValue: 'Provincial/Territorial Compliance' })}
-              </CardTitle>
-              <CardDescription className="mt-1">
-                {t('provincial.description', { defaultValue: 'Compliance breakdown by province and territory' })}
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Select defaultValue="all">
-                <SelectTrigger className="w-45">
-                  <SelectValue placeholder={t('provincial.filter', { defaultValue: 'Filter by province' })} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('provincial.allProvinces', { defaultValue: 'All Provinces' })}</SelectItem>
-                  <SelectItem value="AB">Alberta</SelectItem>
-                  <SelectItem value="BC">British Columbia</SelectItem>
-                  <SelectItem value="MB">Manitoba</SelectItem>
-                  <SelectItem value="NB">New Brunswick</SelectItem>
-                  <SelectItem value="NL">Newfoundland and Labrador</SelectItem>
-                  <SelectItem value="NS">Nova Scotia</SelectItem>
-                  <SelectItem value="ON">Ontario</SelectItem>
-                  <SelectItem value="PE">Prince Edward Island</SelectItem>
-                  <SelectItem value="QC">Quebec</SelectItem>
-                  <SelectItem value="SK">Saskatchewan</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
-                {t('export', { defaultValue: 'Export' })}
-              </Button>
-            </div>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            {t('provincial.title', { defaultValue: 'Provincial/Territorial Compliance' })}
+          </CardTitle>
+          <CardDescription className="mt-1">
+            {t('provincial.description', { defaultValue: 'Compliance breakdown by province and territory' })}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {metrics.provincialCompliance.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <MapPin className="h-16 w-16 mx-auto mb-4 opacity-50" />
               <p>{t('provincial.noData', { defaultValue: 'No provincial compliance data available' })}</p>
-              <p className="text-sm mt-2">{t('provincial.noDataHint', { defaultValue: 'Data will appear once remittances are submitted' })}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {metrics.provincialCompliance.map((province: ProvincialComplianceData, index: number) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+              {metrics.provincialCompliance.map((province) => (
+                <div key={province.name} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
                     <MapPin className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <div className="font-medium">{province.name}</div>
+                      <div className="font-medium">{province.name === '' ? 'Province not recorded' : province.name}</div>
                       <div className="text-sm text-muted-foreground">
                         {province.affiliates} {t('provincial.affiliates', { defaultValue: 'affiliates' })}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className={`text-xl font-bold ${getComplianceStatusColor(province.complianceRate)}`}>
-                        {province.complianceRate}%
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {province.compliant}/{province.affiliates} {t('provincial.compliant', { defaultValue: 'compliant' })}
-                      </div>
+                  <div className="text-right">
+                    <div className={`text-xl font-bold ${getComplianceStatusColor(province.complianceRate)}`}>{province.complianceRate}%</div>
+                    <div className="text-xs text-muted-foreground">
+                      {province.compliant}/{province.affiliates} {t('provincial.compliant', { defaultValue: 'compliant' })}
                     </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/dashboard/clc/compliance?province=${province.code}`}>
-                        {t('viewDetails', { defaultValue: 'View Details' })}
-                      </Link>
-                    </Button>
                   </div>
                 </div>
               ))}
@@ -408,7 +375,7 @@ export default async function CLCCompliancePage() {
         </CardContent>
       </Card>
 
-      {/* Recent Compliance Issues */}
+      {/* Compliance Issues */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -433,74 +400,21 @@ export default async function CLCCompliancePage() {
                   <TableHead>{t('issues.organization', { defaultValue: 'Organization' })}</TableHead>
                   <TableHead>{t('issues.issue', { defaultValue: 'Issue' })}</TableHead>
                   <TableHead>{t('issues.severity', { defaultValue: 'Severity' })}</TableHead>
-                  <TableHead>{t('issues.daysOverdue', { defaultValue: 'Days Overdue' })}</TableHead>
-                  <TableHead className="text-right">{t('issues.actions', { defaultValue: 'Actions' })}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {metrics.recentIssues.map((issue: ComplianceIssue, index: number) => (
-                  <TableRow key={index}>
+                {metrics.recentIssues.map((issue) => (
+                  <TableRow key={issue.id}>
                     <TableCell className="font-medium">{issue.organization}</TableCell>
                     <TableCell>{issue.description}</TableCell>
                     <TableCell>
-                      <Badge variant={issue.severity === 'high' ? 'destructive' : 'secondary'}>
-                        {issue.severity}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{issue.daysOverdue}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        {t('issues.followUp', { defaultValue: 'Follow Up' })}
-                      </Button>
+                      <Badge variant={issue.severity === 'high' ? 'destructive' : 'secondary'}>{issue.severity}</Badge>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('actions.title', { defaultValue: 'Compliance Actions' })}</CardTitle>
-          <CardDescription>
-            {t('actions.description', { defaultValue: 'Common compliance management tasks' })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-auto p-4 flex-col items-start" asChild>
-              <Link href="/dashboard/admin/clc-remittances">
-                <DollarSign className="h-5 w-5 mb-2" />
-                <div className="font-semibold">{t('actions.reviewRemittances', { defaultValue: 'Review Remittances' })}</div>
-                <div className="text-xs text-muted-foreground">{t('actions.reviewDesc', { defaultValue: 'Process pending submissions' })}</div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto p-4 flex-col items-start">
-              <FileText className="h-5 w-5 mb-2" />
-              <div className="font-semibold">{t('actions.generateReport', { defaultValue: 'Generate Report' })}</div>
-              <div className="text-xs text-muted-foreground">{t('actions.reportDesc', { defaultValue: 'Quarterly compliance report' })}</div>
-            </Button>
-
-            <Button variant="outline" className="h-auto p-4 flex-col items-start" asChild>
-              <Link href="/dashboard/clc/affiliates">
-                <Building2 className="h-5 w-5 mb-2" />
-                <div className="font-semibold">{t('actions.viewAffiliates', { defaultValue: 'View Affiliates' })}</div>
-                <div className="text-xs text-muted-foreground">{t('actions.affiliatesDesc', { defaultValue: 'Manage affiliate status' })}</div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto p-4 flex-col items-start" asChild>
-              <Link href="/dashboard/admin/clc-analytics">
-                <BarChart3 className="h-5 w-5 mb-2" />
-                <div className="font-semibold">{t('actions.analytics', { defaultValue: 'View Analytics' })}</div>
-                <div className="text-xs text-muted-foreground">{t('actions.analyticsDesc', { defaultValue: 'Trends and forecasts' })}</div>
-              </Link>
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

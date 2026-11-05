@@ -10,10 +10,10 @@ import { crudRoutes } from '@/lib/api/crud-factory'
 import { withApi } from '@/lib/api/with-api'
 import { ApiError } from '@/lib/api/errors'
 import { claims } from '@/db/schema'
-import { sql } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { allocateClaimNumber } from '@/lib/claims/claim-number'
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { requireCaseFilingCapacity } from '@/lib/cases/case-authorization'
 import { z } from 'zod'
 
 const claimCreateSchema = z
@@ -51,7 +51,8 @@ const claimCreateSchema = z
     witnessesPresent: z.boolean().optional(),
     witnessDetails: z.string().max(5000).optional().nullable(),
     priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-    isAnonymous: z.boolean().optional(),
+    // The other two ways a case is opened (/api/cases, /api/cases/intake) store false when the body says nothing; the column's own default is true.
+    isAnonymous: z.boolean().optional().default(false),
     claimAmount: z.union([z.string(), z.number()]).optional().nullable(),
     status: z
       .enum([
@@ -70,7 +71,7 @@ const claimCreateSchema = z
 
 export const dynamic = 'force-dynamic'
 
-const handlers = crudRoutes({
+const { GET } = crudRoutes({
   table: claims,
   pk: 'claimId',
   tags: ['Claims'],
@@ -80,7 +81,7 @@ const handlers = crudRoutes({
   writeRole: 'steward',
 })
 
-export const GET = handlers.GET
+export { GET }
 
 /**
  * Custom POST: auto-generates claimNumber (CLM-YYYYMMDD-XXXX)
@@ -96,9 +97,13 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    const parsed = claimCreateSchema.safeParse(body ?? {})
+    // Every field of a claim is optional, so a missing or malformed body would otherwise validate as `{}` and create an empty claim.
+    if (body === undefined || body === null || typeof body !== 'object' || Array.isArray(body)) {
+      throw ApiError.badRequest('A JSON object body is required')
+    }
+    const parsed = claimCreateSchema.safeParse(body)
     if (!parsed.success) {
-      throw ApiError.badRequest(parsed.error.errors.map((e) => e.message).join('; '))
+      throw ApiError.badRequest(parsed.error.issues.map((e) => e.message).join('; '))
     }
     const validatedBody = parsed.data
 
@@ -111,6 +116,8 @@ export const POST = withApi(
     // Ordinary same-organization create uses the tenant runtime role.
     // System context is reserved for background, webhook, and maintenance work.
     return withRLSContext({ organizationId }, async (tx) => {
+      // Opening a case is a capacity (staff), checked on the canonical membership, not a role rank.
+      await requireCaseFilingCapacity(tx, { userId: userId!, organizationId }, 'handler')
       const claimNumber = await allocateClaimNumber(tx, organizationId)
 
       // Extract incidentDate separately — Drizzle's PgTimestamp.mapToDriverValue
@@ -126,7 +133,7 @@ export const POST = withApi(
 
       const [row] = await tx.insert(claims).values(values).returning()
       // Mandatory canonical audit shares this transaction: an audit failure rolls the claim back.
-      await appendMandatoryAudit(tx, {
+      await persistAtomicAudit(tx, {
         organizationId,
         action: 'claim.create',
         resourceType: 'claims',

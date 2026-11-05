@@ -1,15 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { db } from '@/db';
+import { logger } from '@/lib/logger';
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
-  import { AI_FEATURES } from '@/lib/services/feature-flags';
-  import { enforceAISafety } from '@nzila/policies';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 /**
  * GET /api/ml/monitoring/metrics
  * 
@@ -37,8 +38,16 @@ import {
  *   timestamp: string
  * }
  */
-export const GET = withRoleAuth('member', async (request: NextRequest, context) => {
-  const { userId, organizationId } = context;
+// The statement reads the organization's own model metadata and predictions: it runs in the caller organization's tenant transaction
+// (`rlsOrgContext`). No call leaves the database, so nothing waits on a network call inside it.
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['ML'], summary: 'Real-time model performance metrics of the organization' },
+  },
+  async ({ user, userId, organizationId }) => {
+  const orgId = organizationId!;
 
   // Rate limit monitoring reads
   const rateLimitResult = await checkRateLimit(
@@ -56,104 +65,46 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     );
   }
 
-    // OWASP AI: Org presence check + feature flag + AI safety gate
-    if (!organizationId) {
-      return NextResponse.json({ error: 'No active organization' }, { status: 400 });
-    }
-    const blocked = await guardAiFeature(AI_FEATURES.ML_MONITORING, { userId, organizationId });
+    // OWASP AI: feature flag + AI safety gate (the wrapper has already required an organization)
+    const blocked = await guardAiFeature(AI_FEATURES.ML_MONITORING, { userId: userId!, organizationId: orgId });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'ml-monitoring-metrics', action: 'GET', organizationId, userId, userRole: 'member', dataClass: 'internal' });
+    enforceAISafety({ origin: 'ml-monitoring-metrics', action: 'GET', organizationId: orgId, userId: userId!, userRole: user?.role ?? 'member', dataClass: 'internal' });
 
   try {
-      const organizationScopeId = organizationId;
+      const organizationScopeId = orgId;
 
-    // Query model performance metrics from analytics tables
-    // Build on existing analytics_scheduled_reports and benchmark_data tables
+    // Model metadata and predictions are organization-scoped. The schema stores
+    // forecast values and model accuracy, not evaluated precision/recall/F1 or
+    // ground-truth prediction correctness. Never fabricate those measurements.
     const modelMetrics = await db.execute(sql`
-      WITH recent_predictions AS (
-        -- Get predictions from last 24 hours across all models
-        SELECT 
-          'Claim Outcome Prediction' as model_name,
-          COUNT(*) as predictions_count,
-          AVG(CASE WHEN prediction_correct THEN 1.0 ELSE 0.0 END) as accuracy,
-          AVG(confidence) as avg_confidence
-        FROM ml_predictions
-        WHERE organization_id = ${organizationScopeId}
-          AND prediction_type = 'claim_outcome'
-          AND predicted_at >= NOW() - INTERVAL '24 hours'
-        
-        UNION ALL
-        
-        SELECT 
-          'Timeline Forecasting' as model_name,
-          COUNT(*) as predictions_count,
-          AVG(CASE WHEN prediction_correct THEN 1.0 ELSE 0.0 END) as accuracy,
-          AVG(confidence) as avg_confidence
-        FROM ml_predictions
-        WHERE organization_id = ${organizationScopeId}
-          AND prediction_type = 'timeline'
-          AND predicted_at >= NOW() - INTERVAL '24 hours'
-        
-        UNION ALL
-        
-        SELECT 
-          'Churn Risk Prediction' as model_name,
-          COUNT(*) as predictions_count,
-          AVG(CASE WHEN prediction_correct THEN 1.0 ELSE 0.0 END) as accuracy,
-          AVG(confidence) as avg_confidence
-        FROM ml_predictions
-        WHERE organization_id = ${organizationScopeId}
-          AND prediction_type = 'churn_risk'
-          AND predicted_at >= NOW() - INTERVAL '24 hours'
-        
-        UNION ALL
-        
-        SELECT 
-          'Smart Assignment' as model_name,
-          COUNT(*) as predictions_count,
-          AVG(CASE WHEN assignment_accepted THEN 1.0 ELSE 0.0 END) as accuracy,
-          AVG(confidence) as avg_confidence
-        FROM ml_predictions
-        WHERE organization_id = ${organizationScopeId}
-          AND prediction_type = 'assignment'
-          AND predicted_at >= NOW() - INTERVAL '24 hours'
-      )
-      SELECT 
-        rp.model_name,
-        COALESCE(rp.accuracy, mm.baseline_accuracy) as accuracy,
-        COALESCE(mm.precision, 0.80) as precision,
-        COALESCE(mm.recall, 0.80) as recall,
-        COALESCE(mm.f1_score, 0.80) as f1_score,
-        COALESCE(rp.predictions_count, 0) as predictions_24h,
-        COALESCE(rp.avg_confidence, mm.baseline_confidence) as avg_confidence,
-        mm.last_evaluated_at,
-        CASE 
-          WHEN rp.accuracy >= 0.85 THEN 'healthy'
-          WHEN rp.accuracy >= 0.75 THEN 'warning'
-          ELSE 'critical'
-        END as status,
-        CASE
-          WHEN rp.accuracy > mm.baseline_accuracy + 0.03 THEN 'up'
-          WHEN rp.accuracy < mm.baseline_accuracy - 0.03 THEN 'down'
-          ELSE 'stable'
-        END as trend
-      FROM recent_predictions rp
-      LEFT JOIN model_metadata mm ON mm.model_name = rp.model_name
-      ORDER BY rp.model_name
+      SELECT
+        mm.model_type AS model_name,
+        mm.accuracy,
+        mm.trained_at AS last_evaluated_at,
+        (SELECT count(*)::int FROM ml_predictions mp
+         WHERE mp.organization_id = mm.organization_id
+           AND mp.prediction_type = mm.model_type
+           AND mp.created_at >= now() - interval '24 hours') AS predictions_24h,
+        (SELECT avg(mp.confidence)::numeric FROM ml_predictions mp
+         WHERE mp.organization_id = mm.organization_id
+           AND mp.prediction_type = mm.model_type
+           AND mp.created_at >= now() - interval '24 hours') AS avg_confidence
+      FROM model_metadata mm
+      WHERE mm.organization_id = ${organizationScopeId}::uuid
+      ORDER BY mm.model_type, mm.trained_at DESC
     `);
 
-    // Transform database results into response format
-    const models = ((modelMetrics as Array<Record<string, unknown>>) || []).map((row: Record<string, unknown>) => ({
+    const models = Array.from(modelMetrics as Iterable<Record<string, unknown>>).map(row => ({
       modelName: row.model_name,
-      accuracy: Number(row.accuracy) || 0,
-      precision: Number(row.precision) || 0,
-      recall: Number(row.recall) || 0,
-      f1Score: Number(row.f1_score) || 0,
-      predictions24h: Number(row.predictions_24h) || 0,
-      avgConfidence: Number(row.avg_confidence) || 0,
-      lastUpdated: row.last_evaluated_at || new Date().toISOString(),
-      status: row.status || 'healthy',
-      trend: row.trend || 'stable'
+      accuracy: row.accuracy == null ? null : Number(row.accuracy),
+      precision: null,
+      recall: null,
+      f1Score: null,
+      predictions24h: Number(row.predictions_24h ?? 0),
+      avgConfidence: row.avg_confidence == null ? null : Number(row.avg_confidence),
+      lastUpdated: row.last_evaluated_at ?? null,
+      status: 'not_evaluated' as const,
+      trend: 'unknown' as const,
     }));
 
     return NextResponse.json({
@@ -162,11 +113,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     });
 
   } catch (error) {
-return standardErrorResponse(
+    logger.error('Failed to fetch model metrics', { error });
+    return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to fetch model metrics',
       error
     );
   }
-});
+  },
+);
 

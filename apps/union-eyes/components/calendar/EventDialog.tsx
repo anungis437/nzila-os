@@ -1,15 +1,18 @@
 /**
  * Event Dialog Component
- * 
- * Modal dialog for creating and editing calendar events.
- * Includes form fields for title, dates, location, recurrence, etc.
- * 
+ *
+ * Modal dialog for creating and editing calendar events. A new event takes a title, times, all-day, type, description, location and a
+ * meeting link. An existing event takes a title, times, description and location: those are the only fields PATCH /api/calendar/events/[id]
+ * accepts, so nothing is shown that an edit could not save. Attendees and recurrence are not offered: no route stores attendees
+ * (event_attendees has no runtime authority) and nothing expands a recurrence rule into occurrences (/api/events/[id]/occurrences answers 501).
+ *
  * @module components/calendar/EventDialog
  */
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useLocale } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -30,31 +33,47 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
- 
-import { Calendar, Clock, MapPin, Users, Video, Repeat } from 'lucide-react';
+import { Calendar, Clock, MapPin, Video } from 'lucide-react';
+import {
+  EventFormError,
+  blankEventForm,
+  formFromEvent,
+  withAllDay,
+  type CalendarEventDetail,
+  type EventFormData,
+} from '@/lib/calendar/event-form';
 
-interface EventFormData {
-  title: string;
-  description: string;
-  location: string;
-  startTime: string;
-  endTime: string;
-  timezone: string;
-  isAllDay: boolean;
-  isRecurring: boolean;
-  recurrenceRule: string;
-  eventType: string;
-  attendees: string[];
-  meetingUrl: string;
-  roomId: string;
-  reminders: Array<{ type: string; minutes: number }>;
-}
+const COPY = {
+  en: {
+    saveFailed: 'The event could not be saved.',
+    deleteFailed: 'The event could not be deleted.',
+    confirmDelete: 'Are you sure you want to delete this event?',
+    problems: {
+      calendar: 'Choose a calendar first.',
+      title: 'Enter a title.',
+      start: 'Enter a valid start.',
+      end: 'Enter a valid end.',
+      range: 'The end must be after the start.',
+    },
+  },
+  fr: {
+    saveFailed: 'L’événement n’a pas pu être enregistré.',
+    deleteFailed: 'L’événement n’a pas pu être supprimé.',
+    confirmDelete: 'Voulez-vous vraiment supprimer cet événement?',
+    problems: {
+      calendar: 'Choisissez d’abord un calendrier.',
+      title: 'Saisissez un titre.',
+      start: 'Saisissez un début valide.',
+      end: 'Saisissez une fin valide.',
+      range: 'La fin doit être postérieure au début.',
+    },
+  },
+} as const;
 
 interface EventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  event?: any;
+  event?: CalendarEventDetail | null;
   initialDate?: Date;
   calendarId: string;
   onSave: (data: EventFormData) => Promise<void>;
@@ -70,68 +89,54 @@ export function EventDialog({
   onSave,
   onDelete,
 }: EventDialogProps) {
-  const [formData, setFormData] = useState<EventFormData>({
-    title: '',
-    description: '',
-    location: '',
-    startTime: '',
-    endTime: '',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    isAllDay: false,
-    isRecurring: false,
-    recurrenceRule: '',
-    eventType: 'meeting',
-    attendees: [],
-    meetingUrl: '',
-    roomId: '',
-    reminders: [{ type: 'notification', minutes: 15 }],
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* The form mounts each time the dialog opens, so it always starts from the event or the clicked day, never from the last one. */}
+        <EventDialogForm
+          event={event ?? null}
+          initialDate={initialDate}
+          onSave={onSave}
+          onDelete={onDelete}
+          onClose={() => onOpenChange(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface EventDialogFormProps {
+  event: CalendarEventDetail | null;
+  initialDate?: Date;
+  onSave: (data: EventFormData) => Promise<void>;
+  onDelete?: (eventId: string) => Promise<void>;
+  onClose: () => void;
+}
+
+function EventDialogForm({ event, initialDate, onSave, onDelete, onClose }: EventDialogFormProps) {
+  const copy = useLocale().toLowerCase().startsWith('fr') ? COPY.fr : COPY.en;
+  const [formData, setFormData] = useState<EventFormData>(() => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return event ? formFromEvent(event, timezone) : blankEventForm(timezone, initialDate);
   });
-
   const [loading, setLoading] = useState(false);
-  const [attendeeInput, setAttendeeInput] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const isEdit = event !== null;
 
-  useEffect(() => {
-    if (event) {
-      // Edit mode - populate form with event data
-      setFormData({
-        title: event.title || '',
-        description: event.description || '',
-        location: event.location || '',
-        startTime: event.startTime || '',
-        endTime: event.endTime || '',
-        timezone: event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-        isAllDay: event.isAllDay || false,
-        isRecurring: event.isRecurring || false,
-        recurrenceRule: event.recurrenceRule || '',
-        eventType: event.eventType || 'meeting',
-        attendees: event.attendees || [],
-        meetingUrl: event.meetingUrl || '',
-        roomId: event.roomId || '',
-        reminders: event.reminders || [{ type: 'notification', minutes: 15 }],
-      });
-    } else if (initialDate) {
-      // Create mode with initial date
-      const start = new Date(initialDate);
-      const end = new Date(start);
-      end.setHours(end.getHours() + 1);
-
-      setFormData(prev => ({
-        ...prev,
-        startTime: start.toISOString().slice(0, 16),
-        endTime: end.toISOString().slice(0, 16),
-      }));
-    }
-  }, [event, initialDate]);
+  const messageOf = (failure: unknown, fallback: string): string => {
+    if (failure instanceof EventFormError) return copy.problems[failure.problem];
+    return failure instanceof Error && failure.message ? failure.message : fallback;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-
     try {
       await onSave(formData);
-      onOpenChange(false);
-    } catch (_error) {
-alert('Failed to save event');
+      onClose();
+    } catch (failure) {
+      setError(messageOf(failure, copy.saveFailed));
     } finally {
       setLoading(false);
     }
@@ -139,98 +144,80 @@ alert('Failed to save event');
 
   const handleDelete = async () => {
     if (!event || !onDelete) return;
-
-    if (confirm('Are you sure you want to delete this event?')) {
-      setLoading(true);
-      try {
-        await onDelete(event.id);
-        onOpenChange(false);
-      } catch (_error) {
-alert('Failed to delete event');
-      } finally {
-        setLoading(false);
-      }
+    if (!window.confirm(copy.confirmDelete)) return;
+    setError(null);
+    setLoading(true);
+    try {
+      await onDelete(event.id);
+      onClose();
+    } catch (failure) {
+      setError(messageOf(failure, copy.deleteFailed));
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleAddAttendee = () => {
-    if (attendeeInput && !formData.attendees.includes(attendeeInput)) {
-      setFormData(prev => ({
-        ...prev,
-        attendees: [...prev.attendees, attendeeInput],
-      }));
-      setAttendeeInput('');
-    }
-  };
-
-  const handleRemoveAttendee = (email: string) => {
-    setFormData(prev => ({
-      ...prev,
-      attendees: prev.attendees.filter(a => a !== email),
-    }));
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{event ? 'Edit Event' : 'Create Event'}</DialogTitle>
-          <DialogDescription>
-            {event ? 'Update event details' : 'Add a new event to your calendar'}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>{isEdit ? 'Edit Event' : 'Create Event'}</DialogTitle>
+        <DialogDescription>
+          {isEdit ? 'Update event details' : 'Add a new event to your calendar'}
+        </DialogDescription>
+      </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title */}
+        <div className="space-y-2">
+          <Label htmlFor="title">Title *</Label>
+          <Input
+            id="title"
+            value={formData.title}
+            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            placeholder="Event title"
+            required
+          />
+        </div>
+
+        {/* Date & Time */}
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Event title"
-              required
-            />
-          </div>
-
-          {/* Date & Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startTime">Start {!formData.isAllDay && 'Time'} *</Label>
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="startTime"
-                  type={formData.isAllDay ? 'date' : 'datetime-local'}
-                  value={formData.startTime}
-                  onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="endTime">End {!formData.isAllDay && 'Time'} *</Label>
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="endTime"
-                  type={formData.isAllDay ? 'date' : 'datetime-local'}
-                  value={formData.endTime}
-                  onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                  required
-                />
-              </div>
+            <Label htmlFor="startTime">Start {!formData.isAllDay && 'Time'} *</Label>
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Input
+                id="startTime"
+                type={formData.isAllDay ? 'date' : 'datetime-local'}
+                value={formData.startTime}
+                onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                required
+              />
             </div>
           </div>
 
-          {/* All Day & Event Type */}
+          <div className="space-y-2">
+            <Label htmlFor="endTime">End {!formData.isAllDay && 'Time'} *</Label>
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Input
+                id="endTime"
+                type={formData.isAllDay ? 'date' : 'datetime-local'}
+                value={formData.endTime}
+                onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* All Day & Event Type: chosen when the event is made, not changeable by an edit */}
+        {!isEdit && (
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">
               <Switch
                 id="isAllDay"
                 checked={formData.isAllDay}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isAllDay: checked }))}
+                onCheckedChange={(checked) => setFormData(prev => withAllDay(prev, checked))}
               />
               <Label htmlFor="isAllDay">All-day event</Label>
             </div>
@@ -241,7 +228,7 @@ alert('Failed to delete event');
                 value={formData.eventType}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, eventType: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger id="eventType">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -254,34 +241,36 @@ alert('Failed to delete event');
               </Select>
             </div>
           </div>
+        )}
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Event description..."
-              rows={3}
+        {/* Description */}
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            placeholder="Event description..."
+            rows={3}
+          />
+        </div>
+
+        {/* Location */}
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <div className="flex items-center space-x-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <Input
+              id="location"
+              value={formData.location}
+              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+              placeholder="Add location"
             />
           </div>
+        </div>
 
-          {/* Location */}
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <div className="flex items-center space-x-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="Add location"
-              />
-            </div>
-          </div>
-
-          {/* Meeting URL */}
+        {/* Meeting URL */}
+        {!isEdit && (
           <div className="space-y-2">
             <Label htmlFor="meetingUrl">Meeting URL</Label>
             <div className="flex items-center space-x-2">
@@ -295,88 +284,33 @@ alert('Failed to delete event');
               />
             </div>
           </div>
+        )}
 
-          {/* Attendees */}
-          <div className="space-y-2">
-            <Label htmlFor="attendees">Attendees</Label>
-            <div className="flex items-center space-x-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <Input
-                id="attendees"
-                type="email"
-                value={attendeeInput}
-                onChange={(e) => setAttendeeInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddAttendee())}
-                placeholder="Add attendee email"
-              />
-              <Button type="button" variant="outline" size="sm" onClick={handleAddAttendee}>
-                Add
-              </Button>
-            </div>
-            {formData.attendees.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.attendees.map(email => (
-                  <div
-                    key={email}
-                    className="px-2 py-1 bg-secondary rounded-md text-sm flex items-center space-x-2"
-                  >
-                    <span>{email}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAttendee(email)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Ã—
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
 
-          {/* Recurring */}
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="isRecurring"
-                checked={formData.isRecurring}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isRecurring: checked }))}
-              />
-              <Label htmlFor="isRecurring" className="flex items-center space-x-2">
-                <Repeat className="h-4 w-4" />
-                <span>Recurring event</span>
-              </Label>
-            </div>
-            {formData.isRecurring && (
-              <Input
-                value={formData.recurrenceRule}
-                onChange={(e) => setFormData(prev => ({ ...prev, recurrenceRule: e.target.value }))}
-                placeholder="RRULE (e.g., FREQ=WEEKLY;BYDAY=MO,WE,FR)"
-              />
-            )}
-          </div>
-
-          <DialogFooter>
-            {event && onDelete && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={loading}
-              >
-                Delete
-              </Button>
-            )}
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+        <DialogFooter>
+          {isEdit && onDelete && (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={loading}
+            >
+              Delete
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : event ? 'Update' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          )}
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Saving...' : isEdit ? 'Update' : 'Create'}
+          </Button>
+        </DialogFooter>
+      </form>
+    </>
   );
 }
-

@@ -18,8 +18,8 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('stripe:refunds:approve')
 
 const ApproveRefundSchema = z.object({
-  refundId: z.string().uuid(),
-  orgId: z.string().uuid(),
+  refundId: z.guid(),
+  orgId: z.guid(),
   action: z.enum(['approve', 'deny']),
 })
 

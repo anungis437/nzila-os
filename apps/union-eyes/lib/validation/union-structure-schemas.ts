@@ -8,6 +8,7 @@
 // =====================================================================================
 
 import { z } from 'zod';
+import { partialWithoutDefaults } from './partial-without-defaults';
 
 // =====================================================
 // Common Validators
@@ -31,7 +32,7 @@ const phoneSchema = z
 
 const emailSchema = z.string().email().optional();
 
-const uuidSchema = z.string().uuid();
+const uuidSchema = z.guid();
 
 // =====================================================
 // Employer Schemas
@@ -89,11 +90,10 @@ export const createEmployerSchema = z.object({
 
   // Additional
   notes: z.string().optional(),
-  customFields: z.record(z.any()).optional(),
+  customFields: z.record(z.string(), z.any()).optional(),
 });
 
-export const updateEmployerSchema = createEmployerSchema
-  .partial()
+export const updateEmployerSchema = partialWithoutDefaults(createEmployerSchema)
   .omit({ organizationId: true });
 
 export const employerQuerySchema = z.object({
@@ -149,11 +149,10 @@ export const createWorksiteSchema = z.object({
   // Additional
   description: z.string().optional(),
   notes: z.string().optional(),
-  customFields: z.record(z.any()).optional(),
+  customFields: z.record(z.string(), z.any()).optional(),
 });
 
-export const updateWorksiteSchema = createWorksiteSchema
-  .partial()
+export const updateWorksiteSchema = partialWithoutDefaults(createWorksiteSchema)
   .omit({ organizationId: true, employerId: true });
 
 export const worksiteQuerySchema = z.object({
@@ -212,11 +211,10 @@ export const createBargainingUnitSchema = z.object({
   // Additional
   description: z.string().optional(),
   notes: z.string().optional(),
-  customFields: z.record(z.any()).optional(),
+  customFields: z.record(z.string(), z.any()).optional(),
 });
 
-export const updateBargainingUnitSchema = createBargainingUnitSchema
-  .partial()
+export const updateBargainingUnitSchema = partialWithoutDefaults(createBargainingUnitSchema)
   .omit({ organizationId: true, employerId: true });
 
 export const bargainingUnitQuerySchema = z.object({
@@ -284,10 +282,10 @@ export const createCommitteeSchema = z.object({
   // Additional
   description: z.string().optional(),
   notes: z.string().optional(),
-  customFields: z.record(z.any()).optional(),
+  customFields: z.record(z.string(), z.any()).optional(),
 });
 
-export const updateCommitteeSchema = createCommitteeSchema.partial().omit({ organizationId: true });
+export const updateCommitteeSchema = partialWithoutDefaults(createCommitteeSchema).omit({ organizationId: true });
 
 export const committeeQuerySchema = z.object({
   organizationId: uuidSchema.optional(),
@@ -347,8 +345,7 @@ export const createCommitteeMembershipSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const updateCommitteeMembershipSchema = createCommitteeMembershipSchema
-  .partial()
+export const updateCommitteeMembershipSchema = partialWithoutDefaults(createCommitteeMembershipSchema)
   .omit({ committeeId: true, memberId: true });
 
 export const committeeMembershipQuerySchema = z.object({
@@ -409,8 +406,7 @@ export const createStewardAssignmentSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const updateStewardAssignmentSchema = createStewardAssignmentSchema
-  .partial()
+export const updateStewardAssignmentSchema = partialWithoutDefaults(createStewardAssignmentSchema)
   .omit({ organizationId: true, stewardId: true });
 
 export const stewardAssignmentQuerySchema = z.object({
@@ -464,8 +460,7 @@ export const createRoleTenureHistorySchema = z.object({
   achievements: z.array(z.string()).optional(),
 });
 
-export const updateRoleTenureHistorySchema = createRoleTenureHistorySchema
-  .partial()
+export const updateRoleTenureHistorySchema = partialWithoutDefaults(createRoleTenureHistorySchema)
   .omit({ organizationId: true, memberId: true });
 
 export const roleTenureHistoryQuerySchema = z.object({

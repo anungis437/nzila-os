@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { supportEmail } from '@/lib/support-contact';
 import PilotDashboard from './pilot-dashboard';
 
 type PageProps = {
@@ -27,5 +28,5 @@ export default async function PilotDashboardPage() {
     redirect('/dashboard');
   }
 
-  return <PilotDashboard />;
+  return <PilotDashboard supportEmail={supportEmail()} />;
 }

@@ -8,8 +8,11 @@
 
 import { db } from '@/db/db';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
+import { ApiError } from '@/lib/api/errors';
 import { integrationConfigs, integrationProviderEnum, integrationTypeEnum } from '@/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { IntegrationRegistry } from './registry';
 import { SyncEngine } from './sync-engine';
 import {
@@ -44,6 +47,8 @@ export interface TenantSyncRequest {
   entities?: string[];
   dryRun?: boolean;
   limit?: number;
+  /** Filled in when the outcome audit row could not be written after the sync ran, so the response can say so. */
+  auditOutcome?: { recorded: boolean };
 }
 
 export interface ServerIssuedSyncBinding {
@@ -108,7 +113,10 @@ function toPublicConfig(row: IntegrationConfigRow) {
     lastSyncAt: row.lastSyncAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-    credentialsStored: true,
+    // No secret is stored or resolved: the credentials column holds only a reference, and nothing turns it into a credential. The
+    // field used to say true for every configuration, which a client read as an integration that could authenticate.
+    credentialsStored: false,
+    credentialsResolvable: false,
   };
 }
 
@@ -167,13 +175,14 @@ export async function listIntegrationConfigsForOrg(organizationId: string) {
 export async function configureIntegrationForOrg(
   organizationId: string,
   input: ConfigureIntegrationInput,
+  userId: string,
 ) {
   assertKnownProvider(input.provider);
   assertProviderType(input.provider, input.type);
   assertApprovedSettingsKeys(input.provider, input.settings);
 
-  return withRLSContext({ organizationId }, async () => {
-    const [existing] = await db
+  return withRLSContext({ organizationId }, async (tx) => {
+    const [existing] = await tx
       .select()
       .from(integrationConfigs)
       .where(
@@ -182,7 +191,8 @@ export async function configureIntegrationForOrg(
           eq(integrationConfigs.provider, input.provider as (typeof integrationProviderEnum.enumValues)[number]),
         ),
       )
-      .limit(1);
+      .limit(1)
+      .for('update');
 
     const values = {
       organizationId,
@@ -195,20 +205,54 @@ export async function configureIntegrationForOrg(
       updatedAt: new Date(),
     };
 
+    let config: IntegrationConfigRow;
     if (existing) {
-      const [updated] = await db
+      // An update changes only what the caller supplied: a steward who sends just a credential reference must not switch the
+      // integration off or clear its settings and webhook URL. (A create still takes the defaults: disabled, no settings.)
+      const changes: Partial<typeof values> = { updatedAt: values.updatedAt };
+      if (input.credentialRef) changes.credentials = values.credentials;
+      if (input.settings !== undefined) changes.settings = values.settings;
+      if (input.webhookUrl !== undefined) changes.webhookUrl = values.webhookUrl;
+      if (input.enabled !== undefined) changes.enabled = values.enabled;
+
+      // Switching an integration on or off here is the same decision as the activate route, so it carries the same concurrency
+      // predicate: the write applies only if the state read above is still the state.
+      const [updated] = await tx
         .update(integrationConfigs)
-        .set({
-          ...values,
-          credentials: input.credentialRef ? values.credentials : existing.credentials,
-        })
-        .where(and(eq(integrationConfigs.id, existing.id), eq(integrationConfigs.organizationId, organizationId)))
+        .set(changes)
+        .where(
+          and(
+            eq(integrationConfigs.id, existing.id),
+            eq(integrationConfigs.organizationId, organizationId),
+            sql`${integrationConfigs.enabled} IS NOT DISTINCT FROM ${existing.enabled}`,
+          ),
+        )
         .returning();
-      return toPublicConfig(updated);
+      if (!updated) throw ApiError.conflict('The integration was changed by someone else; reload and try again');
+      config = updated;
+    } else {
+      [config] = await tx.insert(integrationConfigs).values(values).returning();
     }
 
-    const [created] = await db.insert(integrationConfigs).values(values).returning();
-    return toPublicConfig(created);
+    // The audit names what changed without echoing settings or credential material.
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: existing ? 'integration.configure.update' : 'integration.configure.create',
+      resourceType: 'integration_configs',
+      resourceId: config.id,
+      details: {
+        provider: input.provider,
+        type: input.type,
+        enabled: config.enabled ?? false,
+        previouslyEnabled: existing ? (existing.enabled ?? false) : undefined,
+        settingsKeys: Object.keys(input.settings ?? {}),
+        settingsChanged: input.settings !== undefined,
+        webhookUrlChanged: input.webhookUrl !== undefined,
+        credentialRefChanged: !!input.credentialRef,
+      },
+    });
+    return toPublicConfig(config);
   });
 }
 
@@ -216,17 +260,34 @@ export async function setIntegrationActivationForOrg(
   organizationId: string,
   integrationId: string,
   enabled: boolean,
+  userId: string,
 ) {
-  return withRLSContext({ organizationId }, async () => {
-    const config = await loadIntegrationById(organizationId, integrationId);
+  return withRLSContext({ organizationId }, async (tx) => {
+    const config = await loadIntegrationById(organizationId, integrationId, tx);
     assertKnownProvider(config.provider as IntegrationProvider);
 
-    const [updated] = await db
+    // The predicate on the state read above keeps a concurrent change from being overwritten.
+    const [updated] = await tx
       .update(integrationConfigs)
       .set({ enabled, updatedAt: new Date() })
-      .where(and(eq(integrationConfigs.id, integrationId), eq(integrationConfigs.organizationId, organizationId)))
+      .where(
+        and(
+          eq(integrationConfigs.id, integrationId),
+          eq(integrationConfigs.organizationId, organizationId),
+          sql`${integrationConfigs.enabled} IS NOT DISTINCT FROM ${config.enabled}`,
+        ),
+      )
       .returning();
+    if (!updated) throw ApiError.conflict('The integration was changed by someone else; reload and try again');
 
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: enabled ? 'integration.activate' : 'integration.deactivate',
+      resourceType: 'integration_configs',
+      resourceId: integrationId,
+      details: { provider: config.provider, previouslyEnabled: config.enabled ?? false },
+    });
     return toPublicConfig(updated);
   });
 }
@@ -236,28 +297,49 @@ export async function initiateTenantIntegrationSync(
   userId: string,
   request: TenantSyncRequest,
 ): Promise<SyncResult> {
-  return withRLSContext({ organizationId }, async () => {
-    const config = await loadIntegrationById(organizationId, request.integrationId);
-    if (!config.enabled) {
-      throw new IntegrationError('Integration is disabled', config.provider as IntegrationProvider, 'INTEGRATION_DISABLED');
-    }
+  const config = await withRLSContext({ organizationId }, (tx) =>
+    loadIntegrationById(organizationId, request.integrationId, tx),
+  );
+  if (!config.enabled) {
+    throw new IntegrationError('Integration is disabled', config.provider as IntegrationProvider, 'INTEGRATION_DISABLED');
+  }
 
-    const provider = config.provider as IntegrationProvider;
-    assertKnownProvider(provider);
-    assertProviderType(provider, config.type as IntegrationType);
-    assertApprovedEntities(provider, request.entities);
+  const provider = config.provider as IntegrationProvider;
+  assertKnownProvider(provider);
+  assertProviderType(provider, config.type as IntegrationType);
+  assertApprovedEntities(provider, request.entities);
 
-    const context = trustedTenantContext(organizationId, request.integrationId, provider, userId);
-    const options: SyncOptions = {
-      type: request.syncType,
-      orgs: request.entities,
-      dryRun: request.dryRun,
-      limit: request.limit,
-      trustedContext: context,
-    };
+  const context = trustedTenantContext(organizationId, request.integrationId, provider, userId);
+  const options: SyncOptions = {
+    type: request.syncType,
+    orgs: request.entities,
+    dryRun: request.dryRun,
+    limit: request.limit,
+    trustedContext: context,
+  };
 
-    return SyncEngine.getInstance().executeSync(organizationId, provider, options);
-  });
+  // The sync acts on an external system, so its intent is recorded before it runs and its outcome after.
+  return performAuditedOperation(
+    {
+      organizationId,
+      userId,
+      action: 'integration.sync',
+      resourceType: 'integration_configs',
+      resourceId: request.integrationId,
+      outcomeReport: request.auditOutcome,
+      details: {
+        provider,
+        syncType: request.syncType,
+        entities: request.entities,
+        dryRun: request.dryRun ?? false,
+        limit: request.limit,
+      },
+    },
+    () =>
+      withRLSContext({ organizationId }, async () =>
+        SyncEngine.getInstance().executeSync(organizationId, provider, options),
+      ),
+  );
 }
 
 export async function issueBackgroundSyncBinding(

@@ -28,7 +28,7 @@ export type EvidencePackType = z.infer<typeof evidencePackTypeSchema>
 // ─── Evidence Reference ───────────────────────────────────────────────────────
 
 export const evidenceRefSchema = z.object({
-  refId: z.string().uuid(),
+  refId: z.guid(),
   refType: z.string().min(1),
   description: z.string(),
   capturedAt: z.string().datetime(),
@@ -63,7 +63,7 @@ export type EvidenceApprover = z.infer<typeof evidenceApproverSchema>
 // ─── Machine-Readable Metadata ────────────────────────────────────────────────
 
 export const evidencePackMetadataSchema = z.object({
-  packId: z.string().uuid(),
+  packId: z.guid(),
   orgId: z.string().min(1),
   packType: evidencePackTypeSchema,
   classification: evidenceClassificationSchema,
@@ -81,7 +81,7 @@ export type EvidencePackMetadata = z.infer<typeof evidencePackMetadataSchema>
 
 export const decisionEvidencePackSchema = z.object({
   // Identity & chain
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
   packType: evidencePackTypeSchema,
 

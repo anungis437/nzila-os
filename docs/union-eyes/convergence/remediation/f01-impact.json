@@ -1,0 +1,319 @@
+{
+ "cronRoutes": 20,
+ "scheduledEntries": [
+  "/api/cron/calendar-sync"
+ ],
+ "edgeCronRoutes": [],
+ "violations": {
+  "C1_notPostOnly": [
+   "/api/cron/analytics/daily-metrics",
+   "/api/cron/deadline-overdue",
+   "/api/cron/deadline-reminders",
+   "/api/cron/document-intake-reaper",
+   "/api/cron/education-reminders",
+   "/api/cron/external-data-sync",
+   "/api/cron/location-retention",
+   "/api/cron/monthly-dues",
+   "/api/cron/monthly-per-capita",
+   "/api/cron/overdue-notifications",
+   "/api/cron/process-messages",
+   "/api/cron/process-notifications",
+   "/api/cron/scheduled-reports",
+   "/api/ready",
+   "/api/rewards/cron"
+  ],
+  "C2_noSharedSecretCheck": [
+   "/api/cron/analytics/daily-metrics",
+   "/api/cron/billing-lifecycle",
+   "/api/cron/calendar-sync",
+   "/api/cron/deadline-overdue",
+   "/api/cron/deadline-reminders",
+   "/api/cron/document-intake-reaper",
+   "/api/cron/education-reminders",
+   "/api/cron/external-data-sync",
+   "/api/cron/location-retention",
+   "/api/cron/monthly-dues",
+   "/api/cron/monthly-per-capita",
+   "/api/cron/observability-alerts",
+   "/api/cron/overdue-notifications",
+   "/api/cron/process-messages",
+   "/api/cron/process-notifications",
+   "/api/cron/scheduled-reports",
+   "/api/cron/sla-watchdog",
+   "/api/icra/report/[assessmentId]/review",
+   "/api/ready",
+   "/api/rewards/cron"
+  ],
+  "C3_failureNotSurfaced": [
+   "/api/cron/external-data-sync"
+  ],
+  "C4_notScheduled": [
+   "/api/cron/analytics/daily-metrics",
+   "/api/cron/billing-lifecycle",
+   "/api/cron/deadline-overdue",
+   "/api/cron/deadline-reminders",
+   "/api/cron/document-intake-reaper",
+   "/api/cron/education-reminders",
+   "/api/cron/external-data-sync",
+   "/api/cron/location-retention",
+   "/api/cron/monthly-dues",
+   "/api/cron/monthly-per-capita",
+   "/api/cron/observability-alerts",
+   "/api/cron/overdue-notifications",
+   "/api/cron/process-messages",
+   "/api/cron/process-notifications",
+   "/api/cron/scheduled-reports",
+   "/api/cron/sla-watchdog",
+   "/api/icra/report/[assessmentId]/review",
+   "/api/ready",
+   "/api/rewards/cron"
+  ]
+ },
+ "rows": [
+  {
+   "route": "/api/cron/analytics/daily-metrics",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/billing-lifecycle",
+   "methods": [
+    "POST"
+   ],
+   "C1_postOnly": true,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/calendar-sync",
+   "methods": [
+    "POST"
+   ],
+   "C1_postOnly": true,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": true
+  },
+  {
+   "route": "/api/cron/deadline-overdue",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/deadline-reminders",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": true,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/document-intake-reaper",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": true,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/education-reminders",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/external-data-sync",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": true,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": false,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/location-retention",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": true,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/monthly-dues",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/monthly-per-capita",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": true,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/observability-alerts",
+   "methods": [
+    "POST"
+   ],
+   "C1_postOnly": true,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/overdue-notifications",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/process-messages",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/process-notifications",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/scheduled-reports",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/cron/sla-watchdog",
+   "methods": [
+    "POST"
+   ],
+   "C1_postOnly": true,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": false,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/icra/report/[assessmentId]/review",
+   "methods": [
+    "POST"
+   ],
+   "C1_postOnly": true,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": true,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/ready",
+   "methods": [
+    "GET"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": false,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": true,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  },
+  {
+   "route": "/api/rewards/cron",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "C1_postOnly": false,
+   "getAliasesPost": true,
+   "C2_sharedSecretCheck": false,
+   "weakSecret": true,
+   "C3_failureSurfaced": true,
+   "C4_scheduled": false
+  }
+ ]
+}

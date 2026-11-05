@@ -151,12 +151,13 @@ function getFeatureConfig(name: string): FeatureFlag | undefined {
 }
 
 /**
- * Refresh feature flags from database
+ * Reloads every flag from the database into this instance's cache. Returns whether it did: the request path keeps serving the cached
+ * values when a reload fails, but a caller that needs to know (a flag change that has just committed) must not be told it worked.
  */
-export const refreshFeatureFlags = cache(async () => {
+async function loadFlagsIntoCache(): Promise<boolean> {
   try {
     const flags = await db.select().from(featureFlags);
-    
+
     flagsCache.clear();
     flags.forEach(flag => {
       flagsCache.set(flag.name, {
@@ -169,13 +170,22 @@ export const refreshFeatureFlags = cache(async () => {
         description: flag.description || undefined,
       });
     });
-    
+
     lastFetchTime = Date.now();
     logger.info('Feature flags refreshed', { count: flags.length });
+    return true;
   } catch (error) {
     logger.error('Failed to refresh feature flags', { error });
     // Keep using cached values on error
+    return false;
   }
+}
+
+/**
+ * Refresh feature flags from database
+ */
+export const refreshFeatureFlags = cache(async () => {
+  await loadFlagsIntoCache();
 });
 
 /**
@@ -216,6 +226,44 @@ async function updateFeatureFlag(
     logger.error('Failed to update feature flag', { name, error });
     throw error;
   }
+}
+
+/** A flag that is not defined cannot be switched: the runtime role may update a flag row but not create one. */
+export class FeatureFlagNotFoundError extends Error {
+  constructor(readonly flagName: string) {
+    super(`Feature flag ${flagName} is not defined`);
+    this.name = 'FeatureFlagNotFoundError';
+  }
+}
+
+/**
+ * Switch an existing flag inside the caller's transaction, so the change can commit with its audit record
+ * (performAtomicAuditedOperation). The in-memory cache is refreshed by invalidateFeatureFlagCache after the commit.
+ */
+export async function setFeatureFlagEnabledInTransaction(
+  tx: { update: typeof db.update },
+  name: string,
+  enabled: boolean,
+): Promise<void> {
+  const updated = await tx
+    .update(featureFlags)
+    .set({ enabled, updatedAt: new Date() })
+    .where(eq(featureFlags.name, name))
+    .returning({ name: featureFlags.name });
+  if (updated.length === 0) throw new FeatureFlagNotFoundError(name);
+}
+
+/** Seconds after which another instance reads a committed change on its own (the cache TTL); this instance is refreshed straight away. */
+export const FEATURE_FLAG_PROPAGATION_SECONDS = CACHE_TTL / 1000;
+
+/**
+ * Refreshes this instance's cache after a flag change has committed. Throws when the reload fails, so the caller can say that the change
+ * committed but this instance still serves the old value (it retries on the next read, and other instances converge within
+ * FEATURE_FLAG_PROPAGATION_SECONDS regardless).
+ */
+export async function invalidateFeatureFlagCache(): Promise<void> {
+  lastFetchTime = 0;
+  if (!(await loadFlagsIntoCache())) throw new Error('Feature flag cache refresh failed');
 }
 
 /**

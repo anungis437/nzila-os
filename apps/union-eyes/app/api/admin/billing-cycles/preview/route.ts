@@ -6,9 +6,11 @@
  * @module app/api/admin/billing-cycles/preview
  */
 
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
-import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
+import { resolveBillingPeriod } from '@/lib/finance/billing-period-input';
+import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -20,55 +22,65 @@ import { logger } from '@/lib/logger';
 export const runtime = 'nodejs';
 
 const previewSchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   frequency: z.enum(['monthly', 'bi_weekly', 'weekly', 'quarterly', 'annual']),
   periodStart: z.string().optional(),
   periodEnd: z.string().optional(),
 });
 
-export const POST = withApiAuth(async (request: NextRequest) => {
+// A platform lead previews the cycle of the organization the request names, not of the one they are acting in: the mandate check and the
+// service open that organization's own transaction, so the wrapper opens none. A platform lead need not belong to an organization.
+export const POST = withApi(
+  {
+    auth: { minRole: 'platform_lead' },
+    requireOrg: false,
+    openapi: { tags: ['Admin', 'Billing'], summary: 'Preview a billing cycle before execution' },
+  },
+  async ({ request, user }) => {
   try {
-    const user = await getCurrentUser();
     if (!user) {
       return standardErrorResponse(
         ErrorCode.AUTH_REQUIRED,
         'Authentication required'
       );
     }
-
-    const canAccess = await hasMinRole('platform_lead');
-    if (!canAccess) {
-      return standardErrorResponse(
-        ErrorCode.FORBIDDEN,
-        'Platform lead role required'
-      );
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
     }
-
-    const body = await request.json();
     const validation = previewSchema.safeParse(body);
 
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
     const { organizationId, frequency, periodStart, periodEnd } = validation.data;
 
-    // Calculate period dates if not provided
-    let start: Date;
-    let end: Date;
-
-    if (periodStart && periodEnd) {
-      start = new Date(periodStart);
-      end = new Date(periodEnd);
-    } else {
-      const dates = BillingCycleService.calculatePeriodDates(frequency);
-      start = dates.periodStart;
-      end = dates.periodEnd;
+    try {
+      await requireBillingCycleAuthority(organizationId, user.id);
+    } catch (error) {
+      // Fail closed. A mandate that is absent and a lookup that failed both refuse the preview; the log tells them apart.
+      logger.warn('Billing cycle preview refused: the live financial mandate could not be confirmed', { organizationId, userId: user.id, error });
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Live financial execution mandate required for target organization');
     }
+
+    const period = resolveBillingPeriod(
+      { periodStart, periodEnd },
+      () => BillingCycleService.calculatePeriodDates(frequency),
+    );
+    if (!period) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Invalid billing period: supply both valid ISO boundaries in chronological order',
+      );
+    }
+    const { periodStart: start, periodEnd: end } = period;
 
     logger.info('Previewing billing cycle', {
       organizationId,
@@ -88,6 +100,15 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       executedBy: user.id,
     });
 
+    if (!result.success) {
+      return NextResponse.json({
+        ...result,
+        preview: true,
+        success: false,
+        message: 'Preview incomplete: some members could not be calculated; no charges were created.',
+      }, { status: 422 });
+    }
+
     return standardSuccessResponse({
       preview: true,
       ...result,
@@ -101,4 +122,5 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       'Failed to preview billing cycle'
     );
   }
-});
+  },
+);

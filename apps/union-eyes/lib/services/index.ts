@@ -15,7 +15,6 @@ export { AuditTrailService } from './audit-trail-service';
 export { MultiCurrencyTreasuryService } from './multi-currency-treasury-service';
 export { FinancialEmailService } from './financial-email-service';
 export { InvoiceGenerator } from './invoice-generator';
-// strike-fund-tax-service exports functions, not a class - import directly from file
 // transfer-pricing-service exports functions, not a class - import directly from file
 
 // Document Services
@@ -33,8 +32,6 @@ export { IndigenousDataService } from './indigenous-data-service';
 // Notification & Communication Services
 export { NotificationService } from './notification-service';
 // grievance-notifications exports GrievanceNotificationContext, not GrievanceNotifications - import directly from file
-// payment-notifications exports default, not named export - import directly from file
-// email-templates exports default, not named export - import directly from file
 
 // Workflow & Process Services
 // case-timeline-service exports functions, not a class - import directly from file

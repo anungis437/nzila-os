@@ -53,7 +53,6 @@ import {
   buildRecurringInstances,
   addRecurringException, updateRecurringInstance,
   addAttendee, updateAttendeeResponse, removeAttendee, getEventAttendees,
-  listMeetingRooms, checkRoomAvailability, bookMeetingRoom, cancelRoomBooking,
   getUserAvailability, findCommonAvailability, syncExternalCalendar,
   enableCalendarSync, disableCalendarSync, addEventReminder, getPendingReminders,
   getCalendarStatistics,
@@ -118,31 +117,31 @@ describe("calendar-service", () => {
   describe("updateCalendar", () => {
     it("returns updated calendar", async () => {
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", name: "Updated" }]);
-      const result = await updateCalendar("cal-1", { name: "Updated" } as never);
+      const result = await updateCalendar("cal-1", "org-1", { name: "Updated" } as never);
       expect(result).toEqual({ id: "cal-1", name: "Updated" });
     });
 
     it("returns null when not found", async () => {
       mocks.mockReturning.mockResolvedValueOnce([]);
-      const result = await updateCalendar("nope", {});
+      const result = await updateCalendar("nope", "org-1", {});
       expect(result).toBeNull();
     });
 
     it("throws on update error", async () => {
       mocks.mockSetWhere.mockRejectedValueOnce(new Error("fail"));
-      await expect(updateCalendar("cal-1", { name: "Broken" } as never)).rejects.toThrow("Failed to update calendar");
+      await expect(updateCalendar("cal-1", "org-1", { name: "Broken" } as never)).rejects.toThrow("Failed to update calendar");
     });
   });
 
   describe("deleteCalendar", () => {
     it("returns true", async () => {
-      const result = await deleteCalendar("cal-1");
+      const result = await deleteCalendar("cal-1", "org-1");
       expect(result).toBe(true);
     });
 
     it("throws on error", async () => {
       mocks.mockDeleteWhere.mockRejectedValueOnce(new Error("fail"));
-      await expect(deleteCalendar("x")).rejects.toThrow("Failed to delete calendar");
+      await expect(deleteCalendar("x", "org-1")).rejects.toThrow("Failed to delete calendar");
     });
   });
 
@@ -325,34 +324,6 @@ describe("calendar-service", () => {
     });
   });
 
-  // ── Meeting rooms ────────────────────────────────────────────────────────
-  describe("listMeetingRooms", () => {
-    it("returns empty array (stub)", async () => {
-      expect(await listMeetingRooms()).toEqual([]);
-      expect(await listMeetingRooms({ location: 'HQ', minCapacity: 10, amenities: ['video'] })).toEqual([]);
-    });
-  });
-
-  describe("checkRoomAvailability", () => {
-    it("returns true (stub)", async () => {
-      expect(await checkRoomAvailability("room-1", new Date(), new Date())).toBe(true);
-    });
-  });
-
-  describe("bookMeetingRoom", () => {
-    it("returns booking with generated ID", async () => {
-      const booking = await bookMeetingRoom("room-1", "event-1", new Date(), new Date(), "u1");
-      expect(booking.id).toMatch(/^booking-/);
-      expect(booking.roomId).toBe("room-1");
-    });
-  });
-
-  describe("cancelRoomBooking", () => {
-    it("returns true (stub)", async () => {
-      expect(await cancelRoomBooking("booking-1")).toBe(true);
-    });
-  });
-
   // ── Availability ─────────────────────────────────────────────────────────
   describe("getUserAvailability", () => {
     it("returns empty array (stub)", async () => {
@@ -369,9 +340,9 @@ describe("calendar-service", () => {
   // ── External sync ────────────────────────────────────────────────────────
   describe("syncExternalCalendar", () => {
     it("returns success when calendar found", async () => {
-      mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce({ id: "cal-1", name: "My Cal" });
+      mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce({ id: "cal-1", organizationId: "org-1", name: "My Cal" });
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", name: "My Cal" }]);
-      const result = await syncExternalCalendar("cal-1", "google");
+      const result = await syncExternalCalendar("cal-1", "org-1", "google");
       expect(result.success).toBe(true);
       expect(result.syncedEvents).toBe(0);
     });
@@ -380,7 +351,7 @@ describe("calendar-service", () => {
       mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce(undefined);
       // updateCalendar will be called on error path
       mocks.mockReturning.mockResolvedValueOnce([]);
-      await expect(syncExternalCalendar("nope", "outlook")).rejects.toThrow("Failed to sync external calendar");
+      await expect(syncExternalCalendar("nope", "org-1", "outlook")).rejects.toThrow("Failed to sync external calendar");
     });
   });
 
@@ -389,23 +360,23 @@ describe("calendar-service", () => {
       // updateCalendar for enable
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", syncEnabled: true }]);
       // getCalendarById inside syncExternalCalendar
-      mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce({ id: "cal-1" });
+      mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce({ id: "cal-1", organizationId: "org-1" });
       // updateCalendar inside syncExternalCalendar (lastSyncAt)
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", syncStatus: "synced" }]);
-      const result = await enableCalendarSync("cal-1", "google", "ext-123");
+      const result = await enableCalendarSync("cal-1", "org-1", "google", "ext-123");
       expect(result).toEqual({ id: "cal-1", syncEnabled: true });
     });
 
     it("returns null when update returns null", async () => {
       mocks.mockReturning.mockResolvedValueOnce([]);
-      expect(await enableCalendarSync("cal-1", "google", "ext-1")).toBeNull();
+      expect(await enableCalendarSync("cal-1", "org-1", "google", "ext-1")).toBeNull();
     });
   });
 
   describe("disableCalendarSync", () => {
     it("returns updated calendar", async () => {
       mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", syncEnabled: false }]);
-      const result = await disableCalendarSync("cal-1");
+      const result = await disableCalendarSync("cal-1", "org-1");
       expect(result).toEqual({ id: "cal-1", syncEnabled: false });
     });
   });

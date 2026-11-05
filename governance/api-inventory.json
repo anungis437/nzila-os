@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-04-28T17:39:37.907Z",
   "totals": {
-    "surfaces": 1285,
+    "surfaces": 1281,
     "byApp": {
       "abr": 37,
       "agrimo": 17,
@@ -18,7 +18,7 @@
       "platform-admin": 4,
       "test-scaffold-gp": 1,
       "trade": 4,
-      "union-eyes": 871,
+      "union-eyes": 867,
       "veridian-admin": 3,
       "veridian-care": 3,
       "veridian-site": 3,
@@ -28,8 +28,8 @@
     },
     "byMethod": {
       "*": 516,
-      "GET": 558,
-      "POST": 384,
+      "GET": 556,
+      "POST": 382,
       "PATCH": 52,
       "DELETE": 34,
       "PUT": 12,
@@ -6458,15 +6458,6 @@
     {
       "app": "union-eyes",
       "framework": "next-app",
-      "path": "/api/dues/payment-methods",
-      "methods": [
-        "GET"
-      ],
-      "file": "apps/union-eyes/app/api/dues/payment-methods/route.ts"
-    },
-    {
-      "app": "union-eyes",
-      "framework": "next-app",
       "path": "/api/dues/payment-plans",
       "methods": [
         "GET",
@@ -9273,15 +9264,6 @@
     {
       "app": "union-eyes",
       "framework": "next-app",
-      "path": "/api/profile/me",
-      "methods": [
-        "GET"
-      ],
-      "file": "apps/union-eyes/app/api/profile/me/route.ts"
-    },
-    {
-      "app": "union-eyes",
-      "framework": "next-app",
       "path": "/api/profile/roles",
       "methods": [
         "*"
@@ -10190,24 +10172,6 @@
         "*"
       ],
       "file": "apps/union-eyes/app/api/wcb/claims/[id]/route.ts"
-    },
-    {
-      "app": "union-eyes",
-      "framework": "next-app",
-      "path": "/api/whop/create-checkout",
-      "methods": [
-        "POST"
-      ],
-      "file": "apps/union-eyes/app/api/whop/create-checkout/route.ts"
-    },
-    {
-      "app": "union-eyes",
-      "framework": "next-app",
-      "path": "/api/whop/unauthenticated-checkout",
-      "methods": [
-        "POST"
-      ],
-      "file": "apps/union-eyes/app/api/whop/unauthenticated-checkout/route.ts"
     },
     {
       "app": "union-eyes",

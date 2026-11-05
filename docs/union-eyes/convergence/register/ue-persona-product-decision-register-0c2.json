@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-PERSONA-PRODUCT-DECISION-REGISTER",
+  "gate": "0C.2",
+  "registerVersion": 1,
+  "anchorCommit": "fe8469cff34c561b2beccddb965e13355d74bb09",
+  "note": "Versioned product-decision records for the three persona baselines. A record leaves PROPOSED_FOR_RATIFICATION only on independent documentary approval evidence from an authorized product owner for the exact artifact version and hash. Product acceptance sets the engineering canonical. It cannot issue any institutional authority grant.",
+  "permittedStates": [
+    "PROPOSED_FOR_RATIFICATION",
+    "RETURNED_FOR_REWORK",
+    "ACCEPTED_BY_AUTHORIZED_PRODUCT_OWNER",
+    "REJECTED_BY_AUTHORIZED_PRODUCT_OWNER"
+  ],
+  "approvalEvidenceSchema": {
+    "required": [
+      "decisionMaker.name",
+      "decisionMaker.role",
+      "decidedOn",
+      "artifactVersion",
+      "artifactSha256",
+      "scope",
+      "evidenceDocument.reference",
+      "evidenceDocument.sha256",
+      "independentOfPreparer"
+    ],
+    "decisionMakerRole": "AUTHORIZED_PRODUCT_OWNER",
+    "permittedScopes": [
+      "PRODUCT_SPECIFICATION_BASELINE"
+    ],
+    "note": "The decision maker is a person authorized to decide product specification. An engineering agent, the preparer or a role placeholder is not."
+  },
+  "records": [
+    {
+      "recordId": "PDR-0C2-STEWARD-V1",
+      "recordVersion": 1,
+      "persona": "steward",
+      "state": "PROPOSED_FOR_RATIFICATION",
+      "artifact": {
+        "packageId": "UE-STEWARD-PROPOSED-CANONICAL-R1",
+        "version": "1.0-R1",
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-steward-0c2.json",
+        "sha256": "a01076343d199a98554756e577edabb8150fec6353baddab749d6efe00fa9cea",
+        "baselineFile": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-steward.json",
+        "baselineSha256": "9b7eae86da9598160abb6aae144e8cbcfef1fe12cc465a4fcaab1a084a03d207"
+      },
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "approvalEvidence": null,
+      "selfRatification": false,
+      "permittedScopes": [
+        "PRODUCT_SPECIFICATION_BASELINE"
+      ],
+      "productDecisionsToSettle": [
+        "DEC-PD-01",
+        "DEC-PD-02",
+        "DEC-PD-03",
+        "DEC-PD-04",
+        "DEC-PD-05",
+        "DEC-PD-12",
+        "DEC-PD-0C2-01",
+        "DEC-PD-0C2-02",
+        "DEC-PD-0C2-03",
+        "DEC-PD-0C2-10"
+      ],
+      "institutionalGrants": {
+        "issuedByThisRecord": 0,
+        "grantsInstitutionalAuthority": false,
+        "outstandingInstitutionalDecisions": 79,
+        "note": "A product approval can establish the engineering canonical. It cannot issue the outstanding institutional authority decisions."
+      },
+      "stateHistory": [
+        {
+          "version": 1,
+          "state": "PROPOSED_FOR_RATIFICATION",
+          "recordedOn": "2026-10-27",
+          "recordedBy": "GATE-0C.2 engineering preparation",
+          "basis": "Prepared for a decision. No decision is recorded and none is implied."
+        }
+      ]
+    },
+    {
+      "recordId": "PDR-0C2-REPRESENTATIVE-V1",
+      "recordVersion": 1,
+      "persona": "representative",
+      "state": "PROPOSED_FOR_RATIFICATION",
+      "artifact": {
+        "packageId": "UE-REPRESENTATIVE-PROPOSED-CANONICAL-2.2-R1",
+        "version": "2.2-R1",
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-representative-0c2.json",
+        "sha256": "e4dcbf3635b8807c9e923f2f12b5a1dc9b53196fadf864664393ff19f3af6861",
+        "baselineFile": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-representative.json",
+        "baselineSha256": "34f3d145e945a11bf8cba049d16bd66998fe5ee2b2f6a3e817bdebfdf6b891d0"
+      },
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "approvalEvidence": null,
+      "selfRatification": false,
+      "permittedScopes": [
+        "PRODUCT_SPECIFICATION_BASELINE"
+      ],
+      "productDecisionsToSettle": [
+        "DEC-IA-03",
+        "DEC-IA-07",
+        "DEC-IA-08",
+        "DEC-IA-09",
+        "DEC-IA-10",
+        "DEC-IA-11",
+        "DEC-PD-01",
+        "DEC-PD-03",
+        "DEC-PD-04",
+        "DEC-PD-05",
+        "DEC-PD-06",
+        "DEC-PD-07",
+        "DEC-PD-08",
+        "DEC-PD-12",
+        "DEC-PD-14",
+        "DEC-PD-0C2-04",
+        "DEC-PD-0C2-05",
+        "DEC-PD-0C2-06",
+        "DEC-PD-0C2-10"
+      ],
+      "institutionalGrants": {
+        "issuedByThisRecord": 0,
+        "grantsInstitutionalAuthority": false,
+        "outstandingInstitutionalDecisions": 79,
+        "note": "A product approval can establish the engineering canonical. It cannot issue the outstanding institutional authority decisions."
+      },
+      "stateHistory": [
+        {
+          "version": 1,
+          "state": "PROPOSED_FOR_RATIFICATION",
+          "recordedOn": "2026-10-27",
+          "recordedBy": "GATE-0C.2 engineering preparation",
+          "basis": "Prepared for a decision. No decision is recorded and none is implied."
+        }
+      ]
+    },
+    {
+      "recordId": "PDR-0C2-FINANCIAL-OFFICER-V1",
+      "recordVersion": 1,
+      "persona": "financial-officer",
+      "state": "PROPOSED_FOR_RATIFICATION",
+      "artifact": {
+        "packageId": "UE-FINANCIAL-OFFICER-PROPOSED-CANONICAL-2.1-R1",
+        "version": "2.1-R1",
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-financial-officer-0c2.json",
+        "sha256": "5ec3e9a10eb6c4458f467f5b8e659d746f6631924664d9f7ca062c6e435c3889",
+        "baselineFile": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-financial-officer.json",
+        "baselineSha256": "01e11c12ce91b8ec96ff9d0af68595296effbc36e6f05def07ea0a02f677c216"
+      },
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "approvalEvidence": null,
+      "selfRatification": false,
+      "permittedScopes": [
+        "PRODUCT_SPECIFICATION_BASELINE"
+      ],
+      "productDecisionsToSettle": [
+        "DEC-IA-16",
+        "DEC-IA-24",
+        "DEC-IA-25",
+        "DEC-IA-26",
+        "DEC-IA-31",
+        "DEC-PD-09",
+        "DEC-PD-10",
+        "DEC-PD-11",
+        "DEC-PD-13",
+        "DEC-PD-14",
+        "DEC-PD-0C2-07",
+        "DEC-PD-0C2-08",
+        "DEC-PD-0C2-09",
+        "DEC-PD-0C2-10"
+      ],
+      "institutionalGrants": {
+        "issuedByThisRecord": 0,
+        "grantsInstitutionalAuthority": false,
+        "outstandingInstitutionalDecisions": 79,
+        "note": "A product approval can establish the engineering canonical. It cannot issue the outstanding institutional authority decisions."
+      },
+      "stateHistory": [
+        {
+          "version": 1,
+          "state": "PROPOSED_FOR_RATIFICATION",
+          "recordedOn": "2026-10-27",
+          "recordedBy": "GATE-0C.2 engineering preparation",
+          "basis": "Prepared for a decision. No decision is recorded and none is implied."
+        }
+      ]
+    }
+  ],
+  "raisedByGate0C2": [
+    {
+      "id": "DEC-PD-0C2-01",
+      "persona": "steward",
+      "title": "Steward access when a relationship or the platform role ends",
+      "question": "What happens to a steward’s read access and in-flight work when an assignment ends, a collaborator grant is revoked, the steward role is removed or the person leaves the organization?",
+      "gap": "The proposed baseline specifies collaborator grants (STW-ACT-20) and the recusal denial (STW-DENY-08). It states no rule for the end of an assignment, the removal of the role or departure, and no rule for historical read access to cases the steward once held.",
+      "options": [
+        "Access ends on the next request. Historical entries stay visible to the steward only as audit references without case content.",
+        "Read-only access to closed matters the steward handled continues for an organization-set period.",
+        "No historical access. In-flight work is returned to the triage queue."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-02",
+      "persona": "steward",
+      "title": "Steward scope across federations, locals and territories",
+      "question": "Does a steward act only inside one organization, or may an institution scope a steward to a workplace, a local or a territory?",
+      "gap": "Every steward contract is limited to the active organization and to the cases the steward holds. The baseline states no federation, territory or workplace dimension, and it forbids reading one from the hierarchy.",
+      "options": [
+        "Active organization only. No federation or territory scope exists for a steward.",
+        "A workplace or unit scope is added as an explicit issued instrument, never inferred.",
+        "Defer until the institution names a steward office (DEC-IA-32)."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-03",
+      "persona": "steward",
+      "title": "Steward absence cover and substitution",
+      "question": "When a steward is absent, who acts, and by what explicit instrument?",
+      "gap": "The baseline offers a collaborator grant on a held case (STW-ACT-20) and a handoff summary (STW-ACT-33). It specifies no acting-steward or absence-cover mechanism and no time-bound substitution.",
+      "options": [
+        "No substitution. The supervisor reassigns the case through the existing assignment mandate.",
+        "A time-bound collaborator grant on each held case, issued by the steward.",
+        "A named acting-steward instrument issued by an institutional office."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-04",
+      "persona": "representative",
+      "title": "Representative scope across federations and affiliated organizations",
+      "question": "How do representative actions work when assistance crosses organizations (national office assistance, regional support, territory denial)?",
+      "gap": "Journeys and the four institutional scenarios name the situations. No contract defines a cross-organization assistance model, and R16 (workplace and bargaining-unit context) is NOT_IMPLEMENTED. Scope is never inferred from office or seniority.",
+      "options": [
+        "Active organization only. Cross-organization assistance is out of scope for this canonical.",
+        "An explicit, time-bound, audited assistance instrument issued by both organizations.",
+        "Defer to the institution that adopts a federation protocol (DEC-IA-10)."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-05",
+      "persona": "representative",
+      "title": "Explicit denial of financial authority for the representative",
+      "question": "Should the Representative canonical carry an explicit denial contract that states a representative role holds no financial authority?",
+      "gap": "The steward and Financial Officer packages each carry an explicit financial denial (STW-DENY-06, FO-DENY-01). The Representative package has none, so the boundary is stated on only one side.",
+      "options": [
+        "Add a Representative denial contract that mirrors STW-DENY-06 and FO-DENY-01.",
+        "Keep the boundary in the Financial Officer package only."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-06",
+      "persona": "representative",
+      "title": "Former representative access and mandate termination",
+      "question": "What happens to a representative’s access, mandates and open work when a mandate expires, is revoked or the person leaves?",
+      "gap": "Collaborator revocation (REP-ACT-09), continuity on transfer (REP-ACT-21) and mandate identity (R01) are specified. The end of a representative’s own mandate and any historical access for a former representative are not.",
+      "options": [
+        "Access ends on the next request. Open work returns to triage. No historical access.",
+        "Read-only access to closed matters the person handled for an organization-set period.",
+        "Defer until the institution adopts the mandate lifecycle (DEC-IA-08)."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-07",
+      "persona": "financial-officer",
+      "title": "Finance scope across affiliates and multiple organizations",
+      "question": "Is finance scoped to one organization, or may a central finance office hold duties over several organizations or affiliates?",
+      "gap": "Affiliate remittances (F10) are UNAVAILABLE_501. The four organization scenarios are hypotheses with no source backing, and no source describes any organization’s finance structure.",
+      "options": [
+        "One organization per mandate. Central offices are modelled as separate mandates in each organization.",
+        "A mandate may name several organizations when each organization adopts it.",
+        "Defer to the institution that adopts a finance operating model (DEC-IA-31)."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-08",
+      "persona": "financial-officer",
+      "title": "Absent mandate holder without delegation",
+      "question": "FO-DENY-04 forbids delegating a financial duty. How is a duty carried on when its holder is absent?",
+      "gap": "Succession and revocation (F26) cover a permanent change. A temporary absence has no specified path other than issuing a new mandate.",
+      "options": [
+        "No temporary path. A new mandate is issued through F01 under its separation rules.",
+        "A time-bound mandate that an authorized issuer approves for the absence period."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-09",
+      "persona": "financial-officer",
+      "title": "Financial notifications and workflow transitions",
+      "question": "Which financial events notify whom (approval pending, payment failure, reconciliation exception, mandate expiry)?",
+      "gap": "Arrears follow-up (F06) is the only notification specified. The approval, execution and reconciliation contracts name workflow states with no notification rule.",
+      "options": [
+        "Notify the next mandate holder in the workflow only. No member-facing financial notice other than F06.",
+        "Add a notification contract per workflow transition after the finance operating model is adopted."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    },
+    {
+      "id": "DEC-PD-0C2-10",
+      "persona": "all",
+      "title": "Order of product acceptance and the Steward structure",
+      "question": "In what order are the three packages decided, and must the Steward structural decision (DEC-PD-01) be settled before the Steward and Representative packages are accepted?",
+      "gap": "Fifty-five Steward contracts each name a Representative 2.2 counterpart, and nine shared obligations span the packages. Accepting one package while the other is returned leaves shared obligations without a single owner.",
+      "options": [
+        "Settle DEC-PD-01 first, then decide Representative and Steward together. Decide Financial Officer independently.",
+        "Decide the three packages independently and record the shared-obligation consequence."
+      ],
+      "type": "PRODUCT_DESIGN",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "status": "OUTSTANDING",
+      "recommendedOption": null,
+      "adoptedByInstitution": false,
+      "note": "Raised by Gate 0C.2 while checking the action and visibility matrix. It records a gap and a set of options. The preparer recommends nothing here and settles nothing."
+    }
+  ]
+}

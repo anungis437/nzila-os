@@ -11,78 +11,15 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import type { ContinuityRecommendation, DecisionBrief } from '@/lib/knowledge-transfer/decision-intelligence/decision-models';
+import type { ResilienceRoadmap } from '@/lib/knowledge-transfer/resilience-strategies/strategy-models';
 
 type PlanningTab = 'brief' | 'roadmap' | 'actions';
 
-interface EvidenceItem {
-  observation: string;
-  dataPoint: string;
-  confidence: string;
-}
-
-interface ReasoningStep {
-  step: number;
-  evaluation: string;
-  conclusion: string;
-  assumption: string;
-}
-
-interface Recommendation {
-  id: string;
-  category: string;
-  urgency: string;
-  impact: string;
-  headline: string;
-  rationale: string;
-  evidence: EvidenceItem[];
-  reasoningChain: ReasoningStep[];
-  keyAssumptions: string[];
-  governanceImplications: string[];
-  continuityLogic: string;
-  tradeoffs: string[];
-  estimatedResilienceGain: number;
-}
-
-interface DecisionBriefData {
-  currentStateAssessment: string;
-  continuityScore: number;
-  recommendations: Recommendation[];
-  continuityStrengths: string[];
-  criticalGaps: string[];
-  governanceExposureSummary: string;
-  executiveSummary: string;
-}
-
-interface StrategyMilestone {
-  week: number;
-  description: string;
-  successCriteria: string;
-  dimensionImpacted: string;
-}
-
-interface Strategy {
-  strategyType: string;
-  name: string;
-  description: string;
-  currentMaturity: string;
-  targetMaturity: string;
-  estimatedDurationWeeks: number;
-  projectedResilienceGain: number;
-  governanceStabilityGain: number;
-  dependencyReductionImpact: number;
-  milestones: StrategyMilestone[];
-  kpis: string[];
-}
-
-interface RoadmapData {
-  currentScore: number;
-  projectedScore: number;
-  strategies: Strategy[];
-  phase1QuickWins: string[];
-  phase2Foundation: string[];
-  phase3Sustained: string[];
-  maturityNarrative: string;
-}
+// What the screen reads is what the services return: the routes answer these types under `data`, so a field the service does not have fails to compile here.
+type Recommendation = ContinuityRecommendation;
+type DecisionBriefData = DecisionBrief;
+type RoadmapData = ResilienceRoadmap;
 
 type ActionStatus = 'not_started' | 'in_progress' | 'completed';
 
@@ -164,12 +101,13 @@ export function ContinuityPlanningWorkspace() {
       setBriefLoading(true);
       const res = await fetch('/api/exit-interviews/decision-brief');
       if (!res.ok) throw new Error('Failed to load decision brief');
-      const json = await res.json();
+      const json = (await res.json()) as { data?: DecisionBriefData };
       const raw = json.data;
+      if (!raw) throw new Error('Failed to load decision brief');
       setBriefData(raw);
 
       // Initialize action tracker from recommendations
-      const initialActions: PlanningAction[] = (raw.recommendations ?? []).map((r: Recommendation) => ({
+      const initialActions: PlanningAction[] = raw.recommendations.map((r: Recommendation) => ({
         id: r.id,
         headline: r.headline,
         category: r.category,
@@ -190,7 +128,8 @@ export function ContinuityPlanningWorkspace() {
       setRoadmapLoading(true);
       const res = await fetch('/api/exit-interviews/resilience-roadmap');
       if (!res.ok) throw new Error('Failed to load roadmap');
-      const json = await res.json();
+      const json = (await res.json()) as { data?: RoadmapData };
+      if (!json.data) throw new Error('Failed to load roadmap');
       setRoadmapData(json.data);
     } catch {
       // Show empty state

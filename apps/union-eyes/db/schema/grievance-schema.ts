@@ -83,47 +83,6 @@ export const settlementTypeEnum = pgEnum("settlement_type", [
   "other",
 ]);
 
-// Grievance Responses
-export const grievanceResponses = pgTable("grievance_responses", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  grievanceId: uuid("grievance_id").references(() => grievances.id).notNull(),
-  
-  // Response details
-  responseNumber: integer("response_number").notNull(),
-  respondingParty: varchar("responding_party", { length: 100 }).notNull(), // employer, union, arbitration_board
-  responderName: varchar("responder_name", { length: 255 }),
-  responderTitle: varchar("responder_title", { length: 255 }),
-  
-  // Content
-  response: text("response").notNull(),
-  position: text("position"),
-  
-  // Dates
-  responseDate: timestamp("response_date", { withTimezone: true }).notNull(),
-  receivedDate: timestamp("received_date", { withTimezone: true }),
-  
-  // Outcome
-  acceptedByGrievant: boolean("accepted_by_grievant"),
-  acceptedByEmployer: boolean("accepted_by_employer"),
-  
-  // Next steps
-  nextDeadline: timestamp("next_deadline", { withTimezone: true }),
-  nextStep: varchar("next_step", { length: 100 }),
-  
-  // Attachments
-  attachments: jsonb("attachments").$type<Array<{
-    id: string;
-    name: string;
-    url: string;
-    type: string;
-  }>>(),
-  
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_grievance_responses_grievance").on(table.grievanceId),
-  index("idx_grievance_responses_date").on(table.responseDate),
-]);
-
 // Arbitrations
 export const arbitrations = pgTable("arbitrations", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -247,37 +206,6 @@ export const settlements = pgTable("settlements", {
   index("idx_settlements_org").on(table.organizationId),
 ]);
 
-// Grievance Timeline/History
-export const grievanceTimeline = pgTable("grievance_timeline", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  grievanceId: uuid("grievance_id").references(() => grievances.id).notNull(),
-  
-  // Event details
-  eventType: varchar("event_type", { length: 100 }).notNull(),
-  eventDate: timestamp("event_date", { withTimezone: true }).notNull(),
-  actor: varchar("actor", { length: 255 }),
-  actorRole: varchar("actor_role", { length: 100 }),
-  
-  // Content
-  description: text("description").notNull(),
-  notes: text("notes"),
-  
-  // Attachments
-  attachments: jsonb("attachments").$type<Array<{
-    id: string;
-    name: string;
-    url: string;
-  }>>(),
-  
-  // Metadata
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_grievance_timeline_grievance").on(table.grievanceId),
-  index("idx_grievance_timeline_date").on(table.eventDate),
-  index("idx_grievance_timeline_type").on(table.eventType),
-]);
-
 // Grievance Deadlines
 export const grievanceDeadlines = pgTable("grievance_deadlines", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -337,8 +265,6 @@ export type SettlementType = typeof settlementTypeEnum.enumValues[number];
 
 export type Grievance = typeof grievances.$inferSelect;
 export type GrievanceInsert = typeof grievances.$inferInsert;
-export type GrievanceResponse = typeof grievanceResponses.$inferSelect;
 export type Arbitration = typeof arbitrations.$inferSelect;
 export type Settlement = typeof settlements.$inferSelect;
-export type GrievanceTimeline = typeof grievanceTimeline.$inferSelect;
 export type GrievanceDeadline = typeof grievanceDeadlines.$inferSelect;

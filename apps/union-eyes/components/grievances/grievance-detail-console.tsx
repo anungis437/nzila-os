@@ -1,211 +1,176 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+/**
+ * The detail of one grievance: its status and the changes the server's lifecycle rules allow, its facts, its timeline, its governed
+ * documents and who else has access (see grievance-detail-model.ts for what is read and the rules applied before a request is made).
+ *
+ * Every request is read for what it answered. A load that fails is shown with the reason the server gives and a retry (never as "not
+ * found"); a write that fails shows the server's reason and changes nothing on screen; a write that succeeded and a refresh that then
+ * failed says so, instead of showing the old data as current. The document form registers a document that is already stored at a web
+ * address: it carries no file, so it sends no size and no content hash (the server records the version as unverified), and it says so.
+ * Every word comes from the message catalogs (grievanceDetailConsole), in both languages.
+ */
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useFormatter, useTranslations } from "next-intl";
+import { AlertCircle, ArrowLeft, CheckCircle, Clock, FileText, Lock, Scale, Shield, Upload, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Scale,
-  FileText,
-  Clock,
-  Upload,
-  ArrowLeft,
-  CheckCircle,
-  AlertCircle,
-  Shield,
-  Users,
-  Lock,
-} from "lucide-react";
 import { CaseIntelligencePanel } from "@/components/grievances/case-intelligence-panel";
 import { StewardRecommendations } from "@/components/steward-recommendations";
 import { ClauseSuggestions } from "@/components/clause-suggestions";
+import {
+  ACCESS_ROLES,
+  DOCUMENT_TYPES,
+  GRIEVANCE_STATUSES,
+  PRIVACY_LABELS,
+  STATUS_COLORS,
+  isKnownStatus,
+  maySetStatus,
+  mimeTypeOf,
+  nextStatuses,
+  readGrievanceDetail,
+  webUrl,
+  type GrievanceDetail,
+} from "@/components/grievances/grievance-detail-model";
+import { readApiError } from "@/lib/client/api-envelope";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
-interface GrievanceEvent {
-  id: string;
-  eventType: string;
-  actorUserId: string;
-  notes: string | null;
-  createdAt: string;
-}
+const EMPTY_UPLOAD = { title: "", filename: "", fileUrl: "", documentType: "evidence", privacyLabel: "team_confidential" };
 
-interface GrievanceDocument {
-  id: string;
-  fileUrl: string;
-  documentType: string;
-  uploadedBy: string;
-  createdAt: string;
-}
-
-interface GovernedDocument {
-  id: string;
-  title: string;
-  filename: string;
-  fileUrl: string;
-  documentType: string;
-  privacyLabel: string;
-  createdAt: string;
-}
-
-interface CollaboratorAccess {
-  id: string;
-  userId: string;
-  accessRole: string;
-  status: string;
-  expiresAt: string | null;
-  canComment: boolean;
-  canUploadDocuments: boolean;
-  canEditCaseNotes: boolean;
-  canDraftActions: boolean;
-  canViewPrivateDocuments: boolean;
-}
-
-interface GrievanceDetail {
-  id: string;
-  grievanceNumber: string;
-  type: string;
-  status: string;
-  priority: string;
-  title: string;
-  description: string;
-  filedDate: string | null;
-  resolvedAt: string | null;
-  closedAt: string | null;
-  unionRepId: string | null;
-  primaryLroId?: string | null;
-  employerName: string | null;
-  cbaArticle: string | null;
-  events: GrievanceEvent[];
-  documents: GrievanceDocument[];
-  governedDocuments?: GovernedDocument[];
-  collaborators?: CollaboratorAccess[];
-  effectiveAccess?: {
-    isPrimaryOwner: boolean;
-    canManageAssignments: boolean;
-    canUploadDocuments: boolean;
-  };
-}
-
-const PRIVACY_LABELS = [
-  'public_internal',
-  'team_confidential',
-  'lro_confidential',
-  'privileged',
-  'case_restricted',
-  'highly_sensitive',
-] as const;
-
-const STATUS_PIPELINE = [
-  "new",
-  "triage",
-  "investigation",
-  "negotiation",
-  "arbitration",
-  "resolved",
-  "closed",
-];
-
-const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800",
-  triage: "bg-yellow-100 text-yellow-800",
-  investigation: "bg-orange-100 text-orange-800",
-  negotiation: "bg-purple-100 text-purple-800",
-  arbitration: "bg-red-100 text-red-800",
-  resolved: "bg-green-100 text-green-800",
-  closed: "bg-gray-100 text-gray-800",
-};
-
-// ─── Component ───────────────────────────────────────────────────────────────
+// The tokens the catalog words (grievanceDetailConsole.statuses, .types, .priorities, .privacyLabels, .accessRoles, .accessStatuses); a stored
+// value outside them is shown as stored rather than hidden or guessed.
+const STATUSES = new Set<string>(GRIEVANCE_STATUSES);
+const TYPES = new Set(["individual", "group", "policy", "contract", "harassment", "discrimination", "safety", "seniority", "discipline", "termination", "other"]);
+const PRIORITIES = new Set(["low", "medium", "high", "urgent"]);
+const PRIVACY = new Set<string>(PRIVACY_LABELS);
+const ROLES = new Set<string>(ACCESS_ROLES);
+const ACCESS_STATUSES = new Set(["active", "revoked", "expired"]);
 
 export function GrievanceDetailConsole() {
+  const t = useTranslations("grievanceDetailConsole");
+  const format = useFormatter();
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = Array.isArray(params.id) ? params.id[0] : (params.id as string);
 
   const [grievance, setGrievance] = useState<GrievanceDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
   const [statusNote, setStatusNote] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const [collabUserId, setCollabUserId] = useState("");
-  const [collabRole, setCollabRole] = useState<'secondary_lro' | 'reviewer' | 'read_only'>('reviewer');
+  const [collabRole, setCollabRole] = useState<(typeof ACCESS_ROLES)[number]>("reviewer");
   const [collabCanViewPrivate, setCollabCanViewPrivate] = useState(false);
   const [accessSaving, setAccessSaving] = useState(false);
+  const [accessError, setAccessError] = useState<string | null>(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
-  const [uploadPayload, setUploadPayload] = useState({
-    title: '',
-    filename: '',
-    fileUrl: '',
-    mimeType: 'application/pdf',
-    documentType: 'evidence',
-    privacyLabel: 'team_confidential',
-  });
+  const [uploadPayload, setUploadPayload] = useState(EMPTY_UPLOAD);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploaded, setUploaded] = useState(false);
 
-  const refetchGrievance = useCallback(async () => {
-    const refetch = await fetch(`/api/grievances/${id}`);
-    const refetchJson = await refetch.json();
-    if (refetchJson.data) {
-      setGrievance(refetchJson.data);
-    }
-  }, [id]);
+  const moment = (value: string) => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : format.dateTime(date, { dateStyle: "medium", timeStyle: "short" });
+  };
+  const day = (value: string) => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : format.dateTime(date, { dateStyle: "medium" });
+  };
+  const labelOf = (group: string, members: ReadonlySet<string>, token: string) => (members.has(token) ? t(`${group}.${token}`) : token);
+
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      const response = await fetch(`/api/grievances/${id}`, { signal });
+      if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+      setGrievance(readGrievanceDetail(await response.json()));
+    },
+    [id],
+  );
 
   useEffect(() => {
-    async function fetchGrievance() {
+    const controller = new AbortController();
+    const first = async () => {
+      setLoading(true);
+      setLoadError(null);
       try {
-        await refetchGrievance();
-      } catch {
-        // fallback
+        await load(controller.signal);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setLoadError(errorText(error));
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
-    }
-    fetchGrievance();
-  }, [refetchGrievance]);
+    };
+    first();
+    return () => controller.abort();
+  }, [load, reload]);
 
-  async function advanceStatus(newStatus: string) {
-    setUpdating(true);
+  // After a change the server accepted, the screen is read again; if that read fails, what is shown is said to be out of date.
+  const refresh = useCallback(async () => {
     try {
-      const res = await fetch(`/api/grievances/${id}/status`, {
+      await load();
+      setRefreshError(null);
+    } catch (error) {
+      setRefreshError(errorText(error));
+    }
+  }, [load]);
+
+  async function advanceStatus(next: string) {
+    setUpdating(true);
+    setStatusError(null);
+    try {
+      const response = await fetch(`/api/grievances/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus, notes: statusNote }),
+        body: JSON.stringify({ status: next, notes: statusNote.trim() || undefined }),
       });
-      const json = await res.json();
-      if (json.data) {
-        setGrievance((prev) =>
-          prev ? { ...prev, status: json.data.status, events: [...prev.events] } : prev,
-        );
-        setStatusNote("");
-        // Refetch to get updated events
-        await refetchGrievance();
+      if (!response.ok) {
+        setStatusError(await readApiError(response, t("statusFailed")));
+        return;
       }
+      setStatusNote("");
+      await refresh();
+    } catch (error) {
+      setStatusError(errorText(error));
     } finally {
       setUpdating(false);
     }
   }
 
   async function grantCollaborator() {
-    if (!collabUserId) {
-      return;
-    }
+    if (!collabUserId) return;
     setAccessSaving(true);
+    setAccessError(null);
     try {
-      await fetch(`/api/grievances/${id}/access`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const needsExpiry = collabRole !== "secondary_lro" || collabCanViewPrivate;
+      const response = await fetch(`/api/grievances/${id}/access`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: collabUserId,
           accessRole: collabRole,
+          expiresAt: needsExpiry ? new Date(Date.now() + 30 * 86_400_000).toISOString() : null,
           canComment: true,
-          canUploadDocuments: collabRole !== 'read_only',
-          canEditCaseNotes: collabRole === 'secondary_lro',
-          canDraftActions: collabRole === 'secondary_lro',
+          canUploadDocuments: collabRole === "secondary_lro",
+          canEditCaseNotes: collabRole === "secondary_lro",
+          canDraftActions: collabRole === "secondary_lro",
           canViewPrivateDocuments: collabCanViewPrivate,
         }),
       });
-      setCollabUserId('');
-      setCollabRole('reviewer');
+      if (!response.ok) {
+        setAccessError(await readApiError(response, t("accessGrantFailed")));
+        return;
+      }
+      setCollabUserId("");
+      setCollabRole("reviewer");
       setCollabCanViewPrivate(false);
-      await refetchGrievance();
+      await refresh();
+    } catch (error) {
+      setAccessError(errorText(error));
     } finally {
       setAccessSaving(false);
     }
@@ -213,45 +178,59 @@ export function GrievanceDetailConsole() {
 
   async function revokeCollaborator(assignmentId: string) {
     setAccessSaving(true);
+    setAccessError(null);
     try {
-      await fetch(`/api/grievances/${id}/access`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assignmentId, status: 'revoked' }),
+      const response = await fetch(`/api/grievances/${id}/access`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignmentId, status: "revoked" }),
       });
-      await refetchGrievance();
+      if (!response.ok) {
+        setAccessError(await readApiError(response, t("accessRevokeFailed")));
+        return;
+      }
+      await refresh();
+    } catch (error) {
+      setAccessError(errorText(error));
     } finally {
       setAccessSaving(false);
     }
   }
 
-  async function uploadGovernedDocument(e: React.FormEvent) {
-    e.preventDefault();
-    if (!uploadPayload.privacyLabel || !uploadPayload.fileUrl || !uploadPayload.filename || !uploadPayload.title) {
+  async function uploadGovernedDocument(event: React.FormEvent) {
+    event.preventDefault();
+    setUploaded(false);
+    setUploadError(null);
+    const address = webUrl(uploadPayload.fileUrl);
+    if (address === null) {
+      setUploadError(t("uploadNeedsWebUrl"));
       return;
     }
 
     setUploadingDoc(true);
     try {
-      await fetch(`/api/grievances/${id}/documents`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`/api/grievances/${id}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...uploadPayload,
-          fileSize: 0,
-          contentHash: `manual:${Date.now()}`,
+          title: uploadPayload.title.trim(),
+          filename: uploadPayload.filename.trim(),
+          fileUrl: address,
+          mimeType: mimeTypeOf(uploadPayload.filename),
+          documentType: uploadPayload.documentType,
+          privacyLabel: uploadPayload.privacyLabel,
         }),
       });
-
-      setUploadPayload({
-        title: '',
-        filename: '',
-        fileUrl: '',
-        mimeType: 'application/pdf',
-        documentType: 'evidence',
-        privacyLabel: 'team_confidential',
-      });
-      await refetchGrievance();
+      // A document the server did not accept is neither shown as added nor cleared from the form.
+      if (!response.ok) {
+        setUploadError(await readApiError(response, t("uploadFailed")));
+        return;
+      }
+      setUploadPayload(EMPTY_UPLOAD);
+      setUploaded(true);
+      await refresh();
+    } catch (error) {
+      setUploadError(errorText(error));
     } finally {
       setUploadingDoc(false);
     }
@@ -259,7 +238,7 @@ export function GrievanceDetailConsole() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
+      <div role="status" aria-label={t("loading")} className="flex h-64 items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
       </div>
     );
@@ -267,90 +246,100 @@ export function GrievanceDetailConsole() {
 
   if (!grievance) {
     return (
-      <div className="text-center py-16 text-gray-500">
-        <AlertCircle className="mx-auto h-10 w-10 mb-2" />
-        Grievance not found
+      <div role="alert" className="mx-auto max-w-xl space-y-3 py-16 text-center text-gray-700">
+        <AlertCircle className="mx-auto h-10 w-10" aria-hidden="true" />
+        <p className="font-semibold">{t("loadFailedTitle")}</p>
+        <p className="text-sm">{loadError}</p>
+        <button
+          type="button"
+          onClick={() => setReload((count) => count + 1)}
+          className="rounded border px-3 py-1.5 text-sm font-medium hover:bg-gray-50"
+        >
+          {t("retry")}
+        </button>
       </div>
     );
   }
 
-  const currentIdx = STATUS_PIPELINE.indexOf(grievance.status);
+  const statusLabel = (status: string) => labelOf("statuses", STATUSES, status);
+  const followingStatuses = nextStatuses(grievance.status, grievance.primaryLroId);
+  const mayChangeStatus = maySetStatus(grievance);
+  const owner = grievance.primaryLroId ?? t("assignedRepresentative");
 
   return (
     <div className="space-y-6 p-6">
+      {refreshError !== null && (
+        <div role="alert" className="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <div className="space-y-1">
+            <p className="font-semibold">{t("refreshFailedTitle")}</p>
+            <p>{t("refreshFailedBody")}</p>
+            <p className="text-xs">{refreshError}</p>
+            <button type="button" onClick={refresh} className="rounded border border-amber-400 bg-white px-2 py-1 text-xs font-medium hover:bg-amber-100">
+              {t("retry")}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button
-          onClick={() => router.back()}
-          className="text-gray-500 hover:text-gray-800"
-        >
-          <ArrowLeft className="h-5 w-5" />
+        <button type="button" onClick={() => router.back()} aria-label={t("back")} className="text-gray-500 hover:text-gray-800">
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold">{grievance.title}</h1>
+          <h1 className="text-2xl font-bold">{grievance.title || grievance.grievanceNumber}</h1>
           <p className="text-sm text-gray-500">{grievance.grievanceNumber}</p>
         </div>
         <span
-          className={`ml-auto rounded-full px-3 py-1 text-xs font-semibold ${STATUS_COLORS[grievance.status] ?? "bg-gray-100"}`}
+          className={`ml-auto rounded-full px-3 py-1 text-xs font-semibold ${isKnownStatus(grievance.status) ? STATUS_COLORS[grievance.status] : "bg-gray-100"}`}
         >
-          {grievance.status.toUpperCase()}
+          {statusLabel(grievance.status)}
         </span>
       </div>
 
-      {/* Status Pipeline */}
+      {/* Status */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Scale className="h-4 w-4" /> Lifecycle Progress
+            <Scale className="h-4 w-4" aria-hidden="true" /> {t("statusTitle")}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-1">
-            {STATUS_PIPELINE.map((s, i) => (
-              <div key={s} className="flex items-center">
-                <div
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    i <= currentIdx
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-500"
-                  }`}
-                >
-                  {s}
-                </div>
-                {i < STATUS_PIPELINE.length - 1 && (
-                  <div
-                    className={`mx-1 h-0.5 w-6 ${
-                      i < currentIdx ? "bg-blue-600" : "bg-gray-200"
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+        <CardContent className="space-y-3">
+          <p className="text-sm">{t("currentStatus", { status: statusLabel(grievance.status) })}</p>
 
-          {/* Advance controls */}
-          {grievance.status !== "closed" && (
-            <div className="mt-4 flex items-center gap-3">
+          {!mayChangeStatus ? (
+            <p className="text-sm text-gray-500">{t("statusNoAuthority")}</p>
+          ) : followingStatuses.length === 0 ? (
+            <p className="text-sm text-gray-500">{t("statusNoNext")}</p>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3">
               <input
                 type="text"
                 value={statusNote}
                 onChange={(e) => setStatusNote(e.target.value)}
-                placeholder="Transition note…"
-                className="flex-1 rounded border px-3 py-1.5 text-sm"
+                aria-label={t("transitionNote")}
+                placeholder={t("transitionNote")}
+                className="min-w-48 flex-1 rounded border px-3 py-1.5 text-sm"
               />
-              {STATUS_PIPELINE.slice(currentIdx + 1, currentIdx + 3).map(
-                (next) => (
-                  <button
-                    key={next}
-                    disabled={updating}
-                    onClick={() => advanceStatus(next)}
-                    className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    → {next}
-                  </button>
-                ),
-              )}
+              {followingStatuses.map((next) => (
+                <button
+                  key={next}
+                  type="button"
+                  disabled={updating}
+                  onClick={() => advanceStatus(next)}
+                  className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {t("moveTo", { status: statusLabel(next) })}
+                </button>
+              ))}
             </div>
+          )}
+
+          {statusError !== null && (
+            <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+              {statusError}
+            </p>
           )}
         </CardContent>
       </Card>
@@ -360,35 +349,48 @@ export function GrievanceDetailConsole() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <FileText className="h-4 w-4" /> Case Details
+              <FileText className="h-4 w-4" aria-hidden="true" /> {t("caseDetails")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p><span className="font-medium">Type:</span> {grievance.type}</p>
-            <p><span className="font-medium">Priority:</span> {grievance.priority}</p>
-            <p><span className="font-medium">Filed:</span> {grievance.filedDate ?? "—"}</p>
+            {grievance.type !== "" && (
+              <p>
+                <span className="font-medium">{t("type")}:</span> {labelOf("types", TYPES, grievance.type)}
+              </p>
+            )}
+            {grievance.priority !== "" && (
+              <p>
+                <span className="font-medium">{t("priority")}:</span> {labelOf("priorities", PRIORITIES, grievance.priority)}
+              </p>
+            )}
+            {grievance.filedDate && (
+              <p>
+                <span className="font-medium">{t("filed")}:</span> {day(grievance.filedDate)}
+              </p>
+            )}
             {grievance.employerName && (
-              <p><span className="font-medium">Employer:</span> {grievance.employerName}</p>
+              <p>
+                <span className="font-medium">{t("employer")}:</span> {grievance.employerName}
+              </p>
             )}
             {grievance.cbaArticle && (
-              <p><span className="font-medium">CBA Article:</span> {grievance.cbaArticle}</p>
-            )}
-            {grievance.unionRepId && (
-              <p><span className="font-medium">Assigned Steward:</span> {grievance.unionRepId}</p>
+              <p>
+                <span className="font-medium">{t("cbaArticle")}:</span> {grievance.cbaArticle}
+              </p>
             )}
             {grievance.primaryLroId && (
-              <p><span className="font-medium">Primary Representative:</span> {grievance.primaryLroId}</p>
+              <p>
+                <span className="font-medium">{t("primaryRepresentative")}:</span> {grievance.primaryLroId}
+              </p>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Description</CardTitle>
+            <CardTitle className="text-sm">{t("description")}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-gray-700">
-            {grievance.description}
-          </CardContent>
+          <CardContent className="whitespace-pre-wrap text-sm text-gray-700">{grievance.description ?? t("noDescription")}</CardContent>
         </Card>
       </div>
 
@@ -396,23 +398,21 @@ export function GrievanceDetailConsole() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Clock className="h-4 w-4" /> Event Timeline
+            <Clock className="h-4 w-4" aria-hidden="true" /> {t("timeline")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {grievance.events.length === 0 ? (
-            <p className="text-sm text-gray-400">No events yet</p>
+            <p className="text-sm text-gray-500">{t("noEvents")}</p>
           ) : (
             <ul className="space-y-3">
-              {grievance.events.map((ev) => (
-                <li key={ev.id} className="flex items-start gap-3 text-sm">
-                  <CheckCircle className="mt-0.5 h-4 w-4 text-green-500 shrink-0" />
+              {grievance.events.map((event) => (
+                <li key={event.id} className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" aria-hidden="true" />
                   <div>
-                    <p className="font-medium">{ev.eventType.replace(/_/g, " ")}</p>
-                    {ev.notes && <p className="text-gray-500">{ev.notes}</p>}
-                    <p className="text-xs text-gray-400">
-                      {new Date(ev.createdAt).toLocaleString()}
-                    </p>
+                    <p className="font-medium">{event.eventType.replace(/_/g, " ")}</p>
+                    {event.notes && <p className="text-gray-500">{event.notes}</p>}
+                    <p className="text-xs text-gray-500">{moment(event.createdAt)}</p>
                   </div>
                 </li>
               ))}
@@ -425,85 +425,106 @@ export function GrievanceDetailConsole() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Upload className="h-4 w-4" /> Governed Documents
+            <Upload className="h-4 w-4" aria-hidden="true" /> {t("documents")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {(grievance.governedDocuments?.length ?? 0) === 0 ? (
-            <p className="text-sm text-gray-400">No documents uploaded</p>
+          {grievance.governedDocuments.length === 0 ? (
+            <p className="text-sm text-gray-500">{t("noDocuments")}</p>
           ) : (
             <ul className="space-y-2">
-              {grievance.governedDocuments?.map((doc) => (
-                <li key={doc.id} className="flex items-center gap-2 text-sm">
-                  <FileText className="h-4 w-4 text-gray-400" />
-                  <a
-                    href={doc.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    {doc.title || doc.filename || doc.documentType.replace(/_/g, " ")}
-                  </a>
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                    <Lock className="mr-1 inline h-3 w-3" />
-                    {doc.privacyLabel}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {new Date(doc.createdAt).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
+              {grievance.governedDocuments.map((doc) => {
+                const name = doc.title || doc.filename || doc.documentType.replace(/_/g, " ");
+                const href = webUrl(doc.fileUrl);
+                return (
+                  <li key={doc.id} className="flex flex-wrap items-center gap-2 text-sm">
+                    <FileText className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                    {href ? (
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        {name}
+                      </a>
+                    ) : (
+                      <span>{name}</span>
+                    )}
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      <Lock className="mr-1 inline h-3 w-3" aria-hidden="true" />
+                      {labelOf("privacyLabels", PRIVACY, doc.privacyLabel)}
+                    </span>
+                    <span className="text-xs text-gray-500">{day(doc.createdAt)}</span>
+                  </li>
+                );
+              })}
             </ul>
           )}
 
           <form className="grid grid-cols-1 gap-2 rounded-md border p-3 md:grid-cols-2" onSubmit={uploadGovernedDocument}>
+            <p className="text-xs text-gray-600 md:col-span-2">{t("uploadNote")}</p>
             <input
               value={uploadPayload.title}
               onChange={(e) => setUploadPayload((prev) => ({ ...prev, title: e.target.value }))}
-              placeholder="Document title"
+              aria-label={t("titlePlaceholder")}
+              placeholder={t("titlePlaceholder")}
               className="rounded border px-3 py-2 text-sm"
               required
             />
             <input
               value={uploadPayload.filename}
               onChange={(e) => setUploadPayload((prev) => ({ ...prev, filename: e.target.value }))}
-              placeholder="Filename"
+              aria-label={t("filenamePlaceholder")}
+              placeholder={t("filenamePlaceholder")}
               className="rounded border px-3 py-2 text-sm"
               required
             />
             <input
+              type="url"
               value={uploadPayload.fileUrl}
               onChange={(e) => setUploadPayload((prev) => ({ ...prev, fileUrl: e.target.value }))}
-              placeholder="File URL"
+              aria-label={t("urlPlaceholder")}
+              placeholder={t("urlPlaceholder")}
               className="rounded border px-3 py-2 text-sm md:col-span-2"
               required
             />
             <select
               value={uploadPayload.documentType}
               onChange={(e) => setUploadPayload((prev) => ({ ...prev, documentType: e.target.value }))}
+              aria-label={t("documentType")}
               className="rounded border px-3 py-2 text-sm"
             >
-              <option value="evidence">evidence</option>
-              <option value="witness_statement">witness_statement</option>
-              <option value="correspondence">correspondence</option>
-              <option value="other">other</option>
+              {DOCUMENT_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {t(`documentTypes.${type}`)}
+                </option>
+              ))}
             </select>
             <select
               value={uploadPayload.privacyLabel}
               onChange={(e) => setUploadPayload((prev) => ({ ...prev, privacyLabel: e.target.value }))}
+              aria-label={t("privacyLabel")}
               className="rounded border px-3 py-2 text-sm"
               required
             >
               {PRIVACY_LABELS.map((label) => (
-                <option key={label} value={label}>{label}</option>
+                <option key={label} value={label}>
+                  {t(`privacyLabels.${label}`)}
+                </option>
               ))}
             </select>
+            {uploadError !== null && (
+              <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-800 md:col-span-2">
+                <span className="font-semibold">{t("uploadFailed")}.</span> {uploadError}
+              </p>
+            )}
+            {uploaded && (
+              <p role="status" className="rounded-md border border-green-200 bg-green-50 p-3 text-xs text-green-800 md:col-span-2">
+                {t("uploadSucceeded")}
+              </p>
+            )}
             <button
               type="submit"
               disabled={uploadingDoc}
               className="rounded bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50 md:col-span-2"
             >
-              {uploadingDoc ? 'Uploading…' : 'Upload governed document'}
+              {uploadingDoc ? t("uploading") : t("upload")}
             </button>
           </form>
         </CardContent>
@@ -516,37 +537,37 @@ export function GrievanceDetailConsole() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Users className="h-4 w-4" /> Secondary Representative Access
+            <Users className="h-4 w-4" aria-hidden="true" /> {t("secondaryAccess")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
-            <Shield className="mr-1 inline h-4 w-4" />
-            Primary ownership remains with {grievance.primaryLroId ?? grievance.unionRepId ?? 'assigned representative'}. Collaborators get scoped rights only.
+            <Shield className="mr-1 inline h-4 w-4" aria-hidden="true" />
+            {t("primaryOwnership", { owner })}
           </div>
 
-          {(grievance.collaborators?.length ?? 0) === 0 ? (
-            <p className="text-sm text-gray-500">No secondary access assignments yet.</p>
+          {grievance.collaborators.length === 0 ? (
+            <p className="text-sm text-gray-500">{t("noAssignments")}</p>
           ) : (
             <div className="space-y-2">
-              {grievance.collaborators?.map((assignment) => (
+              {grievance.collaborators.map((assignment) => (
                 <div key={assignment.id} className="flex flex-wrap items-center gap-2 rounded border px-3 py-2 text-sm">
                   <span className="font-medium">{assignment.userId}</span>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">{assignment.accessRole}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${assignment.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                    {assignment.status}
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">
+                    {labelOf("accessRoles", ROLES, assignment.accessRole)}
                   </span>
-                  {assignment.expiresAt && (
-                    <span className="text-xs text-gray-500">expires {new Date(assignment.expiresAt).toLocaleDateString()}</span>
-                  )}
-                  {grievance.effectiveAccess?.canManageAssignments && assignment.status === 'active' && (
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${assignment.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+                    {labelOf("accessStatuses", ACCESS_STATUSES, assignment.status)}
+                  </span>
+                  {assignment.expiresAt && <span className="text-xs text-gray-500">{t("expires", { date: day(assignment.expiresAt) })}</span>}
+                  {grievance.effectiveAccess.canManageAssignments && assignment.status === "active" && (
                     <button
                       type="button"
                       disabled={accessSaving}
                       onClick={() => revokeCollaborator(assignment.id)}
                       className="ml-auto rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
                     >
-                      Revoke
+                      {t("revoke")}
                     </button>
                   )}
                 </div>
@@ -554,38 +575,45 @@ export function GrievanceDetailConsole() {
             </div>
           )}
 
-          {grievance.effectiveAccess?.canManageAssignments && (
+          {accessError !== null && (
+            <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+              {accessError}
+            </p>
+          )}
+
+          {grievance.effectiveAccess.canManageAssignments && (
             <div className="grid grid-cols-1 gap-2 rounded-md border p-3 md:grid-cols-3">
               <input
                 value={collabUserId}
                 onChange={(e) => setCollabUserId(e.target.value)}
-                placeholder="Collaborator user ID"
+                aria-label={t("collaboratorPlaceholder")}
+                placeholder={t("collaboratorPlaceholder")}
                 className="rounded border px-3 py-2 text-sm"
               />
               <select
                 value={collabRole}
-                onChange={(e) => setCollabRole(e.target.value as 'secondary_lro' | 'reviewer' | 'read_only')}
+                onChange={(e) => setCollabRole(e.target.value as (typeof ACCESS_ROLES)[number])}
+                aria-label={t("accessRole")}
                 className="rounded border px-3 py-2 text-sm"
               >
-                <option value="secondary_lro">secondary_lro</option>
-                <option value="reviewer">reviewer</option>
-                <option value="read_only">read_only</option>
+                {ACCESS_ROLES.map((role) => (
+                  <option key={role} value={role}>
+                    {t(`accessRoles.${role}`)}
+                  </option>
+                ))}
               </select>
               <label className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={collabCanViewPrivate}
-                  onChange={(e) => setCollabCanViewPrivate(e.target.checked)}
-                />
-                Can view private docs
+                <input type="checkbox" checked={collabCanViewPrivate} onChange={(e) => setCollabCanViewPrivate(e.target.checked)} />
+                {t("canViewPrivate")}
               </label>
+              <p className="text-xs text-gray-600 md:col-span-3">{t("grantExpiryHint")}</p>
               <button
                 type="button"
                 disabled={accessSaving || !collabUserId}
                 onClick={grantCollaborator}
                 className="rounded bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50 md:col-span-3"
               >
-                {accessSaving ? 'Saving…' : 'Grant collaborator access'}
+                {accessSaving ? t("saving") : t("grant")}
               </button>
             </div>
           )}
@@ -593,21 +621,10 @@ export function GrievanceDetailConsole() {
       </Card>
 
       {/* Steward Recommendations */}
-      <StewardRecommendations
-        grievanceId={id}
-        onAssign={() => {
-          // Refetch grievance to update assigned steward
-          fetch(`/api/grievances/${id}`)
-            .then((r) => r.json())
-            .then((j) => { if (j.data) setGrievance(j.data); });
-        }}
-      />
+      <StewardRecommendations grievanceId={id} onAssign={() => void refresh()} />
 
       {/* Contract Clause Intelligence */}
-      <ClauseSuggestions
-        grievanceId={id}
-        description={grievance.description}
-      />
+      <ClauseSuggestions grievanceId={id} description={grievance.description ?? ""} />
     </div>
   );
 }

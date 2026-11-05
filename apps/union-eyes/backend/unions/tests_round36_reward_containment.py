@@ -84,21 +84,24 @@ class RewardContainmentTests(unittest.TestCase):
         )
 
 
-class RewardSchemaParityTests(unittest.TestCase):
-    """Locks the proven schema drift between each Django model and its real
-    physical table (db/schema/domains/infrastructure/rewards.ts;
-    db/migrations/0097_nzilaos_rls_org_isolation.sql for RLS). If either
-    test starts failing because a model gained the missing columns, the
-    containment reasoning above must be re-evaluated (item 13 of the
-    round-36 brief: mechanically lock stale schema so a future model
-    regeneration triggers authority re-review) \u2014 a schema fix does not by
-    itself prove a legitimate consumer or organization-ownership
-    enforcement exists.
+class RewardSchemaConvergenceTests(unittest.TestCase):
+    """The models describe their physical tables.
+
+    These tests used to lock the models as stale snapshots (an id, two timestamps and one id column) so that a model
+    regeneration would trigger an authority re-review (db/schema/domains/infrastructure/rewards.ts;
+    db/migrations/0097_nzilaos_rls_org_isolation.sql for RLS). The regeneration happened: `manage.py
+    ue_converge_models` made the models describe their tables, proven against PostgreSQL by `manage.py
+    ue_physical_parity --strict`. The re-review's outcome is unchanged: a schema fix does not by itself prove a
+    legitimate consumer or organization-ownership enforcement exists, so both views stay contained
+    (RewardContainmentTests above), and the tests below now hold the models to their tables instead of to their drift.
     """
 
-    WALLET_LEDGER_STALE_FIELDS = {"id", "created_at", "updated_at", "user_id"}
-    WALLET_LEDGER_MISSING_FROM_MODEL = {
+    WALLET_LEDGER_COLUMNS = {
+        "id",
+        "created_at",
+        "updated_at",
         "org_id",
+        "user_id",
         "event_type",
         "amount_credits",
         "balance_after",
@@ -107,8 +110,11 @@ class RewardSchemaParityTests(unittest.TestCase):
         "memo",
     }
 
-    BUDGET_ENVELOPE_STALE_FIELDS = {"id", "created_at", "updated_at", "org_id"}
-    BUDGET_ENVELOPE_MISSING_FROM_MODEL = {
+    BUDGET_ENVELOPE_COLUMNS = {
+        "id",
+        "created_at",
+        "updated_at",
+        "org_id",
         "program_id",
         "name",
         "scope_type",
@@ -120,32 +126,25 @@ class RewardSchemaParityTests(unittest.TestCase):
         "ends_at",
     }
 
-    def test_reward_wallet_ledger_model_field_set_matches_known_stale_snapshot(self):
-        actual_fields = {f.name for f in RewardWalletLedger._meta.get_fields()}
-        self.assertEqual(actual_fields, self.WALLET_LEDGER_STALE_FIELDS)
+    @staticmethod
+    def columns(model):
+        return {f.column for f in model._meta.concrete_fields}
 
-    def test_reward_wallet_ledger_model_is_missing_required_physical_columns(self):
-        actual_fields = {f.name for f in RewardWalletLedger._meta.get_fields()}
-        missing = self.WALLET_LEDGER_MISSING_FROM_MODEL - actual_fields
-        self.assertEqual(missing, self.WALLET_LEDGER_MISSING_FROM_MODEL)
+    def test_reward_wallet_ledger_model_describes_its_physical_columns(self):
+        self.assertLessEqual(self.WALLET_LEDGER_COLUMNS, self.columns(RewardWalletLedger))
 
-    def test_reward_wallet_ledger_has_no_org_id_field_at_all(self):
-        field_names = {f.name for f in RewardWalletLedger._meta.get_fields()}
-        self.assertNotIn("org_id", field_names)
+    def test_reward_wallet_ledger_is_owned_by_a_required_organization(self):
+        field = RewardWalletLedger._meta.get_field("org")
+        self.assertEqual(field.column, "org_id")
+        self.assertFalse(field.null)
 
-    def test_reward_budget_envelopes_model_field_set_matches_known_stale_snapshot(self):
-        actual_fields = {f.name for f in RewardBudgetEnvelopes._meta.get_fields()}
-        self.assertEqual(actual_fields, self.BUDGET_ENVELOPE_STALE_FIELDS)
+    def test_reward_budget_envelopes_model_describes_its_physical_columns(self):
+        self.assertLessEqual(self.BUDGET_ENVELOPE_COLUMNS, self.columns(RewardBudgetEnvelopes))
 
-    def test_reward_budget_envelopes_model_is_missing_required_physical_columns(self):
-        actual_fields = {f.name for f in RewardBudgetEnvelopes._meta.get_fields()}
-        missing = self.BUDGET_ENVELOPE_MISSING_FROM_MODEL - actual_fields
-        self.assertEqual(missing, self.BUDGET_ENVELOPE_MISSING_FROM_MODEL)
-
-    def test_reward_budget_envelopes_org_id_is_nullable_bare_uuid_not_fk(self):
+    def test_reward_budget_envelopes_org_id_is_a_required_bare_uuid_not_fk(self):
         field = RewardBudgetEnvelopes._meta.get_field("org_id")
         self.assertEqual(field.get_internal_type(), "UUIDField")
-        self.assertTrue(field.null)
+        self.assertFalse(field.null)
 
 
 if __name__ == "__main__":

@@ -17,7 +17,9 @@ import {
   boolean,
   jsonb,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { grievances } from "../claims/grievances";
 
 // ─── Enums ────────────────────────────────────────────────────
@@ -86,6 +88,9 @@ export const employerContacts = pgTable(
     index("idx_employer_contacts_org").on(table.organizationId),
     index("idx_employer_contacts_employer").on(table.employerId),
     index("idx_employer_contacts_role").on(table.role),
+    uniqueIndex("employer_contacts_one_primary_per_employer_idx")
+      .on(table.organizationId, table.employerId)
+      .where(sql`${table.isPrimary} IS TRUE AND ${table.isActive} IS NOT FALSE`),
   ]
 );
 
@@ -146,36 +151,9 @@ export const employerCommunications = pgTable(
 
 // ─── Communication Templates ──────────────────────────────────
 
-export const communicationTemplates = pgTable(
-  "communication_templates",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id").notNull(),
-
-    name: varchar("name", { length: 255 }).notNull(),
-    category: templateCategoryEnum("category").notNull(),
-    subject: varchar("subject", { length: 500 }).notNull(),
-    body: text("body").notNull(),
-    variables: jsonb("variables").$type<string[]>().default([]),
-
-    isDefault: boolean("is_default").default(false),
-    isActive: boolean("is_active").default(true),
-
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-    createdBy: uuid("created_by"),
-  },
-  (table) => [
-    index("idx_comm_templates_org").on(table.organizationId),
-    index("idx_comm_templates_category").on(table.category),
-  ]
-);
-
 // ─── Type Exports ─────────────────────────────────────────────
 
 export type EmployerContact = typeof employerContacts.$inferSelect;
 export type EmployerContactInsert = typeof employerContacts.$inferInsert;
 export type EmployerCommunication = typeof employerCommunications.$inferSelect;
 export type EmployerCommunicationInsert = typeof employerCommunications.$inferInsert;
-export type CommunicationTemplate = typeof communicationTemplates.$inferSelect;
-export type CommunicationTemplateInsert = typeof communicationTemplates.$inferInsert;

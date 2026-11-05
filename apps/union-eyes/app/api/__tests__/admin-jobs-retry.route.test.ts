@@ -1,12 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+const audit = vi.hoisted(() => ({
+  run: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: audit.run,
+  operationAuditResponse: () => null,
+}));
+
 const m = vi.hoisted(() => ({
-  withAdminAuth: vi.fn(),
+  withSystemAdminAuth: vi.fn(),
   retryJob: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withAdminAuth: m.withAdminAuth }));
+vi.mock('@/lib/api-auth-guard', () => ({ withSystemAdminAuth: m.withSystemAdminAuth }));
 vi.mock('@/lib/job-queue', () => ({ retryJob: m.retryJob }));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: {
@@ -27,7 +35,7 @@ async function loadRoute() {
 describe('admin/jobs/retry route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withAdminAuth.mockImplementation(
+    m.withSystemAdminAuth.mockImplementation(
       (handler: (request: NextRequest, context: any) => Promise<Response>) =>
         (request: NextRequest, context: any = {}) => handler(request, context),
     );
@@ -62,5 +70,21 @@ describe('admin/jobs/retry route', () => {
 
     expect(response.status).toBe(200);
     expect(m.retryJob).toHaveBeenCalledWith('critical', '550e8400-e29b-41d4-a716-446655440000');
+  });
+
+  it('records the retry as an audited platform operation', async () => {
+    const { POST } = await loadRoute();
+    await POST(
+      new NextRequest('http://localhost/api/admin/jobs/retry', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ queue: 'critical', jobId: '550e8400-e29b-41d4-a716-446655440000' }),
+      }),
+      { organizationId: 'org_1', userId: 'u1' },
+    );
+    expect(audit.run).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'platform.job.retry', resourceId: '550e8400-e29b-41d4-a716-446655440000', organizationId: 'org_1' }),
+      expect.any(Function),
+    );
   });
 });

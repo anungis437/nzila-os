@@ -23,6 +23,7 @@ function hasOfficerPrivileges(role: string | null): boolean {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -37,6 +38,6 @@ export const GET = withApi(
     }
 
     const report = await detectContinuityRisks(organizationId!);
-    return { data: report };
+    return report;
   },
 );

@@ -1,49 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
 
-const m = vi.hoisted(() => ({
-  withApi: vi.fn(),
-  generateInvoice: vi.fn(),
-}));
-
-vi.mock('@/lib/api/framework', () => ({
-  withApi: m.withApi,
-  ApiError: { badRequest: (message: string) => new Error(message) },
-  RATE_LIMITS: { FINANCIAL_WRITE: { requests: 20, window: 60 } },
-  z: require('zod'),
-}));
-vi.mock('@/services/platform-economics', () => ({ generateInvoice: m.generateInvoice }));
-
-async function loadRoute() {
-  return import('../billing/send-invoice/route');
-}
-
+// DEF-0B3-SEND-INVOICE-NOT-SENT: the route generated a platform invoice and delivered nothing. Generation is POST /api/finance/invoices;
+// this path answers 501, keeps its steward floor, and no longer reaches the invoice generator.
 describe('billing/send-invoice route', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.generateInvoice.mockResolvedValue({ id: 'inv_1', total: '100.00' });
+  const source = readFileSync(resolve(__dirname, '../billing/send-invoice/route.ts'), 'utf8');
+
+  it('answers 501 behind the steward floor', () => {
+    expect(source).toContain('ApiError.notImplemented');
+    expect(source).toContain("minRole: 'steward'");
+    expect(source).toContain('export const POST = handler');
   });
 
-  it('throws when organization context is missing', async () => {
-    const { POST } = await loadRoute();
-
-    await expect(POST({ body: { billingPeriodId: '11111111-1111-1111-1111-111111111111' }, userId: 'u1' })).rejects.toThrow('Organization context required');
-  });
-
-  it('generates invoice for organization and billing period', async () => {
-    const { POST } = await loadRoute();
-
-    const result = await POST({
-      organizationId: 'org_1',
-      userId: 'u1',
-      body: { billingPeriodId: '11111111-1111-1111-1111-111111111111' },
-    });
-
-    expect(result).toMatchObject({ id: 'inv_1', total: '100.00' });
-    expect(m.generateInvoice).toHaveBeenCalledWith({
-      organizationId: 'org_1',
-      billingPeriodId: '11111111-1111-1111-1111-111111111111',
-      createdBy: 'u1',
-    });
+  it('does not generate an invoice', () => {
+    expect(source).not.toContain('generateInvoice');
   });
 });

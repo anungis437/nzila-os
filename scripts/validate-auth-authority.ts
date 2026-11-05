@@ -160,8 +160,10 @@ function main(): void {
   }
 
   const ueReadme = readFileSync(join(root, 'apps', 'union-eyes', 'README.md'), 'utf8')
-  if (!ueReadme.includes('Clerk is legacy compatibility only')) {
-    findings.push({ severity: 'error', message: 'apps/union-eyes/README.md must preserve the legacy-compatibility-only Clerk declaration' })
+  // The Clerk provider is retired (UE-CONV-A-006): the declaration that it was "legacy compatibility only" was
+  // superseded by naming the canonical authority, and the retired-provider ratchets forbid reintroducing the name.
+  if (!ueReadme.includes('`@nzila/platform-auth` is canonical (Microsoft Entra ID)')) {
+    findings.push({ severity: 'error', message: 'apps/union-eyes/README.md must declare @nzila/platform-auth (Microsoft Entra ID) as the canonical auth authority' })
   }
 
   findings.push(...scanProtectedSurfaces(root))

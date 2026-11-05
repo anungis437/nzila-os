@@ -62,6 +62,6 @@ export function validateSection(section: unknown): ProcurementSection {
  */
 export function safeValidateSection(
   section: unknown,
-): z.SafeParseReturnType<unknown, ProcurementSection> {
+): z.ZodSafeParseResult<ProcurementSection> {
   return ProcurementSectionSchema.safeParse(section)
 }

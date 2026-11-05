@@ -136,19 +136,19 @@ export const snapshotSummarySchema = z.object({
 
 export const complianceSnapshotSchema = z.object({
   snapshotId: z.string().min(1),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   version: z.number().int().positive(),
   status: z.enum(['pending', 'collected', 'chained', 'verified', 'failed']),
   collectedAt: z.string().min(1),
   collectedBy: z.string().min(1),
   controls: z.array(complianceControlSchema),
   summary: snapshotSummarySchema,
-  metadata: z.record(z.string()),
+  metadata: z.record(z.string(), z.string()),
 })
 
 export const snapshotChainEntrySchema = z.object({
   snapshotId: z.string().min(1),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   version: z.number().int().positive(),
   snapshotHash: z.string().regex(/^[a-f0-9]{64}$/),
   previousHash: z.string().regex(/^[a-f0-9]{64}$/).nullable(),

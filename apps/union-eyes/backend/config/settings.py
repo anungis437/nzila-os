@@ -3,10 +3,13 @@ Django settings for UnionEyes
 """
 
 import os
+import sys
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 
 from dotenv import load_dotenv
+
+from config.hardening import check_debug, is_serving_process, resolve_secrets
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,15 +19,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env.local")
 load_dotenv(BASE_DIR / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY", "django-insecure-CHANGE-ME-IN-PRODUCTION"
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+# Debug mode is refused while ALLOWED_HOSTS names a non-local host, and a serving process (gunicorn, celery) that is not a developer's machine refuses to
+# start without real secrets: see config/hardening.py.
+check_debug(DEBUG, ALLOWED_HOSTS)
+SERVING_PROCESS = is_serving_process(sys.argv)
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY, REQUEST_SIGNING_SECRET, WEBHOOK_DEFAULT_SECRET = resolve_secrets(
+    os.environ.get("DJANGO_SECRET_KEY"),
+    os.environ.get("REQUEST_SIGNING_SECRET"),
+    os.environ.get("WEBHOOK_DEFAULT_SECRET"),
+    SERVING_PROCESS,
+    DEBUG,
+)
 
 # Application definition
 INSTALLED_APPS = [
@@ -112,6 +124,12 @@ DATABASES = {
     }
 }
 
+# The Django suite runs against the schema production has, not the one Django's migrations alone describe:
+# see core/test_runner.py. UE_DJANGO_TEST_TEMPLATE clones a converged database instead of running migrations.
+TEST_RUNNER = "core.test_runner.ConvergedSchemaRunner"
+if os.environ.get("UE_DJANGO_TEST_TEMPLATE"):
+    DATABASES["default"]["TEST"] = {"TEMPLATE": os.environ["UE_DJANGO_TEST_TEMPLATE"], "MIGRATE": False}
+
 UE_CANONICAL_BOOTSTRAP_V2 = os.environ.get("UE_CANONICAL_BOOTSTRAP_V2") == "1"
 UE_V2_PROCESS_CONTEXT = os.environ.get("UE_V2_PROCESS_CONTEXT", "web")
 if UE_CANONICAL_BOOTSTRAP_V2:
@@ -171,21 +189,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Authentication — OIDC (Entra External ID / Clerk)
-AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL") or os.environ.get("CLERK_JWKS_URL")
+# Authentication — OIDC (Microsoft Entra External ID)
+AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL")
 AUTH_ISSUER = os.environ.get("AUTH_ISSUER")
 AUTH_AUDIENCE = os.environ.get("AUTH_AUDIENCE")
 AUTH_PROVIDER_NAMESPACE = os.environ.get("AUTH_PROVIDER_NAMESPACE", "entra")
-AUTH_SECRET = os.environ.get("AUTH_SECRET") or os.environ.get("CLERK_SECRET_KEY")
-AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get(
-    "CLERK_WEBHOOK_SECRET"
-)
-
-# Legacy env var names (backward compat)
-CLERK_JWKS_URL = AUTH_JWKS_URL
-CLERK_SECRET_KEY = AUTH_SECRET
-CLERK_PUBLISHABLE_KEY = os.environ.get("CLERK_PUBLISHABLE_KEY")
-CLERK_WEBHOOK_SECRET = AUTH_WEBHOOK_SECRET
+AUTH_SECRET = os.environ.get("AUTH_SECRET")
+AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET")
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 
@@ -462,6 +472,4 @@ LOGGING = {
     },
 }
 
-# Webhook / signing configuration
-WEBHOOK_DEFAULT_SECRET = os.environ.get("WEBHOOK_DEFAULT_SECRET", SECRET_KEY)
-REQUEST_SIGNING_SECRET = os.environ.get("REQUEST_SIGNING_SECRET", SECRET_KEY)
+# Webhook / signing configuration: WEBHOOK_DEFAULT_SECRET and REQUEST_SIGNING_SECRET are resolved with the secret key (config/hardening.py).

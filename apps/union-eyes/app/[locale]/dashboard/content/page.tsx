@@ -15,109 +15,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import Link from 'next/link';
-import { FileText, BookOpen, Video, Download, Eye, TrendingUp, GraduationCap, FolderOpen } from 'lucide-react';
-import { logger } from '@/lib/logger';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { FileText, BookOpen, Video, Download, Eye, Clock, GraduationCap, FolderOpen } from 'lucide-react';
+import { isUuid } from '@/lib/page-data/uuid';
+import { loadContentDashboard, contentFileHref, type ContentItem, type TrainingCourse } from '@/lib/dashboard-reads/content';
 
-interface ContentItem {
-  id: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  status: string;
-  category: string | null;
-  type: string;
-  fileUrl: string | null;
-  fileSizeMb: number | null;
-  downloads: number;
-  views: number;
-  publishedAt: string | null;
-  updatedAt: string | null;
-}
-
-interface TrainingCourse {
-  id: string;
-  courseCode: string;
-  name: string;
-  description: string | null;
-  category: string;
-  deliveryMethod: string;
-  durationLabel: string | null;
-  completions: number;
-  isActive: boolean;
-  isMandatory: boolean;
-}
-
+// Views and downloads are columns nothing in the application increments, so they are not shown as figures: a count that is always whatever
+// was seeded is not a measure. The overview lists what is real: how much content exists, in which state, and what changed last.
 interface ContentStats {
   templates: { total: number; published: number; draft: number; review: number; archived: number };
   resources: { total: number; published: number };
-  views: number;
-  downloads: number;
-  mostViewed: { title: string; category: string; views: number } | null;
   training: { total: number; active: number; totalCompletions: number };
-}
-
-async function loadContentData(orgId: string): Promise<ContentItem[]> {
-  const result = await db.execute(sql`
-    SELECT id, title, slug, meta_description, status, category,
-           content_type, file_url, file_size_mb, download_count,
-           view_count, published_at, updated_at
-    FROM cms_pages
-    WHERE organization_id = ${orgId}::uuid
-    ORDER BY updated_at DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    title: r.title as string,
-    slug: r.slug as string,
-    description: r.meta_description as string | null,
-    status: r.status as string,
-    category: r.category as string | null,
-    type: r.content_type as string,
-    fileUrl: r.file_url as string | null,
-    fileSizeMb: r.file_size_mb ? Number(r.file_size_mb) : null,
-    downloads: Number(r.download_count ?? 0),
-    views: Number(r.view_count ?? 0),
-    publishedAt: r.published_at as string | null,
-    updatedAt: r.updated_at as string | null,
-  }));
-}
-
-async function loadTrainingCourses(orgId: string): Promise<TrainingCourse[]> {
-  const result = await db.execute(sql`
-    SELECT id, course_code, course_name, course_description,
-           course_category, delivery_method, duration_label,
-           completion_count, is_active, is_mandatory
-    FROM training_courses
-    WHERE organization_id = ${orgId}::uuid AND is_active = true
-    ORDER BY is_mandatory DESC, completion_count DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    courseCode: r.course_code as string,
-    name: r.course_name as string,
-    description: r.course_description as string | null,
-    category: r.course_category as string,
-    deliveryMethod: r.delivery_method as string,
-    durationLabel: r.duration_label as string | null,
-    completions: Number(r.completion_count ?? 0),
-    isActive: r.is_active as boolean,
-    isMandatory: r.is_mandatory as boolean,
-  }));
 }
 
 function computeStats(items: ContentItem[], courses: TrainingCourse[]): ContentStats {
   const templates = items.filter(i => i.type === 'template');
   const resources = items.filter(i => i.type === 'resource');
-  const totalViews = items.reduce((sum, i) => sum + i.views, 0);
-  const totalDownloads = items.reduce((sum, i) => sum + i.downloads, 0);
-
-  const sorted = [...items].sort((a, b) => b.views - a.views);
-  const top = sorted[0] ?? null;
 
   return {
     templates: {
@@ -131,9 +43,6 @@ function computeStats(items: ContentItem[], courses: TrainingCourse[]): ContentS
       total: resources.length,
       published: resources.filter(r => r.status === 'published').length,
     },
-    views: totalViews,
-    downloads: totalDownloads,
-    mostViewed: top ? { title: top.title, category: top.category ?? 'Uncategorized', views: top.views } : null,
     training: {
       total: courses.length,
       active: courses.filter(c => c.isActive).length,
@@ -164,22 +73,13 @@ export default async function ContentDashboard({
   }
 
   const organizationId = user.organizationId;
-
-  let items: ContentItem[] = [];
-  let courses: TrainingCourse[] = [];
-
-  if (organizationId) {
-    try {
-      [items, courses] = await withSystemContext(() =>
-        Promise.all([
-          loadContentData(organizationId),
-          loadTrainingCourses(organizationId),
-        ])
-      );
-    } catch (error) {
-      logger.error('Error loading content data:', error);
-    }
+  // A person who belongs to no organization has no content to read: they go back to the dashboard rather than to an empty one.
+  if (!isUuid(organizationId)) {
+    redirect('/dashboard');
   }
+
+  // A failed read is an error, not an empty dashboard: nothing here catches it.
+  const { items, courses } = await loadContentDashboard(organizationId);
 
   const stats = computeStats(items, courses);
   const allTemplates = items.filter(i => i.type === 'template');
@@ -223,7 +123,7 @@ export default async function ContentDashboard({
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-3">
             <Link href={`/${locale}/dashboard/content?tab=templates`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
@@ -268,46 +168,39 @@ export default async function ContentDashboard({
                 </CardContent>
               </Card>
             </Link>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  {t('totalViewsTitle')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.views.toLocaleString(locale)}</div>
-                <p className="text-xs text-muted-foreground">{t('downloadsCount', { count: stats.downloads.toLocaleString(locale) })}</p>
-              </CardContent>
-            </Card>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{t('contentPerformanceTitle')}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  {t('recentlyUpdatedTitle')}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{t('mostViewedLabel')}</span>
-                    <span className="text-sm font-bold">{stats.mostViewed?.title ?? t('emptyDash')}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{t('topViewsLabel')}</span>
-                    <span className="text-sm font-bold">{stats.mostViewed?.views.toLocaleString(locale) ?? '0'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{t('totalDownloadsLabel')}</span>
-                    <span className="text-sm font-bold">{stats.downloads.toLocaleString(locale)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{t('avgViewsPerItemLabel')}</span>
-                    <span className="text-sm font-bold">
-                      {items.length > 0 ? Math.round(stats.views / items.length).toLocaleString(locale) : '0'}
-                    </span>
-                  </div>
+                  {[...items]
+                    .filter((item) => item.updatedAt)
+                    .sort((a, b) => new Date(b.updatedAt as string).getTime() - new Date(a.updatedAt as string).getTime())
+                    .slice(0, 5)
+                    .map((item) => (
+                      <Link key={item.id} href={item.type === 'template' ? `/${locale}/dashboard/content/${item.slug}` : `/${locale}/dashboard/content?tab=resources`} className="flex items-center justify-between border-b pb-3 last:border-0 hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">{item.title}</p>
+                            <Badge variant="outline" className="text-xs">{t(`itemType.${item.type}`)}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{item.category ?? t('uncategorizedLabel')}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(item.updatedAt as string).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </p>
+                      </Link>
+                    ))}
+                  {items.length === 0 && (
+                    <p className="text-sm text-muted-foreground">{t('noContentFound')}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -338,40 +231,6 @@ export default async function ContentDashboard({
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                {t('popularContentTitle')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[...items]
-                  .sort((a, b) => b.views - a.views)
-                  .slice(0, 5)
-                  .map((item) => (
-                    <Link key={item.id} href={item.type === 'template' ? `/${locale}/dashboard/content/${item.slug}` : `/${locale}/dashboard/content?tab=resources`} className="flex items-center justify-between border-b pb-3 last:border-0 hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium">{item.title}</p>
-                          <Badge variant="outline" className="text-xs">{t(`itemType.${item.type}`)}</Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{item.category ?? t('uncategorizedLabel')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold">{item.views.toLocaleString(locale)}</p>
-                        <p className="text-xs text-muted-foreground">{t('viewsLabel')}</p>
-                      </div>
-                    </Link>
-                  ))}
-                {items.length === 0 && (
-                  <p className="text-sm text-muted-foreground">{t('noContentFound')}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Templates Tab */}
@@ -415,19 +274,12 @@ export default async function ContentDashboard({
                         )}
                         <div className="flex items-center gap-3 text-xs text-muted-foreground">
                           <span>{template.category ?? t('uncategorizedLabel')}</span>
-                          <span>&bull;</span>
-                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{template.views.toLocaleString(locale)}</span>
-                          <span>&bull;</span>
-                          <span className="flex items-center gap-1"><Download className="h-3 w-3" />{template.downloads.toLocaleString(locale)}</span>
                         </div>
                       </div>
                       <div className="flex gap-2 shrink-0">
                         <Link href={`/${locale}/dashboard/content/${template.slug}`} className="p-2 hover:bg-muted rounded-md" title={t('viewTitle')}>
                           <Eye className="h-4 w-4" />
                         </Link>
-                        <button className="p-2 hover:bg-muted rounded-md" title={t('downloadTitle')}>
-                          <Download className="h-4 w-4" />
-                        </button>
                       </div>
                     </div>
                   ))}
@@ -448,34 +300,41 @@ export default async function ContentDashboard({
                 <p className="text-sm text-muted-foreground">{t('noResourcesFound')}</p>
               ) : (
                 <div className="space-y-3">
-                  {resources.map((resource) => (
-                    <div key={resource.id} className="flex items-start justify-between border-b pb-4 last:border-0 gap-4">
-                      <div className="space-y-1.5 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold">{resource.title}</p>
-                          {resource.status !== 'published' && (
-                            <Badge variant="secondary">{resource.status}</Badge>
+                  {resources.map((resource) => {
+                    const href = contentFileHref(resource.fileUrl);
+                    return (
+                      <div key={resource.id} className="flex items-start justify-between border-b pb-4 last:border-0 gap-4">
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-semibold">{resource.title}</p>
+                            {resource.status !== 'published' && (
+                              <Badge variant="secondary">{resource.status}</Badge>
+                            )}
+                          </div>
+                          {resource.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">{resource.description}</p>
                           )}
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>{resource.category ?? t('uncategorizedLabel')}</span>
+                            {resource.fileSizeMb && (
+                              <><span>&bull;</span><span>{t('fileSizeMb', { size: resource.fileSizeMb })}</span></>
+                            )}
+                          </div>
                         </div>
-                        {resource.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2">{resource.description}</p>
-                        )}
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>{resource.category ?? t('uncategorizedLabel')}</span>
-                          <span>&bull;</span>
-                          <span>{t('pdfLabel')}</span>
-                          {resource.fileSizeMb && (
-                            <><span>&bull;</span><span>{t('fileSizeMb', { size: resource.fileSizeMb })}</span></>
-                          )}
-                          <span>&bull;</span>
-                          <span className="flex items-center gap-1"><Download className="h-3 w-3" />{resource.downloads.toLocaleString(locale)}</span>
-                        </div>
+                        {href ? (
+                          <a
+                            href={href}
+                            download
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 shrink-0 inline-flex items-center gap-1"
+                          >
+                            <Download className="h-4 w-4" />
+                            {t('downloadButton')}
+                          </a>
+                        ) : null}
                       </div>
-                      <button className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 shrink-0">
-                        {t('downloadButton')}
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
@@ -524,10 +383,6 @@ export default async function ContentDashboard({
                           </div>
                         </div>
                       </div>
-                      <button className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 shrink-0">
-                        {course.deliveryMethod === 'video' ? t('action.watch') :
-                         course.deliveryMethod === 'workshop' ? t('action.enroll') : t('action.read')}
-                      </button>
                     </div>
                   ))}
                 </div>

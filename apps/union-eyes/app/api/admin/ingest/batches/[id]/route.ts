@@ -6,12 +6,13 @@
  * Powers the Migration Detail View (§2).
  */
 
-import { withApi, ApiError } from '@/lib/api/framework';
-import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
+import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { getBatchDetail } from '@/lib/ingestion/migration-metrics';
 
 export const GET = withApi(
   {
+    // ingestion_records and data_quality_warnings are tenant tables: the read runs in the caller's tenant transaction (runtime role).
+    rlsOrgContext: true,
     auth: { minRole: 'admin' },
     openapi: {
       tags: ['Admin', 'Ingestion'],
@@ -28,10 +29,11 @@ export const GET = withApi(
     if (!batchId) {
       throw ApiError.badRequest('Batch ID is required');
     }
+    if (!zUUID.safeParse(batchId).success) {
+      throw ApiError.badRequest('Batch ID must be a UUID');
+    }
 
-    const detail = await withSystemContext(async () =>
-      getBatchDetail(batchId, organizationId),
-    );
+    const detail = await getBatchDetail(batchId, organizationId);
 
     if (!detail) {
       throw ApiError.notFound('Batch not found');

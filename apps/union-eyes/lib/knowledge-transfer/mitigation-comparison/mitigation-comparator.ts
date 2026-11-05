@@ -157,7 +157,7 @@ async function evaluateMitigationScenario(
       baselineExposure,
       mitigatedExposure,
       exposureReduction: baselineExposure - mitigatedExposure,
-      confidence: effectiveness >= 0.7 ? 'high' : effectiveness >= 0.5 ? 'medium' : 'low',
+      confidence: 'unvalidated',
     };
   });
 
@@ -245,9 +245,10 @@ export async function compareMitigations(
     (node) => `${node.label} remains single-source (${node.continuitySensitivity} sensitivity)`,
   );
 
-  const rationaleParts: string[] = [
-    `Scenario "${best.label}" delivers the highest resilience gain (+${best.resilienceGain} points).`,
-  ];
+  const noNodesEvaluated = results.every((r) => r.domainDeltas.length === 0);
+  const rationaleParts: string[] = noNodesEvaluated
+    ? ['No scenario reached any node, so nothing was evaluated and no scenario is recommended.']
+    : [`Under the assumptions listed (not calibrated against any measured outcome), scenario "${best.label}" has the highest projected resilience gain (+${best.resilienceGain} points).`];
   if (best.governanceStabilizationGain > 20) {
     rationaleParts.push('It provides significant governance stabilization benefits.');
   }
@@ -261,8 +262,15 @@ export async function compareMitigations(
     generatedAt: new Date().toISOString(),
     baselineScore,
     scenarios: results,
-    recommendedScenario: best.scenarioId,
+    recommendedScenario: noNodesEvaluated ? '' : best.scenarioId,
     recommendationRationale: rationaleParts.join(' '),
     residualRisks,
+    basis: 'ASSUMED_EFFECTIVENESS_NOT_CALIBRATED',
+    assumptions: [
+      'Effectiveness per mitigation and node type is a fixed table of assumed multipliers.',
+      'Investment level scales the effect by a fixed 0.7, 1.0 or 1.2.',
+      'Baseline exposure per node comes from its sensitivity label (20, 45, 70 or 90), not from a measurement.',
+    ],
+    noNodesEvaluated,
   };
 }

@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "note": "Disposition of every entry in ue-canonical-schema-census.json (UE-CONV-H-007). A disposition is a classification with its proof, not a suppression: the census baseline keeps every entry until its relation is evolved or its declaration is retired.",
+  "entries": {}
+}

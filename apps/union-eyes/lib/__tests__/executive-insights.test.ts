@@ -75,6 +75,7 @@ vi.mock("@/lib/ai/ai-client", () => ({
     EXECUTIVE_INSIGHTS: "ue-executive-insights",
   },
   UE_SYSTEM_ORG_ID: "00000000-0000-0000-0000-000000000000",
+  toGatewayDataClass: (value: string) => value,
 }));
 
 vi.mock("@/lib/ai/ai-feature-guard", () => ({
@@ -95,9 +96,18 @@ vi.mock("@/lib/audit-logger", () => ({
   auditDataMutation: vi.fn(),
 }));
 
+// Platform AI invocations are audited before they run; the audit store is exercised by the operation-audit tests.
+vi.mock("@/lib/audit/operation-audit", () => ({
+  performAuditedOperation: (_op: unknown, run: () => Promise<unknown>) => run(),
+  operationAuditResponse: () => null,
+}));
+
 vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
+
+const { withRls } = vi.hoisted(() => ({ withRls: vi.fn() }));
+vi.mock("@/lib/db/with-rls-context", () => ({ withRLSContext: withRls }));
 
 import {
   generateInsightReport,
@@ -112,8 +122,11 @@ import {
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("Executive Insights AI", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // The tenant transaction hands the service the same connection stub the rest of this file mocks
+    const { db } = await import("@/db/db");
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(db));
   });
 
   describe("exports", () => {
@@ -145,7 +158,7 @@ describe("Executive Insights AI", () => {
   describe("generateInsightReport", () => {
     it("calls AI client with executive-insights profile", async () => {
       mockGenerate.mockResolvedValue({
-        text: JSON.stringify({
+        content: JSON.stringify({
           title: "90-Day Trend Forecast",
           summary: "Grievances up 12%, employer compliance improving.",
           insights: [{ topic: "grievance_volume", observation: "Rising trend" }],
@@ -181,6 +194,7 @@ describe("Executive Insights AI", () => {
       expect(mockGenerate).toHaveBeenCalledTimes(1);
       const callArgs = mockGenerate.mock.calls[0][0];
       expect(callArgs.profileKey).toBe("ue-executive-insights");
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 
@@ -188,6 +202,7 @@ describe("Executive Insights AI", () => {
     it("returns an array", async () => {
       const result = await getInsightReports("org-1");
       expect(Array.isArray(result)).toBe(true);
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
 
     it("accepts optional reportType filter", async () => {

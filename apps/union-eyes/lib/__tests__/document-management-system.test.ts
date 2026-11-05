@@ -464,13 +464,13 @@ describe('document-management-system', () => {
   // ── updateDocumentOCR ─────────────────────────────────────────────
   describe('updateDocumentOCR', () => {
     it('updates OCR text', async () => {
-      const r = await updateDocumentOCR('doc-1', 'extracted text');
+      const r = await updateDocumentOCR('doc-1', 'org-1', 'extracted text');
       expect(r.success).toBe(true);
     });
 
     it('handles error', async () => {
       mocks.mockUpdateWhere.mockRejectedValueOnce(new Error('fail'));
-      const r = await updateDocumentOCR('doc-1', 'text');
+      const r = await updateDocumentOCR('doc-1', 'org-1', 'text');
       expect(r.success).toBe(false);
     });
   });

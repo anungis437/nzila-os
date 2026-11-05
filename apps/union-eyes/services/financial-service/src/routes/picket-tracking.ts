@@ -20,8 +20,8 @@ function getAuthUser(req: Request): AuthUser {
 
 // Validation schemas
 const checkInSchema = z.object({
-  strikeFundId: z.string().uuid(),
-  memberId: z.string().uuid(),
+  strikeFundId: z.guid(),
+  memberId: z.guid(),
   method: z.enum(['nfc', 'qr_code', 'gps', 'manual']),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
@@ -39,14 +39,14 @@ const checkInSchema = z.object({
 });
 
 const checkOutSchema = z.object({
-  attendanceId: z.string().uuid(),
+  attendanceId: z.guid(),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
 });
 
 const coordinatorOverrideSchema = z.object({
-  strikeFundId: z.string().uuid(),
-  memberId: z.string().uuid(),
+  strikeFundId: z.guid(),
+  memberId: z.guid(),
   hours: z.number().positive().max(24),
   reason: z.string().min(10),
   verifiedBy: z.string().min(1),
@@ -101,7 +101,7 @@ router.post('/check-in', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -147,7 +147,7 @@ router.post('/check-out', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -414,7 +414,7 @@ router.post('/coordinator-override', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({

@@ -72,15 +72,6 @@ export {
   type GuardResult,
 } from './guards'
 
-// ── Auth Adapter ─────────────────────────────────────────────────────────────
-export {
-  resolveIdentity,
-  resolveIdentityFromClerk,
-  resolveServiceIdentity,
-  mapOrgRole,
-  mapClerkOrgRole,
-} from './clerk-adapter'
-
 // ── Middleware Helpers ───────────────────────────────────────────────────────
 export {
   createPublicRouteMatcher,
@@ -89,16 +80,6 @@ export {
   resolveCorrelationId,
   createPlatformHeaders,
 } from './middleware'
-
-// ── Webhook Verification ────────────────────────────────────────────────────
-export {
-  verifySvixSignature,
-  isSvixTimestampValid,
-  extractSvixHeaders,
-  verifyWebhook,
-  verifyClerkWebhook,
-  type SvixHeaders,
-} from './clerk-webhook'
 
 // ── UnionEyes Runtime Acceptance Auth ──────────────────────────────────────
 export {

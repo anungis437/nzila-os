@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
-import { hasStoredConsentDecision } from './consent-decision';
+import { hasStoredConsentDecision, readStoredConsentPreferences } from './consent-decision';
 
 beforeEach(() => localStorage.clear());
 describe('privacy decision precedes optional guidance', () => {
@@ -19,6 +19,19 @@ describe('privacy decision precedes optional guidance', () => {
     localStorage.setItem('cookie_consent', saved);
     expect(hasStoredConsentDecision()).toBe(true);
     expect(localStorage.getItem('cookie_consent')).toBe(saved);
+  });
+  it('hands back exactly the stored choices, and nothing for a choice that is not a boolean', () => {
+    const expiresAt = new Date(Date.now() + 60000).toISOString();
+    localStorage.setItem('cookie_consent_id', 'owned-test');
+    localStorage.setItem('cookie_consent', JSON.stringify({ expiresAt, preferences: { essential: true, functional: true, analytics: false, marketing: false, extra: 'ignored' } }));
+    expect(readStoredConsentPreferences()).toEqual({ essential: true, functional: true, analytics: false, marketing: false });
+    localStorage.setItem('cookie_consent', JSON.stringify({ expiresAt, preferences: { essential: true, functional: 'yes', analytics: false, marketing: false } }));
+    expect(readStoredConsentPreferences()).toBeNull();
+    localStorage.setItem('cookie_consent', JSON.stringify({ expiresAt, preferences: { essential: false, functional: true, analytics: true, marketing: true } }));
+    expect(readStoredConsentPreferences()).toBeNull();
+    localStorage.removeItem('cookie_consent_id');
+    localStorage.setItem('cookie_consent', JSON.stringify({ expiresAt, preferences: { essential: true, functional: true, analytics: true, marketing: true } }));
+    expect(readStoredConsentPreferences()).toBeNull();
   });
   it('requires a new decision when the previous one expires', () => {
     localStorage.setItem('cookie_consent_id', 'owned-test');

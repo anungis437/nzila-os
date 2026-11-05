@@ -19,11 +19,11 @@ import {
  * Approval workflow instance
  */
 export const ApprovalWorkflowSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   workflowType: z.nativeEnum(WorkflowType),
   
   // Request details
-  requestorId: z.string().uuid(),
+  requestorId: z.guid(),
   requestorName: z.string(),
   requestDate: z.string().datetime(),
   
@@ -38,14 +38,14 @@ export const ApprovalWorkflowSchema = z.object({
   currentStep: z.number().int().nonnegative().default(0),
   
   // Resolution reference (if generated)
-  resolutionId: z.string().uuid().optional(),
+  resolutionId: z.guid().optional(),
   
   // Steps
   steps: z.array(z.object({
     order: z.number().int(),
     type: z.enum(['APPROVAL', 'NOTICE', 'WAIT', 'DOCUMENT']),
     actor: z.enum(['board', 'shareholders', 'specific', 'system']),
-    actorId: z.string().uuid().optional(),
+    actorId: z.guid().optional(),
     status: z.nativeEnum(ApprovalStatus),
     required: z.boolean(),
     description: z.string(),
@@ -74,7 +74,7 @@ export type ApprovalWorkflow = z.infer<typeof ApprovalWorkflowSchema>
  * Resolution document
  */
 export const ResolutionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   resolutionNumber: z.string(),  // e.g., "RES-2024-001"
   type: z.nativeEnum(ResolutionType),
   
@@ -105,7 +105,7 @@ export const ResolutionSchema = z.object({
   
   // Signatures
   signatures: z.array(z.object({
-    signerId: z.string().uuid(),
+    signerId: z.guid(),
     signerName: z.string(),
     signerRole: z.string(),
     signedAt: z.string().datetime(),
@@ -113,11 +113,11 @@ export const ResolutionSchema = z.object({
   })),
   
   // Related workflow
-  workflowId: z.string().uuid().optional(),
+  workflowId: z.guid().optional(),
   relatedAction: z.string().optional(),
   
   // Meeting reference (if applicable)
-  meetingId: z.string().uuid().optional(),
+  meetingId: z.guid().optional(),
   meetingDate: z.string().datetime().optional(),
   
   // Status
@@ -137,7 +137,7 @@ export type Resolution = z.infer<typeof ResolutionSchema>
  * Board/Shareholder meeting
  */
 export const MeetingSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   meetingNumber: z.string(),
   type: z.enum(['ANNUAL', 'SPECIAL', 'BOARD', 'COMMITTEE']),
   
@@ -151,12 +151,12 @@ export const MeetingSchema = z.object({
   
   // Attendance
   attendees: z.array(z.object({
-    attendeeId: z.string().uuid(),
+    attendeeId: z.guid(),
     attendeeName: z.string(),
     role: z.string(),
     present: z.boolean(),
     presentAt: z.string().datetime().optional(),
-    proxy: z.string().uuid().optional(),  // If someone else voted on their behalf
+    proxy: z.guid().optional(),  // If someone else voted on their behalf
   })),
   
   // Quorum
@@ -165,7 +165,7 @@ export const MeetingSchema = z.object({
   quorumMet: z.boolean().default(false),
   
   // Resolutions
-  resolutions: z.array(z.string().uuid()),  // Resolution IDs
+  resolutions: z.array(z.guid()),  // Resolution IDs
   
   // Minutes
   minutesApproved: z.boolean().default(false),
@@ -185,7 +185,7 @@ export type Meeting = z.infer<typeof MeetingSchema>
  * Document vault entry
  */
 export const DocumentVaultSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string(),
   type: z.enum([
     'SHARE_CERTIFICATE',
@@ -208,12 +208,12 @@ export const DocumentVaultSchema = z.object({
   
   // Metadata
   entityType: z.enum(['COMPANY', 'SHAREHOLDER', 'SHARE_CLASS', 'WORKFLOW']),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   
   // Signatures
   requiresSignature: z.boolean().default(false),
   signaturesRequired: z.array(z.object({
-    signerId: z.string().uuid(),
+    signerId: z.guid(),
     signerName: z.string(),
     signerRole: z.string(),
     signed: z.boolean(),
@@ -228,7 +228,7 @@ export const DocumentVaultSchema = z.object({
   
   // Versioning
   version: z.number().int().positive().default(1),
-  previousVersionId: z.string().uuid().optional(),
+  previousVersionId: z.guid().optional(),
   
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

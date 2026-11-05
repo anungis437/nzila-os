@@ -42,7 +42,7 @@
  * Development/Test Environments:
  * - Fallback encryption keys are allowed for local development convenience
  * - Test environments require TEST_ENCRYPTION_KEY for deterministic encryption
- * - Staging environments can use either Key Vault or fallback keys
+ * - Staging, pilot and every other deployed runtime are held to the production rule: Key Vault only, no fallback key and no test key
  * 
  * Compliance: PIPEDA, GDPR, SOC 2
  * 
@@ -53,6 +53,7 @@ import { DefaultAzureCredential } from '@azure/identity';
 import { KeyClient, CryptographyClient } from '@azure/keyvault-keys';
 import crypto from 'crypto';
 import { logger } from './logger';
+import { isDeployedRuntime } from './runtime/production-guard';
 // Configuration
 const KEY_VAULT_URL = process.env.AZURE_KEY_VAULT_URL;
 const ENCRYPTION_KEY_NAME = process.env.ENCRYPTION_KEY_NAME || 'pii-encryption-key';
@@ -125,7 +126,8 @@ class EncryptionService {
     try {
       // PRODUCTION SAFETY CHECK: Block fallback encryption in production
       const nodeEnv = process.env.NODE_ENV;
-      const isProduction = nodeEnv === 'production';
+      // Every deployed runtime counts, not only NODE_ENV=production: a container labelled development or test gets neither the fallback key nor the test key.
+      const isProduction = isDeployedRuntime();
       
       if (isProduction && FALLBACK_ENCRYPTION_KEY) {
         const errorMessage = 
@@ -245,7 +247,7 @@ class EncryptionService {
       logger.error('Failed to initialize Azure Key Vault', error as Error);
       
       // Production: Do not fall back, fail fast
-      const isProduction = process.env.NODE_ENV === 'production';
+      const isProduction = isDeployedRuntime();
       if (isProduction) {
         logger.error(
           'CRITICAL: Azure Key Vault initialization failed in production. ' +

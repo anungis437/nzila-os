@@ -21,18 +21,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function SignUpPage({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'signUpCatchAllPage' })
-  const stats = [
-    { value: t('stats.localsValue'), label: t('stats.localsLabel') },
-    { value: t('stats.membersValue'), label: t('stats.membersLabel') },
-    { value: t('stats.uptimeValue'), label: t('stats.uptimeLabel') },
-  ]
 
   return (
     <AuthPageLayout
       appName={t('appName')}
       tagline={t('tagline')}
       subtitle={t('subtitle')}
-      stats={stats}
       isSignUp
     >
       <SignupForm />

@@ -13,7 +13,8 @@ const querySchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    // An alert execution carries the rule's trigger data (case, member and system detail), so the inbox is an officer's.
+    auth: { minRole: 'officer' },
     entitlement: 'grievance_case_suite',
     query: querySchema,
     rateLimit: RATE_LIMITS.ADVANCED_ANALYTICS,

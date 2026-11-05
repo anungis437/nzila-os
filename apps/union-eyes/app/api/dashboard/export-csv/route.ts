@@ -1,133 +1,31 @@
 /**
- * Dashboard CSV Export API
+ * Dashboard CSV export is intentionally unavailable until a real tenant-scoped data source,
+ * institutionally approved export mandate, audit, bounded pagination and spreadsheet-formula
+ * neutralisation are implemented. Never return a fabricated empty 200 CSV in any environment.
  *
- * GET /api/dashboard/export-csv?report=cases|kpis|aging|categories|worksites|assignees|trends
- *
- * PR-051: Returns CSV file download for dashboard data.
- * Authentication: Required via platform auth middleware.
+ * DEF-0B6-CMP-EXPORT-CSV-AUTHENTICATION-ONLY-AND-EMPTY-200-OUTSIDE-PRODUCTION
  */
+import { NextResponse } from 'next/server'
+import { withApi } from '@/lib/api/framework'
 
-import { NextRequest, NextResponse } from 'next/server';
-import { withApiAuth } from '@/lib/api-auth-guard';
-import { createLogger } from '@nzila/os-core';
-import {
-  generateCSV,
-  CASE_COLUMNS,
-  KPI_COLUMNS,
-  AGING_COLUMNS,
-  CATEGORY_COLUMNS,
-  WORKSITE_COLUMNS,
-  ASSIGNEE_COLUMNS,
-  TREND_COLUMNS,
-  kpiCardsToRows,
-} from '@/lib/csv-export';
-import {
-  computeKPIs,
-  computeAgingBuckets,
-  computeTypeCounts,
-  computeWorksiteCounts,
-  computeAssigneeCounts,
-  computeClosureTrends,
-  filterCases,
-  type CaseRow,
-  type CaseFilter,
-} from '@/lib/dashboard-metrics';
+export const dynamic = 'force-dynamic'
 
-const logger = createLogger('dashboard:export-csv');
-
-const VALID_REPORTS = new Set([
-  'cases', 'kpis', 'aging', 'categories', 'worksites', 'assignees', 'trends',
-]);
-
-export const GET = withApiAuth(async (request: NextRequest) => {
-  try {
-    const { searchParams } = new URL(request.url);
-    const report = searchParams.get('report') ?? 'cases';
-
-    if (!VALID_REPORTS.has(report)) {
+export const GET = withApi(
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ organizationId }) => {
+    if (!organizationId) {
       return NextResponse.json(
-        { error: `Invalid report type. Valid: ${[...VALID_REPORTS].join(', ')}` },
-        { status: 400 },
-      );
+        { error: 'ORGANIZATION_CONTEXT_REQUIRED' },
+        { status: 403, headers: { 'Cache-Control': 'private, no-store' } },
+      )
     }
 
-    // The export pipeline is wired but the data source is not — returning
-    // an empty CSV would mislead admins into thinking they have a complete
-    // export of zero rows. Refuse in production; warn loudly elsewhere.
-    if (process.env.NODE_ENV === 'production') {
-      logger.error('dashboard/export-csv: refusing to emit empty CSV in production — data source is not wired', { report });
-      return NextResponse.json(
-        { error: 'CSV export is not yet wired to a data source. Refusing to return an empty export in production.' },
-        { status: 501 },
-      );
-    }
-    logger.warn('dashboard/export-csv: data source not wired; returning empty CSV (dev/test only)', { report });
-    const cases: CaseRow[] = [];
-
-    // Apply filters from query params
-    const filter: CaseFilter = {};
-    const timeframe = searchParams.get('timeframeDays');
-    if (timeframe) filter.timeframeDays = parseInt(timeframe, 10);
-    const status = searchParams.get('status');
-    if (status) filter.status = status;
-    const worksite = searchParams.get('worksite');
-    if (worksite) filter.worksite = worksite;
-
-    const filtered = filterCases(cases, filter);
-
-    let csv: string;
-    let filename: string;
-
-    switch (report) {
-      case 'cases':
-        csv = generateCSV(filtered, CASE_COLUMNS);
-        filename = 'cupe-cases.csv';
-        break;
-      case 'kpis':
-        csv = generateCSV(kpiCardsToRows(computeKPIs(filtered)), KPI_COLUMNS);
-        filename = 'cupe-kpis.csv';
-        break;
-      case 'aging':
-        csv = generateCSV(computeAgingBuckets(filtered), AGING_COLUMNS);
-        filename = 'cupe-aging.csv';
-        break;
-      case 'categories':
-        csv = generateCSV(computeTypeCounts(filtered), CATEGORY_COLUMNS);
-        filename = 'cupe-categories.csv';
-        break;
-      case 'worksites':
-        csv = generateCSV(computeWorksiteCounts(filtered), WORKSITE_COLUMNS);
-        filename = 'cupe-worksites.csv';
-        break;
-      case 'assignees':
-        csv = generateCSV(computeAssigneeCounts(filtered), ASSIGNEE_COLUMNS);
-        filename = 'cupe-assignees.csv';
-        break;
-      case 'trends':
-        csv = generateCSV(computeClosureTrends(filtered), TREND_COLUMNS);
-        filename = 'cupe-closure-trends.csv';
-        break;
-      default:
-        csv = '';
-        filename = 'export.csv';
-    }
-
-    logger.info('CSV export generated', { report, rows: csv.split('\n').length - 1 });
-
-    return new NextResponse(csv, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Cache-Control': 'no-store',
-      },
-    });
-  } catch (error) {
-    logger.error('[/api/dashboard/export-csv] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate CSV export' },
-      { status: 500 },
-    );
-  }
-});
-
+      {
+        error: 'DASHBOARD_CSV_EXPORT_NOT_IMPLEMENTED',
+        message: 'CSV export is unavailable until tenant-scoped records, export authorization, audit and CSV safety controls are implemented and verified.',
+      },
+      { status: 501, headers: { 'Cache-Control': 'private, no-store' } },
+    )
+  },
+)

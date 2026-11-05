@@ -16,6 +16,7 @@
  */
 import type { StorageAuthorityEntry } from './types'
 import { analyticsAiEntries } from './analytics-ai'
+import { authorityKernelEntries } from './authority-kernel'
 import { baseline0108Entries } from './baseline-0108'
 import { claimsContinuityEntries } from './claims-continuity'
 import { communicationsNotificationsEntries } from './communications-notifications'
@@ -33,6 +34,7 @@ export * from './types'
 
 export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   ...analyticsAiEntries,
+  ...authorityKernelEntries,
   ...baseline0108Entries,
   ...claimsContinuityEntries,
   ...communicationsNotificationsEntries,

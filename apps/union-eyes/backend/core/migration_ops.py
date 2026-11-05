@@ -432,3 +432,48 @@ class AddFieldIfNotExists(migrations.AddField):
 
     def describe(self):
         return f"Add field {self.name} to {self.model_name} (skipped if a provably equivalent column already exists)"
+
+
+class RecordFieldState(migrations.operations.base.Operation):
+    """Record fields on one model in the migration state in one step, running no SQL on any database.
+
+    For columns the platform migrations already created: those migrations own the schema and their guards read the
+    current type of these columns, so a Django operation that created or altered them would break a fresh build.
+    ``AddField`` and ``AlterField`` re-render the model after every field, which is quadratic in the size of the model
+    and takes minutes over a few thousand fields; this sets every field and re-renders once. It is only for plain
+    fields: a relation or a key needs the related-model bookkeeping that ``AddField`` and ``AlterField`` do.
+
+    Reversing it changes nothing: Django recomputes migration state from the graph, and there is no SQL to undo.
+    """
+
+    reduces_to_sql = False
+    reversible = True
+
+    def __init__(self, model_name, fields):
+        self.model_name = model_name
+        self.fields = [(name, field) for name, field in fields]
+
+    @property
+    def model_name_lower(self):
+        return self.model_name.lower()
+
+    def deconstruct(self):
+        return (self.__class__.__qualname__, [self.model_name, self.fields], {})
+
+    def state_forwards(self, app_label, state):
+        key = (app_label, self.model_name_lower)
+        fields = state.models[key].fields
+        for name, field in self.fields:
+            if field.is_relation or field.primary_key:
+                raise ValueError(f"{app_label}.{self.model_name}.{name}: RecordFieldState is only for plain fields")
+            fields[name] = field.clone()
+        state.reload_model(*key, delay=True)
+
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        return
+
+    def database_backwards(self, app_label, schema_editor, from_state, to_state):
+        return
+
+    def describe(self):
+        return f"Record {len(self.fields)} fields on {self.model_name} in the migration state (no SQL)"

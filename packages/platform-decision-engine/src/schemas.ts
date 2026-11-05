@@ -141,8 +141,8 @@ export const decisionExportPackSchema = z.object({
   decision_record: decisionRecordSchema,
   evidence_refs: z.array(evidenceRefSchema),
   policy_context: policyContextSchema,
-  governance_status_snapshot: z.record(z.unknown()).optional(),
-  change_status_snapshot: z.record(z.unknown()).optional(),
+  governance_status_snapshot: z.record(z.string(), z.unknown()).optional(),
+  change_status_snapshot: z.record(z.string(), z.unknown()).optional(),
   output_hash: z.string(),
   exported_at: z.string(),
 })

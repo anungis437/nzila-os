@@ -16,61 +16,12 @@ import {
   timestamp,
   boolean,
   integer,
-  jsonb,
-  decimal,
-  date,
-  bigint,
-  varchar,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { organizations } from "../schema-organizations";
 
 // =============================================================================
 // TABLE 1: analytics_scheduled_reports
 // =============================================================================
-
-export const analyticsScheduledReports = pgTable("analytics_scheduled_reports", {
-  // Primary key
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  // Multi-tenancy
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-
-  // Report configuration
-  reportName: text("report_name").notNull(),
-  reportType: text("report_type").notNull(), // 'executive_dashboard', 'communication_analytics', 'engagement_metrics', etc.
-  reportDescription: text("report_description"),
-
-  // Report parameters (JSON for flexibility)
-  reportParameters: jsonb("report_parameters").default({}).notNull(),
-
-  // Schedule configuration
-  scheduleType: text("schedule_type").default("cron").notNull(), // 'cron', 'one_time', 'manual_only'
-  cronExpression: text("cron_expression"), // e.g., '0 6 * * 1' (every Monday at 6 AM)
-  timezone: text("timezone").default("America/Toronto"),
-  nextRunAt: timestamp("next_run_at", { withTimezone: true }),
-  lastRunAt: timestamp("last_run_at", { withTimezone: true }),
-
-  // Delivery configuration
-  recipients: jsonb("recipients").default([]).notNull(), // Array of email addresses
-  deliveryFormat: text("delivery_format").default("pdf").notNull(), // 'pdf', 'excel', 'csv', 'all'
-  includeAttachments: boolean("include_attachments").default(true),
-  emailSubject: text("email_subject"),
-  emailBody: text("email_body"),
-
-  // Status and metadata
-  isActive: boolean("is_active").default(true),
-  runCount: integer("run_count").default(0),
-  lastRunStatus: text("last_run_status"), // 'success', 'failed', 'running', 'skipped'
-  lastRunError: text("last_run_error"),
-
-  // Audit fields
-  createdBy: varchar("created_by", { length: 255 }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
 
 // Indexes for analytics_scheduled_reports
 export const analyticsScheduledReportsIndexes = [
@@ -81,72 +32,11 @@ export const analyticsScheduledReportsIndexes = [
   { name: "idx_scheduled_reports_active", columns: ["organization_id", "is_active"] },
 ];
 
-// Relations for analytics_scheduled_reports
-export const analyticsScheduledReportsRelations = relations(analyticsScheduledReports, ({ one, many }) => ({
-  organization: one(organizations, {
-    fields: [analyticsScheduledReports.organizationId],
-    references: [organizations.id],
-  }),
-  deliveries: many(reportDeliveryHistory),
-}));
-
 // Types for analytics_scheduled_reports
-export type AnalyticsScheduledReport = typeof analyticsScheduledReports.$inferSelect;
-export type NewAnalyticsScheduledReport = typeof analyticsScheduledReports.$inferInsert;
 
 // =============================================================================
 // TABLE 2: report_delivery_history
 // =============================================================================
-
-export const reportDeliveryHistory = pgTable("report_delivery_history", {
-  // Primary key
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  // Multi-tenancy
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-
-  // Report reference
-  scheduledReportId: uuid("scheduled_report_id").references(() => analyticsScheduledReports.id, {
-    onDelete: "set null",
-  }),
-  reportName: text("report_name").notNull(),
-  reportType: text("report_type").notNull(),
-
-  // Delivery details
-  deliveryMethod: text("delivery_method").default("email").notNull(), // 'email', 'download', 'api'
-  recipients: jsonb("recipients").default([]).notNull(),
-  deliveryFormat: text("delivery_format").notNull(), // 'pdf', 'excel', 'csv'
-
-  // File storage
-  fileUrl: text("file_url"),
-  fileSizeBytes: bigint("file_size_bytes", { mode: "number" }),
-  fileHash: text("file_hash"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
-
-  // Status tracking
-  status: text("status").default("pending").notNull(), // 'pending', 'generating', 'sending', 'delivered', 'failed', 'expired'
-  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
-  failedAt: timestamp("failed_at", { withTimezone: true }),
-  errorMessage: text("error_message"),
-  retryCount: integer("retry_count").default(0),
-
-  // Email delivery details
-  emailSubject: text("email_subject"),
-  emailOpened: boolean("email_opened").default(false),
-  emailOpenedAt: timestamp("email_opened_at", { withTimezone: true }),
-  emailClicked: boolean("email_clicked").default(false),
-  emailClickedAt: timestamp("email_clicked_at", { withTimezone: true }),
-
-  // Metrics
-  generationTimeMs: integer("generation_time_ms"),
-  deliveryTimeMs: integer("delivery_time_ms"),
-
-  // Audit fields
-  triggeredBy: varchar("triggered_by", { length: 255 }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
 
 // Indexes for report_delivery_history
 export const reportDeliveryHistoryIndexes = [
@@ -158,21 +48,7 @@ export const reportDeliveryHistoryIndexes = [
   { name: "idx_report_delivery_triggered_by", columns: ["triggered_by"] },
 ];
 
-// Relations for report_delivery_history
-export const reportDeliveryHistoryRelations = relations(reportDeliveryHistory, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [reportDeliveryHistory.organizationId],
-    references: [organizations.id],
-  }),
-  scheduledReport: one(analyticsScheduledReports, {
-    fields: [reportDeliveryHistory.scheduledReportId],
-    references: [analyticsScheduledReports.id],
-  }),
-}));
-
 // Types for report_delivery_history
-export type ReportDeliveryHistory = typeof reportDeliveryHistory.$inferSelect;
-export type NewReportDeliveryHistory = typeof reportDeliveryHistory.$inferInsert;
 
 // =============================================================================
 // TABLE 3: benchmark_categories
@@ -212,9 +88,7 @@ export const benchmarkCategoriesIndexes = [
 ];
 
 // Relations for benchmark_categories
-export const benchmarkCategoriesRelations = relations(benchmarkCategories, ({ many }) => ({
-  benchmarkData: many(benchmarkData),
-  organizationSnapshots: many(organizationBenchmarkSnapshots),
+export const benchmarkCategoriesRelations = relations(benchmarkCategories, () => ({
 }));
 
 // Types for benchmark_categories
@@ -224,44 +98,6 @@ export type NewBenchmarkCategory = typeof benchmarkCategories.$inferInsert;
 // =============================================================================
 // TABLE 4: benchmark_data
 // =============================================================================
-
-export const benchmarkData = pgTable("benchmark_data", {
-  // Primary key
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  // Benchmark segmentation
-  benchmarkCategoryId: uuid("benchmark_category_id")
-    .notNull()
-    .references(() => benchmarkCategories.id, { onDelete: "cascade" }),
-  unionType: text("union_type").notNull(), // 'public_sector', 'private_sector', 'building_trades', etc.
-  unionSizeBracket: text("union_size_bracket").notNull(), // 'small', 'medium', 'large', 'extra_large', 'all'
-  region: text("region").notNull(), // 'BC', 'AB', 'ON', 'National', etc.
-
-  // Time period
-  periodStart: date("period_start").notNull(),
-  periodEnd: date("period_end").notNull(),
-  periodType: text("period_type").default("monthly").notNull(), // 'monthly', 'quarterly', 'annual'
-
-  // Benchmark values
-  metricValue: decimal("metric_value", { precision: 15, scale: 2 }).notNull(),
-  sampleSize: integer("sample_size").notNull(),
-  minValue: decimal("min_value", { precision: 15, scale: 2 }),
-  maxValue: decimal("max_value", { precision: 15, scale: 2 }),
-  percentile25: decimal("percentile_25", { precision: 15, scale: 2 }),
-  percentile50: decimal("percentile_50", { precision: 15, scale: 2 }),
-  percentile75: decimal("percentile_75", { precision: 15, scale: 2 }),
-  standardDeviation: decimal("standard_deviation", { precision: 15, scale: 2 }),
-
-  // Data quality
-  dataQualityScore: integer("data_quality_score").default(100),
-  isProjected: boolean("is_projected").default(false),
-  confidenceLevel: text("confidence_level").default("high"), // 'high', 'medium', 'low'
-
-  // Audit fields
-  dataSource: text("data_source"), // 'internal_aggregate', 'industry_survey', 'government_data'
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
 
 // Indexes for benchmark_data
 export const benchmarkDataIndexes = [
@@ -276,65 +112,11 @@ export const benchmarkDataIndexes = [
   },
 ];
 
-// Relations for benchmark_data
-export const benchmarkDataRelations = relations(benchmarkData, ({ one }) => ({
-  category: one(benchmarkCategories, {
-    fields: [benchmarkData.benchmarkCategoryId],
-    references: [benchmarkCategories.id],
-  }),
-}));
-
 // Types for benchmark_data
-export type BenchmarkData = typeof benchmarkData.$inferSelect;
-export type NewBenchmarkData = typeof benchmarkData.$inferInsert;
 
 // =============================================================================
 // TABLE 5: organization_benchmark_snapshots
 // =============================================================================
-
-export const organizationBenchmarkSnapshots = pgTable("organization_benchmark_snapshots", {
-  // Primary key
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  // Multi-tenancy
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-
-  // Metric reference
-  benchmarkCategoryId: uuid("benchmark_category_id")
-    .notNull()
-    .references(() => benchmarkCategories.id, { onDelete: "cascade" }),
-
-  // Time period
-  periodStart: date("period_start").notNull(),
-  periodEnd: date("period_end").notNull(),
-  periodType: text("period_type").default("monthly").notNull(),
-
-  // Organization metric value
-  metricValue: decimal("metric_value", { precision: 15, scale: 2 }).notNull(),
-
-  // Comparison vs. benchmark
-  benchmarkValue: decimal("benchmark_value", { precision: 15, scale: 2 }),
-  varianceFromBenchmark: decimal("variance_from_benchmark", { precision: 15, scale: 2 }),
-  variancePercentage: decimal("variance_percentage", { precision: 8, scale: 2 }),
-  percentileRank: integer("percentile_rank"),
-  performanceIndicator: text("performance_indicator"), // 'excellent', 'above_average', 'average', 'below_average'
-
-  // Trend analysis
-  previousPeriodValue: decimal("previous_period_value", { precision: 15, scale: 2 }),
-  periodOverPeriodChange: decimal("period_over_period_change", { precision: 15, scale: 2 }),
-  periodOverPeriodPercentage: decimal("period_over_period_percentage", { precision: 8, scale: 2 }),
-  trendDirection: text("trend_direction"), // 'improving', 'stable', 'declining'
-
-  // Data quality
-  dataCompletenessPercentage: integer("data_completeness_percentage").default(100),
-  calculationNotes: text("calculation_notes"),
-
-  // Audit fields
-  calculatedAt: timestamp("calculated_at", { withTimezone: true }).defaultNow(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
 
 // Indexes for organization_benchmark_snapshots
 export const organizationBenchmarkSnapshotsIndexes = [
@@ -348,21 +130,7 @@ export const organizationBenchmarkSnapshotsIndexes = [
   { name: "idx_organization_benchmark_snapshots_performance", columns: ["performance_indicator"] },
 ];
 
-// Relations for organization_benchmark_snapshots
-export const organizationBenchmarkSnapshotsRelations = relations(organizationBenchmarkSnapshots, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [organizationBenchmarkSnapshots.organizationId],
-    references: [organizations.id],
-  }),
-  category: one(benchmarkCategories, {
-    fields: [organizationBenchmarkSnapshots.benchmarkCategoryId],
-    references: [benchmarkCategories.id],
-  }),
-}));
-
 // Types for organization_benchmark_snapshots
-export type OrganizationBenchmarkSnapshot = typeof organizationBenchmarkSnapshots.$inferSelect;
-export type NewOrganizationBenchmarkSnapshot = typeof organizationBenchmarkSnapshots.$inferInsert;
 
 // =============================================================================
 // TYPE UNIONS & UTILITY TYPES

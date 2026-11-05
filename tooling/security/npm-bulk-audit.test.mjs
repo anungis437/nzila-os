@@ -43,7 +43,7 @@ test('registry response is strictly typed and bound to installed packages', () =
   assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': [{ id: 123, severity: 'unknown', title: 'x' }] }, packages), /Invalid advisory record/)
   assert.deepEqual(
     normalizeAdvisoryResponse({ 'node-forge': [{ id: 1244017, severity: 'high', title: 'PEM DoS' }] }, packages),
-    { '1244017': { id: 1244017, severity: 'high', title: 'PEM DoS', package: 'node-forge' } },
+    { '1244017': { id: '1244017', severity: 'high', title: 'PEM DoS', package: 'node-forge' } },
   )
 })
 
@@ -79,7 +79,7 @@ test('duplicate advisory IDs cannot overwrite or downgrade earlier findings', ()
   )
   assert.deepEqual(
     normalizeAdvisoryResponse({ 'node-forge': [high] }, packages),
-    { '1244017': { ...high, package: 'node-forge' } },
+    { '1244017': { ...high, id: '1244017', package: 'node-forge' } },
   )
 })
 
@@ -225,4 +225,15 @@ test("the repository's own pnpm-lock.yaml parses completely", () => {
   for (const set of inventory.values()) versions += set.size
   assert.ok(keys > 1000, `expected a real lockfile, saw ${keys} snapshot keys`)
   assert.ok(versions > 1000 && versions <= keys, `${versions} versions from ${keys} keys`)
+})
+
+test('advisory ids are recorded as the canonical string the policy binds to the map key', () => {
+  const pkgMap = new Map([['esbuild', new Set(['0.27.3'])]])
+  const flat = normalizeAdvisoryResponse(
+    { esbuild: [{ id: 1120680, severity: 'low', title: 'esbuild dev server file read', vulnerable_versions: '>=0.27.3 <0.28.1' }] },
+    pkgMap,
+  )
+  assert.deepEqual(Object.keys(flat), ['1120680'])
+  assert.equal(flat['1120680'].id, '1120680')
+  assert.equal(flat['1120680'].package, 'esbuild')
 })

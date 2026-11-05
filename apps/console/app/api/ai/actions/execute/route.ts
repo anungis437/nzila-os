@@ -16,8 +16,8 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('ai:actions:execute')
 
 const ExecuteBodySchema = z.object({
-  orgId: z.string().uuid(),
-  actionId: z.string().uuid(),
+  orgId: z.guid(),
+  actionId: z.guid(),
 })
 
 export async function POST(req: NextRequest) {

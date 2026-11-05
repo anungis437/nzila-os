@@ -22,4 +22,5 @@ export * from './member-segments';
 export * from './addresses';
 export * from './stewards';
 export * from './jurisdiction-preferences';
+export * from './enhanced-rbac';
 // Note: organization-members-schema was commented out in original (using Phase 5A version from schema-organizations)

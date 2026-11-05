@@ -229,7 +229,7 @@ describe('DATA_RESIDENCY_004 — Pagination respects org boundaries', () => {
       // Pagination routes must verify org on EACH invocation
       // Not just once at the beginning
       const hasOrgVerifyInFn =
-        /withOrgScope|requireOrgAccess|withApi|withRequiredRole|withRequestContext|authenticateUser|requirePlatformRole|getOrganizationIdForUser|ctx\.orgId|organizationId!?|auth\s*\(\)/.test(
+        /withOrgScope|requireOrgAccess|withApi|withRequiredRole|withRequestContext|authenticateUser|requirePlatformRole|getOrganizationIdForUser|withClaimedWorkbookAccess|ctx\.orgId|organizationId!?|auth\s*\(\)/.test(
           content,
         )
       if (!hasOrgVerifyInFn) {

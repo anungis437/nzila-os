@@ -1,30 +1,12 @@
 /**
- * @deprecated Vendor routes removed — vendors table never created.
- * Use /api/billing/reports for financial reporting.
- *
- * Phase 9 — Deprecation System
+ * Union vendors — NOT_IMPLEMENTED. The vendors table was never created and
+ * Nzila billing reports are not a union vendor record. Answers HTTP 501.
  */
-import { withApi } from '@/lib/api/with-api';
-import { logDeprecatedAccess, deprecatedResponse } from '@/lib/api/deprecation';
+import { retiredFinancialRoute } from '@/lib/finance/retired-financial-route';
 
 export const dynamic = 'force-dynamic';
 
-const CANONICAL = '/api/billing/reports';
-
-const handler = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Deprecated'],
-      summary: 'Deprecated — use /api/billing/reports',
-      deprecated: true,
-    },
-  },
-  async ({ request }) => {
-    logDeprecatedAccess('/api/financial/vendors/:id', request.method, CANONICAL);
-    return deprecatedResponse('/api/financial/vendors/:id', CANONICAL);
-  },
-);
+const handler = retiredFinancialRoute('/api/financial/vendors/:id', 'union-vendors');
 
 export const GET = handler;
 export const PATCH = handler;

@@ -304,15 +304,19 @@ export interface TrustMetricDetail {
 
 export interface ImmutabilityMetric extends TrustMetricDetail {
   triggersActive: boolean;
+  /** The history tables on which an enabled trigger refuses both updates and deletes. */
   tablesProtected: string[];
-  violationAttempts: number;
+  /** Refused modification attempts. null: nothing records them, so the figure is not measured. */
+  violationAttempts: number | null;
   lastAudit: Date;
 }
 
 export interface RLSMetric extends TrustMetricDetail {
   policiesActive: number;
-  orgIsolation: string; // "100%"
+  /** The share of tables that carry an organization column and enforce row-level security, as measured ("71%"), or "Unknown". */
+  orgIsolation: string;
   lastPolicyCheck: Date;
+  /** The tables that carry an organization column and enforce row-level security. */
   tablesProtected: string[];
 }
 
@@ -333,8 +337,6 @@ export interface GovernanceMetric extends TrustMetricDetail {
 export interface AuditLogMetric extends TrustMetricDetail {
   eventsLogged: number;
   retentionPolicy: string; // "7 years"
-  lastArchive: Date;
-  archivedEvents: number;
 }
 
 export interface TrustMetrics {

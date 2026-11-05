@@ -101,7 +101,7 @@ const EvaluatePoliciesRequestSchema = z.object({
   actorRole: z.string().default('ops'),
   domain: z.enum(['labour', 'legal', 'commerce', 'media-rights']).default('commerce'),
   jurisdiction: z.string().optional(),
-  context: z.record(z.string(), z.unknown()).default({}),
+  context: z.record(z.string(), z.unknown()).prefault({}),
   orgId: z.string().min(1),
   environment: z.string().optional(),
   overrideReason: z.string().optional(),

@@ -5,7 +5,8 @@
  * Handles grievances, arbitrations, settlements, and related workflows.
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const grievanceTypeEnum = pgEnum("grievance_type", [
   "individual",
@@ -78,7 +79,8 @@ export const settlementTypeEnum = pgEnum("settlement_type", [
 
 // Main Grievance Table
 export const grievances = pgTable("grievances", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  // The physical table is Django-managed and carries no database defaults, so every NOT NULL default is also supplied by the ORM.
+  id: uuid("id").primaryKey().defaultRandom().$defaultFn(() => crypto.randomUUID()),
   grievanceNumber: varchar("grievance_number", { length: 50 }).unique().notNull(),
   
   // Classification
@@ -130,7 +132,7 @@ export const grievances = pgTable("grievances", {
   
   // Related records
   groupGrievanceId: uuid("group_grievance_id"),
-  relatedGrievanceIds: uuid("related_grievance_ids").array(),
+  relatedGrievanceIds: jsonb("related_grievance_ids").$type<string[]>(), // jsonb array of grievance ids, as the Django grievances model stores it
   
   // Attachments
   attachments: jsonb("attachments").$type<Array<{
@@ -142,19 +144,27 @@ export const grievances = pgTable("grievances", {
   }>>(),
   
   // Flags
-  isGroupGrievance: boolean("is_group_grievance").default(false),
-  isArbitrationEligible: boolean("is_arbitration_eligible").default(false),
-  hasLegalImplications: boolean("has_legal_implications").default(false),
-  isConfidential: boolean("is_confidential").default(false),
+  isGroupGrievance: boolean("is_group_grievance").default(false).$defaultFn(() => false),
+  isArbitrationEligible: boolean("is_arbitration_eligible").default(false).$defaultFn(() => false),
+  hasLegalImplications: boolean("has_legal_implications").default(false).$defaultFn(() => false),
+  isConfidential: boolean("is_confidential").default(false).$defaultFn(() => false),
   
   // Organization
   organizationId: uuid("organization_id").notNull(),
   
   // Metadata
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
   createdBy: text("created_by"),
   lastUpdatedBy: text("last_updated_by"),
+
+  // Import traceability (platform 0077): where an imported case came from, so a re-import finds it and changes it instead of adding a second copy.
+  // An external case id always names its source system (a CHECK), and is unique per organization and source system.
+  externalCaseId: varchar("external_case_id", { length: 255 }),
+  importFingerprint: varchar("import_fingerprint", { length: 64 }),
+  sourceSystem: varchar("source_system", { length: 100 }),
+  importedAt: timestamp("imported_at", { withTimezone: true }),
+  importBatchId: uuid("import_batch_id"),
 }, (table) => [
   index("idx_grievances_number").on(table.grievanceNumber),
   index("idx_grievances_status").on(table.status),
@@ -167,47 +177,8 @@ export const grievances = pgTable("grievances", {
   index("idx_grievances_cba").on(table.cbaId),
   index("idx_grievances_org").on(table.organizationId),
   index("idx_grievances_deadline").on(table.responseDeadline),
-]);
-
-// Grievance Responses
-export const grievanceResponses = pgTable("grievance_responses", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  grievanceId: uuid("grievance_id").references(() => grievances.id).notNull(),
-  
-  // Response details
-  responseNumber: integer("response_number").notNull(),
-  respondingParty: varchar("responding_party", { length: 100 }).notNull(), // employer, union, arbitration_board
-  responderName: varchar("responder_name", { length: 255 }),
-  responderTitle: varchar("responder_title", { length: 255 }),
-  
-  // Content
-  response: text("response").notNull(),
-  position: text("position"),
-  
-  // Dates
-  responseDate: timestamp("response_date", { withTimezone: true }).notNull(),
-  receivedDate: timestamp("received_date", { withTimezone: true }),
-  
-  // Outcome
-  acceptedByGrievant: boolean("accepted_by_grievant"),
-  acceptedByEmployer: boolean("accepted_by_employer"),
-  
-  // Next steps
-  nextDeadline: timestamp("next_deadline", { withTimezone: true }),
-  nextStep: varchar("next_step", { length: 100 }),
-  
-  // Attachments
-  attachments: jsonb("attachments").$type<Array<{
-    id: string;
-    name: string;
-    url: string;
-    type: string;
-  }>>(),
-  
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_grievance_responses_grievance").on(table.grievanceId),
-  index("idx_grievance_responses_date").on(table.responseDate),
+  uniqueIndex("ux_grievances_org_source_external_case").on(table.organizationId, table.sourceSystem, table.externalCaseId).where(sql`external_case_id IS NOT NULL`),
+  index("idx_grievances_import_batch_id").on(table.importBatchId).where(sql`import_batch_id IS NOT NULL`),
 ]);
 
 // Arbitrations
@@ -333,36 +304,8 @@ export const settlements = pgTable("settlements", {
   index("idx_settlements_org").on(table.organizationId),
 ]);
 
-// Grievance Timeline/History
-export const grievanceTimeline = pgTable("grievance_timeline", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  grievanceId: uuid("grievance_id").references(() => grievances.id).notNull(),
-  
-  // Event details
-  eventType: varchar("event_type", { length: 100 }).notNull(),
-  eventDate: timestamp("event_date", { withTimezone: true }).notNull(),
-  actor: varchar("actor", { length: 255 }),
-  actorRole: varchar("actor_role", { length: 100 }),
-  
-  // Content
-  description: text("description").notNull(),
-  notes: text("notes"),
-  
-  // Attachments
-  attachments: jsonb("attachments").$type<Array<{
-    id: string;
-    name: string;
-    url: string;
-  }>>(),
-  
-  // Metadata
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_grievance_timeline_grievance").on(table.grievanceId),
-  index("idx_grievance_timeline_date").on(table.eventDate),
-  index("idx_grievance_timeline_type").on(table.eventType),
-]);
+// grievance_timeline is not declared in this barrel. Django GrievanceTimeline and
+// its view set remain. Do not DROP the relation.
 
 // Grievance Deadlines
 export const grievanceDeadlines = pgTable("grievance_deadlines", {
@@ -423,8 +366,6 @@ export type SettlementType = typeof settlementTypeEnum.enumValues[number];
 
 export type Grievance = typeof grievances.$inferSelect;
 export type GrievanceInsert = typeof grievances.$inferInsert;
-export type GrievanceResponse = typeof grievanceResponses.$inferSelect;
 export type Arbitration = typeof arbitrations.$inferSelect;
 export type Settlement = typeof settlements.$inferSelect;
-export type GrievanceTimeline = typeof grievanceTimeline.$inferSelect;
 export type GrievanceDeadline = typeof grievanceDeadlines.$inferSelect;
