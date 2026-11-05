@@ -46,6 +46,18 @@ describe('security gate input containment', () => {
 })
 
 describe('security audit policy: fail closed', () => {
+  it('rejects invalid evaluation clocks rather than authorizing otherwise waived findings', () => {
+    const report = fixture('audit-waived-package.json')
+    for (const invalidClock of [new Date(Number.NaN), new Date('invalid')]) {
+      const result = checkVulnerabilityPolicy(report, invalidClock)
+      expect(result.passed).toBe(false)
+      expect(result.errors).toContain('Invalid security policy evaluation clock')
+    }
+    const valid = checkVulnerabilityPolicy(report, atApproval)
+    expect(valid.errors).not.toContain('Invalid security policy evaluation clock')
+    expect(valid.waived).toBe(1)
+  })
+
   it('refuses an arbitrary JSON file in place of a valid audit', () => {
     const result = checkVulnerabilityPolicy('package.json', atApproval)
     expect(result.passed).toBe(false)
