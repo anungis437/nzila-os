@@ -29,7 +29,7 @@ function allowedSensitivityLevels(role: string | null): ExitInterviewSensitivity
   return ['public_internal'];
 }
 
-/** Whether the role is the steward floor or above: such a caller reads a published interview whose retiree has not consented (canReadInterview). */
+/** Whether the role is the steward floor or above. Search returns only consented interviews whatever the role (canReadInterview). */
 function isStewardPlus(role: string | null): boolean {
   const normalized = normalizeRole((role ?? 'member') as never);
   return (ROLE_HIERARCHY[normalized] ?? 0) >= ROLE_HIERARCHY.steward;

@@ -1,5 +1,5 @@
 // cognition-governance-ci: allow-route-bypass — Publication workflow.
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -7,10 +7,15 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema';
 import { indexExitInterview } from '@/lib/knowledge-transfer/indexing/semantic-indexer';
 import { extractExpertise, flattenExpertiseTags } from '@/lib/knowledge-transfer/expertise/expertise-extractor';
-import { isIndexingAllowed } from '@/lib/knowledge-transfer/governance/consent-controls';
+import { isIndexingAllowed, SENSITIVITY_LEVELS } from '@/lib/knowledge-transfer/governance/consent-controls';
 import { decidePublication } from '@/lib/knowledge-transfer/governance/publication-policy';
 
 export const dynamic = 'force-dynamic';
+
+/** Levels whose interviews may be sent to the AI provider for extraction and indexing. */
+const MODEL_USE_LEVELS = (Object.keys(SENSITIVITY_LEVELS) as Array<keyof typeof SENSITIVITY_LEVELS>).filter(
+  (level) => SENSITIVITY_LEVELS[level].indexingAllowed,
+);
 
 export const POST = withApi(
   {
@@ -137,20 +142,48 @@ export const POST = withApi(
         );
       setImmediate(async () => {
         try {
-          await auditStep('exit_interview.ai_extraction.requested', { sensitivityLevel: existing.sensitivityLevel, dataClass: 'internal' });
-          const expertiseProfile = await extractExpertise(existing);
+          // The extraction runs after the response, so the interview is read again: a consent withdrawn or a level raised
+          // since publication wins over the row read at the start of the request.
+          const current = await withRLSContext({ organizationId: organization }, async (tx) => {
+            const [row] = await tx
+              .select()
+              .from(exitInterviews)
+              .where(and(
+                eq(exitInterviews.id, interviewId),
+                eq(exitInterviews.organizationId, organization),
+                eq(exitInterviews.status, 'published'),
+                eq(exitInterviews.consentGranted, true),
+              ))
+              .limit(1);
+            return row ?? null;
+          });
+          if (!current || !isIndexingAllowed(current.sensitivityLevel, current.consentGranted)) {
+            await auditStep('exit_interview.ai_extraction.skipped', { reason: 'consent_or_level' });
+            return;
+          }
+          await auditStep('exit_interview.ai_extraction.requested', { sensitivityLevel: current.sensitivityLevel, dataClass: 'internal' });
+          const expertiseProfile = await extractExpertise(current);
           const expertiseTags = flattenExpertiseTags(expertiseProfile);
           const riskScore = expertiseProfile.continuitySensitivity === 'critical' ? 90
             : expertiseProfile.continuitySensitivity === 'high' ? 70
             : expertiseProfile.continuitySensitivity === 'medium' ? 40
             : 15;
 
-          // Only a published interview is updated, and the update is audited with the extraction outcome.
-          await withRLSContext({ organizationId: organization }, async (tx) => {
-            await tx
+          // Only a published, consented interview at a level allowing model use is updated, so a withdrawal during the
+          // provider call wins; the update is audited with the extraction outcome.
+          const recorded = await withRLSContext({ organizationId: organization }, async (tx) => {
+            const [row] = await tx
               .update(exitInterviews)
               .set({ expertiseTags, continuityRiskScore: riskScore, continuityRiskFlags: expertiseProfile.undocumentedWorkflows, updatedAt: new Date() })
-              .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, organization), eq(exitInterviews.status, 'published')));
+              .where(and(
+                eq(exitInterviews.id, interviewId),
+                eq(exitInterviews.organizationId, organization),
+                eq(exitInterviews.status, 'published'),
+                eq(exitInterviews.consentGranted, true),
+                inArray(exitInterviews.sensitivityLevel, MODEL_USE_LEVELS),
+              ))
+              .returning({ id: exitInterviews.id });
+            if (!row) return false;
             await persistAtomicAudit(tx, {
               organizationId: organization,
               userId: actor,
@@ -159,11 +192,15 @@ export const POST = withApi(
               resourceId: interviewId,
               details: { tags: expertiseTags.length, riskScore },
             });
+            return true;
           });
-
-          if (isIndexingAllowed((existing.sensitivityLevel ?? 'public_internal') as never, existing.consentGranted ?? false)) {
-            await indexExitInterview(interviewId, organization, actor);
+          if (!recorded) {
+            await auditStep('exit_interview.ai_extraction.skipped', { reason: 'consent_or_level_changed' });
+            return;
           }
+
+          // The indexer reads the interview again and checks consent and level itself.
+          await indexExitInterview(interviewId, organization, actor);
         } catch (error) {
           await auditStep('exit_interview.ai_extraction.failed', { reason: error instanceof Error ? error.name : 'unknown' }).catch(() => undefined);
         }

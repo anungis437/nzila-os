@@ -6,14 +6,16 @@
  *
  * Privacy contract:
  * - Org-scoped: embeddings are never shared cross-org
- * - Sensitivity gate: legal_sensitive + executive_confidential are SKIPPED
+ * - Sensitivity gate: privileged, legal_sensitive and executive_confidential are SKIPPED (only levels whose
+ *   SENSITIVITY_LEVELS entry allows indexing are embedded)
+ * - A skip deactivates any knowledge-base copy already made from the interview
  * - Consent gate: interviews without consent_granted are SKIPPED
  * - Lineage: every kb record has sourceType='exit_interview' + sourceId=interview.id
  *
  * INV-01: All AI calls routed through @nzila/ai-sdk via getAiClient()
  */
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -31,7 +33,9 @@ import { logger } from '@/lib/logger';
 import type { ExitInterview } from '@/db/schema';
 
 // Sensitivity levels that bypass RAG indexing regardless of consent
-const INDEXING_BLOCKED_SENSITIVITY = new Set(['legal_sensitive', 'executive_confidential'] as const);
+const INDEXING_BLOCKED_SENSITIVITY = new Set(['privileged', 'legal_sensitive', 'executive_confidential'] as const);
+// Levels that may be embedded: those SENSITIVITY_LEVELS marks indexingAllowed. Checked again when the index is written.
+const INDEXING_ALLOWED_SENSITIVITY = ['public_internal', 'restricted'] as const;
 
 async function generateEmbedding(text: string, _orgId?: string): Promise<number[]> {
   const cached = await embeddingCache.getCachedEmbedding(text, 'ai-sdk');
@@ -112,7 +116,20 @@ export async function indexExitInterview(
         .update(exitInterviews)
         .set({ indexingStatus: 'skipped', updatedAt: new Date() })
         .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
-      await audit(tx, 'exit_interview.index.skipped', { reason });
+      // An interview that may no longer be indexed leaves no searchable copy behind. The copy is deactivated, not deleted.
+      const deactivated = await tx
+        .update(knowledgeBase)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(
+          and(
+            eq(knowledgeBase.organizationId, orgId),
+            eq(knowledgeBase.sourceType, 'exit_interview'),
+            eq(knowledgeBase.sourceId, interviewId),
+            eq(knowledgeBase.isActive, true),
+          ),
+        )
+        .returning({ id: knowledgeBase.id });
+      await audit(tx, 'exit_interview.index.skipped', { reason, deactivatedKnowledgeBaseIds: deactivated.map((d) => d.id) });
       return { indexed: false, reason };
     });
 
@@ -209,10 +226,14 @@ export async function indexExitInterview(
             eq(exitInterviews.id, interviewId),
             eq(exitInterviews.organizationId, orgId),
             eq(exitInterviews.status, 'published'),
+            // Consent and level are checked again where the index is written: a withdrawal or reclassification while the
+            // embedding ran rolls back the knowledge-base write above.
+            eq(exitInterviews.consentGranted, true),
+            inArray(exitInterviews.sensitivityLevel, [...INDEXING_ALLOWED_SENSITIVITY]),
           ),
         )
         .returning({ id: exitInterviews.id });
-      if (!marked) throw new Error('Interview is no longer published');
+      if (!marked) throw new Error('Interview is no longer published with consent at an indexable level');
 
       if (options.eventNotes) {
         await tx.insert(exitInterviewEvents).values({
