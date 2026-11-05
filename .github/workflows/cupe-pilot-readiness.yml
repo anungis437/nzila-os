@@ -124,6 +124,10 @@ jobs:
         run: pnpm --filter @nzila/union-eyes test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          # Every test passes, but vitest workers exhaust Node's default heap on
+          # the full union-eyes suite and the job exits 1. Same limit as the
+          # unit-coverage job in ci.yml.
+          NODE_OPTIONS: '--max-old-space-size=6144'
 
       - name: Financial Service Tests
         run: pnpm --filter financial-service test
