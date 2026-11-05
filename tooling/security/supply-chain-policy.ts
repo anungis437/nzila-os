@@ -10,7 +10,7 @@
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import * as child_process from 'node:child_process'
+
 
 const ROOT = path.resolve(__dirname, '..', '..')
 
@@ -46,11 +46,23 @@ function safeResolveUnderRoot(filePath: string): string {
 }
 
 function readUtf8(filePath: string): string {
-  return child_process.execFileSync(
-    process.execPath,
-    ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', filePath],
-    { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
-  )
+  // Lexical containment is insufficient: a repository symlink can resolve to
+  // arbitrary host files. Refuse any audit/SBOM input outside the real root.
+  const realRoot = fs.realpathSync(ROOT)
+  const realInput = fs.realpathSync(filePath)
+  if (!isWithinBase(realInput, realRoot)) {
+    throw new Error('Security input resolves outside repository root')
+  }
+  // Read from one validated file descriptor, not a second process reopening a
+  // path after validation. O_NOFOLLOW rejects a final-component symlink swap;
+  // O_NONBLOCK avoids hanging on a substituted FIFO/device.
+  const fd = fs.openSync(realInput, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK)
+  try {
+    if (!fs.fstatSync(fd).isFile()) throw new Error('Security input must be a regular file')
+    return fs.readFileSync(fd, { encoding: 'utf8' })
+  } finally {
+    fs.closeSync(fd)
+  }
 }
 
 // ── License Policy ────────────────────────────────────────────────────────
@@ -101,6 +113,13 @@ export const FORBIDDEN_LICENSES: string[] = [
   'BSL-1.1',
   'Elastic-2.0',
 ]
+
+/** Reject calendar-impossible dates rather than relying on Date's normalization. */
+export function isCanonicalUtcDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const parsed = new Date(`${value}T00:00:00.000Z`)
+  return Number.isFinite(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value
+}
 
 // ── Vulnerability Waiver ──────────────────────────────────────────────────
 
@@ -341,7 +360,7 @@ export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
       }
       if (license && ((license.id !== undefined && typeof license.id !== 'string') ||
           (license.name !== undefined && typeof license.name !== 'string') ||
-          (license.id !== undefined && license.name !== undefined && license.id !== license.name && (ALLOWED_LICENSES.includes(license.name) || FORBIDDEN_LICENSES.includes(license.name))))) {
+          (license.id !== undefined && license.name !== undefined && license.id !== license.name))) {
         throw new Error(`Conflicting or malformed license identity for ${component.name}`)
       }
       const licenseId = (expression as string | undefined) ?? license?.id ?? license?.name ?? 'UNKNOWN'
@@ -391,6 +410,12 @@ export function checkVulnerabilityPolicy(
   now: Date = new Date(),
 ): VulnPolicyResult {
   const errors: string[] = []
+  // An invalid or untrusted evaluation clock must never authorize a waiver.
+  // Date comparisons against NaN are always false, which otherwise makes
+  // both expiry and approval-window checks silently ineffective.
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) {
+    errors.push('Invalid security policy evaluation clock')
+  }
 
   // Waivers expire at the END of their recorded UTC calendar day. No invalid
   // date, duplicate record, expired exception, or ambiguous approval is valid.
@@ -398,7 +423,7 @@ export function checkVulnerabilityPolicy(
   const expiredWaivers: string[] = []
   const seenIds = new Set<string>()
   for (const waiver of ACTIVE_WAIVERS) {
-    const endOfDay = /^\d{4}-\d{2}-\d{2}$/.test(waiver.expiresAt)
+    const endOfDay = isCanonicalUtcDate(waiver.expiresAt)
       ? new Date(`${waiver.expiresAt}T23:59:59.999Z`) : new Date(Number.NaN)
     if (!Number.isFinite(endOfDay.valueOf())) {
       errors.push(`Malformed expiry on waiver ${waiver.id}`)
@@ -406,7 +431,7 @@ export function checkVulnerabilityPolicy(
     }
     if (!waiver.id || !waiver.package || !waiver.approvedBy?.trim() || !waiver.reason?.trim() || seenIds.has(waiver.id) ||
         !['high', 'critical'].includes(waiver.severity) ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(waiver.approvedAt) ||
+        !isCanonicalUtcDate(waiver.approvedAt) ||
         !Number.isFinite(new Date(`${waiver.approvedAt}T00:00:00.000Z`).valueOf()) ||
         new Date(`${waiver.approvedAt}T00:00:00.000Z`) > now ||
         new Date(`${waiver.approvedAt}T00:00:00.000Z`) > endOfDay) {

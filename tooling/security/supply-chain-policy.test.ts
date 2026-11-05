@@ -1,10 +1,63 @@
+import * as fs from 'node:fs'
+import * as os from 'node:os'
+import * as path from 'node:path'
 import { describe, it, expect } from 'vitest'
-import { checkVulnerabilityPolicy, validateSbomLicenses } from './supply-chain-policy'
+import { checkVulnerabilityPolicy, isCanonicalUtcDate, validateSbomLicenses } from './supply-chain-policy'
 
 const atApproval = new Date('2026-10-10T12:00:00Z')
 const fixture = (name: string) => `tooling/security/fixtures/${name}`
 
+describe('waiver calendar integrity', () => {
+  it('accepts valid leap days and rejects normalized impossible dates', () => {
+    expect(isCanonicalUtcDate('2024-02-29')).toBe(true)
+    expect(isCanonicalUtcDate('2026-02-29')).toBe(false)
+    expect(isCanonicalUtcDate('2026-02-30')).toBe(false)
+    expect(isCanonicalUtcDate('2026-04-31')).toBe(false)
+    expect(isCanonicalUtcDate('2026-13-01')).toBe(false)
+    expect(isCanonicalUtcDate('2026-11-05')).toBe(true)
+    expect(isCanonicalUtcDate('2026-11-05T00:00:00Z')).toBe(false)
+  })
+})
+
+describe('security gate input containment', () => {
+  it('refuses directory inputs rather than treating them as an empty audit or SBOM', () => {
+    const directory = 'tooling/security/fixtures'
+    const audit = checkVulnerabilityPolicy(directory, atApproval)
+    expect(audit.passed).toBe(false)
+    expect(audit.errors.some((message) => message.includes('Security input must be a regular file'))).toBe(true)
+    expect(() => validateSbomLicenses(directory)).toThrow('Security input must be a regular file')
+  })
+
+  it('rejects symlink-escaped audit and SBOM inputs', () => {
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'nzila-security-input-'))
+    const link = path.join(__dirname, 'fixtures', 'security-escaped-input-test.json')
+    try {
+      fs.writeFileSync(path.join(outside, 'report.json'), '{}')
+      fs.symlinkSync(path.join(outside, 'report.json'), link)
+      const relative = 'tooling/security/fixtures/security-escaped-input-test.json'
+      expect(checkVulnerabilityPolicy(relative, atApproval).errors.some((message) =>
+        message.includes('Security input resolves outside repository root'))).toBe(true)
+      expect(() => validateSbomLicenses(relative)).toThrow('Security input resolves outside repository root')
+    } finally {
+      fs.rmSync(link, { force: true })
+      fs.rmSync(outside, { recursive: true, force: true })
+    }
+  })
+})
+
 describe('security audit policy: fail closed', () => {
+  it('rejects invalid evaluation clocks rather than authorizing otherwise waived findings', () => {
+    const report = fixture('audit-waived-package.json')
+    for (const invalidClock of [new Date(Number.NaN), new Date('invalid')]) {
+      const result = checkVulnerabilityPolicy(report, invalidClock)
+      expect(result.passed).toBe(false)
+      expect(result.errors).toContain('Invalid security policy evaluation clock')
+    }
+    const valid = checkVulnerabilityPolicy(report, atApproval)
+    expect(valid.errors).not.toContain('Invalid security policy evaluation clock')
+    expect(valid.waived).toBe(1)
+  })
+
   it('refuses an arbitrary JSON file in place of a valid audit', () => {
     const result = checkVulnerabilityPolicy('package.json', atApproval)
     expect(result.passed).toBe(false)
@@ -146,6 +199,11 @@ describe('security audit policy: fail closed', () => {
 
 
 describe('security license policy: exact allowlist', () => {
+  it('rejects an approved SPDX ID paired with an unrecognized conflicting license name', () => {
+    expect(() => validateSbomLicenses(fixture('sbom-unknown-license-alias-conflict.json')))
+      .toThrow('Conflicting or malformed license identity')
+  })
+
   it('rejects forbidden licenses in nested CycloneDX components', () => {
     const violations = validateSbomLicenses(fixture('sbom-nested-forbidden-license.json'))
     expect(violations).toEqual([{ package: 'nested-forbidden', version: '2.0.0', license: 'GPL-3.0-only', status: 'forbidden' }])
