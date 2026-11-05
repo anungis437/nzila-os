@@ -114,6 +114,13 @@ export const FORBIDDEN_LICENSES: string[] = [
   'Elastic-2.0',
 ]
 
+/** Reject calendar-impossible dates rather than relying on Date's normalization. */
+export function isCanonicalUtcDate(value: string): boolean {
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false
+  const parsed = new Date(`${value}T00:00:00.000Z`)
+  return Number.isFinite(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value
+}
+
 // ── Vulnerability Waiver ──────────────────────────────────────────────────
 
 export interface VulnerabilityWaiver {
@@ -457,7 +464,7 @@ export function checkVulnerabilityPolicy(
   const expiredWaivers: string[] = []
   const seenIds = new Set<string>()
   for (const waiver of ACTIVE_WAIVERS) {
-    const endOfDay = /^\d{4}-\d{2}-\d{2}$/.test(waiver.expiresAt)
+    const endOfDay = isCanonicalUtcDate(waiver.expiresAt)
       ? new Date(`${waiver.expiresAt}T23:59:59.999Z`) : new Date(Number.NaN)
     if (!Number.isFinite(endOfDay.valueOf())) {
       errors.push(`Malformed expiry on waiver ${waiver.id}`)
@@ -465,7 +472,7 @@ export function checkVulnerabilityPolicy(
     }
     if (!waiver.id || !waiver.package || !waiver.approvedBy?.trim() || !waiver.reason?.trim() || seenIds.has(waiver.id) ||
         !['high', 'critical'].includes(waiver.severity) ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(waiver.approvedAt) ||
+        !isCanonicalUtcDate(waiver.approvedAt) ||
         !Number.isFinite(new Date(`${waiver.approvedAt}T00:00:00.000Z`).valueOf()) ||
         new Date(`${waiver.approvedAt}T00:00:00.000Z`) > now ||
         new Date(`${waiver.approvedAt}T00:00:00.000Z`) > endOfDay) {
