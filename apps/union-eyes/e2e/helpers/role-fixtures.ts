@@ -243,6 +243,15 @@ export const FORBIDDEN_LABELS: Record<StakeholderRole, string[]> = {
     'Workflow Builder',
     'Exports',
   ],
+  // The treasurer lands in the executive experience (see REQUIRED_VISIBLE_LABELS.finance), so it is held to the executive's limits.
+  finance: [
+    'Raw FSM',
+    'Workflow Builder',
+    'System Status',
+    'Pilot Configuration',
+    'Operations Continuity',
+    'Workspace',
+  ],
 };
 
 export const PILOT_EXCLUDED_ROUTES = [
