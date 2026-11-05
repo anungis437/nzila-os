@@ -6,7 +6,7 @@
  *   - 0072 leaves every column it lists NOT NULL, the four union-structure tables carry NOT NULL created_at and updated_at, and payments.amount stays nullable on purpose;
  *   - its rollback relaxes exactly those columns, applying it again restores them, and applying it twice changes nothing;
  *   - it is fail-closed: a column that holds NULL stops it, nothing is invented to fill the NULL, and the column stays nullable;
- *   - 0073 gives the 35 declared defaults (including the PK ids of claims, grievances and organizations) to the database, so the mission-audits statement that omits
+ *   - 0073 gives the declared defaults (including the PK ids of claims, grievances and organizations) to the database, so the mission-audits statement that omits
  *     impacts_consecutive_compliance succeeds and stores false; its rollback drops exactly what it set;
  *   - 0074 gives the 35 Django model defaults to the Django-only relations: a raw INSERT that names only what a model requires succeeds, a column that already has a
  *     default keeps it, a column that carries a comment is refused, and its rollback drops exactly what it set.
@@ -40,6 +40,14 @@ const DECLARED_DEFAULTS = (JSON.parse(/\$json\$(\[\{"s".*?\])\$json\$::jsonb\) L
   column: d.c,
   expression: d.e,
 }))
+/**
+ * Declared defaults that a Django migration now sets before 0073 runs, so 0073 keeps the existing default instead of
+ * tagging its own. claims.is_anonymous became opt-in (default false) in grievances/0010 (2026-11-04); 0073 still lists
+ * the earlier declaration (true) and, run after Django as in every supported bootstrap, leaves the column alone.
+ */
+const OWNED_BY_DJANGO: Record<string, string> = { 'public.claims.is_anonymous': 'false' }
+const keyOf = (d: { schema: string; table: string; column: string }) => `${d.schema}.${d.table}.${d.column}`
+const APPLIED_DEFAULTS = DECLARED_DEFAULTS.filter((d) => !(keyOf(d) in OWNED_BY_DJANGO))
 /** The defaults 0074 sets, read from the migration itself. */
 const MODEL_DEFAULTS = [...MODEL_UP.matchAll(/^\s+\('([^']+)', '([^']+)', '([^']+)', '((?:[^']|'')*)'\)/gm)].map((m) => ({
   schema: m[1],
@@ -156,20 +164,26 @@ describe.skipIf(!URL)('platform 0072, 0073 and 0074', () => {
     })
   })
 
-  it('0073 gives the database the 35 declared defaults, and its rollback drops exactly those', async () => {
+  it('0073 gives the database its declared defaults (34; one is owned by Django), and its rollback drops exactly those', async () => {
     expect(DECLARED_DEFAULTS).toHaveLength(35)
+    expect(APPLIED_DEFAULTS).toHaveLength(34)
     await inTransaction(async (client) => {
-      for (const d of DECLARED_DEFAULTS) {
+      for (const d of APPLIED_DEFAULTS) {
         const state = await column(client, d.schema, d.table, d.column)
         expect(state.expression, `${d.table}.${d.column}`).not.toBeNull()
         expect(state.tag, `${d.table}.${d.column}`).toBe(DECLARED_TAG)
       }
-      expect((await taggedColumns(client, DECLARED_TAG)).sort()).toEqual(DECLARED_DEFAULTS.map((d) => `${d.schema}.${d.table}.${d.column}`).sort())
+      for (const d of DECLARED_DEFAULTS.filter((x) => keyOf(x) in OWNED_BY_DJANGO)) {
+        const state = await column(client, d.schema, d.table, d.column)
+        expect(state.expression, `${d.table}.${d.column} keeps the Django default`).toBe(OWNED_BY_DJANGO[keyOf(d)])
+        expect(state.tag, `${d.table}.${d.column} is not 0073's`).not.toBe(DECLARED_TAG)
+      }
+      expect((await taggedColumns(client, DECLARED_TAG)).sort()).toEqual(APPLIED_DEFAULTS.map(keyOf).sort())
       const before = await allDefaults(client)
       await client.query(DECLARED_DOWN)
       const after = await allDefaults(client)
       const dropped = before.filter((b) => !after.some((a) => a.col === b.col)).map((b) => b.col)
-      expect(dropped.sort()).toEqual(DECLARED_DEFAULTS.map((d) => `${d.schema}.${d.table}.${d.column}`).sort())
+      expect(dropped.sort()).toEqual(APPLIED_DEFAULTS.map(keyOf).sort())
       // Nothing else changed: every other default is still there, unchanged.
       expect(after.every((a) => before.some((b) => b.col === a.col && b.expression === a.expression))).toBe(true)
       await client.query(DECLARED_DOWN)
