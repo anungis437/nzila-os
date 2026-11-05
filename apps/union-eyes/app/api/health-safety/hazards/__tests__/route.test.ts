@@ -83,6 +83,15 @@ describe('health-safety/hazards route helpers', () => {
       expect(result.reporterContactInfo).toBeUndefined();
     });
 
+    it('rejects a non-boolean isAnonymous instead of hiding the reporter on a row still attributed to them', () => {
+      for (const isAnonymous of ['true', 1, 'yes', {}]) {
+        expect(() => buildHazardCreateValues({
+          hazardType: 'other', priority: 'low', location: 'Site A', description: 'desc',
+          isAnonymous, reporterName: 'Jane Doe', reporterContact: 'jane@example.com',
+        }), String(isAnonymous)).toThrow('isAnonymous must be a boolean');
+      }
+    });
+
     it('carries reporter identity fields when not anonymous', () => {
       const result = buildHazardCreateValues({
         hazardType: 'other',

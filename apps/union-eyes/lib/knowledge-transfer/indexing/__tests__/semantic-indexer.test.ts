@@ -10,13 +10,17 @@ const h = vi.hoisted(() => ({
   operation: vi.fn(),
   ready: vi.fn(),
   writeEmbedding: vi.fn(),
+  where: [] as unknown[],
+  set: [] as unknown[],
 }));
 
 function chain(): Record<string, unknown> {
   const c: Record<string, unknown> = {};
-  for (const m of ['update', 'set', 'where', 'select', 'from', 'limit', 'insert', 'values', 'returning']) {
+  for (const m of ['update', 'select', 'from', 'limit', 'insert', 'values', 'returning']) {
     c[m] = () => c;
   }
+  c.where = (arg: unknown) => { h.where.push(arg); return c; };
+  c.set = (arg: unknown) => { h.set.push(arg); return c; };
   c.then = (resolve: (v: unknown) => void) => resolve(h.queue.shift());
   c.catch = (cb: () => void) => { cb?.(); return c; };
   return c;
@@ -33,7 +37,7 @@ vi.mock('@/db/schema', () => ({
   exitInterviewEvents: new Proxy({}, { get: (_t, p) => String(p) }),
   knowledgeBase: new Proxy({}, { get: (_t, p) => String(p) }),
 }));
-vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
+vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, inArray: (...a: unknown[]) => a }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ embed: h.embed }),
   UE_APP_KEY: 'ue', UE_SYSTEM_ORG_ID: 'sys', UE_PROFILES: { EMBEDDINGS: 'emb' },
@@ -67,6 +71,8 @@ function interview(extra: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   h.queue.length = 0;
+  h.where.length = 0;
+  h.set.length = 0;
   h.getCached.mockReset();
   h.setCached.mockReset().mockResolvedValue(undefined);
   h.embed.mockReset();
@@ -137,7 +143,7 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
   });
 
   it('still skips a blocked or unconsented interview where the vector column is missing', async () => {
-    h.queue.push([interview({ consentGranted: false })], undefined);
+    h.queue.push([interview({ consentGranted: false })], undefined, []);
     h.ready.mockResolvedValue(false);
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result).toEqual({ indexed: false, reason: 'Retiree consent not granted' });
@@ -163,7 +169,7 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
   });
 
   it('skips blocked sensitivity levels and audits the skip', async () => {
-    h.queue.push([interview({ sensitivityLevel: 'legal_sensitive' })], undefined);
+    h.queue.push([interview({ sensitivityLevel: 'legal_sensitive' })], undefined, []);
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result.indexed).toBe(false);
     expect((result as { reason: string }).reason).toContain('blocks indexing');
@@ -172,7 +178,7 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
   });
 
   it('skips when consent not granted and sends nothing to the AI provider', async () => {
-    h.queue.push([interview({ consentGranted: false })], undefined);
+    h.queue.push([interview({ consentGranted: false })], undefined, []);
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result).toEqual({ indexed: false, reason: 'Retiree consent not granted' });
     expect(h.operation).not.toHaveBeenCalled();
@@ -214,6 +220,46 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     expect(result).toEqual({ indexed: false, reason: 'Indexing failed', failed: true });
     expect(JSON.stringify(result)).not.toContain('embed boom');
     expect(h.error).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.failed' }), 'failure');
+  });
+
+  const kbCopyPredicate = expect.arrayContaining([
+    ['organizationId', 'org-1'], ['sourceType', 'exit_interview'], ['sourceId', 'i1'],
+  ]);
+
+  it('does not embed a privileged interview, even with consent, and deactivates its existing knowledge-base copy', async () => {
+    h.queue.push([interview({ sensitivityLevel: 'privileged', knowledgeBaseId: 'kb1' })], undefined, [{ id: 'kb1' }]);
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result).toEqual({ indexed: false, reason: expect.stringContaining('blocks indexing') });
+    expect(h.operation).not.toHaveBeenCalled();
+    expect(h.embed).not.toHaveBeenCalled();
+    expect(h.where).toContainEqual(kbCopyPredicate);
+    expect(h.set).toContainEqual(expect.objectContaining({ isActive: false }));
+    expect(h.audit).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({ action: 'exit_interview.index.skipped', details: expect.objectContaining({ deactivatedKnowledgeBaseIds: ['kb1'] }) }),
+      'success',
+    );
+  });
+
+  it('deactivates the existing knowledge-base copy when consent has been withdrawn', async () => {
+    h.queue.push([interview({ consentGranted: false, knowledgeBaseId: 'kb1' })], undefined, [{ id: 'kb1' }]);
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result).toEqual({ indexed: false, reason: 'Retiree consent not granted' });
+    expect(h.where).toContainEqual(kbCopyPredicate);
+    expect(h.set).toContainEqual(expect.objectContaining({ isActive: false }));
+  });
+
+  it('requires consent and an indexable level where the index is written, and records no success when a withdrawal won', async () => {
+    // The interview was consented when read; by the final write the conditional update matches nothing.
+    h.queue.push([interview()], [{ id: 'kb1' }], []);
+    h.getCached.mockResolvedValue([0.1, 0.2]);
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result).toEqual({ indexed: false, reason: 'Indexing failed', failed: true });
+    expect(h.where).toContainEqual(expect.arrayContaining([
+      ['status', 'published'], ['consentGranted', true], ['sensitivityLevel', ['public_internal', 'restricted']],
+    ]));
+    expect(h.audit).not.toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index' }), 'success');
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.failed' }), 'failure');
   });
 });

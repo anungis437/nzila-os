@@ -78,6 +78,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
   )
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  // Settings, the billing contact, provenance, contact details, membership figures and grievance counts belong to the
+  // organization's administrators (as on the organization list); any other reader gets the public profile, and the
+  // grievance count is not even computed for them.
+  const administrative = canAdministerOrganization(access, id)
+
   // Counts are computed under explicit authority. A bare pooled connection has no
   // tenant identity and can silently return zero or leak cross-tenant aggregates.
   const claimCounts = (tx: typeof db) => tx.execute(sql`SELECT
@@ -88,30 +93,39 @@ export async function GET(_req: NextRequest, { params }: Params) {
   // may be authorized for a descendant without direct membership; canonical binding
   // correctly rejects impersonating that descendant, so use the system role only
   // after the explicit canReadOrganization check and the exact organization predicate.
-  const readClaims = access.platform || !access.direct.has(id)
-    ? withSystemContext(async () => rowsOf<{ total: number; active: number }>(await claimCounts(db)))
-    : withRLSContext({ organizationId: id }, async (tx) => rowsOf<{ total: number; active: number }>(await claimCounts(tx)))
+  const readClaims = !administrative
+    ? Promise.resolve(null)
+    : access.platform || !access.direct.has(id)
+      ? withSystemContext(async () => rowsOf<{ total: number; active: number }>(await claimCounts(db)))
+      : withRLSContext({ organizationId: id }, async (tx) => rowsOf<{ total: number; active: number }>(await claimCounts(tx)))
   const [claimRows, childRows] = await Promise.all([
     readClaims,
     withSystemContext(async () => rowsOf<{ cnt: number }>(
       await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
     )),
   ])
-  const claims = claimRows[0] ?? { total: 0, active: 0 }
+  const childCount = childRows[0]?.cnt ?? 0
 
-  // Settings, the billing contact and provenance belong to the organization's administrators.
-  const { settings: _settings, billing_contact_id: _billing, created_by: _createdBy, legacy_org_id: _legacy, subscription_tier: _tier, ...profile } = mapOrg(row)
-  const administrative = canAdministerOrganization(access, id)
-  const mapped = administrative ? mapOrg(row) : profile
-  return NextResponse.json({
-    data: {
-      ...mapped,
-      memberCount: row.memberCount ?? 0,
-      activeClaims: claims.active,
-      totalClaims: claims.total,
-      childCount: childRows[0]?.cnt ?? 0,
-    },
-  })
+  if (administrative) {
+    const claims = claimRows?.[0] ?? { total: 0, active: 0 }
+    return NextResponse.json({
+      data: {
+        ...mapOrg(row),
+        memberCount: row.memberCount ?? 0,
+        activeClaims: claims.active,
+        totalClaims: claims.total,
+        childCount,
+      },
+    })
+  }
+
+  const {
+    settings: _settings, billing_contact_id: _billing, created_by: _createdBy, legacy_org_id: _legacy, subscription_tier: _tier,
+    email: _email, phone: _phone, address: _address, charter_number: _charter,
+    member_count: _memberCount, active_member_count: _activeMemberCount, last_member_count_update: _memberCountUpdate,
+    ...profile
+  } = mapOrg(row)
+  return NextResponse.json({ data: { ...profile, childCount } })
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {

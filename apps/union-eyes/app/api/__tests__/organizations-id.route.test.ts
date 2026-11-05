@@ -3,10 +3,11 @@ import { NextRequest } from 'next/server';
 
 // The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
 // route's own behaviour as a caller who may read and administer the organization.
+const authority = vi.hoisted(() => ({ administers: true }));
 vi.mock('@/lib/organizations/read-authority', () => ({
   resolveOrganizationAccess: async () => ({ platform: false, direct: new Map([['11111111-1111-4111-8111-111111111111', 'member']]), descendants: new Set() }),
   canReadOrganization: () => true,
-  canAdministerOrganization: () => true,
+  canAdministerOrganization: () => authority.administers,
   readableOrganizationIds: () => null,
   directRoleIn: () => 'admin',
   UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
@@ -86,6 +87,7 @@ describe('organizations/[id] route', () => {
     m.executeQueue = [];
     m.rlsContexts = [];
     m.updateQueue = [];
+    authority.administers = true;
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.requireUserForOrganization.mockResolvedValue({ roles: ['admin'], userId: 'u1' });
     m.requireSystemAdmin.mockResolvedValue(undefined);
@@ -119,6 +121,34 @@ describe('organizations/[id] route', () => {
     expect(json.data.id).toBe('11111111-1111-4111-8111-111111111111');
     expect(json.data.totalClaims).toBe(5);
     expect(m.rlsContexts).toContainEqual({ organizationId: orgRow.id });
+  });
+
+  it('GET gives a reader who does not administer the organization the public profile only, and never counts its grievances', async () => {
+    const { GET } = await loadRoute();
+    authority.administers = false;
+    m.selectQueue.push([{ ...orgRow, email: 'office@org.example', phone: '555-0100', address: { city: 'X' }, charterNumber: 'C-1' }]);
+    m.executeQueue.push([{ cnt: 1 }]);
+
+    const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });
+    expect(response.status).toBe(200);
+    const { data } = await response.json();
+    expect(data).toMatchObject({ id: orgRow.id, name: 'Org', childCount: 1 });
+    for (const key of ['email', 'phone', 'address', 'charter_number', 'member_count', 'active_member_count', 'last_member_count_update', 'memberCount', 'activeClaims', 'totalClaims', 'settings', 'billing_contact_id', 'subscription_tier']) {
+      expect(data, key).not.toHaveProperty(key);
+    }
+    // only the child count ran; the grievance count query was never issued
+    expect(mockDb.execute).toHaveBeenCalledTimes(1);
+    expect(m.rlsContexts).toEqual([]);
+  });
+
+  it('GET gives an administrator contact details, membership figures and grievance counts', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ ...orgRow, email: 'office@org.example', phone: '555-0100' }]);
+    m.executeQueue.push([{ total: 5, active: 2 }], [{ cnt: 1 }]);
+
+    const { data } = await (await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) })).json();
+    expect(data).toMatchObject({ email: 'office@org.example', phone: '555-0100', member_count: 3, active_member_count: 2, memberCount: 3, activeClaims: 2, totalClaims: 5, childCount: 1 });
+    expect(mockDb.execute).toHaveBeenCalledTimes(2);
   });
 
   it('PATCH returns 403 when org auth check fails', async () => {

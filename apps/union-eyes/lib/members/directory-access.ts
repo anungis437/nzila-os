@@ -5,7 +5,7 @@ export type MemberDirectoryScope = 'none' | 'case-context' | 'organization'
 
 export interface MemberDirectoryAccess {
   scope: MemberDirectoryScope
-  /** Employment dates, seniority and free-form profile metadata. */
+  /** Employment dates, seniority, membership number and free-form profile metadata. */
   includeSensitive: boolean
 }
 
@@ -71,7 +71,7 @@ export function projectDirectoryMember(m: DirectoryMemberFields, access: MemberD
     position: m.position || null,
     hireDate: access.includeSensitive ? m.hireDate?.toISOString() ?? null : null,
     seniority: access.includeSensitive ? m.seniority : null,
-    membershipNumber: m.membershipNumber || '',
+    membershipNumber: access.includeSensitive ? (m.membershipNumber || '') : '',
     unionJoinDate: access.includeSensitive ? m.unionJoinDate?.toISOString() ?? null : null,
     createdAt: m.createdAt?.toISOString() ?? null,
     metadata,

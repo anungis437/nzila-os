@@ -30,17 +30,18 @@ describe('member directory access policy', () => {
     }
   });
 
-  it('removes employment dates, seniority and metadata from a non-sensitive projection', () => {
+  it('removes employment dates, seniority, membership number and metadata from a non-sensitive projection', () => {
     const row = {
       id: '1', userId: 'u1', name: 'Pat', email: 'p@example.test', phone: '555', role: 'member', status: 'active',
       department: null, position: null, hireDate: new Date('2020-01-01'), seniority: 9, membershipNumber: 'M1',
       unionJoinDate: new Date('2019-01-01'), createdAt: new Date('2018-01-01'), metadata: { compensation: 1, medical: 'x' },
     };
     const limited = projectDirectoryMember(row, { scope: 'case-context', includeSensitive: false });
-    expect(limited).toMatchObject({ hireDate: null, seniority: null, unionJoinDate: null, metadata: {} });
+    expect(limited).toMatchObject({ hireDate: null, seniority: null, unionJoinDate: null, metadata: {}, membershipNumber: '' });
     const full = projectDirectoryMember(row, { scope: 'organization', includeSensitive: true });
     expect(full.metadata).toEqual({ compensation: 1, medical: 'x' });
     expect(full.seniority).toBe(9);
+    expect(full.membershipNumber).toBe('M1');
   });
 
   it('does not invent a department, a position or years of seniority that the record does not have', () => {

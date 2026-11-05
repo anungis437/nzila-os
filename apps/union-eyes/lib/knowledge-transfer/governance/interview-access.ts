@@ -38,12 +38,13 @@ export interface InterviewAccessFacts {
 export function canReadInterview(row: InterviewAccessFacts, reader: InterviewReader): boolean {
   const isOwner = row.createdBy !== null && row.createdBy === reader.userId;
   const level = row.sensitivityLevel ?? UNRECORDED_LEVEL;
+  const finished = row.status === 'published' || row.status === 'archived';
+  // A finished interview is read only while the retiring employee's consent stands, and only at the reader's level. Neither
+  // authorship nor office overrides a withdrawn consent.
+  if (finished) return row.consentGranted === true && reader.levels.has(level);
   // The author may read their own draft whatever its level; nobody else reads above their office.
   if (!isOwner && !reader.levels.has(level)) return false;
-  const finished = row.status === 'published' || row.status === 'archived';
-  if (!finished) return isOwner || reader.stewardPlus;
-  // A finished interview is shared with the organization only with the retiring employee's consent.
-  return isOwner || reader.stewardPlus || row.consentGranted === true;
+  return isOwner || reader.stewardPlus;
 }
 
 /** The same decision as a list predicate, so a list never returns a row the item route would refuse. */
@@ -54,8 +55,10 @@ export function interviewListCondition(reader: InterviewReader): SQL {
     : sql`false`;
   const owner = reader.userId ? sql`${exitInterviews.createdBy} = ${reader.userId}` : sql`false`;
   const finished = sql`${exitInterviews.status}::text IN ('published', 'archived')`;
-  const visibleState = reader.stewardPlus ? sql`true` : sql`(${finished} AND ${exitInterviews.consentGranted} = true)`;
-  return sql`((${owner}) OR (${levelOk} AND ${visibleState}))`;
+  const unfinishedReader = reader.stewardPlus ? sql`(${owner} OR ${levelOk})` : owner;
+  // Same rule as canReadInterview: a finished row needs consent and the reader's level whoever reads it; an unfinished one
+  // is the author's, or a steward-or-above's at their level.
+  return sql`((${finished} AND ${exitInterviews.consentGranted} = true AND ${levelOk}) OR (NOT ${finished} AND ${unfinishedReader}))`;
 }
 
 /**

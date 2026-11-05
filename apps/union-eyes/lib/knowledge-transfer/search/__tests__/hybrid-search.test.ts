@@ -8,13 +8,15 @@ const h = vi.hoisted(() => ({
   setCached: vi.fn(),
   vectorReady: vi.fn(),
   listCondition: vi.fn(),
+  where: [] as unknown[],
 }));
 
 function chain(): Record<string, unknown> {
   const c: Record<string, unknown> = {};
-  for (const m of ['select', 'from', 'where', 'limit', 'orderBy', 'innerJoin']) {
+  for (const m of ['select', 'from', 'limit', 'orderBy', 'innerJoin']) {
     c[m] = () => c;
   }
+  c.where = (arg: unknown) => { h.where.push(arg); return c; };
   c.then = (resolve: (v: unknown) => void) => resolve(h.selectQueue.shift() ?? []);
   return c;
 }
@@ -58,6 +60,7 @@ function row(id: string, sensitivity = 'low') {
 describe('lib/knowledge-transfer/search/hybrid-search', () => {
   beforeEach(() => {
     h.selectQueue.length = 0;
+    h.where.length = 0;
     h.execute.mockReset();
     h.embed.mockReset();
     h.getCached.mockReset();
@@ -171,5 +174,23 @@ describe('lib/knowledge-transfer/search/hybrid-search', () => {
     expect(statement.strings.join('?')).toContain('ei.consent_granted = true');
     expect(statement.strings.join('?')).not.toContain('0.1,0.2');
     expect(statement.values).toContain('[0.1,0.2,0.3]');
+  });
+
+  // The keyword read and the re-read of semantic-only interviews require consent in their own predicate, whatever the
+  // caller's role, so a withdrawal between the vector query and the re-read wins.
+  it('requires the retiree\'s consent in the keyword read and in the re-read of semantic-only interviews, for a steward too', async () => {
+    h.getCached.mockResolvedValue([0.1, 0.2, 0.3]);
+    h.selectQueue.push([]);
+    h.selectQueue.push([row('c')]);
+    h.execute.mockResolvedValue([{ source_id: 'c', similarity: 0.8 }]);
+
+    await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: ['low'], stewardPlus: true });
+    expect(h.where).toHaveLength(2);
+    for (const predicate of h.where) {
+      expect(predicate).toEqual(expect.arrayContaining([['consentGranted', true], ['organizationId', 'org-1']]));
+    }
+    const statement = (h.execute.mock.calls[0][0] as { strings: string[] }).strings.join('?');
+    expect(statement).toContain('ei.organization_id = ?');
+    expect(statement).toContain('kb.organization_id = ?');
   });
 });

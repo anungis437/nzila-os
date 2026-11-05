@@ -65,6 +65,12 @@ export const POST = withApi(
       throw ApiError.conflict('Summaries can only be generated for published interviews');
     }
 
+    // Without the retiring employee's standing consent the interview is not sent to the AI provider, whatever the
+    // caller's role.
+    if (interview.consentGranted !== true) {
+      throw ApiError.conflict('Retiree consent has not been granted or has been withdrawn');
+    }
+
     let summary: Awaited<ReturnType<typeof generateKnowledgeSummary>>;
     try {
       // The provider call cannot share the database transaction: its intent is recorded first and it is skipped if
@@ -100,10 +106,12 @@ export const POST = withApi(
             eq(exitInterviews.id, params.id),
             eq(exitInterviews.organizationId, organizationId!),
             eq(exitInterviews.status, 'published'),
+            // A withdrawal while the provider ran wins: the summary is not stored.
+            eq(exitInterviews.consentGranted, true),
           ),
         )
         .returning({ id: exitInterviews.id });
-      if (!stored) throw ApiError.conflict('The interview is no longer published');
+      if (!stored) throw ApiError.conflict('The interview is no longer published with consent');
 
       await tx.insert(exitInterviewEvents).values({
         interviewId: params.id,

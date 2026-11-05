@@ -318,6 +318,21 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     }
   });
 
+  it('6a2. refuses a non-boolean isAnonymous before any write, so a report never looks anonymous while attributed to its reporter', async () => {
+    const { POST } = await import('../hazards/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    for (const isAnonymous of ['true', 1]) {
+      const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
+        hazardType: 'fire', priority: 'high', location: 'Warehouse B',
+        description: 'Sparks near flammable storage', isAnonymous, reporterName: 'Jane Doe',
+      }));
+      expect(response.status, String(isAnonymous)).toBe(400);
+      expect(capture()).toBeUndefined();
+    }
+    expect(m.dbInsert).not.toHaveBeenCalled();
+  });
+
   it('6b. refuses conflicting aliases and canonical fields', async () => {
     const { POST } = await import('../incidents/route');
     m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));

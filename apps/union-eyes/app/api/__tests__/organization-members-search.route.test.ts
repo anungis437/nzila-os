@@ -143,6 +143,20 @@ describe('organization/members/search route', () => {
     expect(offset).toHaveBeenCalledWith(0);
   });
 
+  it('gives the membership number only to a caller with sensitive directory access, never to a steward', async () => {
+    const rows = [{ id: 'om_2', name: 'Sam', email: 'sam@example.com', role: 'member', status: 'active', department: null, membershipNumber: 'M-77' }];
+    const offset = vi.fn().mockResolvedValue(rows);
+    const limit = vi.fn().mockReturnValue({ offset });
+    m.db.select.mockReturnValue({ from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ orderBy: vi.fn().mockReturnValue({ limit }) }) }) });
+    const { GET } = await loadRoute();
+
+    const asSteward = await GET(new NextRequest('http://localhost/api/organization/members/search?__test_org_id=org_1&__test_role=steward&q=sam')) as { members: Array<Record<string, unknown>> };
+    expect(asSteward.members[0]).toMatchObject({ id: 'om_2', membershipNumber: '' });
+
+    const asOfficer = await GET(new NextRequest('http://localhost/api/organization/members/search?__test_org_id=org_1&__test_role=officer&q=sam')) as { members: Array<Record<string, unknown>> };
+    expect(asOfficer.members[0]).toMatchObject({ id: 'om_2', membershipNumber: 'M-77' });
+  });
+
   it('takes LIKE wildcards in the search text literally and bounds the term (DEF-0B9-ORG-DIRECTORY-SEARCH-UNESCAPED-WILDCARDS)', async () => {
     const offset = vi.fn().mockResolvedValue([]);
     const limit = vi.fn().mockReturnValue({ offset });

@@ -120,6 +120,7 @@ async function keywordSearch(
         eq(exitInterviews.organizationId, orgId),
         eq(exitInterviews.status, 'published'),
         // The sensitivity floor and the retiree's consent are part of the query, so the limit counts only interviews the caller may read.
+        eq(exitInterviews.consentGranted, true),
         interviewListCondition(reader),
         or(
           ilike(exitInterviews.title, pattern),
@@ -173,6 +174,7 @@ async function semanticSearch(
       FROM knowledge_base kb
       INNER JOIN exit_interviews ei ON ei.id::text = kb.source_id
       WHERE kb.organization_id = ${orgId}
+        AND ei.organization_id = ${orgId}
         AND kb.source_type = 'exit_interview'
         AND kb.is_active = true
         AND ei.status = 'published'
@@ -246,6 +248,8 @@ export async function hybridKnowledgeSearch(
           and(
             eq(exitInterviews.organizationId, orgId),
             eq(exitInterviews.status, 'published'),
+            // Consent is re-checked here, not taken from the vector query: it may have been withdrawn in between.
+            eq(exitInterviews.consentGranted, true),
             interviewListCondition(reader),
             inArray(exitInterviews.id, semanticOnlyIds),
           ),

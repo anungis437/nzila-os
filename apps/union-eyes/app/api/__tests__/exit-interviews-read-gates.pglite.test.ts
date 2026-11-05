@@ -23,6 +23,13 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(state.db),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+// The summary route's provider call and its intent record: the tests below are about whether the interview reaches them.
+const summarizer = vi.hoisted(() => ({ generate: vi.fn() }));
+vi.mock('@/lib/knowledge-transfer/summaries/knowledge-summarizer', () => ({ generateKnowledgeSummary: summarizer.generate }));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: async (_op: unknown, fn: () => Promise<unknown>) => fn(),
+  operationAuditResponse: () => null,
+}));
 // The child holds the knowledge suite, so what its parent shares is readable to it: the test is about WHICH shared rows, not the entitlement
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ checkModuleEntitlement: vi.fn(async () => ({ allowed: true })) }));
 vi.mock('@/lib/api/framework', async () => {
@@ -107,8 +114,20 @@ describe('exit interview list', () => {
 
   it('a steward sees public-internal and restricted rows (and unrecorded), never privileged or above', async () => {
     const ids = await listIds('steward', 'u-steward');
-    expect(ids).toEqual(expect.arrayContaining([id(1), id(2), id(6), id(7), id(8)]));
-    for (const forbidden of [3, 4, 5, 9]) expect(ids).not.toContain(id(forbidden));
+    expect(ids).toEqual(expect.arrayContaining([id(1), id(2), id(7), id(8)]));
+    // Interview 6 is published without consent: no steward reads it.
+    for (const forbidden of [3, 4, 5, 6, 9]) expect(ids).not.toContain(id(forbidden));
+  });
+
+  it('a published or archived interview without consent is listed to nobody: not its author, not an administrator', async () => {
+    await interview(10, { level: 'public_internal', status: 'archived', consent: false, createdBy: 'u-admin' });
+    expect(await listIds('member', 'author-1')).not.toContain(id(6));
+    expect(await listIds('admin', 'author-1')).not.toContain(id(6));
+    const admin = await listIds('admin', 'u-admin');
+    expect(admin).not.toContain(id(6));
+    expect(admin).not.toContain(id(10));
+    // The author still works on their own draft.
+    expect(await listIds('member', 'author-1')).toContain(id(8));
   });
 
   it('an officer reads privileged; legal-sensitive and executive-confidential need an administrator', async () => {
@@ -143,6 +162,19 @@ describe('exit interview item and attachments', () => {
     for (const n of [3, 4, 5]) await expect(item(n, 'steward', 'u-steward'), `steward ${n}`).rejects.toMatchObject({ status: 404 });
     await expect(item(4, 'officer', 'u-officer')).rejects.toMatchObject({ status: 404 });
     await expect(item(4, 'admin', 'u-admin')).resolves.toMatchObject({ data: { id: id(4) } });
+  });
+
+  it('refuses a published or archived interview without consent to its author and to an administrator', async () => {
+    await interview(10, { level: 'public_internal', status: 'archived', consent: false, createdBy: 'author-1' });
+    for (const n of [6, 10]) {
+      await expect(item(n, 'steward', 'u-steward'), `steward ${n}`).rejects.toMatchObject({ status: 404 });
+      await expect(item(n, 'admin', 'u-admin'), `admin ${n}`).rejects.toMatchObject({ status: 404 });
+      await expect(item(n, 'member', 'author-1'), `author ${n}`).rejects.toMatchObject({ status: 404 });
+      await expect(item(n, 'admin', 'author-1'), `author-admin ${n}`).rejects.toMatchObject({ status: 404 });
+    }
+    // With consent the same interview is readable again.
+    await pg.query(`UPDATE exit_interviews SET consent_granted = true WHERE id = $1::uuid`, [id(6)]);
+    await expect(item(6, 'admin', 'u-admin')).resolves.toMatchObject({ data: { id: id(6) } });
   });
 
   it('gives a member the public-internal interview without the workflow events', async () => {
@@ -206,5 +238,41 @@ describe('knowledge base copy of an interview', () => {
     expect(await titles('admin', CHILD)).toEqual(['Policy']);
     // The child's own copy does not reach its parent either
     expect(await titles('admin')).not.toContain('Parent organization interview');
+  });
+});
+
+describe('AI summary of an interview', () => {
+  const summarize = async (n: number) => {
+    state.role = 'admin';
+    state.userId = 'u-admin';
+    const { POST } = await import('../exit-interviews/[id]/summarize/route');
+    return call(POST, { params: { id: id(n) }, organizationId: ORG, userId: 'u-admin', user: { role: 'admin' } });
+  };
+  const storedSummary = async (n: number) =>
+    (await pg.query<{ ai_summary: string | null }>(`SELECT ai_summary FROM exit_interviews WHERE id = $1::uuid`, [id(n)])).rows[0].ai_summary;
+
+  beforeEach(() => {
+    summarizer.generate.mockReset();
+    summarizer.generate.mockResolvedValue({ operationalSummary: 'Generated summary' });
+  });
+
+  it('summarizes a published, consented interview', async () => {
+    await expect(summarize(1)).resolves.toMatchObject({ data: { operationalSummary: 'Generated summary' } });
+    expect(await storedSummary(1)).toBe('Generated summary');
+  });
+
+  it('refuses with 409, and sends nothing to the provider, when the retiree has not consented, even for an administrator', async () => {
+    await expect(summarize(6)).rejects.toMatchObject({ status: 409 });
+    expect(summarizer.generate).not.toHaveBeenCalled();
+    expect(await storedSummary(6)).toBeNull();
+  });
+
+  it('stores nothing when consent is withdrawn while the provider runs', async () => {
+    summarizer.generate.mockImplementation(async () => {
+      await pg.query(`UPDATE exit_interviews SET consent_granted = false WHERE id = $1::uuid`, [id(1)]);
+      return { operationalSummary: 'Generated summary' };
+    });
+    await expect(summarize(1)).rejects.toMatchObject({ status: 409 });
+    expect(await storedSummary(1)).toBeNull();
   });
 });

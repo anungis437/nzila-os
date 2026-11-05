@@ -19,7 +19,7 @@
 import { organizationMembers } from '@/db/schema-organizations';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { toCents } from '@/lib/decimal-safe';
@@ -280,7 +280,9 @@ export class BillingCycleService {
       .where(
         and(
           eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.status, 'active')
+          eq(organizationMembers.status, 'active'),
+          // A removed member keeps status 'active' and only gains deletedAt; they are never billed.
+          isNull(organizationMembers.deletedAt),
         )
       );
 

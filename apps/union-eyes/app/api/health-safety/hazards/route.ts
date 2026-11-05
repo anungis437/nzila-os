@@ -79,6 +79,12 @@ export function preprocessHazardCreateBody(body: unknown): unknown {
 
 export function buildHazardCreateValues(values: Record<string, unknown>): Record<string, unknown> {
   const raw = values;
+  // Anonymity must be an explicit boolean. A truthy non-boolean ("true", 1) would otherwise strip the reporter's name
+  // and contact while the factory's strict anonymousCreate check still attributed the row to the session user.
+  if (raw.isAnonymous !== undefined && raw.isAnonymous !== null && typeof raw.isAnonymous !== 'boolean') {
+    throw ApiError.badRequest('isAnonymous must be a boolean');
+  }
+  const isAnonymous = raw.isAnonymous === true;
   const hazardType = typeof raw.hazardType === 'string' ? raw.hazardType : undefined;
   const priority = typeof raw.priority === 'string' ? raw.priority : undefined;
 
@@ -110,9 +116,9 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
     hazardDescription,
     potentialConsequences: raw.potentialConsequences,
     suggestedCorrections: raw.suggestedCorrections ?? raw.recommendedAction,
-    isAnonymous: raw.isAnonymous ?? false,
-    reportedByName: raw.isAnonymous ? undefined : (raw.reportedByName ?? raw.reporterName),
-    reporterContactInfo: raw.isAnonymous ? undefined : (raw.reporterContactInfo ?? raw.reporterContact),
+    isAnonymous,
+    reportedByName: isAnonymous ? undefined : (raw.reportedByName ?? raw.reporterName),
+    reporterContactInfo: isAnonymous ? undefined : (raw.reporterContactInfo ?? raw.reporterContact),
     organizationId: raw.organizationId,
     createdBy: raw.createdBy,
     metadata: { rawHazardType: hazardType },

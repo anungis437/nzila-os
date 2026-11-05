@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   requireApiAuth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   recordConsent: vi.fn(),
+  getProvinceConfig: vi.fn(),
   hasValidConsent: vi.fn(),
   revokeConsent: vi.fn(),
   persistAtomicAudit: vi.fn(),
@@ -22,6 +23,7 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomic
 vi.mock('@/services/provincial-privacy-service', () => ({
   ProvincialPrivacyService: {
     recordConsent: m.recordConsent,
+    getProvinceConfig: m.getProvinceConfig,
     hasValidConsent: m.hasValidConsent,
     revokeConsent: m.revokeConsent,
   },
@@ -43,6 +45,7 @@ describe('privacy/consent route', () => {
     m.getOrganizationIdForUser.mockResolvedValue('org-1');
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.recordConsent.mockResolvedValue({ id: 'c1' });
+    m.getProvinceConfig.mockImplementation(async (province: string) => ({ province, explicitOptIn: province === 'QC' }));
     m.hasValidConsent.mockResolvedValue(true);
     m.revokeConsent.mockResolvedValue([{ id: 'c1' }]);
   });
@@ -83,6 +86,59 @@ describe('privacy/consent route', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       m.tx,
       expect.objectContaining({ organizationId: 'org-1', userId: 'u1', action: 'privacy.consent.record', resourceId: 'c1' }),
+    );
+  });
+
+  it.each(['implicit', 'opt_out'])('POST answers 400, before any write, for a Quebec grant recorded with %s', async (consentMethod) => {
+    const { POST } = await loadRoute();
+    const { withRLSContext } = await import('@/lib/db/with-rls-context');
+
+    const response = await POST(new NextRequest('http://localhost/api/privacy/consent', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+        province: 'QC', consentType: 'marketing', consentGiven: true, consentText: 'texte de consentement', consentLanguage: 'fr', consentMethod,
+      }),
+    }));
+
+    expect(response.status).toBe(400);
+    expect(m.getProvinceConfig).toHaveBeenCalledWith('QC');
+    expect(withRLSContext).not.toHaveBeenCalled();
+    expect(m.recordConsent).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('POST records a Quebec grant made with an explicit method, and a Quebec refusal made with opt_out', async () => {
+    const { POST } = await loadRoute();
+    const post = (consentGiven: boolean, consentMethod: string) => POST(new NextRequest('http://localhost/api/privacy/consent', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+        province: 'QC', consentType: 'marketing', consentGiven, consentText: 'texte de consentement', consentLanguage: 'fr', consentMethod,
+      }),
+    }));
+
+    expect((await post(true, 'opt_in')).status).toBe(200);
+    expect((await post(true, 'explicit_checkbox')).status).toBe(200);
+    expect((await post(false, 'opt_out')).status).toBe(200);
+    expect(m.recordConsent).toHaveBeenCalledTimes(3);
+  });
+
+  it('POST does not store client-supplied forwarding headers or user agent as consent evidence', async () => {
+    const { POST } = await loadRoute();
+
+    const response = await POST(new NextRequest('http://localhost/api/privacy/consent', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': '6.6.6.6', 'x-real-ip': '7.7.7.7', 'user-agent': 'spoofed-agent' },
+      body: JSON.stringify({
+        province: 'ON', consentType: 'marketing', consentGiven: true, consentText: 'long enough consent text', consentLanguage: 'en',
+      }),
+    }));
+
+    expect(response.status).toBe(200);
+    const [recordArgs] = m.recordConsent.mock.calls[0];
+    expect(recordArgs.ipAddress).toBeUndefined();
+    expect(recordArgs.userAgent).toBeUndefined();
+    expect(JSON.stringify(m.recordConsent.mock.calls)).not.toMatch(/6\.6\.6\.6|7\.7\.7\.7|spoofed-agent/);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      m.tx,
+      expect.objectContaining({ details: expect.objectContaining({ networkEvidenceVerified: false }) }),
     );
   });
 

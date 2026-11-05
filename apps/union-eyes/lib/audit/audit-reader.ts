@@ -50,10 +50,25 @@ const fromCanonical = (row: CanonicalRow): AuditEntryView => ({
   source: 'canonical',
 })
 
+/**
+ * The legacy columns an audit entry shows, and only those: the query never reads addresses, user agents, session ids,
+ * metadata or the old/new payloads, so they cannot reach a response even by mistake.
+ */
+const legacyEntryColumns = () => ({
+  auditId: auditLogs.auditId,
+  action: auditLogs.action,
+  resourceType: auditLogs.resourceType,
+  resourceId: auditLogs.resourceId,
+  userId: auditLogs.userId,
+  severity: auditLogs.severity,
+  outcome: auditLogs.outcome,
+  createdAt: auditLogs.createdAt,
+})
+
 export async function listAuditEntries(tx: RLSTx, organizationId: string, limit = AUDIT_LIST_LIMIT): Promise<AuditEntryView[]> {
   const bound = Math.min(Math.max(1, Math.trunc(limit)), AUDIT_LIST_LIMIT)
   const legacy = await tx
-    .select()
+    .select(legacyEntryColumns())
     .from(auditLogs)
     .where(eq(auditLogs.organizationId, organizationId))
     .orderBy(desc(auditLogs.createdAt))
@@ -123,7 +138,7 @@ export async function readAuditEntry(tx: RLSTx, organizationId: string, auditId:
     if (row) return fromCanonical(row)
   }
   const [legacy] = await tx
-    .select()
+    .select(legacyEntryColumns())
     .from(auditLogs)
     .where(and(eq(auditLogs.auditId, auditId), eq(auditLogs.organizationId, organizationId)))
     .limit(1)

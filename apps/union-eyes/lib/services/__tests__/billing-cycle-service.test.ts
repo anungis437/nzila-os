@@ -13,7 +13,11 @@ const { mockSelect, mockWithRLS, mockCalculate, mockRequireMandate } = vi.hoiste
 }));
 
 vi.mock('@/db/schema-organizations', () => ({
-  organizationMembers: {},
+  organizationMembers: {
+    organizationId: 'organization_members.organization_id',
+    status: 'organization_members.status',
+    deletedAt: 'organization_members.deleted_at',
+  },
 }));
 
 vi.mock('@/db/schema/domains/finance/dues', () => ({
@@ -22,7 +26,13 @@ vi.mock('@/db/schema/domains/finance/dues', () => ({
 
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual };
+  // Conditions are recorded as plain values so a test can read the filter a query was given.
+  return {
+    ...actual,
+    and: (...conditions: unknown[]) => ({ and: conditions }),
+    eq: (column: unknown, value: unknown) => ({ eq: [column, value] }),
+    isNull: (column: unknown) => ({ isNull: column }),
+  };
 });
 
 vi.mock('drizzle-orm/node-postgres', () => ({
@@ -240,6 +250,28 @@ describe('BillingCycleService', () => {
       expect(inserts[0]).toMatchObject({ memberId: OTHER });
       expect(result.members).toMatchObject({ processed: 2, skipped: 1 });
       expect(result.transactionsCreated).toBe(1);
+    });
+
+    it('selects as billing candidates only active members of the organization who have not been removed (deletedAt is null)', async () => {
+      const filters: unknown[] = [];
+      let reads = 0;
+      const tx = {
+        select: vi.fn(() => ({ from: () => ({ where: async (filter: unknown) => { filters.push(filter); reads++; return []; } }) })),
+        insert: vi.fn(),
+      };
+      mockWithRLS.mockImplementationOnce(async (_scope, callback) => callback(tx));
+
+      await BillingCycleService.generateBillingCycle(cycle);
+
+      expect(reads).toBeGreaterThanOrEqual(1);
+      expect(filters[0]).toEqual({
+        and: [
+          { eq: ['organization_members.organization_id', ORG] },
+          { eq: ['organization_members.status', 'active'] },
+          { isNull: 'organization_members.deleted_at' },
+        ],
+      });
+      expect(tx.insert).not.toHaveBeenCalled();
     });
 
     it('skips a member with no assignment on the cycle frequency, and writes nothing for them', async () => {
