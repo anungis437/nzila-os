@@ -11,13 +11,15 @@ const m = vi.hoisted(() => ({
   isIndexingAllowed: vi.fn(),
   indexExitInterview: vi.fn(),
   audit: vi.fn(),
+  selectWhere: [] as unknown[],
+  updateWhere: [] as unknown[],
 }));
 
 const mockDb = {
   select: vi.fn(() => {
     const chain: any = {
       from: vi.fn(() => chain),
-      where: vi.fn(() => chain),
+      where: vi.fn((w: unknown) => { m.selectWhere.push(w); return chain; }),
       limit: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
     };
     return chain;
@@ -29,9 +31,10 @@ const mockDb = {
   })),
   update: vi.fn(() => ({
     set: vi.fn(() => ({
-      where: vi.fn(() => ({
-        returning: vi.fn(async () => (m.updateReturningQueue.shift() ?? [{ id: 'iv_1', status: 'published' }]) as unknown[]),
-      })),
+      where: vi.fn((w: unknown) => {
+        m.updateWhere.push(w);
+        return { returning: vi.fn(async () => (m.updateReturningQueue.shift() ?? [{ id: 'iv_1', status: 'published' }]) as unknown[]) };
+      }),
     })),
   })),
 };
@@ -58,6 +61,12 @@ vi.mock('@/lib/knowledge-transfer/governance/consent-controls', async (importOri
   isIndexingAllowed: m.isIndexingAllowed,
 }));
 
+/** A drizzle WHERE rendered to its SQL text and parameters, so a test can say which predicates it holds. */
+async function render(where: unknown): Promise<{ sql: string; params: unknown[] }> {
+  const { PgDialect } = await import('drizzle-orm/pg-core');
+  return new PgDialect().sqlToQuery(where as never);
+}
+
 async function loadRoute() {
   return import('../exit-interviews/[id]/publish/route');
 }
@@ -68,6 +77,8 @@ describe('exit-interviews/[id]/publish route', () => {
     m.selectQueue = [];
     m.insertReturningQueue = [];
     m.updateReturningQueue = [];
+    m.selectWhere = [];
+    m.updateWhere = [];
     m.extractExpertise.mockResolvedValue({
       continuitySensitivity: 'medium',
       undocumentedWorkflows: ['workflow-a'],
@@ -255,7 +266,8 @@ describe('exit-interviews/[id]/publish route', () => {
     });
 
     it('audits the intent and the outcome of the AI extraction for an interview that may be indexed', async () => {
-      m.selectQueue.push([reviewed()]);
+      // The second read is the background extraction reading the interview again before it calls the provider.
+      m.selectQueue.push([reviewed()], [reviewed({ status: 'published' })]);
       m.insertReturningQueue.push([{ id: 'kb_1' }]);
       m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
       await publish();
@@ -266,7 +278,7 @@ describe('exit-interviews/[id]/publish route', () => {
     });
 
     it('records a failed extraction instead of swallowing it', async () => {
-      m.selectQueue.push([reviewed()]);
+      m.selectQueue.push([reviewed()], [reviewed({ status: 'published' })]);
       m.insertReturningQueue.push([{ id: 'kb_1' }]);
       m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
       m.extractExpertise.mockRejectedValue(new Error('model down'));
@@ -274,6 +286,52 @@ describe('exit-interviews/[id]/publish route', () => {
       await flush();
       const actions = m.audit.mock.calls.map((c) => (c[1] as { action: string }).action);
       expect(actions).toContain('exit_interview.ai_extraction.failed');
+    });
+
+    it('does not send the interview to the AI provider when consent was withdrawn after publication', async () => {
+      // The re-read requires consent: a withdrawn interview is not returned.
+      m.selectQueue.push([reviewed()], []);
+      m.insertReturningQueue.push([{ id: 'kb_1' }]);
+      m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
+      await publish();
+      await flush();
+      expect(m.extractExpertise).not.toHaveBeenCalled();
+      expect(m.indexExitInterview).not.toHaveBeenCalled();
+      const actions = m.audit.mock.calls.map((c) => (c[1] as { action: string }).action);
+      expect(actions).toContain('exit_interview.ai_extraction.skipped');
+      expect(actions).not.toContain('exit_interview.ai_extraction.requested');
+      const reread = await render(m.selectWhere[1]);
+      expect(reread.sql).toContain('"consent_granted" = $');
+      expect(reread.params).toContain(true);
+    });
+
+    it('does not send an interview whose level was raised after publication', async () => {
+      m.selectQueue.push([reviewed()], [reviewed({ status: 'published', sensitivityLevel: 'privileged' })]);
+      m.insertReturningQueue.push([{ id: 'kb_1' }]);
+      m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
+      m.isIndexingAllowed.mockImplementation((level: string, consent: boolean) => consent && level !== 'privileged');
+      await publish();
+      await flush();
+      expect(m.extractExpertise).not.toHaveBeenCalled();
+      expect(m.indexExitInterview).not.toHaveBeenCalled();
+    });
+
+    it('records nothing from the provider, and does not index, when consent is withdrawn while the provider runs', async () => {
+      m.selectQueue.push([reviewed()], [reviewed({ status: 'published' })]);
+      m.insertReturningQueue.push([{ id: 'kb_1' }]);
+      // Publication's update, then the extraction outcome's update, which a withdrawal leaves matching nothing.
+      m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }], []);
+      await publish();
+      await flush();
+      expect(m.extractExpertise).toHaveBeenCalledTimes(1);
+      expect(m.indexExitInterview).not.toHaveBeenCalled();
+      const actions = m.audit.mock.calls.map((c) => (c[1] as { action: string }).action);
+      expect(actions).not.toContain('exit_interview.ai_extraction.completed');
+      expect(actions).toContain('exit_interview.ai_extraction.skipped');
+      const outcome = await render(m.updateWhere[1]);
+      expect(outcome.sql).toContain('"consent_granted" = $');
+      expect(outcome.sql).toMatch(/"sensitivity_level" in \(\$\d+, \$\d+\)/);
+      expect(outcome.params).toEqual(expect.arrayContaining([true, 'public_internal', 'restricted']));
     });
   });
 });
