@@ -130,8 +130,24 @@ export function assertRoleGatedReadStatus(status: number): void {
   expect([200, 403, 500]).toContain(status)
 }
 
-export async function assertNoCrossOrgLeak(response: { status(): number; text(): Promise<string> }): Promise<void> {
-  assertPermissionDenied(response.status())
+/**
+ * For a route that is not implemented and says so: `/api/exports` and
+ * `/api/admin/update-role` throw `ApiError.notImplemented` for every caller
+ * that passes authentication, so they answer 501, change nothing and return
+ * no data. That is still a refusal of the operation, so 501 is accepted here
+ * alongside the usual denials. Use it only for such routes; never use it to
+ * relax a route that has a real implementation.
+ */
+export function assertDeniedOrNotImplemented(status: number): void {
+  expect([401, 403, 404, 501]).toContain(status)
+}
+
+export async function assertNoCrossOrgLeak(
+  response: { status(): number; text(): Promise<string> },
+  options: { notImplemented?: boolean } = {},
+): Promise<void> {
+  if (options.notImplemented) assertDeniedOrNotImplemented(response.status())
+  else assertPermissionDenied(response.status())
   const body = await response.text()
   expect(body).not.toMatch(/UE-QA-1001|secondary\-member|qa-secondary/i)
 }
