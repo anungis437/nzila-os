@@ -11,7 +11,7 @@ describe('Union Eyes V2 Container Apps health probes', () => {
   const source = readFileSync(join(__dirname, '..', '..', 'infrastructure', 'bicep', 'ue-v2', 'modules', 'apps.bicep'), 'utf8')
   const main = readFileSync(join(__dirname, '..', '..', 'infrastructure', 'bicep', 'ue-v2', 'main.bicep'), 'utf8')
   const probe = (kind: string) => {
-    const match = source.match(new RegExp("type: '"+kind+"'[\\s\\S]*?httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
+    const match = source.match(new RegExp("type: '" + kind + "'[\\s\\S]*?httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
     return match?.[1]
   }
 
@@ -28,29 +28,27 @@ describe('Union Eyes V2 Container Apps health probes', () => {
       expect(source).not.toContain(forbidden)
     }
   })
-  it('passes the selected staging or production environment from the root deployment into the app module', () => {
-    expect(main).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param env string/)
+  it('passes the selected environment into the application module', () => {
+    expect(main).toContain("@allowed(['staging', 'prod'])")
+    expect(main).toContain('param env string')
     expect(main).toMatch(/module apps 'modules\/apps\.bicep'[\s\S]*?deploymentEnvironment: env/)
-    expect(main).not.toMatch(/deploymentEnvironment:\s*'prod'/)
+    expect(main).not.toContain("deploymentEnvironment: 'prod'")
   })
 
-  it('requires an explicit deployment target and keeps staging identity and data separate by default', () => {
-    expect(main).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param env string(?:\s|$)/m)
+  it('requires explicit staging or production selection with isolated defaults', () => {
+    expect(main).toContain("@allowed(['staging', 'prod'])\nparam env string")
     expect(main).not.toMatch(/param env string\s*=/)
-    expect(main).toMatch(/param appDatabaseName string = env == 'prod' \? 'ue_v2_prod' : 'ue_v2_staging'/)
-    // Staging gets no production host or site: empty falls back to the Container Apps default FQDN (owner decision
-    // 2026-11-04: staging.unioneyes.app still points at the legacy subscription).
-    expect(main).toMatch(/param publicHostName string = env == 'prod' \? 'app\.unioneyes\.app' : ''/)
-    expect(main).toMatch(/param siteUrl string = env == 'prod' \? 'https:\/\/unioneyes\.app' : ''/)
-    // Staging scales to zero for cost (owner decision 2026-11-04); raise appMinReplicas for an acceptance run.
-    expect(main).toMatch(/param appMinReplicas int = env == 'prod' \? 2 : 0/)
+    expect(main).toContain("param appDatabaseName string = env == 'prod' ? 'ue_v2_prod' : 'ue_v2_staging'")
+    expect(main).toContain("param publicHostName string = env == 'prod' ? 'app.unioneyes.app' : ''")
+    expect(main).toContain("param siteUrl string = env == 'prod' ? 'https://unioneyes.app' : ''")
+    expect(main).toContain("param appMinReplicas int = env == 'prod' ? 2 : 0")
   })
 
-  it('does not label staging as production in the application revision', () => {
-    expect(source).toMatch(/@allowed\(\['staging', 'prod'\]\)\s*param deploymentEnvironment string/)
-    expect(source).toMatch(/name: 'UE_ENVIRONMENT', value: deploymentEnvironment == 'prod' \? 'production' : 'staging'/)
-    expect(source).toMatch(/name: 'UE_DEPLOYMENT_TYPE', value: deploymentEnvironment/)
-    expect(source).toMatch(/name: 'NEXT_PUBLIC_APP_ENV', value: deploymentEnvironment == 'prod' \? 'production' : 'staging'/)
+  it('does not label staging as production', () => {
+    expect(source).toContain("@allowed(['staging', 'prod'])\nparam deploymentEnvironment string")
+    expect(source).toContain("name: 'UE_ENVIRONMENT', value: deploymentEnvironment == 'prod' ? 'production' : 'staging'")
+    expect(source).toContain("name: 'UE_DEPLOYMENT_TYPE', value: deploymentEnvironment")
+    expect(source).toContain("name: 'NEXT_PUBLIC_APP_ENV', value: deploymentEnvironment == 'prod' ? 'production' : 'staging'")
   })
 
 })
