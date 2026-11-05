@@ -1,17 +1,17 @@
 {
-  "nodeVersion": "v24.16.0",
+  "nodeVersion": "v24.13.1",
   "nodeEnvironment": "production",
-  "source": "apps/union-eyes/lib/encryption.ts",
-  "sourceDigest": "50442237a2e45011ceaea61ece9172bf775da11cf60f1191fcdba220a5da8547",
+  "source": "apps\\union-eyes\\lib\\encryption.ts",
+  "sourceDigest": "0e7d048a2c0ccbe801210531a126e0913a5f368d93a8c23179f71715440c4847",
   "fallbackPresent": false,
   "cloudCredentialsInherited": false,
   "encryptSecret": "REFUSED",
   "observedError": "Azure Key Vault initialization failed in production environment. Please verify AZURE_KEY_VAULT_URL and Azure credentials are configured correctly.",
   "networkObservations": [
     {
-      "pid": 74476,
+      "pid": 57936,
       "transport": "PIPE",
-      "targetDigest": "325921e7972c113f775d3bed352b3db26bdab55e362598b0fb26610c63419a2f",
+      "targetDigest": "635d971cc067964ebd818c94f145b8d908ce2198f6f7807ee6faf2e383039908",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false

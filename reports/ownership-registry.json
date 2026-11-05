@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T16:07:43.695Z",
+  "generatedAt": "2026-08-27T20:40:32.349Z",
   "source": "governance/release/app-ownership.json",
   "seriousAppCount": 27,
   "coveragePct": 100,
@@ -250,7 +250,7 @@
       "app": "platform-admin",
       "name": "platform-admin",
       "tier": "frozen",
-      "releaseStatus": "staging-only",
+      "releaseStatus": "frozen",
       "track": "legacy",
       "supportModel": "unknown",
       "owners": {
