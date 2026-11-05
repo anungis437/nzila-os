@@ -40,7 +40,6 @@ interface Pinned {
 
 const COLUMN_ARRAYS: Pinned[] = [
   { file: 'lib/services/policy-engine.ts', text: 'legalHolds.dataTypes', why: 'a column of array type' },
-  { file: 'lib/organizations/reparent.ts', text: 'organizations.hierarchyPath', why: 'a column of array type' },
   { file: 'app/api/organizations/[id]/descendants/route.ts', text: 'organizations.hierarchyPath', why: 'a column of array type' },
   { file: 'app/api/organizations/hierarchy/route.ts', text: 'organizations.hierarchyPath', why: 'a column of array type' },
 ];

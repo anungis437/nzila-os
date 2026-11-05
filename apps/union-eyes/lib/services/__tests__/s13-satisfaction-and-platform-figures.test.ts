@@ -34,9 +34,9 @@ describe('Gate 0 batch B69: satisfaction figures, platform statistics and the in
     expect(ingest).not.toContain('Simplified - actual implementation')
   })
 
-  it('repoints the hierarchy on an organization parent change instead of writing a bare parent id', () => {
+  it('never writes a bare parent id: the item route refuses any parent change (409) until a governed reparent workflow exists (#1116)', () => {
     const route = src('app/api/organizations/[id]/route.ts')
-    expect(route).toContain('repointHierarchy(tx, id, body.parent_id ?? null)')
-    expect(src('lib/organizations/reparent.ts')).toContain("'cycle'")
+    expect(route).not.toContain('repointHierarchy(')
+    expect(route).toContain('Changing parent affiliation or status requires an approved institutional workflow')
   })
 })
