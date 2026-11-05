@@ -39,6 +39,7 @@ describe('Union Eyes V2 Container Apps health probes', () => {
     expect(main).not.toMatch(/param env string\s*=/)
     expect(main).toMatch(/param appDatabaseName string = env == 'prod' \? 'ue_v2_prod' : 'ue_v2_staging'/)
     expect(main).toMatch(/param publicHostName string = env == 'prod' \? 'app\.unioneyes\.app' : 'staging\.unioneyes\.app'/)
+    expect(main).toMatch(/param siteUrl string = env == 'prod' \? 'https:\/\/unioneyes\.app' : 'https:\/\/staging\.unioneyes\.app'/)
     expect(main).toMatch(/param appMinReplicas int = env == 'prod' \? 2 : 1/)
   })
 
