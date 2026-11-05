@@ -7,6 +7,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
 import { logger } from '@/lib/logger';
+import { EXPLICIT_CONSENT_METHODS, violatesExplicitOptIn } from '@/lib/privacy/explicit-consent';
 
 import {
   ErrorCode,
@@ -82,10 +83,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user IP and user agent for audit trail
-    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined;
-    const userAgent = request.headers.get("user-agent") || undefined;
+    // A grant in a province that requires explicit opt-in (Quebec Law 25) must come from an explicit method.
+    const provinceConfig = await ProvincialPrivacyService.getProvinceConfig(province as Province);
+    if (violatesExplicitOptIn(provinceConfig, consentGiven, consentMethod)) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        `${province} requires explicit consent: consentMethod must be one of ${EXPLICIT_CONSENT_METHODS.join(', ')} when consentGiven is true.`
+      );
+    }
 
+    // X-Forwarded-For, X-Real-IP and User-Agent are whatever the client chose to send. They are not
+    // stored as consent evidence (ipAddress/userAgent stay null); the audit row records networkEvidenceVerified=false.
     const organizationId = await getOrganizationIdForUser(userId);
     const consent = await withRLSContext({ organizationId }, async (tx) => {
       const recorded = await ProvincialPrivacyService.recordConsent(
@@ -97,8 +105,8 @@ export async function POST(request: NextRequest) {
           consentMethod,
           consentText,
           consentLanguage,
-          ipAddress,
-          userAgent,
+          ipAddress: undefined,
+          userAgent: undefined,
         },
         tx,
       );
@@ -108,7 +116,7 @@ export async function POST(request: NextRequest) {
         action: 'privacy.consent.record',
         resourceType: 'provincial_consent',
         resourceId: recorded.id,
-        details: { province, consentType, consentGiven, consentMethod },
+        details: { province, consentType, consentGiven, consentMethod, networkEvidenceVerified: false },
       });
       return recorded;
     });
