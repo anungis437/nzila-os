@@ -8265,6 +8265,9 @@ importers:
 
   packages/zonga-payments:
     dependencies:
+      '@nzila/payments-stripe':
+        specifier: workspace:*
+        version: link:../payments-stripe
       '@nzila/zonga-economics':
         specifier: workspace:*
         version: link:../zonga-economics
