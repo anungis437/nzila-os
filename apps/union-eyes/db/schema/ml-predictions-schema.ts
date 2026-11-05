@@ -31,7 +31,7 @@ export const mlPredictions = pgTable("ml_predictions", {
   confidence: decimal("confidence"), // 0-100
   horizon: integer("horizon"), // 30, 60, 90 days
   granularity: varchar("granularity", { length: 20 }), // 'daily', 'weekly'
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   organizationIdx: index("idx_ml_predictions_organization").on(table.organizationId),
   typeIdx: index("idx_ml_predictions_type").on(table.predictionType),

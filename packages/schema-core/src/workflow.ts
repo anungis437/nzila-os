@@ -5,11 +5,11 @@ import { z } from 'zod'
  */
 
 export const workflowStateSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   workflowKey: z.string().min(1),
   currentState: z.string().min(1),
   previousState: z.string().nullable(),
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   entityType: z.string().min(1),
   orgId: z.string().min(1),
   sourceModule: z.string().min(1),
@@ -28,14 +28,14 @@ export const workflowStateSchema = z.object({
 export type WorkflowState = z.infer<typeof workflowStateSchema>
 
 export const workflowTransitionRecordSchema = z.object({
-  id: z.string().uuid(),
-  workflowId: z.string().uuid(),
+  id: z.guid(),
+  workflowId: z.guid(),
   fromState: z.string().min(1),
   toState: z.string().min(1),
   trigger: z.string().min(1),
   actorId: z.string().min(1),
   timestamp: z.string().datetime(),
-  payload: z.record(z.unknown()).optional(),
-  auditId: z.string().uuid().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  auditId: z.guid().optional(),
 })
 export type WorkflowTransitionRecord = z.infer<typeof workflowTransitionRecordSchema>

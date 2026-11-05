@@ -7,14 +7,17 @@
 import { NextResponse } from "next/server";
 import {
   listBargainingNotes,
-  createBargainingNote,
-  bulkCreateBargainingNotes,
-  getBargainingTimeline,
-  getBargainingNotesStatistics,
-  getNotesByTags,
-  getSessionTypes,
 } from "@/lib/services/bargaining-notes-service";
+import {
+  createBargainingNoteAudited,
+  ForeignAgreementError,
+} from "@/lib/services/bargaining-notes-audited-service";
+import { getCbaForOrganization } from "@/lib/services/cba-audited-service";
 import { z } from "zod";
+import { InvalidBargainingNotesListQuery, parseBargainingNotesListQuery } from "@/lib/api/bargaining-notes-list-query";
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { bargainingNotes } from '@/db/schema';
+import { and, or, eq, inArray, asc, desc, count } from 'drizzle-orm';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
  
@@ -29,62 +32,86 @@ import {
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request, context) => {
+  const { userId } = context;
+  const organizationId = context.organizationId;
+  if (!organizationId || !userId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+  }
   try {
       const { searchParams } = new URL(request.url);
+      const listControls = parseBargainingNotesListQuery(searchParams);
       
       // Check for special modes
       const timeline = searchParams.get("timeline") === "true";
       const statistics = searchParams.get("statistics") === "true";
       const sessionTypes = searchParams.get("sessionTypes") === "true";
       const cbaId = searchParams.get("cbaId");
-      const organizationId = searchParams.get("organizationId");
-  if (organizationId && organizationId !== context.organizationId) {
+      const requestedOrganizationId = searchParams.get("organizationId");
+  if (requestedOrganizationId && requestedOrganizationId !== organizationId) {
     return standardErrorResponse(
       ErrorCode.FORBIDDEN,
       'Forbidden'
     );
   }
 
+      // An agreement outside the caller's organization is not found
+      if (cbaId && !(await getCbaForOrganization(organizationId, cbaId))) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'CBA not found');
+      }
 
-      // Return timeline
+      // Special views must use the SAME confidentiality policy as ordinary
+      // listing. The legacy summary helpers read restricted note titles.
+      // All modes, including summaries and service-backed listing, must run on
+      // the authenticated tenant transaction rather than a pooled connection.
+      return withRLSContext({ organizationId, userId }, async (tx) => {
+      const visible = and(
+        eq(bargainingNotes.organizationId, organizationId),
+        or(
+          inArray(bargainingNotes.confidentialityLevel, ['public', 'internal']),
+          eq(bargainingNotes.createdBy, userId),
+        ),
+        cbaId ? eq(bargainingNotes.cbaId, cbaId) : undefined,
+      );
       if (timeline && cbaId) {
-        const timelineData = await getBargainingTimeline(cbaId);
+        const timelineData = await tx.select({
+          id: bargainingNotes.id,
+          sessionDate: bargainingNotes.sessionDate,
+          sessionType: bargainingNotes.sessionType,
+          sessionNumber: bargainingNotes.sessionNumber,
+          title: bargainingNotes.title,
+        }).from(bargainingNotes).where(visible)
+          .orderBy(asc(bargainingNotes.sessionDate)).limit(500);
         return NextResponse.json({ timeline: timelineData });
       }
-
-      // Return statistics
-      if (statistics && organizationId) {
-        const stats = await getBargainingNotesStatistics(organizationId);
-        return NextResponse.json(stats);
+      if (statistics) {
+        const bySessionType = await tx.select({
+          sessionType: bargainingNotes.sessionType,
+          count: count(),
+        }).from(bargainingNotes).where(visible).groupBy(bargainingNotes.sessionType);
+        const [total] = await tx.select({ value: count() }).from(bargainingNotes).where(visible);
+        const recentActivity = await tx.select({
+          sessionDate: bargainingNotes.sessionDate,
+          sessionType: bargainingNotes.sessionType,
+          title: bargainingNotes.title,
+        }).from(bargainingNotes).where(visible).orderBy(desc(bargainingNotes.sessionDate)).limit(5);
+        return NextResponse.json({ total: total?.value ?? 0, bySessionType, recentActivity });
+      }
+      if (sessionTypes) {
+        const rows = await tx.selectDistinct({ sessionType: bargainingNotes.sessionType })
+          .from(bargainingNotes).where(visible);
+        return NextResponse.json({ sessionTypes: rows.map(row => row.sessionType).filter(Boolean) });
       }
 
-      // Return session types
-      if (sessionTypes && organizationId) {
-        const types = await getSessionTypes(organizationId);
-        return NextResponse.json({ sessionTypes: types });
-      }
+      // Privileged session notes stay with their author; everyone else sees public and internal notes only
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const filters: Record<string, any> = { organizationId, visibleToUserId: userId };
+      if (cbaId) filters.cbaId = cbaId;
 
-      // Check for tags filter
-      const tags = searchParams.get("tags");
-      if (tags) {
-        const tagArray = tags.split(",");
-        const limit = parseInt(searchParams.get("limit") || "50");
-        const notes = await getNotesByTags(tagArray, organizationId || undefined, limit);
-        return NextResponse.json({ notes, count: notes.length });
-      }
+      // Tags are an additional predicate, not a separate list endpoint:
+      // apply the same agreement, confidentiality, date and pagination bounds.
+      if (listControls.tags) filters.tags = listControls.tags;
 
       // Build filters
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const filters: Record<string, any> = {};
-      
-      if (cbaId) {
-        filters.cbaId = cbaId;
-      }
-
-      if (organizationId) {
-        filters.organizationId = organizationId;
-      }
-
       const sessionType = searchParams.get("sessionType");
       if (sessionType) {
         filters.sessionType = sessionType.split(",");
@@ -95,15 +122,8 @@ export const GET = withRoleAuth('member', async (request, context) => {
         filters.confidentialityLevel = confidentialityLevel;
       }
 
-      const dateFrom = searchParams.get("dateFrom");
-      if (dateFrom) {
-        filters.dateFrom = new Date(dateFrom);
-      }
-
-      const dateTo = searchParams.get("dateTo");
-      if (dateTo) {
-        filters.dateTo = new Date(dateTo);
-      }
+      if (listControls.dateFrom) filters.dateFrom = listControls.dateFrom;
+      if (listControls.dateTo) filters.dateTo = listControls.dateTo;
 
       const createdBy = searchParams.get("createdBy");
       if (createdBy) {
@@ -116,15 +136,19 @@ export const GET = withRoleAuth('member', async (request, context) => {
       }
 
       // Pagination
-      const page = parseInt(searchParams.get("page") || "1");
-      const limit = parseInt(searchParams.get("limit") || "20");
-      const sortBy = searchParams.get("sortBy") || "sessionDate";
-      const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
-
+      const { page, limit, sortBy, sortOrder } = listControls;
       const result = await listBargainingNotes(filters, { page, limit, sortBy, sortOrder });
 
+      // Preserve the legacy tags response keys while exposing real total/page.
+      if (listControls.tags) {
+        return NextResponse.json({ notes: result.notes, count: result.notes.length, total: result.total, page: result.page, limit: result.limit });
+      }
       return NextResponse.json(result);
+      });
     } catch (error) {
+      if (error instanceof InvalidBargainingNotesListQuery) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, error.message);
+      }
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',
@@ -135,8 +159,8 @@ return standardErrorResponse(
 
 
 const bargainingNotesSchema = z.object({
-  organizationId: z.string().uuid('Invalid organizationId'),
-  cbaId: z.string().uuid().optional(),
+  organizationId: z.guid('Invalid organizationId').optional(),
+  cbaId: z.guid().optional(),
   sessionDate: z.coerce.date(),
   sessionType: z.string().max(100),
   sessionNumber: z.number().int().optional(),
@@ -147,14 +171,17 @@ const bargainingNotesSchema = z.object({
     role: z.string(),
     organization: z.string(),
   })).optional(),
-  relatedClauseIds: z.array(z.string().uuid()).optional(),
-  relatedDecisionIds: z.array(z.string().uuid()).optional(),
+  relatedClauseIds: z.array(z.guid()).optional(),
+  relatedDecisionIds: z.array(z.guid()).optional(),
   tags: z.array(z.string()).optional(),
   confidentialityLevel: z.enum(['public', 'internal', 'restricted', 'confidential']).optional(),
 });
 
 export const POST = withRoleAuth('steward', async (request, context) => {
-    const { userId } = context;
+    const { userId, organizationId: contextOrganizationId } = context;
+    if (!userId || !contextOrganizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+    }
 
   try {
       const body = await request.json();
@@ -164,48 +191,28 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
-    
-    const { organizationId: _organizationId, sessionDate: _sessionDate, sessionType: _sessionType, title: _title, content: _content } = validation.data;
 
-      // Check if bulk create
-      if (Array.isArray(body)) {
-        // Validate all required fields
-        for (const note of body) {
-          if (!note.organizationId || !note.sessionDate || !note.sessionType || !note.title || !note.content) {
-            return NextResponse.json(
-              { error: "All notes must have organizationId, sessionDate, sessionType, title, and content" },
-              { status: 400 }
-            );
-          }
-        }
+    const { organizationId: requestedOrganizationId, ...noteData } = validation.data;
+    if (requestedOrganizationId && requestedOrganizationId !== contextOrganizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Forbidden');
+    }
 
-        // Add createdBy to all notes
-        const notesWithUser = body.map(note => ({
-          ...note,
-          createdBy: userId,
-          lastModifiedBy: userId
-        }));
-
-        const notes = await bulkCreateBargainingNotes(notesWithUser);
-        return standardSuccessResponse(
-      {  notes, count: notes.length  }
-    );
-      }
-
-      // Create note
-      const note = await createBargainingNote({
-        ...validation.data,
-        createdBy: userId!,
-        lastModifiedBy: userId!,
-      });
+      // Create note in the caller's organization
+      const note = await createBargainingNoteAudited(
+        { organizationId: contextOrganizationId, userId },
+        noteData,
+      );
 
       return standardSuccessResponse(
       {  note  }
     );
     } catch (error) {
+      if (error instanceof ForeignAgreementError) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'CBA not found');
+      }
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',

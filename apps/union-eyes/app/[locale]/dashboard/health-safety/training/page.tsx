@@ -1,92 +1,64 @@
 /**
- * Health & Safety - Training Management Page
- * 
- * Safety training tracking and compliance:
- * - Training records overview
- * - Certification status
- * - Upcoming training schedules
- * - Compliance tracking
- * 
+ * Health & Safety - Training Page
+ *
+ * What the application knows about safety training: how many training records an organization holds and how many of them expire within
+ * 30 days, from GET /api/health-safety/stats. No route lists, writes or exports training records, so the page offers no search, filter,
+ * export or list, and it has no figure for certified members or overdue training. A figure the route could not give is a dash, not zero.
+ *
  * @page app/[locale]/dashboard/health-safety/training/page.tsx
  */
 
 "use client";
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Users,
-  Search,
-  Download,
   ArrowLeft,
   GraduationCap,
-  CheckCircle2,
-  AlertTriangle,
   Clock,
   BookOpen,
 } from "lucide-react";
-import { toast } from "sonner";
-import { logger } from '@/lib/logger';
+import { useStats } from "@/components/health-safety/use-stats";
+import { StatsLoadFailed } from "@/components/health-safety/stats-load-failed";
+import { countOrNull, requiredCount } from "@/lib/client/row-fields";
 
-interface TrainingRecord {
-  id: string;
-  record_number: string;
-  created_at: string;
+interface TrainingStats {
+  recordsHeld: number;
+  /** Records that expire within 30 days; null while the organization holds no record, when nothing has been measured. */
+  dueSoon: number | null;
 }
+
+function toTrainingStats(data: Record<string, unknown>): TrainingStats {
+  return { recordsHeld: requiredCount(data, "trainingRecordsHeld"), dueSoon: countOrNull(data, "trainingDue") };
+}
+
+const COPY = {
+  en: {
+    description: "Training records on file and those that expire within 30 days",
+    empty: "No safety training records are on file for this organization.",
+    onFile: (count: number) => `${count} training record${count === 1 ? " is" : "s are"} on file. This release has no screen that lists them.`,
+  },
+  fr: {
+    description: "Dossiers de formation enregistrés et ceux qui expirent dans les 30 jours",
+    empty: "Aucun dossier de formation en sécurité n’est enregistré pour cette organisation.",
+    onFile: (count: number) => `${count} dossier${count === 1 ? "" : "s"} de formation ${count === 1 ? "est enregistré" : "sont enregistrés"}. Cette version n’a aucun écran qui les affiche.`,
+  },
+} as const;
 
 export default function TrainingPage() {
   const t = useTranslations("healthSafetyTrainingPage");
+  const copy = useLocale().toLowerCase().startsWith("fr") ? COPY.fr : COPY.en;
   const organizationId = useOrganizationId();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [_records, _setRecords] = useState<TrainingRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalRecords: 0,
-    certifiedMembers: 0,
-    expiringSoon: 0,
-    overdue: 0,
-  });
 
-  const loadTrainingData = useCallback(async () => {
-    if (!organizationId) return;
-    setLoading(true);
-    try {
-      // Use health-safety stats for overview
-      const res = await fetch(`/api/health-safety/stats?organizationId=${organizationId}&period=30d`);
-      if (res.ok) {
-        const json = await res.json();
-        setStats({
-          totalRecords: json.trainingDue ?? 0,
-          certifiedMembers: 0,
-          expiringSoon: json.trainingDue ?? 0,
-          overdue: 0,
-        });
-      }
-    } catch (error) {
-      logger.error(t("errors.failedToLoadTrainingData"), error);
-      toast.error(t("errors.failedToLoadTrainingRecords"));
-    } finally {
-      setLoading(false);
-    }
-  }, [organizationId, t]);
-
-  useEffect(() => {
-    loadTrainingData();
-  }, [loadTrainingData]);
+  const { outcome, reload } = useStats("/api/health-safety/stats", toTrainingStats, organizationId ?? "", Boolean(organizationId));
+  const stats = outcome?.kind === "ready" ? outcome.stats : null;
+  // Loading is "…"; a figure that could not be read, or that the route could not give, is "—": neither is a count of zero.
+  const figure = (value: number | null | undefined) => (outcome === null ? "…" : value === null || value === undefined ? "—" : value);
 
   if (!organizationId) {
     return (
@@ -116,31 +88,25 @@ export default function TrainingPage() {
             <ArrowLeft className="h-4 w-4" />
             {t("header.back")}
           </Link>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <GraduationCap className="h-8 w-8 text-purple-600" />
-                {t("header.title")}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {t("header.description")}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                {t("header.export")}
-              </Button>
-            </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <GraduationCap className="h-8 w-8 text-purple-600" />
+              {t("header.title")}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              {copy.description}
+            </p>
           </div>
         </motion.div>
+
+        {outcome?.kind === "error" && <StatsLoadFailed message={outcome.message} onRetry={reload} />}
 
         {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-4 md:grid-cols-2"
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -148,19 +114,8 @@ export default function TrainingPage() {
               <BookOpen className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalRecords}</div>
+              <div className="text-2xl font-bold">{figure(stats?.recordsHeld)}</div>
               <p className="text-xs text-muted-foreground">{t("stats.totalRecords.description")}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t("stats.certifiedMembers.title")}</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.certifiedMembers}</div>
-              <p className="text-xs text-muted-foreground">{t("stats.certifiedMembers.description")}</p>
             </CardContent>
           </Card>
 
@@ -170,24 +125,13 @@ export default function TrainingPage() {
               <Clock className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.expiringSoon}</div>
+              <div className="text-2xl font-bold text-orange-600">{figure(stats?.dueSoon)}</div>
               <p className="text-xs text-muted-foreground">{t("stats.expiringSoon.description")}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t("stats.overdue.title")}</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
-              <p className="text-xs text-muted-foreground">{t("stats.overdue.description")}</p>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Search and Filter */}
+        {/* Records */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -201,45 +145,15 @@ export default function TrainingPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t("records.searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-45">
-                    <SelectValue placeholder={t("records.statusPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("records.statusOptions.all")}</SelectItem>
-                    <SelectItem value="current">{t("records.statusOptions.current")}</SelectItem>
-                    <SelectItem value="expiring">{t("records.statusOptions.expiringSoon")}</SelectItem>
-                    <SelectItem value="expired">{t("records.statusOptions.expired")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
-                </div>
-              ) : stats.totalRecords === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">{t("records.empty.title")}</h3>
-                  <p className="text-sm">
-                    {t("records.empty.description")}
-                  </p>
+              {stats === null ? (
+                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                  {outcome === null ? "…" : "—"}
                 </div>
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
+                  <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p className="text-sm">
-                    {t("records.summary", { count: stats.totalRecords })}
+                    {stats.recordsHeld === 0 ? copy.empty : copy.onFile(stats.recordsHeld)}
                   </p>
                 </div>
               )}

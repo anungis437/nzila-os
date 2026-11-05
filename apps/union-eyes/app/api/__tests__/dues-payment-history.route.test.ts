@@ -82,12 +82,26 @@ describe('/api/dues/payment-history route', () => {
           totalAmount: 25,
           status: 'completed',
           paymentMethod: 'payroll',
-          periodStart: '2026-05-01T00:00:00.000Z',
-          periodEnd: '2026-05-01T00:00:00.000Z',
+          periodStart: null,
+          periodEnd: null,
           receiptUrl: '/api/dues/receipt/p1',
         },
       ],
     });
+  });
+
+  it('states a period and a method only when the ledger entry has them, and invents neither', async () => {
+    const limit = vi.fn(async () => [
+      { id: 'p2', transactionDate: new Date('2026-06-01T00:00:00.000Z'), amount: '30.00', status: 'pending', paymentMethod: null, periodStart: new Date('2026-05-01T00:00:00.000Z'), periodEnd: new Date('2026-05-31T00:00:00.000Z'), receiptNumber: null },
+      { id: 'p3', transactionDate: new Date('2026-06-02T00:00:00.000Z'), amount: '30.00', status: 'posted', paymentMethod: 'cash', periodStart: null, periodEnd: null, receiptNumber: null },
+    ]);
+    m.select.mockImplementation(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit })) })) })) }));
+
+    const { GET } = await loadRoute();
+    const result = (await GET({ userId: 'user_1', organizationId: 'org_1', request: { url: 'https://example.test/api/dues/payment-history' } as any })) as { data: Array<Record<string, unknown>> };
+
+    expect(result.data[0]).toMatchObject({ status: 'pending', paymentMethod: null, periodStart: '2026-05-01T00:00:00.000Z', periodEnd: '2026-05-31T00:00:00.000Z', receiptUrl: undefined });
+    expect(result.data[1]).toMatchObject({ status: 'completed', paymentMethod: 'cash', periodStart: null, periodEnd: null });
   });
 
   it('returns empty data when context is missing, without querying the database', async () => {

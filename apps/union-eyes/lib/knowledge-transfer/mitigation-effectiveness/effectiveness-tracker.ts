@@ -8,13 +8,16 @@
  */
 
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
-import type {
-  MitigationEffectivenessReport,
+import {
+  OBSERVATION_WINDOW_DAYS,
+  type MitigationEffectivenessReport,
   MitigationIntervention,
   MitigationOutcome,
   EffectivenessDimension,
-  EffectivenessRating,
+  type EffectivenessRating,
 } from './effectiveness-models';
+
+const DAY_MS = 1000 * 60 * 60 * 24;
 
 function rateEffectiveness(scoreChange: number | null): EffectivenessRating {
   if (scoreChange === null) return 'unverified';
@@ -68,9 +71,10 @@ export async function trackMitigationEffectiveness(
     tags: e.tags,
   }));
 
-  // Match interventions with subsequent baseline entries to measure impact
+  // The follow-up is the next resilience baseline that has a recorded score, and it counts only inside the observation window
+  // and only when no other intervention was recorded in between (otherwise the change cannot be put down to this one).
   const baselineEntries = store.entries
-    .filter((e) => e.resilienceScoreAtCapture !== null)
+    .filter((e) => e.memoryType === 'resilience_baseline' && e.resilienceScoreAtCapture !== null)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
   const outcomes: MitigationOutcome[] = [];
@@ -87,8 +91,22 @@ export async function trackMitigationEffectiveness(
         e.resilienceScoreAtCapture !== null,
     );
 
-    if (!subsequentBaseline || scoreAtIntervention === null) {
-      unverified.push(intervention);
+    if (scoreAtIntervention === null) {
+      unverified.push({ ...intervention, unverifiedReason: 'no_recorded_score' });
+      continue;
+    }
+    const withinWindow =
+      subsequentBaseline &&
+      new Date(subsequentBaseline.createdAt).getTime() - new Date(intervention.recordedAt).getTime() <= OBSERVATION_WINDOW_DAYS * DAY_MS;
+    if (!subsequentBaseline || !withinWindow) {
+      unverified.push({ ...intervention, unverifiedReason: 'no_baseline_in_window' });
+      continue;
+    }
+    const confounded = interventions.some(
+      (other) => other.id !== intervention.id && other.recordedAt > intervention.recordedAt && other.recordedAt < subsequentBaseline.createdAt,
+    );
+    if (confounded) {
+      unverified.push({ ...intervention, unverifiedReason: 'other_intervention_in_window' });
       continue;
     }
 
@@ -176,6 +194,8 @@ export async function trackMitigationEffectiveness(
     mostEffectiveIntervention: mostEffective,
     ineffectiveInterventions,
     unverifiedInterventions: unverified,
+    attribution: 'association_not_causation',
+    observationWindowDays: OBSERVATION_WINDOW_DAYS,
     overallEffectivenessRating: overall,
     continuityRecommendation: recommendationMap[overall] ?? 'Continue building effectiveness history.',
   };

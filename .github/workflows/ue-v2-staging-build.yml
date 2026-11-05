@@ -1,0 +1,265 @@
+name: Union Eyes V2 · Staging Build (new subscription)
+
+# Builds the Union Eyes V2 images for the isolated staging stack in the NEW
+# Azure subscription (d562ba7f-…, registry nzilaventuresacr) and records them
+# in a digest-only release manifest. It never deploys anything.
+#
+# Authority: the `build` GitHub Environment resolves the build identity
+# (nzila-os-build: AcrPush on nzilaventuresacr only, no deploy RBAC) through
+# OIDC. No client secret and no registry admin credential is used.
+#
+# Output: artifact `ue-v2-staging-release-manifest-<sha>` holding
+# release-manifest.json (source SHA + sha256 digests). The staging deploy
+# workflow (ue-v2-staging-deploy.yml) accepts digests only and re-attests them
+# against the registry before any what-if or apply.
+#
+# Setup and role assignments: docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full 40-character commit SHA on main to build
+        required: true
+        type: string
+      clamav_source_ref:
+        description: >-
+          Upstream ClamAV HTTP adapter image to mirror, pinned by digest
+          (registry/repository@sha256:...). Tags are refused.
+        required: true
+        type: string
+      cron_source_ref:
+        description: >-
+          Upstream curl image for the cron job to mirror, pinned by digest
+          (registry/repository@sha256:...). Tags are refused.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ue-v2-staging-build
+  cancel-in-progress: false
+
+env:
+  ACR_NAME: nzilaventuresacr
+  REGISTRY: nzilaventuresacr.azurecr.io
+  APP_REPOSITORY: nzila-os-union-eyes-v2
+  CLAMAV_REPOSITORY: ue-clamav-http-adapter
+  CRON_REPOSITORY: ue-cron-curl
+  EXPECTED_SUBSCRIPTION_ID: d562ba7f-d891-4504-a489-10917c0ebaaf
+  STAGING_MARKETING_URL: https://staging.unioneyes.app
+  STAGING_APP_URL: https://staging-app.unioneyes.app
+
+jobs:
+  plan:
+    name: UE V2 Staging Build · Plan
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.plan.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: plan
+        shell: bash
+        env:
+          INPUT_SHA: ${{ inputs.source_sha }}
+          CLAMAV_SOURCE: ${{ inputs.clamav_source_ref }}
+          CRON_SOURCE: ${{ inputs.cron_source_ref }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::source_sha must be a full 40-character lowercase commit SHA."
+            exit 1
+          fi
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$INPUT_SHA" origin/main; then
+            echo "::error::$INPUT_SHA is not contained in origin/main. Staging images are built from main only."
+            exit 1
+          fi
+          for REF in "$CLAMAV_SOURCE" "$CRON_SOURCE"; do
+            if ! [[ "$REF" =~ ^[a-z0-9.-]+(:[0-9]+)?/[a-z0-9._/-]+@sha256:[0-9a-f]{64}$ ]]; then
+              echo "::error::Upstream image '$REF' is not pinned by digest (registry/repository@sha256:<64 hex>). Tags are refused."
+              exit 1
+            fi
+          done
+          echo "sha=$INPUT_SHA" >> "$GITHUB_OUTPUT"
+          {
+            echo "### UE V2 staging build plan"
+            echo "- Source SHA: \`$INPUT_SHA\` (on main)"
+            echo "- Registry: \`${REGISTRY}\` (new subscription)"
+            echo "- No deployment happens in this workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: UE V2 Staging Build · Build, push, manifest
+    needs: plan
+    runs-on: ubuntu-latest
+    # Push authority only (AcrPush on nzilaventuresacr).
+    environment: build
+    steps:
+      - name: Checkout workflow definition
+        uses: actions/checkout@v5
+
+      - name: Runner disk hygiene
+        uses: ./.github/actions/runner-disk-hygiene
+        with:
+          min_free_gib: '6'
+          prune_docker: 'true'
+
+      - name: Keep the reviewed gate scripts outside the source checkout
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/gate"
+          cp -R tooling/scripts "$RUNNER_TEMP/gate/"
+
+      - name: Checkout application source
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          clean: true
+
+      - name: Verify checked-out source
+        env:
+          EXPECTED_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Assert build identity is configured (fail-closed)
+        env:
+          C: ${{ secrets.AZURE_CLIENT_ID }}
+          T: ${{ secrets.AZURE_TENANT_ID }}
+          S: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$C" ] || [ -z "$T" ] || [ -z "$S" ]; then
+            echo "::error::No build identity on the 'build' GitHub Environment. Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, build identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Assert new subscription and build identity (fail-closed)
+        env:
+          EXPECTED_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          az account show -o json > "$RUNNER_TEMP/account.json"
+          node "$RUNNER_TEMP/gate/scripts/union-eyes-v2-staging-gate-cli.mjs" --gate account --account "$RUNNER_TEMP/account.json"
+          test "$(az account show --query user.name -o tsv)" = "$EXPECTED_CLIENT_ID"
+
+      - name: ACR login (AAD token, no admin user)
+        run: az acr login --name "$ACR_NAME"
+
+      - name: Build and push app image (immutable tag, refuse overwrite)
+        id: app
+        env:
+          SHA: ${{ needs.plan.outputs.sha }}
+          AAD_CLIENT_ID: ${{ vars.AZURE_AD_CLIENT_ID_STAGING }}
+          AAD_TENANT_ID: ${{ vars.AZURE_AD_TENANT_ID_STAGING }}
+        run: |
+          set -euo pipefail
+          TAG="staging-${SHA}"
+          if az acr repository show --name "$ACR_NAME" --image "${APP_REPOSITORY}:${TAG}" >/dev/null 2>&1; then
+            echo "::error::${APP_REPOSITORY}:${TAG} already exists. Tags are immutable; reuse its digest instead of rebuilding."
+            exit 1
+          fi
+          docker build \
+            --target union-eyes \
+            --build-arg TURBO_FILTER="--filter=@nzila/union-eyes" \
+            --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
+            --build-arg "AZURE_AD_CLIENT_ID=${AAD_CLIENT_ID}" \
+            --build-arg "AZURE_AD_TENANT_ID=${AAD_TENANT_ID}" \
+            --build-arg "GITHUB_SHA=${SHA}" \
+            --build-arg "ARTIFACT_ID=${SHA}" \
+            --build-arg "BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --build-arg "RELEASE_ID=UE-V2-STAGING-${SHA}" \
+            --build-arg "NEXT_PUBLIC_SITE_URL=${STAGING_MARKETING_URL}" \
+            --build-arg "NEXT_PUBLIC_APP_URL=${STAGING_APP_URL}" \
+            --build-arg UE_ENVIRONMENT=staging \
+            --build-arg NEXT_PUBLIC_APP_ENV=staging \
+            --build-arg UE_DEPLOYMENT_TYPE=standard \
+            --build-arg UE_FEATURE_PROFILE=full \
+            --build-arg NEXT_PUBLIC_UE_FEATURE_PROFILE=full \
+            --build-arg "UE_MARKETING_URL=${STAGING_MARKETING_URL}" \
+            --build-arg "UE_APP_URL=${STAGING_APP_URL}" \
+            --label "org.opencontainers.image.revision=${SHA}" \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            -t "${REGISTRY}/${APP_REPOSITORY}:${TAG}" \
+            .
+          docker push "${REGISTRY}/${APP_REPOSITORY}:${TAG}"
+          DIGEST=$(az acr repository show --name "$ACR_NAME" --image "${APP_REPOSITORY}:${TAG}" --query digest -o tsv)
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+
+      - name: Mirror pinned upstream images (digest in, digest out)
+        id: mirror
+        env:
+          CLAMAV_SOURCE: ${{ inputs.clamav_source_ref }}
+          CRON_SOURCE: ${{ inputs.cron_source_ref }}
+        run: |
+          set -euo pipefail
+          mirror() {
+            local source="$1" repository="$2"
+            local tag="mirror-${source##*@sha256:}"
+            tag="${tag:0:19}"
+            docker pull "$source" >&2
+            docker tag "$source" "${REGISTRY}/${repository}:${tag}" >&2
+            docker push "${REGISTRY}/${repository}:${tag}" >&2
+            az acr repository show --name "$ACR_NAME" --image "${repository}:${tag}" --query digest -o tsv
+          }
+          echo "clamav=$(mirror "$CLAMAV_SOURCE" "$CLAMAV_REPOSITORY")" >> "$GITHUB_OUTPUT"
+          echo "cron=$(mirror "$CRON_SOURCE" "$CRON_REPOSITORY")" >> "$GITHUB_OUTPUT"
+
+      - name: Write and gate the release manifest
+        env:
+          SHA: ${{ needs.plan.outputs.sha }}
+          APP_DIGEST: ${{ steps.app.outputs.digest }}
+          CLAMAV_DIGEST: ${{ steps.mirror.outputs.clamav }}
+          CRON_DIGEST: ${{ steps.mirror.outputs.cron }}
+          CLAMAV_SOURCE: ${{ inputs.clamav_source_ref }}
+          CRON_SOURCE: ${{ inputs.cron_source_ref }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release"
+          node --input-type=module -e "
+            import fs from 'node:fs'
+            const lib = await import(process.env.RUNNER_TEMP + '/gate/scripts/lib/union-eyes-v2-staging-release.mjs')
+            const e = process.env
+            const manifest = lib.buildReleaseManifest({
+              sourceSha: e.SHA,
+              workflowSha: e.GITHUB_SHA,
+              workflowRunId: e.GITHUB_RUN_ID,
+              createdAt: new Date().toISOString(),
+              images: {
+                app: { repository: e.APP_REPOSITORY, digest: e.APP_DIGEST },
+                clamav: { repository: e.CLAMAV_REPOSITORY, digest: e.CLAMAV_DIGEST, upstream: e.CLAMAV_SOURCE },
+                cron: { repository: e.CRON_REPOSITORY, digest: e.CRON_DIGEST, upstream: e.CRON_SOURCE },
+              },
+            })
+            manifest.upstream = { clamav: e.CLAMAV_SOURCE, cron: e.CRON_SOURCE }
+            fs.writeFileSync(e.RUNNER_TEMP + '/release/release-manifest.json', JSON.stringify(manifest, null, 2) + '\n')
+          "
+          node "$RUNNER_TEMP/gate/scripts/union-eyes-v2-staging-gate-cli.mjs" --gate manifest --manifest "$RUNNER_TEMP/release/release-manifest.json"
+          {
+            echo "### UE V2 staging release manifest"
+            echo '```json'
+            cat "$RUNNER_TEMP/release/release-manifest.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-staging-release-manifest-${{ needs.plan.outputs.sha }}
+          path: ${{ runner.temp }}/release/release-manifest.json
+          retention-days: 90
+          if-no-files-found: error

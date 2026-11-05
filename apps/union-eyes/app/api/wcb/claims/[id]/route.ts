@@ -1,22 +1,27 @@
 /**
- * WCB Claims — Item CRUD
+ * GET PATCH DELETE /api/wcb/claims/:id
  *
- * GET    /api/wcb/claims/:id — get a single claim
- * PATCH  /api/wcb/claims/:id — update a claim
- * DELETE /api/wcb/claims/:id — delete a claim
+ * Not implemented. This path advertises an operation of its own but was the generic CRUD factory over WCB claims, which the governance policy denies for every caller (so it refused every request). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { wcbClaims } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, PATCH, DELETE } = crudRoutes({
-  table: wcbClaims,
-  pk: 'id',
-  tags: ['WCB'],
-  orgScoped: true,
-  itemRoute: true,
-  readRole: 'steward',
-  writeRole: 'steward',
-});
-export { GET, PATCH, DELETE };
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ['WCB'],
+      summary: '/api/wcb/claims/:id (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/wcb/claims/:id is not implemented: it performed no operation of its own.');
+  },
+);
+
+export const GET = handler;
+export const PATCH = handler;
+export const DELETE = handler;

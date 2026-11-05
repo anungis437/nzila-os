@@ -7,6 +7,8 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
+import { formatDay } from "@/lib/client/day";
+import type { ClauseDetailWire } from "@/lib/clause-library/clause-detail";
 import { 
   Eye, 
   GitCompare, 
@@ -38,8 +40,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface ClauseViewerProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  clause: any;
+  clause: ClauseDetailWire;
   isOwner: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -248,12 +249,12 @@ export function ClauseViewer({
                 <div className="text-sm text-muted-foreground space-y-1">
                   {clause.effectiveDate && (
                     <div>
-                      Effective: {format(new Date(clause.effectiveDate), "MMM d, yyyy")}
+                      Effective: {formatDay(clause.effectiveDate, "en-CA")}
                     </div>
                   )}
                   {clause.expiryDate && (
                     <div>
-                      Expiry: {format(new Date(clause.expiryDate), "MMM d, yyyy")}
+                      Expiry: {formatDay(clause.expiryDate, "en-CA")}
                     </div>
                   )}
                 </div>
@@ -307,8 +308,7 @@ export function ClauseViewer({
                   <span>Tags</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {clause.tags.map((tag: any) => (
+                  {clause.tags.map((tag) => (
                     <Badge key={tag.id} variant="secondary">
                       {tag.tagName}
                     </Badge>
@@ -319,7 +319,7 @@ export function ClauseViewer({
           )}
 
           {/* Version */}
-          {clause.version > 1 && (
+          {(clause.version ?? 1) > 1 && (
             <>
               <Separator />
               <div className="text-sm text-muted-foreground">
@@ -329,29 +329,6 @@ export function ClauseViewer({
           )}
         </CardContent>
       </Card>
-
-      {/* Source CBA Info */}
-      {clause.sourceCba && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Source Agreement</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-sm">
-              <span className="font-medium">Employer: </span>
-              {clause.sourceCba.employerName}
-            </div>
-            {clause.sourceCba.effectiveDate && (
-              <div className="text-sm text-muted-foreground">
-                Effective: {format(new Date(clause.sourceCba.effectiveDate), "MMM d, yyyy")}
-                {clause.sourceCba.expiryDate && (
-                  <> - {format(new Date(clause.sourceCba.expiryDate), "MMM d, yyyy")}</>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Timestamps */}
       <div className="text-xs text-muted-foreground">

@@ -259,7 +259,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             await db
               .update(externalBenefitPlans)
               .set(planData)
-              .where(eq(externalBenefitPlans.id, existing[0].id));
+              .where(and(eq(externalBenefitPlans.id, existing[0].id), eq(externalBenefitPlans.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitPlans).values(planData);
@@ -325,7 +325,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             await db
               .update(externalBenefitEnrollments)
               .set(enrollmentData)
-              .where(eq(externalBenefitEnrollments.id, existing[0].id));
+              .where(and(eq(externalBenefitEnrollments.id, existing[0].id), eq(externalBenefitEnrollments.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitEnrollments).values(enrollmentData);
@@ -395,7 +395,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             await db
               .update(externalInsuranceClaims)
               .set(claimData)
-              .where(eq(externalInsuranceClaims.id, existing[0].id));
+              .where(and(eq(externalInsuranceClaims.id, existing[0].id), eq(externalInsuranceClaims.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInsuranceClaims).values(claimData);
@@ -462,7 +462,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             await db
               .update(externalBenefitCoverage)
               .set(coverageData)
-              .where(eq(externalBenefitCoverage.id, existing[0].id));
+              .where(and(eq(externalBenefitCoverage.id, existing[0].id), eq(externalBenefitCoverage.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitCoverage).values(coverageData);

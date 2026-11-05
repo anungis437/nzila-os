@@ -89,7 +89,10 @@ export const GET = withApi({
     labourRelationsBoard: LRB_BOARDS[jurisdiction],
     antiScab: ANTI_SCAB_PROVISIONS[jurisdiction],
     payEquity: PAY_EQUITY_REGIMES[jurisdiction],
-    minimumWage: { hourly: 0, effectiveDate: 'varies' }, // populated by live data
+    // No source of minimum wage rates is wired in, so none is published: a zero hourly rate reads as a real rate. Consumers get an
+    // explicit null with the reason instead.
+    minimumWage: null,
+    minimumWageStatus: 'not_published' as const,
   };
 
   return profile;

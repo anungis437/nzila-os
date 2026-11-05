@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { auth, currentUser } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db/db';
 import { profiles } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { getOrganizationIdForUser, getOrganizationInfo } from '@/lib/organization-utils';
 import { getUserRole } from '@/lib/auth/rbac-server';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,8 +21,23 @@ export async function GET() {
       const active = choices.activeOrganizationId;
       const organization = choices.organizations.find((entry) => entry.id === active) ?? null;
       const membership = choices.memberships.find((entry) => entry.organizationId === active) ?? null;
+      // The caller's own session identity only; this is not an email-based lookup of any profile row.
+      const sessionUser = await currentUser().catch(() => null);
+      const sessionEmail =
+        sessionUser?.primaryEmailAddress?.emailAddress?.trim()
+        || sessionUser?.emailAddresses?.[0]?.emailAddress?.trim()
+        || '';
+      const sessionName =
+        sessionUser?.fullName
+        || `${sessionUser?.firstName || ''} ${sessionUser?.lastName || ''}`.trim()
+        || (sessionEmail ? sessionEmail.split('@')[0] : '');
       return NextResponse.json({
-        user: { id: membership?.userId ?? null, name: '', email: '', phone: '' },
+        user: {
+          id: membership?.userId ?? null,
+          name: sessionName,
+          email: sessionEmail,
+          phone: sessionUser?.primaryPhoneNumber?.phoneNumber ?? '',
+        },
         profile: null,
         organization: organization
           ? {
@@ -51,33 +66,16 @@ export async function GET() {
     || user?.primaryEmailAddress?.emailAddress?.trim()
     || '';
 
-  let profile = (await db
-    .select()
-    .from(profiles)
-    .where(eq(profiles.userId, userId))
-    .limit(1))[0] ?? null;
-
-  // Link legacy profile row by email if userId changed.
-  if (!profile && userEmail) {
-    const byEmail = await db
-      .select()
+  // A profile belongs to a person, not to an organization: it is read in the person's own user context ('system' keeps the authenticated
+  // user and clears the organization). Row-level security (user_id = app.current_user_id) then returns exactly this person's profile.
+  // A profile is never relinked to this person by e-mail address: the provider can return an unverified address, a profile row may carry
+  // any address, and moving a row between user ids would hand one person another's profile (the canonical branch above has no such link either).
+  const profile = await withRLSContext({ organizationId: 'system', userId }, async (tx) =>
+    (await tx
+      .select({ id: profiles.id })
       .from(profiles)
-      .where(sql`lower(${profiles.email}) = lower(${userEmail})`)
-      .limit(1);
-
-    if (byEmail.length > 0) {
-      await db
-        .update(profiles)
-        .set({ userId })
-        .where(eq(profiles.id, byEmail[0].id));
-
-      profile = (await db
-        .select()
-        .from(profiles)
-        .where(eq(profiles.userId, userId))
-        .limit(1))[0] ?? null;
-    }
-  }
+      .where(eq(profiles.userId, userId))
+      .limit(1))[0] ?? null);
 
   const organizationId = await getOrganizationIdForUser(userId);
   const organization = organizationId ? await getOrganizationInfo(organizationId) : null;
@@ -95,14 +93,7 @@ export async function GET() {
       email: userEmail,
       phone: user?.primaryPhoneNumber?.phoneNumber ?? '',
     },
-    profile: profile
-      ? {
-          id: profile.id,
-          membership: profile.membership,
-          status: profile.status,
-          usageCredits: profile.usageCredits,
-        }
-      : null,
+    profile: profile ? { id: profile.id } : null,
     organization: organization
       ? {
           id: organization.id,

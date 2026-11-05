@@ -150,7 +150,7 @@
       "reconciliation": {
         "class": "NON_RUNTIME_ORM_DRIFT",
         "action": "DEFER_TO_REQUIRED_LATER",
-        "detail": "All reachable sites PROJECT: deadline-tracking-system .select({id})+innerJoin; deadline-confirmation-service .select({id,dueDate,calculatedDueDate})+scoped UPDATE. No canonical-43 page-load performs a full-shape read. The 20 declared-but-missing columns are write/action-path (REQUIRED_LATER), not page-load blockers."
+        "detail": "All reachable sites PROJECT: deadline-confirmation-service .select({id,dueDate,calculatedDueDate})+scoped UPDATE. No canonical-43 page-load performs a full-shape read. The 20 declared-but-missing columns are write/action-path (REQUIRED_LATER), not page-load blockers."
       }
     },
     {

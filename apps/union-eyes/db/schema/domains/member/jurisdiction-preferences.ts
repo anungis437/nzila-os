@@ -10,7 +10,7 @@
  * Precedents console while still allowing manual override.
  */
 
-import { pgTable, uuid, text, boolean, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, boolean, timestamp, jsonb, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organizations } from '../../../schema-organizations';
 
 export const memberJurisdictionPreferences = pgTable('member_jurisdiction_preferences', {
@@ -42,4 +42,7 @@ export const memberJurisdictionPreferences = pgTable('member_jurisdiction_prefer
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+}, (table) => [
+  // One row per member and organization (migration 0046); the route upserts against it.
+  uniqueIndex('member_jurisdiction_preferences_user_org_uq').on(table.userId, table.organizationId),
+]);

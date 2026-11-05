@@ -32,6 +32,7 @@ function titleForRole(role: string): string {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Governance'], summary: 'List authorized signatories' },
   },

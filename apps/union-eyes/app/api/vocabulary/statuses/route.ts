@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCUPEVocabulary } from '@nzila/cupe-vocabulary';
 import { withApiAuth } from '@/lib/api-auth-guard';
+import { toPublicVocabulary } from '@/lib/vocabulary/public-vocabulary';
 import { createLogger } from '@nzila/os-core';
 
 const logger = createLogger('vocabulary:statuses');
@@ -16,9 +17,9 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
   try {
     const vocabulary = getCUPEVocabulary();
     
-    return NextResponse.json(vocabulary.statuses, {
+    return NextResponse.json(toPublicVocabulary(vocabulary).statuses, {
       headers: {
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, max-age=3600',
       },
     });
   } catch (error) {

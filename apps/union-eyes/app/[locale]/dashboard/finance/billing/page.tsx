@@ -9,7 +9,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, CreditCard, CheckCircle, Pencil, X } from 'lucide-react';
+import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
 
 interface BillingAddress {
   line1: string;
@@ -56,8 +57,19 @@ interface EditForm {
   country: string;
 }
 
+// The billing_accounts row as GET, POST and PATCH /api/finance/billing send it inside { success, data, timestamp }.
+function readAccount(body: unknown): BillingAccount {
+  const data = envelopeData(body);
+  if (typeof data.id !== 'string' || typeof data.displayName !== 'string' || typeof data.billingEmail !== 'string') {
+    throw new ApiShapeError('no billing account');
+  }
+  return data as unknown as BillingAccount;
+}
+
 export default function BillingPage() {
   const t = useTranslations('financeBillingPage');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
   const [account, setAccount] = useState<BillingAccount | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -70,20 +82,26 @@ export default function BillingPage() {
     line1: '', line2: '', city: '', province: '', postalCode: '', country: 'CA',
   });
   const [error, setError] = useState<string | null>(null);
+  // Not being able to read the account is not "this organization has none": the page does not offer to create one then.
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const fetchAccount = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch('/api/finance/billing');
-      if (res.ok) {
-        const json = await res.json();
-        setAccount(json.data);
-      } else if (res.status === 404) {
+      if (res.status === 404) {
+        // The route answers 404 only when the organization has no billing account yet.
         setAccount(null);
+      } else if (!res.ok) {
+        throw new Error(await readApiError(res, t('errorLoadingAccount')));
+      } else {
+        setAccount(readAccount(await res.json()));
       }
-    } catch {
-      setError(t('errorLoadingAccount'));
+    } catch (err) {
+      setAccount(null);
+      setLoadError(err instanceof Error ? err.message : t('errorLoadingAccount'));
     } finally {
       setLoading(false);
     }
@@ -139,11 +157,9 @@ export default function BillingPage() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error(json.message ?? 'Failed to save');
+        throw new Error(await readApiError(res, 'Failed to save'));
       }
-      const json = await res.json();
-      setAccount(json.data);
+      setAccount(readAccount(await res.json()));
       setEditing(false);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Error saving changes');
@@ -162,9 +178,8 @@ export default function BillingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm),
       });
-      if (!res.ok) throw new Error('Failed to create billing account');
-      const json = await res.json();
-      setAccount(json.data);
+      if (!res.ok) throw new Error(await readApiError(res, 'Failed to create billing account'));
+      setAccount(readAccount(await res.json()));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error');
     } finally {
@@ -235,7 +250,7 @@ export default function BillingPage() {
               )}
               <div className="sm:col-span-2 pt-2 border-t flex items-center gap-2 text-muted-foreground">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                {t('accountCreated', { date: new Date(account.createdAt).toLocaleDateString('en-CA') })}
+                {t('accountCreated', { date: new Date(account.createdAt).toLocaleDateString(locale) })}
               </div>
             </div>
           ) : (
@@ -301,6 +316,15 @@ export default function BillingPage() {
               </div>
             </div>
           )}
+        </Card>
+      ) : loadError !== null ? (
+        <Card className="p-6 max-w-md">
+          <p role="alert" className="text-sm text-destructive flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" /> {loadError}
+          </p>
+          <Button variant="outline" className="mt-4" onClick={() => void fetchAccount()}>
+            {tCommon('retry')}
+          </Button>
         </Card>
       ) : (
         <Card className="p-6 max-w-md">

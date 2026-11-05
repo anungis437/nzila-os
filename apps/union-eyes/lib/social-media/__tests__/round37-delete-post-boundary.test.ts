@@ -50,8 +50,11 @@ const ORG_B = 'org-B';
 
 let posts: FakePost[];
 let accounts: FakeAccount[];
+// The organizations whose tenant transaction each database step ran in.
+let rlsScopes: Array<{ organizationId: string }> = [];
 
-vi.mock('drizzle-orm', () => ({
+vi.mock('drizzle-orm', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('drizzle-orm')>()),
   eq: (field: { __col: string }, value: unknown) => ({ __type: 'eq', field: field.__col, value }),
   and: (...predicates: Predicate[]) => ({ __type: 'and', predicates }),
 }));
@@ -64,7 +67,8 @@ vi.mock('@/db/schema/social-media-schema', () => {
   };
 });
 
-vi.mock('@/db', () => {
+// Every step of the service runs in the tenant transaction of the organization it names: the fake database below is that transaction.
+vi.mock('@/lib/db/with-rls-context', () => {
   const db = {
     select: (shape?: Record<string, { __col: string }>) => ({
       from: () => ({
@@ -95,7 +99,12 @@ vi.mock('@/db', () => {
     }),
     update: () => ({ set: () => ({ where: async () => [] }) }),
   };
-  return { db };
+  return {
+    withRLSContext: async (scope: { organizationId: string }, run: (tx: unknown) => Promise<unknown>) => {
+      rlsScopes.push(scope);
+      return run(db);
+    },
+  };
 });
 
 vi.mock('../meta-api-client', () => ({ createMetaClient: vi.fn(() => ({})) }));
@@ -112,17 +121,22 @@ function seed() {
 describe('round 37 (correction): deletePost enforces organization ownership in its own query', () => {
   beforeEach(() => {
     seed();
+    rlsScopes = [];
   });
 
   it('a foreign-org postId is rejected by the service itself, not merely by the caller', async () => {
     const svc = new SocialMediaService();
 
     await expect(svc.deletePost('rogue-post', ORG_B)).rejects.toThrow(/Post not found/);
+    // The foreign organization's call looked in its own organization only, and never reached the owner's account.
+    expect(rlsScopes.every((scope) => scope.organizationId === ORG_B)).toBe(true);
   });
 
   it('succeeds and uses the platform client only when the org matches', async () => {
     const svc = new SocialMediaService();
 
     await expect(svc.deletePost('rogue-post', ORG_A)).resolves.toBeUndefined();
+    expect(rlsScopes.length).toBeGreaterThan(0);
+    expect(rlsScopes.every((scope) => scope.organizationId === ORG_A)).toBe(true);
   });
 });

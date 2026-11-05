@@ -15,7 +15,6 @@ export * from './allocation-engine';
 export * from './dues-alignment';
 export * from './finance-outputs';
 export * from './contract-service';
-export * from './usage-metering-service';
 export * from './proration-engine';
 export * from './dunning-service';
 export * from './subscription-lifecycle-service';

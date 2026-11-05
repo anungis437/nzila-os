@@ -10,7 +10,7 @@ export const aiRequestSchema = z.object({
   systemPrompt: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),
   maxTokens: z.number().int().positive().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type AIRequest = z.infer<typeof aiRequestSchema>
@@ -41,7 +41,7 @@ export const budgetConfigSchema = z.object({
   monthlyCapUsd: z.number().positive(),
   perRequestCapUsd: z.number().positive().optional(),
   warningThresholdPercent: z.number().min(0).max(100).default(80),
-  roles: z.record(z.object({
+  roles: z.record(z.string(), z.object({
     monthlyCapUsd: z.number().positive(),
   })).optional(),
 })

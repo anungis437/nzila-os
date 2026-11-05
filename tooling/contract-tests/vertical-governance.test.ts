@@ -13,6 +13,8 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
+import { isRetiredNoOpRoute } from './retired-routes'
+import { isReexportAliasOfAcceptedRoute } from './route-aliases'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -139,6 +141,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'verifyShopifySignature(',  // Shopify webhook signature verification
     'withRoleAuth(',             // Role-based auth guard wrapper
     'withAdminAuth(',            // Admin-only auth guard wrapper
+    'withSystemAdminAuth(',      // Platform (system) administrator guard wrapper
     'requireApiAuth(',           // API auth requirement check
     'requireUser(',              // Requires authenticated user
     'getAuth(',                  // Clerk getAuth() direct call
@@ -150,6 +153,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'withOrgWrite(',              // Write-restricted org-scoped guard (withOrgScope + canWrite role check)
     'withRequiredRole(',          // TrustCore role-based auth guard
     'cognitionRoute(',            // Cognition route factory — wraps withApi() with required auth (apps/union-eyes/lib/api/cognition-route.ts)
+    'verifyTrackingToken(',       // union-eyes signed, action-bound tracking-link token (lib/communications/tracking-token.ts): the open and click routes record nothing without it
   ]
 
   // Routes that are explicitly public
@@ -165,7 +169,6 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/docs',                // OpenAPI documentation
     '/api/status',              // Status page (public)
     '/api/gdpr/cookie-consent', // Cookie consent must be public
-    '/api/whop/unauthenticated-checkout', // Whop public checkout flow
     '/api/payments/webhooks/paypal',       // PayPal webhook (has its own signature verification)
     '/api/quote/[token]',                  // Token-gated public quote response
     '/api/zoho/webhook',                   // Zoho webhook (token-verified)
@@ -205,8 +208,16 @@ describe('INV-11 — Every API route has authorization', () => {
       it(`${relPath} — has authorization guard`, () => {
         const content = readFileSync(route, 'utf-8')
 
-        // Route must contain at least one auth pattern
-        const hasAuth = AUTH_PATTERNS.some((pattern) => content.includes(pattern))
+        // Route must contain at least one auth pattern. A route that only re-exports another route is as authorized as that route: one carrying
+        // an auth pattern, or one this contract already lists as public.
+        const hasOwnAuth = (text: string) => AUTH_PATTERNS.some((pattern) => text.includes(pattern)) || isRetiredNoOpRoute(text)
+        const isPublicTarget = (file: string) => {
+          const target = relative(ROOT, file).replace(/\\/g, '/').replace(/%5F/gi, '_')
+          return PUBLIC_ROUTE_PATTERNS.some((p) => target.includes(p))
+        }
+        const hasAuth =
+          hasOwnAuth(content) ||
+          isReexportAliasOfAcceptedRoute(route, content, (file, text) => isPublicTarget(file) || hasOwnAuth(text))
 
         expect(
           hasAuth,

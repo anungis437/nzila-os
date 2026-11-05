@@ -31,7 +31,7 @@ export const platformErrorSchema = z.object({
   category: z.enum(['auth', 'permission', 'validation', 'resource', 'system']),
   retryable: z.boolean().default(false),
   correlationId: z.string().optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
   fieldErrors: z.array(fieldErrorSchema).optional(),
 })
 export type PlatformError = z.infer<typeof platformErrorSchema>

@@ -16,51 +16,15 @@ import { Badge } from '@/components/ui/badge';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { getTranslations } from 'next-intl/server';
 import { Key, Webhook, Activity, CheckCircle2, XCircle, Clock, Plug, AlertTriangle } from 'lucide-react';
-import { logger } from '@/lib/logger';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { isUuid } from '@/lib/page-data/uuid';
+import {
+  loadIntegrationsDashboard,
+  type ApiKey,
+  type WebhookEntry,
+  type PartnerIntegration,
+} from '@/lib/dashboard-reads/integrations';
 
 // ── Types ──────────────────────────────────────────────────────────────────
-
-interface ApiKey {
-  id: string;
-  name: string;
-  keyPrefix: string;
-  status: string;
-  scopes: string[];
-  lastUsedAt: string | null;
-  expiresAt: string | null;
-  requestCount: number;
-  createdBy: string | null;
-  createdAt: string;
-}
-
-interface WebhookEntry {
-  id: string;
-  name: string;
-  url: string;
-  events: string[];
-  status: string;
-  lastTriggeredAt: string | null;
-  lastStatus: string | null;
-  lastResponseCode: number | null;
-  successCount: number;
-  failureCount: number;
-  createdAt: string;
-}
-
-interface PartnerIntegration {
-  id: string;
-  name: string;
-  provider: string;
-  category: string;
-  status: string;
-  description: string | null;
-  icon: string | null;
-  lastSyncAt: string | null;
-  createdAt: string;
-}
 
 interface IntegrationStats {
   activeApiKeys: number;
@@ -80,98 +44,7 @@ interface IntegrationStats {
 }
 
 // ── Data loaders ───────────────────────────────────────────────────────────
-
-async function loadApiKeys(orgId: string): Promise<ApiKey[]> {
-  const result = await db.execute(sql`
-    SELECT id, name, key_prefix,
-      CASE
-        WHEN revoked_at IS NOT NULL THEN 'revoked'
-        WHEN expires_at IS NOT NULL AND expires_at < NOW() THEN 'expired'
-        WHEN is_active THEN 'active'
-        ELSE 'inactive'
-      END AS status,
-      scopes, last_used_at, expires_at, usage_count AS request_count,
-      created_by, created_at
-    FROM integration_api_keys
-    WHERE organization_id = ${orgId}::uuid
-    ORDER BY
-      CASE
-        WHEN revoked_at IS NOT NULL THEN 2
-        WHEN expires_at IS NOT NULL AND expires_at < NOW() THEN 1
-        ELSE 0
-      END,
-      created_at DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    name: r.name as string,
-    keyPrefix: r.key_prefix as string,
-    status: r.status as string,
-    scopes: (r.scopes as string[]) ?? [],
-    lastUsedAt: r.last_used_at as string | null,
-    expiresAt: r.expires_at as string | null,
-    requestCount: Number(r.request_count ?? 0),
-    createdBy: r.created_by as string | null,
-    createdAt: r.created_at as string,
-  }));
-}
-
-async function loadWebhooks(orgId: string): Promise<WebhookEntry[]> {
-  const result = await db.execute(sql`
-    SELECT id,
-      COALESCE(description, url) AS name,
-      url, events,
-      CASE WHEN is_active THEN 'active' ELSE 'paused' END AS status,
-      last_triggered_at,
-      NULL::text AS last_status,
-      NULL::int AS last_response_code,
-      GREATEST(delivery_count - failure_count, 0) AS success_count,
-      failure_count, created_at
-    FROM integration_webhooks
-    WHERE organization_id = ${orgId}::uuid
-    ORDER BY
-      CASE WHEN failure_count > 0 AND is_active THEN 0 WHEN is_active THEN 1 ELSE 2 END,
-      created_at DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    name: r.name as string,
-    url: r.url as string,
-    events: (r.events as string[]) ?? [],
-    status: r.status as string,
-    lastTriggeredAt: r.last_triggered_at as string | null,
-    lastStatus: null,
-    lastResponseCode: null,
-    successCount: Number(r.success_count ?? 0),
-    failureCount: Number(r.failure_count ?? 0),
-    createdAt: r.created_at as string,
-  }));
-}
-
-async function loadPartners(orgId: string): Promise<PartnerIntegration[]> {
-  const result = await db.execute(sql`
-    SELECT id, name, provider, category, status, description, icon, last_sync_at, created_at
-    FROM integration_partners
-    WHERE organization_id = ${orgId}::uuid
-    ORDER BY
-      CASE status WHEN 'error' THEN 0 WHEN 'pending' THEN 1 WHEN 'connected' THEN 2 ELSE 3 END,
-      name
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    name: r.name as string,
-    provider: r.provider as string,
-    category: r.category as string,
-    status: r.status as string,
-    description: r.description as string | null,
-    icon: r.icon as string | null,
-    lastSyncAt: r.last_sync_at as string | null,
-    createdAt: r.created_at as string,
-  }));
-}
+// The reads live in lib/dashboard-reads/integrations.ts, which runs them in the organization's own context.
 
 function computeStats(
   apiKeys: ApiKey[],
@@ -291,24 +164,13 @@ export default async function IntegrationsDashboard({
   }
 
   const organizationId = user.organizationId;
-
-  let apiKeys: ApiKey[] = [];
-  let webhooks: WebhookEntry[] = [];
-  let partners: PartnerIntegration[] = [];
-
-  if (organizationId) {
-    try {
-      [apiKeys, webhooks, partners] = await withSystemContext(() =>
-        Promise.all([
-          loadApiKeys(organizationId),
-          loadWebhooks(organizationId),
-          loadPartners(organizationId),
-        ])
-      );
-    } catch (error) {
-      logger.error('Error loading integrations data:', error);
-    }
+  // A person who belongs to no organization has no integrations to read: they go back to the dashboard rather than to an empty one.
+  if (!isUuid(organizationId)) {
+    redirect(`/${locale}/dashboard`);
   }
+
+  // A failed read is an error, not an empty list of integrations: nothing here catches it.
+  const { apiKeys, webhooks, partners } = await loadIntegrationsDashboard(organizationId);
 
   const stats = computeStats(apiKeys, webhooks, partners);
   const referenceTimeMs = Math.max(

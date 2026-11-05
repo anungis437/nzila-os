@@ -38,8 +38,6 @@ interface OverviewStats {
   inArbitration: number;
   resolvedGrievances: number;
   totalGrievances: number;
-  totalSettlements: number;
-  totalSettlementValue: number;
   avgResponseHours: number;
   avgResolutionHours: number;
   avgSatisfaction: number;
@@ -69,8 +67,6 @@ interface GrievanceRow {
   priority: string;
   orgName: string;
   createdAt: string;
-  monetaryAmount: number | null;
-  settlementStatus: string | null;
 }
 
 interface OrgBreakdown {
@@ -98,7 +94,7 @@ async function loadOverview(): Promise<OverviewStats> {
     await db.execute(sql`
       SELECT
         COUNT(*) FILTER (WHERE status = 'open') as open_tickets,
-        COUNT(*) FILTER (WHERE status = 'in-progress') as in_progress_tickets,
+        COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress_tickets,
         COUNT(*) FILTER (WHERE status = 'resolved') as resolved_tickets,
         COUNT(*) as total_tickets,
         ROUND(AVG(EXTRACT(EPOCH FROM (first_response_at - created_at)) / 3600) FILTER (WHERE first_response_at IS NOT NULL), 1) as avg_response_hours,
@@ -120,13 +116,6 @@ async function loadOverview(): Promise<OverviewStats> {
     `)
   ).map((r: Record<string, unknown>) => r);
 
-  const [settlementStats] = Array.from(
-    await db.execute(sql`
-      SELECT COUNT(*) as total, COALESCE(SUM(monetary_amount), 0) as total_value
-      FROM settlements
-    `)
-  ).map((r: Record<string, unknown>) => r);
-
   return {
     openTickets: Number(ticketStats.open_tickets ?? 0),
     inProgressTickets: Number(ticketStats.in_progress_tickets ?? 0),
@@ -137,23 +126,27 @@ async function loadOverview(): Promise<OverviewStats> {
     inArbitration: Number(grievanceStats.in_arbitration ?? 0),
     resolvedGrievances: Number(grievanceStats.resolved_grievances ?? 0),
     totalGrievances: Number(grievanceStats.total_grievances ?? 0),
-    totalSettlements: Number(settlementStats.total ?? 0),
-    totalSettlementValue: Number(settlementStats.total_value ?? 0),
     avgResponseHours: Number(ticketStats.avg_response_hours ?? 0),
     avgResolutionHours: Number(ticketStats.avg_resolution_hours ?? 0),
     avgSatisfaction: Number(ticketStats.avg_satisfaction ?? 0),
   };
 }
 
+/** The values of the ticket_status enum: a filter outside them is ignored, not sent to a column that would refuse it. */
+const TICKET_STATUSES = ['open', 'in_progress', 'waiting_customer', 'waiting_internal', 'resolved', 'closed', 'cancelled'];
+
 async function loadTickets(statusFilter?: string): Promise<TicketRow[]> {
-  const whereClause = statusFilter && statusFilter !== 'all'
+  const whereClause = statusFilter && TICKET_STATUSES.includes(statusFilter)
     ? sql`WHERE t.status = ${statusFilter}`
     : sql``;
 
+  // A ticket records its channel as `source`, who raised it as the requestor, and who has it as the assignee's name.
   const rows = Array.from(
     await db.execute(sql`
       SELECT t.id, t.ticket_number, t.subject, t.category, t.status, t.priority,
-             t.channel, t.submitted_by, t.assigned_to, o.name as org_name,
+             t.source AS channel,
+             COALESCE(t.requestor_name, t.requestor_email, t.requestor_user_id) AS submitted_by,
+             t.assigned_to_name AS assigned_to, o.name as org_name,
              t.created_at::text, t.resolved_at::text, t.satisfaction_rating
       FROM support_tickets t
       JOIN organizations o ON o.id = t.organization_id
@@ -184,11 +177,9 @@ async function loadGrievances(): Promise<GrievanceRow[]> {
   const rows = Array.from(
     await db.execute(sql`
       SELECT g.id, g.grievance_number, g.title, g.status, g.priority,
-             o.name as org_name, g.created_at::text,
-             s.monetary_amount, s.status as settlement_status
+             o.name as org_name, g.created_at::text
       FROM grievances g
       JOIN organizations o ON o.id = g.organization_id
-      LEFT JOIN settlements s ON s.grievance_id = g.id
       ORDER BY
         CASE g.priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
         g.created_at DESC
@@ -201,8 +192,6 @@ async function loadGrievances(): Promise<GrievanceRow[]> {
     priority: String(r.priority),
     orgName: String(r.org_name),
     createdAt: String(r.created_at),
-    monetaryAmount: r.monetary_amount ? Number(r.monetary_amount) : null,
-    settlementStatus: r.settlement_status ? String(r.settlement_status) : null,
   }));
   return rows;
 }
@@ -212,7 +201,7 @@ async function loadOrgBreakdown(): Promise<OrgBreakdown[]> {
     await db.execute(sql`
       SELECT
         o.name as org_name,
-        COUNT(t.id) FILTER (WHERE t.status IN ('open', 'in-progress')) as open_tickets,
+        COUNT(t.id) FILTER (WHERE t.status IN ('open', 'in_progress')) as open_tickets,
         COUNT(t.id) FILTER (WHERE t.status = 'resolved') as resolved_tickets,
         ROUND(AVG(t.satisfaction_rating) FILTER (WHERE t.satisfaction_rating IS NOT NULL), 1) as avg_satisfaction,
         (SELECT COUNT(*) FROM grievances g WHERE g.organization_id = o.id AND g.status NOT IN ('settled', 'withdrawn', 'denied', 'closed')) as open_grievances,
@@ -252,9 +241,9 @@ async function loadCategoryBreakdown(): Promise<CategoryBreakdown[]> {
 async function loadChannelBreakdown(): Promise<ChannelBreakdown[]> {
   const rows = Array.from(
     await db.execute(sql`
-      SELECT channel, COUNT(*) as count
+      SELECT source AS channel, COUNT(*) as count
       FROM support_tickets
-      GROUP BY channel
+      GROUP BY source
       ORDER BY count DESC
     `)
   ).map((r: Record<string, unknown>) => ({
@@ -274,7 +263,7 @@ function priorityVariant(p: string) {
 
 function statusColor(s: string) {
   if (s === 'open') return 'text-yellow-600';
-  if (s === 'in-progress') return 'text-blue-600';
+  if (s === 'in_progress') return 'text-blue-600';
   if (s === 'resolved' || s === 'settled') return 'text-green-600';
   return '';
 }
@@ -443,15 +432,6 @@ export default async function SupportDashboard({
                       </span>
                     </div>
                   ))}
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-sm text-muted-foreground">{t('settlementsLabel')}</span>
-                    <span className="text-lg font-bold">
-                      {overview.totalSettlements}{' '}
-                      <span className="text-sm font-normal text-muted-foreground">
-                        ({t('currencyAmount', { value: new Intl.NumberFormat(locale).format(overview.totalSettlementValue) })})
-                      </span>
-                    </span>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -514,13 +494,13 @@ export default async function SupportDashboard({
         <>
           {/* Status filter badges */}
           <div className="flex gap-2 flex-wrap">
-            {['all', 'open', 'in-progress', 'resolved'].map((s) => (
+            {['all', 'open', 'in_progress', 'resolved'].map((s) => (
               <Link key={s} href={`?tab=tickets&status=${s}`}>
                 <Badge
                   variant={ticketFilter === s ? 'default' : 'outline'}
                   className="cursor-pointer capitalize"
                 >
-                  {s === 'all' ? t('filterAll', { count: overview.totalTickets }) : s === 'in-progress' ? t('statusInProgress') : s === 'open' ? t('statusOpen') : t('statusResolved')}
+                  {s === 'all' ? t('filterAll', { count: overview.totalTickets }) : s === 'in_progress' ? t('statusInProgress') : s === 'open' ? t('statusOpen') : t('statusResolved')}
                 </Badge>
               </Link>
             ))}
@@ -557,14 +537,14 @@ export default async function SupportDashboard({
                         <td className="py-2 font-mono text-xs">{ticket.ticketNumber}</td>
                         <td className="py-2 max-w-62.5 truncate">{ticket.subject}</td>
                         <td className="py-2">{ticket.orgName}</td>
-                        <td className="py-2 capitalize">{ticket.category.replace('-', ' ')}</td>
+                        <td className="py-2 capitalize">{ticket.category.replace(/[-_]/g, ' ')}</td>
                         <td className="py-2">
                           <Badge variant={priorityVariant(ticket.priority)} className="capitalize">
                             {ticket.priority}
                           </Badge>
                         </td>
                         <td className={`py-2 capitalize font-medium ${statusColor(ticket.status)}`}>
-                          {ticket.status === 'in-progress' ? t('statusInProgress') : ticket.status === 'open' ? t('statusOpen') : ticket.status === 'resolved' ? t('statusResolved') : ticket.status.replace('-', ' ')}
+                          {ticket.status === 'in_progress' ? t('statusInProgress') : ticket.status === 'open' ? t('statusOpen') : ticket.status === 'resolved' ? t('statusResolved') : ticket.status.replace(/[-_]/g, ' ')}
                         </td>
                         <td className="py-2 capitalize">{ticket.channel}</td>
                         <td className="py-2">{ticket.assignedTo ?? t('emptyDash')}</td>
@@ -602,7 +582,6 @@ export default async function SupportDashboard({
                     <th className="pb-2 font-medium">{t('tableOrganization')}</th>
                     <th className="pb-2 font-medium">{t('tablePriority')}</th>
                     <th className="pb-2 font-medium">{t('tableStatus')}</th>
-                    <th className="pb-2 font-medium">{t('tableSettlement')}</th>
                     <th className="pb-2 font-medium">{t('tableFiled')}</th>
                   </tr>
                 </thead>
@@ -621,11 +600,6 @@ export default async function SupportDashboard({
                         <Badge variant={grievanceStatusVariant(g.status)} className="capitalize">
                           {g.status}
                         </Badge>
-                      </td>
-                      <td className="py-2">
-                        {g.monetaryAmount
-                          ? t('settlementValue', { value: new Intl.NumberFormat(locale).format(g.monetaryAmount), status: g.settlementStatus ?? '' })
-                          : t('emptyDash')}
                       </td>
                       <td className="py-2 text-muted-foreground">
                         {new Date(g.createdAt).toLocaleDateString(locale)}

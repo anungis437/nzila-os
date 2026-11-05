@@ -94,19 +94,27 @@ export const clauseLibraryTags = pgTable("clause_library_tags", {
   nameIdx: index("idx_clause_tags_name").on(table.tagName),
 }));
 
-// Comparison history
-export const clauseComparisonsHistory = pgTable("clause_comparisons_history", {
+// Append-only history of the text a shared clause had before each change, and of its final text when it is deleted (platform 0052,
+// cache 0042). clause_id has no foreign key on purpose: the history outlives the clause.
+export const sharedClauseVersions = pgTable("shared_clause_versions", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull(),
   organizationId: uuid("organization_id")
     .notNull()
-    .references(() => organizations.id),
-  clauseIds: uuid("clause_ids").array().notNull(),
-  comparisonNotes: text("comparison_notes"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  clauseId: uuid("clause_id").notNull(),
+  version: integer("version").notNull(),
+  changeKind: varchar("change_kind", { length: 20 }).notNull(), // replaced | deleted
+  clauseNumber: varchar("clause_number", { length: 50 }),
+  clauseTitle: varchar("clause_title", { length: 500 }).notNull(),
+  clauseText: text("clause_text").notNull(),
+  clauseType: varchar("clause_type", { length: 100 }).notNull(),
+  sharingLevel: varchar("sharing_level", { length: 50 }).notNull(),
+  textSha256: varchar("text_sha256", { length: 64 }).notNull(),
+  recordedBy: varchar("recorded_by", { length: 255 }).notNull(),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
-  userIdx: index("idx_clause_comparisons_user").on(table.userId),
-  orgIdx: index("idx_clause_comparisons_org").on(table.organizationId),
+  clauseIdx: index("shared_clause_versions_clause_idx").on(table.clauseId, table.version),
+  orgIdx: index("shared_clause_versions_org_idx").on(table.organizationId, table.recordedAt),
 }));
 
 // ============================================================================
@@ -140,13 +148,6 @@ export const clauseLibraryTagsRelations = relations(clauseLibraryTags, ({ one })
   }),
 }));
 
-export const clauseComparisonsHistoryRelations = relations(clauseComparisonsHistory, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [clauseComparisonsHistory.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
 // ============================================================================
 // TYPESCRIPT TYPES
 // ============================================================================
@@ -157,8 +158,6 @@ export type NewSharedClause = typeof sharedClauseLibrary.$inferInsert;
 export type ClauseLibraryTag = typeof clauseLibraryTags.$inferSelect;
 export type NewClauseLibraryTag = typeof clauseLibraryTags.$inferInsert;
 
-export type ClauseComparison = typeof clauseComparisonsHistory.$inferSelect;
-export type NewClauseComparison = typeof clauseComparisonsHistory.$inferInsert;
 
 // Sharing level enum
 export type SharingLevel = "private" | "federation" | "congress" | "public";

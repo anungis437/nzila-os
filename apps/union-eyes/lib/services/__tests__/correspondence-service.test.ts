@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
   queue: [] as unknown[],
-  createAuditLog: vi.fn(),
+  audit: vi.fn(),
 }));
 
 function makeChain() {
@@ -36,8 +36,9 @@ vi.mock('drizzle-orm', () => ({
   sql: Object.assign(vi.fn(() => 'sql'), { raw: vi.fn(() => 'sql') }),
 }));
 
-vi.mock('@/lib/services/audit-service', () => ({
-  createAuditLog: h.createAuditLog,
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
+vi.mock('@/lib/db/with-rls-context', async () => ({
+  withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import('@/db')).db),
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -54,6 +55,7 @@ vi.mock('@/db/schema/domains/documents/correspondence', () => {
   };
 });
 
+import { db } from '@/db';
 import {
   createCorrespondence,
   getCorrespondenceById,
@@ -75,7 +77,8 @@ import {
 
 beforeEach(() => {
   h.queue = [];
-  h.createAuditLog.mockReset();
+  h.audit.mockReset();
+  h.audit.mockResolvedValue(undefined);
 });
 
 describe('correspondence-service', () => {
@@ -98,7 +101,10 @@ describe('correspondence-service', () => {
     });
 
     expect(row.id).toBe('c1');
-    expect(h.createAuditLog).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'CORRESPONDENCE_CREATED', userId: 'u1', organizationId: 'o1' }),
+    );
   });
 
   it('getCorrespondenceById and getCorrespondenceWithDetails return expected shapes', async () => {
@@ -106,9 +112,14 @@ describe('correspondence-service', () => {
     expect(await getCorrespondenceById('c1')).toEqual({ id: 'c1' });
 
     h.queue = [[{ id: 'c1' }], [{ id: 'r1' }], [{ id: 'a1' }]];
+    vi.mocked(db.select).mockClear();
     const details = await getCorrespondenceWithDetails('c1');
     expect(details?.recipients).toEqual([{ id: 'r1' }]);
     expect(details?.auditTrail).toEqual([{ id: 'a1' }]);
+
+    // The history of a letter names the event, the actor and the time; it never carries the network address, user agent, hash or metadata.
+    const [, , historySelect] = vi.mocked(db.select).mock.calls as unknown as Array<[Record<string, string> | undefined]>;
+    expect(Object.keys(historySelect[0] ?? {}).sort()).toEqual(['actorName', 'actorRole', 'eventDescription', 'eventType', 'id', 'timestamp']);
 
     h.queue = [[]];
     expect(await getCorrespondenceWithDetails('missing')).toBeNull();
@@ -182,6 +193,37 @@ describe('correspondence-service', () => {
 
     h.queue = [[{ id: 'c1', status: 'approved', assignedSignerId: 'u1', organizationId: 'o1', referenceNumber: 'LTR-1' }], [{ id: 'sig1' }], [{ id: 'c1', status: 'signed' }], [], []];
     expect((await signCorrespondence('c1', { actorUserId: 'u1', signatureId: 'sig1' })).status).toBe('signed');
+  });
+
+  it('a transition commits its platform audit on the same transaction and fails with it', async () => {
+    h.queue = [[{ id: 'c1', status: 'pending_review', organizationId: 'o1', referenceNumber: 'LTR-1', draftedBy: 'drafter' }], [{ id: 'c1', status: 'approved' }], [], []];
+    await approveCorrespondence('c1', { actorUserId: 'approver' });
+    expect(h.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'CORRESPONDENCE_APPROVED', userId: 'approver', details: expect.objectContaining({ from: 'pending_review', to: 'approved' }) }),
+    );
+
+    h.audit.mockRejectedValue(new Error('audit down'));
+    h.queue = [[{ id: 'c1', status: 'signed', organizationId: 'o1', referenceNumber: 'LTR-1' }], [{ id: 'c1', status: 'dispatched' }], [], []];
+    await expect(dispatchCorrespondence('c1', { actorUserId: 'u1', dispatchMethod: 'email' })).rejects.toThrow('audit down');
+  });
+
+  it('the drafter cannot approve their own correspondence', async () => {
+    h.queue = [[{ id: 'c1', status: 'pending_review', organizationId: 'o1', draftedBy: 'u1' }]];
+    await expect(approveCorrespondence('c1', { actorUserId: 'u1' })).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('a transition that lost a race to another status change is a conflict with no audit', async () => {
+    h.queue = [[{ id: 'c1', status: 'pending_review', organizationId: 'o1' }], []];
+    await expect(approveCorrespondence('c1', { actorUserId: 'approver' })).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('an edit that lands on a letter that already left draft is a conflict', async () => {
+    h.queue = [[{ id: 'c1', status: 'draft', organizationId: 'o1' }], []];
+    await expect(updateCorrespondence({ id: 'c1', subject: 'N', actorUserId: 'u1' })).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(h.audit).not.toHaveBeenCalled();
   });
 
   it('signature helpers and audit query return records', async () => {

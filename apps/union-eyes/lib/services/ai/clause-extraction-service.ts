@@ -13,9 +13,11 @@ import {
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { db } from '@/db';
 import { cbaClause, collectiveAgreements } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { OperationAuditError, performAuditedOperation } from '@/lib/audit/operation-audit';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
 
@@ -40,52 +42,90 @@ export interface ExtractionResult {
 }
 
 /**
- * Extract clauses from a PDF document using GPT-4 Vision
+ * Extract clauses from a PDF document using GPT-4 Vision.
+ *
+ * The agreement is looked up by id AND organization: one that belongs to another organization is reported as not found.
+ * The provider calls cannot share a database transaction, so their intent is recorded first and they are skipped if
+ * that record cannot be written. The extracted clauses, the agreement update and their audit record commit together.
  */
 export async function extractClausesFromPDF(
   pdfUrl: string,
   cbaId: string,
   options: {
     organizationId: string;
+    userId: string;
     autoSave?: boolean;
     batchSize?: number;
   }
 ): Promise<ExtractionResult> {
   const startTime = Date.now();
   const errors: string[] = [];
+  const { organizationId, userId } = options;
+  const inOrganization = and(
+    eq(collectiveAgreements.id, cbaId),
+    eq(collectiveAgreements.organizationId, organizationId),
+  );
 
   try {
-    // Verify CBA exists
-    const cba = await db.query.collectiveAgreements.findFirst({
-      where: eq(collectiveAgreements.id, cbaId),
-    });
+    // Verify CBA exists in the caller's organization
+    const cba = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.collectiveAgreements.findFirst({ where: inOrganization }),
+    );
 
     if (!cba) {
       throw new Error(`CBA with ID ${cbaId} not found`);
     }
 
-    // Extract text content using GPT-4 Vision
-    const extractedText = await extractTextFromPDF(pdfUrl, options.organizationId);
+    const { extractedText, clauses } = await performAuditedOperation(
+      {
+        organizationId,
+        userId,
+        action: 'ai.clause_extraction.run',
+        resourceType: 'collective_agreements',
+        resourceId: cbaId,
+        details: { autoSave: Boolean(options.autoSave) },
+      },
+      async () => {
+        // Extract text content using GPT-4 Vision
+        const text = await extractTextFromPDF(pdfUrl, organizationId);
 
-    // Process text in chunks to identify clauses
-    const clauses = await identifyClausesInText(extractedText, {
-      jurisdiction: cba.jurisdiction,
-      sector: cba.sector || 'Unknown',
-      organizationId: options.organizationId,
+        // Process text in chunks to identify clauses
+        const identified = await identifyClausesInText(text, {
+          jurisdiction: cba.jurisdiction,
+          sector: cba.sector || 'Unknown',
+          organizationId,
+        });
+        return { extractedText: text, clauses: identified };
+      },
+    );
+
+    await withRLSContext({ organizationId }, async (tx) => {
+      let inserted = 0;
+      // Save clauses if auto-save is enabled
+      if (options.autoSave && clauses.length > 0) {
+        inserted = await saveExtractedClauses(tx, clauses, cbaId, organizationId);
+      }
+
+      // Update CBA with processing metadata
+      const [marked] = await tx
+        .update(collectiveAgreements)
+        .set({
+          aiProcessed: true,
+          rawText: extractedText,
+        })
+        .where(inOrganization)
+        .returning({ id: collectiveAgreements.id });
+      if (!marked) throw new Error(`CBA with ID ${cbaId} not found`);
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'ai.clause_extraction.persist',
+        resourceType: 'collective_agreements',
+        resourceId: cbaId,
+        details: { clausesExtracted: clauses.length, clausesInserted: inserted, autoSave: Boolean(options.autoSave) },
+      });
     });
-
-    // Save clauses if auto-save is enabled
-    if (options.autoSave && clauses.length > 0) {
-      await saveExtractedClauses(clauses, cbaId, options.organizationId);
-    }
-
-    // Update CBA with processing metadata
-    await db.update(collectiveAgreements)
-      .set({
-        aiProcessed: true,
-        rawText: extractedText,
-      })
-      .where(eq(collectiveAgreements.id, cbaId));
 
     return {
       success: true,
@@ -95,6 +135,7 @@ export async function extractClausesFromPDF(
       errors: errors.length > 0 ? errors : undefined,
     };
   } catch (error) {
+    if (error instanceof OperationAuditError) throw error;
     logger.error('Error extracting clauses', { error, cbaId });
     return {
       success: false,
@@ -211,10 +252,11 @@ Return a JSON array of extracted clauses.`;
  * Skips clauses whose content already exists for the same CBA.
  */
 async function saveExtractedClauses(
+  tx: RLSTx,
   clauses: ExtractedClause[],
   cbaId: string,
   organizationId: string
-): Promise<void> {
+): Promise<number> {
   const clausesToInsert = clauses.map(clause => {
     const contentHash = createHash('sha256')
       .update(clause.content)
@@ -238,10 +280,10 @@ async function saveExtractedClauses(
   });
 
   // Fetch existing content hashes for this CBA to skip duplicates
-  const existing = await db
+  const existing = await tx
     .select({ contentHash: cbaClause.contentHash })
     .from(cbaClause)
-    .where(eq(cbaClause.cbaId, cbaId));
+    .where(and(eq(cbaClause.cbaId, cbaId), eq(cbaClause.organizationId, organizationId)));
   const existingHashes = new Set(
     existing.map((r) => r.contentHash).filter(Boolean),
   );
@@ -263,30 +305,34 @@ async function saveExtractedClauses(
   const batchSize = 50;
   for (let i = 0; i < deduped.length; i += batchSize) {
     const batch = deduped.slice(i, i + batchSize);
-    await db.insert(cbaClause).values(batch);
+    await tx.insert(cbaClause).values(batch);
   }
+  return deduped.length;
 }
 
 /**
  * Extract clauses from multiple CBAs in batch
  */
 export async function batchExtractClauses(
-  cbas: Array<{ id: string; documentUrl: string; organizationId: string }>,
-  options?: {
+  cbas: Array<{ id: string; documentUrl: string }>,
+  options: {
+    organizationId: string;
+    userId: string;
     concurrency?: number;
     autoSave?: boolean;
   }
 ): Promise<Map<string, ExtractionResult>> {
   const results = new Map<string, ExtractionResult>();
-  const concurrency = options?.concurrency || 3;
+  const concurrency = options.concurrency || 3;
 
   // Process in batches
   for (let i = 0; i < cbas.length; i += concurrency) {
     const batch = cbas.slice(i, i + concurrency);
     const batchPromises = batch.map(cba =>
       extractClausesFromPDF(cba.documentUrl, cba.id, {
-        organizationId: cba.organizationId,
-        autoSave: options?.autoSave,
+        organizationId: options.organizationId,
+        userId: options.userId,
+        autoSave: options.autoSave,
       }).then(result => ({ cbaId: cba.id, result }))
     );
 

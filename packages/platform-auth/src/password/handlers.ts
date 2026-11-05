@@ -23,6 +23,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { isDeployedRuntime, isLocalQaRuntime } from '../runtime-identity'
 import {
   signup,
   login,
@@ -139,8 +140,7 @@ export async function handleLogin(request: NextRequest) {
     })
   } catch (error) {
     console.error('[platform-auth] handleLogin failed:', error)
-    const exposeDetails =
-      process.env.QA_TEST_ENV === 'true' || process.env.NODE_ENV !== 'production'
+    const exposeDetails = isLocalQaRuntime() || !isDeployedRuntime()
     const err = error as Error & { cause?: unknown }
     const cause = err?.cause as { message?: string; code?: string } | undefined
     return NextResponse.json(

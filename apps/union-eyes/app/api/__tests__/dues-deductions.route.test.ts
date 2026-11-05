@@ -10,11 +10,16 @@ vi.mock('@/lib/api/framework', () => ({
 }));
 vi.mock('@/db', () => ({ db: { select: m.select } }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({
-  payrollDeductions: { organizationId: 'organizationId', userId: 'userId' },
+  payrollDeductions: {
+    id: 'id', organizationId: 'organizationId', userId: 'userId', payPeriodStart: 'payPeriodStart', payPeriodEnd: 'payPeriodEnd', grossPay: 'grossPay',
+    netPay: 'netPay', unionDuesAmount: 'unionDuesAmount', source: 'source', verified: 'verified', verifiedAt: 'verifiedAt', createdAt: 'createdAt',
+    verifiedBy: 'verifiedBy', metadata: 'metadata', otherDeductions: 'otherDeductions', remittanceLineItemId: 'remittanceLineItemId', employerId: 'employerId',
+  },
 }));
 vi.mock('drizzle-orm', () => ({
   and: (...conds: unknown[]) => ({ and: conds }),
-  sql: (parts: TemplateStringsArray, ...values: unknown[]) => ({ parts, values }),
+  eq: (column: unknown, value: unknown) => ({ eq: [column, value] }),
+  desc: (column: unknown) => ({ desc: column }),
 }));
 
 async function loadRoute() {
@@ -27,16 +32,29 @@ describe('/api/dues/deductions route', () => {
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => handler);
   });
 
+  function stubSelect(rows: unknown[] = [{ id: 'd1' }]) {
+    const seen: { fields?: Record<string, unknown>; where?: any; order?: unknown; limit?: number } = {};
+    m.select.mockImplementation((fields: Record<string, unknown>) => {
+      seen.fields = fields;
+      return {
+        from: vi.fn(() => ({
+          where: vi.fn((cond: unknown) => {
+            seen.where = cond;
+            return {
+              orderBy: vi.fn((order: unknown) => {
+                seen.order = order;
+                return { limit: vi.fn((n: number) => { seen.limit = n; return Promise.resolve(rows); }) };
+              }),
+            };
+          }),
+        })),
+      };
+    });
+    return seen;
+  }
+
   it('scopes the query by the authenticated context userId, not a client-supplied query param (IDOR fix)', async () => {
-    let capturedWhere: any;
-    m.select.mockImplementation(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn((cond: unknown) => {
-          capturedWhere = cond;
-          return Promise.resolve([{ id: 'd1' }]);
-        }),
-      })),
-    }));
+    const seen = stubSelect();
 
     const { GET } = await loadRoute();
     // Context userId is 'user_real'; a route callable from a request whose
@@ -46,10 +64,26 @@ describe('/api/dues/deductions route', () => {
 
     expect(result).toEqual({ data: [{ id: 'd1' }] });
     // Both filter clauses reference the context-derived values.
-    const values = capturedWhere.and.flatMap((c: any) => c.values);
-    expect(values).toContain('org_1');
-    expect(values).toContain('user_real');
-    expect(values).not.toContain('user_other');
+    expect(seen.where.and).toEqual([{ eq: ['organizationId', 'org_1'] }, { eq: ['userId', 'user_real'] }]);
+  });
+
+  it('returns a member only what is theirs to see: no verifier, remittance line, employer, metadata or other deductions', async () => {
+    const seen = stubSelect();
+    const { GET } = await loadRoute();
+    await GET({ organizationId: 'org_1', userId: 'user_real' });
+
+    expect(Object.keys(seen.fields ?? {}).sort()).toEqual(
+      ['createdAt', 'grossPay', 'id', 'netPay', 'payPeriodEnd', 'payPeriodStart', 'source', 'unionDuesAmount', 'verified', 'verifiedAt'].sort(),
+    );
+  });
+
+  it('lists the newest pay period first, within a bound', async () => {
+    const seen = stubSelect();
+    const { GET } = await loadRoute();
+    await GET({ organizationId: 'org_1', userId: 'user_real' });
+
+    expect(seen.order).toEqual({ desc: 'payPeriodStart' });
+    expect(seen.limit).toBe(1000);
   });
 
   it('returns empty data when organization/user context is missing', async () => {

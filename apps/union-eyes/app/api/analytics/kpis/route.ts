@@ -12,6 +12,8 @@ const { GET, POST } = crudRoutes({
   tags: ["Analytics"],
   orgScoped: true,
   readRole: 'member',
+  // The alert recipients are user ids and email addresses of the staff who are notified.
+  omitFromResponse: ['alertRecipients'],
   writeRole: 'steward',
 });
 export { GET, POST };

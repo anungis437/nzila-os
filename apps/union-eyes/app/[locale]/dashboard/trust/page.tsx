@@ -20,11 +20,13 @@ export const dynamic = 'force-dynamic';
 import * as React from 'react';
 import { Metadata } from 'next';
 import { getTrustMetrics } from '@/lib/trust/system-metrics';
-import { getTranslations } from 'next-intl/server';
+import { formatTableList } from '@/lib/trust/format';
+import { formatDay } from '@/lib/client/day';
+import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { SystemStatusGrid } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout, CalloutPresets } from '@/components/marketing/human-centered-callout';
-import { Shield, Lock, GitBranch, Scale, FileText, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Shield, Lock, GitBranch, Scale, FileText } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Trust & Sovereignty | UnionEyes',
@@ -33,32 +35,30 @@ export const metadata: Metadata = {
 };
 
 export default async function TrustPage() {
-  const metrics = await getTrustMetrics();
+  // The audit figures are the organization's own, read in its context.
+  const { organizationId } = await requireOrganizationScope();
+  const metrics = await getTrustMetrics(organizationId);
   const t = await getTranslations('trust');
+  // Dates and numbers are read in the reader's language: the server's own default locale is not it.
+  const locale = await getLocale();
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                {t("title")}
-              </h1>
-              <p className="text-slate-600">
-                {t("subtitle")}
-              </p>
-            </div>
-            <Button variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              {t("exportReport")}
-            </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              {t("title")}
+            </h1>
+            <p className="text-slate-600">
+              {t("subtitle")}
+            </p>
           </div>
           <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
             <span>{t("lastUpdated")}:</span>
             <span className="font-medium text-slate-700">
-              {metrics.lastUpdated.toLocaleString('en-US', {
+              {metrics.lastUpdated.toLocaleString(locale, {
                 dateStyle: 'medium',
                 timeStyle: 'short',
               })}
@@ -100,7 +100,7 @@ export default async function TrustPage() {
           <StatCard
             icon={<FileText className="h-5 w-5" />}
             label={t("statAuditEvents")}
-            value={metrics.auditLog.eventsLogged.toLocaleString()}
+            value={metrics.auditLog.eventsLogged.toLocaleString(locale)}
             status={metrics.auditLog.status}
           />
         </div>
@@ -128,11 +128,12 @@ export default async function TrustPage() {
                   },
                   {
                     label: t("violationsBlocked"),
-                    value: metrics.immutability.violationAttempts,
+                    // Nothing records a refused modification: the figure is not measured, so none is shown.
+                    value: metrics.immutability.violationAttempts ?? '—',
                   },
                   {
                     label: t("lastAudit"),
-                    value: metrics.immutability.lastAudit.toLocaleDateString(),
+                    value: metrics.immutability.lastAudit.toLocaleDateString(locale),
                   },
                 ],
                 auditUrl: '#immutability',
@@ -157,7 +158,7 @@ export default async function TrustPage() {
                   },
                   {
                     label: t("lastCheck"),
-                    value: metrics.rlsEnforcement.lastPolicyCheck.toLocaleDateString(),
+                    value: metrics.rlsEnforcement.lastPolicyCheck.toLocaleDateString(locale),
                   },
                 ],
                 auditUrl: '#rls',
@@ -178,7 +179,7 @@ export default async function TrustPage() {
                   },
                   {
                     label: t("lastValidation"),
-                    value: metrics.fsmValidation.lastValidation.toLocaleDateString(),
+                    value: metrics.fsmValidation.lastValidation.toLocaleDateString(locale),
                   },
                 ],
                 auditUrl: '#fsm',
@@ -212,17 +213,11 @@ export default async function TrustPage() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">{t("auditTrail")}</h2>
           <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <p className="text-sm text-slate-600 mb-2">{t("eventsLogged")}</p>
                 <p className="text-3xl font-bold text-slate-900">
-                  {metrics.auditLog.eventsLogged.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-slate-600 mb-2">{t("archivedEvents")}</p>
-                <p className="text-3xl font-bold text-slate-900">
-                  {metrics.auditLog.archivedEvents.toLocaleString()}
+                  {metrics.auditLog.eventsLogged.toLocaleString(locale)}
                 </p>
               </div>
               <div>
@@ -253,8 +248,8 @@ export default async function TrustPage() {
                 <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
                   <li>{t("updateTriggers")}</li>
                   <li>{t("deleteTriggers")}</li>
-                  <li>{t("appliedTo")}: {metrics.immutability.tablesProtected.join(', ')}</li>
-                  <li>{t("verified")}: {metrics.immutability.lastAudit.toLocaleDateString()}</li>
+                  <li>{t("appliedTo")}: {formatTableList(metrics.immutability.tablesProtected)}</li>
+                  <li>{t("verified")}: {metrics.immutability.lastAudit.toLocaleDateString(locale)}</li>
                 </ul>
               </Section>
 
@@ -266,7 +261,7 @@ export default async function TrustPage() {
                 <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
                   <li>{t("activePolicies")}: {metrics.rlsEnforcement.policiesActive}</li>
                   <li>{t("orgIsolation")}: {metrics.rlsEnforcement.orgIsolation}</li>
-                  <li>{t("tablesProtected")}: {metrics.rlsEnforcement.tablesProtected.join(', ')}</li>
+                  <li>{t("tablesProtected")}: {formatTableList(metrics.rlsEnforcement.tablesProtected)}</li>
                 </ul>
               </Section>
 
@@ -297,7 +292,7 @@ export default async function TrustPage() {
                   </li>
                   {metrics.governance.lastElectionDate && (
                     <li>
-                      {t("lastElection")}: {metrics.governance.lastElectionDate.toLocaleDateString()}
+                      {t("lastElection")}: {formatDay(metrics.governance.lastElectionDate, locale, 'numeric')}
                     </li>
                   )}
                   <li>{t("classVotingRights")}</li>
@@ -313,11 +308,7 @@ export default async function TrustPage() {
             variant="trust"
             title={t("securityQuestion")}
             description={t("securityDescriptionContact")}
-          >
-            <Button variant="outline" className="mt-2">
-              {t("contactSecurityTeam")}
-            </Button>
-          </HumanCenteredCallout>
+          />
         </div>
       </main>
     </div>

@@ -39,6 +39,7 @@ import {
 } from '@/db/schema';
 import { eq, and, lte, isNull } from 'drizzle-orm';
 import { getFromEmail, sendResendEmail } from '@/lib/email-service';
+import { formattingLocale } from '@/lib/locales';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -74,6 +75,8 @@ interface RemittanceNotificationData {
   memberCount: number;
   status: string;
   daysOverdue?: number;
+  /** The recipients' language for dates and amounts ('fr', 'fr-CA', 'en-CA'...); en-CA when the caller does not know it. */
+  locale?: string;
 }
 
 interface NotificationResult {
@@ -126,13 +129,15 @@ const EXECUTIVE_EMAIL = process.env.EXECUTIVE_EMAIL || 'executive@clc.ca';
  */
 export async function sendOverdueAlert(
   remittanceId: string,
-  daysOverdue: number
+  daysOverdue: number,
+  locale?: string
 ): Promise<NotificationResult[]> {
   // Fetch remittance details
-  const remittance = await fetchRemittanceData(remittanceId);
-  if (!remittance) {
+  const fetched = await fetchRemittanceData(remittanceId);
+  if (!fetched) {
     throw new Error(`Remittance ${remittanceId} not found`);
   }
+  const remittance: RemittanceNotificationData = { ...fetched, locale };
 
   // Determine escalation level
   const config = getOverdueConfig(daysOverdue);
@@ -171,12 +176,14 @@ export async function sendOverdueAlert(
  * Send payment confirmation
  */
 export async function sendPaymentConfirmation(
-  remittanceId: string
+  remittanceId: string,
+  locale?: string
 ): Promise<NotificationResult[]> {
-  const remittance = await fetchRemittanceData(remittanceId);
-  if (!remittance) {
+  const fetched = await fetchRemittanceData(remittanceId);
+  if (!fetched) {
     throw new Error(`Remittance ${remittanceId} not found`);
   }
+  const remittance: RemittanceNotificationData = { ...fetched, locale };
 
   const config = NOTIFICATION_CONFIG.payment.confirmation;
   const recipients = await getNotificationRecipients(remittance.organizationId, false);
@@ -206,7 +213,8 @@ export async function sendPaymentConfirmation(
  */
 export async function sendMonthlyReminder(
   organizationId: string,
-  remittanceMonth: Date
+  remittanceMonth: Date,
+  locale?: string
 ): Promise<NotificationResult[]> {
   // Check if remittance already exists
   const month = remittanceMonth.getMonth() + 1; // Convert 0-11 to 1-12
@@ -252,7 +260,8 @@ export async function sendMonthlyReminder(
     dueDate: calculateDueDate(remittanceMonth),
     amount: 0, // Not yet calculated
     memberCount: 0,
-    status: 'pending'
+    status: 'pending',
+    locale
   };
 
   const template = generateMonthlyReminderTemplate(reminderData);
@@ -280,7 +289,8 @@ export async function sendMonthlyReminder(
  * Send executive escalation for critical non-compliance
  */
 export async function sendExecutiveEscalation(
-  remittanceIds: string[]
+  remittanceIds: string[],
+  locale?: string
 ): Promise<NotificationResult[]> {
   const remittances = await Promise.all(
     remittanceIds.map(id => fetchRemittanceData(id))
@@ -292,7 +302,7 @@ export async function sendExecutiveEscalation(
     return [];
   }
 
-  const template = generateExecutiveEscalationTemplate(validRemittances);
+  const template = generateExecutiveEscalationTemplate(validRemittances, locale);
 
   const results: NotificationResult[] = [];
 
@@ -330,7 +340,8 @@ export async function sendExecutiveEscalation(
  * Called by cron job 7 days before month start
  */
 export async function sendBulkMonthlyReminders(
-  remittanceMonth: Date
+  remittanceMonth: Date,
+  locale?: string
 ): Promise<{ sent: number; failed: number; skipped: number }> {
   const allOrgs = await db.select().from(organizations);
 
@@ -340,7 +351,7 @@ export async function sendBulkMonthlyReminders(
 
   for (const org of allOrgs) {
     try {
-      const results = await sendMonthlyReminder(org.id, remittanceMonth);
+      const results = await sendMonthlyReminder(org.id, remittanceMonth, locale);
       if (results.length === 0) {
         skipped++;
       } else if (results.some(r => r.success)) {
@@ -519,10 +530,16 @@ function calculateDueDate(remittanceMonth: Date): Date {
 // HELPER FUNCTIONS - TEMPLATES
 // ============================================================================
 
+/** CAD in the recipients' language: "$450.00" in English, "450,00 $" in French. */
+function cad(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 }).format(amount);
+}
+
 function generateOverdueTemplate(
   data: RemittanceNotificationData,
   daysOverdue: number
 ): NotificationTemplate {
+  const locale = formattingLocale(data.locale);
   const severityText = daysOverdue >= 30 ? 'CRITICAL' : daysOverdue >= 14 ? 'URGENT' : 'IMPORTANT';
   
   return {
@@ -548,15 +565,15 @@ function generateOverdueTemplate(
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Period:</strong></td>
-                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.remittanceMonth.toLocaleDateString('en-CA', { year: 'numeric', month: 'long' })}</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.remittanceMonth.toLocaleDateString(locale, { year: 'numeric', month: 'long' })}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Due Date:</strong></td>
-                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.dueDate.toLocaleDateString('en-CA')}</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.dueDate.toLocaleDateString(locale)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Amount:</strong></td>
-                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">$${data.amount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${cad(data.amount, locale)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Members:</strong></td>
@@ -595,8 +612,9 @@ function generateOverdueTemplate(
 function generatePaymentConfirmationTemplate(
   data: RemittanceNotificationData
 ): NotificationTemplate {
+  const locale = formattingLocale(data.locale);
   return {
-    subject: `Payment Confirmed - CLC Per-Capita Remittance for ${data.remittanceMonth.toLocaleDateString('en-CA', { year: 'numeric', month: 'long' })}`,
+    subject: `Payment Confirmed - CLC Per-Capita Remittance for ${data.remittanceMonth.toLocaleDateString(locale, { year: 'numeric', month: 'long' })}`,
     emailBody: `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -618,11 +636,11 @@ function generatePaymentConfirmationTemplate(
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Period:</strong></td>
-                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.remittanceMonth.toLocaleDateString('en-CA', { year: 'numeric', month: 'long' })}</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.remittanceMonth.toLocaleDateString(locale, { year: 'numeric', month: 'long' })}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Amount Paid:</strong></td>
-                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">$${data.amount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${cad(data.amount, locale)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Members:</strong></td>
@@ -654,8 +672,9 @@ function generatePaymentConfirmationTemplate(
 function generateMonthlyReminderTemplate(
   data: RemittanceNotificationData
 ): NotificationTemplate {
+  const locale = formattingLocale(data.locale);
   return {
-    subject: `Reminder: CLC Per-Capita Remittance Due Soon - ${data.remittanceMonth.toLocaleDateString('en-CA', { year: 'numeric', month: 'long' })}`,
+    subject: `Reminder: CLC Per-Capita Remittance Due Soon - ${data.remittanceMonth.toLocaleDateString(locale, { year: 'numeric', month: 'long' })}`,
     emailBody: `
       <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -666,7 +685,7 @@ function generateMonthlyReminderTemplate(
           <div style="padding: 20px; background-color: #f9fafb;">
             <p>Dear ${data.organizationName},</p>
             
-            <p>This is a friendly reminder that your CLC per-capita remittance for <strong>${data.remittanceMonth.toLocaleDateString('en-CA', { year: 'numeric', month: 'long' })}</strong> is due on <strong>${data.dueDate.toLocaleDateString('en-CA')}</strong>.</p>
+            <p>This is a friendly reminder that your CLC per-capita remittance for <strong>${data.remittanceMonth.toLocaleDateString(locale, { year: 'numeric', month: 'long' })}</strong> is due on <strong>${data.dueDate.toLocaleDateString(locale)}</strong>.</p>
             
             <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <h3 style="margin-top: 0;">Remittance Information</h3>
@@ -677,11 +696,11 @@ function generateMonthlyReminderTemplate(
                 </tr>
                 <tr>
                   <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Period:</strong></td>
-                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.remittanceMonth.toLocaleDateString('en-CA', { year: 'numeric', month: 'long' })}</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.remittanceMonth.toLocaleDateString(locale, { year: 'numeric', month: 'long' })}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px;"><strong>Due Date:</strong></td>
-                  <td style="padding: 8px; font-weight: bold;">${data.dueDate.toLocaleDateString('en-CA')}</td>
+                  <td style="padding: 8px; font-weight: bold;">${data.dueDate.toLocaleDateString(locale)}</td>
                 </tr>
               </table>
             </div>
@@ -691,7 +710,7 @@ function generateMonthlyReminderTemplate(
               <ol style="margin: 10px 0;">
                 <li>Review your membership data</li>
                 <li>Calculate your per-capita amount</li>
-                <li>Submit payment by ${data.dueDate.toLocaleDateString('en-CA')}</li>
+                <li>Submit payment by ${data.dueDate.toLocaleDateString(locale)}</li>
               </ol>
             </div>
             
@@ -712,8 +731,10 @@ function generateMonthlyReminderTemplate(
 }
 
 function generateExecutiveEscalationTemplate(
-  remittances: RemittanceNotificationData[]
+  remittances: RemittanceNotificationData[],
+  requestedLocale?: string
 ): NotificationTemplate {
+  const locale = formattingLocale(requestedLocale);
   const totalOverdue = remittances.reduce((sum, r) => sum + r.amount, 0);
   
   return {
@@ -734,7 +755,7 @@ function generateExecutiveEscalationTemplate(
             <div style="background-color: #fee2e2; border: 2px solid #dc2626; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <h3 style="margin-top: 0; color: #991b1b;">Summary</h3>
               <p><strong>Total Critical Cases:</strong> ${remittances.length}</p>
-              <p><strong>Total Amount Overdue:</strong> $${totalOverdue.toLocaleString('en-CA', { minimumFractionDigits: 2 })}</p>
+              <p><strong>Total Amount Overdue:</strong> ${cad(totalOverdue, locale)}</p>
             </div>
             
             <h3>Affected Organizations:</h3>
@@ -753,8 +774,8 @@ function generateExecutiveEscalationTemplate(
                   <tr>
                     <td style="padding: 10px; border: 1px solid #e5e7eb;">${r.organizationName}</td>
                     <td style="padding: 10px; border: 1px solid #e5e7eb;">${r.charterNumber}</td>
-                    <td style="padding: 10px; text-align: right; border: 1px solid #e5e7eb;">${r.remittanceMonth.toLocaleDateString('en-CA', { year: 'numeric', month: 'short' })}</td>
-                    <td style="padding: 10px; text-align: right; border: 1px solid #e5e7eb;">$${r.amount.toLocaleString('en-CA', { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 10px; text-align: right; border: 1px solid #e5e7eb;">${r.remittanceMonth.toLocaleDateString(locale, { year: 'numeric', month: 'short' })}</td>
+                    <td style="padding: 10px; text-align: right; border: 1px solid #e5e7eb;">${cad(r.amount, locale)}</td>
                     <td style="padding: 10px; text-align: right; border: 1px solid #e5e7eb; color: #dc2626; font-weight: bold;">${r.daysOverdue}</td>
                   </tr>
                 `).join('')}
@@ -774,7 +795,7 @@ function generateExecutiveEscalationTemplate(
             <p>This automated alert was generated by the CLC Per-Capita Remittance System.</p>
             
             <p style="margin-top: 30px; color: #6b7280; font-size: 12px;">
-              Generated: ${new Date().toLocaleString('en-CA')}<br>
+              Generated: ${new Date().toLocaleString(locale)}<br>
               System: CLC Per-Capita Remittance Management
             </p>
           </div>

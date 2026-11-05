@@ -2,8 +2,8 @@
  * GET /api/finance/invoices/[id] — Get invoice detail with line items
  */
 
-import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { z } from 'zod';
+import { withApi } from '@/lib/api/framework';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -13,28 +13,32 @@ import { getInvoiceWithLineItems } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withMinRole('officer', async (
-  _request,
-  context: BaseAuthContext & { params: Promise<{ id: string }> },
-) => {
-  const { organizationId, userId } = context;
-  if (!organizationId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
-  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
-
-  const { id } = await context.params;
-  if (!id) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invoice ID required');
-  }
-
-  try {
-    const invoice = await getInvoiceWithLineItems(id);
-    if (!invoice) {
-      return standardErrorResponse(ErrorCode.NOT_FOUND, 'Invoice not found');
+// The invoice and its lines are the caller organization's own: the handler runs in that organization's tenant transaction.
+export const GET = withApi(
+  {
+    auth: { minRole: 'secretary_treasurer' },
+    entitlement: 'financial_intelligence_suite',
+    rlsOrgContext: true,
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Finance'], summary: 'Get an invoice with its line items' },
+  },
+  async ({ organizationId, params }) => {
+    const { id } = params;
+    if (!id) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invoice ID required');
     }
-    return standardSuccessResponse(invoice);
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch invoice', error);
-  }
-});
+    if (!z.guid().safeParse(id).success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invoice ID must be a valid id');
+    }
+
+    try {
+      const invoice = await getInvoiceWithLineItems(id, organizationId!);
+      if (!invoice) {
+        return standardErrorResponse(ErrorCode.NOT_FOUND, 'Invoice not found');
+      }
+      return standardSuccessResponse(invoice);
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch invoice', error);
+    }
+  },
+);

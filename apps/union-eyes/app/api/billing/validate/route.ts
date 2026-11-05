@@ -5,199 +5,147 @@ import {
   checkT106Requirement,
   validateBillingRequest,
 } from '@/lib/services/transfer-pricing-service';
-import type { BillingValidationResponse } from '@/lib/types/compliance-api-types';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
- 
-import {
-  ErrorCode,
-  standardErrorResponse,
-} from '@/lib/api/standardized-responses';
 /**
- * Billing Validation API
- * Enforces CAD-only billing per CRA transfer pricing rules
- * Validates T1 General / T106 slip requirements
+ * Validate proposed billing terms, without authorizing or posting an invoice.
+ * Ordinary validation failures are NOT authentication/security incidents.
+ * Every evaluated result has a durable tenant-bound audit receipt.
  */
-
-// Validation schema for billing validation
 const billingValidationSchema = z.object({
-  amount: z.number().positive('Amount must be positive'),
-  currency: z.string().length(3, 'Currency must be a 3-letter code'),
-  invoiceDate: z.string().optional(),
-});
+  amount: z.number().finite().positive(),
+  currency: z.string().regex(/^[A-Z]{3}$/, 'Currency must be a three-letter ISO code'),
+  invoiceDate: z.string().refine((value) => !Number.isNaN(Date.parse(value)), 'Invalid invoice date').optional(),
+}).strict();
 
-/**
- * POST /api/billing/validate
- * Validate billing request for CAD currency compliance and T106 requirements
- */
-export const POST = withRoleAuth('steward', async (request, context) => {
-  try {
-    await requireEntitlement(context.organizationId as string, 'financial_intelligence_suite', context.userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
+type Actor = { userId: string; organizationId: string };
 
-  let rawBody: any;
+async function recordValidation(
+  actor: Actor,
+  action: 'billing.validation.accepted' | 'billing.validation.rejected' | 'billing.validation.unavailable',
+  details: Record<string, unknown>,
+  outcome: 'success' | 'failure',
+): Promise<void> {
+  await withRLSContext({ organizationId: actor.organizationId }, async (tx) => {
+    await persistAtomicAudit(tx, {
+      organizationId: actor.organizationId,
+      userId: actor.userId,
+      action,
+      resourceType: 'billing_validation',
+      details,
+    }, outcome);
+  });
+}
+
+/** Never return a successful validation result unless its audit row committed. */
+async function auditedResult(
+  actor: Actor,
+  payload: Record<string, unknown>,
+  status: number,
+  action: 'billing.validation.accepted' | 'billing.validation.rejected' | 'billing.validation.unavailable',
+  details: Record<string, unknown>,
+): Promise<NextResponse> {
   try {
-    rawBody = await request.json();
+    await recordValidation(actor, action, details, action === 'billing.validation.accepted' ? 'success' : 'failure');
   } catch {
-    return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid JSON in request body'
+    return NextResponse.json(
+      { valid: false, error: 'Billing validation temporarily unavailable' },
+      { status: 503 },
     );
   }
+  return NextResponse.json(payload, { status });
+}
 
-  const parsed = billingValidationSchema.safeParse(rawBody);
+export const POST = withRoleAuth('steward', async (request, context) => {
+  const actor: Actor = {
+    userId: context.userId as string,
+    organizationId: context.organizationId as string,
+  };
+  if (!actor.userId || !actor.organizationId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Authenticated organization required');
+  }
+  try {
+    await requireEntitlement(actor.organizationId, 'financial_intelligence_suite', actor.userId);
+  } catch {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Entitlement required');
+  }
+
+  let input: unknown;
+  try {
+    input = await request.json();
+  } catch {
+    return auditedResult(actor,
+      { valid: false, error: 'Invalid JSON in request body' }, 400,
+      'billing.validation.rejected', { reason: 'invalid_json' });
+  }
+
+  const parsed = billingValidationSchema.safeParse(input);
   if (!parsed.success) {
-    return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid request body',
-      parsed.error
-    );
+    return auditedResult(actor,
+      { valid: false, error: 'Invalid request body' }, 400,
+      'billing.validation.rejected', { reason: 'invalid_body' });
   }
 
-  const body = parsed.data;
-  const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
+  const { amount, currency, invoiceDate } = parsed.data;
+  const detail = { currency, amount, invoiceDate: invoiceDate ?? null };
 
-    const orgId = (body as Record<string, unknown>)["organizationId"] ?? (body as Record<string, unknown>)["orgId"] ?? (body as Record<string, unknown>)["organization_id"] ?? (body as Record<string, unknown>)["org_id"] ?? (body as Record<string, unknown>)["unionId"] ?? (body as Record<string, unknown>)["union_id"] ?? (body as Record<string, unknown>)["localId"] ?? (body as Record<string, unknown>)["local_id"];
-  if (typeof orgId === 'string' && orgId.length > 0 && orgId !== context.organizationId) {
-    return standardErrorResponse(
-      ErrorCode.FORBIDDEN,
-      'Forbidden'
-    );
-  }
+  try {
+    const validation = await validateBillingRequest({
+      invoiceId: `validation-${Date.now()}`,
+      amount,
+      currency,
+      date: invoiceDate ? new Date(invoiceDate) : new Date(),
+    });
 
-try {
-      const { amount, currency, invoiceDate } = body;
-
-      // Validate billing request
-      const validation = await validateBillingRequest({
-        invoiceId: `inv-${Date.now()}`,
-        amount,
-        currency,
-        date: invoiceDate ? new Date(invoiceDate) : new Date(),
-      });
-
-      if (!validation.valid) {
-        // If not CAD, attempt conversion
-        if (currency !== 'CAD') {
-          try {
-            const convertedAmount = await convertUSDToCAD(amount, new Date());
-            
-            logApiAuditEvent({
-              timestamp: new Date().toISOString(), userId,
-              endpoint: '/api/billing/validate',
-              method: 'POST',
-              eventType: 'success',
-              severity: 'medium',
-              details: {
-                dataType: 'FINANCIAL',
-                originalCurrency: currency,
-                originalAmount: amount,
-                convertedAmount,
-                requiresConversion: true,
-              },
-            });
-
-            return NextResponse.json({
-              valid: false,
-              currency: 'CAD',
-              amount: convertedAmount,
-              message: `Currency must be CAD. ${currency} ${amount} = CAD ${convertedAmount.toFixed(2)}`,
-              error: validation.error,
-            } as BillingValidationResponse);
-          } catch (conversionError) {
-            logApiAuditEvent({
-              timestamp: new Date().toISOString(), userId,
-              endpoint: '/api/billing/validate',
-              method: 'POST',
-              eventType: 'unauthorized_access',
-              severity: 'high',
-              details: { 
-                error: `Currency conversion failed: ${conversionError}`,
-                currency,
-                amount,
-              },
-            });
-
-            return NextResponse.json(
-              {
-                valid: false,
-                currency: 'CAD',
-                error: `Currency conversion failed: ${conversionError}`,
-                requiredCurrency: 'CAD',
-              },
-              { status: 400 }
-            );
-          }
-        }
-
-        logApiAuditEvent({
-          timestamp: new Date().toISOString(), userId,
-          endpoint: '/api/billing/validate',
-          method: 'POST',
-          eventType: 'auth_failed',
-          severity: 'medium',
-          details: { reason: validation.error, currency, amount },
-        });
-
-        return NextResponse.json(
-          {
+    if (!validation.valid) {
+      if (currency === 'USD') {
+        try {
+          const convertedAmount = await convertUSDToCAD(amount, invoiceDate ? new Date(invoiceDate) : new Date());
+          return auditedResult(actor, {
             valid: false,
             currency: 'CAD',
+            amount: convertedAmount,
+            message: 'Billing requires CAD; this is an indicative conversion, not an approved invoice',
             error: validation.error,
+          }, 200, 'billing.validation.rejected',
+          { ...detail, reason: 'requires_CAD_conversion', convertedAmount });
+        } catch {
+          return auditedResult(actor, {
+            valid: false,
+            error: 'Currency conversion temporarily unavailable',
             requiredCurrency: 'CAD',
-          },
-          { status: 400 }
-        );
+          }, 503, 'billing.validation.unavailable',
+          { ...detail, reason: 'conversion_unavailable' });
+        }
       }
-
-      // Check T106 requirements
-      const t106Check = await checkT106Requirement(amount, true);
-
-      logApiAuditEvent({
-        timestamp: new Date().toISOString(), userId,
-        endpoint: '/api/billing/validate',
-        method: 'POST',
-        eventType: 'success',
-        severity: 'medium',
-        details: {
-          dataType: 'FINANCIAL',
-          amount,
-          currency,
-          requiresT106: t106Check.requiresT106,
-        },
-      });
-
-      return NextResponse.json({
-        valid: true,
+      return auditedResult(actor, {
+        valid: false,
         currency: 'CAD',
-        amount,
-        message: 'Billing request approved',
-        requiresT106: t106Check.requiresT106,
-        t106Notes: t106Check.reason,
-      } as BillingValidationResponse);
-    } catch (_error) {
-      logApiAuditEvent({
-        timestamp: new Date().toISOString(), userId,
-        endpoint: '/api/billing/validate',
-        method: 'POST',
-        eventType: 'unauthorized_access',
-        severity: 'high',
-        details: { error: 'Billing validation failed' },
-      });
-
-      return NextResponse.json(
-        {
-          valid: false,
-          error: 'Billing validation failed',
-          currency: 'CAD',
-        },
-        { status: 500 }
-      );
+        error: validation.error ?? 'Billing validation failed',
+        requiredCurrency: 'CAD',
+      }, 400, 'billing.validation.rejected',
+      { ...detail, reason: 'invalid_billing_terms' });
     }
+
+    const t106Check = await checkT106Requirement(amount, true);
+    return auditedResult(actor, {
+      valid: true,
+      currency: 'CAD',
+      amount,
+      message: 'Billing request validated; no invoice has been approved or posted',
+      requiresT106: t106Check.requiresT106,
+      t106Notes: t106Check.reason,
+    }, 200, 'billing.validation.accepted',
+    { ...detail, requiresT106: t106Check.requiresT106 });
+  } catch {
+    return auditedResult(actor, {
+      valid: false,
+      error: 'Billing validation temporarily unavailable',
+    }, 503, 'billing.validation.unavailable',
+    { ...detail, reason: 'validation_dependency_unavailable' });
+  }
 });
-
-

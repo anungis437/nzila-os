@@ -47,7 +47,7 @@ export const orgScopeSchema = z.object({
   /** ISO-8601 creation timestamp. */
   createdAt: z.string().datetime(),
   /** Optional metadata bag for extensions. */
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type OrgScope = z.infer<typeof orgScopeSchema>

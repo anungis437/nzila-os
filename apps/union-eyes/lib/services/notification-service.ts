@@ -7,17 +7,27 @@
  */
 
 import { db } from "@/db";
+import { getActiveSystemDb } from "@/db/system-context-storage";
+import { getActiveTenantDb } from "@/db/tenant-context-storage";
 import { v4 as uuid } from "uuid";
 import { logger } from "@/lib/logger";
+import { stripMarkup } from "@/lib/utils/strip-markup";
 import { getFromEmail, sendResendEmail } from "@/lib/email-service";
 import { createAuditLog } from "./audit-service";
+import { withSystemContext, type RLSTx } from "@/lib/db/with-rls-context";
 import {
   notificationQueue,
   notificationDeliveryLog,
   notificationTemplates,
+  userNotificationPreferences,
 } from "@/db/schema/domains/communications";
 import { organizationMembers } from "@/db/schema";
 import { eq, and, or, lt, isNull } from "drizzle-orm";
+import {
+  decideDeliveryRetry,
+  isDeliveryClaimConflict,
+  loadDeliveryFacts,
+} from "./delivery-reconciliation";
 
 let firebaseAdmin: typeof import('firebase-admin') | null = null;
 let firebaseApp: import('firebase-admin').app.App | null = null;
@@ -61,7 +71,7 @@ async function getFirebaseMessaging() {
 // ============================================================================
 
 export type NotificationType = "email" | "sms" | "push" | "in_app";
-export type NotificationStatus = "pending" | "sent" | "failed" | "delivered" | "bounced";
+export type NotificationStatus = "pending" | "sent" | "failed" | "delivered" | "bounced" | "uncertain";
 export type NotificationPriority = "low" | "normal" | "high" | "urgent";
 
 export interface NotificationPayload {
@@ -86,6 +96,8 @@ export interface NotificationPayload {
   
   metadata?: Record<string, unknown>;
   userId?: string; // User who triggered notification
+  /** Stable across retries. A second send with the same key must not call the provider again after acceptance or an uncertain attempt. */
+  idempotencyKey?: string;
 }
 
 export interface NotificationResponse {
@@ -94,12 +106,103 @@ export interface NotificationResponse {
   sentAt?: Date;
   deliveredAt?: Date;
   failureReason?: string;
+  /** Provider receipt. Present when the provider accepted the submission, including when that acceptance was not recorded. */
+  providerMessageId?: string;
 }
 
 export interface NotificationProvider {
   name: string;
   send(payload: NotificationPayload): Promise<NotificationResponse>;
   trackDelivery?(messageId: string): Promise<NotificationStatus>;
+}
+
+export interface SendOptions {
+  /** For a caller with no tenant session (a webhook, a job): each database step of the delivery runs as the system role in its own short transaction. */
+  systemSteps?: boolean;
+}
+
+/**
+ * The transaction a caller holds when it sends without `systemSteps`: the system transaction of a job, or the tenant transaction of a route. A delivery step
+ * never falls back to the pooled connection, which has no organization: the recipient check would see nobody and the ledger writes would be refused.
+ */
+function callerTransaction(): RLSTx {
+  const transaction = getActiveSystemDb() ?? getActiveTenantDb();
+  if (!transaction) {
+    throw new Error("NotificationService.send needs a tenant or system transaction to be open, or systemSteps for a caller with no session");
+  }
+  return transaction as unknown as RLSTx;
+}
+
+type DeliveryLedgerEvent =
+  | "queued"
+  | "attempted"
+  | "accepted"
+  | "failed"
+  | "retried"
+  | "delivered"
+  | "suppressed"
+  | "bounced"
+  | "uncertain";
+
+/** Provider status `sent` is submission acceptance. Confirmed delivery stays `delivered`. */
+function providerSubmissionEvent(status: NotificationStatus): DeliveryLedgerEvent {
+  if (status === "delivered") return "delivered";
+  if (status === "bounced") return "bounced";
+  if (status === "sent") return "accepted";
+  return "failed";
+}
+
+async function recordDeliveryEvent(input: {
+  organizationId: string;
+  notificationId: string;
+  event: DeliveryLedgerEvent;
+  providerId?: string;
+  externalEventId?: string;
+  statusCode?: string;
+  errorMessage?: string;
+  details?: Record<string, unknown>;
+}, database: RLSTx = db): Promise<void> {
+  await database.insert(notificationDeliveryLog).values({
+    id: uuid(),
+    organizationId: input.organizationId,
+    notificationId: input.notificationId,
+    event: input.event,
+    eventTimestamp: new Date(),
+    providerId: input.providerId,
+    externalEventId: input.externalEventId,
+    statusCode: input.statusCode,
+    errorMessage: input.errorMessage,
+    details: input.details,
+  });
+}
+
+async function channelSuppression(payload: NotificationPayload, database: RLSTx = db): Promise<string | null> {
+  if (!payload.recipientId) return null;
+  const rows = await database
+    .select({
+      emailEnabled: userNotificationPreferences.emailEnabled,
+      smsEnabled: userNotificationPreferences.smsEnabled,
+      pushEnabled: userNotificationPreferences.pushEnabled,
+      inAppEnabled: userNotificationPreferences.inAppEnabled,
+    })
+    .from(userNotificationPreferences)
+    .where(
+      and(
+        eq(userNotificationPreferences.userId, payload.recipientId),
+        eq(userNotificationPreferences.organizationId, payload.organizationId),
+      ),
+    )
+    .limit(1);
+  const prefs = Array.isArray(rows) ? rows[0] : undefined;
+  if (!prefs || typeof prefs.emailEnabled !== "boolean") return null;
+  const enabled = {
+    email: prefs.emailEnabled,
+    sms: prefs.smsEnabled,
+    push: prefs.pushEnabled,
+    in_app: prefs.inAppEnabled,
+  }[payload.type];
+  if (enabled === false) return `suppressed: ${payload.type} disabled by user preference`;
+  return null;
 }
 
 interface TwilioMessageResponse {
@@ -152,12 +255,8 @@ export const notifications = pgTable('notifications', {
 // ============================================================================
 
 function stripHtml(html: string): string {
-  return html
-    // codeql[js/incomplete-multi-character-sanitization] - used for plain-text conversion, not security sanitization
-    .replace(/<style[^>]*>.*<\/style>/gm, '')
-    .replace(/<[^>]+>/gm, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Plain-text conversion for the email fallback; the result never contains markup.
+  return stripMarkup(html).replace(/\s+/g, ' ').trim();
 }
 
 export class ResendEmailProvider implements NotificationProvider {
@@ -534,16 +633,122 @@ export class NotificationService {
   }
 
   /**
-   * Send notification immediately
+   * Send notification immediately.
+   *
+   * A caller that runs inside a tenant transaction (a route with `rlsOrgContext`) or a system transaction (a job) sends on that transaction. A caller with
+   * no session at all (a webhook) passes `systemSteps`: every database step of the delivery then runs as the system role in its own short
+   * transaction, so the claim and the attempt are committed before the provider is called and no transaction is open while it is.
    */
-  async send(payload: NotificationPayload): Promise<NotificationResponse> {
+  async send(payload: NotificationPayload, options: SendOptions = {}): Promise<NotificationResponse> {
+    const step = <T>(work: (database: RLSTx) => Promise<T>): Promise<T> =>
+      options.systemSteps ? withSystemContext((tx) => work(tx)) : work(callerTransaction());
     try {
-      const recipientActive = await isNotificationRecipientActive(payload);
+      const idempotencyKey = payload.idempotencyKey;
+      let retryingConfirmedFailure = false;
+      if (idempotencyKey) {
+        const prior = await step((database) => loadDeliveryFacts(payload.organizationId, idempotencyKey, database));
+        const decision = decideDeliveryRetry(prior);
+        if (decision.action === "skip") {
+          return {
+            id: idempotencyKey,
+            status: decision.status,
+            failureReason: decision.reason,
+            providerMessageId: decision.providerMessageId,
+          };
+        }
+        retryingConfirmedFailure = decision.retry;
+        if (prior.length === 0) {
+          try {
+            await step((database) => database.insert(notificationQueue).values({
+              id: idempotencyKey,
+              organizationId: payload.organizationId,
+              status: "processing",
+              priority: payload.priority || "normal",
+              payload,
+              attemptCount: "0",
+              maxAttempts: "3",
+              nextRetryAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }));
+          } catch (error) {
+            if (!isDeliveryClaimConflict(error)) throw error;
+            const claimed = await step((database) => database
+              .update(notificationQueue)
+              .set({ status: "processing", updatedAt: new Date() })
+              .where(and(
+                eq(notificationQueue.id, idempotencyKey),
+                eq(notificationQueue.organizationId, payload.organizationId),
+                or(
+                  eq(notificationQueue.status, "pending"),
+                  eq(notificationQueue.status, "failed"),
+                  eq(notificationQueue.status, "retrying"),
+                ),
+              ))
+              .returning({ id: notificationQueue.id }));
+            if (Array.isArray(claimed) && claimed.length === 0) {
+              return {
+                id: idempotencyKey,
+                status: "uncertain",
+                failureReason: "another worker claimed this delivery",
+              };
+            }
+          }
+        } else {
+          const claimed = await step((database) => database
+            .update(notificationQueue)
+            .set({ status: "processing", updatedAt: new Date() })
+            .where(and(
+              eq(notificationQueue.id, idempotencyKey),
+              eq(notificationQueue.organizationId, payload.organizationId),
+              or(
+                eq(notificationQueue.status, "pending"),
+                eq(notificationQueue.status, "failed"),
+                eq(notificationQueue.status, "retrying"),
+              ),
+            ))
+            .returning({ id: notificationQueue.id }));
+          if (Array.isArray(claimed) && claimed.length === 0) {
+            return {
+              id: idempotencyKey,
+              status: "uncertain",
+              failureReason: "another worker is retrying this delivery",
+            };
+          }
+        }
+      }
+
+      const recipientActive = await step((database) => isNotificationRecipientActive(payload, database));
       if (!recipientActive) {
+        const id = idempotencyKey ?? uuid();
+        await step((database) => recordDeliveryEvent({
+          organizationId: payload.organizationId,
+          notificationId: id,
+          event: "suppressed",
+          errorMessage: "Recipient is not active in organization",
+          details: { type: payload.type, channel: payload.type, idempotencyKey: id },
+        }, database));
         return {
-          id: uuid(),
+          id,
           status: "failed",
           failureReason: "Recipient is not active in organization",
+        };
+      }
+
+      const suppression = await step((database) => channelSuppression(payload, database));
+      if (suppression) {
+        const id = idempotencyKey ?? uuid();
+        await step((database) => recordDeliveryEvent({
+          organizationId: payload.organizationId,
+          notificationId: id,
+          event: "suppressed",
+          errorMessage: suppression,
+          details: { type: payload.type, channel: payload.type, idempotencyKey: id },
+        }, database));
+        return {
+          id,
+          status: "failed",
+          failureReason: suppression,
         };
       }
 
@@ -553,52 +758,101 @@ export class NotificationService {
         throw new Error(`No provider configured for notification type: ${payload.type}`);
       }
 
+      const attemptId = idempotencyKey ?? uuid();
+      if (retryingConfirmedFailure) {
+        await step((database) => recordDeliveryEvent({
+          organizationId: payload.organizationId,
+          notificationId: attemptId,
+          event: "retried",
+          providerId: provider.name,
+          details: { type: payload.type, channel: payload.type, idempotencyKey: attemptId },
+        }, database));
+      }
+      await step((database) => recordDeliveryEvent({
+        organizationId: payload.organizationId,
+        notificationId: attemptId,
+        event: "attempted",
+        providerId: provider.name,
+        details: { type: payload.type, channel: payload.type, idempotencyKey: attemptId },
+      }, database));
+
       const response = await provider.send(payload);
-
-      // Store notification in queue table (acts as notification delivery log)
+      const ledgerEvent = providerSubmissionEvent(response.status);
+      const providerAccepted = response.status === "sent" || response.status === "delivered";
       try {
-        await db.insert(notificationQueue).values({
-          id: response.id,
+        await step((database) => recordDeliveryEvent({
           organizationId: payload.organizationId,
-          status: 'completed',
-          priority: payload.priority || 'normal',
-          payload: {
-            ...payload,
-          },
-          attemptCount: '1',
-          maxAttempts: '1',
-          processedAt: new Date(),
-          completedAt: response.sentAt,
-          resultNotificationId: response.id,
-        }).catch((err: unknown) => logger.warn("Failed to store notification in queue", {
-          error: err instanceof Error ? err.message : String(err)
-        }));
-
-        // Also log delivery event
-        await db.insert(notificationDeliveryLog).values({
-          id: uuid(),
-          organizationId: payload.organizationId,
-          notificationId: response.id,
-          event: response.status === 'sent' ? 'sent' : 'failed',
-          eventTimestamp: response.sentAt || new Date(),
+          notificationId: attemptId,
+          event: ledgerEvent,
           providerId: provider.name,
           externalEventId: response.id,
-          statusCode: response.status === 'sent' ? '200' : '500',
+          statusCode: providerAccepted ? "202" : "500",
           errorMessage: response.failureReason,
           details: {
             type: payload.type,
             channel: payload.type,
+            providerStatus: response.status,
+            idempotencyKey: attemptId,
+            providerMessageId: response.id,
           },
-        }).catch((err: unknown) => logger.warn("Failed to log delivery event", {
-          error: err instanceof Error ? err.message : String(err)
-        }));
-      } catch (dbError) {
-        logger.warn("Database persistence failed but notification was sent", { dbError, responseId: response.id });
+        }, database));
+      } catch (error) {
+        if (!providerAccepted) throw error;
+        try {
+          await step((database) => recordDeliveryEvent({
+            organizationId: payload.organizationId,
+            notificationId: attemptId,
+            event: "uncertain",
+            providerId: provider.name,
+            externalEventId: response.id,
+            errorMessage: "provider accepted the message but the acceptance was not recorded",
+            details: {
+              type: payload.type,
+              channel: payload.type,
+              idempotencyKey: attemptId,
+              providerMessageId: response.id,
+            },
+          }, database));
+        } catch (uncertainError) {
+          logger.error("Provider accepted a message and neither acceptance nor the uncertain marker was recorded", {
+            uncertainError,
+            idempotencyKey: attemptId,
+            providerMessageId: response.id,
+          });
+        }
+        return {
+          id: attemptId,
+          status: "uncertain",
+          providerMessageId: response.id,
+          failureReason: "provider accepted the message but the acceptance was not recorded",
+        };
+      }
+
+      if (!idempotencyKey) {
+        try {
+          await step((database) => database.insert(notificationQueue).values({
+            id: response.id,
+            organizationId: payload.organizationId,
+            status: ledgerEvent === "failed" || ledgerEvent === "bounced" ? "failed" : "completed",
+            priority: payload.priority || "normal",
+            payload: {
+              ...payload,
+            },
+            attemptCount: "1",
+            maxAttempts: "1",
+            processedAt: new Date(),
+            completedAt: response.sentAt,
+            resultNotificationId: response.id,
+            errorMessage: response.failureReason,
+          }));
+        } catch (dbError) {
+          logger.warn("Queue mirror failed after the delivery ledger was written", { dbError, responseId: response.id });
+        }
       }
 
       // Create audit log
-      if (payload.userId) {
-        await createAuditLog({
+      if (payload.userId && (response.status === "sent" || response.status === "delivered")) {
+        await step((database) => createAuditLog({
           organizationId: payload.organizationId,
           userId: payload.userId,
           action: "NOTIFICATION_SENT",
@@ -609,12 +863,15 @@ export class NotificationService {
             type: payload.type,
             status: response.status,
           },
-        }).catch((err: unknown) => logger.warn("Failed to create audit log for notification", {
+        }, database)).catch((err: unknown) => logger.warn("Failed to create audit log for notification", {
           error: err instanceof Error ? err.message : String(err)
         }));
       }
 
-      return response;
+      return {
+        ...response,
+        providerMessageId: response.id,
+      };
     } catch (error) {
       logger.error("Failed to send notification", { error, payload });
       throw error;
@@ -627,26 +884,24 @@ export class NotificationService {
   async queue(payload: NotificationPayload): Promise<string> {
     const notificationId = uuid();
 
-    // Store in queue table for persistence
-    try {
-      await db.insert(notificationQueue).values({
-        id: notificationId,
-        organizationId: payload.organizationId,
-        status: 'pending',
-        priority: payload.priority || 'normal',
-        payload,
-        attemptCount: '0',
-        maxAttempts: '3',
-        nextRetryAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }).catch((err: unknown) => logger.warn("Failed to queue notification in database", {
-        error: err instanceof Error ? err.message : String(err)
-      }));
-    } catch (dbError) {
-      logger.error("Failed to queue notification", { dbError });
-      throw dbError;
-    }
+    await db.insert(notificationQueue).values({
+      id: notificationId,
+      organizationId: payload.organizationId,
+      status: 'pending',
+      priority: payload.priority || 'normal',
+      payload,
+      attemptCount: '0',
+      maxAttempts: '3',
+      nextRetryAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await recordDeliveryEvent({
+      organizationId: payload.organizationId,
+      notificationId,
+      event: 'queued',
+      details: { type: payload.type, channel: payload.type },
+    });
 
     return notificationId;
   }
@@ -844,9 +1099,21 @@ export class NotificationService {
           if (!payload) continue;
 
           const currentAttempt = parseInt(queuedItem.attemptCount?.toString() || '0', 10);
-          
-          // Send the notification
-          const response = await this.send(payload);
+          const response = await this.send({
+            ...payload,
+            idempotencyKey: payload.idempotencyKey ?? queuedItem.id,
+          });
+
+          if (response.status === 'uncertain' || response.status === 'bounced') {
+            await db.update(notificationQueue).set({
+              status: 'failed',
+              errorMessage: response.failureReason ?? response.status,
+              nextRetryAt: null,
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId ?? payload.organizationId)));
+            failedCount++;
+            retried++;
+            continue;
+          }
           
           // Update queue entry with new status
           if (response.status === 'sent' || response.status === 'delivered') {
@@ -855,7 +1122,7 @@ export class NotificationService {
               processedAt: new Date(),
               completedAt: new Date(),
               resultNotificationId: response.id,
-            }).where(eq(notificationQueue.id, queuedItem.id));
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             succeeded++;
           } else {
             // Schedule next retry with exponential backoff
@@ -867,7 +1134,7 @@ export class NotificationService {
               attemptCount: `${currentAttempt + 1}`,
               nextRetryAt: nextRetryAt,
               errorMessage: response.failureReason,
-            }).where(eq(notificationQueue.id, queuedItem.id));
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             failedCount++;
           }
           retried++;
@@ -883,7 +1150,7 @@ export class NotificationService {
               await db.update(notificationQueue).set({
                 status: 'failed',
                 errorMessage: error instanceof Error ? error.message : 'Unknown error',
-              }).where(eq(notificationQueue.id, queuedItem.id));
+              }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             } else {
               const delaySeconds = 300 * Math.pow(2, currentAttempt);
               const nextRetryAt = new Date(Date.now() + delaySeconds * 1000);
@@ -893,7 +1160,7 @@ export class NotificationService {
                 attemptCount: `${currentAttempt + 1}`,
                 nextRetryAt: nextRetryAt,
                 errorMessage: error instanceof Error ? error.message : 'Unknown error',
-              }).where(eq(notificationQueue.id, queuedItem.id));
+              }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             }
           } catch (updateError) {
             logger.error("Failed to update queue entry on error", { updateError });
@@ -915,12 +1182,12 @@ export class NotificationService {
   }
 }
 
-async function isNotificationRecipientActive(payload: NotificationPayload): Promise<boolean> {
+async function isNotificationRecipientActive(payload: NotificationPayload, database: RLSTx = db): Promise<boolean> {
   if (!payload.recipientId) {
     return true;
   }
 
-  const [membership] = await db
+  const [membership] = await database
     .select({ id: organizationMembers.id })
     .from(organizationMembers)
     .where(
@@ -1067,7 +1334,10 @@ export async function processPendingNotifications(batchSize: number = 50): Promi
         const payload = queuedItem.payload as NotificationPayload;
         if (!payload) continue;
 
-        const response = await notificationService.send(payload);
+        const response = await notificationService.send({
+          ...payload,
+          idempotencyKey: payload.idempotencyKey ?? queuedItem.id,
+        });
         
         if (response.status === 'sent' || response.status === 'delivered') {
           succeeded++;

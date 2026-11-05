@@ -12,7 +12,7 @@ import { NextResponse } from 'next/server'
 import { sql } from 'drizzle-orm'
 import { withApi } from '@/lib/api/framework'
 import { withSystemContext } from '@/lib/db/with-rls-context'
-import { scheduleGrievanceDeadlineReminders, writeDeadlineAuditEvent } from '@/lib/deadline-engine'
+import { organizationTimeZone, scheduleGrievanceDeadlineReminders, writeDeadlineAuditEvent } from '@/lib/deadline-engine'
 import { createLogger } from '@nzila/os-core/telemetry'
 
 const logger = createLogger('union-eyes.cron.deadline-overdue')
@@ -25,9 +25,12 @@ interface OverdueRow {
   grievance_id: string
   organization_id: string
   due_date: string
+  org_settings: Record<string, unknown> | null
+  org_province_territory: string | null
+  org_address: { province?: string | null } | null
 }
 
-export const GET = withApi(
+export const POST = withApi(
   {
     auth: { cron: true },
     openapi: {
@@ -47,9 +50,13 @@ export const GET = withApi(
         gd.id                            as id,
         gd.grievance_id                  as grievance_id,
         g.organization_id                as organization_id,
-        gd.due_date                      as due_date
+        gd.due_date                      as due_date,
+        o.settings                       as org_settings,
+        o.province_territory             as org_province_territory,
+        o.address                        as org_address
       from grievance_deadlines gd
       join grievances g on g.id = gd.grievance_id
+      left join organizations o on o.id = g.organization_id
       where gd.due_date < now()
         and gd.status not in ('completed', 'cancelled')
         and not exists (
@@ -78,6 +85,12 @@ export const GET = withApi(
             dueDate: new Date(row.due_date),
             reminderOffsetsInDays: [0],
             reminderKind: 'overdue',
+            // Recorded on the reminder row: the zone the organization keeps its deadline days in.
+            timezone: organizationTimeZone({
+              settings: row.org_settings,
+              provinceTerritory: row.org_province_territory,
+              address: row.org_address,
+            }).timeZone,
             actor: { type: 'system', id: 'cron:deadline-overdue' },
             correlationId: runId,
           })

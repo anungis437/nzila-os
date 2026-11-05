@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-31 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-05 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,10 +9,10 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 60 |
-| Contract Test Files | 300 |
-| TS/JS Test Files | 2858 |
-| Python Test Files | 43 |
+| GitHub Workflows | 67 |
+| Contract Test Files | 306 |
+| TS/JS Test Files | 3609 |
+| Python Test Files | 52 |
 
 ## Apps
 
@@ -33,12 +33,12 @@
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 106 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 36 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 110 | Partner portal for managing deals, commissions, certifications, and go-to-market |
-| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 190 | Internal admin console for managing platform services — events, knowledge, ontol |
+| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 191 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 5497 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 6287 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 80 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
@@ -50,6 +50,7 @@
 ## Workflows
 
 - access-review-gate.yml
+- agent-skills-validation.yml
 - agri-core-check.yml
 - ai-governance.yml
 - app-floor-check.yml
@@ -106,6 +107,12 @@
 - security-design-review.yml
 - trivy.yml
 - ue-build-push-proof.yml
+- ue-full-regression.yml
+- ue-http-runtime.yml
+- ue-native-postgres.yml
+- ue-security-regression.yml
 - ue-staging-discovery.yml
+- ue-v2-staging-build.yml
+- ue-v2-staging-deploy.yml
 - union-eyes-authority-rollout.yml
 - zonga-check.yml

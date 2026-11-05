@@ -71,10 +71,11 @@ describe('round 36: reward_wallet_ledger is append-only (negative tests 9 & 10)'
 });
 
 describe('round 36: /api/rewards/wallet derives org/user identity from the authenticated session, never from client input (negative tests 7 & 8)', () => {
-  it('the wallet route reads organizationId/userId from the withRoleAuth context, not from searchParams/body', () => {
+  it('the wallet route reads organizationId/userId from the withApi context, not from searchParams/body', () => {
     const source = readFileSync(resolve(APP_ROOT, 'app/api/rewards/wallet/route.ts'), 'utf8');
-    expect(source).toMatch(/withRoleAuth\('member',/);
-    expect(source).toMatch(/const \{ userId, organizationId \} = context/);
+    expect(source).toMatch(/auth: \{ minRole: 'member' \}/);
+    expect(source).toMatch(/async \(\{ request, userId, organizationId \}\)/);
+    expect(source).toMatch(/rlsOrgContext: true/);
     // Negative proof: no target-user/org override is ever read from the
     // request (no userId/organizationId/orgId key pulled out of
     // searchParams or a parsed body).
@@ -102,7 +103,6 @@ describe('round 36: full reachability census for reward_budget_envelopes / rewar
       'db/schema/domains/infrastructure/rewards.ts',
       'db/schema/recognition-rewards-schema.ts',
       'lib/services/rewards/budget-service.ts',
-      'lib/services/rewards/export-service.ts',
     ]);
     for (const file of importers) {
       expect(allowed.has(file), `unexpected new rewardBudgetEnvelopes importer: ${file}`).toBe(true);
@@ -123,7 +123,6 @@ describe('round 36: full reachability census for reward_budget_envelopes / rewar
       'db/schema/recognition-rewards-schema.ts',
       'db/schema/award-templates-schema.ts',
       'lib/services/rewards/wallet-service.ts',
-      'lib/services/rewards/export-service.ts',
       // PRE-EXISTING, already tracked by
       // scripts/__tests__/schema-duplicate-table-ratchet.test.ts:
       // these two import a DIFFERENT (incompatible) rewardWalletLedger
@@ -135,6 +134,8 @@ describe('round 36: full reachability census for reward_budget_envelopes / rewar
       // schema is a separate future tranche).
       'lib/services/rewards/notification-service.ts',
       'lib/utils/rewards-stats-utils.ts',
+      // The dashboard page readers: every read is inside withRLSContext({ organizationId }) (lib/rewards/page-reads.ts).
+      'lib/rewards/page-reads.ts',
     ]);
     for (const file of importers) {
       expect(allowed.has(file), `unexpected new rewardWalletLedger importer: ${file}`).toBe(true);

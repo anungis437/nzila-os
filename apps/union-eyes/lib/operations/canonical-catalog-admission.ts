@@ -6,8 +6,10 @@ import {
   AUTH_ROLE_MEMBERSHIP_EXPECTATIONS,
 } from '@nzila/db/auth-storage-authority'
 import baseContract from './catalog-authority-contract.json'
+import v2Decisions from './catalog-v2-decisions.json'
 import { catalogContractDigest, type CatalogRow } from './catalog-admission-core.mjs'
 import { CASE_ASSIGNEE_CATALOG_QUERY, CASE_ASSIGNEE_PREDICATE_OWNER, caseAssigneePredicateViolations } from '@/db/auth/case-assignee-predicate'
+import { CONVERSATION_ASSIGNEE_CATALOG_QUERY, CONVERSATION_ASSIGNEE_PREDICATE_OWNER, conversationAssigneePredicateViolations } from '@/db/auth/conversation-assignee-predicate'
 
 type Execute = (statement: string) => Promise<CatalogRow[]>
 const roles = [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']
@@ -26,8 +28,21 @@ export function canonicalCatalogContract(base = baseContract) {
   payload.nonPublic = payload.nonPublic.map(entry => entry.schema === 'user_management'
     ? { ...entry, runtime: [], system: [] } : entry)
   payload.systemSchemaUsage = ['public']
+  // The runtime role calls the auth-owned definer functions, so it needs USAGE on user_management. audit_security does not exist in
+  // this topology: its tables are excluded by the V2 plan as superseded by user_management, so it is not part of this contract.
+  payload.runtimeSchemaUsage = ['public', 'user_management']
   const binding = AUTH_PUBLIC_BINDING_EXPECTATIONS
   payload.entries.push({ table: 'platform_identity_bindings', classification: 'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT', runtime: [], system: [] })
+  // Installer-owned receipt: every privilege is revoked from the business roles.
+  payload.entries.push({ table: 'ue_v2_bootstrap_receipt', classification: 'CONTAINED_NO_AUTHORITY', runtime: [], system: [] })
+  // Documented V2 decisions that differ from the legacy manifest. They live in data (see the file's note) and are applied by table.
+  const decided = new Map(v2Decisions.entries.map(({ table, ...change }) => [table, change]))
+  payload.entries = payload.entries.map(entry => {
+    const change = decided.get(entry.table)
+    if (!change) return entry
+    const { decision: _decision, ...applied } = change as Record<string, unknown>
+    return { ...entry, ...applied }
+  })
   for (const [role, tables] of Object.entries(AUTH_PRIVILEGE_EXPECTATIONS)) {
     for (const [table, grants] of Object.entries(tables)) {
       for (const [privilege, columns] of Object.entries(grants)) {
@@ -39,10 +54,14 @@ export function canonicalCatalogContract(base = baseContract) {
     { schema: 'public', table: 'platform_identity_bindings', role: binding.role, privilege: 'SELECT', columns: [...binding.selectColumns].sort() },
     { schema: 'public', table: 'organization_members', role: AUTH_EXECUTION_ROLES.system, privilege: 'SELECT', columns: ['id', 'organization_id', 'status', 'user_id'] },
     { schema: 'public', table: 'organization_members', role: AUTH_EXECUTION_ROLES.system, privilege: 'UPDATE', columns: ['status', 'updated_at'] },
+    // The system role upserts these tables and may read only the predicate columns (scripts/bootstrap-v2/service-column-contracts.ts).
+    { schema: 'public', table: 'commercial_contracts', role: 'union_eyes_system', privilege: 'SELECT', columns: ['contract_number', 'id'] },
+    { schema: 'public', table: 'external_data_sync_log', role: 'union_eyes_system', privilege: 'SELECT', columns: ['sync_id'] },
   )
   const canonical = { ...payload, approvedRuntimeDefiners: [
     ...runtimeFunctions.map(entry => ({ schema: 'user_management', name: entry.name, owner: entry.owner })),
     {schema:'public',name:'ue_case_assignee_authorized',owner:CASE_ASSIGNEE_PREDICATE_OWNER},
+    {schema:'public',name:'ue_conversation_assignee_authorized',owner:CONVERSATION_ASSIGNEE_PREDICATE_OWNER},
   ] }
   return { payload: canonical, digest: catalogContractDigest(canonical) }
 }
@@ -127,5 +146,6 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
     }
   }
   violations.push(...caseAssigneePredicateViolations(await execute(CASE_ASSIGNEE_CATALOG_QUERY)))
+  violations.push(...conversationAssigneePredicateViolations(await execute(CONVERSATION_ASSIGNEE_CATALOG_QUERY)))
   return violations
 }

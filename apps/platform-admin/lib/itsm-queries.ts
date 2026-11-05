@@ -23,6 +23,7 @@ import {
 } from '@nzila/db/schema'
 import { slaTargetsSchema, type SlaTargets } from '@nzila/itsm-core'
 import { z } from 'zod'
+import { partialWithoutDefaults } from './partial-without-defaults'
 
 // ── Schemas (input validation) ────────────────────────────────────────────────
 
@@ -30,24 +31,24 @@ export const createQueueSchema = z.object({
   name: z.string().min(2).max(120),
   description: z.string().max(2000).optional(),
   memberIds: z.array(z.string().min(1)).max(500).default([]),
-  defaultSlaId: z.string().uuid().optional().nullable(),
+  defaultSlaId: z.guid().optional().nullable(),
   active: z.boolean().default(true),
 })
 export type CreateQueueInput = z.infer<typeof createQueueSchema>
 
-export const updateQueueSchema = createQueueSchema.partial()
+export const updateQueueSchema = partialWithoutDefaults(createQueueSchema)
 export type UpdateQueueInput = z.infer<typeof updateQueueSchema>
 
 export const createSlaProfileSchema = z.object({
   name: z.string().min(2).max(120),
   description: z.string().max(2000).optional(),
   targets: slaTargetsSchema,
-  contractId: z.string().uuid().optional().nullable(),
+  contractId: z.guid().optional().nullable(),
   active: z.boolean().default(true),
 })
 export type CreateSlaProfileInput = z.infer<typeof createSlaProfileSchema>
 
-export const updateSlaProfileSchema = createSlaProfileSchema.partial()
+export const updateSlaProfileSchema = partialWithoutDefaults(createSlaProfileSchema)
 export type UpdateSlaProfileInput = z.infer<typeof updateSlaProfileSchema>
 
 export const approvalDecisionSchema = z.object({

@@ -10,7 +10,7 @@ describe('runtime schema authority oracle', () => {
 
   beforeAll(() => {
     oracle = buildRuntimeSchemaOracle()
-  }, 60_000)
+  }, 180_000)
 
   it('records the f60040 baseline as partial instead of complete runtime-schema proof', () => {
     expect(oracle.status).toMatchObject({

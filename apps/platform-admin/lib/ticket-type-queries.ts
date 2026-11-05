@@ -13,6 +13,7 @@ import { platformDb } from '@nzila/db/platform'
 import { itsmTicketFieldDefs } from '@nzila/db/schema'
 import { TICKET_TYPES, type TicketType } from '@nzila/itsm-core'
 import { z } from 'zod'
+import { partialWithoutDefaults } from './partial-without-defaults'
 
 export const FIELD_TYPES = [
   'text',
@@ -46,9 +47,9 @@ export const createFieldDefSchema = z.object({
 })
 export type CreateFieldDefInput = z.infer<typeof createFieldDefSchema>
 
-export const updateFieldDefSchema = createFieldDefSchema
-  .omit({ ticketType: true, fieldKey: true })
-  .partial()
+export const updateFieldDefSchema = partialWithoutDefaults(
+  createFieldDefSchema.omit({ ticketType: true, fieldKey: true }),
+)
 export type UpdateFieldDefInput = z.infer<typeof updateFieldDefSchema>
 
 // ── Row shape ────────────────────────────────────────────────────────────────

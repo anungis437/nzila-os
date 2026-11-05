@@ -5,24 +5,38 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { votes, votingOptions, votingSessions } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { recordRecount } from '@/lib/voting/ballot-process-audit';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get election results' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const id = request.url.split('/sessions/')[1]?.split('/results')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    const [session] = await db.select().from(votingSessions).where(eq(votingSessions.id, id));
+    const [session] = await db
+      .select()
+      .from(votingSessions)
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
     if (!session) throw ApiError.notFound('Voting session not found');
 
     const options = await db.select().from(votingOptions).where(eq(votingOptions.sessionId, id));
+
+    // Tallies are withheld until the session is closed so a running count
+    // cannot be observed. Even a closed tally is NOT a certified result:
+    // certification requires a separate, independently authorized step.
+    if (session.status !== 'closed') {
+      return { session, options, results: [], totalVotes: null, resultsWithheld: true, certification: 'NOT_CERTIFIED' };
+    }
 
     const tallies = await db
       .select({
@@ -34,6 +48,7 @@ export const GET = withApi(
       .groupBy(votes.optionId);
 
     const totalVotes = tallies.reduce((sum, t) => sum + t.count, 0);
+    await withRLSContext({ organizationId }, (tx) => recordRecount(tx, { organizationId, sessionId: id, totalBallots: totalVotes }));
 
     return {
       session,
@@ -45,6 +60,8 @@ export const GET = withApi(
         percentage: totalVotes > 0 ? Math.round((t.count / totalVotes) * 10000) / 100 : 0,
       })),
       totalVotes,
+      resultsWithheld: false,
+      certification: 'NOT_CERTIFIED',
     };
   },
 );

@@ -32,10 +32,12 @@ import {
   type StageAction,
 } from "@/db/schema";
 import { grievanceDeadlines } from "@/db/schema/domains/claims";
+import { deadlineInOrganization } from "@/lib/deadline-engine/deadline-scope";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
 import { getNotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
+import { sameSiteActionPath } from "@/lib/notifications/links";
 import { generatePDF } from "@/lib/utils/pdf-generator";
 import { generateExcel } from "@/lib/utils/excel-generator";
 import DocumentStorageService from "@/lib/services/document-storage-service";
@@ -607,6 +609,7 @@ export async function approveTransition(
       .where(and(
         eq(grievanceTransitions.id, transitionId),
         eq(grievanceTransitions.version, transition.version ?? 1),
+        eq(grievanceTransitions.organizationId, organizationId),
       ))
       .returning({ id: grievanceTransitions.id });
 
@@ -665,7 +668,7 @@ export async function rejectTransition(
         notes: sql`${grievanceTransitions.notes} || ' | Rejected: ' || ${reason}`,
         metadata: sql`jsonb_set(${grievanceTransitions.metadata}, '{rejected}', 'true'::jsonb)`,
       })
-      .where(eq(grievanceTransitions.id, transitionId));
+      .where(and(eq(grievanceTransitions.id, transitionId), eq(grievanceTransitions.organizationId, organizationId)));
 
     // Send rejection notification
     const transition = await db.query.grievanceTransitions.findFirst({
@@ -794,7 +797,7 @@ async function updateClaimProgress(claimId: string, organizationId: string): Pro
       await db
         .update(claims)
         .set({ progress: status.progress })
-        .where(eq(claims.claimId, claimId));
+        .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)));
     }
   } catch (error) {
     logger.error("Error updating claim progress", { error });
@@ -1013,8 +1016,6 @@ async function sendStageNotification(
         priority: 'normal',
         title: `Grievance Stage ${action}`,
         body: `Claim ${claim.claimNumber} has ${action} stage: ${stage.name}`,
-        actionUrl: `/grievances/${claimId}`,
-        actionLabel: 'View Claim',
         metadata: {
           type: 'grievance_stage_notification',
           claimId,
@@ -1054,8 +1055,8 @@ async function sendActionNotification(
       priority: config.priority || 'normal',
       title: config.title || 'Grievance Action Notification',
       body: config.message || 'An action has been triggered on a grievance',
-      actionUrl: config.actionUrl || `/grievances/${claimId}`,
-      actionLabel: config.actionLabel || 'View Details',
+      actionUrl: sameSiteActionPath(config.actionUrl),
+      actionLabel: config.actionLabel,
       metadata: {
         type: 'grievance_action_notification',
         claimId,
@@ -1154,7 +1155,7 @@ async function sendActionEmail(
       title: config.title || 'Grievance Update',
       body: config.body || config.message || 'You have a new grievance update',
       htmlBody: config.htmlBody,
-      actionUrl: config.actionUrl,
+      actionUrl: sameSiteActionPath(config.actionUrl),
       actionLabel: config.actionLabel,
       metadata: {
         type: 'grievance_action_email',
@@ -1250,8 +1251,6 @@ async function sendTransitionRejectedNotification(
       priority: 'high',
       title: 'Stage Transition Rejected',
       body: `Your request to transition claim ${claimId} was rejected. Reason: ${reason}`,
-      actionUrl: `/grievances/${claimId}`,
-      actionLabel: 'View Claim',
       metadata: {
         type: 'grievance_transition_rejected',
         claimId,
@@ -1277,8 +1276,9 @@ async function sendTransitionRejectedNotification(
 export async function processOverdueDeadlines(): Promise<void> {
   try {
     const overdueDeadlines = await db
-      .select()
+      .select({ deadline: grievanceDeadlines, organizationId: grievances.organizationId })
       .from(grievanceDeadlines)
+      .innerJoin(grievances, eq(grievanceDeadlines.grievanceId, grievances.id))
       .where(
         and(
           ne(grievanceDeadlines.status, "met"),
@@ -1290,12 +1290,12 @@ export async function processOverdueDeadlines(): Promise<void> {
         )
       );
 
-    for (const deadline of overdueDeadlines) {
-      // Mark as missed
+    for (const { deadline, organizationId } of overdueDeadlines) {
+      // Mark as missed, within the organization that owns the deadline's grievance
       await db
         .update(grievanceDeadlines)
         .set({ status: "missed", updatedAt: new Date() })
-        .where(eq(grievanceDeadlines.id, deadline.id));
+        .where(and(eq(grievanceDeadlines.id, deadline.id), deadlineInOrganization(organizationId)));
 
       logger.info(`Deadline ${deadline.id} for grievance ${deadline.grievanceId} marked as missed`);
     }
@@ -1343,8 +1343,6 @@ export async function sendDeadlineReminders(): Promise<void> {
               priority: daysUntilDeadline <= 1 ? 'urgent' : 'high',
               title: `Deadline Reminder: ${daysUntilDeadline} Day(s) Remaining`,
               body: `Reminder: Deadline "${deadline.deadlineType}" for grievance ${grievance.grievanceNumber} is due in ${daysUntilDeadline} day(s).`,
-              actionUrl: `/grievances/${grievance.id}`,
-              actionLabel: 'View Grievance',
               metadata: {
                 type: 'grievance_deadline_reminder',
                 deadlineId: deadline.id,
@@ -1369,7 +1367,7 @@ export async function sendDeadlineReminders(): Promise<void> {
         await db
           .update(grievanceDeadlines)
           .set({ remindersSent: [...existingSent, sentRecord] as typeof deadline.remindersSent })
-          .where(eq(grievanceDeadlines.id, deadline.id));
+          .where(and(eq(grievanceDeadlines.id, deadline.id), deadlineInOrganization(grievance.organizationId)));
       }
     }
   } catch (error) {

@@ -10,7 +10,8 @@ const { GET, POST } = crudRoutes({
   table: ppeEquipment,
   tags: ["Health-safety"],
   orgScoped: true,
-  readRole: 'member',
+  // The issuance columns name the member who holds each item.
+  readRole: 'health_safety_rep',
   writeRole: 'admin',
 });
 export { GET, POST };

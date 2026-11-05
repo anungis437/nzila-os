@@ -19,6 +19,7 @@ const STATUS_MAP: Record<string, 'completed' | 'pending' | 'failed' | 'refunded'
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Dues'],
@@ -52,9 +53,10 @@ export const GET = withApi(
       lateFeeAmount: 0,
       totalAmount: Number(r.amount),
       status: STATUS_MAP[r.status] ?? 'pending',
-      paymentMethod: r.paymentMethod ?? 'unknown',
-      periodStart: (r.periodStart ? new Date(r.periodStart) : new Date(r.transactionDate)).toISOString(),
-      periodEnd: (r.periodEnd ? new Date(r.periodEnd) : new Date(r.transactionDate)).toISOString(),
+      // A ledger entry that does not state its method or period has none: nothing is made up for it.
+      paymentMethod: r.paymentMethod ?? null,
+      periodStart: r.periodStart ? new Date(r.periodStart).toISOString() : null,
+      periodEnd: r.periodEnd ? new Date(r.periodEnd).toISOString() : null,
       receiptUrl: r.receiptNumber ? `/api/dues/receipt/${r.id}` : undefined,
     }));
 

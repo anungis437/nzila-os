@@ -7,38 +7,45 @@
 
 import { NextResponse } from "next/server";
 import { 
-  getCBAById, 
-  updateCBA, 
-  deleteCBA,
-  updateCBAStatus 
-} from "@/lib/services/cba-service";
+  getCbaForOrganization,
+  updateCbaAudited,
+  archiveCbaAudited,
+} from "@/lib/services/cba-audited-service";
 import { getClausesByCBAId } from "@/lib/services/clause-service";
 import { getBargainingNotesByCBA } from "@/lib/services/bargaining-notes-service";
 import { z } from "zod";
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { logger } from "@/lib/logger";
 
- 
- 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('member', async (request, context) => {
-  const { params } = context as { params: { id: string } };
+
+// A malformed id is a client error here, never a database fault handed back as a 500.
+const isCbaId = (id: string) => z.guid().safeParse(id).success;
+
+// The agreement, its clauses and its bargaining notes are read in the caller organization's tenant transaction (`rlsOrgContext`).
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['CBAs'], summary: 'Read a collective agreement with its clauses and bargaining notes' },
+  },
+  async ({ request, userId, organizationId: organization, params }) => {
+  const organizationId = organization!;
   try {
       const { id } = params;
+      if (!isCbaId(id)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'CBA id must be a valid id');
+      }
       const { searchParams } = new URL(request.url);
 
       const includeClauses = searchParams.get("includeClauses") === "true";
       const includeNotes = searchParams.get("includeNotes") === "true";
-      const includeAnalytics = searchParams.get("includeAnalytics") === "true";
 
-      // Fetch CBA
-      const cba = await getCBAById(id, { 
-        includeClauses, 
-        includeAnalytics 
-      });
+      // Fetch CBA within the caller's organization
+      const cba = await getCbaForOrganization(organizationId, id, { countView: false });
 
       if (!cba) {
         return standardErrorResponse(
@@ -51,14 +58,19 @@ export const GET = withRoleAuth('member', async (request, context) => {
 
       // Optionally fetch clauses
       if (includeClauses) {
-        const clauses = await getClausesByCBAId(id);
+        const clauses = await getClausesByCBAId(id, organizationId);
         response.clauses = clauses;
         response.clauseCount = clauses.length;
       }
 
-      // Optionally fetch bargaining notes
+      // Optionally fetch bargaining notes; privileged session notes are not embedded for every member.
       if (includeNotes) {
-        const notes = await getBargainingNotesByCBA(id);
+        const notes = (await getBargainingNotesByCBA(id, organizationId)).filter(
+          (note) =>
+            !note.confidentialityLevel ||
+            ['public', 'internal'].includes(note.confidentialityLevel) ||
+            note.createdBy === userId,
+        );
         response.bargainingNotes = notes;
         response.noteCount = notes.length;
       }
@@ -72,7 +84,8 @@ export const GET = withRoleAuth('member', async (request, context) => {
       error
     );
     }
-});
+  },
+);
 
 
 const cbasSchema = z.object({
@@ -94,55 +107,59 @@ const cbasSchema = z.object({
   employeeCoverage: z.number().int().optional(),
   bargainingUnitDescription: z.string().optional(),
   documentUrl: z.string().url().optional(),
-  isPublic: z.boolean().optional(),
 });
 
-export const PATCH = withRoleAuth('steward', async (request, context) => {
-    const { userId, organizationId: _organizationId, params } = context as { userId: string; organizationId: string; params: { id: string } };
+// The audited update opens its own tenant transaction and writes its audit record in it, so the wrapper opens none.
+export const PATCH = withApi(
+  {
+    auth: { minRole: 'steward' },
+    openapi: { tags: ['CBAs'], summary: 'Update a collective agreement' },
+  },
+  async ({ request, userId: actor, organizationId: organization, params }) => {
+    const userId = actor!;
+    const organizationId = organization!;
 
   try {
       const { id } = params;
-      const body = await request.json();
+      if (!isCbaId(id)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'CBA id must be a valid id');
+      }
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+      }
+    // Publishing an agreement outside the organization is not a steward-level decision.
+    if (body && typeof body === 'object' && 'isPublic' in body) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Changing agreement visibility is not permitted here');
+    }
     // Validate request body
     const validation = cbasSchema.safeParse(body);
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
-    
-    const { status: _status } = validation.data;
 
-      // If only updating status, use specialized function
-      if (body.status && Object.keys(body).length === 1) {
-        const updatedCba = await updateCBAStatus(id, body.status);
-        
-        if (!updatedCba) {
-          return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-        }
+    const result = await updateCbaAudited({ organizationId, userId }, id, validation.data);
 
-        return NextResponse.json({ cba: updatedCba });
-      }
+    if (result.kind === 'not_found') {
+      return standardErrorResponse(
+        ErrorCode.RESOURCE_NOT_FOUND,
+        'CBA not found'
+      );
+    }
+    if (result.kind === 'conflict') {
+      return standardErrorResponse(
+        ErrorCode.CONFLICT,
+        'CBA status changed concurrently; reload and retry'
+      );
+    }
 
-      // Update CBA
-      const updatedCba = await updateCBA(id, {
-        ...validation.data,
-        lastModifiedBy: userId,
-      });
-
-      if (!updatedCba) {
-        return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-      }
-
-      return NextResponse.json({ cba: updatedCba });
+    return NextResponse.json({ cba: result.cba });
     } catch (error) {
       logger.error("Error updating CBA", error as Error);
       
@@ -162,47 +179,41 @@ export const PATCH = withRoleAuth('steward', async (request, context) => {
       error
     );
     }
-});
+  },
+);
 
-export const DELETE = withRoleAuth('steward', async (request, context) => {
-  const { params } = context as { params: { id: string } };
+// The audited archive opens its own tenant transaction and writes its audit record in it, so the wrapper opens none.
+export const DELETE = withApi(
+  {
+    auth: { minRole: 'steward' },
+    openapi: { tags: ['CBAs'], summary: 'Archive a collective agreement (never a hard delete)' },
+  },
+  async ({ userId: actor, organizationId: organization, params }) => {
+  const userId = actor!;
+  const organizationId = organization!;
   try {
       const { id } = params;
-      const { searchParams } = new URL(request.url);
-      const hardDelete = searchParams.get("hard") === "true";
-
-      if (hardDelete) {
-        // Hard delete - this will cascade delete all related clauses
-        // Only allow for admins/authorized users
-        const success = await deleteCBA(id); // This does soft delete by default
-        
-        if (!success) {
-          return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-        }
-
-        return NextResponse.json({ 
-          message: "CBA archived successfully",
-          deleted: true 
-        });
-      } else {
-        // Soft delete - set status to archived
-        const success = await deleteCBA(id);
-        
-        if (!success) {
-          return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-        }
-
-        return NextResponse.json({ 
-          message: "CBA archived successfully",
-          deleted: true 
-        });
+      if (!isCbaId(id)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'CBA id must be a valid id');
       }
+      // A "hard" delete request is not honoured: an agreement is only ever archived, so its clauses and notes survive.
+
+      const result = await archiveCbaAudited({ organizationId, userId }, id);
+
+      if (result === 'not_found') {
+        return standardErrorResponse(
+          ErrorCode.RESOURCE_NOT_FOUND,
+          'CBA not found'
+        );
+      }
+      if (result === 'already_archived') {
+        return standardErrorResponse(ErrorCode.CONFLICT, 'CBA is already archived');
+      }
+
+      return NextResponse.json({ 
+        message: "CBA archived successfully",
+        deleted: true 
+      });
     } catch (error) {
       logger.error("Error deleting CBA", error as Error);
       return standardErrorResponse(
@@ -211,4 +222,5 @@ export const DELETE = withRoleAuth('steward', async (request, context) => {
       error
     );
     }
-});
+  },
+);

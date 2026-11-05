@@ -15,7 +15,7 @@ export const autoPaySettings = pgTable('autopay_settings', {
   id: uuid('id').defaultRandom().primaryKey(),
   
   // Member identification
-  userId: varchar('user_id', { length: 255 }).notNull(), // Clerk user ID
+  userId: varchar('user_id', { length: 255 }).notNull(), // Auth user ID
   
   // Payment configuration
   enabled: boolean('enabled').notNull().default(false),
@@ -47,8 +47,8 @@ export const autoPaySettings = pgTable('autopay_settings', {
   notifyDaysBefore: varchar('notify_days_before', { length: 255 }).default('3'),
   
   // Audit
-  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   createdBy: varchar('created_by', { length: 255 }),
   updatedBy: varchar('updated_by', { length: 255 }),
 });

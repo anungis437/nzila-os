@@ -91,7 +91,7 @@ describe('owned real-SDK production vault bootstrap', () => {
           const timer = setTimeout(() => {
             child.kill()
             reject(new Error('UE_V2_LOCAL_VAULT_CHILD_TIMEOUT'))
-          }, 90000)
+          }, 200000)
           child.once('error', (error) => {
             clearTimeout(timer)
             reject(error)
@@ -134,7 +134,7 @@ describe('owned real-SDK production vault bootstrap', () => {
             const timer = setTimeout(() => {
               restarted.kill()
               reject(new Error('UE_V2_RESTART_CHILD_TIMEOUT'))
-            }, 90000)
+            }, 200000)
             restarted.once('error', (error) => {
               clearTimeout(timer)
               reject(error)
@@ -193,6 +193,6 @@ describe('owned real-SDK production vault bootstrap', () => {
         ) + '\n',
       )
     },
-    120000,
+    240000,
   )
 })

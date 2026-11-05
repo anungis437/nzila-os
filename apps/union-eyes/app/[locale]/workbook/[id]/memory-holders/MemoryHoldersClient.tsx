@@ -30,6 +30,10 @@ interface Holder {
   criticality: Criticality | null;
   successorIdentified: boolean;
   notes: string | null;
+  /** The server withheld this person's name and note: the notice to them does not meet the policy and the viewer is not the claimant. */
+  identifyingDetailWithheld?: boolean;
+  /** Whether this person's name and note may be changed: only once the notice to them meets the policy. */
+  identifyingDetailWritable?: boolean;
 }
 
 type Cartography = CartographyResult;
@@ -74,7 +78,14 @@ function copy(locale: Locale) {
     successor: fr ? 'Successeur identifi\u00e9' : 'Successor identified',
     notes: fr ? 'Notes (priv\u00e9es)' : 'Notes (private)',
     remove: fr ? 'Retirer' : 'Remove',
+    detailWithheld: fr ? 'Retenu : la personne n\u2019a pas \u00e9t\u00e9 avis\u00e9e de fa\u00e7on v\u00e9rifi\u00e9e' : 'Withheld: the person has not been verifiably notified',
+    detailLocked: fr
+      ? 'Un nom ou une note ne peut \u00eatre inscrit que lorsqu\u2019un avis \u00e0 la personne a \u00e9t\u00e9 confirm\u00e9 comme livr\u00e9.'
+      : 'A name or note can be entered only once a notice to the person is confirmed as delivered.',
     none: fr ? 'Aucun porteur enregistr\u00e9.' : 'No holders recorded yet.',
+    saveFailed: fr
+      ? 'Cette modification n\u2019a pas pu \u00eatre enregistr\u00e9e; elle a \u00e9t\u00e9 annul\u00e9e. R\u00e9essayez dans un instant.'
+      : 'That change could not be saved and was undone. Try again in a moment.',
     densityLabel: fr ? 'Densit\u00e9 de gestion' : 'Stewardship density',
     densityDescription: fr
       ? 'Indice synth\u00e9tique de concentration. Plus l\u2019indice est \u00e9lev\u00e9, plus la perte d\u2019un seul porteur fragilise la continuit\u00e9.'
@@ -98,6 +109,9 @@ export default function MemoryHoldersClient({
   const [holders, setHolders] = useState<Holder[]>(initialHolders);
   const [cartography, setCartography] = useState<Cartography>(initialCartography);
   const [, startTransition] = useTransition();
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // The inputs are uncontrolled; a changed revision remounts them so an undone change is shown as undone.
+  const [revision, setRevision] = useState(0);
 
   const recompute = (next: Holder[]) => {
     const c = runStewardshipCartography(
@@ -112,13 +126,27 @@ export default function MemoryHoldersClient({
     setCartography(c);
   };
 
-  const persist = (id: string, patch: Partial<Holder>) => {
+  // A change that the server did not accept is undone, and the person is told; it is never left on screen as if it were saved.
+  const undo = (before: Holder[]) => {
+    setHolders(before);
+    recompute(before);
+    setRevision((current) => current + 1);
+    setSaveError(t.saveFailed);
+  };
+
+  const persist = (id: string, patch: Partial<Holder>, before: Holder[]) => {
     startTransition(async () => {
-      await fetch(`/api/workbook/${workbookId}/memory-holders/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(patch),
-      }).catch(() => undefined);
+      try {
+        const res = await fetch(`/api/workbook/${workbookId}/memory-holders/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patch),
+        });
+        if (res.ok) setSaveError(null);
+        else undo(before);
+      } catch {
+        undo(before);
+      }
     });
   };
 
@@ -128,13 +156,20 @@ export default function MemoryHoldersClient({
       responsibility: locale === 'fr-CA' ? '\u00c0 d\u00e9crire' : 'To describe',
       successorIdentified: false,
     };
-    const res = await fetch(`/api/workbook/${workbookId}/memory-holders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(draft),
-    });
-    if (!res.ok) return;
-    const data = (await res.json()) as { id: string; cartography: Cartography };
+    let data: { id: string; cartography: Cartography };
+    try {
+      const res = await fetch(`/api/workbook/${workbookId}/memory-holders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(draft),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      data = (await res.json()) as { id: string; cartography: Cartography };
+    } catch {
+      setSaveError(t.saveFailed);
+      return;
+    }
+    setSaveError(null);
     const next: Holder = {
       id: data.id,
       role: draft.role,
@@ -152,19 +187,27 @@ export default function MemoryHoldersClient({
   };
 
   const removeHolder = async (id: string) => {
+    const before = holders;
     const updated = holders.filter((h) => h.id !== id);
     setHolders(updated);
     recompute(updated);
-    await fetch(`/api/workbook/${workbookId}/memory-holders/${id}`, {
-      method: 'DELETE',
-    }).catch(() => undefined);
+    try {
+      const res = await fetch(`/api/workbook/${workbookId}/memory-holders/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) setSaveError(null);
+      else undo(before);
+    } catch {
+      undo(before);
+    }
   };
 
   const updateHolder = (id: string, patch: Partial<Holder>) => {
+    const before = holders;
     const updated = holders.map((h) => (h.id === id ? { ...h, ...patch } : h));
     setHolders(updated);
     recompute(updated);
-    persist(id, patch);
+    persist(id, patch, before);
   };
 
   const bandTone = useMemo(() => {
@@ -191,6 +234,11 @@ export default function MemoryHoldersClient({
           </h1>
           <p className="mt-5 text-base leading-relaxed text-stone-600">{t.intro}</p>
           <p className="mt-3 text-xs italic text-stone-500">{t.privacy}</p>
+          {saveError && (
+            <p role="alert" className="mt-4 rounded border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
+              {saveError}
+            </p>
+          )}
         </header>
 
         <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[2fr_1fr]">
@@ -203,7 +251,7 @@ export default function MemoryHoldersClient({
               <ul className="space-y-5">
                 {holders.map((h) => (
                   <li
-                    key={h.id}
+                    key={`${h.id}-${revision}`}
                     className="rounded-lg border border-stone-200 bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,0.02)]"
                   >
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -222,6 +270,9 @@ export default function MemoryHoldersClient({
                         <input
                           type="text"
                           defaultValue={h.displayName ?? ''}
+                          disabled={h.identifyingDetailWritable !== true}
+                          placeholder={h.identifyingDetailWithheld ? t.detailWithheld : undefined}
+                          title={h.identifyingDetailWritable === true ? undefined : t.detailLocked}
                           onBlur={(e) => {
                             const v = e.target.value.trim();
                             const next = v.length === 0 ? null : v;
@@ -313,6 +364,9 @@ export default function MemoryHoldersClient({
                         <textarea
                           rows={2}
                           defaultValue={h.notes ?? ''}
+                          disabled={h.identifyingDetailWritable !== true}
+                          placeholder={h.identifyingDetailWithheld ? t.detailWithheld : undefined}
+                          title={h.identifyingDetailWritable === true ? undefined : t.detailLocked}
                           onBlur={(e) => {
                             const v = e.target.value;
                             const next = v.trim().length === 0 ? null : v;

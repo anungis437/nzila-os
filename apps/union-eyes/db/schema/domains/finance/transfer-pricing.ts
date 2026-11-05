@@ -25,7 +25,7 @@ export const currencyEnforcementPolicy = pgTable("currency_enforcement_policy", 
   t106FilingRequired: boolean("t106_filing_required").notNull().default(true), // For transactions >$1M
   t106ThresholdCAD: decimal("t106_threshold_cad", { precision: 15, scale: 2 }).notNull().default("1000000.00"),
   
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
 });
 
@@ -34,7 +34,7 @@ export const bankOfCanadaRates = pgTable("bank_of_canada_rates", {
   id: uuid("id").primaryKey().defaultRandom(),
   
   // Rate details
-  rateDate: timestamp("rate_date").notNull(), // Rate effective date
+  rateDate: timestamp("rate_date", { withTimezone: true }).notNull(), // Rate effective date
   currency: varchar("currency", { length: 3 }).notNull(), // USD, EUR, GBP, etc.
   
   // Rates (CAD per 1 unit of foreign currency)
@@ -50,7 +50,7 @@ export const bankOfCanadaRates = pgTable("bank_of_canada_rates", {
   importedAt: timestamp("imported_at").notNull().defaultNow(),
   importedBy: varchar("imported_by", { length: 255 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Transaction currency conversions (when foreign currency is allowed)
@@ -82,7 +82,7 @@ export const transactionCurrencyConversions = pgTable("transaction_currency_conv
   // Conversion metadata
   conversionMethod: varchar("conversion_method", { length: 50 }).notNull().default("noon_rate"), // "noon_rate", "buy_rate", "sell_rate"
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // CAD enforcement violations (when non-CAD transactions are attempted)
@@ -112,7 +112,7 @@ export const currencyEnforcementViolations = pgTable("currency_enforcement_viola
   ipAddress: varchar("ip_address", { length: 45 }),
   userAgent: text("user_agent"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // T106 filing tracking (>$1M foreign property transactions)
@@ -145,8 +145,8 @@ export const t106FilingTracking = pgTable("t106_filing_tracking", {
   reviewedBy: varchar("reviewed_by", { length: 255 }),
   filedBy: varchar("filed_by", { length: 255 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Transfer pricing documentation (arms-length transactions)
@@ -182,8 +182,8 @@ export const transferPricingDocumentation = pgTable("transfer_pricing_documentat
   reviewedAt: timestamp("reviewed_at"),
   reviewNotes: text("review_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // FX rate audit log
@@ -207,7 +207,7 @@ export const fxRateAuditLog = pgTable("fx_rate_audit_log", {
   // Metadata
   metadata: jsonb("metadata"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Currency enforcement audit log
@@ -234,7 +234,7 @@ export const currencyEnforcementAudit = pgTable("currency_enforcement_audit", {
   metadata: jsonb("metadata"),
   ipAddress: varchar("ip_address", { length: 45 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Exchange rates cache (for audit trail and rate history)
@@ -255,7 +255,7 @@ export const exchangeRates = pgTable("exchange_rates", {
   provider: varchar("provider", { length: 100 }),
   dataQuality: varchar("data_quality", { length: 20 }).default("official"), // "official", "estimated", "manual"
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Cross-border transactions (T106 reporting)
@@ -263,7 +263,7 @@ export const crossBorderTransactions = pgTable("cross_border_transactions", {
   id: uuid("id").primaryKey().defaultRandom(),
   
   // Transaction details
-  transactionDate: timestamp("transaction_date").notNull(),
+  transactionDate: timestamp("transaction_date", { withTimezone: true }).notNull(),
   amountCents: integer("amount_cents").notNull(), // Amount in cents for precision
   originalCurrency: varchar("original_currency", { length: 3 }).default("CAD"),
   cadEquivalentCents: integer("cad_equivalent_cents").notNull(), // CAD amount in cents
@@ -289,7 +289,7 @@ export const crossBorderTransactions = pgTable("cross_border_transactions", {
   counterpartyName: text("counterparty_name"),
   description: text("description"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

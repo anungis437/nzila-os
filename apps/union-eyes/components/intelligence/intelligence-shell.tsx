@@ -20,9 +20,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AnalyticsOverviewConsole } from "@/components/analytics/analytics-overview-console";
 import { InsightsPanel } from "@/components/analytics/insights-panel";
 import ExecutiveDashboard from "@/components/executive/ExecutiveDashboard";
-import StrategicPlanningBoard from "@/components/executive/StrategicPlanningBoard";
 import { useOrganization } from "@/contexts/organization-context";
-import { Briefcase, TrendingUp, AlertCircle, BookOpen } from "lucide-react";
+import { Briefcase, TrendingUp, BookOpen } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
 import { ActionHint } from "@/components/onboarding/action-hint";
@@ -118,34 +117,11 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
                     <h2 className="text-lg font-bold text-gray-900">Strategic Briefing</h2>
                   </div>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    This is your leadership summary, assembled as assistive context for
-                    human review. Active casework, grievance trends, and upcoming deadlines
-                    are consolidated below. Strategic decisions remain with leadership and
-                    should be guided by the priorities and metrics on this page.
+                    Assistive context for human review. The indicators below are
+                    organization-scoped aggregates and each one states what it measures.
+                    Strategic decisions remain with leadership; nothing on this page
+                    approves, adopts or certifies anything.
                   </p>
-                  <div className="grid gap-3 sm:grid-cols-3 mt-4">
-                    <div className="flex items-start gap-2 p-3 rounded-md bg-gray-50">
-                      <AlertCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-gray-700">Priority 1</p>
-                        <p className="text-xs text-gray-500">Review overdue grievances and escalate where needed.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2 p-3 rounded-md bg-gray-50">
-                      <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-gray-700">Priority 2</p>
-                        <p className="text-xs text-gray-500">Prepare for upcoming bargaining sessions and review proposals.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2 p-3 rounded-md bg-gray-50">
-                      <AlertCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-gray-700">Priority 3</p>
-                        <p className="text-xs text-gray-500">Assess resolution rate trends and member satisfaction feedback.</p>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
@@ -153,7 +129,6 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
                 organizationId={organizationId ?? "default"}
                 userRole={userRole}
               />
-              <StrategicPlanningBoard />
             </div>
           </TabsContent>
         )}

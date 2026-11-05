@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { requireUser } from '@/lib/api-auth-guard';
-import { getBalance } from '@/lib/services/rewards/wallet-service';
+import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
+import { loadActiveProgram, loadWalletBalance } from '@/lib/rewards/page-reads';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -15,14 +15,16 @@ export const metadata: Metadata = {
 };
 
 export default async function RedeemCreditsPage() {
-  const user = await requireUser();
-  const userId = user.userId;
-  const orgId = user.organizationId!;
+  // The person and the organization are the signed-in member's own: an organization-less caller is sent back to the dashboard.
+  const { userId, organizationId: orgId } = await requireOrganizationScope();
 
   const t = await getTranslations('rewards');
 
-  // Fetch current balance
-  const balance = await getBalance(orgId, userId);
+  // Fetch current balance, in the member's own organization: a failed read is an error, not a zero balance.
+  const balance = await loadWalletBalance(orgId, userId);
+
+  // A redemption is recorded against the organization's active rewards program.
+  const program = await loadActiveProgram(orgId);
 
   // Check if Shopify is enabled
   const shopifyEnabled = process.env.SHOPIFY_ENABLED === 'true';
@@ -48,16 +50,19 @@ export default async function RedeemCreditsPage() {
           {t('redeem.balanceTitle', { defaultValue: 'Available Balance' })}
         </AlertTitle>
         <AlertDescription>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(t as any)('redeem.balanceMessage', {
-            defaultValue: 'You have {balance} credits available to redeem',
-            values: { balance: balance.toLocaleString() },
-          })}
+          {t('redeem.balanceMessage', { balance: balance.toLocaleString() })}
         </AlertDescription>
       </Alert>
 
       {/* Redemption Options */}
-      {shopifyEnabled ? (
+      {!program ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('redemption.noProgramTitle')}</CardTitle>
+            <CardDescription>{t('redemption.noProgramDescription')}</CardDescription>
+          </CardHeader>
+        </Card>
+      ) : shopifyEnabled ? (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -76,8 +81,7 @@ export default async function RedeemCreditsPage() {
             <RedemptionForm 
               balance={balance} 
               mode="shopify" 
-              userId={userId}
-              orgId={orgId}
+              programId={program.id}
             />
           </CardContent>
         </Card>
@@ -97,8 +101,7 @@ export default async function RedeemCreditsPage() {
             <RedemptionForm 
               balance={balance} 
               mode="manual" 
-              userId={userId}
-              orgId={orgId}
+              programId={program.id}
             />
           </CardContent>
         </Card>

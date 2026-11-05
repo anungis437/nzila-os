@@ -1,0 +1,704 @@
+{
+  "record": "UE-GATE0-ACCOUNTING-RECONCILIATION",
+  "population": 777,
+  "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
+  "totals": {
+    "overlayImplemented": 652,
+    "ledgerImplemented": 600,
+    "creditedByEarlierRuns": 52,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 21,
+    "overlayPartial": 72,
+    "ledgerPartial": 72,
+    "unresolvedByOverlay": 125,
+    "qualificationVerified": 0,
+    "closed": 0
+  },
+  "agreement": {
+    "creditedByBoth": 600,
+    "sameBatchLabel": 572,
+    "differentBatchLabel": 28
+  },
+  "batchLabelDifferences": [
+    {
+      "defectId": "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
+      "overlayBatch": "GATE0-CLAUSE-SHARING-ANONYMIZATION",
+      "ledgerBatch": "B125-F03-B-FEDERATION-AND-CONGRESS-LEVELS-WITHDRAWN-EVERYWHERE"
+    },
+    {
+      "defectId": "DEF-0B4-OHS-COMMITTEE-ROSTER-MEMBER-READ",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B5-COMMITTEE-INTERNAL-NOTES-READ-BY-ANY-MEMBER",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B5-SMS-STEWARD-READS-ALL-MEMBER-MESSAGES",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B5-SMS-CAMPAIGN-READ-BY-ANY-MEMBER",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B5-SURVEY-DRAFTS-READABLE-BY-MEMBERS",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B6-EDU-OWNER-SCOPED-READS-HIDE-MEMBER-RECORDS-FROM-STAFF",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-EXC-PUBLISH-PARSE-FAILURE-STORES-DEFAULT-MEDIUM-RISK-SCORE",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-EXC-NEW-INTERVIEWS-DEFAULT-PUBLIC-INTERNAL-WITH-NO-CLASSIFICATION-STEP",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B8-HS-TRENDS-ORGANIZATION-FROM-QUERY-AND-NO-PREDICATE-WHEN-ABSENT",
+      "overlayBatch": "GATE0-HS-CALENDAR-PRIVACY-RECONCILIATION",
+      "ledgerBatch": "B14-F03-OWN-ORGANIZATION-SCOPE"
+    },
+    {
+      "defectId": "DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT-OF-THE-ORGANIZATION-TO-ANY-MEMBER-AND-NO-ROUTE-READS-IS-PUBLIC",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B11-RPT-TEMPLATES-ROUTE-LISTS-EVERY-REPORT-DEFINITION-AND-STORES-A-NON-TEMPLATE-BY-DEFAULT",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-IS-SERVED-TO-ANY-SIGNED-IN-USER-WHILE-EXECUTION-NEEDS-AN-OFFICER",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY-WITH-ADMIN-LEVEL-SCOPES-AND-PICKS-THE-FIRST-PAGE-AUTOMATICALLY",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B12-PLT-TEST-AUTH-FORWARDS-THE-SESSION-TOKEN-AND-RETURNS-THE-BACKEND-BODY-TO-EVERY-SIGNED-IN-USER",
+      "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    }
+  ],
+  "earlierRunCredits": [
+    {
+      "defectId": "DEF-0B1-CLC-ANALYTICS-WRITABLE",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/lib/api/crud-governance.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B1-BILLING-HISTORY-FAKE-EMPTY",
+      "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+      "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/admin/billing-cycles/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+      "batch": "B11-FINANCIAL-TARGET-MANDATE",
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/lib/finance/billing-cycle-authority.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
+        "apps/union-eyes/lib/services/billing-cycle-service.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B1-CLC-CROSS-TENANT-READ",
+      "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+      "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/admin-clc-analytics-annual-report.route.test.ts; apps/union-eyes/app/api/__tests__/admin-clc-analytics-trends.route.test.ts",
+      "files": [
+        "apps/union-eyes/services/clc/compliance-reports.ts",
+        "apps/union-eyes/app/api/admin/clc/analytics/annual-report/route.ts",
+        "apps/union-eyes/app/api/admin/clc/analytics/trends/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B1-AUDIT-READ-MEMBER-FLOOR",
+      "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+      "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/financial-invoices-audit-read-boundary.contract.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/compliance/audit-logs/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B1-AI-USAGE-LEGACY-CROSS-TENANT",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/admin/ai-usage/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+      "batch": "GATE0-ORG-DIRECTORY-PRIVACY",
+      "sourceCommit": "3da958e3983a54ae749104aab9f07bbc0c9700ce",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/organization-directory-privacy.contract.test.ts; apps/union-eyes/lib/organizations/__tests__/read-authority-transaction.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/organizations/route.ts",
+        "apps/union-eyes/app/api/organizations/search/route.ts",
+        "apps/union-eyes/lib/organizations/read-authority.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/lib/ai/grievance-triage.ts",
+        "apps/union-eyes/lib/ai/clause-reasoning.ts",
+        "apps/union-eyes/lib/ai/steward-copilot.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B2-AI-CLASSIFY-UNGUARDED",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/ai/classify/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B2-AI-PUBLIC-KNOWLEDGE-CROSS-TENANT",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/ai/search/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B2-AI-SEMANTIC-STATS-UNSCOPED",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/ai/semantic-search/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B2-AI-FEEDBACK-READ-OTHER-USERS",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/ai/feedback/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B3-BREAKS-OWNER-IDENTITY-MISMATCH",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/breaks/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B3-BREAKS-CREATE-FOR-OTHER-MEMBER",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/breaks/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B3-EXTERNAL-INVOICES-MEMBER-FLOOR",
+      "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+      "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/financial-invoices-audit-read-boundary.contract.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/billing/invoices/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/billing/send-batch/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/billing/replay-invoice/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B3-AUDIT-ROW-FULL-DISCLOSURE",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/audits/[id]/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/actions/analytics-actions.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B3-BREAK-COMPLIANCE-STEWARD-PER-MEMBER",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/breaks/compliance/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
+      "batch": "B10-CALENDAR-OAUTH-AUDIT",
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/calendar-sync/google/callback/route.ts",
+        "apps/union-eyes/app/api/calendar-sync/microsoft/callback/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
+      "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/calendar-sync/connections/route.ts",
+        "apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+      "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/calendar-sync/connections/route.ts",
+        "apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
+      "batch": "CALENDAR-OWNER-BOUND-SYNC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-SYNC-NO-PERSONAL-CALENDAR-CHECK",
+      "batch": "CALENDAR-OWNER-BOUND-SYNC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
+      "batch": "GATE0-HS-CALENDAR-PRIVACY-RECONCILIATION",
+      "sourceCommit": "5fa80b00ac12611834db0915c7ba19bf48b4e001",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/calendar/events/route.ts",
+        "apps/union-eyes/app/api/calendar/events/[id]/route.ts",
+        "apps/union-eyes/lib/calendar/event-visibility.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B4-CHATBOT-SAFETY-SKIPPED-OR-FAILS-OPEN",
+      "batch": "GATE0-AI-MODERATION-FAIL-CLOSED",
+      "sourceCommit": "aacd2548af1c794e3b2d573cc83a6b5018992f1f",
+      "regressionTest": "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
+      "files": [
+        "apps/union-eyes/lib/ai/chatbot-service.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B6-CMP-CRUD-ORG-SCOPE-NO-OP-ON-TABLE-WITHOUT-ORG-COLUMN",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-ATTESTATIONS-HARD-CODED",
+      "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+      "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/evidence/export/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-ORG-ID-ECHOED-FROM-QUERY",
+      "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+      "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/evidence/export/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-ROLE-DENYLIST",
+      "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+      "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/evidence/export/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-EXPORT-NOT-AUDITED",
+      "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+      "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/evidence/export/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-INCIDENT-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+      "batch": "GATE0-HS-CALENDAR-PRIVACY-RECONCILIATION",
+      "sourceCommit": "5fa80b00ac12611834db0915c7ba19bf48b4e001",
+      "regressionTest": "apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts",
+        "apps/union-eyes/app/api/health-safety/incidents/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-HAZARD-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+      "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/health-safety/hazards/__tests__/route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-ANONYMOUS-REPORTER-STAMPED-IN-CREATED-BY",
+      "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/hazards/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-INCIDENT-CREATE-SILENTLY-NORMALISES-SEVERITY-TYPE-AND-DATE",
+      "batch": "B04-OHS-INCIDENT-CLASSIFICATION-AND-PRIVACY",
+      "sourceCommit": "46dff6b6e7fe85433288fd3039ecf930d4ee2f08",
+      "regressionTest": "apps/union-eyes/app/api/health-safety/__tests__/hazards-incidents-submission.integration.test.ts; apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/incidents/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-INCIDENT-INJURY-WITNESS-AND-REPORTER-DATA-IN-UNTYPED-METADATA",
+      "batch": "B04-OHS-INCIDENT-CLASSIFICATION-AND-PRIVACY",
+      "sourceCommit": "46dff6b6e7fe85433288fd3039ecf930d4ee2f08",
+      "regressionTest": "apps/union-eyes/app/api/health-safety/__tests__/hazards-incidents-submission.integration.test.ts; apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/incidents/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-HAZARD-CREATE-DEFAULTS-LEVEL-AND-CATEGORY-SILENTLY",
+      "batch": "B04-OHS-INCIDENT-CLASSIFICATION-AND-PRIVACY",
+      "sourceCommit": "46dff6b6e7fe85433288fd3039ecf930d4ee2f08",
+      "regressionTest": "apps/union-eyes/app/api/health-safety/__tests__/hazards-incidents-submission.integration.test.ts; apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/hazards/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-DASHBOARD-ERROR-RETURNS-SUCCESS-WITH-CLEAN-METRICS",
+      "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/dashboard/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-HS-DASHBOARD-TRAINING-COMPLIANCE-IS-A-CONSTANT",
+      "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/dashboard/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B9-ML-MONITORING-METRICS-QUERY-ABSENT-COLUMNS-AND-JOIN-MODEL-METADATA-WITHOUT-AN-ORGANIZATION-PREDICATE",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ML-MONITORING-METRICS-SUBSTITUTE-LITERAL-FIGURES-AND-REPORT-HEALTHY-WHEN-NOTHING-IS-MEASURED",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ITEM-GET-STATISTICS-RUN-ON-BARE-DB-AFTER-SYSTEM-READ-WITHOUT-ORGANIZATION-CONTEXT",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/lib/api-auth-guard.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/organizations/hierarchy/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-CHILDREN-ANY-SIGNED-IN-USER-LISTS-CHILDREN-OF-ANY-ORGANIZATION-AS-SYSTEM",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/children/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/path/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B12-PLT-KPI-SUMMARY-GIVES-EVERY-MEMBER-THE-CALCULATION-ALERT-RECIPIENTS-AND-CREATOR-OF-EVERY-TARGET",
+      "batch": null,
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/app/api/targets/summary/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    }
+  ],
+  "consistent": true,
+  "problems": []
+}

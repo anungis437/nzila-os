@@ -1,26 +1,26 @@
 /**
- * CRUD collection route for pendingProfilesTable
+ * GET POST /api/onboarding
+ *
+ * Not implemented. This path advertises an operation of its own but was the generic CRUD factory over the pre-signup pending-profiles table, which the governance policy denies, while the onboarding form posts to it (so every submission was refused). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { pendingProfilesTable } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-// round 52: pendingProfilesTable has no organizationId column (it is a
-// pre-signup identity anchor keyed by email, before any org membership
-// exists), so orgScoped is a no-op here. readRole was 'member' — any
-// authenticated user of ANY organization could list every pre-signup
-// user's email, Whop membership id, and billing-cycle data via GET. Fixed:
-// readRole raised to 'support_agent' (a genuine PLATFORM_ELEVATED_ROLES
-// member, see lib/api-auth-guard.ts), matching the round-51/52
-// feature_flags/data_classification_policy precedent — ordinary tenant
-// members have no legitimate reason to browse this table.
-const { GET, POST } = crudRoutes({
-  table: pendingProfilesTable,
-  pk: 'id',
-  tags: ["Auth"],
-  orgScoped: true,
-  readRole: 'support_agent',
-  writeRole: 'steward',
-});
-export { GET, POST };
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'support_agent' },
+    openapi: {
+      tags: ['Auth'],
+      summary: '/api/onboarding (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/onboarding is not implemented: it performed no operation of its own.');
+  },
+);
+
+export const GET = handler;
+export const POST = handler;

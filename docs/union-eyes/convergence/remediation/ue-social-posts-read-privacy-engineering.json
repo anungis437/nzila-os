@@ -1,0 +1,18 @@
+{
+  "record": "UE-GATE0-SOCIAL-POSTS-READ-PRIVACY-ENGINEERING",
+  "branch": "agents/ue-cursor-final-closure",
+  "baselineSha": "32d60a94aaaf0f3b6f39da398030a6f2f595d13d",
+  "relatesToFrozenDefects": [
+    "DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT-OF-THE-SELECTED-PLATFORMS-AT-STEWARD-FLOOR-WITH-NO-APPROVAL-OR-CLASSIFICATION-CHECK"
+  ],
+  "observation": "The social publishing workbench GET was accessible at member floor and selected every social_posts column, including pending draft copy, internal approval metadata, officer identities and provider errors.",
+  "correction": "Restrict workbench reads to officers; bind count and page queries to tenant RLS context; explicitly project non-secret fields; validate filters; bound search; disable caching.",
+  "regression": "apps/union-eyes/app/api/__tests__/social-posts-read-privacy.route.test.ts",
+  "qualification": "SOURCE_IMPLEMENTED_UNQUALIFIED",
+  "unit": "NOT_RUN",
+  "nativePg15Pg16": "NOT_RUN",
+  "httpBrowserStaging": "NOT_RUN",
+  "independentReview": "OUTSTANDING",
+  "institutionalApproval": "OUTSTANDING",
+  "original777TotalsUnchanged": true
+}

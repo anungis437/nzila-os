@@ -99,8 +99,8 @@ export const signatureWorkflows = pgTable(
     workflowData: jsonb("workflow_data"), // Provider-specific data
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     createdBy: varchar("created_by", { length: 255 }),
     voidedAt: timestamp("voided_at"),
     voidedBy: varchar("voided_by", { length: 255 }),
@@ -124,7 +124,7 @@ export const signers = pgTable(
     workflowId: uuid("workflow_id")
       .notNull()
       .references(() => signatureWorkflows.id, { onDelete: "cascade" }),
-    memberId: varchar("member_id", { length: 255 }).references(() => profiles.userId, { onDelete: "set null" }),
+    memberId: varchar("member_id", { length: 255 }),
     
     // Signer info
     email: varchar("email", { length: 255 }).notNull(),
@@ -153,8 +153,8 @@ export const signers = pgTable(
     reminderCount: integer("reminder_count").default(0),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     workflowIdx: index("signers_workflow_idx").on(t.workflowId),
@@ -172,9 +172,8 @@ export const signatureAuditLog = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     workflowId: uuid("workflow_id")
-      .notNull()
-      .references(() => signatureWorkflows.id, { onDelete: "cascade" }),
-    signerId: uuid("signer_id").references(() => signers.id, { onDelete: "set null" }),
+      .notNull(),
+    signerId: uuid("signer_id"),
     
     // Event
     eventType: varchar("event_type", { length: 100 }).notNull(), // opened, signed, declined, reminded, sent, etc.
@@ -196,7 +195,7 @@ export const signatureAuditLog = pgTable(
     signatureId: varchar("signature_id", { length: 255 }), // Reference to signature in provider
     certificateInfo: jsonb("certificate_info"), // Certificate details if provided
     
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     workflowIdx: index("signature_audit_log_workflow_idx").on(t.workflowId),
@@ -242,7 +241,7 @@ export const signatureVerification = pgTable(
     signatureFile: varchar("signature_file", { length: 500 }), // Path to signature evidence file
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     verifiedAt: timestamp("verified_at"),
     verifiedBy: varchar("verified_by", { length: 255 }),
   },

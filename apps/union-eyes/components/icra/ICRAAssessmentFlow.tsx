@@ -13,6 +13,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { readApiError } from '@/lib/client/api-envelope';
 import type { Answer, ConsentRecord, Question, SectionId } from '@/lib/icra/types';
 import type { MetadataQuestion } from '@/lib/icra/questions';
 import {
@@ -321,12 +322,10 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         required: bank.requiredQuestions.length,
         optional: bank.optionalContextQuestions.length,
         safeDefault: bank.usedSafeDefault,
-        selection: bank.selectionFingerprint.slice(0, 60),
       });
       for (const r of bank.routingRationale) {
         if (r.decision.startsWith('defer_')) {
           emitTelemetry('adaptive_question_deferred', undefined, {
-            questionId: r.questionId.slice(0, 60),
             decision: r.decision,
             ruleId: r.ruleId.slice(0, 60),
           });
@@ -519,8 +518,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         });
 
         if (!res.ok) {
-          const data = (await res.json().catch(() => ({}))) as { error?: string };
-          throw new Error(data.error ?? `Submission failed (${res.status})`);
+          throw new Error(await readApiError(res, `Submission failed (${res.status})`));
         }
 
         const data = (await res.json()) as { assessmentId: string };
@@ -528,9 +526,8 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         try {
           if (typeof window !== 'undefined') window.sessionStorage.removeItem(PERSIST_KEY);
         } catch {
-          // ignore
+          // The draft lives in session storage; if it cannot be cleared (private mode) the next draft replaces it, and it is gone with the tab.
         }
-        emitTelemetry('assessment_submitted', undefined, { answered: finalAnswers.size });
         router.push(`/${locale}/continuity-assessment/results/${data.assessmentId}`);
       } catch (err) {
         setError(err instanceof Error ? err.message : copy.submissionFailed);

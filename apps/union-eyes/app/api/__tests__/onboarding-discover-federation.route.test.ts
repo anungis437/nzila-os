@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   autoDetectParentFederation: vi.fn(),
   checkRateLimit: vi.fn(),
   eventBus: { emit: vi.fn() },
+  record: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
@@ -25,6 +26,8 @@ vi.mock('@/lib/events', () => ({
   AppEvents: { AUDIT_LOG: 'AUDIT_LOG' },
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+// The read audit moved from an in-process event to the canonical audit log (B87); the writer has its own coverage.
+vi.mock('@/lib/utils/onboarding-read-audit', () => ({ recordOnboardingRead: m.record }));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: {
     VALIDATION_ERROR: 'VALIDATION_ERROR',
@@ -176,13 +179,7 @@ describe('onboarding/discover-federation route', () => {
       { userId: 'u1', organizationId: 'org1' },
     );
 
-    expect(m.eventBus.emit).toHaveBeenCalledWith(
-      'AUDIT_LOG',
-      expect.objectContaining({
-        action: 'federation_discovery',
-        resource: 'onboarding',
-      })
-    );
+    expect(m.record).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u1' }), 'onboarding.federation_discovery', expect.anything());
   });
 
   it('POST logs discovery event', async () => {

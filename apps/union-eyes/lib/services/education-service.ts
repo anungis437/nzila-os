@@ -206,6 +206,7 @@ export async function createCourse(data: NewTrainingCourse): Promise<TrainingCou
  */
 export async function updateCourse(
   id: string,
+  organizationId: string,
   data: Partial<NewTrainingCourse>
 ): Promise<TrainingCourse | null> {
   try {
@@ -215,7 +216,7 @@ export async function updateCourse(
         ...data,
         updatedAt: sql`NOW()`,
       })
-      .where(eq(trainingCourses.id, id))
+      .where(and(eq(trainingCourses.id, id), eq(trainingCourses.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -228,11 +229,11 @@ export async function updateCourse(
 /**
  * Delete course
  */
-export async function deleteCourse(id: string): Promise<boolean> {
+export async function deleteCourse(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(trainingCourses)
-      .where(eq(trainingCourses.id, id));
+      .where(and(eq(trainingCourses.id, id), eq(trainingCourses.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -267,13 +268,14 @@ export async function createSession(data: NewCourseSession): Promise<CourseSessi
  */
 export async function updateSession(
   id: string,
+  organizationId: string,
   data: Partial<NewCourseSession>
 ): Promise<CourseSession | null> {
   try {
     const [updated] = await db
       .update(courseSessions)
       .set(data)
-      .where(eq(courseSessions.id, id))
+      .where(and(eq(courseSessions.id, id), eq(courseSessions.organizationId, organizationId)))
       .returning();
 
     return updated || null;

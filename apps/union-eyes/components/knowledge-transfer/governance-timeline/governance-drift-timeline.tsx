@@ -17,6 +17,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
 import {
   LineChart,
   Line,
@@ -56,10 +57,10 @@ const TREND_CONFIG = {
   degrading: { label: 'Needs attention', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
 };
 
-function formatMonth(month: string): string {
+function formatMonth(month: string, locale: string): string {
   const [year, m] = month.split('-');
   const date = new Date(Number(year), Number(m) - 1, 1);
-  return date.toLocaleDateString('en-CA', { month: 'short', year: '2-digit' });
+  return date.toLocaleDateString(locale, { month: 'short', year: '2-digit' });
 }
 
 function CustomTooltip({
@@ -71,10 +72,11 @@ function CustomTooltip({
   payload?: Array<{ name: string; value: number | null; color: string }>;
   label?: string;
 }) {
+  const locale = useLocale();
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border bg-white shadow-md p-3 text-xs space-y-1">
-      <p className="font-semibold text-slate-700">{label ? formatMonth(label) : ''}</p>
+      <p className="font-semibold text-slate-700">{label ? formatMonth(label, locale) : ''}</p>
       {payload.map((entry) =>
         entry.value != null ? (
           <p key={entry.name} style={{ color: entry.color }}>
@@ -87,11 +89,12 @@ function CustomTooltip({
 }
 
 export function GovernanceDriftTimeline({ report }: { report: GovernanceDriftReport }) {
+  const locale = useLocale();
   const trendConfig = TREND_CONFIG[report.trendDirection];
 
   const chartData = report.timeline.map((entry) => ({
     month: entry.month,
-    label: formatMonth(entry.month),
+    label: formatMonth(entry.month, locale),
     'New captures': entry.newInterviewCount,
     'Published': entry.publishedCount,
     'Governance updates': entry.governanceUpdateCount,

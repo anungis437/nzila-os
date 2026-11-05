@@ -50,7 +50,7 @@ export const platformErrorSchema = z.object({
   /** Request correlation ID for support. */
   correlationId: z.string().optional(),
   /** Structured details (safe — no PII, secrets, or stack traces). */
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
   /** Field-level validation errors. */
   fieldErrors: z.array(fieldErrorSchema).optional(),
 })

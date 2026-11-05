@@ -1,9 +1,8 @@
 /**
  * @nzila/platform-auth — Entra ID Adapter
  *
- * Converts NextAuth/Entra session data into platform AuthResult types.
- * This is the Entra counterpart to clerk-adapter.ts — the same
- * AuthenticatedIdentity / AuthResult interfaces, different provider.
+ * Converts NextAuth/Entra session data into platform AuthResult types
+ * (the AuthenticatedIdentity / AuthResult interfaces of ../identity).
  *
  * Usage:
  *   import { auth } from '@nzila/platform-auth/entra/config'

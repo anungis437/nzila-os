@@ -622,7 +622,7 @@ export function createWalletService(deps: {
 // ── Zod Schemas ─────────────────────────────────────────────────────────────
 
 export const CreditWalletSchema = z.object({
-  walletId: z.string().uuid(),
+  walletId: z.guid(),
   amount: z.number().positive(),
   description: z.string().min(1),
   referenceId: z.string().min(1),
@@ -631,7 +631,7 @@ export const CreditWalletSchema = z.object({
 })
 
 export const DebitWalletSchema = z.object({
-  walletId: z.string().uuid(),
+  walletId: z.guid(),
   amount: z.number().positive(),
   description: z.string().min(1),
   referenceId: z.string().min(1),
@@ -640,8 +640,8 @@ export const DebitWalletSchema = z.object({
 })
 
 export const TransferSchema = z.object({
-  fromWalletId: z.string().uuid(),
-  toWalletId: z.string().uuid(),
+  fromWalletId: z.guid(),
+  toWalletId: z.guid(),
   amount: z.number().positive(),
   description: z.string().min(1),
   idempotencyKey: z.string().min(1),

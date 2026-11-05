@@ -197,11 +197,7 @@ const history = await getSyncHistory(organizationId);
 **Entities:** channels, messages, users, files
 
 ### Document Management
-- **SharePoint**: Microsoft document platform
-- **Google Drive**: Cloud storage
-- **Dropbox**: File storage
-
-**Entities:** files, folders, permissions
+No document-management provider is supported. The SharePoint adapter was removed: it was never registered in the catalog or approved by the control-plane policy, and its storage tables hold no database authority.
 
 ## Database Schema
 

@@ -20,6 +20,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Scheduling'], summary: 'Get calendar by ID', description: 'Returns a single calendar record.' },
   },

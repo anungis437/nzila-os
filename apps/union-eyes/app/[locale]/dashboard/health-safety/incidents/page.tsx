@@ -1,12 +1,12 @@
 /**
  * Health & Safety - Incidents Management Page
  * 
- * Comprehensive incident tracking and management:
- * - Incident list table with filtering
- * - Search and advanced filtering
- * - Status tracking and updates
- * - Detailed incident views
- * - Trend analysis
+ * Workplace incident tracking:
+ * - Incident list with its own search and filters
+ * - Statistics and trends for the chosen period (unknown figures are shown as dashes)
+ * - Incident reporting
+ *
+ * No incident detail page exists, so listed incidents cannot be opened.
  * 
  * @page app/[locale]/dashboard/health-safety/incidents/page.tsx
  */
@@ -15,15 +15,13 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useTranslations } from 'next-intl';
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -34,10 +32,7 @@ import {
 } from "@/components/ui/select";
 import {
   FileWarning,
-  Search,
-  Filter,
   Plus,
-  Download,
   TrendingUp,
   CheckCircle2,
   Clock,
@@ -48,67 +43,52 @@ import {
   IncidentListTable,
   IncidentTrendChart,
 } from "@/components/health-safety";
-import { toast } from "sonner";
-import { logger } from '@/lib/logger';
+import { useStats } from "@/components/health-safety/use-stats";
+import { StatsLoadFailed } from "@/components/health-safety/stats-load-failed";
+import { countOrNull, requiredCount } from "@/lib/client/row-fields";
 
-type IncidentStatus = "reported" | "investigating" | "resolved" | "closed";
-type IncidentSeverity = "minor" | "moderate" | "serious" | "critical";
+type DateRange = "7d" | "30d" | "90d" | "12m";
+
+const RANGE_LABEL_KEYS = {
+  "7d": "last7Days",
+  "30d": "last30Days",
+  "90d": "last90Days",
+  "12m": "last12Months",
+} as const;
+
+interface IncidentStats {
+  total: number;
+  investigating: number;
+  closed: number;
+  /** Days from report to closing; null when no incident in the period has been closed. */
+  avgResolutionTime: number | null;
+}
+
+function toIncidentStats(data: Record<string, unknown>): IncidentStats {
+  return {
+    total: requiredCount(data, "total"),
+    investigating: requiredCount(data, "investigating"),
+    closed: requiredCount(data, "closed"),
+    avgResolutionTime: countOrNull(data, "avgResolutionTime"),
+  };
+}
 
 export default function IncidentsPage() {
   const t = useTranslations("healthSafetyIncidentsPage");
-  const router = useRouter();
   const organizationId = useOrganizationId();
-  
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<IncidentStatus | "all">("all");
-  const [severityFilter, setSeverityFilter] = useState<IncidentSeverity | "all">("all");
-  const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d" | "12m">("30d");
 
-  // Summary statistics
-  const [stats, setStats] = useState({
-    total: 0,
-    reported: 0,
-    investigating: 0,
-    resolved: 0,
-    closed: 0,
-    avgResolutionTime: 0,
-  });
+  // The period applies to the statistics and the trends. The list has its own search and filters.
+  const [dateRange, setDateRange] = useState<DateRange>("30d");
 
-  const loadStats = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/health-safety/incidents/stats?organizationId=${organizationId}&period=${dateRange}`);
-      if (res.ok) {
-        const json = await res.json();
-        setStats({
-          total: json.total ?? 0,
-          reported: json.reported ?? 0,
-          investigating: json.investigating ?? 0,
-          resolved: json.resolved ?? 0,
-          closed: json.closed ?? 0,
-          avgResolutionTime: json.avgResolutionTime ?? json.avg_resolution_time ?? 0,
-        });
-      }
-    } catch (error) {
-      logger.error("Failed to load stats:", error);
-      toast.error("Failed to load incident statistics");
-    }
-  }, [organizationId, dateRange]);
-
-  useEffect(() => {
-    if (organizationId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadStats();
-    }
-  }, [organizationId, dateRange, loadStats]);
-
-  const handleViewIncident = (incidentId: string) => {
-    router.push(`/dashboard/health-safety/incidents/${incidentId}`);
-  };
-
-  const handleExportData = () => {
-    toast.info("Exporting incident data...");
-    // Implement export functionality
-  };
+  const { outcome, reload: reloadStats } = useStats(
+    `/api/health-safety/incidents/stats?period=${dateRange}`,
+    toIncidentStats,
+    organizationId ?? "",
+    Boolean(organizationId),
+  );
+  const stats = outcome?.kind === "ready" ? outcome.stats : null;
+  // Loading is "…"; a figure that could not be read, or that the route could not give, is "—": neither is a count of zero.
+  const figure = (value: number | null | undefined) => (outcome === null ? "…" : value === null || value === undefined ? "—" : value);
 
   if (!organizationId) {
     return (
@@ -132,12 +112,12 @@ export default function IncidentsPage() {
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-3 mb-4">
-            <Link href="/dashboard/health-safety">
-              <Button variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2" asChild>
+              <Link href="/dashboard/health-safety">
                 <ArrowLeft className="h-4 w-4" />
                 {t("back")}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
           
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -151,23 +131,17 @@ export default function IncidentsPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={handleExportData}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                {t("exportButton")}
-              </Button>
-              <Link href="/dashboard/health-safety/incidents/new">
-                <Button className="flex items-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+              <Button className="flex items-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700" asChild>
+                <Link href="/dashboard/health-safety/incidents/new">
                   <Plus className="h-4 w-4" />
                   {t("reportIncidentButton")}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </motion.div>
+
+        {outcome?.kind === "error" && <StatsLoadFailed message={outcome.message} onRetry={reloadStats} />}
 
         {/* Statistics Cards */}
         <motion.div
@@ -182,9 +156,9 @@ export default function IncidentsPage() {
               <BarChart3 className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.total}</div>
+              <div className="text-3xl font-bold">{figure(stats?.total)}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {t("lastPeriod", { period: dateRange })}
+                {t(RANGE_LABEL_KEYS[dateRange])}
               </p>
             </CardContent>
           </Card>
@@ -195,7 +169,7 @@ export default function IncidentsPage() {
               <Clock className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-600">{stats.investigating}</div>
+              <div className="text-3xl font-bold text-orange-600">{figure(stats?.investigating)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t("activeCases")}
               </p>
@@ -204,11 +178,11 @@ export default function IncidentsPage() {
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t("resolved")}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("closed")}</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">{stats.resolved}</div>
+              <div className="text-3xl font-bold text-green-600">{figure(stats?.closed)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t("thisPeriod")}
               </p>
@@ -221,7 +195,7 @@ export default function IncidentsPage() {
               <TrendingUp className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.avgResolutionTime}</div>
+              <div className="text-3xl font-bold">{figure(stats?.avgResolutionTime)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t("daysUnit")}
               </p>
@@ -229,7 +203,7 @@ export default function IncidentsPage() {
           </Card>
         </motion.div>
 
-        {/* Filters and Search */}
+        {/* Period of the statistics and trends */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -237,61 +211,20 @@ export default function IncidentsPage() {
         >
           <Card className="bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                {t("filtersTitle")}
-              </CardTitle>
+              <CardTitle className="text-base">{t("dateRangePlaceholder")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t("searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-
-                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as IncidentStatus | "all")}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("statusPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                    <SelectItem value="reported">{t("reported")}</SelectItem>
-                    <SelectItem value="investigating">{t("investigating")}</SelectItem>
-                    <SelectItem value="resolved">{t("resolved")}</SelectItem>
-                    <SelectItem value="closed">{t("closed")}</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as IncidentSeverity | "all")}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("severityPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("allSeverities")}</SelectItem>
-                    <SelectItem value="minor">{t("minor")}</SelectItem>
-                    <SelectItem value="moderate">{t("moderate")}</SelectItem>
-                    <SelectItem value="serious">{t("serious")}</SelectItem>
-                    <SelectItem value="critical">{t("critical")}</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={dateRange} onValueChange={(value) => setDateRange(value as "7d" | "30d" | "90d" | "12m")}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("dateRangePlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7d">{t("last7Days")}</SelectItem>
-                    <SelectItem value="30d">{t("last30Days")}</SelectItem>
-                    <SelectItem value="90d">{t("last90Days")}</SelectItem>
-                    <SelectItem value="12m">{t("last12Months")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select value={dateRange} onValueChange={(value) => setDateRange(value as DateRange)}>
+                <SelectTrigger className="w-full md:w-[240px]" aria-label={t("dateRangePlaceholder")}>
+                  <SelectValue placeholder={t("dateRangePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7d">{t("last7Days")}</SelectItem>
+                  <SelectItem value="30d">{t("last30Days")}</SelectItem>
+                  <SelectItem value="90d">{t("last90Days")}</SelectItem>
+                  <SelectItem value="12m">{t("last12Months")}</SelectItem>
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
         </motion.div>
@@ -323,10 +256,7 @@ export default function IncidentsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <IncidentListTable
-                    organizationId={organizationId}
-                    onViewDetails={handleViewIncident}
-                  />
+                  <IncidentListTable organizationId={organizationId} />
                 </CardContent>
               </Card>
             </TabsContent>

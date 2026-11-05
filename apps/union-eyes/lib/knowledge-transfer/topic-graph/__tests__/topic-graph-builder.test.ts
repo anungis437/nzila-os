@@ -1,8 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
 const { whereMock } = vi.hoisted(() => ({ whereMock: vi.fn() }));
 vi.mock('@/db/db', () => ({
-  db: { select: () => ({ from: () => ({ where: whereMock }) }) },
+  db: { select: () => ({ from: () => ({ where: (...args: unknown[]) => ({ limit: () => whereMock(...args) }) }) }) },
+}));
+// The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
+vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
+  isUuid: () => true,
+  inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
 }));
 vi.mock('@/db/schema', () => ({
   exitInterviews: { id: 'id', roleInUnion: 'roleInUnion', topics: 'topics', expertiseTags: 'expertiseTags', organizationId: 'organizationId', status: 'status' },

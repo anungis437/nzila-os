@@ -14,9 +14,8 @@
  * Rate limit:   AI_COMPLETION (20/hr per user)
  */
 
-import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import {
@@ -25,7 +24,6 @@ import {
   type InsightTimeframe,
 } from '@/lib/ai/executive-insights';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
 
@@ -41,55 +39,64 @@ const querySchema = z.object({
   timeframe: z.enum(['30d', '60d', '90d', '6m', '12m']).default('90d'),
 });
 
-export const GET = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
-  // 1. Rate limit
-  const rl = await checkRateLimit(`ai-insights:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
-  if (!rl.allowed) {
-    return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
-  }
+// The helper reads the organization's counts in its own context and ends that transaction before the provider is called, so the route does not set
+// `rlsOrgContext`. The entitlement is checked by the wrapper.
+export const GET = withApi(
+  {
+    auth: { minRole: 'officer' },
+    entitlement: 'ai_advanced_insights',
+    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Generate an executive insight report' },
+  },
+  async ({ request, user, userId, organizationId, params }) => {
+    // 1. Rate limit
+    const rl = await checkRateLimit(`ai-insights:${userId}`, RATE_LIMITS.AI_COMPLETION);
+    if (!rl.allowed) {
+      return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
+    }
 
-  // 2. Validate reportType path segment
-  const reportType = request.nextUrl.pathname.split('/').at(-1) as InsightReportType;
-  if (!VALID_REPORT_TYPES.includes(reportType)) {
-    return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      `Invalid reportType. Must be one of: ${VALID_REPORT_TYPES.join(', ')}`,
-    );
-  }
+    // 2. Validate reportType path segment
+    const reportType = params.reportType as InsightReportType;
+    if (!VALID_REPORT_TYPES.includes(reportType)) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        `Invalid reportType. Must be one of: ${VALID_REPORT_TYPES.join(', ')}`,
+      );
+    }
 
-  // 3. Feature gate
-  const blocked = await guardAiFeature(AI_FEATURES.EXECUTIVE_INSIGHTS, {
-    userId: context.userId,
-    organizationId: context.organizationId,
-  });
-  if (blocked) return blocked;
-
-  // 4. Entitlement
-  await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
-  enforceAISafety({ origin: 'ai-insights', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'confidential' });
-
-  // 5. Parse query params
-  const parsed = querySchema.safeParse(
-    Object.fromEntries(request.nextUrl.searchParams.entries()),
-  );
-  if (!parsed.success) {
-    return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid timeframe',
-      parsed.error.flatten(),
-    );
-  }
-
-  // 6. Execute
-  try {
-    const result = await generateInsightReport({
-      reportType,
-      timeframe: parsed.data.timeframe as InsightTimeframe,
-      organizationId: context.organizationId!,
-      userId: context.userId!,
+    // 3. Feature gate
+    const blocked = await guardAiFeature(AI_FEATURES.EXECUTIVE_INSIGHTS, {
+      userId: userId!,
+      organizationId: organizationId!,
     });
-    return standardSuccessResponse(result);
-  } catch (_error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Insight report generation failed.');
-  }
-});
+    if (blocked) return blocked;
+
+    // 4. AI safety
+    enforceAISafety({ origin: 'ai-insights', action: 'GET', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'officer', dataClass: 'confidential' });
+
+    // 5. Parse query params
+    const parsed = querySchema.safeParse(
+      Object.fromEntries(request.nextUrl.searchParams.entries()),
+    );
+    if (!parsed.success) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Invalid timeframe',
+        parsed.error.flatten(),
+      );
+    }
+
+    // 6. Execute
+    try {
+      const result = await generateInsightReport({
+        reportType,
+        timeframe: parsed.data.timeframe as InsightTimeframe,
+        organizationId: organizationId!,
+        userId: userId!,
+      });
+      return standardSuccessResponse(result);
+    } catch (_error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Insight report generation failed.');
+    }
+  },
+);

@@ -25,16 +25,20 @@ import {
   Loader2,
   ArrowLeft,
   Calendar,
-  DollarSign,
   FileText,
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
+import { envelopeData, readApiError } from '@/lib/client/api-envelope';
+import { fetchAllRows } from '@/lib/client/crud-lists';
+import { isDayPast, recordedDay } from '@/lib/client/day';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
+// The columns of dues_transactions as GET /api/members/dues sends them: numeric columns arrive as decimal text, and the optional
+// breakdown columns are null when the charge has no such part.
 interface DuesTransaction {
   id: string;
   organizationId: string;
@@ -44,11 +48,11 @@ interface DuesTransaction {
   dueDate: string;
   status: string;
   duesAmount: string;
-  copeAmount: string;
-  pacAmount: string;
-  strikeFundAmount: string;
-  lateFeeAmount: string;
-  adjustmentAmount: string;
+  copeAmount: string | null;
+  pacAmount: string | null;
+  strikeFundAmount: string | null;
+  lateFeeAmount: string | null;
+  adjustmentAmount: string | null;
   totalAmount: string;
   paidDate: string | null;
   paymentMethod: string | null;
@@ -58,10 +62,10 @@ interface DuesTransaction {
   metadata: Record<string, unknown>;
 }
 
-interface CheckoutSession {
-  url: string;
-  sessionId: string;
-}
+// The part of POST /api/payments/checkout/create's answer this page uses is `data.checkoutUrl`, inside { success, data, timestamp }.
+
+/** A nullable decimal column as a number; a missing part of the charge is zero for the purpose of listing its lines. */
+const partOf = (value: string | null): number => (value === null ? 0 : Number(value));
 
 // =============================================================================
 // UTILITIES
@@ -74,7 +78,7 @@ function formatDate(date: string | null, locale: string, t: (key: string) => str
       month: 'long',
       day: '2-digit',
       year: 'numeric',
-    }).format(new Date(date));
+    }).format(recordedDay(date));
   } catch {
     return t('invalidDate');
   }
@@ -87,7 +91,7 @@ function formatDate(date: string | null, locale: string, t: (key: string) => str
 function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
   const t = useTranslations('duesPayPage');
   const locale = useLocale();
-  const isDue = new Date(transaction.dueDate) < new Date();
+  const isDue = isDayPast(transaction.dueDate);
   
   return (
     <Card>
@@ -125,38 +129,38 @@ function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
             <span className="font-medium">{formatCurrency(Number(transaction.duesAmount))}</span>
           </div>
 
-          {parseFloat(transaction.copeAmount) > 0 && (
+          {partOf(transaction.copeAmount) > 0 && (
             <div className="flex justify-between text-sm">
               <span>{t('copeContributionLabel')}</span>
-              <span className="font-medium">{formatCurrency(Number(transaction.copeAmount))}</span>
+              <span className="font-medium">{formatCurrency(partOf(transaction.copeAmount))}</span>
             </div>
           )}
 
-          {parseFloat(transaction.pacAmount) > 0 && (
+          {partOf(transaction.pacAmount) > 0 && (
             <div className="flex justify-between text-sm">
               <span>{t('pacContributionLabel')}</span>
-              <span className="font-medium">{formatCurrency(Number(transaction.pacAmount))}</span>
+              <span className="font-medium">{formatCurrency(partOf(transaction.pacAmount))}</span>
             </div>
           )}
 
-          {parseFloat(transaction.strikeFundAmount) > 0 && (
+          {partOf(transaction.strikeFundAmount) > 0 && (
             <div className="flex justify-between text-sm">
               <span>{t('strikeFundLabel')}</span>
-              <span className="font-medium">{formatCurrency(Number(transaction.strikeFundAmount))}</span>
+              <span className="font-medium">{formatCurrency(partOf(transaction.strikeFundAmount))}</span>
             </div>
           )}
 
-          {parseFloat(transaction.lateFeeAmount) > 0 && (
+          {partOf(transaction.lateFeeAmount) > 0 && (
             <div className="flex justify-between text-sm text-destructive">
               <span>{t('lateFeeLabel')}</span>
-              <span className="font-medium">{formatCurrency(Number(transaction.lateFeeAmount))}</span>
+              <span className="font-medium">{formatCurrency(partOf(transaction.lateFeeAmount))}</span>
             </div>
           )}
 
-          {parseFloat(transaction.adjustmentAmount) !== 0 && (
+          {partOf(transaction.adjustmentAmount) !== 0 && (
             <div className="flex justify-between text-sm">
               <span>{t('adjustmentLabel')}</span>
-              <span className="font-medium">{formatCurrency(Number(transaction.adjustmentAmount))}</span>
+              <span className="font-medium">{formatCurrency(partOf(transaction.adjustmentAmount))}</span>
             </div>
           )}
         </div>
@@ -221,23 +225,6 @@ function PaymentMethodSelector({
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           </div>
         </Button>
-
-        {/* Future: ACH/Bank Transfer */}
-        <Button
-          variant="outline"
-          className="w-full h-auto py-4 justify-start opacity-50 cursor-not-allowed"
-          disabled
-        >
-          <div className="flex items-center space-x-4 w-full">
-            <div className="p-2 bg-muted rounded-lg">
-              <DollarSign className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <div className="flex-1 text-left">
-              <div className="font-semibold">{t('bankTransferOptionTitle')}</div>
-              <div className="text-sm text-muted-foreground">{t('bankTransferOptionDescription')}</div>
-            </div>
-          </div>
-        </Button>
       </CardContent>
     </Card>
   );
@@ -265,15 +252,10 @@ export default function PaymentCheckoutPage() {
     async function fetchTransaction() {
       try {
         setLoading(true);
-        const response = await fetch('/api/members/dues');
-        
-        if (!response.ok) {
-          throw new Error(t('failedToFetchTransaction'));
-        }
+        // The member's own dues transactions, every page of them: the route has no single-record read.
+        const rows = await fetchAllRows<DuesTransaction>('/api/members/dues');
+        const txn = rows.find((row) => row.id === transactionId);
 
-        const data = await response.json();
-        const txn = data.transactions.find((t: DuesTransaction) => t.id === transactionId);
-        
         if (!txn) {
           throw new Error(t('transactionNotFound'));
         }
@@ -307,7 +289,7 @@ export default function PaymentCheckoutPage() {
 
       logger.info(t('initiatingPaymentLog'), { transactionId, method });
 
-      // Create checkout session
+      // Create checkout session: the route names the processor and the two return addresses, nothing else.
       const response = await fetch('/api/payments/checkout/create', {
         method: 'POST',
         headers: {
@@ -315,22 +297,21 @@ export default function PaymentCheckoutPage() {
         },
         body: JSON.stringify({
           transactionId: transaction.id,
-          paymentMethod: method,
-          successUrl: `${window.location.origin}/dashboard/dues?payment=success`,
-          cancelUrl: `${window.location.origin}/dashboard/dues/pay/${transaction.id}?payment=cancelled`,
+          processorType: 'stripe',
+          returnUrl: `${window.location.origin}/${locale}/dashboard/dues?payment=returned`,
+          cancelUrl: `${window.location.origin}/${locale}/dashboard/dues/pay/${transaction.id}?payment=cancelled`,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || t('failedToCreateCheckoutSession'));
+        throw new Error(await readApiError(response, t('failedToCreateCheckoutSession')));
       }
 
-      const data: CheckoutSession = await response.json();
+      const checkoutUrl = envelopeData(await response.json()).checkoutUrl;
 
       // Redirect to checkout
-      if (data.url) {
-        const safeUrl = validateRedirectUrl(data.url);
+      if (typeof checkoutUrl === 'string' && checkoutUrl) {
+        const safeUrl = validateRedirectUrl(checkoutUrl);
         if (!safeUrl) throw new Error(t('untrustedCheckoutUrl'));
         window.location.href = safeUrl;
       } else {

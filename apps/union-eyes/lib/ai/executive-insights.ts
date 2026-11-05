@@ -17,14 +17,15 @@
  * @module lib/ai/executive-insights
  */
 
-import { db } from '@/db/db';
 import { eq, and, desc, gte, count, sql } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
-import { aiInsightReports, type AiInsightReportInsert } from '@/db/schema/domains/ml/ai-insight-reports';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { aiInsightReports } from '@/db/schema/domains/ml/ai-insight-reports';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { employers } from '@/db/schema/union-structure-schema';
 import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compliance';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { logger } from '@/lib/logger';
 
 // ============================================================================
@@ -98,14 +99,20 @@ export async function generateInsightReport(params: {
   // 2. Call AI
   const ai = getAiClient();
   const prompt = buildInsightPrompt(reportType, timeframe, context);
-  const aiResult = await ai.generate({
+  const aiResult = await performAuditedOperation({
+    organizationId,
+    userId,
+    action: 'ai.executive_insights.generate',
+    resourceType: 'ai_invocations',
+    
+  }, () => ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
     trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EXECUTIVE_INSIGHTS,
     input: prompt,
-    dataClass: 'internal',
-  });
+    dataClass: toGatewayDataClass('confidential'),
+  }));
 
   // 3. Parse
   const parsed = parseInsightResponse(aiResult.content ?? '', reportType, timeframe);
@@ -121,25 +128,9 @@ export async function generateInsightReport(params: {
     modelVersion: MODEL_VERSION,
   });
 
-  // 5. Persist
-  const insert: AiInsightReportInsert = {
-    organizationId,
-    reportType,
-    timeframe,
-    title: parsed.result.title,
-    summary: parsed.result.summary,
-    insightsJson: parsed.result.insights,
-    predictionsJson: parsed.result.predictions.length > 0 ? parsed.result.predictions : null,
-    recommendationsJson: parsed.result.recommendations.length > 0 ? parsed.result.recommendations : null,
-    confidence: parsed.confidence.toFixed(4),
-    explanation: parsed.explanation,
-    dataSourcesUsed: parsed.result.dataSourcesUsed,
-    modelVersion: MODEL_VERSION,
-    profileKey: UE_PROFILES.EXECUTIVE_INSIGHTS,
-    auditRef,
-  };
-
-  await db.insert(aiInsightReports).values(insert);
+  // HTTP GET is observational. Do not materialize an AI report or risk score in
+  // the database as a side effect of reading it; explicit governed persistence
+  // requires a separately authorized, audited command.
 
   return buildAiEnvelope(parsed.result, {
     confidence: parsed.confidence,
@@ -194,20 +185,39 @@ export async function predictArbitrationEscalation(
 }
 
 /**
- * Get previously generated reports.
+ * Get previously generated reports, inside `tx` or, without one, the organization's own context.
  */
 export async function getInsightReports(
   organizationId: string,
   reportType?: InsightReportType,
   limit = 10,
-) {
+  tx?: RLSTx,
+): Promise<Array<typeof aiInsightReports.$inferSelect>> {
+  if (!tx) return withRLSContext({ organizationId }, (own) => getInsightReports(organizationId, reportType, limit, own));
+
   const conditions = [eq(aiInsightReports.organizationId, organizationId)];
   if (reportType) conditions.push(eq(aiInsightReports.reportType, reportType));
 
-  return db.query.aiInsightReports.findMany({
+  return tx.query.aiInsightReports.findMany({
     where: and(...conditions),
     orderBy: [desc(aiInsightReports.createdAt)],
     limit,
+  });
+}
+
+/**
+ * The latest report of each type, read one after the other on one connection of the organization's own context.
+ */
+export async function getLatestInsightReports(organizationId: string) {
+  return withRLSContext({ organizationId }, async (tx) => {
+    const latest = async (reportType: InsightReportType) => (await getInsightReports(organizationId, reportType, 1, tx))[0] ?? null;
+    return {
+      trendForecast: await latest('trend_forecast'),
+      employerHotspots: await latest('employer_hotspots'),
+      stewardCapacity: await latest('steward_capacity'),
+      arbitrationEscalation: await latest('arbitration_escalation'),
+      executiveSummary: await latest('executive_summary'),
+    };
   });
 }
 
@@ -236,42 +246,40 @@ async function gatherOrgContext(
   };
   const sinceDate = new Date(now.getTime() - daysMap[timeframe] * 24 * 60 * 60 * 1000);
 
-  const [totalG] = await db
-    .select({ value: count() })
-    .from(grievances)
-    .where(and(eq(grievances.organizationId, organizationId), gte(grievances.createdAt, sinceDate)));
-
-  const [openG] = await db
-    .select({ value: count() })
-    .from(grievances)
-    .where(
-      and(
-        eq(grievances.organizationId, organizationId),
-        sql`${grievances.status} NOT IN ('closed', 'withdrawn', 'settled')`,
-      ),
-    );
-
-  const [arbG] = await db
-    .select({ value: count() })
-    .from(grievances)
-    .where(
-      and(
-        eq(grievances.organizationId, organizationId),
-        eq(grievances.status, 'arbitration'),
-        gte(grievances.createdAt, sinceDate),
-      ),
-    );
-
-  const [empCount] = await db
-    .select({ value: count() })
-    .from(employers)
-    .where(eq(employers.organizationId, organizationId));
-
-  const [alertC] = await db
-    .select({ value: count() })
-    .from(complianceAlerts)
-    .where(and(eq(complianceAlerts.orgId, organizationId), gte(complianceAlerts.createdAt, sinceDate)));
-
+  // The five counts are read in the organization's own context, in one transaction that ends before the provider is called.
+  const [totalG, openG, arbG, empCount, alertC] = await withRLSContext({ organizationId }, async (tx) => [
+    (await tx
+      .select({ value: count() })
+      .from(grievances)
+      .where(and(eq(grievances.organizationId, organizationId), gte(grievances.createdAt, sinceDate))))[0],
+    (await tx
+      .select({ value: count() })
+      .from(grievances)
+      .where(
+        and(
+          eq(grievances.organizationId, organizationId),
+          sql`${grievances.status} NOT IN ('closed', 'withdrawn', 'settled')`,
+        ),
+      ))[0],
+    (await tx
+      .select({ value: count() })
+      .from(grievances)
+      .where(
+        and(
+          eq(grievances.organizationId, organizationId),
+          eq(grievances.status, 'arbitration'),
+          gte(grievances.createdAt, sinceDate),
+        ),
+      ))[0],
+    (await tx
+      .select({ value: count() })
+      .from(employers)
+      .where(eq(employers.organizationId, organizationId)))[0],
+    (await tx
+      .select({ value: count() })
+      .from(complianceAlerts)
+      .where(and(eq(complianceAlerts.orgId, organizationId), gte(complianceAlerts.createdAt, sinceDate))))[0],
+  ]);
   return {
     grievanceCounts: {
       total: totalG?.value ?? 0,

@@ -5,7 +5,7 @@
  * Search clauses and precedents using semantic similarity
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   semanticClauseSearch,
   semanticPrecedentSearch,
@@ -13,28 +13,39 @@ import {
   findSimilarClauses,
 } from '@/lib/services/ai/vector-search-service';
 import { z } from "zod";
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
-import { db } from '@/db/db';
-import { cbaClause } from '@/db/schema/cba-clauses-schema';
+import { count, eq } from 'drizzle-orm';
+import { cbaClause, clauseTypeEnum } from '@/db/schema/cba-clauses-schema';
 import { arbitrationPrecedents } from '@/db/schema/arbitration-precedents-schema';
+import { VectorSearchUnavailableError } from '@/lib/ai/vector-readiness';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
-  import { AI_FEATURES } from '@/lib/services/feature-flags';
-  import { enforceAISafety } from '@nzila/policies';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 
 const semanticSearchSchema = z.object({
   query: z.string().max(1000, 'Query too long').optional(),
   searchType: z.enum(['clauses', 'precedents', 'unified', 'similar']).default('unified'),
-  clauseId: z.string().uuid().optional(),
+  clauseId: z.guid().optional(),
   limit: z.number().int().min(1).max(100).default(10),
   threshold: z.number().min(0).max(1).default(0.7),
-  filters: z.record(z.string(), z.unknown()).default({}),
+  // The filters the searches read, typed: an organization in the filters is never honoured, and a clause type that is not one of the enum's values is
+  // refused here instead of reaching the database as an invalid enum input.
+  filters: z.object({
+    clauseType: z.array(z.enum(clauseTypeEnum.enumValues)).max(20).optional(),
+    jurisdiction: z.string().max(100).optional(),
+    sector: z.string().max(100).optional(),
+    issueType: z.string().max(100).optional(),
+    sameTypeOnly: z.boolean().optional(),
+  }).prefault({}),
   hybridSearch: z.object({
     enabled: z.boolean().default(false),
     keywordWeight: z.number().min(0).max(1).default(0.3),
@@ -44,12 +55,20 @@ const semanticSearchSchema = z.object({
   if (data.searchType === 'similar' && !data.clauseId) return false;
   return true;
 }, { message: 'Query required for non-similar searches, clauseId required for similar searches' });
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
-    const _user = { id: context.userId, organizationId: context.organizationId };
 
+// Each search reads in the organization's own context inside the service, after the embedding call has returned, so no transaction waits on the provider
+// and the route does not set `rlsOrgContext`. The entitlement is checked here, not by the wrapper, to keep its answer (with the upgrade address) as it was.
+export const POST = withApi(
+  {
+    auth: { minRole: 'member' },
+    body: semanticSearchSchema,
+    registry: { audience: 'member', productionStatus: 'active', evidenceRequired: false, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Semantic search over clauses and precedents' },
+  },
+  async ({ user, userId, organizationId, body }) => {
     // CRITICAL: Rate limit AI calls (expensive OpenAI API)
     const rateLimitResult = await checkRateLimit(
-      `ai-completion:${context.userId}`,
+      `ai-completion:${userId}`,
       RATE_LIMITS.AI_COMPLETION
     );
 
@@ -64,7 +83,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     }
 
     // CRITICAL: Check subscription entitlement for AI semantic-search
-    const entitlement = await checkEntitlement(context.organizationId as string, 'ai_semantic_search');
+    const entitlement = await checkEntitlement(organizationId as string, 'ai_semantic_search');
     if (!entitlement.allowed) {
       return NextResponse.json(
         { 
@@ -76,24 +95,12 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       );
     }
 
-      // OWASP AI: Feature flag + AI safety gate
-      const blocked = await guardAiFeature(AI_FEATURES.AI_SEMANTIC_SEARCH, { userId: context.userId, organizationId: context.organizationId });
-      if (blocked) return blocked;
-      enforceAISafety({ origin: 'semantic-search', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
+    // OWASP AI: Feature flag + AI safety gate
+    const blocked = await guardAiFeature(AI_FEATURES.AI_SEMANTIC_SEARCH, { userId: userId!, organizationId: organizationId! });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'semantic-search', action: 'POST', organizationId, userId, userRole: user?.role ?? 'member', dataClass: 'internal' });
 
     try {
-      const body = await request.json();
-      
-      // Validate request body
-      const validation = semanticSearchSchema.safeParse(body);
-      if (!validation.success) {
-        return standardErrorResponse(
-          ErrorCode.VALIDATION_ERROR,
-          'Invalid semantic search request',
-          validation.error.errors
-        );
-      }
-
       const {
         query,
         searchType,
@@ -102,7 +109,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         threshold,
         filters,
         hybridSearch,
-      } = validation.data;
+      } = body;
+
+      // Clauses are searched in the caller's organization only; an organization in the filters is never honoured
+      const callerOrganizationId = organizationId as string;
+      const scopedFilters = { ...filters, organizationId: callerOrganizationId };
 
       let results;
 
@@ -111,7 +122,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           results = await semanticClauseSearch(query!, {
             limit,
             threshold,
-            filters,
+            filters: scopedFilters,
             hybridSearch,
           });
           return NextResponse.json({
@@ -123,10 +134,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         case 'precedents':
           results = await semanticPrecedentSearch(query!, {
+            organizationId: callerOrganizationId,
             limit,
             threshold,
-            issueType: filters.issueType as string | undefined,
-            jurisdiction: filters.jurisdiction as string | undefined,
+            issueType: filters.issueType,
+            jurisdiction: filters.jurisdiction,
           });
           return NextResponse.json({
             searchType: 'precedents',
@@ -137,6 +149,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         case 'unified':
           results = await unifiedSemanticSearch(query!, {
+            organizationId: callerOrganizationId,
             includeClauses: true,
             includePrecedents: true,
             limit,
@@ -157,6 +170,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         case 'similar':
           results = await findSimilarClauses(clauseId!, {
+            organizationId: callerOrganizationId,
             limit,
             threshold,
             sameTypeOnly: Boolean(filters.sameTypeOnly),
@@ -170,11 +184,15 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         default:
           return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid searchType. Use: clauses, precedents, unified, or similar'
-    );
+            ErrorCode.VALIDATION_ERROR,
+            'Invalid searchType. Use: clauses, precedents, unified, or similar'
+          );
       }
-    } catch {
+    } catch (error) {
+      // pgvector is optional: a database without the extension, or with text embedding columns, answers that semantic search is not available (501), not a 500.
+      if (error instanceof VectorSearchUnavailableError) {
+        return standardErrorResponse(ErrorCode.NOT_IMPLEMENTED, error.message);
+      }
       return NextResponse.json(
         {
           error: 'Semantic search failed',
@@ -182,40 +200,51 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         { status: 500 }
       );
     }
-});
+  },
+);
 
-export const GET = withRoleAuth('member', async (_request: NextRequest, _context: BaseAuthContext) => {
-  try {
-    const clauseRows = await db
-      .select({ id: cbaClause.id, embedding: cbaClause.embedding })
-      .from(cbaClause);
-    const clauseTotal = clauseRows.length;
-    const clauseWithEmbed = clauseRows.filter((r) => r.embedding !== null).length;
+// The counts are read in the organization's own context, as counts: the rows (and their embeddings) are not loaded to be counted.
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    registry: { audience: 'member', productionStatus: 'active', evidenceRequired: false, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Semantic search index status of the organization' },
+  },
+  async ({ userId, organizationId }) => {
+    const blocked = await guardAiFeature(AI_FEATURES.AI_SEMANTIC_SEARCH, { userId: userId!, organizationId: organizationId! });
+    if (blocked) return blocked;
+    try {
+      const counts = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+        const [clauseCounts] = await tx
+          .select({ total: count(), withEmbeddings: count(cbaClause.embedding) })
+          .from(cbaClause)
+          .where(eq(cbaClause.organizationId, organizationId!));
+        const [precedentCounts] = await tx
+          .select({ total: count() })
+          .from(arbitrationPrecedents)
+          .where(eq(arbitrationPrecedents.sourceOrganizationId, organizationId!));
+        return { clauseTotal: clauseCounts?.total ?? 0, clauseWithEmbed: clauseCounts?.withEmbeddings ?? 0, precedentTotal: precedentCounts?.total ?? 0 };
+      });
 
-    const precedentRows = await db
-      .select({ id: arbitrationPrecedents.id })
-      .from(arbitrationPrecedents);
-    const precedentTotal = precedentRows.length;
-
-    return NextResponse.json({
-      status: clauseWithEmbed > 0 ? 'ready' : 'pending',
-      clauses: {
-        total: clauseTotal,
-        withEmbeddings: clauseWithEmbed,
-        percentage: clauseTotal > 0 ? Math.round((clauseWithEmbed / clauseTotal) * 100) : 0,
-      },
-      precedents: {
-        total: precedentTotal,
-        withEmbeddings: 0,
-        percentage: 0,
-      },
-    });
-  } catch (error) {
-    return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Status check failed',
-      error
-    );
-  }
-});
-
+      return NextResponse.json({
+        status: counts.clauseWithEmbed > 0 ? 'ready' : 'pending',
+        clauses: {
+          total: counts.clauseTotal,
+          withEmbeddings: counts.clauseWithEmbed,
+          percentage: counts.clauseTotal > 0 ? Math.round((counts.clauseWithEmbed / counts.clauseTotal) * 100) : 0,
+        },
+        precedents: {
+          total: counts.precedentTotal,
+          withEmbeddings: 0,
+          percentage: 0,
+        },
+      });
+    } catch (error) {
+      logger.error('Semantic search status check failed', { error });
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Status check failed'
+      );
+    }
+  },
+);

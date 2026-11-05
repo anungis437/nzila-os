@@ -24,12 +24,29 @@ describe('exit-interviews/search route', () => {
     ]);
   });
 
-  it('returns search results with total count', async () => {
+  it('returns the results as a list; the framework wraps it as the data of the answer', async () => {
     const { POST } = await loadRoute();
     const result = await POST({ organizationId: 'org_1', user: { role: 'officer' }, body: { q: 'retention', limit: 10, semanticWeight: 0.5 } });
 
-    expect(result.total).toBe(2);
-    expect(result.data).toHaveLength(2);
-    expect(m.hybridKnowledgeSearch).toHaveBeenCalledWith(expect.objectContaining({ query: 'retention', orgId: 'org_1', limit: 10, semanticWeight: 0.5 }));
+    expect(result).toHaveLength(2);
+    expect(m.hybridKnowledgeSearch).toHaveBeenCalledWith(expect.objectContaining({ query: 'retention', orgId: 'org_1', limit: 10, semanticWeight: 0.5, stewardPlus: true }));
+  });
+
+  it.each([
+    ['member', false, ['public_internal']],
+    ['steward', true, ['public_internal', 'restricted']],
+    ['officer', true, ['public_internal', 'restricted', 'privileged']],
+  ])('tells the search whether a %s reads an interview without the retiree\'s consent, and at which levels', async (role, stewardPlus, levels) => {
+    const { POST } = await loadRoute();
+    await POST({ organizationId: 'org_1', user: { role }, body: { q: 'retention', limit: 10 } });
+
+    expect(m.hybridKnowledgeSearch).toHaveBeenCalledWith(expect.objectContaining({ stewardPlus, allowedSensitivityLevels: levels }));
+  });
+
+  it('reads a caller with no role as a member: below steward, the public level only', async () => {
+    const { POST } = await loadRoute();
+    await POST({ organizationId: 'org_1', user: undefined, body: { q: 'retention', limit: 10 } });
+
+    expect(m.hybridKnowledgeSearch).toHaveBeenCalledWith(expect.objectContaining({ stewardPlus: false, allowedSensitivityLevels: ['public_internal'] }));
   });
 });

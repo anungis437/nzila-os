@@ -1,0 +1,161 @@
+/**
+ * Django models equal the physical schema (UE-CONV-H-008): every Django model, measured against the database that Django `migrate`
+ * plus the approved platform bootstrap builds, by `manage.py ue_physical_parity`.
+ *
+ * Proves:
+ *   - the strict classes are empty: no model asks for a column or type the table lacks, none may send NULL into a NOT NULL column, no
+ *     NOT NULL column without a default is unknown to its model (every ORM insert would fail), no model can write a value an enum
+ *     or a CHECK rejects, no foreign key (of the two a column can carry) points where the model does not, and no model writes a
+ *     default of its own over the column's, or where the column has none (a Django write and a Drizzle write of one row agree);
+ *     (backend/core/management/commands/ue_physical_parity.py defines each class);
+ *   - every column of every table is described by its model (COLUMN_UNKNOWN is zero): the models are complete, and what a response
+ *     returns is named by the response (backend/core/api_projection.py, backend/core/api_surface.json), not by the model;
+ *   - the advisory classes may only shrink: each has a pinned ceiling;
+ *   - Django's migration state equals the models (`makemigrations --check`), so the migration history records what the tables are.
+ *
+ * Skipped unless UE_AUTHORITY_COMBINED_URL points at a disposable, fully bootstrapped database AND UE_AUTHORITY_DJANGO=1 (python with
+ * the backend requirements is on PATH). It only reads, except the last test, which changes one column of its own clone and puts it back.
+ */
+import { spawnSync } from 'node:child_process'
+import { resolve } from 'node:path'
+import pg from 'pg'
+import { describe, expect, it } from 'vitest'
+
+const URL = process.env.UE_AUTHORITY_COMBINED_URL
+const ENABLED = !!URL && process.env.UE_AUTHORITY_DJANGO === '1'
+const BACKEND = resolve(__dirname, '..', '..', 'backend')
+
+/** Advisory classes that remain open: a change that adds to one fails here; closing findings means lowering the ceiling. */
+const ADVISORY_CEILING: Record<string, number> = {
+  COLUMN_UNKNOWN: 0,
+  CHECK_ABSENT: 0,
+  FK_ABSENT: 0,
+  PK_ABSENT: 0,
+  TYPE_LOOSE: 0,
+  UNIQUE_ABSENT: 0,
+  // A model that requires a value where the table accepts NULL: the table is the looser side. Closed by platform 0072, so a new open one is a model edit that outran the platform.
+  NOT_NULL_ABSENT: 0,
+  // Columns that are `timestamp without time zone` under a DateTimeField: the platform declares them naive, and retyping them is a data decision.
+  TIMESTAMP_NAIVE: 361,
+  // A model's on_delete is applied by Django, in Python; the database rule is what a DELETE that does not go through the ORM gets. All of these are the safe direction
+  // (the ORM cascades where the database refuses a raw delete): the test below holds the dangerous direction at zero, and this ceiling can only fall.
+  FK_DELETE_RULE_MISMATCH: 164,
+}
+
+interface Finding {
+  kind: string
+  table: string
+  column: string | null
+  detail: Record<string, unknown>
+}
+interface Report {
+  measured: number
+  strict: number
+  summary: Record<string, number>
+  findings: Finding[]
+}
+
+describe.skipIf(!ENABLED)('Django models equal the physical schema', () => {
+  const env = () => {
+    const u = new globalThis.URL(URL!)
+    return {
+      ...process.env,
+      DJANGO_SETTINGS_MODULE: 'config.settings',
+      DJANGO_SECRET_KEY: 'parity-test-only',
+      DJANGO_DEBUG: 'True',
+      PGDATABASE: u.pathname.replace(/^\//, ''),
+      PGUSER: decodeURIComponent(u.username),
+      PGPASSWORD: decodeURIComponent(u.password),
+      PGHOST: u.hostname,
+      PGPORT: u.port || '5432',
+      REDIS_URL: 'redis://127.0.0.1:6379/15',
+    }
+  }
+  const manage = (args: string[]) =>
+    spawnSync(process.env.UE_CLEANROOM_PYTHON || 'python', ['manage.py', ...args], {
+      cwd: BACKEND,
+      env: env(),
+      encoding: 'utf8',
+      maxBuffer: 256 * 1024 * 1024,
+    })
+
+  let report: Report
+  const measureFresh = (): Report => {
+    const run = manage(['ue_physical_parity', '--json'])
+    const line = `${run.stdout}`.split('\n').find((l) => l.startsWith('PARITY_JSON='))
+    if (!line) throw new Error(`ue_physical_parity produced no report (exit ${run.status}): ${run.stderr.slice(-800)}`)
+    return JSON.parse(line.slice('PARITY_JSON='.length)) as Report
+  }
+  const measure = () => (report ??= measureFresh())
+  const render = (findings: readonly Finding[]) => findings.slice(0, 12).map((f) => `${f.kind} ${f.table}.${f.column ?? ''}`).join('\n')
+
+  it('measures every Django model of the project', () => {
+    expect(measure().measured).toBeGreaterThan(500)
+  })
+
+  it('has no strict finding: no ORM operation through a model fails or corrupts data', () => {
+    const strict = measure().findings.filter((f) =>
+      [
+        'TABLE_ABSENT',
+        'COLUMN_ABSENT',
+        'TYPE_MISMATCH',
+        'NARROWER_PHYSICAL',
+        'NULL_CONTRACT_MISMATCH',
+        'REQUIRED_COLUMN_UNKNOWN',
+        'ENUM_MEMBER_ABSENT',
+        'FK_TARGET_MISMATCH',
+        'DEFAULT_DIVERGES',
+        'CHECK_REFUSES_CHOICE',
+      ].includes(f.kind),
+    )
+    expect(render(strict)).toBe('')
+    expect(measure().strict).toBe(0)
+  })
+
+  it('holds every advisory class at or below its ceiling, and has no class that has no ceiling', () => {
+    const over = Object.entries(measure().summary)
+      .filter(([kind]) => kind in ADVISORY_CEILING)
+      .filter(([kind, n]) => n > ADVISORY_CEILING[kind])
+      .map(([kind, n]) => `${kind}: ${n} > ${ADVISORY_CEILING[kind]}`)
+    expect(over).toEqual([])
+    const unlisted = Object.keys(measure().summary).filter((k) => !(k in ADVISORY_CEILING))
+    expect(unlisted).toEqual([])
+  })
+
+  it("has no foreign key whose database rule destroys what the model's on_delete protects", () => {
+    const dangerous = measure().findings.filter((f) => f.kind === 'FK_DELETE_RULE_MISMATCH' && f.detail.risk === 'DB_DESTROYS_WHAT_ORM_PROTECTS')
+    expect(render(dangerous)).toBe('')
+  })
+
+  it("has Django's migration state equal to the models", () => {
+    const run = manage(['makemigrations', '--check', '--dry-run'])
+    expect({ status: run.status, out: `${run.stdout}`.slice(-600) }).toEqual({ status: 0, out: expect.stringContaining('No changes detected') })
+  })
+
+  // Last, because it changes one column of this file's own clone and puts it back.
+  it('knows an optional-extension column only in the shape platform 0063 creates it, with or without pgvector on the server', async () => {
+    const embedding = (r: Report) => r.findings.filter((f) => f.table === 'knowledge_base' && f.column === 'embedding')
+    expect(embedding(measure())).toEqual([])
+
+    const admin = new pg.Client({ connectionString: URL })
+    await admin.connect()
+    try {
+      const original = (
+        await admin.query(
+          `SELECT format_type(a.atttypid, a.atttypmod) AS type FROM pg_attribute a WHERE a.attrelid = 'public.knowledge_base'::regclass AND a.attname = 'embedding' AND NOT a.attisdropped`,
+        )
+      ).rows[0]?.type as string | undefined
+      await admin.query('ALTER TABLE public.knowledge_base DROP COLUMN IF EXISTS embedding')
+
+      // Without the column the table is complete; with the column under any other shape it is an unknown column.
+      expect(embedding(measureFresh())).toEqual([])
+      await admin.query('ALTER TABLE public.knowledge_base ADD COLUMN embedding text')
+      expect(embedding(measureFresh()).map((f) => ({ kind: f.kind, physical: f.detail.physical }))).toEqual([{ kind: 'COLUMN_UNKNOWN', physical: 'text' }])
+
+      await admin.query('ALTER TABLE public.knowledge_base DROP COLUMN embedding')
+      if (original) await admin.query(`ALTER TABLE public.knowledge_base ADD COLUMN embedding ${original}`)
+    } finally {
+      await admin.end()
+    }
+  }, 180_000)
+})

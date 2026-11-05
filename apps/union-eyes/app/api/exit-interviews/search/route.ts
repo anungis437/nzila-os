@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 const searchSchema = z.object({
   q: z.string().min(2),
   /** 0–1 weight for semantic vs keyword. Default 0.6. */
-  semanticWeight: z.number().min(0).max(1).default(0.6).optional(),
+  semanticWeight: z.number().min(0).max(1).optional(),
   limit: z.number().int().min(1).max(50).default(20),
 });
 
@@ -29,8 +29,15 @@ function allowedSensitivityLevels(role: string | null): ExitInterviewSensitivity
   return ['public_internal'];
 }
 
+/** Whether the role is the steward floor or above: such a caller reads a published interview whose retiree has not consented (canReadInterview). */
+function isStewardPlus(role: string | null): boolean {
+  const normalized = normalizeRole((role ?? 'member') as never);
+  return (ROLE_HIERARCHY[normalized] ?? 0) >= ROLE_HIERARCHY.steward;
+}
+
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     body: searchSchema,
     entitlement: 'union_knowledge_suite',
@@ -45,10 +52,11 @@ export const POST = withApi(
       query: body.q,
       orgId: organizationId!,
       allowedSensitivityLevels: allowedSensitivityLevels(user?.role ?? null),
+      stewardPlus: isStewardPlus(user?.role ?? null),
       limit: body.limit,
       semanticWeight: body.semanticWeight ?? 0.6,
     });
 
-    return { data: results, total: results.length };
+    return results;
   },
 );

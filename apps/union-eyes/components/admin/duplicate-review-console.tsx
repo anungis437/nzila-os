@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { envelopeData, readApiError } from "@/lib/client/api-envelope";
 import {
   Table,
   TableBody,
@@ -77,18 +78,23 @@ function scoreColor(score: number | null): string {
 export default function DuplicateReviewConsole() {
   const [data, setData] = useState<DuplicatesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [problem, setProblem] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setProblem(null);
     try {
       const params = new URLSearchParams();
       if (statusFilter) params.set("status", statusFilter);
       const res = await fetch(`/api/admin/duplicates?${params.toString()}`);
-      if (res.ok) {
-        setData(await res.json());
-      }
+      if (!res.ok) throw new Error(await readApiError(res, "The duplicate groups could not be loaded."));
+      // The route's own { groups, total } is what the framework wraps as { success, data, timestamp }.
+      setData(envelopeData(await res.json()) as unknown as DuplicatesResponse);
+    } catch (error) {
+      setData(null);
+      setProblem(error instanceof Error ? error.message : "The duplicate groups could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -98,15 +104,20 @@ export default function DuplicateReviewConsole() {
 
   const handleAction = async (groupId: string, action: "confirm" | "dismiss" | "merge") => {
     setActionLoading(groupId);
+    setProblem(null);
     try {
       const res = await fetch("/api/admin/duplicates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ group_id: groupId, action }),
       });
-      if (res.ok) {
-        await fetchData();
+      if (!res.ok) {
+        setProblem(await readApiError(res, "The change could not be saved."));
+        return;
       }
+      await fetchData();
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : "The change could not be saved.");
     } finally {
       setActionLoading(null);
     }
@@ -142,6 +153,12 @@ export default function DuplicateReviewConsole() {
           </Button>
         ))}
       </div>
+
+      {problem && (
+        <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {problem}
+        </p>
+      )}
 
       {/* Groups */}
       {data?.groups.map((group) => (
@@ -239,7 +256,7 @@ export default function DuplicateReviewConsole() {
         </Card>
       ))}
 
-      {!loading && (!data?.groups || data.groups.length === 0) && (
+      {!loading && !problem && (!data?.groups || data.groups.length === 0) && (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
             No duplicate groups found

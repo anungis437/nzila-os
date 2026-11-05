@@ -1,0 +1,802 @@
+{
+ "generatedBy": "the models as they stood when the endpoints were written (see backend/core/api_projection.py)",
+ "policy": "The columns each services/api list endpoint returns for a model. The response names them, so a column a model learns does not reach it. Add a column here only as a deliberate, reviewed change to that endpoint's response.",
+ "models": {
+  "bargaining.CbaClauses": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id",
+   "cba_id"
+  ],
+  "bargaining.CollectiveAgreements": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id",
+   "cba_number"
+  ],
+  "billing.AccountBalanceReconciliation": [
+   "id",
+   "updated_at",
+   "reconciliation_date",
+   "account_id",
+   "account_type",
+   "stripe_reported_balance",
+   "system_calculated_balance",
+   "balance_match",
+   "discrepancy_amount",
+   "discrepancy_reason",
+   "reconciliation_status",
+   "reconciled_by",
+   "reconciliation_notes",
+   "created_at"
+  ],
+  "billing.BankOfCanadaRates": [
+   "id",
+   "created_at",
+   "updated_at",
+   "rate_date",
+   "currency"
+  ],
+  "billing.CpiAdjustedPricing": [
+   "id",
+   "created_at",
+   "updated_at",
+   "item_id",
+   "item_description",
+   "contract_id",
+   "original_price"
+  ],
+  "billing.CpiData": [
+   "id",
+   "created_at",
+   "updated_at",
+   "period_year"
+  ],
+  "billing.CrossBorderTransactions": [
+   "id",
+   "created_at",
+   "updated_at",
+   "transaction_date",
+   "amount_cents",
+   "original_currency"
+  ],
+  "billing.CurrencyEnforcementAudit": [
+   "id",
+   "created_at",
+   "updated_at",
+   "action_type"
+  ],
+  "billing.CurrencyEnforcementPolicy": [
+   "id",
+   "created_at",
+   "updated_at",
+   "enforcement_enabled",
+   "mandatory_currency"
+  ],
+  "billing.CurrencyEnforcementViolations": [
+   "id",
+   "created_at",
+   "updated_at",
+   "violation_type"
+  ],
+  "billing.ExchangeRates": [
+   "id",
+   "created_at",
+   "updated_at",
+   "from_currency"
+  ],
+  "billing.FmvAuditLog": [
+   "id",
+   "created_at",
+   "updated_at",
+   "action_type"
+  ],
+  "billing.FmvBenchmarks": [
+   "id",
+   "created_at",
+   "updated_at",
+   "item_category"
+  ],
+  "billing.FmvPolicy": [
+   "id",
+   "created_at",
+   "updated_at",
+   "policy_enabled",
+   "fmv_verification_required",
+   "competitive_bidding_threshold"
+  ],
+  "billing.FmvViolations": [
+   "id",
+   "created_at",
+   "updated_at",
+   "violation_type"
+  ],
+  "billing.FxRateAuditLog": [
+   "id",
+   "created_at",
+   "updated_at",
+   "action_type"
+  ],
+  "billing.IndependentAppraisals": [
+   "id",
+   "created_at",
+   "updated_at",
+   "item_type"
+  ],
+  "billing.PaymentClassificationPolicy": [
+   "id",
+   "policy_name",
+   "policy_description",
+   "effective_date",
+   "expiry_date",
+   "enforce_strict_separation",
+   "allow_operational_fallback",
+   "require_trust_account",
+   "automatic_classification",
+   "approved_by",
+   "created_at",
+   "updated_at"
+  ],
+  "billing.PaymentRoutingRules": [
+   "id",
+   "payment_type",
+   "payment_category",
+   "destination_account_id",
+   "destination_account_type",
+   "routing_mandatory",
+   "fallback_account_id",
+   "allow_fallback",
+   "routing_priority",
+   "created_at",
+   "updated_at"
+  ],
+  "billing.ProcurementBids": [
+   "id",
+   "created_at",
+   "updated_at",
+   "procurement_request_id",
+   "bidder_name",
+   "bidder_contact",
+   "bidder_email"
+  ],
+  "billing.ProcurementRequests": [
+   "id",
+   "created_at",
+   "updated_at",
+   "request_number"
+  ],
+  "billing.SeparatedPaymentTransactions": [
+   "id",
+   "updated_at",
+   "transaction_date",
+   "payment_type",
+   "payment_category",
+   "payment_amount",
+   "payment_currency",
+   "payer_id",
+   "payer_email",
+   "payee_id",
+   "payee_name",
+   "stripe_payment_intent_id",
+   "stripe_charge_id",
+   "routed_to_account_id",
+   "routed_to_account_type",
+   "routing_rule_id",
+   "separation_enforced",
+   "correct_account_used",
+   "payment_status",
+   "failure_reason",
+   "metadata",
+   "created_at"
+  ],
+  "billing.StrikeFundPaymentAudit": [
+   "id",
+   "updated_at",
+   "audit_date",
+   "audit_period",
+   "total_strike_payments",
+   "total_strike_amount",
+   "strike_payments_to_correct_account",
+   "strike_payments_to_wrong_account",
+   "total_operational_payments",
+   "total_operational_amount",
+   "separation_compliance_rate",
+   "total_violations",
+   "critical_violations",
+   "amount_misrouted",
+   "recommended_actions",
+   "audited_by",
+   "audit_report",
+   "created_at"
+  ],
+  "billing.T106FilingTracking": [
+   "id",
+   "created_at",
+   "updated_at",
+   "fiscal_year"
+  ],
+  "billing.TransactionCurrencyConversions": [
+   "id",
+   "created_at",
+   "updated_at",
+   "transaction_id",
+   "transaction_type"
+  ],
+  "billing.TransferPricingDocumentation": [
+   "id",
+   "created_at",
+   "updated_at",
+   "transaction_id",
+   "transaction_type"
+  ],
+  "billing.WhiplashPreventionAudit": [
+   "id",
+   "created_at",
+   "updated_at",
+   "audit_date",
+   "action_type",
+   "action_description",
+   "account_id",
+   "transaction_id",
+   "performed_by",
+   "compliance_impact",
+   "metadata"
+  ],
+  "billing.WhiplashViolations": [
+   "id",
+   "violation_date",
+   "violation_type",
+   "severity",
+   "transaction_id",
+   "payment_type",
+   "expected_account_id",
+   "actual_account_id",
+   "violation_description",
+   "amount_involved",
+   "correction_required",
+   "correction_action",
+   "violation_status",
+   "detected_by",
+   "resolved_by",
+   "resolved_at",
+   "resolution_notes",
+   "created_at",
+   "updated_at"
+  ],
+  "compliance.AccessJustificationRequests": [
+   "id",
+   "request_date",
+   "requested_by",
+   "requested_by_email",
+   "requested_by_role",
+   "data_type_requested",
+   "data_type_id",
+   "justification",
+   "business_purpose",
+   "request_status",
+   "reviewed_by",
+   "reviewed_at",
+   "review_decision",
+   "review_notes",
+   "approval_expiry_date",
+   "access_granted_at",
+   "access_revoked_at",
+   "created_at",
+   "updated_at"
+  ],
+  "compliance.ArmsLengthVerification": [
+   "id",
+   "created_at",
+   "updated_at",
+   "transaction_id",
+   "transaction_type"
+  ],
+  "compliance.BandCouncilConsent": [
+   "id",
+   "created_at",
+   "updated_at",
+   "band_council_id",
+   "consent_type"
+  ],
+  "compliance.BandCouncils": [
+   "id",
+   "created_at",
+   "updated_at",
+   "band_name",
+   "band_number"
+  ],
+  "compliance.BlindTrustRegistry": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.BreakGlassActivations": [
+   "id",
+   "created_at",
+   "updated_at",
+   "emergency_id",
+   "activation_initiated_at",
+   "activation_approved_at",
+   "activation_reason",
+   "key_holder_ids",
+   "required_signatures",
+   "signatures_received",
+   "signature1_user_id"
+  ],
+  "compliance.BreakGlassSystem": [
+   "id",
+   "created_at",
+   "updated_at",
+   "scenario_type"
+  ],
+  "compliance.ConflictAuditLog": [
+   "id",
+   "created_at",
+   "updated_at",
+   "action_type"
+  ],
+  "compliance.ConflictDisclosures": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.ConflictOfInterestPolicy": [
+   "id",
+   "created_at",
+   "updated_at",
+   "policy_enabled",
+   "blind_trust_required",
+   "annual_disclosure_required",
+   "disclosure_deadline"
+  ],
+  "compliance.ConflictReviewCommittee": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.ConflictTraining": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.CouncilElections": [
+   "id",
+   "created_at",
+   "updated_at",
+   "election_year",
+   "election_date",
+   "positions_available",
+   "candidates",
+   "winners",
+   "total_votes",
+   "participation_rate",
+   "verified_by",
+   "verification_date",
+   "contested_results"
+  ],
+  "compliance.DataSubjectAccessRequests": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.DisasterRecoveryDrills": [
+   "id",
+   "created_at",
+   "updated_at",
+   "drill_name",
+   "drill_type"
+  ],
+  "compliance.EmergencyDeclarations": [
+   "id",
+   "created_at",
+   "updated_at",
+   "emergency_type"
+  ],
+  "compliance.EmployerAccessAttempts": [
+   "id",
+   "created_at",
+   "updated_at",
+   "attempt_timestamp",
+   "user_id",
+   "user_email",
+   "user_role",
+   "data_type_requested",
+   "data_type_id",
+   "access_granted",
+   "denial_reason",
+   "justification_provided",
+   "ip_address",
+   "user_agent",
+   "session_id",
+   "flagged_for_review",
+   "reviewed_by",
+   "reviewed_at",
+   "review_notes"
+  ],
+  "compliance.FirewallAccessRules": [
+   "id",
+   "rule_name",
+   "data_type_id",
+   "user_role",
+   "access_permitted",
+   "access_level",
+   "justification_required",
+   "requires_approval",
+   "approver_role",
+   "created_at",
+   "updated_at"
+  ],
+  "compliance.FirewallComplianceAudit": [
+   "id",
+   "updated_at",
+   "audit_date",
+   "audit_period",
+   "total_access_attempts",
+   "total_employer_attempts",
+   "total_denied_access",
+   "total_violations",
+   "critical_violations",
+   "compliance_rate",
+   "top_violated_data_types",
+   "recommended_actions",
+   "audited_by",
+   "audit_report",
+   "created_at"
+  ],
+  "compliance.FirewallViolations": [
+   "id",
+   "violation_date",
+   "violation_type",
+   "severity",
+   "user_id",
+   "user_email",
+   "user_role",
+   "data_type_accessed",
+   "data_type_id",
+   "violation_description",
+   "system_detected",
+   "detected_by",
+   "incident_status",
+   "investigated_by",
+   "investigation_notes",
+   "resolution_action",
+   "resolved_at",
+   "created_at",
+   "updated_at"
+  ],
+  "compliance.GeofenceEvents": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.Geofences": [
+   "id",
+   "created_at",
+   "updated_at",
+   "name",
+   "description",
+   "geofence_type"
+  ],
+  "compliance.GoldenShares": [
+   "id",
+   "created_at",
+   "updated_at",
+   "share_class",
+   "certificate_number",
+   "issue_date",
+   "holder_type",
+   "council_members",
+   "voting_power_reserved_matters",
+   "voting_power_ordinary_matters",
+   "redemption_value",
+   "dividend_rights",
+   "sunset_clause_active",
+   "sunset_clause_duration",
+   "consecutive_compliance_years",
+   "sunset_triggered_date",
+   "conversion_date",
+   "status",
+   "transferable"
+  ],
+  "compliance.GovernanceEvents": [
+   "id",
+   "updated_at",
+   "event_type",
+   "event_date",
+   "golden_share_id",
+   "reserved_matter_vote_id",
+   "mission_audit_id",
+   "title",
+   "description",
+   "impact",
+   "impact_description",
+   "stakeholders",
+   "notifications_sent",
+   "created_at",
+   "created_by"
+  ],
+  "compliance.IndigenousDataAccessLog": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.IndigenousDataSharingAgreements": [
+   "id",
+   "created_at",
+   "updated_at",
+   "band_council_id",
+   "partner_name",
+   "partner_type"
+  ],
+  "compliance.IndigenousMemberData": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.KeyHolderRegistry": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.LocationDeletionLog": [
+   "id",
+   "created_at",
+   "updated_at",
+   "deletion_type"
+  ],
+  "compliance.LocationTracking": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.LocationTrackingAudit": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.LocationTrackingConfig": [
+   "id",
+   "created_at",
+   "updated_at",
+   "location_tracking_enabled",
+   "max_retention_hours"
+  ],
+  "compliance.MissionAudits": [
+   "id",
+   "created_at",
+   "updated_at",
+   "audit_year",
+   "audit_period_start",
+   "audit_period_end",
+   "auditor_firm",
+   "auditor_name",
+   "auditor_certification",
+   "audit_date",
+   "union_revenue_percent",
+   "member_satisfaction_percent",
+   "data_violations",
+   "union_revenue_threshold",
+   "member_satisfaction_threshold",
+   "data_violations_threshold",
+   "union_revenue_pass",
+   "member_satisfaction_pass",
+   "data_violations_pass",
+   "overall_pass",
+   "total_revenue",
+   "union_revenue",
+   "member_survey_sample_size",
+   "member_survey_responses",
+   "data_violation_details",
+   "auditor_opinion",
+   "auditor_notes",
+   "corrective_actions",
+   "impacts_consecutive_compliance",
+   "consecutive_years_after_audit",
+   "audit_report_pdf_url",
+   "supporting_documents_urls"
+  ],
+  "compliance.PrivacyBreaches": [
+   "id",
+   "created_at",
+   "updated_at",
+   "breach_type"
+  ],
+  "compliance.ProvincialConsent": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.ProvincialDataHandling": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.ProvincialPrivacyConfig": [
+   "id",
+   "created_at",
+   "updated_at",
+   "province"
+  ],
+  "compliance.RecoveryTimeObjectives": [
+   "id",
+   "created_at",
+   "updated_at",
+   "system_component"
+  ],
+  "compliance.RecusalTracking": [
+   "id",
+   "created_at",
+   "updated_at",
+   "user_id"
+  ],
+  "compliance.ReservedMatterVotes": [
+   "id",
+   "created_at",
+   "updated_at",
+   "matter_type",
+   "title",
+   "description",
+   "proposed_by"
+  ],
+  "compliance.TraditionalKnowledgeRegistry": [
+   "id",
+   "created_at",
+   "updated_at",
+   "band_council_id",
+   "knowledge_type"
+  ],
+  "compliance.UnionOnlyDataTags": [
+   "id",
+   "updated_at",
+   "resource_type",
+   "resource_id",
+   "resource_name",
+   "union_only_flag",
+   "employer_access_blocked",
+   "classification_level",
+   "tagged_by",
+   "tagged_at",
+   "tag_reason",
+   "review_date",
+   "created_at"
+  ],
+  "core.AuditLogs": [
+   "id",
+   "created_at",
+   "updated_at",
+   "audit_id",
+   "organization_id",
+   "action",
+   "resource_type",
+   "resource_id",
+   "user_id",
+   "ip_address",
+   "user_agent",
+   "correlation_id",
+   "details",
+   "changes",
+   "content_hash",
+   "previous_hash"
+  ],
+  "core.IntegrationConfigs": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "core.IntegrationSyncLog": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.CommunicationChannels": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.MessageLog": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.MessageTemplates": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.PushDeliveries": [
+   "id",
+   "created_at",
+   "updated_at",
+   "notification_id"
+  ],
+  "notifications.PushDevices": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id",
+   "profile_id"
+  ],
+  "notifications.PushNotificationTemplates": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.PushNotifications": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.SmsCampaignRecipients": [
+   "id",
+   "created_at",
+   "updated_at",
+   "campaign_id"
+  ],
+  "notifications.SmsCampaigns": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.SmsConversations": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.SmsMessages": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.SmsOptOuts": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.SmsRateLimits": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ],
+  "notifications.SmsTemplates": [
+   "id",
+   "created_at",
+   "updated_at",
+   "organization_id"
+  ]
+ },
+ "excludedCredentials": {
+  "reason": "These columns were returned by the list endpoint at the time it was written. A credential is never returned.",
+  "columns": {
+   "compliance.BreakGlassActivations": [
+    "secret_shares"
+   ]
+  }
+ }
+}

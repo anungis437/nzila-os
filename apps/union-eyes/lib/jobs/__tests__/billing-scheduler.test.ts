@@ -35,11 +35,16 @@ const m = vi.hoisted(() => {
     queue,
     chain,
     withSystemContext: vi.fn(),
+    activeSystemDb: vi.fn(),
     generateBillingCycle: vi.fn(),
     getFromEmail: vi.fn(),
     notificationServiceSend: vi.fn(),
   };
 });
+
+vi.mock('@/db/system-context-storage', () => ({
+  getActiveSystemDb: () => m.activeSystemDb(),
+}));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => {
@@ -93,6 +98,7 @@ describe('BillingScheduler — full SYSTEM execution boundary (organization_bill
     vi.clearAllMocks();
     m.calls.length = 0;
     m.queue.length = 0;
+    m.activeSystemDb.mockReturnValue(undefined);
     m.generateBillingCycle.mockResolvedValue({ transactionsCreated: 1, totalAmount: 10 });
     m.notificationServiceSend.mockResolvedValue({ success: true });
   });
@@ -136,6 +142,34 @@ describe('BillingScheduler — full SYSTEM execution boundary (organization_bill
     await BillingScheduler.manualTrigger('weekly');
 
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+  });
+
+  it('lends the run the transaction of a caller that already runs as the system role: no second one is opened on another connection', async () => {
+    m.activeSystemDb.mockReturnValue({});
+    m.queue.push([]); // enumeration: no configured orgs
+    m.queue.push([]); // fallback: no active orgs either
+
+    const { BillingScheduler } = await loadModule();
+    const result = await BillingScheduler.manualTrigger('monthly');
+
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(result.totalOrganizations).toBe(0);
+  });
+
+  it('looks the notification recipients up by the organization uuid: the members table holds no organization slug', async () => {
+    const { eq, inArray } = await import('drizzle-orm');
+    m.queue.push([{ organizationId: 'org-1', organizationName: 'Org One', frequency: 'monthly', enabled: true }]);
+    m.queue.push([{ email: 'org1@example.com' }]);
+    m.queue.push([{ email: 'admin@example.com' }]);
+
+    const { BillingScheduler } = await loadModule();
+    await BillingScheduler.runScheduledBilling('monthly');
+
+    expect(vi.mocked(inArray).mock.calls.map((call) => call[1])).toEqual([
+      ['admin', 'super_admin', 'billing_manager', 'billing_specialist'],
+    ]);
+    expect(eq).toHaveBeenCalledWith('organizationId', 'org-1');
+    expect(m.notificationServiceSend.mock.calls.map(([message]) => message.recipientEmail).sort()).toEqual(['admin@example.com', 'org1@example.com']);
   });
 });
 

@@ -13,7 +13,7 @@ import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
+export const POST = withApi(
   {
     auth: { cron: true },
     openapi: {

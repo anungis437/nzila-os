@@ -12,6 +12,7 @@ import { drizzle as drizzleMssql } from 'drizzle-orm/node-postgres';
 import postgres from 'postgres';
 import { Pool } from 'pg';
 import * as schema from '@/db/schema';
+import { serializeRawDates } from '@/db/driver-dates';
 import { eq, and, or, sql, inArray, isNull, desc, asc, ilike, gte, lte, type AnyColumn } from 'drizzle-orm';
 import { safeColumnName } from '@/lib/safe-sql-identifiers';
 
@@ -94,7 +95,10 @@ function createPostgresClient(config: DatabaseConfig): UnifiedDatabaseClient {
     prepare: false,
   });
 
-  return drizzlePg(client, { schema }) as unknown as UnifiedDatabaseClient;
+  const db = drizzlePg(client, { schema });
+  // after drizzle(): drizzle installs its serializers at construction
+  serializeRawDates(client);
+  return db as unknown as UnifiedDatabaseClient;
 }
 
 /**

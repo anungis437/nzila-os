@@ -151,10 +151,10 @@ describe('20260921 — rollback restores round58 geometry', () => {
 });
 
 describe('20260921 — authority registry alignment', () => {
-  it('workbooks entry requires system SELECT + UPDATE', () => {
+  it('workbooks entry requires system SELECT + INSERT + UPDATE (the public start route creates the unclaimed workbook under the system context)', () => {
     const entry = storageAuthorityManifest.find((e) => e.table === 'workbooks');
     expect(entry, 'workbooks: no manifest entry').toBeTruthy();
-    expect(entry!.requiredSystemPrivileges).toEqual(['SELECT', 'UPDATE']);
+    expect(entry!.requiredSystemPrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE']);
     expect(entry!.requiredRuntimePrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE']);
   });
 

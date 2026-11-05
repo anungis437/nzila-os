@@ -21,6 +21,7 @@ export const CaseAuditEvent = {
   CASE_ACCESS_UPDATED: 'case.access_updated',
   CASE_ACCESS_REVOKED: 'case.access_revoked',
   CASE_ACCESS_EXPIRED: 'case.access_expired',
+  CASE_ACCESS_DENIED: 'case.access_denied',
   CASE_REASSIGNED: 'case.reassigned',
   CASE_NOTE_ADDED: 'case.note_added',
   CASE_ATTACHMENT_UPLOADED: 'case.attachment_uploaded',

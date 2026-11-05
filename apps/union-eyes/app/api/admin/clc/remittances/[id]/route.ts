@@ -1,18 +1,17 @@
 /**
- * CRUD item route for organizationMembers
+ * CLC / affiliate remittance item — NOT_IMPLEMENTED. This route was bound to
+ * organizationMembers (including PATCH/DELETE of membership rows). Answers
+ * HTTP 501.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { organizationMembers } from '@/db/schema';
+import { retiredFinancialRoute } from '@/lib/finance/retired-financial-route';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, PATCH, DELETE } = crudRoutes({
-  table: organizationMembers,
-  pk: 'id',
-  tags: ["Members"],
-  orgScoped: true,
-  itemRoute: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, PATCH, DELETE };
+const handler = retiredFinancialRoute(
+  '/api/admin/clc/remittances/:id',
+  'affiliate-remittances',
+  'No qualified affiliate (per-capita) remittance record store is bound to this route. It no longer reads or writes membership records.',
+);
+export const GET = handler;
+export const PATCH = handler;
+export const DELETE = handler;

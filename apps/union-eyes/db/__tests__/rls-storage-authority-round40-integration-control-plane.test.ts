@@ -74,13 +74,14 @@ const EXPECTED_AUTHORITY = {
   // context. A cross-tenant rule IDOR was also found and fixed this round.
   // See rls-storage-authority-manifest reference-latent.ts allocation_rules entry.
   allocation_rules: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'NONE'],
-  clause_comparisons: ['TENANT_RLS_REQUIRED', ['INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
+  // CTX-3 census: the clause comparison is stored with INSERT ... RETURNING, which also needs SELECT (the old shape pinned INSERT alone, which a real runtime role refuses).
+  clause_comparisons: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   clc_per_capita_benchmarks: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   currency_exchange_rates: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   data_aggregation_consent: ['TENANT_RLS_REQUIRED', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   document_folders: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   external_communication_channels: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
-  external_communication_users: ['TENANT_RLS_REQUIRED', ['INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
+  external_communication_users: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   external_document_libraries: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   external_document_sites: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   external_insurance_claims: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
@@ -94,7 +95,8 @@ const EXPECTED_AUTHORITY = {
   // PolicyEngine.evaluate() now requires and filters by organizationId. See
   // rls-storage-authority-round41-direct-org-runtime-batch.test.ts.
   policy_rules: ['TENANT_RLS_REQUIRED', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'NONE'],
-  recognition_programs: ['TENANT_RLS_REQUIRED', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
+  // UE-CONV-H-023: the admin create/update actions (actions/rewards-actions.ts) run program-service as the runtime role, so INSERT and UPDATE are declared.
+  recognition_programs: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   retention_policies: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   // CORRECTED round 44: a real cross-org platform-admin consumer was found
   // (raw SQL in 3 dashboard pages) that round 40's scan missed. See

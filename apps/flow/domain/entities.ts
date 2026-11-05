@@ -25,9 +25,9 @@ export const QuoteStatus = z.enum([
 export type QuoteStatus = z.infer<typeof QuoteStatus>
 
 export const QuoteSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
-  customer_id: z.string().uuid(),
+  customer_id: z.guid(),
   status: QuoteStatus,
   title: z.string().min(1).max(500),
   total_amount: z.number().min(0),
@@ -89,10 +89,10 @@ export const FulfillmentStatus = z.enum([
 export type FulfillmentStatus = z.infer<typeof FulfillmentStatus>
 
 export const OrderSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
-  quote_id: z.string().uuid().nullable().default(null),
-  customer_id: z.string().uuid(),
+  quote_id: z.guid().nullable().default(null),
+  customer_id: z.guid(),
   status: OrderStatus,
   total_amount: z.number().min(0),
   currency: Currency,
@@ -109,7 +109,7 @@ export type Order = z.infer<typeof OrderSchema>
 // ── Customer ───────────────────────────────────────────────────────────────
 
 export const CustomerSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
   name: z.string().min(1).max(300),
   email: z.string().email().max(320),
@@ -124,7 +124,7 @@ export type Customer = z.infer<typeof CustomerSchema>
 // ── Product ────────────────────────────────────────────────────────────────
 
 export const ProductSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
   name: z.string().min(1).max(500),
   sku: z.string().max(100).nullable().default(null),
@@ -141,7 +141,7 @@ export type Product = z.infer<typeof ProductSchema>
 // ── Vendor ─────────────────────────────────────────────────────────────────
 
 export const VendorSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
   name: z.string().min(1).max(300),
   contact_email: z.string().email().max(320).nullable().default(null),
@@ -169,10 +169,10 @@ export const PurchaseOrderStatus = z.enum([
 export type PurchaseOrderStatus = z.infer<typeof PurchaseOrderStatus>
 
 export const PurchaseOrderSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
-  order_id: z.string().uuid(),
-  vendor_id: z.string().uuid(),
+  order_id: z.guid(),
+  vendor_id: z.guid(),
   status: PurchaseOrderStatus,
   total_amount: z.number().min(0),
   currency: Currency,
@@ -197,11 +197,11 @@ export const ProductionJobStatus = z.enum([
 export type ProductionJobStatus = z.infer<typeof ProductionJobStatus>
 
 export const ProductionJobSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
-  order_id: z.string().uuid(),
-  purchase_order_id: z.string().uuid().nullable().default(null),
-  vendor_id: z.string().uuid(),
+  order_id: z.guid(),
+  purchase_order_id: z.guid().nullable().default(null),
+  vendor_id: z.guid(),
   status: ProductionJobStatus,
   proof_url: z.string().url().nullable().default(null),
   estimated_completion: z.coerce.date().nullable().default(null),
@@ -226,9 +226,9 @@ export const ShipmentStatus = z.enum([
 export type ShipmentStatus = z.infer<typeof ShipmentStatus>
 
 export const ShipmentSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
   carrier: z.string().max(200).nullable().default(null),
   tracking_number: z.string().max(200).nullable().default(null),
   tracking_url: z.string().url().nullable().default(null),
@@ -252,9 +252,9 @@ export const PaymentMethod = z.enum([
 export type PaymentMethod = z.infer<typeof PaymentMethod>
 
 export const PaymentSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
   amount: z.number().min(0),
   currency: Currency,
   method: PaymentMethod,
@@ -276,10 +276,10 @@ export const InvoiceStatus = z.enum([
 export type InvoiceStatus = z.infer<typeof InvoiceStatus>
 
 export const InvoiceSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
-  order_id: z.string().uuid(),
-  customer_id: z.string().uuid(),
+  order_id: z.guid(),
+  customer_id: z.guid(),
   status: InvoiceStatus,
   amount: z.number().min(0),
   currency: Currency,
@@ -293,13 +293,13 @@ export type Invoice = z.infer<typeof InvoiceSchema>
 // ── Audit Event ────────────────────────────────────────────────────────────
 
 export const AuditEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   org_id: z.string().min(1),
   actor_id: z.string().min(1),
   entity_type: z.string().min(1),
-  entity_id: z.string().uuid(),
+  entity_id: z.guid(),
   action: z.string().min(1),
-  metadata: z.record(z.unknown()).nullable().default(null),
+  metadata: z.record(z.string(), z.unknown()).nullable().default(null),
   timestamp: z.coerce.date(),
 })
 export type AuditEvent = z.infer<typeof AuditEventSchema>

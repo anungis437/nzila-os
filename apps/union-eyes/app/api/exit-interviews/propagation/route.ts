@@ -13,58 +13,63 @@
  * Entitlement: union_knowledge_suite
  */
 
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
 import { buildDependencyPropagationMap } from '@/lib/knowledge-transfer/propagation';
 
 export const dynamic = 'force-dynamic';
 
+const querySchema = z.object({
+  nodeId: z.string().trim().min(1).max(200).optional(),
+  analysisType: z.enum(['downstream', 'upstream', 'coupling', 'full']).default('full'),
+}).strict();
+
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     entitlement: 'union_knowledge_suite',
   },
   async ({ organizationId, request }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
     const { searchParams } = new URL(request.url);
-    const nodeId = searchParams.get('nodeId');
-    const analysisType = searchParams.get('analysisType') || 'full';
+    const parsed = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
+    if (!parsed.success) throw ApiError.badRequest('nodeId must be text and analysisType one of downstream, upstream, coupling or full');
+    const { nodeId, analysisType } = parsed.data;
 
-    const propagationMap = await buildDependencyPropagationMap(organizationId!);
+    const propagationMap = await buildDependencyPropagationMap(organizationId);
 
     if (!propagationMap.nodes.length) {
-      return {
-        data: propagationMap,
-        meta: { message: 'No published interviews found to analyze' },
-      };
+      if (nodeId) throw ApiError.notFound('node', nodeId);
+      return { ...propagationMap, message: 'No published interviews found to analyze' };
     }
 
     // Filter to specific node if requested
     if (nodeId) {
       const node = propagationMap.nodes.find((n) => n.id === nodeId);
       if (!node) {
-        throw new Error('Node not found');
+        throw ApiError.notFound('node', nodeId);
       }
 
       const downstreamImpact = propagationMap.downstreamImpacts.find((d) => d.nodeId === nodeId);
       const upstreamDeps = propagationMap.upstreamDependencies.find((u) => u.nodeId === nodeId);
       const coupling = propagationMap.couplingAnalysis.find((c) => c.nodeId === nodeId);
 
+      // The node view honours analysisType too: each type returns only its own section next to the node.
       return {
-        data: {
-          node,
-          downstreamImpact,
-          upstreamDependencies: upstreamDeps,
-          couplingAnalysis: coupling,
-        },
+        node,
+        downstreamImpact: analysisType === 'upstream' || analysisType === 'coupling' ? undefined : downstreamImpact,
+        upstreamDependencies: analysisType === 'downstream' || analysisType === 'coupling' ? undefined : upstreamDeps,
+        couplingAnalysis: analysisType === 'downstream' || analysisType === 'upstream' ? undefined : coupling,
       };
     }
 
     // Return full map, potentially filtered by analysis type
-    const filtered = {
+    // Each analysis type returns its own section: coupling no longer returns the downstream and upstream lists as well.
+    return {
       ...propagationMap,
-      downstreamImpacts: analysisType === 'upstream' ? [] : propagationMap.downstreamImpacts,
-      upstreamDependencies: analysisType === 'downstream' ? [] : propagationMap.upstreamDependencies,
+      downstreamImpacts: analysisType === 'upstream' || analysisType === 'coupling' ? [] : propagationMap.downstreamImpacts,
+      upstreamDependencies: analysisType === 'downstream' || analysisType === 'coupling' ? [] : propagationMap.upstreamDependencies,
+      couplingAnalysis: analysisType === 'downstream' || analysisType === 'upstream' ? [] : propagationMap.couplingAnalysis,
     };
-
-    return { data: filtered };
   },
 );

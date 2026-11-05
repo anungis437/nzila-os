@@ -17,7 +17,7 @@ export const CategoryCapSchema = z.object({
 })
 
 export const OrgBudgetPolicySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   dailyBudgetUsd: z.number().nonnegative(),
   monthlyBudgetUsd: z.number().nonnegative(),
   categoryCaps: z.array(CategoryCapSchema).optional(),

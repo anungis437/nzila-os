@@ -364,12 +364,12 @@ export const ControlPlaneContextSchema = z.object({
   requestId: z.string().min(1),
   timestamp: z.date(),
   reason: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const ExecuteWorkflowSchema = z.object({
   workflowId: z.string().min(1),
-  input: z.record(z.unknown()),
+  input: z.record(z.string(), z.unknown()),
   context: ControlPlaneContextSchema,
 })
 export type ExecuteWorkflowInput = z.infer<typeof ExecuteWorkflowSchema>

@@ -12,6 +12,6 @@ export const GET = withApi(
     },
   },
   async () => {
-    return { data: await getCbaIntelOperationalHealth() };
+    return await getCbaIntelOperationalHealth();
   },
 );

@@ -1,7 +1,7 @@
 /**
  * test action endpoint for organizationMembers
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +14,8 @@ export const POST = withApi(
       description: 'Performs the test action.',
     },
   },
-  async ({ request }) => {
-    await request.json().catch(() => ({}));
-    return { action: 'test', status: 'accepted' };
+  async () => {
+    throw ApiError.notImplemented('Alert test execution is not implemented: no alert was evaluated or delivered.');
   },
 );
 
@@ -30,6 +29,6 @@ export const GET = withApi(
     },
   },
   async () => {
-    return [];
+    throw ApiError.notImplemented('Alert test execution is not implemented: there is no execution status to report.');
   },
 );

@@ -30,10 +30,6 @@ This implementation establishes a foundation for multi-processor support, elimin
   - Payment intents, refunds, customers, payment methods
   - Webhook verification and processing
   
-- ✅ **Whop Processor** ([`processors/whop-processor.ts`](./processors/whop-processor.ts))
-  - Webhook-focused implementation
-  - Documents limitations (no direct payment creation)
-  
 - 🚧 **Future Processors** ([`processors/future-processors.ts`](./processors/future-processors.ts))
   - PayPal, Square, Manual processors
   - Structure in place, ready for implementation
@@ -110,7 +106,6 @@ export async function register() {
    - File: [`app/api/portal/dues/pay/route.ts`](../../app/api/portal/dues/pay/route.ts)
    - Priority: HIGH (member-facing, high usage)
    - Estimated time: 30 minutes
-   - Reference: [`examples/refactored-dues-payment-route.ts`](./examples/refactored-dues-payment-route.ts)
 
 2. **Stripe Webhook Handler**
    - File: [`app/api/stripe/webhooks/route.ts`](../../app/api/stripe/webhooks/route.ts)
@@ -427,13 +422,12 @@ try {
 - ❌ Difficult to add PayPal/Square
 
 ### After Implementation
-- ✅ Abstraction layer supports 5+ processors
+- ✅ Abstraction layer supports multiple processors
 - ✅ Stripe fully implemented via abstraction
-- ✅ Whop webhook processing via abstraction
 - ✅ Ready to add PayPal in 1 week
 - ✅ Ready to add Square in 1 week
 - ✅ Database schema supports multi-processor
-- ✅ Comprehensive documentation and examples
+- ✅ Comprehensive documentation
 
 ---
 
@@ -515,5 +509,4 @@ The Payment Processor Abstraction Layer is **production-ready** and provides:
 
 Refer to:
 - [Main README](./README.md) - Complete documentation
-- [Refactored Example](./examples/refactored-dues-payment-route.ts) - Working code example
 - [Stripe Implementation](./processors/stripe-processor.ts) - Full processor example

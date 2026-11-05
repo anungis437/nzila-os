@@ -34,9 +34,10 @@ class BoardPacketsViewSet(viewsets.ModelViewSet):
     model only maps `title` — it does not model `organization_id`, which the
     Round58 prerequisite migration makes NOT NULL on the physical
     `board_packets` table. No legitimate Django consumer exists anywhere in
-    the app; the canonical writer is app/api/governance/board-packets/route.ts
-    (and lib/services/board-packet-generator.ts), which already derives and
-    writes organizationId. Deny unconditionally until a real consumer with
+    the app; the canonical writers are app/api/governance/board-packets/route.ts
+    and lib/governance/board-packet-service.ts (create, edit, finalize,
+    archive) and lib/services/board-packet-generator.ts (distribution), which
+    already derive and write organizationId. Deny unconditionally until a real consumer with
     proven tenant isolation exists.
     """
     queryset = BoardPackets.objects.all()

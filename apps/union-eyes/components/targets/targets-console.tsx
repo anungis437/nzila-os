@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   BarChart3,
@@ -55,50 +56,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/lib/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
+import { ApiShapeError, readApiError } from '@/lib/client/api-envelope';
+import { readTargetsSummary, type KPITarget, type TargetSummary } from './targets-readers';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-interface KPITarget {
-  id: string;
-  name: string;
-  description: string | null;
-  metricType: string;
-  dataSource: string;
-  calculation: Record<string, unknown>;
-  visualizationType: string;
-  targetValue: string | null;
-  warningThreshold: string | null;
-  criticalThreshold: string | null;
-  alertEnabled: boolean | null;
-  alertRecipients: string[] | null;
-  refreshInterval: number | null;
-  isActive: boolean | null;
-  displayOrder: number | null;
-  createdAt: string;
-  updatedAt: string;
-  // enriched by summary endpoint
-  health?: 'on_track' | 'at_risk' | 'critical' | 'no_data';
-  currentValue?: number | null;
-  progress?: number | null;
-  trend?: string | null;
-}
-
-interface TargetSummary {
-  total: number;
-  onTrack: number;
-  atRisk: number;
-  critical: number;
-  noData: number;
-  bySource: Record<string, number>;
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 const HEALTH_CONFIG = {
   on_track: { label: 'On Track', variant: 'default' as const, icon: CheckCircle2, color: 'text-green-600' },
   at_risk: { label: 'At Risk', variant: 'secondary' as const, icon: AlertTriangle, color: 'text-yellow-600' },
@@ -106,6 +68,12 @@ const HEALTH_CONFIG = {
   no_data: { label: 'No Data', variant: 'outline' as const, icon: Minus, color: 'text-muted-foreground' },
 };
 
+const LOAD_FAILED = 'Unable to load performance targets.';
+const DASH = '—';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 const VIZ_ICONS: Record<string, typeof BarChart3> = {
   line: LineChart,
   bar: BarChart3,
@@ -129,6 +97,11 @@ function TrendIcon({ trend }: { trend: string | null | undefined }) {
   return <Minus className="h-4 w-4 text-muted-foreground" />;
 }
 
+/** The period end the value belongs to, as the calendar day it was stored for, whatever zone the viewer is in. */
+function formatAsOf(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+}
+
 // ---------------------------------------------------------------------------
 // Create Target Form
 // ---------------------------------------------------------------------------
@@ -145,39 +118,44 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
     targetValue: '',
     warningThreshold: '',
     criticalThreshold: '',
-    alertEnabled: false,
   });
 
   const handleSubmit = async () => {
-    if (!form.name || !form.metricType) {
+    if (!form.name.trim() || !form.metricType.trim()) {
       toast({ title: 'Validation', description: 'Name and metric type are required.', variant: 'destructive' });
       return;
     }
+    const numbers = [form.targetValue, form.warningThreshold, form.criticalThreshold].map((text) => (text.trim() === '' ? undefined : Number(text)));
+    if (numbers.some((value) => value !== undefined && !Number.isFinite(value))) {
+      toast({ title: 'Validation', description: 'The target and its thresholds must be numbers.', variant: 'destructive' });
+      return;
+    }
+    const [targetValue, warningThreshold, criticalThreshold] = numbers;
     setLoading(true);
     try {
+      // The route stores no alert: nothing evaluates a threshold and sends one, so none is offered or requested.
       const res = await fetch('/api/targets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: form.name,
-          description: form.description || undefined,
-          metricType: form.metricType,
+          name: form.name.trim(),
+          description: form.description.trim() || undefined,
+          metricType: form.metricType.trim(),
           dataSource: form.dataSource,
           calculation: { aggregation: 'sum' },
           visualizationType: form.visualizationType,
-          targetValue: form.targetValue ? parseFloat(form.targetValue) : undefined,
-          warningThreshold: form.warningThreshold ? parseFloat(form.warningThreshold) : undefined,
-          criticalThreshold: form.criticalThreshold ? parseFloat(form.criticalThreshold) : undefined,
-          alertEnabled: form.alertEnabled,
+          targetValue,
+          warningThreshold,
+          criticalThreshold,
         }),
       });
-      if (!res.ok) throw new Error('Failed to create target');
-      toast({ title: 'Target Created', description: `"${form.name}" has been created.` });
+      if (!res.ok) throw new Error(await readApiError(res, 'Failed to create target.'));
+      toast({ title: 'Target Created', description: `"${form.name.trim()}" has been created.` });
       setOpen(false);
-      setForm({ name: '', description: '', metricType: '', dataSource: 'claims', visualizationType: 'gauge', targetValue: '', warningThreshold: '', criticalThreshold: '', alertEnabled: false });
+      setForm({ name: '', description: '', metricType: '', dataSource: 'claims', visualizationType: 'gauge', targetValue: '', warningThreshold: '', criticalThreshold: '' });
       onCreated();
-    } catch {
-      toast({ title: 'Error', description: 'Failed to create target.', variant: 'destructive' });
+    } catch (failure) {
+      toast({ title: 'Error', description: failure instanceof TypeError ? 'Failed to create target.' : (failure as Error).message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -193,7 +171,7 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
       <DialogContent className="sm:max-w-150">
         <DialogHeader>
           <DialogTitle>Create Performance Target</DialogTitle>
-          <DialogDescription>Define a measurable KPI with thresholds and alerts.</DialogDescription>
+          <DialogDescription>Define a measurable KPI with a target value and thresholds.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">
@@ -204,6 +182,7 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
             <div className="space-y-2">
               <Label htmlFor="metricType">Metric Type *</Label>
               <Input id="metricType" value={form.metricType} onChange={(e) => setForm({ ...form, metricType: e.target.value })} placeholder="e.g. resolution_rate" />
+              <p className="text-xs text-muted-foreground">The target&apos;s value is the latest stored metric of this type. With none, it shows No Data.</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -222,6 +201,7 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
                   <SelectItem value="custom_query">Custom Query</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">Groups targets. It does not change how the value is read.</p>
             </div>
             <div className="space-y-2">
               <Label>Visualization</Label>
@@ -251,10 +231,6 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
               <Input id="critical" type="number" value={form.criticalThreshold} onChange={(e) => setForm({ ...form, criticalThreshold: e.target.value })} placeholder="50" />
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch id="alerts" checked={form.alertEnabled} onCheckedChange={(v) => setForm({ ...form, alertEnabled: v })} />
-            <Label htmlFor="alerts">Enable threshold alerts</Label>
-          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
@@ -268,7 +244,7 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
 // ---------------------------------------------------------------------------
 // Column definitions
 // ---------------------------------------------------------------------------
-function buildColumns(onToggle: (id: string, active: boolean) => void): ColumnDef<KPITarget, unknown>[] {
+function buildColumns(onToggle: (id: string, active: boolean) => void, busyId: string | null, locale: string): ColumnDef<KPITarget, unknown>[] {
   return [
     {
       accessorKey: 'name',
@@ -302,7 +278,7 @@ function buildColumns(onToggle: (id: string, active: boolean) => void): ColumnDe
       header: 'Progress',
       cell: ({ row }) => {
         const p = row.original.progress;
-        if (p === null || p === undefined) return <span className="text-muted-foreground text-sm">—</span>;
+        if (p === null) return <span className="text-muted-foreground text-sm">{DASH}</span>;
         return (
           <div className="flex items-center gap-2 min-w-30">
             <Progress value={Math.min(p, 100)} className="h-2 flex-1" />
@@ -318,10 +294,14 @@ function buildColumns(onToggle: (id: string, active: boolean) => void): ColumnDe
         const val = row.original.currentValue;
         const tv = row.original.targetValue ? parseFloat(row.original.targetValue) : null;
         return (
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-sm">{val !== null && val !== undefined ? val.toLocaleString() : '—'}</span>
-            {tv !== null && <span className="text-xs text-muted-foreground">/ {tv.toLocaleString()}</span>}
-            <TrendIcon trend={row.original.trend} />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm">{val !== null ? val.toLocaleString() : DASH}</span>
+              {tv !== null && <span className="text-xs text-muted-foreground">/ {tv.toLocaleString()}</span>}
+              <TrendIcon trend={row.original.trend} />
+            </div>
+            {row.original.asOf && <div className="text-[11px] text-muted-foreground">as of {formatAsOf(row.original.asOf, locale)}</div>}
+            {row.original.stale && <div className="text-[11px] text-muted-foreground">Latest stored value is too old to judge</div>}
           </div>
         );
       },
@@ -330,8 +310,7 @@ function buildColumns(onToggle: (id: string, active: boolean) => void): ColumnDe
       accessorKey: 'health',
       header: 'Health',
       cell: ({ getValue }) => {
-        const h = (getValue() as string) || 'no_data';
-        const cfg = HEALTH_CONFIG[h as keyof typeof HEALTH_CONFIG] ?? HEALTH_CONFIG.no_data;
+        const cfg = HEALTH_CONFIG[getValue() as keyof typeof HEALTH_CONFIG];
         const Icon = cfg.icon;
         return (
           <Badge variant={cfg.variant} className="gap-1">
@@ -346,7 +325,8 @@ function buildColumns(onToggle: (id: string, active: boolean) => void): ColumnDe
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onToggle(row.original.id, !(row.original.isActive ?? true))}
+          disabled={busyId === row.original.id}
+          onClick={() => onToggle(row.original.id, !row.original.isActive)}
         >
           {row.original.isActive ? 'Deactivate' : 'Activate'}
         </Button>
@@ -359,48 +339,55 @@ function buildColumns(onToggle: (id: string, active: boolean) => void): ColumnDe
 // Main console
 // ---------------------------------------------------------------------------
 export function TargetsConsole() {
+  const locale = useLocale();
   const [summary, setSummary] = useState<TargetSummary | null>(null);
   const [targets, setTargets] = useState<KPITarget[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const { toast } = useToast();
-  const toastRef = useRef(toast);
-  toastRef.current = toast;
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch('/api/targets/summary');
-      if (!res.ok) throw new Error('Failed to load targets');
-      const json = await res.json();
-      setSummary(json.data?.summary ?? null);
-      setTargets(json.data?.targets ?? []);
-    } catch {
-      toastRef.current({ title: 'Error', description: 'Failed to load targets.', variant: 'destructive' });
+      if (!res.ok) throw new Error(await readApiError(res, LOAD_FAILED));
+      const loaded = readTargetsSummary(await res.json());
+      setSummary(loaded.summary);
+      setTargets(loaded.targets);
+    } catch (failure) {
+      setSummary(null);
+      setTargets([]);
+      setLoadError(failure instanceof ApiShapeError || failure instanceof TypeError || failure instanceof SyntaxError ? LOAD_FAILED : (failure as Error).message);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   const handleToggle = async (id: string, isActive: boolean) => {
+    setBusyId(id);
     try {
       const res = await fetch(`/api/targets/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive }),
       });
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) throw new Error(await readApiError(res, 'Failed to update target.'));
       toast({ title: isActive ? 'Activated' : 'Deactivated' });
-      loadData();
-    } catch {
-      toast({ title: 'Error', description: 'Failed to update target.', variant: 'destructive' });
+      await loadData();
+    } catch (failure) {
+      toast({ title: 'Error', description: failure instanceof TypeError ? 'Failed to update target.' : (failure as Error).message, variant: 'destructive' });
+    } finally {
+      setBusyId(null);
     }
   };
 
-  const columns = buildColumns(handleToggle);
+  const columns = buildColumns(handleToggle, busyId, locale);
 
   // Radial gauge data for summary
   const gaugeData = summary
@@ -428,16 +415,39 @@ export function TargetsConsole() {
     );
   }
 
+  const header = (
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Performance Targets</h1>
+        <p className="text-muted-foreground">Define, track, and manage organizational KPIs and targets.</p>
+      </div>
+      <CreateTargetDialog onCreated={loadData} />
+    </div>
+  );
+
+  if (loadError !== null || summary === null) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <Card role="alert" className="border-2 border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-red-600" />
+              <h3 className="text-xl font-semibold mb-2 text-red-900">Error Loading Targets</h3>
+              <p className="text-red-800 mb-4">{loadError ?? LOAD_FAILED}</p>
+              <Button variant="outline" onClick={() => void loadData()}>
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Performance Targets</h1>
-          <p className="text-muted-foreground">Define, track, and manage organizational KPIs and targets.</p>
-        </div>
-        <CreateTargetDialog onCreated={loadData} />
-      </div>
+      {header}
 
       {/* Summary cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -447,8 +457,8 @@ export function TargetsConsole() {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.total ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Active KPI configurations</p>
+            <div className="text-2xl font-bold">{summary.total}</div>
+            <p className="text-xs text-muted-foreground">Configured KPI targets, active or not</p>
           </CardContent>
         </Card>
         <Card>
@@ -457,7 +467,7 @@ export function TargetsConsole() {
             <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{summary?.onTrack ?? 0}</div>
+            <div className="text-2xl font-bold text-green-600">{summary.onTrack}</div>
             <p className="text-xs text-muted-foreground">Meeting or exceeding targets</p>
           </CardContent>
         </Card>
@@ -467,8 +477,8 @@ export function TargetsConsole() {
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{summary?.atRisk ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Below warning threshold</p>
+            <div className="text-2xl font-bold text-yellow-600">{summary.atRisk}</div>
+            <p className="text-xs text-muted-foreground">Past the warning threshold</p>
           </CardContent>
         </Card>
         <Card>
@@ -477,8 +487,8 @@ export function TargetsConsole() {
             <XCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{summary?.critical ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Below critical threshold</p>
+            <div className="text-2xl font-bold text-red-600">{summary.critical}</div>
+            <p className="text-xs text-muted-foreground">Past the critical threshold</p>
           </CardContent>
         </Card>
       </div>
@@ -497,7 +507,7 @@ export function TargetsConsole() {
             <Card>
               <CardHeader>
                 <CardTitle>Health Distribution</CardTitle>
-                <CardDescription>Target health across all active KPIs</CardDescription>
+                <CardDescription>Target health across all configured targets</CardDescription>
               </CardHeader>
               <CardContent>
                 {gaugeData.length > 0 ? (
@@ -525,7 +535,7 @@ export function TargetsConsole() {
             <Card>
               <CardHeader>
                 <CardTitle>Targets by Source</CardTitle>
-                <CardDescription>Distribution across data domains</CardDescription>
+                <CardDescription>How the targets are grouped</CardDescription>
               </CardHeader>
               <CardContent>
                 {sourceData.length > 0 ? (
@@ -556,7 +566,7 @@ export function TargetsConsole() {
             <Card>
               <CardHeader>
                 <CardTitle>Needs Attention</CardTitle>
-                <CardDescription>Targets below their warning or critical thresholds</CardDescription>
+                <CardDescription>Targets past their warning or critical thresholds</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -564,7 +574,7 @@ export function TargetsConsole() {
                     .filter((t) => t.health === 'critical' || t.health === 'at_risk')
                     .slice(0, 5)
                     .map((t) => {
-                      const cfg = HEALTH_CONFIG[t.health!];
+                      const cfg = HEALTH_CONFIG[t.health];
                       const Icon = cfg.icon;
                       return (
                         <div key={t.id} className="flex items-center justify-between p-3 rounded-lg border">
@@ -580,10 +590,10 @@ export function TargetsConsole() {
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <div className="font-mono text-sm">
-                                {t.currentValue?.toLocaleString() ?? '—'}
-                                <span className="text-muted-foreground"> / {t.targetValue ? parseFloat(t.targetValue).toLocaleString() : '—'}</span>
+                                {t.currentValue !== null ? t.currentValue.toLocaleString() : DASH}
+                                <span className="text-muted-foreground"> / {t.targetValue ? parseFloat(t.targetValue).toLocaleString() : DASH}</span>
                               </div>
-                              <div className="text-xs text-muted-foreground">{t.progress ?? 0}% complete</div>
+                              <div className="text-xs text-muted-foreground">{t.progress === null ? DASH : `${t.progress}% complete`}</div>
                             </div>
                             <TrendIcon trend={t.trend} />
                           </div>

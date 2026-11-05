@@ -1,13 +1,5 @@
-import { requireUser } from "@/lib/api-auth-guard";
-import { db } from "@/db";
-import {
-  employerPayrollRuns,
-  employerPayrollRunItems,
-  employerExecutionReplays,
-  employerExecutionComplianceEvents,
-  employerExecutionArtifacts,
-} from "@/db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { requireOrganizationScope } from "@/lib/page-data/organization-scope";
+import { loadPayrollRunDetail } from "@/lib/employer-execution/page-reads";
 import { PayrollRunTracePanel, ReplayDiffViewer } from "@/components/employer-execution";
 import { getTranslations } from "next-intl/server";
 
@@ -21,57 +13,13 @@ export default async function EmployerExecutionPayrollRunDetailPage({
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: "employerPayrollRunDetailPage" });
 
-  const context = await requireUser();
-  const organizationId = context.organizationId;
+  const { organizationId } = await requireOrganizationScope();
 
-  const [run] = await db
-    .select()
-    .from(employerPayrollRuns)
-    .where(and(eq(employerPayrollRuns.organizationId, organizationId), eq(employerPayrollRuns.id, id)))
-    .limit(1);
-
-  if (!run) {
+  const detail = await loadPayrollRunDetail(organizationId, id);
+  if (!detail) {
     return <div className="p-6 text-sm text-muted-foreground">{t("notFound")}</div>;
   }
-
-  const items = await db
-    .select()
-    .from(employerPayrollRunItems)
-    .where(and(eq(employerPayrollRunItems.organizationId, organizationId), eq(employerPayrollRunItems.payrollRunId, run.id)));
-
-  const [latestReplay] = await db
-    .select()
-    .from(employerExecutionReplays)
-    .where(
-      and(
-        eq(employerExecutionReplays.organizationId, organizationId),
-        eq(employerExecutionReplays.sourcePayrollRunId, run.id),
-      ),
-    )
-    .orderBy(desc(employerExecutionReplays.createdAt))
-    .limit(1);
-
-  const complianceEvents = await db
-    .select()
-    .from(employerExecutionComplianceEvents)
-    .where(
-      and(
-        eq(employerExecutionComplianceEvents.organizationId, organizationId),
-        eq(employerExecutionComplianceEvents.payrollRunId, run.id),
-      ),
-    )
-    .orderBy(desc(employerExecutionComplianceEvents.detectedAt));
-
-  const artifacts = await db
-    .select()
-    .from(employerExecutionArtifacts)
-    .where(
-      and(
-        eq(employerExecutionArtifacts.organizationId, organizationId),
-        eq(employerExecutionArtifacts.payrollRunId, run.id),
-      ),
-    )
-    .orderBy(desc(employerExecutionArtifacts.createdAt));
+  const { run, items, latestReplay, complianceEvents, artifacts } = detail;
 
   const chainLinks = artifacts
     .map((artifact) => ((artifact.manifestJson as Record<string, unknown>)?.chainLink ?? null) as Record<string, unknown> | null)

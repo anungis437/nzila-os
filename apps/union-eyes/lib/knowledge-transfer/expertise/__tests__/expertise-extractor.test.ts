@@ -9,7 +9,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
   UE_PROFILES: { EXPERTISE_EXTRACTION: 'ee' },
 }));
 
-import { extractExpertise, flattenExpertiseTags } from '../expertise-extractor';
+import { ExpertiseExtractionError, extractExpertise, flattenExpertiseTags } from '../expertise-extractor';
 
 function interview(extra: Record<string, unknown> = {}) {
   return {
@@ -49,14 +49,19 @@ describe('lib/knowledge-transfer/expertise/expertise-extractor', () => {
     expect(profile.sourceInterviewId).toBe('i1');
   });
 
-  it('falls back to safe profile on invalid JSON and minimal interview', async () => {
+  // Replaced: this test asserted that an unparseable model answer became a default "medium" profile, which stored a guess as an assessment.
+  it('refuses an unparseable model answer instead of inventing a medium-risk profile', async () => {
     generateMock.mockResolvedValue({ content: 'bad' });
-    const profile = await extractExpertise(
+    await expect(extractExpertise(
       interview({ keyLessons: null, bestPractices: null, bargainingAdvice: null, mediationAdvice: null, incomingOfficerAdvice: null, topics: undefined, organizationId: 123 }),
-    );
-    expect(profile.continuitySensitivity).toBe('medium');
-    expect(profile.continuityJustification).toContain('manual review');
-    expect(profile.expertiseDomains).toEqual([]);
+    )).rejects.toBeInstanceOf(ExpertiseExtractionError);
+  });
+
+  it('refuses a model answer with no valid sensitivity or with a non-list field', async () => {
+    generateMock.mockResolvedValue({ content: JSON.stringify({ expertiseDomains: ['x'] }) });
+    await expect(extractExpertise(interview())).rejects.toThrow(/sensitivity/);
+    generateMock.mockResolvedValue({ content: JSON.stringify({ continuitySensitivity: 'low', systemsOwnership: 'HRIS' }) });
+    await expect(extractExpertise(interview())).rejects.toThrow(/systemsOwnership/);
   });
 
   it('flattenExpertiseTags dedupes and lowercases', () => {

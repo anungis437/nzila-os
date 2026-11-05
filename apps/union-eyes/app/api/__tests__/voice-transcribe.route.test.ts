@@ -5,7 +5,14 @@ const m = vi.hoisted(() => ({
   withRoleAuth: vi.fn(),
   isSupportedLanguage: vi.fn(),
   transcribeAudioWithLanguage: vi.fn(),
+  checkRateLimit: vi.fn(),
+  audit: vi.fn(),
+  checkEntitlement: vi.fn(),
 }));
+vi.mock('@/lib/services/entitlements', () => ({ checkEntitlement: m.checkEntitlement }));
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.checkRateLimit, RATE_LIMITS: { AI_COMPLETION: {} } }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_c: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({}) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: m.withRoleAuth,
@@ -18,10 +25,12 @@ vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: {
     VALIDATION_ERROR: 'VALIDATION_ERROR',
     INTERNAL_ERROR: 'INTERNAL_ERROR',
+    FORBIDDEN: 'FORBIDDEN',
+    RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
   },
   standardErrorResponse: (code: string, message: string) =>
     new Response(JSON.stringify({ code, message }), {
-      status: code === 'INTERNAL_ERROR' ? 500 : 400,
+      status: code === 'INTERNAL_ERROR' ? 500 : code === 'RATE_LIMIT_EXCEEDED' ? 429 : 400,
       headers: { 'content-type': 'application/json' },
     }),
 }));
@@ -30,10 +39,15 @@ async function loadRoute() {
   return import('../voice/transcribe/route');
 }
 
-function makeFormRequest(file?: File, language?: string) {
+function makeFormRequest(file?: File, language?: string, consent: 'valid' | 'missing' | 'stale' = 'valid') {
   const form = new FormData();
   if (file) form.append('audio', file);
   if (language) form.append('language', language);
+  if (consent !== 'missing') {
+    form.append('disclosureNoticeVersion', consent === 'stale' ? 'old' : 'v1');
+    form.append('disclosureAcknowledged', 'true');
+    form.append('participantPermissionConfirmed', 'true');
+  }
   return new NextRequest('http://localhost/api/voice/transcribe', {
     method: 'POST',
     body: form,
@@ -49,6 +63,13 @@ describe('voice/transcribe route', () => {
     );
     m.isSupportedLanguage.mockReturnValue(true);
     m.transcribeAudioWithLanguage.mockResolvedValue('hello world');
+    m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 60 });
+    m.audit.mockResolvedValue(undefined);
+    m.checkEntitlement.mockResolvedValue({ allowed: true });
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_VERSION = 'v1';
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_EN_CA = 'External transcription notice';
+    process.env.UE_VOICE_DISCLOSURE_NOTICE_FR_CA = 'Avis de transcription externe';
+    process.env.UE_VOICE_DISCLOSURE_APPROVAL_REFERENCE = 'test-only-approval-reference';
   });
 
   it('returns validation error when audio file is missing', async () => {
@@ -108,6 +129,10 @@ describe('voice/transcribe route', () => {
       language: 'fr-CA',
       success: true,
     });
+    // DEF-0B12-PLT-VOICE-TRANSCRIBE-RETURNS-THE-FILE-SIZE-IN-BYTES-AS-THE-DURATION
+    // Neither bytes nor a guessed duration may be reported as a measured audio duration.
+    expect(payload).not.toHaveProperty('duration');
+    expect(payload).not.toHaveProperty('durationSeconds');
   });
 
   it('returns internal error when transcription throws', async () => {
@@ -117,5 +142,65 @@ describe('voice/transcribe route', () => {
 
     const response = await POST(makeFormRequest(file, 'en-CA'));
     expect(response.status).toBe(500);
+  });
+
+  // DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT
+  it('is rate limited and records the disclosure before the audio is sent', async () => {
+    const { POST } = await loadRoute();
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 30 });
+    const limited = await POST(makeFormRequest(new File(['x'], 'a.wav', { type: 'audio/wav' }), 'en-CA'));
+    expect(limited.status).toBe(429);
+    expect(m.transcribeAudioWithLanguage).not.toHaveBeenCalled();
+
+    const order: string[] = [];
+    m.audit.mockImplementation(async () => { order.push('audit'); });
+    m.transcribeAudioWithLanguage.mockImplementation(async () => { order.push('transcribe'); return 'text'; });
+    const ok = await POST(makeFormRequest(new File(['x'], 'a.wav', { type: 'audio/wav' }), 'en-CA'));
+    expect(ok.status).toBe(200);
+    expect(order).toEqual(['audit', 'transcribe']);
+  });
+
+  it('does not send the audio when the audit cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+    const response = await POST(makeFormRequest(new File(['x'], 'a.wav', { type: 'audio/wav' }), 'en-CA'));
+    expect(response.status).toBe(500);
+    expect(m.transcribeAudioWithLanguage).not.toHaveBeenCalled();
+  });
+  it('refuses external speech calls without both confirmations and a current approved notice', async () => {
+    const { POST } = await loadRoute();
+    const file = new File(['voice'], 'ok.wav', { type: 'audio/wav' });
+    expect((await POST(makeFormRequest(file, 'en-CA', 'missing'))).status).toBe(400);
+    expect((await POST(makeFormRequest(file, 'en-CA', 'stale'))).status).toBe(409);
+    delete process.env.UE_VOICE_DISCLOSURE_NOTICE_FR_CA;
+    expect((await POST(makeFormRequest(file, 'en-CA'))).status).toBe(503);
+    expect(m.audit).not.toHaveBeenCalled();
+    expect(m.transcribeAudioWithLanguage).not.toHaveBeenCalled();
+  });
+
+  it('includes the institutionally configured notice version in pre-disclosure audit', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(makeFormRequest(new File(['voice'], 'ok.wav', { type: 'audio/wav' }), 'fr-CA'));
+    expect(response.status).toBe(200);
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      details: expect.objectContaining({
+        noticeVersion: 'v1',
+        approvalReference: 'test-only-approval-reference',
+        participantPermissionAsserted: true,
+      }),
+    }));
+  });
+
+  it('F06 A7: refuses an organization without the entitlement before reading the recording, auditing or sending it', async () => {
+    m.checkEntitlement.mockResolvedValueOnce({ allowed: false, reason: 'Upgrade required', upgradeUrl: '/pricing' });
+    const { POST } = await loadRoute();
+
+    const response = await POST(makeFormRequest(new File(['x'], 'a.webm', { type: 'audio/webm' })), { userId: 'u1', organizationId: 'org1' } as never);
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ error: 'Upgrade required', feature: 'voice_transcribe' });
+    expect(m.checkEntitlement).toHaveBeenCalledWith('org1', 'ai_search');
+    expect(m.audit).not.toHaveBeenCalled();
+    expect(m.transcribeAudioWithLanguage).not.toHaveBeenCalled();
   });
 });

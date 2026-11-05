@@ -133,12 +133,12 @@ export interface ReasoningStore {
 // ── Zod Schemas ─────────────────────────────────────────────────────────────
 
 export const ReasoningRequestSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   reasoningType: z.enum(
     Object.values(ReasoningTypes) as [string, ...string[]],
   ),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   question: z.string().min(1),
   requestedBy: z.string().min(1),
 })

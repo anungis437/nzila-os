@@ -1,48 +1,117 @@
-import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
+/**
+ * Pension trustee meeting records contain confidential agendas, minutes and attendees.
+ * DEF-0B10-PEN-TRUSTEE-MEETING-READS-RETURN-AGENDA-MINUTES-AND-ATTENDEES-TO-ANY-MEMBER
+ * Until trustee mandates are issued, only the existing pension financial administrator
+ * role may read them. This engineering restriction is not an institutional mandate.
+ */
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
+/**
+ * A trustee meeting is scheduled on an actual calendar date or an explicitly
+ * timezone-qualified instant. z.coerce.date() accepts numbers and normalizes
+ * impossible dates (for example February 30), silently changing the meeting.
+ * Never infer a local timezone from a caller's input.
+ */
+const trusteeMeetingDateSchema = z.string().refine((value) => {
+  const parts = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(Z|([+-])(\d{2}):(\d{2})))?$/.exec(value);
+  if (!parts) return false;
+  const year = Number(parts[1]);
+  const month = Number(parts[2]);
+  const day = Number(parts[3]);
+  if (year < 1000 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const calendar = new Date(Date.UTC(year, month - 1, day));
+  if (calendar.getUTCFullYear() !== year || calendar.getUTCMonth() !== month - 1 || calendar.getUTCDate() !== day) return false;
+  if (parts[4] !== undefined) {
+    if (Number(parts[4]) > 23 || Number(parts[5]) > 59 || Number(parts[6]) > 59) return false;
+    if (parts[8] !== 'Z') {
+      const offsetHours = Number(parts[10]);
+      const offsetMinutes = Number(parts[11]);
+      if (offsetHours > 14 || offsetMinutes > 59 || (offsetHours === 14 && offsetMinutes !== 0)) return false;
+    }
+  }
+  return !Number.isNaN(Date.parse(value.length === 10 ? value + 'T00:00:00.000Z' : value));
+}, 'An actual ISO calendar date or timezone-qualified timestamp is required')
+  .transform((value) => new Date(value.length === 10 ? value + 'T00:00:00.000Z' : value));
+
 const createMeetingSchema = z.object({
-  title: z.string().max(255),
-  scheduledDate: z.coerce.date(),
+  title: z.string().trim().min(1).max(255),
+  scheduledDate: trusteeMeetingDateSchema,
   location: z.string().max(255).optional(),
-  agenda: z.string().optional(),
-  minutes: z.string().optional(),
-  status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
-  attendees: z.array(z.unknown()).optional(),
+  agenda: z.string().max(100000).optional(),
 });
 
 export const dynamic = 'force-dynamic';
 
+const pageSchema = z.object({
+  page: z.coerce.number().int().min(1).max(10000),
+  pageSize: z.coerce.number().int().min(1).max(100),
+});
+
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
-    openapi: { tags: ['Pension'], summary: 'List trustee meetings', description: 'List all trustee meetings for the organization' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
+    openapi: { tags: ['Pension'], summary: 'List trustee meetings (pension financial administrator only)', description: 'Tenant-scoped, audited, paginated trustee meeting list' },
   },
-  async ({ request: _request, organizationId }) => {
-    const meetings = await db
-      .select()
-      .from(pensionTrusteeMeetings)
-      .where(eq(pensionTrusteeMeetings.organizationId, organizationId!))
-      .orderBy(desc(pensionTrusteeMeetings.createdAt));
-    return meetings;
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Pension organization context required');
+    const url = new URL(request.url);
+    const rawPage = url.searchParams.get('page') ?? '1';
+    const rawPageSize = url.searchParams.get('pageSize') ?? '50';
+    if (!/^[1-9]\d*$/.test(rawPage) || !/^[1-9]\d*$/.test(rawPageSize)) {
+      throw ApiError.badRequest('Invalid trustee meeting pagination');
+    }
+    const parsed = pageSchema.safeParse({ page: rawPage, pageSize: rawPageSize });
+    if (!parsed.success) throw ApiError.badRequest('Invalid trustee meeting pagination');
+    const { page, pageSize } = parsed.data;
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      const meetings = await tx
+        .select()
+        .from(pensionTrusteeMeetings)
+        .where(eq(pensionTrusteeMeetings.organizationId, organizationId))
+        .orderBy(desc(pensionTrusteeMeetings.createdAt), desc(pensionTrusteeMeetings.id))
+        .limit(pageSize)
+        .offset((page - 1) * pageSize);
+      await persistAtomicAudit(tx, {
+        organizationId, userId,
+        action: 'pension.trustee_meeting.list_read',
+        resourceType: 'pension_trustee_meetings',
+        resourceId: organizationId,
+        details: { page, pageSize, rows: meetings.length },
+      });
+      return meetings;
+    });
   },
 );
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
-    openapi: { tags: ['Pension'], summary: 'Create trustee meeting', description: 'Schedule a new trustee meeting' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
+    openapi: { tags: ['Pension'], summary: 'Create trustee meeting', description: 'Schedule a trustee meeting without accepting unverified minutes, attendance, or completion status' },
   },
-  async ({ body, organizationId }) => {
-    const parsed = createMeetingSchema.parse(body);
-    const [meeting] = await db
-      .insert(pensionTrusteeMeetings)
-      .values({ ...parsed, organizationId: organizationId! })
-      .returning();
-    return meeting;
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const parsed = createMeetingSchema.strict().safeParse(body);
+    if (!parsed.success) throw ApiError.badRequest('Invalid trustee meeting scheduling fields');
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      const [meeting] = await tx
+        .insert(pensionTrusteeMeetings)
+        .values({ ...parsed.data, organizationId })
+        .returning();
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pension.trustee_meeting.schedule',
+        resourceType: 'pension_trustee_meetings',
+        resourceId: meeting.id,
+        details: { title: parsed.data.title },
+      });
+      return meeting;
+    });
   },
 );
-

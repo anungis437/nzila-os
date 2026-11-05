@@ -3,28 +3,34 @@
 /**
  * Organization Tree Visualization Component
  * Interactive hierarchical tree view for CLC -> Federation -> Union -> Local structure
+ *
+ * Reads GET /api/organizations/tree, which answers plain JSON { data: [organizations] }: a flat list, each organization with its parentId, of the organizations
+ * the caller may read. The tree is nested here, and an organization whose parent is not in the list is shown at the top. A list that could not be read is an
+ * error with a retry, not an empty tree; a member count the route does not have is a dash, not zero.
  */
 
-import React from 'react';
-import { useState, useEffect, useCallback } from "react";
+import React from "react";
+import { useState, useEffect } from "react";
 import { ChevronRight, ChevronDown, Building2, Globe, Users, MapPin, Network, GitBranch, Loader2, AlertCircle, Layers } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { Organization, OrganizationType } from "@/types/organization";
+import { logger } from "@/lib/logger";
+import { isRecord, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, asRecord, countOrNull, humanize, optionalString, requiredString } from "@/lib/client/row-fields";
 
-interface OrganizationTreeNode extends Organization {
-  children?: OrganizationTreeNode[];
-  parentId?: string;
-  memberCount?: number;
-  childCount?: number;
-  isLoading?: boolean;
-  isExpanded?: boolean;
+interface OrganizationTreeNode {
+  id: string;
+  name: string;
+  slug: string | null;
+  type: string | null;
+  /** Null where the count was never computed. */
+  memberCount: number | null;
+  children: OrganizationTreeNode[];
 }
 
 interface OrganizationTreeProps {
-  rootOrgId?: string;
   onSelectOrganization?: (org: OrganizationTreeNode) => void;
   onSelect?: (org: OrganizationTreeNode) => void;
   selectedOrgId?: string;
@@ -33,7 +39,7 @@ interface OrganizationTreeProps {
   className?: string;
 }
 
-const typeConfig: Record<OrganizationType, { label: string; icon: React.ReactElement; color: string }> = {
+const typeConfig: Record<string, { label: string; icon: React.ReactElement; color: string }> = {
   platform: { label: "Platform", icon: <Layers className="w-4 h-4" />, color: "text-rose-600" },
   congress: { label: "Congress", icon: <Globe className="w-4 h-4" />, color: "text-blue-600" },
   federation: { label: "Federation", icon: <Network className="w-4 h-4" />, color: "text-purple-600" },
@@ -43,8 +49,55 @@ const typeConfig: Record<OrganizationType, { label: string; icon: React.ReactEle
   district: { label: "District", icon: <GitBranch className="w-4 h-4" />, color: "text-indigo-600" }
 };
 
+const fallbackConfig = { icon: <Building2 className="w-4 h-4" />, color: "text-muted-foreground" };
+
+function toRow(raw: unknown): { node: OrganizationTreeNode; parentId: string | null } {
+  const row = asRecord(raw, "organization");
+  return {
+    node: {
+      id: requiredString(row, "id"),
+      name: requiredString(row, "name"),
+      slug: optionalString(row, "slug"),
+      // The route names the type both ways; the canonical list names it `type` only.
+      type: optionalString(row, "type") ?? optionalString(row, "organization_type"),
+      // member_count is null where the count was never computed (memberCount is that or 0); the canonical list has memberCount only.
+      memberCount: "member_count" in row ? countOrNull(row, "member_count") : countOrNull(row, "memberCount"),
+      children: [],
+    },
+    parentId: optionalString(row, "parentId"),
+  };
+}
+
+const countNodes = (nodes: OrganizationTreeNode[]): number => nodes.reduce((sum, node) => sum + 1 + countNodes(node.children), 0);
+
+/** Nests the flat list. An organization whose parent is not in it (the caller may not read the parent) is a root. */
+function buildTree(rows: unknown[]): OrganizationTreeNode[] {
+  const parsed = rows.map(toRow);
+  const byId = new Map(parsed.map(({ node }) => [node.id, node]));
+  const roots: OrganizationTreeNode[] = [];
+  for (const { node, parentId } of parsed) {
+    const parent = parentId !== null && parentId !== node.id ? byId.get(parentId) : undefined;
+    (parent ? parent.children : roots).push(node);
+  }
+  // Organizations that are each other's ancestors would be in no root and silently vanish.
+  if (countNodes(roots) !== parsed.length) throw new ApiShapeError("the organizations do not form a hierarchy");
+  return roots;
+}
+
+async function loadTree(): Promise<OrganizationTreeNode[]> {
+  const response = await fetch("/api/organizations/tree");
+  if (!response.ok) throw new Error(await readApiError(response, `The organization tree could not be loaded (HTTP ${response.status}).`));
+  const body: unknown = await response.json();
+  if (!isRecord(body) || !Array.isArray(body.data)) throw new ApiShapeError("no organizations");
+  return buildTree(body.data);
+}
+
+type TreeState =
+  | { status: "loading" }
+  | { status: "ready"; roots: OrganizationTreeNode[] }
+  | { status: "failed"; message: string };
+
 export function OrganizationTree({
-  rootOrgId,
   onSelectOrganization,
   onSelect,
   selectedOrgId,
@@ -52,141 +105,43 @@ export function OrganizationTree({
   showMemberCount = true,
   className
 }: OrganizationTreeProps) {
-  const [treeData, setTreeData] = useState<OrganizationTreeNode | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadTree = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const url = rootOrgId 
-        ? `/api/organizations/${rootOrgId}?include_children=true&include_stats=true`
-        : `/api/organizations/tree`;
-      
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to load organization tree");
-      
-      const data = await response.json();
-      const raw = data.data || data;
-
-      // The tree API returns a flat list — build nested structure client-side
-      if (Array.isArray(raw)) {
-        const byId = new Map<string, OrganizationTreeNode>();
-        for (const org of raw) {
-          byId.set(org.id, { ...org, children: [], isExpanded: false });
-        }
-        const roots: OrganizationTreeNode[] = [];
-        for (const node of byId.values()) {
-          const parentId = node.parentId || node.parent_id;
-          if (parentId && byId.has(parentId)) {
-            byId.get(parentId)!.children!.push(node);
-            byId.get(parentId)!.childCount = byId.get(parentId)!.children!.length;
-          } else {
-            roots.push(node);
-          }
-        }
-        // If single root, use it; otherwise wrap roots in a virtual node
-        if (roots.length === 1) {
-          roots[0].isExpanded = true;
-          setTreeData(roots[0]);
-        } else {
-          setTreeData({
-            id: 'root',
-            name: 'All Organizations',
-            slug: 'root',
-            organization_type: 'platform' as OrganizationType,
-            status: 'active' as const,
-            children: roots,
-            childCount: roots.length,
-            isExpanded: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          } as any as OrganizationTreeNode);
-        }
-      } else {
-        setTreeData(raw);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load tree");
-    } finally {
-      setLoading(false);
-    }
-  }, [rootOrgId]);
+  const [attempt, setAttempt] = useState(0);
+  const [loaded, setLoaded] = useState<{ attempt: number; state: TreeState } | null>(null);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
-    loadTree();
-  }, [loadTree]);
-
-  const loadChildren = async (node: OrganizationTreeNode, path: number[]) => {
-    const updateTree = (tree: OrganizationTreeNode, targetPath: number[], children: OrganizationTreeNode[]): OrganizationTreeNode => {
-      if (targetPath.length === 0) {
-        return { ...tree, children, isExpanded: true, isLoading: false };
-      }
-      
-      const [index, ...rest] = targetPath;
-      const newChildren = tree.children ? [...tree.children] : [];
-      if (newChildren[index]) {
-        newChildren[index] = updateTree(newChildren[index], rest, children);
-      }
-      
-      return { ...tree, children: newChildren };
+    let cancelled = false;
+    loadTree().then(
+      (roots) => {
+        if (cancelled) return;
+        setLoaded({ attempt, state: { status: "ready", roots } });
+        // A single root is opened, so that the first level of the hierarchy is in view.
+        setExpanded(roots.length === 1 ? new Set([roots[0].id]) : new Set());
+      },
+      (failure: unknown) => {
+        logger.error("Failed to load the organization tree", failure);
+        if (!cancelled) setLoaded({ attempt, state: { status: "failed", message: failure instanceof Error ? failure.message : "The organization tree could not be loaded." } });
+      },
+    );
+    return () => {
+      cancelled = true;
     };
+  }, [attempt]);
 
-    // Mark as loading
-    setTreeData(prev => {
-      if (!prev) return null;
-      return updateTree(prev, path, []);
+  const state: TreeState = loaded !== null && loaded.attempt === attempt ? loaded.state : { status: "loading" };
+
+  const toggle = (id: string) =>
+    setExpanded((previous) => {
+      const next = new Set(previous);
+      if (!next.delete(id)) next.add(id);
+      return next;
     });
 
-    try {
-      const response = await fetch(`/api/organizations/${node.id}/children?include_stats=true`);
-      if (!response.ok) throw new Error("Failed to load children");
-      
-      const data = await response.json();
-      const children: OrganizationTreeNode[] = data.data || [];
-      
-      setTreeData(prev => {
-        if (!prev) return null;
-        return updateTree(prev, path, children);
-      });
-    } catch (_err) {
-setTreeData(prev => {
-        if (!prev) return null;
-        return updateTree(prev, path, []);
-      });
-    }
-  };
-
-  const toggleNode = (node: OrganizationTreeNode, path: number[]) => {
-    if (!node.isExpanded && (!node.children || node.children.length === 0)) {
-      loadChildren(node, path);
-    } else {
-      // Just toggle expanded state
-      const updateTree = (tree: OrganizationTreeNode, targetPath: number[]): OrganizationTreeNode => {
-        if (targetPath.length === 0) {
-          return { ...tree, isExpanded: !tree.isExpanded };
-        }
-        
-        const [index, ...rest] = targetPath;
-        const newChildren = tree.children ? [...tree.children] : [];
-        if (newChildren[index]) {
-          newChildren[index] = updateTree(newChildren[index], rest);
-        }
-        
-        return { ...tree, children: newChildren };
-      };
-
-      setTreeData(prev => prev ? updateTree(prev, path) : null);
-    }
-  };
-
-  if (loading) {
+  if (state.status === "loading") {
     return (
       <Card className={className}>
         <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center space-y-2">
+          <div role="status" className="text-center space-y-2">
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
             <p className="text-sm text-muted-foreground">Loading organization tree...</p>
           </div>
@@ -195,14 +150,14 @@ setTreeData(prev => {
     );
   }
 
-  if (error || !treeData) {
+  if (state.status === "failed") {
     return (
       <Card className={className}>
         <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center space-y-2">
+          <div role="alert" className="text-center space-y-2">
             <AlertCircle className="w-8 h-8 mx-auto text-destructive" />
-            <p className="text-sm text-destructive">{error || "Failed to load tree"}</p>
-            <Button variant="outline" size="sm" onClick={loadTree}>
+            <p className="text-sm text-destructive">{state.message}</p>
+            <Button variant="outline" size="sm" onClick={() => setAttempt((count) => count + 1)}>
               Retry
             </Button>
           </div>
@@ -220,18 +175,25 @@ setTreeData(prev => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-1">
-          <TreeNode
-            node={treeData}
-            path={[]}
-            depth={0}
-            maxDepth={maxDepth}
-            onToggle={toggleNode}
-            onSelect={onSelect || onSelectOrganization}
-            selectedId={selectedOrgId}
-            showMemberCount={showMemberCount}
-          />
-        </div>
+        {state.roots.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No organizations are visible to you.</p>
+        ) : (
+          <div role="tree" className="space-y-1">
+            {state.roots.map((root) => (
+              <TreeNode
+                key={root.id}
+                node={root}
+                depth={0}
+                maxDepth={maxDepth}
+                expanded={expanded}
+                onToggle={toggle}
+                onSelect={onSelect || onSelectOrganization}
+                selectedId={selectedOrgId}
+                showMemberCount={showMemberCount}
+              />
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -239,44 +201,61 @@ setTreeData(prev => {
 
 interface TreeNodeProps {
   node: OrganizationTreeNode;
-  path: number[];
   depth: number;
   maxDepth: number;
-  onToggle: (node: OrganizationTreeNode, path: number[]) => void;
+  expanded: ReadonlySet<string>;
+  onToggle: (id: string) => void;
   onSelect?: (node: OrganizationTreeNode) => void;
   selectedId?: string;
   showMemberCount: boolean;
 }
 
-function TreeNode({ node, path, depth, maxDepth, onToggle, onSelect, selectedId, showMemberCount }: TreeNodeProps) {
-  const hasChildren = (node.childCount && node.childCount > 0) || (node.children && node.children.length > 0);
-  const isExpanded = node.isExpanded || false;
+function TreeNode({ node, depth, maxDepth, expanded, onToggle, onSelect, selectedId, showMemberCount }: TreeNodeProps) {
+  const childCount = node.children.length;
+  const isExpanded = expanded.has(node.id);
   const isSelected = selectedId === node.id;
-  const orgType = (node.organization_type || (node as any as Record<string, unknown>).type || 'union') as OrganizationType;
-  const config = typeConfig[orgType] ?? typeConfig.union;
-  const canExpand = hasChildren && depth < maxDepth;
+  const known = node.type !== null ? typeConfig[node.type] : undefined;
+  const icon = known?.icon ?? fallbackConfig.icon;
+  const color = known?.color ?? fallbackConfig.color;
+  const typeLabel = node.type === null ? null : known?.label ?? humanize(node.type);
+  const canExpand = childCount > 0 && depth < maxDepth;
+
+  const label = (
+    <>
+      <div className={cn("shrink-0", color)}>{icon}</div>
+      <div className="flex-1 min-w-0 text-left">
+        <div className="flex items-center gap-2">
+          <span className="font-medium truncate">{node.name}</span>
+          {typeLabel !== null && (
+            <Badge variant="outline" className="text-xs capitalize">
+              {typeLabel}
+            </Badge>
+          )}
+        </div>
+        {node.slug && (
+          <p className="text-xs text-muted-foreground truncate">@{node.slug}</p>
+        )}
+      </div>
+    </>
+  );
 
   return (
-    <div>
+    <div role="treeitem" aria-expanded={canExpand ? isExpanded : undefined} aria-selected={isSelected}>
       <div
         className={cn(
-          "flex items-center gap-2 py-2 px-3 rounded-md hover:bg-accent cursor-pointer transition-colors",
+          "flex items-center gap-2 py-2 px-3 rounded-md hover:bg-accent transition-colors",
           isSelected && "bg-accent border-l-2 border-primary"
         )}
         style={{ paddingLeft: `${depth * 1.5 + 0.75}rem` }}
-        onClick={() => onSelect?.(node)}
       >
         {canExpand ? (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle(node, path);
-            }}
+            type="button"
+            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.name}`}
+            onClick={() => onToggle(node.id)}
             className="p-0.5 hover:bg-accent-foreground/10 rounded"
           >
-            {node.isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-            ) : isExpanded ? (
+            {isExpanded ? (
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             ) : (
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -285,46 +264,38 @@ function TreeNode({ node, path, depth, maxDepth, onToggle, onSelect, selectedId,
         ) : (
           <div className="w-5" />
         )}
-        
-        <div className={cn("shrink-0", config.color)}>
-          {config.icon}
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-medium truncate">{node.name}</span>
-            <Badge variant="outline" className="text-xs">
-              {config.label}
-            </Badge>
-          </div>
-          {node.slug && (
-            <p className="text-xs text-muted-foreground truncate">@{node.slug}</p>
-          )}
-        </div>
-        
-        {showMemberCount && node.memberCount !== undefined && (
-          <Badge variant="secondary" className="flex items-center gap-1">
+
+        {onSelect ? (
+          <button type="button" className="flex flex-1 min-w-0 items-center gap-2 cursor-pointer" onClick={() => onSelect(node)}>
+            {label}
+          </button>
+        ) : (
+          <div className="flex flex-1 min-w-0 items-center gap-2">{label}</div>
+        )}
+
+        {showMemberCount && (
+          <Badge variant="secondary" className="flex items-center gap-1" title={node.memberCount === null ? "The member count has not been computed" : undefined}>
             <Users className="w-3 h-3" />
-            {node.memberCount.toLocaleString()}
+            {node.memberCount === null ? "—" : node.memberCount.toLocaleString()}
           </Badge>
         )}
-        
-        {hasChildren && (
+
+        {childCount > 0 && (
           <Badge variant="outline" className="text-xs">
-            {node.childCount || node.children?.length || 0} {(node.childCount || node.children?.length || 0) === 1 ? 'child' : 'children'}
+            {childCount} {childCount === 1 ? "child" : "children"}
           </Badge>
         )}
       </div>
-      
-      {isExpanded && node.children && node.children.length > 0 && (
-        <div>
-          {node.children.map((child, index) => (
+
+      {isExpanded && canExpand && (
+        <div role="group">
+          {node.children.map((child) => (
             <TreeNode
               key={child.id}
               node={child}
-              path={[...path, index]}
               depth={depth + 1}
               maxDepth={maxDepth}
+              expanded={expanded}
               onToggle={onToggle}
               onSelect={onSelect}
               selectedId={selectedId}
@@ -336,4 +307,3 @@ function TreeNode({ node, path, depth, maxDepth, onToggle, onSelect, selectedId,
     </div>
   );
 }
-

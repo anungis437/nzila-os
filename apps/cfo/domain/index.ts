@@ -88,7 +88,7 @@ export type AssigneeRole = (typeof AssigneeRole)[keyof typeof AssigneeRole]
 // ── Zod Schemas ──────────────────────────────────────────────────────────────
 
 export const ReportSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   title: z.string().min(1),
   type: z.enum(['pnl', 'balance-sheet', 'cash-flow', 'tax-summary', 'audit-trail', 'custom']),
   status: z.enum(['draft', 'generated', 'reviewed', 'published']),
@@ -99,7 +99,7 @@ export const ReportSchema = z.object({
 })
 
 export const LedgerEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   date: z.coerce.date(),
   description: z.string(),
   account: z.string(),
@@ -110,7 +110,7 @@ export const LedgerEntrySchema = z.object({
 })
 
 export const AdvisoryAlertSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   clientId: z.string(),
   clientName: z.string(),
   category: z.enum(['tax-deadline', 'cash-flow', 'compliance', 'tax-optimization', 'receivables', 'payroll']),
@@ -132,17 +132,17 @@ export const WorkflowStepSchema = z.object({
 })
 
 export const AuditEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   action: z.string(),
   actorId: z.string(),
   entityType: z.string(),
   orgId: z.string(),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   createdAt: z.coerce.date(),
 })
 
 export const ClientSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string().min(1, 'Client name is required'),
   email: z.string().email().optional(),
   phone: z.string().optional(),
@@ -153,14 +153,14 @@ export const ClientSchema = z.object({
 })
 
 export const TaskSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   title: z.string().min(1, 'Task title is required'),
   description: z.string().optional(),
   assigneeRole: z.enum(['accountant', 'manager', 'partner', 'client']),
   priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
   status: z.enum(['pending', 'in-progress', 'completed', 'cancelled']).default('pending'),
   dueDate: z.coerce.date().optional(),
-  clientId: z.string().uuid().optional(),
+  clientId: z.guid().optional(),
 })
 
 // ── Types (inferred from schemas) ────────────────────────────────────────────

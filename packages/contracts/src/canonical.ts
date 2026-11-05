@@ -17,7 +17,7 @@ export const CANONICAL_SCHEMA_VERSION = '1.0.0' as const
 
 export const canonicalEntitySchema = z.object({
   /** Globally unique entity ID (UUID). */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Entity type discriminator (e.g. "claim", "order", "event", "member"). */
   entityType: z.string().min(1),
   /** Org scope for tenant boundary. */
@@ -39,7 +39,7 @@ export const canonicalEntitySchema = z.object({
   /** Schema version for forward compatibility. */
   schemaVersion: z.string().default(CANONICAL_SCHEMA_VERSION),
   /** Domain-specific extension payload. */
-  extensions: z.record(z.unknown()).optional(),
+  extensions: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type NzilaCanonicalEntity = z.infer<typeof canonicalEntitySchema>
@@ -48,7 +48,7 @@ export type NzilaCanonicalEntity = z.infer<typeof canonicalEntitySchema>
 
 export const canonicalEventSchema = z.object({
   /** Unique event ID (UUID). */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Event type (e.g. "claim.created", "payment.processed", "ticket.scanned"). */
   eventType: z.string().min(1),
   /** Event version for schema evolution. */
@@ -62,7 +62,7 @@ export const canonicalEventSchema = z.object({
   /** ISO-8601 timestamp of when the event occurred. */
   timestamp: z.string().datetime(),
   /** Target entity ID (the entity this event pertains to). */
-  entityId: z.string().uuid().optional(),
+  entityId: z.guid().optional(),
   /** Target entity type. */
   entityType: z.string().optional(),
   /** Correlation ID for distributed tracing. */
@@ -70,7 +70,7 @@ export const canonicalEventSchema = z.object({
   /** Causation ID (the event/action that triggered this one). */
   causationId: z.string().optional(),
   /** Event payload (domain-specific). */
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   /** Schema version. */
   schemaVersion: z.string().default(CANONICAL_SCHEMA_VERSION),
 })
@@ -95,7 +95,7 @@ export const canonicalMetricSchema = z.object({
   /** ISO-8601 timestamp. */
   timestamp: z.string().datetime(),
   /** Dimensional labels for grouping/filtering. */
-  labels: z.record(z.string()).optional(),
+  labels: z.record(z.string(), z.string()).optional(),
   /** Schema version. */
   schemaVersion: z.string().default(CANONICAL_SCHEMA_VERSION),
 })
@@ -106,7 +106,7 @@ export type NzilaCanonicalMetric = z.infer<typeof canonicalMetricSchema>
 
 export const canonicalAuditRecordSchema = z.object({
   /** Unique audit record ID (UUID). */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** ISO-8601 timestamp. */
   timestamp: z.string().datetime(),
   /** Action performed (e.g. "claim.approved", "payment.refunded"). */
@@ -122,9 +122,9 @@ export const canonicalAuditRecordSchema = z.object({
   /** Target resource ID. */
   resourceId: z.string().optional(),
   /** Before-state snapshot (for mutations). */
-  before: z.record(z.unknown()).optional(),
+  before: z.record(z.string(), z.unknown()).optional(),
   /** After-state snapshot (for mutations). */
-  after: z.record(z.unknown()).optional(),
+  after: z.record(z.string(), z.unknown()).optional(),
   /** Severity classification. */
   severity: z.enum(['info', 'warning', 'critical']),
   /** Whether this record is evidence-grade (hash-chained, tamper-evident). */
@@ -145,7 +145,7 @@ export type NzilaCanonicalAuditRecord = z.infer<typeof canonicalAuditRecordSchem
 
 export const canonicalWorkflowStateSchema = z.object({
   /** Workflow instance ID (UUID). */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Workflow definition key (e.g. "claim-lifecycle", "order-fulfillment"). */
   workflowKey: z.string().min(1),
   /** Current state in the state machine. */
@@ -153,7 +153,7 @@ export const canonicalWorkflowStateSchema = z.object({
   /** Previous state (null for initial). */
   previousState: z.string().nullable(),
   /** The entity this workflow governs. */
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   /** Entity type. */
   entityType: z.string().min(1),
   /** Org scope. */
@@ -186,7 +186,7 @@ export type NzilaCanonicalWorkflowState = z.infer<typeof canonicalWorkflowStateS
 
 export const canonicalIntegrationRecordSchema = z.object({
   /** Record ID (UUID). */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Integration provider (e.g. "stripe", "xero", "shopify", "zoho"). */
   provider: z.string().min(1),
   /** Direction of data flow. */
@@ -225,7 +225,7 @@ export type NzilaCanonicalIntegrationRecord = z.infer<typeof canonicalIntegratio
 
 export const canonicalFinancialRecordSchema = z.object({
   /** Record ID (UUID). */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Transaction type (e.g. "payment", "refund", "payout", "fee", "adjustment"). */
   transactionType: z.string().min(1),
   /** Amount in minor units (cents). */
@@ -237,7 +237,7 @@ export const canonicalFinancialRecordSchema = z.object({
   /** Source module. */
   sourceModule: z.string().min(1),
   /** Related entity ID (order, invoice, subscription, etc.). */
-  entityId: z.string().uuid().optional(),
+  entityId: z.guid().optional(),
   /** Related entity type. */
   entityType: z.string().optional(),
   /** Counterparty ID (customer, creator, vendor). */
@@ -320,9 +320,9 @@ export type NzilaCanonicalOrgContext = z.infer<typeof canonicalOrgContextSchema>
  * Creates a type-safe mapper from app-specific data to a canonical schema.
  * Use this to build adapters in each app/vertical.
  */
-export function createCanonicalMapper<TInput, TCanonical>(
-  schema: z.ZodType<TCanonical>,
-  mapFn: (input: TInput) => TCanonical,
+export function createCanonicalMapper<TInput, TCanonical, TMapped = TCanonical>(
+  schema: z.ZodType<TCanonical, TMapped>,
+  mapFn: (input: TInput) => TMapped,
 ) {
   return (input: TInput): TCanonical => {
     const mapped = mapFn(input)
@@ -333,11 +333,11 @@ export function createCanonicalMapper<TInput, TCanonical>(
 /**
  * Safe version that returns validation result without throwing.
  */
-export function createSafeCanonicalMapper<TInput, TCanonical>(
-  schema: z.ZodType<TCanonical>,
-  mapFn: (input: TInput) => TCanonical,
+export function createSafeCanonicalMapper<TInput, TCanonical, TMapped = TCanonical>(
+  schema: z.ZodType<TCanonical, TMapped>,
+  mapFn: (input: TInput) => TMapped,
 ) {
-  return (input: TInput): z.SafeParseReturnType<TCanonical, TCanonical> => {
+  return (input: TInput): z.ZodSafeParseResult<TCanonical> => {
     const mapped = mapFn(input)
     return schema.safeParse(mapped)
   }

@@ -19,17 +19,17 @@ export const CaseIntakeRequestSchema = z.object({
 
   caseType: z.enum(
     getAllCaseTypeIds() as [string, ...string[]],
-    { errorMap: () => ({ message: `Case type must be one of: ${getAllCaseTypeIds().join(', ')}` }) },
+    { error: `Case type must be one of: ${getAllCaseTypeIds().join(', ')}` },
   ),
 
   priority: z.enum(
     getAllPriorityIds() as [string, ...string[]],
-    { errorMap: () => ({ message: `Priority must be one of: ${getAllPriorityIds().join(', ')}` }) },
+    { error: `Priority must be one of: ${getAllPriorityIds().join(', ')}` },
   ),
 
   severity: z.enum(
     getAllSeverityIds() as [string, ...string[]],
-    { errorMap: () => ({ message: `Severity must be one of: ${getAllSeverityIds().join(', ')}` }) },
+    { error: `Severity must be one of: ${getAllSeverityIds().join(', ')}` },
   ).optional(),
 
   title: z.string()

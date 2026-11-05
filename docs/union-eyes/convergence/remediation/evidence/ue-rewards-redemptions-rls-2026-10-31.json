@@ -1,0 +1,28 @@
+{
+  "record": "UE_GATE0_ENGINEERING_EVIDENCE",
+  "date": "2026-10-31",
+  "defectId": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+  "sourceCommit": "d454eef7630ceea9e93a6388c2b0c9174398a577",
+  "qualificationRepairCommit": "ab8bc27eae3d01b81da0ab7a373770898c2f7fff",
+  "state": "SOURCE_PATCHED_PENDING_QUALIFICATION",
+  "source": [
+    "apps/union-eyes/app/api/rewards/redemptions/route.ts"
+  ],
+  "regression": [
+    "apps/union-eyes/app/api/__tests__/rewards-redemptions-list.route.test.ts",
+    "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts"
+  ],
+  "qualificationRepair": [
+    "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
+    "apps/union-eyes/db/__tests__/platform-0046-row-integrity.pglite.test.ts",
+    "apps/union-eyes/db/__tests__/platform-0047-ml-prediction-feedback.pglite.test.ts"
+  ],
+  "notClaimed": [
+    "unit pass",
+    "native PostgreSQL 15/16 pass for changed behavior",
+    "HTTP/browser/staging pass",
+    "institutional approval",
+    "defect CLOSED"
+  ],
+  "provenance": "Frozen 777 defect source unchanged."
+}

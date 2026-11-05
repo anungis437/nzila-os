@@ -97,8 +97,8 @@ export const clcSyncLog = pgTable(
     verifiedBy: varchar("verified_by", { length: 255 }),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     initiatedBy: varchar("initiated_by", { length: 255 }),
   },
   (t) => ({
@@ -142,7 +142,7 @@ export const clcWebhookLog = pgTable(
     syncLogId: uuid("sync_log_id").references(() => clcSyncLog.id, { onDelete: "set null" }),
     
     // Processing
-    processedAt: timestamp("processed_at"),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
     processingError: text("processing_error"),
     retryCount: integer("retry_count").default(0),
     nextRetryAt: timestamp("next_retry_at"),
@@ -154,8 +154,8 @@ export const clcWebhookLog = pgTable(
     reviewedBy: varchar("reviewed_by", { length: 255 }),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     orgIdx: index("clc_webhook_log_org_idx").on(t.organizationId),
@@ -163,84 +163,6 @@ export const clcWebhookLog = pgTable(
     webhookIdx: index("clc_webhook_log_webhook_idx").on(t.externalWebhookId),
     syncLogIdx: index("clc_webhook_log_sync_idx").on(t.syncLogId),
     payloadHashIdx: index("clc_webhook_log_payload_hash_idx").on(t.payloadHash),
-  })
-);
-
-/**
- * CLC Remittance Mapping - for tracking remittance data from CLC
- */
-export const clcRemittanceMapping = pgTable(
-  "clc_remittance_mapping",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Local and external reference
-    localRemittanceId: uuid("local_remittance_id"),
-    externalRemittanceId: varchar("external_remittance_id", { length: 100 }).notNull(),
-    
-    // Mapping details
-    localData: jsonb("local_data"),
-    externalData: jsonb("external_data"),
-    reconciliationStatus: varchar("reconciliation_status", { length: 50 }),
-    
-    // Verification
-    isVerified: boolean("is_verified").default(false),
-    verificationNotes: text("verification_notes"),
-    
-    // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    verifiedAt: timestamp("verified_at"),
-    verifiedBy: varchar("verified_by", { length: 255 }),
-  },
-  (t) => ({
-    orgIdx: index("clc_remittance_mapping_org_idx").on(t.organizationId),
-    externalIdx: index("clc_remittance_mapping_external_idx").on(t.externalRemittanceId),
-  })
-);
-
-/**
- * CLC API Configuration - stores sync configuration and credentials
- */
-export const clcApiConfig = pgTable(
-  "clc_api_config",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // API credentials (encrypted in application)
-    apiUrl: varchar("api_url", { length: 500 }).notNull(),
-    apiKeyEncrypted: varchar("api_key_encrypted"), // Store encrypted
-    apiSecret: varchar("api_secret"), // Store encrypted
-    
-    // Configuration
-    isEnabled: boolean("is_enabled").default(true),
-    syncFrequency: varchar("sync_frequency", { length: 50 }), // hourly, daily, weekly
-    lastSyncAt: timestamp("last_sync_at"),
-    nextSyncAt: timestamp("next_sync_at"),
-    
-    // Webhook configuration
-    webhookUrlLocal: varchar("webhook_url_local", { length: 500 }),
-    webhookSecretEncrypted: varchar("webhook_secret_encrypted"), // Store encrypted
-    isWebhookVerified: boolean("is_webhook_verified").default(false),
-    
-    // Sync settings
-    syncMembersEnabled: boolean("sync_members_enabled").default(true),
-    syncRemittancesEnabled: boolean("sync_remittances_enabled").default(true),
-    syncDisputesEnabled: boolean("sync_disputes_enabled").default(false),
-    
-    // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    configuredBy: varchar("configured_by", { length: 255 }),
-  },
-  (t) => ({
-    orgIdx: index("clc_api_config_org_idx").on(t.organizationId),
   })
 );
 
@@ -264,20 +186,6 @@ export const clcWebhookLogRelations = relations(clcWebhookLog, ({ one }) => ({
   syncLog: one(clcSyncLog, {
     fields: [clcWebhookLog.syncLogId],
     references: [clcSyncLog.id],
-  }),
-}));
-
-export const clcRemittanceMappingRelations = relations(clcRemittanceMapping, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [clcRemittanceMapping.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
-export const clcApiConfigRelations = relations(clcApiConfig, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [clcApiConfig.organizationId],
-    references: [organizations.id],
   }),
 }));
 

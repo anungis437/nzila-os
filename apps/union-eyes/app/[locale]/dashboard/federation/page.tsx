@@ -13,98 +13,35 @@ import {
   DollarSign, 
   AlertCircle,
   FileText,
-  Calendar,
   BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
-import { db } from '@/db';
-import { perCapitaRemittances } from '@/db/schema';
-import { eq, and, count, sum, sql, lt } from 'drizzle-orm';
-import { getUserRoleInOrganization } from '@/lib/organization-utils';
-import { logger } from '@/lib/logger';
-
-interface MemberUnionData {
-  id: string;
-  name: string;
-  clcAffiliateCode?: string;
-  organizationType?: string;
-}
+import { hasFederationAccess } from '@/lib/organizations/federation-access';
+import { listAffiliates } from '@/lib/organizations/affiliates';
+import { loadRemittanceMetrics } from '@/lib/organizations/per-capita-standing';
 
 export const metadata: Metadata = {
   title: 'Federation Dashboard | UnionEyes',
   description: 'Provincial federation executive dashboard and analytics',
 };
 
-async function checkFederationAccess(userId: string, orgId: string): Promise<boolean> {
-  try {
-    const userRole = await getUserRoleInOrganization(userId, orgId);
-    // Allow fed_staff, fed_executive, and admin roles
-    return ['fed_staff', 'fed_executive', 'admin', 'system_admin'].includes(userRole || '');
-  } catch {
-    return false;
-  }
-}
-
-async function getFederationMetrics(orgId: string) {
-  try {
-    // Fetch member unions count
-    const memberUnions = await db.query.organizations.findMany({
-      where: (organizations, { eq }) => eq(organizations.parentId, orgId),
-    });
-
-    // Aggregate total members from all member unions via per-capita remittances
-    const memberStats = await db
-      .select({
-        totalMembers: sum(perCapitaRemittances.remittableMembers),
-      })
-      .from(perCapitaRemittances)
-      .where(eq(perCapitaRemittances.toOrganizationId, orgId));
-
-    // Query pending remittances (submitted but not approved/paid)
-    const pendingRemittancesResult = await db
-      .select({ count: count() })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          eq(perCapitaRemittances.toOrganizationId, orgId),
-          eq(perCapitaRemittances.status, 'pending')
-        )
-      );
-
-    // Query overdue remittances (past due date and not paid)
-    const overdueRemittancesResult = await db
-      .select({ count: count() })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          eq(perCapitaRemittances.toOrganizationId, orgId),
-          eq(perCapitaRemittances.status, 'pending'),
-          lt(perCapitaRemittances.dueDate, sql`CURRENT_DATE`)
-        )
-      );
-
-    const totalMemberUnions = memberUnions.length;
-    const totalMembers = Number(memberStats[0]?.totalMembers || 0);
-    const pendingRemittances = Number(pendingRemittancesResult[0]?.count || 0);
-    const overdueRemittances = Number(overdueRemittancesResult[0]?.count || 0);
-
-    return {
-      totalMemberUnions,
-      totalMembers,
-      pendingRemittances,
-      overdueRemittances,
-      memberUnions,
-    };
-  } catch (error) {
-    logger.error('Error fetching federation metrics:', error);
-    return {
-      totalMemberUnions: 0,
-      totalMembers: 0,
-      pendingRemittances: 0,
-      overdueRemittances: 0,
-      memberUnions: [],
-    };
-  }
+/**
+ * The federation's member unions (a system read, authorized by the caller's administrative standing over the organization) and the
+ * per-capita remittances addressed to it (read in its own context). A failed read is an error: it must not render as a federation
+ * with no affiliates and nothing owed.
+ */
+async function getFederationMetrics(userId: string, orgId: string) {
+  const [memberUnions, remittances] = await Promise.all([
+    listAffiliates({ userId, organizationId: orgId }),
+    loadRemittanceMetrics(orgId),
+  ]);
+  return {
+    totalMemberUnions: memberUnions.length,
+    totalMembers: remittances.totalMembers,
+    pendingRemittances: remittances.pendingRemittances,
+    overdueRemittances: remittances.overdueRemittances,
+    memberUnions,
+  };
 }
 
 export default async function FederationDashboardPage({
@@ -115,15 +52,11 @@ export default async function FederationDashboardPage({
   const { locale } = await params;
   const user = await requireUser();
   const userId = user.userId;
-  const orgId = user.organizationId!;
-
-  const hasAccess = await checkFederationAccess(userId, orgId);
-  if (!hasAccess) {
-    redirect('/dashboard');
-  }
+  const orgId = user.organizationId;
+  if (!orgId || !(await hasFederationAccess(userId, orgId))) redirect(`/${locale}/dashboard`);
 
   const t = await getTranslations('federation');
-  const metrics = await getFederationMetrics(orgId);
+  const metrics = await getFederationMetrics(userId, orgId);
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -135,9 +68,7 @@ export default async function FederationDashboardPage({
             {t('dashboard.title', { defaultValue: 'Federation Dashboard' })}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {t('dashboard.description', { 
-              defaultValue: 'Provincial federation oversight, affiliate management, and remittance tracking' 
-            })}
+            {t('dashboard.description')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -150,7 +81,7 @@ export default async function FederationDashboardPage({
           <Button asChild>
             <Link href={`/${locale}/dashboard/federation/affiliates`}>
               <Users className="mr-2 h-4 w-4" />
-              {t('dashboard.manageAffiliates', { defaultValue: 'Manage Affiliates' })}
+              {t('dashboard.manageAffiliates')}
             </Link>
           </Button>
         </div>
@@ -240,7 +171,7 @@ export default async function FederationDashboardPage({
           </CardHeader>
           <CardContent>
             <Button variant="destructive" asChild>
-              <Link href={`/${locale}/dashboard/federation/remittances?filter=overdue`}>
+              <Link href={`/${locale}/dashboard/federation/remittances`}>
                 {t('alerts.overdue.action', { defaultValue: 'View Overdue Remittances' })}
               </Link>
             </Button>
@@ -254,12 +185,10 @@ export default async function FederationDashboardPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              {t('quickActions.affiliates.title', { defaultValue: 'Affiliate Management' })}
+              {t('quickActions.affiliates.title')}
             </CardTitle>
             <CardDescription>
-              {t('quickActions.affiliates.description', { 
-                defaultValue: 'View and manage member unions, locals, and organizing campaigns' 
-              })}
+              {t('quickActions.affiliates.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -282,25 +211,17 @@ export default async function FederationDashboardPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              {t('quickActions.remittances.title', { defaultValue: 'Remittance Tracking' })}
+              {t('quickActions.remittances.title')}
             </CardTitle>
             <CardDescription>
-              {t('quickActions.remittances.description', { 
-                defaultValue: 'Monitor per-capita dues remittances from member unions' 
-              })}
+              {t('quickActions.remittances.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Button variant="outline" className="w-full justify-start" asChild>
               <Link href={`/${locale}/dashboard/federation/remittances`}>
                 <FileText className="mr-2 h-4 w-4" />
-                {t('quickActions.remittances.viewAll', { defaultValue: 'View All Remittances' })}
-              </Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href={`/${locale}/dashboard/federation/remittances?filter=pending`}>
-                <Calendar className="mr-2 h-4 w-4" />
-                {t('quickActions.remittances.pending', { defaultValue: 'Pending This Month' })}
+                {t('quickActions.remittances.viewAll')}
               </Link>
             </Button>
           </CardContent>
@@ -327,13 +248,13 @@ export default async function FederationDashboardPage({
               <p>{t('recentAffiliates.empty', { defaultValue: 'No affiliated unions found' })}</p>
               <Button className="mt-4" variant="outline" asChild>
                 <Link href={`/${locale}/dashboard/federation/affiliates`}>
-                  {t('recentAffiliates.manageAction', { defaultValue: 'Manage Affiliates' })}
+                  {t('recentAffiliates.manageAction')}
                 </Link>
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              {(metrics.memberUnions as any as MemberUnionData[]).slice(0, 5).map((union: MemberUnionData) => (
+              {metrics.memberUnions.slice(0, 5).map((union) => (
                 <div key={union.id} className="flex items-center justify-between border-b pb-4 last:border-0">
                   <div>
                     <div className="font-medium">{union.name}</div>
@@ -349,7 +270,7 @@ export default async function FederationDashboardPage({
                     </div>
                   </div>
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/${locale}/dashboard/federation/affiliates?id=${union.id}`}>
+                    <Link href={`/${locale}/dashboard/federation/affiliates?q=${encodeURIComponent(union.name)}`}>
                       {t('recentAffiliates.viewDetails', { defaultValue: 'View' })}
                     </Link>
                   </Button>

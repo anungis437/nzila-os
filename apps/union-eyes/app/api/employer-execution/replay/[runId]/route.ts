@@ -1,6 +1,10 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { recordedRunAmounts } from "@/lib/employer-execution/run-duties";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
 import {
   employerPayrollRuns,
   employerPayrollRunItems,
@@ -27,21 +31,28 @@ const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 const replaySchema = z.object({
   mode: z.enum(["exact", "new_engine", "new_rule"]).default("exact"),
   replayEngineVersion: z.string().optional(),
-  replayRuleVersionId: z.string().uuid().optional(),
+  replayRuleVersionId: z.guid().optional(),
 });
 
 export const POST = withApi(
   {
-    auth: { minRole: "steward" },
+    rlsOrgContext: true,
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_execution_replay",
     body: replaySchema,
     successStatus: 201,
     openapi: { tags: ["Employer Execution"], summary: "Replay payroll run and diff results" },
   },
   async ({ organizationId, params, body, userId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
     const runId = params?.runId;
     if (typeof runId !== "string") throw ApiError.badRequest("Source payroll run id is required");
+
+    // A replay reads every payroll item of the run and returns per-employee differences: the role title alone is not
+    // financial authority, so it needs the same live view mandate as the run's own detail.
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view", resourceId: runId }),
+    );
 
     const [sourceRun] = await db
       .select()
@@ -63,7 +74,7 @@ export const POST = withApi(
         ),
       );
 
-    const [sourceEvidenceManifest] = await db
+    const sourceEvidenceManifests = await db
       .select()
       .from(employerExecutionArtifacts)
       .where(
@@ -73,8 +84,7 @@ export const POST = withApi(
           eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
         ),
       )
-      .orderBy(desc(employerExecutionArtifacts.createdAt))
-      .limit(1);
+      .orderBy(desc(employerExecutionArtifacts.createdAt));
 
     const timesheetEntries = await db
       .select()
@@ -294,10 +304,41 @@ export const POST = withApi(
           : "Replay matched original run",
     };
 
-    const parentLink =
-      ((sourceEvidenceManifest?.manifestJson as Record<string, unknown> | undefined)?.chainLink as
-        | { linkId?: string; sealHash?: string; chainDepth?: number }
-        | undefined) ?? undefined;
+    // The stored mode records an engine change as new_engine (migration 0040); the requested mode and rule version
+    // still travel with the diff, and the same request against the same run is answered with the replay it made.
+    const replayContext = { requestedMode: body.mode, replayRuleVersionId: ruleVersion.id };
+    const diffHash = sha256(JSON.stringify(diff));
+    const priorReplays = await db
+      .select()
+      .from(employerExecutionReplays)
+      .where(
+        and(
+          eq(employerExecutionReplays.organizationId, organizationId),
+          eq(employerExecutionReplays.sourcePayrollRunId, sourceRun.id),
+          eq(employerExecutionReplays.diffHash, diffHash),
+        ),
+      );
+    const priorReplay = priorReplays.find((candidate) => {
+      const context = (candidate.diffJson as { replayContext?: typeof replayContext } | null)?.replayContext;
+      return (
+        context?.requestedMode === replayContext.requestedMode &&
+        context?.replayRuleVersionId === replayContext.replayRuleVersionId &&
+        candidate.replayEngineVersion === replayEngineVersion
+      );
+    });
+    if (priorReplay) {
+      return { data: { replay: priorReplay, diff, replayTotals: replayedTotals, repeated: true } };
+    }
+
+    // A replay chains from the run's own seal, never from an earlier replay's manifest.
+    const parentLink = sourceEvidenceManifests
+      .map(
+        (manifest) =>
+          (manifest.manifestJson as Record<string, unknown> | undefined)?.chainLink as
+            | { linkId?: string; sealHash?: string; chainDepth?: number; entityType?: string }
+            | undefined,
+      )
+      .find((link) => link?.entityType === "payroll_run");
 
     const replayEvidencePack = createEvidencePack({
       entityType: "replay",
@@ -327,19 +368,21 @@ export const POST = withApi(
       ],
     });
 
-    const [replay] = await withRLSContext(async (tx) => {
+    // The replay only ever adds records beside the source run; the run's own status, amounts and approvals are
+    // never written here. The replay, its evidence and the audit record commit together.
+    const [replay] = await withRLSContext({ organizationId }, async (tx) => {
       const [createdReplay] = await tx
         .insert(employerExecutionReplays)
         .values({
           organizationId,
           sourcePayrollRunId: sourceRun.id,
           replayPayrollRunId: null,
-          mode: body.mode === "new_rule" ? "simulated" : "exact",
+          mode: body.mode === "new_rule" ? "simulated" : body.mode === "new_engine" ? "new_engine" : "exact",
           sourceEngineVersion: sourceRun.engineVersion,
           replayEngineVersion,
-          diffJson: diff,
+          diffJson: { ...diff, replayContext },
           diffSummary: diff.summary,
-          diffHash: sha256(JSON.stringify(diff)),
+          diffHash,
           createdBy: userId ?? undefined,
         })
         .returning();
@@ -423,6 +466,27 @@ export const POST = withApi(
           blocking: "no",
         });
       }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "employer_execution.replay.create",
+        resourceType: "employer_execution_replays",
+        resourceId: createdReplay.id,
+        details: {
+          sourcePayrollRunId: sourceRun.id,
+          sourceRunStatus: sourceRun.status,
+          mode: body.mode,
+          sourceEngineVersion: sourceRun.engineVersion,
+          replayEngineVersion,
+          sourceRuleVersionId: sourceRun.cbaRuleVersionId,
+          replayRuleVersionId: ruleVersion.id,
+          changed: diff.changed,
+          differenceCount: diff.differences.length,
+          diffHash: createdReplay.diffHash,
+          sourceAmounts: recordedRunAmounts(sourceRun),
+        },
+      });
 
       return [createdReplay];
     });

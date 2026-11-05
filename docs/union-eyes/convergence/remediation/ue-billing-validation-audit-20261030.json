@@ -1,0 +1,23 @@
+{
+  "record": "UE_GATE0_SOURCE_PATCH_AWAITING_QUALIFICATION",
+  "defectId": "DEF-0B3-BILLING-VALIDATE-LOG-ONLY-MISLABELLED",
+  "sourceBaseSha": "2018f26479bb11902d04a372417c5106454ad722",
+  "sourceState": "IMPLEMENTED_PENDING_QUALIFICATION",
+  "closed": false,
+  "changes": [
+    "Replace application-only audit logging with durable tenant-bound mandatory audit writes.",
+    "Distinguish billing validation failures and dependency outages from authentication failures.",
+    "Fail closed if mandatory audit cannot commit; do not report an unposted invoice as approved.",
+    "Reject client-supplied organization identifiers and do not apply USD conversion to other currencies."
+  ],
+  "tests": [
+    "apps/union-eyes/app/api/__tests__/billing-validate.route.test.ts"
+  ],
+  "verification": {
+    "unit": "NOT_RUN",
+    "nativePg15Pg16": "NOT_RUN",
+    "httpBrowser": "NOT_RUN",
+    "staging": "NOT_RUN"
+  },
+  "institutionalRatification": "NOT_GRANTED"
+}

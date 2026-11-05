@@ -1,6 +1,7 @@
 import type { SupportedLocale } from './adaptivePassageLibrary';
 
-const EMAIL_PATTERN = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
+// Bounded quantifiers keep the match linear on long input; an unanchored match still finds any email-like run.
+const EMAIL_PATTERN = /[A-Z0-9._%+-]{1,64}@[A-Z0-9.-]{1,255}\.[A-Z]{2,24}/i;
 const URL_PATTERN = /https?:\/\//i;
 
 export function assertSupportedLocale(locale: string): asserts locale is SupportedLocale {

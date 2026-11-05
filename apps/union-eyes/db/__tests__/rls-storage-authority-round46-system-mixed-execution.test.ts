@@ -25,7 +25,7 @@
  * CLOSED this round (5 tables):
  *   TENANT_RLS_REQUIRED (MIXED authority): alert_rules, push_devices
  *   SYSTEM_ONLY: webhook_receipts, union_density
- *   CONTAINED_NO_AUTHORITY: shopify_config
+ *   CONTAINED_NO_AUTHORITY: shopify_config (reclassified SYSTEM_ONLY by the CTX-3 census, see the describe below)
  *
  * push_devices CORRECTS round 45's MIXED_ROOT ejection: the cited system
  * path (lib/workers/notification-worker.ts + services/fcm-service.ts) is
@@ -122,15 +122,17 @@ describe('round 46 SYSTEM_ONLY: union_density', () => {
   });
 });
 
-describe('round 46 CONTAINED_NO_AUTHORITY: shopify_config', () => {
-  it('has the strict zero-authority shape (dead TS, Django now contained)', () => {
+describe('round 46 shopify_config, reclassified SYSTEM_ONLY by the CTX-3 census', () => {
+  it('has the webhook-invoked system-read shape: the shop-domain lookup of the Shopify webhook, and no tenant path', () => {
     const entry = storageAuthorityManifest.find((e) => e.table === 'shopify_config');
     expect(entry, 'shopify_config: no manifest entry found').toBeTruthy();
-    expect(entry!.classification).toBe('CONTAINED_NO_AUTHORITY');
+    // The round-46 shape (CONTAINED_NO_AUTHORITY, no authority at all) was written before the Shopify webhook resolved an organization from the signed shop domain;
+    // resolveShopOrganization reads this table as the system role, so a real system role with no grant failed every signed event.
+    expect(entry!.classification).toBe('SYSTEM_ONLY');
     expect(entry!.requiredRuntimePrivileges).toEqual([]);
-    expect(entry!.requiredSystemPrivileges).toEqual([]);
-    expect(entry!.invocationAuthority).toBe('NONE');
-    expect(entry!.dbExecutionPrincipal).toBe('NONE');
+    expect(entry!.requiredSystemPrivileges).toEqual(['SELECT']);
+    expect(entry!.invocationAuthority).toBe('WEBHOOK');
+    expect(entry!.dbExecutionPrincipal).toBe('SYSTEM_RUNTIME');
   });
 });
 
@@ -220,7 +222,8 @@ describe('round 46 user-isolation ratchet: push_devices route', () => {
   it('forces profileId server-side on create via a named, independently tested helper', () => {
     const src = source('app/api/mobile/devices/route.ts');
     expect(src).toContain('export function buildPushDeviceCreateValues');
-    expect(src).toContain('beforeCreate: (values, { userId }) => buildPushDeviceCreateValues(values, userId)');
+    expect(src).toContain('buildPushDeviceCreateValues(values, userId)');
+    expect(src).toContain('await requirePushDeviceProfile(organizationId, userId)');
   });
 });
 

@@ -32,8 +32,11 @@ export interface OrgBenchmarkPosition {
   currentScore: number;
   /** Which cohort the org belongs to */
   cohort: MaturityCohort;
-  /** Approximate percentile (computed from reference distribution) */
-  estimatedPercentile: number;
+  /**
+   * Always null. The score bands below are a rubric with no named source, population or date, so a percentile would state a
+   * population position the source cannot support.
+   */
+  estimatedPercentile: null;
   /** Score needed to reach next cohort */
   pointsToNextCohort: number;
   /** Label of next cohort */
@@ -45,9 +48,10 @@ export interface OrgBenchmarkPosition {
 export interface BenchmarkDimensionComparison {
   dimensionName: string;
   orgScore: number;
-  cohortAverageScore: number;
-  relativePosition: 'above_cohort' | 'at_cohort' | 'below_cohort';
-  gapToCohortAverage: number;
+  /** The midpoint of the rubric band the organization falls in; not an average of any population. */
+  bandMidpointScore: number;
+  relativePosition: 'above_band_midpoint' | 'at_band_midpoint' | 'below_band_midpoint';
+  gapToBandMidpoint: number;
   /** Privacy-safe insight about this dimension */
   insight: string;
 }
@@ -76,8 +80,10 @@ export interface FederatedBenchmarkResult {
   dimensionComparisons: BenchmarkDimensionComparison[];
   /** Privacy-safe maturity curve */
   maturityCurve: PrivacySafeMaturityCurve;
-  /** Reference percentile distribution (no org data) */
+  /** Always empty: no sourced reference distribution exists. */
   percentileReference: BenchmarkPercentileRange[];
+  /** Says what the bands are: an unsourced rubric, not a comparison with other organizations. */
+  referenceStatus: 'UNSOURCED_RUBRIC_NO_POPULATION';
   /** Governance-safe insights based on cohort positioning */
   cohortInsights: string[];
   disclaimer: string;

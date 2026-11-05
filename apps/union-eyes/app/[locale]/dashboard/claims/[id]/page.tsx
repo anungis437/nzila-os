@@ -10,52 +10,49 @@ import { ArrowLeft, Calendar, MapPin, FileText, Clock, AlertCircle } from 'lucid
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
-import { ClaimJurisdictionInfo } from '@/components/claims/claim-jurisdiction-info';
+import { ClaimDeadlineUnavailable } from '@/components/claims/claim-deadline-unavailable';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
+import { envelopeRow, envelopeRows, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
+import type { ClaimAttachmentWire as ClaimAttachment, ClaimDetailWire } from '@/lib/cases/claim-detail-wire';
 import Link from 'next/link';
 
-interface ClaimAttachment {
-  url: string;
-  fileName: string;
-  fileSize: number;
-  fileType: string;
-  uploadedAt: string;
-  uploadedBy: string;
+interface CaseActivity {
+  id: string;
+  timestamp: string | null;
+  description: string | null;
 }
 
-interface WorkflowUpdate {
-  id?: string;
-  newStatus: string;
-  previousStatus?: string | null;
-  changedAt: string;
-  notes?: string | null;
-}
-
-interface Claim {
-  claimId: string;
-  claimNumber: string;
-  organizationId: string;
-  memberId: string;
-  isAnonymous: boolean;
-  claimType: string;
-  status: string;
-  priority: string;
-  incidentDate: string;
-  location: string;
-  description: string;
-  desiredOutcome: string;
-  attachments: ClaimAttachment[];
-  witnessesPresent: boolean;
-  witnessDetails: string | null;
-  filedDate?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// What GET /api/claims/{id} answers with and this page reads: the declaration the route and the test of its query share (a column the schema leaves nullable is null when nothing was recorded).
+type Claim = Pick<
+  ClaimDetailWire,
+  | 'claimId'
+  | 'claimNumber'
+  | 'claimType'
+  | 'status'
+  | 'priority'
+  | 'incidentDate'
+  | 'location'
+  | 'description'
+  | 'desiredOutcome'
+  | 'attachments'
+  | 'witnessesPresent'
+  | 'witnessDetails'
+  | 'createdAt'
+  | 'updatedAt'
+>;
 
 export default function ClaimDetailPage() {
   const t = useTranslations();
   const locale = useLocale();
-  
+
+  // A column the schema leaves nullable is blank when nothing was recorded: say so, rather than print an empty value or "Invalid Date".
+  const recorded = (value: string | null) => (value?.trim() ? value : t('claims.notRecorded'));
+  const instantDay = (value: string | null) => {
+    const instant = value ? new Date(value) : null;
+    return instant && !Number.isNaN(instant.getTime()) ? instant.toLocaleDateString(locale) : '—';
+  };
+
   const statusLabels: Record<string, { label: string; color: string }> = {
     submitted: { label: t('claimStatus.submitted'), color: 'bg-blue-100 text-blue-800' },
     under_review: { label: t('claimStatus.underReview'), color: 'bg-yellow-100 text-yellow-800' },
@@ -98,34 +95,40 @@ export default function ClaimDetailPage() {
   const [claim, setClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [workflowHistory, setWorkflowHistory] = useState<WorkflowUpdate[]>([]);
+  const [unavailable, setUnavailable] = useState(false);
+  const [activity, setActivity] = useState<CaseActivity[]>([]);
+  const [activityFailed, setActivityFailed] = useState(false);
 
   useEffect(() => {
     const fetchClaim = async () => {
       try {
         setLoading(true);
         const response = await fetch(`/api/claims/${claimId}`);
-        
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          throw new Error(body?.message || `HTTP ${response.status} ${response.statusText}`);
+
+        // A missing case and one the user may not read are intentionally indistinguishable.
+        if (response.status === 404 || response.status === 403) {
+          setUnavailable(true);
+          return;
         }
         
-        const data = await response.json();
-        // withApi wraps in { success, data: { data: row }, timestamp }
-        const claimData = data?.data?.data ?? data?.data ?? data?.claim ?? data;
-        setClaim(claimData);
-        trackCaseViewed(claimData?.claimId ?? claimId);
+        if (!response.ok) {
+          throw new Error(await readApiError(response, `HTTP ${response.status} ${response.statusText}`));
+        }
         
-        // Fetch workflow history
+        // The route answers { success, data: { data: <the case> } }: the framework's envelope around the route's own { data }.
+        const claimData = envelopeRow(await response.json()) as unknown as Claim;
+        setClaim(claimData);
+        trackCaseViewed(claimData.claimId ?? claimId);
+        
+        // Member-visible case activity from the canonical timeline (visibility-scoped server side)
         try {
-          const historyResponse = await fetch(`/api/claims/${claimData?.claimId ?? claimId}/workflow/history`);
-          if (historyResponse.ok) {
-            const historyData = await historyResponse.json();
-            setWorkflowHistory(historyData.history || []);
-          }
-        } catch (_histErr) {
-}
+          const timelineResponse = await fetch(`/api/cases/${claimData.claimId ?? claimId}/timeline`);
+          if (!timelineResponse.ok) throw new Error(`HTTP ${timelineResponse.status}`);
+          setActivity(envelopeRows(await timelineResponse.json()) as CaseActivity[]);
+        } catch {
+          // The case itself loaded; only its activity did not, and the card says so rather than reading as "no activity".
+          setActivityFailed(true);
+        }
       } catch (err) {
 setError(err instanceof Error ? err.message : 'Failed to load claim');
       } finally {
@@ -175,9 +178,13 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('errors.loadingError')}</h2>
-            <p className="text-gray-600 mb-4">{error || t('claims.notFound')}</p>
-            <Link href={`/${locale}/dashboard/inbox?type=intake`}>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              {unavailable ? t('claimsPage.notAvailableTitle') : t('errors.loadingError')}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {unavailable ? t('claimsPage.notAvailableBody') : (error || t('claims.notFound'))}
+            </p>
+            <Link href={`/${locale}/dashboard/claims`}>
               <Button>{t('claims.backToClaims')}</Button>
             </Link>
           </CardContent>
@@ -198,7 +205,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Link href={`/${locale}/dashboard/inbox?type=intake`}>
+          <Link href={`/${locale}/dashboard/claims`}>
             <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
               <ArrowLeft size={20} />
               {t('claims.backToClaims')}
@@ -207,8 +214,8 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
           
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{claim.claimNumber}</h1>
-              <p className="text-gray-600">{claimTypeLabels[claim.claimType] || claim.claimType}</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{claim.claimNumber ?? t('claims.claimDetails')}</h1>
+              {claim.claimType && <p className="text-gray-600">{claimTypeLabels[claim.claimType] || claim.claimType}</p>}
             </div>
             <div className="flex gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
@@ -240,12 +247,12 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500">{t('claims.incidentDescription')}</label>
-                    <p className="text-gray-900 mt-1">{claim.description}</p>
+                    <p className="text-gray-900 mt-1">{recorded(claim.description)}</p>
                   </div>
                   
                   <div>
                     <label className="text-sm font-medium text-gray-500">{t('claims.desiredOutcome')}</label>
-                    <p className="text-gray-900 mt-1">{claim.desiredOutcome}</p>
+                    <p className="text-gray-900 mt-1">{recorded(claim.desiredOutcome)}</p>
                   </div>
 
                   {claim.witnessesPresent && claim.witnessDetails && (
@@ -289,17 +296,11 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-              <ClaimJurisdictionInfo
-                claimId={claim.claimId}
-                organizationId={claim.organizationId}
-                claimType={claim.claimType}
-                status={claim.status}
-                filedDate={claim.filedDate}
-              />
+              <ClaimDeadlineUnavailable />
             </motion.div>
 
-            {/* Workflow History */}
-            {workflowHistory.length > 0 && (
+            {/* Case activity */}
+            {(activity.length > 0 || activityFailed) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -310,28 +311,24 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <CardTitle className="text-lg">{t('claims.statusHistory')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {workflowHistory.map((update, index: number) => (
-                        <div key={update.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-900">
-                              {statusLabels[update.newStatus]?.label || update.newStatus}
-                            </span>
+                    {activityFailed ? (
+                      <p role="alert" className="text-sm text-red-600" data-testid="case-activity-error">{t('claims.activityLoadFailed')}</p>
+                    ) : (
+                    <div className="space-y-4" data-testid="case-activity">
+                      {activity.map((item, index: number) => (
+                        <div key={item.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
+                          {item.timestamp && (
                             <span className="text-xs text-gray-500">
-                              {new Date(update.changedAt).toLocaleDateString()}
+                              {instantDay(item.timestamp)}
                             </span>
-                          </div>
-                          {update.previousStatus && (
-                            <p className="text-xs text-gray-500 mb-1">
-                              {t('claims.from')}: {statusLabels[update.previousStatus]?.label || update.previousStatus}
-                            </p>
                           )}
-                          {update.notes && (
-                            <p className="text-sm text-gray-600 mt-1">{update.notes}</p>
+                          {item.description && (
+                            <p className="text-sm text-gray-700 mt-1">{item.description}</p>
                           )}
                         </div>
                       ))}
                     </div>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -354,7 +351,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <Calendar size={18} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">{t('claims.incidentDate')}</p>
-                      <p className="text-gray-900">{new Date(claim.incidentDate).toLocaleDateString()}</p>
+                      <p className="text-gray-900">{claim.incidentDate ? formatDay(claim.incidentDate, locale, 'numeric') : t('claims.incidentDateNotRecorded')}</p>
                     </div>
                   </div>
 
@@ -362,15 +359,15 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <MapPin size={18} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">{t('claims.location')}</p>
-                      <p className="text-gray-900">{claim.location}</p>
+                      <p className="text-gray-900">{recorded(claim.location)}</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <Clock size={18} className="text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500">{t('claims.submittedBy')}</p>
-                      <p className="text-gray-900">{new Date(claim.createdAt).toLocaleDateString()}</p>
+                      <p className="text-sm font-medium text-gray-500">{t('claims.submitted')}</p>
+                      <p className="text-gray-900">{instantDay(claim.createdAt)}</p>
                     </div>
                   </div>
 
@@ -378,7 +375,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <Clock size={18} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">{t('claims.lastUpdated')}</p>
-                      <p className="text-gray-900">{new Date(claim.updatedAt).toLocaleDateString()}</p>
+                      <p className="text-gray-900">{instantDay(claim.updatedAt)}</p>
                     </div>
                   </div>
                 </CardContent>

@@ -121,12 +121,24 @@ export function setCapabilityCookie(response: NextResponse, assessmentId: string
   });
 }
 
+/** Removes the capability cookie from the claiming browser; the stored capability is revoked server-side regardless. */
+export function clearCapabilityCookie(response: NextResponse, assessmentId: string): void {
+  response.cookies.set(cookieName(assessmentId), '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
+}
+
 export interface CapabilityCheckRow {
   capabilityTokenHash: string | null;
   capabilityTokenExpiresAt: Date | null;
 }
 
-export type CapabilityDenialReason = 'missing' | 'invalid' | 'expired' | 'not_found';
+// The last three belong to a claimed assessment (see assessment-access.ts): the bearer capability is no longer accepted for it.
+export type CapabilityDenialReason = 'missing' | 'invalid' | 'expired' | 'not_found' | 'authentication_required' | 'not_owner' | 'claimed';
 
 export type CapabilityCheckResult =
   | { ok: true }
@@ -161,6 +173,10 @@ export function capabilityDenialStatus(reason: CapabilityDenialReason): number {
       return 404;
     case 'expired':
       return 410;
+    case 'not_owner':
+      return 403;
+    case 'claimed':
+      return 409;
     default:
       return 401;
   }

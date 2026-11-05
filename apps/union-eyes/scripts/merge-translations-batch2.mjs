@@ -2,7 +2,7 @@
  * Batch 2: Merge ~1000 new translation keys into en-CA.json and fr-CA.json
  * Covers: dashboard, admin, elections, grievances, strike-fund, trust, workbench,
  * api-docs, deadlines page, mobile, members, cases, voting components,
- * UI components, union structure, billing popups, onboarding
+ * UI components, union structure
  */
 import { readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
@@ -901,51 +901,6 @@ const newEN = {
       assignButton: "Assign"
     }
   },
-  billing: {
-    upgradePlan: {
-      title: "Upgrade to Pro",
-      subtitle: "You've used all your credits ({used}/{total}). Get more with Pro.",
-      monthly: "Monthly",
-      yearly: "Yearly",
-      save33: "Save 33%",
-      monthlyPrice: "$30",
-      yearlyPrice: "$249",
-      yearlyPriceMonthly: "$20",
-      perMonth: "/month",
-      billedAnnually: "Billed annually at $249",
-      billedMonthly: "Billed monthly, cancel anytime",
-      benefit1: "1,000 AI credits per billing cycle",
-      benefit2: "AI-powered grievance triage & drafting",
-      benefit3: "Precedent research & CBA extraction",
-      benefit4: "Priority support from labour specialists",
-      configError: "Configuration issue detected. Please visit the pricing page to complete your purchase.",
-      checkoutFailed: "Failed to create checkout. Please try again later.",
-      checkoutFailedRetry: "Failed to create checkout. Please try again.",
-      untrustedUrl: "Untrusted checkout URL",
-      unexpectedError: "An unexpected error occurred. Please try again later.",
-      getProYearly: "Get Pro Yearly",
-      getProMonthly: "Get Pro Monthly",
-      processing: "Processing...",
-      nextFreeRenewal: "Next free renewal: Not scheduled",
-      close: "Close"
-    },
-    paymentSuccess: {
-      title: "Payment Successful!",
-      subtitleYearly: "Thank you for upgrading to Pro Yearly",
-      subtitleMonthly: "Thank you for upgrading to Pro Monthly",
-      planActive: "Your Pro Plan is Active!",
-      refresh: "Refresh",
-      credits: "Credits",
-      creditsRenewOn: "Credits renew on",
-      notAvailable: "N/A",
-      planIncludes: "Your Pro Plan Includes:",
-      benefit1: "1000 credits every billing cycle",
-      benefit2: "Access to all premium features",
-      benefit3: "Priority support",
-      benefit4: "Advanced analytics and exports",
-      closeLabel: "Close payment success dialog"
-    }
-  },
   workflow: {
     history: {
       statusSubmitted: "Submitted",
@@ -1059,29 +1014,6 @@ const newEN = {
       tabCommittees: "Committees",
       orgStructureTitle: "Organizational Structure",
       orgStructureDescription: "Visual representation of your union's organizational hierarchy"
-    }
-  },
-  onboarding: {
-    welcome: {
-      title: "Welcome!",
-      subtitle: "Thanks for joining! We're excited to have you here.",
-      freePlanActive: "Your Free Plan is Active!",
-      proPlanActive: "Your Pro Plan is Active!",
-      credits: "Credits",
-      nextRenewal: "Next renewal: in 4 weeks",
-      freePlanIncludes: "Your Free Plan Includes:",
-      proPlanIncludes: "Your Pro Plan Includes:",
-      freeBenefit1: "5 free credits every 4 weeks",
-      freeBenefit2: "Access to basic features",
-      freeBenefit3: "Automatic credit renewals",
-      freeBenefit4: "Upgrade to Pro anytime for more credits",
-      proBenefit1: "1000 credits every billing cycle",
-      proBenefit2: "Access to all premium features",
-      proBenefit3: "Priority support",
-      proBenefit4: "Advanced analytics",
-      getStarted: "Let's Get Started",
-      viewProPlans: "View Pro Plans",
-      closeLabel: "Close welcome message"
     }
   }
 };
@@ -1976,51 +1908,6 @@ const newFR = {
       assignButton: "Attribuer"
     }
   },
-  billing: {
-    upgradePlan: {
-      title: "Passer à Pro",
-      subtitle: "Vous avez utilisé tous vos crédits ({used}/{total}). Obtenez-en plus avec Pro.",
-      monthly: "Mensuel",
-      yearly: "Annuel",
-      save33: "Économisez 33 %",
-      monthlyPrice: "30 $",
-      yearlyPrice: "249 $",
-      yearlyPriceMonthly: "20 $",
-      perMonth: "/mois",
-      billedAnnually: "Facturé annuellement à 249 $",
-      billedMonthly: "Facturé mensuellement, annulation à tout moment",
-      benefit1: "1 000 crédits IA par cycle de facturation",
-      benefit2: "Triage et rédaction de griefs alimentés par l'IA",
-      benefit3: "Recherche de précédents et extraction de CC",
-      benefit4: "Soutien prioritaire de spécialistes du travail",
-      configError: "Problème de configuration détecté. Veuillez visiter la page de tarification pour compléter votre achat.",
-      checkoutFailed: "Échec de la création du paiement. Veuillez réessayer plus tard.",
-      checkoutFailedRetry: "Échec de la création du paiement. Veuillez réessayer.",
-      untrustedUrl: "URL de paiement non fiable",
-      unexpectedError: "Une erreur inattendue s'est produite. Veuillez réessayer plus tard.",
-      getProYearly: "Obtenir Pro Annuel",
-      getProMonthly: "Obtenir Pro Mensuel",
-      processing: "Traitement...",
-      nextFreeRenewal: "Prochain renouvellement gratuit : Non prévu",
-      close: "Fermer"
-    },
-    paymentSuccess: {
-      title: "Paiement réussi !",
-      subtitleYearly: "Merci d'avoir souscrit à Pro Annuel",
-      subtitleMonthly: "Merci d'avoir souscrit à Pro Mensuel",
-      planActive: "Votre forfait Pro est actif !",
-      refresh: "Actualiser",
-      credits: "Crédits",
-      creditsRenewOn: "Renouvellement des crédits le",
-      notAvailable: "S/O",
-      planIncludes: "Votre forfait Pro comprend :",
-      benefit1: "1 000 crédits par cycle de facturation",
-      benefit2: "Accès à toutes les fonctionnalités premium",
-      benefit3: "Soutien prioritaire",
-      benefit4: "Analyses et exportations avancées",
-      closeLabel: "Fermer le dialogue de paiement réussi"
-    }
-  },
   workflow: {
     history: {
       statusSubmitted: "Soumis",
@@ -2134,29 +2021,6 @@ const newFR = {
       tabCommittees: "Comités",
       orgStructureTitle: "Structure organisationnelle",
       orgStructureDescription: "Représentation visuelle de la hiérarchie organisationnelle de votre syndicat"
-    }
-  },
-  onboarding: {
-    welcome: {
-      title: "Bienvenue !",
-      subtitle: "Merci de vous être inscrit ! Nous sommes ravis de vous accueillir.",
-      freePlanActive: "Votre forfait gratuit est actif !",
-      proPlanActive: "Votre forfait Pro est actif !",
-      credits: "Crédits",
-      nextRenewal: "Prochain renouvellement : dans 4 semaines",
-      freePlanIncludes: "Votre forfait gratuit comprend :",
-      proPlanIncludes: "Votre forfait Pro comprend :",
-      freeBenefit1: "5 crédits gratuits toutes les 4 semaines",
-      freeBenefit2: "Accès aux fonctionnalités de base",
-      freeBenefit3: "Renouvellements automatiques des crédits",
-      freeBenefit4: "Passez à Pro à tout moment pour plus de crédits",
-      proBenefit1: "1 000 crédits par cycle de facturation",
-      proBenefit2: "Accès à toutes les fonctionnalités premium",
-      proBenefit3: "Soutien prioritaire",
-      proBenefit4: "Analyses avancées",
-      getStarted: "Commencer",
-      viewProPlans: "Voir les forfaits Pro",
-      closeLabel: "Fermer le message de bienvenue"
     }
   }
 };

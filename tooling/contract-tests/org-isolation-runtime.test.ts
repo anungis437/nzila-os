@@ -86,6 +86,7 @@ const ORG_GUARD_PATTERNS = [
   /withOrgScope\s*\(/,           // Org-scoped composite guard (auth + context + org)
   /withOrgWrite\s*\(/,           // Write-restricted org-scoped guard (withOrgScope + canWrite role check)
   /withRequiredRole\s*\(/,       // TrustCore role-based auth guard
+  /verifyTrackingToken\s*\(/,    // UE signed, action-bound tracking-link token: the open and click routes record nothing without it
 ]
 
 function hasOrgGuard(content: string): boolean {

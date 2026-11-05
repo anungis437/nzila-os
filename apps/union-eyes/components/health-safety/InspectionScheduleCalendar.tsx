@@ -17,7 +17,6 @@ import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
 import { 
   Calendar as CalendarIcon, 
   ChevronLeft, 
@@ -38,84 +37,69 @@ import {
   endOfWeek
 } from "date-fns";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
+import { fetchAllRows } from "@/lib/client/crud-lists";
+import { asRecord, humanize, requiredDate, requiredString } from "@/lib/client/row-fields";
 
 export interface Inspection {
   id: string;
   title: string;
   date: Date;
-  status: "scheduled" | "completed" | "overdue" | "in_progress";
-  inspector?: string;
-  location: string;
-}
-
-interface _InspectionData {
-  id: string;
-  title: string;
-  date: string;
-  status: "scheduled" | "completed" | "overdue" | "in_progress";
-  inspector?: string;
-  location: string;
+  /** As stored: scheduled, in_progress, completed, requires_followup, followup_complete, cancelled or overdue. */
+  status: string;
 }
 
 export interface InspectionScheduleCalendarProps {
   organizationId: string;
   onScheduleInspection?: () => void;
+  /** Without it an inspection is shown on its day but is not a button: there is nowhere to open it. */
   onViewInspection?: (inspectionId: string) => void;
 }
+
+function toInspection(value: unknown): Inspection {
+  const row = asRecord(value, "inspection");
+  return {
+    id: requiredString(row, "id"),
+    title: `${requiredString(row, "inspectionNumber")} · ${humanize(requiredString(row, "inspectionType"))}`,
+    date: requiredDate(row, "scheduledDate"),
+    status: requiredString(row, "status"),
+  };
+}
+
+type Outcome = { kind: "ready"; inspections: Inspection[] } | { kind: "error"; message: string };
 
 export function InspectionScheduleCalendar({
   organizationId,
   onScheduleInspection,
   onViewInspection
 }: InspectionScheduleCalendarProps) {
-  const { toast } = useToast();
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
-  const [inspections, setInspections] = React.useState<Inspection[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [attempt, setAttempt] = React.useState(0);
+  // The answer belongs to the organization it was read for: another one's schedule is never drawn while this one loads.
+  const [loaded, setLoaded] = React.useState<{ key: string; outcome: Outcome } | null>(null);
+  const key = `${organizationId}|${attempt}`;
 
-  const loadInspections = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const start = format(startOfMonth(currentMonth), "yyyy-MM-dd");
-      const end = format(endOfMonth(currentMonth), "yyyy-MM-dd");
-
-      const response = await fetch(
-        `/api/health-safety/inspections?organizationId=${organizationId}&startDate=${start}&endDate=${end}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to load inspections");
-      }
-
-      const json = await response.json();
-      if (json.success) {
-        const rows = Array.isArray(json.data?.data) ? json.data.data : [];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setInspections(rows.map((i: any) => ({
-          id: i.id,
-          title: i.inspectionType ?? i.inspectionNumber ?? i.title ?? 'Inspection',
-          date: new Date(i.scheduledDate ?? i.date ?? Date.now()),
-          status: i.status ?? 'scheduled',
-          inspector: i.leadInspectorName ?? i.inspector,
-          location: i.workplaceName ?? i.specificLocation ?? i.location ?? '',
-        })));
-      } else {
-        throw new Error(json.error);
-      }
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to load inspection schedule",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [organizationId, currentMonth, toast]);
-
+  // The inspections route cannot filter by date, so every inspection is read once and each month is drawn from them.
   React.useEffect(() => {
-    loadInspections();
-  }, [loadInspections]);
+    let current = true;
+    fetchAllRows<unknown>("/api/health-safety/inspections")
+      .then((rows) => rows.map(toInspection))
+      .then(
+        (inspections) => {
+          if (current) setLoaded({ key, outcome: { kind: "ready", inspections } });
+        },
+        (error: unknown) => {
+          logger.error("Failed to load the inspection schedule", error);
+          if (current) setLoaded({ key, outcome: { kind: "error", message: error instanceof Error ? error.message : "The inspection schedule could not be loaded." } });
+        },
+      );
+    return () => {
+      current = false;
+    };
+  }, [key]);
+
+  const outcome = loaded?.key === key ? loaded.outcome : null;
+  const inspections = outcome?.kind === "ready" ? outcome.inspections : [];
 
   function getInspectionsForDay(day: Date): Inspection[] {
     return inspections.filter(inspection => 
@@ -126,11 +110,14 @@ export function InspectionScheduleCalendar({
   function getStatusColor(status: string) {
     switch (status) {
       case "completed":
+      case "followup_complete":
         return "bg-green-500";
       case "scheduled":
         return "bg-blue-500";
       case "in_progress":
         return "bg-purple-500";
+      case "requires_followup":
+        return "bg-orange-500";
       case "overdue":
         return "bg-red-500";
       default:
@@ -192,8 +179,17 @@ export function InspectionScheduleCalendar({
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {outcome === null ? (
           <Skeleton className="h-125 w-full" />
+        ) : outcome.kind === "error" ? (
+          <div role="alert" className="flex flex-col items-center gap-3 py-12 text-center">
+            <AlertCircle className="h-10 w-10 text-destructive" />
+            <p className="font-medium">The inspection schedule could not be loaded.</p>
+            <p className="text-sm text-muted-foreground">{outcome.message}</p>
+            <Button variant="outline" size="sm" onClick={() => setAttempt((count) => count + 1)}>
+              Try again
+            </Button>
+          </div>
         ) : (
           <div className="space-y-4">
             {/* Calendar Grid */}
@@ -229,29 +225,38 @@ export function InspectionScheduleCalendar({
                       {format(day, "d")}
                     </div>
                     <div className="space-y-1">
-                      {dayInspections.map(inspection => (
-                        <button
-                          key={inspection.id}
-                          onClick={() => onViewInspection?.(inspection.id)}
-                          className={cn(
-                            "w-full text-left p-1 rounded text-xs hover:opacity-80 transition-opacity",
-                            "flex items-start gap-1"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "w-2 h-2 rounded-full mt-1 shrink-0",
-                              getStatusColor(inspection.status)
+                      {dayInspections.map(inspection => {
+                        const entry = (
+                          <>
+                            <div
+                              className={cn(
+                                "w-2 h-2 rounded-full mt-1 shrink-0",
+                                getStatusColor(inspection.status)
+                              )}
+                            />
+                            <span className="line-clamp-2 flex-1">
+                              {inspection.title}
+                            </span>
+                            {inspection.status === "overdue" && (
+                              <AlertCircle className="h-3 w-3 text-red-600 shrink-0" />
                             )}
-                          />
-                          <span className="line-clamp-2 flex-1">
-                            {inspection.title}
-                          </span>
-                          {inspection.status === "overdue" && (
-                            <AlertCircle className="h-3 w-3 text-red-600 shrink-0" />
-                          )}
-                        </button>
-                      ))}
+                          </>
+                        );
+                        return onViewInspection ? (
+                          <button
+                            key={inspection.id}
+                            type="button"
+                            onClick={() => onViewInspection(inspection.id)}
+                            className="w-full text-left p-1 rounded text-xs hover:opacity-80 transition-opacity flex items-start gap-1"
+                          >
+                            {entry}
+                          </button>
+                        ) : (
+                          <div key={inspection.id} className="w-full p-1 rounded text-xs flex items-start gap-1">
+                            {entry}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -273,8 +278,16 @@ export function InspectionScheduleCalendar({
                 <span className="text-xs text-muted-foreground">Completed</span>
               </div>
               <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-orange-500" />
+                <span className="text-xs text-muted-foreground">Needs follow-up</span>
+              </div>
+              <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-500" />
                 <span className="text-xs text-muted-foreground">Overdue</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-gray-500" />
+                <span className="text-xs text-muted-foreground">Cancelled</span>
               </div>
             </div>
           </div>

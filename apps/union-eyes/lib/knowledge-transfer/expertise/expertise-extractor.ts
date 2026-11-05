@@ -80,6 +80,49 @@ function buildExtractionInput(interview: ExitInterview): string {
   return parts.join('\n');
 }
 
+export class ExpertiseExtractionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ExpertiseExtractionError';
+  }
+}
+
+const SENSITIVITIES = ['low', 'medium', 'high', 'critical'] as const;
+const LIST_FIELDS = [
+  'expertiseDomains', 'systemsOwnership', 'vendorRelationships', 'undocumentedWorkflows',
+  'complianceAreas', 'governanceObligations', 'crossTeamDependencies',
+] as const;
+
+/** A model answer is evidence only when it has the profile's shape; anything else is refused, not repaired into a default. */
+function parseProfile(content: string): Omit<ExpertiseProfile, 'sourceInterviewId'> {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(content);
+  } catch {
+    throw new ExpertiseExtractionError('The model answer is not valid JSON');
+  }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new ExpertiseExtractionError('The model answer is not a profile object');
+  const profile = raw as Record<string, unknown>;
+  if (!SENSITIVITIES.includes(profile.continuitySensitivity as never)) {
+    throw new ExpertiseExtractionError('The model answer has no valid continuity sensitivity');
+  }
+  for (const field of LIST_FIELDS) {
+    const value = profile[field];
+    if (value !== undefined && !(Array.isArray(value) && value.every((entry) => typeof entry === 'string'))) {
+      throw new ExpertiseExtractionError(`The model answer has an invalid ${field}`);
+    }
+  }
+  return {
+    ...Object.fromEntries(LIST_FIELDS.map((field) => [field, (profile[field] as string[] | undefined) ?? []])),
+    continuitySensitivity: profile.continuitySensitivity as ExpertiseProfile['continuitySensitivity'],
+    continuityJustification: typeof profile.continuityJustification === 'string' ? profile.continuityJustification : '',
+  } as Omit<ExpertiseProfile, 'sourceInterviewId'>;
+}
+
+/**
+ * Extracts an expertise profile. When the model's answer cannot be parsed or has the wrong shape this throws: a default
+ * "medium" profile used to be returned and stored as the interview's continuity risk, which presented a guess as an assessment.
+ */
 export async function extractExpertise(interview: ExitInterview): Promise<ExpertiseProfile> {
   const organizationId =
     typeof (interview as { organizationId?: unknown }).organizationId === 'string'
@@ -98,24 +141,7 @@ export async function extractExpertise(interview: ExitInterview): Promise<Expert
     dataClass: 'internal',
   });
 
-  try {
-    const parsed = JSON.parse(result.content) as Omit<ExpertiseProfile, 'sourceInterviewId'>;
-    return { ...parsed, sourceInterviewId: interview.id };
-  } catch {
-    // Graceful fallback — return minimal safe profile
-    return {
-      expertiseDomains: interview.topics ?? [],
-      systemsOwnership: [],
-      vendorRelationships: [],
-      undocumentedWorkflows: [],
-      complianceAreas: [],
-      governanceObligations: [],
-      crossTeamDependencies: [],
-      continuitySensitivity: 'medium',
-      continuityJustification: 'Unable to parse AI extraction result; manual review recommended.',
-      sourceInterviewId: interview.id,
-    };
-  }
+  return { ...parseProfile(result.content), sourceInterviewId: interview.id };
 }
 
 /**

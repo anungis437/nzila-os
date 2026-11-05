@@ -58,8 +58,8 @@ interface TrackEventInput {
 /**
  * Record a single pilot event.
  */
-export async function trackPilotEvent(input: TrackEventInput): Promise<void> {
-  await db.insert(pilotEvents).values({
+export async function trackPilotEvent(input: TrackEventInput, dbHandle: typeof db = db): Promise<void> {
+  await dbHandle.insert(pilotEvents).values({
     organizationId: input.organizationId,
     userId: input.userId,
     sessionId: input.sessionId,
@@ -76,8 +76,9 @@ export async function hasUserEvent(
   userId: string,
   organizationId: string,
   eventType: PilotEventType,
+  dbHandle: typeof db = db,
 ): Promise<boolean> {
-  const rows = await db
+  const rows = await dbHandle
     .select({ id: pilotEvents.id })
     .from(pilotEvents)
     .where(
@@ -99,8 +100,9 @@ export async function trackCaseCreated(
   organizationId: string,
   sessionId: string,
   caseId: string,
+  dbHandle: typeof db = db,
 ): Promise<void> {
-  const isFirst = !(await hasUserEvent(userId, organizationId, "case_created"));
+  const isFirst = !(await hasUserEvent(userId, organizationId, "case_created", dbHandle));
 
   if (isFirst) {
     await trackPilotEvent({
@@ -109,7 +111,7 @@ export async function trackCaseCreated(
       sessionId,
       eventType: "first_case_created",
       metadata: { caseId },
-    });
+    }, dbHandle);
   }
 
   await trackPilotEvent({
@@ -118,7 +120,7 @@ export async function trackCaseCreated(
     sessionId,
     eventType: "case_created",
     metadata: { caseId },
-  });
+  }, dbHandle);
 }
 
 /**
@@ -129,8 +131,9 @@ export async function trackUpdateAdded(
   organizationId: string,
   sessionId: string,
   caseId: string,
+  dbHandle: typeof db = db,
 ): Promise<void> {
-  const isFirst = !(await hasUserEvent(userId, organizationId, "update_added"));
+  const isFirst = !(await hasUserEvent(userId, organizationId, "update_added", dbHandle));
 
   if (isFirst) {
     await trackPilotEvent({
@@ -139,7 +142,7 @@ export async function trackUpdateAdded(
       sessionId,
       eventType: "first_update_added",
       metadata: { caseId },
-    });
+    }, dbHandle);
   }
 
   await trackPilotEvent({
@@ -148,7 +151,7 @@ export async function trackUpdateAdded(
     sessionId,
     eventType: "update_added",
     metadata: { caseId },
-  });
+  }, dbHandle);
 }
 
 /**

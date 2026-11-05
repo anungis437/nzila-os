@@ -93,7 +93,7 @@ export class RequestValidationError extends Error {
 }
 
 export function parseUuidParam(value: string | null | undefined, field: string): string {
-  const result = z.string().uuid().safeParse(value);
+  const result = z.guid().safeParse(value);
   if (!result.success) {
     throw new RequestValidationError(`${field} must be a valid UUID`, {
       field,

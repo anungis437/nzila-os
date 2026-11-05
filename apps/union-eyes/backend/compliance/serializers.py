@@ -58,28 +58,28 @@ class CertificationAuditLogSerializer(serializers.ModelSerializer):
 class DsrRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DsrRequests
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'request_type']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DsrActivityLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = DsrActivityLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'request']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DataResidencyConfigsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataResidencyConfigs
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ConsentRecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConsentRecords
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'subject_type']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -185,6 +185,7 @@ class BreakGlassActivationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BreakGlassActivations
         fields = '__all__'
+        extra_kwargs = {'secret_shares': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -212,28 +213,28 @@ class GdprDataRequestsSerializer(serializers.ModelSerializer):
 class DataProcessingRecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataProcessingRecords
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DataRetentionPoliciesSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataRetentionPolicies
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DataAnonymizationLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataAnonymizationLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class LocationTrackingSerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationTracking
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -247,7 +248,7 @@ class GeofencesSerializer(serializers.ModelSerializer):
 class GeofenceEventsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeofenceEvents
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -289,7 +290,12 @@ class LmbpLettersSerializer(serializers.ModelSerializer):
 class GssApplicationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GssApplications
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'foreign_worker_id', 'application_number',
+            'submission_date', 'gss_category', 'expected_decision_date', 'actual_decision_date',
+            'processing_days', 'met2_week_target', 'status', 'decision_details', 'documents',
+            'employer_id', 'position_details', 'compliance_flags', 'created_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -331,7 +337,7 @@ class BandCouncilConsentSerializer(serializers.ModelSerializer):
 class IndigenousMemberDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndigenousMemberData
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -380,7 +386,7 @@ class PciDssQuarterlyScansSerializer(serializers.ModelSerializer):
 class PciDssCardholderDataFlowSerializer(serializers.ModelSerializer):
     class Meta:
         model = PciDssCardholderDataFlow
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -401,7 +407,7 @@ class ProvincialPrivacyConfigSerializer(serializers.ModelSerializer):
 class ProvincialConsentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProvincialConsent
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -415,14 +421,14 @@ class PrivacyBreachesSerializer(serializers.ModelSerializer):
 class ProvincialDataHandlingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProvincialDataHandling
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DataSubjectAccessRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSubjectAccessRequests
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -436,14 +442,14 @@ class LrbAgreementsSerializer(serializers.ModelSerializer):
 class LrbEmployersSerializer(serializers.ModelSerializer):
     class Meta:
         model = LrbEmployers
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'employer_name']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class LrbUnionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LrbUnions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'union_name']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -492,14 +498,14 @@ class RecusalTrackingSerializer(serializers.ModelSerializer):
 class ConflictReviewCommitteeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConflictReviewCommittee
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ConflictTrainingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConflictTraining
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -513,112 +519,136 @@ class ConflictAuditLogSerializer(serializers.ModelSerializer):
 class GoldenSharesSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoldenShares
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'share_class', 'certificate_number', 'issue_date',
+            'holder_type', 'council_members', 'voting_power_reserved_matters',
+            'voting_power_ordinary_matters', 'redemption_value', 'dividend_rights',
+            'sunset_clause_active', 'sunset_clause_duration', 'consecutive_compliance_years',
+            'sunset_triggered_date', 'conversion_date', 'status', 'transferable',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ReservedMatterVotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReservedMatterVotes
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'matter_type', 'title', 'description', 'proposed_by']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MissionAuditsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MissionAudits
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'audit_year', 'audit_period_start',
+            'audit_period_end', 'auditor_firm', 'auditor_name', 'auditor_certification',
+            'audit_date', 'union_revenue_percent', 'member_satisfaction_percent', 'data_violations',
+            'union_revenue_threshold', 'member_satisfaction_threshold', 'data_violations_threshold',
+            'union_revenue_pass', 'member_satisfaction_pass', 'data_violations_pass',
+            'overall_pass', 'total_revenue', 'union_revenue', 'member_survey_sample_size',
+            'member_survey_responses', 'data_violation_details', 'auditor_opinion', 'auditor_notes',
+            'corrective_actions', 'impacts_consecutive_compliance', 'consecutive_years_after_audit',
+            'audit_report_pdf_url', 'supporting_documents_urls',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GovernanceEventsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GovernanceEvents
-        fields = '__all__'
+        fields = [
+            'id', 'updated_at', 'event_type', 'event_date', 'golden_share_id',
+            'reserved_matter_vote_id', 'mission_audit_id', 'title', 'description', 'impact',
+            'impact_description', 'stakeholders', 'notifications_sent', 'created_at', 'created_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CouncilElectionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CouncilElections
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'election_year', 'election_date',
+            'positions_available', 'candidates', 'winners', 'total_votes', 'participation_rate',
+            'verified_by', 'verification_date', 'contested_results',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class WorkplaceIncidentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkplaceIncidents
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'incident_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SafetyInspectionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyInspections
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'inspection_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class HazardReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = HazardReports
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'report_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SafetyCommitteeMeetingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyCommitteeMeetings
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'meeting_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SafetyTrainingRecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyTrainingRecords
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'record_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PpeEquipmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PpeEquipment
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'item_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SafetyAuditsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyAudits
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'audit_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class InjuryLogsSerializer(serializers.ModelSerializer):
     class Meta:
         model = InjuryLogs
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'log_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SafetyPoliciesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyPolicies
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'policy_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CorrectiveActionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorrectiveActions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'action_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SafetyCertificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyCertifications
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'certification_number']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 

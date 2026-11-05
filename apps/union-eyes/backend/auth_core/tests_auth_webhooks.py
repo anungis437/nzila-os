@@ -68,7 +68,7 @@ def _make_webhook_request(factory, body: bytes, headers: dict):
     pass the same bytes used with ``_build_svix_headers`` so the HMAC matches.
     """
     request = factory.post(
-        "/api/auth_core/webhooks/clerk/",
+        "/api/auth_core/webhooks/auth/",
         data=body,
         content_type="application/json",
         **headers,
@@ -82,7 +82,7 @@ def _make_webhook_request(factory, body: bytes, headers: dict):
 # ============================================================================
 
 
-@override_settings(CLERK_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
+@override_settings(AUTH_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
 class AuthWebhookVerificationTest(TestCase):
     """Test _verify_auth_webhook HMAC-SHA256 base64 verification."""
 
@@ -140,7 +140,7 @@ class AuthWebhookVerificationTest(TestCase):
         request = _make_webhook_request(self.factory, body, headers)
         self.assertTrue(_verify_auth_webhook(request))
 
-    @override_settings(CLERK_WEBHOOK_SECRET="")
+    @override_settings(AUTH_WEBHOOK_SECRET="")
     def test_missing_secret_rejected(self):
         body = b'{"type":"user.created","data":{}}'
         headers = _build_svix_headers(body)
@@ -169,7 +169,7 @@ class AuthWebhookVerificationTest(TestCase):
             "HTTP_SVIX_SIGNATURE": f"v1,{sig}",
         }
 
-        with self.settings(CLERK_WEBHOOK_SECRET=raw_secret):
+        with self.settings(AUTH_WEBHOOK_SECRET=raw_secret):
             request = _make_webhook_request(self.factory, body, headers)
             self.assertTrue(_verify_auth_webhook(request))
 
@@ -318,6 +318,30 @@ class AuthOrganizationHandlerTest(TestCase):
         org = Organizations.objects.get(auth_provider_org_id="org_test_idem")
         self.assertEqual(org.name, "CUPE 2000 Updated")
 
+    def test_handle_organization_created_stores_an_empty_hierarchy_path(self):
+        """The column is NOT NULL with no default, so the handler states it: a new organization has no ancestors here."""
+        _handle_organization_created({"id": "org_test_path_new", "name": "Path New", "slug": "path-new"})
+
+        org = Organizations.objects.get(auth_provider_org_id="org_test_path_new")
+        self.assertEqual(org.hierarchy_path, [])
+
+    def test_handle_organization_created_keeps_the_hierarchy_path_of_an_existing_organization(self):
+        """A repeated event must not move an organization back to the root: it may sit under a parent this webhook knows nothing about."""
+        Organizations.objects.create(
+            auth_provider_org_id="org_test_path_kept",
+            name="Path Kept",
+            slug="path-kept",
+            organization_type="local",
+            hierarchy_path=["federation-1", "council-1"],
+            hierarchy_level=2,
+        )
+        _handle_organization_created({"id": "org_test_path_kept", "name": "Path Kept Renamed", "slug": "path-kept"})
+
+        org = Organizations.objects.get(auth_provider_org_id="org_test_path_kept")
+        self.assertEqual(org.name, "Path Kept Renamed")
+        self.assertEqual(org.hierarchy_path, ["federation-1", "council-1"])
+        self.assertEqual(org.hierarchy_level, 2)
+
     def test_handle_organization_created_no_slug(self):
         """Missing slug should derive from name."""
         data = {"id": "org_test_noslug", "name": "My Union"}
@@ -338,6 +362,7 @@ class AuthOrganizationHandlerTest(TestCase):
             name="Old Name",
             slug="old-name",
             organization_type="union",
+            hierarchy_path=[],
         )
         data = {
             "id": "org_test_update",
@@ -382,6 +407,7 @@ class AuthMembershipHandlerTest(TestCase):
             name="Test Org",
             slug="test-org-membership",
             organization_type="union",
+            hierarchy_path=[],
         )
 
     def _membership_data(self, user_id="user_mem_001", role="member"):
@@ -496,7 +522,7 @@ class AuthMembershipHandlerTest(TestCase):
 # ============================================================================
 
 
-@override_settings(CLERK_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
+@override_settings(AUTH_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
 class AuthWebhookEndpointTest(TestCase):
     """Test the full webhook endpoint POST → handler → DB."""
 
@@ -505,7 +531,7 @@ class AuthWebhookEndpointTest(TestCase):
         headers = _build_svix_headers(body)
         # Django test client uses HTTP_ prefix for extra headers
         return self.client.post(
-            "/api/auth_core/webhooks/clerk/",
+            "/api/auth_core/webhooks/auth/",
             data=body,
             content_type="application/json",
             **headers,
@@ -549,6 +575,7 @@ class AuthWebhookEndpointTest(TestCase):
             name="E2E Mem Org",
             slug="e2e-mem-org",
             organization_type="union",
+            hierarchy_path=[],
         )
         payload = {
             "type": "organizationMembership.created",
@@ -570,6 +597,7 @@ class AuthWebhookEndpointTest(TestCase):
             name="E2E Upd Org",
             slug="e2e-upd-org",
             organization_type="union",
+            hierarchy_path=[],
         )
         OrganizationMembers.objects.create(
             user_id="user_e2e_upd",
@@ -595,7 +623,7 @@ class AuthWebhookEndpointTest(TestCase):
         payload = {"type": "user.created", "data": {"id": "user_bad_sig"}}
         body = json.dumps(payload).encode()
         resp = self.client.post(
-            "/api/auth_core/webhooks/clerk/",
+            "/api/auth_core/webhooks/auth/",
             data=body,
             content_type="application/json",
             HTTP_SVIX_ID="msg_bad",
@@ -613,5 +641,5 @@ class AuthWebhookEndpointTest(TestCase):
 
     def test_get_method_rejected(self):
         """Only POST is allowed."""
-        resp = self.client.get("/api/auth_core/webhooks/clerk/")
+        resp = self.client.get("/api/auth_core/webhooks/auth/")
         self.assertEqual(resp.status_code, 405)

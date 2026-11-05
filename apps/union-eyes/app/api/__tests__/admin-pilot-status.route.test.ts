@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   buildPilotStatus: vi.fn(),
   auth: vi.fn(),
   dbExecute: vi.fn(),
+  tenantContexts: [] as Array<{ organizationId: string }>,
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, hasMinRole: m.hasMinRole }));
@@ -15,17 +16,17 @@ vi.mock('@nzila/os-core', () => ({ createLogger: vi.fn(() => m.logger) }));
 vi.mock('@/lib/pilot-admin', () => ({ buildPilotStatus: m.buildPilotStatus }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db', () => ({ db: { execute: m.dbExecute } }));
-// The route runs every measurement query and the postgres-ping probe
-// through `withSystemContext`, which wraps the operation in
-// `db.transaction(...)` so RLS session variables get cleared for system
-// context. The RLS mechanism itself is exercised by dedicated tests in
-// `apps/union-eyes/lib/db/__tests__/with-rls-context.test.ts`; here we
-// stub the wrapper to invoke the operation with a tx that delegates to
-// the same `dbExecute` mock, keeping the assertion on `dbExecute`
-// call-count meaningful while preserving the route's real code path
-// (measure users → measure worksites → probe postgres ping).
+// The route runs the two organization measurements through `withRLSContext` (the organization's tenant transaction) and the postgres-ping
+// probe through `withSystemContext`. Both wrap the operation in a transaction; the RLS mechanism itself is exercised by dedicated tests in
+// `apps/union-eyes/lib/db/__tests__/with-rls-context.test.ts`. Here each wrapper is stubbed to invoke the operation with a tx that
+// delegates to the same `dbExecute` mock, keeping the assertion on `dbExecute` call-count meaningful while preserving the route's real code
+// path (measure users → measure worksites → probe postgres ping). The tenant wrapper also records the organization it was bound to.
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: (operation: any) => Promise.resolve(operation({ execute: m.dbExecute })),
+  withRLSContext: (context: { organizationId: string }, operation: any) => {
+    m.tenantContexts.push(context);
+    return Promise.resolve(operation({ execute: m.dbExecute }));
+  },
 }));
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign(
@@ -47,6 +48,7 @@ describe('admin/pilot-status route', () => {
   const originalEnv = { ...process.env };
   beforeEach(() => {
     vi.clearAllMocks();
+    m.tenantContexts.length = 0;
     // Reset env each test so secret-presence probes are deterministic.
     process.env = { ...originalEnv };
     process.env.DATABASE_URL = 'postgres://test';
@@ -93,6 +95,8 @@ describe('admin/pilot-status route', () => {
     // dbExecute is now called 3x: users, worksites, and the postgres
     // ping probe (SELECT 1).
     expect(m.dbExecute).toHaveBeenCalledTimes(3);
+    // The two organization measurements ran in that organization's own tenant transaction, not as the system role.
+    expect(m.tenantContexts).toEqual([{ organizationId: 'org-abc' }, { organizationId: 'org-abc' }]);
     // The route MUST emit an `operational` array with the mandated
     // shape. Every entry needs capabilityId/state/severity/etc.
     expect(Array.isArray(payload.operational)).toBe(true);

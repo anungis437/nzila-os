@@ -7,6 +7,8 @@
  * Pure helpers from simulation-models are kept REAL.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 import type { SimulationScenario, SimulationType } from '../simulation-models';
 
 const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[] }));
@@ -14,7 +16,7 @@ const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[]
 function makeChain() {
   const chain: Record<string, unknown> = {};
   chain.from = () => chain;
-  chain.where = () => Promise.resolve(mocks.interviews);
+  chain.where = () => ({ limit: () => Promise.resolve(mocks.interviews) });
   return chain;
 }
 
@@ -22,6 +24,11 @@ vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
 }));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
+// The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
+vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
+  isUuid: () => true,
+  inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
+}));
 vi.mock('@/db/schema', () => ({ exitInterviews: { organizationId: 'organizationId', status: 'status' } }));
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
 
@@ -54,16 +61,20 @@ describe('simulateContinuityImpact', () => {
     mocks.interviews = [];
   });
 
-  it('returns a minimal simulation when no nodes match the scenario', async () => {
+  // DEF-0B7-EXC-SIMULATION-UNMATCHED-NODES-RETURN-REASSURING-RESULT-AND-ROLES-ARE-IGNORED: a scenario that matches nothing used to
+  // be answered with a canned low-severity result. It is now refused, and an affected role selects the nodes it is associated with.
+  it('refuses a scenario that matches no node or role instead of returning a reassuring result', async () => {
     mocks.interviews = [{ id: 'i1' }];
     mocks.buildMap.mockResolvedValue(mapWith([n('a', 'system', false)]));
-    const result = await simulateContinuityImpact('org', scenario('retirement', ['nonexistent']));
-    expect(result.overallImpactSeverity).toBe('low');
-    expect(result.immediateImpactScore).toBe(20);
-    expect(result.domainImpacts).toEqual([]);
-    expect(result.executiveSummary).toContain('did not match');
+    await expect(simulateContinuityImpact('org', scenario('retirement', ['nonexistent']))).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
   });
 
+  it('selects the nodes associated with an affected role', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    mocks.buildMap.mockResolvedValue(mapWith([n('a', 'governance', true, ['Treasurer']), n('b', 'system', false, ['President'])]));
+    const result = await simulateContinuityImpact('org', { simulationType: 'retirement', affectedNodeIds: [], affectedRoles: ['treasurer'] });
+    expect(result.domainImpacts.map((d) => d.domain)).toEqual(['a']);
+  });
   it('simulates a critical multi-domain governance + vendor loss', async () => {
     mocks.interviews = [{ id: 'i1' }, { id: 'i2' }];
     mocks.buildMap.mockResolvedValue(

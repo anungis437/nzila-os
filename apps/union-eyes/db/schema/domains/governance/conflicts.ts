@@ -28,7 +28,7 @@ export const conflictOfInterestPolicy = pgTable("conflict_of_interest_policy", {
   reviewCommitteeRequired: boolean("review_committee_required").notNull().default(true),
   minimumReviewers: varchar("minimum_reviewers", { length: 2 }).notNull().default("2"),
   
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
 });
 
@@ -72,8 +72,8 @@ export const blindTrustRegistry = pgTable("blind_trust_registry", {
   compliant: boolean("compliant").notNull().default(false),
   complianceNotes: text("compliance_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Conflict of interest disclosures (annual + ad-hoc)
@@ -119,8 +119,8 @@ export const conflictDisclosures = pgTable("conflict_disclosures", {
   submittedAt: timestamp("submitted_at").notNull().defaultNow(),
   overdue: boolean("overdue").notNull().default(false),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Arms-length transaction verification
@@ -159,8 +159,8 @@ export const armsLengthVerification = pgTable("arms_length_verification", {
   compliant: boolean("compliant").notNull().default(false),
   complianceNotes: text("compliance_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Recusal tracking (when conflicts require stepping aside)
@@ -196,57 +196,7 @@ export const recusalTracking = pgTable("recusal_tracking", {
   verifiedBy: varchar("verified_by", { length: 255 }),
   verifiedAt: timestamp("verified_at"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-// Conflict of Interest Review Committee
-export const conflictReviewCommittee = pgTable("conflict_review_committee", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  
-  // Committee member
-  userId: varchar("user_id", { length: 255 }).notNull(),
-  fullName: text("full_name").notNull(),
-  role: varchar("role", { length: 50 }).notNull(),
-  
-  // Committee role
-  committeeRole: varchar("committee_role", { length: 50 }).notNull(), // "chair", "member", "advisor"
-  appointedBy: varchar("appointed_by", { length: 255 }),
-  appointedAt: timestamp("appointed_at").notNull().defaultNow(),
-  
-  // Term
-  termStartDate: timestamp("term_start_date").notNull(),
-  termEndDate: timestamp("term_end_date"),
-  
-  // Status
-  status: varchar("status", { length: 20 }).notNull().default("active"), // "active", "inactive", "resigned"
-  
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-// Conflict of Interest Training (required for covered roles)
-export const conflictTraining = pgTable("conflict_training", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  
-  // Trainee
-  userId: varchar("user_id", { length: 255 }).notNull(),
-  fullName: text("full_name").notNull(),
-  role: varchar("role", { length: 50 }).notNull(),
-  
-  // Training details
-  trainingType: varchar("training_type", { length: 50 }).notNull(), // "initial", "annual_refresher", "transaction_specific"
-  trainingDate: timestamp("training_date").notNull(),
-  trainingProvider: text("training_provider"),
-  
-  // Completion
-  completionStatus: varchar("completion_status", { length: 20 }).notNull().default("pending"), // "pending", "in_progress", "completed", "failed"
-  completedAt: timestamp("completed_at"),
-  certificateUrl: text("certificate_url"),
-  
-  // Next training due
-  nextTrainingDue: timestamp("next_training_due"),
-  
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Conflict of Interest Audit Log
@@ -273,6 +223,6 @@ export const conflictAuditLog = pgTable("conflict_audit_log", {
   metadata: jsonb("metadata"),
   ipAddress: varchar("ip_address", { length: 45 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

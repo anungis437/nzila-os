@@ -1153,7 +1153,7 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
       publisher.includes('MA_CHANGED_PATHS') &&
       publisher.includes('evaluateCiResults(results, diffPaths)') &&
       readFileSync(join(WORKFLOWS, PUBLISHER_WORKFLOW_FILE), 'utf8').includes(
-        'MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"',
+        'git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA" > "$MA_CHANGED_PATHS_FILE"',
       )
 
     expect(deferPublications({ action: 'PUBLISH', verdicts: posted })).toEqual([])
@@ -1232,6 +1232,42 @@ globalThis.fetch = async (_url, init) => {
     expect(result.status, result.stderr || result.stdout).toBe(0)
     return JSON.parse(readFileSync(postedPath, 'utf8'))
   }
+
+  // One environment string is capped at 128 KiB on Linux; a pull request touching thousands of paths exceeds it,
+  // so the workflows hand the diff over in MA_CHANGED_PATHS_FILE.
+  it('reads the diff from MA_CHANGED_PATHS_FILE and refuses a disagreeing inline value', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ma-paths-'))
+    const file = join(dir, 'paths.txt')
+    const many = Array.from({ length: 6000 }, (_, i) => `apps/example/src/module-${i}/component-file-${i}.tsx`)
+    writeFileSync(file, `${many.join('\n')}\n`)
+    expect(Buffer.byteLength(many.join('\n'))).toBeGreaterThan(128 * 1024)
+    const resultEnv = Object.fromEntries(
+      CANONICAL_CONTEXTS.map((context) => [
+        {
+          'lint-and-typecheck': 'MA_RESULT_LINT', test: 'MA_RESULT_UNIT', 'schema-drift': 'MA_RESULT_SCHEMA',
+          'sage-postgres-concurrency': 'MA_RESULT_RLS', 'sage-live-postgres': 'MA_RESULT_MIGRATION', build: 'MA_RESULT_BUILD',
+          'contract-tests': 'MA_RESULT_CONTRACTS', 'repository-inventory': 'MA_RESULT_INVENTORY',
+          'governance-integrity': 'MA_RESULT_GOVERNANCE', 'hash-chain-drift': 'MA_RESULT_HASH',
+          'operating-layer-gate': 'MA_RESULT_OPERATING', 'iac-scan': 'MA_RESULT_IAC', 'ops-pack-validation': 'MA_RESULT_OPS',
+        }[context.ciJob],
+        'success',
+      ]),
+    )
+    const fromFile = postedChecks('publish-ci-results', '', {
+      ...resultEnv,
+      GITHUB_EVENT_NAME: 'pull_request',
+      MA_CHANGED_PATHS_FILE: file,
+    })
+    expect(fromFile).toHaveLength(13)
+    expect(() =>
+      postedChecks('publish-ci-results', '', {
+        ...resultEnv,
+        GITHUB_EVENT_NAME: 'pull_request',
+        MA_CHANGED_PATHS_FILE: file,
+        MA_CHANGED_PATHS: 'README.md',
+      }),
+    ).toThrow(/disagree/)
+  })
 
   it('posts terminal NOT_APPLICABLE checks on DEFER_TO_CI and the CI reporter keeps them', () => {
     const deferred = postedChecks('classify-and-publish', `${codePaths.join('\n')}\n`, {})
@@ -1462,7 +1498,7 @@ describe('phase 2 supersession', () => {
         'node tooling/ci/merge-authority/publish.mjs publish-pull-request',
       ) &&
       publisherCommands.includes(
-        'MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"',
+        'git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA" > "$MA_CHANGED_PATHS_FILE"',
       ) &&
       !readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8').includes(
         '/pulls/',

@@ -12,7 +12,7 @@ import { z } from 'zod';
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
 /** UUID v4 string */
-export const zUUID = z.string().uuid('Must be a valid UUID');
+export const zUUID = z.guid('Must be a valid UUID');
 
 /** ISO-8601 date string (YYYY-MM-DD) */
 export const zDateString = z

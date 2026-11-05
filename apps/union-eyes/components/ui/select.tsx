@@ -6,7 +6,15 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Select: typeof SelectPrimitive.Root = SelectPrimitive.Root
+// Inside a form Radix keeps a hidden native <select> in step with `value`. When the value has no <option> yet (items that load later, a value no item carries)
+// the native select reads '' and Radix reports it as a choice: onValueChange(''). No item can have the value '' (Radix throws at render), so a person never
+// chooses it; passing it on would empty the field the moment a form opens with its options still loading, and the next save would send the empty value.
+const Select = ({ onValueChange, ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) => (
+  <SelectPrimitive.Root
+    {...props}
+    onValueChange={onValueChange ? (value: string) => { if (value !== "") onValueChange(value) } : undefined}
+  />
+)
 
 const SelectGroup: typeof SelectPrimitive.Group = SelectPrimitive.Group
 

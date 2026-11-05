@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Star, MapPin, Briefcase, Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { ApiShapeError, isRecord, readApiError } from "@/lib/client/api-envelope";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,47 @@ interface StewardRecommendationsProps {
   onAssign?: (stewardId: string) => void;
 }
 
+const COPY = {
+  en: {
+    assignFailed: "The steward could not be assigned.",
+    steward: "Steward",
+    load: "Load",
+    noneFound: "No steward could be recommended for this grievance.",
+  },
+  fr: {
+    assignFailed: "Le représentant n’a pas pu être attribué.",
+    steward: "Représentant",
+    load: "Charge",
+    noneFound: "Aucun représentant n’a pu être recommandé pour ce grief.",
+  },
+} as const;
+
+/** The candidates of POST /api/grievances/:id/recommend-steward, which answers { success, data: candidates }. */
+function toCandidates(data: unknown): StewardCandidate[] {
+  if (!Array.isArray(data)) throw new ApiShapeError("no candidates");
+  return data.map((candidate): StewardCandidate => {
+    if (
+      !isRecord(candidate) ||
+      typeof candidate.stewardId !== "string" ||
+      typeof candidate.userId !== "string" ||
+      typeof candidate.currentCaseload !== "number" ||
+      typeof candidate.maxCaseload !== "number" ||
+      typeof candidate.score !== "number"
+    ) {
+      throw new ApiShapeError("a candidate without the expected fields");
+    }
+    return {
+      stewardId: candidate.stewardId,
+      userId: candidate.userId,
+      region: typeof candidate.region === "string" ? candidate.region : null,
+      specialization: typeof candidate.specialization === "string" ? candidate.specialization : null,
+      currentCaseload: candidate.currentCaseload,
+      maxCaseload: candidate.maxCaseload,
+      score: candidate.score,
+    };
+  });
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function StewardRecommendations({
@@ -29,7 +71,10 @@ export function StewardRecommendations({
   onAssign,
 }: StewardRecommendationsProps) {
   const t = useTranslations("steward.recommendations");
-  const [candidates, setCandidates] = useState<StewardCandidate[]>([]);
+  const locale = useLocale();
+  const copy = locale.toLowerCase().startsWith("fr") ? COPY.fr : COPY.en;
+  // null until a search has answered: "nobody was found" and "nobody was asked for yet" are different statements.
+  const [candidates, setCandidates] = useState<StewardCandidate[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [assigning, setAssigning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,20 +82,21 @@ export function StewardRecommendations({
   async function fetchRecommendations() {
     setLoading(true);
     setError(null);
+    setCandidates(null);
     try {
       const res = await fetch(`/api/grievances/${grievanceId}/recommend-steward`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
-      const json = await res.json();
-      if (json.data) {
-        setCandidates(json.data);
-      } else {
-        setError(json.error?.message ?? t("failedToGet"));
+      if (!res.ok) {
+        setError(await readApiError(res, t("failedToGet")));
+        return;
       }
-    } catch {
-      setError(t("networkError"));
+      const body: unknown = await res.json();
+      setCandidates(toCandidates(isRecord(body) ? body.data : undefined));
+    } catch (caught) {
+      setError(caught instanceof ApiShapeError ? t("failedToGet") : t("networkError"));
     } finally {
       setLoading(false);
     }
@@ -58,15 +104,20 @@ export function StewardRecommendations({
 
   async function handleAssign(stewardId: string) {
     setAssigning(stewardId);
+    setError(null);
     try {
       const res = await fetch(`/api/grievances/${grievanceId}/assign`, {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stewardId }),
       });
       if (res.ok) {
         onAssign?.(stewardId);
+      } else {
+        setError(await readApiError(res, copy.assignFailed));
       }
+    } catch {
+      setError(t("networkError"));
     } finally {
       setAssigning(null);
     }
@@ -95,12 +146,15 @@ export function StewardRecommendations({
         {error && (
           <p className="mb-3 text-sm text-red-600">{error}</p>
         )}
-        {candidates.length === 0 && !loading && (
+        {candidates === null && !loading && (
           <p className="text-sm text-gray-400">
             {t("emptyState")}
           </p>
         )}
-        {candidates.length > 0 && (
+        {candidates !== null && candidates.length === 0 && (
+          <p className="text-sm text-gray-500">{copy.noneFound}</p>
+        )}
+        {candidates !== null && candidates.length > 0 && (
           <ul className="space-y-3">
             {candidates.map((c, idx) => (
               <li
@@ -112,7 +166,7 @@ export function StewardRecommendations({
                     {idx + 1}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Steward {c.userId.slice(0, 8)}…</p>
+                    <p className="text-sm font-medium">{copy.steward} {c.userId.slice(0, 8)}…</p>
                     <div className="mt-0.5 flex items-center gap-3 text-xs text-gray-500">
                       {c.region && (
                         <span className="flex items-center gap-1">
@@ -125,7 +179,7 @@ export function StewardRecommendations({
                         </span>
                       )}
                       <span>
-                        Load: {c.currentCaseload}/{c.maxCaseload}
+                        {copy.load}: {c.currentCaseload}/{c.maxCaseload}
                       </span>
                     </div>
                   </div>

@@ -9,91 +9,95 @@ from .models import (AnalyticsScheduledReports, ReportDeliveryHistory, Benchmark
 class AnalyticsScheduledReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnalyticsScheduledReports
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ReportDeliveryHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportDeliveryHistory
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BenchmarkCategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = BenchmarkCategories
-        fields = '__all__'
+        fields = [
+            'id', 'updated_at', 'category_name', 'display_name', 'description', 'category_group',
+            'unit_type', 'calculation_method', 'higher_is_better', 'display_order', 'icon', 'color',
+            'is_active', 'created_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BenchmarkDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = BenchmarkData
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'benchmark_category_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizationBenchmarkSnapshotsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationBenchmarkSnapshots
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AnalyticsMetricsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnalyticsMetrics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class KpiConfigurationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = KpiConfigurations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class TrendAnalysesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrendAnalyses
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class InsightRecommendationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = InsightRecommendations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ComparativeAnalysesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ComparativeAnalyses
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PageAnalyticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PageAnalytics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CommunicationAnalyticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommunicationAnalytics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class UserEngagementScoresSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserEngagementScores
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -107,28 +111,28 @@ class ReportsSerializer(serializers.ModelSerializer):
 class ReportTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ReportExecutionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportExecutions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'report_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ScheduledReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduledReports
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'report_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ReportSharesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportShares
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'report_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 

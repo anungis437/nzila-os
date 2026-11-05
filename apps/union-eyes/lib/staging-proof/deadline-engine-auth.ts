@@ -1,4 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { isProductionDeployment } from '@/lib/runtime/production-guard';
+import { secretProblem } from '@/lib/security/secret-strength';
 
 export const STAGING_PROOF_SCENARIOS = [
   'schedule-basic',
@@ -21,10 +23,19 @@ export interface ProofRequestHeaders {
 }
 
 export interface ProofEnvironment {
+  /**
+   * The application environment this image was BUILT for (NEXT_PUBLIC_APP_ENV, inlined at build time). Runtime
+   * variables can be misconfigured on a running container; a production build carries "production" and can never
+   * answer a proof request, whatever its runtime settings say.
+   */
+  BUILD_APP_ENV?: string;
   TARGET_ENVIRONMENT?: string;
   STAGING_PROOFS_ENABLED?: string;
   UNION_EYES_RUNTIME_ID?: string;
   STAGING_PROOF_SECRET?: string;
+  /** What the running deployment says it is: any of these saying production refuses the proof, whatever else is set. */
+  UE_ENVIRONMENT?: string;
+  NZILA_MODE?: string;
 }
 
 export type ProofAuthorization =
@@ -32,10 +43,20 @@ export type ProofAuthorization =
   | { authorized: false };
 
 export function isAuthorizedStagingProofEnvironment(env: ProofEnvironment): boolean {
-  return env.TARGET_ENVIRONMENT === 'staging'
+  // The proof is a staging mechanism: no identity of the running deployment (nor the build) may say production, and the secret that
+  // signs a request is a real secret (not a placeholder, not short): anyone who can guess it can drive the proof.
+  const production = isProductionDeployment({
+    UE_ENVIRONMENT: env.UE_ENVIRONMENT,
+    NEXT_PUBLIC_APP_ENV: env.BUILD_APP_ENV,
+    TARGET_ENVIRONMENT: env.TARGET_ENVIRONMENT,
+    NZILA_MODE: env.NZILA_MODE,
+  });
+  return env.BUILD_APP_ENV === 'staging'
+    && env.TARGET_ENVIRONMENT === 'staging'
     && env.STAGING_PROOFS_ENABLED === 'true'
     && env.UNION_EYES_RUNTIME_ID === 'union-eyes-staging'
-    && Boolean(env.STAGING_PROOF_SECRET);
+    && !production
+    && secretProblem(env.STAGING_PROOF_SECRET) === null;
 }
 
 export function isStagingProofScenario(value: string): value is StagingProofScenario {

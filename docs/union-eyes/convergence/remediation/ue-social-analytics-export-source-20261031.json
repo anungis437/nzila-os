@@ -1,0 +1,29 @@
+{
+  "record": "UE_GATE0_SOURCE_PATCH_AWAITING_QUALIFICATION",
+  "defectId": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
+  "sourceCommit": "ac8c5f3a09f1cb45f9bb23c35d48c9baff9226f0",
+  "sourceBranch": "agents/ue-cursor-final-closure",
+  "sourceFiles": [
+    "apps/union-eyes/app/api/social-media/analytics/route.ts",
+    "apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts",
+    "apps/union-eyes/lib/social-media/export-audit.ts",
+    "apps/union-eyes/lib/social-media/__tests__/export-audit.test.ts"
+  ],
+  "sourceState": "PATCHED_NOT_EXECUTABLY_QUALIFIED",
+  "unit": "NOT_RUN_ON_EXACT_HEAD",
+  "nativePg15": "NOT_RUN_ON_EXACT_HEAD",
+  "nativePg16": "NOT_RUN_ON_EXACT_HEAD",
+  "httpBrowser": "NOT_RUN_ON_EXACT_HEAD",
+  "staging": "NOT_RUN_ON_EXACT_HEAD",
+  "institutionalAuthority": "OUTSTANDING",
+  "independentReviewer": "OUTSTANDING",
+  "personaRatification": "OUTSTANDING",
+  "defectState": "PARTIAL",
+  "qualifiedClosed": false,
+  "notes": [
+    "The social analytics export no longer executes on DELETE: that verb returns 405, while GET ?export=true is separately steward-gated. The export rejects invalid format/date windows and refuses oversized results rather than silently truncating them; CSV remains formula-neutralized and account follower columns now map correctly. A mandatory tenant-bound audit is persisted before any CSV/JSON response; audit failures return 503 without exporting data. Both response types prohibit caching. Source and regression tests are committed but executable and runtime qualification are pending.",
+    "Exact-HEAD focused and full Vitest/contract, native PostgreSQL 15/16 with real RLS and audit storage, HTTP/browser/staging acceptance, and institutional decision on export audience remain outstanding. Campaign export still uses bounded per-campaign queries and needs scalable server-side aggregation; no production acceptance claimed."
+  ],
+  "frozenPopulation": 777,
+  "qualifiedClosedCount": 0
+}

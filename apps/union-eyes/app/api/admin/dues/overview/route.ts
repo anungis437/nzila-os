@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'steward' },
+    rlsOrgContext: true,
     openapi: { tags: ['Admin', 'Dues'], summary: 'Admin dues overview' },
   },
   async ({ organizationId }) => {
@@ -121,7 +122,6 @@ export const GET = withApi(
       totalCollected,
       totalOutstanding,
       totalOverdue,
-      currentBalance: totalCollected + totalOutstanding,
     },
     paymentStats: {
       pending: statMap['pending'] ?? 0,
@@ -131,11 +131,12 @@ export const GET = withApi(
     },
     recentPayments: recentPayments.map((p: Record<string, unknown>) => ({
       id: p.id,
-      memberName: (p.memberName as string) ?? (p.userId as string) ?? 'Unknown',
+      // A payment whose member has no roster entry has no name here: the screen shows that, not an invented one.
+      memberName: typeof p.memberName === 'string' && p.memberName !== '' ? p.memberName : null,
       amount: parseFloat(String(p.amount)),
       status: p.status,
       paidDate: p.transactionDate ? String(p.transactionDate) : null,
-      dueDate: p.periodStart ? String(p.periodStart) : '',
+      dueDate: p.periodStart ? String(p.periodStart) : null,
     })),
     periodStats: {
       thisMonth: {

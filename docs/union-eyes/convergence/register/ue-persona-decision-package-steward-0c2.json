@@ -1,0 +1,2797 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-PERSONA-DECISION-PACKAGE",
+  "gate": "0C.2",
+  "packageId": "UE-STEWARD-PROPOSED-CANONICAL-R1",
+  "version": "1.0-R1",
+  "persona": "steward",
+  "displayName": "Steward",
+  "status": "PROPOSED_FOR_RATIFICATION",
+  "anchorCommit": "fe8469cff34c561b2beccddb965e13355d74bb09",
+  "preparedOn": "2026-10-27",
+  "selfRatification": false,
+  "banner": "PROPOSED FOR RATIFICATION. This package is prepared for a decision by an authorized product owner. It is not a ratified canonical, not the recovered historical canonical and not an institutional authorization. Engineering cannot accept it.",
+  "lineage": {
+    "proposedBaselineFile": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-steward.json",
+    "proposedBaselineSha256": "9b7eae86da9598160abb6aae144e8cbcfef1fe12cc465a4fcaab1a084a03d207",
+    "proposedBaselineStatus": "PROPOSED_NOT_ADOPTED",
+    "baselineArtifactChangedByGate0C2": false,
+    "historicalIdentifier": null,
+    "historicalCanonicalRecovered": false,
+    "relationship": "NEW_DESIGN_NO_HISTORICAL_IDENTIFIER",
+    "statement": "No Steward canonical exists in any scanned reference. This package is a new design and is not a recovered historical document.",
+    "reconciliation": {
+      "file": "docs/union-eyes/convergence/register/ue-persona-requirement-reconciliation-0c2.json",
+      "sha256": "1195f5f987fce1a5399bf6ac8cde26accc57bd03ee7bc11d733c5fa331751fa0"
+    },
+    "completionMatrixPersonaState": {
+      "resolved": false,
+      "trackingCapability": "UE-OMIT-STEWARD-CANONICAL-ABSENT"
+    }
+  },
+  "actionUniverse": {
+    "requirements": 55,
+    "byKind": {
+      "ACTION": 40,
+      "DENIAL": 8,
+      "NAVIGATION": 7
+    },
+    "byAuthorityClass": {
+      "ENGINEERING_REQUIREMENT": 3,
+      "IMPLEMENTED_SOURCE_BEHAVIOR": 34,
+      "PROPOSED_PERMISSION": 18
+    },
+    "byImplementationStatus": {
+      "NOT_IMPLEMENTED": 9,
+      "PARTIAL_SOURCE": 21,
+      "SOURCE_PRESENT": 25
+    },
+    "byEvidenceClassification": {
+      "NEW_DESIGN_NO_HISTORICAL_SOURCE": 55
+    },
+    "requirementIds": [
+      "STW-NAV-1",
+      "STW-NAV-2",
+      "STW-NAV-3",
+      "STW-NAV-4",
+      "STW-NAV-5",
+      "STW-NAV-6",
+      "STW-NAV-7",
+      "STW-ACT-01",
+      "STW-ACT-02",
+      "STW-ACT-03",
+      "STW-ACT-04",
+      "STW-ACT-05",
+      "STW-ACT-06",
+      "STW-ACT-07",
+      "STW-ACT-08",
+      "STW-ACT-09",
+      "STW-ACT-10",
+      "STW-ACT-11",
+      "STW-ACT-12",
+      "STW-ACT-13",
+      "STW-ACT-14",
+      "STW-ACT-15",
+      "STW-ACT-16",
+      "STW-ACT-17",
+      "STW-ACT-18",
+      "STW-ACT-19",
+      "STW-ACT-20",
+      "STW-ACT-21",
+      "STW-ACT-22",
+      "STW-ACT-23",
+      "STW-ACT-24",
+      "STW-ACT-25",
+      "STW-ACT-26",
+      "STW-ACT-27",
+      "STW-ACT-28",
+      "STW-ACT-29",
+      "STW-ACT-30",
+      "STW-ACT-31",
+      "STW-ACT-32",
+      "STW-ACT-33",
+      "STW-ACT-34",
+      "STW-ACT-35",
+      "STW-ACT-36",
+      "STW-ACT-37",
+      "STW-ACT-38",
+      "STW-ACT-39",
+      "STW-ACT-40",
+      "STW-DENY-01",
+      "STW-DENY-02",
+      "STW-DENY-03",
+      "STW-DENY-04",
+      "STW-DENY-05",
+      "STW-DENY-06",
+      "STW-DENY-07",
+      "STW-DENY-08"
+    ]
+  },
+  "authorityClassLegend": {
+    "ENGINEERING_REQUIREMENT": "A requirement the engineering gates must build or prove. It grants nothing.",
+    "IMPLEMENTED_SOURCE_BEHAVIOR": "Behavior that source already shows. It is not a statement that the behavior is complete or qualified.",
+    "PROPOSED_PERMISSION": "A permission proposed for product acceptance that stays inactive until the named institutional decision is adopted.",
+    "ADOPTED_INSTITUTIONAL_AUTHORIZATION": "Not used. No institutional authorization has been adopted and none can be created by this package."
+  },
+  "visibilityWorkflowMatrix": [
+    {
+      "domain": "IDENTITY_ELIGIBILITY",
+      "label": "Identity and eligibility",
+      "coverage": "COVERED",
+      "summary": "Eligibility is a live membership in the active organization that carries the steward platform role. The role is eligibility for a representation capacity and never authority. The Steward workspace is a presentation profile. No institutional office is named or implied.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-ACT-40",
+        "STW-DENY-04",
+        "STW-DENY-05"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 3,
+        "PROPOSED_PERMISSION": 0,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "ORG_FEDERATION_SCOPE",
+      "label": "Organization and federation scope",
+      "coverage": "PARTIAL",
+      "summary": "Every steward contract is bounded to the active organization and to matters the steward holds. No federation, local or territory dimension is specified, and none may be read from the hierarchy.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-02"
+      ],
+      "requirementIds": [
+        "STW-DENY-01"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 0,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "label": "Case, member and document visibility",
+      "coverage": "COVERED",
+      "summary": "A steward sees a case, its timeline, its evidence list and its members only through a live owner, assignee or explicit collaborator relationship to that case. The role title and organization membership alone show nothing.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-NAV-1",
+        "STW-NAV-2",
+        "STW-NAV-3",
+        "STW-NAV-4",
+        "STW-NAV-5",
+        "STW-NAV-6",
+        "STW-NAV-7",
+        "STW-ACT-13",
+        "STW-ACT-14",
+        "STW-ACT-15",
+        "STW-ACT-16",
+        "STW-ACT-34",
+        "STW-ACT-36",
+        "STW-ACT-39"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 10,
+        "PROPOSED_PERMISSION": 4,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "RECORD_CREATION_UPDATE",
+      "label": "Record creation and updates",
+      "coverage": "COVERED",
+      "summary": "Notes, comments, drafts, evidence uploads, document annotations, task completion and in-authority case transitions are written only on a held case, each with an atomic audit record.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-ACT-01",
+        "STW-ACT-02",
+        "STW-ACT-03",
+        "STW-ACT-04",
+        "STW-ACT-06",
+        "STW-ACT-07",
+        "STW-ACT-08",
+        "STW-ACT-09",
+        "STW-ACT-10",
+        "STW-ACT-11",
+        "STW-ACT-12",
+        "STW-ACT-18",
+        "STW-ACT-21",
+        "STW-ACT-22",
+        "STW-ACT-23",
+        "STW-ACT-24",
+        "STW-ACT-25",
+        "STW-ACT-26",
+        "STW-ACT-27",
+        "STW-ACT-35",
+        "STW-ACT-37"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 2,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 13,
+        "PROPOSED_PERMISSION": 6,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "DELEGATION_SUBSTITUTION",
+      "label": "Delegation and substitution",
+      "coverage": "PARTIAL",
+      "summary": "A steward may grant a collaborator on a case the steward owns and may prepare a handoff summary. Assignment and reassignment need a supervisory mandate and are denied from the role. No absence cover is specified.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-03"
+      ],
+      "requirementIds": [
+        "STW-ACT-30",
+        "STW-ACT-31",
+        "STW-DENY-02"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 2,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "label": "Confidentiality and privileged records",
+      "coverage": "COVERED",
+      "summary": "Privileged and counsel-controlled material is excluded from steward reads, search, extraction and export. Staff-held records reach the member only through a separate authorized disclosure by the primary handler.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-ACT-17",
+        "STW-ACT-38",
+        "STW-DENY-03",
+        "STW-DENY-07"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 3,
+        "PROPOSED_PERMISSION": 1,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "label": "Financial or administrative approvals",
+      "coverage": "COVERED",
+      "summary": "The steward holds no financial, administrative, correspondence-approval or retention authority. Each is an explicit denial, and the steward may only draft and submit correspondence for approval by an unnamed office.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-DENY-06"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 0,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "label": "Audit and accountability",
+      "coverage": "COVERED",
+      "summary": "Every steward mutation commits with an audit record, sensitive reads are logged and a refusal is recorded. A recusal is declared by the steward and cannot be lifted by the recused steward.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-ACT-05",
+        "STW-DENY-08"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 1,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "label": "Notifications and workflow transitions",
+      "coverage": "COVERED",
+      "summary": "Assignment acknowledgement, deadline completion, extension requests and overdue reminders are specified as workflow steps. Several rest on a scheduler that does not exist in source and on institutional rules.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-ACT-28",
+        "STW-ACT-29"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 2,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "REVOCATION_TERMINATION_HISTORY",
+      "label": "Revocation, termination and historical access",
+      "coverage": "GAP",
+      "summary": "Only the revocation of a collaborator grant and the recusal denial are specified. The end of an assignment, removal of the role, departure and historical read access are not specified.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-01"
+      ],
+      "requirementIds": [
+        "STW-ACT-20"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 0,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "label": "Cross-persona handoffs",
+      "coverage": "COVERED",
+      "summary": "Triage ownership, routing, senior review, WorkAid referral with consent, correspondence submission and the handoff summary each name the Representative 2.2 or WorkAid counterpart they hand to.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "STW-ACT-19",
+        "STW-ACT-32",
+        "STW-ACT-33"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 1,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 2,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    }
+  ],
+  "actionVisibilityRows": [
+    {
+      "requirementId": "STW-NAV-1",
+      "kind": "NAVIGATION",
+      "title": "Today",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry is not authority over any resource behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Today opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-2",
+      "kind": "NAVIGATION",
+      "title": "Representation",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry is not authority over any resource behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Representation opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-3",
+      "kind": "NAVIGATION",
+      "title": "Members & Workplaces",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry is not authority over any resource behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Members & Workplaces opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-4",
+      "kind": "NAVIGATION",
+      "title": "Communications",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry is not authority over any resource behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Communications opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-5",
+      "kind": "NAVIGATION",
+      "title": "Documents & Evidence",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry is not authority over any resource behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Documents & Evidence opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-6",
+      "kind": "NAVIGATION",
+      "title": "Tasks & Deadlines",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry is not authority over any resource behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Tasks & Deadlines opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-7",
+      "kind": "NAVIGATION",
+      "title": "Knowledge & Guidance",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry is not authority over any resource behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Knowledge & Guidance opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-ACT-01",
+      "kind": "ACTION",
+      "title": "See my assigned-case queue",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Each listed row is a case the steward holds through a live relationship. The list is a narrowing filter; opening a case needs its own decision (STW-ACT-06). Seniority never enlarges the list.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 4,
+      "functionalAcceptance": "A queue of the steward’s own cases. An empty queue says the steward holds no cases; a failed read says it failed."
+    },
+    {
+      "requirementId": "STW-ACT-02",
+      "kind": "ACTION",
+      "title": "See today’s work list",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "An entry appears only for a case or conversation the steward holds. The list adds no source of authority.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "An ordered list with a reason for each entry. A section that failed to load shows an error, not a zero."
+    },
+    {
+      "requirementId": "STW-ACT-03",
+      "kind": "ACTION",
+      "title": "See my workload summary",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Counts cover only cases the steward holds. An organization-wide aggregate needs a live supervisory mandate and is not a steward action.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 4,
+      "functionalAcceptance": "Counts for the steward’s own matters, labelled as such."
+    },
+    {
+      "requirementId": "STW-ACT-04",
+      "kind": "ACTION",
+      "title": "Acknowledge a new assignment",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "ENGINEERING_REQUIREMENT",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The acknowledging person is the live assignee. A person who is not the assignee cannot acknowledge.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 2,
+      "functionalAcceptance": "The assignment shows as acknowledged with the time. A second acknowledgement is refused with a clear message."
+    },
+    {
+      "requirementId": "STW-ACT-05",
+      "kind": "ACTION",
+      "title": "Declare a recusal on an assigned case",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A person may only narrow their own authority. Declaring a recusal for another person, or lifting one, is not offered.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case leaves the steward’s queue and shows as recused. The steward is told who will reassign it."
+    },
+    {
+      "requirementId": "STW-ACT-06",
+      "kind": "ACTION",
+      "title": "Open an assigned case",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision on this case for read and read_internal, made on the same transaction as the read. Privileged matters need an explicit independent grant and are not reachable by assignment alone.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The case file with its internal sections visible to the handler. A case the steward may not read looks the same as a missing one."
+    },
+    {
+      "requirementId": "STW-ACT-07",
+      "kind": "ACTION",
+      "title": "See a case timeline",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The visibility of each row follows the decision’s visibility: internal for a handler, member-visible for the member. A null or unknown visibility is not an affirmative grant.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 4,
+      "functionalAcceptance": "A dated timeline. Each entry is labelled staff-only or member-visible."
+    },
+    {
+      "requirementId": "STW-ACT-08",
+      "kind": "ACTION",
+      "title": "Add a working note",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision for write_notes on this case. This action never makes a note member-visible.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The note appears on the timeline labelled staff-only. An offer to share it with the member opens the disclosure decision."
+    },
+    {
+      "requirementId": "STW-ACT-09",
+      "kind": "ACTION",
+      "title": "Send a member-visible comment",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision for comment on this case, taken on the server for each comment. A client flag cannot supply it.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The comment appears on the member’s timeline and the steward’s, marked member-visible."
+    },
+    {
+      "requirementId": "STW-ACT-10",
+      "kind": "ACTION",
+      "title": "Advance a case within the steward’s authority",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision for transition on this case. The role level in the lifecycle can only narrow what is offered. Seniority without a relationship cannot advance a case.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The new state is shown. The steward sees a refusal with the reason class when the state is not allowed."
+    },
+    {
+      "requirementId": "STW-ACT-11",
+      "kind": "ACTION",
+      "title": "Propose closure of a resolved case",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Proposing is a transition on the held case. Closing is a different decision (case:close) that this baseline does not offer to a steward.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The case shows as awaiting closure and names no approver until the institution designates one."
+    },
+    {
+      "requirementId": "STW-ACT-12",
+      "kind": "ACTION",
+      "title": "Draft a case action",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision for draft_action on this case. Drafting is not sending, signing or filing.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CORRESPONDENCE",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 11,
+      "functionalAcceptance": "The draft appears on the case marked as a draft."
+    },
+    {
+      "requirementId": "STW-ACT-13",
+      "kind": "ACTION",
+      "title": "Upload evidence to a held case",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS",
+      "visibilityAndAuthority": "A kernel decision for upload_evidence on the case. Marking a document privileged is not a steward choice.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 6,
+      "functionalAcceptance": "The document appears in the case with its classification. A rejected file says why."
+    },
+    {
+      "requirementId": "STW-ACT-14",
+      "kind": "ACTION",
+      "title": "See the evidence list and its provenance",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS",
+      "visibilityAndAuthority": "A kernel decision on the case and the classification of each document.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 6,
+      "functionalAcceptance": "A list with provenance. A missing provenance field is shown as not recorded."
+    },
+    {
+      "requirementId": "STW-ACT-15",
+      "kind": "ACTION",
+      "title": "Request text extraction from a case document",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS",
+      "visibilityAndAuthority": "A kernel decision for process_ocr on the case.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 6,
+      "functionalAcceptance": "The extracted text appears beside the document. A failure says the extraction failed."
+    },
+    {
+      "requirementId": "STW-ACT-16",
+      "kind": "ACTION",
+      "title": "Replace or annotate a case document",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS",
+      "visibilityAndAuthority": "A kernel decision for modify_document on the case.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 6,
+      "functionalAcceptance": "The version history shows both versions."
+    },
+    {
+      "requirementId": "STW-ACT-17",
+      "kind": "ACTION",
+      "title": "Disclose a staff-held record to the member",
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_PRIMARY_HANDLER_ONLY",
+      "visibilityAndAuthority": "A kernel decision for disclose_to_member on this case. A collaborator grant never carries it.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 6,
+      "functionalAcceptance": "The member sees the record. The steward sees the disclosure on the timeline."
+    },
+    {
+      "requirementId": "STW-ACT-18",
+      "kind": "ACTION",
+      "title": "Escalate to a formal grievance",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision for transition on the case, and a protocol that allows the steward to escalate.",
+      "sharedObligation": {
+        "id": "SHR-0C2-ESCALATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The grievance opens and the case shows the link. If the protocol forbids escalation, the steward is told to request senior review."
+    },
+    {
+      "requirementId": "STW-ACT-19",
+      "kind": "ACTION",
+      "title": "Request senior review",
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The requester holds the case. The requester gains nothing from a request and the supervisor gains no access from being asked.",
+      "sharedObligation": {
+        "id": "SHR-0C2-ESCALATION",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case shows a pending review request. No decision is shown until one is recorded."
+    },
+    {
+      "requirementId": "STW-ACT-20",
+      "kind": "ACTION",
+      "title": "Grant a collaborator access to a case I own",
+      "domain": "REVOCATION_TERMINATION_HISTORY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Only the primary owner of this specific case may grant. A grant never carries closing, disclosure, sealed export or privileged access.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 2,
+      "functionalAcceptance": "The collaborator appears on the case with permissions and expiry."
+    },
+    {
+      "requirementId": "STW-ACT-21",
+      "kind": "ACTION",
+      "title": "See deadlines on my matters",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Rows are limited to held cases. A generic read floor on the deadline table is not authority.",
+      "sharedObligation": {
+        "id": "SHR-0C2-DEADLINES",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A list ordered by due date with overdue items first."
+    },
+    {
+      "requirementId": "STW-ACT-22",
+      "kind": "ACTION",
+      "title": "Complete a deadline task",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision on the case that owns the deadline.",
+      "sharedObligation": {
+        "id": "SHR-0C2-DEADLINES",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The task shows as complete."
+    },
+    {
+      "requirementId": "STW-ACT-23",
+      "kind": "ACTION",
+      "title": "Request a deadline extension",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The requester holds the case. Granting is a different decision.",
+      "sharedObligation": {
+        "id": "SHR-0C2-DEADLINES",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The deadline shows a pending request. The date does not change."
+    },
+    {
+      "requirementId": "STW-ACT-24",
+      "kind": "ACTION",
+      "title": "Receive an overdue reminder",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "ENGINEERING_REQUIREMENT",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The recipient is the live holder when the notice is created. A person who no longer holds the case receives none.",
+      "sharedObligation": {
+        "id": "SHR-0C2-DEADLINES",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 9,
+      "functionalAcceptance": "An in-app notice that opens the deadline list."
+    },
+    {
+      "requirementId": "STW-ACT-25",
+      "kind": "ACTION",
+      "title": "Reply in a conversation assigned to me",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "THREAD_PARTICIPANT",
+      "visibilityAndAuthority": "The conversation relationship: the steward is its assignee. A mandate, including a legal-hold mandate, confers no read. A delegation is refused.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 11,
+      "functionalAcceptance": "The reply appears in the conversation. A closed conversation offers no reply."
+    },
+    {
+      "requirementId": "STW-ACT-26",
+      "kind": "ACTION",
+      "title": "Close or archive an assigned conversation",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "THREAD_PARTICIPANT",
+      "visibilityAndAuthority": "The conversation relationship. Legal hold is a different duty and is not offered.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 11,
+      "functionalAcceptance": "The conversation shows as closed or archived."
+    },
+    {
+      "requirementId": "STW-ACT-27",
+      "kind": "ACTION",
+      "title": "Submit my correspondence draft for approval",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The submitter authored the draft on a held case. Approval, signature and dispatch are not steward actions.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CORRESPONDENCE",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 11,
+      "functionalAcceptance": "The draft shows as submitted and read-only."
+    },
+    {
+      "requirementId": "STW-ACT-28",
+      "kind": "ACTION",
+      "title": "See the unassigned-case triage queue",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_TRIAGE_DESIGNATION",
+      "visibilityAndAuthority": "A live designation is a subordinate policy that exposes queue metadata only. It grants no kernel action. Role or seniority never confers it.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 2,
+      "functionalAcceptance": "A queue of unassigned cases. Without a designation the steward sees an empty queue with an explanation, not an error."
+    },
+    {
+      "requirementId": "STW-ACT-29",
+      "kind": "ACTION",
+      "title": "See the unassigned-conversation queue",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "THREAD_TRIAGE_DESIGNATION",
+      "visibilityAndAuthority": "A live designation exposes the queue only. Reading a conversation needs assignment.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 11,
+      "functionalAcceptance": "A queue of unassigned conversations, or an empty queue with an explanation."
+    },
+    {
+      "requirementId": "STW-ACT-30",
+      "kind": "ACTION",
+      "title": "Take ownership of an unassigned case",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_SUPERVISORY_MANDATE",
+      "visibilityAndAuthority": "Assigning needs a live supervisory mandate that names the assign power. A designation is not that mandate. Until the institution decides, this action is not offered.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CASE-ASSIGNMENT",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 2,
+      "functionalAcceptance": "Not offered to a steward until the decision is made."
+    },
+    {
+      "requirementId": "STW-ACT-31",
+      "kind": "ACTION",
+      "title": "Route an unassigned case to an eligible assignee",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_SUPERVISORY_MANDATE",
+      "visibilityAndAuthority": "A kernel decision for assign on this case. A privileged matter can be assigned without disclosing it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CASE-ASSIGNMENT",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 2,
+      "functionalAcceptance": "The case shows its new assignee. A steward without a mandate is not offered the action."
+    },
+    {
+      "requirementId": "STW-ACT-32",
+      "kind": "ACTION",
+      "title": "Refer a case to WorkAid with the member’s consent",
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "WORKAID_REFERRAL_WITH_CONSENT",
+      "visibilityAndAuthority": "A kernel decision for refer plus a live consent. A union-authored record can never open counsel material. Referral, dispatch, delivery, receipt and filing are separate events.",
+      "sharedObligation": {
+        "id": "SHR-0C2-WORKAID-REFERRAL",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 7,
+      "functionalAcceptance": "The member and the steward see the referral as recorded and not as accepted, until WorkAid acknowledges it."
+    },
+    {
+      "requirementId": "STW-ACT-33",
+      "kind": "ACTION",
+      "title": "Prepare a handoff summary",
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "authorityClass": "ENGINEERING_REQUIREMENT",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The outgoing handler writes while still the handler. After reassignment the outgoing handler’s authority over the case ends.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 2,
+      "functionalAcceptance": "The incoming handler sees the summary when they acknowledge the assignment."
+    },
+    {
+      "requirementId": "STW-ACT-34",
+      "kind": "ACTION",
+      "title": "Look up a member I represent",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DIRECTORY_SCOPE_BY_CASE_RELATIONSHIP",
+      "visibilityAndAuthority": "The directory policy: self plus members of cases assigned to the steward. A member with no case relationship to the steward does not appear.",
+      "sharedObligation": {
+        "id": "SHR-0C2-MEMBER-DIRECTORY",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A member list limited to the steward’s own members. An empty result says no member matches among those represented."
+    },
+    {
+      "requirementId": "STW-ACT-35",
+      "kind": "ACTION",
+      "title": "See the cases of a member I represent",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Each case is listed through the steward’s own relationship to it. Another handler’s case for the same member is not listed.",
+      "sharedObligation": {
+        "id": "SHR-0C2-MEMBER-DIRECTORY",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A list of the steward’s cases for this member."
+    },
+    {
+      "requirementId": "STW-ACT-36",
+      "kind": "ACTION",
+      "title": "Look up an agreement clause",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "The library page is steward-gated in source and shows only the organization’s published clauses. A clause is a reference, not advice.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Clause text with its source. A clause with an unverified source says so."
+    },
+    {
+      "requirementId": "STW-ACT-37",
+      "kind": "ACTION",
+      "title": "Suggest clauses for a case",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision on the case. The suggestion adds no authority and no advisory output is presented as governed.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A list of clauses with reasons, labelled as suggestions."
+    },
+    {
+      "requirementId": "STW-ACT-38",
+      "kind": "ACTION",
+      "title": "Export a case evidence pack",
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_PRIMARY_HANDLER_ONLY",
+      "visibilityAndAuthority": "A kernel decision for export on this case. A collaborator grant never carries it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 6,
+      "functionalAcceptance": "The pack downloads with a manifest of what is in it."
+    },
+    {
+      "requirementId": "STW-ACT-39",
+      "kind": "ACTION",
+      "title": "Search documents I may read",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS",
+      "visibilityAndAuthority": "Search, preview, download and direct links use one authorization model. A role floor is not a bypass.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 13,
+      "functionalAcceptance": "A result list that omits documents the steward may not read, with no hint that any were omitted."
+    },
+    {
+      "requirementId": "STW-ACT-40",
+      "kind": "ACTION",
+      "title": "Use the workspace in English or French with accessible controls",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "SELF_SCOPED",
+      "visibilityAndAuthority": "The signed-in person’s own settings only.",
+      "sharedObligation": {
+        "id": "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Every steward destination appears in the chosen language without untranslated labels."
+    },
+    {
+      "requirementId": "STW-DENY-01",
+      "kind": "DENIAL",
+      "title": "No organization-wide case or document read from the steward role",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-02",
+      "kind": "DENIAL",
+      "title": "No universal assignment authority from the steward role",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-03",
+      "kind": "DENIAL",
+      "title": "No privileged document access from the steward role",
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-04",
+      "kind": "DENIAL",
+      "title": "No administrative power from the steward role",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-05",
+      "kind": "DENIAL",
+      "title": "No correspondence approval, signature or dispatch from the steward role",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CORRESPONDENCE",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-06",
+      "kind": "DENIAL",
+      "title": "No financial authority from the steward role",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-07",
+      "kind": "DENIAL",
+      "title": "No legal hold or retention authority from the steward role",
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-08",
+      "kind": "DENIAL",
+      "title": "No lifting of a recusal by the recused steward",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "The steward role is eligibility only. This contract states what the role never grants, so a later change cannot add it silently.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The steward is told the action is not permitted and, where one exists, the request path."
+    }
+  ],
+  "functionalAcceptanceCriteria": [
+    {
+      "requirementId": "STW-NAV-1",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Today opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-2",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Representation opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-3",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Members & Workplaces opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-4",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Communications opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-5",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Documents & Evidence opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-6",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Tasks & Deadlines opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-NAV-7",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Knowledge & Guidance opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable."
+    },
+    {
+      "requirementId": "STW-ACT-01",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A queue of the steward’s own cases. An empty queue says the steward holds no cases; a failed read says it failed."
+    },
+    {
+      "requirementId": "STW-ACT-02",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "An ordered list with a reason for each entry. A section that failed to load shows an error, not a zero."
+    },
+    {
+      "requirementId": "STW-ACT-03",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Counts for the steward’s own matters, labelled as such."
+    },
+    {
+      "requirementId": "STW-ACT-04",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The assignment shows as acknowledged with the time. A second acknowledgement is refused with a clear message."
+    },
+    {
+      "requirementId": "STW-ACT-05",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case leaves the steward’s queue and shows as recused. The steward is told who will reassign it."
+    },
+    {
+      "requirementId": "STW-ACT-06",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case file with its internal sections visible to the handler. A case the steward may not read looks the same as a missing one."
+    },
+    {
+      "requirementId": "STW-ACT-07",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A dated timeline. Each entry is labelled staff-only or member-visible."
+    },
+    {
+      "requirementId": "STW-ACT-08",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The note appears on the timeline labelled staff-only. An offer to share it with the member opens the disclosure decision."
+    },
+    {
+      "requirementId": "STW-ACT-09",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The comment appears on the member’s timeline and the steward’s, marked member-visible."
+    },
+    {
+      "requirementId": "STW-ACT-10",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The new state is shown. The steward sees a refusal with the reason class when the state is not allowed."
+    },
+    {
+      "requirementId": "STW-ACT-11",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows as awaiting closure and names no approver until the institution designates one."
+    },
+    {
+      "requirementId": "STW-ACT-12",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The draft appears on the case marked as a draft."
+    },
+    {
+      "requirementId": "STW-ACT-13",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The document appears in the case with its classification. A rejected file says why."
+    },
+    {
+      "requirementId": "STW-ACT-14",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list with provenance. A missing provenance field is shown as not recorded."
+    },
+    {
+      "requirementId": "STW-ACT-15",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The extracted text appears beside the document. A failure says the extraction failed."
+    },
+    {
+      "requirementId": "STW-ACT-16",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The version history shows both versions."
+    },
+    {
+      "requirementId": "STW-ACT-17",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The member sees the record. The steward sees the disclosure on the timeline."
+    },
+    {
+      "requirementId": "STW-ACT-18",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The grievance opens and the case shows the link. If the protocol forbids escalation, the steward is told to request senior review."
+    },
+    {
+      "requirementId": "STW-ACT-19",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows a pending review request. No decision is shown until one is recorded."
+    },
+    {
+      "requirementId": "STW-ACT-20",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The collaborator appears on the case with permissions and expiry."
+    },
+    {
+      "requirementId": "STW-ACT-21",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list ordered by due date with overdue items first."
+    },
+    {
+      "requirementId": "STW-ACT-22",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The task shows as complete."
+    },
+    {
+      "requirementId": "STW-ACT-23",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The deadline shows a pending request. The date does not change."
+    },
+    {
+      "requirementId": "STW-ACT-24",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "An in-app notice that opens the deadline list."
+    },
+    {
+      "requirementId": "STW-ACT-25",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The reply appears in the conversation. A closed conversation offers no reply."
+    },
+    {
+      "requirementId": "STW-ACT-26",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The conversation shows as closed or archived."
+    },
+    {
+      "requirementId": "STW-ACT-27",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The draft shows as submitted and read-only."
+    },
+    {
+      "requirementId": "STW-ACT-28",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A queue of unassigned cases. Without a designation the steward sees an empty queue with an explanation, not an error."
+    },
+    {
+      "requirementId": "STW-ACT-29",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A queue of unassigned conversations, or an empty queue with an explanation."
+    },
+    {
+      "requirementId": "STW-ACT-30",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Not offered to a steward until the decision is made."
+    },
+    {
+      "requirementId": "STW-ACT-31",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows its new assignee. A steward without a mandate is not offered the action."
+    },
+    {
+      "requirementId": "STW-ACT-32",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The member and the steward see the referral as recorded and not as accepted, until WorkAid acknowledges it."
+    },
+    {
+      "requirementId": "STW-ACT-33",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The incoming handler sees the summary when they acknowledge the assignment."
+    },
+    {
+      "requirementId": "STW-ACT-34",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A member list limited to the steward’s own members. An empty result says no member matches among those represented."
+    },
+    {
+      "requirementId": "STW-ACT-35",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list of the steward’s cases for this member."
+    },
+    {
+      "requirementId": "STW-ACT-36",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Clause text with its source. A clause with an unverified source says so."
+    },
+    {
+      "requirementId": "STW-ACT-37",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list of clauses with reasons, labelled as suggestions."
+    },
+    {
+      "requirementId": "STW-ACT-38",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The pack downloads with a manifest of what is in it."
+    },
+    {
+      "requirementId": "STW-ACT-39",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A result list that omits documents the steward may not read, with no hint that any were omitted."
+    },
+    {
+      "requirementId": "STW-ACT-40",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Every steward destination appears in the chosen language without untranslated labels."
+    },
+    {
+      "requirementId": "STW-DENY-01",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-02",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-03",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-04",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-05",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-06",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-07",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    },
+    {
+      "requirementId": "STW-DENY-08",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The steward is told the action is not permitted and, where one exists, the request path."
+    }
+  ],
+  "negativeSecurityAndTenantIsolationCriteria": [
+    {
+      "id": "NSC-STW-01",
+      "class": "TENANT_ISOLATION",
+      "statement": "In a synthetic two-organization fixture, a steward of organization A who holds live relationships in A addresses every read action to resources of organization B and receives a refusal, no rows, no existence signal and a recorded denial.",
+      "requirementIds": [
+        "STW-ACT-01",
+        "STW-ACT-06",
+        "STW-ACT-07",
+        "STW-ACT-14",
+        "STW-ACT-34",
+        "STW-ACT-35",
+        "STW-ACT-39"
+      ]
+    },
+    {
+      "id": "NSC-STW-02",
+      "class": "ROLE_IS_NOT_RELATIONSHIP",
+      "statement": "A principal who holds the steward role but has no live owner, assignee or collaborator relationship to a case reads nothing about that case, including its existence.",
+      "requirementIds": [
+        "STW-ACT-06",
+        "STW-DENY-01"
+      ]
+    },
+    {
+      "id": "NSC-STW-03",
+      "class": "HIERARCHY_IS_NOT_SCOPE",
+      "statement": "A steward in a local that belongs to a federation or region gains no visibility of a parent, sibling or child organization from the hierarchy.",
+      "requirementIds": [
+        "STW-NAV-2",
+        "STW-ACT-34",
+        "STW-DENY-01"
+      ]
+    },
+    {
+      "id": "NSC-STW-04",
+      "class": "PRIVILEGED_EXCLUDED",
+      "statement": "A privileged document is absent from the steward’s list, search, text extraction and evidence export, and an attempt to fetch it by identifier is refused.",
+      "requirementIds": [
+        "STW-ACT-14",
+        "STW-ACT-15",
+        "STW-ACT-38",
+        "STW-ACT-39",
+        "STW-DENY-03"
+      ]
+    },
+    {
+      "id": "NSC-STW-05",
+      "class": "CLIENT_FLAG_IS_NOT_DISCLOSURE",
+      "statement": "A visibility flag sent by the client never makes a staff note member-visible. Disclosure needs classification and a server-side decision by the primary handler.",
+      "requirementIds": [
+        "STW-ACT-08",
+        "STW-ACT-09",
+        "STW-ACT-17"
+      ]
+    },
+    {
+      "id": "NSC-STW-06",
+      "class": "NO_SELF_ESCALATION",
+      "statement": "A steward cannot assign or reassign a case, issue a triage designation, lift their own recusal or approve, sign or dispatch correspondence from the role.",
+      "requirementIds": [
+        "STW-ACT-05",
+        "STW-ACT-30",
+        "STW-ACT-31",
+        "STW-DENY-02",
+        "STW-DENY-05",
+        "STW-DENY-08"
+      ]
+    },
+    {
+      "id": "NSC-STW-07",
+      "class": "REVOKED_RELATIONSHIP",
+      "statement": "After a collaborator grant is revoked or an assignment ends, the next read or write on that case is refused. Historical access is as DEC-PD-0C2-01 decides.",
+      "requirementIds": [
+        "STW-ACT-20",
+        "STW-ACT-06"
+      ]
+    },
+    {
+      "id": "NSC-STW-08",
+      "class": "ATOMIC_AUDIT",
+      "statement": "If the audit record cannot be written, the steward mutation is rolled back and nothing persists.",
+      "requirementIds": [
+        "STW-ACT-08",
+        "STW-ACT-10",
+        "STW-ACT-13",
+        "STW-ACT-16"
+      ]
+    },
+    {
+      "id": "NSC-STW-09",
+      "class": "NO_FINANCIAL_OR_ADMIN_AUTHORITY",
+      "statement": "The steward role never yields a financial, administrative, legal-hold or retention action.",
+      "requirementIds": [
+        "STW-DENY-04",
+        "STW-DENY-06",
+        "STW-DENY-07"
+      ]
+    }
+  ],
+  "dependenciesOnOtherPersonas": [
+    {
+      "onPersona": "financial-officer",
+      "via": "SHARED_OBLIGATION",
+      "ids": [
+        "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "SHR-0C2-WORKAID-REFERRAL"
+      ]
+    },
+    {
+      "onPersona": "representative",
+      "via": "RELATED_REQUIREMENT",
+      "ids": [
+        "STW-ACT-01->REP-ACT-01",
+        "STW-ACT-02->REP-ACT-18",
+        "STW-ACT-02->REP-NAV-1",
+        "STW-ACT-03->REP-ACT-18",
+        "STW-ACT-04->REP-ACT-04",
+        "STW-ACT-04->REP-ACT-21",
+        "STW-ACT-05->REP-ACT-22",
+        "STW-ACT-06->REP-ACT-03",
+        "STW-ACT-07->REP-ACT-03",
+        "STW-ACT-08->REP-ACT-06",
+        "STW-ACT-09->REP-ACT-06",
+        "STW-ACT-09->REP-ACT-23",
+        "STW-ACT-10->REP-ACT-07",
+        "STW-ACT-10->REP-ACT-08",
+        "STW-ACT-10->REP-ACT-23",
+        "STW-ACT-11->REP-ACT-21",
+        "STW-ACT-12->REP-ACT-12",
+        "STW-ACT-13->REP-ACT-15",
+        "STW-ACT-13->REP-ACT-17",
+        "STW-ACT-14->REP-ACT-16",
+        "STW-ACT-14->REP-ACT-17",
+        "STW-ACT-15->REP-ACT-15",
+        "STW-ACT-16->REP-ACT-15",
+        "STW-ACT-17->REP-ACT-23",
+        "STW-ACT-18->REP-ACT-19",
+        "STW-ACT-19->REP-ACT-20",
+        "STW-ACT-20->REP-ACT-09",
+        "STW-ACT-21->REP-ACT-18",
+        "STW-ACT-21->REP-NAV-6",
+        "STW-ACT-22->REP-ACT-18",
+        "STW-ACT-23->REP-ACT-18",
+        "STW-ACT-24->REP-ACT-18",
+        "STW-ACT-25->REP-ACT-12",
+        "STW-ACT-26->REP-ACT-12",
+        "STW-ACT-27->REP-ACT-13",
+        "STW-ACT-28->REP-ACT-02",
+        "STW-ACT-29->REP-ACT-12",
+        "STW-ACT-30->REP-ACT-05",
+        "STW-ACT-31->REP-ACT-04",
+        "STW-ACT-32->REP-ACT-24",
+        "STW-ACT-33->REP-ACT-21",
+        "STW-ACT-34->REP-ACT-10",
+        "STW-ACT-35->REP-ACT-11",
+        "STW-ACT-36->REP-ACT-25",
+        "STW-ACT-36->REP-NAV-7",
+        "STW-ACT-37->REP-NAV-7",
+        "STW-ACT-38->REP-ACT-16",
+        "STW-ACT-39->REP-ACT-15",
+        "STW-ACT-40->REP-ACT-25",
+        "STW-DENY-01->REP-ACT-03",
+        "STW-DENY-01->REP-ACT-15",
+        "STW-DENY-02->REP-ACT-04",
+        "STW-DENY-02->REP-ACT-05",
+        "STW-DENY-03->REP-ACT-17",
+        "STW-DENY-04->REP-ACT-01",
+        "STW-DENY-05->REP-ACT-13",
+        "STW-DENY-06->REP-ACT-01",
+        "STW-DENY-07->REP-ACT-17",
+        "STW-DENY-08->REP-ACT-22",
+        "STW-NAV-1->REP-NAV-1",
+        "STW-NAV-2->REP-NAV-2",
+        "STW-NAV-3->REP-NAV-3",
+        "STW-NAV-4->REP-NAV-4",
+        "STW-NAV-5->REP-NAV-5",
+        "STW-NAV-6->REP-NAV-6",
+        "STW-NAV-7->REP-NAV-7"
+      ]
+    },
+    {
+      "onPersona": "representative",
+      "via": "SHARED_OBLIGATION",
+      "ids": [
+        "SHR-0C2-CASE-ASSIGNMENT",
+        "SHR-0C2-CORRESPONDENCE",
+        "SHR-0C2-DEADLINES",
+        "SHR-0C2-ESCALATION",
+        "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "SHR-0C2-MEMBER-DIRECTORY",
+        "SHR-0C2-NAVIGATION",
+        "SHR-0C2-WORKAID-REFERRAL"
+      ]
+    }
+  ],
+  "sharedObligationsInvolved": [
+    "SHR-0C2-CASE-ASSIGNMENT",
+    "SHR-0C2-CORRESPONDENCE",
+    "SHR-0C2-DEADLINES",
+    "SHR-0C2-ESCALATION",
+    "SHR-0C2-EVIDENCE-DOCUMENTS",
+    "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+    "SHR-0C2-MEMBER-DIRECTORY",
+    "SHR-0C2-NAVIGATION",
+    "SHR-0C2-WORKAID-REFERRAL"
+  ],
+  "outstandingProductDecisions": {
+    "baseline": [
+      {
+        "id": "DEC-PD-01",
+        "title": "Steward as a distinct persona",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-02",
+        "title": "Steward navigation",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-03",
+        "title": "Default visibility of working notes",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-04",
+        "title": "Intake classification",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-05",
+        "title": "Assignment acknowledgement and handoff summary",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-12",
+        "title": "Deadline extension workflow",
+        "status": "OUTSTANDING"
+      }
+    ],
+    "raisedByGate0C2": [
+      {
+        "id": "DEC-PD-0C2-01",
+        "title": "Steward access when a relationship or the platform role ends",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-02",
+        "title": "Steward scope across federations, locals and territories",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-03",
+        "title": "Steward absence cover and substitution",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-10",
+        "title": "Order of product acceptance and the Steward structure",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      }
+    ]
+  },
+  "outstandingInstitutionalAuthorityDecisions": {
+    "note": "These are institutional decisions. A product acceptance of this package cannot issue them. They are outstanding and stay so.",
+    "baseline": [
+      {
+        "id": "DEC-IA-01",
+        "title": "Who holds a triage designation",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-02",
+        "title": "Self-assignment from triage",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-03",
+        "title": "Who may assign or route cases",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-04",
+        "title": "Who may close a case",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-05",
+        "title": "Member-disclosable labels",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-06",
+        "title": "Privileged-matter access grants",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-07",
+        "title": "Recusal lifting and conflict adjudication",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-08",
+        "title": "Temporary delegation, substitute coverage and succession",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-09",
+        "title": "Senior review and approval authority",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-10",
+        "title": "Territory and bargaining-unit mandates per operating model",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-11",
+        "title": "Representation protocol approval",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-12",
+        "title": "WorkAid referral authority and consent wording",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-13",
+        "title": "Deadline extension approval",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-14",
+        "title": "Correspondence approval, signature and dispatch",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-15",
+        "title": "Conversation legal hold and retention",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-32",
+        "title": "Steward role scope per organization",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      }
+    ],
+    "inventoryLevelInstitutionalDecisionsOutstanding": 79
+  },
+  "knownSourceGaps": {
+    "sourceGaps": [
+      {
+        "id": "GAP-STW-NO-CANONICAL",
+        "kind": "IRREDUCIBLE_HISTORICAL",
+        "statement": "No Steward canonical exists in any of the 526 refs scanned. The eight recovered evidence items S1 to S8 define no action. Every one of the Steward contracts is a new design, and no historical Steward action list can be recovered."
+      },
+      {
+        "id": "GAP-STW-STRUCTURE",
+        "kind": "PRODUCT_DECISION",
+        "statement": "Whether Steward is a distinct persona or a scoped profile of Representative 2.2 is undecided (DEC-PD-01)."
+      },
+      {
+        "id": "GAP-STW-OFFICE",
+        "kind": "INSTITUTIONAL",
+        "statement": "No source names a steward office, and none may be created here (DEC-IA-32)."
+      }
+    ],
+    "historicalEvidenceByClass": {
+      "NONE": 55
+    },
+    "implementationStatusCounts": {
+      "NOT_IMPLEMENTED": 9,
+      "PARTIAL_SOURCE": 21,
+      "SOURCE_PRESENT": 25
+    },
+    "irreducibleHistoricalUncertainty": [
+      "GAP-STW-NO-CANONICAL"
+    ],
+    "identifiersWithNoRecoverableDefinition": []
+  },
+  "implementationObligationsByGate": [
+    {
+      "gate": 2,
+      "name": "Case ownership and representation",
+      "requirementIds": [
+        "STW-ACT-04",
+        "STW-ACT-20",
+        "STW-ACT-28",
+        "STW-ACT-30",
+        "STW-ACT-31",
+        "STW-ACT-33"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 3,
+        "SOURCE_PRESENT": 3
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 4,
+      "name": "Claims/grievances convergence",
+      "requirementIds": [
+        "STW-ACT-01",
+        "STW-ACT-03",
+        "STW-ACT-06",
+        "STW-ACT-07",
+        "STW-ACT-08",
+        "STW-ACT-09",
+        "STW-ACT-11",
+        "STW-ACT-18"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 1,
+        "PARTIAL_SOURCE": 3,
+        "SOURCE_PRESENT": 4
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 6,
+      "name": "Documents, privacy and records",
+      "requirementIds": [
+        "STW-ACT-13",
+        "STW-ACT-14",
+        "STW-ACT-15",
+        "STW-ACT-16",
+        "STW-ACT-17",
+        "STW-ACT-38"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 1,
+        "PARTIAL_SOURCE": 3,
+        "SOURCE_PRESENT": 2
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 7,
+      "name": "WorkAid union-side completion",
+      "requirementIds": [
+        "STW-ACT-32"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 1
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 9,
+      "name": "Runtime and installation architecture",
+      "requirementIds": [
+        "STW-ACT-24"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 1
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 10,
+      "name": "Frozen persona journeys",
+      "requirementIds": [
+        "STW-NAV-1",
+        "STW-NAV-2",
+        "STW-NAV-3",
+        "STW-NAV-4",
+        "STW-NAV-5",
+        "STW-NAV-6",
+        "STW-NAV-7",
+        "STW-ACT-02",
+        "STW-ACT-05",
+        "STW-ACT-10",
+        "STW-ACT-19",
+        "STW-ACT-21",
+        "STW-ACT-22",
+        "STW-ACT-23",
+        "STW-ACT-34",
+        "STW-ACT-35",
+        "STW-ACT-36",
+        "STW-ACT-37",
+        "STW-ACT-40",
+        "STW-DENY-01",
+        "STW-DENY-02",
+        "STW-DENY-03",
+        "STW-DENY-04",
+        "STW-DENY-05",
+        "STW-DENY-06",
+        "STW-DENY-07",
+        "STW-DENY-08"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 3,
+        "PARTIAL_SOURCE": 9,
+        "SOURCE_PRESENT": 15
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 11,
+      "name": "Member/staff messaging",
+      "requirementIds": [
+        "STW-ACT-12",
+        "STW-ACT-25",
+        "STW-ACT-26",
+        "STW-ACT-27",
+        "STW-ACT-29"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 4,
+        "SOURCE_PRESENT": 1
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 13,
+      "name": "Generic CRUD and route authorization",
+      "requirementIds": [
+        "STW-ACT-39"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 1
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    }
+  ],
+  "stewardStructure": {
+    "register": "docs/union-eyes/convergence/register/ue-persona-steward-structure-0c2.json",
+    "recommendation": "OPT-C-SCOPED-PROFILE",
+    "recommendationOnly": true,
+    "selected": null
+  },
+  "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+  "consultedRolesAdvisoryOnly": [
+    "Union Eyes representation product lead",
+    "Institution representative of a steward-led protocol, where one exists"
+  ],
+  "approvalOptions": [
+    {
+      "id": "APPROVE",
+      "resultingState": "ACCEPTED_BY_AUTHORIZED_PRODUCT_OWNER",
+      "effect": "Establishes the named artifact version as the engineering canonical for this persona. Settles or explicitly defers each listed product decision. Issues no institutional authority and activates nothing."
+    },
+    {
+      "id": "REJECT",
+      "resultingState": "REJECTED_BY_AUTHORIZED_PRODUCT_OWNER",
+      "effect": "The artifact version is not the engineering canonical. The persona stays unresolved and its Gate 0 blocker stays."
+    },
+    {
+      "id": "RETURN_FOR_REWORK",
+      "resultingState": "RETURNED_FOR_REWORK",
+      "effect": "The named reasons are recorded and a new artifact version is prepared. The returned version stays preserved."
+    }
+  ],
+  "productApprovalDoesNot": [
+    "Issue, approve or activate any of the 79 outstanding institutional decisions or the 32 baseline institutional authority decisions.",
+    "Issue a financial mandate, a triage designation, a supervisory mandate, a delegation, an appointment or any other instrument.",
+    "Create, name or fill an institutional office, including a steward office.",
+    "Change an implementation status, a security status, a release disposition or a runtime qualification status.",
+    "Resolve any ratchet, test or route defect."
+  ],
+  "claims": {
+    "implementationComplete": false,
+    "runtimeQualification": "NOT_QUALIFIED",
+    "securityStatusChanged": false,
+    "institutionalAuthorityGranted": false,
+    "productSpecificationRatified": false
+  }
+}

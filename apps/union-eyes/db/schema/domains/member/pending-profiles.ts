@@ -1,8 +1,8 @@
-import { pgTable, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, boolean, uuid } from "drizzle-orm/pg-core";
 import { paymentProviderEnum, membershipEnum } from "./profiles";
 
 export const pendingProfilesTable = pgTable("pending_profiles", {
-  id: text("id").primaryKey().notNull(), // UUID or generated ID
+  id: uuid("id").primaryKey().notNull(), // UUID or generated ID
   email: text("email").notNull().unique(), // User's email address - unique constraint
   token: text("token"), // Verification token from checkout
   
@@ -16,9 +16,9 @@ export const pendingProfilesTable = pgTable("pending_profiles", {
   
   // Plan details
   planDuration: text("plan_duration"), // "monthly" or "yearly"
-  billingCycleStart: timestamp("billing_cycle_start"),
-  billingCycleEnd: timestamp("billing_cycle_end"),
-  nextCreditRenewal: timestamp("next_credit_renewal"),
+  billingCycleStart: timestamp("billing_cycle_start", { withTimezone: true }),
+  billingCycleEnd: timestamp("billing_cycle_end", { withTimezone: true }),
+  nextCreditRenewal: timestamp("next_credit_renewal", { withTimezone: true }),
   
   // Credits information
   usageCredits: integer("usage_credits").default(0),
@@ -27,11 +27,11 @@ export const pendingProfilesTable = pgTable("pending_profiles", {
   // Claiming status
   claimed: boolean("claimed").default(false),
   claimedByUserId: text("claimed_by_user_id"),
-  claimedAt: timestamp("claimed_at"),
+  claimedAt: timestamp("claimed_at", { withTimezone: true }),
   
   // Standard timestamps
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull()
     .$onUpdate(() => new Date())

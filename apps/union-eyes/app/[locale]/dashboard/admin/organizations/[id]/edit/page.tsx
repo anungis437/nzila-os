@@ -32,9 +32,26 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
-import type { OrganizationType, LabourSector, CAJurisdiction, OrganizationStatus } from "@/types/organization";
+import { readApiError } from "@/lib/client/api-envelope";
+import type { Organization, OrganizationType, LabourSector, CAJurisdiction, OrganizationStatus } from "@/types/organization";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+/** The organization record /api/organizations/{id} answers with, as far as this form reads it (the columns in snake_case); settings is free-form JSON of which the form reads four keys. */
+interface OrganizationRecord {
+  name?: string;
+  slug?: string;
+  organization_type?: OrganizationType;
+  parent_id?: string | null;
+  description?: string | null;
+  status?: OrganizationStatus;
+  charter_number?: string | null;
+  affiliation_date?: string | null;
+  settings?: Record<string, unknown> | null;
+}
+
+/** An organization offered as a parent, as the organization list answers it (purpose=parent). */
+type ParentOption = Pick<Organization, "id" | "name" | "organization_type">;
 
 // Canadian sectors
 const sectors: { value: LabourSector }[] = [
@@ -74,16 +91,17 @@ const jurisdictions: { value: CAJurisdiction }[] = [
   { value: "CA-YT" }
 ];
 
-// Organization types
-const orgTypes: { value: OrganizationType }[] = [
-  { value: "platform" },
-  { value: "congress" },
-  { value: "federation" },
-  { value: "union" },
-  { value: "local" },
-  { value: "region" },
-  { value: "district" }
-];
+// Radix Select refuses an item whose value is the empty string, so "no parent" and "not set" have values of their own (an organization id is a UUID and cannot be one, and neither is a sector or a jurisdiction).
+const NO_PARENT = "none";
+const NOT_SET = "none";
+
+/** A setting stored as text, or "" when the organization has none: an organization that records no sector or jurisdiction is shown as not set, never as one it does not have. */
+const settingText = (settings: OrganizationRecord["settings"], key: string): string => {
+  const value = settings?.[key];
+  return typeof value === "string" ? value : "";
+};
+const isSector = (value: string): value is LabourSector => sectors.some((sector) => sector.value === value);
+const isJurisdiction = (value: string): value is CAJurisdiction => jurisdictions.some((jurisdiction) => jurisdiction.value === value);
 
 // Organization statuses
 const statuses: { value: OrganizationStatus }[] = [
@@ -101,25 +119,24 @@ export default function EditOrganizationPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [availableOrganizations, setAvailableOrganizations] = useState<any[]>([]);
+  const [availableOrganizations, setAvailableOrganizations] = useState<ParentOption[]>([]);
   
-  // Form state
+  // Form state: what the PATCH route accepts (name, slug, parent, status, description, settings). The type is the organization's own and is shown, not edited here.
+  // A sector or jurisdiction the organization does not record is "" (shown as not set) and is not sent.
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
-    type: "local" as OrganizationType,
     parentId: "",
     description: "",
     status: "active" as OrganizationStatus,
-    sector: "other" as LabourSector,
-    jurisdiction: "federal" as CAJurisdiction,
+    sector: "" as LabourSector | "",
+    jurisdiction: "" as CAJurisdiction | "",
     charterNumber: "",
     affiliationDate: ""
   });
 
   // Fetch organization details
-  const { data: orgData, error: orgError, isLoading } = useSWR(
+  const { data: orgData, error: orgError, isLoading } = useSWR<{ data?: OrganizationRecord }>(
     organizationId ? `/api/organizations/${organizationId}` : null,
     fetcher
   );
@@ -128,32 +145,35 @@ export default function EditOrganizationPage() {
   useEffect(() => {
     const loadOrganizations = async () => {
       try {
-        const response = await fetch("/api/organizations?status=active");
-        const data = await response.json();
+        const response = await fetch("/api/organizations?status=active&purpose=parent");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const body = (await response.json()) as { data?: ParentOption[] };
+        if (!Array.isArray(body.data)) throw new Error("Unexpected organization list");
         // Filter out current organization and its descendants
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setAvailableOrganizations((data.data || []).filter((org: any) => org.id !== organizationId));
-      } catch (_error) {
-}
+        setAvailableOrganizations(body.data.filter((org) => org.id !== organizationId));
+      } catch {
+        setError(t('failedToLoadParentOrganizations'));
+      }
     };
     loadOrganizations();
-  }, [organizationId]);
+  }, [organizationId, t]);
 
   // Populate form when organization data loads
   useEffect(() => {
     if (orgData?.data) {
       const org = orgData.data;
+      const sector = settingText(org.settings, "sector");
+      const jurisdiction = settingText(org.settings, "jurisdiction");
       setFormData({
         name: org.name || "",
         slug: org.slug || "",
-        type: org.type || "local",
         parentId: org.parent_id || "",
         description: org.description || "",
         status: org.status || "active",
-        sector: org.settings?.sector || "other",
-        jurisdiction: org.settings?.jurisdiction || "federal",
-        charterNumber: org.settings?.charter_number || "",
-        affiliationDate: org.settings?.affiliation_date || ""
+        sector: isSector(sector) ? sector : "",
+        jurisdiction: isJurisdiction(jurisdiction) ? jurisdiction : "",
+        charterNumber: org.charter_number || settingText(org.settings, "charter_number"),
+        affiliationDate: (org.affiliation_date ? String(org.affiliation_date).slice(0, 10) : "") || settingText(org.settings, "affiliation_date")
       });
     }
   }, [orgData]);
@@ -170,22 +190,20 @@ export default function EditOrganizationPage() {
         body: JSON.stringify({
           name: formData.name,
           slug: formData.slug,
-          type: formData.type,
           parent_id: formData.parentId || null,
           description: formData.description || null,
+          charter_number: formData.charterNumber || null,
+          affiliation_date: formData.affiliationDate || null,
           status: formData.status,
           settings: {
-            sector: formData.sector,
-            jurisdiction: formData.jurisdiction,
-            charter_number: formData.charterNumber || null,
-            affiliation_date: formData.affiliationDate || null
+            ...(formData.sector ? { sector: formData.sector } : {}),
+            ...(formData.jurisdiction ? { jurisdiction: formData.jurisdiction } : {})
           }
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-          throw new Error(errorData.error || t('failedToUpdateOrganization'));
+        throw new Error(await readApiError(response, t('failedToUpdateOrganization')));
       }
 
       router.push(`/dashboard/admin/organizations/${organizationId}`);
@@ -238,6 +256,8 @@ export default function EditOrganizationPage() {
       </div>
     );
   }
+
+  const organizationType = orgData.data.organization_type;
 
   return (
     <div className="container mx-auto p-6 max-w-3xl space-y-6">
@@ -305,24 +325,15 @@ export default function EditOrganizationPage() {
 
             <div className="space-y-2">
               <Label htmlFor="type">{t('organizationTypeLabel')}</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as OrganizationType }))}
-              >
-                <SelectTrigger id="type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {orgTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div>
-                        <div>{t(`orgType.${type.value}`)}</div>
-                        <div className="text-xs text-muted-foreground">{t(`orgTypeDescription.${type.value}`)}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="type"
+                value={organizationType ? t(`orgType.${organizationType}`) : ""}
+                readOnly
+                disabled
+              />
+              {organizationType && (
+                <p className="text-xs text-muted-foreground">{t(`orgTypeDescription.${organizationType}`)}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -369,17 +380,21 @@ export default function EditOrganizationPage() {
             <div className="space-y-2">
               <Label htmlFor="parent">{t('parentOrganizationLabel')}</Label>
               <Select
-                value={formData.parentId}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value }))}
+                value={formData.parentId || NO_PARENT}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value === NO_PARENT ? "" : value }))}
               >
                 <SelectTrigger id="parent">
                   <SelectValue placeholder={t('noParentOption')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('noParentOption')}</SelectItem>
+                  <SelectItem value={NO_PARENT}>{t('noParentOption')}</SelectItem>
+                  {formData.parentId && !availableOrganizations.some(org => org.id === formData.parentId) && (
+                    // The parent the organization has is always a choice: left out, the field would read "no parent" while a save keeps the real one.
+                    <SelectItem value={formData.parentId}>{t('currentParentUnlisted', { id: formData.parentId })}</SelectItem>
+                  )}
                   {availableOrganizations.map(org => (
                     <SelectItem key={org.id} value={org.id}>
-                      {org.name} ({t(`orgType.${org.type}`)})
+                      {org.name} ({t(`orgType.${org.organization_type}`)})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -406,13 +421,14 @@ export default function EditOrganizationPage() {
             <div className="space-y-2">
               <Label htmlFor="sector">{t('primarySectorLabel')}</Label>
               <Select
-                value={formData.sector}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, sector: value as LabourSector }))}
+                value={formData.sector || NOT_SET}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, sector: value === NOT_SET ? "" : value as LabourSector }))}
               >
                 <SelectTrigger id="sector">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={NOT_SET}>{t('notSetOption')}</SelectItem>
                   {sectors.map(sector => (
                     <SelectItem key={sector.value} value={sector.value}>
                       {t(`sector.${sector.value}`)}
@@ -425,13 +441,14 @@ export default function EditOrganizationPage() {
             <div className="space-y-2">
               <Label htmlFor="jurisdiction">{t('jurisdictionLabel')}</Label>
               <Select
-                value={formData.jurisdiction}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, jurisdiction: value as CAJurisdiction }))}
+                value={formData.jurisdiction || NOT_SET}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, jurisdiction: value === NOT_SET ? "" : value as CAJurisdiction }))}
               >
                 <SelectTrigger id="jurisdiction">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={NOT_SET}>{t('notSetOption')}</SelectItem>
                   {jurisdictions.map(jurisdiction => (
                     <SelectItem key={jurisdiction.value} value={jurisdiction.value}>
                       {t(`jurisdiction.${jurisdiction.value}`)}

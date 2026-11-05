@@ -51,6 +51,12 @@ const PERSONALITY_META: Record<
     characteristics: ['Irregular governance engagement', 'Declining or volatile resilience', 'Documentation gaps', 'Mitigation follow-through issues'],
     strategicFocus: 'Establish foundational governance cadences and begin systematic continuity documentation.',
   },
+  insufficient_data: {
+    name: 'Insufficient data',
+    description: 'Too little governance activity has been recorded to characterize this organization.',
+    characteristics: [],
+    strategicFocus: 'Record governance decisions and reasoning sessions; no characterization is made until enough activity exists.',
+  },
   continuity_progressive: {
     name: 'Continuity-Progressive',
     description: 'Leading-edge governance culture with adaptive practices, strong organizational memory, and continuous learning.',
@@ -93,7 +99,7 @@ function resolvePersonality(
   sessionCount: number,
   _latestScore: number | null,
 ): GovernancePersonalityType {
-  if (totalInteractions < 2) return 'resilience_fragile';
+  if (totalInteractions < 2) return 'insufficient_data';
 
   if (trend === 'improving' && totalInteractions >= 8 && govCount >= 3) return 'continuity_progressive';
   if (trend === 'improving' && totalInteractions >= 4) return 'governance_maturing';
@@ -203,7 +209,10 @@ export async function profileGovernancePersonality(orgId: string): Promise<Gover
 
   const dimensions = buildDimensions(trend, govCount, mitCount, sessionCount, totalEntries, volatility);
 
-  const identityStatement = `This organization operates as a "${meta.name}" institution — ${meta.description.split('.')[0].toLowerCase()}.`;
+  const identityStatement =
+    personalityType === 'insufficient_data'
+      ? 'Too little governance activity has been recorded to characterize this organization.'
+      : `This organization operates as a "${meta.name}" institution — ${meta.description.split('.')[0].toLowerCase()}.`;
 
   return {
     organizationId: orgId,

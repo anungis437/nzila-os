@@ -635,25 +635,6 @@
           "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
         },
         {
-          "id": "apps/union-eyes/app/api/whop/create-checkout/route.ts#POST",
-          "sourcePath": "apps/union-eyes/app/api/whop/create-checkout/route.ts",
-          "method": "POST",
-          "failingCases": [
-            {
-              "name": "unauthenticated",
-              "status": 500,
-              "outcome": "FAIL"
-            },
-            {
-              "name": "authenticated",
-              "status": 500,
-              "outcome": "FAIL"
-            }
-          ],
-          "kind": "HARNESS_FIXTURE_OR_BODY_GAP",
-          "reason": "Generic harness reached an internal error; inspect route-specific fixture requirements, path IDs and body derivation before treating as a source defect."
-        },
-        {
           "id": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts#DELETE",
           "sourcePath": "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
           "method": "DELETE",

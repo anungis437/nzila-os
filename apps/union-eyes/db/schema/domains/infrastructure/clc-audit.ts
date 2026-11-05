@@ -12,6 +12,7 @@ import {
   timestamp,
   text,
   json,
+  boolean,
   index,
   foreignKey,
 } from 'drizzle-orm/pg-core';
@@ -97,7 +98,7 @@ export const chartOfAccounts = pgTable(
     accountCategory: varchar('account_category', { length: 100 }), // 'membership_revenue', 'administrative_expense', etc.
     statcanMapping: varchar('statcan_mapping', { length: 50 }), // StatCan LAB-05302 line number mapping
     clcCategory: varchar('clc_category', { length: 100 }), // CLC reporting category
-    isActive: varchar('is_active', { length: 10 }).default('true').notNull(),
+    isActive: boolean('is_active').default(true).notNull(),
     parentAccountId: uuid('parent_account_id'), // For hierarchical chart of accounts
     displayOrder: integer('display_order').default(0),
     description: text('description'),

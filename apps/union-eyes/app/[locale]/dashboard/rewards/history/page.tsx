@@ -1,20 +1,13 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { requireUser } from '@/lib/api-auth-guard';
+import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
 import { getTranslations } from 'next-intl/server';
-import { listLedger } from '@/lib/services/rewards/wallet-service';
+import { loadCreditHistory, parseCreditHistoryQuery, LEDGER_EVENT_TYPES } from '@/lib/rewards/page-reads';
 import { CreditTimeline } from '@/components/rewards/credit-timeline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { History, Download, Filter } from 'lucide-react';
+import { History, Filter } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -23,47 +16,42 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     eventType?: string;
     limit?: string;
     page?: string;
-  };
+  }>;
 }
 
 export default async function CreditHistoryPage({ params, searchParams }: PageProps & { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const user = await requireUser();
-  const userId = user.userId;
-  const orgId = user.organizationId!;
+  // The person and the organization are the signed-in member's own: an organization-less caller is sent back to the dashboard.
+  const { userId, organizationId } = await requireOrganizationScope();
 
   const t = await getTranslations('rewards.history');
+  const filterLabels = {
+    earn: t('filters.earned'),
+    spend: t('filters.spent'),
+    expire: t('filters.expired'),
+    revoke: t('filters.revoked'),
+    refund: t('filters.refunded'),
+    adjust: t('filters.adjusted'),
+  } as const;
+  const query = parseCreditHistoryQuery(await searchParams);
+  const { eventType, limit, page } = query;
 
-  const eventType = searchParams.eventType || 'all';
-  const limit = parseInt(searchParams.limit || '50');
-  const page = parseInt(searchParams.page || '1');
-  const offset = (page - 1) * limit;
+  // One page of the member's ledger, filtered in the database, with the totals over the whole ledger. A failed read is an error, not an empty history.
+  const history = await loadCreditHistory(organizationId, userId, query);
+  const totalPages = Math.max(1, Math.ceil(history.matching / limit));
 
-  // Fetch ledger entries
-  const result = await listLedger(orgId, userId, limit, offset);
+  const historyHref = (overrides: Record<string, string>) =>
+    `/${locale}/dashboard/rewards/history?${new URLSearchParams({ eventType, limit: String(limit), page: String(page), ...overrides })}`;
 
-  // Filter by event type if specified
-  let filteredEntries = result.entries;
-  if (eventType !== 'all') {
-    filteredEntries = filteredEntries.filter((entry) => entry.eventType === eventType);
-  }
-
-  // Calculate summary stats
   const stats = {
-    totalEarned: result.entries
-      .filter((e) => e.eventType === 'earn')
-      .reduce((sum, e) => sum + e.amountCredits, 0),
-    totalSpent: result.entries
-      .filter((e) => e.eventType === 'spend')
-      .reduce((sum, e) => sum + Math.abs(e.amountCredits), 0),
-    totalExpired: result.entries
-      .filter((e) => e.eventType === 'expire')
-      .reduce((sum, e) => sum + Math.abs(e.amountCredits), 0),
-    totalTransactions: result.total,
+    totalEarned: history.totalEarned,
+    totalSpent: history.totalSpent,
+    totalExpired: history.totalExpired,
+    totalTransactions: history.totalTransactions,
   };
 
   return (
@@ -129,83 +117,49 @@ export default async function CreditHistoryPage({ params, searchParams }: PagePr
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filters: each one is a link, so the filtered history is a page of its own that can be shared and reloaded */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              {t('filters.title')}
-            </CardTitle>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              {t('exportCSV')}
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            {t('filters.title')}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Select defaultValue={eventType}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('filters.eventType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('filters.all')}</SelectItem>
-                  <SelectItem value="earn">{t('filters.earned')}</SelectItem>
-                  <SelectItem value="spend">{t('filters.spent')}</SelectItem>
-                  <SelectItem value="expire">{t('filters.expired')}</SelectItem>
-                  <SelectItem value="revoke">{t('filters.revoked')}</SelectItem>
-                  <SelectItem value="refund">{t('filters.refunded')}</SelectItem>
-                  <SelectItem value="adjust">{t('filters.adjusted')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Select defaultValue={limit.toString()}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-                <SelectItem value="200">200</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap gap-2">
+            <Button variant={eventType === 'all' ? 'default' : 'outline'} size="sm" asChild>
+              <Link href={historyHref({ eventType: 'all', page: '1' })}>{t('filters.all')}</Link>
+            </Button>
+            {LEDGER_EVENT_TYPES.map((type) => (
+              <Button key={type} variant={eventType === type ? 'default' : 'outline'} size="sm" asChild>
+                <Link href={historyHref({ eventType: type, page: '1' })}>{filterLabels[type]}</Link>
+              </Button>
+            ))}
           </div>
         </CardContent>
       </Card>
 
       {/* Timeline */}
-      <CreditTimeline entries={filteredEntries} showBalance={true} />
+      <CreditTimeline entries={history.entries} showBalance={true} />
 
-      {/* Pagination */}
-      {result.total > limit && (
+      {/* Pagination: a link only where there is a page to go to */}
+      {history.matching > limit && (
         <div className="flex justify-center gap-2">
-          <Button
-            variant="outline"
-            disabled={page === 1}
-            asChild
-          >
-            <Link href={`?page=${page - 1}&eventType=${eventType}&limit=${limit}`}>
-              {t('pagination.previous')}
-            </Link>
-          </Button>
+          {page > 1 && (
+            <Button variant="outline" asChild>
+              <Link href={historyHref({ page: String(page - 1) })}>{t('pagination.previous')}</Link>
+            </Button>
+          )}
           <div className="flex items-center gap-2 px-4">
             <span className="text-sm text-muted-foreground">
-              {t('pagination.page', { current: page, total: Math.ceil(result.total / limit) })}
+              {t('pagination.page', { current: page, total: totalPages })}
             </span>
           </div>
-          <Button
-            variant="outline"
-            disabled={offset + limit >= result.total}
-            asChild
-          >
-            <Link href={`?page=${page + 1}&eventType=${eventType}&limit=${limit}`}>
-              {t('pagination.next')}
-            </Link>
-          </Button>
+          {page < totalPages && (
+            <Button variant="outline" asChild>
+              <Link href={historyHref({ page: String(page + 1) })}>{t('pagination.next')}</Link>
+            </Button>
+          )}
         </div>
       )}
     </div>

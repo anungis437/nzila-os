@@ -59,7 +59,8 @@ export function ContinuityHealthPanel() {
           }
           throw new Error('Failed to fetch continuity report');
         }
-        const payload = await res.json();
+        const payload = (await res.json()) as { data?: ContinuityRiskReport };
+        if (!payload.data) throw new Error('Unexpected continuity report response');
         setReport(payload.data);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Unknown error');

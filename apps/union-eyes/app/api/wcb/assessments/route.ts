@@ -14,7 +14,8 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ['WCB'],
   orgScoped: true,
-  readRole: 'steward',
+  // Premium rate, assessable payroll and premium due are the organization's financial position: an officer reads them.
+  readRole: 'officer',
   writeRole: 'officer',
 });
 export { GET, POST };

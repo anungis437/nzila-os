@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
@@ -15,13 +17,10 @@ vi.mock('@/db/schema', () => ({ arbitrationDecisions: m.arbitrationDecisions }))
 
 const COLLECTION_ROUTES = [
   ['precedents', () => import('../route')],
-  ['precedents/search', () => import('../search/route')],
 ] as const;
 
 const ITEM_ROUTES = [
   ['precedents/[id]', () => import('../[id]/route')],
-  ['precedents/[id]/citations', () => import('../[id]/citations/route')],
-  ['precedents/[id]/documents', () => import('../[id]/documents/route')],
 ] as const;
 
 describe.each(COLLECTION_ROUTES)('arbitration/%s route (arbitration_decisions)', (_routeName, loadRoute) => {
@@ -68,5 +67,17 @@ describe.each(ITEM_ROUTES)('arbitration/%s route (arbitration_decisions)', (_rou
     expect(m.crudRoutes).not.toHaveBeenCalledWith(expect.objectContaining({ writeRole: 'steward' }));
     expect(m.crudRoutes).not.toHaveBeenCalledWith(expect.objectContaining({ writeRole: 'admin' }));
     expect(m.crudRoutes).not.toHaveBeenCalledWith(expect.objectContaining({ writeRole: 'app_owner' }));
+  });
+});
+
+// DEF-0B3-ARBITRATION-DECISION-SUBRESOURCES-FACADE: search, citations and documents were the generic factory (or a copy of the item route) over the decision
+// table, so they listed or served decision rows under another name. They answer 501 and no longer bind the table.
+describe.each(['search', '[id]/citations', '[id]/documents'])('arbitration/precedents/%s route', (name) => {
+  const source = readFileSync(resolve(__dirname, '..', ...name.split('/'), 'route.ts'), 'utf8');
+
+  it('answers 501 and does not bind the decision table', () => {
+    expect(source).toContain('ApiError.notImplemented');
+    expect(source).not.toContain('crudRoutes');
+    expect(source).not.toContain('arbitrationDecisions');
   });
 });

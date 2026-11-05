@@ -1,84 +1,24 @@
 # Webhook Verification Migration Guide
 
-> Migrate from inline Svix HMAC verification to `@nzila/platform-auth`.
+> Retired. The identity provider (Clerk) is gone, and so is the shared Clerk webhook verifier this guide migrated apps to.
 
-## Problem
+## What changed
 
-Multiple apps hand-roll Svix HMAC-SHA256 verification for Clerk webhooks.
-This creates security-critical code duplication and inconsistent timestamp
-validation across the codebase.
-
-## Solution
-
-`@nzila/platform-auth` now exports a canonical webhook verification pipeline:
-
-```ts
-import { verifyClerkWebhook } from '@nzila/platform-auth'
-```
-
-## Migration Steps
-
-### Before (inline)
-
-```ts
-import { createHmac } from 'crypto'
-
-export async function POST(req: Request) {
-  const body = await req.text()
-  const svixId = req.headers.get('svix-id')
-  const svixTimestamp = req.headers.get('svix-timestamp')
-  const svixSignature = req.headers.get('svix-signature')
-
-  // Hand-rolled HMAC verification...
-  const secret = process.env.CLERK_WEBHOOK_SECRET!
-  const sigBase = Buffer.from(secret.replace('whsec_', ''), 'base64')
-  const content = `${svixId}.${svixTimestamp}.${body}`
-  const expected = createHmac('sha256', sigBase).update(content).digest('base64')
-  // ... timestamp checks, signature comparison, etc.
-}
-```
-
-### After (shared utility)
-
-```ts
-import { verifyClerkWebhook } from '@nzila/platform-auth'
-
-export async function POST(req: Request) {
-  const body = await req.text()
-  const result = verifyClerkWebhook(
-    body,
-    Object.fromEntries(req.headers.entries()),
-    process.env.CLERK_WEBHOOK_SECRET!,
-  )
-
-  if (!result.verified) {
-    return new Response(result.reason, { status: 401 })
-  }
-
-  const event = JSON.parse(body)
-  // Handle event...
-}
-```
-
-## What the Shared Utility Does
-
-1. **Extracts Svix headers** (`svix-id`, `svix-timestamp`, `svix-signature`)
-2. **Validates timestamp** (rejects requests older than 5 minutes — replay protection)
-3. **Verifies HMAC-SHA256** against all signatures in the `svix-signature` header
-4. **Returns typed result** — `{ verified: true }` or `{ verified: false, reason: string }`
+- `@nzila/platform-auth` no longer exports `verifyClerkWebhook`, `verifyWebhook`, `verifySvixSignature`, `isSvixTimestampValid`, `extractSvixHeaders`, the `SvixHeaders` type, `resolveIdentityFromClerk` or `mapClerkOrgRole`, and its `./adapter` and `./clerk-adapter` subpaths are removed. Nothing in the repository imported them.
+- Identity in Union Eyes and in the shared package is Microsoft Entra ID (`@nzila/platform-auth/entra`).
+- Union Eyes keeps one deprecated Django route, `webhooks/clerk/`, as an alias that answers 401 unless `AUTH_WEBHOOK_SECRET` verifies the call, until the last sender is confirmed gone (UE-CONV-A-007).
+- Agrimo still serves its own `app/api/webhooks/clerk/route.ts`; it carries its own Svix HMAC and timestamp check, since there is no shared verifier to call.
 
 ## Contract Test Enforcement
 
 `tooling/contract-tests/webhook-hygiene.test.ts` enforces:
 
-- **WHK-001**: No inline `createHmac('sha256'` in webhook routes (migration warning)
-- **WHK-002**: Clerk webhook handlers must validate timestamps
+- **WHK-001**: every Clerk-named webhook route verifies the Svix signature itself
+- **WHK-002**: every Clerk-named webhook route validates the timestamp
 - **WHK-003**: `api-guards.ts` files should import from `@nzila/platform-auth`
 
-## Apps to Migrate
+`packages/platform-auth/src/identity-provider-residuals.test.ts` proves the retired exports and subpaths stay gone and that every remaining mention of the provider is classified.
 
-| App | Webhook Route | Status |
-|-----|--------------|--------|
-| Zonga | `app/api/webhooks/clerk/route.ts` | Needs migration |
-| Agrimo | `app/api/webhooks/clerk/route.ts` | Needs migration |
-| Other apps | Various | Use `@nzila/platform-auth` for new webhook routes |
+## Webhooks from other senders
+
+A webhook from another sender (Stripe, QuickBooks) verifies its own signature with that sender's documented scheme; none of it is shared with the retired Clerk path.

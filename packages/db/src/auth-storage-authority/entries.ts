@@ -14,7 +14,7 @@ export const authStorageAuthorityEntries: AuthStorageAuthorityEntry[] = [
     table: 'user_management.users',
     classification: 'AUTH_RUNTIME_MIXED',
     reason:
-      "Shared platform-auth credential/profile operations use the canonical scoped auth clients. Cross-user lifecycle operations remain LATENT_UNWIRED. Union Eyes still has duplicate declarations used by api-auth-guard.ts, grievance-notifications.ts and messaging/campaign-service.ts through its APP_OWN_DUPLICATE_RUNTIME business database client; these retain their separate compatibility risk. The deadline recipient resolver no longer imports the legacy users declaration: it first selects an active business membership in the grievance organization, then uses a canonical email-selector lookup and binds the returned active/unlocked profile to the assigned platform user ID. This lookup can execute for an authenticated request or a trusted deadline worker; it does not impersonate the recipient's identity scope. Source implementation and clone database evidence are separate from deployed acceptance.",
+      "Shared platform-auth credential/profile operations use the canonical scoped auth clients. Cross-user lifecycle operations remain LATENT_UNWIRED. Union Eyes still has duplicate declarations used by api-auth-guard.ts and grievance-notifications.ts through its APP_OWN_DUPLICATE_RUNTIME business database client; these retain their separate compatibility risk. The deadline recipient resolver no longer imports the legacy users declaration: it first selects an active business membership in the grievance organization, then uses a canonical email-selector lookup and binds the returned active/unlocked profile to the assigned platform user ID. This lookup can execute for an authenticated request or a trusted deadline worker; it does not impersonate the recipient's identity scope. Source implementation and clone database evidence are separate from deployed acceptance.",
     supportingCapability: [
       'packages/platform-auth/src/password/auth-service.ts',
       'packages/platform-auth/src/entra/server.ts',
@@ -23,7 +23,6 @@ export const authStorageAuthorityEntries: AuthStorageAuthorityEntry[] = [
       'packages/platform-auth/src/lifecycle/service.ts (LATENT_UNWIRED cross-user path)',
       'apps/union-eyes/lib/api-auth-guard.ts (APP_OWN_DUPLICATE_RUNTIME)',
       'apps/union-eyes/lib/services/grievance-notifications.ts (APP_OWN_DUPLICATE_RUNTIME, legacy declaration)',
-      'apps/union-eyes/lib/services/messaging/campaign-service.ts (APP_OWN_DUPLICATE_RUNTIME, legacy declaration)',
       'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts (canonical AUTH_RUNTIME email-selector lookup after organization-scoped membership selection)',
     ],
     invocationAuthority: 'MIXED',

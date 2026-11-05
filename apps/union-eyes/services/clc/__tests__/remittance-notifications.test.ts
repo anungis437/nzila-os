@@ -108,6 +108,23 @@ describe('sendPaymentConfirmation', () => {
     expect(results.length).toBeGreaterThan(0);
   });
 
+  it('writes the month and the amount in English by default', async () => {
+    push(fetchRow({ paidDate: '2024-04-01' }), contacts(), []);
+    await sendPaymentConfirmation('r1');
+    const sent = (h.sendResendEmail.mock.calls[0] as unknown as [{ subject: string; html: string }])[0];
+    expect(sent.subject).toContain('March 2024');
+    expect(sent.html).toContain('$450.00');
+  });
+
+  it('writes the month and the amount in French for a French recipient, still in Canadian dollars', async () => {
+    push(fetchRow({ paidDate: '2024-04-01' }), contacts(), []);
+    await sendPaymentConfirmation('r1', 'fr');
+    const sent = (h.sendResendEmail.mock.calls[0] as unknown as [{ subject: string; html: string }])[0];
+    expect(sent.subject).toContain('mars 2024');
+    expect(sent.html).toContain('450,00\u00a0$');
+    expect(sent.html).not.toContain('$450.00');
+  });
+
   it('throws when the remittance is not found', async () => {
     push([]);
     await expect(sendPaymentConfirmation('r1')).rejects.toThrow('not found');

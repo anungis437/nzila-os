@@ -29,28 +29,28 @@ export type PayoutStatus = (typeof PayoutStatus)[keyof typeof PayoutStatus]
 // ── Core Schemas ─────────────────────────────────────────
 
 export const RevenueRecordSchema = z.object({
-  id: z.string().uuid(),
-  orgId: z.string().uuid(),
-  creatorId: z.string().uuid(),
+  id: z.guid(),
+  orgId: z.guid(),
+  creatorId: z.guid(),
   revenueStreamType: z.nativeEnum(RevenueStreamType),
   grossAmount: z.number().nonnegative(),
   platformFee: z.number().nonnegative(),
   netAmount: z.number().nonnegative(),
   currency: z.string().length(3),
-  eventId: z.string().uuid().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  eventId: z.guid().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   recordedAt: z.string().datetime(),
 })
 export type RevenueRecord = z.infer<typeof RevenueRecordSchema>
 
 export const PayoutRecordSchema = z.object({
-  id: z.string().uuid(),
-  orgId: z.string().uuid(),
-  creatorId: z.string().uuid(),
+  id: z.guid(),
+  orgId: z.guid(),
+  creatorId: z.guid(),
   amount: z.number().positive(),
   currency: z.string().length(3),
   status: z.nativeEnum(PayoutStatus),
-  revenueRecordIds: z.array(z.string().uuid()),
+  revenueRecordIds: z.array(z.guid()),
   initiatedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
 })

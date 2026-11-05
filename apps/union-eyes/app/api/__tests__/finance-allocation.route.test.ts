@@ -1,16 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { declaredOptions } from './with-api-double';
 
 const m = vi.hoisted(() => ({
-  withMinRole: vi.fn(),
   requireEntitlement: vi.fn(),
   getAllocationRules: vi.fn(),
   createAllocationRule: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({
-  withMinRole: m.withMinRole,
-}));
+vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble);
 
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   requireEntitlement: m.requireEntitlement,
@@ -44,56 +42,59 @@ async function loadRoute() {
   return import('../finance/allocation/route');
 }
 
+const ctx = { organizationId: 'org_1', userId: 'u1' };
+
 describe('finance/allocation route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withMinRole.mockImplementation(
-      (_role: string, handler: (request: NextRequest, context: any) => Promise<Response>) =>
-        (request: NextRequest, context: any = { organizationId: 'org_1', userId: 'user_1' }) =>
-          handler(request, context),
-    );
     m.requireEntitlement.mockResolvedValue(undefined);
     m.getAllocationRules.mockResolvedValue([{ id: 'rule_1' }]);
     m.createAllocationRule.mockResolvedValue({ id: 'rule_new' });
   });
 
-  it('GET returns 401 without organization context', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), { userId: 'u1' });
-    expect(response.status).toBe(401);
+  describe('what the route asks of the wrapper', () => {
+    it('lists rules for a secretary-treasurer, in the organization\'s own transaction, behind the allocation entitlement', async () => {
+      const { GET } = await loadRoute();
+      expect(declaredOptions(GET)).toMatchObject({
+        auth: { minRole: 'secretary_treasurer' },
+        entitlement: 'allocation_engine',
+        rlsOrgContext: true,
+        registry: { audience: 'officer', evidenceRequired: true },
+      });
+    });
+
+    it('creates rules only for an administrator, in the organization\'s own transaction, behind the allocation entitlement', async () => {
+      const { POST } = await loadRoute();
+      expect(declaredOptions(POST)).toMatchObject({
+        auth: { minRole: 'admin' },
+        entitlement: 'allocation_engine',
+        rlsOrgContext: true,
+        registry: { audience: 'admin', evidenceRequired: true },
+      });
+    });
   });
 
-  it('GET returns 403 when entitlement check fails', async () => {
+  it('GET returns 403 when entitlement check fails, without reading rules', async () => {
     const { GET } = await loadRoute();
     m.requireEntitlement.mockRejectedValueOnce(new Error('Entitlement missing'));
-    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), {
-      organizationId: 'org_1',
-      userId: 'u1',
-    });
+    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), ctx);
     expect(response.status).toBe(403);
+    expect(m.requireEntitlement).toHaveBeenCalledWith('org_1', 'allocation_engine', 'u1');
+    expect(m.getAllocationRules).not.toHaveBeenCalled();
   });
 
-  it('GET returns allocation rules', async () => {
+  it('GET returns allocation rules of the caller organization', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), {
-      organizationId: 'org_1',
-      userId: 'u1',
-    });
+    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), ctx);
     expect(response.status).toBe(200);
     expect(m.getAllocationRules).toHaveBeenCalledWith('org_1');
   });
 
-  it('POST returns 401 when user context missing', async () => {
-    const { POST } = await loadRoute();
-    const response = await POST(
-      new NextRequest('http://localhost/api/finance/allocation', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name: 'Rule', costType: 'dues', method: 'per_member_count' }),
-      }),
-      { organizationId: 'org_1' },
-    );
-    expect(response.status).toBe(401);
+  it('GET reports a read that failed as a 500, never as an empty list', async () => {
+    const { GET } = await loadRoute();
+    m.getAllocationRules.mockRejectedValueOnce(new Error('db down'));
+    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), ctx);
+    expect(response.status).toBe(500);
   });
 
   it('POST returns validation error for invalid JSON', async () => {
@@ -104,7 +105,7 @@ describe('finance/allocation route', () => {
         headers: { 'content-type': 'application/json' },
         body: 'bad-json',
       }),
-      { organizationId: 'org_1', userId: 'u1' },
+      ctx,
     );
     expect(response.status).toBe(400);
   });
@@ -117,12 +118,13 @@ describe('finance/allocation route', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ name: '', method: 'unknown' }),
       }),
-      { organizationId: 'org_1', userId: 'u1' },
+      ctx,
     );
     expect(response.status).toBe(400);
+    expect(m.createAllocationRule).not.toHaveBeenCalled();
   });
 
-  it('POST creates allocation rule with valid payload', async () => {
+  it('POST creates the rule for the caller organization and user, whatever the body says', async () => {
     const { POST } = await loadRoute();
     const response = await POST(
       new NextRequest('http://localhost/api/finance/allocation', {
@@ -134,11 +136,18 @@ describe('finance/allocation route', () => {
           method: 'weighted_hybrid',
           parameters: { memberWeight: 0.8 },
           effectiveFrom: '2026-07-01T00:00:00.000Z',
+          organizationId: 'org_other',
+          createdBy: 'someone-else',
         }),
       }),
-      { organizationId: 'org_1', userId: 'u1' },
+      ctx,
     );
     expect(response.status).toBe(200);
-    expect(m.createAllocationRule).toHaveBeenCalled();
+    expect(m.createAllocationRule).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: 'org_1',
+      createdBy: 'u1',
+      name: 'Weighted Rule',
+      method: 'weighted_hybrid',
+    }));
   });
 });

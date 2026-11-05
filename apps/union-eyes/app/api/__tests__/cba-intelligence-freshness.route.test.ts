@@ -25,7 +25,7 @@ describe('cba-intelligence/freshness route', () => {
     const result = await GET({ query: {} });
 
     expect(m.getFreshnessOverview).toHaveBeenCalledWith({ agingDays: 14, staleDays: 30, expiredDays: 90 });
-    expect(result).toMatchObject({ data: { summary: { total: 3 } } });
+    expect(result).toMatchObject({ summary: { total: 3 } });
   });
 
   it('uses custom freshness thresholds from query params', async () => {

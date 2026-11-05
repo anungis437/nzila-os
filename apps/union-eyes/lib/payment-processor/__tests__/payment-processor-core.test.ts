@@ -5,7 +5,6 @@
  *  - types.ts          error classes
  *  - base-processor.ts mapProcessorStatus + inherited helpers + abstract guard
  *  - future-processors.ts (ManualProcessor)
- *  - whop-processor.ts (no external SDK)
  *  - processor-factory.ts (full lifecycle; SDK processors initialized via mocks)
  *
  * External coupling is mocked: '@nzila/payments-stripe' getStripeClient and the
@@ -24,7 +23,6 @@ vi.mock('@nzila/payments-stripe', () => ({
 import {
   PaymentProcessorType,
   PaymentStatus,
-  WebhookEventType,
   PaymentProcessorError,
   PaymentIntentError,
   RefundError,
@@ -42,7 +40,6 @@ import {
 } from '../types';
 import { BasePaymentProcessor, mapProcessorStatus } from '../processors/base-processor';
 import { ManualProcessor } from '../processors/future-processors';
-import { WhopProcessor } from '../processors/whop-processor';
 import {
   PaymentProcessorFactory,
   loadProcessorConfigFromEnv,
@@ -133,7 +130,7 @@ describe('types — error classes', () => {
     expect(e.details).toEqual({ x: 1 });
   });
   it('subclasses set their own name + fixed code', () => {
-    const pi = new PaymentIntentError('a', PaymentProcessorType.WHOP, { d: 1 });
+    const pi = new PaymentIntentError('a', PaymentProcessorType.STRIPE, { d: 1 });
     expect(pi.name).toBe('PaymentIntentError');
     expect(pi.code).toBe('PAYMENT_INTENT_ERROR');
     expect(pi).toBeInstanceOf(PaymentProcessorError);
@@ -247,60 +244,6 @@ describe('ManualProcessor', () => {
   });
 });
 
-describe('WhopProcessor', () => {
-  const w = new WhopProcessor();
-
-  it('has whop type and webhook-centric capabilities', () => {
-    expect(w.type).toBe(PaymentProcessorType.WHOP);
-    expect(w.capabilities.supportsWebhooks).toBe(true);
-    expect(w.capabilities.supportsRefunds).toBe(false);
-  });
-  it('initialize delegates to base', async () => {
-    await expect(w.initialize({ apiKey: 'whop' })).resolves.toBeUndefined();
-  });
-  it('unsupported payment-intent operations throw', async () => {
-    await expect(w.createPaymentIntent({ amount: new Decimal('1'), currency: 'usd' })).rejects.toThrow();
-    await expect(w.retrievePaymentIntent('x')).rejects.toThrow();
-    await expect(w.confirmPaymentIntent('x')).rejects.toThrow();
-    await expect(w.cancelPaymentIntent('x')).rejects.toThrow();
-  });
-  it('unsupported refund/customer/payment-method ops throw', async () => {
-    await expect(w.createRefund({ paymentIntentId: 'pi' })).rejects.toThrow();
-    await expect(w.retrieveRefund('rf')).rejects.toThrow();
-    await expect(w.createCustomer({ email: 'a@b.com' })).rejects.toThrow();
-    await expect(w.retrieveCustomer('c')).rejects.toThrow();
-    await expect(w.updateCustomer('c', {})).rejects.toThrow();
-    await expect(w.attachPaymentMethod('pm', 'c')).rejects.toThrow();
-    await expect(w.detachPaymentMethod('pm')).rejects.toThrow();
-    await expect(w.listPaymentMethods('c')).rejects.toThrow();
-  });
-  it('verifyWebhook parses payload and maps known + unknown actions', async () => {
-    const known = await w.verifyWebhook(
-      JSON.stringify({ id: 'evt1', action: 'membership.went_valid', data: { x: 1 } }),
-      'sig',
-    );
-    expect(known.verified).toBe(true);
-    expect(known.event?.type).toBe(WebhookEventType.SUBSCRIPTION_CREATED);
-
-    const unknown = await w.verifyWebhook(
-      JSON.stringify({ action: 'totally.unknown', data: {} }),
-      'sig',
-    );
-    expect(unknown.verified).toBe(true);
-    expect(unknown.event?.type).toBe(WebhookEventType.PAYMENT_SUCCEEDED);
-  });
-  it('verifyWebhook returns verified:false on invalid JSON', async () => {
-    const res = await w.verifyWebhook('not-json', 'sig');
-    expect(res.verified).toBe(false);
-    expect(res.error).toBeDefined();
-  });
-  it('processWebhook is inert', async () => {
-    await expect(
-      w.processWebhook({ id: 'e', type: WebhookEventType.PAYMENT_SUCCEEDED } as WebhookEvent),
-    ).resolves.toBeUndefined();
-  });
-});
-
 describe('processor-factory — lifecycle', () => {
   const realFetch = global.fetch;
 
@@ -318,7 +261,6 @@ describe('processor-factory — lifecycle', () => {
     defaultProcessor: PaymentProcessorType.MANUAL,
     processors: {
       [PaymentProcessorType.STRIPE]: { apiKey: 'sk', environment: 'test' },
-      [PaymentProcessorType.WHOP]: { apiKey: 'whop', environment: 'test' },
       [PaymentProcessorType.PAYPAL]: {
         apiKey: 'cid',
         environment: 'test',
@@ -348,9 +290,9 @@ describe('processor-factory — lifecycle', () => {
     const f = PaymentProcessorFactory.getInstance();
     await f.initialize(fullConfig());
 
-    expect(f.getAvailableProcessors().length).toBe(5);
+    expect(f.getAvailableProcessors().length).toBe(4);
     expect(f.isProcessorAvailable(PaymentProcessorType.STRIPE)).toBe(true);
-    expect(f.getProcessor(PaymentProcessorType.WHOP).type).toBe(PaymentProcessorType.WHOP);
+    expect(f.getProcessor(PaymentProcessorType.PAYPAL).type).toBe(PaymentProcessorType.PAYPAL);
     expect(f.getDefaultProcessor().type).toBe(PaymentProcessorType.MANUAL);
     expect(f.getProcessorCapabilities(PaymentProcessorType.SQUARE)).toBeDefined();
   });
@@ -359,7 +301,7 @@ describe('processor-factory — lifecycle', () => {
     const f = PaymentProcessorFactory.getInstance();
     await f.initialize(fullConfig());
     await f.initialize(fullConfig());
-    expect(f.getAvailableProcessors().length).toBe(5);
+    expect(f.getAvailableProcessors().length).toBe(4);
   });
 
   it('getProcessor for an unconfigured type throws PROCESSOR_UNAVAILABLE', async () => {
@@ -398,8 +340,6 @@ describe('processor-factory — env loading', () => {
   const ENV_KEYS = [
     'STRIPE_SECRET_KEY',
     'STRIPE_WEBHOOK_SECRET',
-    'WHOP_API_KEY',
-    'WHOP_WEBHOOK_SECRET',
     'PAYPAL_CLIENT_ID',
     'PAYPAL_CLIENT_SECRET',
     'PAYPAL_WEBHOOK_ID',
@@ -432,7 +372,6 @@ describe('processor-factory — env loading', () => {
 
   it('with all provider env vars set, every processor is configured', () => {
     process.env.STRIPE_SECRET_KEY = 'sk';
-    process.env.WHOP_API_KEY = 'whop';
     process.env.PAYPAL_CLIENT_ID = 'cid';
     process.env.PAYPAL_CLIENT_SECRET = 'secret';
     process.env.SQUARE_ACCESS_TOKEN = 'tok';
@@ -440,7 +379,6 @@ describe('processor-factory — env loading', () => {
 
     const config = loadProcessorConfigFromEnv();
     expect(config.processors[PaymentProcessorType.STRIPE]).toBeDefined();
-    expect(config.processors[PaymentProcessorType.WHOP]).toBeDefined();
     expect(config.processors[PaymentProcessorType.PAYPAL]?.metadata?.clientSecret).toBe('secret');
     expect(config.processors[PaymentProcessorType.SQUARE]?.metadata?.applicationId).toBe('app');
   });

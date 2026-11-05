@@ -1,5 +1,5 @@
-import { PaymentStatusAlert } from "@/components/payment/payment-status-alert";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/utilities/providers";
 import LayoutWrapper from "@/components/layout-wrapper";
 import { AuthProvider } from '@nzila/platform-auth/entra/client';
@@ -187,12 +187,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Providers>
             <OrganizationProvider>
               <LayoutWrapper>
-                <PaymentStatusAlert />
                 <DemoModeOverlay />
                 {children}
               </LayoutWrapper>
               <CookieConsentProvider messages={messages.experiencePrivacy as Record<string, string>} />
+              {/* One renderer per toast source the application imports: `@/components/ui/use-toast` is drawn by <Toaster />, `sonner` by <SonnerToaster />. lib/__tests__/toast-feedback.test.ts holds this. */}
               <Toaster />
+              <SonnerToaster richColors closeButton position="top-right" />
             </OrganizationProvider>
             </Providers>
           </NzilaAppShell>

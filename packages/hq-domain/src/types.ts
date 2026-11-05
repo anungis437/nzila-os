@@ -95,7 +95,7 @@ export const VentureSchema = z.object({
   next30Days: z.array(z.string()),
   confidence: ConfidenceSchema,
   consoleAppId: z.string().nullable(),
-  externalLinks: z.record(z.string(), z.string().url()).default({}),
+  externalLinks: z.record(z.string(), z.string().url()).prefault({}),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })

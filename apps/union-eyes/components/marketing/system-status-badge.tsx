@@ -8,6 +8,7 @@
  */
 
 import * as React from 'react';
+import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, AlertCircle, XCircle, HelpCircle } from 'lucide-react';
  
@@ -109,6 +110,7 @@ export function SystemStatusCard({
   metadata,
   className,
 }: SystemStatusCardProps) {
+  const locale = useLocale();
   const config = statusConfig[status];
   const Icon = config.icon;
 
@@ -133,7 +135,7 @@ export function SystemStatusCard({
           <div className="text-right">
             <p className="text-xs text-slate-500">Last checked</p>
             <p className="text-xs text-slate-600 font-medium">
-              {formatLastCheck(lastCheck)}
+              {formatLastCheck(lastCheck, locale)}
             </p>
           </div>
         )}
@@ -192,7 +194,7 @@ export function SystemStatusGrid({ systems, className }: SystemStatusGridProps) 
 /**
  * Utility functions
  */
-function formatLastCheck(date: Date): string {
+function formatLastCheck(date: Date, locale: string): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
@@ -206,7 +208,7 @@ function formatLastCheck(date: Date): string {
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays < 7) return `${diffDays}d ago`;
   
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 /**

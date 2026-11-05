@@ -25,7 +25,7 @@ export const createDataAssetSchema = z.object({
   retentionPeriod: z.string().max(255).optional(),
   crossBorderTransfer: z.boolean().default(false),
   destinationCountry: z.string().max(100).optional(),
-  vendorId: z.string().uuid().optional(),
+  vendorId: z.guid().optional(),
 })
 
 export type CreateDataAssetInput = z.infer<typeof createDataAssetSchema>

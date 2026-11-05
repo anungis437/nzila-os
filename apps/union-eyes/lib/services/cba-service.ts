@@ -75,7 +75,7 @@ export async function getCBAById(
           viewCount: sql`${collectiveAgreements.viewCount} + 1`,
           updatedAt: new Date()
         })
-        .where(eq(collectiveAgreements.id, id));
+        .where(and(eq(collectiveAgreements.id, id), eq(collectiveAgreements.organizationId, cba.organizationId)));
     }
 
     return cba as CBAWithClauses;
@@ -241,6 +241,7 @@ export async function createCBA(data: NewCBA): Promise<CBA> {
  */
 export async function updateCBA(
   id: string,
+  organizationId: string,
   data: Partial<NewCBA>
 ): Promise<CBA | null> {
   try {
@@ -250,7 +251,7 @@ export async function updateCBA(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(collectiveAgreements.id, id))
+      .where(and(eq(collectiveAgreements.id, id), eq(collectiveAgreements.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -263,7 +264,7 @@ export async function updateCBA(
 /**
  * Delete a CBA (soft delete by setting status to archived)
  */
-export async function deleteCBA(id: string): Promise<boolean> {
+export async function deleteCBA(id: string, organizationId: string): Promise<boolean> {
   try {
     const [deleted] = await db
       .update(collectiveAgreements)
@@ -271,7 +272,7 @@ export async function deleteCBA(id: string): Promise<boolean> {
         status: "archived",
         updatedAt: new Date(),
       })
-      .where(eq(collectiveAgreements.id, id))
+      .where(and(eq(collectiveAgreements.id, id), eq(collectiveAgreements.organizationId, organizationId)))
       .returning();
 
     return !!deleted;
@@ -284,11 +285,11 @@ export async function deleteCBA(id: string): Promise<boolean> {
 /**
  * Hard delete a CBA (permanent deletion)
  */
-export async function hardDeleteCBA(id: string): Promise<boolean> {
+export async function hardDeleteCBA(id: string, organizationId: string): Promise<boolean> {
   try {
     const _result = await db
       .delete(collectiveAgreements)
-      .where(eq(collectiveAgreements.id, id));
+      .where(and(eq(collectiveAgreements.id, id), eq(collectiveAgreements.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -306,6 +307,7 @@ export async function hardDeleteCBA(id: string): Promise<boolean> {
  */
 export async function updateCBAStatus(
   id: string,
+  organizationId: string,
   status: "active" | "expired" | "under_negotiation" | "ratified_pending" | "archived"
 ): Promise<CBA | null> {
   try {
@@ -315,7 +317,7 @@ export async function updateCBAStatus(
         status,
         updatedAt: new Date(),
       })
-      .where(eq(collectiveAgreements.id, id))
+      .where(and(eq(collectiveAgreements.id, id), eq(collectiveAgreements.organizationId, organizationId)))
       .returning();
 
     return updated || null;

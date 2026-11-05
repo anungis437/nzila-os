@@ -16,7 +16,7 @@ export const ExperimentConfigSchema = z.object({
   category: z.enum(['availability', 'latency', 'data', 'dependency', 'resource']),
   targetService: z.string(),
   faultType: z.string(),
-  faultParams: z.record(z.unknown()).default({}),
+  faultParams: z.record(z.string(), z.unknown()).prefault({}),
   durationMs: z.number().positive().default(30_000),
   steadyStateTimeout: z.number().positive().default(60_000),
   rollbackOnFailure: z.boolean().default(true),

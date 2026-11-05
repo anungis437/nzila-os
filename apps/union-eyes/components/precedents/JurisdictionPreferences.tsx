@@ -16,7 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/lib/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+import { envelopeData, readApiError } from "@/lib/client/api-envelope";
 
 const JURISDICTIONS = [
   { value: "federal", label: "Federal", labelFr: "Fédéral", icon: Globe },
@@ -63,11 +64,16 @@ interface JurisdictionPreferencesProps {
   compact?: boolean;
 }
 
+const strings = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+
 export function JurisdictionPreferences({ onSaved, compact }: JurisdictionPreferencesProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
+  // The saved preferences could not be read: the form then shows defaults that are not the member's, so saving them would overwrite the real ones.
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const [selectedJurisdictions, setSelectedJurisdictions] = useState<string[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
@@ -79,17 +85,17 @@ export function JurisdictionPreferences({ onSaved, compact }: JurisdictionPrefer
     const load = async () => {
       try {
         const res = await fetch("/api/precedents/jurisdiction-preferences");
-        if (res.ok) {
-          const json = await res.json();
-          const data = json.data ?? json;
-          setSelectedJurisdictions(data.preferredJurisdictions ?? []);
-          setSelectedLevels(data.preferredLevels ?? []);
-          setIncludeNational(data.includeNational ?? true);
-          setAutoApply(data.autoApply ?? true);
-          setIsConfigured(data.isConfigured ?? false);
-        }
+        if (!res.ok) throw new Error(await readApiError(res, `HTTP ${res.status}`));
+        // The route's preferences are what the framework wraps as { success, data, timestamp }.
+        const data = envelopeData(await res.json());
+        setSelectedJurisdictions(strings(data.preferredJurisdictions));
+        setSelectedLevels(strings(data.preferredLevels));
+        setIncludeNational(data.includeNational !== false);
+        setAutoApply(data.autoApply !== false);
+        setIsConfigured(data.isConfigured === true);
+        setLoadFailed(false);
       } catch {
-        // silently fail — defaults are fine
+        setLoadFailed(true);
       } finally {
         setIsLoading(false);
       }
@@ -124,8 +130,7 @@ export function JurisdictionPreferences({ onSaved, compact }: JurisdictionPrefer
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error ?? "Failed to save preferences");
+        throw new Error(await readApiError(res, "Failed to save preferences"));
       }
 
       setIsConfigured(true);
@@ -288,6 +293,11 @@ export function JurisdictionPreferences({ onSaved, compact }: JurisdictionPrefer
       </Card>
 
       {/* Summary + Save */}
+      {loadFailed && (
+        <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          Your saved preferences could not be loaded, so saving is turned off to keep them from being overwritten. Reload the page to try again.
+        </p>
+      )}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           {selectedJurisdictions.length === 0 && selectedLevels.length === 0 ? (
@@ -299,7 +309,7 @@ export function JurisdictionPreferences({ onSaved, compact }: JurisdictionPrefer
             </>
           )}
         </div>
-        <Button onClick={handleSave} disabled={isSaving}>
+        <Button onClick={handleSave} disabled={isSaving || loadFailed}>
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

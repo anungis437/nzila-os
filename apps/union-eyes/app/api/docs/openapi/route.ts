@@ -1,6 +1,9 @@
 /**
  * OpenAPI Spec Endpoint
- * Serves the complete OpenAPI 3.0 specification
+ * Serves the complete OpenAPI 3.0 specification.
+ *
+ * The complete specification inventories every operation of the platform, so it is served only to an authenticated
+ * administrator and is never cached by a shared cache. /api/docs/openapi.json is the public documentation.
  */
 
 import fs from 'fs';
@@ -8,8 +11,9 @@ import path from 'path';
 import { NextResponse } from 'next/server';
 import * as yaml from 'js-yaml';
 import { logger } from '@/lib/logger';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
-export async function GET() {
+export const GET = withRoleAuth('admin', async () => {
   try {
     const openApiPath = path.join(process.cwd(), 'docs', 'api', 'openapi-complete.yaml');
     
@@ -26,7 +30,7 @@ export async function GET() {
     return NextResponse.json(spec, {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'private, no-store',
       },
     });
   } catch (error) {
@@ -36,4 +40,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

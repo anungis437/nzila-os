@@ -90,7 +90,7 @@ export const payments = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    memberId: varchar("member_id", { length: 255 }).references(() => profiles.userId, { onDelete: "set null" }),
+    memberId: varchar("member_id", { length: 255 }),
     
     // Payment details
     amount: decimal("amount", { precision: 19, scale: 2 }).notNull(),
@@ -125,8 +125,8 @@ export const payments = pgTable(
     failureReason: text("failure_reason"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     createdBy: varchar("created_by", { length: 255 }),
     updatedBy: varchar("updated_by", { length: 255 }),
   },
@@ -167,8 +167,8 @@ export const paymentCycles = pgTable(
     closedAt: timestamp("closed_at"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     orgIdx: index("payment_cycles_org_idx").on(t.organizationId),
@@ -187,8 +187,7 @@ export const paymentMethods = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
     memberId: varchar("member_id", { length: 255 })
-      .notNull()
-      .references(() => profiles.userId, { onDelete: "cascade" }),
+      .notNull(),
     
     // Method type
     type: paymentMethodEnum("type").notNull(),
@@ -211,8 +210,8 @@ export const paymentMethods = pgTable(
     expiresAt: timestamp("expires_at"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     orgMemberIdx: index("payment_methods_org_member_idx").on(t.organizationId, t.memberId),
@@ -251,8 +250,8 @@ export const bankReconciliation = pgTable(
     reconciliationNotes: text("reconciliation_notes"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     reconciledBy: varchar("reconciled_by", { length: 255 }),
     reconciledAt: timestamp("reconciled_at"),
   },
@@ -288,8 +287,8 @@ export const paymentDisputes = pgTable(
     resolvedAt: timestamp("resolved_at"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     filedBy: varchar("filed_by", { length: 255 }),
     resolvedBy: varchar("resolved_by", { length: 255 }),
   },
@@ -297,44 +296,6 @@ export const paymentDisputes = pgTable(
     orgIdx: index("payment_disputes_org_idx").on(t.organizationId),
     paymentIdx: index("payment_disputes_payment_idx").on(t.paymentId),
     statusIdx: index("payment_disputes_status_idx").on(t.status),
-  })
-);
-
-/**
- * Stripe webhook events - for reconciliation and audit trail
- */
-export const stripeWebhookEvents = pgTable(
-  "stripe_webhook_events",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Event details
-    stripeEventId: varchar("stripe_event_id").notNull().unique(),
-    eventType: varchar("event_type", { length: 100 }).notNull(),
-    
-    // Associated objects
-    stripePaymentIntentId: varchar("stripe_payment_intent_id"),
-    stripeCustomerId: varchar("stripe_customer_id"),
-    
-    // Event data
-    eventData: jsonb("event_data").notNull(),
-    processed: boolean("processed").default(false),
-    
-    // Processing
-    processedAt: timestamp("processed_at"),
-    processingError: text("processing_error"),
-    
-    // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (t) => ({
-    orgIdx: index("stripe_webhook_events_org_idx").on(t.organizationId),
-    stripeEventIdx: index("stripe_webhook_events_stripe_idx").on(t.stripeEventId),
-    processedIdx: index("stripe_webhook_events_processed_idx").on(t.processed),
   })
 );
 
@@ -392,13 +353,6 @@ export const paymentDisputesRelations = relations(paymentDisputes, ({ one }) => 
   payment: one(payments, {
     fields: [paymentDisputes.paymentId],
     references: [payments.id],
-  }),
-}));
-
-export const stripeWebhookEventsRelations = relations(stripeWebhookEvents, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [stripeWebhookEvents.organizationId],
-    references: [organizations.id],
   }),
 }));
 

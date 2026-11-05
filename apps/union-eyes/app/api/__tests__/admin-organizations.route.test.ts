@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  withApi: vi.fn(),
   selectQueue: [] as unknown[][],
+  withSystemContext: vi.fn(),
+  // How many system transactions are open right now
+  systemDepth: { value: 0 },
+  openAtSelect: [] as number[],
 }));
 
 function makeChain(rows: unknown[]) {
@@ -19,12 +22,16 @@ function makeChain(rows: unknown[]) {
 }
 
 const mockDb = {
-  select: vi.fn(() => makeChain((m.selectQueue.shift() ?? []) as unknown[])),
+  select: vi.fn(() => {
+    m.openAtSelect.push(m.systemDepth.value);
+    return makeChain((m.selectQueue.shift() ?? []) as unknown[]);
+  }),
 };
 
-vi.mock('@/lib/api/framework', () => ({
-  withApi: m.withApi,
-}));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
+
+// The route lists every organization, so its statements run as the system role: the test stands the system transaction in, never a real connection.
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 
 vi.mock('@/db/db', () => ({ db: mockDb }));
 
@@ -41,6 +48,8 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   };
 });
 
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
+
 async function loadRoute() {
   return import('../admin/organizations/route');
 }
@@ -48,14 +57,52 @@ async function loadRoute() {
 describe('admin/organizations route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'platform_lead';
     m.selectQueue = [];
-    m.withApi.mockImplementation(
-      (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
-        async (request: NextRequest, ctx: any = {}) => {
-          const data = await handler({ request, ...ctx });
-          return new Response(JSON.stringify(data), { status: 200 });
-        },
-    );
+    m.openAtSelect.length = 0;
+    m.systemDepth.value = 0;
+    m.withSystemContext.mockImplementation(async (run: (tx: unknown) => Promise<unknown>) => {
+      m.systemDepth.value++;
+      try {
+        return await run(mockDb);
+      } finally {
+        m.systemDepth.value--;
+      }
+    });
+  });
+
+  it('declares platform authority: an authenticated platform lead, since it lists every organization', async () => {
+    await loadRoute();
+    expect(declared).toEqual([{ auth: { required: true, minRole: 'platform_lead' } }]);
+  });
+
+  it('refuses every role below platform authority, answering before any system transaction is opened or any row read', async () => {
+    const { GET } = await loadRoute();
+    for (const role of ['member', 'steward', 'officer', 'admin', 'system_admin', 'content_manager']) {
+      caller.role = role;
+      const response = await GET(new NextRequest('http://localhost/api/admin/organizations'));
+      expect((response as Response).status, role).toBe(403);
+    }
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
+  it('answers 401 without an authenticated user, reading nothing', async () => {
+    const { GET } = await loadRoute();
+    caller.userId = null;
+    const response = await GET(new NextRequest('http://localhost/api/admin/organizations'));
+    expect((response as Response).status).toBe(401);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
+  it('runs all three reads as the system role, in one system transaction', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([], [], []);
+    await GET(new NextRequest('http://localhost/api/admin/organizations'));
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+    expect(m.openAtSelect).toEqual([1, 1, 1]);
   });
 
   it('GET returns mapped organizations with live counts and contacts', async () => {
@@ -77,9 +124,7 @@ describe('admin/organizations route', () => {
       [{ organizationId: 'org_1', name: 'Alex President', email: 'alex@example.com', role: 'president' }],
     );
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/organizations'));
-    expect(response.status).toBe(200);
-    const json = await response.json();
+    const json = (await GET(new NextRequest('http://localhost/api/admin/organizations'))) as any[];
     expect(json).toHaveLength(1);
     expect(json[0]).toMatchObject({
       id: 'org_1',
@@ -94,11 +139,9 @@ describe('admin/organizations route', () => {
   it('GET supports search parameter and still returns response', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([], [], []);
-    const response = await GET(
+    const json = await GET(
       new NextRequest('http://localhost/api/admin/organizations?search=local'),
     );
-    expect(response.status).toBe(200);
-    const json = await response.json();
     expect(Array.isArray(json)).toBe(true);
   });
 
@@ -121,8 +164,7 @@ describe('admin/organizations route', () => {
       [],
     );
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/organizations'));
-    const json = await response.json();
+    const json = (await GET(new NextRequest('http://localhost/api/admin/organizations'))) as any[];
     expect(json[0]).toMatchObject({
       memberCount: 45,
       activeCount: 40,
@@ -153,8 +195,7 @@ describe('admin/organizations route', () => {
       ],
     );
 
-    const response = await GET(new NextRequest('http://localhost/api/admin/organizations'));
-    const json = await response.json();
+    const json = (await GET(new NextRequest('http://localhost/api/admin/organizations'))) as any[];
     expect(json[0].president).toBe('First Contact');
     expect(json[0].contact).toBe('first@example.com');
   });

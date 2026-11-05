@@ -60,5 +60,32 @@ describe('POST /api/grievance-deadlines/[id]/confirmation', () => {
     expect(response.status).toBe(403);
     expect(mocks.confirmDeadline).not.toHaveBeenCalled();
   });
+
+  const override = (overrideDueDate: string) => POST(
+    new Request('https://example.test/api/grievance-deadlines/deadline-1/confirmation', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'override', overrideDueDate, overrideReason: 'CBA art. 8.02 extension' }),
+    }),
+    { organizationId: 'org-1', userId: 'user-1' },
+    { id: 'deadline-1' },
+  );
+
+  it('passes a calendar-day override to the service as the day, to fall due at 23:59 in the organization zone', async () => {
+    const response = await override('2026-03-20');
+    expect(response.status).toBe(200);
+    expect(mocks.overrideDeadline).toHaveBeenCalledWith(expect.objectContaining({ overrideDueDate: '2026-03-20' }));
+  });
+
+  it('keeps a datetime override as the instant sent', async () => {
+    const response = await override('2026-03-20T15:30:00.000Z');
+    expect(response.status).toBe(200);
+    expect(mocks.overrideDeadline).toHaveBeenCalledWith(expect.objectContaining({ overrideDueDate: new Date('2026-03-20T15:30:00.000Z') }));
+  });
+
+  it('refuses a day that does not exist', async () => {
+    const response = await override('2026-02-30');
+    expect(response.status).toBe(400);
+    expect(mocks.overrideDeadline).not.toHaveBeenCalled();
+  });
 });
 

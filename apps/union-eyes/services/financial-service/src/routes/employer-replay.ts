@@ -7,8 +7,8 @@ import { replayDiff, hashReplayDiff } from "../services/employer-execution";
 const router = Router();
 
 const replaySchema = z.object({
-  sourceRunId: z.string().uuid(),
-  replayRunId: z.string().uuid(),
+  sourceRunId: z.guid(),
+  replayRunId: z.guid(),
   mode: z.enum(["exact", "simulated"]).default("exact"),
   sourceEngineVersion: z.string(),
   replayEngineVersion: z.string(),
@@ -62,7 +62,7 @@ router.post("/", async (req: Request, res: Response) => {
     return res.status(201).json({ success: true, data: { replayId, diff, diffHash } });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: "Validation failed", details: error.errors });
+      return res.status(400).json({ success: false, error: "Validation failed", details: error.issues });
     }
     return res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Unexpected failure" });
   }

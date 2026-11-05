@@ -19,7 +19,8 @@ import {
   type OrgEntitlement,
 } from '@/db/schema';
 import { eq, and, lte, gte, isNull, or, sql, desc, inArray } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { v4 as uuidv4 } from 'uuid';
 
 // ============================================================================
@@ -132,15 +133,14 @@ export async function createContract(
       }
     }
 
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
+    // The record commits with the contract, or neither does.
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: input.organizationId,
-      resource: 'commercial_contract',
-      resourceId: contractId,
-      action: 'contract_created',
       userId: input.createdBy,
-      metadata: { contractNumber, lineCount: lines.length },
+      action: 'contract_created',
+      resourceType: 'commercial_contract',
+      resourceId: contractId,
+      details: { contractNumber, lineCount: lines.length },
     });
 
     return { contract, lineItems: lines };
@@ -152,6 +152,7 @@ export async function createContract(
  */
 export async function activateContract(
   contractId: string,
+  organizationId: string,
   approvedBy: string,
 ) {
   return await db.transaction(async (tx) => {
@@ -167,6 +168,7 @@ export async function activateContract(
       .where(
         and(
           eq(commercialContracts.id, contractId),
+          eq(commercialContracts.organizationId, organizationId),
           eq(commercialContracts.status, 'draft'),
         ),
       )
@@ -218,15 +220,13 @@ export async function activateContract(
       entitlements.push(ent);
     }
 
-    await auditLog({
-      eventType: AuditEventType.DATA_UPDATE,
-      severity: AuditSeverity.HIGH,
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: contract.organizationId,
-      resource: 'commercial_contract',
-      resourceId: contractId,
-      action: 'contract_activated',
       userId: approvedBy,
-      metadata: { entitlementCount: entitlements.length },
+      action: 'contract_activated',
+      resourceType: 'commercial_contract',
+      resourceId: contractId,
+      details: { entitlementCount: entitlements.length },
     });
 
     return { contract, entitlements };
@@ -238,6 +238,7 @@ export async function activateContract(
  */
 export async function terminateContract(
   contractId: string,
+  organizationId: string,
   terminatedBy: string,
   reason?: string,
 ) {
@@ -251,6 +252,7 @@ export async function terminateContract(
       .where(
         and(
           eq(commercialContracts.id, contractId),
+          eq(commercialContracts.organizationId, organizationId),
           eq(commercialContracts.status, 'active'),
         ),
       )
@@ -287,15 +289,13 @@ export async function terminateContract(
         );
     }
 
-    await auditLog({
-      eventType: AuditEventType.DATA_UPDATE,
-      severity: AuditSeverity.CRITICAL,
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: contract.organizationId,
-      resource: 'commercial_contract',
-      resourceId: contractId,
-      action: 'contract_terminated',
       userId: terminatedBy,
-      metadata: { reason },
+      action: 'contract_terminated',
+      resourceType: 'commercial_contract',
+      resourceId: contractId,
+      details: { reason },
     });
 
     return contract;
@@ -463,26 +463,36 @@ export async function recordEntitlementUsage(
 export async function resetExpiredUsagePeriods(): Promise<number> {
   const now = new Date();
 
-  const result = await db
-    .update(orgEntitlements)
-    .set({
-      currentUsage: 0,
-      usagePeriodStart: now,
-      lastResetAt: now,
-      updatedAt: now,
-    })
-    .where(
-      and(
-        eq(orgEntitlements.status, 'active'),
-        sql`${orgEntitlements.usagePeriod} IS NOT NULL`,
-        sql`(
-          (${orgEntitlements.usagePeriod} = 'monthly'  AND ${orgEntitlements.usagePeriodStart} < NOW() - INTERVAL '1 month') OR
-          (${orgEntitlements.usagePeriod} = 'annual'   AND ${orgEntitlements.usagePeriodStart} < NOW() - INTERVAL '1 year')  OR
-          (${orgEntitlements.usagePeriod} = 'daily'    AND ${orgEntitlements.usagePeriodStart} < NOW() - INTERVAL '1 day')
-        )`,
-      ),
-    )
-    .returning();
+  const periodElapsed = and(
+    eq(orgEntitlements.status, 'active'),
+    sql`${orgEntitlements.usagePeriod} IS NOT NULL`,
+    sql`(
+      (${orgEntitlements.usagePeriod} = 'monthly'  AND ${orgEntitlements.usagePeriodStart} < NOW() - INTERVAL '1 month') OR
+      (${orgEntitlements.usagePeriod} = 'annual'   AND ${orgEntitlements.usagePeriodStart} < NOW() - INTERVAL '1 year')  OR
+      (${orgEntitlements.usagePeriod} = 'daily'    AND ${orgEntitlements.usagePeriodStart} < NOW() - INTERVAL '1 day')
+    )`,
+  );
 
-  return result.length;
+  // The sweep is platform-wide, so each organization's rows are reset by a statement bound to that organization.
+  const candidates = await db
+    .select({ organizationId: orgEntitlements.organizationId })
+    .from(orgEntitlements)
+    .where(periodElapsed);
+
+  let reset = 0;
+  for (const organizationId of new Set(candidates.map((row) => row.organizationId))) {
+    const result = await db
+      .update(orgEntitlements)
+      .set({
+        currentUsage: 0,
+        usagePeriodStart: now,
+        lastResetAt: now,
+        updatedAt: now,
+      })
+      .where(and(periodElapsed, eq(orgEntitlements.organizationId, organizationId)))
+      .returning();
+    reset += result.length;
+  }
+
+  return reset;
 }

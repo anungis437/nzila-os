@@ -22,6 +22,7 @@ const m = vi.hoisted(() => {
     state,
     verifyWebhook: vi.fn(),
     withSystemContext: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     logger: {
       info: vi.fn(),
       warn: vi.fn(),
@@ -58,6 +59,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 async function loadRoute() {
   return import('../communications/webhooks/resend/route');
@@ -80,7 +82,8 @@ describe('communications/webhooks/resend route', () => {
     m.resetQueues();
     process.env.RESEND_API_KEY = 'key_1';
     process.env.RESEND_WEBHOOK_SECRET = 'secret_1';
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withSystemContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.verifyWebhook.mockReturnValue({
       type: 'email.delivered',
       created_at: '2026-01-01T00:00:00.000Z',
@@ -135,125 +138,6 @@ describe('communications/webhooks/resend route', () => {
     expect(payload).toMatchObject({ received: true, ignored: true });
   });
 
-  it('returns received true when log row does not exist', async () => {
-    const { POST } = await loadRoute();
-    m.queueSelect([]);
-
-    const response = await POST(webhookRequest('{}', {
-      'svix-id': 'id1',
-      'svix-timestamp': 'ts1',
-      'svix-signature': 'sig1',
-    }));
-
-    expect(response.status).toBe(200);
-    expect(m.logger.warn).toHaveBeenCalled();
-  });
-
-  it('processes click events and updates campaign stats', async () => {
-    const { POST } = await loadRoute();
-    m.verifyWebhook.mockReturnValueOnce({
-      type: 'email.clicked',
-      created_at: '2026-01-01T00:00:00.000Z',
-      data: { email_id: 'provider_2', to: ['u@example.com'] },
-    });
-    m.queueSelect(
-      [{
-        id: 'msg_1',
-        campaignId: 'camp_1',
-        organizationId: 'org_1',
-        recipientId: 'user_2',
-        sentAt: null,
-        deliveredAt: null,
-        openedAt: null,
-        clickedAt: null,
-        bouncedAt: null,
-        status: 'sent',
-        errorMessage: null,
-      }],
-      [{ stats: { sent: 10 } }],
-    );
-
-    const response = await POST(webhookRequest('{}', {
-      'svix-id': 'id1',
-      'svix-timestamp': 'ts1',
-      'svix-signature': 'sig1',
-    }));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload).toMatchObject({ received: true, eventType: 'email.clicked' });
-    expect(mockDb.update).toHaveBeenCalledTimes(2);
-  });
-
-  it('marks suppressed email events as unsubscribed', async () => {
-    const { POST } = await loadRoute();
-    m.verifyWebhook.mockReturnValueOnce({
-      type: 'email.suppressed',
-      created_at: '2026-01-01T00:00:00.000Z',
-      data: { email_id: 'provider_3', to: ['u@example.com'] },
-    });
-    m.queueSelect(
-      [{
-        id: 'msg_2',
-        campaignId: 'camp_2',
-        organizationId: 'org_2',
-        recipientId: 'user_3',
-        sentAt: null,
-        deliveredAt: null,
-        openedAt: null,
-        clickedAt: null,
-        bouncedAt: null,
-        status: 'sent',
-        errorMessage: null,
-      }],
-      [{ stats: { sent: 4 } }],
-    );
-
-    const response = await POST(webhookRequest('{}', {
-      'svix-id': 'id2',
-      'svix-timestamp': 'ts2',
-      'svix-signature': 'sig2',
-    }));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload).toMatchObject({ received: true, eventType: 'email.suppressed' });
-    expect(mockDb.update).toHaveBeenCalledTimes(3);
-  });
-
-  it('stores failed delivery reasons on the message log', async () => {
-    const { POST } = await loadRoute();
-    m.verifyWebhook.mockReturnValueOnce({
-      type: 'email.failed',
-      created_at: '2026-01-01T00:00:00.000Z',
-      data: { email_id: 'provider_4', to: ['u@example.com'], failed: { reason: 'bounce_loop' } },
-    });
-    m.queueSelect(
-      [{
-        id: 'msg_3',
-        campaignId: 'camp_3',
-        organizationId: 'org_3',
-        recipientId: 'user_4',
-        sentAt: null,
-        deliveredAt: null,
-        openedAt: null,
-        clickedAt: null,
-        bouncedAt: null,
-        status: 'sent',
-        errorMessage: null,
-      }],
-      [{ stats: { sent: 9 } }],
-    );
-
-    const response = await POST(webhookRequest('{}', {
-      'svix-id': 'id3',
-      'svix-timestamp': 'ts3',
-      'svix-signature': 'sig3',
-    }));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload).toMatchObject({ received: true, eventType: 'email.failed' });
-    expect(mockDb.update).toHaveBeenCalledTimes(2);
-  });
+  // Event handling (ordering, redelivery, suppression, unmatched and ambiguous ids, rollback) is exercised against a real SQL engine in
+  // communications-webhooks-resend.pglite.test.ts; this file keeps the configuration, signature and event-type gates.
 });

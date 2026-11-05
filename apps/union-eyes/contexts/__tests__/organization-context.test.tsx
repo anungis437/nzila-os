@@ -59,6 +59,20 @@ const ORG = {
   updatedAt: '2024-01-01',
 };
 
+/** The organization record /api/organizations/{id} answers with: the columns in snake_case. */
+const record = (id: string) => ({
+  id,
+  name: `Record ${id}`,
+  slug: id,
+  organization_type: 'local',
+  parent_id: 'org-parent',
+  sectors: ['education', 'healthcare'],
+  province_territory: 'ON',
+  description: 'A record',
+  created_at: '2023-05-05T00:00:00.000Z',
+  updated_at: '2023-06-06T00:00:00.000Z',
+});
+
 function clearCookies() {
   document.cookie.split(';').forEach((c) => {
     const name = c.split('=')[0].trim();
@@ -245,8 +259,8 @@ describe('contexts/organization-context', () => {
           }),
       ],
       ['/api/organizations/org-1/path', () => resp({ json: async () => ({ data: [] }) })],
-      ['/api/organizations/org-3', () => resp({ json: async () => ({ data: { ...ORG, id: 'org-3', slug: 'org-3' } }) })],
-      ['/api/organizations/org-1', () => resp({ json: async () => ({ data: ORG }) })],
+      ['/api/organizations/org-3', () => resp({ json: async () => ({ data: record('org-3') }) })],
+      ['/api/organizations/org-1', () => resp({ json: async () => ({ data: record('org-1') }) })],
     ]);
 
     const { result } = renderHook(() => useOrganization(), { wrapper });
@@ -254,6 +268,11 @@ describe('contexts/organization-context', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.userOrganizations.map((o) => o.id)).toContain('org-1');
     expect(result.current.userOrganizations.map((o) => o.id)).toContain('org-3');
+    // The record names its columns in snake_case; the organization is read from them, not defaulted.
+    expect(result.current.userOrganizations.find((o) => o.id === 'org-3')).toEqual({
+      id: 'org-3', name: 'Record org-3', slug: 'org-3', type: 'local', parentId: 'org-parent', sector: 'education', jurisdiction: 'ON',
+      description: 'A record', createdAt: '2023-05-05T00:00:00.000Z', updatedAt: '2023-06-06T00:00:00.000Z',
+    });
   });
 
   it('falls back to the profile organization when memberships are empty', async () => {
@@ -269,7 +288,7 @@ describe('contexts/organization-context', () => {
     expect(result.current.userOrganizations.map((o) => o.id)).toContain('org-1');
   });
 
-  it('synthesizes organizations as a last resort', async () => {
+  it('reports organization data it could not read instead of inventing organizations from memberships', async () => {
     routeFetch([
       [
         '/api/users/me/organizations',
@@ -284,19 +303,51 @@ describe('contexts/organization-context', () => {
             }),
           }),
       ],
-      // org-by-id and profile both fail to yield an org → synthetic fallback.
-      ['/api/organizations/abcdef1234/path', () => resp({ json: async () => ({ data: [] }) })],
+      // The record of each membership and the profile both fail to yield an organization.
       ['/api/organizations/abcdef1234', () => resp({ ok: false, status: 404 })],
       ['/api/organizations/ghijkl5678', () => resp({ ok: false, status: 404 })],
       ['/api/users/me/profile', () => resp({ json: async () => ({ organization: null }) })],
+    ]);
+
+    const { result } = renderHook(() => useOrganization(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.userOrganizations).toEqual([]);
+    expect(result.current.organizationId).toBeNull();
+    expect(result.current.organization).toBeNull();
+    expect(result.current.error).toBe('Organization data not found. Please contact support.');
+    expect(document.cookie).toBe('');
+  });
+
+  it('keeps an organization as the server sent it: an unknown type is not an organization, and a date the database lacks stays null', async () => {
+    routeFetch([
+      ['/api/users/me/organizations', () => resp({ json: async () => ({
+        organizations: [
+          { ...ORG, createdAt: null, updatedAt: null },
+          { ...ORG, id: 'org-x', slug: 'org-x', type: 'chapter' },
+          { ...ORG, id: 'org-y', slug: 'org-y', type: undefined },
+        ],
+        memberships: [],
+      }) })],
       ['/path', () => resp({ json: async () => ({ data: [] }) })],
     ]);
 
     const { result } = renderHook(() => useOrganization(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.userOrganizations[0]?.id).toBe('abcdef1234');
-    expect(result.current.userOrganizations).toHaveLength(2);
+    expect(result.current.userOrganizations.map((o) => o.id)).toEqual(['org-1']);
+    expect(result.current.userOrganizations[0]).toMatchObject({ type: 'union', createdAt: null, updatedAt: null });
+  });
+
+  it('treats an answer without the organization and membership lists as an error, not as no organizations', async () => {
+    routeFetch([['/api/users/me/organizations', () => resp({ json: async () => ({ organizations: [ORG] }) })]]);
+
+    const { result } = renderHook(() => useOrganization(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toBe('Unexpected organizations response');
+    expect(result.current.userOrganizations).toEqual([]);
+    expect(result.current.organizationId).toBeNull();
   });
 
   it('sets a sign-in error on 401 responses', async () => {

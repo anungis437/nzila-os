@@ -18,6 +18,11 @@ vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
   ApiError: { badRequest: m.badRequest, notFound: m.notFound },
 }));
+const audit = vi.hoisted(() => ({
+  op: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+  tx: vi.fn(),
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: audit.op, operationAuditResponse: () => null }));
 vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({ memberArrears: m.memberArrears }));
 vi.mock('@/db/schema-organizations', () => ({ organizationMembers: m.organizationMembers }));
@@ -40,6 +45,7 @@ describe('dues/arrears/[id]/reminder route', () => {
     m.and.mockImplementation((...clauses: unknown[]) => clauses);
     m.notifySend.mockResolvedValue(undefined);
     m.getNotificationService.mockReturnValue({ send: m.notifySend });
+    audit.op.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
   });
 
   it('throws 404 when arrears record does not exist', async () => {
@@ -83,5 +89,18 @@ describe('dues/arrears/[id]/reminder route', () => {
     expect(result).toEqual({ sent: true });
     expect(m.notifySend).toHaveBeenCalledTimes(1);
     expect(m.logger.info).toHaveBeenCalledWith('Arrears reminder sent', { memberId: 'member_1', amountOwed: '200.00' });
+  });
+
+  it('records the reminder as an audited operation before sending', async () => {
+    m.db.select
+      .mockReturnValueOnce({ from: () => ({ where: async () => [{ id: 'arr1', totalOwed: '10' }] }) })
+      .mockReturnValueOnce({ from: () => ({ where: async () => [{ name: 'M', email: 'm@x.test' }] }) });
+    const { POST } = await loadRoute();
+    await (POST as any)({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'treasurer' });
+    expect(audit.op).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'dues.arrears.reminder', organizationId: 'org_1', userId: 'treasurer', resourceId: 'arr1' }),
+      expect.any(Function),
+    );
+    expect(m.notifySend).toHaveBeenCalledTimes(1);
   });
 });

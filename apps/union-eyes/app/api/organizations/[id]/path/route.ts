@@ -11,6 +11,9 @@ import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { eq, inArray } from 'drizzle-orm';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
+import { organizationWire } from '@/lib/organizations/organization-wire';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,17 +29,8 @@ function isUuid(value: string): boolean {
 type OrgRow = typeof organizations.$inferSelect;
 function formatOrg(o: OrgRow) {
   return {
-    id: o.id,
-    name: o.name,
-    slug: o.slug,
-    type: o.organizationType ?? 'union',
-    parentId: o.parentId ?? null,
-    sector: (o.sectors ?? [])[0] ?? null,
-    jurisdiction: o.provinceTerritory ?? null,
-    description: o.description ?? null,
+    ...organizationWire(o),
     hierarchyLevel: o.hierarchyLevel ?? 0,
-    createdAt: o.createdAt?.toISOString() ?? new Date().toISOString(),
-    updatedAt: o.updatedAt?.toISOString() ?? new Date().toISOString(),
   };
 }
 
@@ -59,16 +53,19 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const lookupByUuid = isUuid(id);
 
   // Accept either UUID or slug to support mixed legacy test data.
-  const rows = await db
+  const access = await resolveOrganizationAccess(userId);
+  // Legacy lookups require the same verified authority as canonical organization selection.
+  // The system connection is used only for lookup; it never grants the caller access.
+  const rows = await withSystemContext(() => db
     .select()
     .from(organizations)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .where(lookupByUuid ? eq(organizations.id, id as any) : eq(organizations.slug, id as any))
-    .limit(1);
+    .limit(1));
 
   const org = rows[0];
-  if (!org) {
-    return NextResponse.json({ data: [] });
+  if (!org || !canReadOrganization(access, org.id)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   const path: ReturnType<typeof formatOrg>[] = [];
@@ -81,7 +78,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const uuidTokens = hierarchyTokens.filter(isUuid);
     const slugTokens = hierarchyTokens.filter((token) => !isUuid(token));
 
-    const [uuidAncestors, slugAncestors] = await Promise.all([
+    const [uuidAncestors, slugAncestors] = await withSystemContext(() => Promise.all([
       uuidTokens.length > 0
         ? db
             .select()
@@ -96,10 +93,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .where(inArray(organizations.slug, slugTokens as any))
         : Promise.resolve([]),
-    ]);
+    ]));
 
     const ancestorByToken = new Map<string, OrgRow>();
     for (const ancestor of [...uuidAncestors, ...slugAncestors]) {
+      if (!canReadOrganization(access, ancestor.id)) continue;
       ancestorByToken.set(ancestor.id, ancestor);
       if (ancestor.slug) {
         ancestorByToken.set(ancestor.slug, ancestor);

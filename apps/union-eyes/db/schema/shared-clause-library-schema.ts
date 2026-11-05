@@ -94,21 +94,6 @@ export const clauseLibraryTags = pgTable("clause_library_tags", {
   nameIdx: index("idx_clause_tags_name").on(table.tagName),
 }));
 
-// Comparison history
-export const clauseComparisonsHistory = pgTable("clause_comparisons_history", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull(),
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id),
-  clauseIds: uuid("clause_ids").array().notNull(),
-  comparisonNotes: text("comparison_notes"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  userIdx: index("idx_clause_comparisons_user").on(table.userId),
-  orgIdx: index("idx_clause_comparisons_org").on(table.organizationId),
-}));
-
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -140,13 +125,6 @@ export const clauseLibraryTagsRelations = relations(clauseLibraryTags, ({ one })
   }),
 }));
 
-export const clauseComparisonsHistoryRelations = relations(clauseComparisonsHistory, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [clauseComparisonsHistory.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
 // ============================================================================
 // TYPESCRIPT TYPES
 // ============================================================================
@@ -157,8 +135,6 @@ export type NewSharedClause = typeof sharedClauseLibrary.$inferInsert;
 export type ClauseLibraryTag = typeof clauseLibraryTags.$inferSelect;
 export type NewClauseLibraryTag = typeof clauseLibraryTags.$inferInsert;
 
-export type ClauseComparison = typeof clauseComparisonsHistory.$inferSelect;
-export type NewClauseComparison = typeof clauseComparisonsHistory.$inferInsert;
 
 // Sharing level enum
 export type SharingLevel = "private" | "federation" | "congress" | "public";

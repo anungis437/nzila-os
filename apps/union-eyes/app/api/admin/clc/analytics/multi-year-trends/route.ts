@@ -7,15 +7,25 @@
 import { NextResponse } from 'next/server';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { analyzeMultiYearTrends } from '@/services/clc/compliance-reports';
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
-export const GET = withRoleAuth('admin', async (request, context) => {
-  const { userId } = context as { userId: string };
+// The trends read the caller organization's remittances: they run in that organization's tenant transaction, so the ambient handle the
+// compliance service reads through carries the organization row-level security applies to.
+export const GET = withApi(
+  {
+    auth: { minRole: 'admin' },
+    rlsOrgContext: true,
+    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+    openapi: { tags: ['Admin', 'CLC'], summary: 'CLC multi-year remittance trends' },
+  },
+  async ({ request, userId, organizationId }) => {
+  if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+  if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
 
   try {
     const rateLimitResult = await checkRateLimit(userId, RATE_LIMITS.CLC_OPERATIONS);
@@ -33,7 +43,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const years = parseInt(searchParams.get('years') || '5');
+    const rawYears = searchParams.get('years');
+    const years = rawYears === null ? 5 : Number(rawYears);
 
     if (![3, 5, 10].includes(years)) {
       logApiAuditEvent({
@@ -51,7 +62,7 @@ export const GET = withRoleAuth('admin', async (request, context) => {
       );
     }
 
-    const trends = await analyzeMultiYearTrends({ years: years as 3 | 5 | 10 });
+    const trends = await analyzeMultiYearTrends({ years: years as 3 | 5 | 10, organizationId });
 
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
@@ -65,7 +76,7 @@ export const GET = withRoleAuth('admin', async (request, context) => {
 
     return NextResponse.json(trends, {
       headers: {
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, no-store',
       },
     });
   } catch (error) {
@@ -84,4 +95,5 @@ export const GET = withRoleAuth('admin', async (request, context) => {
       error
     );
   }
-});
+  },
+);

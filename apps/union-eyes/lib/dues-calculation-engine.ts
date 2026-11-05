@@ -1,540 +1,116 @@
-import { db } from '@/db';
-import {
-  duesRules,
-  memberDuesAssignments,
-  duesTransactions,
-  members,
-} from '@/services/financial-service/src/db/schema';
-import { eq, and, sql, lte, gte, or, isNull, desc } from 'drizzle-orm';
+/**
+ * Dues calculation.
+ *
+ * A member's dues come from their dues assignment (`dues_assignments`): the organization's record of the amount the member pays every billing
+ * frequency, from an effective date until an end date. The engine reads that record and nothing else; it approves and pays nothing.
+ *
+ * It used to evaluate rule types (percentage, hourly, tiered, formula) from financial-service's `dues_rules` and `member_dues_assignments`.
+ * Neither table is part of the canonical schema, and both are revoked from the application roles, so every calculation failed on a real database.
+ *
+ * Every read goes through the executor the caller gives it: the transaction of the organization the dues belong to.
+ */
+import { duesAssignments } from '@/db/schema/domains/finance/dues-assignments';
+import type { RLSTx } from '@/lib/db/with-rls-context';
+import { toCents } from '@/lib/decimal-safe';
+import { and, desc, eq, gte, isNull, lte, or } from 'drizzle-orm';
 
-interface DuesCalculationParams {
+export type DuesBillingFrequency = 'monthly' | 'bi_weekly' | 'weekly' | 'quarterly' | 'annual';
+
+export interface DuesCalculationParams {
   organizationId: string;
   memberId: string;
   periodStart: Date;
   periodEnd: Date;
-  memberData?: {
-    grossWages?: number;
-    baseSalary?: number;
-    hourlyRate?: number;
-    hoursWorked?: number;
-  };
+  /** The billing cycle's frequency. An assignment on another frequency is not due in this cycle; without one, any frequency is calculated. */
+  frequency?: DuesBillingFrequency;
 }
 
-interface DuesCalculationResult {
+export interface DuesCalculationResult {
   amount: number;
-  calculationType: string;
-  ruleId: string;
-  ruleName: string;
+  calculationType: 'assignment';
+  assignmentId: string;
+  frequency: string;
   periodStart: Date;
   periodEnd: Date;
   dueDate: Date;
   breakdown: {
     baseAmount: number;
-    rate?: number;
-    hours?: number;
-    tier?: string;
-    flatAmount?: number;
-    formula?: string;
+    flatAmount: number;
   };
 }
 
-export class DuesCalculationEngine {
-  private static readonly MAX_FORMULA_LENGTH = 200;
-  private static readonly SAFE_FORMULA_REGEX = /^[0-9+\-*/(). _a-zA-Z]+$/;
+/** Days after the end of the period that the dues fall due. */
+const DAYS_TO_DUE = 15;
 
+const FREQUENCY_ALIASES: Record<string, DuesBillingFrequency> = {
+  weekly: 'weekly',
+  biweekly: 'bi_weekly',
+  bi_weekly: 'bi_weekly',
+  monthly: 'monthly',
+  quarterly: 'quarterly',
+  annual: 'annual',
+  annually: 'annual',
+  yearly: 'annual',
+};
+
+/** The billing frequency an assignment's free-text frequency names, or undefined when it names none. */
+export function assignmentFrequency(value: string): DuesBillingFrequency | undefined {
+  return FREQUENCY_ALIASES[value.trim().toLowerCase().replace(/[\s-]+/g, '_')];
+}
+
+export class DuesCalculationEngine {
   /**
-   * Calculate dues for a member for a given period
+   * The dues of a member for a period: the amount of the member's assignment that is active at the start of the period (not ended before it),
+   * or null when the member has none, or none on the cycle's frequency, or one that charges nothing. When several are active, the most
+   * recently effective one applies.
    */
   static async calculateMemberDues(
-    params: DuesCalculationParams
+    params: DuesCalculationParams,
+    executor: RLSTx,
   ): Promise<DuesCalculationResult | null> {
-    const { organizationId, memberId, periodStart, periodEnd, memberData } = params;
+    const { organizationId, memberId, periodStart, periodEnd, frequency } = params;
+    if (periodStart.getTime() > periodEnd.getTime()) throw new Error('Invalid dues calculation period');
 
-    // Get active dues assignment for member
-    const [assignment] = await db
+    const candidates = await executor
       .select({
-        assignment: memberDuesAssignments,
-        rule: duesRules,
+        id: duesAssignments.id,
+        amount: duesAssignments.amount,
+        frequency: duesAssignments.frequency,
       })
-      .from(memberDuesAssignments)
-      .leftJoin(duesRules, eq(memberDuesAssignments.ruleId, duesRules.id))
+      .from(duesAssignments)
       .where(
         and(
-          eq(memberDuesAssignments.memberId, memberId),
-          eq(memberDuesAssignments.organizationId, organizationId),
-          eq(memberDuesAssignments.isActive, true),
-          lte(memberDuesAssignments.effectiveDate, periodStart.toISOString().split('T')[0]),
-          or(
-            isNull(memberDuesAssignments.endDate),
-            gte(memberDuesAssignments.endDate, periodStart.toISOString().split('T')[0])
-          )
-        )
+          eq(duesAssignments.organizationId, organizationId),
+          eq(duesAssignments.memberId, memberId),
+          eq(duesAssignments.status, 'active'),
+          lte(duesAssignments.effectiveDate, periodStart),
+          or(isNull(duesAssignments.endDate), gte(duesAssignments.endDate, periodStart)),
+        ),
       )
-      .limit(1);
+      .orderBy(desc(duesAssignments.effectiveDate), desc(duesAssignments.createdAt))
+      .limit(10);
 
-    if (!assignment || !assignment.rule) {
-return null;
-    }
+    const assignment = candidates.find((candidate) => !frequency || assignmentFrequency(candidate.frequency) === frequency);
+    if (!assignment) return null;
 
-    const { assignment: assignmentData, rule } = assignment;
-
-    // Check for override amount
-    if (assignmentData.overrideAmount) {
-      return {
-        amount: parseFloat(assignmentData.overrideAmount.toString()),
-        calculationType: 'override',
-        ruleId: rule.id,
-        ruleName: rule.ruleName,
-        periodStart,
-        periodEnd,
-        dueDate: this.calculateDueDate(periodEnd, rule.billingFrequency),
-        breakdown: {
-          baseAmount: parseFloat(assignmentData.overrideAmount.toString()),
-        },
-      };
-    }
-
-    // Calculate based on rule type
-    let amount: number;
-    let breakdown: DuesCalculationResult['breakdown'] = { baseAmount: 0 };
-
-    switch (rule.calculationType) {
-      case 'flat_rate':
-        amount = parseFloat(rule.flatAmount?.toString() || '0');
-        breakdown = { baseAmount: amount };
-        break;
-
-      case 'percentage':
-        amount = this.calculatePercentageDues(rule, memberData);
-        breakdown = {
-          baseAmount: memberData?.[rule.baseField as keyof typeof memberData] || 0,
-          rate: parseFloat(rule.percentageRate?.toString() || '0'),
-        };
-        break;
-
-      case 'hourly':
-        amount = this.calculateHourlyDues(rule, memberData);
-        breakdown = {
-          hours: memberData?.hoursWorked || parseFloat(rule.hoursPerPeriod?.toString() || '0'),
-          rate: parseFloat(rule.hourlyRate?.toString() || '0'),
-          baseAmount: amount,
-        };
-        break;
-
-      case 'tiered':
-        const tierResult = this.calculateTieredDues(rule, memberData);
-        amount = tierResult.amount;
-        breakdown = tierResult.breakdown as DuesCalculationResult['breakdown'];
-        break;
-
-      case 'formula':
-        amount = this.calculateFormulaDues(rule, memberData);
-        breakdown = { baseAmount: amount, formula: rule.customFormula ?? undefined };
-        break;
-
-      default:
-return null;
-    }
+    const amount = toCents(assignment.amount) / 100;
+    if (!(amount > 0)) return null;
 
     return {
-      amount: Math.round(amount * 100) / 100, // Round to 2 decimals
-      calculationType: rule.calculationType,
-      ruleId: rule.id,
-      ruleName: rule.ruleName,
+      amount,
+      calculationType: 'assignment',
+      assignmentId: assignment.id,
+      frequency: assignment.frequency,
       periodStart,
       periodEnd,
-      dueDate: this.calculateDueDate(periodEnd, rule.billingFrequency),
-      breakdown,
+      dueDate: this.calculateDueDate(periodEnd),
+      breakdown: { baseAmount: amount, flatAmount: amount },
     };
   }
 
-  /**
-   * Calculate percentage-based dues
-   */
-  private static calculatePercentageDues(
-    rule: typeof duesRules.$inferSelect,
-    memberData?: DuesCalculationParams['memberData']
-  ): number {
-    if (!rule.percentageRate || !rule.baseField) {
-      return 0;
-    }
-
-    const baseAmount = memberData?.[rule.baseField as keyof typeof memberData] || 0;
-    const rate = parseFloat(rule.percentageRate.toString()) / 100;
-    
-    return baseAmount * rate;
-  }
-
-  /**
-   * Calculate hourly-based dues
-   */
-  private static calculateHourlyDues(
-    rule: typeof duesRules.$inferSelect,
-    memberData?: DuesCalculationParams['memberData']
-  ): number {
-    if (!rule.hourlyRate) {
-      return 0;
-    }
-
-    const hours = memberData?.hoursWorked || parseFloat(rule.hoursPerPeriod?.toString() || '0');
-    const rate = parseFloat(rule.hourlyRate.toString());
-    
-    return hours * rate;
-  }
-
-  /**
-   * Calculate tiered dues
-   */
-  private static calculateTieredDues(
-    rule: typeof duesRules.$inferSelect,
-    memberData?: DuesCalculationParams['memberData']
-  ): { amount: number; breakdown: any } {
-    if (!rule.tierStructure || !Array.isArray(rule.tierStructure)) {
-      return { amount: 0, breakdown: {} };
-    }
-
-    const baseAmount = memberData?.grossWages || memberData?.baseSalary || 0;
-    
-    // Find applicable tier
-    for (const tier of rule.tierStructure) {
-      const minAmount = tier.minAmount || 0;
-      const maxAmount = tier.maxAmount || Infinity;
-      
-      if (baseAmount >= minAmount && baseAmount <= maxAmount) {
-        let tierAmount = 0;
-        
-        if (tier.flatAmount) {
-          tierAmount = tier.flatAmount;
-        } else if (tier.rate) {
-          tierAmount = baseAmount * (tier.rate / 100);
-        }
-        
-        return {
-          amount: tierAmount,
-          breakdown: {
-            baseAmount,
-            tier: `$${minAmount}-$${maxAmount === Infinity ? 'âˆž' : maxAmount}`,
-            rate: tier.rate,
-            flatAmount: tier.flatAmount,
-          },
-        };
-      }
-    }
-
-    return { amount: 0, breakdown: { baseAmount, tier: 'none' } };
-  }
-
-  /**
-   * Calculate formula-based dues
-   */
-  private static calculateFormulaDues(
-    rule: typeof duesRules.$inferSelect,
-    memberData?: DuesCalculationParams['memberData']
-  ): number {
-    if (!rule.customFormula) {
-      return 0;
-    }
-
-    try {
-      this.validateFormula(rule.customFormula);
-      const context = this.buildFormulaContext(memberData);
-      const substituted = this.replaceFormulaVariables(rule.customFormula, context);
-      const result = this.evaluateSafeFormula(substituted);
-      return Number.isFinite(result) ? result : 0;
-    } catch (_error) {
-return 0;
-    }
-  }
-
-  private static buildFormulaContext(memberData?: DuesCalculationParams['memberData']): Record<string, number> {
-    return {
-      grossWages: memberData?.grossWages ?? 0,
-      baseSalary: memberData?.baseSalary ?? 0,
-      hourlyRate: memberData?.hourlyRate ?? 0,
-      hoursWorked: memberData?.hoursWorked ?? 0,
-    };
-  }
-
-  private static validateFormula(formula: string): void {
-    if (formula.length > this.MAX_FORMULA_LENGTH) {
-      throw new Error('Formula exceeds maximum length');
-    }
-    if (!this.SAFE_FORMULA_REGEX.test(formula)) {
-      throw new Error('Formula contains unsafe characters');
-    }
-    const dangerousPatterns = [/eval/i, /function/i, /import/i, /require/i, /process/i, /exec/i];
-    for (const pattern of dangerousPatterns) {
-      if (pattern.test(formula)) {
-        throw new Error('Formula contains forbidden pattern');
-      }
-    }
-  }
-
-  private static replaceFormulaVariables(formula: string, context: Record<string, number>): string {
-    let substituted = formula;
-    Object.entries(context).forEach(([key, value]) => {
-      const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      substituted = substituted.replace(new RegExp(`\\b${escaped}\\b`, 'g'), value.toString());
-    });
-    return substituted;
-  }
-
-  private static evaluateSafeFormula(formula: string): number {
-    let pos = 0;
-
-    const peek = (): string => formula[pos] || '';
-    const consume = (): string => formula[pos++] || '';
-    const skipWhitespace = () => {
-      while (peek() === ' ') consume();
-    };
-
-    const parseNumber = (): number => {
-      skipWhitespace();
-      let numStr = '';
-      while (/[0-9.]/.test(peek())) {
-        numStr += consume();
-      }
-      if (!numStr) throw new Error('Expected number');
-      return Number(numStr);
-    };
-
-    const parseFactor = (): number => {
-      skipWhitespace();
-      if (peek() === '-') {
-        consume();
-        return -parseFactor();
-      }
-      if (peek() === '(') {
-        consume();
-        const result = parseExpression();
-        skipWhitespace();
-        if (consume() !== ')') throw new Error('Expected )');
-        return result;
-      }
-      return parseNumber();
-    };
-
-    const parseTerm = (): number => {
-      let result = parseFactor();
-      skipWhitespace();
-
-      while (peek() === '*' || peek() === '/') {
-        const op = consume();
-        const right = parseFactor();
-        result = op === '*' ? result * right : result / right;
-        skipWhitespace();
-      }
-
-      return result;
-    };
-
-    const parseExpression = (): number => {
-      let result = parseTerm();
-      skipWhitespace();
-
-      while (peek() === '+' || peek() === '-') {
-        const op = consume();
-        const right = parseTerm();
-        result = op === '+' ? result + right : result - right;
-        skipWhitespace();
-      }
-
-      return result;
-    };
-
-    return parseExpression();
-  }
-
-  private static async resolveMemberData(
-    organizationId: string,
-    memberId: string
-  ): Promise<DuesCalculationParams['memberData'] | undefined> {
-    try {
-      const [lastTransaction] = await db
-        .select({ metadata: duesTransactions.metadata })
-        .from(duesTransactions)
-        .where(
-          and(
-            eq(duesTransactions.organizationId, organizationId),
-            eq(duesTransactions.memberId, memberId)
-          )
-        )
-        .orderBy(desc(duesTransactions.createdAt))
-        .limit(1);
-
-      if (!lastTransaction?.metadata) {
-        return undefined;
-      }
-
-      const metadata = typeof lastTransaction.metadata === 'string'
-        ? JSON.parse(lastTransaction.metadata)
-        : lastTransaction.metadata;
-
-      const breakdown = metadata?.breakdown ?? metadata;
-      const baseAmount = Number(breakdown?.baseAmount ?? 0);
-      const hoursWorked = Number(breakdown?.hours ?? 0);
-      const hourlyRate = Number(breakdown?.rate ?? 0);
-
-      return {
-        grossWages: baseAmount || undefined,
-        baseSalary: baseAmount || undefined,
-        hourlyRate: hourlyRate || undefined,
-        hoursWorked: hoursWorked || undefined,
-      };
-    } catch (_error) {
-return undefined;
-    }
-  }
-
-  /**
-   * Calculate due date based on billing frequency
-   */
-  private static calculateDueDate(periodEnd: Date, _frequency: string): Date {
+  private static calculateDueDate(periodEnd: Date): Date {
     const dueDate = new Date(periodEnd);
-    
-    // Due date is typically 15 days after period end
-    dueDate.setDate(dueDate.getDate() + 15);
-    
+    dueDate.setUTCDate(dueDate.getUTCDate() + DAYS_TO_DUE);
     return dueDate;
   }
-
-  /**
-   * Generate dues transactions for all members for a billing period
-   */
-  static async generateBillingCycle(organizationId: string, periodStart: Date, periodEnd: Date) {
-    try {
-      // Get all active members with dues assignments
-      const activeMembers = await db
-        .select({
-          member: members,
-          assignment: memberDuesAssignments,
-        })
-        .from(members)
-        .leftJoin(
-          memberDuesAssignments,
-          and(
-            eq(members.id, memberDuesAssignments.memberId),
-            eq(memberDuesAssignments.isActive, true)
-          )
-        )
-        .where(
-          and(
-            eq(members.organizationId, organizationId),
-            eq(members.status, 'active')
-          )
-        );
-
-      const transactionsToCreate: (typeof duesTransactions.$inferInsert)[] = [];
-
-      for (const { member, assignment } of activeMembers) {
-        if (!assignment) continue;
-
-        // Check if transaction already exists for this period
-        const [existing] = await db
-          .select()
-          .from(duesTransactions)
-          .where(
-            and(
-              eq(duesTransactions.memberId, member.id),
-              eq(duesTransactions.periodStart, periodStart.toISOString().split('T')[0]),
-              eq(duesTransactions.periodEnd, periodEnd.toISOString().split('T')[0])
-            )
-          )
-          .limit(1);
-
-        if (existing) {
-continue;
-        }
-
-        // Calculate dues
-        const calculation = await this.calculateMemberDues({
-          organizationId,
-          memberId: member.id,
-          periodStart,
-          periodEnd,
-          memberData: await this.resolveMemberData(organizationId, member.id),
-        });
-
-        if (!calculation) {
-continue;
-        }
-
-        transactionsToCreate.push({
-          organizationId,
-          memberId: member.id,
-          assignmentId: assignment.id,
-          ruleId: calculation.ruleId,
-          transactionType: 'payment',
-          amount: calculation.amount.toString(),
-          duesAmount: calculation.amount.toString(), // Base dues amount
-          lateFeeAmount: '0.00',
-          totalAmount: calculation.amount.toString(),
-          periodStart: periodStart.toISOString().split('T')[0],
-          periodEnd: periodEnd.toISOString().split('T')[0],
-          dueDate: calculation.dueDate.toISOString().split('T')[0],
-          status: 'pending',
-          metadata: JSON.stringify({
-            calculationType: calculation.calculationType,
-            breakdown: calculation.breakdown,
-          }),
-        });
-      }
-
-      // Bulk insert transactions
-      if (transactionsToCreate.length > 0) {
-        await db.insert(duesTransactions).values(transactionsToCreate);
 }
-
-      return {
-        success: true,
-        transactionsCreated: transactionsToCreate.length,
-      };
-    } catch (error) {
-throw error;
-    }
-  }
-
-  /**
-   * Calculate late fees for overdue transactions
-   */
-  static async calculateLateFees(organizationId: string, lateFeeRate: number = 0.02) {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-
-      // Get all overdue transactions without late fees
-      const overdueTransactions = await db
-        .select()
-        .from(duesTransactions)
-        .where(
-          and(
-            eq(duesTransactions.organizationId, organizationId),
-            eq(duesTransactions.status, 'pending'),
-            sql`${duesTransactions.dueDate} < ${today}`,
-            sql`CAST(${duesTransactions.lateFeeAmount} AS DECIMAL) = 0`
-          )
-        );
-
-      for (const transaction of overdueTransactions) {
-        const amount = parseFloat(transaction.amount.toString());
-        const lateFee = Math.round(amount * lateFeeRate * 100) / 100;
-        const newTotal = amount + lateFee;
-
-        await db
-          .update(duesTransactions)
-          .set({
-            lateFeeAmount: lateFee.toString(),
-            totalAmount: newTotal.toString(),
-            updatedAt: new Date().toISOString(),
-          })
-          .where(eq(duesTransactions.id, transaction.id));
-      }
-return {
-        success: true,
-        transactionsUpdated: overdueTransactions.length,
-      };
-    } catch (error) {
-throw error;
-    }
-  }
-}
-

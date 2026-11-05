@@ -10,6 +10,7 @@ import { organizations, organizationMembers } from "@/db/schema-organizations";
 import { eq, and, isNull } from "drizzle-orm";
 import { authOrganizationUsers } from '@nzila/db/schema'
 import { cookies } from "next/headers";
+import { escapeHatchActive } from '@/lib/runtime/production-guard';
 import { logger } from "./logger";
 import { withSystemContext } from "@/lib/db/with-rls-context";
 import { currentStateContextEnabled } from "@/lib/auth/canonical-bootstrap";
@@ -19,6 +20,8 @@ import { getCanonicalOrganizationContext } from "@/lib/auth/canonical-context";
  * This points to the Default Organization where all users start
  */
 export const DEFAULT_ORGANIZATION_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087"; // Default Organization
+
+const UUID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * BR-6: Raised when organization context cannot be resolved and no safe
@@ -35,16 +38,15 @@ export class OrgContextRequiredError extends Error {
 /**
  * BR-6: Whether a silent fallback to the Default Organization is permitted.
  *
- * NEVER true in production — a production request with no verified membership
+ * NEVER true in a deployment — a production request with no verified membership
  * must fail closed rather than silently read the Default Organization's
- * substrate (cross-tenant drift). The default org is allowed ONLY in a
- * non-production context that has explicitly opted in via UE_ALLOW_DEFAULT_ORG.
+ * substrate (cross-tenant drift). The default org is allowed ONLY on a developer's
+ * machine or a test run that has explicitly opted in via UE_ALLOW_DEFAULT_ORG.
+ * A deployed runtime (NODE_ENV=production, or any production/staging/pilot identity)
+ * never honours it, whatever the variable says (lib/runtime/production-guard.ts).
  */
 export function isDefaultOrgFallbackAllowed(): boolean {
-  return (
-    process.env.NODE_ENV !== 'production' &&
-    process.env.UE_ALLOW_DEFAULT_ORG === 'true'
-  );
+  return escapeHatchActive('UE_ALLOW_DEFAULT_ORG');
 }
 
 /**
@@ -80,7 +82,9 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
       cookieStore.get("selected_org_id")?.value ||
       cookieStore.get("selected_organization_id")?.value;
 
-    if (selectedOrgId) {
+    // The cookie is client-controlled and may be stale (a value from another identity provider, "org_xxx"): one that is not a uuid names no
+    // organization, and sending it to a uuid column would fail the whole resolution for this person until they cleared the cookie.
+    if (selectedOrgId && UUID_SHAPE.test(selectedOrgId)) {
       const orgById = await db
         .select({ id: organizations.id })
         .from(organizations)
@@ -283,11 +287,14 @@ export function getDefaultOrganizationId(): string {
  */
 export async function validateOrganizationExists(organizationId: string): Promise<boolean> {
   try {
-    const result = await db
-      .select({ id: organizations.id })
-      .from(organizations)
-      .where(eq(organizations.id, organizationId))
-      .limit(1);
+    // A lookup of an organization by its id, whoever asks: the system role reads it (organizations is tenant-scoped, and no organization context exists yet).
+    const result = await withSystemContext((tx) =>
+      tx
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1),
+    );
     
     return result.length > 0;
   } catch (error) {
@@ -304,17 +311,19 @@ export async function validateOrganizationExists(organizationId: string): Promis
  */
 export async function getOrganizationInfo(organizationId: string) {
   try {
-    const result = await db
-      .select({
-        id: organizations.id,
-        name: organizations.name,
-        slug: organizations.slug,
-        type: organizations.organizationType,
-        parentId: organizations.parentId,
-      })
-      .from(organizations)
-      .where(eq(organizations.id, organizationId))
-      .limit(1);
+    const result = await withSystemContext((tx) =>
+      tx
+        .select({
+          id: organizations.id,
+          name: organizations.name,
+          slug: organizations.slug,
+          type: organizations.organizationType,
+          parentId: organizations.parentId,
+        })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1),
+    );
     
     return result[0] || null;
   } catch (error) {
@@ -335,18 +344,21 @@ export async function userHasOrganizationAccess(
   organizationId: string
 ): Promise<boolean> {
   try {
-    const result = await db
-      .select({ id: organizationMembers.id })
-      .from(organizationMembers)
-      .where(
-        and(
-          eq(organizationMembers.userId, userId),
-          eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.status, 'active'),
-          isNull(organizationMembers.deletedAt),
+    // The person's own membership, looked up by their id and the organization's before any organization context exists: the system role reads it.
+    const result = await withSystemContext((tx) =>
+      tx
+        .select({ id: organizationMembers.id })
+        .from(organizationMembers)
+        .where(
+          and(
+            eq(organizationMembers.userId, userId),
+            eq(organizationMembers.organizationId, organizationId),
+            eq(organizationMembers.status, 'active'),
+            isNull(organizationMembers.deletedAt),
+          )
         )
-      )
-      .limit(1);
+        .limit(1),
+    );
     
     return result.length > 0;
   } catch (error) {
@@ -402,18 +414,20 @@ export async function getUserRoleInOrganization(
       });
       return context.role as AppRole;
     }
-    const result = await db
-      .select({ role: organizationMembers.role })
-      .from(organizationMembers)
-      .where(
-        and(
-          eq(organizationMembers.userId, userId),
-          eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.status, 'active'),
-          isNull(organizationMembers.deletedAt),
+    const result = await withSystemContext((tx) =>
+      tx
+        .select({ role: organizationMembers.role })
+        .from(organizationMembers)
+        .where(
+          and(
+            eq(organizationMembers.userId, userId),
+            eq(organizationMembers.organizationId, organizationId),
+            eq(organizationMembers.status, 'active'),
+            isNull(organizationMembers.deletedAt),
+          )
         )
-      )
-      .limit(1);
+        .limit(1),
+    );
     
     if (result.length === 0) {
       return null;

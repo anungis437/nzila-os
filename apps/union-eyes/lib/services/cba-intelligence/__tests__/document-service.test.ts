@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -81,6 +83,13 @@ vi.mock("drizzle-orm", async () => {
 });
 
 describe("document-service", () => {
+  it("keeps CBA intelligence documents on their own table", () => {
+    const source = readFileSync(join(__dirname, "../document-service.ts"), "utf8");
+    expect(source).toContain("cbaIntelDocuments");
+    expect(source).not.toContain("documents-schema");
+    expect(source).not.toContain("/api/documents/repository");
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.selectQueue.length = 0;

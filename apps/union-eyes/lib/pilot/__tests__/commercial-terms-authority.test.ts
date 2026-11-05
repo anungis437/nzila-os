@@ -32,6 +32,7 @@ const m = vi.hoisted(() => {
     updateCalls,
     mockDb,
     pilotHasFinancialArtifacts: vi.fn(async () => false),
+    persistAtomicAudit: vi.fn(async () => undefined),
     queueSelect: (...rows: unknown[][]) => state.selectQueue.push(...rows),
     reset: () => {
       state.selectQueue = [];
@@ -47,6 +48,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/lib/pilot/pilot-ownership', () => ({
   pilotHasFinancialArtifacts: m.pilotHasFinancialArtifacts,
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 async function loadModule() {
   return import('../commercial-terms-authority');
@@ -321,6 +323,65 @@ describe('approveCommercialTerms round 27 — requires a verified organization',
     const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250 });
 
     expect(result.ok).toBe(true);
+  });
+});
+
+describe('approveCommercialTerms — independent approval and atomic audit', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.reset();
+    m.pilotHasFinancialArtifacts.mockResolvedValue(false);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+  });
+
+  it('refuses (403) when the administrator who verified the organization approves the terms', async () => {
+    const { approveCommercialTerms } = await loadModule();
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1', verifiedBy: 'admin-1' }]);
+
+    const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250 });
+
+    expect(result).toMatchObject({ ok: false, status: 403 });
+    expect(m.updateCalls).toHaveLength(0);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('records the approval audit on the same transaction under the verified organization', async () => {
+    const { approveCommercialTerms } = await loadModule();
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1', verifiedBy: 'admin-1' }]);
+
+    const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-2', memberCount: 250 });
+
+    expect(result.ok).toBe(true);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      m.mockDb,
+      expect.objectContaining({
+        organizationId: 'org-1',
+        userId: 'admin-2',
+        action: 'pilot.commercial_terms.approve',
+        resourceType: 'pilot_applications',
+        resourceId: 'p1',
+      }),
+    );
+  });
+
+  it('fails the approval when its audit record cannot be written', async () => {
+    const { approveCommercialTerms } = await loadModule();
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1', verifiedBy: 'admin-1' }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    await expect(
+      approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-2', memberCount: 250 }),
+    ).rejects.toThrow('audit down');
+  });
+
+  it('writes no audit when the pilot is missing', async () => {
+    const { approveCommercialTerms } = await loadModule();
+    m.queueSelect([]);
+
+    const result = await approveCommercialTerms({ pilotId: 'missing', approvedBy: 'admin-2', memberCount: 250 });
+
+    expect(result).toMatchObject({ ok: false, status: 404 });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 });
 

@@ -233,7 +233,7 @@ export async function processAssignmentConvergence(
         convergedAt: new Date(),
         lastError: null,
       })
-      .where(eq(deadlineReassignmentConvergence.id, taskId));
+      .where(and(eq(deadlineReassignmentConvergence.id, taskId), eq(deadlineReassignmentConvergence.organizationId, task.organizationId)));
 
     return { taskId, converged: true, refreshedDeadlineIds: result.refreshedDeadlineIds };
   } catch (error) {
@@ -247,7 +247,7 @@ export async function processAssignmentConvergence(
         lastAttemptedAt: new Date(),
         lastError: message,
       })
-      .where(eq(deadlineReassignmentConvergence.id, taskId));
+      .where(and(eq(deadlineReassignmentConvergence.id, taskId), eq(deadlineReassignmentConvergence.organizationId, task.organizationId)));
 
     logger.error('deadline-engine.assignment-sync: convergence attempt failed, remains pending for retry', {
       taskId,

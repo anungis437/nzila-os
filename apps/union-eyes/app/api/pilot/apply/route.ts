@@ -6,15 +6,20 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
-import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS_PER_IP } from '@/lib/rate-limiter';
+import { clientAddress } from '@/lib/public-intake/guard';
 import { logger } from '@/lib/logger';
+import { boundedJsonRecord } from '@/lib/api/bounded-json-record';
+import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
 import { sanitizeResponsesForPublicCreate } from '@/lib/pilot/responses-authority';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
 export const dynamic = 'force-dynamic';
+
+// The body is the application plus a free-form `responses` object that is itself capped at 16 KiB below; nothing legitimate is larger.
+const MAX_BODY_BYTES = 64 * 1024;
 
 // PILOT_PLATFORM_ACCESS_MIN_LEVEL-equivalent gate (PR #752 round 17): this
 // table has no organizationId column (orgScoped can never filter it), and its
@@ -76,8 +81,9 @@ const pilotApplicationBodySchema = z.object({
   // assertion (`responses.organizationId`, if present, is a claim from this
   // unauthenticated submitter — see getPilotClaimedOrganizationId's doc
   // comment in lib/pilot/pilot-ownership.ts).
-  responses: z.record(z.unknown()).optional(),
-  assessment: z.object({ score: z.union([z.number(), z.string()]).optional() }).passthrough().optional(),
+  responses: boundedJsonRecord({ maxBytes: 16 * 1024, maxKeys: 60, maxDepth: 4 }).optional(),
+  // Only the score is read; any other key an anonymous caller adds is dropped rather than carried.
+  assessment: z.object({ score: z.union([z.number().finite(), z.string().trim().max(20)]).optional() }).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -89,9 +95,7 @@ export async function POST(request: NextRequest) {
   // endpoints (see RATE_LIMITS_PER_IP), and fails CLOSED (rejects, not
   // allows) when Redis itself is unavailable, since this route has no other
   // abuse control.
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || request.headers.get('x-real-ip')
-    || 'unknown';
+  const ip = clientAddress(request);
   const rl = await checkRateLimit(ip, RATE_LIMITS_PER_IP.PILOT_APPLY);
   if (!rl.allowed) {
     return NextResponse.json(
@@ -101,7 +105,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const rawBody = await request.json().catch(() => null);
+    let rawBody: unknown = null;
+    try {
+      rawBody = await readBoundedJson(request, MAX_BODY_BYTES);
+    } catch (error) {
+      if (error instanceof RequestBodyTooLargeError) {
+        return NextResponse.json({ error: 'Pilot application is too large' }, { status: 413 });
+      }
+    }
     const parsed = pilotApplicationBodySchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json(
@@ -125,31 +136,36 @@ export async function POST(request: NextRequest) {
       assessment,
     } = parsed.data;
 
-    // Insert into DB
-    const [row] = await db
-      .insert(pilotApplications)
-      .values({
-        organizationName,
-        organizationType: organizationType ?? 'local',
-        contactName,
-        contactEmail,
-        contactPhone: contactPhone ?? null,
-        memberCount: memberCount ?? 0,
-        jurisdictions: jurisdictions ?? [],
-        sectors: sectors ?? [],
-        currentSystem: currentSystem ?? null,
-        challenges: challenges ?? [],
-        goals: goals ?? [],
-        readinessScore: assessment?.score?.toString() ?? null,
-        // PR #752 round 24: an unauthenticated applicant must never be able
-        // to seed a reserved/authoritative key (commercialState,
-        // subscriptionPlanId, qualification scores, artifact metadata, ...)
-        // straight into a brand-new row — the PATCH-time protection built in
-        // rounds 22/23 would then faithfully preserve that attacker-seeded
-        // value forever. organizationId (the claim) remains allowed.
-        responses: sanitizeResponsesForPublicCreate(responses),
-      })
-      .returning();
+    // Insert into DB. A prospective union applies before any organization exists, so the row has no organization for a tenant policy to
+    // match: it is an intake record of the platform, written by the system role, and only after the body has been validated and the
+    // caller rate limited above. Nothing else is done on that connection: the CRM sync below happens after it is closed.
+    const row = await withSystemContext(async (tx) => {
+      const [created] = await tx
+        .insert(pilotApplications)
+        .values({
+          organizationName,
+          organizationType: organizationType ?? 'local',
+          contactName,
+          contactEmail,
+          contactPhone: contactPhone ?? null,
+          memberCount: memberCount ?? 0,
+          jurisdictions: jurisdictions ?? [],
+          sectors: sectors ?? [],
+          currentSystem: currentSystem ?? null,
+          challenges: challenges ?? [],
+          goals: goals ?? [],
+          readinessScore: assessment?.score?.toString() ?? null,
+          // PR #752 round 24: an unauthenticated applicant must never be able
+          // to seed a reserved/authoritative key (commercialState,
+          // subscriptionPlanId, qualification scores, artifact metadata, ...)
+          // straight into a brand-new row — the PATCH-time protection built in
+          // rounds 22/23 would then faithfully preserve that attacker-seeded
+          // value forever. organizationId (the claim) remains allowed.
+          responses: sanitizeResponsesForPublicCreate(responses),
+        })
+        .returning();
+      return created;
+    });
 
     logger.info('pilot_application:created', {
       id: row.id,

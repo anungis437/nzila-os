@@ -32,6 +32,7 @@ import { logger } from '@/lib/logger'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context'
 import { withCanonicalOrganizationBinding } from '@/lib/auth/canonical-organization-selection'
+import { sanitizedBindingError } from '@/lib/db/binding-error'
 import {
   AuthOrgBindingError,
   authenticatedOrgBindingSql,
@@ -110,7 +111,7 @@ export async function withRLSContext<T>(
   }
 
   // Get authenticated user from auth provider
-  const { userId, orgId: clerkOrgId } = await auth()
+  const { userId, orgId: authOrgId } = await auth()
 
   if (!userId) {
     throw new Error(
@@ -128,7 +129,11 @@ export async function withRLSContext<T>(
       (binding) =>
         db.transaction(async (tx) => {
           await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
-          await tx.execute(authenticatedOrgBindingSql(binding))
+          try {
+            await tx.execute(authenticatedOrgBindingSql(binding))
+          } catch (error) {
+            throw sanitizedBindingError(error)
+          }
           return tenantContextStorage.run(tx, () => operation(tx))
         }),
     )
@@ -150,7 +155,7 @@ export async function withRLSContext<T>(
   } else {
     // Resolve orgId using the same fallback chain as getCurrentUser():
     // platform JWT orgId → publicMetadata.organizationId → privateMetadata.organizationId → tenantId
-    orgId = clerkOrgId
+    orgId = authOrgId
     if (!orgId) {
       try {
         const user = await currentUser()
@@ -282,7 +287,7 @@ export async function withExplicitUserContext<T>(
  * @example
  * // auth provider webhook creating a new user
  * export async function POST(req: Request) {
- *   const event = await verifyClerkWebhook(req);
+ *   const event = await verifyAuthWebhook(req);
  *
  *   return withSystemContext(async () => {
  *     await db.insert(users).values({

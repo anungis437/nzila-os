@@ -1,11 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Provider tokens are stored sealed (B91); a deterministic stand-in for the secret service keeps these tests free of key material.
+vi.mock('@/lib/encryption', () => ({
+  encryptSecret: async (value: string) => `sealed(${value})`,
+  decryptSecret: async (value: string) => value.replace(/^sealed\((.*)\)$/, '$1'),
+}));
 import { NextRequest } from 'next/server';
 
 const TEST_USER = {
   userId: 'user_test_001',
   organizationId: '00000000-0000-0000-0000-000000000001',
-  role: 'steward',
+  // Connecting and disconnecting an account are an administrator's acts; the refusals below set the lower roles.
+  role: 'admin',
 };
+
+const ACCOUNT_ID = '00000000-0000-0000-0000-0000000000a1';
 
 const m = vi.hoisted(() => {
   const cookieStore = {
@@ -37,7 +46,10 @@ const m = vi.hoisted(() => {
 
   const createUpdateChain = () => ({
     set: vi.fn(() => ({
-      where: vi.fn(() => nextUpdateWhere()),
+      where: vi.fn(() => {
+        const rows = nextUpdateWhere();
+        return Object.assign(rows, { returning: () => rows.then((r) => (r.length ? r : [{ id: 'row' }])) });
+      }),
     })),
   });
 
@@ -46,6 +58,7 @@ const m = vi.hoisted(() => {
     cookieStore,
     checkRateLimit: vi.fn(),
     logApiAuditEvent: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     createMetaClient: vi.fn(),
     createTwitterClient: vi.fn(),
     createLinkedInClient: vi.fn(),
@@ -73,9 +86,16 @@ const mockDb = {
   select: vi.fn(() => m.createSelectChain()),
   update: vi.fn(() => m.createUpdateChain()),
   delete: vi.fn(() => ({
-    where: vi.fn(() => m.nextDeleteWhere()),
+    where: vi.fn(() => {
+      const rows = m.nextDeleteWhere();
+      return Object.assign(rows, { returning: () => rows.then((r) => (r.length ? r : [{ id: 'row' }])) });
+    }),
   })),
 };
+
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
+
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 vi.mock('@/lib/middleware/api-security', () => ({
   logApiAuditEvent: m.logApiAuditEvent,
@@ -111,17 +131,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
 }));
 
-vi.mock('@/lib/api-auth-guard', async (orig) => {
-  const actual = await orig<typeof import('@/lib/api-auth-guard')>();
-  return {
-    ...actual,
-    withRoleAuth: vi.fn(
-      (_role: string, handler: (req: NextRequest, ctx: typeof TEST_USER) => Promise<Response>) =>
-        (req: NextRequest, ctx: Partial<typeof TEST_USER> = {}) =>
-          handler(req, { ...TEST_USER, ...ctx })
-    ),
-  };
-});
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   const mod = await import('../social-media/accounts/route');
@@ -132,6 +142,10 @@ describe('social-media/accounts route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.resetQueues();
+    resetCaller();
+    caller.userId = TEST_USER.userId;
+    caller.organizationId = TEST_USER.organizationId;
+    caller.role = TEST_USER.role;
     m.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 99, resetIn: 0 });
     m.createMetaClient.mockReturnValue({
       getAuthorizationUrl: vi.fn(() => 'https://meta.example/authorize'),
@@ -149,15 +163,60 @@ describe('social-media/accounts route', () => {
     m.generatePKCE.mockReturnValue({ verifier: 'verifier-123', challenge: 'challenge-123' });
   });
 
-  it('returns forbidden when GET has no organization context', async () => {
+  it('declares what it asks of the wrapper: a member to read, an administrator to start or end a connection, and a steward to refresh a token', async () => {
+    await loadRoute();
+    const summary = (text: string) => declared.find((entry) => entry.openapi?.summary === text);
+
+    expect(summary('List the connected social media accounts of the organization')?.auth).toEqual({ minRole: 'member' });
+    expect(summary('List the connected social media accounts of the organization')?.rlsOrgContext).toBe(true);
+    expect(summary('Start connecting a social media account (OAuth)')?.auth).toEqual({ minRole: 'admin' });
+    expect(summary('Start connecting a social media account (OAuth)')?.rlsOrgContext).toBe(true);
+    // Disconnecting and refreshing contact the platform, so no transaction spans them: each database step opens its own.
+    expect(summary('Disconnect a social media account')?.auth).toEqual({ minRole: 'admin' });
+    expect(summary('Disconnect a social media account')?.rlsOrgContext).toBeUndefined();
+    expect(summary('Refresh the access token of a connected social media account')?.auth).toEqual({ minRole: 'steward' });
+    expect(summary('Refresh the access token of a connected social media account')?.rlsOrgContext).toBeUndefined();
+  });
+
+  it('refuses a steward the start of a connection and a disconnection, and a member a token refresh, before anything is read or written', async () => {
+    const { POST, DELETE, PUT } = await loadRoute();
+
+    caller.role = 'steward';
+    expect((await POST(new NextRequest('http://localhost/api/social-media/accounts', {
+      method: 'POST', body: JSON.stringify({ platform: 'facebook' }), headers: { 'content-type': 'application/json' },
+    }))).status).toBe(403);
+    expect((await DELETE(new NextRequest(`http://localhost/api/social-media/accounts?id=${ACCOUNT_ID}`, { method: 'DELETE' }))).status).toBe(403);
+
+    caller.role = 'member';
+    expect((await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+      method: 'PUT', body: JSON.stringify({ account_id: ACCOUNT_ID }), headers: { 'content-type': 'application/json' },
+    }))).status).toBe(403);
+
+    expect(m.cookieStore.set).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses a caller who is not signed in', async () => {
+    caller.userId = null;
     const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/social-media/accounts'), {
-      ...TEST_USER,
-      organizationId: '',
-    });
+
+    const response = await GET(new NextRequest('http://localhost/api/social-media/accounts'));
+
+    expect(response.status).toBe(401);
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
+  it('returns forbidden when GET has no organization context', async () => {
+    caller.organizationId = null;
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/social-media/accounts'));
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    await expect(response.json()).resolves.toMatchObject({ code: 'INSUFFICIENT_PERMISSIONS' });
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
   }, 60000);
 
   it('returns rate limit details on GET throttling', async () => {
@@ -196,9 +255,10 @@ describe('social-media/accounts route', () => {
     expect(response.status).toBe(200);
     expect(payload.accounts).toHaveLength(1);
     expect(payload.accounts[0]).toMatchObject({ id: 'acct-1', platform: 'facebook' });
-    expect(m.logApiAuditEvent).toHaveBeenCalledWith(expect.objectContaining({
-      action: 'LIST_SOCIAL_ACCOUNTS',
-      metadata: { count: 1 },
+    // The list is recorded in the canonical audit log (B87), not a log line.
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      action: 'social_account.list',
+      details: { count: 1 },
     }));
   });
 
@@ -274,6 +334,20 @@ describe('social-media/accounts route', () => {
     await expect(response.json()).resolves.toMatchObject({ code: 'MISSING_REQUIRED_FIELD' });
   });
 
+  it('answers 400, and reads nothing, for an account id that is not a valid id', async () => {
+    const { DELETE, PUT } = await loadRoute();
+
+    const del = await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=acct-1', { method: 'DELETE' }));
+    const put = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+      method: 'PUT', body: JSON.stringify({ account_id: 'acct-1' }), headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(del.status).toBe(400);
+    expect(put.status).toBe(400);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
   it('reports not found when deleting an account from another organization (org-scoped lookup itself excludes it)', async () => {
     const { DELETE } = await loadRoute();
     // The account SELECT is now org-scoped at the query level, so a
@@ -282,10 +356,12 @@ describe('social-media/accounts route', () => {
     // behavior rather than merely asserting on the eventual HTTP status.
     m.queueSelect([]);
 
-    const response = await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=acct-1', { method: 'DELETE' }));
+    const response = await DELETE(new NextRequest(`http://localhost/api/social-media/accounts?id=${ACCOUNT_ID}`, { method: 'DELETE' }));
 
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toMatchObject({ code: 'RESOURCE_NOT_FOUND' });
+    // The lookup ran in the caller's own organization's tenant transaction.
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: TEST_USER.organizationId }, expect.any(Function));
   });
 
   it('revokes twitter credentials and deletes the account', async () => {
@@ -294,7 +370,7 @@ describe('social-media/accounts route', () => {
     m.createTwitterClient.mockReturnValueOnce({ revokeToken });
     m.queueSelect([
       {
-        id: 'acct-1',
+        id: ACCOUNT_ID,
         organizationId: TEST_USER.organizationId,
         platform: 'twitter',
         accessToken: 'access-token',
@@ -303,13 +379,30 @@ describe('social-media/accounts route', () => {
     ]);
     m.queueDeleteWhere([]);
 
-    const response = await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=acct-1', { method: 'DELETE' }));
+    const response = await DELETE(new NextRequest(`http://localhost/api/social-media/accounts?id=${ACCOUNT_ID}`, { method: 'DELETE' }));
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload).toMatchObject({ account_id: 'acct-1' });
+    expect(payload).toMatchObject({ account_id: ACCOUNT_ID });
     expect(revokeToken).toHaveBeenCalled();
-    expect(m.logApiAuditEvent).toHaveBeenCalledWith(expect.objectContaining({ action: 'DISCONNECT_SOCIAL_ACCOUNT' }));
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ action: 'social.account.disconnect', resourceId: ACCOUNT_ID, userId: TEST_USER.userId }),
+    );
+  });
+
+  it('does not report a disconnect, and writes no audit, when its audit cannot be written', async () => {
+    const { DELETE } = await loadRoute();
+    m.createTwitterClient.mockReturnValueOnce({ revokeToken: vi.fn(async () => undefined) });
+    m.queueSelect([
+      { id: ACCOUNT_ID, organizationId: TEST_USER.organizationId, platform: 'twitter', accessToken: 'a', refreshToken: 'r' },
+    ]);
+    m.queueDeleteWhere([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await DELETE(new NextRequest(`http://localhost/api/social-media/accounts?id=${ACCOUNT_ID}`, { method: 'DELETE' }));
+
+    expect(response.status).toBe(500);
   });
 
   it('returns not found when refreshing a missing account', async () => {
@@ -318,7 +411,7 @@ describe('social-media/accounts route', () => {
 
     const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
       method: 'PUT',
-      body: JSON.stringify({ account_id: 'acct-1' }),
+      body: JSON.stringify({ account_id: ACCOUNT_ID }),
       headers: { 'content-type': 'application/json' },
     }));
 
@@ -330,7 +423,7 @@ describe('social-media/accounts route', () => {
     const { PUT } = await loadRoute();
     m.queueSelect([
       {
-        id: 'acct-1',
+        id: ACCOUNT_ID,
         organizationId: TEST_USER.organizationId,
         platform: 'twitter',
         accessToken: 'access-token',
@@ -341,7 +434,7 @@ describe('social-media/accounts route', () => {
 
     const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
       method: 'PUT',
-      body: JSON.stringify({ account_id: 'acct-1' }),
+      body: JSON.stringify({ account_id: ACCOUNT_ID }),
       headers: { 'content-type': 'application/json' },
     }));
 
@@ -350,11 +443,45 @@ describe('social-media/accounts route', () => {
     expect(mockDb.update).toHaveBeenCalled();
   });
 
+  // DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE
+  it('does not refresh a suspended or disconnected account (409) and changes nothing', async () => {
+    const { PUT } = await loadRoute();
+    for (const status of ['suspended', 'disconnected']) {
+      m.queueSelect([{ id: ACCOUNT_ID, organizationId: TEST_USER.organizationId, platform: 'facebook', accessToken: 'old', refreshToken: null, status }]);
+      const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+        method: 'PUT',
+        body: JSON.stringify({ account_id: ACCOUNT_ID }),
+        headers: { 'content-type': 'application/json' },
+      }));
+      expect(response.status).toBe(409);
+    }
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('does not mark an account expired when the platform refreshed but the record could not be saved', async () => {
+    const { PUT } = await loadRoute();
+    m.queueSelect([{ id: ACCOUNT_ID, organizationId: TEST_USER.organizationId, platform: 'facebook', accessToken: 'old', refreshToken: null, status: 'active' }]);
+    m.queueUpdateWhere([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
+      method: 'PUT',
+      body: JSON.stringify({ account_id: ACCOUNT_ID }),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(response.status).toBe(500);
+    // Only the failed refresh audit would be a second record; a storage failure writes none.
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'social.account.token_refresh_failed' }));
+  });
+
   it('refreshes a facebook token and returns the new expiry', async () => {
     const { PUT } = await loadRoute();
     m.queueSelect([
       {
-        id: 'acct-1',
+        id: ACCOUNT_ID,
         organizationId: TEST_USER.organizationId,
         platform: 'facebook',
         accessToken: 'old-meta-token',
@@ -365,7 +492,7 @@ describe('social-media/accounts route', () => {
 
     const response = await PUT(new NextRequest('http://localhost/api/social-media/accounts', {
       method: 'PUT',
-      body: JSON.stringify({ account_id: 'acct-1' }),
+      body: JSON.stringify({ account_id: ACCOUNT_ID }),
       headers: { 'content-type': 'application/json' },
     }));
     const payload = await response.json();

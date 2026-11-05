@@ -12,6 +12,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Communications"],
   orgScoped: true,
   itemRoute: true,
+  // A removed template or list is archived, not deleted: a list's subscribed and unsubscribed trail cascades from it, so it is kept.
+  archiveColumn: 'isActive',
   readRole: 'member',
   writeRole: 'steward',
 });

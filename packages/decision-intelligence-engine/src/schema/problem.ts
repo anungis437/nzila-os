@@ -69,7 +69,7 @@ export type TelemetryMarker = z.infer<typeof telemetryMarkerSchema>
 // ─── Root Cause Hypothesis ────────────────────────────────────────────────────
 
 export const rootCauseHypothesisSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   hypothesis: z.string().min(1),
   confidence: z.number().min(0).max(100).describe('Confidence score 0–100'),
   evidenceFor: z.array(z.string()),
@@ -83,7 +83,7 @@ export type RootCauseHypothesis = z.infer<typeof rootCauseHypothesisSchema>
 // ─── Mitigation Recommendation ───────────────────────────────────────────────
 
 export const mitigationRecommendationSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   action: z.string().min(1),
   priority: severityScale,
   ownerId: z.string(),
@@ -117,7 +117,7 @@ export type DeviationType = z.infer<typeof deviationTypeSchema>
 // ─── Problem Analysis ─────────────────────────────────────────────────────────
 
 export const problemAnalysisSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
 
   title: z.string().min(1).max(500),
@@ -133,7 +133,7 @@ export const problemAnalysisSchema = z.object({
   // Root cause analysis
   hypotheses: z.array(rootCauseHypothesisSchema),
   confirmedCause: z.string().nullable(),
-  confirmedCauseHypothesisId: z.string().uuid().nullable(),
+  confirmedCauseHypothesisId: z.guid().nullable(),
 
   // Timeline and evidence
   evidenceRefs: z.array(z.string()),
@@ -143,7 +143,7 @@ export const problemAnalysisSchema = z.object({
   // Governance linkage
   governanceReplayRef: z.string().nullable(),
   continuityImplications: z.array(z.string()),
-  situationAssessmentRef: z.string().uuid().nullable(),
+  situationAssessmentRef: z.guid().nullable(),
 
   // Mitigation
   mitigations: z.array(mitigationRecommendationSchema),
@@ -189,7 +189,7 @@ export const problemAnalysisInputSchema = problemAnalysisSchema.omit({
   telemetryMarkers: z.array(telemetryMarkerSchema).optional().default([]),
   continuityImplications: z.array(z.string()).optional().default([]),
   governanceReplayRef: z.string().nullable().optional().default(null),
-  situationAssessmentRef: z.string().uuid().nullable().optional().default(null),
+  situationAssessmentRef: z.guid().nullable().optional().default(null),
 })
 
 export type ProblemAnalysisInput = z.infer<typeof problemAnalysisInputSchema>

@@ -27,7 +27,9 @@ export default async function CorrespondencePage({ params }: PageProps) {
   if (!hasAccess) redirect("/dashboard");
 
   const canSign = await hasMinRole("officer");
-  const organizationId = user.organizationId || "default";
+  // No organization means no authority; the former "default" tenant fallback is removed.
+  const organizationId = user.organizationId;
+  if (!organizationId) redirect("/dashboard");
 
   return (
     <div className="container mx-auto py-6 space-y-6">

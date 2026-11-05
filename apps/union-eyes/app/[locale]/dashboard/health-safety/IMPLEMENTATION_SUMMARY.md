@@ -8,7 +8,6 @@
    - Overview with quick stats
    - Navigation cards to sub-sections
    - Embedded full dashboard component
-   - Export functionality
 
 2. **Incidents Page** - `app/[locale]/dashboard/health-safety/incidents/page.tsx`
    - Incident list table
@@ -32,7 +31,6 @@
    - Grid/List view toggle
    - Inline report form
    - Priority filtering
-   - Corrective action tracker
 
 ### 📚 Documentation Created (3)
 
@@ -83,7 +81,6 @@
 - ✅ InspectionFindingsCard
 - ✅ HazardsList
 - ✅ HazardReportForm
-- ✅ CorrectiveActionTracker
 
 ## 📁 File Structure
 
@@ -256,7 +253,6 @@ All pages depend on:
 - [ ] Filters update views
 - [ ] Search functionality works
 - [ ] Forms validate input
-- [ ] Export buttons trigger actions
 - [ ] Toasts show notifications
 
 ### Accessibility
@@ -345,7 +341,7 @@ Dashboard → Health & Safety → Hazards → Report → Submit → View List
 ## 🐛 Known Limitations
 
 1. **Mock Data**: All pages currently use mock data - needs API integration
-2. **Export**: Export buttons are placeholders - needs implementation
+2. **Export**: Not offered. No export service or authority model covers members' health data, so the pages carry no export buttons.
 3. **Search**: Search/filter logic not fully implemented
 4. **Permissions**: Permission checks not yet in place
 5. **Translations**: Translation keys need to be added to messages JSON

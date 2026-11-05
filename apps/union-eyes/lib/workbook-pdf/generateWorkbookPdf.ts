@@ -7,20 +7,18 @@
  * and renders to Buffer for streaming.
  *
  * AUTHORITY: this entry point and loadWorkbookContext read protected
- * workbook + child rows through the module-level `db` import. It MUST be
- * invoked from inside the claimed-workbook authority boundary
- * (withClaimedWorkbookAccess in lib/workbook/access-control.ts) so those
- * reads inherit the established DB execution context (claimant runtime or
- * bounded system). Calling it outside that boundary reads protected data
- * with no authority context.
+ * workbook + child rows through the transaction they are given. It MUST be
+ * the one the claimed-workbook authority boundary (withClaimedWorkbookAccess in
+ * lib/workbook/access-control.ts) opened for the caller (claimant runtime or
+ * bounded system), so the reads carry the established DB execution context.
  */
 
 import React from 'react';
 import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
 import type { ReactElement, JSXElementConstructor } from 'react';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { GovernanceEntropyWorkbookTemplate, type WorkbookPdfData } from './GovernanceEntropyWorkbookTemplate';
 import { buildWorkbookNarrative } from './workbookNarrativeEngine';
 import { loadWorkbookContext } from './loadWorkbookModules';
@@ -30,8 +28,8 @@ export interface GenerateWorkbookPdfInput {
   organizationName?: string | null;
 }
 
-export async function generateWorkbookPdf(input: GenerateWorkbookPdfInput): Promise<Buffer | null> {
-  const [wb] = await db
+export async function generateWorkbookPdf(tx: RLSTx, input: GenerateWorkbookPdfInput): Promise<Buffer | null> {
+  const [wb] = await tx
     .select({
       id: workbooks.id,
       locale: workbooks.locale,
@@ -50,7 +48,7 @@ export async function generateWorkbookPdf(input: GenerateWorkbookPdfInput): Prom
       ? 'facilitated'
       : 'self-guided';
 
-  const { cartography, holders, modules } = await loadWorkbookContext({
+  const { cartography, holders, modules } = await loadWorkbookContext(tx, {
     workbookId: input.workbookId,
     status,
   });

@@ -11,6 +11,8 @@ import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+from core.fields import EnumArrayField
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -43,7 +45,34 @@ class OrganizationModel(BaseModel):
 class BoardPackets(BaseModel):
     """Migrated from drizzle: board-packet-schema.ts"""
 
-    title = models.CharField(max_length=255, null=True, blank=True)
+    title = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField()
+    description = models.TextField(null=True, blank=True)
+    packet_type = models.CharField(max_length=50)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    fiscal_year = models.IntegerField()
+    fiscal_quarter = models.IntegerField(null=True, blank=True)
+    generated_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    generated_by = models.CharField(max_length=255)
+    status = models.CharField(max_length=50, default='draft')
+    finalized_at = models.DateTimeField(null=True, blank=True)
+    distributed_at = models.DateTimeField(null=True, blank=True)
+    financial_summary = models.JSONField()
+    membership_stats = models.JSONField()
+    case_summary = models.JSONField()
+    motions_and_votes = models.JSONField(null=True, blank=True)
+    audit_exceptions = models.JSONField(null=True, blank=True)
+    compliance_status = models.JSONField()
+    action_items = models.JSONField(null=True, blank=True)
+    recipient_roles = ArrayField(models.TextField())
+    distribution_list = models.JSONField(null=True, blank=True)
+    pdf_url = models.TextField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
+    content_hash = models.CharField(max_length=255, null=True, blank=True)
+    signed_by = models.CharField(max_length=255, null=True, blank=True)
+    signed_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "board_packets"
@@ -75,6 +104,19 @@ class BoardPacketDistributions(BaseModel):
         on_delete=models.CASCADE,
         related_name="board_packet_distributions_packet_set",
     )
+    recipient_id = models.UUIDField()
+    recipient_name = models.CharField(max_length=255)
+    recipient_email = models.CharField(max_length=255)
+    recipient_role = models.CharField(max_length=50)
+    sent_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    delivery_method = models.CharField(max_length=50)
+    opened = models.BooleanField(default=False, null=True, blank=True)
+    opened_at = models.DateTimeField(null=True, blank=True)
+    downloaded = models.BooleanField(default=False, null=True, blank=True)
+    downloaded_at = models.DateTimeField(null=True, blank=True)
+    acknowledged = models.BooleanField(default=False, null=True, blank=True)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    acknowledgment_signature = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "board_packet_distributions"
@@ -116,6 +158,30 @@ class CmsPages(BaseModel):
         on_delete=models.CASCADE,
         related_name="cms_pages_organization_set",
     )
+    template_id = models.UUIDField(null=True, blank=True)
+    title = models.TextField()
+    slug = models.TextField()
+    meta_description = models.TextField(null=True, blank=True)
+    meta_keywords = ArrayField(models.TextField(), null=True, blank=True)
+    og_image = models.TextField(null=True, blank=True)
+    parent_page_id = models.UUIDField(null=True, blank=True)
+    content = models.JSONField(default=list)
+    status = models.TextField(default='draft')
+    published_at = models.DateTimeField(null=True, blank=True)
+    scheduled_for = models.DateTimeField(null=True, blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    category = models.TextField(null=True, blank=True)
+    content_type = models.TextField(null=True, blank=True)
+    file_url = models.TextField(null=True, blank=True)
+    file_size_mb = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    download_count = models.IntegerField(default=0, null=True, blank=True)
+    is_homepage = models.BooleanField(default=False, null=True, blank=True)
+    requires_auth = models.BooleanField(default=False, null=True, blank=True)
+    allowed_roles = ArrayField(models.TextField(), null=True, blank=True)
+    seo_config = models.JSONField(default=dict, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    submitted_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "cms_pages"
@@ -158,6 +224,18 @@ class CmsMediaLibrary(BaseModel):
         on_delete=models.CASCADE,
         related_name="cms_media_library_organization_set",
     )
+    file_name = models.TextField()
+    file_url = models.TextField()
+    file_type = models.TextField()
+    mime_type = models.TextField()
+    file_size = models.IntegerField()
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
+    alt_text = models.TextField(null=True, blank=True)
+    caption = models.TextField(null=True, blank=True)
+    tags = ArrayField(models.TextField(), null=True, blank=True)
+    folder = models.TextField(default='/', null=True, blank=True)
+    uploaded_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "cms_media_library"
@@ -265,7 +343,12 @@ class WebsiteSettings(BaseModel):
 class DocumentFolders(BaseModel):
     """Migrated from drizzle: documents-schema.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    name = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    parent_folder_id = models.UUIDField(null=True, blank=True)
+    created_by = models.TextField()
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "document_folders"
@@ -275,15 +358,15 @@ class DocumentFolders(BaseModel):
 class Documents(BaseModel):
     """Migrated from drizzle: documents-schema.ts — full runtime field set (Phase F convergence)"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
     folder_id = models.UUIDField(null=True, blank=True)
 
     # File information
     title = models.TextField(null=True, blank=True)
     filename = models.TextField(null=True, blank=True)
-    name = models.TextField(null=True, blank=True)
-    file_url = models.TextField(null=True, blank=True)
-    file_type = models.TextField(null=True, blank=True)
+    name = models.TextField(blank=True)
+    file_url = models.TextField(blank=True)
+    file_type = models.TextField(blank=True)
     content_type = models.TextField(null=True, blank=True)
     mime_type = models.TextField(null=True, blank=True)
     document_type = models.TextField(null=True, blank=True)
@@ -305,8 +388,8 @@ class Documents(BaseModel):
     metadata = models.JSONField(default=dict, null=True, blank=True)
 
     # Upload information
-    uploaded_by = models.TextField(null=True, blank=True)
-    uploaded_at = models.DateTimeField(null=True, blank=True)
+    uploaded_by = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(default=timezone.now)
 
     # Status and access
     status = models.CharField(max_length=20, default="active")
@@ -322,6 +405,14 @@ class Documents(BaseModel):
 
     # Soft delete
     deleted_at = models.DateTimeField(null=True, blank=True)
+    checksum = models.TextField(null=True, blank=True)
+    org_id = models.UUIDField(null=True, blank=True)
+
+    # Import traceability (platform 0077). The case a document belongs to is its document_links row, not a column here.
+    source_system = models.CharField(max_length=100, null=True, blank=True)
+    external_document_id = models.CharField(max_length=255, null=True, blank=True)
+    imported_at = models.DateTimeField(null=True, blank=True)
+    import_batch_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = "documents"
@@ -338,6 +429,14 @@ class PublicContent(BaseModel):
         null=True,
         blank=True,
     )
+    body = models.TextField()
+    excerpt = models.TextField(null=True, blank=True)
+    is_published = models.BooleanField(default=False, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+    slug = models.CharField(max_length=200)
+    tags = ArrayField(models.TextField(), null=True, blank=True)
+    title = models.CharField(max_length=500)
 
     class Meta:
         db_table = "public_content"
@@ -353,9 +452,25 @@ class MemberDocuments(BaseModel):
     file_url = models.TextField()
     file_size = models.IntegerField()
     file_type = models.TextField()
-    category = models.TextField(null=True, blank=True, default="General")
+    category = models.TextField(null=True, blank=True)
     uploaded_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+    confidentiality_level = models.TextField(null=True, blank=True)
+    document_name = models.TextField(null=True, blank=True)
+    document_number = models.TextField(null=True, blank=True)
+    document_type = models.TextField(null=True, blank=True)
+    expiry_date = models.DateTimeField(null=True, blank=True)
+    file_hash = models.TextField(null=True, blank=True)
+    is_expired = models.BooleanField(default=False, null=True, blank=True)
+    issue_date = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    mime_type = models.TextField(null=True, blank=True)
+    tags = models.JSONField(null=True, blank=True)
+    uploaded_by = models.TextField(null=True, blank=True)
+    verification_notes = models.TextField(null=True, blank=True)
+    verified = models.BooleanField(default=False, null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verified_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "member_documents"
@@ -365,7 +480,56 @@ class MemberDocuments(BaseModel):
 class SignatureDocuments(BaseModel):
     """Migrated from drizzle: signatures.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    title = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    document_type = models.TextField()
+    file_url = models.TextField()
+    file_name = models.TextField()
+    file_size_bytes = models.IntegerField()
+    file_hash = models.TextField()
+    provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'docusign', 'hellosign', 'adobe_sign', 'pandadoc', 'internal', 'signrequest',
+        ]],
+    )
+    provider_document_id = models.TextField(null=True, blank=True)
+    provider_envelope_id = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'draft', 'sent', 'delivered', 'viewed', 'signed', 'completed', 'declined', 'voided',
+            'expired',
+        ]],
+        default='draft',
+    )
+    sent_by = models.TextField()
+    sent_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    voided_at = models.DateTimeField(null=True, blank=True)
+    voided_by = models.TextField(null=True, blank=True)
+    void_reason = models.TextField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    reminder_schedule = models.JSONField(null=True, blank=True)
+    require_authentication = models.BooleanField(default=False)
+    authentication_method = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'email', 'sms', 'phone_call', 'knowledge_based', 'id_verification', 'multi_factor',
+            'none',
+        ]],
+        null=True,
+        blank=True,
+    )
+    access_code = models.TextField(null=True, blank=True)
+    sequential_signing = models.BooleanField(default=False)
+    allow_decline = models.BooleanField(default=True)
+    allow_reassign = models.BooleanField(default=False)
+    template_id = models.UUIDField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    provider_acknowledged_at = models.DateTimeField(null=True, blank=True)
+    provider_status_observed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "signature_documents"
@@ -375,7 +539,50 @@ class SignatureDocuments(BaseModel):
 class DocumentSigners(BaseModel):
     """Migrated from drizzle: signatures.ts"""
 
-    document_id = models.UUIDField(null=True, blank=True)
+    document_id = models.UUIDField()
+    user_id = models.TextField(null=True, blank=True)
+    email = models.TextField()
+    name = models.TextField()
+    role = models.TextField(null=True, blank=True)
+    signing_order = models.IntegerField(default=1)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'pending', 'sent', 'delivered', 'viewed', 'signed', 'declined', 'authentication_failed',
+            'expired', 'opened', 'skipped',
+        ]],
+        default='pending',
+    )
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    signed_at = models.DateTimeField(null=True, blank=True)
+    signature_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['electronic', 'digital', 'wet', 'clickwrap']],
+        null=True,
+        blank=True,
+    )
+    signature_image_url = models.TextField(null=True, blank=True)
+    authentication_method = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'email', 'sms', 'phone_call', 'knowledge_based', 'id_verification', 'multi_factor',
+            'none',
+        ]],
+        null=True,
+        blank=True,
+    )
+    authenticated_at = models.DateTimeField(null=True, blank=True)
+    declined_at = models.DateTimeField(null=True, blank=True)
+    decline_reason = models.TextField(null=True, blank=True)
+    reassigned_to = models.TextField(null=True, blank=True)
+    reassigned_at = models.DateTimeField(null=True, blank=True)
+    ip_address = models.TextField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    geolocation = models.JSONField(null=True, blank=True)
+    provider_signer_id = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "document_signers"
@@ -385,7 +592,19 @@ class DocumentSigners(BaseModel):
 class SignatureAuditTrail(BaseModel):
     """Migrated from drizzle: signatures.ts"""
 
-    document_id = models.UUIDField(null=True, blank=True)
+    document_id = models.UUIDField()
+    signer_id = models.UUIDField(null=True, blank=True)
+    event_type = models.TextField()
+    event_description = models.TextField()
+    actor_user_id = models.TextField(null=True, blank=True)
+    actor_email = models.TextField(null=True, blank=True)
+    actor_role = models.TextField(null=True, blank=True)
+    ip_address = models.TextField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    geolocation = models.JSONField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    hash_chain = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "signature_audit_trail"
@@ -423,7 +642,39 @@ class SignatureWebhooksLog(BaseModel):
 class SignatureWorkflows(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    auto_reminders_enabled = models.BooleanField(default=True, null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_signatures = models.IntegerField(default=0, null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    document_id = models.UUIDField()
+    expires_at = models.DateTimeField(null=True, blank=True)
+    external_envelope_id = models.CharField(max_length=255)
+    external_workflow_id = models.CharField(max_length=255, null=True, blank=True)
+    last_reminder_sent_at = models.DateTimeField(null=True, blank=True)
+    name = models.CharField(max_length=255)
+    provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'docusign', 'hellosign', 'adobe_sign', 'pandadoc', 'internal', 'signrequest',
+        ]],
+    )
+    reminder_frequency_days = models.IntegerField(default=3, null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'draft', 'sent', 'in_progress', 'completed', 'declined', 'cancelled', 'expired',
+            'voided',
+        ]],
+        default='draft',
+    )
+    total_signers = models.IntegerField()
+    void_reason = models.TextField(null=True, blank=True)
+    voided_at = models.DateTimeField(null=True, blank=True)
+    voided_by = models.CharField(max_length=255, null=True, blank=True)
+    workflow_data = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "signature_workflows"
@@ -433,7 +684,29 @@ class SignatureWorkflows(BaseModel):
 class Signers(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
-    workflow_id = models.UUIDField(null=True, blank=True)
+    workflow_id = models.UUIDField()
+    decline_reason = models.TextField(null=True, blank=True)
+    declined_at = models.DateTimeField(null=True, blank=True)
+    email = models.CharField(max_length=255)
+    external_signer_id = models.CharField(max_length=255, null=True, blank=True)
+    ip_address = models.TextField(null=True, blank=True)
+    last_reminder_sent_at = models.DateTimeField(null=True, blank=True)
+    member_id = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    reminder_count = models.IntegerField(default=0, null=True, blank=True)
+    signature_image = models.TextField(null=True, blank=True)
+    signed_at = models.DateTimeField(null=True, blank=True)
+    signer_order = models.IntegerField()
+    signing_url = models.CharField(max_length=500, null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'pending', 'sent', 'delivered', 'viewed', 'signed', 'declined', 'authentication_failed',
+            'expired', 'opened', 'skipped',
+        ]],
+        default='pending',
+    )
+    user_agent = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "signers"
@@ -443,7 +716,18 @@ class Signers(BaseModel):
 class SignatureAuditLog(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
-    workflow_id = models.UUIDField(null=True, blank=True)
+    workflow_id = models.UUIDField()
+    certificate_info = models.JSONField(null=True, blank=True)
+    event_description = models.TextField(null=True, blank=True)
+    event_type = models.CharField(max_length=100)
+    external_event_id = models.CharField(max_length=255, null=True, blank=True)
+    ip_address = models.TextField(null=True, blank=True)
+    location = models.JSONField(null=True, blank=True)
+    provider_data = models.JSONField(null=True, blank=True)
+    signature_id = models.CharField(max_length=255, null=True, blank=True)
+    signer_id = models.UUIDField(null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    user_agent = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "signature_audit_log"
@@ -453,7 +737,22 @@ class SignatureAuditLog(BaseModel):
 class SignatureVerification(BaseModel):
     """Migrated from drizzle: workflows.ts"""
 
-    workflow_id = models.UUIDField(null=True, blank=True)
+    workflow_id = models.UUIDField()
+    certificate_chain = models.JSONField(null=True, blank=True)
+    certificate_hash = models.CharField(max_length=255, null=True, blank=True)
+    certificate_issuer = models.TextField(null=True, blank=True)
+    certificate_valid_from = models.DateTimeField(null=True, blank=True)
+    certificate_valid_to = models.DateTimeField(null=True, blank=True)
+    is_verified = models.BooleanField(default=False, null=True, blank=True)
+    signature_file = models.CharField(max_length=500, null=True, blank=True)
+    signature_hash = models.CharField(max_length=255)
+    signer_id = models.UUIDField()
+    tamper_details = models.TextField(null=True, blank=True)
+    tamper_detected = models.BooleanField(default=False, null=True, blank=True)
+    verification_method = models.CharField(max_length=100, null=True, blank=True)
+    verification_result = models.JSONField(null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verified_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "signature_verification"
@@ -463,7 +762,12 @@ class SignatureVerification(BaseModel):
 class ShopifyConfig(BaseModel):
     """Migrated from drizzle: rewards.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    admin_token_secret_ref = models.CharField(max_length=255, null=True, blank=True)
+    allowed_collections = models.JSONField(default=list)
+    shop_domain = models.CharField(max_length=255)
+    storefront_token_secret_ref = models.CharField(max_length=255)
+    webhook_secret_ref = models.CharField(max_length=255)
 
     class Meta:
         db_table = "shopify_config"
@@ -474,7 +778,10 @@ class WebhookReceipts(BaseModel):
     """Migrated from drizzle: rewards.ts"""
 
     provider = models.TextField()
-    webhook_id = models.CharField(max_length=255, null=True, blank=True)
+    webhook_id = models.CharField(max_length=255, blank=True)
+    event_type = models.CharField(max_length=100)
+    payload_json = models.JSONField()
+    processed_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "webhook_receipts"
@@ -489,6 +796,39 @@ class SocialAccounts(BaseModel):
         on_delete=models.CASCADE,
         related_name="social_accounts_organization_set",
     )
+    platform = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok',
+        ]],
+    )
+    platform_user_id = models.TextField()
+    username = models.TextField()
+    display_name = models.TextField()
+    profile_image_url = models.TextField(null=True, blank=True)
+    access_token = models.TextField()
+    refresh_token = models.TextField(null=True, blank=True)
+    token_expires_at = models.DateTimeField(null=True, blank=True)
+    scopes = ArrayField(models.TextField(), null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'active', 'expired', 'disconnected', 'rate_limited', 'suspended',
+        ]],
+        default='active',
+    )
+    is_primary = models.BooleanField(default=False, null=True, blank=True)
+    is_verified = models.BooleanField(default=False, null=True, blank=True)
+    rate_limit_remaining = models.IntegerField(null=True, blank=True)
+    rate_limit_reset_at = models.DateTimeField(null=True, blank=True)
+    follower_count = models.IntegerField(default=0, null=True, blank=True)
+    following_count = models.IntegerField(default=0, null=True, blank=True)
+    post_count = models.IntegerField(default=0, null=True, blank=True)
+    engagement_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    account_metadata = models.JSONField(default=dict, null=True, blank=True)
+    connected_by = models.TextField(null=True, blank=True)
+    connected_at = models.DateTimeField(default=timezone.now)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "social_accounts"
@@ -503,6 +843,42 @@ class SocialPosts(BaseModel):
         on_delete=models.CASCADE,
         related_name="social_posts_organization_set",
     )
+    account_id = models.UUIDField()
+    campaign_id = models.UUIDField(null=True, blank=True)
+    post_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'text', 'image', 'video', 'link', 'carousel', 'story', 'reel',
+        ]],
+        default='text',
+    )
+    content = models.TextField()
+    media_urls = ArrayField(models.TextField(), null=True, blank=True)
+    link_url = models.TextField(null=True, blank=True)
+    link_preview_image = models.TextField(null=True, blank=True)
+    hashtags = ArrayField(models.TextField(), null=True, blank=True)
+    mentions = ArrayField(models.TextField(), null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['draft', 'scheduled', 'published', 'failed', 'deleted']],
+        default='draft',
+    )
+    scheduled_for = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+    platform_post_id = models.TextField(null=True, blank=True)
+    platform_url = models.TextField(null=True, blank=True)
+    likes_count = models.IntegerField(default=0, null=True, blank=True)
+    comments_count = models.IntegerField(default=0, null=True, blank=True)
+    shares_count = models.IntegerField(default=0, null=True, blank=True)
+    impressions_count = models.IntegerField(default=0, null=True, blank=True)
+    reach_count = models.IntegerField(default=0, null=True, blank=True)
+    engagement_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    error_message = models.TextField(null=True, blank=True)
+    retry_count = models.IntegerField(default=0, null=True, blank=True)
+    last_retry_at = models.DateTimeField(null=True, blank=True)
+    post_metadata = models.JSONField(default=dict, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "social_posts"
@@ -517,6 +893,32 @@ class SocialCampaigns(BaseModel):
         on_delete=models.CASCADE,
         related_name="social_campaigns_organization_set",
     )
+    campaign_code = models.TextField(null=True, blank=True)
+    campaign_hashtags = ArrayField(models.TextField(), null=True, blank=True)
+    campaign_metadata = models.JSONField(default=dict, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    goal_conversions = models.IntegerField(null=True, blank=True)
+    goal_engagement_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    goal_impressions = models.IntegerField(null=True, blank=True)
+    name = models.TextField()
+    platforms = ArrayField(models.TextField(), null=True, blank=True)
+    start_date = models.DateField()
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'draft', 'scheduled', 'sending', 'sent', 'paused', 'cancelled', 'failed', 'planning',
+            'active', 'completed',
+        ]],
+        default='planning',
+    )
+    target_audience = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "social_campaigns"
@@ -531,6 +933,22 @@ class SocialAnalytics(BaseModel):
         on_delete=models.CASCADE,
         related_name="social_analytics_organization_set",
     )
+    account_id = models.UUIDField()
+    analytics_date = models.DateField()
+    follower_count = models.IntegerField(default=0, null=True, blank=True)
+    follower_change = models.IntegerField(default=0, null=True, blank=True)
+    following_count = models.IntegerField(default=0, null=True, blank=True)
+    posts_published = models.IntegerField(default=0, null=True, blank=True)
+    total_impressions = models.IntegerField(default=0, null=True, blank=True)
+    total_reach = models.IntegerField(default=0, null=True, blank=True)
+    total_likes = models.IntegerField(default=0, null=True, blank=True)
+    total_comments = models.IntegerField(default=0, null=True, blank=True)
+    total_shares = models.IntegerField(default=0, null=True, blank=True)
+    total_engagements = models.IntegerField(default=0, null=True, blank=True)
+    engagement_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    profile_visits = models.IntegerField(default=0, null=True, blank=True)
+    link_clicks = models.IntegerField(default=0, null=True, blank=True)
+    analytics_metadata = models.JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         db_table = "social_analytics"
@@ -587,6 +1005,20 @@ class CaseStudies(BaseModel):
         null=True,
         blank=True,
     )
+    organization_type = models.TextField()
+    category = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['pilot', 'success-story', 'before-after', 'transformation']],
+    )
+    summary = models.TextField()
+    challenge = models.TextField()
+    solution = models.TextField()
+    outcome = models.TextField()
+    metrics = models.JSONField()
+    testimonial = models.JSONField(null=True, blank=True)
+    visibility = models.TextField(default='public')
+    featured = models.BooleanField(default=False)
+    published_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "case_studies"
@@ -626,11 +1058,11 @@ class PilotApplications(BaseModel):
     contact_email = models.TextField()
     contact_phone = models.TextField(null=True, blank=True)
     member_count = models.IntegerField()
-    jurisdictions = models.TextField()
-    sectors = models.TextField()
+    jurisdictions = ArrayField(models.TextField())
+    sectors = ArrayField(models.TextField())
     current_system = models.TextField(null=True, blank=True)
-    challenges = models.TextField()
-    goals = models.TextField()
+    challenges = ArrayField(models.TextField())
+    goals = ArrayField(models.TextField())
     readiness_score = models.DecimalField(
         max_digits=19, decimal_places=2, null=True, blank=True
     )
@@ -666,6 +1098,18 @@ class PilotApplications(BaseModel):
     verified_subscription_plan_id = models.UUIDField(null=True, blank=True)
     commercial_terms_approved_by = models.TextField(null=True, blank=True)
     commercial_terms_approved_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'submitted', 'review', 'approved', 'active', 'completed', 'declined',
+        ]],
+        default='submitted',
+    )
+    submitted_at = models.DateTimeField(default=timezone.now)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    responses = models.JSONField(default=dict)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "pilot_applications"
@@ -675,7 +1119,17 @@ class PilotApplications(BaseModel):
 class PilotMetrics(BaseModel):
     """Migrated from drizzle: marketing.ts"""
 
-    pilot_id = models.UUIDField(null=True, blank=True)
+    pilot_id = models.UUIDField()
+    organization_id = models.UUIDField()
+    enrollment_date = models.DateTimeField()
+    days_active = models.IntegerField(default=0)
+    organizer_adoption_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    member_engagement_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    cases_managed = models.IntegerField(default=0)
+    avg_time_to_resolution = models.DecimalField(max_digits=10, decimal_places=2)
+    health_score = models.DecimalField(max_digits=5, decimal_places=2)
+    milestones = models.JSONField()
+    last_calculated = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "pilot_metrics"
@@ -696,7 +1150,20 @@ class OrganizerImpacts(BaseModel):
 class DataAggregationConsent(BaseModel):
     """Migrated from drizzle: marketing.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    consent_given = models.BooleanField(default=False)
+    consent_date = models.DateTimeField()
+    categories = EnumArrayField(
+        models.CharField(
+            max_length=63,
+            choices=[(value, value) for value in [
+                'grievance-type', 'resolution-pattern', 'systemic-issue', 'sector-trend',
+                'jurisdiction-pattern',
+            ]],
+        ),
+        enum_type='movement_trend_category',
+    )
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "data_aggregation_consent"

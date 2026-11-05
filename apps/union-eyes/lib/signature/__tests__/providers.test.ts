@@ -20,7 +20,6 @@ import {
   SignatureError,
   DocuSignProvider,
   HelloSignProvider,
-  InternalSignatureProvider,
   SignatureProviderFactory,
   type CreateEnvelopeRequest,
   type EnvelopeResponse,
@@ -59,62 +58,6 @@ describe('SignatureError', () => {
   it('creates with custom status', () => {
     const err = new SignatureError('not found', 404);
     expect(err.status).toBe(404);
-  });
-});
-
-// ─── InternalSignatureProvider ───────────────────────────────────────
-
-describe('InternalSignatureProvider', () => {
-  let provider: InternalSignatureProvider;
-
-  beforeEach(() => {
-    provider = new InternalSignatureProvider();
-  });
-
-  it('has name "internal"', () => {
-    expect(provider.name).toBe('internal');
-  });
-
-  it('creates envelope with deterministic structure', async () => {
-    const req = makeRequest();
-    const result = await provider.createEnvelope(req);
-
-    expect(result.envelopeId).toMatch(/^internal_/);
-    expect(result.status).toBe('sent');
-    expect(result.signers).toHaveLength(2);
-    expect(result.signers[0].email).toBe('alice@example.com');
-    expect(result.signers[0].signerId).toBe('signer_1');
-    expect(result.signers[0].status).toBe('sent');
-    expect(result.signers[0].signUrl).toContain('/sign/');
-    expect(result.signers[0].signUrl).toContain('token=');
-    expect(result.createdAt).toBeInstanceOf(Date);
-  });
-
-  it('different signers get different sign URLs', async () => {
-    const req = makeRequest();
-    const result = await provider.createEnvelope(req);
-    expect(result.signers[0].signUrl).not.toBe(result.signers[1].signUrl);
-  });
-
-  it('returns default envelope status', async () => {
-    const status = await provider.getEnvelopeStatus('env_123');
-    expect(status.envelopeId).toBe('env_123');
-    expect(status.status).toBe('sent');
-    expect(status.signers).toEqual([]);
-  });
-
-  it('returns empty buffer for downloadDocument', async () => {
-    const buf = await provider.downloadDocument('env_123');
-    expect(buf).toBeInstanceOf(Buffer);
-    expect(buf.length).toBe(0);
-  });
-
-  it('voidEnvelope resolves', async () => {
-    await expect(provider.voidEnvelope('env_123', 'cancel')).resolves.toBeUndefined();
-  });
-
-  it('sendReminder resolves', async () => {
-    await expect(provider.sendReminder('env_123', 'signer_1')).resolves.toBeUndefined();
   });
 });
 
@@ -410,9 +353,10 @@ describe('SignatureProviderFactory', () => {
     SignatureProviderFactory.initialize({});
   });
 
-  it('always has internal provider', () => {
-    const provider = SignatureProviderFactory.getProvider('internal');
-    expect(provider.name).toBe('internal');
+  // DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT: the built-in provider stored and
+  // sent nothing and reported every envelope as sent. There is none now.
+  it('has no built-in provider that pretends to send', () => {
+    expect(() => (SignatureProviderFactory as any).getProvider('internal')).toThrow('Provider internal not configured');
   });
 
   it('throws for unconfigured provider', () => {
@@ -454,10 +398,9 @@ describe('SignatureProviderFactory', () => {
     expect(p.name).toBe('hellosign');
   });
 
-  it('getDefaultProvider falls back to internal', () => {
+  it('getDefaultProvider refuses, rather than falling back to a stub, when no provider is configured', () => {
     SignatureProviderFactory.initialize({});
-    const p = SignatureProviderFactory.getDefaultProvider();
-    expect(p.name).toBe('internal');
+    expect(() => SignatureProviderFactory.getDefaultProvider()).toThrow('No signature provider is configured');
   });
 
   it('type checks for interfaces', () => {

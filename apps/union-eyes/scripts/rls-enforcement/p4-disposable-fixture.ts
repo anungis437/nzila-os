@@ -151,7 +151,22 @@ export async function buildP4DisposableFixture(sql: postgres.Sql): Promise<void>
   ddl.push(`DROP INDEX IF EXISTS placeholder_idx_never_used;`);
   ddl.push(`CREATE INDEX IF NOT EXISTS idx_automation_rules_org ON automation_rules (organization_id);`);
 
+  // The tables the HISTORICAL Round58/59 chain actually names. Matching the manifest by the SQL text (rather than by the regenerated
+  // geometry file, which now lists every current table) keeps this a proof of the historical chain.
+  const historicalSql = [
+    "20260913_round58_production_geometry_prerequisites.sql",
+    "20260914_round58_complete_production_geometry_prerequisites.sql",
+    "20260910_rls_enforcement_expansion_round58.sql",
+  ]
+    .map((file) => fs.readFileSync(path.join(REPO_ROOT, "db/migrations", file), "utf8"))
+    .join("\n");
+  const namedByHistoricalChain = (table: string): boolean => new RegExp(`(^|[^A-Za-z0-9_])"?${table}"?([^A-Za-z0-9_]|$)`).test(historicalSql);
+
   for (const entry of storageAuthorityManifest) {
+    // This fixture proves the HISTORICAL Round58/59 apply chain. The manifest has since grown to tables that chain never
+    // covered (the authority kernel, cognition, ...); stubbing them would make the post-apply verifier demand policies the
+    // historical chain was never meant to create. Newer tables belong to the current-source checks, which run separately.
+    if (!namedByHistoricalChain(entry.table) && !overridesByTable.has(entry.table)) continue;
     const g = geometryFile.tables[entry.table];
     if (g) {
       for (const fk of g.otherForeignKeys) {
@@ -193,8 +208,12 @@ export async function buildP4DisposableFixture(sql: postgres.Sql): Promise<void>
     await sql.unsafe(`GRANT ALL ON TABLE ${quoteIdent(t)} TO union_eyes_runtime, union_eyes_system`);
   }
 
+  // The generic stub set above can already contain django_migrations with only a generic shape (the storage-authority manifest
+  // classifies it), which made a plain CREATE TABLE IF NOT EXISTS a silent no-op and the INSERT below fail. Replace the stub with
+  // the real ledger shape the p4 attestation reads, and restore its grants.
   await sql.unsafe(`
-    CREATE TABLE IF NOT EXISTS django_migrations (
+    DROP TABLE IF EXISTS django_migrations CASCADE;
+    CREATE TABLE django_migrations (
       id serial primary key,
       app varchar(255) NOT NULL,
       name varchar(255) NOT NULL,
@@ -206,5 +225,6 @@ export async function buildP4DisposableFixture(sql: postgres.Sql): Promise<void>
       ('content', '0003_pilotapplications_commercial_terms'),
       ('core', '0003_automation_rules_organization_id')
     ON CONFLICT DO NOTHING;
+    GRANT ALL ON TABLE django_migrations TO union_eyes_runtime, union_eyes_system;
   `);
 }

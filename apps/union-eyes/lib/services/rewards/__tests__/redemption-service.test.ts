@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   mockQueryRewardRedemptions: { findFirst: vi.fn(), findMany: vi.fn() },
   // sibling service mocks
   mockApplyLedgerEntry: vi.fn(),
+  mockAudit: vi.fn(),
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -88,6 +89,11 @@ vi.mock('../wallet-service', () => ({
   applyLedgerEntry: mocks.mockApplyLedgerEntry,
 }));
 
+vi.mock('../audit', () => ({
+  auditRewards: mocks.mockAudit,
+  rewardsActor: (userId?: string | null, fallback = 'system:rewards') => (userId && userId !== 'system' ? userId : fallback),
+}));
+
 import {
   initiateRedemption,
   updateRedemptionCheckout,
@@ -105,6 +111,9 @@ import {
 describe('redemption-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockAudit.mockResolvedValue(undefined);
+    // Plain updates run on a transaction whose update chain is the shared mockUpdate chain.
+    mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => cb({ update: mocks.mockUpdate }));
   });
 
   /* ============================= initiateRedemption ============================= */
@@ -241,53 +250,68 @@ describe('redemption-service', () => {
   });
 
   /* ============================= processRedemptionRefund ============================= */
-  describe('processRedemptionRefund', () => {
-    it('refunds credits and marks as refunded', async () => {
-      const redemption = {
-        id: 'r-1',
-        orgId: 'org-1',
-        userId: 'u-1',
-        creditsSpent: 200,
-        status: 'ordered',
-        providerPayloadJson: {},
-      };
+  /* ============================= audit and authority ============================= */
+  // processRedemptionRefund (partial and cumulative refunds, repeated refund ids, not-found, concurrency) is exercised against a real SQL
+  // engine in app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts, where its ledger and status effects can be observed.
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
-          query: {
-            rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) },
-          },
-          update: vi.fn().mockReturnValue({
-            set: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'refunded' }]),
-              }),
-            }),
-          }),
-        };
-        return cb(tx);
-      });
-      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 700 });
+  describe('audit on the same transaction', () => {
+    it('records the order with the webhook actor, and refuses an order that is not awaiting payment', async () => {
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'r-1', status: 'ordered' }]);
+      await markRedemptionOrdered('r-1', 'org-1', 'order-1', {});
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({ update: mocks.mockUpdate }),
+        expect.objectContaining({ organizationId: 'org-1', userId: 'system:shopify-webhook', action: 'rewards.redemption.ordered', resourceId: 'r-1' }),
+      );
 
-      const result = await processRedemptionRefund('r-1', 'org-1', { reason: 'defective' });
-
-      expect(result.redemption.status).toBe('refunded');
-      expect(result.newBalance).toBe(700);
+      mocks.mockAudit.mockClear();
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await expect(markRedemptionOrdered('r-1', 'org-1', 'order-1', {})).rejects.toThrow('not awaiting payment');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
     });
 
-    it('returns existing if already refunded (idempotent)', async () => {
-      const redemption = { id: 'r-1', status: 'refunded', orgId: 'org-1', userId: 'u-1', creditsSpent: 100, providerPayloadJson: {} };
+    it('fails the fulfilment when its audit cannot be written', async () => {
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'r-1', status: 'fulfilled' }]);
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+      await expect(markRedemptionFulfilled('r-1', 'org-1', {})).rejects.toThrow('audit unavailable');
+    });
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
+    it('lets only the owning member cancel a redemption, and audits the refund', async () => {
+      const redemption = { id: 'r-1', orgId: 'org-1', userId: 'owner', creditsSpent: 50, status: 'initiated', providerPayloadJson: {} };
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) =>
+        cb({
           query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
-        };
-        return cb(tx);
-      });
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'cancelled' }]) }),
+            }),
+          }),
+        }),
+      );
+      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 50 });
 
-      const result = await processRedemptionRefund('r-1', 'org-1', {});
+      await expect(cancelRedemption('r-1', 'org-1', 'member_cancelled', { userId: 'someone-else', mustOwn: true })).rejects.toThrow('Redemption not found');
+      expect(mocks.mockApplyLedgerEntry).not.toHaveBeenCalled();
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
 
-      expect(result.redemption.status).toBe('refunded');
+      await cancelRedemption('r-1', 'org-1', 'member_cancelled', { userId: 'owner', mustOwn: true });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'owner', action: 'rewards.redemption.cancel', details: expect.objectContaining({ creditsRefunded: 50 }) }),
+      );
+    });
+
+    it('does not refund credits when a concurrent change already moved the redemption on', async () => {
+      const redemption = { id: 'r-1', orgId: 'org-1', userId: 'owner', creditsSpent: 50, status: 'initiated', providerPayloadJson: {} };
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) =>
+        cb({
+          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }) }),
+          }),
+        }),
+      );
+
+      await expect(cancelRedemption('r-1', 'org-1', 'x')).rejects.toThrow('changed concurrently');
       expect(mocks.mockApplyLedgerEntry).not.toHaveBeenCalled();
     });
   });
@@ -411,44 +435,6 @@ describe('redemption-service', () => {
   });
 
   /* ============================= processRedemptionRefund — gap coverage ============================= */
-  describe('processRedemptionRefund — gap coverage', () => {
-    it('handles null providerPayloadJson in refund', async () => {
-      const redemption = {
-        id: 'r-rpj', orgId: 'org-1', userId: 'u-1', creditsSpent: 100,
-        status: 'ordered', providerPayloadJson: null,
-      };
-
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
-          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
-          update: vi.fn().mockReturnValue({
-            set: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'refunded' }]),
-              }),
-            }),
-          }),
-        };
-        return cb(tx);
-      });
-      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 300 });
-
-      const result = await processRedemptionRefund('r-rpj', 'org-1', { reason: 'test' });
-      expect(result.redemption.status).toBe('refunded');
-    });
-
-    it('throws when redemption not found', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
-          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(null) } },
-        };
-        return cb(tx);
-      });
-
-      await expect(processRedemptionRefund('nope', 'org-1', {})).rejects.toThrow('Redemption not found');
-    });
-  });
-
   /* ============================= getRedemptionByOrderId — gap coverage ============================= */
   describe('getRedemptionByOrderId — gap coverage', () => {
     it('queries WITHOUT orgId (else branch)', async () => {

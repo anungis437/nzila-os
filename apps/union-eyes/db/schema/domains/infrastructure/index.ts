@@ -37,6 +37,7 @@
 
 // Export all infrastructure-related schemas from consolidated domain location
 export * from './audit';
+export * from './public-intake-audit';
 export * from './features';
 export * from './uuid-mapping';
 export * from './alerting';

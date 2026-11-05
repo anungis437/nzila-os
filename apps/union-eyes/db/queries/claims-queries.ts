@@ -1,5 +1,3 @@
-"use server";
-
 import { eq, and, desc, sql, count, gte, lt } from "drizzle-orm";
 import { claims, claimUpdates } from "../schema/claims-schema";
 import { organizations } from "../schema-organizations";

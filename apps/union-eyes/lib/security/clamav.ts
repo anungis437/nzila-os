@@ -1,4 +1,5 @@
 import { URL } from 'node:url';
+import { isDeployedRuntime } from '@/lib/runtime/production-guard';
 
 export type MalwareScanStatus = 'clean' | 'infected' | 'unavailable';
 
@@ -133,6 +134,10 @@ export async function scanBufferWithClamAV(buffer: Buffer): Promise<MalwareScanR
 }
 
 function shouldFailClosed(): boolean {
+  // Neither switch can turn the scanner off on a deployed runtime: an unavailable scanner there always refuses the upload.
+  if (isDeployedRuntime()) {
+    return true;
+  }
   if (process.env.CLAMAV_FAIL_OPEN === 'true') {
     return false;
   }
