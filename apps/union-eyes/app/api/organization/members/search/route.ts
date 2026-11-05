@@ -92,7 +92,8 @@ export const GET = withApi(
         role: m.role,
         status: m.status,
         department: m.department,
-        membershipNumber: m.membershipNumber || '',
+        // The membership number is a sensitive attribute: only a caller with sensitive directory access reads it.
+        membershipNumber: access.includeSensitive ? (m.membershipNumber || '') : '',
       }));
 
       return { members };

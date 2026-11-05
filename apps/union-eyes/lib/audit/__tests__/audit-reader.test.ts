@@ -6,9 +6,15 @@ const m = vi.hoisted(() => ({
   canonicalRows: [] as Record<string, unknown>[],
   executed: [] as unknown[],
   legacyLimit: 0,
+  projections: [] as unknown[],
 }))
 
-vi.mock('@/db/schema/audit-security-schema', () => ({ auditLogs: { auditId: 'auditId', organizationId: 'organizationId', createdAt: 'createdAt' } }))
+vi.mock('@/db/schema/audit-security-schema', () => ({
+  auditLogs: Object.fromEntries([
+    'auditId', 'organizationId', 'action', 'resourceType', 'resourceId', 'userId', 'severity', 'outcome', 'createdAt',
+    'ipAddress', 'userAgent', 'sessionId', 'metadata', 'oldValues', 'newValues',
+  ].map((column) => [column, `audit_logs.${column}`])),
+}))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => m.canonical }))
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>()
@@ -16,7 +22,7 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 })
 
 const tx = {
-  select: () => ({
+  select: (projection?: unknown) => (m.projections.push(projection), {
     from: () => ({
       where: () => ({
         orderBy: () => ({ limit: async (n: number) => { m.legacyLimit = n; return m.legacyRows } }),
@@ -41,6 +47,7 @@ describe('audit reader', () => {
     m.canonicalRows = [canonical]
     m.executed = []
     m.legacyLimit = 0
+    m.projections = []
   })
 
   it('reads only the legacy store when the canonical state context is off, and never queries the canonical table', async () => {
@@ -60,6 +67,24 @@ describe('audit reader', () => {
     m.canonical = true
     const text = JSON.stringify(await listAuditEntries(tx as never, 'org_1'))
     expect(text).not.toMatch(/secret|10\.0\.0|ipAddress|details|metadata/)
+  })
+
+  it('reads only the columns an entry shows from the legacy store, never addresses, sessions, metadata or payloads', async () => {
+    await listAuditEntries(tx as never, 'org_1')
+    await readAuditEntry(tx as never, 'org_1', ID_L)
+    expect(m.projections).toHaveLength(2)
+    for (const projection of m.projections) {
+      expect(projection).toEqual({
+        auditId: 'audit_logs.auditId',
+        action: 'audit_logs.action',
+        resourceType: 'audit_logs.resourceType',
+        resourceId: 'audit_logs.resourceId',
+        userId: 'audit_logs.userId',
+        severity: 'audit_logs.severity',
+        outcome: 'audit_logs.outcome',
+        createdAt: 'audit_logs.createdAt',
+      })
+    }
   })
 
   it('bounds the page', async () => {
