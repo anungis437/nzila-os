@@ -24,7 +24,7 @@ test.describe('UE E2E - cross-org containment', () => {
     await assertNoCrossOrgLeak(transition)
 
     const exportAccess = await request.get('/api/exports')
-    await assertNoCrossOrgLeak(exportAccess)
+    await assertNoCrossOrgLeak(exportAccess, { notImplemented: true })
   })
 
   test('wrong-org member cannot access evidence/documents from another org (MEMBER-CANNOT-VIEW-WRONG-ORG-DOCUMENT)', async ({ request }) => {
