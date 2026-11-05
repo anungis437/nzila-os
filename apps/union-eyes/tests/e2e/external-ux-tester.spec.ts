@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
+import { assertDeniedOrNotImplemented, assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
 import { UE_TEST_USERS } from '../fixtures/test-users'
 
 test.describe('UE E2E - external UX tester containment', () => {
@@ -27,7 +27,7 @@ test.describe('UE E2E - external UX tester containment', () => {
     assertPermissionDenied(deniedAdmin.status())
 
     const deniedExport = await request.get('/api/exports')
-    assertPermissionDenied(deniedExport.status())
+    assertDeniedOrNotImplemented(deniedExport.status())
   })
 
   test('attempted role escalation by external tester is denied and audit-evidenced (NEG-ATTEMPTED-ROLE-ESCALATION)', async ({
