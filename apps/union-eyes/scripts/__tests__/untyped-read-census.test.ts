@@ -114,5 +114,5 @@ describe('the frontend against what nothing checks', () => {
     expect(over).toEqual([])
     expect(counts.ANY_READ).toBeLessThanOrEqual(CEILING)
     expect(counts.READER_KEY_NOT_RETURNED).toBeLessThanOrEqual(CEILING)
-  }, 300_000)
+  }, 900_000) // ~5 min under coverage instrumentation (2026-11-05); a repository-wide scan that grows with the app
 })
