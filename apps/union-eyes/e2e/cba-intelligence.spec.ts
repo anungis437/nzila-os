@@ -61,7 +61,9 @@ test.describe("Labor continuity intelligence page", () => {
   }
 
   const PAGE_URL = "/en-CA/dashboard/cba-intelligence";
-  const TABS = ["Sources", "Ingestion", "Agreements", "Review", "Benchmark", "Freshness"];
+  // The Review tab is offered only to the platform authority that curates the shared dataset (cba-intelligence-client.tsx,
+  // `canCurate`); the executive session used here reads the dataset but does not curate it.
+  const TABS = ["Sources", "Ingestion", "Agreements", "Benchmark", "Freshness"];
 
   test("authenticated user can navigate protected continuity route without auth failure", async ({ page }) => {
     await authenticateExecutiveSession(page);
@@ -100,6 +102,7 @@ test.describe("Labor continuity intelligence page", () => {
     for (const tabName of TABS) {
       await expect(primaryTabList.getByRole("tab", { name: tabName })).toBeVisible({ timeout: 10_000 });
     }
+    await expect(primaryTabList.getByRole("tab", { name: /^Review/ })).toHaveCount(0);
 
     const sourcesTab = primaryTabList.getByRole("tab", { name: "Sources" });
     await expect(sourcesTab).toHaveAttribute("aria-selected", "true", { timeout: 10_000 });
@@ -165,7 +168,8 @@ test.describe("Labor continuity intelligence page", () => {
     await expect(page.getByText("Source Freshness", { exact: true })).toBeVisible();
     await expect(page.getByText("Distribution", { exact: true })).toBeVisible();
 
-    for (const tabName of ["Review", "Benchmark", "Freshness"]) {
+    // Review is a curator's tab and is absent for this session (see TABS).
+    for (const tabName of ["Benchmark", "Freshness"]) {
       await selectTab(primaryTabList, tabName);
       await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);
       await expect(page.getByRole("tabpanel")).toBeVisible();
