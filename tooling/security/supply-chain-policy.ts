@@ -457,6 +457,12 @@ export function checkVulnerabilityPolicy(
   now: Date = new Date(),
 ): VulnPolicyResult {
   const errors: string[] = []
+  // An invalid or untrusted evaluation clock must never authorize a waiver.
+  // Date comparisons against NaN are always false, which otherwise makes
+  // both expiry and approval-window checks silently ineffective.
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) {
+    errors.push('Invalid security policy evaluation clock')
+  }
 
   // Waivers expire at the END of their recorded UTC calendar day. No invalid
   // date, duplicate record, expired exception, or ambiguous approval is valid.
