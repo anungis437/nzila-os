@@ -2193,8 +2193,8 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
       stripe:
-        specifier: ^22.1.0
-        version: 22.1.0(@types/node@25.5.2)
+        specifier: 23.1.0
+        version: 23.1.0(@types/node@25.5.2)
       zod:
         specifier: ^4.6.7
         version: 4.6.7
@@ -2711,8 +2711,8 @@ importers:
         specifier: ^44.0.0
         version: 44.0.1
       stripe:
-        specifier: ^20.4.0
-        version: 20.4.1(@types/node@25.5.2)
+        specifier: 23.1.0
+        version: 23.1.0(@types/node@25.5.2)
       swr:
         specifier: ^2.3.7
         version: 2.4.1(react@19.3.1)
@@ -3000,9 +3000,6 @@ importers:
       postgres:
         specifier: ^3.4.3
         version: 3.4.8
-      stripe:
-        specifier: ^17.7.0
-        version: 17.7.0
       winston:
         specifier: ^3.11.0
         version: 3.19.0
@@ -5973,8 +5970,8 @@ importers:
         specifier: '>=0.45.2'
         version: 0.45.2(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(@upstash/redis@1.37.0)(better-sqlite3@12.9.0)(gel@2.2.0)(pg@8.20.0)(postgres@3.4.8)
       stripe:
-        specifier: ^20.4.0
-        version: 20.4.1(@types/node@25.9.9)
+        specifier: 23.1.0
+        version: 23.1.0(@types/node@25.9.9)
       zod:
         specifier: ^4.6.7
         version: 4.6.7
@@ -19254,24 +19251,11 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  stripe@17.7.0:
-    resolution: {integrity: sha512-aT2BU9KkizY9SATf14WhhYVv2uOapBWX0OFWF4xvcj1mPaNotlSc2CsxpS4DS46ZueSppmCF5BX1sNYBtwBvfw==}
-    engines: {node: '>=12.*'}
-
-  stripe@20.4.1:
-    resolution: {integrity: sha512-axCguHItc8Sxt0HC6aSkdVRPffjYPV7EQqZRb2GkIa8FzWDycE7nHJM19C6xAIynH1Qp1/BHiopSi96jGBxT0w==}
-    engines: {node: '>=16'}
+  stripe@23.1.0:
+    resolution: {integrity: sha512-fVUfMSfTPoukfoV//MUKAx2+YxyKmYaYtnAL9VkfnHfaPNQylFdWZMD+zgUFerI8rjbaiER8Vzj2XEUQ2AhAsQ==}
+    engines: {node: '>=20'}
     peerDependencies:
-      '@types/node': '>=16'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-
-  stripe@22.1.0:
-    resolution: {integrity: sha512-w/xHyJGxXWnLPbNHG13sz/fae0MrFGC80Oz7YbICQymbfpqfEcsoG+6yG+9BWb81PWc4rrkeSO4wmTcmefmbLw==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@types/node': '>=18'
+      '@types/node': '>=20'
     peerDependenciesMeta:
       '@types/node':
         optional: true
@@ -33665,22 +33649,13 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  stripe@17.7.0:
-    dependencies:
-      '@types/node': 25.9.1
-      qs: 6.17.1
-
-  stripe@20.4.1(@types/node@25.5.2):
+  stripe@23.1.0(@types/node@25.5.2):
     optionalDependencies:
       '@types/node': 25.5.2
 
-  stripe@20.4.1(@types/node@25.9.9):
+  stripe@23.1.0(@types/node@25.9.9):
     optionalDependencies:
       '@types/node': 25.9.9
-
-  stripe@22.1.0(@types/node@25.5.2):
-    optionalDependencies:
-      '@types/node': 25.5.2
 
   strnum@2.2.3: {}
 
