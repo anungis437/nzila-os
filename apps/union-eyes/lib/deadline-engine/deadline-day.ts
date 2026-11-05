@@ -90,7 +90,7 @@ export function isKnownTimeZone(timeZone: unknown): timeZone is string {
   }
 }
 
-const formatters = new Map<string, Intl.DateTimeFormat>();
+const formatters = new Map<string, Intl.DateTimeFormat>(); // ga-check:exempt — memo of Intl.DateTimeFormat instances per time zone, not persisted state
 
 function wallClockFormatter(timeZone: string): Intl.DateTimeFormat {
   let formatter = formatters.get(timeZone);

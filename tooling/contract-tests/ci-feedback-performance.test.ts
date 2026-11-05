@@ -277,10 +277,17 @@ describe('Union Eyes E2E shard authority', () => {
     const canonical = workflow.jobs['e2e-canonical']
     expect(worker.name).toBe("${{ format('UE PR E2E worker ({0}/4)', matrix.shard) }}")
     expect(canonical.name).toBe("${{ format('UE E2E worker ({0}/4)', matrix.shard) }}")
-    expect(canonical.environment).toBe('staging')
+    // Fresh synthetic database on main too (owner decision 2026-11-04): no staging environment, no Azure token,
+    // no secrets, and the same bootstrap step as the PR worker.
+    expect(canonical.environment).toBeUndefined()
     expect(canonical.if).toBe("github.event_name == 'push' && github.ref == 'refs/heads/main'")
-    expect(canonical.permissions).toEqual({ contents: 'read', 'id-token': 'write' })
-    expect(canonical.steps.some((step: { uses?: string }) => step.uses === 'azure/login@v3')).toBe(true)
+    expect(canonical.permissions).toEqual({ contents: 'read' })
+    expect(canonical.steps.some((step: { uses?: string }) => step.uses === 'azure/login@v3')).toBe(false)
+    expect(JSON.stringify(canonical)).not.toContain('secrets.')
+    const prBootstrap = worker.steps.find((step: { name?: string }) => step.name === 'Bootstrap Union Eyes E2E database (synthetic)')
+    const canonicalBootstrap = canonical.steps.find((step: { name?: string }) => step.name === 'Bootstrap Union Eyes E2E database (synthetic)')
+    expect(canonicalBootstrap.run).toBe(prBootstrap.run)
+    expect(canonicalBootstrap.env).toEqual(prBootstrap.env)
     expect(gate.if).toBe('always()')
     expect(gate.permissions).toEqual({ contents: 'read', actions: 'read' })
     expect(worker.steps).toEqual(workflow.jobs.e2e.steps)

@@ -9,9 +9,9 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 66 |
+| GitHub Workflows | 67 |
 | Contract Test Files | 306 |
-| TS/JS Test Files | 3609 |
+| TS/JS Test Files | 3610 |
 | Python Test Files | 52 |
 
 ## Apps
@@ -103,6 +103,7 @@
 - runtime-governance-attestation.yml
 - sbom.yml
 - secret-scan.yml
+- security-bulk-audit-contract.yml
 - security-design-review.yml
 - trivy.yml
 - ue-build-push-proof.yml

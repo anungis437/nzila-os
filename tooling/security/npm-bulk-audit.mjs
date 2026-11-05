@@ -17,7 +17,7 @@
  *   --audit-level=<low|moderate|high|critical>  Minimum severity to report (default: critical)
  *   --json                                       Write JSON report to stdout
  *   --output=<path>                              Write JSON report to file (and print summary to stdout)
- *   --ignore-registry-errors                     Exit 0 even if the registry is unreachable
+ *   Audit/network/lockfile/response failures are always blocking (fail closed).
  *
  * Exit codes:
  *   0 — no vulnerabilities at or above --audit-level
@@ -26,6 +26,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const BULK_ENDPOINT = 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk'
 const SEVERITY_ORDER = ['info', 'low', 'moderate', 'high', 'critical']
@@ -35,8 +36,24 @@ const SEVERITY_ORDER = ['info', 'low', 'moderate', 'high', 'critical']
 const args = process.argv.slice(2)
 const auditLevel = args.find((a) => a.startsWith('--audit-level='))?.split('=')[1] ?? 'critical'
 const jsonMode = args.includes('--json')
-const outFile = args.find((a) => a.startsWith('--output='))?.split('=')[1]
-const ignoreRegistryErrors = args.includes('--ignore-registry-errors')
+const outFile = args.find((a) => a.startsWith('--output='))?.slice('--output='.length)
+const invalidOptions = args.filter((a) =>
+  a !== '--json' && !/^--audit-level=(info|low|moderate|high|critical)$/.test(a) && !a.startsWith('--output='),
+)
+if (invalidOptions.length) {
+  console.error(`Unsupported audit option(s): ${invalidOptions.join(', ')}. Registry or audit failures cannot be ignored.`)
+  process.exit(2)
+}
+
+// Ambiguous repeated flags must not allow a wrapper or caller to silently
+// select a weaker threshold or redirect the report to an unexpected path.
+const levelFlags = args.filter((a) => a.startsWith('--audit-level='))
+const outputFlags = args.filter((a) => a.startsWith('--output='))
+if (levelFlags.length > 1 || outputFlags.length > 1 || args.filter((a) => a === '--json').length > 1 ||
+    (jsonMode && outputFlags.length > 0) || outputFlags.some((a) => a.length === '--output='.length)) {
+  console.error('Ambiguous or empty audit options: provide at most one --audit-level, one output mode, and a nonempty --output')
+  process.exit(2)
+}
 
 const minSeverityIdx = SEVERITY_ORDER.indexOf(auditLevel)
 if (minSeverityIdx === -1) {
@@ -56,31 +73,62 @@ if (minSeverityIdx === -1) {
  *   "  @scope/pkg@1.0.0:"
  *   "  webpack@5.0.0(esbuild@0.19.0):"  ← peer suffix is stripped
  */
-function parseLockfilePackages(lockfilePath) {
+export function parseLockfilePackages(lockfilePath) {
   const content = readFileSync(lockfilePath, 'utf-8')
   const pkgMap = new Map()
+  const seenSnapshots = new Set()
 
-  // Find the snapshots section (may also be called 'packages' in v6)
-  const snapshotsMatch = content.match(/\n(snapshots|packages):\n([\s\S]*)$/)
-  if (!snapshotsMatch) {
-    console.warn('Warning: no snapshots/packages section found in pnpm-lock.yaml')
-    return pkgMap
+  // A lockfile inventory must be derived from one top-level resolved section,
+  // never from arbitrary indented text or sections appended after snapshots.
+  const lines = content.split(/\r?\n/)
+  const versions = lines.filter((line) => /^lockfileVersion\s*:/.test(line))
+  if (versions.length !== 1 || !/^lockfileVersion: ['\"]?9(?:\.0)?['\"]?\s*$/.test(versions[0])) {
+    throw new Error('Unsupported pnpm lockfile version or ambiguous declarations; expected exactly one v9 declaration')
   }
-
-  const snapshotsBlock = snapshotsMatch[2]
-
-  // Each key is a 2-space-indented line followed by a colon
-  // e.g:  "  @scope/pkg@1.2.3(peer@x):"
-  const lineRe = /^ {2}(@?[^@\n(]+)@([^(\n:]+)/gm
-  let m
-  while ((m = lineRe.exec(snapshotsBlock)) !== null) {
-    const name = m[1].trim()
-    const version = m[2].trim()
-    if (!name || !version) continue
+  // Reject noncanonical snapshot headers, including trailing whitespace, before
+  // they can evade the exact-section count and hide a second resolved graph.
+  const snapshotHeaders = lines.filter((line) => /^snapshots\s*:/.test(line))
+  if (snapshotHeaders.some((line) => line !== 'snapshots:')) {
+    throw new Error('Malformed snapshots section header in pnpm-lock.yaml')
+  }
+  const start = lines.findIndex((line) => line === 'snapshots:')
+  if (start === -1) {
+    throw new Error('Missing snapshots/packages section in pnpm-lock.yaml; cannot establish dependency inventory')
+  }
+  if (lines.filter((line) => line === 'snapshots:').length !== 1) {
+    throw new Error('Ambiguous pnpm lockfile: expected exactly one snapshots section')
+  }
+  for (let i = start + 1; i < lines.length; i++) {
+    const line = lines[i]
+    if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
+    if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
+    // pnpm writes a snapshot key either bare or single-quoted (it quotes every key
+    // that starts with `@`), followed by `:` and either nothing (a nested mapping
+    // follows) or an empty inline mapping ` {}` (a package with no dependencies).
+    // Those are the only two accepted shapes; anything else is malformed.
+    const entry = /^ {2}(?:'([^'\n]+)'|([^\s'"][^\n]*?)):(?: \{\})?\s*$/.exec(line)
+    const snapshotKey = entry ? (entry[1] ?? entry[2]) : null
+    const match = snapshotKey
+      ? /^((?:@[^\s@/:]+\/)?[^\s@/:]+)@([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)(?:\([^\n]*\))?$/.exec(snapshotKey)
+      : null
+    if (!match) {
+      throw new Error('Malformed resolved snapshot key in pnpm-lock.yaml')
+    }
+    const [, name, version] = match
+    // YAML duplicate mapping keys can silently replace an earlier resolution.
+    // Reject them rather than certifying an incomplete or ambiguous inventory;
+    // a quoted and an unquoted spelling of one key are the same key.
+    if (seenSnapshots.has(snapshotKey)) {
+      throw new Error(`Duplicate resolved snapshot key in pnpm-lock.yaml: ${snapshotKey}`)
+    }
+    seenSnapshots.add(snapshotKey)
     if (!pkgMap.has(name)) pkgMap.set(name, new Set())
     pkgMap.get(name).add(version)
   }
 
+  if (pkgMap.size === 0) {
+    throw new Error('No resolved packages found in pnpm-lock.yaml; cannot certify an empty graph')
+  }
   return pkgMap
 }
 
@@ -93,49 +141,62 @@ function parseLockfilePackages(lockfilePath) {
  * New endpoint response shape:
  *   { "package-name": [ { id, title, severity, vulnerable_versions, ... } ] }
  */
-async function fetchAdvisories(pkgMap) {
-  const requestBody = {}
-  for (const [name, versions] of pkgMap) {
-    requestBody[name] = [...versions]
+export function normalizeAdvisoryResponse(raw, pkgMap) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error('Invalid npm bulk audit payload: expected package-to-advisory object')
   }
-
-  let response
-  try {
-    response = await fetch(BULK_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    })
-  } catch (err) {
-    if (ignoreRegistryErrors) {
-      console.warn(`Registry unreachable (ignored): ${err.message}`)
-      return {}
-    }
-    throw new Error(`Failed to reach audit endpoint: ${err.message}`)
-  }
-
-  if (!response.ok) {
-    const body = await response.text()
-    if (ignoreRegistryErrors) {
-      console.warn(`Registry returned ${response.status} (ignored): ${body}`)
-      return {}
-    }
-    throw new Error(`Audit endpoint returned ${response.status}: ${body}`)
-  }
-
-  // Response: { "pkg-name": [ { id, title, severity, ... } ] }
-  // Flatten to { advisoryId: { ...advisory, package: pkgName } } for compat
-  const raw = await response.json()
   const flat = {}
   for (const [pkgName, advisoryList] of Object.entries(raw)) {
+    if (!pkgMap.has(pkgName) || !Array.isArray(advisoryList)) {
+      throw new Error(`Invalid audit package entry: ${pkgName}`)
+    }
     for (const adv of advisoryList) {
-      const key = String(adv.id)
-      if (!flat[key]) {
-        flat[key] = { ...adv, package: pkgName }
+      if (!adv || typeof adv !== 'object' || Array.isArray(adv) ||
+          !(Number.isSafeInteger(adv.id) && adv.id > 0 ||
+            typeof adv.id === 'string' && /^[1-9][0-9]*$/.test(adv.id) &&
+            Number.isSafeInteger(Number(adv.id))) ||
+          !SEVERITY_ORDER.includes(adv.severity) ||
+          typeof adv.title !== 'string' || !adv.title.trim()) {
+        throw new Error(`Invalid advisory record for ${pkgName}`)
       }
+      const key = String(adv.id)
+      // Never let a repeated advisory ID overwrite an earlier finding. The
+      // registry may return several affected versions for one package; a
+      // collision must be investigated, not silently downgraded or hidden.
+      if (Object.prototype.hasOwnProperty.call(flat, key)) {
+        throw new Error(`Duplicate advisory ID in registry response: ${key}`)
+      }
+      // The policy binds each map key to a string id (it refuses coerced identities), and the registry sends
+      // numbers: record the canonical decimal string that was just validated, so the two always agree.
+      flat[key] = { ...adv, id: key, package: pkgName }
     }
   }
   return flat
+}
+
+async function fetchAdvisories(pkgMap) {
+  const requestBody = {}
+  for (const [name, versions] of pkgMap) requestBody[name] = [...versions]
+
+  const response = await fetch(BULK_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody),
+    signal: AbortSignal.timeout(30000),
+  }).catch((err) => {
+    throw new Error(`Audit registry unreachable: ${err.message}`)
+  })
+
+  if (!response.ok) {
+    throw new Error(`Audit registry returned HTTP ${response.status}; a failed request is never an empty audit`)
+  }
+  let raw
+  try {
+    raw = await response.json()
+  } catch (err) {
+    throw new Error(`Audit registry returned malformed JSON: ${err.message}`)
+  }
+  return normalizeAdvisoryResponse(raw, pkgMap)
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────
@@ -148,12 +209,7 @@ async function main() {
     pkgMap = parseLockfilePackages(lockfilePath)
   } catch (err) {
     console.error(`Failed to read pnpm-lock.yaml: ${err.message}`)
-    process.exit(ignoreRegistryErrors ? 0 : 1)
-  }
-
-  if (pkgMap.size === 0) {
-    console.warn('No packages found in pnpm-lock.yaml — skipping audit.')
-    process.exit(0)
+    process.exit(1)
   }
 
   let advisories
@@ -179,6 +235,9 @@ async function main() {
     metadata: {
       vulnerabilities: vulnCounts,
       totalDependencies: pkgMap.size,
+      source: 'npm-bulk-advisories',
+      status: 'complete',
+      lockfile: 'pnpm-lock.yaml',
     },
   }
 
@@ -218,7 +277,9 @@ async function main() {
   process.exit(0)
 }
 
-main().catch((err) => {
-  console.error('Fatal audit error:', err.message)
-  process.exit(ignoreRegistryErrors ? 0 : 1)
-})
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch((err) => {
+    console.error('Fatal audit error:', err.message)
+    process.exit(1)
+  })
+}

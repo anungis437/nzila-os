@@ -1,0 +1,37 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    {
+      "name": "spoofed-license",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-3.0-only WITH MIT"
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-license",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {}
+        }
+      ]
+    },
+    {
+      "name": "approved-dual-license",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "(MIT OR Apache-2.0)"
+          }
+        }
+      ]
+    }
+  ]
+}
