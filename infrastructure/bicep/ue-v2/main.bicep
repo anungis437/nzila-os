@@ -57,7 +57,7 @@ param dbBackupRetentionDays int = 35
 param appMinReplicas int = env == 'prod' ? 2 : 1
 param appMaxReplicas int = 6
 param publicHostName string = env == 'prod' ? 'app.unioneyes.app' : 'staging.unioneyes.app'
-param siteUrl string = 'https://unioneyes.app'
+param siteUrl string = env == 'prod' ? 'https://unioneyes.app' : 'https://staging.unioneyes.app'
 param emailFrom string = 'noreply@unioneyes.app'
 param emailReplyTo string = 'support@unioneyes.app'
 param redisSkuName string = 'Balanced_B1'
