@@ -174,6 +174,11 @@ describe('security audit policy: fail closed', () => {
 
 
 describe('security license policy: exact allowlist', () => {
+  it('rejects an approved SPDX ID paired with an unrecognized conflicting license name', () => {
+    expect(() => validateSbomLicenses(fixture('sbom-unknown-license-alias-conflict.json')))
+      .toThrow('Conflicting or malformed license identity')
+  })
+
   it('rejects forbidden licenses in nested CycloneDX components', () => {
     const violations = validateSbomLicenses(fixture('sbom-nested-forbidden-license.json'))
     expect(violations).toEqual([{ package: 'nested-forbidden', version: '2.0.0', license: 'GPL-3.0-only', status: 'forbidden' }])
