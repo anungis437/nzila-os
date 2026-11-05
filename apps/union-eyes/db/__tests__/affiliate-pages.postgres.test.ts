@@ -8,8 +8,8 @@
  * and proves that
  *   - a parent's administrator is shown the organizations directly below it (not its grandchildren, not another tree); a member who is not an
  *     administrator, and an administrator of another tree, are refused before anything is read. Issue #1116: the hierarchy is an affiliation
- *     graph, not an access grant, so an affiliate is its directory entry (name, type, status) and its province, code, contact details,
- *     description and active-member count are given only where the caller is a direct member of the affiliate;
+ *     graph, not an access grant, so an affiliate is its directory entry (name, type, status, province, affiliate code) and its contact
+ *     details, description and active-member count are given only where the caller is a direct member of the affiliate;
  *   - the remittance figures are the ones addressed to the organization: members are each affiliate's latest period (never a sum over periods),
  *     overdue means still pending past its due date, compliance counts what fell due and was submitted by then, and there is no rate (null) when
  *     nothing fell due; the affiliate with no remittance on file is pending and at risk;
@@ -101,7 +101,7 @@ describe.skipIf(!URL)('the affiliate and remittance reads on the combined schema
       expect(list.map((row) => row.name)).toEqual([`Federation ${tag}`, `Union ${tag}`])
       const federation = list.find((row) => row.id === FED)
       expect(federation).toMatchObject({
-        organizationType: 'federation', provinceTerritory: null, clcAffiliateCode: null, email: null, phone: null,
+        organizationType: 'federation', provinceTerritory: 'ON', clcAffiliateCode: 'F-1', email: null, phone: null,
         address: null, description: null, memberCount: null,
       })
       expect(list.find((row) => row.id === UNION)?.memberCount).toBeNull()

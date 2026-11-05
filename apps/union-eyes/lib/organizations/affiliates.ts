@@ -106,7 +106,9 @@ export async function listAffiliates(input: { userId: string; organizationId: st
   const memberCounts = new Map(counts.map((row) => [row.organizationId, row.memberCount]));
   return children.map((child) => {
     if (!canReadOrganization(access, child.id)) {
-      return { ...child, provinceTerritory: null, clcAffiliateCode: null, email: null, phone: null, address: null, description: null, memberCount: null };
+      // Affiliation metadata (where the affiliate sits and its affiliate code) stays visible; contacts, address, description and membership
+      // figures are the affiliate's own and need a direct membership (#1116).
+      return { ...child, email: null, phone: null, address: null, description: null, memberCount: null };
     }
     return { ...child, address: addressLine(child.address), memberCount: memberCounts.get(child.id) ?? 0 };
   });
