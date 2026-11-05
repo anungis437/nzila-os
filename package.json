@@ -327,9 +327,9 @@
     "lefthook": "^2.1.1",
     "jszip": "^3.10.1",
     "prettier": "^3.9.10",
-    "tailwindcss": "^4.2.0",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.19.3",
-    "turbo": "^2.11.8",
+    "turbo": "^2.11.10",
     "typescript": "^6",
     "vitest": "^5.0.5",
     "yaml": "^2.8.3"
