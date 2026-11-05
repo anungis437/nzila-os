@@ -137,9 +137,13 @@ test.describe("Labor continuity intelligence page", () => {
 
     await selectTab(primaryTabList, "Benchmark");
     await expect(page.getByPlaceholder("Paste agreement UUID...")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Run Benchmark" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Save Snapshot" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Show History" })).toBeVisible();
+    // Run Benchmark waits for an agreement ID. Show History belongs to a benchmark
+    // result, so it is absent until one has run. Saving a snapshot curates the
+    // shared dataset (platform authority), so this non-curator session is never
+    // offered it, as with the Review tab.
+    await expect(page.getByRole("button", { name: "Run Benchmark" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Show History" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Save Snapshot" })).toHaveCount(0);
 
     await selectTab(primaryTabList, "Freshness");
     await expect(page.getByRole("heading", { name: "Thresholds" })).toBeVisible();

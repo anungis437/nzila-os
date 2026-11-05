@@ -113,6 +113,7 @@ export const EXECUTIVE_ALLOWED_PREFIXES: readonly string[] = [
   '/dashboard/priorities',
   '/dashboard/committees',
   '/dashboard/intelligence',
+  '/dashboard/cba-intelligence', // Existing role/entitlement-gated deep link, not an eighth primary destination.
   '/dashboard/executive-operating-intelligence',
   '/dashboard/governance-center',
   '/dashboard/outcomes',
