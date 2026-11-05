@@ -37,4 +37,30 @@ describe('Stripe 23.1.0 / Endive single-version contract', () => {
     expect(p).not.toContain('latest_invoice.payment_intent')
     expect(source('apps/zonga/app/api/webhooks/stripe/route.ts')).toContain('invoice.parent?.subscription_details?.subscription')
   })
+  it('pins the current Stripe Python Endive client in active billing and generated scaffolds', () => {
+    for (const path of [
+      'apps/union-eyes/backend/requirements.txt',
+      'tech-repo-scaffold/django-backbone/requirements/base.txt',
+      'tech-repo-scaffold/vertical-apps/template/backend/requirements.txt',
+      'packages/automation/generators/migration/scaffold_populator.py',
+    ]) {
+      expect(source(path), path).toContain('stripe==16.1.0')
+    }
+    const billing = source('apps/union-eyes/backend/billing/tasks.py')
+    expect(billing).toContain('stripe.StripeClient(stripe_key')
+    expect(billing).toContain('client.v1.payment_intents.create(')
+    expect(billing).not.toContain('stripe.api_key =')
+    expect(billing).not.toContain('stripe.PaymentIntent.create(')
+  })
+
+  it('does not allow Zonga to bypass SDK, override API version or fake signatures', () => {
+    const adapter = source('packages/zonga-payments/src/adapters/stripe.adapter.ts')
+    expect(adapter).toContain('createStripeClientForKey')
+    expect(adapter).toContain('stripe.webhooks.constructEvent(')
+    expect(adapter).not.toContain('expectedSig.length > 0')
+    expect(adapter).not.toContain('Stripe-Version')
+    expect(adapter).not.toContain('apiVersion:')
+    expect(manifest('packages/zonga-payments/package.json').dependencies?.['@nzila/payments-stripe']).toBe('workspace:*')
+  })
+
 })
