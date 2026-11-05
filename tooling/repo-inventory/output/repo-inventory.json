@@ -3,7 +3,7 @@
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 67,
+  "workflowCount": 68,
   "contractTestCount": 306,
   "tsTestFileCount": 3610,
   "pythonTestFileCount": 52,
@@ -853,6 +853,7 @@
   ],
   "workflows": [
     "access-review-gate.yml",
+    "agent-skills-validation.yml",
     "agri-core-check.yml",
     "ai-governance.yml",
     "app-floor-check.yml",

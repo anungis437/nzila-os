@@ -1,0 +1,38 @@
+name: Agent Skills Validation
+
+on:
+  pull_request:
+    paths:
+      - '.agents/skills/**'
+      - '.augment/skills/**'
+      - '.cursor/skills/**'
+      - '.claude/skills/**'
+      - '.codex/skills/**'
+      - '.github/skills/**'
+      - 'tooling/scripts/check-agent-skills.mjs'
+      - '.github/workflows/agent-skills-validation.yml'
+  push:
+    paths:
+      - '.agents/skills/**'
+      - '.augment/skills/**'
+      - '.cursor/skills/**'
+      - '.claude/skills/**'
+      - '.codex/skills/**'
+      - '.github/skills/**'
+      - 'tooling/scripts/check-agent-skills.mjs'
+      - '.github/workflows/agent-skills-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Node
+        run: node --version
+      - name: Validate agent skill structure and metadata
+        run: node tooling/scripts/check-agent-skills.mjs
+
