@@ -230,6 +230,15 @@ describe('CLC affiliates page', () => {
     )
   })
 
+  // Issue #1116: administering the congress does not show an affiliate's membership; the count is null and reads as not available.
+  it('shows N/A, not zero, for an affiliate whose member count the caller may not see', async () => {
+    m.listAffiliates.mockResolvedValue([affiliate({ id: 'aff-a', name: 'Union Alpha', organizationType: 'union', provinceTerritory: null, memberCount: null })])
+    const { container } = render(await CLCAffiliatesPage())
+    expect(screen.getByText('Union Alpha')).toBeInTheDocument()
+    expect(screen.getAllByText('N/A').length).toBeGreaterThanOrEqual(1)
+    expect(container.textContent).not.toMatch(/\b0 members/)
+  })
+
   it('lists each tab\'s own affiliates instead of a placeholder sentence', async () => {
     const user = userEvent.setup()
     render(await CLCAffiliatesPage())

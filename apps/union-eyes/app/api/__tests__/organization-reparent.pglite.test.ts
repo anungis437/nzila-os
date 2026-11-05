@@ -85,11 +85,13 @@ describe('repointHierarchy', () => {
 })
 
 describe('organization item route', () => {
-  it('applies the repoint, records the previous parent and answers a refusal as 400', async () => {
+  // Issue #1116: a parent change needs an approved institutional workflow that is not built, so the item route refuses it for every caller
+  // (no platform escape) and never repoints the hierarchy. repointHierarchy stays for that workflow.
+  it('does not repoint the hierarchy and refuses a parent or status change with 409', async () => {
     const { readFileSync } = await import('node:fs')
     const route = readFileSync(`${process.cwd()}/app/api/organizations/[id]/route.ts`, 'utf8').replace(/\r\n/g, '\n')
-    expect(route).toContain('repointHierarchy(tx, id, body.parent_id ?? null)')
-    expect(route).toContain('previousParentId: reparent.previousParentId')
-    expect(route).toContain("'refused' in updated")
+    expect(route).not.toContain('repointHierarchy(')
+    expect(route).toContain("if (parentChanged || statusChanged) return 'governed' as const")
+    expect(route).toMatch(/updated === 'governed'[\s\S]{0,300}status: 409/)
   })
 })

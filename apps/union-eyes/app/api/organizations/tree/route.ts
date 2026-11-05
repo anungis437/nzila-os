@@ -12,8 +12,8 @@ import { organizations } from '@/db/schema-organizations';
 import { asc, inArray } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
-import { readableOrganizationIds, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
-import { organizationWire } from '@/lib/organizations/organization-wire';
+import { affiliationOrganizationIds, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
+import { organizationDirectoryWire, organizationWire } from '@/lib/organizations/organization-wire';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,21 +33,22 @@ export async function GET(_req: NextRequest) {
   }
 
   const access = await resolveOrganizationAccess(userId);
-  const readable = readableOrganizationIds(access);
-  if (readable && readable.length === 0) return NextResponse.json({ data: [] });
+  const visible = affiliationOrganizationIds(access);
+  if (visible.length === 0) return NextResponse.json({ data: [] });
 
-  // Read as the system role, bounded to the organizations the caller may read; the ambient connection role is not tenant-scoped.
+  // Read as the system role, bounded to the organizations the caller is affiliated with; the ambient connection role is not tenant-scoped.
+  // An organization the caller is not a direct member of (one below an organization they administer) is its directory entry only.
   const orgs = await withSystemContext(() =>
     db
       .select()
       .from(organizations)
-      .where(readable ? inArray(organizations.id, readable) : undefined)
+      .where(inArray(organizations.id, visible))
       .orderBy(asc(organizations.hierarchyLevel), asc(organizations.name))
       .limit(1000),
   );
 
   return NextResponse.json({
-    data: orgs.map((o) => ({
+    data: orgs.map((o) => !canReadOrganization(access, o.id) ? { ...organizationDirectoryWire(o), organization_type: o.organizationType } : ({
       ...organizationWire(o),
       organization_type: o.organizationType,
       hierarchyLevel: o.hierarchyLevel ?? 0,

@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   canReadOrganization: vi.fn(),
+  canSeeAffiliation: vi.fn(),
   selectQueue: [] as unknown[][],
 }));
 
@@ -24,9 +25,11 @@ const mockDb = {
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: () => Promise<unknown>) => fn() }));
+// Every test caller is a direct member (canReadOrganization) unless a test says otherwise; an affiliated-only caller sees the directory entry.
 vi.mock('@/lib/organizations/read-authority', () => ({
-  resolveOrganizationAccess: async () => ({ platform: false, direct: new Map(), descendants: new Set() }),
+  resolveOrganizationAccess: async () => ({ direct: new Map(), affiliated: new Set() }),
   canReadOrganization: m.canReadOrganization,
+  canSeeAffiliation: m.canSeeAffiliation,
 }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -48,6 +51,7 @@ describe('organizations/[id]/path route', () => {
     m.selectQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.canReadOrganization.mockReturnValue(true);
+    m.canSeeAffiliation.mockReturnValue(true);
   });
 
   it('GET returns 401 when unauthenticated', async () => {
@@ -77,6 +81,7 @@ describe('organizations/[id]/path route', () => {
   it('GET rejects a foreign organization before querying its ancestors', async () => {
     const { GET } = await loadRoute();
     m.canReadOrganization.mockReturnValue(false);
+    m.canSeeAffiliation.mockReturnValue(false);
     m.selectQueue.push([{ id: 'org_1', slug: 'org-1', hierarchyPath: ['foreign-parent'] }]);
 
     const response = await GET(new NextRequest('http://localhost/api/organizations/org_1/path'), {
@@ -178,5 +183,21 @@ describe('organizations/[id]/path route', () => {
     const json = await response.json();
     expect(json.data.length).toBeGreaterThanOrEqual(2);
     expect(json.data[json.data.length - 1].id).toBe('org_1');
+  });
+
+  it('GET gives an organization the caller is only affiliated with (administers above it) as its directory entry', async () => {
+    const { GET } = await loadRoute();
+    m.canReadOrganization.mockReturnValue(false);
+    m.selectQueue.push([
+      {
+        id: 'org_1', name: 'Org 1', slug: 'org-1', organizationType: 'local', parentId: 'parent', sectors: ['healthcare'],
+        provinceTerritory: 'ON', description: 'private', hierarchyLevel: 1, hierarchyPath: [], status: 'active',
+        createdAt: new Date('2024-01-01T00:00:00.000Z'), updatedAt: new Date('2024-01-02T00:00:00.000Z'),
+      },
+    ]);
+    const json = await (await GET(new NextRequest('http://localhost/api/organizations/org_1/path'), { params: Promise.resolve({ id: 'org_1' }) })).json();
+    expect(json.data).toEqual([
+      { id: 'org_1', name: 'Org 1', slug: 'org-1', type: 'local', parentId: 'parent', hierarchyLevel: 1, hierarchyPath: [], status: 'active' },
+    ]);
   });
 });

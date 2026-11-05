@@ -6,8 +6,10 @@
  * set. As the runtime role that showed a parent no affiliate at all (a tenant session reads only its own organization row), no member count and no
  * remittance, and a failure rendered as the same empty page. This runs the unmodified functions, with only the context boundary replaced by the harness's,
  * and proves that
- *   - a parent's administrator is shown the organizations directly below it (not its grandchildren, not another tree) with the active members each
- *     has; a member who is not an administrator, and an administrator of another tree, are refused before anything is read;
+ *   - a parent's administrator is shown the organizations directly below it (not its grandchildren, not another tree); a member who is not an
+ *     administrator, and an administrator of another tree, are refused before anything is read. Issue #1116: the hierarchy is an affiliation
+ *     graph, not an access grant, so an affiliate is its directory entry (name, type, status) and its province, code, contact details,
+ *     description and active-member count are given only where the caller is a direct member of the affiliate;
  *   - the remittance figures are the ones addressed to the organization: members are each affiliate's latest period (never a sum over periods),
  *     overdue means still pending past its due date, compliance counts what fell due and was submitted by then, and there is no rate (null) when
  *     nothing fell due; the affiliate with no remittance on file is pending and at risk;
@@ -49,6 +51,7 @@ describe.skipIf(!URL)('the affiliate and remittance reads on the combined schema
   const clcMember = `clc-member-${tag}`
   const fedAdmin = `fed-admin-${tag}`
   const strangerAdmin = `stranger-${tag}`
+  const clcAdminAndFedMember = `clc-admin-fed-member-${tag}`
   let admin: pg.Client
 
   const remittance = (from: string, to: string, month: number, status: string, dueOffsetDays: number, submittedOffsetDays: number | null, members: number, amount: number) =>
@@ -73,6 +76,8 @@ describe.skipIf(!URL)('the affiliate and remittance reads on the combined schema
     await insertMember(admin, CLC, { userId: clcMember, role: 'member' })
     await insertMember(admin, FED, { userId: fedAdmin, role: 'admin' })
     await insertMember(admin, OTHER_CLC, { userId: strangerAdmin, role: 'admin' })
+    await insertMember(admin, CLC, { userId: clcAdminAndFedMember, role: 'admin' })
+    await insertMember(admin, FED, { userId: clcAdminAndFedMember, role: 'member' })
     for (const [org, count] of [[FED, 3], [UNION, 2], [LOCAL_1, 1], [OTHER_CHILD, 4]] as Array<[string, number]>) {
       for (let i = 0; i < count; i += 1) await insertMember(admin, org, { userId: `m-${org.slice(0, 6)}-${i}-${tag}` })
     }
@@ -91,22 +96,31 @@ describe.skipIf(!URL)('the affiliate and remittance reads on the combined schema
   })
 
   describe('the affiliates', () => {
-    it('lists the organizations directly below, by name, with their active members and the contact details the column holds', async () => {
+    it('lists the organizations directly below, by name, as directory entries only: administering the congress shows no contact details or member counts', async () => {
       const list = await affiliates!.listAffiliates({ userId: clcStaff, organizationId: CLC })
       expect(list.map((row) => row.name)).toEqual([`Federation ${tag}`, `Union ${tag}`])
       const federation = list.find((row) => row.id === FED)
       expect(federation).toMatchObject({
-        organizationType: 'federation', provinceTerritory: 'ON', clcAffiliateCode: 'F-1', email: 'fed@example.test', phone: '416-555-0100',
-        address: '1 Main St, Toronto, M5V 1A1', description: 'The federation', memberCount: 4,
+        organizationType: 'federation', provinceTerritory: null, clcAffiliateCode: null, email: null, phone: null,
+        address: null, description: null, memberCount: null,
       })
-      expect(list.find((row) => row.id === UNION)?.memberCount).toBe(2)
+      expect(list.find((row) => row.id === UNION)?.memberCount).toBeNull()
     })
 
-    it('shows a federation its own locals and neither the congress above it nor another tree', async () => {
+    it('gives the private details of an affiliate only where the caller is a direct member of it', async () => {
+      const list = await affiliates!.listAffiliates({ userId: clcAdminAndFedMember, organizationId: CLC })
+      expect(list.find((row) => row.id === FED)).toMatchObject({
+        organizationType: 'federation', provinceTerritory: 'ON', clcAffiliateCode: 'F-1', email: 'fed@example.test', phone: '416-555-0100',
+        address: '1 Main St, Toronto, M5V 1A1', description: 'The federation', memberCount: 5,
+      })
+      expect(list.find((row) => row.id === UNION)?.memberCount).toBeNull()
+    })
+
+    it('shows a federation its own locals (as directory entries) and neither the congress above it nor another tree', async () => {
       const list = await affiliates!.listAffiliates({ userId: fedAdmin, organizationId: FED })
       expect(list.map((row) => row.id).sort()).toEqual([LOCAL_1, LOCAL_2].sort())
-      expect(list.find((row) => row.id === LOCAL_1)?.memberCount).toBe(1)
-      expect(list.find((row) => row.id === LOCAL_2)?.memberCount).toBe(0)
+      expect(list.find((row) => row.id === LOCAL_1)?.memberCount).toBeNull()
+      expect(list.find((row) => row.id === LOCAL_2)?.memberCount).toBeNull()
     })
 
     it('refuses a member who is not an administrator and an administrator of another tree, before reading anything', async () => {

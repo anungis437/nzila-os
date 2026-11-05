@@ -183,6 +183,16 @@ describe('the federation affiliates page', () => {
     expect(within(card('Unions')).getByText('1')).toBeInTheDocument();
   });
 
+  // Issue #1116: an affiliate the caller is not a direct member of comes without its member count or contact details (null).
+  it('shows no member count, rather than zero, for an affiliate whose membership the caller may not see', async () => {
+    m.listAffiliates.mockResolvedValue([
+      affiliate({ id: 'aff-d', name: 'Directory Local', clcAffiliateCode: null, email: null, phone: null, address: null, provinceTerritory: null, memberCount: null }),
+    ]);
+    const { container } = render(await FederationAffiliatesPage(withSearch()));
+    expect(names(container)).toEqual(['Directory Local']);
+    expect(container.textContent).not.toMatch(/active member/);
+  });
+
   it('is a form that filters by the address, with the choices the affiliates really have', async () => {
     m.listAffiliates.mockResolvedValue(rows());
     const { container } = render(await FederationAffiliatesPage(withSearch()));

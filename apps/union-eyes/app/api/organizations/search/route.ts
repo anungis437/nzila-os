@@ -4,7 +4,13 @@ import { organizations } from '@/db/schema-organizations'
 import { and, asc, ilike, inArray, or, ne, sql } from 'drizzle-orm'
 import { likeContaining } from '@/lib/api/like-pattern'
 import { withSystemContext } from '@/lib/db/with-rls-context'
-import { canAdministerOrganization, readableOrganizationIds, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
+import {
+  affiliationOrganizationIds,
+  canAdministerOrganization,
+  canReadOrganization,
+  directoryProjection,
+  resolveOrganizationAccess,
+} from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,11 +22,12 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url)
   const q = (url.searchParams.get('q') ?? url.searchParams.get('query') ?? '').slice(0, 100)
 
-  // The search runs as the system role, which is not tenant-scoped, so it is bound to what the caller may read: a
-  // signed-in user could otherwise enumerate every organization of every tenant.
+  // The search runs as the system role, which is not tenant-scoped, so it is bound to the organizations the caller is affiliated with
+  // (their memberships and those below one they administer; a platform title adds none): a signed-in user could otherwise enumerate
+  // every organization of every tenant. Outside the caller's own memberships a result is the directory entry only.
   const access = await resolveOrganizationAccess(userId)
-  const readable = readableOrganizationIds(access)
-  if (readable && readable.length === 0) return NextResponse.json({ data: [] })
+  const visible = affiliationOrganizationIds(access)
+  if (visible.length === 0) return NextResponse.json({ data: [] })
   // The platform organization and any organization that is not active are never offered, with or without a search term, and the
   // term is matched literally so a bare percent or underscore cannot list the whole directory.
   const listable = and(ne(organizations.organizationType, 'platform'), sql`coalesce(${organizations.status}, 'active') = 'active'`)!
@@ -30,20 +37,15 @@ export async function GET(req: NextRequest) {
     tx
       .select()
       .from(organizations)
-      .where(readable ? and(text, inArray(organizations.id, readable)) : text)
+      .where(and(text, inArray(organizations.id, visible)))
       .orderBy(asc(organizations.name), asc(organizations.id))
       .limit(50),
   )
 
   const mapped = rows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    organization_type: row.organizationType,
-    parent_id: row.parentId,
+    ...directoryProjection(row),
+    ...(canReadOrganization(access, row.id) ? { sectors: row.sectors } : {}),
     ...(canAdministerOrganization(access, row.id) ? { member_count: row.memberCount } : {}),
-    status: row.status,
-    sectors: row.sectors,
   }))
 
   return NextResponse.json({ data: mapped })

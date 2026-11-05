@@ -27,8 +27,9 @@ export async function GET() {
     return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
   }
 
-  // The row is read only by someone who holds an active membership here, and its settings, billing contact and provenance are returned
-  // only to the organization's administrators; any other member receives the public profile.
+  // The row is read only by someone who holds an active, non-removed membership here (an administrator above it or a platform title
+  // does not), and its settings, billing contact and provenance are returned only to the organization's own administrators; any other
+  // member receives the profile.
   const access = await resolveOrganizationAccess(userId);
   if (!canReadOrganization(access, organizationId)) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const administrative = canAdministerOrganization(access, organizationId);

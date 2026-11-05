@@ -1,17 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
-// The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
-// route's own behaviour as a caller who may read and administer the organization.
+// The organization read authority is exercised in organizations-read-authority.pglite.test.ts; these tests exercise the
+// route's own behaviour as the organization's own administrator (a direct membership), or as anyone else.
 vi.mock('@/lib/organizations/read-authority', () => ({
-  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
-  canReadOrganization: () => true,
-  canAdministerOrganization: () => true,
-  readableOrganizationIds: () => null,
-  directRoleIn: () => 'admin',
+  resolveOrganizationAccess: async () => ({ direct: new Map([['11111111-1111-4111-8111-111111111111', 'admin']]), affiliated: new Set() }),
+  canAdministerOrganization: () => m.administers,
   UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
 }));
 const m = vi.hoisted(() => ({
+  administers: true,
   auth: vi.fn(),
   db: { select: vi.fn(), execute: vi.fn() },
   withRLSContext: vi.fn(),
@@ -36,6 +34,7 @@ async function loadRoute() {
 describe('organizations/[id]/analytics route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.administers = true;
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.withRLSContext.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.db));
     m.db.select.mockReturnValue({ from: vi.fn(() => ({ where: vi.fn(async () => [{ id: '11111111-1111-4111-8111-111111111111', name: 'Union', organizationType: 'union' }]) })) } as any);
@@ -64,6 +63,19 @@ describe('organizations/[id]/analytics route', () => {
       memberGrowthRate: 50,
       suppression: { minimumGroupSize: 5, members: false, claims: false },
     });
+    // Every figure is read under the caller's own membership of the organization in the path (tenant row-level security).
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: '11111111-1111-4111-8111-111111111111' });
+  });
+
+  it('answers 404, reading nothing, to anyone who does not administer the organization directly (officer, ancestor administrator, platform title)', async () => {
+    m.administers = false;
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111/analytics'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });
+    expect(response.status).toBe(404);
+    expect(m.db.select).not.toHaveBeenCalled();
+    expect(m.db.execute).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
   });
   it('suppresses the entire member and claim families when small cells could be inferred', async () => {
     m.db.execute.mockReset();

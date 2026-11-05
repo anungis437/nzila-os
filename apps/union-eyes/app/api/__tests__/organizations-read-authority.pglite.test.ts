@@ -6,6 +6,8 @@ import { NextRequest } from 'next/server';
 // DEF-0B9-ORG-ITEM-GET…, -ANALYTICS…, -CHILDREN…, -DESCENDANTS…, -HIERARCHY-LIST…, DEF-0B10-OPL-05 (search),
 // DEF-0B9-ORG-ROSTER-GET…, DEF-0B9-ORG-ROSTER-POST…: each answered any signed-in user, reading as the system role.
 // The real routes and the real read-authority module run against real SQL holding three organizations.
+// Issue #1116: authority is direct and specific. An administrator above an organization sees its directory entry only, and a platform
+// title confers nothing; neither receives a roster, contact details, member counts, grievance counts or analytics.
 
 const state = vi.hoisted(() => ({
   db: null as unknown,
@@ -103,13 +105,40 @@ beforeEach(async () => {
   await pg.query(`INSERT INTO grievances (organization_id, status) VALUES ($1::uuid, 'filed'), ($1::uuid, 'closed')`, [LOCAL_A]);
 });
 
+/** What an affiliated-only caller must never receive about an organization. */
+const PRIVATE_KEYS = [
+  'settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'legacy_org_id', 'email', 'phone', 'address', 'charter_number',
+  'member_count', 'active_member_count', 'memberCount', 'activeClaims', 'totalClaims', 'description', 'sectors', 'website', 'display_name',
+];
+const expectDirectoryOnly = (row: Record<string, unknown>, label: string) => {
+  for (const key of PRIVATE_KEYS) expect(row, `${label}: ${key}`).not.toHaveProperty(key);
+};
+const UNKNOWN = '99999999-9999-4999-8999-999999999999';
+const platformCaller = () => {
+  state.userId = 'platform-1';
+  state.platformAdmins.add('platform-1');
+};
+
 describe('GET /api/organizations/[id]', () => {
-  it('a signed-in stranger reads another organization as not found, and a suspended member too', async () => {
+  it('a signed-in stranger reads another organization as not found, and a suspended or removed member too', async () => {
     const { GET } = await import('../organizations/[id]/route');
-    for (const user of ['u-member-b', 'u-suspended-a', 'nobody']) {
+    await member('u-removed-a', LOCAL_A, 'admin');
+    await pg.query(`UPDATE organization_members SET deleted_at = now() WHERE user_id = 'u-removed-a'`);
+    for (const user of ['u-member-b', 'u-suspended-a', 'u-removed-a', 'nobody']) {
       state.userId = user;
       expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status, user).toBe(404);
     }
+  });
+
+  it('an unknown organization id reads exactly as an organization the caller may not see: no existence leak', async () => {
+    const { GET } = await import('../organizations/[id]/route');
+    state.userId = 'u-admin-fed';
+    const unknown = await GET(get(`/api/organizations/${UNKNOWN}`), params(UNKNOWN));
+    state.userId = 'u-member-b';
+    const foreign = await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A));
+    expect(unknown.status).toBe(404);
+    expect(foreign.status).toBe(404);
+    expect(await unknown.json()).toEqual(await foreign.json());
   });
 
   it('a member reads the public profile without settings, billing contact, tier, provenance, contact details, membership figures or grievance counts; an administrator reads all', async () => {
@@ -125,20 +154,35 @@ describe('GET /api/organizations/[id]', () => {
     expect(asAdmin).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', totalClaims: 2, activeClaims: 1 });
   });
 
-  it('the administrator of the federation reads a local below it; a member of the federation does not read a sibling local', async () => {
+  it('the administrator of the federation sees only the directory entry of a local below it; a member of the federation does not see a local', async () => {
     const { GET } = await import('../organizations/[id]/route');
     state.userId = 'u-admin-fed';
-    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(200);
+    const response = await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A));
+    expect(response.status).toBe(200);
+    const { data } = await response.json();
+    // Exactly the directory entry (the table helper creates columns without defaults, so level and status are null here).
+    expect(Object.keys(data).sort()).toEqual(
+      ['id', 'name', 'slug', 'organization_type', 'parent_id', 'hierarchy_level', 'hierarchy_path', 'status', 'childCount'].sort(),
+    );
+    expect(data).toMatchObject({ id: LOCAL_A, name: 'LocalA', slug: 'locala', organization_type: 'local', parent_id: FED, hierarchy_path: [FED, LOCAL_A], childCount: 0 });
+    expectDirectoryOnly(data, 'ancestor admin');
     await member('u-member-fed', FED, 'member');
     state.userId = 'u-member-fed';
     expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
   });
 
-  it('a platform administrator reads any organization', async () => {
+  it('a local administrator does not see a sibling local', async () => {
     const { GET } = await import('../organizations/[id]/route');
-    state.userId = 'platform-1';
-    state.platformAdmins.add('platform-1');
-    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(200);
+    state.userId = 'u-admin-a';
+    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
+  });
+
+  it('a platform title confers no organization: every organization reads as not found', async () => {
+    const { GET } = await import('../organizations/[id]/route');
+    platformCaller();
+    for (const id of [FED, LOCAL_A, LOCAL_B]) {
+      expect((await GET(get(`/api/organizations/${id}`), params(id))).status, id).toBe(404);
+    }
   });
 });
 
@@ -157,12 +201,27 @@ describe('children, descendants, hierarchy, search, tree', () => {
     expect(await names(await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED)))).toEqual([LOCAL_A, LOCAL_B].sort());
   });
 
+  it('gives the administrator above the directory entries of the locals below, without member counts or profile', async () => {
+    const children = await import('../organizations/[id]/children/route');
+    const descendants = await import('../organizations/[id]/descendants/route');
+    state.userId = 'u-admin-fed';
+    for (const res of [
+      await children.GET(get(`/api/organizations/${FED}/children`), params(FED)),
+      await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED)),
+    ]) {
+      for (const row of (await res.json()).data) expectDirectoryOnly(row, row.id);
+    }
+    platformCaller();
+    expect((await children.GET(get(`/api/organizations/${FED}/children`), params(FED))).status).toBe(404);
+    expect((await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED))).status).toBe(404);
+  });
+
   it('rejects a malformed organization id before any read', async () => {
     const children = await import('../organizations/[id]/children/route');
     expect((await children.GET(get('/api/organizations/x/children'), params("x' OR 1=1 --"))).status).toBe(400);
   });
 
-  it('hierarchy and search list only what the caller may read', async () => {
+  it('hierarchy and search list only what the caller is affiliated with, and a platform title lists nothing', async () => {
     const hierarchy = await import('../organizations/hierarchy/route');
     const search = await import('../organizations/search/route');
     state.userId = 'u-member-a';
@@ -170,13 +229,19 @@ describe('children, descendants, hierarchy, search, tree', () => {
     expect(await names(await search.GET(get('/api/organizations/search?q=Local')))).toEqual([LOCAL_A]);
     expect(await names(await search.GET(get('/api/organizations/search?q=Federation')))).toEqual([]);
     state.userId = 'u-admin-fed';
-    expect(await names(await hierarchy.GET(get('/api/organizations/hierarchy')))).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    const tree = (await (await hierarchy.GET(get('/api/organizations/hierarchy'))).json()).data as Array<Record<string, unknown>>;
+    expect(tree.map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    for (const row of tree.filter((r) => r.id !== FED)) expectDirectoryOnly(row, String(row.id));
+    expect(tree.find((r) => r.id === FED)).toHaveProperty('member_count');
+    const found = (await (await search.GET(get('/api/organizations/search?q=Local'))).json()).data as Array<Record<string, unknown>>;
+    expect(found.map((r) => r.id).sort()).toEqual([LOCAL_A, LOCAL_B].sort());
+    for (const row of found) expectDirectoryOnly(row, String(row.id));
     state.userId = 'nobody';
     expect(await (await hierarchy.GET(get('/api/organizations/hierarchy'))).json()).toMatchObject({ data: [] });
     expect(await (await search.GET(get('/api/organizations/search?q=Local'))).json()).toMatchObject({ data: [] });
-    state.userId = 'platform-1';
-    state.platformAdmins.add('platform-1');
-    expect(await names(await search.GET(get('/api/organizations/search?q=Local')))).toEqual([LOCAL_A, LOCAL_B].sort());
+    platformCaller();
+    expect(await (await search.GET(get('/api/organizations/search?q=Local'))).json()).toMatchObject({ data: [] });
+    expect(await (await hierarchy.GET(get('/api/organizations/hierarchy'))).json()).toMatchObject({ data: [] });
   });
 
   it('a suspended member lists nothing', async () => {
@@ -192,8 +257,9 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     return GET(get(url));
   };
 
-  it('lists nothing to a signed-in stranger or a suspended member, and refuses an anonymous caller', async () => {
-    for (const user of ['nobody', 'u-suspended-a']) {
+  it('lists nothing to a signed-in stranger, a suspended member or a platform title, and refuses an anonymous caller', async () => {
+    state.platformAdmins.add('platform-1');
+    for (const user of ['nobody', 'u-suspended-a', 'platform-1']) {
       state.userId = user;
       expect(await (await listed()).json(), user).toMatchObject({ data: [] });
     }
@@ -209,7 +275,7 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     expect(await names(await listed(`/api/organizations?parent=${FED}`))).toEqual([LOCAL_A]);
   });
 
-  it('gives a member the public profile only, and the administrator everything for what they administer', async () => {
+  it('gives a member the public profile only, the administrator everything for their own organization, and the administrator above the directory entry', async () => {
     state.userId = 'u-member-a';
     const [asMember] = (await (await listed('/api/organizations?include_stats=true')).json()).data;
     for (const key of ['settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'legacy_org_id', 'email', 'phone', 'address', 'charter_number', 'activeClaims']) {
@@ -217,17 +283,15 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     }
     expect(asMember).toMatchObject({ id: LOCAL_A, childCount: 0 });
 
+    state.userId = 'u-admin-a';
+    const [asAdmin] = (await (await listed('/api/organizations?include_stats=true')).json()).data;
+    expect(asAdmin).toMatchObject({ id: LOCAL_A, billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', activeClaims: 1 });
+
     state.userId = 'u-admin-fed';
     const rows = (await (await listed('/api/organizations?include_stats=true')).json()).data as Array<Record<string, unknown>>;
     expect(rows.map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
-    const local = rows.find((r) => r.id === LOCAL_A);
-    expect(local).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', activeClaims: 1 });
-  });
-
-  it('shows the federation administrator the locals below, and a platform administrator everything', async () => {
-    state.userId = 'platform-1';
-    state.platformAdmins.add('platform-1');
-    expect(await names(await listed())).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    for (const local of rows.filter((r) => r.id !== FED)) expectDirectoryOnly(local, String(local.id));
+    expect(rows.find((r) => r.id === FED)).toMatchObject({ subscription_tier: 'pro', activeClaims: 0, childCount: 2 });
   });
 
   it('rejects a malformed parent or status filter before any read', async () => {
@@ -237,69 +301,71 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     expect((await listed('/api/organizations?purpose=everything')).status).toBe(400);
   });
 
-  // DEF-0B10-OPL-02: what a caller may read is not what they may choose as a parent.
-  it('offers parent candidates only to a platform administrator, and an honest empty list to everyone else, however much they can read', async () => {
+  // DEF-0B10-OPL-02: what a caller may read is not what they may choose as a parent. Changing a parent needs an approved institutional
+  // workflow that is not built, so no caller (a platform title included) is offered candidates.
+  it('offers parent candidates to no caller, platform title included, and says so honestly', async () => {
     const candidates = async (user: string) => {
       state.userId = user;
       return (await listed('/api/organizations?purpose=parent')).json();
     };
     state.platformAdmins.add('platform-1');
-    const platform = await candidates('platform-1');
-    expect(platform).toMatchObject({ purpose: 'parent', assignable: true });
-    expect((platform.data as Array<{ id: string }>).map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
-    for (const user of ['u-admin-fed', 'u-admin-a', 'u-officer-a', 'u-member-a', 'nobody']) {
+    for (const user of ['platform-1', 'u-admin-fed', 'u-admin-a', 'u-officer-a', 'u-member-a', 'nobody']) {
       expect(await candidates(user), user).toEqual({ data: [], purpose: 'parent', assignable: false });
     }
-    // The same federation administrator still reads the locals below when no purpose is named.
+    // The same federation administrator still sees the locals below (as directory entries) when no purpose is named.
     state.userId = 'u-admin-fed';
     expect(await names(await listed())).toEqual([FED, LOCAL_A, LOCAL_B].sort());
   });
 
-  it('confines the tree to what the caller may read, in the legacy mode', async () => {
+  it('confines the tree to what the caller is affiliated with, in the legacy mode', async () => {
     const { GET } = await import('../organizations/tree/route');
     state.userId = 'u-member-b';
     expect(await names(await GET(get('/api/organizations/tree')))).toEqual([LOCAL_B]);
     state.userId = 'nobody';
     expect(await (await GET(get('/api/organizations/tree'))).json()).toMatchObject({ data: [] });
+    platformCaller();
+    expect(await (await GET(get('/api/organizations/tree'))).json()).toMatchObject({ data: [] });
     state.userId = 'u-admin-fed';
-    expect(await names(await GET(get('/api/organizations/tree')))).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    const rows = (await (await GET(get('/api/organizations/tree'))).json()).data as Array<Record<string, unknown>>;
+    expect(rows.map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    for (const local of rows.filter((r) => r.id !== FED)) {
+      expectDirectoryOnly(local, String(local.id));
+      for (const key of ['sector', 'jurisdiction', 'createdAt', 'updatedAt']) expect(local, key).not.toHaveProperty(key);
+    }
   });
 });
 
 describe('analytics', () => {
-  it('is refused to a stranger (404) and a plain member (403), and given to an officer and to the administrator above', async () => {
+  it('is given only to the organization\'s own administrator; everyone else (officer, ancestor administrator, platform title, stranger) reads not found', async () => {
     const { GET } = await import('../organizations/[id]/analytics/route');
-    state.userId = 'u-member-b';
-    expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status).toBe(404);
-    state.userId = 'u-member-a';
-    expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status).toBe(403);
-    state.userId = 'u-officer-a';
-    expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status).toBe(200);
-    state.userId = 'u-admin-fed';
+    state.platformAdmins.add('platform-1');
+    for (const user of ['u-member-b', 'u-member-a', 'u-steward-a', 'u-officer-a', 'u-admin-fed', 'u-suspended-a', 'platform-1', 'nobody']) {
+      state.userId = user;
+      expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status, user).toBe(404);
+    }
+    state.userId = 'u-admin-a';
     expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status).toBe(200);
   });
 
   // DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS: the figures are those of the
-  // organization in the path whoever reads them, including the administrator of the federation above, whose own organization has none.
-  it('reports the figures of the organization in the path to its officer and to the federation administrator above it', async () => {
+  // organization in the path.
+  it('reports the figures of the organization in the path to its own administrator', async () => {
     const { GET } = await import('../organizations/[id]/analytics/route');
-    for (const user of ['u-officer-a', 'u-admin-fed']) {
-      state.userId = user;
-      const { data } = await (await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).json();
-      // The seeded organization is below the minimum group size (5 members of whom 1 is inactive, 2 claims), so the figures are withheld
-      // rather than published (the small-group rule); the identity of the organization and its child count are not figures about people.
-      expect(data, user).toMatchObject({
-        organizationId: LOCAL_A,
-        totalMembers: null,
-        activeMembers: null,
-        totalClaims: null,
-        activeClaims: null,
-        resolvedClaims: null,
-        childOrganizations: 0,
-        claimsByStatus: null,
-        suppression: { members: true, claims: true },
-      });
-    }
+    state.userId = 'u-admin-a';
+    const { data } = await (await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).json();
+    // The seeded organization is below the minimum group size (5 members of whom 1 is inactive, 2 claims), so the figures are withheld
+    // rather than published (the small-group rule); the identity of the organization and its child count are not figures about people.
+    expect(data).toMatchObject({
+      organizationId: LOCAL_A,
+      totalMembers: null,
+      activeMembers: null,
+      totalClaims: null,
+      activeClaims: null,
+      resolvedClaims: null,
+      childOrganizations: 0,
+      claimsByStatus: null,
+      suppression: { members: true, claims: true },
+    });
   });
 });
 
@@ -315,21 +381,21 @@ describe('roster', () => {
     return POST(new NextRequest(`http://localhost/api/organizations/${org}/members`, { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } }), params(org));
   };
 
-  it('a plain member, a suspended member and a stranger cannot read the roster; a steward can', async () => {
-    expect((await rosterGet('u-member-a')).status).toBe(403);
-    expect((await rosterGet('u-suspended-a')).status).toBe(403);
-    expect((await rosterGet('u-member-b')).status).toBe(403);
-    const steward = await rosterGet('u-steward-a');
-    expect(steward.status).toBe(200);
-    expect((await steward.json()).data.every((r: { organization_id: string }) => r.organization_id === LOCAL_A)).toBe(true);
-    expect((await rosterGet('u-admin-fed')).status).toBe(200);
+  it('only the organization\'s own administrator reads the roster: not a member, steward, officer, ancestor administrator, platform title or stranger', async () => {
+    state.platformAdmins.add('platform-1');
+    for (const user of ['u-member-a', 'u-suspended-a', 'u-member-b', 'u-steward-a', 'u-officer-a', 'u-admin-fed', 'platform-1']) {
+      expect((await rosterGet(user)).status, user).toBe(403);
+    }
+    const admin = await rosterGet('u-admin-a');
+    expect(admin.status).toBe(200);
+    expect((await admin.json()).data.every((r: { organization_id: string }) => r.organization_id === LOCAL_A)).toBe(true);
   });
 
   // DEF-0B9-ORG-ROSTER-GET-INCLUDES-REMOVED-MEMBERS-AND-IS-UNBOUNDED
   it('leaves a removed member off the roster and reads it a page at a time in a stable order', async () => {
     await pg.query(`UPDATE organization_members SET deleted_at = now() WHERE user_id = 'u-member-a'`);
     const { GET } = await import('../organizations/[id]/members/route');
-    state.userId = 'u-steward-a';
+    state.userId = 'u-admin-a';
     const all = (await (await GET(get(`/api/organizations/${LOCAL_A}/members`), params(LOCAL_A))).json()).data as Array<{ user_id: string }>;
     expect(all.map((r) => r.user_id)).not.toContain('u-member-a');
     const first = (await (await GET(get(`/api/organizations/${LOCAL_A}/members?limit=2&page=1`), params(LOCAL_A))).json()).data as Array<{ user_id: string }>;
@@ -339,10 +405,15 @@ describe('roster', () => {
     expect(new Set([...first, ...second].map((r) => r.user_id)).size).toBe(first.length + second.length);
   });
 
+  it('a removed administrator no longer reads the roster', async () => {
+    await pg.query(`UPDATE organization_members SET deleted_at = now() WHERE user_id = 'u-admin-a'`);
+    expect((await rosterGet('u-admin-a')).status).toBe(403);
+  });
+
   const candidate = { user_id: 'new-user', name: 'New Person', email: 'new@x.example' };
 
-  it('a steward may add a member, but only as a pending membership; naming a user id grants no access', async () => {
-    const response = await rosterPost('u-steward-a', { ...candidate, role: 'member', status: 'active' });
+  it('the organization\'s administrator may add a member, but only as a pending membership; naming a user id grants no access', async () => {
+    const response = await rosterPost('u-admin-a', { ...candidate, role: 'member', status: 'active' });
     expect(response.status).toBe(201);
     const { rows } = await pg.query('SELECT role, status FROM organization_members WHERE user_id = $1', ['new-user']);
     expect(rows).toEqual([{ role: 'member', status: 'pending' }]);
@@ -351,23 +422,26 @@ describe('roster', () => {
 
   // DEF-0B9-ORG-ROSTER-POST-DUPLICATE-USER-ID-AND-INVALID-JSON-HANDLING-LEAVES-UNHANDLED-ERRORS
   it('answers 409, not a server error, when the user is already on the roster, and keeps the one row', async () => {
-    expect((await rosterPost('u-steward-a', { ...candidate, role: 'member' })).status).toBe(201);
-    const again = await rosterPost('u-steward-a', { ...candidate, role: 'member' });
+    expect((await rosterPost('u-admin-a', { ...candidate, role: 'member' })).status).toBe(201);
+    const again = await rosterPost('u-admin-a', { ...candidate, role: 'member' });
     expect(again.status).toBe(409);
     expect((await pg.query('SELECT 1 FROM organization_members WHERE user_id = $1', ['new-user'])).rows).toHaveLength(1);
   });
 
-  it('no caller may grant a role at or above their own, and nobody grants admin through this route', async () => {
-    for (const [user, role] of [['u-steward-a', 'steward'], ['u-steward-a', 'admin'], ['u-steward-a', 'executive'], ['u-officer-a', 'admin'], ['u-admin-a', 'admin']] as const) {
-      const response = await rosterPost(user, { ...candidate, role });
-      expect(response.status, `${user} -> ${role}`).toBe(403);
+  it('nobody grants a privileged role (admin, executive) through this route', async () => {
+    for (const role of ['admin', 'executive']) {
+      const response = await rosterPost('u-admin-a', { ...candidate, role });
+      expect(response.status, role).toBe(403);
     }
     expect((await pg.query('SELECT 1 FROM organization_members WHERE user_id = $1', ['new-user'])).rows).toHaveLength(0);
     expect((await rosterPost('u-admin-a', { ...candidate, role: 'steward' })).status).toBe(201);
   });
 
-  it('a plain member and a stranger cannot add anyone', async () => {
-    expect((await rosterPost('u-member-a', { ...candidate, role: 'member' })).status).toBe(403);
-    expect((await rosterPost('u-member-b', { ...candidate, role: 'member' })).status).toBe(403);
+  it('a member, steward, officer, ancestor administrator, platform title and stranger cannot add anyone', async () => {
+    state.platformAdmins.add('platform-1');
+    for (const user of ['u-member-a', 'u-member-b', 'u-steward-a', 'u-officer-a', 'u-admin-fed', 'platform-1', 'nobody']) {
+      expect((await rosterPost(user, { ...candidate, role: 'member' })).status, user).toBe(403);
+    }
+    expect((await pg.query('SELECT 1 FROM organization_members WHERE user_id = $1', ['new-user'])).rows).toHaveLength(0);
   });
 });
