@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+const org = vi.hoisted(() => '11111111-1111-4111-8111-111111111111');
 const m = vi.hoisted(() => ({
   options: null as Record<string, unknown> | null,
   rows: [] as Array<Record<string, unknown>>,
@@ -18,6 +19,11 @@ vi.mock('@/lib/api/framework', () => ({
     badRequest: (message: string) => Object.assign(new Error(message), { code: 'VALIDATION_ERROR' }),
     notFound: (message: string) => Object.assign(new Error(message), { code: 'NOT_FOUND' }),
   },
+}));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: false, direct: new Map([[org, 'admin']]), descendants: new Set() }),
+  directRoleIn: (access: { direct: Map<string, string> }, organizationId: string) => access.direct.get(organizationId),
+  isAdministrativeRole: (role: string | undefined) => role === 'admin',
 }));
 vi.mock('drizzle-orm', () => ({
   eq: (_column: unknown, value: unknown) => ({ value }),
@@ -46,7 +52,6 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   },
 }));
 
-const org = '11111111-1111-4111-8111-111111111111';
 const id = '22222222-2222-4222-8222-222222222222';
 const ctx = { organizationId: org, userId: 'officer-1', params: { id } };
 type RouteHandler = (context: Record<string, unknown>) => Promise<unknown>;
@@ -66,9 +71,9 @@ describe('audit item officer disclosure boundary', () => {
     m.predicates.length = 0;
   });
 
-  it('requires officer authorization and returns a redacted projection with mandatory read audit', async () => {
+  it('requires administrator authorization and returns a redacted projection with mandatory read audit', async () => {
     const { GET } = await import('../audits/[id]/route');
-    expect(m.options).toMatchObject({ auth: { minRole: 'officer' }, requireOrg: true });
+    expect(m.options).toMatchObject({ auth: { minRole: 'admin' }, requireOrg: true });
     const result = await (GET as unknown as RouteHandler)(ctx);
     expect(result).toEqual({
       auditId: id, action: 'case.updated', resourceType: 'grievances',

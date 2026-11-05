@@ -47,9 +47,12 @@ describe('F06 batch 3 (A4): an outcome is recorded only when the system did it o
     expect(evidence).toContain('the target member does not hold that role')
   })
 
-  it('the pilot overview needs platform-administrator authority, is paged, batched and audited', () => {
+  it('the pilot overview reads only directly administered organizations, is paged, batched and audited', () => {
     const route = src('app/api/pilot/overview/route.ts')
-    expect(route).toContain('isPlatformAdminUser(user.userId)')
+    // #1116: a platform title is no mandate for a cross-tenant read.
+    expect(route).not.toContain('isPlatformAdminUser')
+    expect(route).toContain('resolveOrganizationAccess(user.userId)')
+    expect(route).toContain('inArray(pilotEnrollments.organizationId, permittedOrgIds)')
     expect(route).not.toContain('DEFAULT_ORGANIZATION_ID)')
     expect(route).not.toContain('currentStateContextEnabled')
     expect(route).toContain("action: 'pilot.overview.read'".replace(/'/g, '"'))

@@ -27,6 +27,15 @@
  * check itself stays OUTSIDE/BEFORE withSystemContext — the authorization
  * decision is made on the caller's real identity before any system-
  * privileged execution begins.
+ *
+ * #1116 (direct, specific authority): the platform title is not enough on
+ * its own. Once the membership row is resolved, the caller must also be a
+ * live, direct administrator of that member's exact organization; anything
+ * else answers 404 exactly as a missing member does, so the route does not
+ * disclose that the membership exists. Hierarchy grants nothing. A caller
+ * cannot offboard (or toggle) their own membership (409), and reactivating a
+ * member who holds an officer role or above is refused (409) until an
+ * independent office approval exists to rely on.
  */
 import { organizationMembers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -35,13 +44,38 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { createLogger } from '@nzila/os-core/telemetry';
 import { revokeMemberAccess, reactivateMemberAccess } from '@/lib/services/member-access-revocation-service';
-import { isPlatformAdminUser } from '@/lib/api-auth-guard';
+import { isPlatformAdminUser, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { directRoleIn, isAdministrativeRole, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
 
 const logger = createLogger('union-eyes.admin.users');
 
 export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ userId: string }> };
+
+type MemberRecord = { status: string | null; role: string | null; organizationId: string; authUserId: string };
+
+const OFFICER_RANK = ROLE_HIERARCHY.officer;
+/**
+ * An officer role or above (officer, chief steward, executive, administrator, ...): reactivating one restores privileged office.
+ * A role the hierarchy does not know is treated as privileged, so an unrecognised title fails closed.
+ */
+const isPrivilegedRole = (role: string | null) => {
+  const rank = ROLE_HIERARCHY[(role ?? '') as keyof typeof ROLE_HIERARCHY] as number | undefined;
+  return rank === undefined || rank >= OFFICER_RANK;
+};
+
+/**
+ * The caller acts on a membership only as a live, direct administrator of that membership's own organization ('not-found' otherwise,
+ * so the refusal does not disclose the membership), and never on their own membership ('self').
+ */
+async function refusalFor(callerId: string, memberRecord: MemberRecord | undefined): Promise<'not-found' | 'self' | null> {
+  if (!memberRecord) return 'not-found';
+  const access = await resolveOrganizationAccess(callerId);
+  if (!isAdministrativeRole(directRoleIn(access, memberRecord.organizationId))) return 'not-found';
+  if (memberRecord.authUserId === callerId) return 'self';
+  return null;
+}
 
 export async function PUT(req: NextRequest, { params }: Params) {
   const { userId: callerId } = await auth();
@@ -54,10 +88,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const { userId: membershipId } = await params;
 
   try {
-    const memberRecord = await withSystemContext(async (tx) => {
+    const memberRecord: MemberRecord | undefined = await withSystemContext(async (tx) => {
       const [record] = await tx
         .select({
           status: organizationMembers.status,
+          role: organizationMembers.role,
           organizationId: organizationMembers.organizationId,
           authUserId: organizationMembers.userId,
         })
@@ -67,8 +102,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
       return record;
     });
 
-    if (!memberRecord) {
+    const refusal = await refusalFor(callerId, memberRecord);
+    if (refusal === 'not-found' || !memberRecord) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+    if (refusal === 'self') {
+      return NextResponse.json({ error: 'A member cannot change or remove their own membership' }, { status: 409 });
     }
 
     const newStatus = memberRecord.status === 'active' ? 'inactive' : 'active';
@@ -78,6 +117,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
     // "reactivated" member with a disabled authOrganizationUsers row,
     // failing the canonical role resolver despite a 200 response.
     if (newStatus === 'active') {
+      if (isPrivilegedRole(memberRecord.role)) {
+        return NextResponse.json({ error: 'Privileged reactivation requires independent office approval' }, { status: 409 });
+      }
       const result = await reactivateMemberAccess({
         membershipId,
         authUserId: memberRecord.authUserId,
@@ -130,10 +172,11 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const { userId: membershipId } = await params;
 
   try {
-    const memberRecord = await withSystemContext(async (tx) => {
+    const memberRecord: MemberRecord | undefined = await withSystemContext(async (tx) => {
       const [record] = await tx
         .select({
           status: organizationMembers.status,
+          role: organizationMembers.role,
           organizationId: organizationMembers.organizationId,
           authUserId: organizationMembers.userId,
         })
@@ -143,8 +186,12 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
       return record;
     });
 
-    if (!memberRecord) {
+    const refusal = await refusalFor(callerId, memberRecord);
+    if (refusal === 'not-found' || !memberRecord) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+    if (refusal === 'self') {
+      return NextResponse.json({ error: 'A member cannot change or remove their own membership' }, { status: 409 });
     }
 
     const result = await revokeMemberAccess({
